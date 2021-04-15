@@ -33,6 +33,7 @@ dependencies:
   - pytest-benchmark # tests
   - python>=3.7
   - rasterio
+  - requests
   - scipy
   - setuptools_scm
   - toml

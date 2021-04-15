@@ -28,6 +28,7 @@ setup(
         "entrypoints",
         "xarray",
         "rasterio",
+        "requests",
         "dask",
         "pandas",
         "pygeos",

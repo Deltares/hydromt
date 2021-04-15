@@ -27,6 +27,7 @@ dependencies:
   - pytest # tests
   - pytest-cov # tests
   - pytest-benchmark # tests
+  - requests
   - rasterio
   - scipy
   - setuptools_scm
