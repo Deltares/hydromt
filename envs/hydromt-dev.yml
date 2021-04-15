@@ -7,12 +7,14 @@ channels:
 # if you only want the user dependencies, see
 # install_requires in setup.py
 dependencies:
+  - affine
   - click
   - black
   - bottleneck
   - cartopy # to run examples
   - dask>=2.30
   - descartes # to run examples
+  - entrypoints
   - gdal>=3.1
   - geopandas
   - jupyter # to run examples

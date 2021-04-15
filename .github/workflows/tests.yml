@@ -8,7 +8,7 @@ on:
 
 jobs:
   Test:
-    name: ${{ matrix.os }}, ${{ matrix.python-version }}
+    name: ${{ matrix.os }} - py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -26,6 +26,11 @@ jobs:
           environment-file: envs/hydromt-test.yml
           python-version: ${{ matrix.python-version }}
           activate-environment: test
+
+      - name: Conda info
+        run: |
+         conda info
+         conda list
 
       - name: Check style
         run: black --check .
