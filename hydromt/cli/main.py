@@ -29,7 +29,7 @@ opt_config = click.option(
     "-i",
     "--config",
     type=click.Path(resolve_path=True),
-    help="Path to hydroMT configuration file, see https://deltares.gitlab.io/wflow/hydromt/models/ for the model specific implementation.",
+    help="Path to hydroMT configuration file, for the model specific implementation.",
 )
 arg_root = click.argument(
     "MODEL_ROOT",
@@ -57,7 +57,7 @@ data_opt = click.option(
     "--data",
     multiple=True,
     type=click.Path(resolve_path=True, file_okay=True),
-    help="File path to yml data sources file. See https://deltares.gitlab.io/wflow/hydromt/data/index.html for required yml file format.",
+    help="File path to yml data sources file. See documentation for required yml file format.",
 )
 
 ## MAIN
