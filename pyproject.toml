@@ -1,0 +1,11 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "hydromt"
+author = "Deltares"
+author-email = "dirk.eilander@deltares.nl"
+home-page = "https://github.com/Deltares/hydromt"
+classifiers = [ "License :: OSI Approved :: MIT License",]
+description-file = "README.rst"

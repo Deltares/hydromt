@@ -1,0 +1,44 @@
+name: hydromt-dev
+
+channels:
+  - conda-forge
+
+# note that these are the developer dependencies,
+# if you only want the user dependencies, see
+# install_requires in setup.py
+dependencies:
+  - click
+  - black
+  - bottleneck
+  - cartopy # to run examples
+  - dask>=2.30
+  - descartes # to run examples
+  - gdal>=3.1
+  - geopandas
+  - jupyter # to run examples
+  - netcdf4
+  - matplotlib # to run examples
+  - numba
+  - numpy
+  - openpyxl
+  - pandas
+  - pcraster # TODO make optional
+  - pip
+  - pyflwdir>=0.4.6
+  - pygeos>=0.8
+  - pytest # tests
+  - pytest-cov # tests
+  - pytest-benchmark # tests
+  - python>=3.7
+  - rasterio
+  - scipy
+  - setuptools_scm
+  - toml
+  - sphinx # docs
+  - sphinx_rtd_theme # docs
+  - xarray
+  - zarr
+  - pip:
+    - hydroengine
+    - sphinx_autosummary_accessors
+

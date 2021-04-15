@@ -1,0 +1,28 @@
+name: hydromt-min
+
+channels:
+  - conda-forge
+
+# note that these are the developer dependencies,
+# if you only want the user dependencies, see
+# install_requires in setup.py
+dependencies:
+  - click
+  - bottleneck
+  - dask>=2.30
+  - gdal>=3.1
+  - geopandas
+  - netcdf4
+  - numba
+  - numpy
+  - openpyxl
+  - pandas
+  - pip
+  - pyflwdir>=0.4.6
+  - pygeos>=0.8
+  - python>=3.7
+  - rasterio
+  - scipy
+  - toml
+  - xarray
+  - zarr
