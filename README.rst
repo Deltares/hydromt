@@ -1,46 +1,50 @@
-.. image:: https://gitlab.com/deltares/wflow/hydromt/badges/master/coverage.svg
-   :target: https://gitlab.com/deltares/wflow/hydromt/commits/master
+hydroMT: Build and analyze hydro models
+#######################################
 
-################################################################################
-HydroMT
-################################################################################
+#TODO add badges
 
-HydroMT is a python package, developed by @Deltares, to build and analysis hydrological models.
-It adopts the xarray data structure for model schematization maps and pyflwdir for any
-flow direction based methods.
+**hydorMT** is a python package, developed by Deltares, to build and analysis hydro models.
+It provides a generic model api with attributes to access the model schematization,
+(dynamic) forcing data, results and states. hydroMT builds on the latest packages in the
+scientific and geospatial python eco-system: It adopts the xarray_ data structure for 
+model maps, rasterio_ for raster I/O, geopandas_ data structure for model geometries and 
+vector I/O and the pyflwdir_ data structure flow direction data.
+
+
+.. _xarray: https://xarray.pydata.org
+.. _geopandas: https://geopandas.org
+.. _rasterio: https://rasterio.readthedocs.io
+.. _pyflwdir: https://deltares.gitlab.io/wflow/pyflwdir
+
+Why hydroMT?
+------------
 
 Installation
 ------------
 
-To install hydromt (add a -e flag to pip install to install developer package), do:
+hydroMT is availble from pypi and conda-forge, but we recommend installing with conda.
+
+To install hydromt using conda do:
 
 .. code-block:: console
 
-  git clone https://gitlab.com/deltares/wflow/hydromt.git
-  cd hydromt
-  conda env create -f environment.yml
-  conda activate hydromt
-  pip install . 
+  conda install hydromt -c conda-forge
 
-
-To update hydromt, assuming you have installed using the instructions above.
-Navigate to your local clone of the hydromt repository, then run the following from command line
+To create a hydromt environment with conda installed do:
 
 .. code-block:: console
 
-  conda activate hydromt
-  git checkout master 
-  git pull
-  conda env update -f=environment.yml  # update your conda hydromt environment
-  # if you have installed hydromt as a developer package (check with 'conda list hydromt') this should be sufficient otherwise do the following:
-  pip uninstall hydromt
-  pip install .
-
+  conda create hydromt -n hydromt -c conda-forge
 
 Documentation
 -------------
 
-`hydroMT documentation <https://deltares.gitlab.io/wflow/hydromt/>`_
+Learn more about hydroMT in its `online documentation <https://deltares.github.io/hydromt>`_
+
+Contributing
+------------
+
+You can find information about contributing to hydroMT at our `Contributing page <https://deltares.github.io/hydromt/contributing.html>`_.
 
 License
 -------
@@ -54,3 +58,5 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+#TODO add licences of thrid party software
