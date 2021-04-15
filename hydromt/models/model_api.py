@@ -246,7 +246,7 @@ class Model(object, metaclass=ABCMeta):
     @abstractmethod
     def write_staticmaps(self):
         """Write staticmaps at <root/?/> in model ready format """
-        # to write to gdal raster files use: self.staticmaps.rio.to_mapstack()
+        # to write to gdal raster files use: self.staticmaps.raster.to_mapstack()
         # to write to netcdf use: self.staticmaps.to_netcdf()
         if not self._write:
             raise IOError("Model opened in read-only mode")
@@ -609,51 +609,51 @@ class Model(object, metaclass=ABCMeta):
     @property
     def crs(self):
         """Returns coordinate reference system embedded in staticmaps."""
-        return self.staticmaps.rio.crs
+        return self.staticmaps.raster.crs
 
     def set_crs(self, crs):
         """Embed coordinate reference system staticmaps metadata."""
-        return self.staticmaps.rio.set_crs(crs)
+        return self.staticmaps.raster.set_crs(crs)
 
     @property
     def dims(self):
         """Returns spatial dimension names of staticmaps."""
-        return self.staticmaps.rio.dims
+        return self.staticmaps.raster.dims
 
     @property
     def coords(self):
         """Returns coordinates of staticmaps."""
-        return self.staticmaps.rio.coords
+        return self.staticmaps.raster.coords
 
     @property
     def res(self):
         """Returns coordinates of staticmaps."""
-        return self.staticmaps.rio.res
+        return self.staticmaps.raster.res
 
     @property
     def transform(self):
         """Returns spatial transform staticmaps."""
-        return self.staticmaps.rio.transform
+        return self.staticmaps.raster.transform
 
     @property
     def width(self):
         """Returns width of staticmaps."""
-        return self.staticmaps.rio.width
+        return self.staticmaps.raster.width
 
     @property
     def height(self):
         """Returns height of staticmaps."""
-        return self.staticmaps.rio.height
+        return self.staticmaps.raster.height
 
     @property
     def shape(self):
         """Returns shape of staticmaps."""
-        return self.staticmaps.rio.shape
+        return self.staticmaps.raster.shape
 
     @property
     def bounds(self):
         """Returns shape of staticmaps."""
-        return self.staticmaps.rio.bounds
+        return self.staticmaps.raster.bounds
 
     @property
     def region(self):

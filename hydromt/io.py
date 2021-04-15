@@ -11,7 +11,7 @@ from shapely.geometry import box
 import pyproj
 import logging
 
-from . import rio, geo, gis_utils, merge
+from . import raster, vector, gis_utils, merge
 
 logger = logging.getLogger(__name__)
 
@@ -53,17 +53,17 @@ def open_raster(
     """
     da = xr.open_rasterio(filename, chunks=chunks, **kwargs)
     da = da.squeeze().reset_coords(drop=True)  # drop band dimension if single layer
-    # additional hydromt.rio parsing
-    if da.rio.nodata is None:
+    # additional hydromt.raster parsing
+    if da.raster.nodata is None:
         if nodata is not None:
-            da.rio.set_nodata(nodata)  # overwrite nodata value
+            da.raster.set_nodata(nodata)  # overwrite nodata value
         else:
             logger.warning(f"nodata value missing for {filename}")
-    da.rio.set_crs()  # parse crs information
-    for k in rio.UNWANTED_RIO_ATTRS:
+    da.raster.set_crs()  # parse crs information
+    for k in raster.UNWANTED_RIO_ATTRS:
         da.attrs.pop(k, None)
     if mask_nodata:
-        da = da.rio.mask_nodata()
+        da = da.raster.mask_nodata()
     return da
 
 
@@ -85,7 +85,7 @@ def open_mfraster(
     If ``concat`` the DataArrays are concatenated along ``concat_dim`` returning a
     Dataset with a single 3D DataArray.
     If ``mosaic`` the DataArrays are concatenated along the the spatial dimensions
-    using :py:meth:`~hydromt.rio.merge`.
+    using :py:meth:`~hydromt.raster.merge`.
 
     Arguments
     ----------
@@ -116,7 +116,7 @@ def open_mfraster(
         Mosaic key_word arguments to unify raster crs and/or resolution. See
         :py:meth:`hydromt.merge.merge` for options.
     **kwargs
-        key-word arguments are passed to :py:meth:`hydromt.rio.open_raster`
+        key-word arguments are passed to :py:meth:`hydromt.raster.open_raster`
 
     Returns
     -------
@@ -168,11 +168,11 @@ def open_mfraster(
         if i > 0:
             if not mosaic:
                 # check if transform, shape and crs are close
-                if not da_lst[0].rio.identical_grid(da):
+                if not da_lst[0].raster.identical_grid(da):
                     raise xr.MergeError(f"Geotransform and/or shape do not match")
                 # copy coordinates from first raster
-                da[da.rio.x_dim] = da_lst[0][da.rio.x_dim]
-                da[da.rio.y_dim] = da_lst[0][da.rio.y_dim]
+                da[da.raster.x_dim] = da_lst[0][da.raster.x_dim]
+                da[da.raster.y_dim] = da_lst[0][da.raster.y_dim]
             if concat or mosaic:
                 # copy name from first raster
                 da.name = da_lst[0].name
@@ -252,7 +252,7 @@ def open_raster_from_tindex(
         paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs
     )
     # clip to extent
-    ds_out = ds_out.rio.clip_geom(geom)
+    ds_out = ds_out.raster.clip_geom(geom)
     return ds_out  # dataset to be consitent with open_mfraster
 
 
@@ -310,11 +310,11 @@ def open_geodataset(
     # read timeseries file
     if fn_ts is not None and isfile(fn_ts):
         da_ts = open_timeseries_from_table(fn_ts, index_dim=index_dim, logger=logger)
-        ds = geo.GeoDataset.from_gdf(gdf, da_ts, index_dim=index_dim)
+        ds = vector.GeoDataset.from_gdf(gdf, da_ts, index_dim=index_dim)
     elif fn_ts is not None:
         raise IOError(f"GeoDataset timeseries csv file not found: {fn_ts}")
     else:
-        ds = geo.GeoDataset.from_gdf(gdf, index_dim=index_dim)  # coordinates only
+        ds = vector.GeoDataset.from_gdf(gdf, index_dim=index_dim)  # coordinates only
     return ds.chunk(chunks)
 
 
@@ -497,14 +497,14 @@ def open_vector_from_table(
     # infer points from table
     df.columns = [c.lower() for c in df.columns]
     if x_dim is None:
-        for dim in rio.XDIMS:
+        for dim in raster.XDIMS:
             if dim in df.columns:
                 x_dim = dim
                 break
     if x_dim is None or x_dim not in df.columns:
         raise ValueError(f'x dimension "{x_dim}" not found in columns: {df.columns}.')
     if y_dim is None:
-        for dim in rio.YDIMS:
+        for dim in raster.YDIMS:
             if dim in df.columns:
                 y_dim = dim
                 break

@@ -57,7 +57,7 @@ def basin_index_id(root, da_bas, basids):
         if not np.any(bas_mask):
             raise ValueError(f"Basin IDs {basids} not found in map.")
         basins = np.where(bas_mask, da_bas.values, 0)
-        basids, bboxs, _ = region_bounds(basins, da_bas.rio.transform)
+        basids, bboxs, _ = region_bounds(basins, da_bas.raster.transform)
         columsn = ["xmin", "ymin", "xmax", "ymax"]
         df = pd.DataFrame(index=basids, columns=columsn, data=bboxs)
     if len(df) == 0:
@@ -68,8 +68,8 @@ def basin_index_id(root, da_bas, basids):
 def basin_index_xy(root, da_bas, xy):
     """"Returns pandas.DataFrame of basins at xy sampled from da_bas map."""
     sel = {
-        da_bas.rio.x_dim: xr.IndexVariable("xy", np.atleast_1d(xy[0])),
-        da_bas.rio.y_dim: xr.IndexVariable("xy", np.atleast_1d(xy[1])),
+        da_bas.raster.x_dim: xr.IndexVariable("xy", np.atleast_1d(xy[0])),
+        da_bas.raster.y_dim: xr.IndexVariable("xy", np.atleast_1d(xy[1])),
     }
     basids = np.unique(da_bas.sel(**sel, method="nearest").values)
     basids = np.atleast_1d(basids[basids > 0])
@@ -105,7 +105,7 @@ def clip_mask_basin(da_bas, df):
     total_bbox = np.asarray(
         [df["xmin"].min(), df["ymin"].min(), df["xmax"].max(), df["ymax"].max()]
     )
-    bas0 = da_bas.rio.clip_bbox(total_bbox)
+    bas0 = da_bas.raster.clip_bbox(total_bbox)
     mask = np.isin(bas0.values, df.index.values)
     if not np.any(mask):
         raise ValueError(f"No basins with given IDs found in data.")
@@ -123,14 +123,14 @@ def clip_and_mask(ds, bbox=None, geom=None, buffer=0):
     ds_clip = ds
     # NOTE: prioritize geom of bbox
     if geom is not None:
-        ds_clip = ds.rio.clip_geom(geom=geom, buffer=buffer)
+        ds_clip = ds.raster.clip_geom(geom=geom, buffer=buffer)
     elif bbox is not None:
-        ds_clip = ds.rio.clip_bbox(bbox=bbox, buffer=buffer)
+        ds_clip = ds.raster.clip_bbox(bbox=bbox, buffer=buffer)
     if "mask" in ds_clip:
         # mask values outside geom
         mask = ds_clip.coords["mask"]
         for name in ds.data_vars:
-            ds_clip[name] = ds_clip[name].where(mask, ds_clip[name].rio.nodata)
+            ds_clip[name] = ds_clip[name].where(mask, ds_clip[name].raster.nodata)
     return ds_clip
 
 
@@ -198,8 +198,8 @@ def get_basin_geometry(
         if basins_name not in ds:
             logger.info(f'basin map "{basins_name}" missing, calculating on the fly.')
             flwdir = flwdir_from_da(ds[flwdir_name], ftype=ftype)
-            ds[basins_name] = xr.Variable(ds.rio.dims, flwdir.basins())
-            ds[basins_name].rio.set_nodata(0)
+            ds[basins_name] = xr.Variable(ds.raster.dims, flwdir.basins())
+            ds[basins_name].raster.set_nodata(0)
         # clip
         dvars = dvars + [basins_name]
         ds_clip = clip_and_mask(ds[dvars], bbox=bbox, geom=geom)
@@ -225,16 +225,16 @@ def get_basin_geometry(
                 logger.debug(f"Getting bounds of intersecting basins.")
                 df_basins = basin_index_all(root, ds_clip[basins_name], ds[basins_name])
         da_mask = clip_mask_basin(ds[basins_name], df_basins)
-        bbox = da_mask.rio.transform_bounds(4326)
+        bbox = da_mask.raster.transform_bounds(4326)
 
     if kind == "subbasin":
         # clip with geom to yield region_mask
         if geom is None and bbox is not None:
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-        ds_clip = ds[dvars].rio.clip_geom(geom, buffer=buffer)
+        ds_clip = ds[dvars].raster.clip_geom(geom, buffer=buffer)
         region_mask = ds_clip["mask"]
         # warning for large domain
-        if np.multiply(*ds_clip.rio.shape) > 12e3 ** 2:  # > 10x10 degree at 3 arcsec
+        if np.multiply(*ds_clip.raster.shape) > 12e3 ** 2:  # > 10x10 degree at 3 arcsec
             logger.warning(
                 "Loading very large spatial domain to derive a subbasin. "
                 "Provide an initial 'bbox' region if this takes too long."
@@ -245,7 +245,7 @@ def get_basin_geometry(
             logger.debug(
                 f"Delineating subbasin(s). Outlets at stream thresholds {stream_kwargs}"
             )
-            stream = np.full(ds_clip.rio.shape, True, dtype=np.bool)
+            stream = np.full(ds_clip.raster.shape, True, dtype=np.bool)
             for name, value in stream_kwargs.items():
                 stream = np.logical_and(stream, ds_clip[name].values >= value)
         elif outlets:
@@ -270,14 +270,14 @@ def get_basin_geometry(
         da_mask.data = np.where(region_mask, da_mask.values, 0)
         if not np.any(da_mask):
             raise ValueError("No subbasin found with given criteria.")
-        da_mask = da_mask.astype(np.int32).rio.clip_mask(da_mask)
+        da_mask = da_mask.astype(np.int32).raster.clip_mask(da_mask)
 
-    w, s, e, n = da_mask.rio.bounds
+    w, s, e, n = da_mask.raster.bounds
     ncells = np.sum(da_mask.values != 0)
     logger.info(f"basin bbox: [{w:.4f}, {s:.4f}, {e:.4f}, {n:.4f}] / size: {ncells}")
 
     # vectorize
-    da_mask.rio.set_nodata(0)
-    da_mask.rio.set_crs(ds.rio.crs)
-    geom = da_mask.rio.vectorize()
+    da_mask.raster.set_nodata(0)
+    da_mask.raster.set_crs(ds.raster.crs)
+    geom = da_mask.raster.vectorize()
     return geom, xy

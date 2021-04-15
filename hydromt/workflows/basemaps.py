@@ -75,7 +75,7 @@ def hydrography(
     outidx = None
     if not "mask" in ds.coords and xy is None:
         ds.coords["mask"] = xr.Variable(
-            dims=ds.rio.dims, data=np.ones(ds.rio.shape, dtype=np.bool)
+            dims=ds.raster.dims, data=np.ones(ds.raster.shape, dtype=np.bool)
         )
     elif not "mask" in ds.coords:
         # NOTE if no subbasin mask is provided calculate it here
@@ -91,7 +91,7 @@ def hydrography(
     ncells = np.sum(ds["mask"].values)
     logger.debug(f"(Sub)basin at original resolution has {ncells} cells.")
 
-    scale_ratio = int(np.round(res / ds.rio.res[0]))
+    scale_ratio = int(np.round(res / ds.raster.res[0]))
     if scale_ratio > 1:  # upscale flwdir
         if flwdir is None:
             # NOTE initialize with mask is FALSE
@@ -115,17 +115,17 @@ def hydrography(
             flwdir_name=flwdir_name,
             logger=logger,
         )
-        da_flw.rio.set_crs(ds.rio.crs)
+        da_flw.raster.set_crs(ds.raster.crs)
         # make sure x_out and y_out get saved
         ds_out = da_flw.to_dataset().reset_coords(["x_out", "y_out"])
-        dims = ds_out.rio.dims
+        dims = ds_out.raster.dims
         # find pits within basin mask
         idxs_pit0 = flwdir_out.idxs_pit
         outlon = ds_out["x_out"].values.ravel()
         outlat = ds_out["y_out"].values.ravel()
         sel = {
-            ds.rio.x_dim: xr.Variable("yx", outlon[idxs_pit0]),
-            ds.rio.y_dim: xr.Variable("yx", outlat[idxs_pit0]),
+            ds.raster.x_dim: xr.Variable("yx", outlon[idxs_pit0]),
+            ds.raster.y_dim: xr.Variable("yx", outlat[idxs_pit0]),
         }
         outbas_pit = (
             ds.coords["mask"]
@@ -140,14 +140,14 @@ def hydrography(
             idxs_pit = idxs_pit0[outbas_pit != 0]
             basins = flwdir_out.basins(idxs=idxs_pit).astype(np.int32)
             ds_out.coords["mask"] = xr.Variable(
-                dims=ds_out.rio.dims, data=basins != 0, attrs=dict(_FillValue=0)
+                dims=ds_out.raster.dims, data=basins != 0, attrs=dict(_FillValue=0)
             )
         else:
             # NOTE: this else statement seems wrong. instead an error is at place
             # ds_out.coords["mask"] = (
             #     ds["mask"]
             #     .astype(np.int8)
-            #     .rio.reproject_like(da_flw, method="nearest")
+            #     .raster.reproject_like(da_flw, method="nearest")
             #     .astype(np.bool)
             # )
             # basins = ds_out["mask"].values.astype(np.int32)
@@ -180,14 +180,14 @@ def hydrography(
         ds_out = xr.DataArray(
             name=flwdir_name,
             data=flwdir_out.to_array(),
-            coords=ds.rio.coords,
-            dims=ds.rio.dims,
+            coords=ds.raster.coords,
+            dims=ds.raster.dims,
             attrs=dict(
                 long_name=f"{ftype} flow direction",
                 _FillValue=flwdir_out._core._mv,
             ),
         ).to_dataset()
-        dims = ds_out.rio.dims
+        dims = ds_out.raster.dims
         ds_out.coords["mask"] = xr.Variable(
             dims=dims, data=flwdir_out.mask.reshape(flwdir_out.shape)
         )
@@ -195,7 +195,9 @@ def hydrography(
         for dvar in [basins_name, uparea_name, strord_name]:
             if dvar in ds.data_vars:
                 ds_out[dvar] = xr.where(
-                    ds_out["mask"], ds[dvar], ds[dvar].dtype.type(ds[dvar].rio.nodata)
+                    ds_out["mask"],
+                    ds[dvar],
+                    ds[dvar].dtype.type(ds[dvar].raster.nodata),
                 )
                 ds_out[dvar].attrs.update(ds[dvar].attrs)
         # basins
@@ -210,7 +212,7 @@ def hydrography(
             ds_out[uparea_name] = xr.Variable(dims, uparea, attrs=attrs)
         # cell area
         # NOTE: subgrid cella area is currently not used in wflow
-        ys, xs = ds.rio.ycoords.values, ds.rio.xcoords.values
+        ys, xs = ds.raster.ycoords.values, ds.raster.xcoords.values
         subare = gis_utils.reggrid_area(ys, xs) / 1e6  # km2
         attrs = dict(_FillValue=-9999, unit="km2")
         ds_out["subare"] = xr.Variable(dims, subare, attrs=attrs)
@@ -224,11 +226,13 @@ def hydrography(
         ds_out[strord_name] = xr.Variable(dims, strord, attrs=dict(_FillValue=-1))
 
     # clip to basin extent
-    ds_out = ds_out.rio.clip_mask(mask=ds_out[basins_name])
-    ds_out.rio.set_crs(ds.rio.crs)
-    logger.debug(f"Map shape: {ds_out.rio.shape}; active cells: {flwdir_out.ncells}.")
+    ds_out = ds_out.raster.clip_mask(mask=ds_out[basins_name])
+    ds_out.raster.set_crs(ds.raster.crs)
+    logger.debug(
+        f"Map shape: {ds_out.raster.shape}; active cells: {flwdir_out.ncells}."
+    )
     logger.debug(f"Outlet coordinates (head): {xy_pit_str}.")
-    if np.any(np.asarray(ds_out.rio.shape) == 1):
+    if np.any(np.asarray(ds_out.raster.shape) == 1):
         raise ValueError(
             "The output extent should at consist of two cells on each axis. "
             "Consider using a larger domain or higher spatial resolution. "
@@ -270,20 +274,20 @@ def topography(
     """
     if lndslp_name not in ds.data_vars:
         logger.debug(f"Slope map {lndslp_name} not found: derive from elevation map.")
-        crs = ds[elevtn_name].rio.crs
-        nodata = ds[elevtn_name].rio.nodata
+        crs = ds[elevtn_name].raster.crs
+        nodata = ds[elevtn_name].raster.nodata
         ds[lndslp_name] = xr.Variable(
-            dims=ds.rio.dims,
+            dims=ds.raster.dims,
             data=dem.slope(
                 elevtn=ds[elevtn_name].values,
                 nodata=nodata,
                 latlon=crs is not None and crs.to_epsg() == 4326,
-                transform=ds[elevtn_name].rio.transform,
+                transform=ds[elevtn_name].raster.transform,
             ),
         )
-        ds[lndslp_name].rio.set_nodata(nodata)
+        ds[lndslp_name].raster.set_nodata(nodata)
     # clip or reproject if non-identical grids
-    ds_out = ds[[elevtn_name, lndslp_name]].rio.reproject_like(ds_like, method)
+    ds_out = ds[[elevtn_name, lndslp_name]].raster.reproject_like(ds_like, method)
     ds_out[elevtn_name].attrs.update(unit="m")
     ds_out[lndslp_name].attrs.update(unit="m.m-1")
     return ds_out

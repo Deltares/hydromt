@@ -12,7 +12,7 @@ from pathlib import Path
 import rasterio
 
 import hydromt
-from hydromt import rio
+from hydromt import raster
 
 
 def test_open_vector(tmpdir, df, geodf, world):
@@ -84,7 +84,7 @@ def test_open_geodataset(tmpdir, geodf):
     ds = hydromt.open_geodataset(fn_gdf)
     assert isinstance(ds, xr.Dataset)
     assert len(ds.data_vars) == 0
-    assert np.all(geodf[["geometry"]] == ds.geo.to_gdf())
+    assert np.all(geodf[["geometry"]] == ds.vector.to_gdf())
     # add timeseries
     ds = hydromt.open_geodataset(fn_gdf, fn_ts)
     assert name in ds.data_vars
@@ -136,7 +136,7 @@ def test_raster_io(tmpdir, rioda):
     da = rioda
     fn_tif = str(tmpdir.join("test.tif"))
     # to_raster / open_raster
-    da.rio.to_raster(fn_tif, crs=3857, tags={"name": "test"})
+    da.raster.to_raster(fn_tif, crs=3857, tags={"name": "test"})
     assert os.path.isfile(fn_tif)
     assert np.all(hydromt.open_raster(fn_tif).values == da.values)
     with rasterio.open(fn_tif, "r") as src:
@@ -146,70 +146,74 @@ def test_raster_io(tmpdir, rioda):
     assert np.any(np.isnan(da1.values))
     # TODO window needs checking & better testing
     fn_tif = str(tmpdir.join("test1.tif"))
-    da1.rio.to_raster(fn_tif, nodata=-9999, windowed=True)
+    da1.raster.to_raster(fn_tif, nodata=-9999, windowed=True)
     da2 = hydromt.open_raster(fn_tif)
     assert not np.any(np.isnan(da2.values))
     fn_tif = str(tmpdir.join("test_2.tif"))
-    da1.expand_dims("t").round(0).astype(np.int32).rio.to_raster(fn_tif, dtype=np.int32)
+    da1.expand_dims("t").round(0).astype(np.int32).raster.to_raster(
+        fn_tif, dtype=np.int32
+    )
     da3 = hydromt.open_raster(fn_tif)
     assert da3.dtype == np.int32
     # to_mapstack / open_mfraster
     ds = da.to_dataset()
     prefix = "_test_"
     root = str(tmpdir)
-    ds.rio.to_mapstack(root, prefix=prefix, mask=True, driver="GTiff")
-    for name in ds.rio.vars:
+    ds.raster.to_mapstack(root, prefix=prefix, mask=True, driver="GTiff")
+    for name in ds.raster.vars:
         assert os.path.isfile(join(root, f"{prefix}{name}.tif"))
     ds_in = hydromt.open_mfraster(join(root, f"{prefix}*.tif"), mask_nodata=True)
-    dvars = ds_in.rio.vars
-    assert np.all([n in dvars for n in ds.rio.vars])
-    assert np.all([np.isnan(ds_in[n].rio.nodata) for n in dvars])
+    dvars = ds_in.raster.vars
+    assert np.all([n in dvars for n in ds.raster.vars])
+    assert np.all([np.isnan(ds_in[n].raster.nodata) for n in dvars])
     # concat
     fn_tif = str(tmpdir.join("test_3.tif"))
-    da.rio.to_raster(fn_tif, crs=3857)
+    da.raster.to_raster(fn_tif, crs=3857)
     ds_in = hydromt.open_mfraster(join(root, f"test_*.tif"), concat=True)
-    assert ds_in[ds_in.rio.vars[0]].ndim == 3
+    assert ds_in[ds_in.raster.vars[0]].ndim == 3
     # with reading with pathlib
     paths = [Path(p) for p in glob.glob(join(root, f"{prefix}*.tif"))]
-    dvars2 = hydromt.open_mfraster(paths, mask_nodata=True).rio.vars
-    assert np.all([f"{prefix}{n}" in dvars2 for n in ds.rio.vars])
+    dvars2 = hydromt.open_mfraster(paths, mask_nodata=True).raster.vars
+    assert np.all([f"{prefix}{n}" in dvars2 for n in ds.raster.vars])
     # test writing to subdir
-    ds.rename({"test": "test/test"}).rio.to_mapstack(root, driver="GTiff")
+    ds.rename({"test": "test/test"}).raster.to_mapstack(root, driver="GTiff")
     assert os.path.isfile(join(root, "test", "test.tif"))
 
 
 def test_rasterio_errors(tmpdir, rioda):
     with pytest.raises(OSError, match="no files to open"):
         hydromt.open_mfraster(str(tmpdir.join("test*.tiffff")))
-    da0 = rio.full_from_transform(
+    da0 = raster.full_from_transform(
         [0.5, 0.0, 3.0, 0.0, -0.5, -9.0], (4, 6), nodata=-1, name="test"
     )
-    da1 = rio.full_from_transform(
+    da1 = raster.full_from_transform(
         [0.2, 0.0, 3.0, 0.0, 0.25, -11.0], (8, 15), nodata=-1, name="test"
     )
-    da0.rio.to_raster(str(tmpdir.join("test0.tif")))
-    da1.rio.to_raster(str(tmpdir.join("test1.tif")))
+    da0.raster.to_raster(str(tmpdir.join("test0.tif")))
+    da1.raster.to_raster(str(tmpdir.join("test1.tif")))
     with pytest.raises(xr.MergeError, match="Geotransform and/or shape do not match"):
         hydromt.open_mfraster(str(tmpdir.join("test*.tif")))
     with pytest.raises(ValueError, match="will be set based on the DataArray"):
-        da0.rio.to_raster(str(tmpdir.join("test2.tif")), count=3)
+        da0.raster.to_raster(str(tmpdir.join("test2.tif")), count=3)
     with pytest.raises(ValueError, match="Extension unknown for driver"):
-        da0.to_dataset().rio.to_mapstack(root=str(tmpdir), driver="unknown")
+        da0.to_dataset().raster.to_mapstack(root=str(tmpdir), driver="unknown")
 
 
 @pytest.mark.skipif(not hydromt.HAS_PCRASTER, reason="PCRaster not installed.")
 def test_io_pcr(tmpdir):
     # test write ldd with clone
-    da = rio.full_from_transform(
+    da = raster.full_from_transform(
         [0.5, 0.0, 3.0, 0.0, -0.5, -9.0], (4, 6), nodata=247, dtype=np.uint8, name="ldd"
     )
     fn_ldd = str(tmpdir.join("test_ldd.map"))
-    da.rio.to_raster(fn_ldd, driver="PCRaster", pcr_vs="ldd")
+    da.raster.to_raster(fn_ldd, driver="PCRaster", pcr_vs="ldd")
     assert os.path.isfile(fn_ldd)
     # test ordinal
-    da.rio.to_raster(fn_ldd, driver="PCRaster", pcr_vs="ordinal", clone_path=fn_ldd)
+    da.raster.to_raster(fn_ldd, driver="PCRaster", pcr_vs="ordinal", clone_path=fn_ldd)
     assert os.path.isfile(fn_ldd)
-    da.expand_dims("time").rio.to_raster(tmpdir.join("testldd.map"), driver="PCRaster")
+    da.expand_dims("time").raster.to_raster(
+        tmpdir.join("testldd.map"), driver="PCRaster"
+    )
     assert os.path.isfile(tmpdir.join("testldd0.001"))
     ds_in = hydromt.open_mfraster(
         str(tmpdir.join("testldd*")), concat=True, mask_nodata=True
@@ -218,5 +222,5 @@ def test_io_pcr(tmpdir):
     # mapstack
     prefix = "test_"
     root = str(tmpdir)
-    assert np.all([np.isnan(ds_in[n].rio.nodata) for n in ds_in.rio.vars])
-    ds_in.rio.to_mapstack(join(root, "pcr"), prefix=prefix, driver="PCRaster")
+    assert np.all([np.isnan(ds_in[n].raster.nodata) for n in ds_in.raster.vars])
+    ds_in.raster.to_mapstack(join(root, "pcr"), prefix=prefix, driver="PCRaster")

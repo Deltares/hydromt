@@ -13,7 +13,7 @@ from affine import Affine
 
 from pyflwdir import core_d8
 import hydromt
-from hydromt import rio
+from hydromt import raster
 from .testclass import TestModel
 from hydromt.models import MODELS
 from hydromt.models.model_api import Model
@@ -81,15 +81,15 @@ def _create_staticmaps(model):
         for n in _maps
         if n in _models[model]
     }
-    ds = rio.RasterDataset.from_numpy(data_vars=data_vars, transform=transform)
-    ds.rio.set_crs(4326)
+    ds = raster.RasterDataset.from_numpy(data_vars=data_vars, transform=transform)
+    ds.raster.set_crs(4326)
     return ds
 
 
 def _create_dynmaps(model, ds_like, forcing=True):
-    shape = 10, ds_like.rio.height, ds_like.rio.width
+    shape = 10, ds_like.raster.height, ds_like.raster.width
     dims = ["time"]
-    dims.extend(list(ds_like.rio.dims))
+    dims.extend(list(ds_like.raster.dims))
     if forcing:
         data_vars = {
             n: (dims, _forcing[n]["func"](shape))
@@ -103,19 +103,19 @@ def _create_dynmaps(model, ds_like, forcing=True):
             if n in _models[model]
         }
     coords = dict(time=pd.date_range(start="2010/01/01", periods=10, freq="D"))
-    coords.update(ds_like.rio.coords)
+    coords.update(ds_like.raster.coords)
     ds = xr.Dataset(data_vars=data_vars, coords=coords)
     return ds
 
 
 def _create_states(model, ds_like):
-    shape = ds_like.rio.shape
+    shape = ds_like.raster.shape
     data_vars = {
-        n: (list(ds_like.rio.dims), _states[n]["func"](shape))
+        n: (list(ds_like.raster.dims), _states[n]["func"](shape))
         for n in _results
         if n in _models[model]
     }
-    ds = xr.Dataset(data_vars=data_vars, coords=ds_like.rio.coords)
+    ds = xr.Dataset(data_vars=data_vars, coords=ds_like.raster.coords)
     return ds
 
 

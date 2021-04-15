@@ -607,8 +607,8 @@ def abs_path(root, rel_path):
 
 
 def round_latlon(ds, decimals=5):
-    x_dim = ds.rio.x_dim
-    y_dim = ds.rio.y_dim
+    x_dim = ds.raster.x_dim
+    y_dim = ds.raster.y_dim
     ds[x_dim] = np.round(ds[x_dim], decimals=decimals)
     ds[y_dim] = np.round(ds[y_dim], decimals=decimals)
     return ds
@@ -836,7 +836,7 @@ class RasterDatasetAdapter(DataAdapter):
         # write using various writers
         if driver in ["netcdf"]:  # TODO complete list
             fn_out = join(data_root, f"{data_name}.nc")
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.rio.vars
+            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
             encoding = {k: {"zlib": True} for k in dvars}
             obj.to_netcdf(fn_out, encoding=encoding, **kwargs)
         elif driver == "zarr":
@@ -848,10 +848,12 @@ class RasterDatasetAdapter(DataAdapter):
             ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
             if isinstance(obj, xr.DataArray):
                 fn_out = join(data_root, f"{data_name}.{ext}")
-                obj.rio.to_raster(fn_out, driver=driver, **kwargs)
+                obj.raster.to_raster(fn_out, driver=driver, **kwargs)
             else:
                 fn_out = join(data_root, data_name, "{variable}" + f".{ext}")
-                obj.rio.to_mapstack(join(data_root, data_name), driver=driver, **kwargs)
+                obj.raster.to_mapstack(
+                    join(data_root, data_name), driver=driver, **kwargs
+                )
             driver = "raster"
 
         return fn_out, driver
@@ -896,8 +898,8 @@ class RasterDatasetAdapter(DataAdapter):
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
 
         # rename and select vars
-        if variables and len(ds_out.rio.vars) == 1 and len(self.rename) == 0:
-            rm = {ds_out.rio.vars[0]: variables[0]}
+        if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
+            rm = {ds_out.raster.vars[0]: variables[0]}
         else:
             rm = {k: v for k, v in self.rename.items() if k in ds_out}
         ds_out = ds_out.rename(rm)
@@ -923,23 +925,23 @@ class RasterDatasetAdapter(DataAdapter):
                 raise IndexError(f"RasterDataset: Time slice out of range.")
 
         # set crs
-        if ds_out.rio.crs is None and self.crs != None:
-            ds_out.rio.set_crs(self.crs)
-        elif ds_out.rio.crs is None:
+        if ds_out.raster.crs is None and self.crs != None:
+            ds_out.raster.set_crs(self.crs)
+        elif ds_out.raster.crs is None:
             raise ValueError(
                 "RasterDataset: The data has no CRS, set in RasterDatasetAdapter."
             )
 
         # clip
-        epsg = ds_out.rio.crs.to_epsg()
+        epsg = ds_out.raster.crs.to_epsg()
         if geom is not None:
             bbox = geom.to_crs(4326).total_bounds
         if epsg != 4326 and bbox is not None and geom is None:
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
         elif epsg == 4326:
-            w, e = np.asarray(ds_out.rio.bounds)[[0, 2]]
+            w, e = np.asarray(ds_out.raster.bounds)[[0, 2]]
             if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
-                x_dim = ds_out.rio.x_dim
+                x_dim = ds_out.raster.x_dim
                 ds_out = gis_utils.meridian_offset(ds_out, x_dim, bbox).sortby(x_dim)
         if bbox is not None:
             err = f"RasterDataset: No data within spatial domain for {self.path}."
@@ -947,13 +949,13 @@ class RasterDatasetAdapter(DataAdapter):
                 bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
                 if geom is not None:
                     logger.debug(f"RasterDataset: Clip with geom - [{bbox_str}]")
-                    ds_out = ds_out.rio.clip_geom(geom, buffer=buffer, align=align)
+                    ds_out = ds_out.raster.clip_geom(geom, buffer=buffer, align=align)
                 elif bbox is not None:
                     logger.debug(f"RasterDataset: Clip with bbox - [{bbox_str}]")
-                    ds_out = ds_out.rio.clip_bbox(bbox, buffer=buffer, align=align)
+                    ds_out = ds_out.raster.clip_bbox(bbox, buffer=buffer, align=align)
             except IndexError:
                 raise IndexError(err)
-            if ds_out.rio.xcoords.size == 0 or ds_out.rio.ycoords.size == 0:
+            if ds_out.raster.xcoords.size == 0 or ds_out.raster.ycoords.size == 0:
                 raise IndexError(err)
 
         # set nodata value
@@ -964,8 +966,8 @@ class RasterDatasetAdapter(DataAdapter):
                 nodata = self.nodata
             for k in ds_out.data_vars:
                 mv = nodata.get(k, None)
-                if mv is not None and ds_out[k].rio.nodata is None:
-                    ds_out[k].rio.set_nodata(mv)
+                if mv is not None and ds_out[k].raster.nodata is None:
+                    ds_out[k].raster.set_nodata(mv)
 
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
@@ -979,9 +981,9 @@ class RasterDatasetAdapter(DataAdapter):
             a = self.unit_add.get(name, 0)
             da = ds_out[name]
             attrs = da.attrs.copy()
-            nodata_isnan = da.rio.nodata is None or np.isnan(da.rio.nodata)
+            nodata_isnan = da.raster.nodata is None or np.isnan(da.raster.nodata)
             # nodata value is explicitly set to NaN in case no nodata value is provided
-            nodata = np.nan if nodata_isnan else da.rio.nodata
+            nodata = np.nan if nodata_isnan else da.raster.nodata
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
             ds_out[name] = xr.where(data_bool, da * m + a, nodata)
             ds_out[name].attrs.update(attrs)  # set original attributes
@@ -992,8 +994,8 @@ class RasterDatasetAdapter(DataAdapter):
             ds_out[k].attrs.update(units=self.units[k])
 
         # return data array if single var
-        if single_var_as_array and len(ds_out.rio.vars) == 1:
-            ds_out = ds_out[ds_out.rio.vars[0]]
+        if single_var_as_array and len(ds_out.raster.vars) == 1:
+            ds_out = ds_out[ds_out.raster.vars[0]]
 
         # set meta data
         ds_out.attrs.update(self.meta)
@@ -1106,14 +1108,14 @@ class GeoDatasetAdapter(DataAdapter):
         obj = self.get_data(
             bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
         )
-        if obj.geo.index.size == 0 or ("time" in obj and obj.time.size == 0):
+        if obj.vector.index.size == 0 or ("time" in obj and obj.time.size == 0):
             return None, None
 
         if driver is None or driver == "netcdf":
             # always write netcdf
             driver = "netcdf"
             fn_out = join(data_root, f"{data_name}.nc")
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.rio.vars
+            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
             encoding = {k: {"zlib": True} for k in dvars}
             obj.to_netcdf(fn_out, encoding=encoding)
         elif driver == "zarr":
@@ -1182,11 +1184,11 @@ class GeoDatasetAdapter(DataAdapter):
         ds_out = ds_out.rename({k: v for k, v in self.rename.items() if k in ds_out})
         # check spatial dims and make sure all are set as coordinates
         try:
-            ds_out.geo.set_spatial_dims()
-            idim = ds_out.geo.index_dim
+            ds_out.vector.set_spatial_dims()
+            idim = ds_out.vector.index_dim
             if idim not in ds_out:  # set coordinates for index dimension if missing
                 ds_out[idim] = xr.IndexVariable(idim, np.arange(ds_out.dims[idim]))
-            coords = [ds_out.geo.x_dim, ds_out.geo.y_dim, idim]
+            coords = [ds_out.vector.x_dim, ds_out.vector.y_dim, idim]
             ds_out = ds_out.set_coords(coords)
         except ValueError:
             raise ValueError(f"GeoDataset: No spatial coords found in data {self.path}")
@@ -1196,9 +1198,9 @@ class GeoDatasetAdapter(DataAdapter):
             ds_out = ds_out[variables]
 
         # set crs
-        if ds_out.geo.crs is None and self.crs != None:
-            ds_out.geo.set_crs(self.crs)
-        if ds_out.geo.crs is None:
+        if ds_out.vector.crs is None and self.crs != None:
+            ds_out.vector.set_crs(self.crs)
+        if ds_out.vector.crs is None:
             raise ValueError(
                 "GeoDataset: The data has no CRS, set in GeoDatasetAdapter."
             )
@@ -1206,14 +1208,17 @@ class GeoDatasetAdapter(DataAdapter):
         # clip
         if geom is not None:
             bbox = geom.to_crs(4326).total_bounds
-        if ds_out.geo.crs.to_epsg() == 4326:
-            w, e = ds_out.geo.xcoords.values.min(), ds_out.geo.xcoords.values.max()
+        if ds_out.vector.crs.to_epsg() == 4326:
+            w, e = (
+                ds_out.vector.xcoords.values.min(),
+                ds_out.vector.xcoords.values.max(),
+            )
             if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
-                ds_out = gis_utils.meridian_offset(ds_out, ds_out.geo.x_dim, bbox)
+                ds_out = gis_utils.meridian_offset(ds_out, ds_out.vector.x_dim, bbox)
         if geom is not None:
             predicate = kwargs.pop("predicate", "intersects")
-            ds_out = ds_out.geo.clip_geom(geom, predicate=predicate)
-        if ds_out.geo.index.size == 0:
+            ds_out = ds_out.vector.clip_geom(geom, predicate=predicate)
+        if ds_out.vector.index.size == 0:
             logger.warning(
                 f"GeoDataset: No data within spatial domain for {self.path}."
             )
@@ -1244,8 +1249,8 @@ class GeoDatasetAdapter(DataAdapter):
                 nodata = self.nodata
             for k in ds_out.data_vars:
                 mv = nodata.get(k, None)
-                if mv is not None and ds_out[k].rio.nodata is None:
-                    ds_out[k].rio.set_nodata(mv)
+                if mv is not None and ds_out[k].raster.nodata is None:
+                    ds_out[k].raster.set_nodata(mv)
 
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
@@ -1257,16 +1262,16 @@ class GeoDatasetAdapter(DataAdapter):
             a = self.unit_add.get(name, 0)
             da = ds_out[name]
             attrs = da.attrs.copy()
-            nodata_isnan = da.rio.nodata is None or np.isnan(da.rio.nodata)
+            nodata_isnan = da.raster.nodata is None or np.isnan(da.raster.nodata)
             # nodata value is explicitly set to NaN in case no nodata value is provided
-            nodata = np.nan if nodata_isnan else da.rio.nodata
+            nodata = np.nan if nodata_isnan else da.raster.nodata
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
             ds_out[name] = xr.where(data_bool, da * m + a, nodata)
             ds_out[name].attrs.update(attrs)  # set original attributes
 
         # return data array if single var
-        if single_var_as_array and len(ds_out.rio.vars) == 1:
-            ds_out = ds_out[ds_out.rio.vars[0]]
+        if single_var_as_array and len(ds_out.raster.vars) == 1:
+            ds_out = ds_out[ds_out.raster.vars[0]]
 
         # set meta data
         ds_out.attrs.update(self.meta)

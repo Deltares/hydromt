@@ -11,13 +11,13 @@ from shapely.geometry import box
 import pyproj
 import logging
 
-from . import gis_utils, rio
+from . import gis_utils, raster
 
 logger = logging.getLogger(__name__)
 
 
-class GeoBase(rio.XGeoBase):
-    """This is a geo extension for xarray.DataArray 1D time series data
+class GeoBase(raster.XGeoBase):
+    """This is a vector extension for xarray.DataArray 1D time series data
     with geographical location information"""
 
     def __init__(self, xarray_obj):
@@ -34,14 +34,14 @@ class GeoBase(rio.XGeoBase):
 
     @property
     def x_dim(self):
-        # NOTE overwrites rio.XGeoBase.x_dim
+        # NOTE overwrites raster.XGeoBase.x_dim
         if self.get_attrs("x_dim") not in self._all_names:
             self.set_spatial_dims()
         return self.attrs["x_dim"]
 
     @property
     def y_dim(self):
-        # NOTE overwrites rio.XGeoBase.y_dim
+        # NOTE overwrites raster.XGeoBase.y_dim
         if self.get_attrs("y_dim") not in self._all_names:
             self.set_spatial_dims()
         return self.attrs["y_dim"]
@@ -54,14 +54,14 @@ class GeoBase(rio.XGeoBase):
         x_dim, y_dim, index_dim: str, optional
             The name of the x, y and index dimensions.
         """
-        # NOTE overwrites rio.XGeoBase.set_spatial_dims
+        # NOTE overwrites raster.XGeoBase.set_spatial_dims
         # infer x and index dims
         _obj = self._obj
         names = list(_obj.coords.keys())
         if isinstance(_obj, xr.Dataset):
             names = names + list(_obj.data_vars.keys())
         if x_dim is None:
-            for dim in rio.XDIMS:
+            for dim in raster.XDIMS:
                 if dim in names:
                     dim0 = index_dim if index_dim is not None else _obj[dim].dims[0]
                     if _obj[dim0].dims[0] == dim0:
@@ -84,7 +84,7 @@ class GeoBase(rio.XGeoBase):
             )
         # infer y dim
         if y_dim is None:
-            for dim in rio.YDIMS:
+            for dim in raster.YDIMS:
                 if dim in names:
                     if _obj[dim].dims[0] == index_dim:
                         y_dim = dim
@@ -186,11 +186,11 @@ class GeoBase(rio.XGeoBase):
             DataArray with transformed geospatial coordinates
         """
         if self.crs is None:
-            raise ValueError("Source CRS is missing. Use da.geo.set_crs(crs) first.")
+            raise ValueError("Source CRS is missing. Use da.vector.set_crs(crs) first.")
         _obj = self._obj.copy()  # shallow
         gdf = self.to_gdf().to_crs(pyproj.CRS.from_user_input(dst_crs))
         # TODO rename depending on crs
-        _obj.geo.set_crs(dst_crs)
+        _obj.vector.set_crs(dst_crs)
         _obj[self.x_dim] = xr.IndexVariable(self.index_dim, gdf.geometry.x)
         _obj[self.y_dim] = xr.IndexVariable(self.index_dim, gdf.geometry.y)
         # reset spatial index
@@ -255,9 +255,9 @@ class GeoBase(rio.XGeoBase):
         return self._obj.isel({self.index_dim: idx})
 
 
-@xr.register_dataarray_accessor("geo")
+@xr.register_dataarray_accessor("vector")
 class GeoDataArray(GeoBase):
-    """This is a geo extension for xarray.DataArray 1D time series data
+    """This is a vector extension for xarray.DataArray 1D time series data
     with geographical location information"""
 
     @staticmethod
@@ -317,9 +317,9 @@ class GeoDataArray(GeoBase):
                 )
         da = da.reindex({index_dim: gdf.index}).assign_coords(scoords)
         # set geospatial attributes
-        da.geo.set_spatial_dims(x_dim="x", y_dim="y", index_dim=index_dim)
+        da.vector.set_spatial_dims(x_dim="x", y_dim="y", index_dim=index_dim)
         if gdf.crs is not None:
-            da.geo.set_crs(gdf.crs)
+            da.vector.set_crs(gdf.crs)
         if da.dims[0] != index_dim:
             da = da.transpose(index_dim, ...)
         return da
@@ -352,9 +352,9 @@ class GeoDataArray(GeoBase):
         raise NotImplementedError()
 
 
-@xr.register_dataset_accessor("geo")
+@xr.register_dataset_accessor("vector")
 class GeoDataset(GeoBase):
-    """This is a geo extension for xarray.Dataset 1D time series data
+    """This is a vector extension for xarray.Dataset 1D time series data
     with geographical location information"""
 
     def __init__(self, xarray_obj):
@@ -416,9 +416,9 @@ class GeoDataset(GeoBase):
         else:
             ds = xr.Dataset(coords=scoords)
         # set geospatial attributes
-        ds.geo.set_spatial_dims(x_dim="x", y_dim="y", index_dim=index_dim)
+        ds.vector.set_spatial_dims(x_dim="x", y_dim="y", index_dim=index_dim)
         if gdf.crs is not None:
-            ds.geo.set_crs(gdf.crs)
+            ds.vector.set_crs(gdf.crs)
         return ds
 
     @property

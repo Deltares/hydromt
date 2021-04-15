@@ -42,11 +42,11 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=True):
     if not isinstance(da, xr.DataArray):
         raise TypeError("da should be instance xarray.DataArray type")
 
-    crs = da.rio.crs
+    crs = da.raster.crs
     latlon = False
     if crs is not None and crs.to_epsg() == 4326:
         latlon = True
-    elif crs is None or da.rio.crs.is_projected:
+    elif crs is None or da.raster.crs.is_projected:
         warnings.warn("Assuming a projected CRS with unit meter.")
     elif crs is not None and crs.is_geographic:
         raise NotImplementedError("unknown geographic CRS unit")
@@ -55,7 +55,7 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=True):
         ftype=ftype,
         check_ftype=check_ftype,
         mask=da["mask"].values != 0 if (mask and "mask" in da.coords) else None,
-        transform=da.rio.transform,
+        transform=da.raster.transform,
         latlon=latlon,
     )
     return flwdir
@@ -64,7 +64,7 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=True):
 def gaugemap(ds, idxs=None, xy=None, ids=None, mask=None, flwdir=None, logger=logger):
     # Snap if mask and flwdir are not None
     if xy is not None:
-        idxs = ds.rio.xy_to_idx(xs=xy[0], ys=xy[1])
+        idxs = ds.raster.xy_to_idx(xs=xy[0], ys=xy[1])
     elif idxs is None:
         raise ValueError("Either idxs or xy required")
     if ids is None:
@@ -76,11 +76,11 @@ def gaugemap(ds, idxs=None, xy=None, ids=None, mask=None, flwdir=None, logger=lo
         if np.any(dist > 10000):
             far = len(dist[dist > 10000])
             logger.warn(f"Snapping distance of {far} gauge(s) is > 10km")
-    gauges = np.zeros(ds.rio.shape, dtype=np.int32)
+    gauges = np.zeros(ds.raster.shape, dtype=np.int32)
     gauges.flat[idxs] = ids
     da_gauges = xr.DataArray(
-        dims=ds.rio.dims,
-        coords=ds.rio.coords,
+        dims=ds.raster.dims,
+        coords=ds.raster.coords,
         data=gauges,
         attrs=dict(_FillValue=0),
     )
@@ -128,13 +128,13 @@ def basin_map(
     xy : tuple of array_like of float
         snapped x, y coordinates of sub(basin) outlets
     """
-    if not np.all(flwdir.shape == ds.rio.shape):
+    if not np.all(flwdir.shape == ds.raster.shape):
         raise ValueError("flwdir and ds dimensions do not match")
     # get stream map
     locs = xy is not None or idxs is not None
     if locs and (stream is not None or len(stream_kwargs) > 0):
         if stream is None:
-            stream = np.full(ds.rio.shape, True, dtype=np.bool)
+            stream = np.full(ds.raster.shape, True, dtype=np.bool)
         for name, value in stream_kwargs.items():
             stream = np.logical_and(stream, ds[name].values >= value)
         if not np.any(stream):
@@ -152,11 +152,11 @@ def basin_map(
             )
         ids = None
     da_basins = xr.DataArray(
-        dims=ds.rio.dims,
+        dims=ds.raster.dims,
         data=flwdir.basins(idxs=idxs, xy=xy, ids=ids).astype(np.int32),
-        coords=ds.rio.coords,
+        coords=ds.raster.coords,
     )
-    da_basins.rio.set_nodata(0)
+    da_basins.raster.set_nodata(0)
     if idxs is not None:
         xy = flwdir.xy(idxs)
     return da_basins, xy
@@ -180,16 +180,16 @@ def basin_shape(ds, flwdir, basin_name="basins", mask=True, **kwargs):
     geopandas.GeoDataFrame
         GeoDataFrame with basin shapes.
     """
-    if not np.all(flwdir.shape == ds.rio.shape):
+    if not np.all(flwdir.shape == ds.raster.shape):
         raise ValueError("flwdir and ds dimensions do not match")
     if basin_name not in ds:
         ds[basin_name] = basin_map(ds, flwdir, **kwargs)[0]
     da_basins = ds[basin_name]
-    nodata = da_basins.rio.nodata
+    nodata = da_basins.raster.nodata
     if mask and "mask" in da_basins.coords and nodata is not None:
         da_basins = da_basins.where(da_basins.coords["mask"] != 0, nodata)
-        da_basins.rio.set_nodata(nodata)
-    gdf = da_basins.rio.vectorize().set_index("value").sort_index()
+        da_basins.raster.set_nodata(nodata)
+    gdf = da_basins.raster.vectorize().set_index("value").sort_index()
     gdf.index.name = basin_name
     return gdf
 
@@ -224,10 +224,10 @@ def clip_basins(ds, flwdir, xy, flwdir_name="flwdir", **stream_kwargs):
     dir_arr = ds[flwdir_name].values.copy()
     dir_arr.flat[idxs_pit] = pit_value
     attrs = ds[flwdir_name].attrs.copy()
-    ds[flwdir_name] = xr.Variable(dims=ds.rio.dims, data=dir_arr, attrs=attrs)
+    ds[flwdir_name] = xr.Variable(dims=ds.raster.dims, data=dir_arr, attrs=attrs)
     # clip data
     ds.coords["mask"] = da_basins
-    return ds.rio.clip_mask(da_basins)
+    return ds.raster.clip_mask(da_basins)
 
 
 def upscale_flwdir(
@@ -269,7 +269,7 @@ def upscale_flwdir(
     flwdir_out : pyflwdir.FlwdirRaster
         Upscaled flow direction raster object.
     """
-    if not np.all(flwdir.shape == ds.rio.shape):
+    if not np.all(flwdir.shape == ds.raster.shape):
         raise ValueError("Flwdir and ds dimensions do not match.")
     uparea = None
     if uparea_name is not None:
@@ -282,9 +282,9 @@ def upscale_flwdir(
     )
     # setup output DataArray
     ftype = flwdir.ftype
-    dims = ds.rio.dims
+    dims = ds.raster.dims
     xs, ys = gis_utils.affine_to_coords(flwdir_out.transform, flwdir_out.shape)
-    coords = {ds.rio.y_dim: ys, ds.rio.x_dim: xs}
+    coords = {ds.raster.y_dim: ys, ds.raster.x_dim: xs}
     da_flwdir = xr.DataArray(
         name=flwdir_name,
         data=flwdir_out.to_array(ftype),
@@ -293,7 +293,7 @@ def upscale_flwdir(
         attrs=dict(long_name=f"{ftype} flow direction", _FillValue=flwdir._core._mv),
     )
     # translate outlet indices to global x,y coordinates
-    x_out, y_out = ds.rio.idx_to_xy(idxs_out, mask=idxs_out != flwdir._mv)
+    x_out, y_out = ds.raster.idx_to_xy(idxs_out, mask=idxs_out != flwdir._mv)
     da_flwdir.coords["x_out"] = xr.Variable(
         dims=dims,
         data=x_out,

@@ -39,23 +39,25 @@ def precip(
     p_out: xarray.DataArray (lazy)
         processed precipitation forcing
     """
-    if precip.rio.dim0 != "time":
-        raise ValueError(f'First precip dim should be "time", not {precip.rio.dim0}')
+    if precip.raster.dim0 != "time":
+        raise ValueError(f'First precip dim should be "time", not {precip.raster.dim0}')
     # downscale precip (lazy); global min of zero
-    p_out = xr.ufuncs.fmax(precip.rio.reproject_like(da_like, method=reproj_method), 0)
+    p_out = xr.ufuncs.fmax(
+        precip.raster.reproject_like(da_like, method=reproj_method), 0
+    )
     # correct precip based on high-res monthly climatology
     if clim is not None:
         # make sure first dim is month
-        clim = clim.rename({clim.rio.dim0: "month"})
+        clim = clim.rename({clim.raster.dim0: "month"})
         if not clim["month"].size == 12:
             raise ValueError("Precip climatology does not contain 12 months.")
         # set missings to NaN
-        clim = clim.rio.mask_nodata()
+        clim = clim.raster.mask_nodata()
         # calculate downscaling multiplication factor
-        clim_coarse = clim.rio.reproject_like(
+        clim_coarse = clim.raster.reproject_like(
             precip, method="average"
-        ).rio.reproject_like(da_like, method="average")
-        clim_fine = clim.rio.reproject_like(da_like, method="average")
+        ).raster.reproject_like(da_like, method="average")
+        clim_fine = clim.raster.reproject_like(da_like, method="average")
         p_mult = xr.where(clim_coarse > 0, clim_fine / clim_coarse, 1.0).fillna(1.0)
         # multiply with monthly multiplication factor
         p_out = p_out.groupby("time.month") * p_mult
@@ -109,14 +111,14 @@ def temp(
     t_out: xarray.DataArray (lazy)
         processed temperature forcing
     """
-    if temp.rio.dim0 != "time":
-        raise ValueError(f'First temp dim should be "time", not {temp.rio.dim0}')
+    if temp.raster.dim0 != "time":
+        raise ValueError(f'First temp dim should be "time", not {temp.raster.dim0}')
     # apply lapse rate
     if lapse_correction:
         # if dem_forcing is not provided, reproject dem_model
-        dem_model = dem_model.rio.mask_nodata()
+        dem_model = dem_model.raster.mask_nodata()
         if dem_forcing is None:
-            dem_forcing = dem_model.rio.reproject_like(temp, "average")
+            dem_forcing = dem_model.raster.reproject_like(temp, "average")
             if np.any(np.isnan(dem_forcing)):
                 logger.warning(
                     "Temperature lapse rate could be computed for some (edge) cells. "
@@ -124,13 +126,13 @@ def temp(
                 )
         else:
             # assume nans in dem_forcing occur above the ocean only -> set to zero
-            dem_forcing = dem_forcing.rio.mask_nodata().fillna(0)
-            dem_forcing = dem_forcing.rio.reproject_like(temp, "average")
+            dem_forcing = dem_forcing.raster.mask_nodata().fillna(0)
+            dem_forcing = dem_forcing.raster.reproject_like(temp, "average")
         # compute temperature at quasi MSL
         t_add_sea_level = temp_correction(dem_forcing, lapse_rate=lapse_rate)
         temp = temp - t_add_sea_level
     # downscale temperature (lazy) and add zeros with mask to mask areas outside AOI
-    t_out = temp.rio.reproject_like(dem_model, method=reproj_method)
+    t_out = temp.raster.reproject_like(dem_model, method=reproj_method)
     if lapse_correction:
         # correct temperature based on high-res DEM
         # calculate downscaling addition
@@ -180,10 +182,10 @@ def press(
     press_out: xarray.DataArray (lazy)
         processed pressure forcing
     """
-    if press.rio.dim0 != "time":
-        raise ValueError(f'First press dim should be "time", not {press.rio.dim0}')
+    if press.raster.dim0 != "time":
+        raise ValueError(f'First press dim should be "time", not {press.raster.dim0}')
     # downscale pressure (lazy)
-    press_out = press.rio.reproject_like(dem_model, method=reproj_method)
+    press_out = press.raster.reproject_like(dem_model, method=reproj_method)
     # correct temperature based on high-res DEM
     if lapse_correction:
         # calculate downscaling addition
@@ -239,15 +241,15 @@ def pet(
         reference evapotranspiration
     """
     # # resample in time
-    if temp.rio.dim0 != "time" or ds.rio.dim0 != "time":
+    if temp.raster.dim0 != "time" or ds.raster.dim0 != "time":
         raise ValueError(f'First dimension of input variables should be "time"')
     # make sure temp and ds align both temporally and spatially
     if not np.all(temp["time"].values == ds["time"].values):
         raise ValueError("All input variables have same time index.")
-    if not temp.rio.identical_grid(dem_model):
+    if not temp.raster.identical_grid(dem_model):
         raise ValueError("Temp variable should be on model grid.")
     # resample input to model grid
-    ds_out = ds.rio.reproject_like(dem_model, method=reproj_method)
+    ds_out = ds.raster.reproject_like(dem_model, method=reproj_method)
     if press_correction:
         ds_out["press"] = press(
             ds["press_msl"],

@@ -59,11 +59,11 @@ def test_data_catalog(tmpdir):
 
 def test_rasterdataset(rioda, tmpdir):
     fn_tif = str(tmpdir.join("test.tif"))
-    rioda.rio.to_raster(fn_tif)
+    rioda.raster.to_raster(fn_tif)
     data_catalog = DataCatalog()
-    da1 = data_catalog.get_rasterdataset(fn_tif, bbox=rioda.rio.bounds)
+    da1 = data_catalog.get_rasterdataset(fn_tif, bbox=rioda.raster.bounds)
     assert np.all(da1 == rioda)
-    da1 = data_catalog.get_rasterdataset("test", geom=rioda.rio.box)
+    da1 = data_catalog.get_rasterdataset("test", geom=rioda.raster.box)
     assert np.all(da1 == rioda)
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_rasterdataset("no_file.tif")
@@ -78,7 +78,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     ts.to_csv(fn_csv)
     data_catalog = DataCatalog()
     da1 = data_catalog.get_geodataset(
-        fn_nc, rename={"test": "test1"}, bbox=geoda.geo.bounds
+        fn_nc, rename={"test": "test1"}, bbox=geoda.vector.bounds
     ).sortby("index")
     assert np.allclose(da1, geoda) and da1.name == "test1"
     ds1 = data_catalog.get_geodataset("test", single_var_as_array=False)

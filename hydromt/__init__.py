@@ -23,7 +23,7 @@ except ImportError:
 
 
 # submoduls
-from . import cli, workflows, stats, flw, rio, geo
+from . import cli, workflows, stats, flw, raster, vector
 
 # high-level methods
 from .models import *

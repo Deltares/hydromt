@@ -73,17 +73,17 @@ def full_like(other, nodata=None, lazy=False):
     if not isinstance(other, xr.DataArray):
         raise ValueError("other should be xarray.DataArray.")
     if nodata is None:
-        nodata = other.rio.nodata if other.rio.nodata is not None else np.nan
+        nodata = other.raster.nodata if other.raster.nodata is not None else np.nan
     da = full(
         coords={d: c for d, c in other.coords.items() if d in other.dims},
         nodata=nodata,
         dtype=other.dtype,
         name=other.name,
         attrs=other.attrs,
-        crs=other.rio.crs,
+        crs=other.raster.crs,
         lazy=lazy,
     )
-    da.rio.set_attrs(**other.rio.attrs)
+    da.raster.set_attrs(**other.raster.attrs)
     return da
 
 
@@ -120,8 +120,8 @@ def full(
     shape = tuple([coords[dim].size for dim in dims])
     data = f(shape, nodata, dtype=dtype)
     da = xr.DataArray(data, coords, dims, name, attrs)
-    da.rio.set_nodata(nodata)
-    da.rio.set_crs(crs)
+    da.raster.set_nodata(nodata)
+    da.raster.set_crs(crs)
     return da
 
 
@@ -136,7 +136,7 @@ def full_from_transform(
     lazy=False,
 ):
     """Return a full DataArray based on a geospatial transform and shape.
-    See :py:meth:`~hydromt.rio.full` for all options.
+    See :py:meth:`~hydromt.raster.full` for all options.
 
     Arguments
     ---------
@@ -184,7 +184,7 @@ class XGeoBase(object):
         return self._obj.coords[GEO_MAP_COORD].attrs
 
     def set_attrs(self, **kwargs):
-        """Update spatial attributes. Usage rio.set_attr(key=value)."""
+        """Update spatial attributes. Usage raster.set_attr(key=value)."""
         self._obj.coords[GEO_MAP_COORD].attrs.update(**kwargs)
 
     def get_attrs(self, key, placeholder=None):
@@ -263,7 +263,7 @@ class XGeoBase(object):
         check_x = np.all(np.isclose(np.diff(np.diff(self._obj[x_dim])), 0, atol=1e-4))
         check_y = np.all(np.isclose(np.diff(np.diff(self._obj[y_dim])), 0, atol=1e-4))
         if check_x == False or check_y == False:
-            raise ValueError("rio only applies to regular grids")
+            raise ValueError("raster only applies to regular grids")
 
     def set_crs(self, input_crs=None):
         """Set the Coordinate Reference System.
@@ -312,7 +312,7 @@ class XGeoBase(object):
         _da = _da.rename({self.x_dim: x_dim, self.y_dim: y_dim})
         _da[x_dim].attrs.update(x_attrs)
         _da[y_dim].attrs.update(y_attrs)
-        _da.rio.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
+        _da.raster.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
         return _da
 
 
@@ -429,21 +429,29 @@ class XRasterBase(XGeoBase):
     def identical_grid(self, other):
         """Return True if other has an same grid as object (crs, transform, shape)."""
         return (
-            (self.crs is None or other.rio.crs is None or self.crs == other.rio.crs)
-            and np.allclose(self.transform, other.rio.transform, atol=1e-06)
-            and np.allclose(self.shape, other.rio.shape)
+            (
+                self.crs is None
+                or other.raster.crs is None
+                or self.crs == other.raster.crs
+            )
+            and np.allclose(self.transform, other.raster.transform, atol=1e-06)
+            and np.allclose(self.shape, other.raster.shape)
         )
 
     def aligned_grid(self, other):
         """Return True if other grid aligns with object grid (crs, resolution, origin),
         but with a smaller extent"""
         w, s, e, n = self.bounds
-        w1, s1, e1, n1 = other.rio.bounds
+        w1, s1, e1, n1 = other.raster.bounds
         dx = (w - w1) % self.res[0]
         dy = (n - n1) % self.res[1]
         return (
-            (self.crs is None or other.rio.crs is None or self.crs == other.rio.crs)
-            and np.allclose(self.res, other.rio.res)
+            (
+                self.crs is None
+                or other.raster.crs is None
+                or self.crs == other.raster.crs
+            )
+            and np.allclose(self.res, other.raster.res)
             and (np.isclose(dx, 0) or np.isclose(dx, 1))
             and (np.isclose(dy, 0) or np.isclose(dy, 1))
             and np.logical_and.reduce((w <= w1, s <= s1, e >= e1, n >= n1))
@@ -654,10 +662,10 @@ class XRasterBase(XGeoBase):
         obj_out = self._obj.isel(ds_sel)
         if True or np.any(obj_out["mask"]):
             if isinstance(obj_out, xr.DataArray):
-                obj_out = obj_out.where(obj_out["mask"], obj_out.rio.nodata)
+                obj_out = obj_out.where(obj_out["mask"], obj_out.raster.nodata)
             else:
                 for var in obj_out.data_vars:
-                    nodata = obj_out[var].rio.nodata
+                    nodata = obj_out[var].raster.nodata
                     obj_out[var] = obj_out[var].where(obj_out["mask"], nodata)
         return obj_out
 
@@ -688,27 +696,27 @@ class XRasterBase(XGeoBase):
         _ST = ["count", "min", "max", "sum", "mean", "std", "median"]
 
         def rmd(ds, stat):
-            return {var: f"{var}_{stat}" for var in ds.rio.vars}
+            return {var: f"{var}_{stat}" for var in ds.raster.vars}
 
         def gen_zonal_stat(ds, geoms, stats, all_touched=False):
-            a, b, _, d, e, _, _, _, _ = tuple(ds.rio.transform)
-            dims = (ds.rio.x_dim, ds.rio.y_dim)
+            a, b, _, d, e, _, _, _, _ = tuple(ds.raster.transform)
+            dims = (ds.raster.x_dim, ds.raster.y_dim)
             for i, geom in enumerate(geoms):
                 # add buffer to work with point geometries
-                ds1 = ds.rio.clip_bbox(geom.bounds, buffer=1).rio.mask_nodata()
-                if np.any(np.asarray(ds1.rio.shape) == 0):
+                ds1 = ds.raster.clip_bbox(geom.bounds, buffer=1).raster.mask_nodata()
+                if np.any(np.asarray(ds1.raster.shape) == 0):
                     continue
                 # transform based on ds resolution as ds1 resolution cannot be
                 # calculated in case of x/y dimension with length one
                 c, f = (
-                    ds1.rio.xcoords.values[0] - a / 2.0,
-                    ds1.rio.ycoords.values[0] - e / 2.0,
+                    ds1.raster.xcoords.values[0] - a / 2.0,
+                    ds1.raster.ycoords.values[0] - e / 2.0,
                 )
                 transform = Affine(a, b, c, d, e, f)
-                mask = full(ds1.rio.coords, nodata=0, dtype=np.uint8)
+                mask = full(ds1.raster.coords, nodata=0, dtype=np.uint8)
                 features.rasterize(
                     (geom, 1),
-                    out_shape=mask.rio.shape,
+                    out_shape=mask.raster.shape,
                     fill=0,
                     transform=transform,
                     out=mask.data,
@@ -819,7 +827,7 @@ class XRasterBase(XGeoBase):
         """
         if not isinstance(mask, xr.DataArray):
             raise ValueError("Mask should be xarray.DataArray type.")
-        if not mask.rio.shape == self.shape:
+        if not mask.raster.shape == self.shape:
             raise ValueError("Mask shape invalid.")
         mask_bin = (mask.values != 0).astype(np.uint8)
         if not np.any(mask_bin):
@@ -853,7 +861,7 @@ class XRasterBase(XGeoBase):
         if geom.crs is not None and self.crs is not None and geom.crs != self.crs:
             bbox = rasterio.warp.transform_bounds(geom.crs, self.crs, *bbox)
         ds_clip = self.clip_bbox(bbox, align=align, buffer=buffer)
-        ds_clip.coords["mask"] = ds_clip.rio.geometry_mask(geom)
+        ds_clip.coords["mask"] = ds_clip.raster.geometry_mask(geom)
         return ds_clip
 
     def rasterize(
@@ -926,8 +934,8 @@ class XRasterBase(XGeoBase):
         da_out = xr.DataArray(
             name=col_name, dims=self.dims, coords=self.coords, data=raster, attrs=attrs
         )
-        da_out.rio.set_nodata(nodata)
-        da_out.rio.set_attrs(**self.attrs)
+        da_out.raster.set_nodata(nodata)
+        da_out.raster.set_attrs(**self.attrs)
         return da_out
 
     def geometry_mask(self, gdf, all_touched=False, invert=False, **kwargs):
@@ -1026,7 +1034,7 @@ class XRasterBase(XGeoBase):
         Index mappings typically are used in reprojection workflows of time series,
         or combinations of time series
 
-        ... Note: Is used by :py:meth:`~hydromt.rio.RasterDataArray.reproject` if method equals 'nearest_index'
+        ... Note: Is used by :py:meth:`~hydromt.raster.RasterDataArray.reproject` if method equals 'nearest_index'
 
         Arguments
         ----------
@@ -1090,12 +1098,12 @@ class XRasterBase(XGeoBase):
             dims=dims,
             coords={self.y_dim: dst_ys, self.x_dim: dst_xs},
         )
-        index.rio.set_crs(dst_crs)
-        index.rio.set_nodata(-1)
+        index.raster.set_crs(dst_crs)
+        index.raster.set_nodata(-1)
         return index
 
 
-@xr.register_dataarray_accessor("rio")
+@xr.register_dataarray_accessor("raster")
 class RasterDataArray(XRasterBase):
     """This is the GIS extension for xarray.DataArray"""
 
@@ -1138,12 +1146,14 @@ class RasterDataArray(XRasterBase):
             dims=dims,
             coords={"y": _ycoords, "x": _xcoords},
         )
-        da.rio.set_spatial_dims(x_dim="x", y_dim="y")
-        da.rio.set_nodata(nodata=nodata)  # parse nodatavals attr to default _FillValue
+        da.raster.set_spatial_dims(x_dim="x", y_dim="y")
+        da.raster.set_nodata(
+            nodata=nodata
+        )  # parse nodatavals attr to default _FillValue
         if attrs:
             da.attrs.update(attrs)
         if crs is not None:
-            da.rio.set_crs(input_crs=crs)
+            da.raster.set_crs(input_crs=crs)
         return da
 
     @property
@@ -1191,7 +1201,7 @@ class RasterDataArray(XRasterBase):
         _da = self._obj
         if self.nodata is not None and self.nodata != np.nan:
             _da = _da.where(_da != self.nodata)
-            _da.rio.set_nodata(np.nan)
+            _da.raster.set_nodata(np.nan)
         return _da
 
     def _reproject(
@@ -1228,7 +1238,7 @@ class RasterDataArray(XRasterBase):
             src_nodata=self.nodata,
             dst_transform=dst_transform,
             dst_crs=dst_crs,
-            dst_nodata=da_reproject.rio.nodata,
+            dst_nodata=da_reproject.raster.nodata,
             resampling=resampling,
         )
         return da_reproject
@@ -1237,7 +1247,7 @@ class RasterDataArray(XRasterBase):
         """Return reindexed (reprojected) object"""
         # create new DataArray for output
         dst_coords = {d: self._obj.coords[d] for d in self._obj.dims}
-        ys, xs = index.rio.ycoords, index.rio.xcoords
+        ys, xs = index.raster.ycoords, index.raster.xcoords
         dst_coords.update({self.y_dim: ys, self.x_dim: xs})
         da_reproject = full(
             dst_coords,
@@ -1245,7 +1255,7 @@ class RasterDataArray(XRasterBase):
             dtype=self._obj.dtype,
             name=self._obj.name,
             attrs=self._obj.attrs,
-            crs=index.rio.crs,
+            crs=index.raster.crs,
         )
         # reproject by indexing
         shape2d = (self._obj.shape[0] if self.dim0 else 1, self.size)
@@ -1301,7 +1311,7 @@ class RasterDataArray(XRasterBase):
         """
 
         def _reproj(da, **kwargs):
-            return da.rio._reproject(**kwargs)
+            return da.raster._reproject(**kwargs)
 
         # parse and check destination grid and crs
         dst_crs = self._dst_crs(dst_crs)
@@ -1345,8 +1355,8 @@ class RasterDataArray(XRasterBase):
             _da = self._obj.chunk(chunks)
             da_temp = da_temp.chunk(chunks)
             da_reproj = _da.map_blocks(_reproj, kwargs=reproj_kwargs, template=da_temp)
-        da_reproj.rio.set_crs(dst_crs)
-        return da_reproj.rio.reset_spatial_dims_attrs()
+        da_reproj.raster.set_crs(dst_crs)
+        return da_reproj.raster.reset_spatial_dims_attrs()
 
     def reproject_like(self, other, method="nearest"):
         """Reproject a object to match the grid of ``other``.
@@ -1356,7 +1366,7 @@ class RasterDataArray(XRasterBase):
         other : xarray.DataArray or Dataset
             DataArray of the target resolution and projection.
         method : str, optional
-            See :py:meth:`~hydromt.rio.RasterDataArray.reproject` for existing methods,
+            See :py:meth:`~hydromt.raster.RasterDataArray.reproject` for existing methods,
             by default 'nearest'.
 
         Returns
@@ -1367,30 +1377,38 @@ class RasterDataArray(XRasterBase):
         # clip first; then reproject
         da = self._obj
         if self.aligned_grid(other):
-            da = self.clip_bbox(other.rio.bounds)
+            da = self.clip_bbox(other.raster.bounds)
         elif not self.identical_grid(other):
-            dst_bbox = other.rio.transform_bounds(self.crs)
-            da = self.clip_bbox(dst_bbox, buffer=2).rio.reproject(
-                dst_crs=other.rio.crs,
-                dst_transform=other.rio.transform,
-                dst_width=other.rio.width,
-                dst_height=other.rio.height,
+            dst_bbox = other.raster.transform_bounds(self.crs)
+            da = self.clip_bbox(dst_bbox, buffer=2).raster.reproject(
+                dst_crs=other.raster.crs,
+                dst_transform=other.raster.transform,
+                dst_width=other.raster.width,
+                dst_height=other.raster.height,
                 method=method,
             )
-        if da.rio.x_dim != other.rio.x_dim or da.rio.y_dim != other.rio.y_dim:
+        if (
+            da.raster.x_dim != other.raster.x_dim
+            or da.raster.y_dim != other.raster.y_dim
+        ):
             # overwrite spatial dimension names which might have been changed
-            rm = {da.rio.x_dim: other.rio.x_dim, da.rio.y_dim: other.rio.y_dim}
+            rm = {
+                da.raster.x_dim: other.raster.x_dim,
+                da.raster.y_dim: other.raster.y_dim,
+            }
             da = da.rename(rm)
-            da.rio.set_spatial_dims(x_dim=other.rio.x_dim, y_dim=other.rio.y_dim)
+            da.raster.set_spatial_dims(
+                x_dim=other.raster.x_dim, y_dim=other.raster.y_dim
+            )
         # make sure coordinates are identical!
-        da[other.rio.x_dim] = other.rio.xcoords
-        da[other.rio.y_dim] = other.rio.ycoords
+        da[other.raster.x_dim] = other.raster.xcoords
+        da[other.raster.y_dim] = other.raster.ycoords
         return da
 
     def reindex2d(self, index, dst_nodata=None):
         """Return reprojected DataArray object based on simple reindexing using
         linear indices in ``index``, which can be calculated with
-        :py:meth:`~hydromt.rio.RasterDataArray.nearest_index`.
+        :py:meth:`~hydromt.raster.RasterDataArray.nearest_index`.
 
         This is typically used to downscale time series data.
 
@@ -1406,7 +1424,7 @@ class RasterDataArray(XRasterBase):
         """
 
         def _reindex2d(da, index, dst_nodata):
-            return da.rio._reindex2d(index=index, dst_nodata=dst_nodata)
+            return da.raster._reindex2d(index=index, dst_nodata=dst_nodata)
 
         if dst_nodata is None:
             dst_nodata = self.nodata if self.nodata is not None else np.nan
@@ -1416,7 +1434,7 @@ class RasterDataArray(XRasterBase):
         else:
             # create template with dask data
             dst_coords = {d: self._obj.coords[d] for d in self._obj.dims}
-            ys, xs = index.rio.ycoords, index.rio.xcoords
+            ys, xs = index.raster.ycoords, index.raster.xcoords
             dst_coords.update({self.y_dim: ys, self.x_dim: xs})
             da_temp = full(
                 dst_coords,
@@ -1424,7 +1442,7 @@ class RasterDataArray(XRasterBase):
                 dtype=self._obj.dtype,
                 name=self._obj.name,
                 attrs=self._obj.attrs,
-                crs=index.rio.crs,
+                crs=index.raster.crs,
                 lazy=True,
             )
             # chunk along first dim
@@ -1434,8 +1452,8 @@ class RasterDataArray(XRasterBase):
             da_temp = da_temp.chunk(chunks)
             # map blocks
             da_reproj = _da.map_blocks(_reindex2d, kwargs=kwargs, template=da_temp)
-        da_reproj.rio.set_nodata(dst_nodata)
-        return da_reproj.rio.reset_spatial_dims_attrs()
+        da_reproj.raster.set_nodata(dst_nodata)
+        return da_reproj.raster.reset_spatial_dims_attrs()
 
     def _interpolate_na(self, src_data, method="nearest"):
         """Interpolate missing data, powered by :py:meth:`scipy.interpolate.griddata`.
@@ -1538,8 +1556,8 @@ class RasterDataArray(XRasterBase):
         da_out = self._obj
         # set nodata, mask, crs and dtype
         if "nodata" in profile_kwargs:
-            da_out.rio.set_nodata(profile_kwargs.pop("nodata"))
-        nodata = da_out.rio.nodata
+            da_out.raster.set_nodata(profile_kwargs.pop("nodata"))
+        nodata = da_out.raster.nodata
         if nodata is not None and not np.isnan(nodata):
             da_out = da_out.fillna(nodata)
         elif nodata is None:
@@ -1549,9 +1567,9 @@ class RasterDataArray(XRasterBase):
         if dtype is not None:
             da_out = da_out.astype(dtype)
         if "crs" in profile_kwargs:
-            da_out.rio.set_crs(profile_kwargs.pop("crs"))
+            da_out.raster.set_crs(profile_kwargs.pop("crs"))
         # check dimensionality
-        dim0 = da_out.rio.dim0
+        dim0 = da_out.raster.dim0
         count = 1
         if dim0 is not None:
             count = da_out[dim0].size
@@ -1569,20 +1587,20 @@ class RasterDataArray(XRasterBase):
                 gis_utils.write_map(
                     data,
                     raster_path,
-                    crs=da_out.rio.crs,
-                    transform=da_out.rio.transform,
+                    crs=da_out.raster.crs,
+                    transform=da_out.raster.transform,
                     nodata=nodata,
                     **profile_kwargs,
                 )
         else:
             profile = dict(
                 driver=driver,
-                height=da_out.rio.height,
-                width=da_out.rio.width,
+                height=da_out.raster.height,
+                width=da_out.raster.width,
                 count=count,
                 dtype=str(da_out.dtype),
-                crs=da_out.rio.crs,
-                transform=da_out.rio.transform,
+                crs=da_out.raster.crs,
+                transform=da_out.raster.transform,
                 nodata=nodata,
                 **profile_kwargs,
             )
@@ -1641,7 +1659,7 @@ class RasterDataArray(XRasterBase):
     #     pass
 
 
-@xr.register_dataset_accessor("rio")
+@xr.register_dataset_accessor("raster")
 class RasterDataset(XRasterBase):
     """This is the GIS extension for :class:`xarray.Dataset`"""
 
@@ -1656,7 +1674,7 @@ class RasterDataset(XRasterBase):
         """
         ds_out = self._obj
         for var in self.vars:
-            ds_out[var] = ds_out[var].rio.mask_nodata()
+            ds_out[var] = ds_out[var].raster.mask_nodata()
         return ds_out
 
     @staticmethod
@@ -1702,8 +1720,8 @@ class RasterDataset(XRasterBase):
         if attrs is not None:
             ds.attrs.update(attrs)
         if crs is not None:
-            ds.rio.set_crs(input_crs=crs)
-            ds = ds.rio.reset_spatial_dims_attrs()
+            ds.raster.set_crs(input_crs=crs)
+            ds = ds.raster.reset_spatial_dims_attrs()
         return ds
 
     def reproject(
@@ -1759,7 +1777,7 @@ class RasterDataset(XRasterBase):
                 raise ValueError("Method should be a dictionary mapping or string.")
             ds = xr.Dataset(attrs=self._obj.attrs)
             for var in method:
-                ds[var] = self._obj[var].rio.reproject(
+                ds[var] = self._obj[var].raster.reproject(
                     method=method[var], **reproj_kwargs
                 )
         return ds
@@ -1775,7 +1793,7 @@ class RasterDataset(XRasterBase):
         method: dict, optional
             Reproject method mapping. If a string is provided all variables are
             reprojecte with the same method. See
-            :py:meth:`~hydromt.rio.RasterDataArray.reproject` for existing methods,
+            :py:meth:`~hydromt.raster.RasterDataArray.reproject` for existing methods,
             by default nearest.
 
         Returns
@@ -1785,30 +1803,38 @@ class RasterDataset(XRasterBase):
         """
         ds = self._obj
         if self.aligned_grid(other):
-            ds = self.clip_bbox(other.rio.bounds)
+            ds = self.clip_bbox(other.raster.bounds)
         elif not self.identical_grid(other):
-            dst_bbox = other.rio.transform_bounds(self.crs)
-            ds = self.clip_bbox(dst_bbox, buffer=2).rio.reproject(
-                dst_crs=other.rio.crs,
-                dst_transform=other.rio.transform,
-                dst_width=other.rio.width,
-                dst_height=other.rio.height,
+            dst_bbox = other.raster.transform_bounds(self.crs)
+            ds = self.clip_bbox(dst_bbox, buffer=2).raster.reproject(
+                dst_crs=other.raster.crs,
+                dst_transform=other.raster.transform,
+                dst_width=other.raster.width,
+                dst_height=other.raster.height,
                 method=method,
             )
-        if ds.rio.x_dim != other.rio.x_dim or ds.rio.y_dim != other.rio.y_dim:
+        if (
+            ds.raster.x_dim != other.raster.x_dim
+            or ds.raster.y_dim != other.raster.y_dim
+        ):
             # overwrite spatial dimension names which might have been changed
-            rm = {ds.rio.x_dim: other.rio.x_dim, ds.rio.y_dim: other.rio.y_dim}
+            rm = {
+                ds.raster.x_dim: other.raster.x_dim,
+                ds.raster.y_dim: other.raster.y_dim,
+            }
             ds = ds.rename(rm)
-            ds.rio.set_spatial_dims(x_dim=other.rio.x_dim, y_dim=other.rio.y_dim)
+            ds.raster.set_spatial_dims(
+                x_dim=other.raster.x_dim, y_dim=other.raster.y_dim
+            )
         # make sure coordinates are identical!
-        ds[other.rio.x_dim] = other.rio.xcoords
-        ds[other.rio.y_dim] = other.rio.ycoords
+        ds[other.raster.x_dim] = other.raster.xcoords
+        ds[other.raster.y_dim] = other.raster.ycoords
         return ds
 
     def reindex2d(self, index):
         """Return reprojected Dataset object based on simple reindexing using
         linear indices in ``index``, which can be calculated with
-        :py:meth:`~hydromt.rio.RasterDataArray.nearest_index`.
+        :py:meth:`~hydromt.raster.RasterDataArray.nearest_index`.
 
         Arguments
         ----------
@@ -1822,7 +1848,7 @@ class RasterDataset(XRasterBase):
         """
         ds_out = xr.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
-            ds_out[var] = self._obj[var].rio.reindex2d(index=index)
+            ds_out[var] = self._obj[var].raster.reindex2d(index=index)
         return ds_out
 
     def to_mapstack(
@@ -1896,7 +1922,7 @@ class RasterDataset(XRasterBase):
                     raster_path = join(root, f"{prefix}{var}{postfix}.{ext}")
                 if driver == "PCRaster":
                     profile_kwargs.update({"pcr_vs": pcr_vs_map.get(var, "scalar")})
-                self._obj[var].rio.to_raster(
+                self._obj[var].raster.to_raster(
                     raster_path,
                     driver=driver,
                     dtype=dtype,

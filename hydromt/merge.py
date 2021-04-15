@@ -5,7 +5,7 @@ import rasterio
 from rasterio.crs import CRS
 from shapely.geometry import box
 
-from .rio import full_from_transform
+from .raster import full_from_transform
 
 
 def merge(
@@ -41,7 +41,7 @@ def merge(
         * max: pixel-wise max of existing and new
         * new: assert no pixel overlap
     **kwargs:
-        Key-word arguments passed to :py:meth:`~hydromt.rio.RasterDataArray.reproject`
+        Key-word arguments passed to :py:meth:`~hydromt.raster.RasterDataArray.reproject`
 
     Returns
     -------
@@ -95,18 +95,22 @@ def merge(
         raise ValueError("Mosaic is only implemented for 2D DataArrays.")
     # dst CRS
     if dst_crs is None:
-        dst_crs = da0.rio.crs
+        dst_crs = da0.raster.crs
         if dst_res is None:
-            dst_res = da0.rio.res
+            dst_res = da0.raster.res
     else:
         dst_crs = CRS.from_user_input(dst_crs)
         # rough estimate of dst_res based input rasters
         if dst_res is None:
             xs, ys = [], []
             for da in data_arrays:
-                w, h, bounds = da.rio.width, da.rio.height, da.rio.internal_bounds
+                w, h, bounds = (
+                    da.raster.width,
+                    da.raster.height,
+                    da.raster.internal_bounds,
+                )
                 transform0 = rasterio.warp.calculate_default_transform(
-                    da.rio.crs, dst_crs, w, h, *bounds
+                    da.raster.crs, dst_crs, w, h, *bounds
                 )[0]
                 xs.append(transform0[0])
                 ys.append(transform0[4])
@@ -125,9 +129,9 @@ def merge(
     if dst_bounds is None:
         for i, da in enumerate(data_arrays):
             if i == 0:
-                w, s, e, n = da.rio.transform_bounds(dst_crs)
+                w, s, e, n = da.raster.transform_bounds(dst_crs)
             else:
-                w1, s1, e1, n1 = da.rio.transform_bounds(dst_crs)
+                w1, s1, e1, n1 = da.raster.transform_bounds(dst_crs)
                 w = min(w, w1)
                 s = min(s, s1)
                 e = max(e, e1)
@@ -149,7 +153,7 @@ def merge(
     )
 
     # creat output array
-    nodata = da0.rio.nodata
+    nodata = da0.raster.nodata
     isnan = np.isnan(nodata)
     dtype = da0.dtype
     da_out = full_from_transform(
@@ -161,20 +165,20 @@ def merge(
         attrs=da0.attrs,
         crs=dst_crs,
     )
-    ys = da_out.rio.ycoords.values
-    xs = da_out.rio.xcoords.values
+    ys = da_out.raster.ycoords.values
+    xs = da_out.raster.xcoords.values
     dest = da_out.values
     kwargs.update(dst_crs=dst_crs, dst_res=dst_res, align=True)
     for i, da in enumerate(data_arrays):
         # reproject
-        if not da.rio.aligned_grid(da_out):
-            da = da.rio.clip_geom(dst_geom, buffer=10).rio.reproject(**kwargs)
+        if not da.raster.aligned_grid(da_out):
+            da = da.raster.clip_geom(dst_geom, buffer=10).raster.reproject(**kwargs)
         # clip to bounds
-        da = da.rio.clip_bbox(dst_bounds)
-        if np.any([da[dim].size == 0 for dim in da.rio.dims]):
+        da = da.raster.clip_bbox(dst_bounds)
+        if np.any([da[dim].size == 0 for dim in da.raster.dims]):
             continue  # out of bounds
         # merge overlap
-        w0, s0, e0, n0 = da.rio.bounds
+        w0, s0, e0, n0 = da.raster.bounds
         if y_res < 0:
             top = np.where(ys <= n0)[0][0] if n0 < ys[0] else 0
             bottom = np.where(ys < s0)[0][0] if s0 > ys[-1] else None
@@ -196,5 +200,5 @@ def merge(
         copyto(region, temp, region_nodata, temp_nodata)
 
     # set attrs
-    da_out.rio.set_crs(dst_crs)
-    return da_out.rio.reset_spatial_dims_attrs()
+    da_out.raster.set_crs(dst_crs)
+    return da_out.raster.reset_spatial_dims_attrs()

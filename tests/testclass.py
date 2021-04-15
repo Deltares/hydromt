@@ -10,7 +10,7 @@ import logging
 
 from pyflwdir import core_d8
 import hydromt
-from hydromt import rio
+from hydromt import raster
 from hydromt.models import MODELS
 from hydromt.models.model_api import Model
 
@@ -54,7 +54,7 @@ class TestModel(Model):
     def setup_param(self, name, value):
         nodatafloat = -999
         da_param = xr.where(self.staticmaps[self._MAPS["basins"]], value, nodatafloat)
-        da_param.rio.set_nodata(nodatafloat)
+        da_param.raster.set_nodata(nodatafloat)
 
         da_param = da_param.rename(name)
         self.set_staticmaps(da_param)
@@ -97,6 +97,6 @@ def _create_staticmaps(_maps, bbox, res):
     shape = (6, 10)
     transform = Affine(res, w, e, s, res, n)
     data_vars = {n: (_maps[n]["func"](shape), _maps[n]["nodata"]) for n in _maps}
-    ds = rio.RasterDataset.from_numpy(data_vars=data_vars, transform=transform)
-    ds.rio.set_crs(4326)
+    ds = raster.RasterDataset.from_numpy(data_vars=data_vars, transform=transform)
+    ds.raster.set_crs(4326)
     return ds

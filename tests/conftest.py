@@ -12,12 +12,12 @@ from rasterio.crs import CRS
 from rasterio.transform import Affine, xy, rowcol
 from shapely.geometry import box
 
-from hydromt import rio, geo
+from hydromt import raster, vector
 
 
 @pytest.fixture
 def rioda():
-    return rio.full_from_transform(
+    return raster.full_from_transform(
         transform=[0.5, 0.0, 3.0, 0.0, -0.5, -9.0],
         shape=(4, 6),
         nodata=-1,
@@ -68,5 +68,5 @@ def ts(geodf):
 
 @pytest.fixture
 def geoda(geodf, ts):
-    da = geo.GeoDataArray.from_gdf(geodf, ts, name="test", dims=("index", "time"))
+    da = vector.GeoDataArray.from_gdf(geodf, ts, name="test", dims=("index", "time"))
     return da
