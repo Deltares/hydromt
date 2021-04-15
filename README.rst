@@ -3,7 +3,7 @@ hydroMT: Build and analyze hydro models
 
 #TODO add badges
 
-**hydorMT** is a python package, developed by Deltares, to build and analysis hydro models.
+**hydroMT** is a python package, developed by Deltares, to build and analysis hydro models.
 It provides a generic model api with attributes to access the model schematization,
 (dynamic) forcing data, results and states. hydroMT builds on the latest packages in the
 scientific and geospatial python eco-system: It adopts the xarray_ data structure for 
