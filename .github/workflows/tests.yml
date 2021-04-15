@@ -17,11 +17,10 @@ jobs:
         python-version: ["3.7", "3.8", "3.9"]
     
     steps:
-      - name: Install Env
       - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: hydromt
+          activate-environment: test
           environment-file: envs/hydromt-test.yml
           python-version: ${{ matrix.python-version }}
 
