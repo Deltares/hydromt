@@ -665,3 +665,49 @@ class Model(object, metaclass=ABCMeta):
             crs = None if self.crs is None else self.crs.to_epsg()
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region
+
+    def test_model_api(self):
+        """Test compliance to model API instances.
+
+        Returns
+        -------
+        non_compliant: list
+            List of objects that are non-compliant with the model API structure.
+        """
+        non_compliant = []
+        # Staticmaps
+        if not isinstance(self.staticmaps, xr.Dataset):
+            non_compliant.append("staticmaps")
+        # Staticgeoms
+        if not isinstance(self.staticgeoms, dict):
+            non_compliant.append("staticgeoms")
+        elif self.staticgeoms:  # non-empty dict
+            for name, geom in self.staticgeoms.items():
+                if not isinstance(geom, gpd.GeoDataFrame):
+                    non_compliant.append(f"staticgeoms.{name}")
+        # Forcing
+        if not isinstance(self.forcing, dict):
+            non_compliant.append("forcing")
+        elif self.forcing:  # non-empty dict
+            for name, data in self.forcing.items():
+                if not isinstance(data, xr.DataArray):
+                    non_compliant.append(f"forcing.{name}")
+        # Config
+        if not isinstance(self.config, dict):
+            non_compliant.append("config")
+        # States
+        if not isinstance(self.states, dict):
+            non_compliant.append("states")
+        elif self.states:  # non-empty dict
+            for name, data in self.states.items():
+                if not isinstance(data, xr.DataArray):
+                    non_compliant.append(f"states.{name}")
+        # Results
+        if not isinstance(self.results, dict):
+            non_compliant.append("results")
+        elif self.results:  # non-empty dict
+            for name, data in self.results.items():
+                if not isinstance(data, xr.DataArray):
+                    non_compliant.append(f"results.{name}")
+
+        return non_compliant
