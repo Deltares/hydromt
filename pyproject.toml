@@ -54,7 +54,7 @@ doc = [
 ]
 
 [project.urls]
-Documentation = "https://deltares.github.io/hydromt"
+Documentation = "https://hydromt.readthedocs.io"
 Source = "https://github.com/Deltares/hydromt"
 
 [project.scripts]

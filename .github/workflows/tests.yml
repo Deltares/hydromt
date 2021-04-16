@@ -28,9 +28,7 @@ jobs:
          conda list
 
       - name: Test
-        run: |
-          flit install
-          python -m pytest --verbose
+        run: python -m pytest --verbose
   
   Test-matrix:
     name: ${{ matrix.os }} - py${{ matrix.python-version }}
