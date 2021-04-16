@@ -30,4 +30,4 @@ dependencies:
   - rasterio
   - scipy
   - xarray
-  - zarr # optional
+  - zarr
