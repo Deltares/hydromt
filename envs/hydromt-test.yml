@@ -7,10 +7,12 @@ channels:
 # if you only want the user dependencies, see
 # install_requires in setup.py
 dependencies:
+  - affine
   - click
   - black
   - bottleneck
   - dask>=2.30
+  - entrypoints
   - gdal>=3.1
   - geopandas
   - netcdf4
@@ -18,18 +20,14 @@ dependencies:
   - numpy
   - openpyxl
   - pandas
-  - pcraster # TODO make optional
-  - pip
+  - pcraster # optional
   - pyflwdir>=0.4.6
   - pygeos>=0.8
   - pytest # tests
   - pytest-cov # tests
   - pytest-benchmark # tests
+  - requests
   - rasterio
   - scipy
-  - setuptools_scm
-  - toml
   - xarray
-  - zarr
-  - pip:
-    - hydroengine
+  - zarr # optional

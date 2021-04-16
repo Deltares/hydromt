@@ -8,30 +8,34 @@ on:
 
 jobs:
   Test:
-    name: ${{ matrix.os }}, ${{ matrix.env }}
+    name: ${{ matrix.os }} - py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        python-version: ["3.7", "3.8", "3.9"]
+        python-version: ["3.8", "3.9"] # fix tests to support older versions
     
     steps:
       - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: test
           environment-file: envs/hydromt-test.yml
           python-version: ${{ matrix.python-version }}
+          activate-environment: test
+
+      - name: Conda info
+        run: |
+         conda info
+         conda list
 
       - name: Check style
-        shell: bash
-        run: |
-          black --check .
+        run: black --check .
 
       - name: Test
-        shell: bash
-        run: |          
-          python -m pytest --verbose --cov=hydromt
+        run: python -m pytest --verbose --cov=hydromt
 
       - uses: codecov/codecov-action@v1
