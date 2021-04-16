@@ -1,7 +1,12 @@
 hydroMT: Build and analyze hydro models
 #######################################
 
-#TODO add badges
+.. image:: https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH
+:target: https://codecov.io/gh/Deltares/hydromt
+
+.. image:: https://readthedocs.org/projects/hydromt/badge/?version=latest
+:target: https://hydromt.readthedocs.io/en/latest/?badge=latest
+:alt: Documentation Status
 
 **hydroMT** is a python package, developed by Deltares, to build and analysis hydro models.
 It provides a generic model api with attributes to access the model schematization,
@@ -22,6 +27,8 @@ Why hydroMT?
 Installation
 ------------
 
+NOTE: This part is still in development.
+
 hydroMT is availble from pypi and conda-forge, but we recommend installing with conda.
 
 To install hydromt using conda do:
@@ -39,12 +46,12 @@ To create a hydromt environment with conda installed do:
 Documentation
 -------------
 
-Learn more about hydroMT in its `online documentation <https://deltares.github.io/hydromt>`_
+Learn more about hydroMT in its `online documentation <https://hydromt.readthedocs.io>`_
 
 Contributing
 ------------
 
-You can find information about contributing to hydroMT at our `Contributing page <https://deltares.github.io/hydromt/contributing.html>`_.
+You can find information about contributing to hydroMT at our `Contributing page <https://hydromt.readthedocs.io/contributing.html>`_.
 
 License
 -------
