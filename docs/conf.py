@@ -16,7 +16,6 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import pkg_resources
 import os
 import sys
 import hydromt
@@ -60,10 +59,8 @@ project = "hydromt"
 copyright = "Deltares"
 author = "Dirk Eilander"
 
-# The full version, including alpha/beta/rc tags
-release = pkg_resources.get_distribution("hydromt").version
 # The short version which is displayed
-version = ".".join(release.split(".")[:3]) + ".dev"
+version = hydromt.__version__
 
 # -- General configuration ------------------------------------------------
 

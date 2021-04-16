@@ -9,7 +9,7 @@ HydroMT and this documentation use a specific terminology to describe specific o
 For **HydroMT** in general, these are:
 
 - Command Line Interface (CLI): high-level interface to HydroMT methods.
-- Configuration: (*.ini) file setting the different model components and options to be processed by HydroMT methods.
+- Configuration: (.ini) file setting the different model components and options to be processed by HydroMT methods.
 - Method: HydroMT high level functions available from the CLI to interact with models. These are *build*, *update* and *cli*.
 - Model: models that are integrated into the HydroMT framework and with which the user can interact. For example *wflow*, *sfincs* etc.
 - Region: argument of the *build* method that specifies the region of interest where the model should be prepared.
@@ -18,7 +18,7 @@ For **Data** in HydroMT, these are:
 
 - Data catalog: complete list of data sources available for HydroMT. This object is internal to HydroMT and can be viewed in a csv file 
   after running HydroMT methods.
-- Data library: (*.yml) files containing one or several data sources to be used by HydroMT and their properties.
+- Data library: (.yml) files containing one or several data sources to be used by HydroMT and their properties.
 - Data source: input data. To be processed by HydroMT, data sources are listed in data libraries.
 
 For **Models** in HydroMT, these are:
