@@ -211,7 +211,7 @@ def test_model(model, tmpdir):
 
     mod._staticgeoms["nc_test"] = dict()
     mod._forcing["nc_test"] = xr.Dataset()
-    mod._config["nc_test"] = "test"
+    mod._config = "test"
     mod._states["nc_test"] = dict()
     mod._results["nc_test"] = dict()
     non_compliant_list = mod.test_model_api()
