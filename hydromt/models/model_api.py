@@ -695,10 +695,6 @@ class Model(object, metaclass=ABCMeta):
         # Config
         if not isinstance(self.config, dict):
             non_compliant.append("config")
-        elif self.config:  # non-empty dict
-            for name, value in self.config.items():
-                if not isinstance(value, dict):
-                    non_compliant.append(f"config.{name}")
         # States
         if not isinstance(self.states, dict):
             non_compliant.append("states")
