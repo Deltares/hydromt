@@ -50,7 +50,7 @@ test = [
 doc = [
 	"sphinx",
 	"sphinx_rtd_theme",
-	"black",  # TOML highlighting
+	"black",
 ]
 
 [project.urls]
