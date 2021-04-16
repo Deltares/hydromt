@@ -9,6 +9,7 @@ import glob
 import numpy as np
 import xarray as xr
 import pandas as pd
+import geopandas as gpd
 from affine import Affine
 
 from pyflwdir import core_d8
@@ -203,6 +204,30 @@ def test_model(model, tmpdir):
     mod.shape
     mod.bounds
     mod.region
+
+    # test api compliance
+    non_compliant_list = mod.test_model_api()
+    assert len(non_compliant_list) == 0
+
+    mod._staticgeoms["nc_test"] = dict()
+    mod._forcing["nc_test"] = xr.Dataset()
+    mod._config["nc_test"] = "test"
+    mod._states["nc_test"] = dict()
+    mod._results["nc_test"] = dict()
+    non_compliant_list = mod.test_model_api()
+    assert len(non_compliant_list) == 5
+    assert "staticgeoms.nc_test" in non_compliant_list
+    assert "forcing.nc_test" in non_compliant_list
+
+    mod._staticmaps = dict()
+    mod._staticgeoms = ["test"]
+    mod._forcing = ["test"]
+    mod._config = ["test"]
+    mod._results = ["test"]
+    mod._states = ["test"]
+    non_compliant_list = mod.test_model_api()
+    assert len(non_compliant_list) == 6
+    assert "staticmaps" in non_compliant_list
 
 
 @pytest.mark.parametrize("model", list(_models.keys()))
