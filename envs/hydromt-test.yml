@@ -1,4 +1,4 @@
-name: test
+name: hydromt-test
 
 channels:
   - conda-forge
