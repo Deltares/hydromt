@@ -10,7 +10,7 @@ import logging
 import pkg_resources
 
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
-version = pkg_resources.get_distribution("hydromt").version
+from . import __version__
 
 
 def setuplog(name, path=None, log_level=20, fmt=FMT, append=True):
@@ -26,7 +26,7 @@ def setuplog(name, path=None, log_level=20, fmt=FMT, append=True):
         if append is False and os.path.isfile(path):
             os.unlink(path)
         add_filehandler(logger, path, log_level=log_level, fmt=fmt)
-    logger.info(f"HydroMT version: {version}")
+    logger.info(f"HydroMT version: {__version__}")
 
     return logger
 

@@ -15,6 +15,7 @@ dependencies:
   - dask>=2.30
   - descartes # to run examples
   - entrypoints
+  - flit>=3.2
   - gdal>=3.1
   - geopandas
   - jupyter # to run examples
@@ -35,7 +36,6 @@ dependencies:
   - rasterio
   - requests
   - scipy
-  - setuptools_scm
   - toml
   - sphinx # docs
   - sphinx_rtd_theme # docs

@@ -21,7 +21,6 @@ dependencies:
   - openpyxl
   - pandas
   - pcraster # optional
-  - pip
   - pyflwdir>=0.4.6
   - pygeos>=0.8
   - pytest # tests
@@ -30,6 +29,5 @@ dependencies:
   - requests
   - rasterio
   - scipy
-  - setuptools_scm
   - xarray
   - zarr # optional

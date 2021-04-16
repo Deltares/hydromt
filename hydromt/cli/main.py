@@ -20,6 +20,7 @@ import inspect
 from . import cli_utils
 from .. import config, log, data_adapter
 from ..models import MODELS  # global var
+from .. import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +65,7 @@ data_opt = click.option(
 
 
 @click.group()
-# @quiet_opt
-# @verbose_opt
+@click.version_option(__version__)
 @click.pass_context
 def main(ctx):  # , quiet, verbose):
     """Command line interface for hydromt models."""
