@@ -2,11 +2,11 @@ hydroMT: Build and analyze hydro models
 #######################################
 
 .. image:: https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH
-:target: https://codecov.io/gh/Deltares/hydromt
+    :target: https://codecov.io/gh/Deltares/hydromt
 
 .. image:: https://readthedocs.org/projects/hydromt/badge/?version=latest
-:target: https://hydromt.readthedocs.io/en/latest/?badge=latest
-:alt: Documentation Status
+    :target: https://hydromt.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 **hydroMT** is a python package, developed by Deltares, to build and analysis hydro models.
 It provides a generic model api with attributes to access the model schematization,
