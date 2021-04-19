@@ -104,6 +104,11 @@ def test_geodataframe(geodf, tmpdir):
         data_catalog.get_geodataframe("no_file.geojson")
 
 
+def test_deltares_sources():
+    data_catalog = DataCatalog(deltares_data=True)
+    assert len(data_catalog._sources) > 0
+
+
 def test_export_global_datasets(tmpdir):
     DTYPES = {
         "RasterDatasetAdapter": (xr.DataArray, xr.Dataset),

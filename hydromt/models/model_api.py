@@ -35,15 +35,20 @@ class Model(object, metaclass=ABCMeta):
     _FOLDERS = [""]
 
     def __init__(
-        self, root=None, mode="w", config_fn=None, data_libs=None, logger=logger
+        self,
+        root=None,
+        mode="w",
+        config_fn=None,
+        data_libs=None,
+        deltares_data=False,
+        logger=logger,
     ):
         self.logger = logger
 
         # link to data
-        self.data_catalog = DataCatalog(logger=self.logger)  # data sources
-        # self.data_catalog.from_global_sources()
-        if data_libs is not None:
-            self.data_catalog.from_yml(data_libs)
+        self.data_catalog = DataCatalog(
+            data_libs=data_libs, deltares_data=deltares_data, logger=self.logger
+        )
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn

@@ -34,7 +34,12 @@ __all__ = [
 
 
 class DataCatalog(object):
-    def __init__(self, data_libs=None, logger=logger):
+    # root URL and version with data source artifacts
+    # url = f"{_url}/download/{_version}/<filename>"
+    _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases"
+    _version = "v0.0.2"
+
+    def __init__(self, data_libs=None, logger=logger, deltares_data=False):
         """Catalog of DataAdapter sources to easily read from different files
         and keep track of files which have been accessed.
 
@@ -52,6 +57,8 @@ class DataCatalog(object):
         self._sources = {}  # dictionary of DataAdapter
         self._used_data = []
         self.logger = logger
+        if deltares_data:
+            self.from_deltares_sources()
         if data_libs is not None:
             self.from_yml(data_libs)
 
@@ -59,8 +66,7 @@ class DataCatalog(object):
     def sources(self):
         """Returns dictionary of DataAdapter sources."""
         if len(self._sources) == 0:
-            # read artifacts by default
-            self.from_artifacts()
+            self.from_artifacts()  # read artifacts by default
         return self._sources
 
     @property
@@ -95,17 +101,17 @@ class DataCatalog(object):
         for k, v in kwargs.items():
             self[k] = v
 
-    def from_artifacts(self, version="v0.0.1"):
+    def from_artifacts(self, version=None):
         """Add test data to data catalog.
         The data is available on https://github.com/DirkEilander/hydromt-artifacts and
         stored to to {user_home}/.hydromt/{version}/
         """
         # prepare url and paths
-        _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases/download"
-        url = f"{_url}/{version}/data.tar.gz"
-        folder = join(Path.home(), ".hydromt_data", version)
+        version = self._version if version is None else version
+        url = fr"{self._url}/download/{version}/data.tar.gz"
+        folder = join(Path.home(), ".hydromt_data", "data", version)
         path_data = join(folder, "data.tar.gz")
-        path_yml = join(folder, "data", "data_catalog.yml")
+        path_yml = join(folder, "data_catalog.yml")
         if not isdir(folder):
             os.makedirs(folder)
         # download data
@@ -122,10 +128,26 @@ class DataCatalog(object):
         self.logger.info(f"Updating data sources from yml file {path_yml}")
         self.from_yml(path_yml)
 
-    def to_yml(self, fn, root=None):
-        """Write data catalog to yml format"""
-        with open(fn, "w") as f:
-            yaml.dump(self.to_dict(root=root), f, default_flow_style=False)
+    def to_yml(self, path, root=None):
+        """Write data catalog to yml format.
+
+        Parameters
+        ----------
+        path: str, Path
+            yml oOutput path.
+        root: str, Path, optional
+            Global root for all relative paths in yml file.
+            If None the data soruce paths are relative to the yml output ``path``.
+        """
+        if root is None:
+            # set paths relative to yml file
+            root = os.path.dirname(path)
+            d = self.to_dict(root=root)
+            d.pop("root", None)  # remoev absolute root path
+        else:
+            d = self.to_dict(root=root)
+        with open(path, "w") as f:
+            yaml.dump(d, f, default_flow_style=False)
 
     def from_yml(self, path, root=None):
         """Add data sources based on yml file.
@@ -212,10 +234,13 @@ class DataCatalog(object):
         """
         self.update(**_parse_data_dict(data_dict, root=root))
 
-    def from_global_sources(self, root=None):
-        """Add global data sources to data catalog."""
-        # self.from_yml(path=DATA_LIBS, root=root)
-        raise NotImplementedError()
+    def from_deltares_sources(self, version=None):
+        """Add global data sources from the Deltares network to the data catalog."""
+        version = self._version if version is None else version
+        url = rf"{self._url}/download/{version}/data_sources_deltares.yml"
+        with requests.get(url, stream=True) as r:
+            yml_str = r.text
+        return self.from_dict(yaml.load(yml_str, Loader=yaml.FullLoader))
 
     def to_dict(self, source_names=[], root=None):
         """Return data catalog in dictionary format"""
@@ -566,6 +591,8 @@ def _parse_data_dict(data_dict, root=None, category=None):
     # set data_type sections as source entry
     # for backwards compatability
     sources = copy.deepcopy(data_dict)
+    if root is None:
+        root = sources.pop("root", None)
     for key in data_dict:
         _key = key.replace("Adapter", "")
         if _key in ADAPTERS:

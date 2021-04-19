@@ -25,6 +25,14 @@ from .. import __version__
 logger = logging.getLogger(__name__)
 
 
+def print_models(ctx, param, value):
+    if not value:
+        return {}
+    mods = ", ".join(list(MODELS.keys()))
+    click.echo(f"hydroMT model plugins: {mods:s}")
+    ctx.exit()
+
+
 ## common arguments / options
 opt_config = click.option(
     "-i",
@@ -61,16 +69,33 @@ data_opt = click.option(
     help="File path to yml data sources file. See documentation for required yml file format.",
 )
 
+deltares_data_opt = click.option(
+    "--dd",
+    "--deltares-data",
+    is_flag=True,
+    default=False,
+    help=f"Parse default deltares data yml from {data_adapter.DataCatalog()._url}",
+)
+
 ## MAIN
 
 
 @click.group()
-@click.version_option(__version__)
+@click.version_option(__version__, message="hydroMT version: %(version)s")
+@click.option(
+    "--models",
+    default=False,
+    is_flag=True,
+    is_eager=True,
+    help="Print availabe model plugins and exit.",
+    callback=print_models,
+)
 @click.pass_context
-def main(ctx):  # , quiet, verbose):
+def main(ctx, models):  # , quiet, verbose):
     """Command line interface for hydromt models."""
     if ctx.obj is None:
         ctx.obj = {}
+
     # ctx.obj["log_level"] = max(10, 30 - 10 * (verbose - quiet))
     # logging.basicConfig(stream=sys.stderr, level=ctx.obj["log_level"])
 
@@ -81,7 +106,7 @@ def main(ctx):  # , quiet, verbose):
 @main.command(short_help="Build models")
 @click.argument(
     "MODEL",
-    type=click.Choice(list(MODELS.keys())),
+    type=str,
 )
 @arg_root
 @click.argument(
@@ -100,11 +125,23 @@ def main(ctx):  # , quiet, verbose):
 @opt_cli
 @opt_config
 @data_opt
+@deltares_data_opt
 @quiet_opt
 @verbose_opt
 @click.pass_context
 def build(
-    ctx, model, model_root, region, res, build_base, opt, config, data, verbose, quiet
+    ctx,
+    model,
+    model_root,
+    region,
+    res,
+    build_base,
+    opt,
+    config,
+    data,
+    dd,
+    verbose,
+    quiet,
 ):
     """Build models from source data.
 
@@ -139,8 +176,13 @@ def build(
     logger.info(f"User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt, logger=logger)
     kwargs = opt.pop("global", {})
+    kwargs.update(deltares_data=dd)
     data_libs = data + tuple(kwargs.pop("data_libs", []))
     try:
+        if model not in MODELS:
+            raise ValueError(
+                f"Model unknown : {model}, select from {list(MODELS.keys())}"
+            )
         # initialize model and create folder structure
         mod = MODELS.get(model)(
             root=model_root,
@@ -166,7 +208,7 @@ def build(
 )
 @click.argument(
     "MODEL",
-    type=click.Choice(list(MODELS.keys())),
+    type=str,
 )
 @arg_root
 @click.option(
@@ -186,11 +228,12 @@ def build(
 @opt_cli
 @opt_config
 @data_opt
+@deltares_data_opt
 @quiet_opt
 @verbose_opt
 @click.pass_context
 def update(
-    ctx, model, model_root, model_out, components, opt, data, config, verbose, quiet
+    ctx, model, model_root, model_out, components, opt, data, dd, config, verbose, quiet
 ):
     """Update a specific component of a model.
     Set an output directory to copy the edited model to a new folder, otherwise maps
@@ -222,8 +265,13 @@ def update(
     logger.info(f"User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt, logger=logger)
     kwargs = opt.pop("global", {})
+    kwargs.update(deltares_data=dd)
     data_libs = data + tuple(kwargs.pop("data_libs", []))
     try:
+        if model not in MODELS:
+            raise ValueError(
+                f"Model unknown : {model}, select from {list(MODELS.keys())}"
+            )
         # initialize model and create folder structure
         mod = MODELS.get(model)(
             root=model_root,
@@ -253,7 +301,7 @@ def update(
 @main.command(short_help="Clip models.")
 @click.argument(
     "MODEL",
-    type=click.Choice(list(MODELS.keys())),
+    type=str,
 )
 @arg_root
 @click.argument(
@@ -300,6 +348,10 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     if model != "wflow":
         raise NotImplementedError("Clip function only implemented for wflow model.")
     try:
+        if model not in MODELS:
+            raise ValueError(
+                f"Model unknown : {model}, select from {list(MODELS.keys())}"
+            )
         mod = MODELS.get(model)(root=model_root, mode="r", logger=logger)
         logger.info("Reading model to clip")
         mod.read()
