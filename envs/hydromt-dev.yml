@@ -1,4 +1,4 @@
-name: hydromt-dev
+name: hydromt-dev2
 
 channels:
   - conda-forge
@@ -27,7 +27,7 @@ dependencies:
   - pandas
   - pcraster # TODO make optional
   - pip
-  - pyflwdir>=0.4.6
+  - pyflwdir>=0.4.7
   - pygeos>=0.8
   - pytest # tests
   - pytest-cov # tests
