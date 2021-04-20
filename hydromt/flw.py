@@ -18,7 +18,7 @@ from . import gis_utils
 logger = logging.getLogger(__name__)
 
 
-def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=True):
+def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=None):
     """Parse dataarray to flow direction raster object. If a mask coordinate is present
     this will be passed on the the pyflwdir.from_array method.
 
@@ -30,9 +30,8 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=True):
         name of flow direction type, infer from data if 'infer', by default is 'infer'
     check_ftype : bool, optional
         check if valid flow direction raster if ftype is not 'infer', by default True
-    mask : boolean, optional
-        Use the mask coordinate array to mask the gridded flow direction data, by
-        default True.
+    mask : xr.DataArray of bool, optional
+        Mask for gridded flow direction data, by default None.
 
     Returns
     -------
@@ -50,11 +49,18 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=True):
         warnings.warn("Assuming a projected CRS with unit meter.")
     elif crs is not None and crs.is_geographic:
         raise NotImplementedError("unknown geographic CRS unit")
+    if isinstance(mask, xr.DataArray):
+        mask = mask.values
+    elif isinstance(mask, bool) and mask and "mask" in da.coords:
+        # backwards compatibility for mask = True
+        mask = da["mask"].Values
+    elif not isinstance(mask, np.ndarray):
+        mask is None
     flwdir = pyflwdir.from_array(
         data=da.squeeze().values,
         ftype=ftype,
         check_ftype=check_ftype,
-        mask=da["mask"].values != 0 if (mask and "mask" in da.coords) else None,
+        mask=mask,
         transform=da.raster.transform,
         latlon=latlon,
     )
@@ -85,6 +91,63 @@ def gaugemap(ds, idxs=None, xy=None, ids=None, mask=None, flwdir=None, logger=lo
         attrs=dict(_FillValue=0),
     )
     return da_gauges, idxs, ids
+
+
+def outlet_map(da_flw, ftype="infer"):
+    """Returns a mask of basin outlets/pits from a flow direction raster.
+
+    Parameters
+    ----------
+    da_flw: xr.DataArray
+        Flow direction data array
+    ftype : {'d8', 'ldd', 'nextxy', 'nextidx', 'infer'}, optional
+        name of flow direction type, infer from data if 'infer', by default is 'infer'
+
+    Returns
+    -------
+    da_basin : xarray.DataArray of int32
+        basin ID map
+    """
+    if ftype == "infer":
+        ftype = pyflwdir.pyflwdir._infer_ftype(da_flw.values)
+    elif ftype not in pyflwdir.pyflwdir.FTYPES:
+        raise ValueError(f"Unknown pyflwdir ftype: {ftype}")
+    pit_values = pyflwdir.pyflwdir.FTYPES[ftype]._pv
+    mask = np.isin(da_flw.values, pit_values)
+    return xr.DataArray(mask, dims=da_flw.raster.dims, coords=da_flw.raster.coords)
+
+
+def stream_map(ds, stream=None, **stream_kwargs):
+    """Return a stream mask DataArray
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        dataset containing flow direction data
+    stream: 2D array of bool, optional
+        Initial mask of stream cells used to snap outlets to, by default None
+    stream_kwargs : dict, optional
+        Parameter-treshold pairs to define streams. Multiple threshold will be combined
+        using a logical_and operation. If a stream if provided, it is combined with the
+        threhold based map as well.
+
+    Returns
+    -------
+    stream : xarray.DataArray of bool
+        stream mask
+    """
+    if stream is None or isinstance(stream, np.ndarray):
+        data = np.full(ds.raster.shape, True, dtype=bool) if stream is None else stream
+        stream = xr.DataArray(
+            coords=ds.raster.coords, dims=ds.raster.dims, data=data, name="mask"
+        )  # all True
+    for name, value in stream_kwargs.items():
+        stream = stream.where(
+            np.logical_and(ds[name] != ds[name].raster.nodata, ds[name] >= value), False
+        )
+    if not np.any(stream):
+        raise ValueError("Stream criteria resulted in invalid mask.")
+    return stream
 
 
 def basin_map(
@@ -133,14 +196,9 @@ def basin_map(
     # get stream map
     locs = xy is not None or idxs is not None
     if locs and (stream is not None or len(stream_kwargs) > 0):
-        if stream is None:
-            stream = np.full(ds.raster.shape, True, dtype=np.bool)
-        for name, value in stream_kwargs.items():
-            stream = np.logical_and(stream, ds[name].values >= value)
-        if not np.any(stream):
-            raise ValueError("Stream criteria resulted in invalid mask.")
         # snap provided xy/idxs to streams
-        idxs = flwdir.snap(xy=xy, idxs=idxs, mask=stream)[0]
+        stream = stream_map(ds, stream=stream, **stream_kwargs)
+        idxs = flwdir.snap(xy=xy, idxs=idxs, mask=stream.values)[0]
         xy = None
     elif not locs and outlets:
         # get idxs from real outlets excluding pits at the domain edge
@@ -152,8 +210,8 @@ def basin_map(
             )
         ids = None
     da_basins = xr.DataArray(
-        dims=ds.raster.dims,
         data=flwdir.basins(idxs=idxs, xy=xy, ids=ids).astype(np.int32),
+        dims=ds.raster.dims,
         coords=ds.raster.coords,
     )
     da_basins.raster.set_nodata(0)
