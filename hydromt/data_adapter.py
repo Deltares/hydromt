@@ -1487,6 +1487,8 @@ class GeoDataFrameAdapter(DataAdapter):
         if variables is not None:
             if np.any([var not in gdf.columns for var in variables]):
                 raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")
+            if "geometry" not in variables:  # always keep geometry column
+                variables = variables + ["geometry"]
             gdf = gdf.loc[:, variables]
 
         # nodata and unit conversion for numeric data
