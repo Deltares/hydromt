@@ -20,6 +20,7 @@ from pyflwdir import pyflwdir
 from ..raster import full_like
 from ..flw import flwdir_from_da, basin_map, stream_map, outlet_map
 from ..models import MODELS
+from ..data_adapter import GeoDataFrameAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +181,7 @@ def _check_size(ds, logger=logger, threshold=12e3 ** 2):
 
 def get_basin_geometry(
     ds,
-    gdf_bas=None,
+    basin_index=None,
     kind="basin",
     bounds=None,
     bbox=None,
@@ -208,7 +209,7 @@ def get_basin_geometry(
     ----------
     ds : xarray.Dataset
         dataset containing basin and flow direction variables
-    gdf_bas: geopandas.GeoDataFrame
+    basin_index: geopandas.GeoDataFrame or GeoDataFrameAdapter
         Dataframe with basin geomtries or bounding boxes with "basid" column
         corresponding to the ``ds[<basins_name>]`` map.
     kind : {"basin", "subbasin", "interbasin"}
@@ -259,9 +260,19 @@ def get_basin_geometry(
     if geom is None and bbox is not None:
         geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=ds.raster.crs)
 
-    if gdf_bas is not None:
-        if "basid" not in gdf_bas.columns:
-            raise ValueError("Basin geometries does not have 'basid' column.")
+    gdf_bas = None
+    if basin_index is not None:
+        if isinstance(basin_index, GeoDataFrameAdapter):
+            kwargs = dict(variables=["basid"])
+            if geom is not None:
+                kwargs.update(geom=geom)
+            elif xy is not None:
+                kwargs.update(bbox=[xy[0] - 0.1, xy[1] - 0.1, xy[0] + 0.1, xy[1] + 0.1])
+            gdf_bas = basin_index.get_data(**kwargs)
+        elif isinstance(basin_index, gpd.GeoDataFrame):
+            gdf_bas = basin_index
+            if "basid" not in gdf_bas.columns:
+                raise ValueError("Basin geometries does not have 'basid' column.")
         if gdf_bas.crs != ds.raster.crs:
             logger.warn("Basin geometries CRS does not match the input raster CRS.")
             gdf_bas = gdf_bas.to_crs(ds.raster.crs)

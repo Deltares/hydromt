@@ -7,8 +7,11 @@ import pandas as pd
 import geopandas as gpd
 import xarray as xr
 import hydromt
+import logging
 
 from hydromt.workflows.basin_mask import get_basin_geometry, parse_region
+
+logger = logging.getLogger("tets_basin")
 
 
 def test_region(tmpdir, geodf):
@@ -66,9 +69,10 @@ def test_region(tmpdir, geodf):
 
 
 def test_basin():
-    data_catalog = hydromt.DataCatalog()
+    data_catalog = hydromt.DataCatalog(logger=logger)
     ds = data_catalog.get_rasterdataset("hydro_merit")
     gdf_bas_index = data_catalog.get_geodataframe("hydro_merit_index")
+    bas_index = data_catalog["hydro_merit_index"]
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds.drop_vars("basins"),
@@ -81,7 +85,7 @@ def test_basin():
     assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 9346337868.28675)
 
     gdf_bas, gdf_out = get_basin_geometry(
-        ds, kind="subbasin", gdf_bas=gdf_bas_index, xy=[12.2051, 45.8331], strord=4
+        ds, kind="subbasin", basin_index=bas_index, xy=[12.2051, 45.8331], strord=4
     )
     assert gdf_bas.index.size == 1
     assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 8.277817e09)
@@ -103,7 +107,7 @@ def test_basin():
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="basin",
-        gdf_bas=gdf_bas_index,
+        basin_index=gdf_bas_index,
         bbox=[12.6, 45.5, 12.9, 45.7],
         buffer=1,
     )
@@ -113,7 +117,7 @@ def test_basin():
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="basin",
-        gdf_bas=gdf_bas_index,
+        basin_index=gdf_bas_index,
         bbox=[12.6, 45.5, 12.9, 45.7],
         buffer=1,
         strord=4,
@@ -124,7 +128,7 @@ def test_basin():
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="subbasin",
-        gdf_bas=gdf_bas_index,
+        basin_index=gdf_bas_index,
         bbox=[12.2, 46.2, 12.4, 46.3],
         strord=8,
     )
@@ -135,7 +139,7 @@ def test_basin():
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="interbasin",
-        gdf_bas=gdf_bas_index,
+        basin_index=gdf_bas_index,
         bbox=[12.2, 46.2, 12.4, 46.3],
         strord=8,
     )
@@ -146,7 +150,7 @@ def test_basin():
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="interbasin",
-        gdf_bas=gdf_bas_index,
+        basin_index=gdf_bas_index,
         bbox=[12.8, 45.55, 12.9, 45.65],
         outlets=True,
     )
@@ -156,9 +160,8 @@ def test_basin():
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="basin",
-        gdf_bas=gdf_bas_index,
+        basin_index=gdf_bas_index,
         bbox=[12.8, 45.55, 12.9, 45.65],
         outlets=True,
     )
     assert gdf_bas.index.size == 92
-    gdf_bas.to_file(r"d:\work\hydromt\piava\gdf_bas.geojson", driver="GeoJSON")
