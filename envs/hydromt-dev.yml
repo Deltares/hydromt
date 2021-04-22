@@ -21,6 +21,7 @@ dependencies:
   - jupyter # to run examples
   - netcdf4
   - matplotlib # to run examples
+  - nbsphinx # docs notebook examples
   - numba
   - numpy
   - openpyxl

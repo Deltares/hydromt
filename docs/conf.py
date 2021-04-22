@@ -18,6 +18,7 @@
 #
 import os
 import sys
+import shutil
 import sphinx_autosummary_accessors
 from click.testing import CliRunner
 
@@ -25,13 +26,30 @@ import hydromt
 from hydromt import DataCatalog
 from hydromt.cli.main import main as hydromt_cli
 
-# here = os.path.dirname(__file__)
-# sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
 
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
+
+# -- Project information -----------------------------------------------------
+
+project = "hydromt"
+copyright = "Deltares"
+author = "Dirk Eilander"
+
+# The short version which is displayed
+version = hydromt.__version__
+
+# -- Generate data catalog csv table to inlcude in docs -------
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
 
-# -- Generate data catalog csv table to inlcude in docs -------
 data_catalog = DataCatalog()
 data_catalog.from_deltares_sources()
 df = data_catalog.to_dataframe()
@@ -78,14 +96,8 @@ with open(r"_generated/cli_clip.rst", "w") as f:
     for line in cli_clip.output.split("\n"):
         f.write(f"    {line}\n")
 
-# -- Project information -----------------------------------------------------
-
-project = "hydromt"
-copyright = "Deltares"
-author = "Dirk Eilander"
-
-# The short version which is displayed
-version = hydromt.__version__
+# -- Copy examples folder into docs for nbsphinx ----------------------------
+copytree("../examples", "examples/notebooks")
 
 # -- General configuration ------------------------------------------------
 
@@ -106,6 +118,7 @@ extensions = [
     "sphinx_autosummary_accessors",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
+    "nbsphinx",
 ]
 
 autosummary_generate = True
