@@ -1,7 +1,7 @@
 .. _data:
 
-Data input and the HydroMT yaml libraries
-=========================================
+Data input
+==========
 
 HydroMT can make use of various types of data sources such as vector data, GDAL rasters or NetCDF files. 
 The path and attributes of each of these dataset are listed in different *.yml* library files. HydroMT already 
@@ -329,7 +329,7 @@ Available global datasets
 Below is the list of data sources directly available in HydroMT (within the Deltares network).
 
 .. csv-table:: Data Catalog
-   :file: ../_static/data_sources.csv
+   :file: ../_generated/data_sources.csv
    :header-rows: 1
    :widths: auto
    :width: 50%

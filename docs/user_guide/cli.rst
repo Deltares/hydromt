@@ -1,7 +1,7 @@
 .. _cli:
 
-Interacting with a model
-========================
+Command Line Interface
+======================
 Configure workflow
 ------------------
 The command line interface (CLI) provides a high-level interface to the different models and methods 

@@ -3,7 +3,7 @@ HydroMT: Build and analyze models like a data-wizard
 ====================================================
 
 Spatial environmental models (such as hydrology, hydrodynamic, groundwater, flooding, water quality and water demand), 
-generally require lot's of data and data manipuations to set up. Then, once you have model results you'd like to analyze 
+generally require lot's of data and data manipulations to set up. Then, once you have model results you'd like to analyze 
 these and make nice graphics. This package aims to facilitate the processes of building 
 a model input data, connecting models and analyzing model output data based on the state of the art 
 scientific python ecosystem. Using this package every modeller will become a true data wizard.

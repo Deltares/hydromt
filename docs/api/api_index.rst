@@ -10,5 +10,6 @@ documentation.
    :maxdepth: 2
 
    Methods <api_methods>
+   Workflows <api_workflows>
    Models <api_models>
    Data Adapter <api_data_adapter>
