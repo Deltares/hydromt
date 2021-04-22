@@ -12,7 +12,7 @@ General
 -------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    data_adapter.DataCatalog
    data_adapter.DataCatalog.sources
@@ -25,9 +25,10 @@ Add data sources
 ----------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
-   data_adapter.DataCatalog.from_global_sources
+   data_adapter.DataCatalog.from_artifacts
+   data_adapter.DataCatalog.from_deltares_sources
    data_adapter.DataCatalog.from_dict
    data_adapter.DataCatalog.from_yml
    data_adapter.DataCatalog.update
@@ -37,7 +38,7 @@ Get data
 --------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    data_adapter.DataCatalog.get_rasterdataset
    data_adapter.DataCatalog.get_geodataset
@@ -49,7 +50,7 @@ RasterDatasetAdapter
 ====================
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    data_adapter.RasterDatasetAdapter
    data_adapter.RasterDatasetAdapter.to_dict
@@ -60,7 +61,7 @@ GeoDatasetAdapter
 ==================
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    data_adapter.GeoDatasetAdapter
    data_adapter.GeoDatasetAdapter.to_dict
@@ -71,7 +72,7 @@ GeoDataFrameAdapter
 ===================
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    data_adapter.GeoDataFrameAdapter
    data_adapter.GeoDataFrameAdapter.to_dict

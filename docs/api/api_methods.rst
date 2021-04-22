@@ -11,7 +11,7 @@ Reading methods
 ---------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    io.open_raster
    io.open_mfraster
@@ -24,7 +24,7 @@ Raster writing methods
 ----------------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.raster.to_raster
@@ -38,7 +38,7 @@ High level methods
 ------------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    merge.merge
    raster.full
@@ -46,7 +46,7 @@ High level methods
    raster.full_from_transform
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
    
    DataArray.raster.from_numpy
@@ -56,7 +56,7 @@ Attributes
 ----------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_attribute.rst
 
    DataArray.raster.attrs
@@ -84,7 +84,7 @@ General methods
 ---------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.raster.set_crs
@@ -99,7 +99,7 @@ Nodata handling and interpolation
 ---------------------------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.raster.set_nodata
@@ -111,7 +111,7 @@ Clip
 ----
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.raster.clip_bbox
@@ -122,7 +122,7 @@ Reproject
 ---------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.raster.reproject
@@ -135,7 +135,7 @@ Transform
 ---------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.raster.rasterize
@@ -147,7 +147,7 @@ Low level methods
 -----------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    gis_utils.axes_attrs
    gis_utils.meridian_offset
@@ -159,7 +159,7 @@ High level methods
 ------------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.vector.from_gdf
@@ -171,7 +171,7 @@ Attributes
 ----------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_attribute.rst
 
    DataArray.vector.attrs
@@ -192,7 +192,7 @@ General methods
 ---------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.vector.set_crs
@@ -204,7 +204,7 @@ Clip
 ----
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.vector.clip_bbox
@@ -214,7 +214,7 @@ Reproject
 ---------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.vector.to_crs
@@ -223,7 +223,7 @@ Low-level methods
 -----------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    gis_utils.filter_gdf
 
@@ -233,7 +233,7 @@ Flow direction methods
 
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    flw.flwdir_from_da
    flw.gaugemap
@@ -247,7 +247,7 @@ General GIS methods
 ===================
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
    
    gis_utils.parse_crs
    gis_utils.utm_crs

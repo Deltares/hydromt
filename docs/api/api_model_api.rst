@@ -9,7 +9,7 @@ Attributes
 ----------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    Model.region
    Model.crs
@@ -24,7 +24,7 @@ High level methods
 ------------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    Model.read
    Model.write
@@ -35,7 +35,7 @@ General methods
 ---------------
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: ../_generated
 
    Model.setup_config
    Model.get_config

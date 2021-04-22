@@ -18,17 +18,40 @@
 #
 import os
 import sys
+import shutil
 import sphinx_autosummary_accessors
-
-here = os.path.dirname(__file__)
-sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
+from click.testing import CliRunner
 
 import hydromt
 from hydromt import DataCatalog
+from hydromt.cli.main import main as hydromt_cli
+
+
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
+
+# -- Project information -----------------------------------------------------
+
+project = "hydromt"
+copyright = "Deltares"
+author = "Dirk Eilander"
+
+# The short version which is displayed
+version = hydromt.__version__
 
 # -- Generate data catalog csv table to inlcude in docs -------
+if not os.path.isdir("_generated"):
+    os.makedirs("_generated")
+
 data_catalog = DataCatalog()
-data_catalog.from_artifacts()
+data_catalog.from_deltares_sources()
 df = data_catalog.to_dataframe()
 df.index = [
     f"`{k} <{url}>`__" if isinstance(url, str) else k
@@ -51,17 +74,30 @@ rm = {
     "source_license": "license",
     "data_type": "data type",
 }
-df.loc[:, cols].rename(columns=rm).to_csv(r"_static/data_sources.csv")
+df.loc[:, cols].rename(columns=rm).to_csv(r"_generated/data_sources.csv")
 
+# -- Generate cli help docs ----------------------------------------------
 
-# -- Project information -----------------------------------------------------
+cli_build = CliRunner().invoke(hydromt_cli, ["build", "--help"])
+with open(r"_generated/cli_build.rst", "w") as f:
+    f.write(".. code-block:: console\n\n")
+    for line in cli_build.output.split("\n"):
+        f.write(f"    {line}\n")
 
-project = "hydromt"
-copyright = "Deltares"
-author = "Dirk Eilander"
+cli_update = CliRunner().invoke(hydromt_cli, ["update", "--help"])
+with open(r"_generated/cli_update.rst", "w") as f:
+    f.write(".. code-block:: console\n\n")
+    for line in cli_update.output.split("\n"):
+        f.write(f"    {line}\n")
 
-# The short version which is displayed
-version = hydromt.__version__
+cli_clip = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
+with open(r"_generated/cli_clip.rst", "w") as f:
+    f.write(".. code-block:: console\n\n")
+    for line in cli_clip.output.split("\n"):
+        f.write(f"    {line}\n")
+
+# -- Copy examples folder into docs for nbsphinx ----------------------------
+copytree("../examples", "examples/notebooks")
 
 # -- General configuration ------------------------------------------------
 
@@ -82,6 +118,7 @@ extensions = [
     "sphinx_autosummary_accessors",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
+    "nbsphinx",
 ]
 
 autosummary_generate = True

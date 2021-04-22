@@ -8,9 +8,9 @@ channels:
 # install_requires in setup.py
 dependencies:
   - affine
-  - click
   - bottleneck
-  - dask>=2.30
+  - click
+  - dask>=2.3
   - entrypoints
   - flit>=3.2
   - gdal>=3.1
@@ -20,11 +20,12 @@ dependencies:
   - numpy
   - openpyxl
   - pandas
-  - pyflwdir>=0.4.6
+  - pyflwdir>=0.4.7
   - pygeos>=0.8
-  - python>=3.7
+  - python>=3.8
   - rasterio
   - requests
+  - rtree  # =0.9.3  issue with dll in newer vesions
   - scipy
   - xarray
   - zarr

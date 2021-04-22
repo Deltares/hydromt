@@ -21,13 +21,14 @@ dependencies:
   - jupyter # to run examples
   - netcdf4
   - matplotlib # to run examples
+  - nbsphinx # docs notebook examples
   - numba
   - numpy
   - openpyxl
   - pandas
   - pcraster # TODO make optional
   - pip
-  - pyflwdir>=0.4.6
+  - pyflwdir>=0.4.7
   - pygeos>=0.8
   - pytest # tests
   - pytest-cov # tests

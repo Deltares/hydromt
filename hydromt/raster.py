@@ -836,7 +836,7 @@ class XRasterBase(XGeoBase):
         self._obj.coords["mask"] = xr.Variable(self.dims, mask_bin)
         return self._obj.isel({self.x_dim: col_slice, self.y_dim: row_slice})
 
-    def clip_geom(self, geom, align=None, buffer=0):
+    def clip_geom(self, geom, align=None, buffer=0, mask=False):
         """Clip object to the bounding box of the geometry and add geometry 'mask' coordinate.
 
         Arguments
@@ -848,6 +848,8 @@ class XRasterBase(XGeoBase):
         buffer : int, optional
             Buffer around the bounding box expressed in resolution multiplicity,
             by default 0
+        mask: bool, optional
+            Mask values outside geometry with the
 
         Returns
         -------
@@ -860,9 +862,11 @@ class XRasterBase(XGeoBase):
         bbox = geom.total_bounds
         if geom.crs is not None and self.crs is not None and geom.crs != self.crs:
             bbox = rasterio.warp.transform_bounds(geom.crs, self.crs, *bbox)
-        ds_clip = self.clip_bbox(bbox, align=align, buffer=buffer)
-        ds_clip.coords["mask"] = ds_clip.raster.geometry_mask(geom)
-        return ds_clip
+        obj_clip = self.clip_bbox(bbox, align=align, buffer=buffer)
+        obj_clip.coords["mask"] = obj_clip.raster.geometry_mask(geom)
+        if mask:
+            obj_clip = obj_clip.raster.mask(obj_clip.coords["mask"])
+        return obj_clip
 
     def rasterize(
         self,
@@ -1147,9 +1151,7 @@ class RasterDataArray(XRasterBase):
             coords={"y": _ycoords, "x": _xcoords},
         )
         da.raster.set_spatial_dims(x_dim="x", y_dim="y")
-        da.raster.set_nodata(
-            nodata=nodata
-        )  # parse nodatavals attr to default _FillValue
+        da.raster.set_nodata(nodata=nodata)  # set  _FillValue attr
         if attrs:
             da.attrs.update(attrs)
         if crs is not None:
@@ -1203,6 +1205,16 @@ class RasterDataArray(XRasterBase):
             _da = _da.where(_da != self.nodata)
             _da.raster.set_nodata(np.nan)
         return _da
+
+    def mask(self, mask, logger=logger):
+        """Mask cells where mask equals False with the data nodata value.
+        A warning is raised if no the data has no nodata value."""
+        if self.nodata is not None:
+            da_masked = self._obj.where(mask != 0, self.nodata)
+        else:
+            logger.warn("Nodata value missing, skipping mask")
+            da_masked = self._obj
+        return da_masked
 
     def _reproject(
         self,
@@ -1675,6 +1687,14 @@ class RasterDataset(XRasterBase):
         ds_out = self._obj
         for var in self.vars:
             ds_out[var] = ds_out[var].raster.mask_nodata()
+        return ds_out
+
+    def mask(self, mask):
+        """Mask cells where mask equals False with the data nodata value.
+        A warning is raised if no the data has no nodata value."""
+        ds_out = self._obj
+        for var in self.vars:
+            ds_out[var] = ds_out[var].raster.mask(mask)
         return ds_out
 
     @staticmethod
