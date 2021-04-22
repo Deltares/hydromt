@@ -53,7 +53,7 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=None):
         mask = mask.values
     elif isinstance(mask, bool) and mask and "mask" in da.coords:
         # backwards compatibility for mask = True
-        mask = da["mask"].Values
+        mask = da["mask"].values
     elif not isinstance(mask, np.ndarray):
         mask = None
     flwdir = pyflwdir.from_array(
