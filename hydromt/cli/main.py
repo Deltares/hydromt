@@ -355,12 +355,12 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         mod = MODELS.get(model)(root=model_root, mode="r", logger=logger)
         logger.info("Reading model to clip")
         mod.read()
+        mod.set_root(model_destination, mode="w")
         logger.info("Clipping staticmaps")
         mod.clip_staticmaps(region)
         logger.info("Clipping forcing")
-        mod.clip_forcing(model_destination)
+        mod.clip_forcing()
         logger.info("Writting clipped model")
-        mod.set_root(model_destination, mode="w")
         mod.write()
     except Exception as e:
         logger.exception(e)  # catch and log errors
