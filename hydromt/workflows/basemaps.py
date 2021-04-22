@@ -49,8 +49,8 @@ def hydrography(
         Dataset containing gridded flow direction and elevation data.
     res : float
         output resolution
-    tuple : tuple of 1Darray of float, optional
-        x, y coordinates of subbasin pits. Only required when upscaling a subbasin.
+    xy : geopandas.GeoDataFrame, optional
+        Subbasin pits. Only required when upscaling a subbasin.
     river_upa : float
         minimum upstream area threshold for the river map [km2]
     smooth_len : float
@@ -98,6 +98,9 @@ def hydrography(
             flwdir = flw.flwdir_from_da(ds[flwdir_name], ftype=ftype, mask=False)
         if xy is not None:
             logger.debug(f"Burn subbasin outlet in upstream area data.")
+            if isinstance(xy, gpd.GeoDataFrame):
+                assert xy.crs == ds.raster.crs
+                xy = xy.geometry.x, xy.geometry.y
             idxs_pit = flwdir.index(*xy)
             flwdir.add_pits(idxs=idxs_pit)
             uparea = ds[uparea_name].values
