@@ -19,16 +19,21 @@
 import os
 import sys
 import sphinx_autosummary_accessors
-
-here = os.path.dirname(__file__)
-sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
+from click.testing import CliRunner
 
 import hydromt
 from hydromt import DataCatalog
+from hydromt.cli.main import main as hydromt_cli
+
+# here = os.path.dirname(__file__)
+# sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
+
+if not os.path.isdir("_generated"):
+    os.makedirs("_generated")
 
 # -- Generate data catalog csv table to inlcude in docs -------
 data_catalog = DataCatalog()
-data_catalog.from_artifacts()
+data_catalog.from_deltares_sources()
 df = data_catalog.to_dataframe()
 df.index = [
     f"`{k} <{url}>`__" if isinstance(url, str) else k
@@ -51,8 +56,27 @@ rm = {
     "source_license": "license",
     "data_type": "data type",
 }
-df.loc[:, cols].rename(columns=rm).to_csv(r"_static/data_sources.csv")
+df.loc[:, cols].rename(columns=rm).to_csv(r"_generated/data_sources.csv")
 
+# -- Generate cli help docs ----------------------------------------------
+
+cli_build = CliRunner().invoke(hydromt_cli, ["build", "--help"])
+with open(r"_generated/cli_build.rst", "w") as f:
+    f.write(".. code-block:: console\n\n")
+    for line in cli_build.output.split("\n"):
+        f.write(f"    {line}\n")
+
+cli_update = CliRunner().invoke(hydromt_cli, ["update", "--help"])
+with open(r"_generated/cli_update.rst", "w") as f:
+    f.write(".. code-block:: console\n\n")
+    for line in cli_update.output.split("\n"):
+        f.write(f"    {line}\n")
+
+cli_clip = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
+with open(r"_generated/cli_clip.rst", "w") as f:
+    f.write(".. code-block:: console\n\n")
+    for line in cli_clip.output.split("\n"):
+        f.write(f"    {line}\n")
 
 # -- Project information -----------------------------------------------------
 

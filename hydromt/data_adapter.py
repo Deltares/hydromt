@@ -50,9 +50,9 @@ class DataCatalog(object):
             to entries of the data catalog. By default the data catalog is initiated
             without data entries. See :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
             for accepted yml format.
-        get_global_data: bool, optional
-            If True run :py:meth:`~hydromt.data_adapter.DataCatalog.from_global_sources`
-            to parse available global datasets library yml files.
+        deltares_data: bool, optional
+            If True run :py:meth:`~hydromt.data_adapter.DataCatalog.from_deltares_sources`
+            to parse available Deltares global datasets library yml files.
         """
         self._sources = {}  # dictionary of DataAdapter
         self._used_data = []

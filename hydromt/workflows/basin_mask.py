@@ -65,6 +65,8 @@ def parse_region(region, logger=logger):
 
         * {'basin': [xmin, ymin, xmax, ymax], 'outlets': true}
 
+        * {'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
+
         Subbasins are defined by its outlet locations and include all area upstream
         from these points. The outlet locations can be passed as xy coordinate pairs,
         but also derived from the most downstream cell(s) within a area of interest
@@ -74,28 +76,25 @@ def parse_region(region, logger=logger):
         should contain all upstream cell. If cells upstream of the subbasin are not
         within the provide bounds a warning will be raised. Common use-cases include:
 
-        * {'subbasin': [x, y], 'variable': threshold}
+        * {'subbasin': [x, y], '<variable>': threshold}
 
-        * {'subbasin': [[x1, x2, ..], [y1, y2, ..]], 'variable': threshold, 'bounds': [xmin, ymin, xmax, ymax]}
+        * {'subbasin': [[x1, x2, ..], [y1, y2, ..]], '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]}
 
-        * {'subbasin': (path to) geopandas.GeoDataFrame[Point], 'variable': threshold}
+        * {'subbasin': (path to) geopandas.GeoDataFrame[Point], '<variable>': threshold}
 
-        * {'subbasin': [xmin, ymin, xmax, ymax], 'variable': threshold}
+        * {'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
 
-        * {'subbasin': (path to) geopandas.GeoDataFrame[Polygon], 'variable': threshold}
+        * {'subbasin': (path to) geopandas.GeoDataFrame[Polygon], '<variable>': threshold}
 
         Interbasins are also defined by its outlet locations but include only the most
         downstream contiguous area with the area of interest. The outlet locations
         are derive from the most downstream cell(s) within a area of interest
         defined by a bounding box or geometry, optionally refined by stream threshold arguments.
-        The selected basins can be further refined to basins with their oultet within
-        the area of interest ('bounds': true). Common use-cases include:
+        Common use-cases include:
 
-        * {'interbasin': [xmin, ymin, xmax, ymax], 'variable': threshold}
+        * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
 
-        * {'interbasin': [xmin, ymin, xmax, ymax], 'bounds': true}
-
-        * {'interbasin': (path to) geopandas.GeoDataFrame[Polygon], 'variable': threshold}
+        * {'interbasin': [xmin, ymin, xmax, ymax], 'outlets': true}
 
     Returns
     -------
@@ -237,8 +236,10 @@ def get_basin_geometry(
 
     Returns
     -------
-    geopandas.geoDataFrame
+    basin_geom : geopandas.geoDataFrame
         geometry the (sub)basin(s)
+    outlet_geom : geopandas.geoDataFrame
+        geometry the outlet point location
     """
     kind_lst = ["basin", "subbasin", "interbasin"]
     if kind == "outlet":
