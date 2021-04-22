@@ -55,7 +55,7 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=None):
         # backwards compatibility for mask = True
         mask = da["mask"].Values
     elif not isinstance(mask, np.ndarray):
-        mask is None
+        mask = None
     flwdir = pyflwdir.from_array(
         data=da.squeeze().values,
         ftype=ftype,
