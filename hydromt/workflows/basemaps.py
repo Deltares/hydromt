@@ -8,6 +8,7 @@ import pandas as pd
 import xarray as xr
 import warnings
 import logging
+import geopandas as gpd
 from pyflwdir import dem
 
 logger = logging.getLogger(__name__)
