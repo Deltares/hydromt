@@ -11,7 +11,7 @@ jobs:
   # Build our docs on Linux against multiple Pythons, including pre-releases
   Docs:
     name: linux docs
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
     env:
       DOC_VERSION: dev
     strategy:
@@ -19,16 +19,15 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
-
     steps:
       - name: Checkout source
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
       
       - name: Get tags
         run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       - name: Setup environment
-      - uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v2
         with:
           environment-file: envs/hydromt-dev.yml
           python-version: "3.9"
