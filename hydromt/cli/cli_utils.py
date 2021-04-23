@@ -32,32 +32,28 @@ def parse_opt(ctx, param, value):
         }
     Note: `==VAL` breaks this as `str.split('=', 1)` is used.
     """
-
+    out = {}
     if not value:
-        return {}
-    else:
-        out = {}
-        for pair in value:
-            if "=" not in pair:
-                raise click.BadParameter(
-                    "Invalid syntax for KEY=VAL arg: {}".format(pair)
-                )
+        return out
+    for pair in value:
+        if "=" not in pair:
+            raise click.BadParameter("Invalid syntax for KEY=VAL arg: {}".format(pair))
+        else:
+            k, v = pair.split("=", 1)
+            k = k.lower()
+            s = None
+            if "." in k:
+                s, k = k.split(".", 1)
+            try:
+                v = literal_eval(v)
+            except Exception:
+                pass
+            if s:
+                if s not in out:
+                    out[s] = dict()
+                out[s].update({k: v})
             else:
-                k, v = pair.split("=", 1)
-                k = k.lower()
-                s = None
-                if "." in k:
-                    s, k = k.split(".", 1)
-                try:
-                    v = literal_eval(v)
-                except Exception:
-                    pass
-                if s:
-                    if s not in out:
-                        out[s] = dict()
-                    out[s].update({k: v})
-                else:
-                    out.update({k: v})
+                out.update({k: v})
         return out
 
 

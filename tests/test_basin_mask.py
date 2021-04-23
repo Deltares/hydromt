@@ -74,6 +74,13 @@ def test_basin():
     gdf_bas_index = data_catalog.get_geodataframe("hydro_merit_index")
     bas_index = data_catalog["hydro_merit_index"]
 
+    with pytest.raises(ValueError, match=r"No basins found"):
+        gdf_bas, gdf_out = get_basin_geometry(
+            ds,
+            kind="basin",
+            basid=0,  # basin ID should be > 0
+        )
+
     gdf_bas, gdf_out = get_basin_geometry(
         ds.drop_vars("basins"),
         kind="basin",

@@ -349,7 +349,7 @@ class Model(object, metaclass=ABCMeta):
         if not self._write:
             raise IOError("Model opened in read-only mode")
         if len(args) < 2:
-            TypeError("set_config() requires a least one key and one value.")
+            raise TypeError("set_config() requires a least one key and one value.")
         if not self.config:
             self._config = dict()
         args = list(args)
