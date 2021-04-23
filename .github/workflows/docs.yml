@@ -1,0 +1,61 @@
+name: Build Docs
+
+# We don't want pushes (or PRs) to gh-pages to kick anything off
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Build our docs on Linux against multiple Pythons, including pre-releases
+  Docs:
+    name: linux docs
+    runs-on: "ubuntu-latest"
+    env:
+      DOC_VERSION: dev
+    strategy:
+      fail-fast: false
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout source
+      - uses: actions/checkout@v2
+      
+      - name: Get tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - name: Setup environment
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: envs/hydromt-dev.yml
+          python-version: "3.9"
+          activate-environment: hydromt-dev
+
+      - name: Install hydromt
+        run: flit install
+
+      - name: Build docs
+        run: |
+          pushd docs
+          make html
+          popd
+
+      # This overrides the version "dev" with the proper version if we're building off a
+      # branch that's not master (which is confined to n.nn.x above) or on a tag.
+      - name: Set doc version
+        if: ${{ github.event_name != 'push' || !contains(github.ref, 'master') }}
+        run: echo "DOC_VERSION=v$(python -c 'import hydromt; print(hydromt.__version__.rsplit(".", maxsplit=2)[0])')" >> $GITHUB_ENV
+
+      - name: Upload to GitHub Pages
+        if: ${{ github.event_name != 'pull_request' && matrix.experimental == false }}
+        uses: peaceiris/actions-gh-pages@v3.8.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build/html
+          exclude_assets: '.buildinfo'
+          destination_dir: ./${{ env.DOC_VERSION }}
+          keep_files: false
+          full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages

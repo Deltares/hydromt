@@ -2,17 +2,18 @@ hydroMT Examples
 ################
 
 .. image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/Deltares/hydromt/binder?filepath=example
+    :target: https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples
 
-This folder contains several ipython notebook examples. 
+This folder contains several ipython notebook examples for **hydroMT**. 
 
-To run these examples start `binder <https://mybinder.org/v2/gh/Deltares/hydromt/binder?filepath=example>`_.
+To run these examples start with the **binder** badge above.
 
-To run these examples on your local machine create a conda environment based on the 
-environment.yml in this folder and than start jupyer notebook:
+To run these examples on your local machine create a conda e nvironment based on the 
+environment.yml in the root of this repository and than start jupyer notebook. 
+Run the following steps the examples folder:
 
 .. code-block:: console
 
-  conda env create -f environment.yml
+  conda env create -f ../environment.yml
   conda activate hydromt
   jupyter notebook
