@@ -354,7 +354,7 @@ class Model(object, metaclass=ABCMeta):
         value = args.pop(-1)
         if len(args) == 1 and "." in args[0]:
             args = args[0].split(".") + args[1:]
-        branch = self._config
+        branch = self.config  # reads config at first call
         for key in args[:-1]:
             if not key in branch or not isinstance(branch[key], dict):
                 branch[key] = {}
