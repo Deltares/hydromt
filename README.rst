@@ -4,17 +4,13 @@ hydroMT: Build and analyze hydro models
 .. image:: https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH
     :target: https://codecov.io/gh/Deltares/hydromt
 
-.. image:: https://readthedocs.org/projects/hydromt/badge/?version=latest
-    :target: https://hydromt.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+.. image:: https://img.shields.io/badge/docs-stable-brightgreen.svg
+    :target: https://deltares.github.io/hydromt
+    :alt: Latest Docs
 
-.. image:: https://pypip.in/v/$REPO/badge.png
-    :target: https://crate.io/packages/$REPO/
+.. image:: https://pypip.in/v/hydromt/badge.png
+    :target: https://pypi.org/project/hydromt/
     :alt: Latest PyPI version
-
-.. image:: https://pypip.in/d/$REPO/badge.png
-    :target: https://crate.io/packages/$REPO/
-    :alt: Number of PyPI downloads
 
 .. image:: https://anaconda.org/conda-forge/hydromt/badges/installer/conda.svg
     :target: https://anaconda.org/conda-forge/hydromt
@@ -53,12 +49,12 @@ To install hydromt using conda do:
 Documentation
 -------------
 
-Learn more about hydroMT in its `online documentation <https://hydromt.readthedocs.io>`_
+Learn more about hydroMT in its `online documentation <https://deltares.github.io/hydromt>`_
 
 Contributing
 ------------
 
-You can find information about contributing to hydroMT at our `Contributing page <https://hydromt.readthedocs.io/contributing.html>`_.
+You can find information about contributing to hydroMT at our `Contributing page <https://deltares.github.io/hydromt/contributing.html>`_.
 
 License
 -------
