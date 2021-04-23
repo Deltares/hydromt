@@ -31,5 +31,5 @@ dependencies:
   - scipy
   - xarray
   - zarr
-  pip:
+  - pip:
     - git+https://github.com/Deltares/hydromt.git
