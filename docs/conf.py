@@ -36,6 +36,7 @@ def cli2rst(output, fn):
         for line in output.split("\n"):
             f.write(f"    {line}\n")
 
+
 # NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
 # -- Project information -----------------------------------------------------
 
