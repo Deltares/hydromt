@@ -32,10 +32,10 @@ jobs:
          conda info
          conda list
 
-      - name: Check style
-        run: black --check .
-
       - name: Test
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - uses: codecov/codecov-action@v1
+
+      - name: Check style
+        run: black --check .

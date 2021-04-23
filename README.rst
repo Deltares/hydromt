@@ -4,9 +4,20 @@ hydroMT: Build and analyze hydro models
 .. image:: https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH
     :target: https://codecov.io/gh/Deltares/hydromt
 
-.. image:: https://readthedocs.org/projects/hydromt/badge/?version=latest
-    :target: https://hydromt.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+.. image:: https://img.shields.io/badge/docs-stable-brightgreen.svg
+    :target: https://deltares.github.io/hydromt
+    :alt: Latest Docs
+
+.. image:: https://pypip.in/v/hydromt/badge.png
+    :target: https://pypi.org/project/hydromt/
+    :alt: Latest PyPI version
+
+.. image:: https://anaconda.org/conda-forge/hydromt/badges/installer/conda.svg
+    :target: https://anaconda.org/conda-forge/hydromt
+
+.. image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples
+    
 
 **hydroMT** is a python package, developed by Deltares, to build and analysis hydro models.
 It provides a generic model api with attributes to access the model schematization,
@@ -27,8 +38,6 @@ Why hydroMT?
 Installation
 ------------
 
-NOTE: This part is still in development.
-
 hydroMT is availble from pypi and conda-forge, but we recommend installing with conda.
 
 To install hydromt using conda do:
@@ -37,21 +46,15 @@ To install hydromt using conda do:
 
   conda install hydromt -c conda-forge
 
-To create a hydromt environment with conda installed do:
-
-.. code-block:: console
-
-  conda create hydromt -n hydromt -c conda-forge
-
 Documentation
 -------------
 
-Learn more about hydroMT in its `online documentation <https://hydromt.readthedocs.io>`_
+Learn more about hydroMT in its `online documentation <https://deltares.github.io/hydromt>`_
 
 Contributing
 ------------
 
-You can find information about contributing to hydroMT at our `Contributing page <https://hydromt.readthedocs.io/contributing.html>`_.
+You can find information about contributing to hydroMT at our `Contributing page <https://deltares.github.io/hydromt/contributing.html>`_.
 
 License
 -------

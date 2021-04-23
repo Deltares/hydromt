@@ -22,21 +22,22 @@ import shutil
 import sphinx_autosummary_accessors
 from click.testing import CliRunner
 
+# here = os.path.dirname(__file__)
+# sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
+
 import hydromt
 from hydromt import DataCatalog
 from hydromt.cli.main import main as hydromt_cli
 
 
-def copytree(src, dst, symlinks=False, ignore=None):
-    for item in os.listdir(src):
-        s = os.path.join(src, item)
-        d = os.path.join(dst, item)
-        if os.path.isdir(s):
-            shutil.copytree(s, d, symlinks, ignore)
-        else:
-            shutil.copy2(s, d)
+def cli2rst(output, fn):
+    with open(fn, "w") as f:
+        f.write(".. code-block:: console\n\n")
+        for line in output.split("\n"):
+            f.write(f"    {line}\n")
 
 
+# NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
 # -- Project information -----------------------------------------------------
 
 project = "hydromt"
@@ -79,25 +80,13 @@ df.loc[:, cols].rename(columns=rm).to_csv(r"_generated/data_sources.csv")
 # -- Generate cli help docs ----------------------------------------------
 
 cli_build = CliRunner().invoke(hydromt_cli, ["build", "--help"])
-with open(r"_generated/cli_build.rst", "w") as f:
-    f.write(".. code-block:: console\n\n")
-    for line in cli_build.output.split("\n"):
-        f.write(f"    {line}\n")
+cli2rst(cli_build.output, r"_generated/cli_build.rst")
 
 cli_update = CliRunner().invoke(hydromt_cli, ["update", "--help"])
-with open(r"_generated/cli_update.rst", "w") as f:
-    f.write(".. code-block:: console\n\n")
-    for line in cli_update.output.split("\n"):
-        f.write(f"    {line}\n")
+cli2rst(cli_update.output, r"_generated/cli_update.rst")
 
 cli_clip = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
-with open(r"_generated/cli_clip.rst", "w") as f:
-    f.write(".. code-block:: console\n\n")
-    for line in cli_clip.output.split("\n"):
-        f.write(f"    {line}\n")
-
-# -- Copy examples folder into docs for nbsphinx ----------------------------
-copytree("../examples", "examples/notebooks")
+cli2rst(cli_clip.output, r"_generated/cli_clip.rst")
 
 # -- General configuration ------------------------------------------------
 
@@ -249,3 +238,15 @@ texinfo_documents = [
         "Miscellaneous",
     ),
 ]
+
+# FIXME exception while evaluating only directive expression: chunk after expression
+# nbsphinx_prolog = r"""
+# {% set docname = env.doc2path(env.docname, base=None) %}
+# .. only:: html
+#     .. role:: raw-html(raw)
+#         :format: html
+#     .. note::
+#         | This page was generated from `{{ docname }}`__.
+#         | Interactive online version: :raw-html:`<a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/{{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>`
+#         __ https://github.com/Deltares/hydromt/blob/main/examples/{{ docname }}
+# """

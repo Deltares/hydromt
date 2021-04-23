@@ -8,6 +8,7 @@ import glob
 import logging
 import sys
 import inspect
+import warnings
 
 ### Uncomment the following lines for building exe
 # import sys
@@ -168,8 +169,9 @@ def build(
     )
     logger.info(f"Building instance of {model} model at {model_root}.")
     if build_base:
-        DeprecationWarning(
-            'The "build-base" flag has been deprecated, modify the ini file instead.'
+        warnings.warn(
+            'The "build-base" flag has been deprecated, modify the ini file instead.',
+            DeprecationWarning,
         )
     if len(data) > 0:
         logger.info(f"Additional data sources: {data}")

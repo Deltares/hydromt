@@ -321,7 +321,7 @@ def get_basin_geometry(
                 ds.raster.y_dim: xr.IndexVariable("xy", np.atleast_1d(xy[1])),
             }
             basid = np.unique(ds_clip[basins_name].sel(**sel, method="nearest").values)
-        else:
+        elif basid is None:
             if stream_kwargs or outlets:
                 if stream_kwargs:
                     stream = stream_map(ds_clip, **stream_kwargs)

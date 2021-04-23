@@ -349,9 +349,7 @@ class Model(object, metaclass=ABCMeta):
         if not self._write:
             raise IOError("Model opened in read-only mode")
         if len(args) < 2:
-            TypeError("set_config() requires a least one key and one value.")
-        if not self.config:
-            self._config = dict()
+            raise TypeError("set_config() requires a least one key and one value.")
         args = list(args)
         value = args.pop(-1)
         if len(args) == 1 and "." in args[0]:
@@ -405,7 +403,7 @@ class Model(object, metaclass=ABCMeta):
         args = list(args)
         if len(args) == 1 and "." in args[0]:
             args = args[0].split(".") + args[1:]
-        branch = self._config
+        branch = self.config  # reads config at first call
         for key in args[:-1]:
             branch = branch.get(key, {})
             if not isinstance(branch, dict):
