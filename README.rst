@@ -4,7 +4,7 @@ hydroMT: Build and analyze hydro models
 .. image:: https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH
     :target: https://codecov.io/gh/Deltares/hydromt
 
-.. image:: https://img.shields.io/badge/docs-stable-brightgreen.svg
+.. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg
     :target: https://deltares.github.io/hydromt
     :alt: Latest Docs
 
