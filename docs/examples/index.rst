@@ -6,4 +6,5 @@ Examples
 .. toctree::
    :maxdepth: 1
 
-   Delineate basin <examples/delineate_basin>
+   Read raster data <examples/read_raster_data>
+   Delineate basins <examples/delineate_basin>
