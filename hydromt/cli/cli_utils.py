@@ -54,7 +54,7 @@ def parse_opt(ctx, param, value):
                 out[s].update({k: v})
             else:
                 out.update({k: v})
-        return out
+    return out
 
 
 def parse_json(ctx, param, value):
