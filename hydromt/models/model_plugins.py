@@ -19,6 +19,8 @@ def discover(path=None, logger=logger):
     -------
     drivers : dict
         Name mapped to model class.
+    eps : dict
+        Entrypoints dict
     """
     # Discover drivers via entrypoints.
     group = entrypoints.get_group_named("hydromt.models", path=path)
@@ -35,17 +37,19 @@ def discover(path=None, logger=logger):
                 )
 
     plugins = {}
+    eps = {}
     for name, ep in group.items():
         logger.debug(
-            f"Discovered model plugin '{name} = {ep.module_name}.{ep.object_name}'"
+            f"Discovered model plugin '{name} = {ep.module_name}.{ep.object_name}' ({ep.distro.version})"
         )
 
         try:
             plugins[ep.name] = ep.load()
+            eps[ep.name] = ep
         except (ModuleNotFoundError, AttributeError) as err:
             logger.exception(f"Error while loading entrypoint {name}: {str(err)}")
             continue
         logger.debug(
-            f"Loaded model plugin '{name} = {ep.module_name}.{ep.object_name}'"
+            f"Loaded model plugin '{name} = {ep.module_name}.{ep.object_name}' ({ep.distro.version})"
         )
-    return plugins
+    return plugins, eps
