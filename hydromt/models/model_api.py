@@ -250,7 +250,7 @@ class Model(object, metaclass=ABCMeta):
 
     @abstractmethod
     def write_staticmaps(self):
-        """Write staticmaps at <root/?/> in model ready format """
+        """Write staticmaps at <root/?/> in model ready format"""
         # to write to gdal raster files use: self.staticmaps.raster.to_mapstack()
         # to write to netcdf use: self.staticmaps.to_netcdf()
         if not self._write:
@@ -267,7 +267,7 @@ class Model(object, metaclass=ABCMeta):
 
     @abstractmethod
     def write_staticgeoms(self):
-        """Write staticmaps at <root/?/> in model ready format """
+        """Write staticmaps at <root/?/> in model ready format"""
         # to write use self.staticgeoms[var].to_file()
         if not self._write:
             raise IOError("Model opened in read-only mode")

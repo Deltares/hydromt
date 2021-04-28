@@ -101,11 +101,13 @@ Below are two examples where these options are used for a raster and a vector fi
 
 .. code-block:: console
 
-      hydro_merit:
-        path: base/hydro_merit/*.vrt
+      merit_hydro:
+        path: base/merit_hydro/*.vrt
         data_type: RasterDataset
-        chunks: {x: 6000, y: 6000}
+        driver: raster
         crs: 4326
+        kwargs:
+            chunks: {x: 6000, y: 6000}
         rename:
           dir: flwdir
           bas: basins
@@ -125,6 +127,7 @@ Below are two examples where these options are used for a raster and a vector fi
       hydro_reservoirs:
         path: base/waterbodies/reservoir-db.gpkg
         data_type: GeoDataFrame
+        driver: vector
         crs: 4326
         nodata: [-99]
         rename:

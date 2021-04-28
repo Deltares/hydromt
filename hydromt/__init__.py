@@ -1,6 +1,6 @@
 """HydroMT: Build and analyze models like a data-wizard!"""
 
-__version__ = "0.4.0"
+__version__ = "0.4.1.dev"
 
 import geopandas as gpd
 from os.path import join, isdir, dirname, basename, isfile, abspath

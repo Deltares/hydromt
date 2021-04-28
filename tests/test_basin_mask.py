@@ -70,9 +70,9 @@ def test_region(tmpdir, geodf):
 
 def test_basin():
     data_catalog = hydromt.DataCatalog(logger=logger)
-    ds = data_catalog.get_rasterdataset("hydro_merit")
-    gdf_bas_index = data_catalog.get_geodataframe("hydro_merit_index")
-    bas_index = data_catalog["hydro_merit_index"]
+    ds = data_catalog.get_rasterdataset("merit_hydro")
+    gdf_bas_index = data_catalog.get_geodataframe("merit_hydro_index")
+    bas_index = data_catalog["merit_hydro_index"]
 
     with pytest.raises(ValueError, match=r"No basins found"):
         gdf_bas, gdf_out = get_basin_geometry(
