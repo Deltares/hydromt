@@ -5,8 +5,12 @@ hydroMT: Build and analyze hydro models
     :target: https://codecov.io/gh/Deltares/hydromt
 
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg
-    :target: https://deltares.github.io/hydromt
-    :alt: Latest Docs
+    :target: https://deltares.github.io/hydromt/latest
+    :alt: Latest developers docs
+
+.. image:: https://img.shields.io/badge/docs-stable-brightgreen.svg
+    :target: https://deltares.github.io/hydromt/stable
+    :alt: Stable docs last release
 
 .. image:: https://pypip.in/v/hydromt/badge.png
     :target: https://pypi.org/project/hydromt/

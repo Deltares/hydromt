@@ -5,9 +5,7 @@ from .model_api import Model
 from . import model_plugins
 
 # model dictionary to be used in command line interface
-MODELS = {}
-
-MODELS.update(model_plugins.discover())
+MODELS, ENTRYPOINTS = model_plugins.discover()
 
 # make models available for import
 # from hydromt.models import xxxxModel

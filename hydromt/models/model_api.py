@@ -43,7 +43,13 @@ class Model(object, metaclass=ABCMeta):
         deltares_data=False,
         logger=logger,
     ):
+        from . import ENTRYPOINTS  # load within method to avoid circular imports
+
         self.logger = logger
+        ep = ENTRYPOINTS.get(self._NAME, None)
+        version = ep.distro.version if ep is not None else ""
+        dist = ep.distro.name if ep is not None else "unknown"
+        self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
 
         # link to data
         self.data_catalog = DataCatalog(

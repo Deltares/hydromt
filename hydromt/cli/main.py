@@ -20,7 +20,7 @@ import warnings
 
 from . import cli_utils
 from .. import config, log, data_adapter
-from ..models import MODELS  # global var
+from ..models import MODELS, ENTRYPOINTS  # global var
 from .. import __version__
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,10 @@ logger = logging.getLogger(__name__)
 def print_models(ctx, param, value):
     if not value:
         return {}
-    mods = ", ".join(list(MODELS.keys()))
+    mod_lst = []
+    for name, ep in ENTRYPOINTS.items():
+        mod_lst.append(f"{name} (v{ep.distro.version})")
+    mods = ", ".join(mod_lst)
     click.echo(f"hydroMT model plugins: {mods:s}")
     ctx.exit()
 
