@@ -93,7 +93,7 @@ class Model(object, metaclass=ABCMeta):
                     v = args[i]
                 else:
                     continue
-            self.logger.debug(f"{method}.{k}: {v}")
+            self.logger.info(f"{method}.{k}: {v}")
         return func(*args, **kwargs)
 
     def build(self, region, res=None, write=True, opt=None):
