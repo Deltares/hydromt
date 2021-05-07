@@ -4,6 +4,7 @@ basin maps or flow direction maps.
 """
 
 from os.path import join, isdir, dirname, basename, isfile
+from pathlib import Path
 import glob
 import os
 import numpy as np
@@ -17,6 +18,7 @@ from pyflwdir.regions import region_bounds
 from pyflwdir import pyflwdir
 
 # local
+from ..io import open_raster
 from ..raster import full_like
 from ..flw import flwdir_from_da, basin_map, stream_map, outlet_map
 from ..models import MODELS
@@ -41,9 +43,13 @@ def parse_region(region, logger=logger):
 
         * {'geom': (path to) geopandas.GeoDataFrame[Polygon]}
 
-        For an copy of another models grid:
+        For a region based of another models grid:
 
-        * {wflow/sfincs/..: root}
+        * {'<model_name>': root}
+
+        For a region based of the grid of a raster file:
+
+        * {'grid': (path to) raster file}
 
         Entire basin can be defined based on an ID, one or multiple point location (x, y),
         or a region of interest (bounding box or geometry) for which the basin IDs are
@@ -98,7 +104,7 @@ def parse_region(region, logger=logger):
 
     Returns
     -------
-    kind : {'basin', 'subbasin', 'interbasin', 'geom', 'bbox'}
+    kind : {'basin', 'subbasin', 'interbasin', 'geom', 'bbox', 'grid'}
         region kind
     kwargs : dict
         parsed region json
@@ -109,17 +115,23 @@ def parse_region(region, logger=logger):
         "basin": ["basid", "geom", "bbox", "xy"],
         "subbasin": ["geom", "bbox", "xy"],
         "interbasin": ["geom", "bbox", "xy"],
-        "outlet": ["geom", "bbox"],
+        "outlet": ["geom", "bbox"],  # deprecated!
         "geom": ["geom"],
         "bbox": ["bbox"],
+        "grid": ["RasterDataArray"],
     }
     kind = next(iter(kwargs))
     value0 = kwargs.pop(kind)
     if kind in MODELS:
         kwargs = dict(mod=MODELS[kind](root=value0, mode="r", logger=logger))
         kind = "model"
+    elif kind == "grid":
+        if isinstance(value0, (str, Path)) and isfile(value0):
+            kwargs = dict(grid=open_raster(value0, **kwargs))
+        elif isinstance(value0, (xr.Dataset, xr.DataArray)):
+            kwargs = dict(grid=value0)
     elif kind not in options:
-        k_lst = '", "'.join(list(options.keys()))
+        k_lst = '", "'.join(list(options.keys()) + list(MODELS.keys()))
         raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
     else:
         kwarg = _parse_region_value(value0)
@@ -130,11 +142,13 @@ def parse_region(region, logger=logger):
                 f'provide one of "{v_lst}"'
             )
         kwargs.update(kwarg)
-    kwargs_str = kwargs.copy()
+    kwargs_str = dict()
     for k, v in kwargs.items():
         if isinstance(v, gpd.GeoDataFrame):
-            v = f"GeoDataFrame ({v.index.size} rows)"
-            kwargs_str.update({k: v})
+            v = f"GeoDataFrame {v.total_bounds} (crs = {v.crs})"
+        elif isinstance(v, xr.DataArray):
+            v = f"DataArray {v.raster.bounds} (crs = {v.raster.crs})"
+        kwargs_str.update({k: v})
     logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
     return kind, kwargs
 
