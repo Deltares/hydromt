@@ -147,18 +147,17 @@ def hydrography(
                 dims=ds_out.raster.dims, data=basins != 0, attrs=dict(_FillValue=0)
             )
         else:
-            # NOTE: this else statement seems wrong. instead an error is at place
-            # ds_out.coords["mask"] = (
-            #     ds["mask"]
-            #     .astype(np.int8)
-            #     .raster.reproject_like(da_flw, method="nearest")
-            #     .astype(np.bool)
-            # )
-            # basins = ds_out["mask"].values.astype(np.int32)
-            raise ValueError(
-                "Unable to upscale the flow direction. "
-                "Consider using a larger domain or higher spatial resolution. "
-                "For subbasin models, consider a (higher) threshold to snap the outlet."
+            # This is a patch for basins which are clipped based on bbox or wrong geom
+            ds_out.coords["mask"] = (
+                ds["mask"]
+                .astype(np.int8)
+                .raster.reproject_like(da_flw, method="nearest")
+                .astype(np.bool)
+            )
+            basins = ds_out["mask"].values.astype(np.int32)
+            logger.warning(
+                "The basin delination might be wrong as no original resolution outlets "
+                "are found in the upscaled map."
             )
         ds_out[basins_name] = xr.Variable(dims, basins, attrs=dict(_FillValue=0))
         # calculate upstream area using subgrid ucat cell areas
@@ -221,6 +220,7 @@ def hydrography(
         attrs = dict(_FillValue=-9999, unit="km2")
         ds_out["subare"] = xr.Variable(dims, subare, attrs=attrs)
     # logging
+    npits = flwdir_out.idxs_pit.size
     xy_pit = flwdir_out.xy(flwdir_out.idxs_pit[:5])
     xy_pit_str = ", ".join([f"({x:.5f},{y:.5f})" for x, y in zip(*xy_pit)])
     # stream order
@@ -235,7 +235,7 @@ def hydrography(
     logger.debug(
         f"Map shape: {ds_out.raster.shape}; active cells: {flwdir_out.ncells}."
     )
-    logger.debug(f"Outlet coordinates (head): {xy_pit_str}.")
+    logger.debug(f"Outlet coordinates ({len(xy_pit[0])}/{npits}): {xy_pit_str}.")
     if np.any(np.asarray(ds_out.raster.shape) == 1):
         raise ValueError(
             "The output extent should at consist of two cells on each axis. "
