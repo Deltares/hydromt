@@ -179,7 +179,7 @@ def build(
     if len(data) > 0:
         logger.info(f"Additional data sources: {data}")
     logger.info(f"User settings:")
-    opt = cli_utils.parse_config(config, opt_cli=opt, logger=logger)
+    opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     kwargs.update(deltares_data=dd)
     data_libs = data + tuple(kwargs.pop("data_libs", []))
@@ -268,7 +268,7 @@ def update(
     if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
         opt = {components[0]: opt}
     logger.info(f"User settings:")
-    opt = cli_utils.parse_config(config, opt_cli=opt, logger=logger)
+    opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     kwargs.update(deltares_data=dd)
     data_libs = data + tuple(kwargs.pop("data_libs", []))
