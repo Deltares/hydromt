@@ -3,20 +3,55 @@ import xarray as xr
 import numpy as np
 import re
 import logging
+from typing import Optional, Union
+
+from ..raster import full
 
 logger = logging.getLogger(__name__)
 
 
+def _downscale_precip(
+    precip: xr.DataArray,
+    nindex: xr.DataArray,
+    precip_fact: Optional[xr.DataArray] = None,
+) -> xr.DataArray:
+    """
+    Downscale precipitation
+
+    Arguments
+    ----------
+    precip: xarray.DataArray of float32
+        DataArray with source precip
+    nindex: xarray.DataArray of intp
+        Desitnation DataArray with flat indices of source DataArray
+    precip_fact: xarray.DataArray of float32, optional
+        Desitnation DataArray with monthly correction factors
+
+    Returns
+    -------
+    precip_reproj : xarray.DataArray
+        Downscaled precipitation
+    """
+    precip = precip.where(precip >= 0, 0)
+    precip_reproj = precip.raster._reindex2d(nindex)
+    # multiply with monthly multiplication factor
+    if precip_fact is not None:
+        precip_reproj = precip_reproj.groupby("time.month") * precip_fact
+        precip_reproj = precip_reproj.drop("month")
+    return precip_reproj
+
+
 def precip(
-    precip,
-    da_like,
-    clim=None,
-    freq=None,
-    reproj_method="nearest_index",
-    resample_kwargs={},
-    logger=logger,
-):
-    """Lazy reprojection of precipitation to model grid and resampling of time dimension to frequency.
+    precip: xr.DataArray,
+    da_like: xr.DataArray,
+    clim: Optional[xr.DataArray] = None,
+    freq: Optional[Union[pd.Timedelta, str]] = None,
+    chunksize: Optional[int] = None,
+    resample_kwargs: Optional[dict] = {},
+    logger: logging.Logger = logger,
+) -> xr.DataArray:
+    """Lazy downscaling of precipitation to model grid  `da_like` and
+    resampling of time dimension to frequency `freq`.
 
     Parameters
     ----------
@@ -29,8 +64,8 @@ def precip(
         to correct the precip downscaling.
     freq: str, Timedelta
         output frequency of time dimension
-    reproj_method: str, optional
-        Method for spatital reprojection of precip, by default 'nearest_index'
+    chunksize: int, optional
+        Chunksize along time dimension. By default the chunksize of the data is used.
     resample_kwargs:
         Additional key-word arguments (e.g. label, closed) for time resampling method
 
@@ -41,11 +76,19 @@ def precip(
     """
     if precip.raster.dim0 != "time":
         raise ValueError(f'First precip dim should be "time", not {precip.raster.dim0}')
-    # downscale precip (lazy); global min of zero
-    p_out = xr.ufuncs.fmax(
-        precip.raster.reproject_like(da_like, method=reproj_method), 0
-    )
-    # correct precip based on high-res monthly climatology
+    # get nearest index and mask nodata values
+    nindex = precip.raster.nearest_index(
+        dst_crs=da_like.raster.crs,
+        dst_transform=da_like.raster.transform,
+        dst_width=da_like.raster.width,
+        dst_height=da_like.raster.height,
+    ).compute()  # compute !
+    # set nodata values outside model domain based on da_like nodata
+    # use numpy array (.values) because nindex might have different dimension names
+    mask = (da_like != da_like.raster.nodata).values
+    nindex = nindex.where(mask, nindex.raster.nodata)
+    kwargs = dict(nindex=nindex)
+    # get precip correction based on high-res monthly climatology
     if clim is not None:
         # make sure first dim is month
         clim = clim.rename({clim.raster.dim0: "month"})
@@ -58,15 +101,49 @@ def precip(
             precip, method="average"
         ).raster.reproject_like(da_like, method="average")
         clim_fine = clim.raster.reproject_like(da_like, method="average")
-        p_mult = xr.where(clim_coarse > 0, clim_fine / clim_coarse, 1.0).fillna(1.0)
-        # multiply with monthly multiplication factor
-        p_out = p_out.groupby("time.month") * p_mult
+        clim_coarse = clim_coarse.where(clim_coarse > 0, clim_fine)  # fix zero division
+        precip_fact = (
+            ((clim_fine / clim_coarse).fillna(1.0)).astype(np.float32).compute()
+        )  # compute !
+        # make sure names and coords align!
+        precip_fact = precip_fact.rename(
+            {
+                precip_fact.raster.x_dim: nindex.raster.x_dim,
+                precip_fact.raster.y_dim: nindex.raster.y_dim,
+            }
+        )
+        precip_fact[nindex.raster.y_dim] = nindex.raster.ycoords
+        precip_fact[nindex.raster.x_dim] = nindex.raster.xcoords
+        kwargs.update(precip_fact=precip_fact)
+    # create output template with dask data
+    dst_coords = {
+        "time": precip.time,
+        nindex.raster.y_dim: nindex.raster.ycoords,
+        nindex.raster.x_dim: nindex.raster.xcoords,
+    }
+    da_temp = full(
+        dst_coords,
+        nodata=precip.raster.nodata,
+        dtype=precip.dtype,
+        name=precip.name,
+        attrs=precip.attrs,
+        crs=nindex.raster.crs,
+        lazy=True,
+    )
+    # chunk time and set reset chunks on other dims
+    chunksize = max(precip.chunks[0]) if chunksize is None else chunksize
+    precip = precip.chunk({d: chunksize if d == "time" else -1 for d in precip.dims})
+    da_temp = da_temp.chunk({d: chunksize if d == "time" else -1 for d in da_temp.dims})
+    # apply with mapblocks (lazy)
+    p_out = precip.map_blocks(_downscale_precip, kwargs=kwargs, template=da_temp)
     # resample time
-    p_out.name = "precip"
-    p_out.attrs.update(unit="mm")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="sum", logger=logger)
         p_out = resample_time(p_out, freq, conserve_mass=True, **resample_kwargs)
+    # attributes
+    p_out = p_out.round(2)
+    p_out.name = "precip"
+    p_out.attrs.update(unit="mm")
     return p_out
 
 
@@ -375,7 +452,7 @@ def pet_debruin(
     ) + beta
     ep_joule = xr.where(k_ext == 0.0, 0.0, ep_joule)
     pet = ((ep_joule / lam) * timestep).astype(np.float32)
-    pet = xr.where(pet > 0.0, pet, 0.0)
+    pet = pet.where(pet > 0.0, 0.0)
     return pet
 
 
@@ -410,7 +487,7 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
 
     ep_joule = 0.65 * slope / (slope + gamma) * k_in
     pet = ((ep_joule / lam) * timestep).astype(np.float32)
-    pet = xr.where(pet > 0.0, pet, 0.0)
+    pet = pet.where(pet > 0.0, 0.0)
     return pet
 
 
