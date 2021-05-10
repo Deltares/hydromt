@@ -668,7 +668,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         # check for non default driver based on extension
         if driver is None:
             driver = self._DRIVERS.get(
-                path.split(".")[-1].lower(), self._DEFAULT_DRIVER
+                str(path).split(".")[-1].lower(), self._DEFAULT_DRIVER
             )
         self.driver = driver
         self.kwargs = kwargs
@@ -716,12 +716,12 @@ class DataAdapter(object, metaclass=ABCMeta):
         vrs = ["*"]
         dates = [""]
         fns = []
-        if time_tuple is not None and "{year" in self.path:
+        if time_tuple is not None and "{year" in str(self.path):
             dt = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
             trange = pd.to_datetime(list(time_tuple)) - dt
-            freq = "m" if "{month" in self.path else "a"
+            freq = "m" if "{month" in str(self.path) else "a"
             dates = pd.period_range(*trange, freq=freq)
-        if variables is not None and "{variable" in self.path:
+        if variables is not None and "{variable" in str(self.path):
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
         for date, var in product(dates, vrs):

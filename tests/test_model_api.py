@@ -190,7 +190,8 @@ def test_model(model, tmpdir):
     mod.write()
     mod1 = TESTMODELS.get(model)(root=mod.root, mode="r")
     mod1.read()
-    assert np.all(mod1.staticmaps == mod.staticmaps)
+    for name in mod1.staticmaps.data_vars:
+        assert np.all(mod1.staticmaps[name] == mod.staticmaps[name])
     assert mod.config == mod1.config, f"config mismatch"
 
     # test properties

@@ -392,7 +392,9 @@ class XRasterBase(XGeoBase):
     @property
     def box(self):
         """Return :py:meth:`~geopandas.GeoDataFrame` of bounding box"""
-        crs = None if self.crs is None else self.crs.to_epsg()
+        crs = self.crs
+        if crs is None and crs.to_epsg() is not None:
+            crs = crs.to_epsg()  # not all CRS have an EPSG code
         return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
 
     @property
@@ -1661,7 +1663,9 @@ class RasterDataArray(XRasterBase):
             {"geometry": geom, "properties": {"value": idx}}
             for geom, idx in list(feats_gen)
         ]
-        crs = None if self.crs is None else self.crs.to_epsg()
+        crs = self.crs
+        if crs is None and crs.to_epsg() is not None:
+            crs = crs.to_epsg()  # not all CRS have an EPSG code
         gdf = gpd.GeoDataFrame.from_features(feats, crs=crs)
         gdf.index = gdf.index.astype(self._obj.dtype)
         return gdf
