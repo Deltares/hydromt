@@ -3,23 +3,16 @@
 basin maps or flow direction maps.
 """
 
-from os.path import join, isdir, dirname, basename, isfile
+from os.path import isdir, isfile
 from pathlib import Path
-import glob
-import os
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 import xarray as xr
-import pandas as pd
 import logging
-import copy
-from pyflwdir.regions import region_bounds
-from pyflwdir import pyflwdir
 
 # local
 from ..io import open_raster
-from ..raster import full_like
 from ..flw import flwdir_from_da, basin_map, stream_map, outlet_map
 from ..models import MODELS
 from ..data_adapter import GeoDataFrameAdapter

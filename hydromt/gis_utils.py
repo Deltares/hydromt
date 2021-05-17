@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """gis related convience functions. More in pyflwdir.gis_utils"""
-import os
 from os.path import join, isfile
 import numpy as np
 import xarray as xr
+import rasterio
 from rasterio.crs import CRS
 from rasterio.transform import Affine
 from osgeo import gdal
@@ -334,7 +334,7 @@ def write_map(
                 wkt_projection=None if crs is None else CRS.from_user_input(crs).wkt,
                 shape=data.shape,
             )
-        elif not os.path.isfile(clone_path):
+        elif not isfile(clone_path):
             raise IOError(f'clone_path: "{clone_path}" does not exist')
         pcr.setclone(clone_path)
         if nodata is None and pcr_vs != "ldd":

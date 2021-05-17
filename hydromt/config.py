@@ -4,17 +4,13 @@
 config functions
 """
 
-import re
 import codecs
-import sys
 from configparser import ConfigParser
-import collections
-import os
-from os.path import dirname, basename, isfile, join, abspath, exists, relpath
+from os.path import dirname, join, abspath, exists
 from ast import literal_eval
 import numpy as np
 import abc
-from pathlib import Path, PurePath
+from pathlib import Path
 
 
 def configread(

@@ -3,7 +3,7 @@
 
 """General data adapters for HydroMT"""
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import os
 from os.path import join, isdir, dirname, basename, isfile, abspath
 from itertools import product
@@ -14,12 +14,9 @@ import xarray as xr
 import geopandas as gpd
 from shapely.geometry import box
 import pandas as pd
-import rasterio
-import pyproj
 import glob
 import yaml
 import pprint
-import warnings
 import logging
 import requests
 import shutil
@@ -1044,7 +1041,6 @@ class GeoDatasetAdapter(DataAdapter):
         rename={},
         unit_mult={},
         unit_add={},
-        units={},
         meta={},
         **kwargs,
     ):
@@ -1177,10 +1173,10 @@ class GeoDatasetAdapter(DataAdapter):
             # convert bbox to geom with crs EPGS:4326 to apply buffer later
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
             bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-            clip_str = f"and clip to bbox - [{bbox_str}]"
+            clip_str = f" and clip to bbox - [{bbox_str}]"
         elif geom is not None:
             bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            clip_str = f"and clip to geom - [{bbox_str}]"
+            clip_str = f" and clip to geom - [{bbox_str}]"
         if geom is not None:
             # make sure geom is projected > buffer in meters!
             if buffer > 0 and geom.crs.is_geographic:
@@ -1190,8 +1186,7 @@ class GeoDatasetAdapter(DataAdapter):
             kwargs.update(predicate="contains")
 
         # read and clip
-        ext = str(fns[0]).split(".")[-1].lower()
-        logger.info(f"GeoDataset: Read {ext} data {clip_str}")
+        logger.info(f"GeoDataset: Read {self.driver} data{clip_str}.")
         if self.driver in ["netcdf"]:
             ds_out = xr.open_mfdataset(fns, **kwargs)
         elif self.driver == "zarr":

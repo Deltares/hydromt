@@ -9,15 +9,9 @@ This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets/dataarrays.
 """
 
-import copy
 import os
-import glob
 from os.path import join, basename, dirname, isdir
-from pathlib import Path
-from datetime import datetime
-import warnings
 import numpy as np
-import pandas as pd
 from shapely.geometry import box
 import geopandas as gpd
 import xarray as xr
@@ -27,7 +21,6 @@ from rasterio.crs import CRS
 import rasterio.warp
 from rasterio import features
 from rasterio.enums import Resampling
-from rasterio.features import geometry_mask
 from scipy.spatial import cKDTree
 from scipy.interpolate import griddata
 from scipy import ndimage

@@ -2,12 +2,8 @@
 """command line interface for hydromt models"""
 
 import click
-import os
 from os.path import join
-import glob
 import logging
-import sys
-import inspect
 import warnings
 
 ### Uncomment the following lines for building exe
@@ -19,7 +15,7 @@ import warnings
 ###
 
 from . import cli_utils
-from .. import config, log, data_adapter
+from .. import log, data_adapter
 from ..models import MODELS, ENTRYPOINTS  # global var
 from .. import __version__
 

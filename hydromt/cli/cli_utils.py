@@ -2,10 +2,8 @@
 """Utils for parsing cli options and arguments 
 """
 
-from os.path import join, isfile, isdir
-import numpy as np
+from os.path import isfile
 import json
-import geopandas as gpd
 import logging
 import click
 from ast import literal_eval
