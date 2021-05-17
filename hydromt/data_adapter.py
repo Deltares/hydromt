@@ -34,7 +34,7 @@ class DataCatalog(object):
     # root URL and version with data source artifacts
     # url = f"{_url}/download/{_version}/<filename>"
     _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases"
-    _version = "v0.0.3"  # latest version
+    _version = "v0.0.4"  # latest version
 
     def __init__(
         self, data_libs=None, deltares_data=None, artifact_data=None, logger=logger
@@ -149,7 +149,7 @@ class DataCatalog(object):
             # set paths relative to yml file
             root = os.path.dirname(path)
             d = self.to_dict(root=root)
-            d.pop("root", None)  # remoev absolute root path
+            d.pop("root", None)  # remove absolute root path
         else:
             d = self.to_dict(root=root)
         with open(path, "w") as f:
@@ -266,7 +266,9 @@ class DataCatalog(object):
                     root_drive == source_drive
                     and os.path.commonpath([path, root]) == root
                 ):
-                    source_dict["path"] = os.path.relpath(source_dict["path"], root)
+                    source_dict["path"] = os.path.relpath(
+                        source_dict["path"], root
+                    ).replace("\\", "/")
             sources_out.update({name: source_dict})
         return sources_out
 
