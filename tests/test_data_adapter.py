@@ -108,7 +108,7 @@ def test_deltares_sources():
     data_catalog = DataCatalog(deltares_data=True)
     assert len(data_catalog._sources) > 0
     source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
-    assert str(source0.path).startswith("p")
+    assert "p" in str(source0.path).split("/")[0]
 
 
 def test_artifact_sources():
