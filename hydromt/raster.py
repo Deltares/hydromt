@@ -1727,11 +1727,8 @@ class RasterDataset(XRasterBase):
                 data, args = data[0], data[1:]
             da = RasterDataArray.from_numpy(data, transform, *args)
             da.name = name
-            if i > 0:
-                if da.shape[-2:] != _shape:
-                    raise xr.MergeError(f"Data shapes do not match.")
-            else:
-                _shape = da.shape[-2:]
+            if i > 0 and da.shape[-2:] != da_lst[0].shape[-2:]:
+                raise xr.MergeError(f"Data shapes do not match.")
             da_lst.append(da)
         ds = xr.merge(da_lst)
         if attrs is not None:
