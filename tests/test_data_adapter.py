@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
-import pdb
+import os
 import hydromt
 from hydromt.data_adapter import DataAdapter, parse_data_sources, DataCatalog
 
@@ -108,7 +108,7 @@ def test_deltares_sources():
     data_catalog = DataCatalog(deltares_data=True)
     assert len(data_catalog._sources) > 0
     source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
-    assert "p" in str(source0.path).split("/")[0]
+    assert "p" in str(source0.path)[:4]
 
 
 def test_artifact_sources():
