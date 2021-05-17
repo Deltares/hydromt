@@ -18,30 +18,51 @@ model and finally use it for assessment of the impact of strategies.
 
 .. image:: img/hydromt_approach.png
 
-HydroMT and the BlueEarth Initiative
-------------------------------------
-HydroMT, with imod-python and HYDROLIB, is part of the Model Builder Engine of Deltares 
-|BlueEarth|: `<https://blueearth.deltares.org/>`_ 
-
-.. image:: img/BE_model_tools.png
 
 Scope of HydroMT
 ----------------
 HydroMT is a very flexible tool and helps the user to interact with the different components of model preparation so 
 that the modeller can prepare exactly what he needs from the data of its choice. Currently supported models are:
 
+- Delft-FIAT
 - Delwaq
 - SFINCS
-- RIBASIM
 - Wflow: sbm and sediment
 
 Support for the following models is in development:
 
 - iMOD
+- RIBASIM
 - Delft3D-FM
-- Delft-FIAT
 - Delft-FEWS
 
 .. image:: img/supported_models.png
+
+Plugin architecture
+-------------------
+HydroMT is organised via a **plugin architecture**. All the **core functionnalities** are included in the **hydromt package**. This includes:
+
+- Command Line Interface and methods (build, update, clip).
+- High end methods for raster and vector processing, GIS, configuration and flow direction functionnalities.
+- Data reading, processing and export via the ``DataCatalog``.
+- General workflows from input data to model data such as basin_mask or forcing.
+- Definition of the hydroMT ``Model API`` class.
+
+Implementation of hydroMT core functionnalities for specific models are realised in separate **plugin packages** (one per model). In each plugin, you can find:
+
+- Definition of a Model class compliant to the ``Model API`` with model specific methods and attributes.
+- Model specific workflows to go from input data to model data.
+- Specific documentation and examples.
+
+The plugin architecture (including known existing plugins) is:
+
+.. image:: img/hydromt_plugins.png
+
+The known existing plugin packages can be found at:
+
+- Delft-FIAT: https://github.com/Deltares/hydromt_fiat
+- DELWAQ: https://github.com/Deltares/hydromt_delwaq
+- SFINCS: https://github.com/Deltares/hydromt_sfincs
+- Wflow: https://github.com/Deltares/hydromt_wflow
 
 .. |BlueEarth| image:: img/BlueEarth-icon.png
