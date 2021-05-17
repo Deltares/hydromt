@@ -77,8 +77,9 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     geodf.to_file(fn_gdf, driver="GeoJSON")
     ts.to_csv(fn_csv)
     data_catalog = DataCatalog()
+    # added fn_ts to test if it does not go into xr.open_dataset
     da1 = data_catalog.get_geodataset(
-        fn_nc, rename={"test": "test1"}, bbox=geoda.vector.bounds
+        fn_nc, rename={"test": "test1"}, fn_ts=None, bbox=geoda.vector.bounds
     ).sortby("index")
     assert np.allclose(da1, geoda) and da1.name == "test1"
     ds1 = data_catalog.get_geodataset("test", single_var_as_array=False)

@@ -1051,6 +1051,7 @@ class GeoDatasetAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
+        fn_ts=None,
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
@@ -1099,6 +1100,7 @@ class GeoDatasetAdapter(DataAdapter):
             meta=meta,
             **kwargs,
         )
+        self.fn_ts = fn_ts  # used for driver='vector'
 
     def export_data(
         self,
@@ -1206,7 +1208,9 @@ class GeoDatasetAdapter(DataAdapter):
             ds_out = xr.open_zarr(fns[0], **kwargs)
         elif self.driver == "vector":
             # read geodataset from point + time series file
-            ds_out = io.open_geodataset(fn_locs=fns[0], mask=geom, **kwargs)
+            ds_out = io.open_geodataset(
+                fn_locs=fns[0], mask=geom, fn_ts=self.fn_ts, **kwargs
+            )
             geom = None  # already clipped
         else:
             raise ValueError(f"GeoDataset: Driver {self.driver} unknown")
