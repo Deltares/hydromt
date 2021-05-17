@@ -34,9 +34,11 @@ class DataCatalog(object):
     # root URL and version with data source artifacts
     # url = f"{_url}/download/{_version}/<filename>"
     _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases"
-    _version = "v0.0.3"
+    _version = "v0.0.3"  # latest version
 
-    def __init__(self, data_libs=None, logger=logger, deltares_data=False):
+    def __init__(
+        self, data_libs=None, deltares_data=None, artifact_data=None, logger=logger
+    ):
         """Catalog of DataAdapter sources to easily read from different files
         and keep track of files which have been accessed.
 
@@ -47,15 +49,22 @@ class DataCatalog(object):
             to entries of the data catalog. By default the data catalog is initiated
             without data entries. See :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
             for accepted yml format.
-        deltares_data: bool, optional
-            If True run :py:meth:`~hydromt.data_adapter.DataCatalog.from_deltares_sources`
+        deltares_data: bool, str, optional
+            Deltares data version number, if True or version provided run :py:meth:`~hydromt.data_adapter.DataCatalog.from_deltares_sources`
+            to parse available Deltares global datasets library yml files.
+        artifact_data: bool, str, optional
+            Artifact data version number, if True provided run :py:meth:`~hydromt.data_adapter.DataCatalog.from_artifacts`
             to parse available Deltares global datasets library yml files.
         """
         self._sources = {}  # dictionary of DataAdapter
         self._used_data = []
         self.logger = logger
+        if artifact_data:
+            version = artifact_data if isinstance(artifact_data, str) else None
+            self.from_artifacts(version=version)
         if deltares_data:
-            self.from_deltares_sources()
+            version = deltares_data if isinstance(deltares_data, str) else None
+            self.from_deltares_sources(version=version)
         if data_libs is not None:
             self.from_yml(data_libs)
 

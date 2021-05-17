@@ -107,6 +107,15 @@ def test_geodataframe(geodf, tmpdir):
 def test_deltares_sources():
     data_catalog = DataCatalog(deltares_data=True)
     assert len(data_catalog._sources) > 0
+    source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
+    assert str(source0.path).startswith("p")
+
+
+def test_artifact_sources():
+    data_catalog = DataCatalog(artifact_data="v0.0.3")
+    assert len(data_catalog._sources) > 0
+    source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
+    assert ".hydromt_data" in str(source0.path)
 
 
 def test_export_global_datasets(tmpdir):
