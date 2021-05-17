@@ -11,7 +11,7 @@ dependencies:
   - click
   - black
   - bottleneck
-  - dask>=2.30
+  - dask=2021.4  # pin version because of AttributeError in 2021.5
   - entrypoints
   - gdal>=3.1
   - geopandas

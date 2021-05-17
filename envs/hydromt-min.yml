@@ -10,7 +10,7 @@ dependencies:
   - affine
   - bottleneck
   - click
-  - dask>=2.3
+  - dask=2021.4  # pin version because of AttributeError in 2021.5
   - entrypoints
   - flit>=3.2
   - gdal>=3.1
