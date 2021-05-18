@@ -12,7 +12,7 @@ dependencies = [
     "affine",
     "bottleneck",
     "click",
-    "dask>=2021.1",
+    "dask>=2021.1,<2021.5",
     "geopandas>=0.8",
     "entrypoints",
     "gdal>=3.1",
