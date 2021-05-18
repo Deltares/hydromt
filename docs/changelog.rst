@@ -7,6 +7,10 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 
 [Unreleased]
 ------------
+
+
+v0.4.1 (18 May 2021)
+--------------------
 Noticeable changes are a new CLI region option based on ``grid``.
 
 Added

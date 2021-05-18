@@ -1,10 +1,8 @@
 """HydroMT: Build and analyze models like a data-wizard!"""
 
-__version__ = "0.4.1.dev"
+__version__ = "0.4.1"
 
 import geopandas as gpd
-from os.path import join, isdir, dirname, basename, isfile, abspath
-import glob
 
 # required for accessor style documentation
 from xarray import DataArray, Dataset
