@@ -8,7 +8,7 @@ these and make nice graphics. This package aims to facilitate the processes of b
 a model input data, connecting models and analyzing model output data based on the state of the art 
 scientific python ecosystem. Using this package every modeller will become a true data wizard.
 
-HydroMT is part of the Model Builder Engine of Deltares |BlueEarth|
+HydroMT is part of the Model Builder Engine of Deltares |BlueEarth|. More info on `<https://blueearth.deltares.org/>`_
 
 
 Latest applications with HydroMT
