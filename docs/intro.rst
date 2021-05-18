@@ -18,28 +18,22 @@ model and finally use it for assessment of the impact of strategies.
 
 .. image:: img/hydromt_approach.png
 
-HydroMT and the BlueEarth Initiative
-------------------------------------
-HydroMT, with imod-python and HYDROLIB, is part of the Model Builder Engine of Deltares 
-|BlueEarth|: `<https://blueearth.deltares.org/>`_ 
-
-.. image:: img/BE_model_tools.png
 
 Scope of HydroMT
 ----------------
 HydroMT is a very flexible tool and helps the user to interact with the different components of model preparation so 
 that the modeller can prepare exactly what he needs from the data of its choice. Currently supported models are:
 
+- Delft-FIAT
 - Delwaq
 - SFINCS
-- RIBASIM
 - Wflow: sbm and sediment
 
 Support for the following models is in development:
 
 - iMOD
+- RIBASIM
 - Delft3D-FM
-- Delft-FIAT
 - Delft-FEWS
 
 .. image:: img/supported_models.png
