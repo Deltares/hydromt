@@ -3,15 +3,11 @@
 
 """hydrological methods powered by pyFlwDir"""
 
-import os
-from os.path import join, isdir, dirname, basename, isfile
 import warnings
 import logging
 import numpy as np
 import xarray as xr
-from rasterio.enums import Resampling
 import pyflwdir
-from pyflwdir import FlwdirRaster
 
 from . import gis_utils
 

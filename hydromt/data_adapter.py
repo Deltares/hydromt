@@ -3,7 +3,7 @@
 
 """General data adapters for HydroMT"""
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import os
 from os.path import join, isdir, dirname, basename, isfile, abspath
 from itertools import product
@@ -14,12 +14,9 @@ import xarray as xr
 import geopandas as gpd
 from shapely.geometry import box
 import pandas as pd
-import rasterio
-import pyproj
 import glob
 import yaml
 import pprint
-import warnings
 import logging
 import requests
 import shutil
@@ -37,9 +34,11 @@ class DataCatalog(object):
     # root URL and version with data source artifacts
     # url = f"{_url}/download/{_version}/<filename>"
     _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases"
-    _version = "v0.0.3"
+    _version = "v0.0.4"  # latest version
 
-    def __init__(self, data_libs=None, logger=logger, deltares_data=False):
+    def __init__(
+        self, data_libs=None, deltares_data=None, artifact_data=None, logger=logger
+    ):
         """Catalog of DataAdapter sources to easily read from different files
         and keep track of files which have been accessed.
 
@@ -50,15 +49,22 @@ class DataCatalog(object):
             to entries of the data catalog. By default the data catalog is initiated
             without data entries. See :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
             for accepted yml format.
-        deltares_data: bool, optional
-            If True run :py:meth:`~hydromt.data_adapter.DataCatalog.from_deltares_sources`
+        deltares_data: bool, str, optional
+            Deltares data version number, if True or version provided run :py:meth:`~hydromt.data_adapter.DataCatalog.from_deltares_sources`
+            to parse available Deltares global datasets library yml files.
+        artifact_data: bool, str, optional
+            Artifact data version number, if True provided run :py:meth:`~hydromt.data_adapter.DataCatalog.from_artifacts`
             to parse available Deltares global datasets library yml files.
         """
         self._sources = {}  # dictionary of DataAdapter
         self._used_data = []
         self.logger = logger
+        if artifact_data:
+            version = artifact_data if isinstance(artifact_data, str) else None
+            self.from_artifacts(version=version)
         if deltares_data:
-            self.from_deltares_sources()
+            version = deltares_data if isinstance(deltares_data, str) else None
+            self.from_deltares_sources(version=version)
         if data_libs is not None:
             self.from_yml(data_libs)
 
@@ -143,7 +149,7 @@ class DataCatalog(object):
             # set paths relative to yml file
             root = os.path.dirname(path)
             d = self.to_dict(root=root)
-            d.pop("root", None)  # remoev absolute root path
+            d.pop("root", None)  # remove absolute root path
         else:
             d = self.to_dict(root=root)
         with open(path, "w") as f:
@@ -260,7 +266,9 @@ class DataCatalog(object):
                     root_drive == source_drive
                     and os.path.commonpath([path, root]) == root
                 ):
-                    source_dict["path"] = os.path.relpath(source_dict["path"], root)
+                    source_dict["path"] = os.path.relpath(
+                        source_dict["path"], root
+                    ).replace("\\", "/")
             sources_out.update({name: source_dict})
         return sources_out
 
@@ -1044,8 +1052,8 @@ class GeoDatasetAdapter(DataAdapter):
         rename={},
         unit_mult={},
         unit_add={},
-        units={},
         meta={},
+        fn_ts=None,
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
@@ -1094,6 +1102,7 @@ class GeoDatasetAdapter(DataAdapter):
             meta=meta,
             **kwargs,
         )
+        self.fn_ts = fn_ts  # used for driver='vector'
 
     def export_data(
         self,
@@ -1177,10 +1186,10 @@ class GeoDatasetAdapter(DataAdapter):
             # convert bbox to geom with crs EPGS:4326 to apply buffer later
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
             bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-            clip_str = f"and clip to bbox - [{bbox_str}]"
+            clip_str = f" and clip to bbox - [{bbox_str}]"
         elif geom is not None:
             bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            clip_str = f"and clip to geom - [{bbox_str}]"
+            clip_str = f" and clip to geom - [{bbox_str}]"
         if geom is not None:
             # make sure geom is projected > buffer in meters!
             if buffer > 0 and geom.crs.is_geographic:
@@ -1190,8 +1199,7 @@ class GeoDatasetAdapter(DataAdapter):
             kwargs.update(predicate="contains")
 
         # read and clip
-        ext = str(fns[0]).split(".")[-1].lower()
-        logger.info(f"GeoDataset: Read {ext} data {clip_str}")
+        logger.info(f"GeoDataset: Read {self.driver} data{clip_str}.")
         if self.driver in ["netcdf"]:
             ds_out = xr.open_mfdataset(fns, **kwargs)
         elif self.driver == "zarr":
@@ -1202,7 +1210,9 @@ class GeoDatasetAdapter(DataAdapter):
             ds_out = xr.open_zarr(fns[0], **kwargs)
         elif self.driver == "vector":
             # read geodataset from point + time series file
-            ds_out = io.open_geodataset(fn_locs=fns[0], mask=geom, **kwargs)
+            ds_out = io.open_geodataset(
+                fn_locs=fns[0], mask=geom, fn_ts=self.fn_ts, **kwargs
+            )
             geom = None  # already clipped
         else:
             raise ValueError(f"GeoDataset: Driver {self.driver} unknown")

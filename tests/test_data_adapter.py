@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
-import pdb
+import os
 import hydromt
 from hydromt.data_adapter import DataAdapter, parse_data_sources, DataCatalog
 
@@ -77,8 +77,9 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     geodf.to_file(fn_gdf, driver="GeoJSON")
     ts.to_csv(fn_csv)
     data_catalog = DataCatalog()
+    # added fn_ts to test if it does not go into xr.open_dataset
     da1 = data_catalog.get_geodataset(
-        fn_nc, rename={"test": "test1"}, bbox=geoda.vector.bounds
+        fn_nc, rename={"test": "test1"}, fn_ts=None, bbox=geoda.vector.bounds
     ).sortby("index")
     assert np.allclose(da1, geoda) and da1.name == "test1"
     ds1 = data_catalog.get_geodataset("test", single_var_as_array=False)
@@ -107,6 +108,15 @@ def test_geodataframe(geodf, tmpdir):
 def test_deltares_sources():
     data_catalog = DataCatalog(deltares_data=True)
     assert len(data_catalog._sources) > 0
+    source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
+    assert "wflow_global" in str(source0.path)
+
+
+def test_artifact_sources():
+    data_catalog = DataCatalog(artifact_data="v0.0.3")
+    assert len(data_catalog._sources) > 0
+    source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
+    assert ".hydromt_data" in str(source0.path)
 
 
 def test_export_global_datasets(tmpdir):

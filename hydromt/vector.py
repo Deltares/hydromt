@@ -3,7 +3,6 @@
 """Convenience methods for reading and writing point  objects.
 """
 
-import pandas as pd
 import numpy as np
 import geopandas as gpd
 import xarray as xr

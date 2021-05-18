@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT"""
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import os
-from os.path import join, isdir, dirname, basename, isfile, abspath, exists
+from os.path import join, isdir, isfile, abspath
 import xarray as xr
 import numpy as np
 import geopandas as gpd
-import pandas as pd
 from shapely.geometry import box
 import logging
 from pathlib import Path
-from functools import wraps
 import inspect
 
 from ..data_adapter import DataCatalog
@@ -40,7 +38,8 @@ class Model(object, metaclass=ABCMeta):
         mode="w",
         config_fn=None,
         data_libs=None,
-        deltares_data=False,
+        deltares_data=None,
+        artifact_data=None,
         logger=logger,
     ):
         from . import ENTRYPOINTS  # load within method to avoid circular imports
@@ -53,7 +52,10 @@ class Model(object, metaclass=ABCMeta):
 
         # link to data
         self.data_catalog = DataCatalog(
-            data_libs=data_libs, deltares_data=deltares_data, logger=self.logger
+            data_libs=data_libs,
+            deltares_data=deltares_data,
+            artifact_data=artifact_data,
+            logger=self.logger,
         )
 
         # placeholders

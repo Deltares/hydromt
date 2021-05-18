@@ -12,7 +12,7 @@ dependencies = [
     "affine",
     "bottleneck",
     "click",
-    "dask>=2.3",
+    "dask>=2021.1,<2021.5",
     "geopandas>=0.8",
     "entrypoints",
     "gdal>=3.1",
@@ -66,3 +66,7 @@ hydromt = "hydromt.cli.main:main"
 [tool.black]
 line-length = 88
 target-version = ['py37']
+
+[tool.flit.sdist]
+include = ["hydromt"]
+exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]

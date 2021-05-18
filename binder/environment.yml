@@ -9,7 +9,7 @@ dependencies:
   - black
   - bottleneck
   - cartopy # to run examples
-  - dask>=2.30
+  - dask=2021.4  # pin version because of AttributeError in 2021.5
   - descartes # to run examples
   - entrypoints
   - flit>=3.2
@@ -31,5 +31,3 @@ dependencies:
   - scipy
   - xarray
   - zarr
-  - pip:
-    - git+https://github.com/Deltares/hydromt.git

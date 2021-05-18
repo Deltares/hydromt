@@ -14,18 +14,23 @@ Added
 
 - New REGION option of the **build** CLI methods for model region based on a ``grid``.
 - Keep track of the hydroMT plugin versions in the logging and ``--models`` CLI flag.
+- deltares_data and artifact_data options in DataCatalog class and Model API
 
 Changed
 ^^^^^^^
 
-- Changed the **data-artifacts** version to **v0.0.3**. This includes renaming from hydrom_merit to merit_hydro.
+- Changed the **data-artifacts** version to **v0.0.4**. This includes renaming from hydrom_merit to merit_hydro.
+- moved binder to seperate folder with postBuild script
+- Bump Black version (formatting).
 
 Fixed
 ^^^^^
 
-- Bump Black version (formatting).
-- Several``--opt`` arguments added in the CLI are now taken into account.
+- Multiple ``--opt`` arguments from CLI are now taken into account (instead of only the first).
 - Bugfix for crs without an EPSG code.
+- Bugfix for Path type path in DataCatalog
+- Bugfix missing rasterio in gis_utils.write_map() method
+- Bugfix handling of fn_ts in DataCatalog.get_geodataset() method
 
 Documentation
 ^^^^^^^^^^^^^
