@@ -17,8 +17,6 @@ def discover(path=None, logger=logger):
 
     Returns
     -------
-    drivers : dict
-        Name mapped to model class.
     eps : dict
         Entrypoints dict
     """
@@ -36,20 +34,36 @@ def discover(path=None, logger=logger):
                     f"The match {winner} is selected."
                 )
 
-    plugins = {}
     eps = {}
     for name, ep in group.items():
         logger.debug(
             f"Discovered model plugin '{name} = {ep.module_name}.{ep.object_name}' ({ep.distro.version})"
         )
+        eps[ep.name] = ep
+    return eps
 
-        try:
-            plugins[ep.name] = ep.load()
-            eps[ep.name] = ep
-        except (ModuleNotFoundError, AttributeError) as err:
-            logger.exception(f"Error while loading entrypoint {name}: {str(err)}")
-            continue
+
+def load(ep, module=None, logger=logger):
+    """Load entrypoint and return plugin model class
+
+    Parameters
+    ----------
+    ep : entrypoint
+        discovered entrypoint
+
+    Returns
+    -------
+    model_class : Model
+        plugin model class
+    """
+    try:
+        # plugins[ep.name] = ep.load()
+        model_class = ep.load()
+        if module is not None:
+            setattr(module, model_class.__name__, model_class)
         logger.debug(
-            f"Loaded model plugin '{name} = {ep.module_name}.{ep.object_name}' ({ep.distro.version})"
+            f"Loaded model plugin '{ep.name} = {ep.module_name}.{ep.object_name}' ({ep.distro.version})"
         )
-    return plugins, eps
+    except (ModuleNotFoundError, AttributeError) as err:
+        logger.exception(f"Error while loading entrypoint {ep.name}: {str(err)}")
+    return model_class
