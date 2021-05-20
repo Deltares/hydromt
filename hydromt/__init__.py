@@ -1,6 +1,6 @@
 """HydroMT: Build and analyze models like a data-wizard!"""
 
-__version__ = "0.4.1"
+__version__ = "v0.4.2.dev"
 
 import geopandas as gpd
 import warnings
