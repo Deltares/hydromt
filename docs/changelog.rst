@@ -8,6 +8,16 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 [Unreleased]
 ------------
 
+Changed
+^^^^^^^
+
+- New import of model plugins. Before plugins were only loaded when import MODELS or xxxModel from hydromt.models and not when importing hydromt as before.
+
+Deprecated
+^^^^^^^^^^
+
+- Importing model plugins via "hydromt import xxxModel" or "import hydromt.xxxModel" will be deprecated. Instead use "from hydromt.models import xxxModel" 
+  or "from hydromt_xxx import xxxModel"
 
 v0.4.1 (18 May 2021)
 --------------------
