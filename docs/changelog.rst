@@ -8,6 +8,11 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 [Unreleased]
 ------------
 
+Added
+^^^^^
+
+- Small patch for geoms/bbox regions when upscaling flow dir.
+
 Changed
 ^^^^^^^
 
@@ -17,7 +22,12 @@ Deprecated
 ^^^^^^^^^^
 
 - Importing model plugins via "hydromt import xxxModel" or "import hydromt.xxxModel" will be deprecated. Instead use "from hydromt.models import xxxModel" 
-  or "from hydromt_xxx import xxxModel"
+  or "from hydromt_xxx import xxxModel".
+
+Fixed
+^^^^^
+
+- Fix error when deriving basin mask for subbasin with multiple xy.
 
 v0.4.1 (18 May 2021)
 --------------------
