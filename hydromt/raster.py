@@ -9,15 +9,9 @@ This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets/dataarrays.
 """
 
-import copy
 import os
-import glob
 from os.path import join, basename, dirname, isdir
-from pathlib import Path
-from datetime import datetime
-import warnings
 import numpy as np
-import pandas as pd
 from shapely.geometry import box
 import geopandas as gpd
 import xarray as xr
@@ -27,7 +21,6 @@ from rasterio.crs import CRS
 import rasterio.warp
 from rasterio import features
 from rasterio.enums import Resampling
-from rasterio.features import geometry_mask
 from scipy.spatial import cKDTree
 from scipy.interpolate import griddata
 from scipy import ndimage
@@ -392,7 +385,9 @@ class XRasterBase(XGeoBase):
     @property
     def box(self):
         """Return :py:meth:`~geopandas.GeoDataFrame` of bounding box"""
-        crs = None if self.crs is None else self.crs.to_epsg()
+        crs = self.crs
+        if crs is None and crs.to_epsg() is not None:
+            crs = crs.to_epsg()  # not all CRS have an EPSG code
         return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
 
     @property
@@ -1661,7 +1656,9 @@ class RasterDataArray(XRasterBase):
             {"geometry": geom, "properties": {"value": idx}}
             for geom, idx in list(feats_gen)
         ]
-        crs = None if self.crs is None else self.crs.to_epsg()
+        crs = self.crs
+        if crs is None and crs.to_epsg() is not None:
+            crs = crs.to_epsg()  # not all CRS have an EPSG code
         gdf = gpd.GeoDataFrame.from_features(feats, crs=crs)
         gdf.index = gdf.index.astype(self._obj.dtype)
         return gdf
@@ -1730,11 +1727,8 @@ class RasterDataset(XRasterBase):
                 data, args = data[0], data[1:]
             da = RasterDataArray.from_numpy(data, transform, *args)
             da.name = name
-            if i > 0:
-                if da.shape[-2:] != _shape:
-                    raise xr.MergeError(f"Data shapes do not match.")
-            else:
-                _shape = da.shape[-2:]
+            if i > 0 and da.shape[-2:] != da_lst[0].shape[-2:]:
+                raise xr.MergeError(f"Data shapes do not match.")
             da_lst.append(da)
         ds = xr.merge(da_lst)
         if attrs is not None:

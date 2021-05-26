@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT"""
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import os
-from os.path import join, isdir, dirname, basename, isfile, abspath, exists
+from os.path import join, isdir, isfile, abspath
 import xarray as xr
 import numpy as np
 import geopandas as gpd
-import pandas as pd
 from shapely.geometry import box
 import logging
 from pathlib import Path
-from functools import wraps
 import inspect
 
 from ..data_adapter import DataCatalog
@@ -40,7 +38,8 @@ class Model(object, metaclass=ABCMeta):
         mode="w",
         config_fn=None,
         data_libs=None,
-        deltares_data=False,
+        deltares_data=None,
+        artifact_data=None,
         logger=logger,
     ):
         from . import ENTRYPOINTS  # load within method to avoid circular imports
@@ -53,12 +52,11 @@ class Model(object, metaclass=ABCMeta):
 
         # link to data
         self.data_catalog = DataCatalog(
-            data_libs=data_libs, deltares_data=deltares_data, logger=self.logger
+            data_libs=data_libs,
+            deltares_data=deltares_data,
+            artifact_data=artifact_data,
+            logger=self.logger,
         )
-
-        # model paths
-        self._config_fn = self._CONF if config_fn is None else config_fn
-        self.set_root(root, mode)
 
         # placeholders
         self._staticmaps = xr.Dataset()
@@ -67,6 +65,10 @@ class Model(object, metaclass=ABCMeta):
         self._config = dict()  # nested dictionary
         self._states = dict()  # dictionnary of xr.DataArray
         self._results = dict()  # dictionnary of xr.DataArray
+
+        # model paths
+        self._config_fn = self._CONF if config_fn is None else config_fn
+        self.set_root(root, mode)
 
     def _check_get_opt(self, opt):
         """Check all opt keys and raise sensible error messages if unknonwn."""
@@ -93,19 +95,48 @@ class Model(object, metaclass=ABCMeta):
                     v = args[i]
                 else:
                     continue
-            self.logger.debug(f"{method}.{k}: {v}")
+            self.logger.info(f"{method}.{k}: {v}")
         return func(*args, **kwargs)
 
-    def build(self, region, res=None, write=True, opt=None):
+    def build(
+        self, region: dict, res: float = None, write: bool = True, opt: dict = None
+    ):
         """Single method to setup and write a full model schematization and
-        configuration from scratch"""
+        configuration from scratch
+
+        Parameters
+        ----------
+        region: dict
+            Description of model region. See :py:meth:`~hydromt.workflows.parse_region`
+            for all options.
+        res: float, optional
+            Model restolution. Use only if applicable to your model. By default None.
+        write: bool, optional
+            Write the complete model schematization after setting up all model components.
+            By default True.
+        opt: dict, optional
+            Model setup configuration. This is a nested dictionary where the first-level
+            keys are the names of model spedific setup methods and the second-level
+            keys the arguments of the method:
+
+            ```{
+                <name of method1>: {
+                    <argument1>: <value1>, <argument2>: <value2>
+                    }
+                <name of method2>: {
+                    ...
+                    }
+                }
+            }```
+        """
         opt = self._check_get_opt(opt)
 
         # run setup_config and setup_basemaps first!
         self._run_log_method("setup_config", **opt.pop("setup_config", {}))
         kwargs = opt.pop("setup_basemaps", {})
         kwargs.update(region=region)
-        if res is not None:
+
+        if res is not None:  # res is optional
             kwargs.update(res=res)
         self._run_log_method("setup_basemaps", **kwargs)
 
@@ -119,7 +150,31 @@ class Model(object, metaclass=ABCMeta):
 
     def update(self, model_out=None, write=True, opt=None):
         """Single method to setup and write a full model schematization and
-        configuration from scratch"""
+        configuration from scratch
+
+
+        Parameters
+        ----------
+        model_out: str, path, optional
+            Desitation folder to write the model schematization after updating
+            the model. If None the updated model components are overwritten in the
+            current model schematization if these exist. By defualt None.
+        write: bool, optional
+            Write the updated model schematization to disk. By default True.
+        opt: dict, optional
+            Model update configuration. This is a nested dictionary where the first-level
+            keys are the names of model spedific setup methods and the second-level
+            keys the arguments of the method:
+
+            ```{
+                <name of method1>: {
+                    <argument1>: <value1>, <argument2>: <value2>
+                    }
+                <name of method2>: {
+                    ...
+                    }
+            }```
+        """
         opt = self._check_get_opt(opt)
 
         # read current model
@@ -216,20 +271,23 @@ class Model(object, metaclass=ABCMeta):
         return config.configwrite(fn, self.config)
 
     def read_config(self, config_fn=None):
-        """Initialize default config and fill with config at <config_fn>"""
-        if config_fn is not None:
-            self._config_fn = config_fn
+        """Parse config from file. If no config file found a default config file is
+        read in writing mode."""
+        prefix = "User defined"
+        if config_fn is None:  # prioritize user defined config path (new v0.4.1)
+            if not self._read:  # write-only mode > read default config
+                config_fn = join(self._DATADIR, self._NAME, self._CONF)
+                prefix = "Default"
+            elif self.root is not None:  # append or write mode > read model config
+                config_fn = join(self.root, self._config_fn)
+                prefix = "Model"
         cfdict = dict()
-        if not self._read:
-            fn_def = join(self._DATADIR, self._NAME, self._CONF)
-            if isfile(fn_def):
-                cfdict = self._configread(fn_def)
-                self.logger.debug(f"Default config read from {fn_def}")
-        elif self.root is not None and self._config_fn is not None:
-            fn = join(self.root, self._config_fn)
-            if isfile(fn):
-                cfdict = self._configread(fn)
-                self.logger.debug(f"Model config read from {fn}")
+        if config_fn is not None:
+            if isfile(config_fn):
+                cfdict = self._configread(config_fn)
+                self.logger.debug(f"{prefix} config read from {config_fn}")
+            else:
+                self.logger.error(f"{prefix} config file not found at {config_fn}")
         self._config = cfdict
 
     def write_config(self, config_name=None, config_root=None):
@@ -426,16 +484,25 @@ class Model(object, metaclass=ABCMeta):
 
     @property
     def staticmaps(self):
-        """xarray.dataset representation of all parameter maps"""
+        """xarray.Dataset representation of all static parameter maps"""
         if len(self._staticmaps) == 0:
             if self._read:
                 self.read_staticmaps()
-            else:
-                self.logger.warning("No staticmaps defined")
         return self._staticmaps
 
     def set_staticmaps(self, data, name=None):
-        """Add data to staticmaps"""
+        """Add data to staticmaps.
+
+        All layers of staticmaps must have identical spatial coordinates.
+
+        Parameters
+        ----------
+        data: xarray.DataArray or xarray.Dataset
+            new map layer to add to staticmaps
+        name: str, optional
+            Name of new map layer, this is used to overwrite the name of a DataArray
+            or to select a variable from a Dataset.
+        """
         if name is None:
             if isinstance(data, xr.DataArray) and data.name is not None:
                 name = data.name
@@ -453,8 +520,6 @@ class Model(object, metaclass=ABCMeta):
             data.name = name
             data = data.to_dataset()
         if len(self._staticmaps) == 0:  # new data
-            if not isinstance(data, xr.Dataset):
-                raise ValueError("First parameter map(s) should xarray.Dataset")
             self._staticmaps = data
         else:
             if isinstance(data, np.ndarray):
@@ -671,7 +736,9 @@ class Model(object, metaclass=ABCMeta):
         if "region" in self.staticgeoms:
             region = self.staticgeoms["region"]
         elif len(self.staticmaps) > 0:
-            crs = None if self.crs is None else self.crs.to_epsg()
+            crs = self.crs
+            if crs is None and crs.to_epsg() is not None:
+                crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region
 

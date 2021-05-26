@@ -7,7 +7,6 @@ import logging.handlers
 import sys
 import os
 import logging
-import pkg_resources
 
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 from . import __version__

@@ -1,5 +1,4 @@
 import numpy as np
-import xarray as xr
 import geopandas as gpd
 import rasterio
 from rasterio.crs import CRS

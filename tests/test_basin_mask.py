@@ -2,8 +2,8 @@
 """Tests for the hydromt.workflows.basin_mask"""
 
 import pytest
+import os
 import numpy as np
-import pandas as pd
 import geopandas as gpd
 import xarray as xr
 import hydromt
@@ -14,7 +14,7 @@ from hydromt.workflows.basin_mask import get_basin_geometry, parse_region
 logger = logging.getLogger("tets_basin")
 
 
-def test_region(tmpdir, geodf):
+def test_region(tmpdir, world, geodf, rioda):
     # model
     region = {"region": [0.0, -1.0]}
     with pytest.raises(ValueError, match=r"Region key .* not understood.*"):
@@ -24,21 +24,38 @@ def test_region(tmpdir, geodf):
     if len(MODELS) > 0:
         model = [x for x in MODELS][0]
         root = str(tmpdir.join(model)) + "_test_region"
-        if not isdir(root):
+        if not os.path.isdir(root):
             os.mkdir(root)
         region = {model: root}
         kind, region = parse_region(region)
         assert kind == "model"
 
     # geom
+    region = {"geom": world}
+    kind, region = parse_region(region)
+    assert kind == "geom"
+    assert isinstance(region["geom"], gpd.GeoDataFrame)
+    fn_gdf = str(tmpdir.join("world.geojson"))
+    world.to_file(fn_gdf, driver="GeoJSON")
+    region = {"geom": fn_gdf}
+    kind, region = parse_region(region)
+    assert kind == "geom"
+    assert isinstance(region["geom"], gpd.GeoDataFrame)
+    # geom:  points should fail
     region = {"geom": geodf}
     with pytest.raises(ValueError, match=r"Region value.*"):
         kind, region = parse_region(region)
-    fn_gdf = str(tmpdir.join("test.geojson"))
-    geodf.to_file(fn_gdf, driver="GeoJSON")
-    region = {"geom": fn_gdf}
-    with pytest.raises(ValueError, match=r"Region value.*"):
-        kind, region = parse_region(region)
+
+    # grid
+    region = {"grid": rioda}
+    kind, region = parse_region(region)
+    assert kind == "grid"
+    assert isinstance(region["grid"], xr.DataArray)
+    fn_grid = str(tmpdir.join("grid.tif"))
+    rioda.raster.to_raster(fn_grid)
+    region = {"grid": fn_grid}
+    kind, region = parse_region(region)
+    assert isinstance(region["grid"], xr.DataArray)
 
     # basid
     region = {"basin": [1001, 1002, 1003, 1004, 1005]}

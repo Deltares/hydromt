@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
-from os.path import join, isdir, dirname, basename, isfile, abspath
-import glob
 import numpy as np
-import pandas as pd
 import xarray as xr
-import warnings
 import logging
 import geopandas as gpd
 from pyflwdir import dem
@@ -26,7 +21,6 @@ def hydrography(
     uparea_name="uparea",
     basins_name="basins",
     strord_name="strord",
-    channel_dir="up",
     ftype="infer",
     logger=logger,
     **kwargs,
@@ -60,8 +54,6 @@ def hydrography(
         Upscaling method for flow direction data, by default 'com2'.
     flwdir_name, elevtn_name, uparea_name : str, optional
         Name of flow direction, elevation and upstream area variables in ds
-    channel_dir : {'up', 'down'}
-        Define channel up or downstream from outlet, be default upstream
 
     Returns
     -------

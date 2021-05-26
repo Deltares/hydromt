@@ -2,12 +2,8 @@
 """command line interface for hydromt models"""
 
 import click
-import os
 from os.path import join
-import glob
 import logging
-import sys
-import inspect
 import warnings
 
 ### Uncomment the following lines for building exe
@@ -19,11 +15,13 @@ import warnings
 ###
 
 from . import cli_utils
-from .. import config, log, data_adapter
-from ..models import MODELS, ENTRYPOINTS  # global var
+from .. import log, data_adapter
+from ..models import ENTRYPOINTS, model_plugins
 from .. import __version__
 
 logger = logging.getLogger(__name__)
+
+_models = list(ENTRYPOINTS.keys())
 
 
 def print_models(ctx, param, value):
@@ -179,17 +177,15 @@ def build(
     if len(data) > 0:
         logger.info(f"Additional data sources: {data}")
     logger.info(f"User settings:")
-    opt = cli_utils.parse_config(config, opt_cli=opt, logger=logger)
+    opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     kwargs.update(deltares_data=dd)
     data_libs = data + tuple(kwargs.pop("data_libs", []))
     try:
-        if model not in MODELS:
-            raise ValueError(
-                f"Model unknown : {model}, select from {list(MODELS.keys())}"
-            )
+        if model not in _models:
+            raise ValueError(f"Model unknown : {model}, select from {_models}")
         # initialize model and create folder structure
-        mod = MODELS.get(model)(
+        mod = model_plugins.load(ENTRYPOINTS[model], logger=logger)(
             root=model_root,
             data_libs=data_libs,
             mode="w",
@@ -268,17 +264,15 @@ def update(
     if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
         opt = {components[0]: opt}
     logger.info(f"User settings:")
-    opt = cli_utils.parse_config(config, opt_cli=opt, logger=logger)
+    opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     kwargs.update(deltares_data=dd)
     data_libs = data + tuple(kwargs.pop("data_libs", []))
     try:
-        if model not in MODELS:
-            raise ValueError(
-                f"Model unknown : {model}, select from {list(MODELS.keys())}"
-            )
+        if model not in _models:
+            raise ValueError(f"Model unknown : {model}, select from {_models}")
         # initialize model and create folder structure
-        mod = MODELS.get(model)(
+        mod = model_plugins.load(ENTRYPOINTS[model], logger=logger)(
             root=model_root,
             data_libs=data_libs,  #  from data/data_sources.yml
             mode=mode,
@@ -353,11 +347,11 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     if model != "wflow":
         raise NotImplementedError("Clip function only implemented for wflow model.")
     try:
-        if model not in MODELS:
-            raise ValueError(
-                f"Model unknown : {model}, select from {list(MODELS.keys())}"
-            )
-        mod = MODELS.get(model)(root=model_root, mode="r", logger=logger)
+        if model not in _models:
+            raise ValueError(f"Model unknown : {model}, select from {_models}")
+        mod = model_plugins.load(ENTRYPOINTS[model], logger=logger)(
+            root=model_root, mode="r", logger=logger
+        )
         logger.info("Reading model to clip")
         mod.read()
         mod.set_root(model_destination, mode="w")

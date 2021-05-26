@@ -2,10 +2,8 @@
 """Utils for parsing cli options and arguments 
 """
 
-from os.path import join, isfile, isdir
-import numpy as np
+from os.path import isfile
 import json
-import geopandas as gpd
 import logging
 import click
 from ast import literal_eval
@@ -74,7 +72,7 @@ def parse_json(ctx, param, value):
 ### general parsin methods ##
 
 
-def parse_config(path=None, opt_cli=None, components=None, logger=logger):
+def parse_config(path=None, opt_cli=None):
     opt = {}
     if path is not None and isfile(path):
         opt = config.configread(path, abs_path=True)
@@ -95,9 +93,4 @@ def parse_config(path=None, opt_cli=None, components=None, logger=logger):
                 continue
             for option, value in opt_cli[section].items():
                 opt[section].update({option: value})
-    for section in opt:
-        for option in opt[section]:
-            value = opt[section][option]
-            if logger is not None and (components is None or section in components):
-                logger.info(f"{section}.{option}: {value}")
     return opt
