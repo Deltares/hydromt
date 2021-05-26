@@ -119,6 +119,18 @@ def test_basin():
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="subbasin",
+        basin_index=bas_index,
+        xy=[[12.2051, 12.9788], [45.8331, 45.6973]],
+        strord=5,
+    )
+    assert gdf_bas.index.size == 2
+    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 8.446160e09)
+    assert np.isclose(gdf_out.geometry.x[1], 12.97292)
+    assert np.isclose(gdf_out.geometry.y[1], 45.69958)
+
+    gdf_bas, gdf_out = get_basin_geometry(
+        ds,
+        kind="subbasin",
         xy=[12.2051, 45.8331],
         strord=4,
         bounds=gdf_bas.total_bounds,
