@@ -268,7 +268,16 @@ def get_basin_geometry(
             if geom is not None:
                 kwargs.update(geom=geom)
             elif xy is not None:
-                kwargs.update(bbox=[xy[0] - 0.1, xy[1] - 0.1, xy[0] + 0.1, xy[1] + 0.1])
+                xy0 = np.atleast_1d(xy[0])
+                xy1 = np.atleast_1d(xy[1])
+                kwargs.update(
+                    bbox=[
+                        min(xy0) - 0.1,
+                        min(xy1) - 0.1,
+                        max(xy0) + 0.1,
+                        max(xy1) + 0.1,
+                    ]
+                )
             gdf_bas = basin_index.get_data(**kwargs)
         elif isinstance(basin_index, gpd.GeoDataFrame):
             gdf_bas = basin_index
