@@ -1468,7 +1468,7 @@ class GeoDataFrameAdapter(DataAdapter):
         kwargs = self.kwargs.copy()
         _ = self.resolve_paths()  # throw nice error if data not found
 
-        #TODO: Ask Helene: could the order of functions be:
+        # TODO: Ask Helene: could the order of functions be:
         # io.open_vector (read and filter based on geom),
         # slice_gpd (slice based on query rows and columns, i.e. variables),
         # nodata,
@@ -1476,7 +1476,7 @@ class GeoDataFrameAdapter(DataAdapter):
         # unit conversion,
         # rename,
         # (or everything after rename)?
-        #TODO: Ask Helene: what about append nre data column or replace or fill-in na?
+        # TODO: Ask Helene: what about append nre data column or replace or fill-in na?
 
         # parse geom, bbox and buffer arguments
         clip_str = ""
@@ -1518,9 +1518,7 @@ class GeoDataFrameAdapter(DataAdapter):
                     nodata = {c: self.nodata for c in cols}
                 else:
                     nodata = self.nodata
-                logger.debug(
-                    f"GeoDataFrame: Parse nodata for {len(nodata)} columns."
-                )
+                logger.debug(f"GeoDataFrame: Parse nodata for {len(nodata)} columns.")
                 for c in cols:
                     mv = nodata.get(c, None)
                     if mv is not None:
@@ -1528,35 +1526,45 @@ class GeoDataFrameAdapter(DataAdapter):
                         gdf[c] = np.where(is_nodata, np.nan, gdf[c])
 
         # astype to force dtypes per column
-        #TODO: Ask Helene: data_type is used for describing the type of the dataset, so I used astype. What do you think?
-        #TODO: Ask Helene: I have added astype in DataAdaptor API? but I doubt whether it is correct because maybe it is only used for GeoDataFrame. What do you think?
-        #TODO: Ask Helene: for consistency, the astype dict is put before rename, because the key of the dict is original data column. What do you think?
+        # TODO: Ask Helene: data_type is used for describing the type of the dataset, so I used astype. What do you think?
+        # TODO: Ask Helene: I have added astype in DataAdaptor API? but I doubt whether it is correct because maybe it is only used for GeoDataFrame. What do you think?
+        # TODO: Ask Helene: for consistency, the astype dict is put before rename, because the key of the dict is original data column. What do you think?
         if self.astype is not None and len(self.astype) > 0:
             cols = gdf.columns
             if not isinstance(self.astype, dict):
                 astype = {c: self.astype for c in cols}
             else:
                 astype = {k: v for k, v in self.astype.items() if k in cols}
-            logger.debug(
-                f"GeoDataFrame: Perform astype for {len(astype)} columns."
-            )
+            logger.debug(f"GeoDataFrame: Perform astype for {len(astype)} columns.")
             for c in cols:
                 mv = astype.get(c, None)
                 if mv is not None:
-                    if mv == 'bool': #TODO: Ask Helene: astype does not work well for bool, both bool('TRUE') and bool('False') will be True. Could we add this?
-                        gdf[c] = gdf[c].replace({'True': True, 'True': True, 'true': True, '1':True,
-                                                 'FALSE': False, 'False': False, 'false': False, '0':False})
+                    if (
+                        mv == "bool"
+                    ):  # TODO: Ask Helene: astype does not work well for bool, both bool('TRUE') and bool('False') will be True. Could we add this?
+                        gdf[c] = gdf[c].replace(
+                            {
+                                "True": True,
+                                "True": True,
+                                "true": True,
+                                "1": True,
+                                "FALSE": False,
+                                "False": False,
+                                "false": False,
+                                "0": False,
+                            }
+                        )
                         try:
                             gdf[c] = gdf[c].astype(mv)
                         except ValueError:
-                            raise ValueError(f"GeoDataFrame: astype({mv}) could not be performed on column{c}")
+                            raise ValueError(
+                                f"GeoDataFrame: astype({mv}) could not be performed on column{c}"
+                            )
 
         # rename
         if self.rename:
             rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
-            logger.debug(
-                f"GeoDataFrame: Perform rename for {len(rename)} columns."
-            )
+            logger.debug(f"GeoDataFrame: Perform rename for {len(rename)} columns.")
             gdf = gdf.rename(columns=rename)
 
         # select columns
