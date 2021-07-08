@@ -664,6 +664,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         driver,
         crs=None,
         nodata=None,
+        astype={},
         rename={},
         unit_mult={},
         unit_add={},
@@ -683,6 +684,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         # data adapter arguments
         self.crs = crs
         self.nodata = nodata
+        self.astype = astype
         self.rename = rename
         self.unit_mult = unit_mult
         self.unit_add = unit_add
@@ -1331,6 +1333,7 @@ class GeoDataFrameAdapter(DataAdapter):
         driver=None,
         crs=None,
         nodata=None,
+        astype={},
         rename={},
         unit_mult={},
         unit_add={},
@@ -1378,6 +1381,7 @@ class GeoDataFrameAdapter(DataAdapter):
             driver=driver,
             crs=crs,
             nodata=nodata,
+            astype=astype,
             rename=rename,
             unit_mult=unit_mult,
             unit_add=unit_add,
@@ -1464,6 +1468,16 @@ class GeoDataFrameAdapter(DataAdapter):
         kwargs = self.kwargs.copy()
         _ = self.resolve_paths()  # throw nice error if data not found
 
+        #TODO: Ask Helene: could the order of functions be:
+        # io.open_vector (read and filter based on geom),
+        # slice_gpd (slice based on query rows and columns, i.e. variables),
+        # nodata,
+        # astype (assert dtypes),
+        # unit conversion,
+        # rename,
+        # (or everything after rename)?
+        #TODO: Ask Helene: what about append nre data column or replace or fill-in na?
+
         # parse geom, bbox and buffer arguments
         clip_str = ""
         if geom is None and bbox is not None:
@@ -1490,35 +1504,79 @@ class GeoDataFrameAdapter(DataAdapter):
         else:
             raise ValueError(f"GeoDataFrame: driver {self.driver} unknown.")
 
-        # rename and select columns
-        if self.rename:
-            rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
-            gdf = gdf.rename(columns=rename)
-        if variables is not None:
-            if np.any([var not in gdf.columns for var in variables]):
-                raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")
-            if "geometry" not in variables:  # always keep geometry column
-                variables = variables + ["geometry"]
-            gdf = gdf.loc[:, variables]
+        # TODO: Ask Helene: is it possible to add a seperate function slice_gpd in gis_utils (query rows + select columns)
 
-        # nodata and unit conversion for numeric data
+        # nodata data
+        # TODO: Ask Helen: I modified the nodata to also include str type. What do you think? although str like 'NULL' 'None' has to have '' to indicate it is string
         if gdf.index.size == 0:
             logger.warning(f"GeoDataFrame: No data within spatial domain {self.path}.")
         else:
             # parse nodata values
-            cols = gdf.select_dtypes([np.number]).columns
+            cols = gdf.columns
             if self.nodata is not None and len(cols) > 0:
                 if not isinstance(self.nodata, dict):
                     nodata = {c: self.nodata for c in cols}
                 else:
                     nodata = self.nodata
+                logger.debug(
+                    f"GeoDataFrame: Parse nodata for {len(nodata)} columns."
+                )
                 for c in cols:
                     mv = nodata.get(c, None)
                     if mv is not None:
                         is_nodata = np.isin(gdf[c], np.atleast_1d(mv))
                         gdf[c] = np.where(is_nodata, np.nan, gdf[c])
 
-            # unit conversion
+        # astype to force dtypes per column
+        #TODO: Ask Helene: data_type is used for describing the type of the dataset, so I used astype. What do you think?
+        #TODO: Ask Helene: I have added astype in DataAdaptor API? but I doubt whether it is correct because maybe it is only used for GeoDataFrame. What do you think?
+        #TODO: Ask Helene: for consistency, the astype dict is put before rename, because the key of the dict is original data column. What do you think?
+        if self.astype is not None and len(self.astype) > 0:
+            cols = gdf.columns
+            if not isinstance(self.astype, dict):
+                astype = {c: self.astype for c in cols}
+            else:
+                astype = {k: v for k, v in self.astype.items() if k in cols}
+            logger.debug(
+                f"GeoDataFrame: Perform astype for {len(astype)} columns."
+            )
+            for c in cols:
+                mv = astype.get(c, None)
+                if mv is not None:
+                    if mv == 'bool': #TODO: Ask Helene: astype does not work well for bool, both bool('TRUE') and bool('False') will be True. Could we add this?
+                        gdf[c] = gdf[c].replace({'True': True, 'True': True, 'true': True, '1':True,
+                                                 'FALSE': False, 'False': False, 'false': False, '0':False})
+                        try:
+                            gdf[c] = gdf[c].astype(mv)
+                        except ValueError:
+                            raise ValueError(f"GeoDataFrame: astype({mv}) could not be performed on column{c}")
+
+        # rename
+        if self.rename:
+            rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
+            logger.debug(
+                f"GeoDataFrame: Perform rename for {len(rename)} columns."
+            )
+            gdf = gdf.rename(columns=rename)
+
+        # select columns
+        # TODO: Ask Helene: variables are used by both RasterDataset GeoDataset and GeoDataFrame, why it is not used in data_source.yml and in DataAdaptor.__ini__
+        # TODO: Ask Helene: is it possible to add a seperate function slice_gpd in gis_utils (query rows + select columns) -  mentioned above
+        if variables is not None:
+            if np.any([var not in gdf.columns for var in variables]):
+                raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")
+            if "geometry" not in variables:  # always keep geometry column
+                variables = variables + ["geometry"]
+                logger.debug(
+                    f"GeoDataFrame: Slice variables for {len(variables)} columns."
+                )
+            gdf = gdf.loc[:, variables]
+
+        # unit conversion for numeric data
+        # TODO: Ask Helene: maybe this should also be before rename? for consistency of the dictionary in yml?
+        if gdf.index.size == 0:
+            logger.warning(f"GeoDataFrame: No data within spatial domain {self.path}.")
+        else:
             unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
             unit_names = [k for k in unit_names if k in gdf.columns]
             if len(unit_names) > 0:
