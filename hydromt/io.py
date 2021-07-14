@@ -184,11 +184,11 @@ def open_mfraster(
                 da = xr.concat(da_lst, dim=concat_dim)
                 da.coords[concat_dim] = xr.IndexVariable(concat_dim, index_lst)
                 da = da.sortby(concat_dim).transpose(concat_dim, ...)
+                da.attrs.update(da_lst[0].attrs)
+                da.attrs.update({"source_file": "; ".join(fn_attrs)})
         else:
             da = merge.merge(da_lst, **mosaic_kwargs)  # spatial merge
-        da.attrs.update(da_lst[0].attrs)
         ds = da.to_dataset()  # dataset for consistency
-        ds.attrs.update(source_files="; ".join(fn_attrs))
     else:
         ds = xr.merge(da_lst)
     return ds
@@ -241,13 +241,9 @@ def open_raster_from_tindex(
             path = Path(str(fn))
             if not path.is_absolute():
                 paths.append(Path(abspath(join(root, fn))))
-    # set destination crs and bounds to speed up merging
-    if "dst_crs" not in mosaic_kwargs:
-        mosaic_kwargs.update(dst_crs=geom.crs)
-    if "dst_bounds" not in mosaic_kwargs:
-        dst_bounds = geom.to_crs(mosaic_kwargs["dst_crs"]).total_bounds
-        mosaic_kwargs.update(dst_bounds=dst_bounds)
     # read & merge data
+    if "dst_bounds" not in mosaic_kwargs:
+        mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
     ds_out = open_mfraster(
         paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs
     )
