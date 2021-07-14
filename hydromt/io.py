@@ -1,5 +1,7 @@
 from os.path import isfile, basename, abspath, join, dirname
 from pathlib import Path
+from typing import List, Dict
+import zipfile
 import glob
 import pandas as pd
 import numpy as np
@@ -24,6 +26,9 @@ __all__ = [
     "open_vector_from_table",
     "open_timeseries_from_table",
     "write_xy",
+    "get_dir",
+    "clean_dir",
+    "create_zipfile",
 ]
 
 
@@ -532,3 +537,102 @@ def write_xy(fn, gdf, fmt="%.4f"):
     xy = np.stack((gdf.geometry.x.values, gdf.geometry.y.values)).T
     with open(fn, "w") as f:
         np.savetxt(f, xy, fmt=fmt)
+
+
+def get_dir(base: str, subfolders: List[str] = []) -> Path:
+    """
+    Static methods returns WindowsPath-object of directory as listed in configuration, if needed supplemented with sub-folders.
+    Checks for folder existence and creates new if needed.
+
+    Parameters
+    ----------
+    base: str
+        base folder from which sub-folders are checked/created
+    subfolders: list, Optional
+        Fews-config subfolders
+    Returns
+    -------
+    folder: Path
+        WindowsPath-object
+    """
+    if not Path(base).exists():
+        Path(base).mkdir()
+    if len(subfolders) == 0:
+        return Path(base)
+    else:
+        folder = Path(base)
+        for sub in subfolders:
+            folder = Path(folder).joinpath(sub)
+            if not folder.exists():
+                folder.mkdir()
+        return folder
+
+
+def clean_dir(basedir: Path):
+    """
+    Cleans all files and sub-folders of directory.
+
+    Parameters
+    ----------
+    basedir: Path
+        path - folder to clear
+    """
+    sub_dirs = [x for x in basedir.iterdir() if x.is_dir()]
+    for sub_dir in sub_dirs:
+        subsub_dirs = [x for x in sub_dir.iterdir() if x.is_dir()]
+        if len(subsub_dirs) > 0:
+            for subsub in subsub_dirs:
+                for file in subsub.iterdir():
+                    file.unlink()
+                subsub.rmdir()
+        for file in sub_dir.iterdir():
+            file.unlink()
+        sub_dir.rmdir()
+
+
+def create_zipfile(
+    outfile: Path,
+    files_to_append=List[str],
+    add_dir_name: str = None,
+    conditionalsuffix_sub_dir: Dict = {},
+):
+    """
+    Creates zipfile-object by adding files listed and write do destination path.
+
+    Parameters
+    ----------
+    outfile: Path
+        path to output file
+    files_to_append: list
+        list of files to include in zip file
+    add_dir_name: str, Optional
+        add directory name when zipping
+    conditionalsuffix_sub_dir: dict, Optional
+        add sub-directory name (dict value) when file suffix in dict keys,
+        only applied in combination with add_dir_name.
+    """
+    zipObj = zipfile.ZipFile(outfile, "w", zipfile.ZIP_DEFLATED)
+    for fileObj in files_to_append:
+        if add_dir_name is None:
+            zipObj.write(filename=fileObj, arcname=fileObj.name)
+        if len(conditionalsuffix_sub_dir) > 0:
+            for fsuffix in conditionalsuffix_sub_dir:
+                if fileObj.suffix == fsuffix:
+                    zipObj.write(
+                        filename=fileObj,
+                        arcname="{}/{}/{}".format(
+                            add_dir_name,
+                            conditionalsuffix_sub_dir[fsuffix],
+                            fileObj.name,
+                        ),
+                    )
+                else:
+                    zipObj.write(
+                        filename=fileObj,
+                        arcname="{}/{}".format(add_dir_name, fileObj.name),
+                    )
+        else:
+            zipObj.write(
+                filename=fileObj, arcname="{}/{}".format(add_dir_name, fileObj.name)
+            )
+    zipObj.close()

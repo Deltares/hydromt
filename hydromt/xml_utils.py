@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Basic xml related convience functions."""
 import xml.etree.ElementTree as ET
 
@@ -48,8 +45,8 @@ def create_xml_parent(ns, schema_url, schema_name, extra_attributes={}):
 def create_fews_xml_root(schema: str, version: str = None) -> ET.ElementTree:
     """
     Function to create xml rot with fews namespace and url.
-    
-    Arguments
+
+    Parameters
     ----------
     schema: str
         schema to create
@@ -57,7 +54,7 @@ def create_fews_xml_root(schema: str, version: str = None) -> ET.ElementTree:
         version to create, default = 1.1
     Returns
     -------
-    xml_root element: ET.element
+    xml_root element: ET.ElementTree
     """
     _ns = {
         "xmlns": "http://www.wldelft.nl/fews",
