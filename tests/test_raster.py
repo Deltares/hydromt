@@ -138,7 +138,7 @@ def test_rasterize(rioda):
     assert np.all(rioda.raster.rasterize(gdf, col_name="id") == 3)
     assert np.all(rioda.raster.rasterize(gdf, col_name="id", sindex=True) == 3)
     mask = rioda.raster.geometry_mask(gdf)
-    assert mask.dtype == np.bool
+    assert mask.dtype == bool
     assert np.all(mask)
     with pytest.raises(ValueError, match="No shapes found"):
         rioda.raster.rasterize(gpd.GeoDataFrame())
@@ -303,8 +303,8 @@ def test_zonal_stats():
 
     ds0 = ds.raster.zonal_stats(gdf.to_crs(3857), [np.nanmean, "mean"])
     ds1 = ds.raster.zonal_stats(gdf, [np.nanmean, "mean"])
-    assert np.all(ds0["test_nanmean"] == ds0["test_mean"])
-    assert np.all(ds1["test_mean"] == ds0["test_mean"])
+    assert np.all(ds0["test_nanmean"].values == ds0["test_mean"].values)
+    assert np.all(ds1["test_mean"].values == ds0["test_mean"].values)
 
     with pytest.raises(ValueError, match="Stat asdf not valid"):
         da.raster.zonal_stats(gdf, "asdf")
