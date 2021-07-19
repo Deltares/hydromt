@@ -301,10 +301,10 @@ def test_zonal_stats():
     assert np.all(ds0["index"] == np.array([0, 2, 3]))
     assert np.all(ds0["test_count"] == np.array([40, 1, 10]))
 
-    ds0 = ds.raster.zonal_stats(gdf.to_crs(3857), [np.nanmean, "mean"])
-    ds1 = ds.raster.zonal_stats(gdf, [np.nanmean, "mean"])
-    assert np.all(ds0["test_nanmean"].values == ds0["test_mean"].values)
-    assert np.all(ds1["test_mean"].values == ds0["test_mean"].values)
+    ds0 = ds.raster.zonal_stats(gdf.to_crs(3857), [np.nanmean, "mean"]).fillna(0)
+    ds1 = ds.raster.zonal_stats(gdf, [np.nanmean, "mean"]).fillna(0)
+    assert np.all(ds0["test_nanmean"] == ds0["test_mean"])
+    assert np.all(ds1["test_mean"] == ds0["test_mean"])
 
     with pytest.raises(ValueError, match="Stat asdf not valid"):
         da.raster.zonal_stats(gdf, "asdf")
