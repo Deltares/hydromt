@@ -291,8 +291,8 @@ def test_zonal_stats():
     geoms = [
         box(w, s, w + abs(e - w) / 2.0, n),
         box(w - 2, s, w - 0.2, n),  # outside
-        Point((w, n)),
-        LineString([(w, n), (e, s)]),
+        Point((w + 0.1, n - 0.1)),
+        LineString([(w, (n + s) / 2 - 0.1), (e, (n + s) / 2 - 0.1)]),  # vert line
     ]
     gdf = gpd.GeoDataFrame(geometry=geoms, crs=da.raster.crs)
 
@@ -301,8 +301,9 @@ def test_zonal_stats():
     assert np.all(ds0["index"] == np.array([0, 2, 3]))
     assert np.all(ds0["test_count"] == np.array([40, 1, 10]))
 
-    ds0 = ds.raster.zonal_stats(gdf.to_crs(3857), [np.nanmean, "mean"]).fillna(0)
-    ds1 = ds.raster.zonal_stats(gdf, [np.nanmean, "mean"]).fillna(0)
+    ds0 = ds.raster.zonal_stats(gdf.to_crs(3857), [np.nanmean, "mean"])
+    ds1 = ds.raster.zonal_stats(gdf, [np.nanmean, "mean"])
+
     assert np.all(ds0["test_nanmean"] == ds0["test_mean"])
     assert np.all(ds1["test_mean"] == ds0["test_mean"])
 
