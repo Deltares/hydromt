@@ -12,6 +12,7 @@ def merge(
     dst_crs=None,
     dst_bounds=None,
     dst_res=None,
+    mask=None,
     merge_method="first",
     **kwargs,
 ):
@@ -27,10 +28,13 @@ def merge(
         Tiles to merge
     dst_crs: pyproj.CRS, int
         CRS (or EPSG code) of destination grid
-    dst_bound: list of float
+    dst_bounds: list of float
         Bounding box [xmin, ymin, xmax, ymax] of destination grid
     dst_res: float
         Resolution of destination grid
+    mask: geopands.GeoDataFrame, optional
+        Mask of destination area of interest.
+        Used to determine dst_crs, dst_bounds and dst_res if missing.
     merge_method: {'first','last','min','max','new'}, callable
         Merge method:
 
@@ -89,32 +93,28 @@ def merge(
         copyto = merge_method
 
     # resolve arguments
-    da0 = data_arrays[0]
-    if da0.ndim != 2:
+    if data_arrays[0].ndim != 2:
         raise ValueError("Mosaic is only implemented for 2D DataArrays.")
+    if dst_crs is None and (dst_bounds is not None or dst_res is not None):
+        raise ValueError("dst_bounds and dst_res not understood without dst_crs.")
+    idx0 = 0
+    if mask is not None and dst_res is None or dst_crs is None:
+        # select array with largest overlap if mask is given
+        areas = []
+        for da in data_arrays:
+            p1 = da.raster.box.unary_union.buffer(0)
+            p0 = mask.to_crs(da.raster.crs).unary_union.buffer(0)
+            areas.append(p1.intersection(p0).area)
+        idx0 = np.argmax(areas)
+    da0 = data_arrays[idx0]  # used for default dst_crs and dst_res
     # dst CRS
     if dst_crs is None:
         dst_crs = da0.raster.crs
-        if dst_res is None:
-            dst_res = da0.raster.res
     else:
         dst_crs = CRS.from_user_input(dst_crs)
-        # rough estimate of dst_res based input rasters
-        if dst_res is None:
-            xs, ys = [], []
-            for da in data_arrays:
-                w, h, bounds = (
-                    da.raster.width,
-                    da.raster.height,
-                    da.raster.internal_bounds,
-                )
-                transform0 = rasterio.warp.calculate_default_transform(
-                    da.raster.crs, dst_crs, w, h, *bounds
-                )[0]
-                xs.append(transform0[0])
-                ys.append(transform0[4])
-            dst_res = np.mean(xs), np.mean(ys)
     # dst res
+    if dst_res is None:
+        dst_res = da0.raster.res
     if isinstance(dst_res, float):
         x_res, y_res = dst_res, -dst_res
     elif isinstance(dst_res, (tuple, list)) and len(dst_res) == 2:
@@ -125,7 +125,9 @@ def merge(
     # TODO test y_res > 0
     dst_res = (x_res, -y_res)  # NOTE: y_res is multiplied with -1 in rasterio!
     # dst bounds
-    if dst_bounds is None:
+    if dst_bounds is None and mask is not None:
+        w, s, e, n = mask.to_crs(dst_crs).total_bounds
+    elif dst_bounds is None:
         for i, da in enumerate(data_arrays):
             if i == 0:
                 w, s, e, n = da.raster.transform_bounds(dst_crs)
@@ -140,8 +142,6 @@ def merge(
     # check N>S orientation
     top, bottom = (n, s) if y_res < 0 else (s, n)
     dst_bounds = w, bottom, e, top
-    # save dst geometry for clipping later
-    dst_geom = gpd.GeoDataFrame(geometry=[box(*dst_bounds)], crs=dst_crs)
     # dst transform
     width = int(round((e - w) / abs(x_res)))
     height = int(round((n - s) / abs(y_res)))
@@ -168,14 +168,22 @@ def merge(
     xs = da_out.raster.xcoords.values
     dest = da_out.values
     kwargs.update(dst_crs=dst_crs, dst_res=dst_res, align=True)
+    sf_lst = []
     for i, da in enumerate(data_arrays):
-        # reproject
         if not da.raster.aligned_grid(da_out):
-            da = da.raster.clip_geom(dst_geom, buffer=10).raster.reproject(**kwargs)
-        # clip to bounds
+            # clip with buffer
+            src_bbox = da_out.raster.transform_bounds(da.raster.crs)
+            da = da.raster.clip_bbox(src_bbox, buffer=10)
+            if np.any([da[dim].size == 0 for dim in da.raster.dims]):
+                continue  # out of bounds
+            # reproject
+            da = da.raster.reproject(**kwargs)
+        # clip to dst_bounds
         da = da.raster.clip_bbox(dst_bounds)
         if np.any([da[dim].size == 0 for dim in da.raster.dims]):
             continue  # out of bounds
+        if "source_file" in da.attrs:
+            sf_lst.append(da.attrs["source_file"])
         # merge overlap
         w0, s0, e0, n0 = da.raster.bounds
         if y_res < 0:
@@ -199,5 +207,6 @@ def merge(
         copyto(region, temp, region_nodata, temp_nodata)
 
     # set attrs
+    da_out.attrs.update(source_file="; ".join(sf_lst))
     da_out.raster.set_crs(dst_crs)
     return da_out.raster.reset_spatial_dims_attrs()

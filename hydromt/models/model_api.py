@@ -410,8 +410,6 @@ class Model(object, metaclass=ABCMeta):
         >> set_config('b', 'c', 'd', 99) # identical to set_config('b.d.e', 99)
         >> {'a': 1, 'b': {'c': {'d': 99}}}
         """
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
         if len(args) < 2:
             raise TypeError("set_config() requires a least one key and one value.")
         args = list(args)

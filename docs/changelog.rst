@@ -12,11 +12,13 @@ Added
 ^^^^^
 
 - Small patch for geoms/bbox regions when upscaling flow dir.
+- Mask option in merge.merge method for improved open_raster_from_tindex.
 
 Changed
 ^^^^^^^
 
 - New import of model plugins. Before plugins were only loaded when import MODELS or xxxModel from hydromt.models and not when importing hydromt as before.
+- Dropped dask version pins
 
 Deprecated
 ^^^^^^^^^^
