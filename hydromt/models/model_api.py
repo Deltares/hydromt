@@ -521,12 +521,8 @@ class Model(object, metaclass=ABCMeta):
                 data = xr.DataArray(dims=self.dims, data=data, name=name).to_dataset()
             for dvar in data.data_vars.keys():
                 if dvar in self._staticmaps:
-                    if not self._write:
-                        raise IOError(
-                            f"Cannot overwrite staticmap {dvar} in read-only mode"
-                        )
-                    elif self._read:
-                        self.logger.warning(f"Overwriting staticmap: {dvar}")
+                    if self._read:
+                        self.logger.warning(f"Replacing staticmap: {dvar}")
                 self._staticmaps[dvar] = data[dvar]
 
     @property
@@ -545,10 +541,8 @@ class Model(object, metaclass=ABCMeta):
                 "First parameter map(s) should be geopandas.GeoDataFrame or geopandas.GeoSeries"
             )
         if name in self._staticgeoms:
-            if not self._write:
-                raise IOError(f"Cannot overwrite staticgeom {name} in read-only mode")
-            elif self._read:
-                self.logger.warning(f"Overwriting staticgeom: {name}")
+            if self._read:
+                self.logger.warning(f"Replacing staticgeom: {name}")
         self._staticgeoms[name] = geom
 
     @property
@@ -586,8 +580,6 @@ class Model(object, metaclass=ABCMeta):
             data = {name: data}
         for name in data:
             if name in self._forcing:
-                if not self._write:
-                    raise IOError(f"Cannot replace forcing {name} in read-only mode")
                 self.logger.warning(f"Replacing forcing: {name}")
             self._forcing[name] = data[name]
 
@@ -626,8 +618,6 @@ class Model(object, metaclass=ABCMeta):
             data = {name: data}
         for name in data:
             if name in self._states:
-                if not self._write:
-                    raise IOError(f"Cannot replace state {name} in read-only mode")
                 self.logger.warning(f"Replacing state: {name}")
             self._states[name] = data[name]
 
@@ -666,8 +656,6 @@ class Model(object, metaclass=ABCMeta):
             data = {name: data}
         for name in data:
             if name in self._results:
-                if not self._write:
-                    raise IOError(f"Cannot replace results {name} in read-only mode")
                 self.logger.warning(f"Replacing result: {name}")
             self._results[name] = data[name]
 
