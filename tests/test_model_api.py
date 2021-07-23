@@ -263,6 +263,12 @@ def test_model_method(model, tmpdir):
     with pytest.raises(ValueError):
         # model_out None with mode=r
         mod1.update(opt=opt)
+    with pytest.raises(IOError):
+        mod1.write_staticmaps()
+    with pytest.raises(IOError):
+        mod1.write_staticgeoms()
+    with pytest.raises(IOError):
+        mod1.write_config()
     opt = {
         "setup_config": {"global.name": "test"},
         "setup_basemaps": {"add_geom": True},
@@ -321,8 +327,6 @@ def test_object(model, tmpdir):
             mod1.write_forcing()
         with pytest.raises(IOError):
             mod1.write_states()
-        with pytest.raises(IOError):
-            mod1.write_results()
         mod1 = TESTMODELS.get(model)(root=root, mode="w")
         with pytest.raises(NotImplementedError):
             mod1.write_staticmaps()
@@ -332,8 +336,6 @@ def test_object(model, tmpdir):
             mod1.write_forcing()
         with pytest.raises(NotImplementedError):
             mod1.write_states()
-        with pytest.raises(NotImplementedError):
-            mod1.write_results()
 
 
 p.stop()

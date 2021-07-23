@@ -292,6 +292,8 @@ class Model(object, metaclass=ABCMeta):
 
     def write_config(self, config_name=None, config_root=None):
         """Write config to <root/config_fn>"""
+        if not self._write:
+            raise IOError("Model opened in read-only mode")
         if config_name is not None:
             self._config_fn = config_name
         elif self._config_fn is None:
@@ -373,13 +375,6 @@ class Model(object, metaclass=ABCMeta):
         if not self._write:
             # start fresh in read-only mode
             self._results = dict()
-        raise NotImplementedError()
-
-    @abstractmethod
-    def write_results(self):
-        """write results at <root/?/> in model ready format"""
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
         raise NotImplementedError()
 
     ## model configuration
