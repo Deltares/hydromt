@@ -19,6 +19,7 @@ Changed
 
 - New import of model plugins. Before plugins were only loaded when import MODELS or xxxModel from hydromt.models and not when importing hydromt as before.
 - Dropped dask version pins
+- read-only check in write_config; dropped write_results
 
 Deprecated
 ^^^^^^^^^^
@@ -30,6 +31,7 @@ Fixed
 ^^^^^
 
 - Fix error when deriving basin mask for subbasin with multiple xy.
+- Fix passing timeseries and crs for get_geodataset with vector driver
 
 v0.4.1 (18 May 2021)
 --------------------
