@@ -626,8 +626,9 @@ def _parse_data_dict(data_dict, root=None, category=None):
             meta.update(category=category)
         # lower kwargs for backwards compatability
         source.update(**source.pop("kwargs", {}))
-        if "fn_ts" in source:
-            source.update(fn_ts=abs_path(root, source["fn_ts"]))
+        for opt in source:
+            if "fn" in opt:  # get absolute paths for file names
+                source.update({opt: abs_path(root, source[opt])})
         data[name] = adapter(path=path, meta=meta, **source)
     return data
 
@@ -1053,7 +1054,6 @@ class GeoDatasetAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
-        fn_ts=None,
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
@@ -1102,7 +1102,6 @@ class GeoDatasetAdapter(DataAdapter):
             meta=meta,
             **kwargs,
         )
-        self.fn_ts = fn_ts  # used for driver='vector'
 
     def export_data(
         self,
@@ -1185,16 +1184,16 @@ class GeoDatasetAdapter(DataAdapter):
         if geom is None and bbox is not None:
             # convert bbox to geom with crs EPGS:4326 to apply buffer later
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-            bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-            clip_str = f" and clip to bbox - [{bbox_str}]"
+            clip_str = " and clip to bbox (epsg:4326)"
         elif geom is not None:
-            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            clip_str = f" and clip to geom - [{bbox_str}]"
+            clip_str = f" and clip to geom (epsg:{geom.crs.to_epsg():d})"
         if geom is not None:
             # make sure geom is projected > buffer in meters!
             if buffer > 0 and geom.crs.is_geographic:
                 geom = geom.to_crs(3857)
             geom = geom.buffer(buffer)
+            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
+            clip_str = f"{clip_str} [{bbox_str}]"
         if kwargs.pop("within", False):  # for backward compatibility
             kwargs.update(predicate="contains")
 
@@ -1211,14 +1210,18 @@ class GeoDatasetAdapter(DataAdapter):
         elif self.driver == "vector":
             # read geodataset from point + time series file
             ds_out = io.open_geodataset(
-                fn_locs=fns[0], mask=geom, fn_ts=self.fn_ts, **kwargs
+                fn_locs=fns[0], geom=geom, crs=self.crs, **kwargs
             )
             geom = None  # already clipped
         else:
             raise ValueError(f"GeoDataset: Driver {self.driver} unknown")
 
         # rename and select vars
-        ds_out = ds_out.rename({k: v for k, v in self.rename.items() if k in ds_out})
+        if variables and len(ds_out.vector.vars) == 1 and len(self.rename) == 0:
+            rm = {ds_out.vector.vars[0]: variables[0]}
+        else:
+            rm = {k: v for k, v in self.rename.items() if k in ds_out}
+        ds_out = ds_out.rename(rm)
         # check spatial dims and make sure all are set as coordinates
         try:
             ds_out.vector.set_spatial_dims()

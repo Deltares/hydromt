@@ -254,14 +254,13 @@ def open_raster_from_tindex(
 
 def open_geodataset(
     fn_locs,
-    fn_ts=None,
+    fn_data=None,
     var_name=None,
     index_dim=None,
-    ts_reader=None,
     chunks={},
     crs=None,
     bbox=None,
-    mask=None,
+    geom=None,
     logger=logger,
     **kwargs,
 ):
@@ -269,23 +268,23 @@ def open_geodataset(
 
     Arguments
     ---------
-    fn: path, str
+    fn_locs: path, str
         Path to point location file, see :py:meth:`geopandas.read_file` for options.
-    fn_ts: path, str
+    fn_data: path, str
         Path to data file of which the index dimension which should match the geospatial
         coordinates index.
         This can either be a csv with datetime in the first column and the location
-        index in the header, or a 2 dimesional netcdf with a datetime and index column.
+        index in the header row, or a netcdf with a time and index dimensions.
     var_name: str, optional
-        Name of the variable in case of a csv fn_ts file. By default, None and
+        Name of the variable in case of a csv fn_data file. By default, None and
         infered from basename.
     crs: str, `pyproj.CRS`, or dict
         Source coordinate reference system, ignored for files with a native crs.
     bbox : array of float, default None
         Filter features by given bounding box described by [xmin, ymin, xmax, ymax]
-        Cannot be used with mask.
-    mask : GeoDataFrame or GeoSeries | shapely Geometry, default None
-        Filter for features that intersect with the mask.
+        Cannot be used with geom.
+    geom : GeoDataFrame or GeoSeries | shapely Geometry, default None
+        Filter for features that intersect with the geom.
         CRS mis-matches are resolved if given a GeoSeries or GeoDataFrame.
         Cannot be used with bbox.
     **kwargs
@@ -300,15 +299,17 @@ def open_geodataset(
         raise IOError(f"GeoDataset point location file not found: {fn_locs}")
     # read geometry file
     kwargs.update(assert_gtype="Point")
-    gdf = open_vector(fn_locs, crs=crs, **kwargs)
+    gdf = open_vector(fn_locs, crs=crs, bbox=bbox, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
     # read timeseries file
-    if fn_ts is not None and isfile(fn_ts):
-        da_ts = open_timeseries_from_table(fn_ts, index_dim=index_dim, logger=logger)
+    if fn_data is not None and isfile(fn_data):
+        da_ts = open_timeseries_from_table(
+            fn_data, name=var_name, index_dim=index_dim, logger=logger
+        )
         ds = vector.GeoDataset.from_gdf(gdf, da_ts, index_dim=index_dim)
-    elif fn_ts is not None:
-        raise IOError(f"GeoDataset timeseries csv file not found: {fn_ts}")
+    elif fn_data is not None:
+        raise IOError(f"GeoDataset data file not found: {fn_data}")
     else:
         ds = vector.GeoDataset.from_gdf(gdf, index_dim=index_dim)  # coordinates only
     return ds.chunk(chunks)
