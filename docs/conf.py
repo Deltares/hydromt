@@ -264,5 +264,5 @@ intersphinx_mapping = {
     # "dask": ("https://docs.dask.org/en/latest", None),
     "rasterio": ("https://rasterio.readthedocs.io/en/latest", None),
     "geopandas": ("https://geopandas.org", None),
-    "xarray": ("http://xarray.pydata.org/en/stable", None),
+    "xarray": ("https://xarray.pydata.org/en/stable", None),
 }

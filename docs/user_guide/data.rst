@@ -20,10 +20,10 @@ the Deltares network and a slice of these datasets will be downloaded for demons
 purposes if no other yml file is provided. Local or other datasets can also be included 
 by extending the data catalog with new .yml files. 
 
-Providing a data catalog for the CLI *build* and *update* methods is done with 
-**-d /path/to/data_catalog.yml**. Entries from the data_catalog can then be used 
-in the *options.ini*. Multiple yml files can be added by reusing the **-d** option.
-To read data from the deltares network use the **--dd** flag (no path required).
+Providing a data catalog for the CLI ``hydromt build`` and ``hydromt update`` methods is done with 
+``-d /path/to/data_catalog.yml``. Entries from the data_catalog can then be used 
+in the *options.ini*. Multiple yml files can be added by reusing the ``-d`` option.
+To read data from the deltares network use the ``--dd`` flag (no path required).
 
 .. code-block:: console
 
@@ -50,13 +50,13 @@ with the shown keys is highly recommended. The ``rename``, ``nodata``, ``unit_ad
 ``unit_mult`` options are set per variable (or attribute table column in case of a GeoDataFrame).
 For more information see :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
 
-.. code-block:: console
+.. code-block:: yaml
 
-    my_dataset
+    my_dataset:
       path: /path/to/my_dataset.extension
-      data_type: RasterDataset or GeoDataFrame or GeoDataset
-      driver: extension file reader
-      crs: EPSG-code or WKT
+      data_type: RasterDataset/GeoDataset/GeoDataFrame
+      driver: raster/raster_tindex/netcdf/zarr/vector/vector_table
+      crs: EPSG/WKT
       kwargs:
         key: value
       rename:
@@ -70,9 +70,9 @@ For more information see :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
       meta:
         source_url: zenodo.org/my_dataset
         paper_ref: Author et al. (2020)
-        paper_doi: <>
+        paper_doi: doi
         source_license: CC-BY-3.0
-        category: 
+        category: <category>
 
 
 A full list of **data entry options** is given below
@@ -122,60 +122,59 @@ Tabulated data without a spatial component such as mapping tables are planned to
 Please contact us through the issue list if you would like to add other drivers.
 
 .. list-table:: RasterDataset
-   :widths: 20, 20, 30, 30
+   :widths: 17, 25, 28, 30
    :header-rows: 1
 
    * - Driver
-     - Method
      - File formats
+     - Method
      - Comments
    * - ``raster`` 
+     - GeoTIFF, ArcASCII, VRT, etc. (see `GDAL formats <http://www.gdal.org/formats_list.html>`_)
      - :py:meth:`~hydromt.io.open_mfraster`
-     - GeoTIFF, ArcASCII, VRT, etc (see `GDAL formats list <http://www.gdal.org/formats_list.html>`_)
      - Based on :py:func:`xarray.open_rasterio` 
        and :py:func:`rasterio.open`
    * - ``raster_tindex`` 
+     - raster tile index file (see `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_)
      - :py:meth:`~hydromt.io.open_raster_from_tindex`
-     - raster tile index (see `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_)
-     - 
+     - Options to merge tiles via ``mosaic_kwargs``.
    * - ``netcdf`` or ``zarr``
+     - NetCDF and Zarr
      - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
-     - 
      - required y and x dimensions_
 
 .. list-table:: GeoDataFrame
-   :widths: 20, 20, 30, 30
+   :widths: 17, 25, 28, 30
    :header-rows: 1
 
    * - Driver
-     - Method
      - File formats
+     - Method
      - Comments
    * - ``vector`` 
+     - ESRI Shapefile, GeoPackage, GeoJSON, etc.
      - :py:meth:`~hydromt.io.open_vector` 
-     - ESRI Shapefile, GeoPackage, GeoJSON, etc. through :py:meth:`~geopandas.read_file`
-     - Point, Line and Polygon geometries 
+     - Point, Line and Polygon geometries. Uses :py:func:`geopandas.read_file`
    * - ``vector_table``
+     - CSV, XY, and EXCEL. 
      - :py:meth:`~hydromt.io.open_vector`
-     - CSV, XY, and EXCEL files through :py:meth:`~hydromt.io.open_vector_from_table`
-     - Point geometries based on y and x columns 
+     - Point geometries only. Uses :py:meth:`~hydromt.io.open_vector_from_table`
 
 .. list-table:: GeoDataset
-   :widths: 20, 20, 30, 30
+   :widths: 17, 25, 28, 30
    :header-rows: 1
 
    * - Driver
-     - Method
      - File formats
+     - Method
      - Comments
    * - ``vector`` 
+     - Combined point location (e.g. CSV or GeoJSON) and text delimited timeseries (e.g. CSV) data.
      - :py:meth:`~hydromt.io.open_geodataset`
-     - combined Point geometry :py:meth:`~hydromt.io.open_vector` 
-       and tabulated timeseries :py:meth:`~hydromt.io.open_timeseries_from_table`
-     -
+     - Uses :py:meth:`~hydromt.io.open_vector`, :py:meth:`~hydromt.io.open_timeseries_from_table`
    * - ``netcdf`` or ``zarr``
+     - NetCDF and Zarr
      - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
-     - 
      - required time and index dimensions_ and x- and y coordinates.
 
 
@@ -198,7 +197,7 @@ The variable name is based on the filename, in this case "GLOBCOVER_200901_20091
 The ``chunks`` key-word argument is passed to :py:meth:`~hydromt.io.open_mfraster` 
 and allows lazy reading of the data. 
 
-.. code-block:: console
+.. code-block:: yaml
 
     globcover:
       path: base/landcover/globcover/GLOBCOVER_200901_200912_300x300m.tif
@@ -230,16 +229,16 @@ VRT files are usefull for large raster datasets which are often tiled and can be
 gdalbuildvrt (see https://gdal.org/programs/gdalbuildvrt.html).
 
 
-.. code-block:: console
+.. code-block:: yaml
 
     merit_hydro:
-    path: base/merit_hydro/{variable}.vrt
-    data_type: RasterDataset
-    driver: raster
-    crs: 4326
-    kwargs:
+      path: base/merit_hydro/{variable}.vrt
+      data_type: RasterDataset
+      driver: raster
+      crs: 4326
+      kwargs:
         chunks: {x: 6000, y: 6000}
-    rename:
+      rename:
         dir: flwdir
         bas: basins
         upa: uparea
@@ -248,7 +247,7 @@ gdalbuildvrt (see https://gdal.org/programs/gdalbuildvrt.html).
         sto: strord
         slp: lndslp
         wth: rivwth
-    meta:
+      meta:
         category: topography
         source_version: 1.0
         paper_doi: 10.1029/2019WR024873
@@ -272,7 +271,7 @@ The ``mosaic_kwargs`` are passed to :py:meth:`~hydromt.io.open_raster_from_tinde
 set the resampling ``method`` and name of column in the tile index attribute table ``tileindex``
 which contains the raster tile file names.
 
-.. code-block:: console
+.. code-block:: yaml
 
     grwl_mask:
       path: static_data/base/grwl/tindex.gpkg
@@ -320,7 +319,7 @@ see description of the ``path`` argument in the :ref:`yaml file description <dat
 In this example additional renaming and unit conversion preprocessing steps are added to 
 unify the data to match the hydroMT naming and unit :ref:`data convention <data_convention>`. 
 
-.. code-block:: console
+.. code-block:: yaml
 
     era5_hourly:
       path: forcing/ERA5/org/era5_{variable}_{year}_hourly.nc
@@ -359,7 +358,7 @@ spatial index for fast filtering of the data based on spatial location. An examp
 shown below. Not that the rename, unit_mult, unit_add and nodata options refer to
 columns of the attribute table in case of a GeoDataFrame.
 
-.. code-block:: console
+.. code-block:: yaml
 
       GDP_world:
         path: base/emissions/GDP-countries/World_countries_GDPpcPPP.gpkg
@@ -412,7 +411,7 @@ is based on the file exetension unless the ``kwargs`` ``driver`` option is set.
 See py:meth:`~hydromt.io.open_vector` and py:meth:`~hydromt.io.open_vector_from_table` for more
 options.
 
-.. code-block:: console
+.. code-block:: yaml
 
     stations:
       path: /path/to/stations.csv
@@ -453,7 +452,7 @@ see description of the ``path`` argument in the :ref:`yaml file description <dat
 In this example additional renaming and unit conversion preprocessing steps are added to 
 unify the data to match the hydroMT naming and unit :ref:`data convention <data_convention>`. 
 
-.. code-block:: console
+.. code-block:: yaml
 
     gtsmv3_eu_era5:
       path: reanalysis-waterlevel-{year}-m{month:02d}.nc
@@ -488,7 +487,7 @@ For more options see the :py:meth:`~hydromt.io.open_geodataset` method.
 
 
 
-.. code-block:: console
+.. code-block:: yaml
 
     waterlevels_txt:
       path: /path/to/stations.csv
