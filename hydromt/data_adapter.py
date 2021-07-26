@@ -47,13 +47,13 @@ class DataCatalog(object):
         data_libs: (list of) str, Path, optional
             One or more paths to yml files containing data sources which are parsed
             to entries of the data catalog. By default the data catalog is initiated
-            without data entries. See :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
+            without data entries. See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
             for accepted yml format.
         deltares_data: bool, str, optional
-            Deltares data version number, if True or version provided run :py:meth:`~hydromt.data_adapter.DataCatalog.from_deltares_sources`
+            Deltares data version number, if True or version provided run :py:func:`~hydromt.data_adapter.DataCatalog.from_deltares_sources`
             to parse available Deltares global datasets library yml files.
         artifact_data: bool, str, optional
-            Artifact data version number, if True provided run :py:meth:`~hydromt.data_adapter.DataCatalog.from_artifacts`
+            Artifact data version number, if True provided run :py:func:`~hydromt.data_adapter.DataCatalog.from_artifacts`
             to parse available Deltares global datasets library yml files.
         """
         self._sources = {}  # dictionary of DataAdapter
@@ -184,7 +184,8 @@ class DataCatalog(object):
               kwargs:
                 <key>: <value>
               crs: <crs>
-              nodata: <nodata>
+              nodata:
+                <native_variable_name1>: <nodata>
               rename:
                 <native_variable_name1>: <hydromt_variable_name1>
                 <native_variable_name2>: <hydromt_variable_name2>
@@ -370,7 +371,7 @@ class DataCatalog(object):
         provide the `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-varaible data source
-        will be returned as xarray.DataArray rather than Dataset.
+        will be returned as :py:class:`xarray.DataArray` rather than :py:class:`xarray.Dataset`.
 
         Arguments
         ---------
@@ -561,7 +562,7 @@ class DataCatalog(object):
 
 def parse_data_sources(path=None, root=None):
     """Parse data sources yml file.
-    For details see :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
+    For details see :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
     """
     # check path argument
     if isinstance(path, (str, Path)):
@@ -772,7 +773,7 @@ class RasterDatasetAdapter(DataAdapter):
         """Initiates data adapter for geospatial raster data.
 
         This object contains all properties required to read supported raster files into
-        a single unified RasterDataset, i.e. :py:meth:`xarray.Dataset` with geospatial attributes.
+        a single unified RasterDataset, i.e. :py:class:`xarray.Dataset` with geospatial attributes.
         In addition it keeps meta data to be able to reproduce which data is used.
 
         Parameters
@@ -781,9 +782,9 @@ class RasterDatasetAdapter(DataAdapter):
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable}, {year}, {month} placeholders as well as path search pattern
             using a '*' wildcard.
-        driver: {'raster', 'netcdf', 'zarr'}, optional
-            Driver to read files with, for 'raster' :py:meth:`~hydromt.io.open_mfraster`,
-            for 'netcdf' :py:meth:`xarray.open_mfdataset`, and for 'zarr' :py:meth:`xarray.open_zarr`
+        driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
+            Driver to read files with, for 'raster' :py:func:`~hydromt.io.open_mfraster`,
+            for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is infered from the file extension and falls back to
             'raster' if unknown.
         crs: int, dict, or str, optional
@@ -853,7 +854,7 @@ class RasterDatasetAdapter(DataAdapter):
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:meth:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
+            Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
         """
 
         try:
@@ -908,7 +909,7 @@ class RasterDatasetAdapter(DataAdapter):
         """Returns a clipped, sliced and unified RasterDataset based on the properties
         of this RasterDatasetAdapter.
 
-        For a detailed description see: :py:meth:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
+        For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
         """
         kwargs = self.kwargs.copy()
         fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
@@ -1059,7 +1060,7 @@ class GeoDatasetAdapter(DataAdapter):
         """Initiates data adapter for geospatial timeseries data.
 
         This object contains all properties required to read supported files into
-        a single unified GeoDataset, i.e. :py:meth:`xarray.Dataset` with geospatial point
+        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial point
         geometries. In addition it keeps meta data to be able to reproduce which data is used.
 
         Parameters
@@ -1068,9 +1069,9 @@ class GeoDatasetAdapter(DataAdapter):
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable}, {year}, {month} placeholders as well as path search pattern
             using a '*' wildcard.
-        driver: {'vector', 'netcdf'}, optional
-            Driver to read files with, for 'vector' :py:meth:`~hydromt.io.open_geodataset`,
-            for 'netcdf' :py:meth:`xarray.open_mfdataset`.
+        driver: {'vector', 'netcdf', 'zarr'}, optional
+            Driver to read files with, for 'vector' :py:func:`~hydromt.io.open_geodataset`,
+            for 'netcdf' :py:func:`xarray.open_mfdataset`.
             By default the driver is infered from the file extension and falls back to
             'vector' if unknown.
         crs: int, dict, or str, optional
@@ -1138,7 +1139,7 @@ class GeoDatasetAdapter(DataAdapter):
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:meth:`~hydromt.data_adapter.DataCatalog.get_geodataset`
+            Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataset`
         """
         obj = self.get_data(
             bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
@@ -1150,7 +1151,7 @@ class GeoDatasetAdapter(DataAdapter):
             # always write netcdf
             driver = "netcdf"
             fn_out = join(data_root, f"{data_name}.nc")
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
+            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.vector.vars
             encoding = {k: {"zlib": True} for k in dvars}
             obj.to_netcdf(fn_out, encoding=encoding)
         elif driver == "zarr":
@@ -1174,7 +1175,7 @@ class GeoDatasetAdapter(DataAdapter):
         """Returns a clipped, sliced and unified GeoDataset based on the properties
         of this GeoDatasetAdapter.
 
-        For a detailed description see: :py:meth:`~hydromt.data_adapter.DataCatalog.get_geodataset`
+        For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataset`
         """
         kwargs = self.kwargs.copy()
         fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
@@ -1289,8 +1290,8 @@ class GeoDatasetAdapter(DataAdapter):
                 nodata = self.nodata
             for k in ds_out.data_vars:
                 mv = nodata.get(k, None)
-                if mv is not None and ds_out[k].raster.nodata is None:
-                    ds_out[k].raster.set_nodata(mv)
+                if mv is not None and ds_out[k].vector.nodata is None:
+                    ds_out[k].vector.set_nodata(mv)
 
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
@@ -1302,16 +1303,16 @@ class GeoDatasetAdapter(DataAdapter):
             a = self.unit_add.get(name, 0)
             da = ds_out[name]
             attrs = da.attrs.copy()
-            nodata_isnan = da.raster.nodata is None or np.isnan(da.raster.nodata)
+            nodata_isnan = da.vector.nodata is None or np.isnan(da.vector.nodata)
             # nodata value is explicitly set to NaN in case no nodata value is provided
-            nodata = np.nan if nodata_isnan else da.raster.nodata
+            nodata = np.nan if nodata_isnan else da.vector.nodata
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
             ds_out[name] = xr.where(data_bool, da * m + a, nodata)
             ds_out[name].attrs.update(attrs)  # set original attributes
 
         # return data array if single var
-        if single_var_as_array and len(ds_out.raster.vars) == 1:
-            ds_out = ds_out[ds_out.raster.vars[0]]
+        if single_var_as_array and len(ds_out.vector.vars) == 1:
+            ds_out = ds_out[ds_out.vector.vars[0]]
 
         # set meta data
         ds_out.attrs.update(self.meta)
@@ -1344,16 +1345,16 @@ class GeoDataFrameAdapter(DataAdapter):
         """Initiates data adapter for geospatial vector data.
 
         This object contains all properties required to read supported files into
-        a single unified :py:meth:`geopandas.GeoDataFrame`.
+        a single unified :py:func:`geopandas.GeoDataFrame`.
         In addition it keeps meta data to be able to reproduce which data is used.
 
         Parameters
         ----------
         path: str, Path
             Path to data source.
-        driver: {'vector', 'xy', 'csv', 'xls', 'xlsx'}, optional
-            Driver to read files with, for 'vector' :py:meth:`~geopandas.read_file`,
-            for {'xy', 'csv', 'xls', 'xlsx'} :py:meth:`hydromt.io.open_vector_from_table`
+        driver: {'vector', 'vector_table'}, optional
+            Driver to read files with, for 'vector' :py:func:`~geopandas.read_file`,
+            for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
             By default the driver is infered from the file extension and falls back to
             'vector' if unknown.
         crs: int, dict, or str, optional
@@ -1419,7 +1420,7 @@ class GeoDataFrameAdapter(DataAdapter):
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:meth:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
+            Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
         """
         kwargs.pop("time_tuple", None)
         gdf = self.get_data(bbox=bbox, logger=logger)
@@ -1427,7 +1428,8 @@ class GeoDataFrameAdapter(DataAdapter):
             return None, None
 
         if driver is None:
-            driver = "csv" if self.driver in ["csv", "xls", "xlsx", "xy"] else "GPKG"
+            _lst = ["csv", "xls", "xlsx", "xy", "vector_table"]
+            driver = "csv" if self.driver in _lst else "GPKG"
         # always write netcdf
         if driver == "csv":
             fn_out = join(data_root, f"{data_name}.csv")
@@ -1462,7 +1464,7 @@ class GeoDataFrameAdapter(DataAdapter):
         """Returns a clipped and unified GeoDataFrame (vector) based on the properties
         of this GeoDataFrameAdapter.
 
-        For a detailed description see: :py:meth:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
+        For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
         """
         kwargs = self.kwargs.copy()
         _ = self.resolve_paths()  # throw nice error if data not found
@@ -1472,23 +1474,28 @@ class GeoDataFrameAdapter(DataAdapter):
         if geom is None and bbox is not None:
             # convert bbox to geom with crs EPGS:4326 to apply buffer later
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-            bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-            clip_str = f"and clip to bbox - [{bbox_str}]"
+            clip_str = " and clip to bbox (epsg:4326)"
         elif geom is not None:
-            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            clip_str = f"and clip to geom - [{bbox_str}]"
+            clip_str = f" and clip to geom (epsg:{geom.crs.to_epsg():d})"
         if geom is not None:
             # make sure geom is projected > buffer in meters!
             if geom.crs.is_geographic and buffer > 0:
                 geom = geom.to_crs(3857)
             geom = geom.buffer(buffer)  # a buffer with zero fixes some topology errors
+            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
+            clip_str = f"{clip_str} [{bbox_str}]"
         if kwargs.pop("within", False):  # for backward compatibility
-            kwargs.update(predicate="contains")
+            predicate = "contains"
 
         # read and clip
-        if self.driver in ["csv", "xls", "xlsx", "xy", "vector"]:
+        logger.info(f"GeoDataFrame: Read {self.driver} data{clip_str}.")
+        if self.driver in ["csv", "xls", "xlsx", "xy", "vector", "vector_table"]:
+            # "csv", "xls", "xlsx", "xy" deprecated use vector_table instead.
+            # specific driver should be added to open_vector kwargs
+            if "driver" not in kwargs and self.driver in ["csv", "xls", "xlsx", "xy"]:
+                kwargs.update(driver=self.driver)
             gdf = io.open_vector(
-                self.path, driver=self.driver, crs=self.crs, geom=geom, **kwargs
+                self.path, crs=self.crs, geom=geom, predicate=predicate, **kwargs
             )
         else:
             raise ValueError(f"GeoDataFrame: driver {self.driver} unknown.")
