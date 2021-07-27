@@ -64,7 +64,7 @@ class Model(object, metaclass=ABCMeta):
         self._forcing = dict()  # dictionnary of xr.DataArray
         self._config = dict()  # nested dictionary
         self._states = dict()  # dictionnary of xr.DataArray
-        self._results = dict()  # dictionnary of xr.DataArray
+        self._results = dict()  # dictionnary of xr.DataArray and/or xr.Dataset
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
@@ -629,19 +629,26 @@ class Model(object, metaclass=ABCMeta):
                 self.read_results()
         return self._results
 
-    def set_results(self, data, name=None):
-        """Add data to results attribute which is a dictionary of xarray.DataArray.
+    def set_results(self, data, name=None, split_dataset=False):
+        """Add data to results attribute which is a dictionary of xarray.DataArray and/or xarray.Dataset.
+
         The dictionary key is taken from the variable name. In case of a DataArray
-        without name, the name can be passed using the optional name argument.
+        without name, the name can be passed using the optional name argument. In case of
+        a Dataset, the dictionnary key is passed using the name argument.
+
+        Dataset can either be added as is to the dictionnary (default) or split into several
+        DataArrays using the split_dataset argument.
 
         Arguments
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
         name: str, optional
-            Variable name, only in case data is of type DataArray
+            Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
+        split_dataset: bool, optional
+            If data is a xarray.Dataset, either add it as is to results or split it into several xarray.DataArrays.
         """
-        # check dataset dtype
+        # check data dtype
         dtypes = [xr.DataArray, xr.Dataset]
         if not np.any([isinstance(data, t) for t in dtypes]):
             raise ValueError("Data type not recognized")
@@ -652,12 +659,21 @@ class Model(object, metaclass=ABCMeta):
             elif name is None and data.name is not None:
                 name = data.name
             elif data.name is None and name is None:
-                raise ValueError("Name required for forcing DataArray.")
+                raise ValueError("Name required for result DataArray.")
             data = {name: data}
-        for name in data:
-            if name in self._results:
-                self.logger.warning(f"Replacing result: {name}")
-            self._results[name] = data[name]
+        # Add to results
+        if isinstance(data, xr.Dataset) and not split_dataset:
+            if name is not None:
+                if name in self._results:
+                    self.logger.warning(f"Replacing result: {name}")
+                self._results[name] = data
+            else:
+                raise ValueError("Name required to add DataSet directly to results")
+        else:
+            for name in data:
+                if name in self._results:
+                    self.logger.warning(f"Replacing result: {name}")
+                self._results[name] = data[name]
 
     ## properties / methods below can be used directly in actual class
 
@@ -763,8 +779,9 @@ class Model(object, metaclass=ABCMeta):
         if not isinstance(self.results, dict):
             non_compliant.append("results")
         elif self.results:  # non-empty dict
+            dtypes = [xr.DataArray, xr.Dataset]
             for name, data in self.results.items():
-                if not isinstance(data, xr.DataArray):
+                if not np.any([isinstance(data, t) for t in dtypes]):
                     non_compliant.append(f"results.{name}")
 
         return non_compliant

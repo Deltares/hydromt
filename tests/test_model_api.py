@@ -170,7 +170,10 @@ def _create_model(model, tmpdir):
 
     # results
     results = _create_dynmaps(model, mod.staticmaps, forcing=False)
-    mod.set_results(results)
+    with pytest.raises(ValueError):
+        mod.set_results(results)
+    mod.set_results(results, name="results")
+    mod.set_results(results, split_dataset=True)
     testres = results["waterlevel"].rename("test")
     with pytest.raises(ValueError):
         mod.set_results(testres.values)

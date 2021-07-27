@@ -20,6 +20,7 @@ Changed
 - New import of model plugins. Before plugins were only loaded when import MODELS or xxxModel from hydromt.models and not when importing hydromt as before.
 - Dropped dask version pins
 - read-only check in write_config; dropped write_results
+- results objects of Model API can also contain xarray.Dataset. To split a Dataset into DataArrays use the split_dataset option of set_results.
 
 Deprecated
 ^^^^^^^^^^
