@@ -5,11 +5,11 @@
 Data input
 ==========
 
-HydroMT makes using various types of data sources such as vector data, raster (timeseries) data, 
-point location timeseries and tabulated data. All but the tabulate data can be accesed
+HydroMT makes use of various types of data sources such as vector data, raster (timeseries) data, 
+point location timeseries and tabulated data. All but the tabulate data can be accessed
 through the so-called data-catalog which is build from **.yml** files. The yml file
 contains the path, reading and pre-processing arguments as well as meta data for each
-dataset. The goal of this data catalog is simple and standardized access to (slices of) 
+dataset. The goal of this data catalog is to provide simple and standardized access to (slices of) 
 many datasets parsed in convienent Python data objects. Pre-processing steps to unify 
 the datasets include renaming of variables, unit conversion and setting/adding nodata 
 values. 
@@ -89,8 +89,8 @@ A full list of **data entry options** is given below
 - **unit_add** (optional): add or substract a value to the input data for unit conversion (e.g. -273.15 for conversion of temperature from Kelvin to Celsius). 
 - **unit_mult** (optional): multiply the input data by a value for unit conversion (e.g. 1000 for conversion from m to mm of precipitation).
 - **meta** (optional): additional information on the dataset organised in a sub-list, for example version or data source url etc. These are added to the data attributes.
-- **units** (optional and for *RasterDataset* only). specify the units of the input data: supported are [mm], and [m3/s]. TODO: add which units are recognized.
-  This option used *only* for the forcing of the Delwaq models in order to do specific unit conversions that cannot be handled from simple 
+- **units** (optional and for *RasterDataset* only). specify the units of the input data: supported are [m3], [m], [mm], and [m3/s].
+  This option is used *only* for the forcing of the Delwaq models in order to do specific unit conversions that cannot be handled from simple 
   addition or multiplication (e.g. conversion from mm water equivalent to m3/s of water which requires a multiplication by each grid cell area and not a fixed number).
   
 Apart from the data entries, the yaml file also has two **global options**:
@@ -376,8 +376,8 @@ columns of the attribute table in case of a GeoDataFrame.
           source_info: data combined from World Bank and CIA World Factbook
 
 
-Point vector from text delmited data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Point vector from text delimited data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Tabulated point vector data files can be parsed to a **GeoDataFrame** with the **vector_table** 
 driver. This driver reads CSV (or similar delimited text files), EXCEL and XY 
@@ -394,7 +394,7 @@ can be used to read other text delimited files or excel files.
     <ID2>, <X2>, <Y2>, <>, <>
     ...
 
-A XY files looks like. As it does not contain headers or an index, the first column 
+A XY files looks like the example below. As it does not contain headers or an index, the first column 
 is assumed to contain the x-coordinates, the second column the y-coordinates and the 
 index is a simple enumeration starting at 1. Any additional column is saved as column 
 of the GeoDataFrame attribute table. 
@@ -407,7 +407,7 @@ of the GeoDataFrame attribute table.
 
 As the CRS of the coordinates cannot be infered from the data it must be set in the 
 data entry in the yaml file as shown in the example below. The internal data format 
-is based on the file exetension unless the ``kwargs`` ``driver`` option is set.
+is based on the file extension unless the ``kwargs`` ``driver`` option is set.
 See py:meth:`~hydromt.io.open_vector` and py:meth:`~hydromt.io.open_vector_from_table` for more
 options.
 
