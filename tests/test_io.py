@@ -91,8 +91,8 @@ def test_open_geodataset(tmpdir, geodf):
     assert np.all(ds[name].values == 0)
     with pytest.raises(IOError, match="GeoDataset point location file not found"):
         hydromt.open_geodataset("missing_file.csv")
-    with pytest.raises(IOError, match="GeoDataset timeseries csv file not found"):
-        hydromt.open_geodataset(fn_gdf, fn_ts="missing_file.csv")
+    with pytest.raises(IOError, match="GeoDataset data file not found"):
+        hydromt.open_geodataset(fn_gdf, fn_data="missing_file.csv")
 
 
 def test_timeseries_io(tmpdir, ts):

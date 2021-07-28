@@ -8,6 +8,10 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 [Unreleased]
 ------------
 
+v0.4.2 (28 July 2021)
+---------------------
+Noticeable changes include new import of model plugins and improvements of reading methods for tile index and geodataset.
+
 Added
 ^^^^^
 
@@ -19,6 +23,8 @@ Changed
 
 - New import of model plugins. Before plugins were only loaded when import MODELS or xxxModel from hydromt.models and not when importing hydromt as before.
 - Dropped dask version pins
+- read-only check in write_config; dropped write_results
+- results objects of Model API can also contain xarray.Dataset. To split a Dataset into DataArrays use the split_dataset option of set_results.
 
 Deprecated
 ^^^^^^^^^^
@@ -30,6 +36,7 @@ Fixed
 ^^^^^
 
 - Fix error when deriving basin mask for subbasin with multiple xy.
+- Fix passing timeseries and crs for get_geodataset with vector driver
 
 v0.4.1 (18 May 2021)
 --------------------

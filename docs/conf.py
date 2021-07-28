@@ -104,6 +104,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
+    "sphinx.ext.intersphinx",
     "sphinx_autosummary_accessors",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
@@ -250,3 +251,18 @@ texinfo_documents = [
 #         | Interactive online version: :raw-html:`<a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/{{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>`
 #         __ https://github.com/Deltares/hydromt/blob/main/examples/{{ docname }}
 # """
+
+# -- INTERSPHINX -----------------------------------------------------------
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    # "numpy": ("https://numpy.org/doc/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
+    # "matplotlib": ("https://matplotlib.org/stable/", None),
+    # "dask": ("https://docs.dask.org/en/latest", None),
+    "rasterio": ("https://rasterio.readthedocs.io/en/latest", None),
+    "geopandas": ("https://geopandas.org", None),
+    "xarray": ("https://xarray.pydata.org/en/stable", None),
+}

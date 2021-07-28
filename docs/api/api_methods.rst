@@ -18,6 +18,7 @@ Reading methods
    io.open_raster_from_tindex
    io.open_vector
    io.open_vector_from_table
+   io.open_geodataset
    io.open_timeseries_from_table
 
 Raster writing methods
