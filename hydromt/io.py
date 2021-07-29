@@ -416,7 +416,7 @@ def open_vector(
         Parsed geometry file
     """
     filtered = False
-    driver = driver if driver is not None else fn.split(".")[-1].lower()
+    driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     else:
@@ -477,7 +477,7 @@ def open_vector_from_table(
     gdf: geopandas.GeoDataFrame
         Parsed and filtered point geometries
     """
-    driver = driver.lower() if driver is not None else fn.split(".")[-1].lower()
+    driver = driver.lower() if driver is not None else str(fn).split(".")[-1].lower()
     if "index_col" not in kwargs:
         kwargs.update(index_col=0)
     if driver in ["csv"]:
