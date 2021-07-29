@@ -8,6 +8,10 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 [Unreleased]
 ------------
 
+Fixed
+^^^^^
+- Fix bug in io.open_vector and io.open_vector_from_table with WindowsPath fn
+
 v0.4.2 (28 July 2021)
 ---------------------
 Noticeable changes include new import of model plugins and improvements of reading methods for tile index and geodataset.
