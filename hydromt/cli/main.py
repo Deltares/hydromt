@@ -180,14 +180,14 @@ def build(
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     kwargs.update(deltares_data=dd)
-    data_libs = data + tuple(kwargs.pop("data_libs", []))
+    if data:  # overwrite data_libs from config [global] section with command line
+        kwargs.update(data_libs=data)
     try:
         if model not in _models:
             raise ValueError(f"Model unknown : {model}, select from {_models}")
         # initialize model and create folder structure
         mod = model_plugins.load(ENTRYPOINTS[model], logger=logger)(
             root=model_root,
-            data_libs=data_libs,
             mode="w",
             logger=logger,
             **kwargs,
@@ -267,14 +267,14 @@ def update(
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     kwargs.update(deltares_data=dd)
-    data_libs = data + tuple(kwargs.pop("data_libs", []))
+    if data:  # overwrite data_libs from config [global] section with command line
+        kwargs.update(data_libs=data)
     try:
         if model not in _models:
             raise ValueError(f"Model unknown : {model}, select from {_models}")
         # initialize model and create folder structure
         mod = model_plugins.load(ENTRYPOINTS[model], logger=logger)(
             root=model_root,
-            data_libs=data_libs,  #  from data/data_sources.yml
             mode=mode,
             logger=logger,
             **kwargs,
