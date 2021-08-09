@@ -618,6 +618,7 @@ class XRasterBase(XGeoBase):
         ojb_out: xr.Dataset or xr.DataArray
             Output sample data
         """
+        # TODO: add method for line geometries
         if not np.all(gdf.geometry.type == "Point"):
             raise ValueError("Only point geometries accepted")
 
@@ -644,7 +645,7 @@ class XRasterBase(XGeoBase):
                     self.x_dim: xr.Variable(("index", "wdw"), cwdw),
                     self.y_dim: xr.Variable(("index", "wdw"), rwdw),
                 }
-            ).set_coords("mask")
+            )
         else:
             ds_sel = xr.Dataset(
                 {
@@ -653,15 +654,10 @@ class XRasterBase(XGeoBase):
                     self.x_dim: xr.Variable("index", c),
                     self.y_dim: xr.Variable("index", r),
                 }
-            ).set_coords("mask")
-        obj_out = self._obj.isel(ds_sel)
-        if True or np.any(obj_out["mask"]):
-            if isinstance(obj_out, xr.DataArray):
-                obj_out = obj_out.where(obj_out["mask"], obj_out.raster.nodata)
-            else:
-                for var in obj_out.data_vars:
-                    nodata = obj_out[var].raster.nodata
-                    obj_out[var] = obj_out[var].where(obj_out["mask"], nodata)
+            )
+        obj_out = self._obj.isel(ds_sel[[self.y_dim, self.x_dim]])
+        if np.any(~ds_sel["mask"]):  # mask out of domain points
+            obj_out = obj_out.raster.mask(ds_sel["mask"])
         return obj_out
 
     def zonal_stats(self, gdf, stats, all_touched=False):
