@@ -56,30 +56,30 @@ def merge(
     if merge_method == "first":
 
         def copyto(old_data, new_data, old_nodata, new_nodata):
-            mask = np.logical_and(old_nodata, ~new_nodata)
-            old_data[mask] = new_data[mask]
+            dmask = np.logical_and(old_nodata, ~new_nodata)
+            old_data[dmask] = new_data[dmask]
 
     elif merge_method == "last":
 
         def copyto(old_data, new_data, old_nodata, new_nodata):
-            mask = ~new_nodata
-            old_data[mask] = new_data[mask]
+            dmask = ~new_nodata
+            old_data[dmask] = new_data[dmask]
 
     elif merge_method == "min":
 
         def copyto(old_data, new_data, old_nodata, new_nodata):
-            mask = np.logical_and(~old_nodata, ~new_nodata)
-            old_data[mask] = np.minimum(old_data[mask], new_data[mask])
-            mask = np.logical_and(old_nodata, ~new_nodata)
-            old_data[mask] = new_data[mask]
+            dmask = np.logical_and(~old_nodata, ~new_nodata)
+            old_data[dmask] = np.minimum(old_data[dmask], new_data[dmask])
+            dmask = np.logical_and(old_nodata, ~new_nodata)
+            old_data[dmask] = new_data[dmask]
 
     elif merge_method == "max":
 
         def copyto(old_data, new_data, old_nodata, new_nodata):
-            mask = np.logical_and(~old_nodata, ~new_nodata)
-            old_data[mask] = np.maximum(old_data[mask], new_data[mask])
-            mask = np.logical_and(old_nodata, ~new_nodata)
-            old_data[mask] = new_data[mask]
+            dmask = np.logical_and(~old_nodata, ~new_nodata)
+            old_data[dmask] = np.maximum(old_data[dmask], new_data[dmask])
+            dmask = np.logical_and(old_nodata, ~new_nodata)
+            old_data[dmask] = new_data[dmask]
 
     elif merge_method == "new":
 
@@ -98,7 +98,7 @@ def merge(
     if dst_crs is None and (dst_bounds is not None or dst_res is not None):
         raise ValueError("dst_bounds and dst_res not understood without dst_crs.")
     idx0 = 0
-    if mask is not None and dst_res is None or dst_crs is None:
+    if mask is not None and (dst_res is None or dst_crs is None):
         # select array with largest overlap if mask is given
         areas = []
         for da in data_arrays:
