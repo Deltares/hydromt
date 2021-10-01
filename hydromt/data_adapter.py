@@ -60,7 +60,7 @@ class DataCatalog(object):
         self._used_data = []
         self.logger = logger
         for name, version in artifact_keys.items():
-            if version is None:
+            if version is None or not version:
                 continue
             if name == "deltares_data" and LooseVersion(version) <= LooseVersion(
                 "v0.0.4"
@@ -614,17 +614,18 @@ def _parse_data_dict(data_dict, root=None, category=None):
 
     # parse data
     data = dict()
-    elias_lst = []
+    alias_lst = []
     for name, source in sources.items():
-        if "elias" in source:
-            elias_lst.append(name)
+        if "alias" in source:
+            alias_lst.append(name)
+            continue
         if "path" not in source:
-            raise ValueError("Missing required path argument.")
+            raise ValueError(f"{name}: Missing required path argument.")
         data_type = source.pop("data_type", None)
         if data_type is None:
-            raise ValueError("Data type missing.")
+            raise ValueError(f"{name}: Data type missing.")
         elif data_type not in ADAPTERS:
-            raise ValueError(f"Data type unknown: {data_type}")
+            raise ValueError(f"{name}: Data type {data_type} unkonwn")
         adapter = ADAPTERS.get(data_type)
         path = abs_path(root, source.pop("path"))
         meta = source.pop("meta", {})
@@ -636,11 +637,11 @@ def _parse_data_dict(data_dict, root=None, category=None):
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
         data[name] = adapter(path=path, meta=meta, **source)
-    for elias in elias_lst:
-        name = sources[name]["elias"]
+    for alias in alias_lst:
+        name = sources[alias]["alias"]
         if name not in data:
-            raise ValueError(f"Elias {elias} -> {name} not found in data catalog.")
-        data[elias] = data[name]
+            raise ValueError(f"alias {alias} -> {name} not found in data catalog.")
+        data[alias] = data[name]
     return data
 
 
