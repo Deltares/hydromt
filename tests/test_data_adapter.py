@@ -9,21 +9,9 @@ import geopandas as gpd
 import xarray as xr
 import os
 import hydromt
-from hydromt.data_adapter import DataAdapter, parse_data_sources, DataCatalog
+from hydromt.data_adapter import DataAdapter, DataCatalog
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
-
-
-def test_parse_sources():
-    sources = parse_data_sources(join(TESTDATADIR, "test_sources.yml"))
-    assert isinstance(sources, dict)
-    assert np.all([isinstance(s, DataAdapter) for _, s in sources.items()])
-    with pytest.raises(ValueError, match="Unknown type for path argument"):
-        parse_data_sources(path=dict(test=False))
-    with pytest.raises(ValueError, match="Unknown type for root argument"):
-        parse_data_sources(path=TESTDATADIR, root=dict(test=False))
-    with pytest.raises(FileNotFoundError):
-        parse_data_sources("test_fail.yml")
 
 
 def test_data_catalog_io(tmpdir):
@@ -114,7 +102,7 @@ def test_geodataframe(geodf, tmpdir):
 
 
 def test_deltares_sources():
-    data_catalog = DataCatalog(deltares_data=True)
+    data_catalog = DataCatalog(deltares_data="v0.0.4")
     assert len(data_catalog._sources) > 0
     source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
     assert "wflow_global" in str(source0.path)
