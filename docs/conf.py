@@ -51,8 +51,7 @@ version = hydromt.__version__
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
 
-data_catalog = DataCatalog()
-data_catalog.from_deltares_sources()
+data_catalog = DataCatalog(deltares_data=True)
 df = data_catalog.to_dataframe()
 df.index = [
     f"`{k} <{url}>`__" if isinstance(url, str) else k

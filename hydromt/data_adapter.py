@@ -36,7 +36,7 @@ class DataCatalog(object):
     # root URL and version with data artifacts
     # url = f"{_url}/download/{_version}/<filename>"
     _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases"
-    _version = "v0.0.4"  # latest version
+    _version = "v0.0.5"  # latest version
 
     def __init__(self, data_libs=None, logger=logger, **artifact_keys):
         """Catalog of DataAdapter sources to easily read from different files
@@ -62,10 +62,10 @@ class DataCatalog(object):
         for name, version in artifact_keys.items():
             if version is None or not version:
                 continue
-            if name == "deltares_data" and LooseVersion(version) <= LooseVersion(
+            if isinstance(version, str) and LooseVersion(version) <= LooseVersion(
                 "v0.0.4"
             ):
-                name = "data_sources_deltares"
+                raise ValueError("The minimal support version is v0.0.5")
             self.from_artifacts(name=name, version=version)
         if data_libs is not None:
             for path in np.atleast_1d(data_libs):

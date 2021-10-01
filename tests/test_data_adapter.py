@@ -102,14 +102,14 @@ def test_geodataframe(geodf, tmpdir):
 
 
 def test_deltares_sources():
-    data_catalog = DataCatalog(deltares_data="v0.0.4")
+    data_catalog = DataCatalog(deltares_data="v0.0.5")
     assert len(data_catalog._sources) > 0
     source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
     assert "wflow_global" in str(source0.path)
 
 
 def test_artifact_sources():
-    data_catalog = DataCatalog(artifact_data="v0.0.3")
+    data_catalog = DataCatalog(artifact_data="v0.0.5")
     assert len(data_catalog._sources) > 0
     source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
     assert ".hydromt_data" in str(source0.path)
