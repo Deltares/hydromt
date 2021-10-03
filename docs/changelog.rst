@@ -20,6 +20,7 @@ Fixed
 improved
 ^^^^^^^^
 - generalize DataCatalog artifact kwargs to allow for multiple yml files from artifacts
+- use mamba for github actions 
 
 Deprecated
 ^^^^^^^^^^
