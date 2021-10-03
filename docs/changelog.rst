@@ -8,9 +8,24 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 [Unreleased]
 ------------
 
+New
+^^^
+- log hydromt_data.yml with write_datata_catalog (needs to be implemented in various plugins)
+
 Fixed
 ^^^^^
 - Fix bug in io.open_vector and io.open_vector_from_table with WindowsPath fn
+- Fix data_libs usage from [global] section of config in cli/main.py
+
+improved
+^^^^^^^^
+- generalize DataCatalog artifact kwargs to allow for multiple yml files from artifacts
+
+Deprecated
+^^^^^^^^^^
+- data_adapter.parse_data_sources method deprecated
+
+
 
 v0.4.2 (28 July 2021)
 ---------------------
