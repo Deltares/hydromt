@@ -84,7 +84,8 @@ def test_open_geodataset(tmpdir, geodf):
     ds = hydromt.open_geodataset(fn_gdf)
     assert isinstance(ds, xr.Dataset)
     assert len(ds.data_vars) == 0
-    assert np.all(geodf[["geometry"]] == ds.vector.to_gdf())
+    geodf1 = ds.vector.to_gdf()
+    assert np.all(geodf == geodf1[geodf.columns])
     # add timeseries
     ds = hydromt.open_geodataset(fn_gdf, fn_ts)
     assert name in ds.data_vars

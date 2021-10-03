@@ -326,7 +326,7 @@ class GeoDataArray(GeoBase):
     def to_gdf(self, reducer=None):
         """Return geopandas GeoDataFrame with Point geometry based on DataArray
         coordinates. If a reducer is passed the DataArray values are reduced along
-        the "time" dimension and saved in a column with same name as the DataArray.
+        all non-index dimensions and saved in a column with same name as the GeoDataFrame.
 
         Arguments
         ---------
@@ -340,6 +340,14 @@ class GeoDataArray(GeoBase):
         """
         gdf = gpd.GeoDataFrame(index=self.index, geometry=self.geometry, crs=self.crs)
         gdf.index.name = self.index_dim
+        # keep 1D variables with matching index_dim
+        sdims = [self.y_dim, self.x_dim, self.index_dim, "geometry"]
+        for name in self._obj.coords:
+            if name not in sdims and np.all(
+                np.array(self._obj[name].dims) == self.index_dim
+            ):
+                gdf[name] = self._obj[name].values
+        # keep reduced data variable
         if reducer is not None:
             name = self._obj.name if self._obj.name is not None else "values"
             dims = [dim for dim in self._obj.dims if dim != self.index_dim]
@@ -426,9 +434,9 @@ class GeoDataset(GeoBase):
         return list(self._obj.data_vars.keys())
 
     def to_gdf(self, reducer=None):
-        """Return geopandas GeoDataFrame with Point geometry based on DataArray
-        coordinates. If a reducer is passed the DataArray values are reduced along
-        the "time" dimension and saved in the "values" column.
+        """Return geopandas GeoDataFrame with Point geometry based on Dataset
+        coordinates. If a reducer is passed the Dataset variables are reduced along
+        the all non-index dimensions and to a GeoDataFrame column.
 
         Arguments
         ---------
@@ -442,6 +450,14 @@ class GeoDataset(GeoBase):
         """
         gdf = gpd.GeoDataFrame(index=self.index, geometry=self.geometry, crs=self.crs)
         gdf.index.name = self.index_dim
+        # keep 1D variables with matching index_dim
+        sdims = [self.y_dim, self.x_dim, self.index_dim, "geometry"]
+        for name in self._obj.reset_coords():
+            if name not in sdims and np.all(
+                np.array(self._obj[name].dims) == self.index_dim
+            ):
+                gdf[name] = self._obj[name].values
+        # keep reduced data variables
         if reducer is not None:
             for name in self.vars:
                 dims = [dim for dim in self._obj[name].dims if dim != self.index_dim]
