@@ -5,8 +5,8 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-[Unreleased]
-------------
+v0.4.3 (3 October 2021)
+-----------------------
 
 New
 ^^^
@@ -21,9 +21,10 @@ Fixed
 
 improved
 ^^^^^^^^
+- add alias option in data catalog yml files
 - generalize DataCatalog artifact kwargs to allow for multiple yml files from artifacts
-- use mamba for github actions 
 - keep geom attributes with <Dataset/DataArray>.vector.to_gdf method
+- use mamba for github actions 
 
 Deprecated
 ^^^^^^^^^^

@@ -170,3 +170,29 @@ To automatically reformat your code:
 .. code-block:: console
 
     $ black . 
+
+Creating a release
+^^^^^^^^^^^^^^^^^^
+
+1. Prepare the release by bumping the version number in the __init__.py and updating the docs/changelog.rst file
+2. First create a new release on github under https://github.com/Deltares/hydromt/releases. We use semantic versioning and describe the release based on the CHANGELOG.
+3. Make sure to update and clean your local git folder. This remmoves all files which are not tracked by git. 
+
+.. code-block:: console
+
+    $ git pull
+    $ git clean -xfd
+
+4. Build wheels and sdist for the package and check the resulting files in the dist/ directory.
+
+.. code-block:: console
+
+    $ flit build
+
+5. Then use publish to pypi. It will prompt you for your username and password.
+
+.. code-block:: console
+
+    $ flit publish --repository pypi
+
+6. Bump the version number in __init__.py to the next release number with ".dev" postfix and push commit
