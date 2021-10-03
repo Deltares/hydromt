@@ -38,9 +38,8 @@ class Model(object, metaclass=ABCMeta):
         mode="w",
         config_fn=None,
         data_libs=None,
-        deltares_data=None,
-        artifact_data=None,
         logger=logger,
+        **artifact_keys,
     ):
         from . import ENTRYPOINTS  # load within method to avoid circular imports
 
@@ -52,10 +51,7 @@ class Model(object, metaclass=ABCMeta):
 
         # link to data
         self.data_catalog = DataCatalog(
-            data_libs=data_libs,
-            deltares_data=deltares_data,
-            artifact_data=artifact_data,
-            logger=self.logger,
+            data_libs=data_libs, logger=self.logger, **artifact_keys
         )
 
         # placeholders
@@ -231,7 +227,7 @@ class Model(object, metaclass=ABCMeta):
         """
         if mode not in ["r", "r+", "w"]:
             raise ValueError(f'mode "{mode}" unknown, select from "r", "r+" or "w"')
-        old_root = getattr(self, "_root", None)
+        # old_root = getattr(self, "_root", None)
         self._root = root if root is None else abspath(root)
         self._read = mode.startswith("r")
         self._write = mode != "r"
@@ -249,6 +245,11 @@ class Model(object, metaclass=ABCMeta):
             # check directory
             elif not isdir(self._root):
                 raise IOError(f'model root not found at "{self._root}"')
+            # read hydromt_data yml file and add to data catalog
+            data_fn = join(self._root, "hydromt_data.yml")
+            if self._read and isfile(data_fn):
+                # read data and mark as used
+                self.data_catalog.from_yml(data_fn, mark_used=True)
 
     ## I/O
 
@@ -269,6 +270,20 @@ class Model(object, metaclass=ABCMeta):
 
     def _configwrite(self, fn):
         return config.configwrite(fn, self.config)
+
+    def write_data_catalog(self, root=None, used_only=True):
+        """Write the data catalog to `hydromt_data.yml`
+
+        Parameters
+        ----------
+        root: str, Path, optional
+            Global root for all relative paths in yml file.
+            If "auto" the data soruce paths are relative to the yml output ``path``.
+        used_only: bool
+            If True, export only data entries kept in used_data list.
+        """
+        path = join(self.root, "hydromt_data.yml")
+        self.data_catalog.to_yml(path, root=root, used_only=used_only)
 
     def read_config(self, config_fn=None):
         """Parse config from file. If no config file found a default config file is

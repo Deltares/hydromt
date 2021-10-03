@@ -28,7 +28,6 @@ Add data sources
    :toctree: ../_generated
 
    data_adapter.DataCatalog.from_artifacts
-   data_adapter.DataCatalog.from_deltares_sources
    data_adapter.DataCatalog.from_dict
    data_adapter.DataCatalog.from_yml
    data_adapter.DataCatalog.update

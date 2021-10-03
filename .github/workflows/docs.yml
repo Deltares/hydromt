@@ -27,8 +27,11 @@ jobs:
       - name: Setup environment
         uses: conda-incubator/setup-miniconda@v2
         with:
-          environment-file: envs/hydromt-dev.yml
           python-version: "3.9"
+          mamba-version: "*"
+          channels: conda-forge,defaults
+          channel-priority: true
+          environment-file: envs/hydromt-dev.yml
           activate-environment: hydromt-dev
 
       - name: Install hydromt

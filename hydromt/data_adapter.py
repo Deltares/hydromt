@@ -19,7 +19,9 @@ import yaml
 import pprint
 import logging
 import requests
+from urllib.parse import urlparse
 import shutil
+from distutils.version import LooseVersion
 
 from . import gis_utils, io
 
@@ -31,14 +33,12 @@ __all__ = [
 
 
 class DataCatalog(object):
-    # root URL and version with data source artifacts
+    # root URL and version with data artifacts
     # url = f"{_url}/download/{_version}/<filename>"
     _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases"
-    _version = "v0.0.4"  # latest version
+    _version = "v0.0.5"  # latest version
 
-    def __init__(
-        self, data_libs=None, deltares_data=None, artifact_data=None, logger=logger
-    ):
+    def __init__(self, data_libs=None, logger=logger, **artifact_keys):
         """Catalog of DataAdapter sources to easily read from different files
         and keep track of files which have been accessed.
 
@@ -49,24 +49,27 @@ class DataCatalog(object):
             to entries of the data catalog. By default the data catalog is initiated
             without data entries. See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
             for accepted yml format.
-        deltares_data: bool, str, optional
-            Deltares data version number, if True or version provided run :py:func:`~hydromt.data_adapter.DataCatalog.from_deltares_sources`
-            to parse available Deltares global datasets library yml files.
-        artifact_data: bool, str, optional
-            Artifact data version number, if True provided run :py:func:`~hydromt.data_adapter.DataCatalog.from_artifacts`
-            to parse available Deltares global datasets library yml files.
+        artifact_keys:
+            key-word arguments specifying the name and version of a hydroMT data artifact,
+            to get the latest version use `True` instead of a version. For instance,
+            to get the latest data catalog with Deltares Data use `deltares_data=True`;
+            to get the latest
+
         """
         self._sources = {}  # dictionary of DataAdapter
         self._used_data = []
         self.logger = logger
-        if artifact_data:
-            version = artifact_data if isinstance(artifact_data, str) else None
-            self.from_artifacts(version=version)
-        if deltares_data:
-            version = deltares_data if isinstance(deltares_data, str) else None
-            self.from_deltares_sources(version=version)
+        for name, version in artifact_keys.items():
+            if version is None or not version:
+                continue
+            if isinstance(version, str) and LooseVersion(version) <= LooseVersion(
+                "v0.0.4"
+            ):
+                raise ValueError("The minimal support version is v0.0.5")
+            self.from_artifacts(name=name, version=version)
         if data_libs is not None:
-            self.from_yml(data_libs)
+            for path in np.atleast_1d(data_libs):
+                self.from_yml(path)
 
     @property
     def sources(self):
@@ -107,55 +110,48 @@ class DataCatalog(object):
         for k, v in kwargs.items():
             self[k] = v
 
-    def from_artifacts(self, version=None):
-        """Add test data to data catalog.
-        The data is available on https://github.com/DirkEilander/hydromt-artifacts and
-        stored to to {user_home}/.hydromt/{version}/
-        """
-        # prepare url and paths
-        version = self._version if version is None else version
-        url = fr"{self._url}/download/{version}/data.tar.gz"
-        folder = join(Path.home(), ".hydromt_data", "data", version)
-        path_data = join(folder, "data.tar.gz")
-        path_yml = join(folder, "data_catalog.yml")
-        if not isdir(folder):
-            os.makedirs(folder)
-        # download data
-        if not isfile(path_data):
-            self.logger.info(f"Downloading file to {path_data}")
-            with requests.get(url, stream=True) as r:
-                with open(path_data, "wb") as f:
-                    shutil.copyfileobj(r.raw, f)
-        if not isfile(path_yml):
-            self.logger.debug(f"Unpacking data from {path_data}")
-            shutil.unpack_archive(path_data, dirname(path_data))
-        if not isfile(path_yml):
-            raise FileNotFoundError(f"Data catalog file not found: {path_yml}")
-        self.logger.info(f"Updating data sources from yml file {path_yml}")
-        self.from_yml(path_yml)
+    def from_artifacts(self, name=None, version=None):
+        """Read a catalog file from https://github.com/DirkEilander/hydromt-artifacts releases.
 
-    def to_yml(self, path, root=None):
-        """Write data catalog to yml format.
+        If no name is provided the artifact sample data is downloaded and
+        stored to to {user_home}/.hydromt/{version}/
 
         Parameters
         ----------
-        path: str, Path
-            yml oOutput path.
-        root: str, Path, optional
-            Global root for all relative paths in yml file.
-            If None the data soruce paths are relative to the yml output ``path``.
+        name: str, optional
+            Catalog name. If None (default) sample data is downloaded.
+        version: str, optional
+            Release version. By default it takes the latest known release.
         """
-        if root is None:
-            # set paths relative to yml file
-            root = os.path.dirname(path)
-            d = self.to_dict(root=root)
-            d.pop("root", None)  # remove absolute root path
+        #
+        version = version if isinstance(version, str) else self._version
+        if name is None or name == "artifact_data":
+            # prepare url and paths
+            url = fr"{self._url}/download/{version}/data.tar.gz"
+            folder = join(Path.home(), ".hydromt_data", "data", version)
+            path_data = join(folder, "data.tar.gz")
+            path = join(folder, "data_catalog.yml")
+            if not isdir(folder):
+                os.makedirs(folder)
+            # download data
+            if not isfile(path_data):
+                with requests.get(url, stream=True) as r:
+                    if r.status_code != 200:
+                        self.logger.error(f"Artifact data {version} not found at {url}")
+                        return
+                    self.logger.info(f"Downloading file to {path_data}")
+                    with open(path_data, "wb") as f:
+                        shutil.copyfileobj(r.raw, f)
+            if not isfile(path):
+                self.logger.debug(f"Unpacking data from {path_data}")
+                shutil.unpack_archive(path_data, dirname(path_data))
+            self.logger.info(f"Adding sample data {version} from artifacts")
         else:
-            d = self.to_dict(root=root)
-        with open(path, "w") as f:
-            yaml.dump(d, f, default_flow_style=False)
+            path = rf"{self._url}/download/{version}/{name}.yml"
+            self.logger.info(f"Adding {name} {version} sources from {path}")
+        self.from_yml(path)
 
-    def from_yml(self, path, root=None):
+    def from_yml(self, path, root=None, mark_used=False):
         """Add data sources based on yml file.
 
         Parameters
@@ -164,6 +160,8 @@ class DataCatalog(object):
             Path(s) to data source yml files.
         root: str, Path, optional
             Global root for all relative paths in yml file(s).
+        mark_used: bool
+            If True, append to used_data list.
 
         Examples
         --------
@@ -200,9 +198,20 @@ class DataCatalog(object):
                 paper_ref: <paper_ref>
                 paper_doi: <paper_doi>
         """
-        self.update(**parse_data_sources(path=path, root=root))
+        if uri_validator(path):
+            with requests.get(path, stream=True) as r:
+                if r.status_code != 200:
+                    raise IOError(f"URL {r.content}: {path}")
+                yml = yaml.load(r.text, Loader=yaml.FullLoader)
+        else:
+            with open(path, "r") as stream:
+                yml = yaml.load(stream, Loader=yaml.FullLoader)
+        # parse data
+        if root is None:
+            root = yml.pop("root", dirname(path))
+        self.from_dict(yml, root=root, mark_used=mark_used)
 
-    def from_dict(self, data_dict, root=None):
+    def from_dict(self, data_dict, root=None, mark_used=False):
         """Add data sources based on dictionary.
 
         Parameters
@@ -211,6 +220,8 @@ class DataCatalog(object):
             Dictionary of data_sources.
         root: str, Path, optional
             Global root for all relative paths in `data_dict`.
+        mark_used: bool
+            If True, append to used_data list.
 
         Examples
         --------
@@ -239,15 +250,35 @@ class DataCatalog(object):
             }
 
         """
-        self.update(**_parse_data_dict(data_dict, root=root))
+        category = data_dict.pop("category", None)
+        data_dict = _parse_data_dict(data_dict, root=root, category=category)
+        self.update(**data_dict)
+        if mark_used:
+            self._used_data.extend(list(data_dict.keys()))
 
-    def from_deltares_sources(self, version=None):
-        """Add global data sources from the Deltares network to the data catalog."""
-        version = self._version if version is None else version
-        url = rf"{self._url}/download/{version}/data_sources_deltares.yml"
-        with requests.get(url, stream=True) as r:
-            yml_str = r.text
-        return self.from_dict(yaml.load(yml_str, Loader=yaml.FullLoader))
+    def to_yml(self, path, root="auto", used_only=False):
+        """Write data catalog to yml format.
+
+        Parameters
+        ----------
+        path: str, Path
+            yml output path.
+        root: str, Path, optional
+            Global root for all relative paths in yml file.
+            If "auto" the data soruce paths are relative to the yml output ``path``.
+        used_only: bool
+            If True, export only data entries kept in used_data list.
+        """
+        if root == "auto":
+            # set paths relative to yml file
+            root = os.path.dirname(path)
+            d = self.to_dict(root=root)
+            d.pop("root", None)  # remove absolute root path
+        else:
+            source_names = self._used_data if used_only else []
+            d = self.to_dict(root=root, source_names=source_names)
+        with open(path, "w") as f:
+            yaml.dump(d, f, default_flow_style=False)
 
     def to_dict(self, source_names=[], root=None):
         """Return data catalog in dictionary format"""
@@ -348,7 +379,7 @@ class DataCatalog(object):
         data_catalog_out = DataCatalog()
         data_catalog_out._sources = sources_out
         fn = join(data_root, "data_catalog.yml")
-        data_catalog_out.to_yml(fn)
+        data_catalog_out.to_yml(fn, root="auto")
 
     def get_rasterdataset(
         self,
@@ -560,35 +591,6 @@ class DataCatalog(object):
         return obj
 
 
-def parse_data_sources(path=None, root=None):
-    """Parse data sources yml file.
-    For details see :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
-    """
-    # check path argument
-    if isinstance(path, (str, Path)):
-        path = [path]
-    elif not isinstance(path, (list, tuple)):
-        raise ValueError(f"Unknown type for path argument: {type(path).__name__}")
-    # check root argument
-    if isinstance(root, (str, Path)):
-        root = [root]
-    elif root is not None and not isinstance(root, (list, tuple)):
-        raise ValueError(f"Unknown type for root argument: {type(root).__name__}")
-    if root is not None and len(root) == 1 and len(path) > 1:
-        root = [root[0] for _ in range(len(path))]
-    # loop over yml files
-    data = dict()
-    for i in range(len(path)):
-        with open(path[i], "r") as stream:
-            yml = yaml.load(stream, Loader=yaml.FullLoader)
-        # read global root & category vars
-        path0 = yml.pop("root", dirname(path[i]))
-        path0 = path0 if root is None else root[i]
-        category = yml.pop("category", None)
-        data.update(**_parse_data_dict(yml, root=path0, category=category))
-    return data
-
-
 def _parse_data_dict(data_dict, root=None, category=None):
     """Parse data source dictionary."""
     # link yml keys to adapter classes
@@ -612,14 +614,18 @@ def _parse_data_dict(data_dict, root=None, category=None):
 
     # parse data
     data = dict()
+    alias_lst = []
     for name, source in sources.items():
+        if "alias" in source:
+            alias_lst.append(name)
+            continue
         if "path" not in source:
-            raise ValueError("Missing required path argument.")
+            raise ValueError(f"{name}: Missing required path argument.")
         data_type = source.pop("data_type", None)
         if data_type is None:
-            raise ValueError("Data type missing.")
+            raise ValueError(f"{name}: Data type missing.")
         elif data_type not in ADAPTERS:
-            raise ValueError(f"Data type unknown: {data_type}")
+            raise ValueError(f"{name}: Data type {data_type} unkonwn")
         adapter = ADAPTERS.get(data_type)
         path = abs_path(root, source.pop("path"))
         meta = source.pop("meta", {})
@@ -631,7 +637,20 @@ def _parse_data_dict(data_dict, root=None, category=None):
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
         data[name] = adapter(path=path, meta=meta, **source)
+    for alias in alias_lst:
+        name = sources[alias]["alias"]
+        if name not in data:
+            raise ValueError(f"alias {alias} -> {name} not found in data catalog.")
+        data[alias] = data[name]
     return data
+
+
+def uri_validator(x):
+    try:
+        result = urlparse(x)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
 
 
 def abs_path(root, rel_path):
@@ -1423,7 +1442,7 @@ class GeoDataFrameAdapter(DataAdapter):
             Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
         """
         kwargs.pop("time_tuple", None)
-        gdf = self.get_data(bbox=bbox, logger=logger)
+        gdf = self.get_data(bbox=bbox, variables=variables, logger=logger)
         if gdf.index.size == 0:
             return None, None
 

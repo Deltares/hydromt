@@ -148,7 +148,7 @@ def test_basin():
         buffer=1,
     )
     assert gdf_bas.index.size == 470
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 18425646855.41593)
+    assert np.isclose(gdf_bas.area.sum(), 1.0323381944444296)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -191,7 +191,6 @@ def test_basin():
         outlets=True,
     )
     assert gdf_bas.index.size == 180
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 59680812.46813557)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
