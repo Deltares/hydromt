@@ -1,5 +1,5 @@
-hydroMT: Build and analyze hydro models
-#######################################
+hydroMT: Build and analyze models like a data-wizard!
+#####################################################
 
 .. image:: https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH
     :target: https://codecov.io/gh/Deltares/hydromt
@@ -34,7 +34,7 @@ vector I/O and the pyflwdir_ data structure flow direction data.
 .. _xarray: https://xarray.pydata.org
 .. _geopandas: https://geopandas.org
 .. _rasterio: https://rasterio.readthedocs.io
-.. _pyflwdir: https://deltares.gitlab.io/wflow/pyflwdir
+.. _pyflwdir: https://deltares.github.io/pyflwdir
 
 Why hydroMT?
 ------------
