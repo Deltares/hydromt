@@ -16,11 +16,14 @@ Fixed
 ^^^^^
 - Fix bug in io.open_vector and io.open_vector_from_table with WindowsPath fn
 - Fix data_libs usage from [global] section of config in cli/main.py
+- Bugfix sampling for rasters with 'mask' coordinate
+- Bugfix logical operator in merge method
 
 improved
 ^^^^^^^^
 - generalize DataCatalog artifact kwargs to allow for multiple yml files from artifacts
 - use mamba for github actions 
+- keep geom attributes with <Dataset/DataArray>.vector.to_gdf method
 
 Deprecated
 ^^^^^^^^^^
