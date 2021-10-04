@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+
+Unreleased
+----------
+
+Fixed
+^^^^^
+- DataCatalog.to_yml Path objects written as normal strings 
+
+
 v0.4.3 (3 October 2021)
 -----------------------
 
