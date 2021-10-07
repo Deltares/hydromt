@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+unreleased
+----------
+
+New
+^^^
+- flw.d8_from_dem to derive a flow direction raster from a DEM
+- flw.reproject_hydrography_like to reproject flow direction raster data
+
+Deprecated
+^^^^^^^^^^
+- flw.gaugemap is replaced by flw.gauge_map for a more conistent interace of flw.*map methods
+- flw.basin_shape is redundant
+
 v0.4.3 (3 October 2021)
 -----------------------
 
