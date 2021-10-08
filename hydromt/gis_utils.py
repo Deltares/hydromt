@@ -14,6 +14,11 @@ from shapely.geometry.base import BaseGeometry
 from shapely.geometry import box
 import tempfile
 from pyflwdir import core_conversion, core_d8, core_ldd
+from pyflwdir import gis_utils as gis
+from typing import Optional
+
+
+__all__ = ["spread2d"]
 
 _R = 6371e3  # Radius of earth in m. Use 3956e3 for miles
 XATTRS = {
@@ -86,7 +91,7 @@ GDAL_DRIVER_CODE_MAP = {
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
 
-##
+## GEOM functions
 
 
 def filter_gdf(gdf, geom=None, bbox=None, predicate="intersects"):
@@ -172,8 +177,10 @@ def axes_attrs(crs):
     return x_dim, y_dim, x_attrs, y_attrs
 
 
-def meridian_offset(ds, x_name, bbox=None):
+def meridian_offset(ds, x_name="x", bbox=None):
     """re-arange data along x dim"""
+    if ds.raster.crs is None or ds.raster.crs.is_projected:
+        raise ValueError("The method is only applicable to geographic CRS")
     lons = np.copy(ds[x_name].values)
     w, e = lons.min(), lons.max()
     if bbox is not None and bbox[0] < w and bbox[0] < -180:  # 180W - 180E > 360W - 0W
@@ -184,8 +191,9 @@ def meridian_offset(ds, x_name, bbox=None):
         lons = np.where(lons > 180, lons - 360, lons)
     else:
         return ds
+    ds = ds.copy(deep=False)  # make sure not to overwrite original ds
     ds[x_name] = xr.Variable(ds[x_name].dims, lons)
-    return ds
+    return ds.sortby(x_name)
 
 
 # TRANSFORM
@@ -258,6 +266,72 @@ def cellres(lat, xres=1.0, yres=1.0):
     )
 
     return dx * xres, dy * yres
+
+
+## SPREAD
+
+
+def spread2d(
+    da_obs: xr.DataArray,
+    nodata: Optional[float] = None,
+    da_mask: Optional[xr.DataArray] = None,
+    da_friction: Optional[xr.DataArray] = None,
+) -> xr.Dataset:
+    """Returns values of `da_obs` spreaded to cells with `nodata` value within `da_mask`,
+    powered by :py:meth:`pyflwdir.gis_utils.spread2d`
+
+    Parameters
+    ----------
+    da_obs : xarray.DataArray
+        Input raster with observation values and background/nodata values which are
+        filled by the spreading algorithm.
+    nodata : float, optional
+        Nodata or background value. Must be finite numeric value. If not given the
+        raster nodata value is used.
+    da_mask :  xarray.DataArray, optional
+        Mask of cells to fill with the spreading algorithm, by default None
+    da_friction :  xarray.DataArray, optional
+        Friction values used by the spreading algorithm to calcuate the friction
+        distance, by default None
+
+    Returns
+    -------
+    ds_out: xarray.Dataset
+        Dataset with spreaded source values, linear index of the source cell "source_idx"
+        and friction distance to the source cell "source_dst".
+    """
+    nodata = da_obs.raster.nodata if nodata is None else nodata
+    if nodata is None or np.isnan(nodata):
+        raise ValueError(f'"nodata" must be a finite value, not {nodata}')
+    msk, frc = None, None
+    if da_mask is not None:
+        assert da_obs.raster.identical_grid(da_mask)
+        msk = da_mask.values
+    if da_friction is not None:
+        assert da_obs.raster.identical_grid(da_friction)
+        frc = da_friction.values
+    out, src, dst = gis.spread2d(
+        obs=da_obs.values,
+        msk=msk,
+        frc=frc,
+        nodata=da_obs.raster.nodata if nodata is None else nodata,
+        latlon=da_obs.raster.crs.is_geographic,
+        transform=da_obs.raster.transform,
+    )
+    # combine outputs and return as dataset
+    dims = da_obs.raster.dims
+    coords = da_obs.raster.coords
+    name = da_obs.name if da_obs.name else "source_value"
+    da_out = xr.DataArray(dims=dims, coords=coords, data=out, name=name)
+    da_out.raster.attrs.update(**da_obs.attrs)  # keep attrs incl nodata and unit
+    da_src = xr.DataArray(dims=dims, coords=coords, data=src, name="source_idx")
+    da_src.raster.set_nodata(-1)
+    da_dst = xr.DataArray(dims=dims, coords=coords, data=dst, name="source_dst")
+    da_dst.raster.set_nodata(-1)
+    da_dst.attrs.update(unit="m")
+    ds_out = xr.merge([da_out, da_src, da_dst])
+    ds_out.raster.set_crs(da_obs.raster.crs)
+    return ds_out
 
 
 ## PCRASTER
