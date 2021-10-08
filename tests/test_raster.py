@@ -208,6 +208,9 @@ def test_reproject():
     ds0 = da0.to_dataset()
     ds1 = raster.full_from_transform(*testdata[1], **kwargs).to_dataset()
     assert np.all(ds1.raster.bounds == ds1.raster.transform_bounds(ds1.raster.crs))
+    # flipud
+    assert ds1.raster.flipud().raster.res[1] == -ds1.raster.res[1]
+    # reproject nearest index
     ds2 = ds1.raster.reproject(dst_crs=3857, method="nearest_index")
     assert ds2.raster.crs.to_epsg() == 3857
     ds2 = ds1.raster.reproject(dst_crs=3857, dst_res=1000, align=True)
@@ -240,6 +243,22 @@ def test_reproject():
     ds1.raster.set_attrs(crs_wkt=None)
     with pytest.raises(ValueError, match="CRS is missing"):
         ds1.raster.reproject(dst_crs=3857)
+
+
+def test_area_grid(rioda):
+    # latlon
+    area = rioda.raster.area_grid()
+    assert area.std() > 0  # cells have different area
+    # test dataset
+    assert np.all(rioda.to_dataset().raster.area_grid() == area)
+    # test projected crs
+    rioda_proj = rioda.copy()
+    rioda_proj.raster.set_crs(3857)
+    area1 = rioda_proj.raster.area_grid()
+    assert np.all(area1 == 0.25)
+    # density
+    assert np.all(rioda.raster.density_grid() == rioda / area)
+    assert np.all(rioda_proj.raster.density_grid() == rioda_proj / area1)
 
 
 def test_interpolate_na():

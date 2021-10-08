@@ -23,6 +23,7 @@ __all__ = [
     "basin_map",
     "outlet_map",
     "clip_basins",
+    "upscale_flwdir",
 ]
 
 ### FLWDIR METHODS ###

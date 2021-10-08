@@ -12,6 +12,9 @@ New
 ^^^
 - flw.d8_from_dem to derive a flow direction raster from a DEM
 - flw.reproject_hydrography_like to reproject flow direction raster data
+- raster.flipud method to flip data along y-axis
+- raster.area_grid to get the raster cell areas [m2]
+- raster.density_grid to convert the values to [unit/m2]
 
 Deprecated
 ^^^^^^^^^^

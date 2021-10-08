@@ -32,10 +32,7 @@ def test_upscale(hydds, flwdir):
     assert np.all([v in flwda1.coords for v in ["x_out", "y_out", "idx_out"]])
 
 
-def test_reproject_flwdir(
-    hydds,
-    demda,
-):
+def test_reproject_flwdir(hydds, demda):
     demda_reproj = demda.raster.reproject(dst_crs=4326)
     hydds1 = flw.reproject_hydrography_like(hydds, demda_reproj)
     assert hydds1.raster.crs == demda_reproj.raster.crs
