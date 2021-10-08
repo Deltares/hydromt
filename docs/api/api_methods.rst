@@ -259,6 +259,7 @@ General GIS methods
 .. autosummary::
    :toctree: ../_generated
    
+   gis_utils.spread2d
    gis_utils.parse_crs
    gis_utils.utm_crs
    gis_utils.affine_to_coords
