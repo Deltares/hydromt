@@ -371,7 +371,9 @@ def gaugemap(ds, idxs=None, xy=None, ids=None, mask=None, flwdir=None, logger=lo
     )
 
 
-def gauge_map(ds, idxs=None, xy=None, ids=None, mask=None, flwdir=None, logger=logger):
+def gauge_map(
+    ds, idxs=None, xy=None, ids=None, stream=None, flwdir=None, logger=logger
+):
     """Return map with unique gauge IDs. Initial gauge locations are snapped to the
     nearest downstream river defined by mask if both `flwdir` and `mask` are provided.
 
@@ -407,8 +409,8 @@ def gauge_map(ds, idxs=None, xy=None, ids=None, mask=None, flwdir=None, logger=l
         ids = np.arange(1, idxs.size + 1, dtype=np.int32)
     # Snapping
     # TODO: should we do the snapping similar to basin_map ??
-    if mask is not None and flwdir is not None:
-        idxs, dist = flwdir.snap(idxs=idxs, mask=mask, unit="m")
+    if stream is not None and flwdir is not None:
+        idxs, dist = flwdir.snap(idxs=idxs, mask=stream, unit="m")
         if np.any(dist > 10000):
             far = len(dist[dist > 10000])
             logger.warn(f"Snapping distance of {far} gauge(s) is > 10km")
