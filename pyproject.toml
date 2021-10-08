@@ -20,7 +20,7 @@ dependencies = [
     "numpy",
     "netcdf4",
     "pandas",
-    "pyflwdir>=0.5.1",
+    "pyflwdir>=0.5.0",
     "pygeos",
     "openpyxl",
     "rasterio",

@@ -15,7 +15,7 @@ New
 - raster.flipud method to flip data along y-axis
 - raster.area_grid to get the raster cell areas [m2]
 - raster.density_grid to convert the values to [unit/m2]
-- gis_utils.spread2d method
+- gis_utils.spread2d method wrapping its pyflwdir equivalent
 
 Deprecated
 ^^^^^^^^^^
