@@ -301,6 +301,9 @@ class DataCatalog(object):
                     source_dict["path"] = os.path.relpath(
                         source_dict["path"], root
                     ).replace("\\", "/")
+            else:
+                # convert windows path to str
+                source_dict["path"] = str(source_dict["path"])
             sources_out.update({name: source_dict})
         return sources_out
 
