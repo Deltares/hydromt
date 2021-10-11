@@ -360,7 +360,15 @@ def get_basin_geometry(
             gdf_match = np.isin(gdf_bas["basid"], basid)
             gdf_bas = gdf_bas.loc[gdf_match]
             if gdf_bas.index.size > 0:
-                total_bounds = gdf_bas.total_bounds
+                xminbas, yminbas, xmaxbas, ymaxbas = gdf_bas.total_bounds
+                # Check that total_bounds is at least bigger than original geom bounds
+                xmingeom, ymingeom, xmaxgeom, ymaxgeom = geom.total_bounds
+                total_bounds = [
+                    min(xminbas, xmingeom),
+                    min(yminbas, ymingeom),
+                    max(xmaxbas, xmaxgeom),
+                    max(ymaxbas, ymaxgeom),
+                ]
                 ds = ds[dvars].raster.clip_bbox(total_bounds, buffer=0)
             elif np.any(gdf_match):
                 logger.warn("No matching basin IDs found in basin geometries.")
