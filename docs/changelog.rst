@@ -17,6 +17,10 @@ Added
 - raster.density_grid to convert the values to [unit/m2]
 - gis_utils.spread2d method wrapping its pyflwdir equivalent
 
+Fixed
+^^^^^
+- DataCatalog.to_yml Path objects written as normal strings 
+
 Deprecated
 ^^^^^^^^^^
 - flw.gaugemap is replaced by flw.gauge_map for a more conistent interace of flw.*map methods
