@@ -21,7 +21,7 @@ dependencies:
   - openpyxl
   - pandas
   - pcraster # optional
-  - pyflwdir>=0.4.7
+  - pyflwdir>=0.5.0
   - pygeos>=0.8
   - pytest # tests
   - pytest-cov # tests
