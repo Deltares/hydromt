@@ -5,21 +5,40 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-
 Unreleased
 ----------
+
+Added
+^^^^^
+- flw.d8_from_dem to derive a flow direction raster from a DEM
+- flw.reproject_hydrography_like to reproject flow direction raster data
+- raster.flipud method to flip data along y-axis
+- raster.area_grid to get the raster cell areas [m2]
+- raster.density_grid to convert the values to [unit/m2]
+- gis_utils.spread2d method wrapping its pyflwdir equivalent
 
 Fixed
 ^^^^^
 - DataCatalog.to_yml Path objects written as normal strings 
 
+Deprecated
+^^^^^^^^^^
+- flw.gaugemap is replaced by flw.gauge_map for a more conistent interace of flw.*map methods
+- flw.basin_shape is redundant
 
 v0.4.3 (3 October 2021)
 -----------------------
 
-New
-^^^
+Added
+^^^^^
 - log hydromt_data.yml with write_datata_catalog (needs to be implemented in various plugins)
+- add alias option in data catalog yml files
+- use mamba for github actions 
+
+Changed
+^^^^^^^
+- generalize DataCatalog artifact kwargs to allow for multiple yml files from artifacts
+- keep geom attributes with <Dataset/DataArray>.vector.to_gdf method
 
 Fixed
 ^^^^^
@@ -27,13 +46,6 @@ Fixed
 - Fix data_libs usage from [global] section of config in cli/main.py
 - Bugfix sampling for rasters with 'mask' coordinate
 - Bugfix logical operator in merge method
-
-improved
-^^^^^^^^
-- add alias option in data catalog yml files
-- generalize DataCatalog artifact kwargs to allow for multiple yml files from artifacts
-- keep geom attributes with <Dataset/DataArray>.vector.to_gdf method
-- use mamba for github actions 
 
 Deprecated
 ^^^^^^^^^^

@@ -95,6 +95,10 @@ General methods
    DataArray.raster.aligned_grid
    DataArray.raster.idx_to_xy
    DataArray.raster.xy_to_idx
+   DataArray.raster.flipud
+   DataArray.raster.area_grid
+   DataArray.raster.densitity_grid
+
 
 Nodata handling and interpolation
 ---------------------------------
@@ -232,16 +236,21 @@ Low-level methods
 Flow direction methods
 ======================
 
+These methods are based on the pyflwdir library. For more flow direction based methods
+visit the `pyflwdir docs. <https://deltares.github.io/pyflwdir/latest/>`_
 
 .. autosummary::
    :toctree: ../_generated
 
    flw.flwdir_from_da
-   flw.gaugemap
-   flw.basin_map
-   flw.basin_shape
-   flw.clip_basins
+   flw.d8_from_dem
+   flw.reproject_hydrography_like
    flw.upscale_flwdir
+   flw.stream_map
+   flw.basin_map
+   flw.gauge_map
+   flw.outlet_map
+   flw.clip_basins
 
 
 General GIS methods
@@ -250,6 +259,7 @@ General GIS methods
 .. autosummary::
    :toctree: ../_generated
    
+   gis_utils.spread2d
    gis_utils.parse_crs
    gis_utils.utm_crs
    gis_utils.affine_to_coords

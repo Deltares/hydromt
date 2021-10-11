@@ -483,6 +483,11 @@ class XRasterBase(XGeoBase):
             bounds = self.bounds
         return bounds
 
+    def flipud(self):
+        """Returns raster flipped along y-axis"""
+        yrev = list(reversed(self.ycoords))
+        return self._obj.reindex({self.y_dim: yrev})
+
     def rowcol(self, xs, ys, mask=None, mask_outside=False, nodata=-1):
         """Return row, col indices of x, y coordinates
 
@@ -972,6 +977,53 @@ class XRasterBase(XGeoBase):
                 right = w + (j + 1) * dx
                 cells.append(box(left, bottom, right, top))
         return gpd.GeoDataFrame(geometry=cells, crs=self.crs)
+
+    def area_grid(self, dtype=np.float32):
+        """Returns the grid cell area [m2].
+
+        Returns
+        -------
+        da_area : xarray.DataArray
+            Grid cell surface area [m2].
+        """
+        if self.crs.is_geographic:
+            data = gis_utils.reggrid_area(self.ycoords.values, self.xcoords.values)
+        elif self.crs.is_projected:
+            xres = abs(self.res[0]) * self.crs.linear_units_factor[1]
+            yres = abs(self.res[1]) * self.crs.linear_units_factor[1]
+            data = np.full(self.shape, xres * yres)
+        da_area = xr.DataArray(
+            data=data.astype(dtype), coords=self.coords, dims=self.dims
+        )
+        da_area.raster.set_nodata(0)
+        da_area.raster.set_crs(self.crs)
+        da_area.attrs.update(unit="m2")
+        return da_area.rename("area")
+
+    def density_grid(self):
+        """Returns the density in [unit/m2] of raster(s). The cell areas are calculated
+        using :py:meth:`~hydromt.raster.XRasterBase.area_grid`.
+
+        Returns
+        -------
+        ds_out: xarray.DataArray or xarray.DataSet
+            The density in [unit/m2] of the raster.
+        """
+
+        # Create a grid that contains the area in m2 per grid cell.
+        if self.crs.is_geographic:
+            area = self.area_grid()
+
+        elif self.crs.is_projected:
+            xres = abs(self.res[0]) * self.crs.linear_units_factor[1]
+            yres = abs(self.res[1]) * self.crs.linear_units_factor[1]
+            area = xres * yres
+
+        # Create a grid that contains the density in unit/m2 per grid cell.
+        unit = self._obj.attrs.get("unit", "")
+        ds_out = self._obj / area
+        ds_out.attrs.update(unit=f"{unit}.m-2")
+        return ds_out
 
     def _dst_transform(
         self,

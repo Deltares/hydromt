@@ -23,7 +23,7 @@ dependencies:
   - openpyxl
   - pandas
   - pip
-  - pyflwdir>=0.4.7
+  - pyflwdir>=0.5.0
   - pygeos>=0.8
   - python>=3.8
   - rasterio
