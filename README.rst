@@ -12,7 +12,7 @@ hydroMT: Build and analyze models like a data-wizard!
     :target: https://deltares.github.io/hydromt/stable
     :alt: Stable docs last release
 
-.. image:: https://pypip.in/v/hydromt/badge.png
+.. image:: https://badge.fury.io/py/hydromt.svg
     :target: https://pypi.org/project/hydromt/
     :alt: Latest PyPI version
 
