@@ -199,4 +199,4 @@ def test_basin():
         bbox=[12.8, 45.55, 12.9, 45.65],
         outlets=True,
     )
-    assert gdf_bas.index.size == 92
+    assert gdf_bas.index.size == 180

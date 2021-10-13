@@ -20,6 +20,7 @@ Added
 Fixed
 ^^^^^
 - DataCatalog.to_yml Path objects written as normal strings 
+- Bugfix in basin_mask.get_basin_geometry when using bbox or geom arguments
 
 Deprecated
 ^^^^^^^^^^
