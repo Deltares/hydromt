@@ -138,6 +138,9 @@ class Model(object, metaclass=ABCMeta):
 
         # then loop over other methods
         for method in opt:
+            # if any write_* functions are present in opt, skip the final self.write() call
+            if method.startswith("write_"):
+                write = False
             self._run_log_method(method, **opt[method])
 
         # write
@@ -198,6 +201,9 @@ class Model(object, metaclass=ABCMeta):
         # loop over other methods from ini file
         self._run_log_method("setup_config", **opt.pop("setup_config", {}))
         for method in opt:
+            # if any write_* functions are present in opt, skip the final self.write() call
+            if method.startswith("write_"):
+                write = False
             self._run_log_method(method, **opt[method])
 
         # write
