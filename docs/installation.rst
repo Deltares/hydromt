@@ -78,7 +78,7 @@ Known model plugin packages linked to HydroMT are:
 - `hydromt_delwaq <https://github.com/Deltares/hydromt_delwaq>`_ for delwaq
 - `hydromt_fiat <https://github.com/Deltares/hydromt_fiat>`_ for fiat
 - `hydromt_ribasim <https://github.com/Deltares/hydromt_ribasim>`_ for ribasim
-- `hydromt_sphincs <https://github.com/Deltares/hydromt_sfincs>`_ for sphincs
+- `hydromt_sfincs <https://github.com/Deltares/hydromt_sfincs>`_ for SFINCS
 - `hydromt_wflow <https://github.com/Deltares/hydromt_wflow>`_ for wflow and wflow_sediment
 
 You can follow installation instructions of the different plugins in their own documentation pages (same steps as for the core).
