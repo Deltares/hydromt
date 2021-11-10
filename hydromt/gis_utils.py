@@ -12,13 +12,16 @@ from osgeo import gdal
 import geopandas as gpd
 from shapely.geometry.base import BaseGeometry
 from shapely.geometry import box
+import pygeos
 import tempfile
+import logging
 from pyflwdir import core_conversion, core_d8, core_ldd
 from pyflwdir import gis_utils as gis
-from typing import Optional
+from typing import Optional, Tuple
 
+__all__ = ["spread2d", "nearest", "nearest_merge"]
 
-__all__ = ["spread2d"]
+logger = logging.getLogger(__name__)
 
 _R = 6371e3  # Radius of earth in m. Use 3956e3 for miles
 XATTRS = {
@@ -92,6 +95,104 @@ GDAL_DRIVER_CODE_MAP = {
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
 
 ## GEOM functions
+
+
+def nearest_merge(
+    gdf1: gpd.GeoDataFrame,
+    gdf2: gpd.GeoDataFrame,
+    columns: Optional[list] = None,
+    max_dist: Optional[float] = None,
+    overwrite: bool = False,
+    inplace: bool = False,
+    logger=logger,
+) -> gpd.GeoDataFrame:
+    """Merge attributes of gdf2 with the nearest feature of gdf1, optionally bounded by
+    a maximumum distance `max_dist`. Unless `overwrite = True`, gdf2 values are only
+    merged where gdf1 has missing values.
+
+    Parameters
+    ----------
+    gdf1, gdf2: geopandas.GeoDataFrame
+        Source `gdf1` and destination `gdf2` geometries.
+    columns : list of str, optional
+        Names of columns in `gdf2` to merge, by default None
+    max_dist : float, optional
+        Maximum distance threshold for merge, by default None, i.e.: no threshold.
+    overwrite : bool, optional
+        If False (default) gdf2 values are only merged where gdf1 has missing values,
+        i.e. NaN values for existing columns or missing columns.
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Merged GeoDataFrames
+    """
+    idx_nn, dst = nearest(gdf1, gdf2)
+    if not inplace:
+        gdf1 = gdf1.copy()
+    valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
+    columns = gdf2.columns if columns is None else columns
+    gdf1["distance_right"] = dst
+    gdf1["index_right"] = -1
+    gdf1.loc[valid, "index_right"] = idx_nn[valid]
+    skip = ["geometry"]
+    for col in columns:
+        if col in skip or col not in gdf2:
+            if col not in gdf2:
+                logger.warning(f"Column {col} not found in gdf2 and skipped.")
+            continue
+        new_vals = gdf2.loc[idx_nn[valid], col].values
+        if col in gdf1 and not overwrite:
+            old_vals = gdf1.loc[valid, col]
+            replace = np.logical_or(old_vals.isnull(), old_vals.eq(""))
+            new_vals = np.where(replace, new_vals, old_vals)
+        gdf1.loc[valid, col] = new_vals
+    return gdf1
+
+
+def nearest(
+    gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return the index of and distance [m] to the nearest geometry
+    in `gdf2` for each geometry of `gdf1`. For Line geometries in `gdf1` the nearest
+    geometry is based line center point and for polygons on its representative point.
+    Mixed geometry types are not yet supported.
+
+    Note: Since geopandas v0.10.0 it contains a sjoin_nearest method which is very
+    similar and should.
+
+
+    Parameters
+    ----------
+    gdf1, gdf2: geopandas.GeoDataFrame
+        Source `gdf1` and destination `gdf2` geometries.
+
+    Returns
+    -------
+    index: ndarray
+        index of nearest `gdf2` geometry
+    dst: ndarray of float
+        distance to the nearest `gdf2` geometry
+    """
+    if np.all(gdf1.type == "Point"):
+        pnts = gdf1.geometry.copy()
+    elif np.all(np.isin(gdf1.type, ["LineString", "MultiLineString"])):
+        pnts = gdf1.geometry.interpolate(0.5, normalized=True)  # mid point
+    elif np.all(np.isin(gdf1.type, ["Polygon", "MultiPolygon"])):
+        pnts = gdf1.geometry.representative_point()  # inside polygon
+    else:
+        raise NotImplementedError("Mixed geometry dataframes are not yet supported.")
+    if gdf1.crs != gdf2.crs:
+        pnts = pnts.to_crs(gdf2.crs)
+    # find nearest using pygeos
+    idx = gdf2.sindex.nearest(pygeos.from_shapely(pnts.geometry.values))[1]
+    # get distance in meters
+    gdf2_nearest = gdf2.iloc[idx]
+    if gdf2_nearest.crs.is_geographic:
+        pnts = pnts.to_crs(3857)  # web mercator
+        gdf2_nearest = gdf2_nearest.to_crs(3857)
+    dst = gdf2_nearest.distance(pnts, align=False).values
+    return gdf2.index.values[idx], dst
 
 
 def filter_gdf(gdf, geom=None, bbox=None, predicate="intersects"):

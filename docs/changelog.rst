@@ -15,7 +15,8 @@ Added
 - raster.flipud method to flip data along y-axis
 - raster.area_grid to get the raster cell areas [m2]
 - raster.density_grid to convert the values to [unit/m2]
-- gis_utils.spread2d method wrapping its pyflwdir equivalent
+- gis_utils.spread2d method (wrapping its pyflwdir equivalent) to spread values on a raster
+- gis_utils.nearest and gis_utils.nearest_merge methods to merge GeoDataFrame based on proximity
 
 Changed
 ^^^^^^^
