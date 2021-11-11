@@ -17,6 +17,8 @@ Added
 - raster.density_grid to convert the values to [unit/m2]
 - gis_utils.spread2d method (wrapping its pyflwdir equivalent) to spread values on a raster
 - gis_utils.nearest and gis_utils.nearest_merge methods to merge GeoDataFrame based on proximity
+- river_width to estimate a segment average river width based on a river mask raster 
+- river_depth to get segment average river depth estimates based bankfull discharge (requires pyflwdir v0.5.2)
 
 Changed
 ^^^^^^^

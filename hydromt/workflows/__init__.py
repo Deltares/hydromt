@@ -4,3 +4,4 @@
 from .basemaps import *
 from .basin_mask import *
 from .forcing import *
+from .rivers import *

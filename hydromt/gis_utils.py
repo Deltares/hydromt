@@ -374,9 +374,9 @@ def cellres(lat, xres=1.0, yres=1.0):
 
 def spread2d(
     da_obs: xr.DataArray,
-    nodata: Optional[float] = None,
     da_mask: Optional[xr.DataArray] = None,
     da_friction: Optional[xr.DataArray] = None,
+    nodata: Optional[float] = None,
 ) -> xr.Dataset:
     """Returns values of `da_obs` spreaded to cells with `nodata` value within `da_mask`,
     powered by :py:meth:`pyflwdir.gis_utils.spread2d`
@@ -386,14 +386,14 @@ def spread2d(
     da_obs : xarray.DataArray
         Input raster with observation values and background/nodata values which are
         filled by the spreading algorithm.
-    nodata : float, optional
-        Nodata or background value. Must be finite numeric value. If not given the
-        raster nodata value is used.
     da_mask :  xarray.DataArray, optional
         Mask of cells to fill with the spreading algorithm, by default None
     da_friction :  xarray.DataArray, optional
         Friction values used by the spreading algorithm to calcuate the friction
         distance, by default None
+    nodata : float, optional
+        Nodata or background value. Must be finite numeric value. If not given the
+        raster nodata value is used.
 
     Returns
     -------
