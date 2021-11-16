@@ -757,11 +757,10 @@ class DataAdapter(object, metaclass=ABCMeta):
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
         for date, var in product(dates, vrs):
-            root, bname = dirname(self.path), basename(self.path)
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            bname = bname.format(year=yr, month=mth, variable=var)
-            fns.extend(glob.glob(join(root, bname)))
+            path = self.path.format(year=yr, month=mth, variable=var)
+            fns.extend(glob.glob(path))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {self.path}")
         return list(set(fns))  # return unique paths

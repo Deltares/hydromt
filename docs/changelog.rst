@@ -32,6 +32,7 @@ Fixed
 - DataCatalog.to_yml Path objects written as normal strings 
 - Bugfix in basin_mask.get_basin_geometry when using bbox or geom arguments
 - Bugfix DataAdapter.__init__ setting None value in meta data
+- Bugfix DataAdapter.resolve_paths with argument in root
 
 Deprecated
 ^^^^^^^^^^
