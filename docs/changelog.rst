@@ -26,6 +26,7 @@ Changed
   a the global write method is skipped.
 - default GTiff lwz compression with DataCatalog.export_data method
 - rename DataAdapter.export_data to DataAdapter.to_file to avoid confusion with DataCatalog.export_data method
+- allow "alias" with attributes in DataCatalog yml files / dictionaries
 
 Fixed
 ^^^^^

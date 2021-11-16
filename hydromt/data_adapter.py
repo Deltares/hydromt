@@ -617,11 +617,15 @@ def _parse_data_dict(data_dict, root=None, category=None):
 
     # parse data
     data = dict()
-    alias_lst = []
     for name, source in sources.items():
         if "alias" in source:
-            alias_lst.append(name)
-            continue
+            alias = source.pop("alias")
+            if alias not in sources:
+                raise ValueError(f"alias {alias} not found in sources.")
+            # use alias source but overwrite any attributes with original source
+            source_org = source.copy()
+            source = sources[alias].copy()
+            source.update(source_org)
         if "path" not in source:
             raise ValueError(f"{name}: Missing required path argument.")
         data_type = source.pop("data_type", None)
@@ -640,11 +644,6 @@ def _parse_data_dict(data_dict, root=None, category=None):
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
         data[name] = adapter(path=path, meta=meta, **source)
-    for alias in alias_lst:
-        name = sources[alias]["alias"]
-        if name not in data:
-            raise ValueError(f"alias {alias} -> {name} not found in data catalog.")
-        data[alias] = data[name]
     return data
 
 
@@ -759,7 +758,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         for date, var in product(dates, vrs):
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            path = self.path.format(year=yr, month=mth, variable=var)
+            path = str(self.path).format(year=yr, month=mth, variable=var)
             fns.extend(glob.glob(path))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {self.path}")
@@ -905,7 +904,7 @@ class RasterDatasetAdapter(DataAdapter):
             raise ValueError(f"RasterDataset: Driver {driver} unknown.")
         else:
             ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
-            if driver == "GTiff" and "zlib" not in kwargs:
+            if driver == "GTiff" and "compress" not in kwargs:
                 kwargs.update(compress="lzw")  # default lzw compression
             if isinstance(obj, xr.DataArray):
                 fn_out = join(data_root, f"{data_name}.{ext}")
