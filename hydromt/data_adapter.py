@@ -353,7 +353,7 @@ class DataCatalog(object):
                     unit_add = source.unit_add
                     source.unit_mult = {}
                     source.unit_add = {}
-                fn_out, driver = source.export_data(
+                fn_out, driver = source.to_file(
                     data_root=data_root,
                     data_name=key,
                     bbox=bbox,
@@ -841,7 +841,7 @@ class RasterDatasetAdapter(DataAdapter):
         # TODO: see if the units argument can be solved with unit_mult/unit_add
         self.units = units
 
-    def export_data(
+    def to_file(
         self,
         data_root,
         data_name,
@@ -852,7 +852,7 @@ class RasterDatasetAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Export a data slice to file.
+        """Save a data slice to file.
 
         Parameters
         ----------
@@ -895,9 +895,10 @@ class RasterDatasetAdapter(DataAdapter):
         # write using various writers
         if driver in ["netcdf"]:  # TODO complete list
             fn_out = join(data_root, f"{data_name}.nc")
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
-            encoding = {k: {"zlib": True} for k in dvars}
-            obj.to_netcdf(fn_out, encoding=encoding, **kwargs)
+            if "encoding" not in kwargs:
+                dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
+                kwargs.update(encoding={k: {"zlib": True} for k in dvars})
+            obj.to_netcdf(fn_out, **kwargs)
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
             obj.to_zarr(fn_out, **kwargs)
@@ -905,6 +906,8 @@ class RasterDatasetAdapter(DataAdapter):
             raise ValueError(f"RasterDataset: Driver {driver} unknown.")
         else:
             ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
+            if driver == "GTiff" and "zlib" not in kwargs:
+                kwargs.update(compress="lzw")  # default lzw compression
             if isinstance(obj, xr.DataArray):
                 fn_out = join(data_root, f"{data_name}.{ext}")
                 obj.raster.to_raster(fn_out, driver=driver, **kwargs)
@@ -1126,7 +1129,7 @@ class GeoDatasetAdapter(DataAdapter):
             **kwargs,
         )
 
-    def export_data(
+    def to_file(
         self,
         data_root,
         data_name,
@@ -1137,7 +1140,7 @@ class GeoDatasetAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Export a data slice to file.
+        """Save a data slice to file.
 
         Parameters
         ----------
@@ -1411,7 +1414,7 @@ class GeoDataFrameAdapter(DataAdapter):
             **kwargs,
         )
 
-    def export_data(
+    def to_file(
         self,
         data_root,
         data_name,
@@ -1421,7 +1424,7 @@ class GeoDataFrameAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Export a data slice to file.
+        """Save a data slice to file.
 
         Parameters
         ----------
