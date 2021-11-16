@@ -174,7 +174,7 @@ class DataCatalog(object):
         .. code-block:: console
 
             root: <path>
-            category: <path>
+            category: <category>
             <name>:
               path: <path>
               data_type: <data_type>
@@ -632,7 +632,7 @@ def _parse_data_dict(data_dict, root=None, category=None):
         adapter = ADAPTERS.get(data_type)
         path = abs_path(root, source.pop("path"))
         meta = source.pop("meta", {})
-        if "category" not in meta:
+        if "category" not in meta and category is not None:
             meta.update(category=category)
         # lower kwargs for backwards compatability
         source.update(**source.pop("kwargs", {}))
@@ -711,7 +711,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.unit_mult = unit_mult
         self.unit_add = unit_add
         # meta data
-        self.meta = meta
+        self.meta = {k: v for k, v in meta.items() if v is not None}
 
     @property
     def data_type(self):
