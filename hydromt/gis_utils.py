@@ -185,7 +185,9 @@ def nearest(
     if gdf1.crs != gdf2.crs:
         pnts = pnts.to_crs(gdf2.crs)
     # find nearest using pygeos
-    idx = gdf2.sindex.nearest(pygeos.from_shapely(pnts.geometry.values))[1]
+    # NOTE: requires geopandas 0.10
+    other = pygeos.from_shapely(pnts.geometry.values)
+    idx = gdf2.sindex.nearest(other, return_all=False)[1]
     # get distance in meters
     gdf2_nearest = gdf2.iloc[idx]
     if gdf2_nearest.crs.is_geographic:

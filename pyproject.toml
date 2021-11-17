@@ -13,7 +13,7 @@ dependencies = [
     "bottleneck",
     "click",
     "dask",
-    "geopandas>=0.8",
+    "geopandas>=0.10",
     "entrypoints",
     "gdal>=3.1",
     "numba",
