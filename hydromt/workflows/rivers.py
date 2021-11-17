@@ -70,7 +70,7 @@ def river_depth(
     manning: float = 0.03,
     qbankfull_name: str = "qbankfull",
     rivwth_name: str = "rivwth",
-    zs_name: str = "zs",
+    rivzs_name: str = "rivzs",
     rivdst_name: str = "rivdst",
     rivslp_name: str = "rivslp",
     **kwargs,
@@ -78,7 +78,9 @@ def river_depth(
     """Derive river depth estimates based bankfull discharge.
 
     For a full overview of methods see Neal et al. (2021)
-    TODO: add ref
+    
+    Neal et al (2021) "Estimating river channel bathymetry in large scale flood inundation models", 
+    Water Resour. Res., 57, https://doi.org/10.1029/2020wr028301
 
     Parameters
     ----------
@@ -99,7 +101,7 @@ def river_depth(
         Minimum river depth [m], by default 1.0
     manning : float, optional
         Constant manning roughness [s/m^{1/3}], by default 0.03
-    qbankfull_name, rivwth_name, zs_name, rivdst_name, rivslp_name: str, optional
+    qbankfull_name, rivwth_name, rivzs_name, rivdst_name, rivslp_name: str, optional
         Name for variables in data: bankfull discharge [m3/s], river width [m],
         bankfull water surface elevation profile [m+REF], distance to river outlet [m],
         and river slope [m/m]
@@ -122,7 +124,7 @@ def river_depth(
         rivdph = flwdir.river_depth(
             qbankfull=data[qbankfull_name].values,
             rivwth=data[rivwth_name].values,
-            zs=data[zs_name].values if zs_name in data else None,
+            zs=data[rivzs_name].values if rivzs_name in data else None,
             rivdst=data[rivdst_name].values if rivdst_name in data else None,
             rivslp=data[rivslp_name].values if rivslp_name in data else None,
             manning=manning,
