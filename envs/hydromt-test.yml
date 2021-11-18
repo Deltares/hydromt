@@ -14,14 +14,14 @@ dependencies:
   - dask
   - entrypoints
   - gdal>=3.1
-  - geopandas
+  - geopandas>=0.10
   - netcdf4
   - numba
   - numpy
   - openpyxl
   - pandas
   - pcraster # optional
-  - pyflwdir>=0.5.0
+  - pyflwdir>=0.5.2
   - pygeos>=0.8
   - pytest # tests
   - pytest-cov # tests
