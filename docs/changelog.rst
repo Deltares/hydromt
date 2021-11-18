@@ -22,6 +22,7 @@ Added
 
 Changed
 ^^^^^^^
+- bumped hydromt-artifacts version to v0.0.6
 - In model API build and update functions, if any write_* are called in the ini file (opt), 
   the final self.write() call is skipped. This enables passing custom arguments to the write_ 
   functions without double writting files or costumizing the order in which write_ functions 
