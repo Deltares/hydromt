@@ -20,7 +20,7 @@ dependencies:
   - numpy
   - openpyxl
   - pandas
-  - pyflwdir>=0.5.2
+  - pyflwdir>=0.5.3
   - pygeos>=0.8
   - python>=3.8
   - rasterio
