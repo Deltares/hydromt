@@ -1,7 +1,7 @@
 """HydroMT: Build and analyze models like a data-wizard!"""
 
 # version number without 'v' at start
-__version__ = "0.4.4"
+__version__ = "0.4.5.dev"
 
 import geopandas as gpd
 import warnings
