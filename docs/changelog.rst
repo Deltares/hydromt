@@ -24,11 +24,16 @@ Changed
   functions without double writting files or costumizing the order in which write_ functions 
   are called. If any write_ function is called we assume the user manages the writing and
   a the global write method is skipped.
+- default GTiff lwz compression with DataCatalog.export_data method
+- rename DataAdapter.export_data to DataAdapter.to_file to avoid confusion with DataCatalog.export_data method
+- allow "alias" with attributes in DataCatalog yml files / dictionaries
 
 Fixed
 ^^^^^
 - DataCatalog.to_yml Path objects written as normal strings 
 - Bugfix in basin_mask.get_basin_geometry when using bbox or geom arguments
+- Bugfix DataAdapter.__init__ setting None value in meta data
+- Bugfix DataAdapter.resolve_paths with argument in root
 
 Deprecated
 ^^^^^^^^^^
