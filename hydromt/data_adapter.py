@@ -36,7 +36,7 @@ class DataCatalog(object):
     # root URL and version with data artifacts
     # url = f"{_url}/download/{_version}/<filename>"
     _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases"
-    _version = "v0.0.5"  # latest version
+    _version = "v0.0.6"  # latest version
 
     def __init__(self, data_libs=None, logger=logger, **artifact_keys):
         """Catalog of DataAdapter sources to easily read from different files

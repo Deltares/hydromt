@@ -23,6 +23,16 @@ Basin mask
    workflows.basin_mask.get_basin_geometry
    workflows.basin_mask.parse_region
 
+River bathymetry
+================
+
+.. autosummary::
+   :toctree: ../_generated
+
+   workflows.rivers.river_width
+   workflows.rivers.river_depth
+
+
 Forcing
 =======
 

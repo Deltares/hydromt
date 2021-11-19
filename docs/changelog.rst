@@ -5,20 +5,25 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-Unreleased
-----------
+v0.4.4 (19 November 2011)
+-------------------------
 
 Added
 ^^^^^
 - flw.d8_from_dem to derive a flow direction raster from a DEM
 - flw.reproject_hydrography_like to reproject flow direction raster data
+- flw.floodplain_elevation method which returns floodplain classification and hydrologically adjusted elevation
 - raster.flipud method to flip data along y-axis
 - raster.area_grid to get the raster cell areas [m2]
 - raster.density_grid to convert the values to [unit/m2]
-- gis_utils.spread2d method wrapping its pyflwdir equivalent
+- gis_utils.spread2d method (wrapping its pyflwdir equivalent) to spread values on a raster
+- gis_utils.nearest and gis_utils.nearest_merge methods to merge GeoDataFrame based on proximity
+- river_width to estimate a segment average river width based on a river mask raster 
+- river_depth to get segment average river depth estimates based bankfull discharge (requires pyflwdir v0.5.2)
 
 Changed
 ^^^^^^^
+- bumped hydromt-artifacts version to v0.0.6
 - In model API build and update functions, if any write_* are called in the ini file (opt), 
   the final self.write() call is skipped. This enables passing custom arguments to the write_ 
   functions without double writting files or costumizing the order in which write_ functions 
