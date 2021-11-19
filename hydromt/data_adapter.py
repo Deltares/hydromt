@@ -174,7 +174,7 @@ class DataCatalog(object):
         .. code-block:: console
 
             root: <path>
-            category: <path>
+            category: <category>
             <name>:
               path: <path>
               data_type: <data_type>
@@ -353,7 +353,7 @@ class DataCatalog(object):
                     unit_add = source.unit_add
                     source.unit_mult = {}
                     source.unit_add = {}
-                fn_out, driver = source.export_data(
+                fn_out, driver = source.to_file(
                     data_root=data_root,
                     data_name=key,
                     bbox=bbox,
@@ -617,11 +617,15 @@ def _parse_data_dict(data_dict, root=None, category=None):
 
     # parse data
     data = dict()
-    alias_lst = []
     for name, source in sources.items():
         if "alias" in source:
-            alias_lst.append(name)
-            continue
+            alias = source.pop("alias")
+            if alias not in sources:
+                raise ValueError(f"alias {alias} not found in sources.")
+            # use alias source but overwrite any attributes with original source
+            source_org = source.copy()
+            source = sources[alias].copy()
+            source.update(source_org)
         if "path" not in source:
             raise ValueError(f"{name}: Missing required path argument.")
         data_type = source.pop("data_type", None)
@@ -632,7 +636,7 @@ def _parse_data_dict(data_dict, root=None, category=None):
         adapter = ADAPTERS.get(data_type)
         path = abs_path(root, source.pop("path"))
         meta = source.pop("meta", {})
-        if "category" not in meta:
+        if "category" not in meta and category is not None:
             meta.update(category=category)
         # lower kwargs for backwards compatability
         source.update(**source.pop("kwargs", {}))
@@ -640,11 +644,6 @@ def _parse_data_dict(data_dict, root=None, category=None):
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
         data[name] = adapter(path=path, meta=meta, **source)
-    for alias in alias_lst:
-        name = sources[alias]["alias"]
-        if name not in data:
-            raise ValueError(f"alias {alias} -> {name} not found in data catalog.")
-        data[alias] = data[name]
     return data
 
 
@@ -711,7 +710,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.unit_mult = unit_mult
         self.unit_add = unit_add
         # meta data
-        self.meta = meta
+        self.meta = {k: v for k, v in meta.items() if v is not None}
 
     @property
     def data_type(self):
@@ -757,11 +756,10 @@ class DataAdapter(object, metaclass=ABCMeta):
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
         for date, var in product(dates, vrs):
-            root, bname = dirname(self.path), basename(self.path)
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            bname = bname.format(year=yr, month=mth, variable=var)
-            fns.extend(glob.glob(join(root, bname)))
+            path = str(self.path).format(year=yr, month=mth, variable=var)
+            fns.extend(glob.glob(path))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {self.path}")
         return list(set(fns))  # return unique paths
@@ -841,7 +839,7 @@ class RasterDatasetAdapter(DataAdapter):
         # TODO: see if the units argument can be solved with unit_mult/unit_add
         self.units = units
 
-    def export_data(
+    def to_file(
         self,
         data_root,
         data_name,
@@ -852,7 +850,7 @@ class RasterDatasetAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Export a data slice to file.
+        """Save a data slice to file.
 
         Parameters
         ----------
@@ -895,9 +893,10 @@ class RasterDatasetAdapter(DataAdapter):
         # write using various writers
         if driver in ["netcdf"]:  # TODO complete list
             fn_out = join(data_root, f"{data_name}.nc")
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
-            encoding = {k: {"zlib": True} for k in dvars}
-            obj.to_netcdf(fn_out, encoding=encoding, **kwargs)
+            if "encoding" not in kwargs:
+                dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
+                kwargs.update(encoding={k: {"zlib": True} for k in dvars})
+            obj.to_netcdf(fn_out, **kwargs)
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
             obj.to_zarr(fn_out, **kwargs)
@@ -905,6 +904,8 @@ class RasterDatasetAdapter(DataAdapter):
             raise ValueError(f"RasterDataset: Driver {driver} unknown.")
         else:
             ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
+            if driver == "GTiff" and "compress" not in kwargs:
+                kwargs.update(compress="lzw")  # default lzw compression
             if isinstance(obj, xr.DataArray):
                 fn_out = join(data_root, f"{data_name}.{ext}")
                 obj.raster.to_raster(fn_out, driver=driver, **kwargs)
@@ -1126,7 +1127,7 @@ class GeoDatasetAdapter(DataAdapter):
             **kwargs,
         )
 
-    def export_data(
+    def to_file(
         self,
         data_root,
         data_name,
@@ -1137,7 +1138,7 @@ class GeoDatasetAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Export a data slice to file.
+        """Save a data slice to file.
 
         Parameters
         ----------
@@ -1411,7 +1412,7 @@ class GeoDataFrameAdapter(DataAdapter):
             **kwargs,
         )
 
-    def export_data(
+    def to_file(
         self,
         data_root,
         data_name,
@@ -1421,7 +1422,7 @@ class GeoDataFrameAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Export a data slice to file.
+        """Save a data slice to file.
 
         Parameters
         ----------
