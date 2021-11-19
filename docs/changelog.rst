@@ -5,8 +5,8 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-Unreleased
-----------
+v0.4.4 (19 November 2011)
+-------------------------
 
 Added
 ^^^^^
