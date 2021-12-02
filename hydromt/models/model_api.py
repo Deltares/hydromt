@@ -755,7 +755,7 @@ class Model(object, metaclass=ABCMeta):
             region = self.staticgeoms["region"]
         elif len(self.staticmaps) > 0:
             crs = self.crs
-            if crs is None and crs.to_epsg() is not None:
+            if crs is not None and crs.to_epsg() is not None:
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region

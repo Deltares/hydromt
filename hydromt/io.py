@@ -30,8 +30,8 @@ __all__ = [
 def open_raster(
     filename, mask_nodata=False, chunks={}, nodata=None, logger=logger, **kwargs
 ):
-    """Open a gdal-readable file with rasterio based on :py:meth:`xarray.open_rasterio`
-    and parse geospatial attributes.
+    """Open a gdal-readable file with rasterio based on
+    :py:meth:`rioxarray.open_rasterio`, but return squeezed DataArray.
 
     Arguments
     ----------
@@ -39,31 +39,43 @@ def open_raster(
         Path to the file to open. Or already open rasterio dataset.
     mask_nodata : bool, optional
         set nodata values to np.nan (xarray default nodata value)
+    nodata: int, float, optional
+        Set nodata value if missing
     chunks : int, tuple or dict, optional
         Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or
         ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
         DataArray into a dask array.
     **kwargs
-        key-word arguments are passed to :py:meth:`xarray.open_rasterio`
+        key-word arguments are passed to :py:meth:`xarray.open_dataset` with
+        "rasterio" engine.
 
     Returns
     -------
     data : DataArray
-        The newly created DataArray.
+        DataArray
     """
-    da = xr.open_rasterio(filename, chunks=chunks, **kwargs)
-    da = da.squeeze().reset_coords(drop=True)  # drop band dimension if single layer
-    # additional hydromt.raster parsing
-    if da.raster.nodata is None:
+    kwargs.update(
+        masked=mask_nodata, default_name="data", engine="rasterio", chunks=chunks
+    )
+    if not mask_nodata:  # if mask_and_scale by default True in xarray ?
+        kwargs.update(mask_and_scale=False)
+    # keep only 2D DataArray
+    da = xr.open_dataset(filename, **kwargs)["data"].squeeze(drop=True)
+    # set missing _FillValue
+    if mask_nodata:
+        da.raster.set_nodata(np.nan)
+    elif da.raster.nodata is None:
         if nodata is not None:
-            da.raster.set_nodata(nodata)  # overwrite nodata value
+            da.raster.set_nodata(nodata)
         else:
             logger.warning(f"nodata value missing for {filename}")
-    da.raster.set_crs()  # parse crs information
-    for k in raster.UNWANTED_RIO_ATTRS:
-        da.attrs.pop(k, None)
-    if mask_nodata:
-        da = da.raster.mask_nodata()
+    # there is no option for scaling but not masking ...
+    scale_factor = da.attrs.pop("scale_factor", 1)
+    add_offset = da.attrs.pop("add_offset", 0)
+    if not mask_nodata and (scale_factor != 1 or add_offset != 0):
+        raise NotImplementedError(
+            "scale and offset in combination with mask_nodata==False is not supported."
+        )
     return da
 
 
@@ -125,7 +137,7 @@ def open_mfraster(
     """
     if concat and mosaic:
         raise ValueError("Only one of 'mosaic' or 'concat' can be True.")
-    prefix, postfix, _name = "", "", ""
+    prefix, postfix = "", ""
     if isinstance(paths, str):
         if "*" in paths:
             prefix, postfix = basename(paths).split(".")[0].split("*")
@@ -185,12 +197,16 @@ def open_mfraster(
                 da.coords[concat_dim] = xr.IndexVariable(concat_dim, index_lst)
                 da = da.sortby(concat_dim).transpose(concat_dim, ...)
                 da.attrs.update(da_lst[0].attrs)
-                da.attrs.update({"source_file": "; ".join(fn_attrs)})
         else:
             da = merge.merge(da_lst, **mosaic_kwargs)  # spatial merge
+            da.attrs.update({"source_file": "; ".join(fn_attrs)})
         ds = da.to_dataset()  # dataset for consistency
     else:
-        ds = xr.merge(da_lst)
+        ds = xr.merge(da_lst, combine_attrs="drop")
+    # update spatial attributes
+    if da_lst[0].rio.crs is not None:
+        ds.rio.write_crs(da_lst[0].rio.crs, inplace=True)
+    ds.rio.write_transform(inplace=True)
     return ds
 
 

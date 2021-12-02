@@ -24,6 +24,7 @@ import shutil
 from distutils.version import LooseVersion
 
 from . import gis_utils, io
+from .raster import GEO_MAP_COORD
 
 logger = logging.getLogger(__name__)
 
@@ -956,6 +957,8 @@ class RasterDatasetAdapter(DataAdapter):
             ds_out = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
+        if GEO_MAP_COORD in ds_out.data_vars:
+            ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
         # rename and select vars
         if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
@@ -1239,6 +1242,8 @@ class GeoDatasetAdapter(DataAdapter):
             geom = None  # already clipped
         else:
             raise ValueError(f"GeoDataset: Driver {self.driver} unknown")
+        if GEO_MAP_COORD in ds_out.data_vars:
+            ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
         # rename and select vars
         if variables and len(ds_out.vector.vars) == 1 and len(self.rename) == 0:

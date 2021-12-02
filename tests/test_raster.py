@@ -240,9 +240,8 @@ def test_reproject():
     # check error messages
     with pytest.raises(ValueError, match="Resampling method unknown"):
         ds1.raster.reproject(dst_crs=3857, method="unknown")
-    ds1.raster.set_attrs(crs_wkt=None)
     with pytest.raises(ValueError, match="CRS is missing"):
-        ds1.raster.reproject(dst_crs=3857)
+        ds1.drop_vars("spatial_ref").raster.reproject(dst_crs=3857)
 
 
 def test_area_grid(rioda):
@@ -285,7 +284,7 @@ def test_vector_grid(rioda):
 def test_sample():
     transform, shape = [0.2, 0.0, 3.0, 0.0, 0.25, -11.0], (8, 10)
     da = raster.full_from_transform(transform, shape, name="test", crs=4326)
-    da.data = np.arange(da.raster.size).reshape(da.raster.shape)
+    da.data = np.arange(da.raster.size).reshape(da.raster.shape).astype(da.dtype)
     gdf0 = gpd.GeoDataFrame(geometry=gpd.points_from_xy(da.x.values[:8], da.y.values))
 
     values = np.arange(0, 78, 11)
@@ -304,7 +303,7 @@ def test_sample():
 def test_zonal_stats():
     transform, shape = [0.2, 0.0, 3.0, 0.0, -0.25, -11.0], (8, 10)
     da = raster.full_from_transform(transform, shape, name="test", crs=4326)
-    da.data = np.arange(da.raster.size).reshape(da.raster.shape)
+    da.data = np.arange(da.raster.size).reshape(da.raster.shape).astype(da.dtype)
     ds = xr.merge([da, da.expand_dims("time").to_dataset().rename({"test": "test1"})])
     w, s, e, n = da.raster.bounds
     geoms = [
