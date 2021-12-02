@@ -123,14 +123,7 @@ def hydrography(
             ds.raster.x_dim: xr.Variable("yx", outlon[idxs_pit0]),
             ds.raster.y_dim: xr.Variable("yx", outlat[idxs_pit0]),
         }
-        outbas_pit = (
-            ds.coords["mask"]
-            .sel(
-                sel,
-                method="nearest",
-            )
-            .values
-        )
+        outbas_pit = ds.coords["mask"].sel(sel, method="nearest").values
         # derive basins
         if np.any(outbas_pit != 0):
             idxs_pit = idxs_pit0[outbas_pit != 0]

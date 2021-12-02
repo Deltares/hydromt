@@ -606,51 +606,52 @@ def clip_basins(ds, flwdir, xy, flwdir_name="flwdir", **stream_kwargs):
     return ds.raster.clip_mask(da_basins)
 
 
-def floodplain_elevation(
-    ds_model: xr.Dataset,
-    adjust_river_d8: bool = False,
+def dem_adjust(
+    da_elevtn,
+    da_flwdir,
+    da_rivmsk=None,
+    flwdir=None,
     connectivity=4,
+    river_d8: bool = False,
     logger=logger,
-    **kwargs,
 ) -> xr.Dataset:
-    """Returns a binary floodplain classification and hydrologically adjusted elevation.
+    """Returns hydrologically adjusted elevation and
+    if `return_floodplain`, a binary floodplain classification.
 
     Parameters
     ----------
-    ds_model : xr.Dataset
-        Model dataset containing flow directions ("flwdir") [-], elevation ("elevtn") [m+REF]
-        and upstream area ("uparea") [km2] variables.
+    da_elevtn, da_flwdir, da_rivmsk : xr.DataArray
+        elevation [m+REF]
+        D8 flow directions [-]
+        binary river mask [-], optional
+    flwdir : pyflwdir.FlwdirRaster, optional
+        Flow direction raster object. If None it is derived from da_flwdir.
     connectivity: {4, 8}
         D4 or D8 flow connectivity.
     river_d8 : bool
-        If True and overall D4 connectivity, additionally condition river cells to D8.
-        Requires an additonal river mask ("rivmsk") [-] variable in `ds_model`.
-    **kwargs:
-        arugments are passed to :py:meth:`pyflwdir.FlwdirRaster.floodplains`
+        If True and `connectivity==4`, additionally condition river cells to D8.
+        Requires `da_rivmsk`.
 
     Returns
     -------
     xr.Dataset
-        Dataset with binary floodplain classification ('fldpln') [-] and
-        hydrologically adjusted elevation ('elevtn') [m+REF]
+        Dataset with hydrologically adjusted elevation ('elevtn') [m+REF]
     """
-    # check data variables.
-    dvars_model = ["flwdir", "elevtn"]
-    if not np.all([v in ds_model for v in dvars_model]):
-        raise ValueError(f"One or more variables missing from ds_model: {dvars_model}")
-
     # get flow directions for entire domain and for rivers
-    flwdir = flwdir_from_da(ds_model["flwdir"], mask=False)
+    if flwdir is None:
+        flwdir = flwdir_from_da(da_flwdir, mask=False)
+    elevtn = da_elevtn.values
+    nodata = da_elevtn.raster.nodata
+    rivmsk = da_rivmsk.values == 1 if da_rivmsk is not None else None
 
     logger.info(f"Condition elevation to D{connectivity} flow directions.")
     # get D8 conditioned elevation
-    nodata = ds_model["elevtn"].raster.nodata
-    elv = flwdir.dem_adjust(ds_model["elevtn"].values)
+    elevtn = flwdir.dem_adjust(elevtn)
     # get D4 conditioned elevation (based on D8 conditioned!)
     if connectivity == 4:
         # derive D4 flow directions with forced pits at original locations
         d4 = pyflwdir.dem.fill_depressions(
-            elevtn=elv,
+            elevtn=flwdir.dem_dig_d4(elevtn, rivmsk=rivmsk, nodata=nodata),
             nodata=nodata,
             connectivity=connectivity,
             idxs_pit=flwdir.idxs_pit,
@@ -659,33 +660,22 @@ def floodplain_elevation(
         flwdir_d4 = pyflwdir.from_array(
             d4, ftype="d8", transform=flwdir.transform, latlon=flwdir.latlon
         )
-        elv = flwdir_d4.dem_adjust(elv)
+        elevtn = flwdir_d4.dem_adjust(elevtn)
         # condition river cells to D8
-        if adjust_river_d8 and "rivmsk" in ds_model:
-            rivmsk = ds_model["rivmsk"] == 1
-            flwdir_river = flwdir_from_da(ds_model["flwdir"], mask=rivmsk)
-            elv = flwdir_river.dem_adjust(elv)
+        if river_d8 and rivmsk is not None:
+            flwdir_river = flwdir_from_da(da_flwdir, mask=rivmsk)
+            elevtn = flwdir_river.dem_adjust(elevtn)
             # assert np.all((elv2 - flwdir_river.downstream(elv2))>=0)
-        elif adjust_river_d8:
+        elif river_d8:
             logger.warning('Provide "rivmsk" variable to condition river cells in D8.')
         # assert np.all((elv2 - flwdir_d4.downstream(elv2))>=0)
 
-    # get binary floodplain map from D8 values
-    uparea = ds_model["uparea"].values if "uparea" in ds_model else None
-    if uparea is None:
-        logger.warning(
-            '"uparea" variable calculated on the fly, '
-            "provide the variable for better floodplain classification."
-        )
-    fldpln = flwdir.floodplains(elevtn=elv, uparea=uparea, **kwargs)
-
-    # save to dataset
-    dims = ds_model.raster.dims
-    ds_out = xr.Dataset(coords=ds_model.raster.coords)
-    ds_out["elevtn"] = xr.Variable(dims, elv)
-    ds_out["elevtn"].raster.set_nodata(nodata)
-    ds_out["fldpln"] = xr.Variable(dims, fldpln)
-    ds_out["fldpln"].raster.set_nodata(-1)
-
-    ds_out.raster.set_crs(ds_model.raster.crs)
-    return ds_out
+    # save to dataarray
+    da_out = xr.DataArray(
+        data=elevtn,
+        coords=da_elevtn.raster.coords,
+        dim=da_elevtn.raster.dims,
+    )
+    da_out.raster.set_nodata(nodata)
+    da_out.raster.set_crs(da_elevtn.raster.crs)
+    return da_out
