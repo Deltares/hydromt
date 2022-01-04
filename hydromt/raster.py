@@ -1523,19 +1523,19 @@ class RasterDataArray(XRasterBase):
         xarray.DataArray
             Filled object
         """
-        src_data_flat = np.copy(src_data).ravel()
         data_isnan = True if self.nodata is None else np.isnan(self.nodata)
-        mask = ~np.isnan(src_data_flat) if data_isnan else src_data_flat != self.nodata
+        mask = ~np.isnan(src_data) if data_isnan else src_data != self.nodata
         if not mask.any() or mask.all():
             return src_data
         xs, ys = np.meshgrid(self.xcoords.values, self.ycoords.values)
-        return griddata(
-            points=(xs.ravel()[mask], ys.ravel()[mask]),
-            values=src_data_flat[mask],
+        interp_data = griddata(
+            points=(xs[mask], ys[mask]),
+            values=src_data[mask],
             xi=(xs, ys),
             method=method,
             fill_value=self.nodata,
         )
+        return np.where(mask, src_data, interp_data)
 
     def interpolate_na(self, method="nearest"):
         """Interpolate missing data, powered by :py:meth:`scipy.interpolate.griddata`.
