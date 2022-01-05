@@ -15,6 +15,7 @@ from . import __version__
 def setuplog(name, path=None, log_level=20, fmt=FMT, append=True):
     """Set-up the logging on sys.stdout"""
     logger = logging.getLogger(name)
+    logger.handlers = []  # remove earlier handlers
     logging.captureWarnings(True)
     logger.setLevel(log_level)
     console = logging.StreamHandler(sys.stdout)

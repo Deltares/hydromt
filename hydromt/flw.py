@@ -78,10 +78,10 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=None, logger=logger
     return flwdir
 
 
-def d8_from_dem(da_elv, gdf_stream=None, max_depth=-1.0, outlets="edge"):
+def d8_from_dem(da_elv, gdf_stream=None, max_depth=-1.0, outlets="edge", idxs_pit=None):
     """Derive D8 flow directions grid from an elevation grid.
 
-    Outlets occur at the edge of the data or at the interface with nodata values.
+    Outlets occur at the edge of valid data or at user defined cells (if `idxs_pit` is provided).
     A local depressions is filled based on its lowest pour point level if the pour point
     depth is smaller than the maximum pour point depth `max_depth`, otherwise the lowest
     elevation in the depression becomes a pit.
@@ -102,6 +102,8 @@ def d8_from_dem(da_elv, gdf_stream=None, max_depth=-1.0, outlets="edge"):
     outlets: {'edge', 'min'}
         Position for basin outlet(s) at the all valid elevation edge cell ('edge')
         or only the minimum elevation edge cell ('min')
+    idxs_pit: 1D array of int
+        Linear indices of outlet cells.
 
     Returns
     -------
@@ -130,6 +132,7 @@ def d8_from_dem(da_elv, gdf_stream=None, max_depth=-1.0, outlets="edge"):
         max_depth=max_depth,
         nodata=da_elv.raster.nodata,
         outlets=outlets,
+        idxs_pit=idxs_pit,
     )[1]
     # return xarray data array
     da_flw = xr.DataArray(
@@ -231,23 +234,21 @@ def reproject_hydrography_like(
     ds_hydro,
     da_elv,
     river_upa=5,
-    method="bilinear",
     uparea_name="uparea",
     flwdir_name="flwdir",
     logger=logger,
 ):
     """Reproject flow direction and upstream area data to the `da_elv` crs and grid.
-    Note that the resolution of `da_elv` and `ds_hydro` should be similar or smaller
-    for good results.
 
-    The reprojection is based on a synthetic elevation grid defined by the
-    destination elevation minus the reprojected log10 upstream area [km2] grids.
-    Additionally, rivers are vectorized and burned into the synthetic elevation grid
-    for better results.
+    Flow directions are derived from a reprojected grid of synthetic elevation,
+    based on the log10 upstream area [m2]. For regions without upstream area, the original
+    elevation is used assuming these elevation values are <= 0 (i.e. offshore bathymetry).
 
-    If not all upstream area is inlcuded, the upstream area of rivers entering the
-    domain will be used as boundary conditions to the reprojected upsteam area raster.
+    Upstream area on the reprojected grid is based on the new flow directions and
+    the upstream area of rivers entering the domain.
 
+    NOTE: the resolution of `ds_hydro` should be similar or smaller than the resolution
+    of `da_elv` for good results.
     NOTE: this method is still experimental and might change in the future!
 
     Parameters
@@ -258,97 +259,77 @@ def reproject_hydrography_like(
     da_elv: xarray.DataArray
         DataArray with elevation on destination grid.
     river_upa: float, optional
-        Minimum upstream area threshold for rivers, by default 5 [km2]
-    method:
-        Interpolation method for the upstream area grid.
+        Minimum upstream area threshold for inflowing rivers, by default 5 [km2]
 
     Returns
     -------
     xarray.Dataset
         Reprojected flow direction and upstream area grids.
     """
-    # TODO fix for case without ds_hydro, but with gdf_stream
     # check N->S orientation
     assert da_elv.raster.res[1] < 0
     assert ds_hydro.raster.res[1] < 0
+    for name in [uparea_name, flwdir_name]:
+        if name not in ds_hydro:
+            raise ValueError(f"{name} variable not found in ds_hydro")
     crs = da_elv.raster.crs
-    bbox = np.asarray(da_elv.raster.bounds)
-    # pad da_elv to avoid boundary problems
-    buf0 = 2
-    nrow, ncol = da_elv.raster.shape
-    t = da_elv.raster.transform
-    dst_transform = from_origin(
-        t[2] - buf0 * t[0], t[5] + buf0 * abs(t[4]), t[0], abs(t[4])
-    )
-    dst_shape = nrow + buf0 * 2, ncol + buf0 * 2
-    xcoords, ycoords = gis_utils.affine_to_coords(dst_transform, dst_shape)
-    da_elv = xr.DataArray(
-        dims=da_elv.raster.dims,
-        coords={da_elv.raster.x_dim: xcoords, da_elv.raster.y_dim: ycoords},
-        data=np.pad(da_elv.values, buf0, "edge"),
-        attrs=da_elv.attrs,
-    )
-    da_elv.raster.set_crs(crs)
-    # reproject uparea & elevation with buffer
-    da_upa = ds_hydro[uparea_name].raster.reproject_like(da_elv, method=method)
-    max_upa = da_upa.where(da_upa != da_upa.raster.nodata).max().values
     nodata = da_elv.raster.nodata
-    # vectorize and reproject river uparea
-    mask = ds_hydro[uparea_name] > river_upa
-    flwdir_src = flwdir_from_da(ds_hydro[flwdir_name], mask=mask)
-    feats = flwdir_src.vectorize(uparea=ds_hydro[uparea_name].values)
+    # synthetic elevation -> max(log10(uparea[m2])) - log10(uparea[m2])
+    # the largest outlet has elevation zero / headwater cells have ~ equal highest elevation
+    da_upa = ds_hydro[uparea_name]
+    upa_mask = da_upa != da_upa.raster.nodata
+    elvsyn = da_upa.where(~upa_mask, np.log10(np.maximum(1.0, da_upa * 1e3)))
+    elvsyn = elvsyn.where(~upa_mask, elvsyn.max() - elvsyn)
+    # reproject with 'min' to preserve rivers and merge with elevation
+    # this assumes that regions without uparea, where we use elevation directly,
+    # have elevation < 0 (i.e. offshore bathymetry)
+    elvsyn_reproj = elvsyn.raster.reproject_like(da_elv, method="min")
+    elvsyn_reproj = elvsyn_reproj.where(elvsyn_reproj != nodata, da_elv - da_elv.max())
+    elvsyn_reproj.raster.set_crs(crs)
+    elvsyn_reproj.raster.set_nodata(nodata)
+    # get flow directions based on reprojected synthetic elevation
+    da_flw1 = d8_from_dem(elvsyn_reproj)
+    flwdir = flwdir_from_da(da_flw1, ftype="d8")
+    # vectorize and reproject river segments(!) with uparea attribute
+    rivmask = da_upa > river_upa
+    flwdir_src = flwdir_from_da(ds_hydro[flwdir_name], mask=rivmask)
+    feats = flwdir_src.streams(uparea=da_upa.values, mask=rivmask)
     gdf_stream = gpd.GeoDataFrame.from_features(feats, crs=ds_hydro.raster.crs)
     gdf_stream = gdf_stream.sort_values(by="uparea")
-    # only area with upa otherwise the outflows are not resolved!
-    # synthetic elevation -> reprojected elevation - log10(reprojected uparea[m2])
-    elvsyn = xr.where(
-        np.logical_and(da_elv != nodata, da_upa != da_upa.raster.nodata),
-        da_elv - np.log10(np.maximum(1.0, da_upa * 1e3)),
-        nodata,
-    )
-    elvsyn.raster.set_nodata(nodata)
-    elvsyn.raster.set_crs(crs)
-    # get flow directions
-    da_flw = d8_from_dem(elvsyn, gdf_stream).raster.clip_bbox(bbox)
-    # calculate upstream area with uparea from rivers at edge
-    flwdir = flwdir_from_da(da_flw, ftype="d8")
-    da_flw.data = flwdir.to_array()  # to set outflow pits after clip
+    # calculate upstream area with uparea from inflowing rivers at edge
+    # get edge river cells indices
     area = flwdir.area / 1e6  # area [km2]
-    # get inflow cells: headwater river cells at edge
-    rivupa = da_flw.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
-    _edge = pyflwdir.gis_utils.get_edge(da_flw.values != 247)
-    headwater = np.logical_and(
-        rivupa.values > 0, flwdir.upstream_sum(rivupa.values > 0) == 0
-    )
-    inflow_idxs = np.where(np.logical_and(headwater, _edge).ravel())[0]
+    rivupa = da_flw1.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
+    _edge = pyflwdir.gis_utils.get_edge(da_flw1.values != 247)
+    inflow_idxs = np.where(np.logical_and(rivupa.values > 0, _edge).ravel())[0]
     if inflow_idxs.size > 0:
-        # use nearest mapping to avoid duplicating uparea when reprojecting to higher res.
+        # map nearest segment to each river edge cell;
+        # keep cell which longest distance to outlet per river segment to avoid duplicating uparea
         gdf0 = gpd.GeoDataFrame(
             index=inflow_idxs,
             geometry=gpd.points_from_xy(*flwdir.xy(inflow_idxs)),
             crs=crs,
         )
+        gdf0["distnc"] = flwdir.distnc.flat[inflow_idxs]
         gdf0["idx2"], gdf0["dst2"] = gis_utils.nearest(gdf0, gdf_stream)
-        gdf0 = gdf0.sort_values(by="dst2").drop_duplicates("idx2")
+        gdf0 = gdf0.sort_values(by="distnc", ascending=False).drop_duplicates("idx2")
         gdf0["uparea"] = gdf_stream.loc[gdf0["idx2"].values, "uparea"].values
         # set stream uparea to selected inflow cells and calculate total uparea
         area.flat[gdf0.index.values] = gdf0["uparea"].values
-        logger.info(
-            f"Calculating upstream area with {gdf0.index.size} input cell at the domain edge."
-        )
-    da_upa = xr.DataArray(
-        dims=da_flw.raster.dims,
-        coords=da_flw.raster.coords,
+        logger.info(f"Calculating upstream area with {gdf0.index.size} river inflows.")
+    da_upa1 = xr.DataArray(
+        dims=da_flw1.raster.dims,
+        coords=da_flw1.raster.coords,
         data=flwdir.accuflux(area).astype(np.float32),
         name="uparea",
-    )
-    da_upa.raster.set_nodata(-9999)
-    da_upa.raster.set_crs(crs)
-    max_upa1 = da_upa.max().values
-    logger.info(
-        f"Reprojected maximum upstream area: {max_upa1:.2f} km2 ({max_upa:.2f} km2)"
-    )
-    return xr.merge([da_flw, da_upa])
+    ).where(da_elv != nodata, -9999)
+    da_upa1.raster.set_nodata(-9999)
+    da_upa1.raster.set_crs(crs)
+    bbox_geom = da_upa1.raster.box
+    max_upa = da_upa.raster.clip_geom(bbox_geom).where(upa_mask).max().values
+    max_upa1 = da_upa1.max().values
+    logger.info(f"New/original max upstream area: {max_upa1:.2f}/{max_upa:.2f} km2")
+    return xr.merge([da_flw1, da_upa1])
 
 
 ### hydrography maps ###
