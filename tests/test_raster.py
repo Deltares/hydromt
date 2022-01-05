@@ -269,7 +269,10 @@ def test_interpolate_na():
     assert np.all(np.isnan(da1) == False)
     assert np.all(np.isin(da1, [1, 2]))
     assert np.all(np.isnan(da1.raster.interpolate_na()) == False)
-    assert np.all(da0.raster.interpolate_na(method="rio_idw") != da0.raster.nodata)
+    assert np.all(
+        da0.raster.interpolate_na(method="rio_idw", max_search_distance=3)
+        != da0.raster.nodata
+    )
     assert np.all(da0.expand_dims("t").raster.interpolate_na() != da0.raster.nodata)
     da2 = da0.astype(np.int32)  # this removes the nodata value ...
     da2.raster.set_nodata(-9999)

@@ -1554,13 +1554,14 @@ class RasterDataArray(XRasterBase):
         dim0 = self.dim0
         if dim0:
             interp_data = np.empty(self._obj.shape, dtype=self._obj.dtype)
-            i = 0
-            for _, sub_xds in self._obj.groupby(dim0):
-                src_data = sub_xds.load().data
-                interp_data[i, ...] = self._interpolate_na(src_data, method=method)
-                i += 1
+            for i, (_, sub_xds) in enumerate(self._obj.groupby(dim0)):
+                interp_data[i, ...] = self._interpolate_na(
+                    sub_xds.load().data, method=method, **kwargs
+                )
         else:
-            interp_data = self._interpolate_na(self._obj.load().data, method=method)
+            interp_data = self._interpolate_na(
+                self._obj.load().data, method=method, **kwargs
+            )
         interp_array = xr.DataArray(
             name=self._obj.name,
             dims=self._obj.dims,
