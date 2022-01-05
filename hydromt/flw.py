@@ -316,7 +316,7 @@ def reproject_hydrography_like(
     area = flwdir.area / 1e6  # area [km2]
     # get inflow cells: headwater river cells at edge
     rivupa = da_flw.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
-    _edge = pyflwdir.gis_utils.get_edge(da_flw.values == 247)
+    _edge = pyflwdir.gis_utils.get_edge(da_flw.values != 247)
     headwater = np.logical_and(
         rivupa.values > 0, flwdir.upstream_sum(rivupa.values > 0) == 0
     )
@@ -674,7 +674,7 @@ def dem_adjust(
     da_out = xr.DataArray(
         data=elevtn,
         coords=da_elevtn.raster.coords,
-        dim=da_elevtn.raster.dims,
+        dims=da_elevtn.raster.dims,
     )
     da_out.raster.set_nodata(nodata)
     da_out.raster.set_crs(da_elevtn.raster.crs)
