@@ -19,6 +19,7 @@ import dask
 from affine import Affine
 from rasterio.crs import CRS
 import rasterio.warp
+import rasterio.fill
 from rasterio import features
 from rasterio.enums import Resampling
 from scipy.spatial import cKDTree
@@ -681,7 +682,7 @@ class XRasterBase(XGeoBase):
         all_touched : bool, optional
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
-            selected by Bresenham’s line algorithm will be used. By default False.
+            selected by Bresenham's line algorithm will be used. By default False.
 
         Returns
         -------
@@ -711,7 +712,7 @@ class XRasterBase(XGeoBase):
                 transform = Affine(a, b, c, d, e, f)
                 mask = full(ds1.raster.coords, nodata=0, dtype=np.uint8)
                 features.rasterize(
-                    (geom, 1),
+                    [(geom, 1)],
                     out_shape=mask.raster.shape,
                     fill=0,
                     transform=transform,
@@ -746,7 +747,7 @@ class XRasterBase(XGeoBase):
             gdf = gdf.to_crs(self.crs)
         geoms = gdf["geometry"].values
 
-        ds = self._obj
+        ds = self._obj.copy()
         if isinstance(ds, xr.DataArray):
             if ds.name is None:
                 ds.name = "values"
@@ -887,7 +888,7 @@ class XRasterBase(XGeoBase):
         all_touched : bool, optional
             If True, all pixels touched by geometries will be burned in. If false, only
             pixels whose center is within the polygon or that are selected by
-            Bresenham’s line algorithm will be burned in.
+            Bresenham's line algorithm will be burned in.
         dtype : numpy dtype, optional
             Used as data type for results, by default it is derived from values.
         sindex : bool, optional
@@ -948,7 +949,7 @@ class XRasterBase(XGeoBase):
         all_touched : bool, optional
             If True, all pixels touched by geometries will masked. If false, only
             pixels whose center is within the polygon or that are selected by
-            Bresenham’s line algorithm will be burned in. By default False.
+            Bresenham's line algorithm will be burned in. By default False.
         invert : bool, optional
             If True, the mask will be False where shapes overlap pixels, by default False
 
@@ -1510,40 +1511,40 @@ class RasterDataArray(XRasterBase):
         da_reproj.raster.set_nodata(dst_nodata)
         return da_reproj.raster.reset_spatial_dims_attrs()
 
-    def _interpolate_na(self, src_data, method="nearest"):
-        """Interpolate missing data, powered by :py:meth:`scipy.interpolate.griddata`.
-
-        Arguments
-        ----------
-        method: {‘linear’, ‘nearest’, ‘cubic’}, optional
-            The method to use for interpolation in :py:meth:`scipy.interpolate.griddata`.
-
-        Returns
-        -------
-        xarray.DataArray
-            Filled object
-        """
+    def _interpolate_na(
+        self, src_data: np.ndarray, method: str = "nearest", **kwargs
+    ) -> np.ndarray:
+        """Returns interpolated array"""
         data_isnan = True if self.nodata is None else np.isnan(self.nodata)
         mask = ~np.isnan(src_data) if data_isnan else src_data != self.nodata
         if not mask.any() or mask.all():
             return src_data
-        xs, ys = np.meshgrid(self.xcoords.values, self.ycoords.values)
-        interp_data = griddata(
-            points=(xs[mask], ys[mask]),
-            values=src_data[mask],
-            xi=(xs, ys),
-            method=method,
-            fill_value=self.nodata,
-        )
-        return np.where(mask, src_data, interp_data)
+        if method == "rio_idw":  # NOTE: modifies src_data inplace
+            interp_data = rasterio.fill.fillnodata(src_data.copy(), mask, **kwargs)
+        else:
+            xs, ys = np.meshgrid(self.xcoords.values, self.ycoords.values)
+            interp_data = griddata(
+                points=(xs[mask], ys[mask]),
+                values=src_data[mask],
+                xi=(xs, ys),
+                method=method,
+                fill_value=self.nodata,
+            )
+            # required because in some cases valid values are set to nodata?!
+            interp_data = np.where(mask, src_data, interp_data)
+        return interp_data
 
-    def interpolate_na(self, method="nearest"):
-        """Interpolate missing data, powered by :py:meth:`scipy.interpolate.griddata`.
+    def interpolate_na(self, method: str = "nearest", **kwargs):
+        """Interpolate missing data
 
         Arguments
-        ---------
-        method: {‘linear’, ‘nearest’, ‘cubic’}, optional
-            The method to use for interpolation in `scipy.interpolate.griddata`.
+        ----------
+        method: {'linear', 'nearest', 'cubic', 'rio_idw'}, optional
+            {'linear', 'nearest', 'cubic'} use :py:meth:`scipy.interpolate.griddata`;
+            'rio_idw' applies inverse distance weighting based on :py:meth:`rasterio.fill.fillnodata`.
+        **kwargs
+            Additional key-word arguments are passed to :py:meth:`rasterio.fill.fillnodata`,
+            only used in combination with `method='rio_idw'`
 
         Returns
         -------
@@ -1704,16 +1705,14 @@ class RasterDataArray(XRasterBase):
             {"geometry": geom, "properties": {"value": idx}}
             for geom, idx in list(feats_gen)
         ]
+        if len(feats) == 0:  # return empty GeoDataFrame
+            return gpd.GeoDataFrame()
         crs = self.crs
         if crs is None and crs.to_epsg() is not None:
             crs = crs.to_epsg()  # not all CRS have an EPSG code
         gdf = gpd.GeoDataFrame.from_features(feats, crs=crs)
         gdf.index = gdf.index.astype(self._obj.dtype)
         return gdf
-
-    # TODO port https://rasterio.readthedocs.io/en/latest/api/rasterio.features.html#rasterio.features.sieve
-    # def sieve(self):
-    #     pass
 
 
 @xr.register_dataset_accessor("raster")
