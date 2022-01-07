@@ -1240,14 +1240,15 @@ class RasterDataArray(XRasterBase):
         elif "_FillValue" in self._obj.attrs:
             self._obj.attrs.pop("_FillValue")
 
-    def mask_nodata(self):
-        """Mask nodata values with np.nan.
-        Note this will change integer dtypes to float.
+    def mask_nodata(self, fill_value=np.nan):
+        """Mask nodata values with fill_value (default np.nan).
+        Note that masking with np.nan will change integer dtypes to float.
         """
         _da = self._obj
-        if self.nodata is not None and self.nodata != np.nan:
-            _da = _da.where(_da != self.nodata)
-            _da.raster.set_nodata(np.nan)
+        if self.nodata is not None and self.nodata != fill_value:
+            mask = _da.notnull() if np.isnan(self.nodata) else _da != self.nodata
+            _da = _da.where(mask, fill_value)
+            _da.raster.set_nodata(fill_value)
         return _da
 
     def mask(self, mask, logger=logger):
