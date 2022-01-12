@@ -10,14 +10,19 @@ unreleased
 
 Added
 ^^^^^
+- new rasterio inverse distance weighting method ("rio_idw") in raster.interpolate_na
 
 
 Changed
 ^^^^^^^
+- improved flw.reproject_hydrography_like and flw.dem_adjust methods
+- file handlers of loggers are replaced in Model.set_root
+- log.setuplog replaces old handlers if these exist to avoid duplicates.
 
 
 Fixed
 ^^^^^
+- fix incorrect nodata values at valid cells from scipy.griddata method in raster.interpolate_na
 
 
 Deprecated
