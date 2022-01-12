@@ -7,10 +7,9 @@ import warnings
 import logging
 import numpy as np
 import xarray as xr
-from rasterio.transform import from_origin
 import geopandas as gpd
 import pyflwdir
-
+from typing import Tuple, Union, Optional
 from . import gis_utils
 
 logger = logging.getLogger(__name__)
@@ -29,7 +28,13 @@ __all__ = [
 ### FLWDIR METHODS ###
 
 
-def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=None, logger=logger):
+def flwdir_from_da(
+    da: xr.DataArray,
+    ftype: str = "infer",
+    check_ftype: bool = True,
+    mask: Union[xr.DataArray, bool, None] = None,
+    logger=logger,
+):
     """Parse dataarray to flow direction raster object. If a mask coordinate is present
     this will be passed on the the pyflwdir.from_array method.
 
@@ -41,8 +46,9 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=None, logger=logger
         name of flow direction type, infer from data if 'infer', by default is 'infer'
     check_ftype : bool, optional
         check if valid flow direction raster if ftype is not 'infer', by default True
-    mask : xr.DataArray of bool, optional
+    mask : xr.DataArray, bool, optional
         Mask for gridded flow direction data, by default None.
+        If True, use the mask coordinate of `da`.
 
     Returns
     -------
@@ -50,16 +56,14 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=None, logger=logger
         Flow direction raster object
     """
     if not isinstance(da, xr.DataArray):
-        raise TypeError("da should be instance xarray.DataArray type")
-
+        raise TypeError("da should be an instance of xarray.DataArray")
     crs = da.raster.crs
-    latlon = False
-    if crs is not None and crs.is_geographic:
-        latlon = True
-        _crs = "geographic CRS with unit degree"
-    elif crs is None or da.raster.crs.is_projected:
-        _crs = "projected CRS with unit meter"
-    logger.debug(f"Initializing flwdir with {_crs}.")
+    if crs is None:
+        raise ValueError("da is missing CRS property, set using `da.raster.set_crs`")
+    latlon = crs.is_geographic
+    _crs = "geographic" if latlon else "projected"
+    _unit = "degree" if latlon else "meter"
+    logger.debug(f"Initializing flwdir with {_crs} CRS with unit {_unit}.")
     if isinstance(mask, xr.DataArray):
         mask = mask.values
     elif isinstance(mask, bool) and mask and "mask" in da.coords:
@@ -78,15 +82,19 @@ def flwdir_from_da(da, ftype="infer", check_ftype=True, mask=None, logger=logger
     return flwdir
 
 
-def d8_from_dem(da_elv, gdf_stream=None, max_depth=-1.0, outlets="edge", idxs_pit=None):
+def d8_from_dem(
+    da_elv: xr.DataArray,
+    gdf_stream: Optional[gpd.GeoDataFrame] = None,
+    max_depth: float = -1.0,
+    outlets: str = "edge",
+    idxs_pit: Optional[np.ndarray] = None,
+) -> xr.DataArray:
     """Derive D8 flow directions grid from an elevation grid.
 
     Outlets occur at the edge of valid data or at user defined cells (if `idxs_pit` is provided).
     A local depressions is filled based on its lowest pour point level if the pour point
     depth is smaller than the maximum pour point depth `max_depth`, otherwise the lowest
     elevation in the depression becomes a pit.
-
-    Based on: Wang, L., & Liu, H. (2006). https://doi.org/10.1080/13658810500433453
 
     Parameters
     ----------
@@ -107,8 +115,12 @@ def d8_from_dem(da_elv, gdf_stream=None, max_depth=-1.0, outlets="edge", idxs_pi
 
     Returns
     -------
-    da_flw: 2D xarray.DataArray
-        D8 flow direction data
+    da_flw: xarray.DataArray
+        D8 flow direction grid
+
+    See Also
+    --------
+    pyflwdir.dem.fill_depressions
     """
     nodata = da_elv.raster.nodata
     crs = da_elv.raster.crs
@@ -147,33 +159,27 @@ def d8_from_dem(da_elv, gdf_stream=None, max_depth=-1.0, outlets="edge", idxs_pi
 
 
 def upscale_flwdir(
-    ds,
-    flwdir,
-    scale_ratio,
-    method="com2",
-    uparea_name=None,
-    flwdir_name="flwdir",
+    ds: xr.Dataset,
+    flwdir: pyflwdir.FlwdirRaster,
+    scale_ratio: int,
+    method: str = "com2",
+    uparea_name: Optional[str] = None,
+    flwdir_name: str = "flwdir",
     logger=logger,
     **kwargs,
-):
-    """Upscale flow direction network to lower resolution and resample other data
-    variables in dataset to the same resolution.
-
-    Note: This method only works for D8 data.
-
-    # TODO add doi
-    Based on: Eilander et al. (2021).
+) -> Tuple[xr.DataArray, pyflwdir.FlwdirRaster]:
+    """Upscale flow direction network to lower resolution.
 
     Parameters
     ----------
     ds : xarray.Dataset
-        Dataset flow direction and auxiliry data data
+        Dataset flow direction.
     flwdir : pyflwdir.FlwdirRaster
         Flow direction raster object.
     scale_ratio: int
         Size of upscaled (coarse) grid cells.
     uparea_name : str, optional
-        Name of upstream area DataArray, by default None
+        Name of upstream area DataArray, by default None and derived on the fly.
     flwdir_name : str, optional
         Name of upscaled flow direction raster DataArray, by default "flwdir"
     method : {'com2', 'com', 'eam', 'dmm'}
@@ -181,10 +187,14 @@ def upscale_flwdir(
 
     Returns
     -------
-    ds_out = xarray.Dataset
-        Upscaled Dataset
+    da_flwdir = xarray.DataArray
+        Upscaled D8 flow direction grid.
     flwdir_out : pyflwdir.FlwdirRaster
-        Upscaled flow direction raster object.
+        Upscaled pyflwdir flow direction raster object.
+
+    See Also
+    --------
+    pyflwdir.FlwdirRaster.upscale
     """
     if not np.all(flwdir.shape == ds.raster.shape):
         raise ValueError("Flwdir and ds dimensions do not match.")
@@ -231,21 +241,22 @@ def upscale_flwdir(
 
 
 def reproject_hydrography_like(
-    ds_hydro,
-    da_elv,
-    river_upa=5,
-    uparea_name="uparea",
-    flwdir_name="flwdir",
+    ds_hydro: xr.Dataset,
+    da_elv: xr.DataArray,
+    river_upa: float = 5.0,
+    uparea_name: str = "uparea",
+    flwdir_name: str = "flwdir",
     logger=logger,
-):
+    **kwargs,
+) -> xr.Dataset:
     """Reproject flow direction and upstream area data to the `da_elv` crs and grid.
 
     Flow directions are derived from a reprojected grid of synthetic elevation,
     based on the log10 upstream area [m2]. For regions without upstream area, the original
     elevation is used assuming these elevation values are <= 0 (i.e. offshore bathymetry).
 
-    Upstream area on the reprojected grid is based on the new flow directions and
-    the upstream area of rivers entering the domain.
+    The upstream area on the reprojected grid is based on the new flow directions and
+    rivers entering the domain, defined by the minimum upstream area `river_upa` [km2].
 
     NOTE: the resolution of `ds_hydro` should be similar or smaller than the resolution
     of `da_elv` for good results.
@@ -260,11 +271,20 @@ def reproject_hydrography_like(
         DataArray with elevation on destination grid.
     river_upa: float, optional
         Minimum upstream area threshold for inflowing rivers, by default 5 [km2]
+    uparea_name, flwdir_name : str, optional
+        Name of upstream area (default "uparea") and flow direction ("flwdir") variables
+        in `ds_hydro`.
+    kwargs: key-word arguments
+        key-word arguments are passed to `d8_from_dem`
 
     Returns
     -------
     xarray.Dataset
-        Reprojected flow direction and upstream area grids.
+        Reprojected gridded dataset with flow direction and upstream area variables.
+
+    See Also
+    --------
+    d8_from_dem
     """
     # check N->S orientation
     assert da_elv.raster.res[1] < 0
@@ -288,42 +308,51 @@ def reproject_hydrography_like(
     elvsyn_reproj.raster.set_crs(crs)
     elvsyn_reproj.raster.set_nodata(nodata)
     # get flow directions based on reprojected synthetic elevation
-    da_flw1 = d8_from_dem(elvsyn_reproj)
+    da_flw1 = d8_from_dem(elvsyn_reproj, **kwargs)
     flwdir = flwdir_from_da(da_flw1, ftype="d8")
-    # vectorize and reproject river segments(!) with uparea attribute
-    rivmask = da_upa > river_upa
-    flwdir_src = flwdir_from_da(ds_hydro[flwdir_name], mask=rivmask)
-    feats = flwdir_src.streams(uparea=da_upa.values, mask=rivmask)
-    gdf_stream = gpd.GeoDataFrame.from_features(feats, crs=ds_hydro.raster.crs)
-    gdf_stream = gdf_stream.sort_values(by="uparea")
-    # calculate upstream area with uparea from inflowing rivers at edge
-    # get edge river cells indices
+    # find source river cells outside destination grid bbox
+    outside_dst = da_upa.raster.geometry_mask(da_elv.raster.box, invert=True)
     area = flwdir.area / 1e6  # area [km2]
-    rivupa = da_flw1.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
-    _edge = pyflwdir.gis_utils.get_edge(da_flw1.values != 247)
-    inflow_idxs = np.where(np.logical_and(rivupa.values > 0, _edge).ravel())[0]
-    if inflow_idxs.size > 0:
-        # map nearest segment to each river edge cell;
-        # keep cell which longest distance to outlet per river segment to avoid duplicating uparea
-        gdf0 = gpd.GeoDataFrame(
-            index=inflow_idxs,
-            geometry=gpd.points_from_xy(*flwdir.xy(inflow_idxs)),
-            crs=crs,
-        )
-        gdf0["distnc"] = flwdir.distnc.flat[inflow_idxs]
-        gdf0["idx2"], gdf0["dst2"] = gis_utils.nearest(gdf0, gdf_stream)
-        gdf0 = gdf0.sort_values(by="distnc", ascending=False).drop_duplicates("idx2")
-        gdf0["uparea"] = gdf_stream.loc[gdf0["idx2"].values, "uparea"].values
-        # set stream uparea to selected inflow cells and calculate total uparea
-        area.flat[gdf0.index.values] = gdf0["uparea"].values
-        logger.info(f"Calculating upstream area with {gdf0.index.size} river inflows.")
+    # If any river cell outside the destination grid, vectorize and reproject
+    # river segments(!) with uparea attribute to set as boundary condition to the
+    # upstream area map.
+    nriv = 0
+    if np.any(np.logical_and(da_upa > river_upa, outside_dst)):
+        rivmask = da_upa > river_upa
+        flwdir_src = flwdir_from_da(ds_hydro[flwdir_name], mask=rivmask)
+        feats = flwdir_src.streams(uparea=da_upa.values, mask=rivmask)
+        gdf_stream = gpd.GeoDataFrame.from_features(feats, crs=ds_hydro.raster.crs)
+        gdf_stream = gdf_stream.sort_values(by="uparea")
+        # calculate upstream area with uparea from inflowing rivers at edge
+        # get edge river cells indices
+        rivupa = da_flw1.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
+        _edge = pyflwdir.gis_utils.get_edge(da_flw1.values != 247)
+        inflow_idxs = np.where(np.logical_and(rivupa.values > 0, _edge).ravel())[0]
+        if inflow_idxs.size > 0:
+            # map nearest segment to each river edge cell;
+            # keep cell which longest distance to outlet per river segment to avoid duplicating uparea
+            gdf0 = gpd.GeoDataFrame(
+                index=inflow_idxs,
+                geometry=gpd.points_from_xy(*flwdir.xy(inflow_idxs)),
+                crs=crs,
+            )
+            gdf0["distnc"] = flwdir.distnc.flat[inflow_idxs]
+            gdf0["idx2"], gdf0["dst2"] = gis_utils.nearest(gdf0, gdf_stream)
+            gdf0 = gdf0.sort_values(by="distnc", ascending=False).drop_duplicates(
+                "idx2"
+            )
+            gdf0["uparea"] = gdf_stream.loc[gdf0["idx2"].values, "uparea"].values
+            # set stream uparea to selected inflow cells and calculate total uparea
+            nriv = gdf0.index.size
+            area.flat[gdf0.index.values] = gdf0["uparea"].values
+    logger.info(f"Calculating upstream area with {nriv} river inflows.")
     da_upa1 = xr.DataArray(
         dims=da_flw1.raster.dims,
         coords=da_flw1.raster.coords,
         data=flwdir.accuflux(area).astype(np.float32),
         name="uparea",
+        attrs=dict(units="km2", _FillValue=-9999),
     ).where(da_elv != nodata, -9999)
-    da_upa1.raster.set_nodata(-9999)
     da_upa1.raster.set_crs(crs)
     bbox_geom = da_upa1.raster.box
     max_upa = da_upa.raster.clip_geom(bbox_geom).where(upa_mask).max().values
@@ -335,10 +364,18 @@ def reproject_hydrography_like(
 ### hydrography maps ###
 
 
-def gaugemap(ds, idxs=None, xy=None, ids=None, mask=None, flwdir=None, logger=logger):
-    """This method has been deprecated. See :py:meth:`~hydromt.flw.gauge_map`"""
+def gaugemap(
+    ds: xr.Dataset,
+    idxs: Optional[np.ndarray] = None,
+    xy: Optional[Tuple] = None,
+    ids: Optional[np.ndarray] = None,
+    mask: Optional[xr.DataArray] = None,
+    flwdir: Optional[pyflwdir.FlwdirRaster] = None,
+    logger=logger,
+) -> xr.DataArray:
+    """This method is deprecated. See :py:meth:`~hydromt.flw.gauge_map`"""
     warnings.warn(
-        'The "gaugemap" method has been deprecated, use  "gauge_map" instead.',
+        'The "gaugemap" method is deprecated, use  "hydromt.flw.gauge_map" instead.',
         DeprecationWarning,
     )
     return gauge_map(
@@ -353,33 +390,52 @@ def gaugemap(ds, idxs=None, xy=None, ids=None, mask=None, flwdir=None, logger=lo
 
 
 def gauge_map(
-    ds, idxs=None, xy=None, ids=None, stream=None, flwdir=None, logger=logger
-):
-    """Return map with unique gauge IDs. Initial gauge locations are snapped to the
-    nearest downstream river defined by mask if both `flwdir` and `mask` are provided.
+    ds: Union[xr.Dataset, xr.DataArray],
+    idxs: Optional[np.ndarray] = None,
+    xy: Optional[Tuple] = None,
+    ids: Optional[np.ndarray] = None,
+    stream: Optional[xr.DataArray] = None,
+    flwdir: Optional[pyflwdir.FlwdirRaster] = None,
+    max_dist: float = 10e3,
+    logger=logger,
+) -> Tuple[xr.DataArray, np.ndarray, np.ndarray]:
+    """Return map with unique gauge IDs.
+
+    Gauge locations should be provided by either x,y coordinates (`xy`) or
+    linear indices (`idxs`). Gauge labels (`ids`) can optionally be provided,
+    but are by default numbered starting at one.
+
+    If `flwdir` and `stream` are provided, the gauge locations are snapped to the
+    nearest downstream river defined by the boolean `stream` mask. Else, the gauge
+    locations
 
     Parameters
     ----------
     ds : xarray.Dataset
-        dataset containing flow direction data
+        Dataset or Dataarray with destination grid.
     idxs : 1D array or int, optional
         linear indices of gauges, by default is None.
     xy : tuple of 1D array of float, optional
         x, y coordinates of gauges, by default is None.
-    outlets : bool, optional
-        If True and xy and idxs are None, the basin map is derived for basin outlets
-        only, excluding pits at the edge of the domain of incomplete basins.
     ids : 1D array of int32, optional
-        IDs of gauges, values must be larger than zero, by default None.
-    flwdir : pyflwdir.FlwdirRaster
-        Flow direction raster object
+        IDs of gauges, values must be larger than zero.
+        By default None and numbered on the fly.
+    flwdir : pyflwdir.FlwdirRaster, optional
+        Flow direction raster object, by default None.
     stream: 2D array of bool, optional
         Mask of stream cells used to snap gauges to, by default None
+    max_dist: float, optional
+        Maximum distance between original and snapped point location.
+        A warning is logged if exceeded. By default 10 km.
 
     Returns
     -------
-    xarray.DataArray
+    da_gauges: xarray.DataArray
         Map with unique gauge IDs
+    idxs: 1D array or int
+        linear indices of gauges
+    ids: 1D array of int
+        IDs of gauges
     """
     # Snap if mask and flwdir are not None
     if xy is not None:
@@ -387,14 +443,17 @@ def gauge_map(
     elif idxs is None:
         raise ValueError("Either idxs or xy required")
     if ids is None:
+        idxs = np.atleast_1d(idxs)
         ids = np.arange(1, idxs.size + 1, dtype=np.int32)
     # Snapping
     # TODO: should we do the snapping similar to basin_map ??
     if stream is not None and flwdir is not None:
         idxs, dist = flwdir.snap(idxs=idxs, mask=stream, unit="m")
-        if np.any(dist > 10000):
-            far = len(dist[dist > 10000])
-            logger.warn(f"Snapping distance of {far} gauge(s) is > 10km")
+        if np.any(dist > max_dist):
+            far = len(dist[dist > max_dist])
+            msg = f"Snapping distance of {far} gauge(s) exceeds {max_dist} m"
+            warnings.warn(msg, UserWarning)
+            logger.warning(msg)
     gauges = np.zeros(ds.raster.shape, dtype=np.int32)
     gauges.flat[idxs] = ids
     da_gauges = xr.DataArray(
@@ -406,7 +465,7 @@ def gauge_map(
     return da_gauges, idxs, ids
 
 
-def outlet_map(da_flw, ftype="infer"):
+def outlet_map(da_flw: xr.DataArray, ftype: str = "infer") -> xr.DataArray:
     """Returns a mask of basin outlets/pits from a flow direction raster.
 
     Parameters
@@ -419,7 +478,7 @@ def outlet_map(da_flw, ftype="infer"):
     Returns
     -------
     da_basin : xarray.DataArray of int32
-        basin ID map
+        basin outlets/pits ID map
     """
     if ftype == "infer":
         ftype = pyflwdir.pyflwdir._infer_ftype(da_flw.values)
@@ -436,13 +495,13 @@ def stream_map(ds, stream=None, **stream_kwargs):
     Parameters
     ----------
     ds : xarray.Dataset
-        dataset containing flow direction data
+        dataset containing all maps for stream criteria
     stream: 2D array of bool, optional
         Initial mask of stream cells. If a stream if provided, it is combined with the
-        threshold based map using a logical AND operation..
+        threshold based map using a logical AND operation.
     stream_kwargs : dict, optional
-        Parameter-treshold pairs to define streams. Multiple threshold will be combined
-        using a logical AND operation.
+        Parameter: minimum threshold pairs to define streams.
+        Multiple threshold will be combined using a logical AND operation.
 
     Returns
     -------
@@ -464,15 +523,15 @@ def stream_map(ds, stream=None, **stream_kwargs):
 
 
 def basin_map(
-    ds,
-    flwdir,
-    xy=None,
-    idxs=None,
-    outlets=False,
-    ids=None,
-    stream=None,
+    ds: xr.Dataset,
+    flwdir: pyflwdir.FlwdirRaster,
+    xy: Optional[Tuple] = None,
+    idxs: Optional[np.ndarray] = None,
+    outlets: bool = False,
+    ids: Optional[np.ndarray] = None,
+    stream: Optional[xr.DataArray] = None,
     **stream_kwargs,
-):
+) -> Union[xr.DataArray, Tuple]:
     """Return a (sub)basin map, with unique non-zero IDs for each subbasin.
 
     Parameters
@@ -503,9 +562,14 @@ def basin_map(
         basin ID map
     xy : tuple of array_like of float
         snapped x, y coordinates of sub(basin) outlets
+
+    See Also
+    --------
+    stream_map
+    outlet_map
     """
     if not np.all(flwdir.shape == ds.raster.shape):
-        raise ValueError("flwdir and ds dimensions do not match")
+        raise ValueError("Flwdir and ds dimensions do not match")
     # get stream map
     locs = xy is not None or idxs is not None
     if locs and (stream is not None or len(stream_kwargs) > 0):
@@ -518,10 +582,9 @@ def basin_map(
         idxs = flwdir.idxs_outlet
         if idxs is None or len(idxs) == 0:
             raise ValueError(
-                "No outlets found in domain. "
-                "Provide 'xy' or 'idxs' outlet locations or set 'outlets' to False."
+                "No basin outlets found in domain."
+                "Provide 'xy' or 'idxs' outlet locations or set 'outlets=False'"
             )
-        ids = None
     da_basins = xr.DataArray(
         data=flwdir.basins(idxs=idxs, xy=xy, ids=ids).astype(np.int32),
         dims=ds.raster.dims,
@@ -533,14 +596,25 @@ def basin_map(
     return da_basins, xy
 
 
-def basin_shape(ds, flwdir, basin_name="basins", mask=True, **kwargs):
-    """This method  will be deprecated. Use :py:meth:`~hydromt.flw.basin_map` in combination
+def basin_shape(
+    ds: xr.Dataset,
+    flwdir: pyflwdir.FlwdirRaster,
+    basin_name: str = "basins",
+    mask: bool = True,
+    **kwargs,
+) -> gpd.GeoDataFrame:
+    """This method is be deprecated. Use :py:meth:`~hydromt.flw.basin_map` in combination
     with :py:meth:`~hydromt.raster.RasterDataArray.vectorize` instead.
     """
-    if not np.all(flwdir.shape == ds.raster.shape):
-        raise ValueError("flwdir and ds dimensions do not match")
+    warnings.warn(
+        "basin_shape is deprecated, use a combination of hydromt.flw.basin_map"
+        " and hydromt.raster.RasterDataArray.vectorize instead.",
+        DeprecationWarning,
+    )
     if basin_name not in ds:
         ds[basin_name] = basin_map(ds, flwdir, **kwargs)[0]
+    elif not np.all(flwdir.shape == ds.raster.shape):
+        raise ValueError("flwdir and ds dimensions do not match")
     da_basins = ds[basin_name]
     nodata = da_basins.raster.nodata
     if mask and "mask" in da_basins.coords and nodata is not None:
@@ -551,28 +625,39 @@ def basin_shape(ds, flwdir, basin_name="basins", mask=True, **kwargs):
     return gdf
 
 
-def clip_basins(ds, flwdir, xy, flwdir_name="flwdir", **stream_kwargs):
+def clip_basins(
+    ds: xr.Dataset,
+    flwdir: pyflwdir.FlwdirRaster,
+    xy: Optional[Tuple],
+    flwdir_name: str = "flwdir",
+    **kwargs,
+) -> xr.Dataset:
     """Clip a dataset to a subbasin.
 
     Parameters
     ----------
     ds : xarray.Dataset
-        dataset containing flow direction data
+        Dataset to be clipped, containing flow direction (`flwdir_name`) data
     flwdir : pyflwdir.FlwdirRaster
         Flow direction raster object
-    xy : tuple of array_like of float
+    xy : tuple of array_like of float, optional
         x, y coordinates of (sub)basin outlet locations
     flwdir_name : str, optional
-        name of flow direction DataArray, by default 'dir'
-    stream_kwargs : key-word arguments
-        name of variable in ds and threshold value
+        name of flow direction DataArray, by default 'flwdir'
+    kwargs : key-word arguments
+        Keyword arguments based to the :py:meth:`~hydromt.flw.basin_map` method.
 
     Returns
     -------
     xarray.Dataset
         clipped dataset
+
+    See Also
+    --------
+    basin_map
+    hydromt.RasterDataArray.clip_mask
     """
-    da_basins, xy = basin_map(ds, flwdir, xy, **stream_kwargs)
+    da_basins, xy = basin_map(ds, flwdir, xy, **kwargs)
     idxs_pit = flwdir.index(*xy)
     # set pit values in DataArray
     pit_value = flwdir._core._pv
@@ -588,16 +673,23 @@ def clip_basins(ds, flwdir, xy, flwdir_name="flwdir", **stream_kwargs):
 
 
 def dem_adjust(
-    da_elevtn,
-    da_flwdir,
-    da_rivmsk=None,
-    flwdir=None,
-    connectivity=4,
+    da_elevtn: xr.DataArray,
+    da_flwdir: xr.DataArray,
+    da_rivmsk: Optional[xr.DataArray] = None,
+    flwdir: Optional[pyflwdir.FlwdirRaster] = None,
+    connectivity: int = 4,
     river_d8: bool = False,
     logger=logger,
-) -> xr.Dataset:
-    """Returns hydrologically adjusted elevation and
-    if `return_floodplain`, a binary floodplain classification.
+) -> xr.DataArray:
+    """Returns hydrologically conditioned elevation.
+
+    The elevation is conditioned to D4 (`connectivity=4`) or D8 (`connectivity=8`)
+    flow directions.
+
+    The method assumes the orignal flow directions are in D8. Therefore, if
+    `connectivity=4`, an intermediate D4 conditioned elevation raster is derived
+    first, based on which new D4 flow directions are obtained used to condition the
+    original elvation.
 
     Parameters
     ----------
@@ -606,7 +698,7 @@ def dem_adjust(
         D8 flow directions [-]
         binary river mask [-], optional
     flwdir : pyflwdir.FlwdirRaster, optional
-        Flow direction raster object. If None it is derived from da_flwdir.
+        D8 flow direction raster object. If None it is derived on the fly from `da_flwdir`.
     connectivity: {4, 8}
         D4 or D8 flow connectivity.
     river_d8 : bool
@@ -617,19 +709,26 @@ def dem_adjust(
     -------
     xr.Dataset
         Dataset with hydrologically adjusted elevation ('elevtn') [m+REF]
+
+    See Also
+    --------
+    pyflwdir.FlwdirRaster.dem_adjust
+    pyflwdir.FlwdirRaster.dem_dig_d4
     """
     # get flow directions for entire domain and for rivers
     if flwdir is None:
         flwdir = flwdir_from_da(da_flwdir, mask=False)
+    if connectivity == 4 and river_d8 and da_rivmsk is None:
+        raise ValueError('Provide "da_rivmsk" in combination with "river_d8"')
     elevtn = da_elevtn.values
     nodata = da_elevtn.raster.nodata
-    rivmsk = da_rivmsk.values == 1 if da_rivmsk is not None else None
 
     logger.info(f"Condition elevation to D{connectivity} flow directions.")
     # get D8 conditioned elevation
     elevtn = flwdir.dem_adjust(elevtn)
     # get D4 conditioned elevation (based on D8 conditioned!)
     if connectivity == 4:
+        rivmsk = da_rivmsk.values == 1 if da_rivmsk is not None else None
         # derive D4 flow directions with forced pits at original locations
         d4 = pyflwdir.dem.fill_depressions(
             elevtn=flwdir.dem_dig_d4(elevtn, rivmsk=rivmsk, nodata=nodata),
@@ -643,12 +742,9 @@ def dem_adjust(
         )
         elevtn = flwdir_d4.dem_adjust(elevtn)
         # condition river cells to D8
-        if river_d8 and rivmsk is not None:
+        if river_d8:
             flwdir_river = flwdir_from_da(da_flwdir, mask=rivmsk)
             elevtn = flwdir_river.dem_adjust(elevtn)
-            # assert np.all((elv2 - flwdir_river.downstream(elv2))>=0)
-        elif river_d8:
-            logger.warning('Provide "rivmsk" variable to condition river cells in D8.')
         # assert np.all((elv2 - flwdir_d4.downstream(elv2))>=0)
 
     # save to dataarray
