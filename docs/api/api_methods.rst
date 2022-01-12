@@ -271,5 +271,23 @@ General GIS methods
    
 
 
+Statistics and performance metrics
+==================================
 
+.. autosummary::
+   :toctree: ../_generated
+   
+   stats.bias
+   stats.percentual_bias
+   stats.nashsutcliffe
+   stats.lognashsutcliffe
+   stats.pearson_correlation
+   stats.pearman_rank_correlation
+   stats.kge
+   stats.kge_2012
+   stats.kge_non_parametric
+   stats.kge_non_parametric_flood
+   stats.rsquared
+   stats.mse
+   stats.rmse
 
