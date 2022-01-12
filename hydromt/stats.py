@@ -123,8 +123,8 @@ def lognashsutcliffe(sim, obs, epsilon=1e-6, dim="time"):
     xarray DataArray
         the log of the Nash-Sutcliffe model efficiency
     """
-    obs = xr.ufuncs.log(obs + epsilon)
-    sim = xr.ufuncs.log(sim + epsilon)
+    obs = np.log(obs + epsilon)
+    sim = np.log(sim + epsilon)
     # wrap numpy function
     kwargs = dict(
         input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
@@ -217,7 +217,7 @@ def kge_non_parametric(sim, obs, dim="time"):
     alpha.name = "kge_np_rel_var"
     beta = sim.sum(dim=dim) / obs.sum(dim=dim)
     beta.name = "kge_np_bias"
-    kge = 1 - xr.ufuncs.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    kge = 1 - np.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
     kge.name = "kge_np"
     ds_out = xr.merge([kge, cc, alpha, beta])
     return ds_out
@@ -255,7 +255,7 @@ def kge_non_parametric_flood(sim, obs, dim="time"):
     alpha.name = "kge_np_flood_rel_var"
     beta = sim.sum(dim=dim) / obs.sum(dim=dim)
     beta.name = "kge_np_flood_bias"
-    kge = 1 - xr.ufuncs.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    kge = 1 - np.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
     kge.name = "kge_np_flood"
     ds_out = xr.merge([kge, cc, alpha, beta])
     return ds_out
@@ -336,7 +336,7 @@ def rmse(sim, obs, dim="time"):
     xarray DataArray
         the root mean squared error
     """
-    rmse = xr.ufuncs.sqrt(mse(sim, obs, dim=dim))
+    rmse = np.sqrt(mse(sim, obs, dim=dim))
     rmse.name = "rmse"
     return rmse
 
@@ -369,7 +369,7 @@ def kge(sim, obs, dim="time"):
     alpha.name = "kge_rel_var"
     beta = sim.sum(dim=dim) / obs.sum(dim=dim)
     beta.name = "kge_bias"
-    kge = 1 - xr.ufuncs.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    kge = 1 - np.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
     kge.name = "kge"
     ds_out = xr.merge([kge, cc, alpha, beta])
     return ds_out
@@ -408,7 +408,7 @@ def kge_2012(sim, obs, dim="time"):
         obs.std(dim=dim) * sim.sum(dim=dim)
     )
     alpha.name = "kge_2012_rel_var"
-    kge_2012 = 1 - xr.ufuncs.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    kge_2012 = 1 - np.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
     kge_2012.name = "kge_2012"
     ds_out = xr.merge([kge_2012, cc, alpha, beta])
     return ds_out
