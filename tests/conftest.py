@@ -126,16 +126,3 @@ def obsda():
     )
     da.raster.set_crs(4326)
     return da
-
-
-@pytest.fixture
-def simda():
-    rng = np.random.default_rng(12345)
-    da = xr.DataArray(
-        data=rng.random(size=365) * 100 + 5,
-        dims=("time"),
-        coords={"time": pd.date_range(start="2020-01-01", periods=365, freq="1D")},
-        attrs=dict(_FillValue=-9999),
-    )
-    da.raster.set_crs(4326)
-    return da

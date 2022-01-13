@@ -277,17 +277,17 @@ Statistics and performance metrics
 .. autosummary::
    :toctree: ../_generated
    
-   stats.bias
-   stats.percentual_bias
-   stats.nashsutcliffe
-   stats.lognashsutcliffe
-   stats.pearson_correlation
-   stats.pearman_rank_correlation
-   stats.kge
-   stats.kge_2012
-   stats.kge_non_parametric
-   stats.kge_non_parametric_flood
-   stats.rsquared
-   stats.mse
-   stats.rmse
+   stats.skills.bias
+   stats.skills.percentual_bias
+   stats.skills.nashsutcliffe
+   stats.skills.lognashsutcliffe
+   stats.skills.pearson_correlation
+   stats.skills.pearman_rank_correlation
+   stats.skills.kge
+   stats.skills.kge_2012
+   stats.skills.kge_non_parametric
+   stats.skills.kge_non_parametric_flood
+   stats.skills.rsquared
+   stats.skills.mse
+   stats.skills.rmse
 

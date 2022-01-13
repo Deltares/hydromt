@@ -188,7 +188,7 @@ def spearman_rank_correlation(sim, obs, dim="time"):
 
 
 def kge_non_parametric(sim, obs, dim="time"):
-    """Returns the Non Parametric Kling-Gupta Efficiency (KGE) of two time series
+    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series with decomposed scores
 
     .. ref::
     Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
@@ -209,7 +209,7 @@ def kge_non_parametric(sim, obs, dim="time"):
         Non Parametric Kling-Gupta Efficiency (2018) and with decomposed score
     """
     cc = spearman_rank_correlation(sim, obs, dim=dim)
-    cc.name = "spearman_rank_correlation_coef"
+    cc.name = "kge_np_spearman_rank_correlation_coef"
     kwargs = dict(
         input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
     )
@@ -224,7 +224,7 @@ def kge_non_parametric(sim, obs, dim="time"):
 
 
 def kge_non_parametric_flood(sim, obs, dim="time"):
-    """Returns the Non Parametric Kling-Gupta Efficiency (KGE) of two time series
+    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series optimized for flood peaks using Pearson (see Pool et al., 2018)
 
     .. ref::
     Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
@@ -243,11 +243,11 @@ def kge_non_parametric_flood(sim, obs, dim="time"):
     -------
     xarray DataSet
         Non Parametric Kling-Gupta Efficiency (2018) optimize for flood peaks
-        using pearson (see Pool et all., 2018) and with decomposed score
+        using pearson (see Pool et al., 2018) and with decomposed score
     """
     # cc = spearman_rank_correlation(sim, obs)
     cc = pearson_correlation(sim, obs, dim=dim)
-    cc.name = "kge_pearson_coef"
+    cc.name = "kge_np_flood_pearson_coef"
     kwargs = dict(
         input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
     )
@@ -376,7 +376,7 @@ def kge(sim, obs, dim="time"):
 
 
 def kge_2012(sim, obs, dim="time"):
-    """Returns the Kling-Gupta Efficiency (KGE) of two time series
+    """Returns the Kling-Gupta Efficiency (KGE, 2012) of two time series
 
         .. ref::
         Kling, H., Fuchs, M., & Paulin, M. (2012). Runoff conditions in the
@@ -399,8 +399,6 @@ def kge_2012(sim, obs, dim="time"):
     """
     cc = pearson_correlation(sim, obs, dim=dim)
     cc.name = "kge_2012_pearson_coef"
-    alpha = sim.std(dim=dim) / obs.std(dim=dim)
-    alpha.name = "kge_2012_rel_var"
     beta = sim.sum(dim=dim) / obs.sum(dim=dim)
     beta.name = "kge_2012_bias"
     # divide alpha by bias

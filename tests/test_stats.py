@@ -5,23 +5,23 @@ import pytest
 import numpy as np
 import xarray as xr
 
-from hydromt import stats
+from hydromt.stats import skills
 
 
-def test_geo(obsda, simda):
-    assert stats.bias(simda, obsda).values.round(2) == 5.0
-    assert stats.percentual_bias(simda, obsda).values.round(2) == 0.1
-    assert stats.nashsutcliffe(simda, obsda).values.round(2) == 0.97
-    assert stats.lognashsutcliffe(simda, obsda).values.round(2) == 0.85
-    assert stats.pearson_correlation(simda, obsda).values.round(2) == 1.0
-    assert stats.spearman_rank_correlation(simda, obsda).values.round(2) == 1.0
-    assert stats.kge(simda, obsda)["kge"].values.round(2) == 0.9
-    assert stats.kge_2012(simda, obsda)["kge_2012"].values.round(2) == 0.86
-    assert stats.kge_non_parametric(simda, obsda)["kge_np"].values.round(2) == 0.9
-    assert (
-        stats.kge_non_parametric_flood(simda, obsda)["kge_np_flood"].values.round(2)
-        == 0.9
+def test_skills(obsda):
+    simda = obsda + 5.0
+    assert np.isclose(skills.bias(simda, obsda).values, 5.0)
+    assert np.isclose(skills.percentual_bias(simda, obsda).values, 0.1033)
+    assert np.isclose(skills.nashsutcliffe(simda, obsda).values, 0.97015)
+    assert np.isclose(skills.lognashsutcliffe(simda, obsda).values, 0.8517)
+    assert np.isclose(skills.pearson_correlation(simda, obsda).values, 1.0)
+    assert np.isclose(skills.spearman_rank_correlation(simda, obsda).values, 1.0)
+    assert np.isclose(skills.kge(simda, obsda)["kge"].values, 0.8967)
+    assert np.isclose(skills.kge_2012(simda, obsda)["kge_2012"].values, 0.86058)
+    assert np.isclose(skills.kge_non_parametric(simda, obsda)["kge_np"].values, 0.8967)
+    assert np.isclose(
+        skills.kge_non_parametric_flood(simda, obsda)["kge_np_flood"].values, 0.8967
     )
-    assert stats.rsquared(simda, obsda).values.round(2) == 1.0
-    assert stats.mse(simda, obsda).values.round(2) == 9125.0
-    assert stats.rmse(simda, obsda).values.round(2) == 95.52
+    assert np.isclose(skills.rsquared(simda, obsda).values, 1.0)
+    assert np.isclose(skills.mse(simda, obsda).values, 9125.0)
+    assert np.isclose(skills.rmse(simda, obsda).values, 95.5249)
