@@ -116,7 +116,7 @@ def hydds(flwda, flwdir):
 
 
 @pytest.fixture
-def obsda():
+def ts():
     rng = np.random.default_rng(12345)
     da = xr.DataArray(
         data=rng.random(size=365) * 100,
