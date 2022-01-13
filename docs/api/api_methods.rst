@@ -251,6 +251,7 @@ visit the `pyflwdir docs. <https://deltares.github.io/pyflwdir/latest/>`_
    flw.gauge_map
    flw.outlet_map
    flw.clip_basins
+   flw.floodplain_elevation
 
 
 General GIS methods

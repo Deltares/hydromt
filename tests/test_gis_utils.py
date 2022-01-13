@@ -47,23 +47,30 @@ def test_area_res():
 
 
 def test_gdf(world):
-    assert np.all(
-        gu.filter_gdf(
-            world,
-            world.iloc[
-                [0],
-            ].to_crs(3857),
-        )
-        == 0
-    )
+    country = world.iloc[[0], :].to_crs(3857)
+    assert np.all(gu.filter_gdf(world, country) == 0)
+    idx0 = gu.filter_gdf(world, bbox=[3, 51.5, 4, 52])[0]
     assert (
         world.iloc[
-            gu.filter_gdf(world, bbox=[3, 51.5, 4, 52])[0],
+            idx0,
         ]["iso_a3"]
         == "NLD"
     )
     with pytest.raises(ValueError, match="Unknown geometry mask type"):
         gu.filter_gdf(world, geom=[3, 51.5, 4, 52])
+
+
+def test_nearest(world, geodf):
+    idx, _ = gu.nearest(geodf, geodf)
+    assert np.all(idx == geodf.index)
+    idx, dst = gu.nearest(geodf, world)
+    assert np.all(dst == 0)
+    assert np.all(world.loc[idx, "name"].values == geodf["country"].values)
+    gdf0 = geodf.copy()
+    gdf0["iso_a3"] = ""
+    gdf1 = gu.nearest_merge(geodf, world.drop(idx), max_dist=1e6)
+    assert np.all(gdf1.loc[gdf1["distance_right"] > 1e6, "index_right"] == -1)
+    assert np.all(gdf1.loc[gdf1["distance_right"] > 1e6, "iso_a3"] != "")
 
 
 def test_spread():
