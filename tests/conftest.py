@@ -113,3 +113,16 @@ def hydds(flwda, flwdir):
     )
     ds.raster.set_crs(flwda.raster.crs)
     return ds
+
+
+@pytest.fixture
+def obsda():
+    rng = np.random.default_rng(12345)
+    da = xr.DataArray(
+        data=rng.random(size=365) * 100,
+        dims=("time"),
+        coords={"time": pd.date_range(start="2020-01-01", periods=365, freq="1D")},
+        attrs=dict(_FillValue=-9999),
+    )
+    da.raster.set_crs(4326)
+    return da

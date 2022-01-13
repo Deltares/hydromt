@@ -123,8 +123,8 @@ def lognashsutcliffe(sim, obs, epsilon=1e-6, dim="time"):
     xarray DataArray
         the log of the Nash-Sutcliffe model efficiency
     """
-    obs = xr.ufuncs.log(obs + epsilon)
-    sim = xr.ufuncs.log(sim + epsilon)
+    obs = np.log(obs + epsilon)
+    sim = np.log(sim + epsilon)
     # wrap numpy function
     kwargs = dict(
         input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
@@ -185,6 +185,80 @@ def spearman_rank_correlation(sim, obs, dim="time"):
     spearmanr = xr.apply_ufunc(_spearman_correlation, sim, obs, **kwargs)
     spearmanr.name = "spearmanr_coef"
     return spearmanr
+
+
+def kge_non_parametric(sim, obs, dim="time"):
+    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series with decomposed scores
+
+    .. ref::
+    Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
+    a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
+
+    Parameters
+    ----------
+    sim : xarray DataArray
+        simulations time series
+    obs : xarray DataArray
+        observations time series
+    dim : str, optional
+        name of time dimension in sim and obs (the default is 'time')
+
+    Returns
+    -------
+    xarray DataSet
+        Non Parametric Kling-Gupta Efficiency (2018) and with decomposed score
+    """
+    cc = spearman_rank_correlation(sim, obs, dim=dim)
+    cc.name = "kge_np_spearman_rank_correlation_coef"
+    kwargs = dict(
+        input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
+    )
+    alpha = xr.apply_ufunc(_fdc_alpha, sim, obs, **kwargs)
+    alpha.name = "kge_np_rel_var"
+    beta = sim.sum(dim=dim) / obs.sum(dim=dim)
+    beta.name = "kge_np_bias"
+    kge = 1 - np.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    kge.name = "kge_np"
+    ds_out = xr.merge([kge, cc, alpha, beta])
+    return ds_out
+
+
+def kge_non_parametric_flood(sim, obs, dim="time"):
+    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series optimized for flood peaks using Pearson (see Pool et al., 2018)
+
+    .. ref::
+    Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
+    a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
+
+    Parameters
+    ----------
+    sim : xarray DataArray
+        simulations time series
+    obs : xarray DataArray
+        observations time series
+    dim : str, optional
+        name of time dimension in sim and obs (the default is 'time')
+
+    Returns
+    -------
+    xarray DataSet
+        Non Parametric Kling-Gupta Efficiency (2018) optimize for flood peaks
+        using pearson (see Pool et al., 2018) and with decomposed score
+    """
+    # cc = spearman_rank_correlation(sim, obs)
+    cc = pearson_correlation(sim, obs, dim=dim)
+    cc.name = "kge_np_flood_pearson_coef"
+    kwargs = dict(
+        input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
+    )
+    alpha = xr.apply_ufunc(_fdc_alpha, sim, obs, **kwargs)
+    alpha.name = "kge_np_flood_rel_var"
+    beta = sim.sum(dim=dim) / obs.sum(dim=dim)
+    beta.name = "kge_np_flood_bias"
+    kge = 1 - np.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    kge.name = "kge_np_flood"
+    ds_out = xr.merge([kge, cc, alpha, beta])
+    return ds_out
 
 
 def rsquared(sim, obs, dim="time"):
@@ -262,7 +336,7 @@ def rmse(sim, obs, dim="time"):
     xarray DataArray
         the root mean squared error
     """
-    rmse = xr.ufuncs.sqrt(mse(sim, obs, dim=dim))
+    rmse = np.sqrt(mse(sim, obs, dim=dim))
     rmse.name = "rmse"
     return rmse
 
@@ -295,9 +369,46 @@ def kge(sim, obs, dim="time"):
     alpha.name = "kge_rel_var"
     beta = sim.sum(dim=dim) / obs.sum(dim=dim)
     beta.name = "kge_bias"
-    kge = 1 - xr.ufuncs.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    kge = 1 - np.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
     kge.name = "kge"
     ds_out = xr.merge([kge, cc, alpha, beta])
+    return ds_out
+
+
+def kge_2012(sim, obs, dim="time"):
+    """Returns the Kling-Gupta Efficiency (KGE, 2012) of two time series
+
+        .. ref::
+        Kling, H., Fuchs, M., & Paulin, M. (2012). Runoff conditions in the
+        upper Danube basin under an ensemble of climate change scenarios.
+        Journal of Hydrology, 424, 264-277, doi:10.1016/j.jhydrol.2012.01.011.
+
+    Parameters
+    ----------
+    sim : xarray DataArray
+        simulations time series
+    obs : xarray DataArray
+        observations time series
+    dim : str, optional
+        name of time dimension in sim and obs (the default is 'time')
+
+    Returns
+    -------
+    xarray DataSet
+        Kling-Gupta Efficiency (2012) and with decomposed scores
+    """
+    cc = pearson_correlation(sim, obs, dim=dim)
+    cc.name = "kge_2012_pearson_coef"
+    beta = sim.sum(dim=dim) / obs.sum(dim=dim)
+    beta.name = "kge_2012_bias"
+    # divide alpha by bias
+    alpha = (sim.std(dim=dim) * obs.sum(dim=dim)) / (
+        obs.std(dim=dim) * sim.sum(dim=dim)
+    )
+    alpha.name = "kge_2012_rel_var"
+    kge_2012 = 1 - np.sqrt((cc - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    kge_2012.name = "kge_2012"
+    ds_out = xr.merge([kge_2012, cc, alpha, beta])
     return ds_out
 
 
@@ -322,6 +433,12 @@ def _spearman_correlation(x, y):
 
 
 # numpy functions
+def _fdc_alpha(sim, obs, axis=-1):
+    fdc_s = np.sort(sim, axis=axis) / (np.nanmean(sim, axis=axis) * len(sim))
+    fdc_o = np.sort(obs, axis=axis) / (np.nanmean(obs, axis=axis) * len(obs))
+    return 1 - 0.5 * np.nanmean(np.abs(fdc_s - fdc_o))
+
+
 def _bias(sim, obs, axis=-1):
     """bias"""
     return np.nansum(sim - obs, axis=axis) / np.nansum(np.isfinite(obs), axis=axis)
