@@ -10,11 +10,11 @@ unreleased
 
 Added
 ^^^^^
-
+- New skill socres: KGE 2012, KGE non-parametric (2018), KGE non-parametric flood (2018).
 
 Changed
 ^^^^^^^
-
+- stats.py is now in stats/skills.py in order to include more and different type of new statistics later.
 
 Fixed
 ^^^^^
