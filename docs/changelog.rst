@@ -10,15 +10,15 @@ unreleased
 
 Added
 ^^^^^
+- New skill socres: KGE 2012, KGE non-parametric (2018), KGE non-parametric flood (2018).
 - new rasterio inverse distance weighting method ("rio_idw") in raster.interpolate_na
-
 
 Changed
 ^^^^^^^
+- stats.py is now in stats/skills.py in order to include more and different type of new statistics later.
 - improved flw.reproject_hydrography_like and flw.dem_adjust methods
 - file handlers of loggers are replaced in Model.set_root
 - log.setuplog replaces old handlers if these exist to avoid duplicates.
-
 
 Fixed
 ^^^^^
