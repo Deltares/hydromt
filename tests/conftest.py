@@ -80,6 +80,7 @@ def demda():
 
 @pytest.fixture
 def flwdir(demda):
+    # NOTE: single basin!
     return pyflwdir.from_dem(
         demda.values,
         nodata=demda.raster.nodata,

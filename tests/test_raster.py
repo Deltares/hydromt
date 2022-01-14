@@ -264,12 +264,15 @@ def test_area_grid(rioda):
 def test_interpolate_na():
     # mv > nan
     da0 = raster.full_from_transform(*testdata[0], nodata=-1)
-    da0.values[0, 0] = 1
-    da1 = da0.raster.mask_nodata().raster.interpolate_na()
+    da0.values.flat[np.array([0, 3, -3, -1])] = np.array([1, 1, 2, 2])
+    da1 = da0.raster.mask_nodata().raster.interpolate_na()  # nearest
     assert np.all(np.isnan(da1) == False)
-    assert np.all(da1 == 1)
+    assert np.all(np.isin(da1, [1, 2]))
     assert np.all(np.isnan(da1.raster.interpolate_na()) == False)
-    assert np.all(da0.raster.interpolate_na() != da0.raster.nodata)
+    assert np.all(
+        da0.raster.interpolate_na(method="rio_idw", max_search_distance=3)
+        != da0.raster.nodata
+    )
     assert np.all(da0.expand_dims("t").raster.interpolate_na() != da0.raster.nodata)
     da2 = da0.astype(np.int32)  # this removes the nodata value ...
     da2.raster.set_nodata(-9999)

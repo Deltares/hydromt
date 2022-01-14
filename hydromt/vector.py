@@ -343,9 +343,8 @@ class GeoDataArray(GeoBase):
         # keep 1D variables with matching index_dim
         sdims = [self.y_dim, self.x_dim, self.index_dim, "geometry"]
         for name in self._obj.coords:
-            if name not in sdims and np.all(
-                np.array(self._obj[name].dims) == self.index_dim
-            ):
+            dims = self._obj[name].dims
+            if name not in sdims and len(dims) == 1 and dims[0] == self.index_dim:
                 gdf[name] = self._obj[name].values
         # keep reduced data variable
         if reducer is not None:
@@ -453,9 +452,8 @@ class GeoDataset(GeoBase):
         # keep 1D variables with matching index_dim
         sdims = [self.y_dim, self.x_dim, self.index_dim, "geometry"]
         for name in self._obj.reset_coords():
-            if name not in sdims and np.all(
-                np.array(self._obj[name].dims) == self.index_dim
-            ):
+            dims = self._obj[name].dims
+            if name not in sdims and len(dims) == 1 and dims[0] == self.index_dim:
                 gdf[name] = self._obj[name].values
         # keep reduced data variables
         if reducer is not None:

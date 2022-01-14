@@ -2,8 +2,9 @@
 """General and basic API for models in HydroMT"""
 
 from abc import ABCMeta, abstractmethod
+import enum
 import os
-from os.path import join, isdir, isfile, abspath
+from os.path import join, isdir, isfile, abspath, dirname, basename
 import xarray as xr
 import numpy as np
 import geopandas as gpd
@@ -13,7 +14,7 @@ from pathlib import Path
 import inspect
 
 from ..data_adapter import DataCatalog
-from .. import config
+from .. import config, log
 
 __all__ = ["Model"]
 
@@ -256,6 +257,13 @@ class Model(object, metaclass=ABCMeta):
             if self._read and isfile(data_fn):
                 # read data and mark as used
                 self.data_catalog.from_yml(data_fn, mark_used=True)
+            # change output localtion of any logging file handlers
+            for i, h in enumerate(self.logger.handlers):
+                if hasattr(h, "baseFilename") and dirname(h.baseFilename) != self._root:
+                    self.logger.handlers.pop(i).close()  # remove handler and close file
+                    new_path = join(self._root, basename(h.baseFilename))
+                    log.add_filehandler(self.logger, new_path, h.level)
+                    break
 
     ## I/O
 

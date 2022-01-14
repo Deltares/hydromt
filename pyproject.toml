@@ -70,3 +70,8 @@ target-version = ['py37']
 [tool.flit.sdist]
 include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:distutils Version classes are deprecated:DeprecationWarning",
+]

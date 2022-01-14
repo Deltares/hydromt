@@ -33,7 +33,7 @@ def test_geo(geoda, geodf):
     with pytest.raises(ValueError, match="Unknown data type"):
         vector.GeoDataset.from_gdf(geoda)
     with pytest.raises(ValueError, match="only contain Point geometry"):
-        vector.GeoDataset.from_gdf(geodf.buffer(1))
+        vector.GeoDataset.from_gdf(geodf.to_crs(3857).buffer(1))
     with pytest.raises(ValueError, match="not found"):
         vector.GeoDataset.from_gdf(geodf, geoda.rename({"index": "missing"}))
 
