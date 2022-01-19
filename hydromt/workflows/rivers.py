@@ -103,7 +103,7 @@ def river_depth(
     manning : float, optional
         Constant manning roughness [s/m^{1/3}] used if `rivman_name` not in data,
         by default 0.03
-    qbankfull_name, rivwth_name, rivzs_name, rivdst_name, rivslp_name: str, optional
+    qbankfull_name, rivwth_name, rivzs_name, rivdst_name, rivslp_name, rivman_name: str, optional
         Name for variables in data: bankfull discharge [m3/s], river width [m],
         bankfull water surface elevation profile [m+REF], distance to river outlet [m],
         river slope [m/m] and river manning roughness [s/m^{1/3}]
