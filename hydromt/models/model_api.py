@@ -32,6 +32,8 @@ class Model(object, metaclass=ABCMeta):
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
+    # tell hydroMT which methods should receive the res and region arguments
+    _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
 
     def __init__(
         self,
@@ -96,7 +98,7 @@ class Model(object, metaclass=ABCMeta):
         return func(*args, **kwargs)
 
     def build(
-        self, region: dict, res: float = None, write: bool = True, opt: dict = None
+        self, region: dict, res: float = None, write: bool = True, opt: dict = {}
     ):
         """Single method to setup and write a full model schematization and
         configuration from scratch
@@ -128,14 +130,18 @@ class Model(object, metaclass=ABCMeta):
         """
         opt = self._check_get_opt(opt)
 
+        # merge cli region and res argumetns with opt
+        # insert region method if it does not exist in opt
+        if self._CLI_ARGS["region"] not in opt:
+            opt = {"self._region_method": {}, **opt}
+        # update region method kwargs with region
+        opt[self._CLI_ARGS["region"]].update(region=region)
+        # update res method kwargs with res (optional)
+        if "res" in self._CLI_ARGS and res is not None and self._CLI_ARGS["res"] in opt:
+            opt[self._CLI_ARGS["res"]].update(res=res)
+
         # run setup_config and setup_basemaps first!
         self._run_log_method("setup_config", **opt.pop("setup_config", {}))
-        kwargs = opt.pop("setup_basemaps", {})
-        kwargs.update(region=region)
-
-        if res is not None:  # res is optional
-            kwargs.update(res=res)
-        self._run_log_method("setup_basemaps", **kwargs)
 
         # then loop over other methods
         for method in opt:
@@ -210,6 +216,12 @@ class Model(object, metaclass=ABCMeta):
         # write
         if write:
             self.write()
+
+    ## general setup methods
+
+    def setup_region(self):
+        # TODO
+        pass
 
     ## file system
 
