@@ -9,6 +9,7 @@ from os.path import join, isdir, dirname, basename, isfile, abspath
 from itertools import product
 import copy
 from pathlib import Path
+from unittest.mock import NonCallableMagicMock
 import numpy as np
 import xarray as xr
 import geopandas as gpd
@@ -392,6 +393,9 @@ class DataCatalog(object):
         buffer=0,
         align=None,
         variables=None,
+        models=None,
+        scenarios=None,
+        realizations=None,
         time_tuple=None,
         single_var_as_array=True,
         **kwargs,
@@ -403,6 +407,7 @@ class DataCatalog(object):
         To slice the data to the time period of interest, provide the `time_tuple` argument.
         To return only the dataset variables of interest and check their presence,
         provide the `variables` argument.
+
 
         NOTE: Unless `single_var_as_array` is set to False a single-varaible data source
         will be returned as :py:class:`xarray.DataArray` rather than :py:class:`xarray.Dataset`.
@@ -423,6 +428,12 @@ class DataCatalog(object):
         variables : list of str, optional.
             Names of RasterDataset variables to return. By default all dataset variables
             are returned.
+        models : list of a single str, optional.
+            Name of placeholder {model} in path of data catalog key.
+        scenarios : list of a single str, optional.
+            Name of placeholder {scenario} in path of data catalog key.
+        realizations : list of a single str, optional.
+            Name of placeholder {realization} in path of data catalog key.
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
@@ -454,6 +465,9 @@ class DataCatalog(object):
             buffer=buffer,
             align=align,
             variables=variables,
+            models=models,
+            scenarios=scenarios,
+            realizations=realizations,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
             logger=self.logger,
@@ -740,11 +754,21 @@ class DataAdapter(object, metaclass=ABCMeta):
     def __repr__(self):
         return self.__str__()
 
-    def resolve_paths(self, time_tuple=None, variables=None):
-        """Returns list of paths. Resolve {year}, {month} and {variable} keywords
-        in self.path based 'time_tuple' and 'variables' arguments"""
+    def resolve_paths(
+        self,
+        time_tuple=None,
+        variables=None,
+        scenarios=None,
+        models=None,
+        realizations=None,
+    ):
+        """Returns list of paths. Resolve {year}, {month}, {variable}, {model}, {scenario} and {realization} keywords
+        in self.path based 'time_tuple' and 'variables' 'models', 'scenarios', 'realizations' arguments"""
         yr, mth = "*", "*"
         vrs = ["*"]
+        mods = ["*"]
+        scens = ["*"]
+        reals = ["*"]
         dates = [""]
         fns = []
         if time_tuple is not None and "{year" in str(self.path):
@@ -755,10 +779,27 @@ class DataAdapter(object, metaclass=ABCMeta):
         if variables is not None and "{variable" in str(self.path):
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
-        for date, var in product(dates, vrs):
+        if models is not None and "{model" in str(self.path):
+            mv_inv = {v: k for k, v in self.rename.items()}
+            mods = [mv_inv.get(mod, mod) for mod in models]
+        if scenarios is not None and "{scenario" in str(self.path):
+            mv_inv = {v: k for k, v in self.rename.items()}
+            scens = [mv_inv.get(scen, scen) for scen in scenarios]
+        if realizations is not None and "{realization" in str(self.path):
+            mv_inv = {v: k for k, v in self.rename.items()}
+            reals = [mv_inv.get(real, real) for real in realizations]
+        for date, var, mod, scen, real in product(dates, vrs, mods, scens, reals):
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            path = str(self.path).format(year=yr, month=mth, variable=var)
+            # import pdb; pdb.set_trace()
+            path = str(self.path).format(
+                year=yr,
+                month=mth,
+                variable=var,
+                model=mod,
+                scenario=scen,
+                realization=real,
+            )
             fns.extend(glob.glob(path))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {self.path}")
@@ -800,7 +841,7 @@ class RasterDatasetAdapter(DataAdapter):
         ----------
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
-            contain {variable}, {year}, {month} placeholders as well as path search pattern
+            contain {variable}, {year}, {month}, {model}, {scenario}, {realization} placeholders as well as path search pattern
             using a '*' wildcard.
         driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
             Driver to read files with, for 'raster' :py:func:`~hydromt.io.open_mfraster`,
@@ -847,6 +888,9 @@ class RasterDatasetAdapter(DataAdapter):
         time_tuple,
         driver=None,
         variables=None,
+        models=None,
+        scenarios=None,
+        realizations=None,
         logger=logger,
         **kwargs,
     ):
@@ -868,6 +912,12 @@ class RasterDatasetAdapter(DataAdapter):
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
+        models: list of str, optional
+            Name of placeholder {model} in data catalog path
+        scenarios: list of str, optional
+            Name of placeholder {scenarios} in data catalog path
+        realizations: list of str, optional
+            Name of placeholder {realizations} in data catalog path
 
         Returns
         -------
@@ -879,7 +929,13 @@ class RasterDatasetAdapter(DataAdapter):
 
         try:
             obj = self.get_data(
-                bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
+                bbox=bbox,
+                time_tuple=time_tuple,
+                variables=variables,
+                models=models,
+                scenarios=scenarios,
+                realizations=realizations,
+                logger=logger,
             )
         except IndexError as err:  # out of bounds
             logger.warning(str(err))
@@ -925,6 +981,9 @@ class RasterDatasetAdapter(DataAdapter):
         buffer=0,
         align=None,
         variables=None,
+        models=None,
+        scenarios=None,
+        realizations=None,
         time_tuple=None,
         single_var_as_array=True,
         logger=logger,
@@ -935,7 +994,13 @@ class RasterDatasetAdapter(DataAdapter):
         For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
         """
         kwargs = self.kwargs.copy()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
+        fns = self.resolve_paths(
+            time_tuple=time_tuple,
+            variables=variables,
+            scenarios=scenarios,
+            models=models,
+            realizations=realizations,
+        )
 
         # read using various readers
         if self.driver in ["netcdf"]:  # TODO complete list
@@ -1191,6 +1256,9 @@ class GeoDatasetAdapter(DataAdapter):
         geom=None,
         buffer=0,
         variables=None,
+        models=None,
+        scenarios=None,
+        realizations=None,
         time_tuple=None,
         single_var_as_array=True,
         logger=logger,
@@ -1201,7 +1269,13 @@ class GeoDatasetAdapter(DataAdapter):
         For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataset`
         """
         kwargs = self.kwargs.copy()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
+        fns = self.resolve_paths(
+            time_tuple=time_tuple,
+            variables=variables,
+            scenarios=scenarios,
+            models=models,
+            realizations=realizations,
+        )
 
         # parse geom, bbox and buffer arguments
         clip_str = ""
