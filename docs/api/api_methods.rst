@@ -95,9 +95,11 @@ General methods
    DataArray.raster.aligned_grid
    DataArray.raster.idx_to_xy
    DataArray.raster.xy_to_idx
+   DataArray.raster.rowcol
+   DataArray.raster.xy
    DataArray.raster.flipud
    DataArray.raster.area_grid
-   DataArray.raster.densitity_grid
+   DataArray.raster.density_grid
 
 
 Nodata handling and interpolation
@@ -147,6 +149,17 @@ Transform
    DataArray.raster.geometry_mask
    DataArray.raster.vectorize
    DataArray.raster.vector_grid
+
+Sampling and zonal stats
+------------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :template: autosummary/accessor_method.rst
+
+   DataArray.raster.sample
+   DataArray.raster.zonal_stats
+
 
 Low level methods
 -----------------
@@ -214,6 +227,7 @@ Clip
 
    DataArray.vector.clip_bbox
    DataArray.vector.clip_geom
+   DataArray.vector.clip_mask
 
 Reproject
 ---------
@@ -251,7 +265,7 @@ visit the `pyflwdir docs. <https://deltares.github.io/pyflwdir/latest/>`_
    flw.gauge_map
    flw.outlet_map
    flw.clip_basins
-   flw.floodplain_elevation
+   flw.dem_adjust
 
 
 General GIS methods
@@ -283,7 +297,7 @@ Statistics and performance metrics
    stats.skills.nashsutcliffe
    stats.skills.lognashsutcliffe
    stats.skills.pearson_correlation
-   stats.skills.pearman_rank_correlation
+   stats.skills.spearman_rank_correlation
    stats.skills.kge
    stats.skills.kge_2012
    stats.skills.kge_non_parametric

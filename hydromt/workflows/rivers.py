@@ -78,11 +78,6 @@ def river_depth(
 ) -> Union[xr.DataArray, np.ndarray]:
     """Derive river depth estimates based bankfull discharge.
 
-    For a full overview of methods see Neal et al. (2021)
-
-    Neal et al (2021) "Estimating river channel bathymetry in large scale flood inundation models",
-    Water Resour. Res., 57, https://doi.org/10.1029/2020wr028301
-
     Parameters
     ----------
     data : xr.Dataset, pd.DataFrame, gpd.GeoDataFrame
@@ -90,12 +85,14 @@ def river_depth(
     method : {'powlaw', 'manning', 'gvf'}
         Method to estimate the river depth:
 
-        * powlaw:  power-law hc*Qbf**hp, requires qbankfull (Qbf) variable and
-          optional hc (default = 0.27) and hp (default = 0.30)
-        * manning: river depth for kinematic conditions, requires qbankfull, rivwth,
-          rivslp and manning variables, optional min_rivslp (default = 1e-5)
-        * gvf: gradually varying flow, requires qbankfull, rivwth, zs, rivdst and
-          manning variables, optional min_rivslp (default = 1e-5)
+        * powlaw [1]_ [2]_: power-law hc*Qbf**hp, requires bankfull discharge (Qbf) variable in `data`.
+          Optionally, `hc` (default = 0.27) and `hp` (default = 0.30) set through `kwargs`.
+        * manning [3]_: river depth for kinematic conditions, requires bankfull discharge,
+          river width, river slope in `data`; the river manning roughness either in data
+          or as constant and optionally `min_rivslp` (default = 1e-5) set through `kwargs`.
+        * gvf [4]_: gradually varying flow, requires bankfull discharge,
+          river width, river surface elevation in `data`; the river manning roughness either in data
+          or as constant and optionally `min_rivslp` (default = 1e-5) set through `kwargs`.
     flwdir : Flwdir, FlwdirRaster, optional
         Flow directions, required if method is not powlaw
     min_rivdph : float, optional
@@ -111,8 +108,19 @@ def river_depth(
     Returns
     -------
     rivdph: xr.DataArray, np.ndarray
-        River depth [m]. A DataArra is returned if the input data is a Dataset, otherwise
+        River depth [m]. A DataArray is returned if the input data is a Dataset, otherwise
         a array with the shape of one input data variable is returned.
+
+    References
+    ----------
+    .. [1] Leopold & Maddock (1953). The hydraulic geometry of stream channels and some physiographic implications (No. 252; Professional Paper). U.S. Government Printing Office. https://doi.org/10.3133/pp252
+    .. [2] Andreadis et al. (2013). A simple global river bankfull width and depth database. Water Resources Research, 49(10), 7164–7168. https://doi.org/10.1002/wrcr.20440
+    .. [3] Sampson et al. (2015). A high-resolution global flood hazard model. Water Resources Research, 51(9), 7358–7381. https://doi.org/10.1002/2015WR016954
+    .. [4] Neal et al. (2021). Estimating river channel bathymetry in large scale flood inundation models. Water Resources Research, 57(5). https://doi.org/10.1029/2020wr028301
+
+    See Also
+    --------
+    pyflwdir.FlwdirRaster.river_depth
     """
     methods = ["powlaw", "manning", "gvf"]
     if method == "powlaw":

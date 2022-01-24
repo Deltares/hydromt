@@ -23,6 +23,7 @@ __all__ = [
     "outlet_map",
     "clip_basins",
     "upscale_flwdir",
+    "dem_adjust",
 ]
 
 ### FLWDIR METHODS ###
@@ -105,7 +106,7 @@ def d8_from_dem(
         the river in the elevation data.
     max_depth: float, optional
         Maximum pour point depth. Depressions with a larger pour point
-        depth are set as pit. A negative value (default) equals an infitely
+        depth are set as pit. A negative value (default) equals an infinitely
         large pour point depth causing all depressions to be filled.
     outlets: {'edge', 'min'}
         Position for basin outlet(s) at the all valid elevation edge cell ('edge')
@@ -554,7 +555,7 @@ def basin_map(
     stream_kwargs : dict, optional
         Parameter-treshold pairs to define streams. Multiple threshold will be combined
         using a logical_and operation. If a stream if provided, it is combined with the
-        threhold based map as well.
+        threshhold based map as well.
 
     Returns
     -------
@@ -684,12 +685,12 @@ def dem_adjust(
     """Returns hydrologically conditioned elevation.
 
     The elevation is conditioned to D4 (`connectivity=4`) or D8 (`connectivity=8`)
-    flow directions.
+    flow directions based on the algorithm described in Yamazaki et al. [1]_
 
-    The method assumes the orignal flow directions are in D8. Therefore, if
+    The method assumes the original flow directions are in D8. Therefore, if
     `connectivity=4`, an intermediate D4 conditioned elevation raster is derived
     first, based on which new D4 flow directions are obtained used to condition the
-    original elvation.
+    original elevation.
 
     Parameters
     ----------
@@ -709,6 +710,11 @@ def dem_adjust(
     -------
     xr.Dataset
         Dataset with hydrologically adjusted elevation ('elevtn') [m+REF]
+
+    References
+    ----------
+    .. [1] Yamazaki et al. (2012). Adjustment of a spaceborne DEM for use in floodplain hydrodynamic modeling. Journal of Hydrology, 436-437, 81–91. https://doi.org/10.1016/j.jhydrol.2012.02.045
+
 
     See Also
     --------
