@@ -324,7 +324,8 @@ def reproject_hydrography_like(
     if not kwargs:
         _msk = np.logical_and(_edge, elvsyn_reproj <= 0)
         _msk = np.logical_or(_msk, elvsyn_reproj == 0)
-        kwargs.update(idxs_pit=np.where(_msk.values.ravel())[0])
+        if np.any(_msk):  # False if all pits outside domain
+            kwargs.update(idxs_pit=np.where(_msk.values.ravel())[0])
     logger.info(f"Deriving flow direction from reprojected synthethic elevation.")
     da_flw1 = d8_from_dem(elvsyn_reproj, **kwargs)
     flwdir = flwdir_from_da(da_flw1, ftype="d8", mask=elv_mask)
