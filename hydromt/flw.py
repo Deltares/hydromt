@@ -244,6 +244,7 @@ def reproject_hydrography_like(
     ds_hydro: xr.Dataset,
     da_elv: xr.DataArray,
     river_upa: float = 5.0,
+    river_len: float = 1e3,
     uparea_name: str = "uparea",
     flwdir_name: str = "flwdir",
     logger=logger,
@@ -270,7 +271,9 @@ def reproject_hydrography_like(
     da_elv: xarray.DataArray
         DataArray with elevation on destination grid.
     river_upa: float, optional
-        Minimum upstream area threshold for inflowing rivers, by default 5 [km2]
+        Minimum upstream area threshold [km2] for inflowing rivers, by default 5 km2
+    river_len: float, optional
+        Mimimum distance from river outlet for inflowing river location, by default 1000 m.
     uparea_name, flwdir_name : str, optional
         Name of upstream area (default "uparea") and flow direction ("flwdir") variables
         in `ds_hydro`.
@@ -293,41 +296,53 @@ def reproject_hydrography_like(
         if name not in ds_hydro:
             raise ValueError(f"{name} variable not found in ds_hydro")
     crs = da_elv.raster.crs
-    nodata = da_elv.raster.nodata
-    # synthetic elevation -> max(log10(uparea[m2])) - log10(uparea[m2])
-    # the largest outlet has elevation zero / headwater cells have ~ equal highest elevation
     da_upa = ds_hydro[uparea_name]
-    upa_mask = da_upa != da_upa.raster.nodata
-    elvsyn = da_upa.where(~upa_mask, np.log10(np.maximum(1.0, da_upa * 1e3)))
-    elvsyn = elvsyn.where(~upa_mask, elvsyn.max() - elvsyn)
-    # reproject with 'min' to preserve rivers and merge with elevation
-    # this assumes that regions without uparea, where we use elevation directly,
-    # have elevation < 0 (i.e. offshore bathymetry)
+    nodata = da_upa.raster.nodata
+    upa_mask = da_upa != nodata
+    rivmask = da_upa > river_upa
+    # synthetic elevation -> max(log10(uparea[m2])) - log10(uparea[m2])
+    elvsyn = np.log10(np.maximum(1.0, da_upa * 1e3))
+    elvsyn = da_upa.where(~upa_mask, elvsyn.max() - elvsyn)
+    # take minimum with rank to ensure pits of main rivers have zero syn. elevation
+    if np.any(rivmask):
+        flwdir_src = flwdir_from_da(ds_hydro[flwdir_name], mask=rivmask)
+        elvsyn = elvsyn.where(flwdir_src.rank < 0, np.minimum(flwdir_src.rank, elvsyn))
+    # reproject with 'min' to preserve rivers
+    elv_mask = da_elv != da_elv.raster.nodata
     elvsyn_reproj = elvsyn.raster.reproject_like(da_elv, method="min")
-    elvsyn_reproj = elvsyn_reproj.where(elvsyn_reproj != nodata, da_elv - da_elv.max())
+    # in regions without uparea use elevation, assuming the elevation < 0 (i.e. offshore bathymetry)
+    elvsyn_reproj = elvsyn_reproj.where(
+        np.logical_or(elvsyn_reproj != nodata, ~elv_mask),
+        da_elv - da_elv.where(elvsyn_reproj == nodata).max() - 0.1,  # make sure < 0
+    )
+    elvsyn_reproj = elvsyn_reproj.where(da_elv != da_elv.raster.nodata, nodata)
     elvsyn_reproj.raster.set_crs(crs)
     elvsyn_reproj.raster.set_nodata(nodata)
     # get flow directions based on reprojected synthetic elevation
+    # initiate new flow direction at edge with syn elv <= 0 + inland pits if no kwargs given
+    _edge = pyflwdir.gis_utils.get_edge(elv_mask.values)
+    if not kwargs:
+        _msk = np.logical_and(_edge, elvsyn_reproj <= 0)
+        _msk = np.logical_or(_msk, elvsyn_reproj == 0)
+        kwargs.update(idxs_pit=np.where(_msk.values.ravel())[0])
+    logger.info(f"Deriving flow direction from reprojected synthethic elevation.")
     da_flw1 = d8_from_dem(elvsyn_reproj, **kwargs)
-    flwdir = flwdir_from_da(da_flw1, ftype="d8")
+    flwdir = flwdir_from_da(da_flw1, ftype="d8", mask=elv_mask)
     # find source river cells outside destination grid bbox
     outside_dst = da_upa.raster.geometry_mask(da_elv.raster.box, invert=True)
     area = flwdir.area / 1e6  # area [km2]
-    # If any river cell outside the destination grid, vectorize and reproject
-    # river segments(!) with uparea attribute to set as boundary condition to the
-    # upstream area map.
+    # If any river cell outside the destination grid, vectorize and reproject river segments(!) uparea
+    # to set as boundary condition to the upstream area map.
     nriv = 0
-    if np.any(np.logical_and(da_upa > river_upa, outside_dst)):
-        rivmask = da_upa > river_upa
-        flwdir_src = flwdir_from_da(ds_hydro[flwdir_name], mask=rivmask)
+    if np.any(np.logical_and(rivmask, outside_dst)):
         feats = flwdir_src.streams(uparea=da_upa.values, mask=rivmask)
         gdf_stream = gpd.GeoDataFrame.from_features(feats, crs=ds_hydro.raster.crs)
         gdf_stream = gdf_stream.sort_values(by="uparea")
         # calculate upstream area with uparea from inflowing rivers at edge
         # get edge river cells indices
         rivupa = da_flw1.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
-        _edge = pyflwdir.gis_utils.get_edge(da_flw1.values != 247)
-        inflow_idxs = np.where(np.logical_and(rivupa.values > 0, _edge).ravel())[0]
+        rivmsk = np.logical_and(flwdir.distnc > river_len, rivupa > 0).values
+        inflow_idxs = np.where(np.logical_and(rivmsk, _edge).ravel())[0]
         if inflow_idxs.size > 0:
             # map nearest segment to each river edge cell;
             # keep cell which longest distance to outlet per river segment to avoid duplicating uparea
@@ -338,9 +353,7 @@ def reproject_hydrography_like(
             )
             gdf0["distnc"] = flwdir.distnc.flat[inflow_idxs]
             gdf0["idx2"], gdf0["dst2"] = gis_utils.nearest(gdf0, gdf_stream)
-            gdf0 = gdf0.sort_values(by="distnc", ascending=False).drop_duplicates(
-                "idx2"
-            )
+            gdf0 = gdf0.sort_values("distnc", ascending=False).drop_duplicates("idx2")
             gdf0["uparea"] = gdf_stream.loc[gdf0["idx2"].values, "uparea"].values
             # set stream uparea to selected inflow cells and calculate total uparea
             nriv = gdf0.index.size
@@ -354,10 +367,11 @@ def reproject_hydrography_like(
         attrs=dict(units="km2", _FillValue=-9999),
     ).where(da_elv != nodata, -9999)
     da_upa1.raster.set_crs(crs)
-    bbox_geom = da_upa1.raster.box
-    max_upa = da_upa.raster.clip_geom(bbox_geom).where(upa_mask).max().values
-    max_upa1 = da_upa1.max().values
-    logger.info(f"New/original max upstream area: {max_upa1:.2f}/{max_upa:.2f} km2")
+    if logger.getEffectiveLevel() <= 10:
+        upa_reproj_max = da_upa.raster.reproject_like(da_elv, method="max")
+        max_upa = upa_reproj_max.where(elv_mask).max().values
+        max_upa1 = da_upa1.max().values
+        logger.debug(f"New/org max upstream area: {max_upa1:.2f}/{max_upa:.2f} km2")
     return xr.merge([da_flw1, da_upa1])
 
 
