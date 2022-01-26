@@ -70,56 +70,80 @@ Region options
 
 The region of interest can be described in three ways:
 
-- based on **geospatial region** using *bbox*, *geom*:
+- based on **geospatial region** using a bounding box *bbox*, or geometry file *geom*:
 
     - ``{'bbox': [xmin, ymin, xmax, ymax]}``
     - ``{'geom': '/path/to/geometry_file'}``
 
+- based on the **grid** of another model or raster file, e.g:
+
+    - ``{'<model_name>': '/path/to/model_root'}``
+    - ``{'grid': '/path/to/raster_file'}``
+
 - Based on a **hydrographic region** using *basin*, *subbasin*, *interbasin*:
 
-  A *basin* is defined by the entire area which drain to the sea or a local depression.
-  Users can supply a point location ``[x, y]`` or an area of interest based on a 
-  bounding box ``[xmin, ymin, xmax, ymax]`` or geometry ``'/path/to/geometry_file'`` 
-  for which the intersecting basin(s) are delineated. 
-  Optionally, ``<variable>:<threshold>`` combinations (e.g. 'uparea':30) can be passed to 
-  define streams to filter the basin selection. To filter the basins based on their 
-  outlet location within the area of interest use `'outlets': true`.  
+  A *basin* is defined by the entire area which drains to the sea or an inland depression.
+  To delineate the basin(s) touching a region or point location, users can supply 
+  one (or more) point location(s) or a region defined by a bounding box or a geometry file. 
+  Alternatively, if the unique basin ID is known this can also be used.
   
     - ``{'basin': [x, y]}``
+    - ``{'basin': [[x1, x2, ..], [y1, y2, ..]]}``
+    - ``{'basin': [xmin, ymin, xmax, ymax]}``
+    - ``{'basin': '/path/to/geometry_file'}``
+    - ``{'basin': [ID1]}``
+    - ``{'basin': [ID1, ID2, ..]}``
+
+  To filter basins, variable-threshold pairs to define streams can be used in combination with
+  a bounding box or geometry file, e.g.: ``'uparea':30`` to filter based on streams with 
+  a minimum drainage area of 30 km2 or ``'strord':8`` to filter basins based on streams 
+  with a minimal stream order of 8.
+    
     - ``{'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}``
+
+  To only select basins with their outlet location use ``'outlets': true`` in combination with
+  a bounding box or geometry file
+  
     - ``{'basin': [xmin, ymin, xmax, ymax], 'outlets': true}``
 
-  A *subbasin* is based on a user supplied outlet location and defined by the area
-  that drains into that outlet. 
-  Users can supply a the outlet point location ``[x, y]``, or an area of interest based
-  on a bounding box ``[xmin, ymin, xmax, ymax]`` or geometry ``'/path/to/geometry_file'``
-  from which all outlet locations are used and all upstream area is delineated. 
-  Optionally, ``<variable>:<threshold>`` combinations (e.g. 'uparea':30) can be passed to define streams to 
-  which the outlet point location are snapped or to filter outlets within the area of interest. 
-  To speed up the delineation process users can supply an initial bounding box of the subbasin
-  (This must be larger than the area of interest!) with ``'bounds': [xmin, ymin, xmax, ymax]`` 
-  In case not all upstream cells are included a warning is raised.   
+  A *subbasin* is defined by the area that drains into an outlet, stream or region. 
+  Users can supply one (or more) point outlet location(s) or a region defined by a 
+  bounding box or a geometry file. 
   
+    - ``{'subbasin': [x, y]}``
+    - ``{'subbasin': [[x1, x2, ..], [y1, y2, ..]]}``
+    - ``{'subbasin': [xmin, ymin, xmax, ymax]}``
+    - ``{'subbasin': '/path/to/geometry_file'}``
+
+  To speed up the delineation process users can supply an estimated initial 
+  bounding box in combination with all the options mentioned above.
+  A warning will be raised if the bounding box does not contain all upstream area.
+
+    - ``{'subbasin': [x, y], 'bounds': [xmin, ymin, xmax, ymax]}``
+
+  The subbasins can further be refined based one (or more) variable-threshold pair(s) 
+  to define streams, as described above for basins. If used in combination with point outlet locations, 
+  these are snapped to the nearest stream which meets the threshold criteria. 
+    
     - ``{'subbasin': [x, y], '<variable>': threshold}``
-    - ``{'subbasin': [x, y], '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]}``
-    - ``{'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]}``
 
-  An *interbasin* is based on a user supplied area of interest and contains the most 
-  downstream contiguous area that drains to any outflow of the area of interest. 
-  Users can supply an area of interest based on a bounding box ``[xmin, ymin, xmax, ymax]`` 
-  or geometry ``'/path/to/geometry_file'`` from which all outlet locations are used. 
-  Optionally, ``<variable>:<threshold>`` (e.g. 'uparea':30) combinations can be passed to define streams 
-  to filter outlets within the area of interest. To only use basin outlets 
-  within the area of interest to derive interbasins use `'outlets': true`.
-  
+  An *interbasin* is defined by the area that drains into an outlet or stream and 
+  bounded by a region and therefore does not necessarily including all upstream area. 
+  Users should supply a bounding region in combination with stream and/or outlet arguments. 
+  The bounding region is defined by a bounding box or a geometry file; streams by 
+  (or more) variable-threshold pair(s) and outlet by point location coordinates. 
+  Similar to subbasins, point locations are snapped to nearest downstream stream if 
+  combined with stream arguments.
+
     - ``{'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}``
-    - ``{'interbasin': [xmin, ymin, xmax, ymax], '<variable>': 'outets': true}``
+    - ``{'interbasin': /path/to/geometry_file, '<variable>': threshold}``
+    - ``{'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold, 'xy': [x, y]}``
 
-- based on the grid of **another model**, e.g:
+  To only select interbasins based on the outlet location of entire basins use ``'outlets': true`` 
+  
+    - ``{'interbasin': [xmin, ymin, xmax, ymax], 'outlets': true}``
 
-    - ``{'wflow': '/path/to/wflow/root'}``
-
-For a detailed desription of the options see :py:meth:`~hydromt.workflows.basin_mask.parse_region`
-and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry`. 
+See also the *delineate basins* example and the :py:meth:`~hydromt.workflows.basin_mask.parse_region`
+and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry` methods. 
 
 .. image:: ../img/region.png
