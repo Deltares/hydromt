@@ -200,11 +200,10 @@ class Model(object, metaclass=ABCMeta):
             raise ValueError("Model region not found, setup model using `build` first.")
 
         # remove setup_basemaps from options and throw warning
-        if "setup_basemaps" in opt:
-            opt.pop("setup_basemaps")  # remove from opt
-            self.logger.warning(
-                '"setup_basemaps" can only be called when building a model.'
-            )
+        method = self._CLI_ARGS["region"]
+        if method in opt:
+            opt.pop(method)  # remove from opt
+            self.logger.warning(f'"{method}" can only be called when building a model.')
 
         # loop over other methods from ini file
         self._run_log_method("setup_config", **opt.pop("setup_config", {}))

@@ -257,7 +257,9 @@ def reproject_hydrography_like(
     elevation is used assuming these elevation values are <= 0 (i.e. offshore bathymetry).
 
     The upstream area on the reprojected grid is based on the new flow directions and
-    rivers entering the domain, defined by the minimum upstream area `river_upa` [km2].
+    rivers entering the domain, defined by the minimum upstream area `river_upa` [km2]
+    and a distance from river outlets `river_len` [m]. The latter is to avoid setting
+    boundary conditions at the downstream end / outflow of a river.
 
     NOTE: the resolution of `ds_hydro` should be similar or smaller than the resolution
     of `da_elv` for good results.
