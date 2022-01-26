@@ -27,7 +27,7 @@ Fixed
 
 Deprecated
 ^^^^^^^^^^
-
+- workflows.basemaps methods (hydrography and topography) moved to hydromt_wflow
 
 v0.4.4 (19 November 2011)
 -------------------------
