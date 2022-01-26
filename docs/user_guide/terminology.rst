@@ -29,10 +29,10 @@ For **Models** in HydroMT, these are:
 - Components: parts of a model linked to a specific HydroMT function. For example, basemaps, rivers, soil, forcing etc. They are specific 
   to each model.
 - Configuration: for the model, this is one or several files used to set-up and run the model. They can be updated using the setup_config 
-  component. In HydroMT, the config object is a nested dictionnary.
-- Forcing: model (dynamic) forcing data (meteo or hydrological for example). In HydroMT, this is a dictionnary of xarray DataArray that is updated 
+  component. In HydroMT, the config object is a nested dictionary.
+- Forcing: model (dynamic) forcing data (meteo or hydrological for example). In HydroMT, this is a dictionary of xarray DataArray that is updated 
   each time a component of the forcing type is run (eg setup_precip_forcing for wflow).
-- Staticgeoms: model (static) vector data or information. In HydroMT, this is a dictionnary of GeoPandas GeoDataFrame that is updated 
+- Staticgeoms: model (static) vector data or information. In HydroMT, this is a dictionary of GeoPandas GeoDataFrame that is updated 
   when certain components are run (eg setup_basemaps).
 - Staticmaps: model (static) gridded data such as land properties and model parameters. In HydroMT, this is a xarray DataSet that is updated 
   when most of the components are run (eg setup_basemaps).
