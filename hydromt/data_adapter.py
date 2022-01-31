@@ -713,6 +713,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         unit_mult={},
         unit_add={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         # general arguments
@@ -733,6 +734,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.unit_add = unit_add
         # meta data
         self.meta = {k: v for k, v in meta.items() if v is not None}
+        # placeholders
+        self.placeholders = {k: v for k, v in placeholders.items() if v is not None}
 
     @property
     def data_type(self):
@@ -810,6 +813,7 @@ class RasterDatasetAdapter(DataAdapter):
         unit_add={},
         units={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial raster data.
@@ -844,6 +848,8 @@ class RasterDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -856,6 +862,7 @@ class RasterDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            placeholders=placeholders,
             **kwargs,
         )
         # TODO: see if the units argument can be solved with unit_mult/unit_add
@@ -1100,6 +1107,7 @@ class GeoDatasetAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
@@ -1134,6 +1142,8 @@ class GeoDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -1146,6 +1156,7 @@ class GeoDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            placeholders=placeholders,
             **kwargs,
         )
 
