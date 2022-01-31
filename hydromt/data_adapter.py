@@ -652,17 +652,20 @@ def _parse_data_dict(data_dict, root=None, category=None):
             options = source["placeholders"]
             keys = options.keys()
             values = (options[key] for key in keys)
-            combinations = [dict(zip(keys, combination)) for combination in itertools.product(*values)]
+            combinations = [
+                dict(zip(keys, combination))
+                for combination in itertools.product(*values)
+            ]
             for combination in combinations:
                 path_n = path
                 name_n = name
                 for placeholder in list(combination.items()):
                     path_n = path_n.replace("{" + placeholder[0] + "}", placeholder[1])
-                    name_n = name_n.replace("{" + placeholder[0] + "}", placeholder[1])                
+                    name_n = name_n.replace("{" + placeholder[0] + "}", placeholder[1])
                 data[name_n] = adapter(path=path_n, meta=meta, **source)
         else:
             data[name] = adapter(path=path, meta=meta, **source)
-        
+
     return data
 
 
