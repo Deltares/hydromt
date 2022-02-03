@@ -607,29 +607,21 @@ def _parse_data_dict(data_dict, root=None, category=None):
         "GeoDataFrame": GeoDataFrameAdapter,
         "GeoDataset": GeoDatasetAdapter,
     }
-    # set data_type sections as source entry
-    # for backwards compatability
-    sources = copy.deepcopy(data_dict)
+    # NOTE: shouldn't the kwarg overwrite the dict/yml ?
     if root is None:
-        root = sources.pop("root", None)
-    for key in data_dict:
-        _key = key.replace("Adapter", "")
-        if _key in ADAPTERS:
-            _sources = data_dict.pop(key)
-            for name, source in _sources.items():
-                source["data_type"] = _key
-                sources[name] = source
+        root = data_dict.pop("root", None)
 
     # parse data
     data = dict()
-    for name, source in sources.items():
+    for name, source in data_dict.items():
+        source = source.copy()  # important as we modify with pop
         if "alias" in source:
             alias = source.pop("alias")
-            if alias not in sources:
-                raise ValueError(f"alias {alias} not found in sources.")
+            if alias not in data_dict:
+                raise ValueError(f"alias {alias} not found in data_dict.")
             # use alias source but overwrite any attributes with original source
             source_org = source.copy()
-            source = sources[alias].copy()
+            source = data_dict[alias].copy()
             source.update(source_org)
         if "path" not in source:
             raise ValueError(f"{name}: Missing required path argument.")
@@ -637,31 +629,26 @@ def _parse_data_dict(data_dict, root=None, category=None):
         if data_type is None:
             raise ValueError(f"{name}: Data type missing.")
         elif data_type not in ADAPTERS:
-            raise ValueError(f"{name}: Data type {data_type} unkonwn")
+            raise ValueError(f"{name}: Data type {data_type} unknown")
         adapter = ADAPTERS.get(data_type)
         path = abs_path(root, source.pop("path"))
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)
         # lower kwargs for backwards compatability
+        # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
         source.update(**source.pop("kwargs", {}))
         for opt in source:
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
         if "placeholders" in source:
             options = source["placeholders"]
-            keys = options.keys()
-            values = (options[key] for key in keys)
-            combinations = [
-                dict(zip(keys, combination))
-                for combination in itertools.product(*values)
-            ]
-            for combination in combinations:
+            for combination in itertools.product(*options.values()):
                 path_n = path
                 name_n = name
-                for placeholder in list(combination.items()):
-                    path_n = path_n.replace("{" + placeholder[0] + "}", placeholder[1])
-                    name_n = name_n.replace("{" + placeholder[0] + "}", placeholder[1])
+                for k, v in zip(options.keys(), combination):
+                    path_n = path_n.replace("{" + k + "}", v)
+                    name_n = name_n.replace("{" + k + "}", v)
                 data[name_n] = adapter(path=path_n, meta=meta, **source)
         else:
             data[name] = adapter(path=path, meta=meta, **source)
