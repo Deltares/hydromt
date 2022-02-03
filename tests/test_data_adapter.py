@@ -20,12 +20,13 @@ TESTDATADIR = join(dirname(abspath(__file__)), "data")
 
 
 def test_parser():
+    # valid abs root on windows and linux!
+    root = "c:/root" if os.name == "nt" else "/c/root"
     # simple; abs path
-    root = "c:/root"
     dd = {
         "test": {
             "data_type": "RasterDataset",
-            "path": "d:/path/to/data.tif",
+            "path": f"{root}/to/data.tif",
         }
     }
     dd_out = _parse_data_dict(dd, root=root)
