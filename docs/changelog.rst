@@ -10,9 +10,10 @@ unreleased
 
 Added
 ^^^^^
-- New skill socres: KGE 2012, KGE non-parametric (2018), KGE non-parametric flood (2018).
+- New skill scores: KGE 2012, KGE non-parametric (2018), KGE non-parametric flood (2018).
 - new rasterio inverse distance weighting method ("rio_idw") in raster.interpolate_na
 - Add option to add placeholders in yml file to explode a single yml entry to multiple yml entries (useful for climate datasets).
+- general Model.setup_region method
 
 Changed
 ^^^^^^^
@@ -20,6 +21,8 @@ Changed
 - improved flw.reproject_hydrography_like and flw.dem_adjust methods
 - file handlers of loggers are replaced in Model.set_root
 - log.setuplog replaces old handlers if these exist to avoid duplicates.
+- setup_basemaps method no longer required for build method
+- improver interbasin regions in workflows.get_basin_geometry
 
 Fixed
 ^^^^^
@@ -28,7 +31,7 @@ Fixed
 
 Deprecated
 ^^^^^^^^^^
-
+- workflows.basemaps methods (hydrography and topography) moved to hydromt_wflow
 
 v0.4.4 (19 November 2011)
 -------------------------
@@ -51,7 +54,7 @@ Changed
 - bumped hydromt-artifacts version to v0.0.6
 - In model API build and update functions, if any write_* are called in the ini file (opt), 
   the final self.write() call is skipped. This enables passing custom arguments to the write_ 
-  functions without double writting files or costumizing the order in which write_ functions 
+  functions without double writing files or customizing the order in which write_ functions 
   are called. If any write_ function is called we assume the user manages the writing and
   a the global write method is skipped.
 - default GTiff lwz compression with DataCatalog.export_data method
@@ -67,7 +70,7 @@ Fixed
 
 Deprecated
 ^^^^^^^^^^
-- flw.gaugemap is replaced by flw.gauge_map for a more conistent interace of flw.*map methods
+- flw.gaugemap is replaced by flw.gauge_map for a more consistent interface of flw.*map methods
 - flw.basin_shape is redundant
 
 v0.4.3 (3 October 2021)
@@ -75,7 +78,7 @@ v0.4.3 (3 October 2021)
 
 Added
 ^^^^^
-- log hydromt_data.yml with write_datata_catalog (needs to be implemented in various plugins)
+- log hydromt_data.yml with write_data_catalog (needs to be implemented in various plugins)
 - add alias option in data catalog yml files
 - use mamba for github actions 
 

@@ -5,15 +5,6 @@ Workflows
 #############
 
 
-Basemaps
-========
-
-.. autosummary::
-   :toctree: ../_generated
-
-   workflows.basemaps.hydrography
-   workflows.basemaps.topography
-
 Basin mask
 ==========
 

@@ -160,10 +160,7 @@ def test_stream_map(hydds, flwdir):
 def test_dem_adjust(hydds, demda, flwdir):
     demda1 = flw.dem_adjust(demda, hydds["flwdir"], hydds["uparea"] > 5, river_d8=True)
     assert np.all((demda1.values - flwdir.downstream(demda1.values)) >= 0)
-    assert np.isclose(np.abs((demda1 - demda)).max(), 0.6912271)
-    # FIXME see https://github.com/Deltares/pyflwdir/issues/16
-    # demda2 = flw.dem_adjust(demda, hydds['flwdir'], flwdir=flwdir, connectivity=8)
-    # assert np.all((demda2.values - flwdir.downstream(demda2.values))>=0)
-    # errors
+    demda2 = flw.dem_adjust(demda, hydds["flwdir"], flwdir=flwdir, connectivity=8)
+    assert np.all((demda2.values - flwdir.downstream(demda2.values)) >= 0)
     with pytest.raises(ValueError, match='Provide "da_rivmsk" in combination'):
         flw.dem_adjust(demda, hydds["flwdir"], river_d8=True)
