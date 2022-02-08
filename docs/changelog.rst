@@ -12,6 +12,7 @@ Added
 ^^^^^
 - New skill scores: KGE 2012, KGE non-parametric (2018), KGE non-parametric flood (2018).
 - new rasterio inverse distance weighting method ("rio_idw") in raster.interpolate_na
+- Add option to add placeholders in yml file to explode a single yml entry to multiple yml entries (useful for climate datasets).
 - general Model.setup_region method
 
 Changed

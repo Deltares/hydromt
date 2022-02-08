@@ -365,7 +365,7 @@ def pet_debruin(
     # slope of vapour pressure curve
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
-    lam = (2.502 * 10 ** 6) - (2250.0 * temp)
+    lam = (2.502 * 10**6) - (2250.0 * temp)
     gamma = (cp * press) / (0.622 * lam)
     # compute ref. evaporation (with global radiation, therefore calling it potential)
     # in J m-2 over whole period
@@ -405,7 +405,7 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
     # slope of vapour pressure curve
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
-    lam = (2.502 * 10 ** 6) - (2250.0 * temp)
+    lam = (2.502 * 10**6) - (2250.0 * temp)
     gamma = (cp * press) / (0.622 * lam)
 
     ep_joule = 0.65 * slope / (slope + gamma) * k_in
