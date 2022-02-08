@@ -721,8 +721,6 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.unit_add = unit_add
         # meta data
         self.meta = {k: v for k, v in meta.items() if v is not None}
-        # placeholders
-        self.placeholders = {k: v for k, v in placeholders.items() if v is not None}
 
     @property
     def data_type(self):
