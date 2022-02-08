@@ -340,7 +340,7 @@ def cellarea(lat, xres=1.0, yres=1.0):
     l1 = np.radians(lat - np.abs(yres) / 2.0)
     l2 = np.radians(lat + np.abs(yres) / 2.0)
     dx = np.radians(np.abs(xres))
-    return _R ** 2 * dx * (np.sin(l2) - np.sin(l1))
+    return _R**2 * dx * (np.sin(l2) - np.sin(l1))
 
 
 def cellres(lat, xres=1.0, yres=1.0):

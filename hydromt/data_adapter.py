@@ -128,7 +128,7 @@ class DataCatalog(object):
         version = version if isinstance(version, str) else self._version
         if name is None or name == "artifact_data":
             # prepare url and paths
-            url = fr"{self._url}/download/{version}/data.tar.gz"
+            url = rf"{self._url}/download/{version}/data.tar.gz"
             folder = join(Path.home(), ".hydromt_data", "data", version)
             path_data = join(folder, "data.tar.gz")
             path = join(folder, "data_catalog.yml")
