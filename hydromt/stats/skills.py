@@ -436,7 +436,7 @@ def _spearman_correlation(x, y):
 def _fdc_alpha(sim, obs, axis=-1):
     fdc_s = np.sort(sim, axis=axis) / (np.nanmean(sim, axis=axis) * len(sim))
     fdc_o = np.sort(obs, axis=axis) / (np.nanmean(obs, axis=axis) * len(obs))
-    return 1 - 0.5 * np.nansum(np.abs(fdc_s - fdc_o))
+    return 1 - 0.5 * np.sum(np.abs(fdc_s - fdc_o))
 
 
 def _bias(sim, obs, axis=-1):
