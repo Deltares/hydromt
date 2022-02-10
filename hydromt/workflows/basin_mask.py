@@ -175,7 +175,7 @@ def _parse_region_value(value):
     return kwarg
 
 
-def _check_size(ds, logger=logger, threshold=12e3 ** 2):
+def _check_size(ds, logger=logger, threshold=12e3**2):
     # warning for large domain
     if (
         np.multiply(*ds.raster.shape) > threshold

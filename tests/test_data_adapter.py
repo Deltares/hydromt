@@ -9,9 +9,70 @@ import geopandas as gpd
 import xarray as xr
 import os
 import hydromt
-from hydromt.data_adapter import DataAdapter, DataCatalog
+from hydromt.data_adapter import (
+    DataAdapter,
+    DataCatalog,
+    RasterDatasetAdapter,
+    _parse_data_dict,
+)
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
+
+
+def test_parser():
+    # valid abs root on windows and linux!
+    root = "c:/root" if os.name == "nt" else "/c/root"
+    # simple; abs path
+    dd = {
+        "test": {
+            "data_type": "RasterDataset",
+            "path": f"{root}/to/data.tif",
+        }
+    }
+    dd_out = _parse_data_dict(dd, root=root)
+    assert isinstance(dd_out["test"], RasterDatasetAdapter)
+    assert dd_out["test"].path == abspath(dd["test"]["path"])
+    # rel path
+    dd = {
+        "test": {
+            "data_type": "RasterDataset",
+            "path": "path/to/data.tif",
+            "kwargs": {"fn": "test"},
+        },
+        "root": root,
+    }
+    dd_out = _parse_data_dict(dd)
+    assert dd_out["test"].path == abspath(join(root, dd["test"]["path"]))
+    # check if path in kwargs is also absolute
+    assert dd_out["test"].kwargs["fn"] == abspath(join(root, "test"))
+    # alias
+    dd = {
+        "test": {
+            "data_type": "RasterDataset",
+            "path": "path/to/data.tif",
+        },
+        "test1": {"alias": "test"},
+    }
+    dd_out = _parse_data_dict(dd, root=root)
+    assert dd_out["test"].path == dd_out["test1"].path
+    # placeholder
+    dd = {
+        "test_{p1}_{p2}": {
+            "data_type": "RasterDataset",
+            "path": "data_{p2}.tif",
+            "placeholders": {"p1": ["a", "b"], "p2": ["1", "2", "3"]},
+        },
+    }
+    dd_out = _parse_data_dict(dd, root=root)
+    assert len(dd_out) == 6
+    assert dd_out["test_a_1"].path == abspath(join(root, "data_1.tif"))
+    # errors
+    with pytest.raises(ValueError, match="Missing required path argument"):
+        _parse_data_dict({"test": {}})
+    with pytest.raises(ValueError, match="Data type error unknown"):
+        _parse_data_dict({"test": {"path": "", "data_type": "error"}})
+    with pytest.raises(ValueError, match="alias test not found in data_dict"):
+        _parse_data_dict({"test1": {"alias": "test"}})
 
 
 def test_data_catalog_io(tmpdir):

@@ -22,6 +22,7 @@ import requests
 from urllib.parse import urlparse
 import shutil
 from distutils.version import LooseVersion
+import itertools
 
 from . import gis_utils, io
 
@@ -127,7 +128,7 @@ class DataCatalog(object):
         version = version if isinstance(version, str) else self._version
         if name is None or name == "artifact_data":
             # prepare url and paths
-            url = fr"{self._url}/download/{version}/data.tar.gz"
+            url = rf"{self._url}/download/{version}/data.tar.gz"
             folder = join(Path.home(), ".hydromt_data", "data", version)
             path_data = join(folder, "data.tar.gz")
             path = join(folder, "data_catalog.yml")
@@ -197,6 +198,9 @@ class DataCatalog(object):
                 source_licence: <source_licence>
                 paper_ref: <paper_ref>
                 paper_doi: <paper_doi>
+              placeholders:
+                <placeholder_name_1>: <list of names>
+                <placeholder_name_2>: <list of names>
         """
         if uri_validator(path):
             with requests.get(path, stream=True) as r:
@@ -242,7 +246,8 @@ class DataCatalog(object):
                     "rename": {<native_variable_name1>: <hydromt_variable_name1>},
                     "unit_add": {<native_variable_name1>: <float/int>},
                     "unit_mult": {<native_variable_name1>: <float/int>},
-                    "meta": {...}
+                    "meta": {...},
+                    "placeholders": {<placeholder_name_1>: <list of names>},
                 }
                 <name2>: {
                     ...
@@ -602,29 +607,21 @@ def _parse_data_dict(data_dict, root=None, category=None):
         "GeoDataFrame": GeoDataFrameAdapter,
         "GeoDataset": GeoDatasetAdapter,
     }
-    # set data_type sections as source entry
-    # for backwards compatability
-    sources = copy.deepcopy(data_dict)
+    # NOTE: shouldn't the kwarg overwrite the dict/yml ?
     if root is None:
-        root = sources.pop("root", None)
-    for key in data_dict:
-        _key = key.replace("Adapter", "")
-        if _key in ADAPTERS:
-            _sources = data_dict.pop(key)
-            for name, source in _sources.items():
-                source["data_type"] = _key
-                sources[name] = source
+        root = data_dict.pop("root", None)
 
     # parse data
     data = dict()
-    for name, source in sources.items():
+    for name, source in data_dict.items():
+        source = source.copy()  # important as we modify with pop
         if "alias" in source:
             alias = source.pop("alias")
-            if alias not in sources:
-                raise ValueError(f"alias {alias} not found in sources.")
+            if alias not in data_dict:
+                raise ValueError(f"alias {alias} not found in data_dict.")
             # use alias source but overwrite any attributes with original source
             source_org = source.copy()
-            source = sources[alias].copy()
+            source = data_dict[alias].copy()
             source.update(source_org)
         if "path" not in source:
             raise ValueError(f"{name}: Missing required path argument.")
@@ -632,18 +629,30 @@ def _parse_data_dict(data_dict, root=None, category=None):
         if data_type is None:
             raise ValueError(f"{name}: Data type missing.")
         elif data_type not in ADAPTERS:
-            raise ValueError(f"{name}: Data type {data_type} unkonwn")
+            raise ValueError(f"{name}: Data type {data_type} unknown")
         adapter = ADAPTERS.get(data_type)
         path = abs_path(root, source.pop("path"))
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)
         # lower kwargs for backwards compatability
+        # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
         source.update(**source.pop("kwargs", {}))
         for opt in source:
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
-        data[name] = adapter(path=path, meta=meta, **source)
+        if "placeholders" in source:
+            options = source["placeholders"]
+            for combination in itertools.product(*options.values()):
+                path_n = path
+                name_n = name
+                for k, v in zip(options.keys(), combination):
+                    path_n = path_n.replace("{" + k + "}", v)
+                    name_n = name_n.replace("{" + k + "}", v)
+                data[name_n] = adapter(path=path_n, meta=meta, **source)
+        else:
+            data[name] = adapter(path=path, meta=meta, **source)
+
     return data
 
 
@@ -691,6 +700,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         unit_mult={},
         unit_add={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         # general arguments
@@ -788,6 +798,7 @@ class RasterDatasetAdapter(DataAdapter):
         unit_add={},
         units={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial raster data.
@@ -822,6 +833,8 @@ class RasterDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -834,6 +847,7 @@ class RasterDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            placeholders=placeholders,
             **kwargs,
         )
         # TODO: see if the units argument can be solved with unit_mult/unit_add
@@ -1078,6 +1092,7 @@ class GeoDatasetAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
@@ -1112,6 +1127,8 @@ class GeoDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -1124,6 +1141,7 @@ class GeoDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            placeholders=placeholders,
             **kwargs,
         )
 
