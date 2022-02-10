@@ -1,5 +1,5 @@
-hydroMT: Build and analyze hydro models
-#######################################
+hydroMT: Build and analyze models like a data-wizard!
+#####################################################
 
 .. image:: https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH
     :target: https://codecov.io/gh/Deltares/hydromt
@@ -12,7 +12,7 @@ hydroMT: Build and analyze hydro models
     :target: https://deltares.github.io/hydromt/stable
     :alt: Stable docs last release
 
-.. image:: https://pypip.in/v/hydromt/badge.png
+.. image:: https://badge.fury.io/py/hydromt.svg
     :target: https://pypi.org/project/hydromt/
     :alt: Latest PyPI version
 
@@ -34,7 +34,7 @@ vector I/O and the pyflwdir_ data structure flow direction data.
 .. _xarray: https://xarray.pydata.org
 .. _geopandas: https://geopandas.org
 .. _rasterio: https://rasterio.readthedocs.io
-.. _pyflwdir: https://deltares.gitlab.io/wflow/pyflwdir
+.. _pyflwdir: https://deltares.github.io/pyflwdir
 
 Why hydroMT?
 ------------

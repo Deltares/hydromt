@@ -12,12 +12,12 @@ dependencies:
   - black
   - bottleneck
   - cartopy # to run examples
-  - dask=2021.4  # pin version because of AttributeError in 2021.5
+  - dask
   - descartes # to run examples
   - entrypoints
   - flit>=3.2
   - gdal>=3.1
-  - geopandas
+  - geopandas>=0.10
   - jupyter # to run examples
   - netcdf4
   - matplotlib # to run examples
@@ -28,7 +28,7 @@ dependencies:
   - pandas
   - pcraster # TODO make optional
   - pip
-  - pyflwdir>=0.4.7
+  - pyflwdir>=0.5.3
   - pygeos>=0.8
   - pytest # tests
   - pytest-cov # tests

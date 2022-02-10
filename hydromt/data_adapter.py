@@ -19,7 +19,10 @@ import yaml
 import pprint
 import logging
 import requests
+from urllib.parse import urlparse
 import shutil
+from distutils.version import LooseVersion
+import itertools
 
 from . import gis_utils, io
 
@@ -31,14 +34,12 @@ __all__ = [
 
 
 class DataCatalog(object):
-    # root URL and version with data source artifacts
+    # root URL and version with data artifacts
     # url = f"{_url}/download/{_version}/<filename>"
     _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases"
-    _version = "v0.0.4"  # latest version
+    _version = "v0.0.6"  # latest version
 
-    def __init__(
-        self, data_libs=None, deltares_data=None, artifact_data=None, logger=logger
-    ):
+    def __init__(self, data_libs=None, logger=logger, **artifact_keys):
         """Catalog of DataAdapter sources to easily read from different files
         and keep track of files which have been accessed.
 
@@ -47,26 +48,29 @@ class DataCatalog(object):
         data_libs: (list of) str, Path, optional
             One or more paths to yml files containing data sources which are parsed
             to entries of the data catalog. By default the data catalog is initiated
-            without data entries. See :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
+            without data entries. See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
             for accepted yml format.
-        deltares_data: bool, str, optional
-            Deltares data version number, if True or version provided run :py:meth:`~hydromt.data_adapter.DataCatalog.from_deltares_sources`
-            to parse available Deltares global datasets library yml files.
-        artifact_data: bool, str, optional
-            Artifact data version number, if True provided run :py:meth:`~hydromt.data_adapter.DataCatalog.from_artifacts`
-            to parse available Deltares global datasets library yml files.
+        artifact_keys:
+            key-word arguments specifying the name and version of a hydroMT data artifact,
+            to get the latest version use `True` instead of a version. For instance,
+            to get the latest data catalog with Deltares Data use `deltares_data=True`;
+            to get the latest
+
         """
         self._sources = {}  # dictionary of DataAdapter
         self._used_data = []
         self.logger = logger
-        if artifact_data:
-            version = artifact_data if isinstance(artifact_data, str) else None
-            self.from_artifacts(version=version)
-        if deltares_data:
-            version = deltares_data if isinstance(deltares_data, str) else None
-            self.from_deltares_sources(version=version)
+        for name, version in artifact_keys.items():
+            if version is None or not version:
+                continue
+            if isinstance(version, str) and LooseVersion(version) <= LooseVersion(
+                "v0.0.4"
+            ):
+                raise ValueError("The minimal support version is v0.0.5")
+            self.from_artifacts(name=name, version=version)
         if data_libs is not None:
-            self.from_yml(data_libs)
+            for path in np.atleast_1d(data_libs):
+                self.from_yml(path)
 
     @property
     def sources(self):
@@ -107,55 +111,48 @@ class DataCatalog(object):
         for k, v in kwargs.items():
             self[k] = v
 
-    def from_artifacts(self, version=None):
-        """Add test data to data catalog.
-        The data is available on https://github.com/DirkEilander/hydromt-artifacts and
-        stored to to {user_home}/.hydromt/{version}/
-        """
-        # prepare url and paths
-        version = self._version if version is None else version
-        url = fr"{self._url}/download/{version}/data.tar.gz"
-        folder = join(Path.home(), ".hydromt_data", "data", version)
-        path_data = join(folder, "data.tar.gz")
-        path_yml = join(folder, "data_catalog.yml")
-        if not isdir(folder):
-            os.makedirs(folder)
-        # download data
-        if not isfile(path_data):
-            self.logger.info(f"Downloading file to {path_data}")
-            with requests.get(url, stream=True) as r:
-                with open(path_data, "wb") as f:
-                    shutil.copyfileobj(r.raw, f)
-        if not isfile(path_yml):
-            self.logger.debug(f"Unpacking data from {path_data}")
-            shutil.unpack_archive(path_data, dirname(path_data))
-        if not isfile(path_yml):
-            raise FileNotFoundError(f"Data catalog file not found: {path_yml}")
-        self.logger.info(f"Updating data sources from yml file {path_yml}")
-        self.from_yml(path_yml)
+    def from_artifacts(self, name=None, version=None):
+        """Read a catalog file from https://github.com/DirkEilander/hydromt-artifacts releases.
 
-    def to_yml(self, path, root=None):
-        """Write data catalog to yml format.
+        If no name is provided the artifact sample data is downloaded and
+        stored to to {user_home}/.hydromt/{version}/
 
         Parameters
         ----------
-        path: str, Path
-            yml oOutput path.
-        root: str, Path, optional
-            Global root for all relative paths in yml file.
-            If None the data soruce paths are relative to the yml output ``path``.
+        name: str, optional
+            Catalog name. If None (default) sample data is downloaded.
+        version: str, optional
+            Release version. By default it takes the latest known release.
         """
-        if root is None:
-            # set paths relative to yml file
-            root = os.path.dirname(path)
-            d = self.to_dict(root=root)
-            d.pop("root", None)  # remove absolute root path
+        #
+        version = version if isinstance(version, str) else self._version
+        if name is None or name == "artifact_data":
+            # prepare url and paths
+            url = rf"{self._url}/download/{version}/data.tar.gz"
+            folder = join(Path.home(), ".hydromt_data", "data", version)
+            path_data = join(folder, "data.tar.gz")
+            path = join(folder, "data_catalog.yml")
+            if not isdir(folder):
+                os.makedirs(folder)
+            # download data
+            if not isfile(path_data):
+                with requests.get(url, stream=True) as r:
+                    if r.status_code != 200:
+                        self.logger.error(f"Artifact data {version} not found at {url}")
+                        return
+                    self.logger.info(f"Downloading file to {path_data}")
+                    with open(path_data, "wb") as f:
+                        shutil.copyfileobj(r.raw, f)
+            if not isfile(path):
+                self.logger.debug(f"Unpacking data from {path_data}")
+                shutil.unpack_archive(path_data, dirname(path_data))
+            self.logger.info(f"Adding sample data {version} from artifacts")
         else:
-            d = self.to_dict(root=root)
-        with open(path, "w") as f:
-            yaml.dump(d, f, default_flow_style=False)
+            path = rf"{self._url}/download/{version}/{name}.yml"
+            self.logger.info(f"Adding {name} {version} sources from {path}")
+        self.from_yml(path)
 
-    def from_yml(self, path, root=None):
+    def from_yml(self, path, root=None, mark_used=False):
         """Add data sources based on yml file.
 
         Parameters
@@ -164,6 +161,8 @@ class DataCatalog(object):
             Path(s) to data source yml files.
         root: str, Path, optional
             Global root for all relative paths in yml file(s).
+        mark_used: bool
+            If True, append to used_data list.
 
         Examples
         --------
@@ -176,7 +175,7 @@ class DataCatalog(object):
         .. code-block:: console
 
             root: <path>
-            category: <path>
+            category: <category>
             <name>:
               path: <path>
               data_type: <data_type>
@@ -184,7 +183,8 @@ class DataCatalog(object):
               kwargs:
                 <key>: <value>
               crs: <crs>
-              nodata: <nodata>
+              nodata:
+                <native_variable_name1>: <nodata>
               rename:
                 <native_variable_name1>: <hydromt_variable_name1>
                 <native_variable_name2>: <hydromt_variable_name2>
@@ -198,10 +198,24 @@ class DataCatalog(object):
                 source_licence: <source_licence>
                 paper_ref: <paper_ref>
                 paper_doi: <paper_doi>
+              placeholders:
+                <placeholder_name_1>: <list of names>
+                <placeholder_name_2>: <list of names>
         """
-        self.update(**parse_data_sources(path=path, root=root))
+        if uri_validator(path):
+            with requests.get(path, stream=True) as r:
+                if r.status_code != 200:
+                    raise IOError(f"URL {r.content}: {path}")
+                yml = yaml.load(r.text, Loader=yaml.FullLoader)
+        else:
+            with open(path, "r") as stream:
+                yml = yaml.load(stream, Loader=yaml.FullLoader)
+        # parse data
+        if root is None:
+            root = yml.pop("root", dirname(path))
+        self.from_dict(yml, root=root, mark_used=mark_used)
 
-    def from_dict(self, data_dict, root=None):
+    def from_dict(self, data_dict, root=None, mark_used=False):
         """Add data sources based on dictionary.
 
         Parameters
@@ -210,6 +224,8 @@ class DataCatalog(object):
             Dictionary of data_sources.
         root: str, Path, optional
             Global root for all relative paths in `data_dict`.
+        mark_used: bool
+            If True, append to used_data list.
 
         Examples
         --------
@@ -230,7 +246,8 @@ class DataCatalog(object):
                     "rename": {<native_variable_name1>: <hydromt_variable_name1>},
                     "unit_add": {<native_variable_name1>: <float/int>},
                     "unit_mult": {<native_variable_name1>: <float/int>},
-                    "meta": {...}
+                    "meta": {...},
+                    "placeholders": {<placeholder_name_1>: <list of names>},
                 }
                 <name2>: {
                     ...
@@ -238,15 +255,35 @@ class DataCatalog(object):
             }
 
         """
-        self.update(**_parse_data_dict(data_dict, root=root))
+        category = data_dict.pop("category", None)
+        data_dict = _parse_data_dict(data_dict, root=root, category=category)
+        self.update(**data_dict)
+        if mark_used:
+            self._used_data.extend(list(data_dict.keys()))
 
-    def from_deltares_sources(self, version=None):
-        """Add global data sources from the Deltares network to the data catalog."""
-        version = self._version if version is None else version
-        url = rf"{self._url}/download/{version}/data_sources_deltares.yml"
-        with requests.get(url, stream=True) as r:
-            yml_str = r.text
-        return self.from_dict(yaml.load(yml_str, Loader=yaml.FullLoader))
+    def to_yml(self, path, root="auto", used_only=False):
+        """Write data catalog to yml format.
+
+        Parameters
+        ----------
+        path: str, Path
+            yml output path.
+        root: str, Path, optional
+            Global root for all relative paths in yml file.
+            If "auto" the data soruce paths are relative to the yml output ``path``.
+        used_only: bool
+            If True, export only data entries kept in used_data list.
+        """
+        if root == "auto":
+            # set paths relative to yml file
+            root = os.path.dirname(path)
+            d = self.to_dict(root=root)
+            d.pop("root", None)  # remove absolute root path
+        else:
+            source_names = self._used_data if used_only else []
+            d = self.to_dict(root=root, source_names=source_names)
+        with open(path, "w") as f:
+            yaml.dump(d, f, default_flow_style=False)
 
     def to_dict(self, source_names=[], root=None):
         """Return data catalog in dictionary format"""
@@ -269,6 +306,9 @@ class DataCatalog(object):
                     source_dict["path"] = os.path.relpath(
                         source_dict["path"], root
                     ).replace("\\", "/")
+            else:
+                # convert windows path to str
+                source_dict["path"] = str(source_dict["path"])
             sources_out.update({name: source_dict})
         return sources_out
 
@@ -318,7 +358,7 @@ class DataCatalog(object):
                     unit_add = source.unit_add
                     source.unit_mult = {}
                     source.unit_add = {}
-                fn_out, driver = source.export_data(
+                fn_out, driver = source.to_file(
                     data_root=data_root,
                     data_name=key,
                     bbox=bbox,
@@ -347,7 +387,7 @@ class DataCatalog(object):
         data_catalog_out = DataCatalog()
         data_catalog_out._sources = sources_out
         fn = join(data_root, "data_catalog.yml")
-        data_catalog_out.to_yml(fn)
+        data_catalog_out.to_yml(fn, root="auto")
 
     def get_rasterdataset(
         self,
@@ -370,7 +410,7 @@ class DataCatalog(object):
         provide the `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-varaible data source
-        will be returned as xarray.DataArray rather than Dataset.
+        will be returned as :py:class:`xarray.DataArray` rather than :py:class:`xarray.Dataset`.
 
         Arguments
         ---------
@@ -559,35 +599,6 @@ class DataCatalog(object):
         return obj
 
 
-def parse_data_sources(path=None, root=None):
-    """Parse data sources yml file.
-    For details see :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
-    """
-    # check path argument
-    if isinstance(path, (str, Path)):
-        path = [path]
-    elif not isinstance(path, (list, tuple)):
-        raise ValueError(f"Unknown type for path argument: {type(path).__name__}")
-    # check root argument
-    if isinstance(root, (str, Path)):
-        root = [root]
-    elif root is not None and not isinstance(root, (list, tuple)):
-        raise ValueError(f"Unknown type for root argument: {type(root).__name__}")
-    if root is not None and len(root) == 1 and len(path) > 1:
-        root = [root[0] for _ in range(len(path))]
-    # loop over yml files
-    data = dict()
-    for i in range(len(path)):
-        with open(path[i], "r") as stream:
-            yml = yaml.load(stream, Loader=yaml.FullLoader)
-        # read global root & category vars
-        path0 = yml.pop("root", dirname(path[i]))
-        path0 = path0 if root is None else root[i]
-        category = yml.pop("category", None)
-        data.update(**_parse_data_dict(yml, root=path0, category=category))
-    return data
-
-
 def _parse_data_dict(data_dict, root=None, category=None):
     """Parse data source dictionary."""
     # link yml keys to adapter classes
@@ -596,40 +607,61 @@ def _parse_data_dict(data_dict, root=None, category=None):
         "GeoDataFrame": GeoDataFrameAdapter,
         "GeoDataset": GeoDatasetAdapter,
     }
-    # set data_type sections as source entry
-    # for backwards compatability
-    sources = copy.deepcopy(data_dict)
+    # NOTE: shouldn't the kwarg overwrite the dict/yml ?
     if root is None:
-        root = sources.pop("root", None)
-    for key in data_dict:
-        _key = key.replace("Adapter", "")
-        if _key in ADAPTERS:
-            _sources = data_dict.pop(key)
-            for name, source in _sources.items():
-                source["data_type"] = _key
-                sources[name] = source
+        root = data_dict.pop("root", None)
 
     # parse data
     data = dict()
-    for name, source in sources.items():
+    for name, source in data_dict.items():
+        source = source.copy()  # important as we modify with pop
+        if "alias" in source:
+            alias = source.pop("alias")
+            if alias not in data_dict:
+                raise ValueError(f"alias {alias} not found in data_dict.")
+            # use alias source but overwrite any attributes with original source
+            source_org = source.copy()
+            source = data_dict[alias].copy()
+            source.update(source_org)
         if "path" not in source:
-            raise ValueError("Missing required path argument.")
+            raise ValueError(f"{name}: Missing required path argument.")
         data_type = source.pop("data_type", None)
         if data_type is None:
-            raise ValueError("Data type missing.")
+            raise ValueError(f"{name}: Data type missing.")
         elif data_type not in ADAPTERS:
-            raise ValueError(f"Data type unknown: {data_type}")
+            raise ValueError(f"{name}: Data type {data_type} unknown")
         adapter = ADAPTERS.get(data_type)
         path = abs_path(root, source.pop("path"))
         meta = source.pop("meta", {})
-        if "category" not in meta:
+        if "category" not in meta and category is not None:
             meta.update(category=category)
         # lower kwargs for backwards compatability
+        # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
         source.update(**source.pop("kwargs", {}))
-        if "fn_ts" in source:
-            source.update(fn_ts=abs_path(root, source["fn_ts"]))
-        data[name] = adapter(path=path, meta=meta, **source)
+        for opt in source:
+            if "fn" in opt:  # get absolute paths for file names
+                source.update({opt: abs_path(root, source[opt])})
+        if "placeholders" in source:
+            options = source["placeholders"]
+            for combination in itertools.product(*options.values()):
+                path_n = path
+                name_n = name
+                for k, v in zip(options.keys(), combination):
+                    path_n = path_n.replace("{" + k + "}", v)
+                    name_n = name_n.replace("{" + k + "}", v)
+                data[name_n] = adapter(path=path_n, meta=meta, **source)
+        else:
+            data[name] = adapter(path=path, meta=meta, **source)
+
     return data
+
+
+def uri_validator(x):
+    try:
+        result = urlparse(x)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
 
 
 def abs_path(root, rel_path):
@@ -668,6 +700,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         unit_mult={},
         unit_add={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         # general arguments
@@ -687,7 +720,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.unit_mult = unit_mult
         self.unit_add = unit_add
         # meta data
-        self.meta = meta
+        self.meta = {k: v for k, v in meta.items() if v is not None}
 
     @property
     def data_type(self):
@@ -733,11 +766,10 @@ class DataAdapter(object, metaclass=ABCMeta):
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
         for date, var in product(dates, vrs):
-            root, bname = dirname(self.path), basename(self.path)
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            bname = bname.format(year=yr, month=mth, variable=var)
-            fns.extend(glob.glob(join(root, bname)))
+            path = str(self.path).format(year=yr, month=mth, variable=var)
+            fns.extend(glob.glob(path))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {self.path}")
         return list(set(fns))  # return unique paths
@@ -766,12 +798,13 @@ class RasterDatasetAdapter(DataAdapter):
         unit_add={},
         units={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial raster data.
 
         This object contains all properties required to read supported raster files into
-        a single unified RasterDataset, i.e. :py:meth:`xarray.Dataset` with geospatial attributes.
+        a single unified RasterDataset, i.e. :py:class:`xarray.Dataset` with geospatial attributes.
         In addition it keeps meta data to be able to reproduce which data is used.
 
         Parameters
@@ -780,9 +813,9 @@ class RasterDatasetAdapter(DataAdapter):
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable}, {year}, {month} placeholders as well as path search pattern
             using a '*' wildcard.
-        driver: {'raster', 'netcdf', 'zarr'}, optional
-            Driver to read files with, for 'raster' :py:meth:`~hydromt.io.open_mfraster`,
-            for 'netcdf' :py:meth:`xarray.open_mfdataset`, and for 'zarr' :py:meth:`xarray.open_zarr`
+        driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
+            Driver to read files with, for 'raster' :py:func:`~hydromt.io.open_mfraster`,
+            for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is infered from the file extension and falls back to
             'raster' if unknown.
         crs: int, dict, or str, optional
@@ -800,6 +833,8 @@ class RasterDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -812,12 +847,13 @@ class RasterDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            placeholders=placeholders,
             **kwargs,
         )
         # TODO: see if the units argument can be solved with unit_mult/unit_add
         self.units = units
 
-    def export_data(
+    def to_file(
         self,
         data_root,
         data_name,
@@ -828,7 +864,7 @@ class RasterDatasetAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Export a data slice to file.
+        """Save a data slice to file.
 
         Parameters
         ----------
@@ -852,7 +888,7 @@ class RasterDatasetAdapter(DataAdapter):
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:meth:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
+            Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
         """
 
         try:
@@ -871,9 +907,10 @@ class RasterDatasetAdapter(DataAdapter):
         # write using various writers
         if driver in ["netcdf"]:  # TODO complete list
             fn_out = join(data_root, f"{data_name}.nc")
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
-            encoding = {k: {"zlib": True} for k in dvars}
-            obj.to_netcdf(fn_out, encoding=encoding, **kwargs)
+            if "encoding" not in kwargs:
+                dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
+                kwargs.update(encoding={k: {"zlib": True} for k in dvars})
+            obj.to_netcdf(fn_out, **kwargs)
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
             obj.to_zarr(fn_out, **kwargs)
@@ -881,6 +918,8 @@ class RasterDatasetAdapter(DataAdapter):
             raise ValueError(f"RasterDataset: Driver {driver} unknown.")
         else:
             ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
+            if driver == "GTiff" and "compress" not in kwargs:
+                kwargs.update(compress="lzw")  # default lzw compression
             if isinstance(obj, xr.DataArray):
                 fn_out = join(data_root, f"{data_name}.{ext}")
                 obj.raster.to_raster(fn_out, driver=driver, **kwargs)
@@ -907,7 +946,7 @@ class RasterDatasetAdapter(DataAdapter):
         """Returns a clipped, sliced and unified RasterDataset based on the properties
         of this RasterDatasetAdapter.
 
-        For a detailed description see: :py:meth:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
+        For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
         """
         kwargs = self.kwargs.copy()
         fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
@@ -1053,13 +1092,13 @@ class GeoDatasetAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
-        fn_ts=None,
+        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
 
         This object contains all properties required to read supported files into
-        a single unified GeoDataset, i.e. :py:meth:`xarray.Dataset` with geospatial point
+        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial point
         geometries. In addition it keeps meta data to be able to reproduce which data is used.
 
         Parameters
@@ -1068,9 +1107,9 @@ class GeoDatasetAdapter(DataAdapter):
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable}, {year}, {month} placeholders as well as path search pattern
             using a '*' wildcard.
-        driver: {'vector', 'netcdf'}, optional
-            Driver to read files with, for 'vector' :py:meth:`~hydromt.io.open_geodataset`,
-            for 'netcdf' :py:meth:`xarray.open_mfdataset`.
+        driver: {'vector', 'netcdf', 'zarr'}, optional
+            Driver to read files with, for 'vector' :py:func:`~hydromt.io.open_geodataset`,
+            for 'netcdf' :py:func:`xarray.open_mfdataset`.
             By default the driver is infered from the file extension and falls back to
             'vector' if unknown.
         crs: int, dict, or str, optional
@@ -1088,6 +1127,8 @@ class GeoDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -1100,11 +1141,11 @@ class GeoDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            placeholders=placeholders,
             **kwargs,
         )
-        self.fn_ts = fn_ts  # used for driver='vector'
 
-    def export_data(
+    def to_file(
         self,
         data_root,
         data_name,
@@ -1115,7 +1156,7 @@ class GeoDatasetAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Export a data slice to file.
+        """Save a data slice to file.
 
         Parameters
         ----------
@@ -1139,7 +1180,7 @@ class GeoDatasetAdapter(DataAdapter):
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:meth:`~hydromt.data_adapter.DataCatalog.get_geodataset`
+            Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataset`
         """
         obj = self.get_data(
             bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
@@ -1151,7 +1192,7 @@ class GeoDatasetAdapter(DataAdapter):
             # always write netcdf
             driver = "netcdf"
             fn_out = join(data_root, f"{data_name}.nc")
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
+            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.vector.vars
             encoding = {k: {"zlib": True} for k in dvars}
             obj.to_netcdf(fn_out, encoding=encoding)
         elif driver == "zarr":
@@ -1175,7 +1216,7 @@ class GeoDatasetAdapter(DataAdapter):
         """Returns a clipped, sliced and unified GeoDataset based on the properties
         of this GeoDatasetAdapter.
 
-        For a detailed description see: :py:meth:`~hydromt.data_adapter.DataCatalog.get_geodataset`
+        For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataset`
         """
         kwargs = self.kwargs.copy()
         fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
@@ -1185,16 +1226,16 @@ class GeoDatasetAdapter(DataAdapter):
         if geom is None and bbox is not None:
             # convert bbox to geom with crs EPGS:4326 to apply buffer later
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-            bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-            clip_str = f" and clip to bbox - [{bbox_str}]"
+            clip_str = " and clip to bbox (epsg:4326)"
         elif geom is not None:
-            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            clip_str = f" and clip to geom - [{bbox_str}]"
+            clip_str = f" and clip to geom (epsg:{geom.crs.to_epsg():d})"
         if geom is not None:
             # make sure geom is projected > buffer in meters!
             if buffer > 0 and geom.crs.is_geographic:
                 geom = geom.to_crs(3857)
             geom = geom.buffer(buffer)
+            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
+            clip_str = f"{clip_str} [{bbox_str}]"
         if kwargs.pop("within", False):  # for backward compatibility
             kwargs.update(predicate="contains")
 
@@ -1211,14 +1252,18 @@ class GeoDatasetAdapter(DataAdapter):
         elif self.driver == "vector":
             # read geodataset from point + time series file
             ds_out = io.open_geodataset(
-                fn_locs=fns[0], mask=geom, fn_ts=self.fn_ts, **kwargs
+                fn_locs=fns[0], geom=geom, crs=self.crs, **kwargs
             )
             geom = None  # already clipped
         else:
             raise ValueError(f"GeoDataset: Driver {self.driver} unknown")
 
         # rename and select vars
-        ds_out = ds_out.rename({k: v for k, v in self.rename.items() if k in ds_out})
+        if variables and len(ds_out.vector.vars) == 1 and len(self.rename) == 0:
+            rm = {ds_out.vector.vars[0]: variables[0]}
+        else:
+            rm = {k: v for k, v in self.rename.items() if k in ds_out}
+        ds_out = ds_out.rename(rm)
         # check spatial dims and make sure all are set as coordinates
         try:
             ds_out.vector.set_spatial_dims()
@@ -1286,8 +1331,8 @@ class GeoDatasetAdapter(DataAdapter):
                 nodata = self.nodata
             for k in ds_out.data_vars:
                 mv = nodata.get(k, None)
-                if mv is not None and ds_out[k].raster.nodata is None:
-                    ds_out[k].raster.set_nodata(mv)
+                if mv is not None and ds_out[k].vector.nodata is None:
+                    ds_out[k].vector.set_nodata(mv)
 
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
@@ -1299,16 +1344,16 @@ class GeoDatasetAdapter(DataAdapter):
             a = self.unit_add.get(name, 0)
             da = ds_out[name]
             attrs = da.attrs.copy()
-            nodata_isnan = da.raster.nodata is None or np.isnan(da.raster.nodata)
+            nodata_isnan = da.vector.nodata is None or np.isnan(da.vector.nodata)
             # nodata value is explicitly set to NaN in case no nodata value is provided
-            nodata = np.nan if nodata_isnan else da.raster.nodata
+            nodata = np.nan if nodata_isnan else da.vector.nodata
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
             ds_out[name] = xr.where(data_bool, da * m + a, nodata)
             ds_out[name].attrs.update(attrs)  # set original attributes
 
         # return data array if single var
-        if single_var_as_array and len(ds_out.raster.vars) == 1:
-            ds_out = ds_out[ds_out.raster.vars[0]]
+        if single_var_as_array and len(ds_out.vector.vars) == 1:
+            ds_out = ds_out[ds_out.vector.vars[0]]
 
         # set meta data
         ds_out.attrs.update(self.meta)
@@ -1341,16 +1386,16 @@ class GeoDataFrameAdapter(DataAdapter):
         """Initiates data adapter for geospatial vector data.
 
         This object contains all properties required to read supported files into
-        a single unified :py:meth:`geopandas.GeoDataFrame`.
+        a single unified :py:func:`geopandas.GeoDataFrame`.
         In addition it keeps meta data to be able to reproduce which data is used.
 
         Parameters
         ----------
         path: str, Path
             Path to data source.
-        driver: {'vector', 'xy', 'csv', 'xls', 'xlsx'}, optional
-            Driver to read files with, for 'vector' :py:meth:`~geopandas.read_file`,
-            for {'xy', 'csv', 'xls', 'xlsx'} :py:meth:`hydromt.io.open_vector_from_table`
+        driver: {'vector', 'vector_table'}, optional
+            Driver to read files with, for 'vector' :py:func:`~geopandas.read_file`,
+            for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
             By default the driver is infered from the file extension and falls back to
             'vector' if unknown.
         crs: int, dict, or str, optional
@@ -1385,7 +1430,7 @@ class GeoDataFrameAdapter(DataAdapter):
             **kwargs,
         )
 
-    def export_data(
+    def to_file(
         self,
         data_root,
         data_name,
@@ -1395,7 +1440,7 @@ class GeoDataFrameAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Export a data slice to file.
+        """Save a data slice to file.
 
         Parameters
         ----------
@@ -1416,15 +1461,16 @@ class GeoDataFrameAdapter(DataAdapter):
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:meth:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
+            Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
         """
         kwargs.pop("time_tuple", None)
-        gdf = self.get_data(bbox=bbox, logger=logger)
+        gdf = self.get_data(bbox=bbox, variables=variables, logger=logger)
         if gdf.index.size == 0:
             return None, None
 
         if driver is None:
-            driver = "csv" if self.driver in ["csv", "xls", "xlsx", "xy"] else "GPKG"
+            _lst = ["csv", "xls", "xlsx", "xy", "vector_table"]
+            driver = "csv" if self.driver in _lst else "GPKG"
         # always write netcdf
         if driver == "csv":
             fn_out = join(data_root, f"{data_name}.csv")
@@ -1459,7 +1505,7 @@ class GeoDataFrameAdapter(DataAdapter):
         """Returns a clipped and unified GeoDataFrame (vector) based on the properties
         of this GeoDataFrameAdapter.
 
-        For a detailed description see: :py:meth:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
+        For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
         """
         kwargs = self.kwargs.copy()
         _ = self.resolve_paths()  # throw nice error if data not found
@@ -1469,23 +1515,28 @@ class GeoDataFrameAdapter(DataAdapter):
         if geom is None and bbox is not None:
             # convert bbox to geom with crs EPGS:4326 to apply buffer later
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-            bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-            clip_str = f"and clip to bbox - [{bbox_str}]"
+            clip_str = " and clip to bbox (epsg:4326)"
         elif geom is not None:
-            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            clip_str = f"and clip to geom - [{bbox_str}]"
+            clip_str = f" and clip to geom (epsg:{geom.crs.to_epsg():d})"
         if geom is not None:
             # make sure geom is projected > buffer in meters!
             if geom.crs.is_geographic and buffer > 0:
                 geom = geom.to_crs(3857)
             geom = geom.buffer(buffer)  # a buffer with zero fixes some topology errors
+            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
+            clip_str = f"{clip_str} [{bbox_str}]"
         if kwargs.pop("within", False):  # for backward compatibility
-            kwargs.update(predicate="contains")
+            predicate = "contains"
 
         # read and clip
-        if self.driver in ["csv", "xls", "xlsx", "xy", "vector"]:
+        logger.info(f"GeoDataFrame: Read {self.driver} data{clip_str}.")
+        if self.driver in ["csv", "xls", "xlsx", "xy", "vector", "vector_table"]:
+            # "csv", "xls", "xlsx", "xy" deprecated use vector_table instead.
+            # specific driver should be added to open_vector kwargs
+            if "driver" not in kwargs and self.driver in ["csv", "xls", "xlsx", "xy"]:
+                kwargs.update(driver=self.driver)
             gdf = io.open_vector(
-                self.path, driver=self.driver, crs=self.crs, geom=geom, **kwargs
+                self.path, crs=self.crs, geom=geom, predicate=predicate, **kwargs
             )
         else:
             raise ValueError(f"GeoDataFrame: driver {self.driver} unknown.")

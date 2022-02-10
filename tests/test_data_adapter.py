@@ -9,21 +9,70 @@ import geopandas as gpd
 import xarray as xr
 import os
 import hydromt
-from hydromt.data_adapter import DataAdapter, parse_data_sources, DataCatalog
+from hydromt.data_adapter import (
+    DataAdapter,
+    DataCatalog,
+    RasterDatasetAdapter,
+    _parse_data_dict,
+)
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 
 
-def test_parse_sources():
-    sources = parse_data_sources(join(TESTDATADIR, "test_sources.yml"))
-    assert isinstance(sources, dict)
-    assert np.all([isinstance(s, DataAdapter) for _, s in sources.items()])
-    with pytest.raises(ValueError, match="Unknown type for path argument"):
-        parse_data_sources(path=dict(test=False))
-    with pytest.raises(ValueError, match="Unknown type for root argument"):
-        parse_data_sources(path=TESTDATADIR, root=dict(test=False))
-    with pytest.raises(FileNotFoundError):
-        parse_data_sources("test_fail.yml")
+def test_parser():
+    # valid abs root on windows and linux!
+    root = "c:/root" if os.name == "nt" else "/c/root"
+    # simple; abs path
+    dd = {
+        "test": {
+            "data_type": "RasterDataset",
+            "path": f"{root}/to/data.tif",
+        }
+    }
+    dd_out = _parse_data_dict(dd, root=root)
+    assert isinstance(dd_out["test"], RasterDatasetAdapter)
+    assert dd_out["test"].path == abspath(dd["test"]["path"])
+    # rel path
+    dd = {
+        "test": {
+            "data_type": "RasterDataset",
+            "path": "path/to/data.tif",
+            "kwargs": {"fn": "test"},
+        },
+        "root": root,
+    }
+    dd_out = _parse_data_dict(dd)
+    assert dd_out["test"].path == abspath(join(root, dd["test"]["path"]))
+    # check if path in kwargs is also absolute
+    assert dd_out["test"].kwargs["fn"] == abspath(join(root, "test"))
+    # alias
+    dd = {
+        "test": {
+            "data_type": "RasterDataset",
+            "path": "path/to/data.tif",
+        },
+        "test1": {"alias": "test"},
+    }
+    dd_out = _parse_data_dict(dd, root=root)
+    assert dd_out["test"].path == dd_out["test1"].path
+    # placeholder
+    dd = {
+        "test_{p1}_{p2}": {
+            "data_type": "RasterDataset",
+            "path": "data_{p2}.tif",
+            "placeholders": {"p1": ["a", "b"], "p2": ["1", "2", "3"]},
+        },
+    }
+    dd_out = _parse_data_dict(dd, root=root)
+    assert len(dd_out) == 6
+    assert dd_out["test_a_1"].path == abspath(join(root, "data_1.tif"))
+    # errors
+    with pytest.raises(ValueError, match="Missing required path argument"):
+        _parse_data_dict({"test": {}})
+    with pytest.raises(ValueError, match="Data type error unknown"):
+        _parse_data_dict({"test": {"path": "", "data_type": "error"}})
+    with pytest.raises(ValueError, match="alias test not found in data_dict"):
+        _parse_data_dict({"test1": {"alias": "test"}})
 
 
 def test_data_catalog_io(tmpdir):
@@ -73,19 +122,27 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
+    fn_csv_locs = str(tmpdir.join("test_locs.xy"))
     geoda.to_netcdf(fn_nc)
     geodf.to_file(fn_gdf, driver="GeoJSON")
     ts.to_csv(fn_csv)
+    hydromt.io.write_xy(fn_csv_locs, geodf)
     data_catalog = DataCatalog()
     # added fn_ts to test if it does not go into xr.open_dataset
     da1 = data_catalog.get_geodataset(
-        fn_nc, rename={"test": "test1"}, fn_ts=None, bbox=geoda.vector.bounds
+        fn_nc, variables=["test1"], bbox=geoda.vector.bounds
     ).sortby("index")
     assert np.allclose(da1, geoda) and da1.name == "test1"
     ds1 = data_catalog.get_geodataset("test", single_var_as_array=False)
-    assert isinstance(ds1, xr.Dataset) and "test1" in ds1
-    ds1 = data_catalog.get_geodataset(fn_gdf, fn_ts=fn_csv).sortby("index")
-    assert np.allclose(da1, geoda)
+    assert isinstance(ds1, xr.Dataset) and "test" in ds1
+    da2 = data_catalog.get_geodataset(fn_gdf, fn_data=fn_csv).sortby("index")
+    assert np.allclose(da2, geoda)
+    # test with xy locs
+    da3 = data_catalog.get_geodataset(
+        fn_csv_locs, fn_data=fn_csv, crs=geodf.crs
+    ).sortby("index")
+    assert np.allclose(da3, geoda)
+    assert da3.vector.crs.to_epsg() == 4326
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_geodataset("no_file.geojson")
 
@@ -106,14 +163,14 @@ def test_geodataframe(geodf, tmpdir):
 
 
 def test_deltares_sources():
-    data_catalog = DataCatalog(deltares_data=True)
+    data_catalog = DataCatalog(deltares_data="v0.0.5")
     assert len(data_catalog._sources) > 0
     source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
     assert "wflow_global" in str(source0.path)
 
 
 def test_artifact_sources():
-    data_catalog = DataCatalog(artifact_data="v0.0.3")
+    data_catalog = DataCatalog(artifact_data="v0.0.5")
     assert len(data_catalog._sources) > 0
     source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
     assert ".hydromt_data" in str(source0.path)

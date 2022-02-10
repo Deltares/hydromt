@@ -12,8 +12,16 @@ from osgeo import gdal
 import geopandas as gpd
 from shapely.geometry.base import BaseGeometry
 from shapely.geometry import box
+import pygeos
 import tempfile
+import logging
 from pyflwdir import core_conversion, core_d8, core_ldd
+from pyflwdir import gis_utils as gis
+from typing import Optional, Tuple
+
+__all__ = ["spread2d", "nearest", "nearest_merge"]
+
+logger = logging.getLogger(__name__)
 
 _R = 6371e3  # Radius of earth in m. Use 3956e3 for miles
 XATTRS = {
@@ -86,7 +94,107 @@ GDAL_DRIVER_CODE_MAP = {
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
 
-##
+## GEOM functions
+
+
+def nearest_merge(
+    gdf1: gpd.GeoDataFrame,
+    gdf2: gpd.GeoDataFrame,
+    columns: Optional[list] = None,
+    max_dist: Optional[float] = None,
+    overwrite: bool = False,
+    inplace: bool = False,
+    logger=logger,
+) -> gpd.GeoDataFrame:
+    """Merge attributes of gdf2 with the nearest feature of gdf1, optionally bounded by
+    a maximumum distance `max_dist`. Unless `overwrite = True`, gdf2 values are only
+    merged where gdf1 has missing values.
+
+    Parameters
+    ----------
+    gdf1, gdf2: geopandas.GeoDataFrame
+        Source `gdf1` and destination `gdf2` geometries.
+    columns : list of str, optional
+        Names of columns in `gdf2` to merge, by default None
+    max_dist : float, optional
+        Maximum distance threshold for merge, by default None, i.e.: no threshold.
+    overwrite : bool, optional
+        If False (default) gdf2 values are only merged where gdf1 has missing values,
+        i.e. NaN values for existing columns or missing columns.
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Merged GeoDataFrames
+    """
+    idx_nn, dst = nearest(gdf1, gdf2)
+    if not inplace:
+        gdf1 = gdf1.copy()
+    valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
+    columns = gdf2.columns if columns is None else columns
+    gdf1["distance_right"] = dst
+    gdf1["index_right"] = -1
+    gdf1.loc[valid, "index_right"] = idx_nn[valid]
+    skip = ["geometry"]
+    for col in columns:
+        if col in skip or col not in gdf2:
+            if col not in gdf2:
+                logger.warning(f"Column {col} not found in gdf2 and skipped.")
+            continue
+        new_vals = gdf2.loc[idx_nn[valid], col].values
+        if col in gdf1 and not overwrite:
+            old_vals = gdf1.loc[valid, col]
+            replace = np.logical_or(old_vals.isnull(), old_vals.eq(""))
+            new_vals = np.where(replace, new_vals, old_vals)
+        gdf1.loc[valid, col] = new_vals
+    return gdf1
+
+
+def nearest(
+    gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return the index of and distance [m] to the nearest geometry
+    in `gdf2` for each geometry of `gdf1`. For Line geometries in `gdf1` the nearest
+    geometry is based line center point and for polygons on its representative point.
+    Mixed geometry types are not yet supported.
+
+    Note: Since geopandas v0.10.0 it contains a sjoin_nearest method which is very
+    similar and should.
+
+
+    Parameters
+    ----------
+    gdf1, gdf2: geopandas.GeoDataFrame
+        Source `gdf1` and destination `gdf2` geometries.
+
+    Returns
+    -------
+    index: ndarray
+        index of nearest `gdf2` geometry
+    dst: ndarray of float
+        distance to the nearest `gdf2` geometry
+    """
+    if np.all(gdf1.type == "Point"):
+        pnts = gdf1.geometry.copy()
+    elif np.all(np.isin(gdf1.type, ["LineString", "MultiLineString"])):
+        pnts = gdf1.geometry.interpolate(0.5, normalized=True)  # mid point
+    elif np.all(np.isin(gdf1.type, ["Polygon", "MultiPolygon"])):
+        pnts = gdf1.geometry.representative_point()  # inside polygon
+    else:
+        raise NotImplementedError("Mixed geometry dataframes are not yet supported.")
+    if gdf1.crs != gdf2.crs:
+        pnts = pnts.to_crs(gdf2.crs)
+    # find nearest using pygeos
+    # NOTE: requires geopandas 0.10
+    other = pygeos.from_shapely(pnts.geometry.values)
+    idx = gdf2.sindex.nearest(other, return_all=False)[1]
+    # get distance in meters
+    gdf2_nearest = gdf2.iloc[idx]
+    if gdf2_nearest.crs.is_geographic:
+        pnts = pnts.to_crs(3857)  # web mercator
+        gdf2_nearest = gdf2_nearest.to_crs(3857)
+    dst = gdf2_nearest.distance(pnts, align=False).values
+    return gdf2.index.values[idx], dst
 
 
 def filter_gdf(gdf, geom=None, bbox=None, predicate="intersects"):
@@ -172,8 +280,10 @@ def axes_attrs(crs):
     return x_dim, y_dim, x_attrs, y_attrs
 
 
-def meridian_offset(ds, x_name, bbox=None):
+def meridian_offset(ds, x_name="x", bbox=None):
     """re-arange data along x dim"""
+    if ds.raster.crs is None or ds.raster.crs.is_projected:
+        raise ValueError("The method is only applicable to geographic CRS")
     lons = np.copy(ds[x_name].values)
     w, e = lons.min(), lons.max()
     if bbox is not None and bbox[0] < w and bbox[0] < -180:  # 180W - 180E > 360W - 0W
@@ -184,8 +294,9 @@ def meridian_offset(ds, x_name, bbox=None):
         lons = np.where(lons > 180, lons - 360, lons)
     else:
         return ds
+    ds = ds.copy(deep=False)  # make sure not to overwrite original ds
     ds[x_name] = xr.Variable(ds[x_name].dims, lons)
-    return ds
+    return ds.sortby(x_name)
 
 
 # TRANSFORM
@@ -229,7 +340,7 @@ def cellarea(lat, xres=1.0, yres=1.0):
     l1 = np.radians(lat - np.abs(yres) / 2.0)
     l2 = np.radians(lat + np.abs(yres) / 2.0)
     dx = np.radians(np.abs(xres))
-    return _R ** 2 * dx * (np.sin(l2) - np.sin(l1))
+    return _R**2 * dx * (np.sin(l2) - np.sin(l1))
 
 
 def cellres(lat, xres=1.0, yres=1.0):
@@ -258,6 +369,72 @@ def cellres(lat, xres=1.0, yres=1.0):
     )
 
     return dx * xres, dy * yres
+
+
+## SPREAD
+
+
+def spread2d(
+    da_obs: xr.DataArray,
+    da_mask: Optional[xr.DataArray] = None,
+    da_friction: Optional[xr.DataArray] = None,
+    nodata: Optional[float] = None,
+) -> xr.Dataset:
+    """Returns values of `da_obs` spreaded to cells with `nodata` value within `da_mask`,
+    powered by :py:meth:`pyflwdir.gis_utils.spread2d`
+
+    Parameters
+    ----------
+    da_obs : xarray.DataArray
+        Input raster with observation values and background/nodata values which are
+        filled by the spreading algorithm.
+    da_mask :  xarray.DataArray, optional
+        Mask of cells to fill with the spreading algorithm, by default None
+    da_friction :  xarray.DataArray, optional
+        Friction values used by the spreading algorithm to calcuate the friction
+        distance, by default None
+    nodata : float, optional
+        Nodata or background value. Must be finite numeric value. If not given the
+        raster nodata value is used.
+
+    Returns
+    -------
+    ds_out: xarray.Dataset
+        Dataset with spreaded source values, linear index of the source cell "source_idx"
+        and friction distance to the source cell "source_dst".
+    """
+    nodata = da_obs.raster.nodata if nodata is None else nodata
+    if nodata is None or np.isnan(nodata):
+        raise ValueError(f'"nodata" must be a finite value, not {nodata}')
+    msk, frc = None, None
+    if da_mask is not None:
+        assert da_obs.raster.identical_grid(da_mask)
+        msk = da_mask.values
+    if da_friction is not None:
+        assert da_obs.raster.identical_grid(da_friction)
+        frc = da_friction.values
+    out, src, dst = gis.spread2d(
+        obs=da_obs.values,
+        msk=msk,
+        frc=frc,
+        nodata=da_obs.raster.nodata if nodata is None else nodata,
+        latlon=da_obs.raster.crs.is_geographic,
+        transform=da_obs.raster.transform,
+    )
+    # combine outputs and return as dataset
+    dims = da_obs.raster.dims
+    coords = da_obs.raster.coords
+    name = da_obs.name if da_obs.name else "source_value"
+    da_out = xr.DataArray(dims=dims, coords=coords, data=out, name=name)
+    da_out.raster.attrs.update(**da_obs.attrs)  # keep attrs incl nodata and unit
+    da_src = xr.DataArray(dims=dims, coords=coords, data=src, name="source_idx")
+    da_src.raster.set_nodata(-1)
+    da_dst = xr.DataArray(dims=dims, coords=coords, data=dst, name="source_dst")
+    da_dst.raster.set_nodata(-1)
+    da_dst.attrs.update(unit="m")
+    ds_out = xr.merge([da_out, da_src, da_dst])
+    ds_out.raster.set_crs(da_obs.raster.crs)
+    return ds_out
 
 
 ## PCRASTER

@@ -3,16 +3,9 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
-import rasterio
-import os
-import glob
-from os.path import join
-from pathlib import Path
-from rasterio.crs import CRS
-from rasterio.transform import Affine, xy, rowcol
-from shapely.geometry import box
 
-from hydromt import raster, vector
+from hydromt import raster, vector, gis_utils
+import pyflwdir
 
 
 @pytest.fixture
@@ -69,4 +62,68 @@ def ts(geodf):
 @pytest.fixture
 def geoda(geodf, ts):
     da = vector.GeoDataArray.from_gdf(geodf, ts, name="test", dims=("index", "time"))
+    return da
+
+
+@pytest.fixture
+def demda():
+    np.random.seed(11)
+    da = xr.DataArray(
+        data=np.random.rand(15, 10),
+        dims=("y", "x"),
+        coords={"y": -np.arange(0, 1500, 100), "x": np.arange(0, 1000, 100)},
+        attrs=dict(_FillValue=-9999),
+    )
+    da.raster.set_crs(3785)
+    return da
+
+
+@pytest.fixture
+def flwdir(demda):
+    # NOTE: single basin!
+    return pyflwdir.from_dem(
+        demda.values,
+        nodata=demda.raster.nodata,
+        outlets="min",
+        transform=demda.raster.transform,
+        latlon=demda.raster.crs.is_geographic,
+    )
+
+
+@pytest.fixture
+def flwda(flwdir):
+    xcoords, ycoords = gis_utils.affine_to_coords(flwdir.transform, flwdir.shape)
+    da = xr.DataArray(
+        name="flwdir",
+        data=flwdir.to_array("d8"),
+        dims=("y", "x"),
+        coords={"y": ycoords, "x": xcoords},
+        attrs=dict(_FillValue=247),
+    )
+    da.raster.set_crs(3785)
+    return da
+
+
+@pytest.fixture
+def hydds(flwda, flwdir):
+    ds = flwda.copy().to_dataset()
+    ds["uparea"] = xr.DataArray(
+        data=flwdir.upstream_area("cell"),
+        dims=flwda.raster.dims,
+        attrs=dict(_FillValue=-9999),
+    )
+    ds.raster.set_crs(flwda.raster.crs)
+    return ds
+
+
+@pytest.fixture
+def obsda():
+    rng = np.random.default_rng(12345)
+    da = xr.DataArray(
+        data=rng.random(size=365) * 100,
+        dims=("time"),
+        coords={"time": pd.date_range(start="2020-01-01", periods=365, freq="1D")},
+        attrs=dict(_FillValue=-9999),
+    )
+    da.raster.set_crs(4326)
     return da

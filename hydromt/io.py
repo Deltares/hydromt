@@ -189,11 +189,11 @@ def open_mfraster(
                 da = xr.concat(da_lst, dim=concat_dim)
                 da.coords[concat_dim] = xr.IndexVariable(concat_dim, index_lst)
                 da = da.sortby(concat_dim).transpose(concat_dim, ...)
+                da.attrs.update(da_lst[0].attrs)
+                da.attrs.update({"source_file": "; ".join(fn_attrs)})
         else:
             da = merge.merge(da_lst, **mosaic_kwargs)  # spatial merge
-        da.attrs.update(da_lst[0].attrs)
         ds = da.to_dataset()  # dataset for consistency
-        ds.attrs.update(source_files="; ".join(fn_attrs))
     else:
         ds = xr.merge(da_lst)
     return ds
@@ -246,13 +246,9 @@ def open_raster_from_tindex(
             path = Path(str(fn))
             if not path.is_absolute():
                 paths.append(Path(abspath(join(root, fn))))
-    # set destination crs and bounds to speed up merging
-    if "dst_crs" not in mosaic_kwargs:
-        mosaic_kwargs.update(dst_crs=geom.crs)
-    if "dst_bounds" not in mosaic_kwargs:
-        dst_bounds = geom.to_crs(mosaic_kwargs["dst_crs"]).total_bounds
-        mosaic_kwargs.update(dst_bounds=dst_bounds)
     # read & merge data
+    if "dst_bounds" not in mosaic_kwargs:
+        mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
     ds_out = open_mfraster(
         paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs
     )
@@ -263,14 +259,13 @@ def open_raster_from_tindex(
 
 def open_geodataset(
     fn_locs,
-    fn_ts=None,
+    fn_data=None,
     var_name=None,
     index_dim=None,
-    ts_reader=None,
     chunks={},
     crs=None,
     bbox=None,
-    mask=None,
+    geom=None,
     logger=logger,
     **kwargs,
 ):
@@ -278,23 +273,23 @@ def open_geodataset(
 
     Arguments
     ---------
-    fn: path, str
+    fn_locs: path, str
         Path to point location file, see :py:meth:`geopandas.read_file` for options.
-    fn_ts: path, str
+    fn_data: path, str
         Path to data file of which the index dimension which should match the geospatial
         coordinates index.
         This can either be a csv with datetime in the first column and the location
-        index in the header, or a 2 dimesional netcdf with a datetime and index column.
+        index in the header row, or a netcdf with a time and index dimensions.
     var_name: str, optional
-        Name of the variable in case of a csv fn_ts file. By default, None and
+        Name of the variable in case of a csv fn_data file. By default, None and
         infered from basename.
     crs: str, `pyproj.CRS`, or dict
         Source coordinate reference system, ignored for files with a native crs.
     bbox : array of float, default None
         Filter features by given bounding box described by [xmin, ymin, xmax, ymax]
-        Cannot be used with mask.
-    mask : GeoDataFrame or GeoSeries | shapely Geometry, default None
-        Filter for features that intersect with the mask.
+        Cannot be used with geom.
+    geom : GeoDataFrame or GeoSeries | shapely Geometry, default None
+        Filter for features that intersect with the geom.
         CRS mis-matches are resolved if given a GeoSeries or GeoDataFrame.
         Cannot be used with bbox.
     **kwargs
@@ -309,15 +304,17 @@ def open_geodataset(
         raise IOError(f"GeoDataset point location file not found: {fn_locs}")
     # read geometry file
     kwargs.update(assert_gtype="Point")
-    gdf = open_vector(fn_locs, crs=crs, **kwargs)
+    gdf = open_vector(fn_locs, crs=crs, bbox=bbox, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
     # read timeseries file
-    if fn_ts is not None and isfile(fn_ts):
-        da_ts = open_timeseries_from_table(fn_ts, index_dim=index_dim, logger=logger)
+    if fn_data is not None and isfile(fn_data):
+        da_ts = open_timeseries_from_table(
+            fn_data, name=var_name, index_dim=index_dim, logger=logger
+        )
         ds = vector.GeoDataset.from_gdf(gdf, da_ts, index_dim=index_dim)
-    elif fn_ts is not None:
-        raise IOError(f"GeoDataset timeseries csv file not found: {fn_ts}")
+    elif fn_data is not None:
+        raise IOError(f"GeoDataset data file not found: {fn_data}")
     else:
         ds = vector.GeoDataset.from_gdf(gdf, index_dim=index_dim)  # coordinates only
     return ds.chunk(chunks)
@@ -424,7 +421,7 @@ def open_vector(
         Parsed geometry file
     """
     filtered = False
-    driver = driver if driver is not None else fn.split(".")[-1].lower()
+    driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     else:
@@ -485,7 +482,7 @@ def open_vector_from_table(
     gdf: geopandas.GeoDataFrame
         Parsed and filtered point geometries
     """
-    driver = driver.lower() if driver is not None else fn.split(".")[-1].lower()
+    driver = driver.lower() if driver is not None else str(fn).split(".")[-1].lower()
     if "index_col" not in kwargs:
         kwargs.update(index_col=0)
     if driver in ["csv"]:

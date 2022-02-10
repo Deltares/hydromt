@@ -18,6 +18,7 @@ Reading methods
    io.open_raster_from_tindex
    io.open_vector
    io.open_vector_from_table
+   io.open_geodataset
    io.open_timeseries_from_table
 
 Raster writing methods
@@ -94,6 +95,12 @@ General methods
    DataArray.raster.aligned_grid
    DataArray.raster.idx_to_xy
    DataArray.raster.xy_to_idx
+   DataArray.raster.rowcol
+   DataArray.raster.xy
+   DataArray.raster.flipud
+   DataArray.raster.area_grid
+   DataArray.raster.density_grid
+
 
 Nodata handling and interpolation
 ---------------------------------
@@ -142,6 +149,17 @@ Transform
    DataArray.raster.geometry_mask
    DataArray.raster.vectorize
    DataArray.raster.vector_grid
+
+Sampling and zonal stats
+------------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :template: autosummary/accessor_method.rst
+
+   DataArray.raster.sample
+   DataArray.raster.zonal_stats
+
 
 Low level methods
 -----------------
@@ -209,6 +227,7 @@ Clip
 
    DataArray.vector.clip_bbox
    DataArray.vector.clip_geom
+   DataArray.vector.clip_mask
 
 Reproject
 ---------
@@ -231,16 +250,22 @@ Low-level methods
 Flow direction methods
 ======================
 
+These methods are based on the pyflwdir library. For more flow direction based methods
+visit the `pyflwdir docs. <https://deltares.github.io/pyflwdir/latest/>`_
 
 .. autosummary::
    :toctree: ../_generated
 
    flw.flwdir_from_da
-   flw.gaugemap
-   flw.basin_map
-   flw.basin_shape
-   flw.clip_basins
+   flw.d8_from_dem
+   flw.reproject_hydrography_like
    flw.upscale_flwdir
+   flw.stream_map
+   flw.basin_map
+   flw.gauge_map
+   flw.outlet_map
+   flw.clip_basins
+   flw.dem_adjust
 
 
 General GIS methods
@@ -249,6 +274,7 @@ General GIS methods
 .. autosummary::
    :toctree: ../_generated
    
+   gis_utils.spread2d
    gis_utils.parse_crs
    gis_utils.utm_crs
    gis_utils.affine_to_coords
@@ -260,5 +286,23 @@ General GIS methods
    
 
 
+Statistics and performance metrics
+==================================
 
+.. autosummary::
+   :toctree: ../_generated
+   
+   stats.skills.bias
+   stats.skills.percentual_bias
+   stats.skills.nashsutcliffe
+   stats.skills.lognashsutcliffe
+   stats.skills.pearson_correlation
+   stats.skills.spearman_rank_correlation
+   stats.skills.kge
+   stats.skills.kge_2012
+   stats.skills.kge_non_parametric
+   stats.skills.kge_non_parametric_flood
+   stats.skills.rsquared
+   stats.skills.mse
+   stats.skills.rmse
 

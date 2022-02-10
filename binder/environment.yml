@@ -9,7 +9,7 @@ dependencies:
   - black
   - bottleneck
   - cartopy # to run examples
-  - dask=2021.4  # pin version because of AttributeError in 2021.5
+  - dask
   - descartes # to run examples
   - entrypoints
   - flit>=3.2
@@ -23,7 +23,7 @@ dependencies:
   - openpyxl
   - pandas
   - pip
-  - pyflwdir>=0.4.7
+  - pyflwdir>=0.5.0
   - pygeos>=0.8
   - python>=3.8
   - rasterio

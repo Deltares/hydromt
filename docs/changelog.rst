@@ -5,18 +5,118 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-[Unreleased]
-------------
+unreleased
+----------
+
+Added
+^^^^^
+- New skill scores: KGE 2012, KGE non-parametric (2018), KGE non-parametric flood (2018).
+- new rasterio inverse distance weighting method ("rio_idw") in raster.interpolate_na
+- Add option to add placeholders in yml file to explode a single yml entry to multiple yml entries (useful for climate datasets).
+- general Model.setup_region method
+
+Changed
+^^^^^^^
+- stats.py is now in stats/skills.py in order to include more and different type of new statistics later.
+- improved flw.reproject_hydrography_like and flw.dem_adjust methods
+- file handlers of loggers are replaced in Model.set_root
+- log.setuplog replaces old handlers if these exist to avoid duplicates.
+- setup_basemaps method no longer required for build method
+- improver interbasin regions in workflows.get_basin_geometry
+
+Fixed
+^^^^^
+- fix incorrect nodata values at valid cells from scipy.griddata method in raster.interpolate_na
+
+
+Deprecated
+^^^^^^^^^^
+- workflows.basemaps methods (hydrography and topography) moved to hydromt_wflow
+
+v0.4.4 (19 November 2011)
+-------------------------
+
+Added
+^^^^^
+- flw.d8_from_dem to derive a flow direction raster from a DEM
+- flw.reproject_hydrography_like to reproject flow direction raster data
+- flw.floodplain_elevation method which returns floodplain classification and hydrologically adjusted elevation
+- raster.flipud method to flip data along y-axis
+- raster.area_grid to get the raster cell areas [m2]
+- raster.density_grid to convert the values to [unit/m2]
+- gis_utils.spread2d method (wrapping its pyflwdir equivalent) to spread values on a raster
+- gis_utils.nearest and gis_utils.nearest_merge methods to merge GeoDataFrame based on proximity
+- river_width to estimate a segment average river width based on a river mask raster 
+- river_depth to get segment average river depth estimates based bankfull discharge (requires pyflwdir v0.5.2)
+
+Changed
+^^^^^^^
+- bumped hydromt-artifacts version to v0.0.6
+- In model API build and update functions, if any write_* are called in the ini file (opt), 
+  the final self.write() call is skipped. This enables passing custom arguments to the write_ 
+  functions without double writing files or customizing the order in which write_ functions 
+  are called. If any write_ function is called we assume the user manages the writing and
+  a the global write method is skipped.
+- default GTiff lwz compression with DataCatalog.export_data method
+- rename DataAdapter.export_data to DataAdapter.to_file to avoid confusion with DataCatalog.export_data method
+- allow "alias" with attributes in DataCatalog yml files / dictionaries
+
+Fixed
+^^^^^
+- DataCatalog.to_yml Path objects written as normal strings 
+- Bugfix in basin_mask.get_basin_geometry when using bbox or geom arguments
+- Bugfix DataAdapter.__init__ setting None value in meta data
+- Bugfix DataAdapter.resolve_paths with argument in root
+
+Deprecated
+^^^^^^^^^^
+- flw.gaugemap is replaced by flw.gauge_map for a more consistent interface of flw.*map methods
+- flw.basin_shape is redundant
+
+v0.4.3 (3 October 2021)
+-----------------------
+
+Added
+^^^^^
+- log hydromt_data.yml with write_data_catalog (needs to be implemented in various plugins)
+- add alias option in data catalog yml files
+- use mamba for github actions 
+
+Changed
+^^^^^^^
+- generalize DataCatalog artifact kwargs to allow for multiple yml files from artifacts
+- keep geom attributes with <Dataset/DataArray>.vector.to_gdf method
+
+Fixed
+^^^^^
+- Fix bug in io.open_vector and io.open_vector_from_table with WindowsPath fn
+- Fix data_libs usage from [global] section of config in cli/main.py
+- Bugfix sampling for rasters with 'mask' coordinate
+- Bugfix logical operator in merge method
+
+Deprecated
+^^^^^^^^^^
+- data_adapter.parse_data_sources method deprecated
+
+
+
+v0.4.2 (28 July 2021)
+---------------------
+Noticeable changes include new import of model plugins and improvements of reading methods for tile index and geodataset.
 
 Added
 ^^^^^
 
 - Small patch for geoms/bbox regions when upscaling flow dir.
+- Mask option in merge.merge method for improved open_raster_from_tindex.
 
 Changed
 ^^^^^^^
 
 - New import of model plugins. Before plugins were only loaded when import MODELS or xxxModel from hydromt.models and not when importing hydromt as before.
+- Dropped dask version pins
+- read-only check in write_config; dropped write_results
+- results objects of Model API can also contain xarray.Dataset. To split a Dataset into DataArrays use the split_dataset option of set_results.
 
 Deprecated
 ^^^^^^^^^^
@@ -28,6 +128,7 @@ Fixed
 ^^^^^
 
 - Fix error when deriving basin mask for subbasin with multiple xy.
+- Fix passing timeseries and crs for get_geodataset with vector driver
 
 v0.4.1 (18 May 2021)
 --------------------

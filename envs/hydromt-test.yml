@@ -11,17 +11,17 @@ dependencies:
   - click
   - black
   - bottleneck
-  - dask=2021.4  # pin version because of AttributeError in 2021.5
+  - dask
   - entrypoints
   - gdal>=3.1
-  - geopandas
+  - geopandas>=0.10
   - netcdf4
   - numba
   - numpy
   - openpyxl
   - pandas
   - pcraster # optional
-  - pyflwdir>=0.4.7
+  - pyflwdir>=0.5.3
   - pygeos>=0.8
   - pytest # tests
   - pytest-cov # tests

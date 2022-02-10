@@ -2,8 +2,9 @@
 """General and basic API for models in HydroMT"""
 
 from abc import ABCMeta, abstractmethod
+import enum
 import os
-from os.path import join, isdir, isfile, abspath
+from os.path import join, isdir, isfile, abspath, dirname, basename
 import xarray as xr
 import numpy as np
 import geopandas as gpd
@@ -13,7 +14,7 @@ from pathlib import Path
 import inspect
 
 from ..data_adapter import DataCatalog
-from .. import config
+from .. import config, log, workflows
 
 __all__ = ["Model"]
 
@@ -31,6 +32,8 @@ class Model(object, metaclass=ABCMeta):
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
+    # tell hydroMT which methods should receive the res and region arguments
+    _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
 
     def __init__(
         self,
@@ -38,9 +41,8 @@ class Model(object, metaclass=ABCMeta):
         mode="w",
         config_fn=None,
         data_libs=None,
-        deltares_data=None,
-        artifact_data=None,
         logger=logger,
+        **artifact_keys,
     ):
         from . import ENTRYPOINTS  # load within method to avoid circular imports
 
@@ -52,10 +54,7 @@ class Model(object, metaclass=ABCMeta):
 
         # link to data
         self.data_catalog = DataCatalog(
-            data_libs=data_libs,
-            deltares_data=deltares_data,
-            artifact_data=artifact_data,
-            logger=self.logger,
+            data_libs=data_libs, logger=self.logger, **artifact_keys
         )
 
         # placeholders
@@ -64,14 +63,14 @@ class Model(object, metaclass=ABCMeta):
         self._forcing = dict()  # dictionnary of xr.DataArray
         self._config = dict()  # nested dictionary
         self._states = dict()  # dictionnary of xr.DataArray
-        self._results = dict()  # dictionnary of xr.DataArray
+        self._results = dict()  # dictionnary of xr.DataArray and/or xr.Dataset
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
         self.set_root(root, mode)
 
     def _check_get_opt(self, opt):
-        """Check all opt keys and raise sensible error messages if unknonwn."""
+        """Check all opt keys and raise sensible error messages if unknown."""
         for method in opt.keys():
             m = method.strip("0123456789")
             if not callable(getattr(self, m, None)):
@@ -99,10 +98,9 @@ class Model(object, metaclass=ABCMeta):
         return func(*args, **kwargs)
 
     def build(
-        self, region: dict, res: float = None, write: bool = True, opt: dict = None
+        self, region: dict, res: float = None, write: bool = True, opt: dict = {}
     ):
-        """Single method to setup and write a full model schematization and
-        configuration from scratch
+        """Single method to build a model from scratch based on settings in `opt`.
 
         Parameters
         ----------
@@ -110,13 +108,13 @@ class Model(object, metaclass=ABCMeta):
             Description of model region. See :py:meth:`~hydromt.workflows.parse_region`
             for all options.
         res: float, optional
-            Model restolution. Use only if applicable to your model. By default None.
+            Model resolution. Use only if applicable to your model. By default None.
         write: bool, optional
             Write the complete model schematization after setting up all model components.
             By default True.
         opt: dict, optional
-            Model setup configuration. This is a nested dictionary where the first-level
-            keys are the names of model spedific setup methods and the second-level
+            Model build configuration. This is a nested dictionary where the first-level
+            keys are the names of model specific setup methods and the second-level
             keys the arguments of the method:
 
             ```{
@@ -131,17 +129,30 @@ class Model(object, metaclass=ABCMeta):
         """
         opt = self._check_get_opt(opt)
 
+        # merge cli region and res arguments with opt
+        # insert region method if it does not exist in opt
+        if self._CLI_ARGS["region"] not in opt:
+            opt = {self._CLI_ARGS["region"]: {}, **opt}
+        # update region method kwargs with region
+        opt[self._CLI_ARGS["region"]].update(region=region)
+        # update res method kwargs with res (optional)
+        if res is not None:
+            if self._CLI_ARGS["res"] not in opt:
+                m = self._CLI_ARGS["res"]
+                self.logger.warning(
+                    f'"res" argument ignored as the "{m}" is not in the model build configuration.'
+                )
+            else:
+                opt[self._CLI_ARGS["res"]].update(res=res)
+
         # run setup_config and setup_basemaps first!
         self._run_log_method("setup_config", **opt.pop("setup_config", {}))
-        kwargs = opt.pop("setup_basemaps", {})
-        kwargs.update(region=region)
-
-        if res is not None:  # res is optional
-            kwargs.update(res=res)
-        self._run_log_method("setup_basemaps", **kwargs)
 
         # then loop over other methods
         for method in opt:
+            # if any write_* functions are present in opt, skip the final self.write() call
+            if method.startswith("write_"):
+                write = False
             self._run_log_method(method, **opt[method])
 
         # write
@@ -149,21 +160,19 @@ class Model(object, metaclass=ABCMeta):
             self.write()
 
     def update(self, model_out=None, write=True, opt=None):
-        """Single method to setup and write a full model schematization and
-        configuration from scratch
-
+        """Single method to update a model based the settings in `opt`.
 
         Parameters
         ----------
         model_out: str, path, optional
-            Desitation folder to write the model schematization after updating
+            Destination folder to write the model schematization after updating
             the model. If None the updated model components are overwritten in the
-            current model schematization if these exist. By defualt None.
+            current model schematization if these exist. By default None.
         write: bool, optional
             Write the updated model schematization to disk. By default True.
         opt: dict, optional
             Model update configuration. This is a nested dictionary where the first-level
-            keys are the names of model spedific setup methods and the second-level
+            keys are the names of model specific setup methods and the second-level
             keys the arguments of the method:
 
             ```{
@@ -188,25 +197,107 @@ class Model(object, metaclass=ABCMeta):
 
         # check if model has a region
         if self.region is None:
-            raise ValueError(
-                'Model region not found, setup basemaps using "build" method first.'
-            )
+            raise ValueError("Model region not found, setup model using `build` first.")
 
         # remove setup_basemaps from options and throw warning
-        if "setup_basemaps" in opt:
-            opt.pop("setup_basemaps")  # remove from opt
-            self.logger.warning(
-                '"setup_basemaps" can only be called when building a model.'
-            )
+        method = self._CLI_ARGS["region"]
+        if method in opt:
+            opt.pop(method)  # remove from opt
+            self.logger.warning(f'"{method}" can only be called when building a model.')
 
         # loop over other methods from ini file
         self._run_log_method("setup_config", **opt.pop("setup_config", {}))
         for method in opt:
+            # if any write_* functions are present in opt, skip the final self.write() call
+            if method.startswith("write_"):
+                write = False
             self._run_log_method(method, **opt[method])
 
         # write
         if write:
             self.write()
+
+    ## general setup methods
+
+    def setup_region(
+        self,
+        region,
+        hydrography_fn="merit_hydro",
+        basin_index_fn="merit_hydro_index",
+    ):
+        """
+        This component sets the `region` of interest of the model.
+
+        Adds model layer:
+
+        * **region** geom: region boundary vector
+
+        Parameters
+        ----------
+        region : dict
+            Dictionary describing region of interest, e.g.:
+
+            * {'bbox': [xmin, ymin, xmax, ymax]}
+
+            * {'geom': 'path/to/polygon_geometry'}
+
+            * {'basin': [xmin, ymin, xmax, ymax]}
+
+            * {'subbasin': [x, y], '<variable>': threshold}
+
+            For a complete overview of all region options,
+            see :py:function:~hydromt.workflows.basin_mask.parse_region
+        hydrography_fn : str
+            Name of data source for basemap parameters.
+            FIXME describe data requirements
+        basin_index_fn : str
+            Name of data source with basin (bounding box) geometries associated with
+            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
+            based on a (sub)(inter)basins without a 'bounds' argument.
+
+        Returns
+        -------
+        region: dict
+            Parsed region dictionary
+
+        See Also
+        --------
+        hydromt.workflows.basin_mask.parse_region
+        """
+        kind, region = workflows.parse_region(region, logger=self.logger)
+        # NOTE: kind=outlet is deprecated!
+        if kind in ["basin", "subbasin", "interbasin", "outlet"]:
+            # retrieve global hydrography data (lazy!)
+            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
+            if "bounds" not in region:
+                region.update(basin_index=self.data_catalog[basin_index_fn])
+            # get basin geometry
+            geom, xy = workflows.get_basin_geometry(
+                ds=ds_org,
+                kind=kind,
+                logger=self.logger,
+                **region,
+            )
+            region.update(xy=xy)
+        elif "bbox" in region:
+            bbox = region["bbox"]
+            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+        elif "geom" in region:
+            geom = region["geom"]
+            if geom.crs is None:
+                raise ValueError('Model region "geom" has no CRS')
+        elif "grid" in region:
+            geom = region["grid"].raster.box
+        elif "model" in region:
+            geom = region["model"].region
+        else:
+            raise ValueError(f"model region argument not understood: {region}")
+
+        self.set_staticgeoms(geom, name="region")
+
+        # This setup method returns region so that it can be wrapped for models which require
+        # more information, e.g. grid RasterDataArray or xy coordinates.
+        return region
 
     ## file system
 
@@ -231,7 +322,7 @@ class Model(object, metaclass=ABCMeta):
         """
         if mode not in ["r", "r+", "w"]:
             raise ValueError(f'mode "{mode}" unknown, select from "r", "r+" or "w"')
-        old_root = getattr(self, "_root", None)
+        # old_root = getattr(self, "_root", None)
         self._root = root if root is None else abspath(root)
         self._read = mode.startswith("r")
         self._write = mode != "r"
@@ -249,6 +340,18 @@ class Model(object, metaclass=ABCMeta):
             # check directory
             elif not isdir(self._root):
                 raise IOError(f'model root not found at "{self._root}"')
+            # read hydromt_data yml file and add to data catalog
+            data_fn = join(self._root, "hydromt_data.yml")
+            if self._read and isfile(data_fn):
+                # read data and mark as used
+                self.data_catalog.from_yml(data_fn, mark_used=True)
+            # change output localtion of any logging file handlers
+            for i, h in enumerate(self.logger.handlers):
+                if hasattr(h, "baseFilename") and dirname(h.baseFilename) != self._root:
+                    self.logger.handlers.pop(i).close()  # remove handler and close file
+                    new_path = join(self._root, basename(h.baseFilename))
+                    log.add_filehandler(self.logger, new_path, h.level)
+                    break
 
     ## I/O
 
@@ -269,6 +372,20 @@ class Model(object, metaclass=ABCMeta):
 
     def _configwrite(self, fn):
         return config.configwrite(fn, self.config)
+
+    def write_data_catalog(self, root=None, used_only=True):
+        """Write the data catalog to `hydromt_data.yml`
+
+        Parameters
+        ----------
+        root: str, Path, optional
+            Global root for all relative paths in yml file.
+            If "auto" the data source paths are relative to the yml output ``path``.
+        used_only: bool
+            If True, export only data entries kept in used_data list.
+        """
+        path = join(self.root, "hydromt_data.yml")
+        self.data_catalog.to_yml(path, root=root, used_only=used_only)
 
     def read_config(self, config_fn=None):
         """Parse config from file. If no config file found a default config file is
@@ -292,6 +409,8 @@ class Model(object, metaclass=ABCMeta):
 
     def write_config(self, config_name=None, config_root=None):
         """Write config to <root/config_fn>"""
+        if not self._write:
+            raise IOError("Model opened in read-only mode")
         if config_name is not None:
             self._config_fn = config_name
         elif self._config_fn is None:
@@ -375,13 +494,6 @@ class Model(object, metaclass=ABCMeta):
             self._results = dict()
         raise NotImplementedError()
 
-    @abstractmethod
-    def write_results(self):
-        """write results at <root/?/> in model ready format"""
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
-        raise NotImplementedError()
-
     ## model configuration
 
     @property
@@ -410,8 +522,6 @@ class Model(object, metaclass=ABCMeta):
         >> set_config('b', 'c', 'd', 99) # identical to set_config('b.d.e', 99)
         >> {'a': 1, 'b': {'c': {'d': 99}}}
         """
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
         if len(args) < 2:
             raise TypeError("set_config() requires a least one key and one value.")
         args = list(args)
@@ -528,12 +638,8 @@ class Model(object, metaclass=ABCMeta):
                 data = xr.DataArray(dims=self.dims, data=data, name=name).to_dataset()
             for dvar in data.data_vars.keys():
                 if dvar in self._staticmaps:
-                    if not self._write:
-                        raise IOError(
-                            f"Cannot overwrite staticmap {dvar} in read-only mode"
-                        )
-                    elif self._read:
-                        self.logger.warning(f"Overwriting staticmap: {dvar}")
+                    if self._read:
+                        self.logger.warning(f"Replacing staticmap: {dvar}")
                 self._staticmaps[dvar] = data[dvar]
 
     @property
@@ -552,10 +658,8 @@ class Model(object, metaclass=ABCMeta):
                 "First parameter map(s) should be geopandas.GeoDataFrame or geopandas.GeoSeries"
             )
         if name in self._staticgeoms:
-            if not self._write:
-                raise IOError(f"Cannot overwrite staticgeom {name} in read-only mode")
-            elif self._read:
-                self.logger.warning(f"Overwriting staticgeom: {name}")
+            if self._read:
+                self.logger.warning(f"Replacing staticgeom: {name}")
         self._staticgeoms[name] = geom
 
     @property
@@ -593,8 +697,6 @@ class Model(object, metaclass=ABCMeta):
             data = {name: data}
         for name in data:
             if name in self._forcing:
-                if not self._write:
-                    raise IOError(f"Cannot replace forcing {name} in read-only mode")
                 self.logger.warning(f"Replacing forcing: {name}")
             self._forcing[name] = data[name]
 
@@ -633,8 +735,6 @@ class Model(object, metaclass=ABCMeta):
             data = {name: data}
         for name in data:
             if name in self._states:
-                if not self._write:
-                    raise IOError(f"Cannot replace state {name} in read-only mode")
                 self.logger.warning(f"Replacing state: {name}")
             self._states[name] = data[name]
 
@@ -646,19 +746,26 @@ class Model(object, metaclass=ABCMeta):
                 self.read_results()
         return self._results
 
-    def set_results(self, data, name=None):
-        """Add data to results attribute which is a dictionary of xarray.DataArray.
+    def set_results(self, data, name=None, split_dataset=False):
+        """Add data to results attribute which is a dictionary of xarray.DataArray and/or xarray.Dataset.
+
         The dictionary key is taken from the variable name. In case of a DataArray
-        without name, the name can be passed using the optional name argument.
+        without name, the name can be passed using the optional name argument. In case of
+        a Dataset, the dictionnary key is passed using the name argument.
+
+        Dataset can either be added as is to the dictionnary (default) or split into several
+        DataArrays using the split_dataset argument.
 
         Arguments
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
         name: str, optional
-            Variable name, only in case data is of type DataArray
+            Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
+        split_dataset: bool, optional
+            If data is a xarray.Dataset, either add it as is to results or split it into several xarray.DataArrays.
         """
-        # check dataset dtype
+        # check data dtype
         dtypes = [xr.DataArray, xr.Dataset]
         if not np.any([isinstance(data, t) for t in dtypes]):
             raise ValueError("Data type not recognized")
@@ -669,14 +776,21 @@ class Model(object, metaclass=ABCMeta):
             elif name is None and data.name is not None:
                 name = data.name
             elif data.name is None and name is None:
-                raise ValueError("Name required for forcing DataArray.")
+                raise ValueError("Name required for result DataArray.")
             data = {name: data}
-        for name in data:
-            if name in self._results:
-                if not self._write:
-                    raise IOError(f"Cannot replace results {name} in read-only mode")
-                self.logger.warning(f"Replacing result: {name}")
-            self._results[name] = data[name]
+        # Add to results
+        if isinstance(data, xr.Dataset) and not split_dataset:
+            if name is not None:
+                if name in self._results:
+                    self.logger.warning(f"Replacing result: {name}")
+                self._results[name] = data
+            else:
+                raise ValueError("Name required to add DataSet directly to results")
+        else:
+            for name in data:
+                if name in self._results:
+                    self.logger.warning(f"Replacing result: {name}")
+                self._results[name] = data[name]
 
     ## properties / methods below can be used directly in actual class
 
@@ -782,8 +896,9 @@ class Model(object, metaclass=ABCMeta):
         if not isinstance(self.results, dict):
             non_compliant.append("results")
         elif self.results:  # non-empty dict
+            dtypes = [xr.DataArray, xr.Dataset]
             for name, data in self.results.items():
-                if not isinstance(data, xr.DataArray):
+                if not np.any([isinstance(data, t) for t in dtypes]):
                     non_compliant.append(f"results.{name}")
 
         return non_compliant

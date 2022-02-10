@@ -10,17 +10,17 @@ dependencies:
   - affine
   - bottleneck
   - click
-  - dask=2021.4  # pin version because of AttributeError in 2021.5
+  - dask
   - entrypoints
   - flit>=3.2
   - gdal>=3.1
-  - geopandas
+  - geopandas>=0.10
   - netcdf4
   - numba
   - numpy
   - openpyxl
   - pandas
-  - pyflwdir>=0.4.7
+  - pyflwdir>=0.5.3
   - pygeos>=0.8
   - python>=3.8
   - rasterio

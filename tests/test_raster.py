@@ -138,7 +138,7 @@ def test_rasterize(rioda):
     assert np.all(rioda.raster.rasterize(gdf, col_name="id") == 3)
     assert np.all(rioda.raster.rasterize(gdf, col_name="id", sindex=True) == 3)
     mask = rioda.raster.geometry_mask(gdf)
-    assert mask.dtype == np.bool
+    assert mask.dtype == bool
     assert np.all(mask)
     with pytest.raises(ValueError, match="No shapes found"):
         rioda.raster.rasterize(gpd.GeoDataFrame())
@@ -208,6 +208,9 @@ def test_reproject():
     ds0 = da0.to_dataset()
     ds1 = raster.full_from_transform(*testdata[1], **kwargs).to_dataset()
     assert np.all(ds1.raster.bounds == ds1.raster.transform_bounds(ds1.raster.crs))
+    # flipud
+    assert ds1.raster.flipud().raster.res[1] == -ds1.raster.res[1]
+    # reproject nearest index
     ds2 = ds1.raster.reproject(dst_crs=3857, method="nearest_index")
     assert ds2.raster.crs.to_epsg() == 3857
     ds2 = ds1.raster.reproject(dst_crs=3857, dst_res=1000, align=True)
@@ -242,15 +245,34 @@ def test_reproject():
         ds1.raster.reproject(dst_crs=3857)
 
 
+def test_area_grid(rioda):
+    # latlon
+    area = rioda.raster.area_grid()
+    assert area.std() > 0  # cells have different area
+    # test dataset
+    assert np.all(rioda.to_dataset().raster.area_grid() == area)
+    # test projected crs
+    rioda_proj = rioda.copy()
+    rioda_proj.raster.set_crs(3857)
+    area1 = rioda_proj.raster.area_grid()
+    assert np.all(area1 == 0.25)
+    # density
+    assert np.all(rioda.raster.density_grid() == rioda / area)
+    assert np.all(rioda_proj.raster.density_grid() == rioda_proj / area1)
+
+
 def test_interpolate_na():
     # mv > nan
     da0 = raster.full_from_transform(*testdata[0], nodata=-1)
-    da0.values[0, 0] = 1
-    da1 = da0.raster.mask_nodata().raster.interpolate_na()
+    da0.values.flat[np.array([0, 3, -3, -1])] = np.array([1, 1, 2, 2])
+    da1 = da0.raster.mask_nodata().raster.interpolate_na()  # nearest
     assert np.all(np.isnan(da1) == False)
-    assert np.all(da1 == 1)
+    assert np.all(np.isin(da1, [1, 2]))
     assert np.all(np.isnan(da1.raster.interpolate_na()) == False)
-    assert np.all(da0.raster.interpolate_na() != da0.raster.nodata)
+    assert np.all(
+        da0.raster.interpolate_na(method="rio_idw", max_search_distance=3)
+        != da0.raster.nodata
+    )
     assert np.all(da0.expand_dims("t").raster.interpolate_na() != da0.raster.nodata)
     da2 = da0.astype(np.int32)  # this removes the nodata value ...
     da2.raster.set_nodata(-9999)
@@ -291,8 +313,8 @@ def test_zonal_stats():
     geoms = [
         box(w, s, w + abs(e - w) / 2.0, n),
         box(w - 2, s, w - 0.2, n),  # outside
-        Point((w, n)),
-        LineString([(w, n), (e, s)]),
+        Point((w + 0.1, n - 0.1)),
+        LineString([(w, (n + s) / 2 - 0.1), (e, (n + s) / 2 - 0.1)]),  # vert line
     ]
     gdf = gpd.GeoDataFrame(geometry=geoms, crs=da.raster.crs)
 
@@ -303,6 +325,7 @@ def test_zonal_stats():
 
     ds0 = ds.raster.zonal_stats(gdf.to_crs(3857), [np.nanmean, "mean"])
     ds1 = ds.raster.zonal_stats(gdf, [np.nanmean, "mean"])
+
     assert np.all(ds0["test_nanmean"] == ds0["test_mean"])
     assert np.all(ds1["test_mean"] == ds0["test_mean"])
 

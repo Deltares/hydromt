@@ -19,6 +19,8 @@ Attributes
    Model.staticmaps
    Model.staticgeoms
    Model.forcing
+   Model.states
+   Model.results
 
 High level methods
 ------------------
@@ -54,3 +56,10 @@ General methods
    Model.set_forcing
    Model.read_forcing
    Model.write_forcing
+
+   Model.set_states
+   Model.read_states
+   Model.write_states
+
+   Model.set_results
+   Model.read_results
