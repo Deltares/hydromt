@@ -270,7 +270,7 @@ class DataCatalog(object):
             yml output path.
         root: str, Path, optional
             Global root for all relative paths in yml file.
-            If "auto" the data soruce paths are relative to the yml output ``path``.
+            If "auto" the data source paths are relative to the yml output ``path``.
         used_only: bool
             If True, export only data entries kept in used_data list.
         """
@@ -306,9 +306,8 @@ class DataCatalog(object):
                     source_dict["path"] = os.path.relpath(
                         source_dict["path"], root
                     ).replace("\\", "/")
-            else:
-                # convert windows path to str
-                source_dict["path"] = str(source_dict["path"])
+            # remove non serializable entries to prevent errors
+            source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
             sources_out.update({name: source_dict})
         return sources_out
 
@@ -409,7 +408,7 @@ class DataCatalog(object):
         To return only the dataset variables of interest and check their presence,
         provide the `variables` argument.
 
-        NOTE: Unless `single_var_as_array` is set to False a single-varaible data source
+        NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as :py:class:`xarray.DataArray` rather than :py:class:`xarray.Dataset`.
 
         Arguments
@@ -432,7 +431,7 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         single_var_as_array: bool, optional
-            If True, return a DataArray if the dataset conists of a single variable.
+            If True, return a DataArray if the dataset consists of a single variable.
             If False, always return a Dataset. By default True.
 
         Returns
@@ -440,7 +439,7 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             RasterDataset
         """
-        if len(glob.glob(str(path_or_key))) > 0:
+        if path_or_key not in self.sources and len(glob.glob(str(path_or_key))) > 0:
             path = path_or_key
             name = basename(path_or_key).split(".")[0]
             self.update(**{name: RasterDatasetAdapter(path=path, **kwargs)})
@@ -502,7 +501,7 @@ class DataCatalog(object):
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
-        if isfile(path_or_key):
+        if path_or_key not in self.sources and len(glob.glob(str(path_or_key))) > 0:
             path = path_or_key
             name = basename(path_or_key).split(".")[0]
             self.update(**{name: GeoDataFrameAdapter(path=path, **kwargs)})
@@ -543,7 +542,7 @@ class DataCatalog(object):
         To return only the dataset variables of interest and check their presence,
         provide the `variables` argument.
 
-        NOTE: Unless `single_var_as_array` is set to False a single-varaible data source
+        NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as xarray.DataArray rather than Dataset.
 
         Arguments
@@ -566,7 +565,7 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         single_var_as_array: bool, optional
-            If True, return a DataArray if the dataset conists of a single variable.
+            If True, return a DataArray if the dataset consits of a single variable.
             If False, always return a Dataset. By default True.
 
         Returns
@@ -574,7 +573,7 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             GeoDataset
         """
-        if isfile(path_or_key):
+        if path_or_key not in self.sources and len(glob.glob(str(path_or_key))) > 0:
             path = path_or_key
             name = basename(path_or_key).split(".")[0]
             self.update(**{name: GeoDatasetAdapter(path=path, **kwargs)})
@@ -664,6 +663,20 @@ def uri_validator(x):
         return False
 
 
+def _process_dict(d, logger=logger):
+    """Recursively change dict values to keep only python literal structures."""
+    for k, v in d.items():
+        _check_key = isinstance(k, str)
+        if _check_key and isinstance(v, dict):
+            d[k] = _process_dict(v)
+        elif _check_key and isinstance(v, Path):
+            d[k] = str(v)  # path to string
+        elif not _check_key or not isinstance(v, (list, str, int, float, bool)):
+            d.pop(k)
+            logger.debug(f'Removing non-serializable entry "{k}"')
+    return d
+
+
 def abs_path(root, rel_path):
     path = Path(str(rel_path))
     if not path.is_absolute():
@@ -704,7 +717,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         **kwargs,
     ):
         # general arguments
-        self.path = path
+        self.path = str(path)  # string path to make it serializable to yml
         # driver and driver keyword-arguments
         # check for non default driver based on extension
         if driver is None:
@@ -720,7 +733,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.unit_mult = unit_mult
         self.unit_add = unit_add
         # meta data
-        self.meta = {k: v for k, v in meta.items() if v is not None}
+        self.meta = {k: str(v) for k, v in meta.items() if v is not None}
 
     @property
     def data_type(self):
@@ -777,7 +790,7 @@ class DataAdapter(object, metaclass=ABCMeta):
     @abstractmethod
     def get_data(self, bbox, geom, buffer):
         """Return a view (lazy if possible) of the data with standardized field names.
-        If bbox of maks are given, clip data to that extent"""
+        If bbox of mask are given, clip data to that extent"""
 
 
 class RasterDatasetAdapter(DataAdapter):
@@ -816,7 +829,7 @@ class RasterDatasetAdapter(DataAdapter):
         driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
             Driver to read files with, for 'raster' :py:func:`~hydromt.io.open_mfraster`,
             for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
-            By default the driver is infered from the file extension and falls back to
+            By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
