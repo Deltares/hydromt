@@ -494,7 +494,7 @@ class DataCatalog(object):
         align : float, optional
             Resolution to align the bounding box, by default None
         variables : list of str, optional.
-            Names of GeoDataFrame columns to return. By default all colums are returned.
+            Names of GeoDataFrame columns to return. By default all columns are returned.
 
         Returns
         -------
@@ -565,7 +565,7 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         single_var_as_array: bool, optional
-            If True, return a DataArray if the dataset consits of a single variable.
+            If True, return a DataArray if the dataset consists of a single variable.
             If False, always return a Dataset. By default True.
 
         Returns
@@ -717,7 +717,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         **kwargs,
     ):
         # general arguments
-        self.path = str(path)  # string path to make it serializable to yml
+        self.path = path
         # driver and driver keyword-arguments
         # check for non default driver based on extension
         if driver is None:
@@ -1123,7 +1123,7 @@ class GeoDatasetAdapter(DataAdapter):
         driver: {'vector', 'netcdf', 'zarr'}, optional
             Driver to read files with, for 'vector' :py:func:`~hydromt.io.open_geodataset`,
             for 'netcdf' :py:func:`xarray.open_mfdataset`.
-            By default the driver is infered from the file extension and falls back to
+            By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
@@ -1409,7 +1409,7 @@ class GeoDataFrameAdapter(DataAdapter):
         driver: {'vector', 'vector_table'}, optional
             Driver to read files with, for 'vector' :py:func:`~geopandas.read_file`,
             for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
-            By default the driver is infered from the file extension and falls back to
+            By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)

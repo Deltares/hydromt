@@ -12,7 +12,7 @@ Added
 ^^^^^
 - New skill scores: KGE 2012, KGE non-parametric (2018), KGE non-parametric flood (2018).
 - new rasterio inverse distance weighting method ("rio_idw") in raster.interpolate_na
-- Add option to add placeholders in yml file to explode a single yml entry to multiple yml entries (useful for climate datasets).
+- Add option to add placeholders in yml file to explode a single yml entry to multiple yml entries (useful for e.g. climate datasets).
 - general Model.setup_region method
 
 Changed
@@ -22,7 +22,10 @@ Changed
 - file handlers of loggers are replaced in Model.set_root
 - log.setuplog replaces old handlers if these exist to avoid duplicates.
 - setup_basemaps method no longer required for build method
-- improver interbasin regions in workflows.get_basin_geometry
+- improved interbasin regions in workflows.get_basin_geometry
+- drop non-serializable entries from yml file when writing data catalog to avoid it getting corrupt
+- data catalog yml entries get priority over local files or folders with the same name in the data_adapter.get_* methods
+  multi-file rasterdatasets are only supported through the data catalog yml file 
 
 Fixed
 ^^^^^
