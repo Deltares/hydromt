@@ -5,7 +5,7 @@
 
 from abc import ABCMeta, abstractmethod
 import os
-from os.path import join, isdir, dirname, basename, isfile, abspath
+from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 from itertools import product
 import copy
 from pathlib import Path
@@ -439,8 +439,8 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             RasterDataset
         """
-        if path_or_key not in self.sources and len(glob.glob(str(path_or_key))) > 0:
-            path = path_or_key
+        if path_or_key not in self.sources and exists(abspath(path_or_key)):
+            path = str(abspath(path_or_key))
             name = basename(path_or_key).split(".")[0]
             self.update(**{name: RasterDatasetAdapter(path=path, **kwargs)})
         elif path_or_key in self.sources:
@@ -501,8 +501,8 @@ class DataCatalog(object):
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
-        if path_or_key not in self.sources and len(glob.glob(str(path_or_key))) > 0:
-            path = path_or_key
+        if path_or_key not in self.sources and exists(abspath(path_or_key)):
+            path = str(abspath(path_or_key))
             name = basename(path_or_key).split(".")[0]
             self.update(**{name: GeoDataFrameAdapter(path=path, **kwargs)})
         elif path_or_key in self.sources:
@@ -573,8 +573,8 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             GeoDataset
         """
-        if path_or_key not in self.sources and len(glob.glob(str(path_or_key))) > 0:
-            path = path_or_key
+        if path_or_key not in self.sources and exists(abspath(path_or_key)):
+            path = str(abspath(path_or_key))
             name = basename(path_or_key).split(".")[0]
             self.update(**{name: GeoDatasetAdapter(path=path, **kwargs)})
         elif path_or_key in self.sources:
@@ -672,7 +672,7 @@ def _process_dict(d, logger=logger):
         elif _check_key and isinstance(v, Path):
             d[k] = str(v)  # path to string
         elif not _check_key or not isinstance(v, (list, str, int, float, bool)):
-            d.pop(k)
+            d.pop(k)  # remove this entry
             logger.debug(f'Removing non-serializable entry "{k}"')
     return d
 
@@ -733,7 +733,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.unit_mult = unit_mult
         self.unit_add = unit_add
         # meta data
-        self.meta = {k: str(v) for k, v in meta.items() if v is not None}
+        self.meta = {k: v for k, v in meta.items() if v is not None}
 
     @property
     def data_type(self):
