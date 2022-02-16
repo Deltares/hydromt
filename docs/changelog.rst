@@ -5,8 +5,8 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-unreleased
-----------
+v0.4.5 (16 February 2022)
+-------------------------
 
 Added
 ^^^^^
@@ -31,12 +31,11 @@ Fixed
 ^^^^^
 - fix incorrect nodata values at valid cells from scipy.griddata method in raster.interpolate_na
 
-
 Deprecated
 ^^^^^^^^^^
 - workflows.basemaps methods (hydrography and topography) moved to hydromt_wflow
 
-v0.4.4 (19 November 2011)
+v0.4.4 (19 November 2021)
 -------------------------
 
 Added
