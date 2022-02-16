@@ -13,6 +13,8 @@ Added
 
 Changed
 ^^^^^^^
+- Add rioxarray dependency to read raster data
+
 
 Fixed
 ^^^^^
