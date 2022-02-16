@@ -57,7 +57,4 @@ THE SOFTWARE.
    :titlesonly:
    :hidden:
 
-   getting_started
    user_guide
-   api.rst
-   dev_guide

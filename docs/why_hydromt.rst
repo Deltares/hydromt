@@ -1,3 +1,3 @@
-Why HydroMt
+Why HydroMT
 ============
 dummy
