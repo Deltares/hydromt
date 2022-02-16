@@ -144,9 +144,8 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-# todo: change theme 
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 autodoc_member_order = "bysource"  # overwrite default alphabetical sort
 autoclass_content = "both"
 
@@ -160,6 +159,7 @@ html_theme_options = {"style_external_links": True}
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_css_files = ["theme-deltares.css"]
 html_context = {}
 
 # Custom sidebar templates, must be a dictionary that maps document names
@@ -174,6 +174,9 @@ html_context = {}
 #     ]
 # }
 
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+html_logo = "_static/deltares-white.svg"
 
 # -- Options for HTMLHelp output ------------------------------------------
 

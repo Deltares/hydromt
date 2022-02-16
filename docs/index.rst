@@ -18,77 +18,6 @@ Latest applications with HydroMT
 - Water quality diagnostic in Peru
 - National hydrologic models for Indonesia
 
-Documentation
-=============
-
-**Getting Started**
-
-* :doc:`intro`
-* :doc:`installation`
-* :doc:`user_stories`
-* :doc:`examples/index`
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Getting Started
-
-   intro
-   installation
-   user_stories
-   examples/index
-
-**User Guide**
-
-* :doc:`user_guide/intro`
-* :doc:`user_guide/terminology`
-* :doc:`user_guide/data`
-* :doc:`user_guide/models/index`
-* :doc:`user_guide/cli`
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: User Guide
-
-   user_guide/intro
-   user_guide/terminology
-   user_guide/data
-   user_guide/models/index
-   user_guide/cli
-
-**Advanced topics**
-
-* :doc:`advanced/model_api`
-* :doc:`advanced/data_catalog`
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Advanced topics
-
-   advanced/model_api
-   advanced/data_catalog
-
-
-**References & Help**
-
-* :doc:`api/api_index`
-* :doc:`architecture`
-* :doc:`contributing`
-* :doc:`roadmap`
-* :doc:`changelog`
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: References & Help
-
-   api/api_index
-   architecture
-   contributing
-   roadmap
-   changelog
 
 Dependencies
 ------------
@@ -123,3 +52,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 .. |BlueEarth| image:: img/BlueEarth-icon.png
+
+.. toctree::
+   :titlesonly:
+   :hidden:
+
+   getting_started
+   user_guide
+   api.rst
+   dev_guide

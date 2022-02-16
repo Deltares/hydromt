@@ -1,0 +1,9 @@
+.bg-deltares {
+    background-color: #080c80;
+}
+
+/* Override the default color set in the original theme */
+.navbar-nav>.active>.nav-link {
+    color: #fff !important;
+    font-weight: 400 !important;
+}
