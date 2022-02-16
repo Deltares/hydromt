@@ -268,8 +268,9 @@ Use gdaltindex to build an excepted tile index file (see https://gdal.org/progra
 
 Here a GeoPackage with the tile index refering to individual GeoTiff raster tiles is used. 
 The ``mosaic_kwargs`` are passed to :py:meth:`~hydromt.io.open_raster_from_tindex` to 
-set the resampling ``method`` and name of column in the tile index attribute table ``tileindex``
-which contains the raster tile file names.
+set the resampling ``method``. The name of the column in the tile index attribute table ``tileindex``
+which contains the raster tile file names is set in the ``kwargs`` (to be directly passed as an argument to 
+:py:meth:`~hydromt.io.open_raster_from_tindex`).
 
 .. code-block:: yaml
 
@@ -280,7 +281,8 @@ which contains the raster tile file names.
       nodata: 0
       kwargs:
         chunks: {x: 3000, y: 3000}
-        mosaic_kwargs: {method: nearest, tileindex: location}
+        mosaic_kwargs: {method: nearest}
+        tileindex: location
       meta:
         category: surface water
         paper_doi: 10.1126/science.aat0636

@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
+from sklearn.neighbors import VALID_METRICS
 import xarray as xr
 import logging
 
@@ -34,7 +35,7 @@ def parse_region(region, logger=logger):
 
         * {'bbox': [xmin, ymin, xmax, ymax]}
 
-        * {'geom': (path to) geopandas.GeoDataFrame[Polygon]}
+        * {'geom': /path/to/polygon_geometry}
 
         For a region based of another models grid:
 
@@ -42,7 +43,7 @@ def parse_region(region, logger=logger):
 
         For a region based of the grid of a raster file:
 
-        * {'grid': (path to) raster file}
+        * {'grid': /path/to/raster}
 
         Entire basin can be defined based on an ID, one or multiple point location (x, y),
         or a region of interest (bounding box or geometry) for which the basin IDs are
@@ -58,7 +59,7 @@ def parse_region(region, logger=logger):
 
         * {'basin': [[x1, x2, ..], [y1, y2, ..]]}
 
-        * {'basin': (path to) geopandas.GeoDataFrame[Point]}
+        * {'basin': /path/to/point_geometry}
 
         * {'basin': [xmin, ymin, xmax, ymax]}
 
@@ -79,21 +80,20 @@ def parse_region(region, logger=logger):
 
         * {'subbasin': [[x1, x2, ..], [y1, y2, ..]], '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]}
 
-        * {'subbasin': (path to) geopandas.GeoDataFrame[Point], '<variable>': threshold}
+        * {'subbasin': /path/to/point_geometry, '<variable>': threshold}
 
         * {'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
 
-        * {'subbasin': (path to) geopandas.GeoDataFrame[Polygon], '<variable>': threshold}
+        * {'subbasin': /path/to/polygon_geometry, '<variable>': threshold}
 
-        Interbasins are also defined by its outlet locations but include only the most
-        downstream contiguous area with the area of interest. The outlet locations
-        are derive from the most downstream cell(s) within a area of interest
-        defined by a bounding box or geometry, optionally refined by stream threshold arguments.
-        Common use-cases include:
+        Interbasins are similar to subbasins but are bounded by a bounding box or geometry
+        and do not include all upstream area. Common use-cases include:
 
         * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
 
-        * {'interbasin': [xmin, ymin, xmax, ymax], 'outlets': true}
+        * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
+
+        * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
 
     Returns
     -------
@@ -107,13 +107,13 @@ def parse_region(region, logger=logger):
     options = {
         "basin": ["basid", "geom", "bbox", "xy"],
         "subbasin": ["geom", "bbox", "xy"],
-        "interbasin": ["geom", "bbox", "xy"],
+        "interbasin": ["geom", "bbox", "xy"],  # FIXME remove interbasin & xy combi?
         "outlet": ["geom", "bbox"],  # deprecated!
         "geom": ["geom"],
         "bbox": ["bbox"],
         "grid": ["RasterDataArray"],
     }
-    kind = next(iter(kwargs))
+    kind = next(iter(kwargs))  # first key of region
     value0 = kwargs.pop(kind)
     if kind in ENTRYPOINTS:
         model_class = model_plugins.load(ENTRYPOINTS[kind], logger=logger)
@@ -175,7 +175,7 @@ def _parse_region_value(value):
     return kwarg
 
 
-def _check_size(ds, logger=logger, threshold=12e3 ** 2):
+def _check_size(ds, logger=logger, threshold=12e3**2):
     # warning for large domain
     if (
         np.multiply(*ds.raster.shape) > threshold
@@ -207,7 +207,7 @@ def get_basin_geometry(
 
     This method derives a geometry of sub-, inter- or full basin based on an input
     dataset with flow-direction and optional basins ID raster data in combination
-    with a matching basin geometry file containing the bouding boxes of each basin.
+    with a matching basin geometry file containing the bounding boxes of each basin.
 
     Either ``bbox``, ``geom``, ``xy`` (or ``basid`` in case of ``kind='basin'``) must
     be provided.
@@ -222,7 +222,8 @@ def get_basin_geometry(
     kind : {"basin", "subbasin", "interbasin"}
         kind of basin description
     bounds: array_like of float, optional
-        [xmin, ymin, xmax, ymax] coordinates of total
+        [xmin, ymin, xmax, ymax] coordinates of total bounding box, i.e. the data is
+        clipped to this domain before futher processing.
     bbox : array_like of float, optional
         [xmin, ymin, xmax, ymax] coordinates to infer (sub)(inter)basin(s)
     geom : geopandas.GeoDataFrame, optional
@@ -265,10 +266,27 @@ def get_basin_geometry(
         logger.warning(
             '"within" stream argument has been deprecated.', DeprecationWarning
         )
+
+    # check variables
+    dvars = [flwdir_name] + [v for v in stream_kwargs]
+    for name in dvars:
+        if name not in ds.data_vars:
+            raise ValueError(f"Dataset variable {name} not in ds.")
+
+    # for interbasins we can limit the domain based on either bbox / geom or bounds
+    if kind == "interbasin" and bounds is None:
+        if bbox is None and geom is None:
+            raise ValueError('"kind=interbasin" requires either "bbox" or "geom"')
+        bounds = bbox if bbox is not None else geom.total_bounds
+    # initial clip based on bounds
+    if bounds is not None:
+        ds = ds.raster.clip_bbox(bounds, buffer=buffer)
     # convert bbox to geom
     if geom is None and bbox is not None:
         geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=ds.raster.crs)
 
+    # check basin index
+    # TODO understand pfafstetter codes
     gdf_bas = None
     if basin_index is not None:
         if isinstance(basin_index, GeoDataFrameAdapter):
@@ -294,18 +312,6 @@ def get_basin_geometry(
         if gdf_bas.crs != ds.raster.crs:
             logger.warn("Basin geometries CRS does not match the input raster CRS.")
             gdf_bas = gdf_bas.to_crs(ds.raster.crs)
-
-    # initial clip based on bounds
-    if kind == "interbasin" and geom is not None and bounds is None:
-        bounds = geom.total_bounds
-    if bounds is not None:
-        ds = ds.raster.clip_bbox(bounds, buffer=buffer)
-
-    # check variables
-    dvars = [flwdir_name] + [v for v in stream_kwargs]
-    for name in dvars:
-        if name not in ds.data_vars:
-            raise ValueError(f"Dataset variable {name} not in ds.")
 
     ## BASINS
     if kind == "basin" or bounds is None:
@@ -383,15 +389,18 @@ def get_basin_geometry(
         ds = ds.raster.clip_mask(ds[basins_name])
         bas_mask = ds[basins_name]
 
-    # SUBBASINS
+    # INTER- & SUBBASINS
     xy_out = None
     if kind in ["subbasin", "interbasin"]:
         # get flow directions
         _check_size(ds, logger)  # warning for large domain
-        kwargs = dict()
-        if basins_name in ds:  # set flwdir mask based on basin map
-            kwargs.update(mask=ds[basins_name] > 0)
-        flwdir = flwdir_from_da(ds[flwdir_name], ftype=ftype, **kwargs)
+        mask = False
+        # if interbasin, set flwdir mask within geometry / bounding box
+        if kind == "interbasin":  # we have checked before that geom is not None
+            mask = ds.raster.geometry_mask(geom)
+        elif basins_name in ds:  # set flwdir mask based on basin map
+            mask = ds[basins_name] > 0
+        flwdir = flwdir_from_da(ds[flwdir_name], ftype=ftype, mask=mask)
         # get area of interest (aoi) mask
         if geom is not None:
             aoi = ds.raster.geometry_mask(geom)
@@ -422,16 +431,12 @@ def get_basin_geometry(
             xy = outmap.raster.idx_to_xy(idxs_out)
         # get subbasin map
         bas_mask, xy_out = basin_map(ds, flwdir, xy, **kwargs)
-        # check sub/inter basin map
+        # is subbasin with bounds check if all upstream cells are included
         if kind == "subbasin" and bounds is not None:
-            region = gpd.GeoDataFrame(geometry=[box(*bounds)], crs=ds.raster.crs)
-            region_mask = ds.raster.geometry_mask(region)
-            if np.any(np.logical_and(region_mask == 0, bas_mask != 0)):
+            geom = gpd.GeoDataFrame(geometry=[box(*bounds)], crs=ds.raster.crs)
+            mask = ds.raster.geometry_mask(geom)
+            if np.any(np.logical_and(mask == 0, bas_mask != 0)):
                 logger.warning("The subbasin does not include all upstream cells.")
-        elif kind == "interbasin" and np.any(np.logical_and(aoi == 0, bas_mask != 0)):
-            # derive interbasin (most downstream contiguous area within region)
-            _mask = flwdir.interbasin_mask(aoi.values, **kwargs)
-            bas_mask = bas_mask.where(_mask, 0)
 
     if not np.any(bas_mask > 0):
         raise ValueError(f"No {kind} found with given criteria.")
@@ -439,8 +444,7 @@ def get_basin_geometry(
     bas_mask.raster.set_crs(ds.raster.crs)
     bas_mask.raster.set_nodata(0)
     w, s, e, n = bas_mask.raster.clip_mask(bas_mask).raster.bounds
-    ncells = np.sum(bas_mask.values != 0)
-    logger.info(f"basin bbox: [{w:.4f}, {s:.4f}, {e:.4f}, {n:.4f}] / size: {ncells}")
+    logger.info(f"{kind} bbox: [{w:.4f}, {s:.4f}, {e:.4f}, {n:.4f}]")
 
     # vectorize basins and outlets
     basin_geom = bas_mask.raster.vectorize()

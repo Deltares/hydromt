@@ -20,7 +20,7 @@ dependencies = [
     "numpy",
     "netcdf4",
     "pandas",
-    "pyflwdir>=0.5.3",
+    "pyflwdir>=0.5.4",
     "pygeos",
     "openpyxl",
     "rasterio",
@@ -71,3 +71,8 @@ target-version = ['py37']
 [tool.flit.sdist]
 include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:distutils Version classes are deprecated:DeprecationWarning",
+]

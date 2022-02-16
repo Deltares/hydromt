@@ -1,0 +1,18 @@
+{
+    "title": "hydroMT",
+    "description": "Build and analyze models like a data-wizard!",
+    "upload_type": "software",
+    "creators": [
+        {
+            "affiliation": "Deltares",
+            "name": "Eilander, Dirk",
+            "orcid": "0000-0002-0951-8418"
+        },
+        {
+            "affiliation": "Deltares",
+            "name": "Boisgontier, Hélène"
+        }
+    ],
+    "access_right": "open",
+    "license": "MIT"
+}

@@ -2,8 +2,9 @@
 """General and basic API for models in HydroMT"""
 
 from abc import ABCMeta, abstractmethod
+import enum
 import os
-from os.path import join, isdir, isfile, abspath
+from os.path import join, isdir, isfile, abspath, dirname, basename
 import xarray as xr
 import numpy as np
 import geopandas as gpd
@@ -13,7 +14,7 @@ from pathlib import Path
 import inspect
 
 from ..data_adapter import DataCatalog
-from .. import config
+from .. import config, log, workflows
 
 __all__ = ["Model"]
 
@@ -31,6 +32,8 @@ class Model(object, metaclass=ABCMeta):
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
+    # tell hydroMT which methods should receive the res and region arguments
+    _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
 
     def __init__(
         self,
@@ -67,7 +70,7 @@ class Model(object, metaclass=ABCMeta):
         self.set_root(root, mode)
 
     def _check_get_opt(self, opt):
-        """Check all opt keys and raise sensible error messages if unknonwn."""
+        """Check all opt keys and raise sensible error messages if unknown."""
         for method in opt.keys():
             m = method.strip("0123456789")
             if not callable(getattr(self, m, None)):
@@ -95,10 +98,9 @@ class Model(object, metaclass=ABCMeta):
         return func(*args, **kwargs)
 
     def build(
-        self, region: dict, res: float = None, write: bool = True, opt: dict = None
+        self, region: dict, res: float = None, write: bool = True, opt: dict = {}
     ):
-        """Single method to setup and write a full model schematization and
-        configuration from scratch
+        """Single method to build a model from scratch based on settings in `opt`.
 
         Parameters
         ----------
@@ -106,13 +108,13 @@ class Model(object, metaclass=ABCMeta):
             Description of model region. See :py:meth:`~hydromt.workflows.parse_region`
             for all options.
         res: float, optional
-            Model restolution. Use only if applicable to your model. By default None.
+            Model resolution. Use only if applicable to your model. By default None.
         write: bool, optional
             Write the complete model schematization after setting up all model components.
             By default True.
         opt: dict, optional
-            Model setup configuration. This is a nested dictionary where the first-level
-            keys are the names of model spedific setup methods and the second-level
+            Model build configuration. This is a nested dictionary where the first-level
+            keys are the names of model specific setup methods and the second-level
             keys the arguments of the method:
 
             ```{
@@ -127,14 +129,24 @@ class Model(object, metaclass=ABCMeta):
         """
         opt = self._check_get_opt(opt)
 
+        # merge cli region and res arguments with opt
+        # insert region method if it does not exist in opt
+        if self._CLI_ARGS["region"] not in opt:
+            opt = {self._CLI_ARGS["region"]: {}, **opt}
+        # update region method kwargs with region
+        opt[self._CLI_ARGS["region"]].update(region=region)
+        # update res method kwargs with res (optional)
+        if res is not None:
+            if self._CLI_ARGS["res"] not in opt:
+                m = self._CLI_ARGS["res"]
+                self.logger.warning(
+                    f'"res" argument ignored as the "{m}" is not in the model build configuration.'
+                )
+            else:
+                opt[self._CLI_ARGS["res"]].update(res=res)
+
         # run setup_config and setup_basemaps first!
         self._run_log_method("setup_config", **opt.pop("setup_config", {}))
-        kwargs = opt.pop("setup_basemaps", {})
-        kwargs.update(region=region)
-
-        if res is not None:  # res is optional
-            kwargs.update(res=res)
-        self._run_log_method("setup_basemaps", **kwargs)
 
         # then loop over other methods
         for method in opt:
@@ -148,21 +160,19 @@ class Model(object, metaclass=ABCMeta):
             self.write()
 
     def update(self, model_out=None, write=True, opt=None):
-        """Single method to setup and write a full model schematization and
-        configuration from scratch
-
+        """Single method to update a model based the settings in `opt`.
 
         Parameters
         ----------
         model_out: str, path, optional
-            Desitation folder to write the model schematization after updating
+            Destination folder to write the model schematization after updating
             the model. If None the updated model components are overwritten in the
-            current model schematization if these exist. By defualt None.
+            current model schematization if these exist. By default None.
         write: bool, optional
             Write the updated model schematization to disk. By default True.
         opt: dict, optional
             Model update configuration. This is a nested dictionary where the first-level
-            keys are the names of model spedific setup methods and the second-level
+            keys are the names of model specific setup methods and the second-level
             keys the arguments of the method:
 
             ```{
@@ -187,16 +197,13 @@ class Model(object, metaclass=ABCMeta):
 
         # check if model has a region
         if self.region is None:
-            raise ValueError(
-                'Model region not found, setup basemaps using "build" method first.'
-            )
+            raise ValueError("Model region not found, setup model using `build` first.")
 
         # remove setup_basemaps from options and throw warning
-        if "setup_basemaps" in opt:
-            opt.pop("setup_basemaps")  # remove from opt
-            self.logger.warning(
-                '"setup_basemaps" can only be called when building a model.'
-            )
+        method = self._CLI_ARGS["region"]
+        if method in opt:
+            opt.pop(method)  # remove from opt
+            self.logger.warning(f'"{method}" can only be called when building a model.')
 
         # loop over other methods from ini file
         self._run_log_method("setup_config", **opt.pop("setup_config", {}))
@@ -209,6 +216,88 @@ class Model(object, metaclass=ABCMeta):
         # write
         if write:
             self.write()
+
+    ## general setup methods
+
+    def setup_region(
+        self,
+        region,
+        hydrography_fn="merit_hydro",
+        basin_index_fn="merit_hydro_index",
+    ):
+        """
+        This component sets the `region` of interest of the model.
+
+        Adds model layer:
+
+        * **region** geom: region boundary vector
+
+        Parameters
+        ----------
+        region : dict
+            Dictionary describing region of interest, e.g.:
+
+            * {'bbox': [xmin, ymin, xmax, ymax]}
+
+            * {'geom': 'path/to/polygon_geometry'}
+
+            * {'basin': [xmin, ymin, xmax, ymax]}
+
+            * {'subbasin': [x, y], '<variable>': threshold}
+
+            For a complete overview of all region options,
+            see :py:function:~hydromt.workflows.basin_mask.parse_region
+        hydrography_fn : str
+            Name of data source for basemap parameters.
+            FIXME describe data requirements
+        basin_index_fn : str
+            Name of data source with basin (bounding box) geometries associated with
+            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
+            based on a (sub)(inter)basins without a 'bounds' argument.
+
+        Returns
+        -------
+        region: dict
+            Parsed region dictionary
+
+        See Also
+        --------
+        hydromt.workflows.basin_mask.parse_region
+        """
+        kind, region = workflows.parse_region(region, logger=self.logger)
+        # NOTE: kind=outlet is deprecated!
+        if kind in ["basin", "subbasin", "interbasin", "outlet"]:
+            # retrieve global hydrography data (lazy!)
+            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
+            if "bounds" not in region:
+                region.update(basin_index=self.data_catalog[basin_index_fn])
+            # get basin geometry
+            geom, xy = workflows.get_basin_geometry(
+                ds=ds_org,
+                kind=kind,
+                logger=self.logger,
+                **region,
+            )
+            region.update(xy=xy)
+        elif "bbox" in region:
+            bbox = region["bbox"]
+            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+        elif "geom" in region:
+            geom = region["geom"]
+            if geom.crs is None:
+                raise ValueError('Model region "geom" has no CRS')
+        elif "grid" in region:
+            geom = region["grid"].raster.box
+        elif "model" in region:
+            geom = region["model"].region
+        else:
+            raise ValueError(f"model region argument not understood: {region}")
+
+        self.set_staticgeoms(geom, name="region")
+
+        # This setup method returns region so that it can be wrapped for models which require
+        # more information, e.g. grid RasterDataArray or xy coordinates.
+        return region
 
     ## file system
 
@@ -256,6 +345,13 @@ class Model(object, metaclass=ABCMeta):
             if self._read and isfile(data_fn):
                 # read data and mark as used
                 self.data_catalog.from_yml(data_fn, mark_used=True)
+            # change output localtion of any logging file handlers
+            for i, h in enumerate(self.logger.handlers):
+                if hasattr(h, "baseFilename") and dirname(h.baseFilename) != self._root:
+                    self.logger.handlers.pop(i).close()  # remove handler and close file
+                    new_path = join(self._root, basename(h.baseFilename))
+                    log.add_filehandler(self.logger, new_path, h.level)
+                    break
 
     ## I/O
 
@@ -284,7 +380,7 @@ class Model(object, metaclass=ABCMeta):
         ----------
         root: str, Path, optional
             Global root for all relative paths in yml file.
-            If "auto" the data soruce paths are relative to the yml output ``path``.
+            If "auto" the data source paths are relative to the yml output ``path``.
         used_only: bool
             If True, export only data entries kept in used_data list.
         """

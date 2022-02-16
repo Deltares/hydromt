@@ -12,9 +12,11 @@ FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 from . import __version__
 
 
-def setuplog(name, path=None, log_level=20, fmt=FMT, append=True):
+def setuplog(name="hydromt", path=None, log_level=20, fmt=FMT, append=True):
     """Set-up the logging on sys.stdout"""
     logger = logging.getLogger(name)
+    for _ in range(len(logger.handlers)):
+        logger.handlers.pop().close()  # remove and close existing handlers
     logging.captureWarnings(True)
     logger.setLevel(log_level)
     console = logging.StreamHandler(sys.stdout)
