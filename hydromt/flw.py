@@ -89,6 +89,7 @@ def d8_from_dem(
     max_depth: float = -1.0,
     outlets: str = "edge",
     idxs_pit: Optional[np.ndarray] = None,
+    **kwargs,
 ) -> xr.DataArray:
     """Derive D8 flow directions grid from an elevation grid.
 
@@ -146,6 +147,7 @@ def d8_from_dem(
         nodata=da_elv.raster.nodata,
         outlets=outlets,
         idxs_pit=idxs_pit,
+        **kwargs,
     )[1]
     # return xarray data array
     da_flw = xr.DataArray(
@@ -309,7 +311,7 @@ def reproject_hydrography_like(
     # take minimum with rank to ensure pits of main rivers have zero syn. elevation
     if np.any(rivmask):
         flwdir_src = flwdir_from_da(ds_hydro[flwdir_name], mask=rivmask)
-        elvsyn = elvsyn.where(flwdir_src.rank < 0, np.minimum(flwdir_src.rank, elvsyn))
+        elvsyn = np.minimum(flwdir_src.rank, elvsyn).where(flwdir_src.rank == 0, elvsyn)
     # reproject with 'min' to preserve rivers
     elv_mask = da_elv != da_elv.raster.nodata
     elvsyn_reproj = elvsyn.raster.reproject_like(da_elv, method="min")
@@ -322,13 +324,6 @@ def reproject_hydrography_like(
     elvsyn_reproj.raster.set_crs(crs)
     elvsyn_reproj.raster.set_nodata(nodata)
     # get flow directions based on reprojected synthetic elevation
-    # initiate new flow direction at edge with syn elv <= 0 + inland pits if no kwargs given
-    _edge = pyflwdir.gis_utils.get_edge(elv_mask.values)
-    if not kwargs:
-        _msk = np.logical_and(_edge, elvsyn_reproj <= 0)
-        _msk = np.logical_or(_msk, elvsyn_reproj == 0)
-        if np.any(_msk):  # False if all pits outside domain
-            kwargs.update(idxs_pit=np.where(_msk.values.ravel())[0])
     logger.info(f"Deriving flow direction from reprojected synthethic elevation.")
     da_flw1 = d8_from_dem(elvsyn_reproj, **kwargs)
     flwdir = flwdir_from_da(da_flw1, ftype="d8", mask=elv_mask)
@@ -346,6 +341,7 @@ def reproject_hydrography_like(
         # get edge river cells indices
         rivupa = da_flw1.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
         rivmsk = np.logical_and(flwdir.distnc > river_len, rivupa > 0).values
+        _edge = pyflwdir.gis_utils.get_edge(elv_mask.values)
         inflow_idxs = np.where(np.logical_and(rivmsk, _edge).ravel())[0]
         if inflow_idxs.size > 0:
             # map nearest segment to each river edge cell;
