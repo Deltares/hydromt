@@ -40,7 +40,7 @@ def cli2rst(output, fn):
 # NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
 # -- Project information -----------------------------------------------------
 
-project = "hydromt"
+project = "hydroMT"
 copyright = "Deltares"
 author = "Dirk Eilander"
 
@@ -131,7 +131,8 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+# TODO remove _archive after completion of new docs
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_archive"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -160,7 +161,17 @@ autoclass_content = "both"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_css_files = ["theme-deltares.css"]
-# html_context = {}
+html_theme_options = {
+    "navbar_align": "content",
+    "icon_links": [
+        {
+            "name": "Deltares",
+            "url": "https://deltares.nl/en/",
+            "icon": "_static/deltares-white.svg",
+            "type": "local",
+        },
+    ],
+}
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -176,12 +187,11 @@ html_css_files = ["theme-deltares.css"]
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "_static/deltares-white.svg"
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "pyflwdir_doc"
+htmlhelp_basename = "hydromt_doc"
 
 
 # -- Options for LaTeX output ---------------------------------------------

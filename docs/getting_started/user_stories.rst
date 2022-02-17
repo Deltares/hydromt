@@ -1,22 +1,22 @@
 User's stories
 ==============
 
-.. _use_case_mozambique_coumpound_flood:
+.. _use_case_mozambique_compound_flood:
 
-Coumpound flooding in Mozambique
+Compound flooding in Mozambique
 --------------------------------
-An integrated flood modelling (coumpound flood with riverine and coastal influence) was 
-developped for Mozambique based on global data with HydroMT. The wflow and SFINCS models 
-were coupled offline using HydroMT to aligne the rivers at different resolutions and coordinate 
+An integrated flood modelling (compound flood with riverine and coastal influence) was 
+developed for Mozambique based on global data with HydroMT. The wflow and SFINCS models 
+were coupled offline using HydroMT to align the rivers at different resolutions and coordinate 
 reference systems, and to create automatic boundary conditions.
 
-.. image:: img/mozambique_wflow_sfincs.png
+.. image:: ../_static/mozambique_wflow_sfincs.png
 
 The models were run  and the Cyclone Idai (March 2019) event was analysed and compared with UNOSAT 
 flood extent data. ERA5 was used as precipitation input for both wflow and SFINCS in order to provide 
 discharge and GTSM waterlevels. Preliminary results of SFINCS flood depths (blue) are shown below.
 
-.. image:: img/mozambique_result_flood.png
+.. image:: ../_static/mozambique_result_flood.png
 
 
 .. _use_case_waq_peru:
@@ -31,13 +31,13 @@ of global and local sources in various format using the HydroMT tool. These incl
 and cattle grids, local mines and industry locations, regional statistics for GDP or treatment infrastructures etc. 
 The wflow model was forced using local meteorological grids (PISCO). 
 
-.. image:: img/data_peru.png
+.. image:: ../_static/data_peru.png
 
 With this combination of local and global dataset, water quality hotspots for different substances and pressures 
 could be assessed and compared to field observations (BOD, E. Coli, Nutrients, Metals from mining industry and 
 chemicals). 
 
-.. image:: img/peru_coli.png
+.. image:: ../_static/peru_coli.png
 
 .. _use_case_wflow_Indonesia:
 
@@ -47,10 +47,10 @@ HydroMT was used to prepare the updated national hydrologic models for Indonesia
 Cooperation Program between the Netherlands and Indonesia. As this is a large scale domain, seven models corresponding 
 to the different Indonesian regions (BaliNusaTenggara, Java, Kalimantan, Maluku, Papua, Sumatra, Sulawesi) were derived 
 at three different resolutions and integrated to the IWRM Indonesia Instrument in Delft-FEWS (using a new export to FEWS 
-function from HydroMT). The clipping functionnality of HydroMT can also be used to prepare sub-models for use in specific 
+function from HydroMT). The clipping functionality of HydroMT can also be used to prepare sub-models for use in specific 
 projects and to connect to existing RIBASIM models (using RIBASIM components within HydroMT).
 
-.. image:: img/wflow_indonesia.png
+.. image:: ../_static/wflow_indonesia.png
 
 
 .. _use_case_waq_global:
@@ -65,4 +65,4 @@ assessment of the concentrations of contaminants, as well as the impact these su
 human health. Applying the models at this scale (whole of Africa) on a 1x1 km2 resolution also provided 
 us with valuable insight in the capabilities and challenges of setting up models at this scale.
 
-.. image:: img/africa_hiwai.png
+.. image:: ../_static/africa_hiwai.png

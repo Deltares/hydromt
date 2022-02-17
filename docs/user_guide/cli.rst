@@ -11,7 +11,7 @@ in HydroMT. Currently three methods are supported and explained below:
 - **update** to update specific component(s) of an existing model
 - **clip** to extract a smaller sub-region of an existing model
 
-To use the CLI, you need to open a command prompt (exemple Windows command prompt, Linux prompt, Anaconda prompt, .bat or .cmd files) and first 
+To use the CLI, you need to open a command prompt (example Windows command prompt, Linux prompt, Anaconda prompt, .bat or .cmd files) and first 
 activate the HydroMT python environment and then run the command line with the HydroMT method:
 
 .. code-block:: console
@@ -19,7 +19,7 @@ activate the HydroMT python environment and then run the command line with the H
     activate hydromt
     hydromt build --help
 
-The choice of components to include when building or updating a model is defined in the :ref:`HydroMT configuration file <ini_options>`.
+The choice of components to include when building or updating a model is defined in the :HydroMT configuration file.
 The different methods and their command line arguments are described below.
 
 .. _cli_build:
@@ -146,4 +146,4 @@ The region of interest can be described in three ways:
 See also the *delineate basins* example and the :py:meth:`~hydromt.workflows.basin_mask.parse_region`
 and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry` methods. 
 
-.. image:: ../img/region.png
+.. image:: ../_static/region.png

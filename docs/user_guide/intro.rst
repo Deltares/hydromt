@@ -1,7 +1,7 @@
 .. _intro:
 
-Introduction
-============
+User Guide
+==========
 
 From the user side, HydroMT is organised in the following way:
 
@@ -21,4 +21,12 @@ In general, the steps to use HydroMT are:
 3. Select the different model components and their options (in an ini file)
 4. Run the HydroMT Command Line Interface
 
-.. image:: ../img/user_steps.png
+.. image:: ../_static/user_steps.png
+
+
+.. toctree::
+   :maxdepth: 2
+
+   terminology.rst
+   data.rst
+   cli.rst

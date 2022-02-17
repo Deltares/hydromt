@@ -1,6 +1,6 @@
 Model API
 =========
-The models submodule contains a basic general model API class which can easiliy be 
+The models submodule contains a basic general model API class which can easily be 
 implemented and, if required extended, for individual models. The general model API 
 contains methods to read, write and build models and ensures a common interface to 
 different models. Workflows can be combined and wrapped into methods such as the 

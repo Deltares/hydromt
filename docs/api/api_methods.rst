@@ -227,7 +227,6 @@ Clip
 
    DataArray.vector.clip_bbox
    DataArray.vector.clip_geom
-   DataArray.vector.clip_mask
 
 Reproject
 ---------

@@ -1,3 +1,8 @@
+.. _contributing:
+
+Contributing
+============
+
 Welcome to the hydroMT project. All contributions, bug reports, bug fixes, 
 documentation improvements, enhancements, and ideas are welcome. Here's how we work.
 

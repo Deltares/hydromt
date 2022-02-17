@@ -70,7 +70,7 @@ For Linux:
 Plugins install
 ---------------
 HydroMT core can easily access and navigate through different model implementations thanks to its plugin architecture.
-The hydromt package contains core functionnalities and the command line interface. The models, following HydroMT's 
+The hydromt package contains core functionalities and the command line interface. The models, following HydroMT's 
 architecture, are then implemented in separate plugins available in other python packages. 
 
 Known model plugin packages linked to HydroMT are:
