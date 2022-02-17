@@ -48,6 +48,7 @@ A full dataset entry for a dataset called **my_dataset** is given in the example
 The ``path``, ``data_type`` and ``driver`` options are required and the ``meta`` option 
 with the shown keys is highly recommended. The ``rename``, ``nodata``, ``unit_add`` and 
 ``unit_mult`` options are set per variable (or attribute table column in case of a GeoDataFrame).
+``kwargs`` is an option to pass additional options to each open data method of the different drivers.
 For more information see :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
 
 .. code-block:: yaml
@@ -84,6 +85,7 @@ A full list of **data entry options** is given below
 - **data_type** (required): type of input data. Either *RasterDataset*, *GeoDataset* or *GeoDataFrame*.
 - **driver** (required): data_type specific driver to read a dataset, see overview below.
 - **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. Only used if not crs can be infered from the input data.
+- **kwargs** (optional): pairs of key value arguments to pass to the driver specific open data method (eg xr.open_mfdataset for netdcf raster, see the full list below).
 - **rename** (optional): pairs of variable names in the input data (*old_variable_name*) and the corresponding generic HydroMT name for renaming (*new_variable_name*). 
 - **nodata** (optional): nodata value of the input data. For Raster- and GeoDatasets this is only used if not inferred from the original input data, For GeoDataFrame provided nodata values are converted to nan values.
 - **unit_add** (optional): add or substract a value to the input data for unit conversion (e.g. -273.15 for conversion of temperature from Kelvin to Celsius). 
@@ -350,6 +352,14 @@ unify the data to match the hydroMT naming and unit :ref:`data convention <data_
       unit_mult:
         precip: 1000
 
+In :py:func:`xarray.open_mfdataset`, xarray allows for a *preprocess* function to be run before merging several 
+netcdf files together. In hydroMT, some preprocess functions are availabel and can be passed through the ``kwargs`` 
+options in the same way as any xr.open_mfdataset options. These preprocess functions are:
+
+- **round_latlon**: round x and y dimensions to 5 decimals to avoid merging problems in xarray due to small differences
+  in x, y values in the different netcdf files of the same data source.
+- **transpose_dims**: transpose dimensions of gridded timeseries to (time, y_dim, x_dim) which is the HydroMT standard in 
+  different (GIS) processing functions.
 
 GeoPackage spatial vector data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

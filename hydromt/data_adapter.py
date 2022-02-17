@@ -694,7 +694,17 @@ def round_latlon(ds, decimals=5):
     return ds
 
 
-PREPROCESSORS = {"round_latlon": round_latlon}
+def transpose_dims(ds):
+    x_dim = ds.raster.x_dim
+    y_dim = ds.raster.y_dim
+    ds = ds.transpose("time", y_dim, x_dim)
+    return ds
+
+
+PREPROCESSORS = {
+    "round_latlon": round_latlon,
+    "transpose_dims": transpose_dims,
+}
 
 
 class DataAdapter(object, metaclass=ABCMeta):
