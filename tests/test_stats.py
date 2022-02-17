@@ -18,9 +18,9 @@ def test_skills(obsda):
     assert np.isclose(skills.spearman_rank_correlation(simda, obsda).values, 1.0)
     assert np.isclose(skills.kge(simda, obsda)["kge"].values, 0.8967)
     assert np.isclose(skills.kge_2012(simda, obsda)["kge_2012"].values, 0.86058)
-    assert np.isclose(skills.kge_non_parametric(simda, obsda)["kge_np"].values, 0.8967)
+    assert np.isclose(skills.kge_non_parametric(simda, obsda)["kge_np"].values, 0.89390)
     assert np.isclose(
-        skills.kge_non_parametric_flood(simda, obsda)["kge_np_flood"].values, 0.8967
+        skills.kge_non_parametric_flood(simda, obsda)["kge_np_flood"].values, 0.8939
     )
     assert np.isclose(skills.rsquared(simda, obsda).values, 1.0)
     assert np.isclose(skills.mse(simda, obsda).values, 9125.0)

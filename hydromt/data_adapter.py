@@ -5,7 +5,7 @@
 
 from abc import ABCMeta, abstractmethod
 import os
-from os.path import join, isdir, dirname, basename, isfile, abspath
+from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 from itertools import product
 import copy
 from pathlib import Path
@@ -22,6 +22,7 @@ import requests
 from urllib.parse import urlparse
 import shutil
 from distutils.version import LooseVersion
+import itertools
 
 from . import gis_utils, io
 
@@ -127,7 +128,7 @@ class DataCatalog(object):
         version = version if isinstance(version, str) else self._version
         if name is None or name == "artifact_data":
             # prepare url and paths
-            url = fr"{self._url}/download/{version}/data.tar.gz"
+            url = rf"{self._url}/download/{version}/data.tar.gz"
             folder = join(Path.home(), ".hydromt_data", "data", version)
             path_data = join(folder, "data.tar.gz")
             path = join(folder, "data_catalog.yml")
@@ -197,6 +198,9 @@ class DataCatalog(object):
                 source_licence: <source_licence>
                 paper_ref: <paper_ref>
                 paper_doi: <paper_doi>
+              placeholders:
+                <placeholder_name_1>: <list of names>
+                <placeholder_name_2>: <list of names>
         """
         if uri_validator(path):
             with requests.get(path, stream=True) as r:
@@ -242,7 +246,8 @@ class DataCatalog(object):
                     "rename": {<native_variable_name1>: <hydromt_variable_name1>},
                     "unit_add": {<native_variable_name1>: <float/int>},
                     "unit_mult": {<native_variable_name1>: <float/int>},
-                    "meta": {...}
+                    "meta": {...},
+                    "placeholders": {<placeholder_name_1>: <list of names>},
                 }
                 <name2>: {
                     ...
@@ -265,7 +270,7 @@ class DataCatalog(object):
             yml output path.
         root: str, Path, optional
             Global root for all relative paths in yml file.
-            If "auto" the data soruce paths are relative to the yml output ``path``.
+            If "auto" the data source paths are relative to the yml output ``path``.
         used_only: bool
             If True, export only data entries kept in used_data list.
         """
@@ -301,9 +306,8 @@ class DataCatalog(object):
                     source_dict["path"] = os.path.relpath(
                         source_dict["path"], root
                     ).replace("\\", "/")
-            else:
-                # convert windows path to str
-                source_dict["path"] = str(source_dict["path"])
+            # remove non serializable entries to prevent errors
+            source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
             sources_out.update({name: source_dict})
         return sources_out
 
@@ -404,7 +408,7 @@ class DataCatalog(object):
         To return only the dataset variables of interest and check their presence,
         provide the `variables` argument.
 
-        NOTE: Unless `single_var_as_array` is set to False a single-varaible data source
+        NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as :py:class:`xarray.DataArray` rather than :py:class:`xarray.Dataset`.
 
         Arguments
@@ -427,7 +431,7 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         single_var_as_array: bool, optional
-            If True, return a DataArray if the dataset conists of a single variable.
+            If True, return a DataArray if the dataset consists of a single variable.
             If False, always return a Dataset. By default True.
 
         Returns
@@ -435,8 +439,8 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             RasterDataset
         """
-        if len(glob.glob(str(path_or_key))) > 0:
-            path = path_or_key
+        if path_or_key not in self.sources and exists(abspath(path_or_key)):
+            path = str(abspath(path_or_key))
             name = basename(path_or_key).split(".")[0]
             self.update(**{name: RasterDatasetAdapter(path=path, **kwargs)})
         elif path_or_key in self.sources:
@@ -490,15 +494,15 @@ class DataCatalog(object):
         align : float, optional
             Resolution to align the bounding box, by default None
         variables : list of str, optional.
-            Names of GeoDataFrame columns to return. By default all colums are returned.
+            Names of GeoDataFrame columns to return. By default all columns are returned.
 
         Returns
         -------
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
-        if isfile(path_or_key):
-            path = path_or_key
+        if path_or_key not in self.sources and exists(abspath(path_or_key)):
+            path = str(abspath(path_or_key))
             name = basename(path_or_key).split(".")[0]
             self.update(**{name: GeoDataFrameAdapter(path=path, **kwargs)})
         elif path_or_key in self.sources:
@@ -538,7 +542,7 @@ class DataCatalog(object):
         To return only the dataset variables of interest and check their presence,
         provide the `variables` argument.
 
-        NOTE: Unless `single_var_as_array` is set to False a single-varaible data source
+        NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as xarray.DataArray rather than Dataset.
 
         Arguments
@@ -561,7 +565,7 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         single_var_as_array: bool, optional
-            If True, return a DataArray if the dataset conists of a single variable.
+            If True, return a DataArray if the dataset consists of a single variable.
             If False, always return a Dataset. By default True.
 
         Returns
@@ -569,8 +573,8 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             GeoDataset
         """
-        if isfile(path_or_key):
-            path = path_or_key
+        if path_or_key not in self.sources and exists(abspath(path_or_key)):
+            path = str(abspath(path_or_key))
             name = basename(path_or_key).split(".")[0]
             self.update(**{name: GeoDatasetAdapter(path=path, **kwargs)})
         elif path_or_key in self.sources:
@@ -602,29 +606,21 @@ def _parse_data_dict(data_dict, root=None, category=None):
         "GeoDataFrame": GeoDataFrameAdapter,
         "GeoDataset": GeoDatasetAdapter,
     }
-    # set data_type sections as source entry
-    # for backwards compatability
-    sources = copy.deepcopy(data_dict)
+    # NOTE: shouldn't the kwarg overwrite the dict/yml ?
     if root is None:
-        root = sources.pop("root", None)
-    for key in data_dict:
-        _key = key.replace("Adapter", "")
-        if _key in ADAPTERS:
-            _sources = data_dict.pop(key)
-            for name, source in _sources.items():
-                source["data_type"] = _key
-                sources[name] = source
+        root = data_dict.pop("root", None)
 
     # parse data
     data = dict()
-    for name, source in sources.items():
+    for name, source in data_dict.items():
+        source = source.copy()  # important as we modify with pop
         if "alias" in source:
             alias = source.pop("alias")
-            if alias not in sources:
-                raise ValueError(f"alias {alias} not found in sources.")
+            if alias not in data_dict:
+                raise ValueError(f"alias {alias} not found in data_dict.")
             # use alias source but overwrite any attributes with original source
             source_org = source.copy()
-            source = sources[alias].copy()
+            source = data_dict[alias].copy()
             source.update(source_org)
         if "path" not in source:
             raise ValueError(f"{name}: Missing required path argument.")
@@ -632,18 +628,30 @@ def _parse_data_dict(data_dict, root=None, category=None):
         if data_type is None:
             raise ValueError(f"{name}: Data type missing.")
         elif data_type not in ADAPTERS:
-            raise ValueError(f"{name}: Data type {data_type} unkonwn")
+            raise ValueError(f"{name}: Data type {data_type} unknown")
         adapter = ADAPTERS.get(data_type)
         path = abs_path(root, source.pop("path"))
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)
         # lower kwargs for backwards compatability
+        # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
         source.update(**source.pop("kwargs", {}))
         for opt in source:
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
-        data[name] = adapter(path=path, meta=meta, **source)
+        if "placeholders" in source:
+            options = source["placeholders"]
+            for combination in itertools.product(*options.values()):
+                path_n = path
+                name_n = name
+                for k, v in zip(options.keys(), combination):
+                    path_n = path_n.replace("{" + k + "}", v)
+                    name_n = name_n.replace("{" + k + "}", v)
+                data[name_n] = adapter(path=path_n, meta=meta, **source)
+        else:
+            data[name] = adapter(path=path, meta=meta, **source)
+
     return data
 
 
@@ -653,6 +661,20 @@ def uri_validator(x):
         return all([result.scheme, result.netloc])
     except:
         return False
+
+
+def _process_dict(d, logger=logger):
+    """Recursively change dict values to keep only python literal structures."""
+    for k, v in d.items():
+        _check_key = isinstance(k, str)
+        if _check_key and isinstance(v, dict):
+            d[k] = _process_dict(v)
+        elif _check_key and isinstance(v, Path):
+            d[k] = str(v)  # path to string
+        elif not _check_key or not isinstance(v, (list, str, int, float, bool)):
+            d.pop(k)  # remove this entry
+            logger.debug(f'Removing non-serializable entry "{k}"')
+    return d
 
 
 def abs_path(root, rel_path):
@@ -691,6 +713,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         unit_mult={},
         unit_add={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         # general arguments
@@ -767,7 +790,7 @@ class DataAdapter(object, metaclass=ABCMeta):
     @abstractmethod
     def get_data(self, bbox, geom, buffer):
         """Return a view (lazy if possible) of the data with standardized field names.
-        If bbox of maks are given, clip data to that extent"""
+        If bbox of mask are given, clip data to that extent"""
 
 
 class RasterDatasetAdapter(DataAdapter):
@@ -788,6 +811,7 @@ class RasterDatasetAdapter(DataAdapter):
         unit_add={},
         units={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial raster data.
@@ -805,7 +829,7 @@ class RasterDatasetAdapter(DataAdapter):
         driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
             Driver to read files with, for 'raster' :py:func:`~hydromt.io.open_mfraster`,
             for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
-            By default the driver is infered from the file extension and falls back to
+            By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
@@ -822,6 +846,8 @@ class RasterDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -834,6 +860,7 @@ class RasterDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            placeholders=placeholders,
             **kwargs,
         )
         # TODO: see if the units argument can be solved with unit_mult/unit_add
@@ -1078,6 +1105,7 @@ class GeoDatasetAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
+        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
@@ -1095,7 +1123,7 @@ class GeoDatasetAdapter(DataAdapter):
         driver: {'vector', 'netcdf', 'zarr'}, optional
             Driver to read files with, for 'vector' :py:func:`~hydromt.io.open_geodataset`,
             for 'netcdf' :py:func:`xarray.open_mfdataset`.
-            By default the driver is infered from the file extension and falls back to
+            By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
@@ -1112,6 +1140,8 @@ class GeoDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -1124,6 +1154,7 @@ class GeoDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            placeholders=placeholders,
             **kwargs,
         )
 
@@ -1378,7 +1409,7 @@ class GeoDataFrameAdapter(DataAdapter):
         driver: {'vector', 'vector_table'}, optional
             Driver to read files with, for 'vector' :py:func:`~geopandas.read_file`,
             for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
-            By default the driver is infered from the file extension and falls back to
+            By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
