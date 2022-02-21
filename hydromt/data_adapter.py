@@ -184,14 +184,14 @@ class DataCatalog(object):
                 <key>: <value>
               crs: <crs>
               nodata:
-                <native_variable_name1>: <nodata>
+                <hydromt_variable_name1>: <nodata>
               rename:
                 <native_variable_name1>: <hydromt_variable_name1>
                 <native_variable_name2>: <hydromt_variable_name2>
               unit_add:
-                <native_variable_name1>: <float/int>
+                <hydromt_variable_name1>: <float/int>
               unit_mult:
-                <native_variable_name1>: <float/int>
+                <hydromt_variable_name1>: <float/int>
               meta:
                 source_url: <source_url>
                 source_version: <source_version>
