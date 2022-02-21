@@ -244,8 +244,8 @@ class DataCatalog(object):
                     "crs": <crs>,
                     "nodata": <nodata>,
                     "rename": {<native_variable_name1>: <hydromt_variable_name1>},
-                    "unit_add": {<native_variable_name1>: <float/int>},
-                    "unit_mult": {<native_variable_name1>: <float/int>},
+                    "unit_add": {<hydromt_variable_name1>: <float/int>},
+                    "unit_mult": {<hydromt_variable_name1>: <float/int>},
                     "meta": {...},
                     "placeholders": {<placeholder_name_1>: <list of names>},
                 }
