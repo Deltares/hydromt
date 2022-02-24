@@ -700,10 +700,11 @@ def transpose_dims(ds):
     ds = ds.transpose("time", y_dim, x_dim)
     return ds
 
+
 def to_datetimeindex(ds):
-    if ds.indexes['time'].dtype == "O":
-        ds['time'] = ds.indexes['time'].to_datetimeindex()
-    return ds 
+    if ds.indexes["time"].dtype == "O":
+        ds["time"] = ds.indexes["time"].to_datetimeindex()
+    return ds
 
 
 PREPROCESSORS = {

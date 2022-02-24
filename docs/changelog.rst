@@ -11,6 +11,7 @@ Unreleased
 Added
 ^^^^^
 - Function ``transpose_dims`` in available preprocess functions for xr.open_dataset in the data adapter.
+- Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
 
 Changed
 ^^^^^^^
