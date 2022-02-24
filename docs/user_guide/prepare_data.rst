@@ -1,24 +1,58 @@
 .. currentmodule:: hydromt
 
-.. _data:
+.. _prepare_data:
 
-Data catalog
-============
+Preparing a Data Catalog 
+========================
+
+.. note::
+    
+    TODO: review intro text
 
 HydroMT makes use of various types of data sources such as vector data, raster (timeseries) data, 
 point location timeseries and tabulated data. All but the tabulate data can be accessed
 through the so-called data-catalog which is build from **.yml** files. The yml file
 contains the path, reading and pre-processing arguments as well as meta data for each
-dataset. The goal of this data catalog is to provide simple and standardized access to (slices of) 
-many datasets parsed in convienent Python data objects. Pre-processing steps to unify 
+dataset, see :ref:`yaml file description <data_yaml>`. 
+The goal of this data catalog is to provide simple and standardized access to (slices of) 
+many datasets parsed in convenient Python data objects. Pre-processing steps to unify 
 the datasets include renaming of variables, unit conversion and setting/adding nodata 
 values. 
+
+There are several ways for the user to select which data libraries to use
+ - Make :ref:`Use existing Data Catalogs <existing_catalog>` (global data)
+ - Create :ref:`your own Data Catalog <own_catalog>` (e.g. to include local data)
 
 The documentation contains a list of (global) datasets_  which can be downloaded to be 
 used with various hydroMT models and workflows. The full datasets are available within 
 the Deltares network and a slice of these datasets will be downloaded for demonstration 
 purposes if no other yml file is provided. Local or other datasets can also be included 
 by extending the data catalog with new .yml files. 
+
+.. _existing_catalog:
+
+Use existing Data Catalogs
+--------------------------
+
+.. note::
+    
+    TODO: finish steps in brief, add examples
+
+
+- If no yaml file is selected (e.g. for testing purposes), HydroMT will use the data stored in the 
+  `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_ 
+  which contains an extract of global data for a small region around the Piave river in Northern Italy.
+
+- For Deltares users is to select the deltares-data library (requires access to the Deltares 
+  P-drive). In the command lines examples below, this is done by adding either **-dd** or **--deltares-data** 
+  to the build / update command line.
+
+**Steps (in brief):**
+ - search the dataset you are interested in from the list of :ref:`suggested global datasets <datasets>` (or see `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_)
+ - download the dataset
+ - include reference to the dataset
+ - ...
+
 
 Providing a data catalog for the CLI ``hydromt build`` and ``hydromt update`` methods is done with 
 ``-d /path/to/data_catalog.yml``. Entries from the data_catalog can then be used 
@@ -37,10 +71,11 @@ Basic usage to read a raster dataset
     data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
     ds = data_cat.get_rasterdataset('merit_hydro', bbox=[xmin, ymin, xmax, ymax])  # returns xarray.dataset
 
+
 .. _data_yaml:
 
 Data catalog yaml file
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 Each dataset, is added in the yaml file with a user-defined name. This name is used in 
 the ini file (CLI) or :py:class:`~hydromt.data_adapter.DataCatalog` *get_data*  methods (Python), see basic usage above. 
@@ -102,14 +137,51 @@ Apart from the data entries, the yaml file also has two **global options**:
   within HydroMT are *topography*, *meteo*, *soil*, *landuse & landcover*, *surface water*, *ocean*, *socio economic*, *observed data* 
   but the user is free to define its own categories. The category attribute can also be added to each source meta attributes.
 
+
+.. _datasets:
+
+Suggested global datasets
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+    
+    TODO: improve table layout
+
+Below is the list of suggested data sources for use with HydroMT. The overview contains
+links to the source of and available literature behind each dataset. The complete 
+datasets are available within the Deltares network and a slice of data is available 
+for demonstration purposes.  
+
+.. csv-table:: Data Catalog
+   :file: ../_generated/data_sources.csv
+   :header-rows: 1
+   :widths: auto
+   :width: 50
+
+
+.. _own_catalog:
+
+Preparing your own Data Catalog
+-------------------------------
+
+.. note::
+    
+  TODO: add steps in brief, add examples
+
+
+- The user can prepare its own yaml libary (or libraries) 
+  These user libraries can be added either in the command line using the **-d** option and path/to/yaml or in the **ini file** 
+  with the **data_libs** option in the [global] sections.
+
+
 Supported data types and associated drivers
--------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 HydroMT currently supports the following data types:
 
-- **RasterDataset**: static and dynamic raster data 
-- **GeoDataFrame**: static vector data 
-- **GeoDataset** dynamic point location data
+- :ref:`*RasterDataset* <RasterDataset>`: static and dynamic raster data 
+- :ref:`*GeoDataFrame* <GeoDataFrame>`: static vector data 
+- :ref:`*GeoDataset* <GeoDataset>`: dynamic point location data
 
 Internally the RasterDataset and GeoDataset are represented by :py:class:`xarray.Dataset` objects 
 and GeoDataFrame by :py:class:`geopandas.GeoDataFrame`. We use externaly 
@@ -121,7 +193,18 @@ some examples.
 Tabulated data without a spatial component such as mapping tables are planned to be added. 
 Please contact us through the issue list if you would like to add other drivers.
 
-.. list-table:: RasterDataset
+.. _RasterDataset: 
+
+RasterDataset
+"""""""""""""
+
+- :ref:`Single variable GeoTiff raster <GeoTiff>`
+- :ref:`Multi variable Virtual Raster Tileset (VRT) <VRT>`
+- :ref:`Tiled raster dataset <Tile>`
+- :ref:`Netcdf raster dataset <NC_raster>`
+
+
+.. list-table::
    :widths: 17, 25, 28, 30
    :header-rows: 1
 
@@ -143,52 +226,10 @@ Please contact us through the issue list if you would like to add other drivers.
      - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
      - required y and x dimensions_
 
-.. list-table:: GeoDataFrame
-   :widths: 17, 25, 28, 30
-   :header-rows: 1
 
-   * - Driver
-     - File formats
-     - Method
-     - Comments
-   * - ``vector`` 
-     - ESRI Shapefile, GeoPackage, GeoJSON, etc.
-     - :py:meth:`~hydromt.io.open_vector` 
-     - Point, Line and Polygon geometries. Uses :py:func:`geopandas.read_file`
-   * - ``vector_table``
-     - CSV, XY, and EXCEL. 
-     - :py:meth:`~hydromt.io.open_vector`
-     - Point geometries only. Uses :py:meth:`~hydromt.io.open_vector_from_table`
+.. _GeoTiff: 
 
-.. list-table:: GeoDataset
-   :widths: 17, 25, 28, 30
-   :header-rows: 1
-
-   * - Driver
-     - File formats
-     - Method
-     - Comments
-   * - ``vector`` 
-     - Combined point location (e.g. CSV or GeoJSON) and text delimited timeseries (e.g. CSV) data.
-     - :py:meth:`~hydromt.io.open_geodataset`
-     - Uses :py:meth:`~hydromt.io.open_vector`, :py:meth:`~hydromt.io.open_timeseries_from_table`
-   * - ``netcdf`` or ``zarr``
-     - NetCDF and Zarr
-     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
-     - required time and index dimensions_ and x- and y coordinates.
-
-
-.. _dimensions: 
-
-recognized dimension and coordinate names:
-
-- time: time or date stamp ["time"].
-- x: x coordinate ["x", "longitude", "lon", "long"]. 
-- y: y-coordinate ["y", "latitude", "lat"].
-
-
-Single variable GeoTiff raster
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Single variable GeoTiff raster**
 
 Single raster files are parsed to a **RasterDataset** based on the **raster** driver.
 This driver supports 2D raster for which the dimensions are names "x" and "y". 
@@ -211,10 +252,9 @@ and allows lazy reading of the data.
         paper_doi: 10.1594/PANGAEA.787668
         source_license: CC-BY-3.0
 
+.. _VRT: 
 
-
-Multi variable Virtual Raster Tileset (VRT)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Multi variable Virtual Raster Tileset (VRT)**
 
 Multiple raster layers from different files are parsed to a **RasterDataset** using the **raster** driver.
 Each raster becomes a variable in the resulting RasterDataset based on its filename.
@@ -255,9 +295,9 @@ gdalbuildvrt (see https://gdal.org/programs/gdalbuildvrt.html).
         source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
         source_license: CC-BY-NC 4.0 or ODbL 1.0
 
+.. _Tile:
 
-Tiled raster dataset
-^^^^^^^^^^^^^^^^^^^^
+**Tiled raster dataset**
 
 Tiled index datasets are parsed to a **RasterDataset** using the **raster_tindex** driver.
 This data format is used to combine raster tiles with different CRS projections. 
@@ -291,9 +331,9 @@ which contains the raster tile file names is set in the ``kwargs`` (to be direct
         source_url: https://doi.org/10.5281/zenodo.1297434
         source_version: 1.01
 
+.. _NC_raster:
 
-Netcdf raster dataset
-^^^^^^^^^^^^^^^^^^^^^
+**Netcdf raster dataset**
 
 Netcdf and Zarr raster data are parsed to **RasterDataset** using the **netcdf** and **zarr** drivers.
 A typical raster netcdf or zarr raster dataset has the following structure with 
@@ -350,9 +390,37 @@ unify the data to match the hydroMT naming and unit :ref:`terminology <terminolo
       unit_mult:
         precip: 1000
 
+.. _GeoDataFrame: 
 
-GeoPackage spatial vector data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+GeoDataFrame
+""""""""""""
+
+- :ref:`GeoPackage spatial vector data <GP_vector>`
+- :ref:`Point vector from text delimited data <textdelimited_vector>`
+
+
+.. list-table::
+   :widths: 17, 25, 28, 30
+   :header-rows: 1
+
+   * - Driver
+     - File formats
+     - Method
+     - Comments
+   * - ``vector`` 
+     - ESRI Shapefile, GeoPackage, GeoJSON, etc.
+     - :py:meth:`~hydromt.io.open_vector` 
+     - Point, Line and Polygon geometries. Uses :py:func:`geopandas.read_file`
+   * - ``vector_table``
+     - CSV, XY, and EXCEL. 
+     - :py:meth:`~hydromt.io.open_vector`
+     - Point geometries only. Uses :py:meth:`~hydromt.io.open_vector_from_table`
+
+
+
+.. _GP_vector:
+
+**GeoPackage spatial vector data**
 
 Sptial vector data is parsed to a **GeoDataFrame** using the **vector** driver.
 For large spatial vector datasets we recommend the GeoPackage format as it includes a 
@@ -377,9 +445,9 @@ columns of the attribute table in case of a GeoDataFrame.
           source_author: Wilfred Altena
           source_info: data combined from World Bank and CIA World Factbook
 
+.. _textdelimited_vector:
 
-Point vector from text delimited data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Point vector from text delimited data**
 
 Tabulated point vector data files can be parsed to a **GeoDataFrame** with the **vector_table** 
 driver. This driver reads CSV (or similar delimited text files), EXCEL and XY 
@@ -423,10 +491,47 @@ options.
       kwargs:
         driver: csv
 
+.. _GeoDataset: 
+
+GeoDataset
+""""""""""
+
+- :ref:`Netcdf point timeseries dataset <NC_point>`
+- :ref:`CSV point timeseries data <CSV_point>`
 
 
-Netcdf point timeseries dataset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. list-table::
+   :widths: 17, 25, 28, 30
+   :header-rows: 1
+
+   * - Driver
+     - File formats
+     - Method
+     - Comments
+   * - ``vector`` 
+     - Combined point location (e.g. CSV or GeoJSON) and text delimited timeseries (e.g. CSV) data.
+     - :py:meth:`~hydromt.io.open_geodataset`
+     - Uses :py:meth:`~hydromt.io.open_vector`, :py:meth:`~hydromt.io.open_timeseries_from_table`
+   * - ``netcdf`` or ``zarr``
+     - NetCDF and Zarr
+     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
+     - required time and index dimensions_ and x- and y coordinates.
+
+
+.. _dimensions: 
+
+recognized dimension and coordinate names:
+
+- time: time or date stamp ["time"].
+- x: x coordinate ["x", "longitude", "lon", "long"]. 
+- y: y-coordinate ["y", "latitude", "lat"].
+
+
+
+
+.. _NC_point: 
+
+**Netcdf point timeseries dataset**
 
 Netcdf and Zarr point timeseries data are parsed to **GeoDataset** using the **netcdf** and **zarr** drivers.
 A typical netcdf or zarr point timeseries dataset has the following structure with 
@@ -473,9 +578,9 @@ unify the data to match the hydroMT naming and unit :ref:`terminology <terminolo
         source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
         source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview
 
+.. _CSV_point: 
 
-CSV point timeseries data
-^^^^^^^^^^^^^^^^^^^^^^^^^
+**CSV point timeseries data**
 
 Point timeseries data where the geospatial point geometries and timeseries are saved in
 seperate (text) files are parsed to **GeoDataset** using the **vector** driver. 
@@ -486,8 +591,6 @@ In addition a tabulated timeseries text file can be passed to be used as a varia
 This data is added by a second file which is refered to using the ``fn_data`` key-word argument. 
 The index of the timeseries (in the columns header) and point locations must match. 
 For more options see the :py:meth:`~hydromt.io.open_geodataset` method.
-
-
 
 .. code-block:: yaml
 
@@ -510,18 +613,3 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
     <time1>, <value>, <value>
     <time2>, <value>, <value>
     ...
-
-.. _datasets:
-
-Suggested global datasets
--------------------------
-Below is the list of suggested data sources for use with HydroMT. The overview contains
-links to the source of and available literature behind each dataset. The complete 
-datasets are available within the Deltares network and a slice of data is available 
-for demonstration purposes.  
-
-.. csv-table:: Data Catalog
-   :file: ../_generated/data_sources.csv
-   :header-rows: 1
-   :widths: auto
-   :width: 50
