@@ -360,6 +360,7 @@ options in the same way as any xr.open_mfdataset options. These preprocess funct
   in x, y values in the different netcdf files of the same data source.
 - **transpose_dims**: transpose dimensions of gridded timeseries to (time, y_dim, x_dim) which is the HydroMT standard in 
   different (GIS) processing functions.
+- **to_datetimeindex**: transpose time dimension of gridded timeseries to datetime index.
 
 GeoPackage spatial vector data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
