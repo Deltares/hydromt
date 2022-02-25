@@ -108,6 +108,7 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx",
+    "sphinx_panels",
 ]
 
 autosummary_generate = True

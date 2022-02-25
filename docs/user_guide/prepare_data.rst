@@ -152,11 +152,53 @@ links to the source of and available literature behind each dataset. The complet
 datasets are available within the Deltares network and a slice of data is available 
 for demonstration purposes.  
 
-.. csv-table:: Data Catalog
-   :file: ../_generated/data_sources.csv
-   :header-rows: 1
-   :widths: auto
-   :width: 50
+.. tabbed:: Landuse & landcover
+
+    .. csv-table::
+        :file: ../_generated/data_sources_landuse.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
+
+.. tabbed:: Meteo
+
+    .. csv-table::
+        :file: ../_generated/data_sources_meteo.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
+
+.. tabbed:: All
+
+    .. csv-table::
+        :file: ../_generated/data_sources.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
+
+.. tabbed:: Wildcard search
+    :selected:
+
+    .. dropdown:: Data Category
+        :container: + shadow
+        :title: bg-primary text-white text-center font-weight-bold
+        :body: text-left font-italic
+
+        Is formatted
+
+        landuse
+
+        meteo
+        
+        soil
+
+
+..
+  .. csv-table:: Data Catalog
+    :file: ../_generated/data_sources.csv
+    :header-rows: 1
+    :widths: auto
+    :width: 50
 
 
 .. _own_catalog:
