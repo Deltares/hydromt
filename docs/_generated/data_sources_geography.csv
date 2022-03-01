@@ -1,0 +1,9 @@
+name (link),category,data type,reference,version,license
+`gadm <https://gadm.org/download_world.html>`__,geography,GeoDataFrame,,3.6,`Specific <https://gadm.org/license.html>`__
+`gadm_level1_v3.6 <https://gadm.org/download_world.html>`__,geography,GeoDataFrame,,3.6,`Specific <https://gadm.org/license.html>`__
+`gadm_level2_v3.6 <https://gadm.org/download_world.html>`__,geography,GeoDataFrame,,3.6,`Specific <https://gadm.org/license.html>`__
+`gadm_level3_v3.6 <https://gadm.org/download_world.html>`__,geography,GeoDataFrame,,3.6,`Specific <https://gadm.org/license.html>`__
+`osm_coastlines <https://osmdata.openstreetmap.de/data/coastlines.html>`__,geography,GeoDataFrame,,1,ODbL
+`osm_coastlines_v20200109 <https://osmdata.openstreetmap.de/data/coastlines.html>`__,geography,GeoDataFrame,,1,ODbL
+`osm_landareas <https://osmdata.openstreetmap.de/data/coastlines.html>`__,geography,GeoDataFrame,,1,ODbL
+`osm_landareas_v20200109 <https://osmdata.openstreetmap.de/data/coastlines.html>`__,geography,GeoDataFrame,,1,ODbL

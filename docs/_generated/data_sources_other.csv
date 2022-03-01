@@ -1,0 +1,5 @@
+name (link),category,data type,reference,version,license
+`grdc <https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue>`__,observed data,GeoDataFrame,,,`Specific <https://www.bafg.de/GRDC/EN/02_srvcs/21_tmsrs/210_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854>`__
+`grip_roads <https://www.globio.info/download-grip-dataset>`__,road,GeoDataFrame,"`Meijer et al, 2018 <https://doi.org/10.1088/1748-9326/aabd42>`__",v4,CC0-1.0
+`grip_roads_v4 <https://www.globio.info/download-grip-dataset>`__,road,GeoDataFrame,"`Meijer et al, 2018 <https://doi.org/10.1088/1748-9326/aabd42>`__",v4,CC0-1.0
+

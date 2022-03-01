@@ -1,0 +1,15 @@
+name (link),category,data type,reference,version,license
+`corine <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`__,landuse & landcover,RasterDataset,,v.2020_20u1,`Specific <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata>`__
+`corine_2018_v2020_u1 <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`__,landuse & landcover,RasterDataset,,v.2020_20u1,`Specific <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata>`__
+`globcover <http://due.esrin.esa.int/page_globcover.php>`__,landuse,RasterDataset,`Arino et al (2012) <https://doi.org/10.1594/PANGAEA.787668>`__,v2.3,CC-BY-3.0
+`globcover_2009_v2.3 <http://due.esrin.esa.int/page_globcover.php>`__,landuse,RasterDataset,`Arino et al (2012) <https://doi.org/10.1594/PANGAEA.787668>`__,v2.3,CC-BY-3.0
+`modis_lai <https://lpdaac.usgs.gov/products/mcd15a3hv006/>`__,landuse,RasterDataset,`Myneni et al (2015) <https://doi.org/10.5067/MODIS/MCD15A3H.006>`__,MCD15A3H V006,`Specific <https://lpdaac.usgs.gov/data/data-citation-and-policies/>`__
+`modis_mcd15a3h_v006 <https://lpdaac.usgs.gov/products/mcd15a3hv006/>`__,landuse,RasterDataset,`Myneni et al (2015) <https://doi.org/10.5067/MODIS/MCD15A3H.006>`__,MCD15A3H V006,`Specific <https://lpdaac.usgs.gov/data/data-citation-and-policies/>`__
+`simard <https://webmap.ornl.gov/ogc/dataset.jsp?ds_id=10023>`__,landuse,RasterDataset,`Simard et al (2011) <https://doi.org/10.1029/2011JG001708>`__,,
+`simard_v2011 <https://webmap.ornl.gov/ogc/dataset.jsp?ds_id=10023>`__,landuse,RasterDataset,`Simard et al (2011) <https://doi.org/10.1029/2011JG001708>`__,,
+`vito <https://land.copernicus.eu/global/products/lc>`__,landuse,RasterDataset,`Buchhorn et al (2020) <https://doi.org/10.5281/zenodo.3939038>`__,v2.0.2,
+`vito_2015_v2.0.2 <https://land.copernicus.eu/global/products/lc>`__,landuse,RasterDataset,`Buchhorn et al (2020) <https://doi.org/10.5281/zenodo.3939038>`__,v2.0.2,
+`vito_2016_v3.0.1 <https://land.copernicus.eu/global/products/lc>`__,landuse,RasterDataset,`Buchhorn et al (2020) <https://doi.org/10.5281/zenodo.3518026>`__,v3.0.1,
+`vito_2017_v3.0.1 <https://land.copernicus.eu/global/products/lc>`__,landuse,RasterDataset,`Buchhorn et al (2020) <https://doi.org/10.5281/zenodo.3518036>`__,v3.0.1,
+`vito_2018_v3.0.1 <https://land.copernicus.eu/global/products/lc>`__,landuse,RasterDataset,`Buchhorn et al (2020) <https://doi.org/10.5281/zenodo.3518038>`__,v3.0.1,
+`vito_2019_v3.0.1 <https://land.copernicus.eu/global/products/lc>`__,landuse,RasterDataset,`Buchhorn et al (2020) <https://doi.org/10.5281/zenodo.3939050>`__,v3.0.1,

@@ -11,23 +11,33 @@ Preparing a Data Catalog
 
 HydroMT makes use of various types of data sources such as vector data, raster (timeseries) data, 
 point location timeseries and tabulated data. All but the tabulate data can be accessed
-through the so-called data-catalog which is build from **.yml** files. The yml file
+through the so-called data-catalog which is build from **.yml** files. The :ref:`yml file <data_yaml>`
 contains the path, reading and pre-processing arguments as well as meta data for each
-dataset, see :ref:`yaml file description <data_yaml>`. 
+dataset. 
 The goal of this data catalog is to provide simple and standardized access to (slices of) 
 many datasets parsed in convenient Python data objects. Pre-processing steps to unify 
 the datasets include renaming of variables, unit conversion and setting/adding nodata 
 values. 
 
 There are several ways for the user to select which data libraries to use
- - Make :ref:`Use existing Data Catalogs <existing_catalog>` (global data)
+ - Make :ref:`use of existing Data Catalogs <existing_catalog>` (global data)
  - Create :ref:`your own Data Catalog <own_catalog>` (e.g. to include local data)
 
 The documentation contains a list of (global) datasets_  which can be downloaded to be 
 used with various hydroMT models and workflows. The full datasets are available within 
-the Deltares network and a slice of these datasets will be downloaded for demonstration 
-purposes if no other yml file is provided. Local or other datasets can also be included 
-by extending the data catalog with new .yml files. 
+the Deltares network and a slice of these datasets (i.e. the Piave basin) will be downloaded to ~/.hydromt_data/ 
+can be downloaded (for testing purposes, written to  ~/.hydromt_data/) if no yml file is provided. 
+Local or other datasets can also be included by extending the data catalog with new .yml files. 
+
+- If no yml file is selected (e.g. for testing purposes), HydroMT will use the data stored in the 
+  `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_ 
+  which contains an extract of global data for a small region around the Piave river in Northern Italy.
+
+- For Deltares users is to select the deltares-data library (requires access to the Deltares 
+  P-drive). In the command lines examples below, this is done by adding either **-dd** or **--deltares-data** (no path required)
+  to the build / update command line.
+
+- In all other cases refer to a local yml file by adding -d /path/to/data_catalog.yml in the command line.
 
 .. _existing_catalog:
 
@@ -36,46 +46,18 @@ Use existing Data Catalogs
 
 .. note::
     
-    TODO: finish steps in brief, add examples
-
-
-- If no yaml file is selected (e.g. for testing purposes), HydroMT will use the data stored in the 
-  `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_ 
-  which contains an extract of global data for a small region around the Piave river in Northern Italy.
-
-- For Deltares users is to select the deltares-data library (requires access to the Deltares 
-  P-drive). In the command lines examples below, this is done by adding either **-dd** or **--deltares-data** 
-  to the build / update command line.
+    TODO: review, add examples if available
 
 **Steps (in brief):**
  - search the dataset you are interested in from the list of :ref:`suggested global datasets <datasets>` (or see `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_)
  - download the dataset
- - include reference to the dataset
- - ...
-
-
-Providing a data catalog for the CLI ``hydromt build`` and ``hydromt update`` methods is done with 
-``-d /path/to/data_catalog.yml``. Entries from the data_catalog can then be used 
-in the *options.ini*. Multiple yml files can be added by reusing the ``-d`` option.
-To read data from the deltares network use the ``--dd`` flag (no path required).
-
-.. code-block:: console
-
-    hydromt build MODEL REGION -i options.ini -d /path/to/data_catalog.yml
-
-Basic usage to read a raster dataset
-
-.. code-block:: python
-
-    import hydromt
-    data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
-    ds = data_cat.get_rasterdataset('merit_hydro', bbox=[xmin, ymin, xmax, ymax])  # returns xarray.dataset
-
+ - include reference to the dataset in the yml file
+ - continue with steps described in section :ref:`get_data <get_data>`
 
 .. _data_yaml:
 
-Data catalog yaml file
-^^^^^^^^^^^^^^^^^^^^^^
+Data catalog yml file
+^^^^^^^^^^^^^^^^^^^^^
 
 Each dataset, is added in the yaml file with a user-defined name. This name is used in 
 the ini file (CLI) or :py:class:`~hydromt.data_adapter.DataCatalog` *get_data*  methods (Python), see basic usage above. 
@@ -145,12 +127,28 @@ Suggested global datasets
 
 .. note::
     
-    TODO: improve table layout
+    TODO: improve table layout; requires updated conf.py to split data_sources.csv per category
 
 Below is the list of suggested data sources for use with HydroMT. The overview contains
 links to the source of and available literature behind each dataset. The complete 
 datasets are available within the Deltares network and a slice of data is available 
 for demonstration purposes.  
+
+.. tabbed:: Geography
+
+    .. csv-table::
+        :file: ../_generated/data_sources_geography.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
+
+.. tabbed:: Hydrography
+
+    .. csv-table::
+        :file: ../_generated/data_sources_hydrography.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
 
 .. tabbed:: Landuse & landcover
 
@@ -168,6 +166,46 @@ for demonstration purposes.
         :widths: auto
         :width: 50
 
+.. tabbed:: Socio-economic
+
+    .. csv-table::
+        :file: ../_generated/data_sources_socecon.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
+
+.. tabbed:: Soil
+
+    .. csv-table::
+        :file: ../_generated/data_sources_soil.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
+
+.. tabbed:: Surface water
+
+    .. csv-table::
+        :file: ../_generated/data_sources_surfwater.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
+
+.. tabbed:: Topgraphy
+
+    .. csv-table::
+        :file: ../_generated/data_sources_topo.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
+
+.. tabbed:: Other
+
+    .. csv-table::
+        :file: ../_generated/data_sources_other.csv
+        :header-rows: 1
+        :widths: auto
+        :width: 50
+
 .. tabbed:: All
 
     .. csv-table::
@@ -176,7 +214,9 @@ for demonstration purposes.
         :widths: auto
         :width: 50
 
-.. tabbed:: Wildcard search
+.. 
+  *comment* dropdown option embedded in tab
+  .. tabbed:: Wildcard search
     :selected:
 
     .. dropdown:: Data Category
@@ -184,21 +224,11 @@ for demonstration purposes.
         :title: bg-primary text-white text-center font-weight-bold
         :body: text-left font-italic
 
-        Is formatted
-
         landuse
 
         meteo
         
         soil
-
-
-..
-  .. csv-table:: Data Catalog
-    :file: ../_generated/data_sources.csv
-    :header-rows: 1
-    :widths: auto
-    :width: 50
 
 
 .. _own_catalog:
@@ -208,13 +238,21 @@ Preparing your own Data Catalog
 
 .. note::
     
-  TODO: add steps in brief, add examples
+  TODO: review, add examples
 
+**Steps (in brief):**
+ - have your (local) dataset ready in one of the :ref:`supported data formats <SupportedDataset>`
+ - create your own yml file which should contain a reference to your prepared dataset
+ - continue with steps described in section :ref:`get_data <get_data>`
 
-- The user can prepare its own yaml libary (or libraries) 
-  These user libraries can be added either in the command line using the **-d** option and path/to/yaml or in the **ini file** 
-  with the **data_libs** option in the [global] sections.
+The user can prepare its own yml libary (or libraries) 
+These user libraries can be added either in the command line using the **-d** option and path/to/yml or in the **ini file** 
+with the **data_libs** option in the [global] sections.
 
+An example for adding local data to your catalog is given for the hydromt-hydromt_delwaq plugin:
+`Adding local data to the model <https://deltares.github.io/hydromt_delwaq/latest/examples/examples/adding_local_emission.html#Adding-local-data-to-the-model>`_
+
+.. _SupportedDataset: 
 
 Supported data types and associated drivers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

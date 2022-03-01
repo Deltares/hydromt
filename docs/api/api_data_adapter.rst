@@ -1,7 +1,7 @@
 .. currentmodule:: hydromt
 
 #############
-Data Adapater
+Data Adapter
 #############
 
 
