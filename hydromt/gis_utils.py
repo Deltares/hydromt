@@ -240,7 +240,8 @@ def utm_crs(bbox):
     # BUGFIX hydroMT v0.3.5: south=False doesn't work only add south=True if y<0
     if y < 0:
         kwargs.update(south=True)
-    epsg = CRS(proj="utm", ellps="WGS84", **kwargs).to_epsg()
+    # BUGFIX hydroMT v0.4.6: add datum
+    epsg = CRS(proj="utm", datum="WGS84", ellps="WGS84", **kwargs).to_epsg()
     return CRS.from_epsg(epsg)
 
 
