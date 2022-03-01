@@ -16,6 +16,7 @@ Changed
 
 Fixed
 ^^^^^
+- Fixed the WGS84 datum in the gis_utils.utm_crs method.
 
 v0.4.5 (16 February 2022)
 -------------------------
