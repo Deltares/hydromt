@@ -1,7 +1,0 @@
-name (link),category,data type,reference,version,license
-`gcn250 <https://doi.org/10.6084/m9.figshare.7756202.v1>`__,soil,RasterDataset,`Jaafar et al. (2019) <https://doi.org/10.1038/s41597-019-0155-x>`__,v1,CC BY 4.0
-`gcn250_v1 <https://doi.org/10.6084/m9.figshare.7756202.v1>`__,soil,RasterDataset,`Jaafar et al. (2019) <https://doi.org/10.1038/s41597-019-0155-x>`__,v1,CC BY 4.0
-`soilgrids <https://www.isric.org/explore/soilgrids/faq-soilgrids-2017>`__,soil,RasterDataset,`Hengl et al. (2017) <https://doi.org/10.1371/journal.pone.0169748>`__,2017,ODbL
-`soilgrids_v1.0 <https://www.isric.org/explore/soilgrids/faq-soilgrids-2017>`__,soil,RasterDataset,`Hengl et al. (2017) <https://doi.org/10.1371/journal.pone.0169748>`__,2017,ODbL
-`soilgrids_2020 <https://www.isric.org/explore/soilgrids/faq-soilgrids>`__,soil,RasterDataset,`de Sousa et al. (2020) <https://doi.org/https://doi.org/10.5194/soil-2020-65>`__,2020,CC BY 4.0
-`soilgrids_v2.0 <https://www.isric.org/explore/soilgrids/faq-soilgrids>`__,soil,RasterDataset,`de Sousa et al. (2020) <https://doi.org/https://doi.org/10.5194/soil-2020-65>`__,2020,CC BY 4.0

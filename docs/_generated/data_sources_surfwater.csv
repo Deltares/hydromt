@@ -1,7 +1,0 @@
-name (link),category,data type,reference,version,license
-`grwl <https://doi.org/10.5281/zenodo.1297434>`__,surface water,GeoDataFrame,`Allen and Pavelsky (2018) <https://doi.org/10.1126/science.aat0636>`__,1.01,CC BY 4.0
-`grwl_v1.01 <https://doi.org/10.5281/zenodo.1297434>`__,surface water,GeoDataFrame,`Allen and Pavelsky (2018) <https://doi.org/10.1126/science.aat0636>`__,1.01,CC BY 4.0
-hydro_lakes,surface water,GeoDataFrame,,1,
-hydro_reservoirs,surface water,GeoDataFrame,,1,
-`rgi <https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview>`__,surface water,GeoDataFrame,`Pfeffer et al. (2014) <https://doi.org/10.3189/2014JoG13J176>`__,6,CC BY 4.0
-`rgi_v0.6 <https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview>`__,surface water,GeoDataFrame,`Pfeffer et al. (2014) <https://doi.org/10.3189/2014JoG13J176>`__,6,CC BY 4.0

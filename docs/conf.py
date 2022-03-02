@@ -19,6 +19,7 @@
 import os
 import sys
 import shutil
+import numpy as np
 import sphinx_autosummary_accessors
 from click.testing import CliRunner
 
@@ -47,34 +48,61 @@ author = "Dirk Eilander"
 # The short version which is displayed
 version = hydromt.__version__
 
-# -- Generate data catalog csv table to inlcude in docs -------
+# # -- Generate data catalog csv table to inlcude in docs -------
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
 
-data_catalog = DataCatalog(deltares_data=True)
-df = data_catalog.to_dataframe()
-df.index = [
-    f"`{k} <{url}>`__" if isinstance(url, str) else k
-    for k, url in zip(df.index, df["source_url"])
+categories = [
+    "geography",
+    "hydrography",
+    "landuse & landcover",
+    "meteo",
+    "socio-economic",
+    "topography",
+    "other",
 ]
-df["reference"] = [
-    f"`{k} <https://doi.org/{doi}>`__" if isinstance(doi, str) else k
-    for k, doi in zip(df["paper_ref"], df["paper_doi"])
-]
-df["source_license"] = [
-    k
-    if not isinstance(k, str)
-    else ((f"`Specific <{k}>`__") if k.startswith("https://") else k)
-    for k in df["source_license"]
-]
-df.index.name = "name (link)"
-cols = ["category", "data_type", "reference", "source_version", "source_license"]
-rm = {
-    "source_version": "version",
-    "source_license": "license",
-    "data_type": "data type",
-}
-df.loc[:, cols].rename(columns=rm).to_csv(r"_generated/data_sources.csv")
+
+
+def write_panel(f, name, content="", level=0, item="dropdown"):
+    pad = "".ljust(level * 3)
+    f.write(f"{pad}.. {item}:: {name}\n")
+    f.write("\n")
+    if content:
+        pad = "".ljust((level + 1) * 3)
+        for line in content.split("\n"):
+            f.write(f"{pad}{line}\n")
+        f.write("\n")
+
+
+def write_nested_dropdown(name, data_cat, note="", categories=categories):
+    df = data_cat.to_dataframe().sort_index().drop_duplicates("path")
+    with open(f"_generated/{name}.rst", mode="w") as f:
+        write_panel(f, "", level=0, item="div")
+        write_panel(f, name, note, level=1)
+        for category in categories:
+            if category == "other":
+                sources = df.index[~np.isin(df["category"], categories)]
+            else:
+                sources = df.index[df["category"] == category]
+            if len(sources) > 0:
+                write_panel(f, category, level=2, item="tabbed")
+            for source in sources:
+                items = data_cat[source].summary().items()
+                summary = "\n".join([f":{k}: {v}" for k, v in items if k != "category"])
+                write_panel(f, source, summary, level=3)
+
+        write_panel(f, "all", level=2, item="tabbed")
+        for source in df.index.values:
+            items = data_cat[source].summary().items()
+            summary = "\n".join([f":{k}: {v}" for k, v in items])
+            write_panel(f, source, summary, level=3)
+
+
+# TODO add other data sources
+data_cat = hydromt.DataCatalog(deltares_data=True)
+note = "Only accessible when connected to the Deltares network."
+write_nested_dropdown("deltares_data", data_cat, note=note)
+
 
 # -- Generate cli help docs ----------------------------------------------
 
@@ -97,6 +125,7 @@ cli2rst(cli_clip.output, r"_generated/cli_clip.rst")
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx_panels",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
@@ -108,7 +137,6 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx",
-    "sphinx_panels",
 ]
 
 autosummary_generate = True

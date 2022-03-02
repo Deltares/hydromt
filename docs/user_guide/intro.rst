@@ -28,6 +28,7 @@ In general, the steps to use HydroMT are:
    :maxdepth: 2
 
    terminology.rst
-   prepare_data.rst
    get_data.rst
+   prepare_data.rst
+   existing_datacatalogs.rst
    cli.rst

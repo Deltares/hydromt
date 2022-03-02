@@ -1,58 +1,24 @@
-.. currentmodule:: hydromt
-
-.. _prepare_data:
+.. _own_catalog:
 
 Preparing a Data Catalog 
 ========================
 
 .. note::
     
-    TODO: review intro text
-
-HydroMT makes use of various types of data sources such as vector data, raster (timeseries) data, 
-point location timeseries and tabulated data. All but the tabulate data can be accessed
-through the so-called data-catalog which is build from **.yml** files. The :ref:`yml file <data_yaml>`
-contains the path, reading and pre-processing arguments as well as meta data for each
-dataset. 
-The goal of this data catalog is to provide simple and standardized access to (slices of) 
-many datasets parsed in convenient Python data objects. Pre-processing steps to unify 
-the datasets include renaming of variables, unit conversion and setting/adding nodata 
-values. 
-
-There are several ways for the user to select which data libraries to use
- - Make :ref:`use of existing Data Catalogs <existing_catalog>` (global data)
- - Create :ref:`your own Data Catalog <own_catalog>` (e.g. to include local data)
-
-The documentation contains a list of (global) datasets_  which can be downloaded to be 
-used with various hydroMT models and workflows. The full datasets are available within 
-the Deltares network and a slice of these datasets (i.e. the Piave basin) will be downloaded to ~/.hydromt_data/ 
-can be downloaded (for testing purposes, written to  ~/.hydromt_data/) if no yml file is provided. 
-Local or other datasets can also be included by extending the data catalog with new .yml files. 
-
-- If no yml file is selected (e.g. for testing purposes), HydroMT will use the data stored in the 
-  `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_ 
-  which contains an extract of global data for a small region around the Piave river in Northern Italy.
-
-- For Deltares users is to select the deltares-data library (requires access to the Deltares 
-  P-drive). In the command lines examples below, this is done by adding either **-dd** or **--deltares-data** (no path required)
-  to the build / update command line.
-
-- In all other cases refer to a local yml file by adding -d /path/to/data_catalog.yml in the command line.
-
-.. _existing_catalog:
-
-Use existing Data Catalogs
---------------------------
-
-.. note::
-    
-    TODO: review, add examples if available
+  TODO: review, add examples
 
 **Steps (in brief):**
- - search the dataset you are interested in from the list of :ref:`suggested global datasets <datasets>` (or see `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_)
- - download the dataset
- - include reference to the dataset in the yml file
+ - have your (local) dataset ready in one of the :ref:`supported data formats <SupportedDataset>`
+ - create your own yml file which should contain a reference to your prepared dataset
  - continue with steps described in section :ref:`get_data <get_data>`
+
+The user can prepare its own yml libary (or libraries) 
+These user libraries can be added either in the command line using the **-d** option and path/to/yml or in the **ini file** 
+with the **data_libs** option in the [global] sections.
+
+An example for adding local data to your catalog is given for the hydromt-hydromt_delwaq plugin:
+`Adding local data to the model <https://deltares.github.io/hydromt_delwaq/latest/examples/examples/adding_local_emission.html#Adding-local-data-to-the-model>`_
+
 
 .. _data_yaml:
 
@@ -85,11 +51,12 @@ For more information see :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
       unit_mult:
         new_variable_name: value
       meta:
-        source_url: zenodo.org/my_dataset
-        paper_ref: Author et al. (2020)
+        url: zenodo.org/my_dataset
+        license: CC-BY-3.0
+        license_url: url/to/license_file
+        paper_ref: Author et al. (year)
         paper_doi: doi
-        source_license: CC-BY-3.0
-        category: <category>
+        category: category
 
 
 A full list of **data entry options** is given below
@@ -120,158 +87,8 @@ Apart from the data entries, the yaml file also has two **global options**:
   but the user is free to define its own categories. The category attribute can also be added to each source meta attributes.
 
 
-.. _datasets:
-
-Suggested global datasets
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. note::
-    
-    TODO: improve table layout; requires updated conf.py to split data_sources.csv per category
-
-Below is the list of suggested data sources for use with HydroMT. The overview contains
-links to the source of and available literature behind each dataset. The complete 
-datasets are available within the Deltares network and a slice of data is available 
-for demonstration purposes.  
-
-.. tabbed:: Geography
-
-    .. csv-table::
-        :file: ../_generated/data_sources_geography.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. tabbed:: Hydrography
-
-    .. csv-table::
-        :file: ../_generated/data_sources_hydrography.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. tabbed:: Landuse & landcover
-
-    .. csv-table::
-        :file: ../_generated/data_sources_landuse.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. tabbed:: Meteo
-
-    .. csv-table::
-        :file: ../_generated/data_sources_meteo.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. tabbed:: Socio-economic
-
-    .. csv-table::
-        :file: ../_generated/data_sources_socecon.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. tabbed:: Soil
-
-    .. csv-table::
-        :file: ../_generated/data_sources_soil.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. tabbed:: Surface water
-
-    .. csv-table::
-        :file: ../_generated/data_sources_surfwater.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. tabbed:: Topgraphy
-
-    .. csv-table::
-        :file: ../_generated/data_sources_topo.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. tabbed:: Other
-
-    .. csv-table::
-        :file: ../_generated/data_sources_other.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. tabbed:: All
-
-    .. csv-table::
-        :file: ../_generated/data_sources.csv
-        :header-rows: 1
-        :widths: auto
-        :width: 50
-
-.. 
-  *comment* dropdown option embedded in tab
-  .. tabbed:: Wildcard search
-    :selected:
-
-    .. dropdown:: Data Category
-        :container: + shadow
-        :title: bg-primary text-white text-center font-weight-bold
-        :body: text-left font-italic
-
-        landuse
-
-        meteo
-        
-        soil
 
 
-.. _own_catalog:
-
-Preparing your own Data Catalog
--------------------------------
-
-.. note::
-    
-  TODO: review, add examples
-
-**Steps (in brief):**
- - have your (local) dataset ready in one of the :ref:`supported data formats <SupportedDataset>`
- - create your own yml file which should contain a reference to your prepared dataset
- - continue with steps described in section :ref:`get_data <get_data>`
-
-The user can prepare its own yml libary (or libraries) 
-These user libraries can be added either in the command line using the **-d** option and path/to/yml or in the **ini file** 
-with the **data_libs** option in the [global] sections.
-
-An example for adding local data to your catalog is given for the hydromt-hydromt_delwaq plugin:
-`Adding local data to the model <https://deltares.github.io/hydromt_delwaq/latest/examples/examples/adding_local_emission.html#Adding-local-data-to-the-model>`_
-
-.. _SupportedDataset: 
-
-Supported data types and associated drivers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-HydroMT currently supports the following data types:
-
-- :ref:`*RasterDataset* <RasterDataset>`: static and dynamic raster data 
-- :ref:`*GeoDataFrame* <GeoDataFrame>`: static vector data 
-- :ref:`*GeoDataset* <GeoDataset>`: dynamic point location data
-
-Internally the RasterDataset and GeoDataset are represented by :py:class:`xarray.Dataset` objects 
-and GeoDataFrame by :py:class:`geopandas.GeoDataFrame`. We use externaly 
-availabe data readers, often wrapped in hydroMT functions, to parse many different file
-formats to this standardized internal data representation. An overview of the supported 
-data formats and associated drivers and python methods are shown below followed by 
-some examples.
-
-Tabulated data without a spatial component such as mapping tables are planned to be added. 
-Please contact us through the issue list if you would like to add other drivers.
 
 .. _RasterDataset: 
 

@@ -1,9 +1,117 @@
-.. currentmodule:: hydromt
-
 .. _get_data:
 
 Getting data from the Data Catalog  
 ==================================
+
+The best way to provide data to hydroMT is by trough a **data catalog**. The goal of this 
+data catalog is to provide simple and standardized access to (large) datasets which are 
+parsed to convenient Python objects. It supports many drivers to read different data formats and 
+contains several pre-processing steps to unify the datasets.  A data catalog can be build from one 
+or more yaml files, which contain all required information to read and pre-process a dataset, 
+as well as meta data to improve reproducibility.
+
+You can `explore and make use of pre-defined data catalogs <existing_catalog>`_, 
+`create your own Data Catalog <own_catalog>`_ or use a combination of both. 
+
+.. note::
+
+    Not all data catalogs are openly accessible, but may require you to be connected to a specific network.
+
+.. note::
+
+    If the data catalog is initiating without a reference to a user- or pre-defined data catalog, hydroMT
+    will default to the *hydromt-artifacts* data catalog where a small spatial subset of several datasets is
+    stored for testing purposes.
+
+.. _SupportedDataset: 
+
+Supported data types
+^^^^^^^^^^^^^^^^^^^^
+
+HydroMT currently supports the following data types:
+
+- :ref:`*RasterDataset* <RasterDataset>`: static and dynamic raster (or gridded) data 
+- :ref:`*GeoDataFrame* <GeoDataFrame>`: static vector data 
+- :ref:`*GeoDataset* <GeoDataset>`: dynamic point location data
+
+Internally the RasterDataset and GeoDataset are represented by :py:class:`xarray.Dataset` objects 
+and GeoDataFrame by :py:class:`geopandas.GeoDataFrame`. We use drivers, typically from third-party
+packages and sometimes wrapped in hydroMT functions, to parse many different file formats to this 
+standardized internal data representation. 
+
+An overview of the supported data formats and associated drivers and arguments are shown in the 
+`Preparing a Data Catalog <own_catalog>`_ section.
+
+.. note::
+
+    Tabulated data without a spatial component such as mapping tables are planned to be added. 
+    Please contact us through the issue list if you would like to add other drivers.
+
+
+Command line usage 
+^^^^^^^^^^^^^^^^^^
+
+When using the hydroMT command line, one can link to the data catalog by specifying the
+name of an existing data catalog file or the path to where the yaml file is located with 
+the ``-d`` or ``--data`` option. Multiple yaml files can be added by reusing the ``-d`` option.
+
+For example when using the build method:
+
+.. code-block:: console
+
+    hydromt build MODEL REGION -d /path/to/data_catalog1.yml -d /path/to/data_catalog1.yml
+
+A special exception is made for the deltares_data catalog which can be accessed with the 
+``--dd`` or ``--deltares-data`` flag.
+
+.. code-block:: console
+
+    hydromt build MODEL REGION -dd
+
+
+Python usage 
+^^^^^^^^^^^^
+
+Basic usage to read a dataset in python using the hydroMT data catalog requires two steps:
+ - Initialize a DataCatalog with references to user- or pre-defined data catalog files
+ - Use one of the get_* methods to access the data.
+
+
+Example usage to retrieve a raster dataset
+
+.. code-block:: python
+
+    import hydromt
+    data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
+    ds = data_cat.get_rasterdataset('source_name', bbox=[xmin, ymin, xmax, ymax])  # returns xarray.dataset
+
+
+
+For the hydromt_delwaq plugin three data types exist, see `emissions <https://deltares.github.io/hydromt_delwaq/latest/api/api_workflows.html#emissions>`_: 
+raster, vector and admin. The admin type is an administrative raster to which related parameters can be mapped (e.g. country or region boundaries can be used to delign different values of sewage connection percentage). 
+A mapping table is required to link the related parameters to the administrative raster.
+
+
+
+There are several ways for the user to select which data libraries to use
+ - Make :ref:`use of existing Data Catalogs <existing_catalog>` (global data)
+ - Create :ref:`your own Data Catalog <own_catalog>` (e.g. to include local data)
+
+The documentation contains a list of (global) datasets which can be 
+used with various hydroMT models and workflows. The full datasets are available within 
+the Deltares network and a slice of these datasets (i.e. the Piave basin) will be downloaded to ~/.hydromt_data/ 
+can be downloaded (for testing purposes, written to  ~/.hydromt_data/) if no yml file is provided. 
+Local or other datasets can also be included by extending the data catalog with new .yml files. 
+
+- If no yml file is selected (e.g. for testing purposes), HydroMT will use the data stored in the 
+  `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_ 
+  which contains an extract of global data for a small region around the Piave river in Northern Italy.
+
+- For Deltares users is to select the deltares-data library (requires access to the Deltares 
+  P-drive). In the command lines examples below, this is done by adding either **-dd** or **--deltares-data** (no path required)
+  to the build / update command line.
+
+- In all other cases refer to a local yml file by adding -d /path/to/data_catalog.yml in the command line.
 
 .. note::
     
@@ -62,35 +170,7 @@ For all available functions see:
  - `API Data Catalog <https://deltares.github.io/hydromt/latest/api/api_data_adapter.html#data-catalog>`_
  - `API Data adapter <https://deltares.github.io/hydromt/latest/api/api_data_adapter.html#data-adapter>`_
 
-Usages with Model plugins 
-^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When using hydromt in combination with one of the model plugins one can link to the data catalog by specifying the path where the yml file is located:
-
-::
-
-    -d, --data PATH     File path to yml data sources file.
-
-Providing a data catalog for the CLI ``hydromt build`` and ``hydromt update`` methods is done with 
-``-d /path/to/data_catalog.yml``. Entries from the data_catalog can then be used 
-in the *options.ini*. Multiple yml files can be added by reusing the ``-d`` option.
-
-.. code-block:: console
-
-    hydromt build MODEL REGION -i options.ini -d /path/to/data_catalog.yml
-
-Basic usage to read a raster dataset
-
-.. code-block:: python
-
-    import hydromt
-    data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
-    ds = data_cat.get_rasterdataset('merit_hydro', bbox=[xmin, ymin, xmax, ymax])  # returns xarray.dataset
-
-
-For the hydromt_delwaq plugin three data types exist, see `emissions <https://deltares.github.io/hydromt_delwaq/latest/api/api_workflows.html#emissions>`_: 
-raster, vector and admin. The admin type is an administrative raster to which related parameters can be mapped (e.g. country or region boundaries can be used to delign different values of sewage connection percentage). 
-A mapping table is required to link the related parameters to the administrative raster.
 
 Visualizing a dataset
 ^^^^^^^^^^^^^^^^^^^^^

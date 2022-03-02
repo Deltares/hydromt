@@ -51,8 +51,11 @@ test = [
     "black",
 ]
 doc = [
-	"sphinx",
-	"pydata-sphinx-theme",
+	"nbsphinx",
+    "pydata-sphinx-theme",
+    "sphinx",
+    "sphinx-panels",
+    "sphinx_autosummary_accessors",
 ]
 
 [project.urls]
