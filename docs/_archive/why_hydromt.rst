@@ -1,14 +1,18 @@
-Why HydroMT
-============
+Why HydroMT?
+=============
 
-Scope and aspirations
----------------------
+HydroMT 
 
-Setting up spatially-distributed geoscientific models typically requires many (manual) steps 
+Setting up spatial geoscientific models typically requires many (manual) steps 
 to process input data and might therefore be time consuming and hard to reproduce. Furthermore, 
 it can be hard to improve models based on new or updated (large) datasets, such as (global) 
 digital elevation models and land use maps, potentially slowing down the uptake of such datasets 
 for geoscientific modelling.
+
+
+Spatial geoscientific models
+----------------------------
+
 
 HydroMT is an open-source Python package that aims to facilitate the process of building models 
 and analyzing model results based on the state-of-the-art scientific python ecosystem, including 
