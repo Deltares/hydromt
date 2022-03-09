@@ -3,14 +3,10 @@
 Preparing a Data Catalog 
 ========================
 
-.. note::
-    
-  TODO: review, add examples
-
-**Steps (in brief):**
+**Steps in brief:**
  - have your (local) dataset ready in one of the :ref:`supported data formats <SupportedDataset>`
- - create your own yml file which should contain a reference to your prepared dataset
- - continue with steps described in section :ref:`get_data <get_data>`
+ - create your own :ref:`yml file <data_yaml>` which should contain a reference to your prepared dataset
+ - continue with steps described in :ref:`Working with data in hydroMT <get_data>` under section :ref:`command line <get_data_cli>` or :ref:`python <get_data_python>` usage
 
 The user can prepare its own yml libary (or libraries) 
 These user libraries can be added either in the command line using the **-d** option and path/to/yml or in the **ini file** 

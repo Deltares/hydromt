@@ -1,8 +1,14 @@
 
 .. _existing_catalog:
 
-Using a pre-defined Data Catalogs
-=================================
+Using a pre-defined Data Catalog
+================================
+
+The documentation contains a list of (global) datasets which can be 
+used with various hydroMT models and workflows. The full datasets are available within 
+the Deltares network and a slice of these datasets (i.e. the Piave basin) will be downloaded to ~/.hydromt_data/ 
+can be downloaded (for testing purposes, written to  ~/.hydromt_data/) if no yml file is provided. 
+Local or other datasets can also be included by extending the data catalog with new .yml files. 
 
 Python usage 
 ^^^^^^^^^^^^

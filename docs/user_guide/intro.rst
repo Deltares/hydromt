@@ -27,8 +27,8 @@ In general, the steps to use HydroMT are:
 .. toctree::
    :maxdepth: 2
 
-   terminology.rst
    get_data.rst
-   prepare_data.rst
    existing_datacatalogs.rst
+   prepare_data.rst
    cli.rst
+   terminology.rst
