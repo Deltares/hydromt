@@ -5,16 +5,14 @@ Preparing a Data Catalog
 
 **Steps in brief:**
  - have your (local) dataset ready in one of the :ref:`supported data formats <SupportedDataset>`
- - create your own :ref:`yml file <data_yaml>` which should contain a reference to your prepared dataset
+ - create your own :ref:`yml file <data_yaml>` with a reference to your prepared dataset following the HydroMT :ref:`data conventions <data_convention>`
  - continue with steps described in :ref:`Working with data in hydroMT <get_data>` under section :ref:`command line <get_data_cli>` or :ref:`python <get_data_python>` usage
 
-The user can prepare its own yml libary (or libraries) 
-These user libraries can be added either in the command line using the **-d** option and path/to/yml or in the **ini file** 
-with the **data_libs** option in the [global] sections.
+The user can prepare its own data catalog based on one or more yml files. 
+The yml files can be added either in the command line using the **-d** option and path/to/yml.
 
-An example for adding local data to your catalog is given for the hydromt-hydromt_delwaq plugin:
+A detailed description of the yml file is given below and an example in the hydromt-hydromt_delwaq plugin:
 `Adding local data to the model <https://deltares.github.io/hydromt_delwaq/latest/examples/examples/adding_local_emission.html#Adding-local-data-to-the-model>`_
-
 
 .. _data_yaml:
 
@@ -22,7 +20,7 @@ Data catalog yml file
 ^^^^^^^^^^^^^^^^^^^^^
 
 Each dataset, is added in the yaml file with a user-defined name. This name is used in 
-the ini file (CLI) or :py:class:`~hydromt.data_adapter.DataCatalog` *get_data*  methods (Python), see basic usage above. 
+the ini file (CLI) or :py:class:`~hydromt.data_adapter.DataCatalog` *get_data*  methods (Python). 
 A full dataset entry for a dataset called **my_dataset** is given in the example below. 
 The ``path``, ``data_type`` and ``driver`` options are required and the ``meta`` option 
 with the shown keys is highly recommended. The ``rename``, ``nodata``, ``unit_add`` and 
@@ -60,11 +58,11 @@ A full list of **data entry options** is given below
 - **path** (required): path to the data file. 
   Relative paths are combined with the global ``root`` option of the yaml file (if available) or the directory of the yaml file itself. 
   To read multiple files in a single dataset (if supported by the driver) a string glob in the form of ``"path/to/my/files/*.nc"`` can be used.
-  The filenames can be futher specified with ``{variable}``, ``{year}`` and ``{month}`` keys to limit which files are being read based on the get_data request in the form of ``"path/to/my/files/{variable}_{year}_{month:02d}.nc"``
+  The filenames can be further specified with ``{variable}``, ``{year}`` and ``{month}`` keys to limit which files are being read based on the get_data request in the form of ``"path/to/my/files/{variable}_{year}_{month:02d}.nc"``
 - **data_type** (required): type of input data. Either *RasterDataset*, *GeoDataset* or *GeoDataFrame*.
 - **driver** (required): data_type specific driver to read a dataset, see overview below.
-- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. Only used if not crs can be infered from the input data.
-- **rename** (optional): pairs of variable names in the input data (*old_variable_name*) and the corresponding generic HydroMT name for renaming (*new_variable_name*). 
+- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. Only used if not crs can be inferred from the input data.
+- **rename** (optional): pairs of variable names in the input data (*old_variable_name*) and the corresponding generic HydroMT naming conventions (*new_variable_name*). 
 - **nodata** (optional): nodata value of the input data. For Raster- and GeoDatasets this is only used if not inferred from the original input data, For GeoDataFrame provided nodata values are converted to nan values.
 - **unit_add** (optional): add or substract a value to the input data for unit conversion (e.g. -273.15 for conversion of temperature from Kelvin to Celsius). 
 - **unit_mult** (optional): multiply the input data by a value for unit conversion (e.g. 1000 for conversion from m to mm of precipitation).

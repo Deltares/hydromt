@@ -283,7 +283,7 @@ General GIS methods
    gis_utils.write_map 
    gis_utils.write_clone
    
-
+.. _Statistics:
 
 Statistics and performance metrics
 ==================================
