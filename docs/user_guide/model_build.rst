@@ -7,9 +7,10 @@ To build a complete model from scratch using available data the ``build`` comman
 The interface is identical for each model, but the configuration file has different 
 options (see documentation of the individual models). The mandatory :ref:`region <cli_region>` 
 argument describes the region of interest. The build method will start by running the component in which
-the model grid (if applicable) is defined for the region, usually the setup_basemaps method.
+the model grid (if applicable) is defined for the region, usually the `setup_basemaps` method.
 The configuration file should listing all the components that the user wants to include during the build. 
-The verbosity of the log messages can be increased with `-v` for info and `-vv` for debug messages.
+
+.. Tip: The verbosity of the log messages can be increased with `-v` for info and `-vv` for debug messages.
 
 After activating the HydroMT python environment, the HydroMT ``build`` method can be run from the command line. 
 To check its options run:
