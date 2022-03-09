@@ -23,7 +23,16 @@ results. The following analysis fields are addressed:
 .. code-block:: console
 
     from hydromt.stats import skills as skillstats
-    nse = skillstats.nashsutcliffe().values.round()
+    from hydromt_wflow import WflowModel
+    import xarray as xr
+    # read model results
+    # NOTE: the name of the results depends on the wflow run configuration (toml file)
+    mod = WflowModel(root=r'/path/to/wflow_model/root', mode='r')
+    sim = mod.results['Q_gauges_grdc']  
+    # read observations
+    obs = xr.open_dataset(r'/path/to/grdc_obs.nc')
+    # calculate skill statistic
+    nse = skillstats.nashsutcliffe(sim, obs)
 
 .. _plot:
 
@@ -42,7 +51,6 @@ examples exist how to use existing Python packages for plotting.
 .. code-block:: console
 
     from hydromt_sfincs import SfincsModel
-    mod = SfincsModel()
-    mod.read()
+    mod = SfincsModel(root=r'/path/to/sfincs_model/root', mode='r')
     mod.plot_basemap()
 

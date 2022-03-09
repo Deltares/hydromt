@@ -12,11 +12,12 @@ The ``clip`` method allows to clip a subregion from a model, including all stati
 static geometries and forcing data. The :ref:`region <cli_region>` argument follows the same syntax as
 in the :ref:`build method <cli_build>`.
 
-After activating the HydroMT python environment, the HydroMT ``clip`` method can be run from the command line:
+After activating the HydroMT python environment, the HydroMT ``clip`` method can be run from the command line.
+To check its options run:
 
 .. code-block:: console
 
-    hydromt clip
+    hydromt clip --help
 
 **Example usage**
 
