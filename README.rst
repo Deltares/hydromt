@@ -110,8 +110,8 @@ happy to discuss how it can be implemented for your model.
 
 .. |doi| image:: https://zenodo.org/badge/348020332.svg
     :alt: Zenodo
-   :target: https://zenodo.org/badge/latestdoi/348020332
+    :target: https://zenodo.org/badge/latestdoi/348020332
 
 .. |license| image:: https://img.shields.io/github/license/Deltares/hydromt?style=flat
-   :alt: License
-   :target: https://github.com/Deltares/hydromt/blob/main/LICENSE
+    :alt: License
+    :target: https://github.com/Deltares/hydromt/blob/main/LICENSE
