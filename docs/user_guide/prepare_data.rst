@@ -1,49 +1,26 @@
-.. currentmodule:: hydromt
+.. _own_catalog:
 
-.. _data:
+Preparing a Data Catalog 
+========================
 
-Data input
-==========
+**Steps in brief:**
+ - have your (local) dataset ready in one of the :ref:`supported data formats <SupportedDataset>`
+ - create your own :ref:`yml file <data_yaml>` with a reference to your prepared dataset following the HydroMT :ref:`data conventions <data_convention>`
+ - continue with steps described in :ref:`Working with data in hydroMT <get_data>` under section :ref:`command line <get_data_cli>` or :ref:`python <get_data_python>` usage
 
-HydroMT makes use of various types of data sources such as vector data, raster (timeseries) data, 
-point location timeseries and tabulated data. All but the tabulate data can be accessed
-through the so-called data-catalog which is build from **.yml** files. The yml file
-contains the path, reading and pre-processing arguments as well as meta data for each
-dataset. The goal of this data catalog is to provide simple and standardized access to (slices of) 
-many datasets parsed in convienent Python data objects. Pre-processing steps to unify 
-the datasets include renaming of variables, unit conversion and setting/adding nodata 
-values. 
+The user can prepare its own data catalog based on one or more yml files. 
+The yml files can be added either in the command line using the **-d** option and path/to/yml.
 
-The documentation contains a list of (global) datasets_  which can be downloaded to be 
-used with various hydroMT models and workflows. The full datasets are available within 
-the Deltares network and a slice of these datasets will be downloaded for demonstration 
-purposes if no other yml file is provided. Local or other datasets can also be included 
-by extending the data catalog with new .yml files. 
-
-Providing a data catalog for the CLI ``hydromt build`` and ``hydromt update`` methods is done with 
-``-d /path/to/data_catalog.yml``. Entries from the data_catalog can then be used 
-in the *options.ini*. Multiple yml files can be added by reusing the ``-d`` option.
-To read data from the deltares network use the ``--dd`` flag (no path required).
-
-.. code-block:: console
-
-    hydromt build MODEL REGION -i options.ini -d /path/to/data_catalog.yml
-
-Basic usage to read a raster dataset
-
-.. code-block:: python
-
-    import hydromt
-    data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
-    ds = data_cat.get_rasterdataset('merit_hydro', bbox=[xmin, ymin, xmax, ymax])  # returns xarray.dataset
+A detailed description of the yml file is given below and an example in the hydromt-hydromt_delwaq plugin:
+`Adding local data to the model <https://deltares.github.io/hydromt_delwaq/latest/examples/examples/adding_local_emission.html#Adding-local-data-to-the-model>`_
 
 .. _data_yaml:
 
-Data catalog yaml file
-----------------------
+Data catalog yml file
+^^^^^^^^^^^^^^^^^^^^^
 
 Each dataset, is added in the yaml file with a user-defined name. This name is used in 
-the ini file (CLI) or :py:class:`~hydromt.data_adapter.DataCatalog` *get_data*  methods (Python), see basic usage above. 
+the ini file (CLI) or :py:class:`~hydromt.data_adapter.DataCatalog` *get_data*  methods (Python). 
 A full dataset entry for a dataset called **my_dataset** is given in the example below. 
 The ``path``, ``data_type`` and ``driver`` options are required and the ``meta`` option 
 with the shown keys is highly recommended. The ``rename``, ``nodata``, ``unit_add`` and 
@@ -68,11 +45,12 @@ For more information see :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
       unit_mult:
         new_variable_name: value
       meta:
-        source_url: zenodo.org/my_dataset
-        paper_ref: Author et al. (2020)
+        url: zenodo.org/my_dataset
+        license: CC-BY-3.0
+        license_url: url/to/license_file
+        paper_ref: Author et al. (year)
         paper_doi: doi
-        source_license: CC-BY-3.0
-        category: <category>
+        category: category
 
 
 A full list of **data entry options** is given below
@@ -80,11 +58,11 @@ A full list of **data entry options** is given below
 - **path** (required): path to the data file. 
   Relative paths are combined with the global ``root`` option of the yaml file (if available) or the directory of the yaml file itself. 
   To read multiple files in a single dataset (if supported by the driver) a string glob in the form of ``"path/to/my/files/*.nc"`` can be used.
-  The filenames can be futher specified with ``{variable}``, ``{year}`` and ``{month}`` keys to limit which files are being read based on the get_data request in the form of ``"path/to/my/files/{variable}_{year}_{month:02d}.nc"``
+  The filenames can be further specified with ``{variable}``, ``{year}`` and ``{month}`` keys to limit which files are being read based on the get_data request in the form of ``"path/to/my/files/{variable}_{year}_{month:02d}.nc"``
 - **data_type** (required): type of input data. Either *RasterDataset*, *GeoDataset* or *GeoDataFrame*.
 - **driver** (required): data_type specific driver to read a dataset, see overview below.
-- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. Only used if not crs can be infered from the input data.
-- **rename** (optional): pairs of variable names in the input data (*old_variable_name*) and the corresponding generic HydroMT name for renaming (*new_variable_name*). 
+- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. Only used if not crs can be inferred from the input data.
+- **rename** (optional): pairs of variable names in the input data (*old_variable_name*) and the corresponding generic HydroMT naming conventions (*new_variable_name*). 
 - **nodata** (optional): nodata value of the input data. For Raster- and GeoDatasets this is only used if not inferred from the original input data, For GeoDataFrame provided nodata values are converted to nan values.
 - **unit_add** (optional): add or substract a value to the input data for unit conversion (e.g. -273.15 for conversion of temperature from Kelvin to Celsius). 
 - **unit_mult** (optional): multiply the input data by a value for unit conversion (e.g. 1000 for conversion from m to mm of precipitation).
@@ -102,26 +80,22 @@ Apart from the data entries, the yaml file also has two **global options**:
   within HydroMT are *topography*, *meteo*, *soil*, *landuse & landcover*, *surface water*, *ocean*, *socio economic*, *observed data* 
   but the user is free to define its own categories. The category attribute can also be added to each source meta attributes.
 
-Supported data types and associated drivers
--------------------------------------------
 
-HydroMT currently supports the following data types:
 
-- **RasterDataset**: static and dynamic raster data 
-- **GeoDataFrame**: static vector data 
-- **GeoDataset** dynamic point location data
 
-Internally the RasterDataset and GeoDataset are represented by :py:class:`xarray.Dataset` objects 
-and GeoDataFrame by :py:class:`geopandas.GeoDataFrame`. We use externaly 
-availabe data readers, often wrapped in hydroMT functions, to parse many different file
-formats to this standardized internal data representation. An overview of the supported 
-data formats and associated drivers and python methods are shown below followed by 
-some examples.
 
-Tabulated data without a spatial component such as mapping tables are planned to be added. 
-Please contact us through the issue list if you would like to add other drivers.
+.. _RasterDataset: 
 
-.. list-table:: RasterDataset
+RasterDataset
+"""""""""""""
+
+- :ref:`Single variable GeoTiff raster <GeoTiff>`
+- :ref:`Multi variable Virtual Raster Tileset (VRT) <VRT>`
+- :ref:`Tiled raster dataset <Tile>`
+- :ref:`Netcdf raster dataset <NC_raster>`
+
+
+.. list-table::
    :widths: 17, 25, 28, 30
    :header-rows: 1
 
@@ -143,52 +117,10 @@ Please contact us through the issue list if you would like to add other drivers.
      - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
      - required y and x dimensions_
 
-.. list-table:: GeoDataFrame
-   :widths: 17, 25, 28, 30
-   :header-rows: 1
 
-   * - Driver
-     - File formats
-     - Method
-     - Comments
-   * - ``vector`` 
-     - ESRI Shapefile, GeoPackage, GeoJSON, etc.
-     - :py:meth:`~hydromt.io.open_vector` 
-     - Point, Line and Polygon geometries. Uses :py:func:`geopandas.read_file`
-   * - ``vector_table``
-     - CSV, XY, and EXCEL. 
-     - :py:meth:`~hydromt.io.open_vector`
-     - Point geometries only. Uses :py:meth:`~hydromt.io.open_vector_from_table`
+.. _GeoTiff: 
 
-.. list-table:: GeoDataset
-   :widths: 17, 25, 28, 30
-   :header-rows: 1
-
-   * - Driver
-     - File formats
-     - Method
-     - Comments
-   * - ``vector`` 
-     - Combined point location (e.g. CSV or GeoJSON) and text delimited timeseries (e.g. CSV) data.
-     - :py:meth:`~hydromt.io.open_geodataset`
-     - Uses :py:meth:`~hydromt.io.open_vector`, :py:meth:`~hydromt.io.open_timeseries_from_table`
-   * - ``netcdf`` or ``zarr``
-     - NetCDF and Zarr
-     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
-     - required time and index dimensions_ and x- and y coordinates.
-
-
-.. _dimensions: 
-
-recognized dimension and coordinate names:
-
-- time: time or date stamp ["time"].
-- x: x coordinate ["x", "longitude", "lon", "long"]. 
-- y: y-coordinate ["y", "latitude", "lat"].
-
-
-Single variable GeoTiff raster
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Single variable GeoTiff raster**
 
 Single raster files are parsed to a **RasterDataset** based on the **raster** driver.
 This driver supports 2D raster for which the dimensions are names "x" and "y". 
@@ -211,10 +143,9 @@ and allows lazy reading of the data.
         paper_doi: 10.1594/PANGAEA.787668
         source_license: CC-BY-3.0
 
+.. _VRT: 
 
-
-Multi variable Virtual Raster Tileset (VRT)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Multi variable Virtual Raster Tileset (VRT)**
 
 Multiple raster layers from different files are parsed to a **RasterDataset** using the **raster** driver.
 Each raster becomes a variable in the resulting RasterDataset based on its filename.
@@ -255,9 +186,9 @@ gdalbuildvrt (see https://gdal.org/programs/gdalbuildvrt.html).
         source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
         source_license: CC-BY-NC 4.0 or ODbL 1.0
 
+.. _Tile:
 
-Tiled raster dataset
-^^^^^^^^^^^^^^^^^^^^
+**Tiled raster dataset**
 
 Tiled index datasets are parsed to a **RasterDataset** using the **raster_tindex** driver.
 This data format is used to combine raster tiles with different CRS projections. 
@@ -291,9 +222,9 @@ which contains the raster tile file names is set in the ``kwargs`` (to be direct
         source_url: https://doi.org/10.5281/zenodo.1297434
         source_version: 1.01
 
+.. _NC_raster:
 
-Netcdf raster dataset
-^^^^^^^^^^^^^^^^^^^^^
+**Netcdf raster dataset**
 
 Netcdf and Zarr raster data are parsed to **RasterDataset** using the **netcdf** and **zarr** drivers.
 A typical raster netcdf or zarr raster dataset has the following structure with 
@@ -319,7 +250,7 @@ In case the CRS cannot be infered from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys, 
 see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to 
-unify the data to match the hydroMT naming and unit :ref:`data convention <data_convention>`. 
+unify the data to match the hydroMT naming and unit :ref:`terminology <terminology>`. 
 
 .. code-block:: yaml
 
@@ -350,9 +281,37 @@ unify the data to match the hydroMT naming and unit :ref:`data convention <data_
       unit_mult:
         precip: 1000
 
+.. _GeoDataFrame: 
 
-GeoPackage spatial vector data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+GeoDataFrame
+""""""""""""
+
+- :ref:`GeoPackage spatial vector data <GP_vector>`
+- :ref:`Point vector from text delimited data <textdelimited_vector>`
+
+
+.. list-table::
+   :widths: 17, 25, 28, 30
+   :header-rows: 1
+
+   * - Driver
+     - File formats
+     - Method
+     - Comments
+   * - ``vector`` 
+     - ESRI Shapefile, GeoPackage, GeoJSON, etc.
+     - :py:meth:`~hydromt.io.open_vector` 
+     - Point, Line and Polygon geometries. Uses :py:func:`geopandas.read_file`
+   * - ``vector_table``
+     - CSV, XY, and EXCEL. 
+     - :py:meth:`~hydromt.io.open_vector`
+     - Point geometries only. Uses :py:meth:`~hydromt.io.open_vector_from_table`
+
+
+
+.. _GP_vector:
+
+**GeoPackage spatial vector data**
 
 Sptial vector data is parsed to a **GeoDataFrame** using the **vector** driver.
 For large spatial vector datasets we recommend the GeoPackage format as it includes a 
@@ -377,9 +336,9 @@ columns of the attribute table in case of a GeoDataFrame.
           source_author: Wilfred Altena
           source_info: data combined from World Bank and CIA World Factbook
 
+.. _textdelimited_vector:
 
-Point vector from text delimited data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Point vector from text delimited data**
 
 Tabulated point vector data files can be parsed to a **GeoDataFrame** with the **vector_table** 
 driver. This driver reads CSV (or similar delimited text files), EXCEL and XY 
@@ -423,10 +382,47 @@ options.
       kwargs:
         driver: csv
 
+.. _GeoDataset: 
+
+GeoDataset
+""""""""""
+
+- :ref:`Netcdf point timeseries dataset <NC_point>`
+- :ref:`CSV point timeseries data <CSV_point>`
 
 
-Netcdf point timeseries dataset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. list-table::
+   :widths: 17, 25, 28, 30
+   :header-rows: 1
+
+   * - Driver
+     - File formats
+     - Method
+     - Comments
+   * - ``vector`` 
+     - Combined point location (e.g. CSV or GeoJSON) and text delimited timeseries (e.g. CSV) data.
+     - :py:meth:`~hydromt.io.open_geodataset`
+     - Uses :py:meth:`~hydromt.io.open_vector`, :py:meth:`~hydromt.io.open_timeseries_from_table`
+   * - ``netcdf`` or ``zarr``
+     - NetCDF and Zarr
+     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
+     - required time and index dimensions_ and x- and y coordinates.
+
+
+.. _dimensions: 
+
+recognized dimension and coordinate names:
+
+- time: time or date stamp ["time"].
+- x: x coordinate ["x", "longitude", "lon", "long"]. 
+- y: y-coordinate ["y", "latitude", "lat"].
+
+
+
+
+.. _NC_point: 
+
+**Netcdf point timeseries dataset**
 
 Netcdf and Zarr point timeseries data are parsed to **GeoDataset** using the **netcdf** and **zarr** drivers.
 A typical netcdf or zarr point timeseries dataset has the following structure with 
@@ -452,7 +448,7 @@ In case the CRS cannot be infered from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys, 
 see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to 
-unify the data to match the hydroMT naming and unit :ref:`data convention <data_convention>`. 
+unify the data to match the hydroMT naming and unit :ref:`terminology <terminology>`. 
 
 .. code-block:: yaml
 
@@ -473,9 +469,9 @@ unify the data to match the hydroMT naming and unit :ref:`data convention <data_
         source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
         source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview
 
+.. _CSV_point: 
 
-CSV point timeseries data
-^^^^^^^^^^^^^^^^^^^^^^^^^
+**CSV point timeseries data**
 
 Point timeseries data where the geospatial point geometries and timeseries are saved in
 seperate (text) files are parsed to **GeoDataset** using the **vector** driver. 
@@ -486,8 +482,6 @@ In addition a tabulated timeseries text file can be passed to be used as a varia
 This data is added by a second file which is refered to using the ``fn_data`` key-word argument. 
 The index of the timeseries (in the columns header) and point locations must match. 
 For more options see the :py:meth:`~hydromt.io.open_geodataset` method.
-
-
 
 .. code-block:: yaml
 
@@ -510,110 +504,3 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
     <time1>, <value>, <value>
     <time2>, <value>, <value>
     ...
-
-
-.. _data_convention:
-
-Conventions on variable names and units
----------------------------------------
-
-This section lists the different variable naming and unit conventions of HydroMT by types. This list is still in development. 
-Names and units mentioned here are mandatory in order for the input data to be processed correctly and produced the right derived data. 
-It is also possible to use the rename option so that variables and model data produced by HydroMT have more explicit names.
-A list of recognized dimensions_ is found here.
-
-Topography
-^^^^^^^^^^
-   
-- elevtn: altitude [m].
-- mdt: mean dynamic topography [m].
-- flwdir: flow direction. Format supported are ArcGIS D8, LDD, NEXTXY. The format is infered from the data.
-- uparea: upstream area [km2].
-- lndslp: slope [m/m].
-- strord: Stralher streamorder [-].
-- basins: basins ID mapping [-].
-
-
-Surface waters
-^^^^^^^^^^^^^^
-Rivers:
-
-- rivlen: river length [m].
-- rivslp: river slope [m/m].
-- rivwth: river width [m].
-- rivmsk: mask of river cells (for raster models) [bool].
-
-Reservoirs / Lakes:
-
-- waterbody_id: reservoir/lake ID [-].
-- Hylak_id: ID from the HydroLAKES database (to connect to the hydroengine library) [-].
-- Area_avg: average waterbody area [m2].
-- Vol_avg: average waterbody volume [m3].
-- Depth_avg: average waterbody depth [m].
-- Dis_avg: average waterbody discharge [m3/s].
-- xout: longitude of the waterbody outlet [-].
-- yout: latitude of the waterbody outlet [-].
-- Capacity_max: maximum reservoir capacity volume [m3].
-- Capacity_norm: normal/average reservoir capacity volume [m3].
-- Capacity_min: minimum reservoir capcity volume [m3].
-- Dam_height: height of the dam [m].
-
-Glaciers:
-
-- simple_id: glacier ID in the current database [-].
-
-Landuse and landcover
-^^^^^^^^^^^^^^^^^^^^^
-
-- landuse: landuse classification [-].
-- LAI: Leaf Area Index [-].
-
-Soil
-^^^^
-
-- bd_sl*: bulk density of the different soil layers (1 to 7 in soilgridsv2017) [g cm-3].
-- clyppt_sl*: clay content of the different soil layers (1 to 7 in soilgridsv2017) [%].
-- oc_sl*: organic carbon contant of the different soil layers (1 to 7 in soilgridsv2017) [%].
-- ph_sl*: pH of the different soil layers (1 to 7 in soilgridsv2017) [-].
-- sltppt_sl*: silt content of the different soil layers (1 to 7 in soilgridsv2017) [%].
-- sndppt_sl*: sand content of the different soil layers (1 to 7 in soilgridsv2017) [%].
-- soilthickness: soil thickness [cm].
-- tax_usda: USDA soil classification [-].
-
-
-Meteorology
-^^^^^^^^^^^
-
-- precip: precipitation (rainfall+snowfall) [mm].
-- temp: average temperature [oC].
-- temp_min: minimum temperature [oC].
-- temp_max: maximum temperature [oC].
-- press_msl: atmospheric pressure [hPa].
-- kin: shortwave incoming radiation [W m-2].
-- kout: TOA incident solar radiation [W m-2].
-
-Hydrology
-^^^^^^^^^
-
-- run: surface water runoff (overland flow + river discharge) [m3/s].
-- vol: water volumes [m3].
-- infilt: water infiltration in the soil [m3/s].
-- runPav: excess infiltration runoff on paved areas [m3/s].
-- runUnp: excess infiltration runoff on unpaved areas [m3/s].
-- inwater: sum of all fluxes entering/leaving the surface waters (precipitation, evaporation, infiltration...) [m3/s].
-- inwaterInternal: sum of all fluxes between the land and river surface waters (part of inwater) [m3/s].
-
-.. _datasets:
-
-Suggested global datasets
--------------------------
-Below is the list of suggested data sources for use with HydroMT. The overview contains
-links to the source of and available literature behind each dataset. The complete 
-datasets are available within the Deltares network and a slice of data is available 
-for demonstration purposes.  
-
-.. csv-table:: Data Catalog
-   :file: ../_generated/data_sources.csv
-   :header-rows: 1
-   :widths: auto
-   :width: 50

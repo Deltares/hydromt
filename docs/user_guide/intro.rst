@@ -41,9 +41,12 @@ Content
    :maxdepth: 2
    :hidden:
 
-   data.rst
+   get_data.rst
+   existing_datacatalogs.rst
+   prepare_data.rst
    model_build.rst
    model_update.rst
    model_clip.rst
    model_post.rst
    terminology.rst
+   data_conventions.rst

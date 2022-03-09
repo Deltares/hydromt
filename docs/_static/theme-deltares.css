@@ -32,3 +32,8 @@ img.icon-link-image {
 .navbar-toggler-icon {
     filter: invert(100%) ;
 }
+
+/* fix sphinx panels messing up the main container width  */
+.container, .container-lg, .container-md, .container-sm, .container-xl {
+    max-width: 1400px !important;
+  }
