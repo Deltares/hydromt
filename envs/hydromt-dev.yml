@@ -40,10 +40,10 @@ dependencies:
   - scipy
   - toml
   - sphinx # docs
-  - sphinx-panels # docs
   - xarray
   - zarr
   - pip:
     - hydroengine
-    - sphinx_autosummary_accessors
+    - sphinx_design  # docs
+    - sphinx_autosummary_accessors  # docs
 

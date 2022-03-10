@@ -154,3 +154,11 @@ Visualizing a dataset
 ^^^^^^^^^^^^^^^^^^^^^
 
 For visualization purposes one can use the `geopandas explore function <https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.explore.html#geopandas-geodataframe-explore>`_.
+
+
+.. toctree::
+    :hidden:
+
+    existing_datacatalogs.rst
+    prepare_data.rst
+    data_conventions.rst

@@ -42,8 +42,5 @@ Content
    :hidden:
 
    get_data.rst
-   existing_datacatalogs.rst
-   prepare_data.rst
    model_main.rst
    terminology.rst
-   data_conventions.rst
