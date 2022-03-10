@@ -44,9 +44,6 @@ Content
    get_data.rst
    existing_datacatalogs.rst
    prepare_data.rst
-   model_build.rst
-   model_update.rst
-   model_clip.rst
-   model_post.rst
+   model_main.rst
    terminology.rst
    data_conventions.rst
