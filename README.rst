@@ -25,18 +25,18 @@ Especially improving models based on global geospatial datasets, which are
 rapidly becoming available at increasingly high resolutions, might be challenging. 
 Furthermore, analyzing model schematization and results from different models, 
 which often use model-specific peculiar data formats, can be time consuming.
-This package aims to make the model building process **fast**, **modular**, **reproducible** 
+This package aims to make the model building process **fast**, **modular** and **reproducible** 
 by configuring the model building process from a single *ini* configuration file
-and **model and data source agnostic** through a common model and data API. 
+and **model- and data-agnostic** through a common model and data interface. 
 
 
 How to use HydroMT?
 -------------------
 HydroMT can be used as a **command line** application, which provides commands to *build*,
 *update* and *clip* models with a single line, or **from python** to exploit its rich interface.
-You can learn more about how to use HydroMT in its `online documentation <docs>`_
+You can learn more about how to use HydroMT in its `online documentation. <https://deltares.github.io/hydromt/preview/>`_
 For a smooth installing experience we recommend installing HydroMT and its dependencies 
-from conda-forge in a clean environment, see `installation guide <install_guide>`_.
+from conda-forge in a clean environment, see `installation guide. <https://deltares.github.io/hydromt/preview/getting_started/installation>`_ .
 
 
 HydroMT model plugins
@@ -58,11 +58,11 @@ For publications, please cite our work using the DOI provided in the Zenodo badg
 
 How to contribute?
 -------------------
-If you find any issues in the code or documentation feel free to leave an issue on the `github issue tracker <issues>`_. 
-You can find information about how to contribute to the HydroMT project at our `contributing page <contributing>`_.
+If you find any issues in the code or documentation feel free to leave an issue on the `github issue tracker. <https://github.com/Deltares/hydromt/issues>`_
+You can find information about how to contribute to the HydroMT project at our `contributing page. <https://deltares.github.io/hydromt/preview/dev/contributing>`_
 
 HydroMT seeks active contribution from the (hydro) geoscientific community. 
-So far, it has been developed and tested with a range of `Deltares <Deltares_EN>`_ models, but 
+So far, it has been developed and tested with a range of `Deltares <https://www.deltares.nl/en/>`_ models, but 
 we believe it is applicable to a much wider set of geoscientific models and are 
 happy to discuss how it can be implemented for your model.
 
@@ -73,15 +73,10 @@ happy to discuss how it can be implemented for your model.
 .. _rioxarray: https://corteva.github.io/rioxarray/stable/
 .. _rasterio: https://rasterio.readthedocs.io
 .. _pyflwdir: https://deltares.github.io/pyflwdir
-.. _Deltares_EN: https://www.deltares.nl/en/
 .. _hydromt_wflow: https://deltares.github.io/hydromt_wflow
 .. _hydromt_sfincs: https://deltares.github.io/hydromt_sfincs
 .. _hydromt_delwaq: https://deltares.github.io/hydromt_delwaq
 .. _hydromt_fiat: https://deltares.github.io/hydromt_fiat
-.. _install_guide: https://deltares.github.io/hydromt/preview/getting_started/installation.html
-.. _contributing: https://deltares.github.io/hydromt/preview/dev_guide/contributing.html
-.. _docs: https://deltares.github.io/hydromt/preview
-.. _issues: https://github.com/Deltares/hydromt/issues
 
 .. |pypi| image:: https://img.shields.io/pypi/v/hydromt.svg?style=flat
     :alt: PyPI

@@ -1,8 +1,8 @@
 .. currentmodule:: hydromt
 
-#############
-Data Adapter
-#############
+####
+Data
+####
 
 
 Data Catalog

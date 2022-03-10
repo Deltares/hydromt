@@ -1,7 +1,10 @@
 .. currentmodule:: hydromt
 .. _model_api:
 
-=========
+======
+Models
+======
+
 Model API
 =========
 

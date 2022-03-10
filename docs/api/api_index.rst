@@ -4,14 +4,17 @@
 API reference
 #############
 
-This page provides an auto-generated summary of HydroMT's API. For more details
-and examples, refer to the relevant chapters in the main part of the
-documentation.
+This page provides an auto-generated summary of HydroMT's API. 
 
 .. toctree::
    :maxdepth: 2
 
-   Methods <api_methods>
-   Workflows <api_workflows>
-   Models <api_models>
-   Data Adapter <api_data_adapter>
+   api_data_adapter.rst
+   api_models.rst
+   api_workflows.rst
+   api_io.rst
+   api_raster.rst
+   api_vector.rst
+   api_flw.rst
+   api_gis.rst
+   api_stats.rst

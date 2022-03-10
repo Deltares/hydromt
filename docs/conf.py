@@ -96,10 +96,10 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
-if os.path.isdir("getting_started/examples"):
-    remove_dir_content("getting_started/examples")
-os.makedirs("getting_started/examples")
-copy_tree("../examples", "getting_started/examples")
+# if os.path.isdir("getting_started/examples"):
+#     remove_dir_content("getting_started/examples")
+# os.makedirs("getting_started/examples")
+# copy_tree("../examples", "getting_started/examples")
 
 # # -- Generate panels rst files from data catalogs to include in docs -------
 if not os.path.isdir("_generated"):
@@ -153,6 +153,7 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx",
+    "sphinx_remove_toctrees",
 ]
 
 autosummary_generate = True
@@ -218,6 +219,8 @@ html_theme_options = {
         },
     ],
 }
+
+remove_from_toctrees = ["api/api_gen/*"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
