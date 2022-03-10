@@ -9,7 +9,7 @@ HydroMT and this documentation use a specific terminology to describe specific o
 ==============================  ======================================================================================
 Term                            Explanation
 ==============================  ======================================================================================
-Attributes                      direct properties of a model, such as root or crs. They can be called when using hydroMT from python.
+Attributes                      direct properties of a model, such as root or crs. They can be called when using HydroMT from python.
 Basemaps                        basic maps representing the model schematization/grid (usually DEM at the model resolution). This is the first thing HydroMT
                                 prepares when building a model from a region argument.
 Command Line Interface (CLI)    high-level interface to HydroMT *build*, *update* and *clip* methods.

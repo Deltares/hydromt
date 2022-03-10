@@ -2,7 +2,6 @@
 
 .navbar-light {
     background: #080c80 !important;
-    /* color: #fff !important; */
 }
 
 .bg-light {
@@ -22,7 +21,7 @@
 }
 
 .nav-link {
-    color: rgb(230, 230, 230) !important;
+    color: #8486c0 !important;
 }
 
 img.icon-link-image {
@@ -33,7 +32,10 @@ img.icon-link-image {
     filter: invert(100%) ;
 }
 
-/* fix sphinx panels messing up the main container width  */
-.container, .container-lg, .container-md, .container-sm, .container-xl {
-    max-width: 1400px !important;
-  }
+/* sphinx design */
+:root {
+    --sd-color-card-border-hover: #080c80;
+    --sd-color-tabs-label-active: #080c80;
+    --sd-color-tabs-label-hover: #080c80;
+    --sd-color-tabs-underline-active: #080c80;
+}

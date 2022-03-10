@@ -1,7 +1,7 @@
 .. image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples
 
-This folder contains several ipython notebook examples for **hydroMT**. 
+This folder contains several ipython notebook examples for **HydroMT**. 
 
 To run these examples start with the **binder** badge above.
 

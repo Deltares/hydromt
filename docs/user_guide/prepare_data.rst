@@ -6,7 +6,7 @@ Preparing a Data Catalog
 **Steps in brief:**
  - have your (local) dataset ready in one of the :ref:`supported data formats <SupportedDataset>`
  - create your own :ref:`yml file <data_yaml>` with a reference to your prepared dataset following the HydroMT :ref:`data conventions <data_convention>`
- - continue with steps described in :ref:`Working with data in hydroMT <get_data>` under section :ref:`command line <get_data_cli>` or :ref:`python <get_data_python>` usage
+ - continue with steps described in :ref:`Working with data in HydroMT <get_data>` under section :ref:`command line <get_data_cli>` or :ref:`python <get_data_python>` usage
 
 The user can prepare its own data catalog based on one or more yml files. 
 The yml files can be added either in the command line using the **-d** option and path/to/yml.
@@ -250,7 +250,7 @@ In case the CRS cannot be infered from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys, 
 see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to 
-unify the data to match the hydroMT naming and unit :ref:`terminology <terminology>`. 
+unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`. 
 
 .. code-block:: yaml
 
@@ -448,7 +448,7 @@ In case the CRS cannot be infered from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys, 
 see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to 
-unify the data to match the hydroMT naming and unit :ref:`terminology <terminology>`. 
+unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`. 
 
 .. code-block:: yaml
 

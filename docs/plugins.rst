@@ -17,7 +17,7 @@ Plugins
         for precipitation, interception, snow accumulation and melt, evapotranspiration, soil water, 
         surface water and groundwater recharge in a fully distributed environment. 
         +++
-        wflow model plugin :octicon:`link-external`
+        Wflow model plugin :octicon:`link-external`
 
     .. grid-item-card:: 
         :text-align: center
@@ -25,6 +25,9 @@ Plugins
         :link-type: url
         
         :octicon:`package-dependents;10em`
+
+        SFINCS is the reduced-complexity model, designed for super-fast modelling of compound 
+        flooding events in a dynamic way.
         +++
         SFINCS model plugin :octicon:`link-external`
 

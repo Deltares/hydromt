@@ -1,9 +1,9 @@
 .. _model_main:
 
-Working with models in hydroMT  
+Working with models in HydroMT  
 ==============================
 
-hydroMT is commonly used in combination with a model plugin, relevant functions for setting up or adjusting models include: 
+HydroMT is commonly used in combination with a model plugin, relevant functions for setting up or adjusting models include: 
 
 * :ref:`building a model <cli_build>`: building a model from scratch.
 * :ref:`updating a model <cli_update>`: updating an existing model (e.g. update datafeeds).

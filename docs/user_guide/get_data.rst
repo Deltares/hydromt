@@ -1,9 +1,9 @@
 .. _get_data:
 
-Working with data in hydroMT  
+Working with data in HydroMT  
 ============================
 
-The best way to provide data to hydroMT is by using a **data catalog**. The goal of this 
+The best way to provide data to HydroMT is by using a **data catalog**. The goal of this 
 data catalog is to provide simple and standardized access to (large) datasets which are 
 parsed to convenient Python objects. It supports many drivers to read different data formats and 
 contains several pre-processing steps to unify the datasets. A data catalog can be build from one 
@@ -19,7 +19,7 @@ You can :ref:`explore and make use of pre-defined data catalogs <existing_catalo
 
 .. note::
 
-    If the data catalog is initiating without a reference to a user- or pre-defined data catalog, hydroMT
+    If the data catalog is initiating without a reference to a user- or pre-defined data catalog, HydroMT
     will default to the *hydromt-artifacts* data catalog where a small spatial subset of several datasets is
     stored for testing purposes.
 
@@ -36,7 +36,7 @@ HydroMT currently supports the following data types:
 
 Internally the RasterDataset and GeoDataset are represented by :py:class:`xarray.Dataset` objects 
 and GeoDataFrame by :py:class:`geopandas.GeoDataFrame`. We use drivers, typically from third-party
-packages and sometimes wrapped in hydroMT functions, to parse many different file formats to this 
+packages and sometimes wrapped in HydroMT functions, to parse many different file formats to this 
 standardized internal data representation. 
 
 An overview of the supported data formats and associated drivers and arguments are shown in the 
@@ -52,7 +52,7 @@ An overview of the supported data formats and associated drivers and arguments a
 Command line usage 
 ^^^^^^^^^^^^^^^^^^
 
-When using the hydroMT command line, one can link to the data catalog by specifying the
+When using the HydroMT command line, one can link to the data catalog by specifying the
 name of an existing data catalog file or the path to where the yaml file is located with 
 the ``-d`` or ``--data`` option. Multiple yaml files can be added by reusing the ``-d`` option.
 
@@ -80,12 +80,12 @@ A special exception is made for the deltares_data catalog which can be accessed 
 Python usage 
 ^^^^^^^^^^^^
 
-With a `DataCatalog` in place **hydroMT** can be used to read the data with the `DataCatalog.getrasterdataset` method.
+With a `DataCatalog` in place **HydroMT** can be used to read the data with the `DataCatalog.getrasterdataset` method.
 The use of a `DataCatalog` allows for minimal pre-processing in order to get uniform variable names and units.
 See `Reading raster data examples <https://deltares.github.io/hydromt/latest/examples/examples/read_raster_data.html#Reading-raster-data>`_ which highlights 
 various commonly used options to read single or multiple file raster datasets into an `xarray.Dataset` or `xarray.DataArray` object with geospatial attributes.
 
-Basic usage to read a dataset in python using the hydroMT data catalog requires two steps:
+Basic usage to read a dataset in python using the HydroMT data catalog requires two steps:
  - Initialize a DataCatalog with references to user- or pre-defined data catalog files
  - Use one of the get_* methods to access the data.
 

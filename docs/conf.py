@@ -87,7 +87,7 @@ def write_nested_dropdown(name, data_cat, note="", categories=[]):
 # NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
 # -- Project information -----------------------------------------------------
 
-project = "hydroMT"
+project = "HydroMT"
 copyright = "Deltares"
 author = "Dirk Eilander"
 
