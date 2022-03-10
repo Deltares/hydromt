@@ -1,28 +1,27 @@
 .. _readme:
 
 =====================================================
-hydroMT: Build and analyze models like a data-wizard!
+HydroMT: Build and analyze models like a data-wizard!
 =====================================================
 
 |pypi| |conda forge| |docs_latest| |docs_stable| |codecov| |license| |doi| |binder|
 
 
-What is hydroMT?
+What is HydroMT?
 ----------------
-**hydroMT** is an open-source Python package that facilitates the process of building and 
-analyzing spatial geoscientific models with a focus on water system models. 
+**HydroMT** (Hydro Model Tools) is an open-source Python package that facilitates the process of 
+building and analyzing spatial geoscientific models with a focus on water system models. 
 It does so by automating the workflow to go from raw data to a complete model instance which 
 is ready to run and to analyse model results once the simulation has finished. 
-
-hydroMT builds on the latest packages in the scientific and geospatial python eco-system including 
+HydroMT builds on the latest packages in the scientific and geospatial python eco-system including 
 xarray_, rasterio_, rioxarray_, geopandas_, scipy_ and pyflwdir_.
 
 
-Why hydroMT?
+Why HydroMT?
 ------------
 Setting up spatial geoscientific models typically requires many (manual) steps 
 to process input data and might therefore be time consuming and hard to reproduce. 
-Especially improving models based on global geospatial datasets, which are which are 
+Especially improving models based on global geospatial datasets, which are 
 rapidly becoming available at increasingly high resolutions, might be challenging. 
 Furthermore, analyzing model schematization and results from different models, 
 which often use model-specific peculiar data formats, can be time consuming.
@@ -31,25 +30,25 @@ by configuring the model building process from a single *ini* configuration file
 and **model and data source agnostic** through a common model and data API. 
 
 
-How to use hydroMT?
+How to use HydroMT?
 -------------------
-hydroMT can be used as a **command line** application, which provides command to *build*,
+HydroMT can be used as a **command line** application, which provides commands to *build*,
 *update* and *clip* models with a single line, or **from python** to exploit its rich interface.
-You can learn more about how to use hydroMT in its `online documentation <docs>`_
-For a smooth installing experience we recommend installing hydroMT and its dependencies 
+You can learn more about how to use HydroMT in its `online documentation <docs>`_
+For a smooth installing experience we recommend installing HydroMT and its dependencies 
 from conda-forge in a clean environment, see `installation guide <install_guide>`_.
 
 
-hydroMT model plugins
+HydroMT model plugins
 ---------------------
-hydroMT is commonly used in combination with a **model plugin** which 
+HydroMT is commonly used in combination with a **model plugin** which 
 provides an implementation of the model API for specific model software. 
 Known models for which a plugin has been developed include:
 
 * hydromt_wflow_: A framework for distributed rainfall-runoff (wflow_sbm) sediment transport (wflow_sediment) modelling.
 * hydromt_delwaq_: A framework for water quality (D-Water Quality) and emissions (D-Emissions) modelling.
 * hydromt_sfincs_: A fast 2D hydrodynamic flood model.
-* hydromt_fiat_: A flood impact model
+* hydromt_fiat_: A flood impact model.
 
 
 How to cite?
@@ -59,11 +58,11 @@ For publications, please cite our work using the DOI provided in the Zenodo badg
 
 How to contribute?
 -------------------
-If you find any issues in the code or documentation feel free to leave in issue on the `github issue tracker <issues>`_ 
-You can find information about how to contribute to the hydroMT project at our `contributing page <contributing>`_.
+If you find any issues in the code or documentation feel free to leave an issue on the `github issue tracker <issues>`_. 
+You can find information about how to contribute to the HydroMT project at our `contributing page <contributing>`_.
 
-hydroMT seeks active contribution from the (hydro) geoscientific community. 
-So, far it has been developed and tested with a range of _Deltares models, but 
+HydroMT seeks active contribution from the (hydro) geoscientific community. 
+So far, it has been developed and tested with a range of `Deltares <Deltares_EN>`_ models, but 
 we believe it is applicable to a much wider set of geoscientific models and are 
 happy to discuss how it can be implemented for your model.
 
@@ -74,7 +73,7 @@ happy to discuss how it can be implemented for your model.
 .. _rioxarray: https://corteva.github.io/rioxarray/stable/
 .. _rasterio: https://rasterio.readthedocs.io
 .. _pyflwdir: https://deltares.github.io/pyflwdir
-.. _Deltares: https://www.deltares.nl/en/
+.. _Deltares_EN: https://www.deltares.nl/en/
 .. _hydromt_wflow: https://deltares.github.io/hydromt_wflow
 .. _hydromt_sfincs: https://deltares.github.io/hydromt_sfincs
 .. _hydromt_delwaq: https://deltares.github.io/hydromt_delwaq

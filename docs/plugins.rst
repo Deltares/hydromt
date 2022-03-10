@@ -12,8 +12,12 @@ Plugins
         :link-type: url
         
         :octicon:`package-dependents;10em`
+        
+        Wflow is Deltares' solution for modelling hydrological processes, allowing users to account 
+        for precipitation, interception, snow accumulation and melt, evapotranspiration, soil water, 
+        surface water and groundwater recharge in a fully distributed environment. 
         +++
-        wflow model plugin
+        wflow model plugin :octicon:`link-external`
 
     .. grid-item-card:: 
         :text-align: center
@@ -22,7 +26,7 @@ Plugins
         
         :octicon:`package-dependents;10em`
         +++
-        SFINCS model plugin
+        SFINCS model plugin :octicon:`link-external`
 
     .. grid-item-card:: 
         :text-align: center
@@ -31,7 +35,7 @@ Plugins
         
         :octicon:`package-dependents;10em`
         +++
-        Delwaq model plugin
+        Delwaq model plugin :octicon:`link-external`
 
 
     .. grid-item-card:: 
@@ -41,4 +45,4 @@ Plugins
         
         :octicon:`package-dependents;10em`
         +++
-        FIAT model plugin
+        FIAT model plugin :octicon:`link-external`

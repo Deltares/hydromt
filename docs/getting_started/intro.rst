@@ -68,3 +68,4 @@ Getting started
    examples_index.rst
    user_stories.rst
    faq.rst
+   publications.rst

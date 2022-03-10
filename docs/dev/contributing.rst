@@ -1,9 +1,9 @@
 .. _contributing:
 
-Contributing
-============
+Developers Guide
+================
 
-Welcome to the hydroMT project. All contributions, bug reports, bug fixes, 
+Welcome to the HydroMT project. All contributions, bug reports, bug fixes, 
 documentation improvements, enhancements, and ideas are welcome. Here's how we work.
 
 Rights
@@ -14,9 +14,9 @@ The MIT license (see LICENSE.txt) applies to all contributions.
 Issue Conventions
 -----------------
 
-The hydroMT issue tracker is for actionable issues.
+The HydroMT issue tracker is for actionable issues.
 
-hydroMT is a relatively new project and highly active. We have bugs, both
+HydroMT is a relatively new project and highly active. We have bugs, both
 known and unknown.
 
 Please search existing issues, open and closed, before creating a new one.
@@ -27,7 +27,7 @@ datasets demonstrating the issue are especially helpful!
 Design Principles
 -----------------
 
-hydroMT contains methods to build and analyze models in the hydrology sphere. We try
+HydroMT contains methods to build and analyze models in the hydrology sphere. We try
 to build a modular framework in which data can be interchanged in workflows and 
 method and workflows can be reused between models. To achieve this we designed a 
 GeneralDataApapter to work with any type of regural gridded data in Xarray and vector
@@ -52,9 +52,9 @@ GitHub account. We follow the `GitHub workflow
 to allow many people to work together on the project.
 
 After discussing a new proposal or implementation in the issue tracker, you can start 
-working on the code. You write your code locally in a new branch hydroMT repo or in a 
+working on the code. You write your code locally in a new branch HydroMT repo or in a 
 branch of a fork. Once you're done with your first iteration, you commit your code and 
-push to your hydroMT repository. 
+push to your HydroMT repository. 
 
 To create a new branch after you've downloaded the latest changes in the project: 
 
@@ -104,14 +104,14 @@ based on pytest, but also stylistic errors.
 Development Environment
 -----------------------
 
-Developing hydroMT requires Python >= 3.6. We prefer developing with the most recent 
+Developing HydroMT requires Python >= 3.6. We prefer developing with the most recent 
 version of Python. We strongly encourage you to develop in a seperate conda environment.
-All Python dependencies required to develop hydroMT can be found in `environment.yml <environment.yml>`__.
+All Python dependencies required to develop HydroMT can be found in `environment.yml <environment.yml>`__.
 
 Initial Setup
 ^^^^^^^^^^^^^
 
-First, clone hydroMT's ``git`` repo and navigate into the repository:
+First, clone HydroMT's ``git`` repo and navigate into the repository:
 
 .. code-block:: console
 
@@ -135,7 +135,7 @@ Finally, build and install hydromt:
 Running the tests
 ^^^^^^^^^^^^^^^^^
 
-hydroMT's tests live in the tests folder and generally match the main package layout. 
+HydroMT's tests live in the tests folder and generally match the main package layout. 
 Test should be run from the tests folder.
 
 To run the entire suite and the code coverage report:
