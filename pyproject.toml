@@ -54,7 +54,7 @@ doc = [
 	"nbsphinx",
     "pydata-sphinx-theme",
     "sphinx",
-    "sphinx-panels",
+    "sphinx_design",
     "sphinx_autosummary_accessors",
 ]
 

@@ -22,6 +22,7 @@ import shutil
 import numpy as np
 import sphinx_autosummary_accessors
 from click.testing import CliRunner
+from distutils.dir_util import copy_tree
 
 # here = os.path.dirname(__file__)
 # sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
@@ -38,29 +39,14 @@ def cli2rst(output, fn):
             f.write(f"    {line}\n")
 
 
-# NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
-# -- Project information -----------------------------------------------------
-
-project = "hydroMT"
-copyright = "Deltares"
-author = "Dirk Eilander"
-
-# The short version which is displayed
-version = hydromt.__version__
-
-# # -- Generate data catalog csv table to inlcude in docs -------
-if not os.path.isdir("_generated"):
-    os.makedirs("_generated")
-
-categories = [
-    "geography",
-    "hydrography",
-    "landuse & landcover",
-    "meteo",
-    "socio-economic",
-    "topography",
-    "other",
-]
+def remove_dir_content(path: str) -> None:
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
+    if os.path.isdir(root):
+        shutil.rmtree(root)
 
 
 def write_panel(f, name, content="", level=0, item="dropdown"):
@@ -74,35 +60,65 @@ def write_panel(f, name, content="", level=0, item="dropdown"):
         f.write("\n")
 
 
-def write_nested_dropdown(name, data_cat, note="", categories=categories):
+def write_nested_dropdown(name, data_cat, note="", categories=[]):
     df = data_cat.to_dataframe().sort_index().drop_duplicates("path")
     with open(f"_generated/{name}.rst", mode="w") as f:
-        write_panel(f, "", level=0, item="div")
-        write_panel(f, name, note, level=1)
+        write_panel(f, name, note, level=0)
+        write_panel(f, "", level=1, item="tab-set")
         for category in categories:
             if category == "other":
                 sources = df.index[~np.isin(df["category"], categories)]
             else:
                 sources = df.index[df["category"] == category]
             if len(sources) > 0:
-                write_panel(f, category, level=2, item="tabbed")
+                write_panel(f, category, level=2, item="tab-item")
             for source in sources:
                 items = data_cat[source].summary().items()
                 summary = "\n".join([f":{k}: {v}" for k, v in items if k != "category"])
                 write_panel(f, source, summary, level=3)
 
-        write_panel(f, "all", level=2, item="tabbed")
+        write_panel(f, "all", level=2, item="tab-item")
         for source in df.index.values:
             items = data_cat[source].summary().items()
             summary = "\n".join([f":{k}: {v}" for k, v in items])
             write_panel(f, source, summary, level=3)
 
 
+# NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
+# -- Project information -----------------------------------------------------
+
+project = "hydroMT"
+copyright = "Deltares"
+author = "Dirk Eilander"
+
+# The short version which is displayed
+version = hydromt.__version__
+
+
+# # -- Copy notebooks to include in docs -------
+if os.path.isdir("getting_started/examples"):
+    remove_dir_content("getting_started/examples")
+os.makedirs("getting_started/examples")
+copy_tree("../examples", "getting_started/examples")
+
+# # -- Generate panels rst files from data catalogs to include in docs -------
+if not os.path.isdir("_generated"):
+    os.makedirs("_generated")
+
+categories = [
+    "geography",
+    "hydrography",
+    "landuse & landcover",
+    "meteo",
+    "socio-economic",
+    "topography",
+    "other",
+]
+
 # TODO add other data sources
 data_cat = hydromt.DataCatalog(deltares_data=True)
 note = "Only accessible when connected to the Deltares network."
-write_nested_dropdown("deltares_data", data_cat, note=note)
-
+write_nested_dropdown("deltares_data", data_cat, note=note, categories=categories)
 
 # -- Generate cli help docs ----------------------------------------------
 
@@ -125,7 +141,7 @@ cli2rst(cli_clip.output, r"_generated/cli_clip.rst")
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx_panels",
+    "sphinx_design",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
@@ -191,6 +207,7 @@ autoclass_content = "both"
 html_static_path = ["_static"]
 html_css_files = ["theme-deltares.css"]
 html_theme_options = {
+    "show_nav_level": 2,
     "navbar_align": "content",
     "icon_links": [
         {
@@ -296,11 +313,11 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     # "numpy": ("https://numpy.org/doc/stable", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
     # "matplotlib": ("https://matplotlib.org/stable/", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
     "rasterio": ("https://rasterio.readthedocs.io/en/latest", None),
-    "geopandas": ("https://geopandas.org", None),
+    "geopandas": ("https://geopandas.org/en/stable", None),
     "xarray": ("https://xarray.pydata.org/en/stable", None),
 }

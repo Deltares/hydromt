@@ -1,3 +1,5 @@
+.. _user_stories:
+
 User's stories
 ==============
 

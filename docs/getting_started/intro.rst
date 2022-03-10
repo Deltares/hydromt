@@ -1,74 +1,62 @@
 Getting started
 ===============
 
-.. panels::
-    :body: text-center
+.. grid:: 2
+    :gutter: 1 
 
-    :fa:`laptop-code, fa-10x`
+    .. grid-item-card:: 
+        :text-align: center
+        :link: installation_guide
+        :link-type: ref
+        
+        :octicon:`settings;10em`
+        +++
+        Installation guide
 
-    +++
+    .. grid-item-card:: 
+        :text-align: center
+        :link: intro_user_guide
+        :link-type: ref
+        
+        :octicon:`book;10em`
+        +++
+        User guide
 
-    .. link-button:: installation_guide
-        :type: ref
-        :text: Installation guide
-        :classes: btn-outline-secondary btn-block stretched-link
+    .. grid-item-card:: 
+        :text-align: center
+        :link: plugins
+        :link-type: ref
+        
+        :octicon:`package-dependents;10em`
+        +++
+        Model plugins
 
-    ---
+    .. grid-item-card:: 
+        :text-align: center
+        :link: api_reference
+        :link-type: ref
+        
+        :octicon:`list-unordered;10em`
+        +++
+        API reference
 
-    :fa:`book-open, fa-10x`
+    .. grid-item-card:: 
+        :text-align: center
+        :link: examples
+        :link-type: ref
+                
+        :octicon:`graph;10em`
+        +++
+        Examples
 
-    +++
-
-    .. link-button:: intro_user_guide
-        :type: ref
-        :text: User guide
-        :classes: btn-outline-secondary btn-block stretched-link
-
-    ---
-
-    :fa:`plug, fa-10x`
-
-    +++
-
-    .. link-button:: plugins
-        :type: ref
-        :text: Model plugins
-        :classes: btn-outline-secondary btn-block stretched-link
-
-
-    ---
-
-    :fa:`list-ul, fa-10x`
-
-    +++
-
-    .. link-button:: api_reference
-        :type: ref
-        :text: API reference
-        :classes: btn-outline-secondary btn-block stretched-link
-
-    ---
-
-    :fa:`rocket, fa-10x`
-
-    +++
-
-    .. link-button:: examples
-        :type: ref
-        :text: Examples
-        :classes: btn-outline-secondary btn-block stretched-link
-
-
-    ---
-
-    :fa:`images, fa-10x`
-
-    +++
-
-    .. link-button:: user_stories
-        :type: ref
-        :text: User stories
-        :classes: btn-outline-secondary btn-block stretched-link
+    .. grid-item-card:: 
+        :text-align: center
+        :link: user_stories
+        :link-type: ref
+        
+        :octicon:`file-media;10em`
+        +++
+        User stories
 
 
 .. toctree::
@@ -77,5 +65,6 @@ Getting started
 
    installation.rst
    quick_overview.rst
+   examples_index.rst
    user_stories.rst
    faq.rst
