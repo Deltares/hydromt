@@ -40,6 +40,7 @@ Content
 .. toctree::
    :maxdepth: 2
    :hidden:
+   :caption: Table of Contents
 
    get_data.rst
    model_main.rst

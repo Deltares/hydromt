@@ -8,8 +8,8 @@ def remove_dir_content(path: str) -> None:
             os.unlink(os.path.join(root, f))
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
-    if os.path.isdir(root):
-        shutil.rmtree(root)
+    if os.path.isdir(path):
+        shutil.rmtree(path)
 
 
 remove_dir_content("_build")

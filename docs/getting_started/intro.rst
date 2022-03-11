@@ -60,6 +60,7 @@ Getting started
 
 
 .. toctree::
+   :caption: Table of Contents
    :maxdepth: 2
    :hidden:
 

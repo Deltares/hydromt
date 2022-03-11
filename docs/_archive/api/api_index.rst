@@ -7,6 +7,7 @@ API reference
 This page provides an auto-generated summary of HydroMT's API. 
 
 .. toctree::
+   :caption: Table of Contents
    :maxdepth: 2
 
    api_data_adapter.rst

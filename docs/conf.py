@@ -45,8 +45,8 @@ def remove_dir_content(path: str) -> None:
             os.unlink(os.path.join(root, f))
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
-    if os.path.isdir(root):
-        shutil.rmtree(root)
+    if os.path.isdir(path):
+        shutil.rmtree(path)
 
 
 def write_panel(f, name, content="", level=0, item="dropdown"):
@@ -96,10 +96,10 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
-# if os.path.isdir("getting_started/examples"):
-#     remove_dir_content("getting_started/examples")
-# os.makedirs("getting_started/examples")
-# copy_tree("../examples", "getting_started/examples")
+if os.path.isdir("getting_started/examples"):
+    remove_dir_content("getting_started/examples")
+os.makedirs("getting_started/examples")
+copy_tree("../examples", "getting_started/examples")
 
 # # -- Generate panels rst files from data catalogs to include in docs -------
 if not os.path.isdir("_generated"):
@@ -153,7 +153,6 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx",
-    "sphinx_remove_toctrees",
 ]
 
 autosummary_generate = True
@@ -200,7 +199,6 @@ autoclass_content = "both"
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {"style_external_links": True}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -210,6 +208,7 @@ html_css_files = ["theme-deltares.css"]
 html_theme_options = {
     "show_nav_level": 2,
     "navbar_align": "content",
+    "use_edit_page_button": True,
     "icon_links": [
         {
             "name": "Deltares",
@@ -220,7 +219,19 @@ html_theme_options = {
     ],
 }
 
-remove_from_toctrees = ["api/api_gen/*"]
+html_context = {
+    "github_url": "https://github.com", # or your GitHub Enterprise interprise
+    "github_user": "Deltares",
+    "github_repo": "hydromt",
+    "github_version": "docs",  # FIXME
+    "doc_path": "docs",
+}
+
+# no sidebar in api section
+# html_sidebars = {
+#   "api": [],
+#   "_generated/*": []
+# }
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
