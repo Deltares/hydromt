@@ -220,7 +220,7 @@ html_theme_options = {
 }
 
 html_context = {
-    "github_url": "https://github.com", # or your GitHub Enterprise interprise
+    "github_url": "https://github.com",  # or your GitHub Enterprise interprise
     "github_user": "Deltares",
     "github_repo": "hydromt",
     "github_version": "docs",  # FIXME

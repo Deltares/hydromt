@@ -117,18 +117,16 @@ class Model(object, metaclass=ABCMeta):
             keys are the names of model specific setup methods and the second-level
             keys the arguments of the method:
 
-        Examples
-        --------
-        .. code-block:: text
+            .. code-block:: text
 
-            {
-                <name of method1>: {
-                    <argument1>: <value1>, <argument2>: <value2>
-                },
-                <name of method2>: {
-                    ...
+                {
+                    <name of method1>: {
+                        <argument1>: <value1>, <argument2>: <value2>
+                    },
+                    <name of method2>: {
+                        ...
+                    }
                 }
-            }
 
         """
         opt = self._check_get_opt(opt)
@@ -179,14 +177,16 @@ class Model(object, metaclass=ABCMeta):
             keys are the names of model specific setup methods and the second-level
             keys the arguments of the method:
 
-            ```{
-                <name of method1>: {
-                    <argument1>: <value1>, <argument2>: <value2>
+            .. code-block:: text
+
+                {
+                    <name of method1>: {
+                        <argument1>: <value1>, <argument2>: <value2>
+                    },
+                    <name of method2>: {
+                        ...
                     }
-                <name of method2>: {
-                    ...
-                    }
-            }```
+                }
         """
         opt = self._check_get_opt(opt)
 

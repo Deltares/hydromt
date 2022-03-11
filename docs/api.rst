@@ -94,22 +94,13 @@ Models
 Model API
 =========
 
-Attributes
-----------
+Class and Attributes
+--------------------
 
 .. autosummary::
    :toctree: _generated
 
-   Model.region
-   Model.crs
-   Model.res
-   Model.root
-   Model.config
-   Model.staticmaps
-   Model.staticgeoms
-   Model.forcing
-   Model.states
-   Model.results
+   Model
 
 High level methods
 ------------------
@@ -122,6 +113,9 @@ High level methods
    Model.build
    Model.update
    Model.set_root
+   Model.setup_region
+   Model.setup_config
+   Model.write_data_catalog
 
 General methods
 ---------------
@@ -129,7 +123,6 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   Model.setup_config
    Model.get_config
    Model.set_config
    Model.read_config

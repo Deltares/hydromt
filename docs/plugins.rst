@@ -37,6 +37,10 @@ Plugins
         :link-type: url
         
         :octicon:`package-dependents;10em`
+
+        Delwaq is Deltares' water quality process library used to quantify point source and 
+        diffuse emissions (D-Emissions) and model the fate and transport (D-Water Quality) 
+        of various substances/pollutants in surface water systems.
         +++
         Delwaq model plugin :octicon:`link-external`
 
