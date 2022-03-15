@@ -202,7 +202,9 @@ def open_mfraster(
             da.attrs.update({"source_file": "; ".join(fn_attrs)})
         ds = da.to_dataset()  # dataset for consistency
     else:
-        ds = xr.merge(da_lst, combine_attrs="drop")
+        ds = xr.merge(da_lst) #, combine_attrs="drop") seems that with rioxarray drops all datarrays atrributes not just ds
+        ds.attrs = {}
+    
     # update spatial attributes
     if da_lst[0].rio.crs is not None:
         ds.rio.write_crs(da_lst[0].rio.crs, inplace=True)

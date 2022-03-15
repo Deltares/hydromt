@@ -970,7 +970,7 @@ class RasterDatasetAdapter(DataAdapter):
             if "preprocess" in kwargs:
                 preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
                 kwargs.update(preprocess=preprocess)
-            ds_out = xr.open_mfdataset(fns, **kwargs)
+            ds_out = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
         elif self.driver == "zarr":
             if len(fns) > 1:
                 raise ValueError(
