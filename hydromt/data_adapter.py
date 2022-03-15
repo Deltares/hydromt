@@ -1077,6 +1077,7 @@ class RasterDatasetAdapter(DataAdapter):
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
             ds_out[name] = xr.where(data_bool, da * m + a, nodata)
             ds_out[name].attrs.update(attrs)  # set original attributes
+            ds_out[name].raster.set_nodata(nodata)  # reset nodata in case of change
 
         # unit attributes
         # TODO: can we solve this with unit conversion or otherwise generalize meta
