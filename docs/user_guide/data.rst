@@ -361,6 +361,7 @@ options in the same way as any xr.open_mfdataset options. These preprocess funct
 - **transpose_dims**: transpose dimensions of gridded timeseries to (time, y_dim, x_dim) which is the HydroMT standard in 
   different (GIS) processing functions.
 - **to_datetimeindex**: transpose time dimension of gridded timeseries to datetime index.
+- **remove_duplicates**: remove time duplicates when opening xarray mfdataset.
 
 GeoPackage spatial vector data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

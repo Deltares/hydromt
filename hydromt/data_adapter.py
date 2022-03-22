@@ -707,10 +707,15 @@ def to_datetimeindex(ds):
     return ds
 
 
+def remove_duplicates(ds):
+    return ds.sel(time=~ds.get_index("time").duplicated())
+
+
 PREPROCESSORS = {
     "round_latlon": round_latlon,
     "transpose_dims": transpose_dims,
     "to_datetimeindex": to_datetimeindex,
+    "remove_duplicates": remove_duplicates,
 }
 
 
