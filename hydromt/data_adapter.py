@@ -23,6 +23,7 @@ from urllib.parse import urlparse
 import shutil
 from distutils.version import LooseVersion
 import itertools
+import warnings
 
 from . import gis_utils, io
 
@@ -424,7 +425,7 @@ class DataCatalog(object):
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         align : float, optional
             Resolution to align the bounding box, by default None
-        variables : list of str, optional.
+        variables : str or list of str, optional.
             Names of RasterDataset variables to return. By default all dataset variables
             are returned.
         time_tuple : tuple of str, datetime, optional
@@ -493,7 +494,7 @@ class DataCatalog(object):
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
         align : float, optional
             Resolution to align the bounding box, by default None
-        variables : list of str, optional.
+        variables : str or list of str, optional.
             Names of GeoDataFrame columns to return. By default all columns are returned.
 
         Returns
@@ -558,7 +559,7 @@ class DataCatalog(object):
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
         align : float, optional
             Resolution to align the bounding box, by default None
-        variables : list of str, optional.
+        variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
         time_tuple : tuple of str, datetime, optional
@@ -961,6 +962,10 @@ class RasterDatasetAdapter(DataAdapter):
 
         For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
         """
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
+
         kwargs = self.kwargs.copy()
         fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
 
@@ -987,6 +992,11 @@ class RasterDatasetAdapter(DataAdapter):
         # rename and select vars
         if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
             rm = {ds_out.raster.vars[0]: variables[0]}
+            if rm.keys() != rm.values():
+                warnings.warn(
+                    f"Automatic renaming of single var array will be deprecated, rename {rm} in the data catalog instead.",
+                    DeprecationWarning,
+                )
         else:
             rm = {k: v for k, v in self.rename.items() if k in ds_out}
         ds_out = ds_out.rename(rm)
@@ -1231,6 +1241,10 @@ class GeoDatasetAdapter(DataAdapter):
 
         For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataset`
         """
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
+
         kwargs = self.kwargs.copy()
         fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
 
@@ -1520,6 +1534,10 @@ class GeoDataFrameAdapter(DataAdapter):
 
         For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
         """
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
+
         kwargs = self.kwargs.copy()
         _ = self.resolve_paths()  # throw nice error if data not found
 

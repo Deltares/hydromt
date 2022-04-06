@@ -13,10 +13,15 @@ Added
 
 Changed
 ^^^^^^^
+- In get_data() methods, variables can now also be a str as well as a list of strings.
 
 Fixed
 ^^^^^
 - Fixed the WGS84 datum in the gis_utils.utm_crs method.
+
+Deprecated
+^^^^^^^^^^
+- Automatic renaming of single var dataset if variables is provided in get_rasterdataset. Data catalog should be used instead.
 
 v0.4.5 (16 February 2022)
 -------------------------
