@@ -13,6 +13,7 @@ Added
 
 Changed
 ^^^^^^^
+- In build or update methods, setup_config opt is not ran first anymore but according to order in the opt list.
 
 Fixed
 ^^^^^
