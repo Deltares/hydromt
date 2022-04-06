@@ -14,6 +14,7 @@ Added
 Changed
 ^^^^^^^
 - Interpolate missing values based on D4 neighbors of missing value cells only. This largely improves the performance without loosing accuracy.
+  Changes have been observed when `nearest` method is used but this should not impact quality of the interpolation.
 
 Fixed
 ^^^^^
