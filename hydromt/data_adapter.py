@@ -695,7 +695,21 @@ def round_latlon(ds, decimals=5):
     return ds
 
 
-PREPROCESSORS = {"round_latlon": round_latlon}
+def to_datetimeindex(ds):
+    if ds.indexes["time"].dtype == "O":
+        ds["time"] = ds.indexes["time"].to_datetimeindex()
+    return ds
+
+
+def remove_duplicates(ds):
+    return ds.sel(time=~ds.get_index("time").duplicated())
+
+
+PREPROCESSORS = {
+    "round_latlon": round_latlon,
+    "to_datetimeindex": to_datetimeindex,
+    "remove_duplicates": remove_duplicates,
+}
 
 
 class DataAdapter(object, metaclass=ABCMeta):
@@ -988,6 +1002,11 @@ class RasterDatasetAdapter(DataAdapter):
             ds_out = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
+
+        # transpose dims to get y and x dim last
+        x_dim = ds_out.raster.x_dim
+        y_dim = ds_out.raster.y_dim
+        ds_out = ds_out.transpose(..., y_dim, x_dim)
 
         # rename and select vars
         if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
