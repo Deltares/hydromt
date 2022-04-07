@@ -13,7 +13,11 @@ Added
 
 Changed
 ^^^^^^^
-- In get_data() methods, variables can now also be a str as well as a list of strings.
+- In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, variables can now also be a str as well as a list of strings.
+- In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, automatic renaming of single variable datasets based on the variables argument will be deprecated
+- Interpolate missing values based on D4 neighbors of missing value cells only. This largely improves the performance without loosing accuracy.
+  Changes have been observed when `nearest` method is used but this should not impact quality of the interpolation.
+
 
 Fixed
 ^^^^^

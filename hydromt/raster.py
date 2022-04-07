@@ -1521,18 +1521,21 @@ class RasterDataArray(XRasterBase):
         if not mask.any() or mask.all():
             return src_data
         if method == "rio_idw":  # NOTE: modifies src_data inplace
+            # NOTE this method might also extrapolate
             interp_data = rasterio.fill.fillnodata(src_data.copy(), mask, **kwargs)
         else:
+            # get valid cells D4-neighboring nodata cells to setup triangulation
+            valid = np.logical_and(mask, ndimage.binary_dilation(~mask))
             xs, ys = np.meshgrid(self.xcoords.values, self.ycoords.values)
-            interp_data = griddata(
-                points=(xs[mask], ys[mask]),
-                values=src_data[mask],
-                xi=(xs, ys),
+            # interpolate data at nodata cells only
+            interp_data = src_data.copy()
+            interp_data[~mask] = griddata(
+                points=(xs[valid], ys[valid]),
+                values=src_data[valid],
+                xi=(xs[~mask], ys[~mask]),
                 method=method,
                 fill_value=self.nodata,
             )
-            # required because in some cases valid values are set to nodata?!
-            interp_data = np.where(mask, src_data, interp_data)
         return interp_data
 
     def interpolate_na(self, method: str = "nearest", **kwargs):
