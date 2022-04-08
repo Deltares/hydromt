@@ -36,7 +36,7 @@ HydroMT can be used as a **command line** application, which provides commands t
 *update* and *clip* models with a single line, or **from python** to exploit its rich interface.
 You can learn more about how to use HydroMT in its `online documentation. <https://deltares.github.io/hydromt/preview/>`_
 For a smooth installing experience we recommend installing HydroMT and its dependencies 
-from conda-forge in a clean environment, see `installation guide. <https://deltares.github.io/hydromt/preview/getting_started/installation>`_ .
+from conda-forge in a clean environment, see `installation guide. <https://deltares.github.io/hydromt/preview/getting_started/installation>`_
 
 
 HydroMT model plugins

@@ -34,3 +34,4 @@ HydroMT currently supports the following models:
     model_update.rst
     model_clip.rst
     model_post.rst
+    Example: Delineate basins <../_examples/delineate_basin.ipynb>

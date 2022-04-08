@@ -3,7 +3,7 @@ requires = ["flit_core >=3.2.0,<3.3"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "hydromt"
+name = "HydroMT"
 authors = [
     {name = "Dirk Eilander", email = "dirk.eilander@deltares.nl"},
     {name = "Hélène Boisgontier", email = "helene.boisgontier@deltares.nl"},

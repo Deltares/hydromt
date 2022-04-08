@@ -1,7 +1,7 @@
 .. _contributing:
 
-Developers Guide
-================
+Developer's guide
+=================
 
 Welcome to the HydroMT project. All contributions, bug reports, bug fixes, 
 documentation improvements, enhancements, and ideas are welcome. Here's how we work.
@@ -11,7 +11,7 @@ Rights
 
 The MIT license (see LICENSE.txt) applies to all contributions.
 
-Issue Conventions
+Issue conventions
 -----------------
 
 The HydroMT issue tracker is for actionable issues.
@@ -24,7 +24,7 @@ Please search existing issues, open and closed, before creating a new one.
 Please provide these details as well as tracebacks and relevant logs. Short scripts and 
 datasets demonstrating the issue are especially helpful!
 
-Design Principles
+Design principles
 -----------------
 
 HydroMT contains methods to build and analyze models in the hydrology sphere. We try
@@ -38,7 +38,7 @@ different models.
   open_raterio for gdal raster data and xarray for netcdf data. 
 - Flow direction data is parsed to the pyflwdir.FlwdirRaster object.
 
-Git Conventions
+Git conventions
 ---------------
 
 First of all, if git is new to you, here are some great resources for learning Git:
@@ -90,7 +90,7 @@ merge request. We recommend creating a merge request as early as possible to giv
 developers a heads up and to provide an opportunity for valuable early feedback. You 
 can create a merge request online or by pushing your branch to a feature-branch. 
 
-Code Conventions
+Code conventions
 ----------------
 
 We use `black <https://black.readthedocs.io/en/stable/>`__ for standardized code formatting.
@@ -100,37 +100,6 @@ should go in the tests directory.
 
 During Continuous Integration testing, several tools will be run to check your code for 
 based on pytest, but also stylistic errors.
-
-Development Environment
------------------------
-
-Developing HydroMT requires Python >= 3.6. We prefer developing with the most recent 
-version of Python. We strongly encourage you to develop in a seperate conda environment.
-All Python dependencies required to develop HydroMT can be found in `environment.yml <environment.yml>`__.
-
-Initial Setup
-^^^^^^^^^^^^^
-
-First, clone HydroMT's ``git`` repo and navigate into the repository:
-
-.. code-block:: console
-
-    $ git https://github.com/Deltares/hydromt.git
-    $ cd hydromt
-
-Then, make and activate a new hydromt conda environment based on the environment.yml 
-file contained in the repository:
-
-.. code-block:: console
-
-    $ conda env create -f environment.yml
-    $ conda activate hydromt
-
-Finally, build and install hydromt:
-
-.. code-block:: console
-
-    $ pip install -e .
 
 Running the tests
 ^^^^^^^^^^^^^^^^^

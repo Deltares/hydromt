@@ -3,10 +3,12 @@
 Examples
 ========
 
-.. include:: examples/README.rst
+.. include:: ../_examples/README.rst
+
+
+For a static (non-interactive) view of the examples follow one of the links below:
 
 .. toctree::
-   :maxdepth: 1
 
-   Read raster data <examples/read_raster_data>
-   Delineate basins <examples/delineate_basin>
+   ../_examples/delineate_basin.ipynb
+   ../_examples/read_raster_data.ipynb

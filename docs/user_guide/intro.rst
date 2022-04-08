@@ -1,6 +1,6 @@
 .. _intro_user_guide:
 
-User Guide
+User guide
 ==========
 
 HydroMT is a Python package that aims to facilitate the process of building models and analyzing model results
@@ -21,7 +21,7 @@ From the user side, HydroMT is organised in the following way:
   This file describes the full pipeline of model setup components and their arguments. The components vary for the 
   different model plugins and are documented for each at their respective documentation websites.
 
-| **Data Catalogue**
+| **Data Catalog**
 | HydroMT can make use of various types of data sources such as vector data, GDAL rasters or NetCDF files.
   The path and attributes of each of these dataset are listed in a data catalogue *.yml* file. HydroMT provides 
   several pre-defined data catalogues with mostly global datasets that can be used as is, but note that not all data is 

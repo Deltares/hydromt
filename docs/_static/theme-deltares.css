@@ -12,18 +12,6 @@
     color: #fff !important;
 }
 
-.navbar-nav>.active>.nav-link {
-    color: #fff !important;
-}
-
-.navbar-nav>:hover>.nav-link {
-    color: #fff !important;
-}
-
-.nav-link {
-    color: #8486c0 !important;
-}
-
 img.icon-link-image {
     height: 2.5em !important;
 }
@@ -32,10 +20,16 @@ img.icon-link-image {
     filter: invert(100%) ;
 }
 
-/* sphinx design */
 :root {
+    /* sphinx design */
     --sd-color-card-border-hover: #080c80;
     --sd-color-tabs-label-active: #080c80;
     --sd-color-tabs-label-hover: #080c80;
     --sd-color-tabs-underline-active: #080c80;
+    
+    /* hyperlinks */
+    --pst-color-link: 13, 56, 224;
+    --pst-color-navbar-link: 237, 237, 255;
+    --pst-color-navbar-link-hover: 255, 255, 255;
+    --pst-color-navbar-link-active: 255, 255, 255;
 }

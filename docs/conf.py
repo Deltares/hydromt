@@ -96,10 +96,10 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
-if os.path.isdir("getting_started/examples"):
-    remove_dir_content("getting_started/examples")
-os.makedirs("getting_started/examples")
-copy_tree("../examples", "getting_started/examples")
+if os.path.isdir("_examples"):
+    remove_dir_content("_examples")
+os.makedirs("_examples")
+copy_tree("../examples", "_examples")
 
 # # -- Generate panels rst files from data catalogs to include in docs -------
 if not os.path.isdir("_generated"):
