@@ -24,6 +24,7 @@ Changed
 Fixed
 ^^^^^
 - Fixed the WGS84 datum in the gis_utils.utm_crs method.
+- In merge.merge the grid is now aligned with input dataset with the largest overlap if no dst_bounds & dst_res are given.
 
 Deprecated
 ^^^^^^^^^^
