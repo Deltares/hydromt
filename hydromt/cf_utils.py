@@ -208,7 +208,9 @@ class Utils:
             old_file_name.rename(new_file_name)
 
     @staticmethod
-    def replace_tags_by_filetree(source_dir_templ, destination_dir, tag_dict, extensions):
+    def replace_tags_by_filetree(
+        source_dir_templ, destination_dir, tag_dict, extensions
+    ):
         """
         replaces tags in all source file templates in the file tree and save the filled templates in the respective destination pth
         :param source_file: source file that contains tags and therefore serves as template
@@ -223,9 +225,9 @@ class Utils:
         ), f"Cannot find destination directory: {destination_dir}"
 
         tag_files = []
-        for path in source_dir_templ.rglob('*'):
+        for path in source_dir_templ.rglob("*"):
             if path.suffix in extensions:
-                tag_files.append(path)		
+                tag_files.append(path)
 
         for file_path in tag_files:
             tag_files_paths_filled = file_path
@@ -235,16 +237,16 @@ class Utils:
                         "{" + key + "}", value, str(tag_files_paths_filled)
                     )
                     if not "{" in tag_files_paths_filled:
-                        source_file=file_path
-                        relative_path = os.path.relpath(source_file, source_dir_templ)					
+                        source_file = file_path
+                        relative_path = os.path.relpath(source_file, source_dir_templ)
                         destination_file = Path(destination_dir / relative_path)
                         Utils.replace_tags_by_file(
                             source_file, destination_file, tag_dict, extensions
                         )
-                else: #if no tag that needs to be replaced present in file_path
+                else:  # if no tag that needs to be replaced present in file_path
                     if key == list(tag_dict)[-1]:
-                        source_file=file_path
-                        relative_path = os.path.relpath(source_file, source_dir_templ)					
+                        source_file = file_path
+                        relative_path = os.path.relpath(source_file, source_dir_templ)
                         destination_file = Path(destination_dir / relative_path)
                         os.makedirs(os.path.dirname(destination_file), exist_ok=True)
                         shutil.copy(source_file, destination_file, follow_symlinks=True)

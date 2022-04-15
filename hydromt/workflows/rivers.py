@@ -126,7 +126,7 @@ def river_depth(
     if method == "powlaw":
 
         def rivdph_powlaw(qbankfull, hc=0.27, hp=0.30, min_rivdph=1.0):
-            return np.maximum(hc * qbankfull**hp, min_rivdph)
+            return np.maximum(hc * qbankfull ** hp, min_rivdph)
 
         rivdph = rivdph_powlaw(data[qbankfull_name], min_rivdph=min_rivdph, **kwargs)
     elif method in ["manning", "gvf"]:
