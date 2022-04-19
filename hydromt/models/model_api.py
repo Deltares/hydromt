@@ -89,7 +89,7 @@ class Model(object, metaclass=ABCMeta):
         signature = inspect.signature(func)
         for i, (k, v) in enumerate(signature.parameters.items()):
             v = kwargs.get(k, v.default)
-            if v is inspect.Parameter.empty:
+            if v == inspect._empty:
                 if len(args) >= i + 1:
                     v = args[i]
                 else:
@@ -102,7 +102,7 @@ class Model(object, metaclass=ABCMeta):
     ):
         """Single method to build a model from scratch based on settings in `opt`.
         Methods will be run one by one based on the order of appearance in `opt` (ini file)..
-        All model methods are supported incuding setup_*, read_* and write_*
+        All model methods are supported including setup_*, read_* and write_*
 
         Parameters
         ----------
