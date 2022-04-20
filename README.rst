@@ -1,8 +1,8 @@
 .. _readme:
 
-=====================================================
-HydroMT: Build and analyze models like a data-wizard!
-=====================================================
+===============================================================
+HydroMT: Automated and reproducible model building and analysis
+===============================================================
 
 |pypi| |conda forge| |docs_latest| |docs_stable| |codecov| |license| |doi| |binder|
 

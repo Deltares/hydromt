@@ -1,6 +1,6 @@
 .. _dev_env:
 
-Development environment
+Developer's environment
 -----------------------
 
 Developing HydroMT requires Python >= 3.6. We prefer developing with the most recent 
@@ -10,16 +10,16 @@ All Python dependencies required to develop HydroMT can be found in `envs/hydrom
 Developer installation guide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-First, clone hydromt's ``git`` repo from
+First, clone the HydroMT ``git`` repo using `ssh <https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account>`_ from
 `github <https://github.com/Deltares/hydromt.git>`_.
 
 .. code-block:: console
 
-    $ git clone https://github.com/Deltares/hydromt.git
+    $ git clone git@github.com:Deltares/hydromt_delwaq.git
     $ cd hydromt
 
 Then, navigate into the the code folder (where the envs folder and pyproject.toml are located):
-Make and activate a new hydromt-dev conda environment based on the envs/hydromt-dev.yml
+Make and activate a new ``hydromt-dev`` conda environment based on the envs/hydromt-dev.yml
 file contained in the repository:
 
 .. code-block:: console

@@ -304,7 +304,7 @@ texinfo_documents = [
         "HydroMT Documentation",
         author,
         "HydroMT",
-        "Build and analyze hydrological models like a data-wizard.",
+        "Automated and reproducible model building and analysis",
         "Miscellaneous",
     ),
 ]
