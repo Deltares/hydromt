@@ -3,10 +3,15 @@
 Data conventions
 ================
 
-This section lists the different variable naming and unit conventions of HydroMT by types. This list is still in development.
 Names and units mentioned here are mandatory in order for the input data to be processed correctly and produced the right derived data.
-It is also possible to use the rename option so that variables and model data produced by HydroMT have more explicit names.
-A list of recognized :ref:`dimensions <dimensions>` is found here.
+It is possible to use the ``rename`` option in the :ref:`data catalog yaml file <data_yaml>` so that data variables have more correct names.
+This section lists the different variable naming and unit conventions of HydroMT by types.  
+A list of recognized :ref:`dimension names <dimensions>` is found here.
+
+.. NOTE::
+
+    This list is still in development.
+
 
 Topography
 ^^^^^^^^^^

@@ -5,7 +5,7 @@ Building a model
 
 To build a complete model from scratch using available data the ``build`` command can be used.
 The interface is identical for each model, but the configuration file has different 
-options (see documentation of the individual models). The mandatory :ref:`region <cli_region>` 
+options (see documentation of the individual models). The mandatory :ref:`region <region>`
 argument describes the region of interest. The build method will start by running the component in which
 the model grid (if applicable) is defined for the region, usually the `setup_basemaps` method.
 The configuration file should listing all the components that the user wants to include during the build. 
@@ -33,8 +33,3 @@ To check its options run:
 **Further options**
 
 .. include:: ../_generated/cli_build.rst
-
-.. toctree::
-    :hidden:
-
-    build_region.rst

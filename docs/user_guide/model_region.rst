@@ -1,9 +1,13 @@
-.. _cli_region:
+.. _region:
 
 Region options
 --------------
 
-The region of interest can be described in three ways:
+A user can define the region of interest based on general geospatial or hydrographic area using one of the following options:
+
+.. NOTE::
+
+    All x and y coordinates in the *point* and *bbox* are in the EPSG:4326 (WGS84) coordinate reference system.
 
 Geospatial region
 ^^^^^^^^^^^^^^^^^
@@ -12,23 +16,22 @@ Geospatial region
 
     Geometry file (geom): ``{'geom': '/path/to/geometry_file'}``
 
+    Based on another model: ``{'<model_name>': '/path/to/model_root'}``
 
-Grid
-^^^^
-    Another model: ``{'<model_name>': '/path/to/model_root'}``
+    Based on a raster file: ``{'grid': '/path/to/raster_file'}``
 
-    Raster file: ``{'grid': '/path/to/raster_file'}``
-
-hydrographic region
+Hydrographic region
 ^^^^^^^^^^^^^^^^^^^
 
-    The hydrographic region can be divided into:
-    - basin
-    - subbasin
-    - interbasin
+The following hydrographic regions are supported:
 
-    **Basin**: is defined by the entire area which drains to the sea or an inland depression.
-    To delineate the basin(s) touching a region or point location, users can supply the following:
+- basin
+- subbasin
+- interbasin
+
+
+**Basin**: is defined by the entire area which drains to the sea or an inland depression.
+To delineate the basin(s) touching a region or point location, users can supply the following:
 
     - One point location: ``{'basin': [x, y]}``
 
@@ -47,15 +50,16 @@ hydrographic region
     a minimum drainage area of 30 km2 or ``'strord':8`` to filter basins based on streams
     with a minimal stream order of 8.
 
-    ``{'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}``
+    - ``{'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}``
 
     To only select basins with their outlet location use ``'outlets': true`` in combination with
     a bounding box or geometry file
 
-    ``{'basin': [xmin, ymin, xmax, ymax], 'outlets': true}``
+    - ``{'basin': [xmin, ymin, xmax, ymax], 'outlets': true}``
 
-    **Subbasin**: is defined by the area that drains into an outlet, stream or region.
-    Users can supply the following:
+    
+**Subbasin**: is defined by the area that drains into an outlet, stream or region.
+Users can supply the following:
 
     - One point location: ``{'subbasin': [x, y]}``
 
@@ -69,21 +73,22 @@ hydrographic region
     bounding box in combination with all the options mentioned above.
     A warning will be raised if the bounding box does not contain all upstream area.
 
-    ``{'subbasin': [x, y], 'bounds': [xmin, ymin, xmax, ymax]}``
+    - ``{'subbasin': [x, y], 'bounds': [xmin, ymin, xmax, ymax]}``
 
     The subbasins can further be refined based one (or more) variable-threshold pair(s)
     to define streams, as described above for basins. If used in combination with point outlet locations,
     these are snapped to the nearest stream which meets the threshold criteria.
 
-    ``{'subbasin': [x, y], '<variable>': threshold}``
+    - ``{'subbasin': [x, y], '<variable>': threshold}``
 
-    **Interbasin**: is defined by the area that drains into an outlet or stream and
-    bounded by a region and therefore does not necessarily including all upstream area.
-    Users should supply a bounding region in combination with stream and/or outlet arguments.
-    The bounding region is defined by a bounding box or a geometry file; streams by a
-    (or more) variable-threshold pair(s) and outlet by point location coordinates.
-    Similar to subbasins, point locations are snapped to nearest downstream stream if
-    combined with stream arguments.
+
+**Interbasin**: is defined by the area that drains into an outlet or stream and
+bounded by a region and therefore does not necessarily including all upstream area.
+Users should supply a bounding region in combination with stream and/or outlet arguments.
+The bounding region is defined by a bounding box or a geometry file; streams by a
+(or more) variable-threshold pair(s) and outlet by point location coordinates.
+Similar to subbasins, point locations are snapped to nearest downstream stream if
+combined with stream arguments.
 
     - ``{'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}``
 
@@ -95,7 +100,7 @@ hydrographic region
 
     ``{'interbasin': [xmin, ymin, xmax, ymax], 'outlets': true}``
 
-See also the *delineate basins* example and the :py:meth:`~hydromt.workflows.basin_mask.parse_region`
-and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry` methods.
+See also the `hydrographic regions <../_examples/delineate_basin.ipynb>`_ example and the 
+:py:meth:`~hydromt.workflows.basin_mask.parse_region` and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry` methods.
 
 .. image:: ../_static/region.png

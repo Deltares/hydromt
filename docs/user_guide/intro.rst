@@ -4,44 +4,43 @@ User guide
 ==========
 
 HydroMT is a Python package that aims to facilitate the process of building models and analyzing model results
-by automating the process to go from raw data to model data. It is an interface between *data*, *user* and hydro
-*models*. In the user guide you can find:
+by automating the process to go from raw data to model data. It is an interface between *user*, *data* and hydro
+*models*. 
 
-- how to work with data in HydroMT
-- how to develop and process models with HydroMT
+From the user side, HydroMT is organized in the following way:
 
-From the user side, HydroMT is organised in the following way:
-
-| **Command Line Interface (CLI)**
-| The CLI is a high-level interface to HydroMT. It is used to run HydroMT methods such as **build**, **update** or **clip** for
-  all model plugins, such as Wflow, Delwaq, SFINCS etc.
+| **Data Catalog**
+| HydroMT is data-agnostic through the *Data adapter* that reads a wide range of data formats 
+  and unifies the input data. HydroMT currently supports vector (*GeoDataFrame*), raster (*RasterDataset*)
+  and time-series data (*GeoDataset*) types. Datasets are listed in and passed to HydroMT in a user defined data catalog 
+  :ref:`yaml file <data_yaml>`. HydroMT also provides several pre-defined data catalogs with mostly global datasets that can be used as is, 
+  but note that not all data is openly accessible. 
 
 | **Configuration**
 | The complete building or updating process of a model can be configured in a single configuration *.ini* file. 
-  This file describes the full pipeline of model setup components and their arguments. The components vary for the 
-  different model plugins and are documented for each at their respective documentation websites.
+  This file describes the full pipeline of model setup components and their arguments. The components vary per 
+  model :ref:`plugin <plugins>` and are documented for each at their respective documentation websites.
 
-| **Data Catalog**
-| HydroMT can make use of various types of data sources such as vector data, GDAL rasters or NetCDF files.
-  The path and attributes of each of these dataset are listed in a data catalogue *.yml* file. HydroMT provides 
-  several pre-defined data catalogues with mostly global datasets that can be used as is, but note that not all data is 
-  openly accessible. Local or other datasets can also be included by extending or using a user defined yaml file.
+| **Command Line Interface (CLI)**
+| The CLI is a high-level interface to HydroMT. It is used to run HydroMT methods such as 
+  :ref:`*build* <cli_build>`, :ref:`*update* <cli_update>` or :ref:`*clip* <cli_clip>`.
 
 | **Python Interface**
-| Most common functionalities can be called through the CLI. From the Python interface, however, much more
-  lower level functionalities are available.
+| Most common functionalities can be called through the CLI. From the Python interface, however, the user
+  can interact directly with a model through the :ref:`Model API <model_interface>` that provides a general interface 
+  to the model schematization (*staticgeoms* and *staticmaps*), model *forcing*, model *states*, model *results* 
+  and model configuration (*config*). Furthermore, many methods for raster and vector GIS, 
+  hydrography and statists are available.
 
-This user guide concentrates on the core functions of HydroMT. For more specific information each
-:ref:`plugin <plugins>` contains an additional user guide.
-
-Content
--------
+.. image:: ../_static/Architecture_model_data_input.png
 
 .. toctree::
    :maxdepth: 2
    :hidden:
    :caption: Table of Contents
 
-   get_data.rst
+   data_main.rst
    model_main.rst
-   terminology.rst
+   gis.rst
+   statistics.rst
+   terminology.rst  

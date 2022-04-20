@@ -22,8 +22,8 @@ Python and the `conda package manager`_. Differences to note, in a nutshell:
   default from the **conda-forge channel**.
 * Miniconda is a company driven (Anaconda) installer, installing by default
   from the **anaconda channel**.
-* Installing from the anaconda channel has certain (legal) limitations_
-  for "commercial use".
+* Installing from the anaconda channel has certain (legal) `limitations
+  for "commercial use" <limitations>`_.
 
 Installing Mambaforge/Miniforge/Miniconda does not require administrative
 rights to your computer and doesn't interfere with any other Python
@@ -57,11 +57,11 @@ Spatial and statistical operations:
 * `pygeos <https://pygeos.readthedocs.io/en/stable/>`__
 * `pyproj <https://pyproj4.github.io/pyproj/stable/>`__
 * `rasterio <https://rasterio.readthedocs.io/en/latest/>`__
-* `pyflwdir` <https://deltares.github.io/pyflwdir/latest/>`__
+* `pyflwdir <https://deltares.github.io/pyflwdir/latest/>`__
 
 Command line interface
 
-* `click` <https://click.palletsprojects.com/>`__
+* `click <https://click.palletsprojects.com/>`__
 
 
 Installation

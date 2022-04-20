@@ -9,7 +9,7 @@ Clipping a model
     :ref:`plugin<plugins>` for more information on whether the clip method is available.
 
 The ``clip`` method allows to clip a subregion from a model, including all static maps,
-static geometries and forcing data. The :ref:`region <cli_region>` argument follows the same syntax as
+static geometries and forcing data. The :ref:`region <region>` argument follows the same syntax as
 in the :ref:`build method <cli_build>`.
 
 After activating the HydroMT python environment, the HydroMT ``clip`` method can be run from the command line.

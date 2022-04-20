@@ -3,12 +3,12 @@
 User Guide
 ==========
 
-From the user side, HydroMT is organised in the following way:
+From the user side, HydroMT is organized in the following way:
 
 -  **Command Line Interface (CLI)**: high-level interface to HydroMT. It is used to run HydroMT methods
    such as build, update or clip for a specific model supported by the package, such as Wflow, Delwaq, SFINCS etc.
 -  **CLI options**: When using the CLI, specific options such as which data sources to use, which components to include etc. 
-   are provided in a *.ini* file. These options, organised in sections, vary for the different models and are documented 
+   are provided in a *.ini* file. These options, organized in sections, vary for the different models and are documented 
    in the model components.
 -  **Dataset list**: HydroMT can make use of various types of data sources such as vector data, GDAL rasters or NetCDF files. 
    The path and attributes of each of these dataset are listed in a *.yml* file. HydroMT already contains a list of default 

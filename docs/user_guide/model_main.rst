@@ -3,29 +3,30 @@
 Working with models in HydroMT  
 ==============================
 
-HydroMT is commonly used in combination with a model plugin, relevant functions for setting up or adjusting models include: 
+High level functionality
+------------------------
 
+HydroMT has the following high-level functionality for setting up models from raw data or adjusting models: 
+
+* :ref:`defining a model region <region>` for *building* or *clipping* models.
 * :ref:`building a model <cli_build>`: building a model from scratch.
-* :ref:`updating a model <cli_update>`: updating an existing model (e.g. update datafeeds).
+* :ref:`updating a model <cli_update>`: updating an existing model (e.g. add model components or change data source).
 * :ref:`clipping a model <cli_clip>`: changing the spatial domain of an existing model (e.g. select subbasins from a larger model).
-* :ref:`postprocessing model results <post>`: generating statistics, visualizing results.
 
-.. _SupportedModels: 
+The exact process of building or updating a model can be configured in a single configuration *.ini* file. 
+This file describes the full pipeline of model components and their arguments. The components vary for the 
+different model :ref:`plugins` and are documented for each at their respective documentation websites.
+
+.. _model_interface:
+
+Model interface
+---------------
+
 
 Supported models
-^^^^^^^^^^^^^^^^
+----------------
 
-HydroMT currently supports the following models:
-
-* hydromt_wflow_: A framework for distributed rainfall-runoff (wflow_sbm) sediment transport (wflow_sediment) modelling.
-* hydromt_delwaq_: A framework for water quality (D-Water Quality) and emissions (D-Emissions) modelling.
-* hydromt_sfincs_: A fast 2D hydrodynamic flood model.
-* hydromt_fiat_: A flood impact model.
-
-.. _hydromt_wflow: https://deltares.github.io/hydromt_wflow
-.. _hydromt_sfincs: https://deltares.github.io/hydromt_sfincs
-.. _hydromt_delwaq: https://deltares.github.io/hydromt_delwaq
-.. _hydromt_fiat: https://deltares.github.io/hydromt_fiat
+For a list of supported models see the :ref:`plugins` page.
 
 .. toctree::
     :hidden:
@@ -33,5 +34,5 @@ HydroMT currently supports the following models:
     model_build.rst
     model_update.rst
     model_clip.rst
-    model_post.rst
-    Example: Delineate basins <../_examples/delineate_basin.ipynb>
+    model_region.rst
+    Example: Hydrographic regions <../_examples/delineate_basin.ipynb>

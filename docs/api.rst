@@ -1,6 +1,5 @@
 .. currentmodule:: hydromt
 
-
 .. _api_reference:
 
 #############
@@ -11,6 +10,7 @@ API reference
 Data
 ====
 
+.. _api_data_catalog:
 
 Data Catalog
 ============
@@ -39,6 +39,7 @@ Add data sources
    data_adapter.DataCatalog.from_yml
    data_adapter.DataCatalog.update
 
+.. _api_data_catalog_get:
 
 Get data
 --------
@@ -218,6 +219,8 @@ Computation methods
 =======================
 Reading/writing methods
 =======================
+
+.. _open_methods:
 
 Reading methods
 ===============

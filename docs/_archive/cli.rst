@@ -29,7 +29,7 @@ build
 
 To build a complete model from scratch using available data the build command can be used. 
 The interface is identical for each model, but the configuration file has different 
-options (see documentation of the individual models). The mandatory :ref:`region <cli_region>` 
+options (see documentation of the individual models). The mandatory :ref:`region <region>` 
 argument describes the region of interest. The build method will start by running the setup_basemaps 
 component of the model in order to prepare the model schematization/grid based on the region arguments. 
 The configuration file should then start by listing the setup_basemaps components and then all the components 
@@ -57,7 +57,7 @@ clip
 
 The clip method allows to clip a subregion from a model, including all static maps,
 static geometries and forcing data. This method has only been implemented for the 
-wflow model so far. The :ref:`region <cli_region>` argument follows the same syntax as 
+wflow model so far. The :ref:`region <region>` argument follows the same syntax as 
 in the build method.
 
 .. include:: ../_generated/cli_clip.rst
@@ -65,7 +65,7 @@ in the build method.
 Region options
 --------------
 
-.. _cli_region:
+.. _region:
 
 
 The region of interest can be described in three ways:

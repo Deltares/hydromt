@@ -9,7 +9,7 @@ Install HydroMT & model plugin
 ------------------------------
 
 If you haven't already done so, first install HydroMT and the `HydroMT-Wflow plugin`_ 
-in a new ``hydromt`` environment and activate this environment.
+in a new **hydromt** environment and activate this environment.
 For more information about the installation, please refer to the :ref:`installation guide <installation_guide>`.
 
 .. code-block:: console
@@ -33,7 +33,7 @@ Now you can create a model from raw data. To do so, you need to define
 
 1) the **source data**: To try out HydroMT, you can make use of the publicly available :ref:`HydroMT artifacts data catalog <existing_catalog>` 
    which contains data for the Piave basin in Northern Italy and is the default catalog if no other one is specified.
-2) the **model region**: There are many options to define the :ref:`model region <cli_region>`. In this example the model region is defined 
+2) the **model region**: There are many options to define the :ref:`region <region>`. In this example the model region is defined 
    by the Piave subbasin upstream from a outlet point defined: ``"{'subbasin': [12.2051, 45.8331], 'strord': 4}"``
 3) the **model setup configuration**: Finally, the model setup needs to be configured. Here, the example configuration from the HydroMT-Wflow repository 
    is used. You can download the *ini* file `here (right click & save as) <https://raw.githubusercontent.com/Deltares/hydromt_wflow/main/examples/wflow_build.ini>`_ and save it in the current directory. 
