@@ -23,7 +23,7 @@ From the user side, HydroMT is organized in the following way:
 
 | **Command Line Interface (CLI)**
 | The CLI is a high-level interface to HydroMT. It is used to run HydroMT methods such as 
-  :ref:`*build* <cli_build>`, :ref:`*update* <cli_update>` or :ref:`*clip* <cli_clip>`.
+  :ref:`build <cli_build>`, :ref:`update <cli_update>` or :ref:`clip <cli_clip>`.
 
 | **Python Interface**
 | Most common functionalities can be called through the CLI. From the Python interface, however, the user

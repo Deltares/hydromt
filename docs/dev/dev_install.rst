@@ -7,6 +7,8 @@ Developing HydroMT requires Python >= 3.6. We prefer developing with the most re
 version of Python. We strongly encourage you to develop in a separate conda environment.
 All Python dependencies required to develop HydroMT can be found in `envs/hydromt-dev.yml <environment.yml>`__.
 
+.. _dev_install:
+
 Developer installation guide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

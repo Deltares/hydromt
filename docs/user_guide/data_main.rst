@@ -98,7 +98,7 @@ For related functions see:
 .. toctree::
     :hidden:
 
-    data_existing_cat.rst
     data_prepare_cat.rst
+    data_existing_cat.rst
     data_conventions.rst
     Example: Reading raster data <../_examples/read_raster_data.ipynb>

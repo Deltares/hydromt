@@ -1,4 +1,26 @@
 Roadmap
 =======
-Here we plan to describe our ideas of how we want to evolve the package, including our philosophy and general vision.
 
+.. NOTE::
+
+    This roadmap is still under discussion
+
+
+Ambition
+--------
+
+
+Short-term plans
+----------------
+
+Shared data
+"""""""""""
+
+Support for lumped and network models
+"""""""""""""""""""""""""""""""""""""
+
+Dashboard / web interface
+"""""""""""""""""""""""""
+
+Integration with other scientific python packages
+"""""""""""""""""""""""""""""""""""""""""""""""""

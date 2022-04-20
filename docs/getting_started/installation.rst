@@ -122,7 +122,7 @@ Note that you might have to uninstall HydroMT first to successfully install from
 Developer installation
 ----------------------
 
-To be able to test and develop the HydroMT package see instructions in the `Developer installation guide <dev_env>`_.
+To be able to test and develop the HydroMT package see instructions in the :ref:`Developer installation guide <dev_install>`.
 
 
 .. _plugin_install:
