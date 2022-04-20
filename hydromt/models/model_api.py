@@ -101,6 +101,8 @@ class Model(object, metaclass=ABCMeta):
         self, region: dict, res: float = None, write: bool = True, opt: dict = {}
     ):
         """Single method to build a model from scratch based on settings in `opt`.
+        Methods will be run one by one based on the order of appearance in `opt` (ini file)..
+        All model methods are supported incuding setup_*, read_* and write_*
 
         Parameters
         ----------
@@ -147,9 +149,6 @@ class Model(object, metaclass=ABCMeta):
             else:
                 opt[self._CLI_ARGS["res"]].update(res=res)
 
-        # run setup_config and setup_basemaps first!
-        self._run_log_method("setup_config", **opt.pop("setup_config", {}))
-
         # then loop over other methods
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write() call
@@ -163,6 +162,10 @@ class Model(object, metaclass=ABCMeta):
 
     def update(self, model_out=None, write=True, opt=None):
         """Single method to update a model based the settings in `opt`.
+        Methods will be run one by one based on the order of appearance in `opt` (ini file).
+        All model methods are supported incuding setup_*, read_* and write_*
+        If a write_* option is listed in `opt` (ini file) the full writing of the model at the end
+        of the update process is skipped.
 
         Parameters
         ----------
@@ -210,7 +213,6 @@ class Model(object, metaclass=ABCMeta):
             self.logger.warning(f'"{method}" can only be called when building a model.')
 
         # loop over other methods from ini file
-        self._run_log_method("setup_config", **opt.pop("setup_config", {}))
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write() call
             if method.startswith("write_"):

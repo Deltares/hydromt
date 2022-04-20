@@ -22,6 +22,7 @@ An example dataset entry called **my_dataset** is shown below.
 The ``path``, ``data_type`` and ``driver`` options are required and the ``meta`` option 
 with the shown keys is highly recommended. The ``rename``, ``nodata``, ``unit_add`` and 
 ``unit_mult`` options are set per variable (or attribute table column in case of a GeoDataFrame).
+``kwargs`` is an option to pass additional options to each open data method of the different drivers.
 For more information see :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
 
 .. code-block:: yaml
@@ -58,8 +59,9 @@ A full list of **data entry options** is given below
   The filenames can be further specified with ``{variable}``, ``{year}`` and ``{month}`` keys to limit which files are being read 
   based on the get_data request in the form of ``"path/to/my/files/{variable}_{year}_{month:02d}.nc"``
 - **data_type** (required): type of input data. Either *RasterDataset*, *GeoDataset* or *GeoDataFrame*.
-- **driver** (required): data_type specific driver to read a dataset, see overview below.
 - **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. 
+- **driver** (required): data_type specific driver to read a dataset, see overview below.
+- **kwargs** (optional): pairs of key value arguments to pass to the driver specific open data method (eg xr.open_mfdataset for netdcf raster, see the full list below).
   Only used if not crs can be inferred from the input data.
 - **rename** (optional): pairs of variable names in the input data (*old_variable_name*) and the corresponding 
   :ref:`HydroMT variable naming conventions <data_convention>` and :ref:`recognized dimension names <dimensions>` (*new_variable_name*). 
@@ -294,6 +296,21 @@ unify the data to match the HydroMT naming and unit :ref:`terminology <terminolo
         temp: -273.15
       unit_mult:
         precip: 1000
+
+
+Preprocess functions when combining multiple files
+""""""""""""""""""""""""""""""""""""""""""""""""""
+
+In :py:func:`xarray.open_mfdataset`, xarray allows for a *preprocess* function to be run before merging several 
+netcdf files together. In hydroMT, some preprocess functions are available and can be passed through the ``kwargs`` 
+options in the same way as any xr.open_mfdataset options. These preprocess functions are:
+
+- **round_latlon**: round x and y dimensions to 5 decimals to avoid merging problems in xarray due to small differences
+  in x, y values in the different netcdf files of the same data source.
+- **to_datetimeindex**: force parsing the time dimension to a datetime index.
+- **remove_duplicates**: remove time duplicates
+
+
 
 .. _GeoDataFrame: 
 
