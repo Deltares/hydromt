@@ -227,6 +227,8 @@ html_context = {
     "doc_path": "docs",
 }
 
+remove_from_toctrees = ["_generated/*"]
+
 # no sidebar in api section
 # html_sidebars = {
 #   "api": [],

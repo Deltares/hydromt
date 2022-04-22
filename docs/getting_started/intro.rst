@@ -1,7 +1,7 @@
 Getting started
 ===============
 
-.. grid:: 2
+.. grid:: 3
     :gutter: 1 
 
     .. grid-item-card:: 
@@ -68,5 +68,4 @@ Getting started
    quick_overview.rst
    examples_index.rst
    user_stories.rst
-   faq.rst
    publications.rst

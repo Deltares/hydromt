@@ -1,4 +1,0 @@
-Frequently asked questions
-==========================
-
-dummy
