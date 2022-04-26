@@ -68,4 +68,5 @@ Getting started
    quick_overview.rst
    examples_index.rst
    user_stories.rst
+   faq.rst
    publications.rst

@@ -101,4 +101,5 @@ For related functions see:
     data_prepare_cat.rst
     data_existing_cat.rst
     data_conventions.rst
-    Example: Reading raster data <../_examples/read_raster_data.ipynb>
+    Example: Reading raster data <../_examples/reading_raster_data.ipynb>
+    Example: Reading vector data <../_examples/reading_vector_data.ipynb>

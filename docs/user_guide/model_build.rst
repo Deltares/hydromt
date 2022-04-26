@@ -10,7 +10,9 @@ argument describes the region of interest. The build method will start by runnin
 the model grid (if applicable) is defined for the region, usually the `setup_basemaps` method.
 The configuration file should listing all the components that the user wants to include during the build. 
 
-.. Tip: The verbosity of the log messages can be increased with `-v` for info and `-vv` for debug messages.
+.. Tip::
+    
+    The verbosity of the log messages can be increased with `-v` for info and `-vv` for debug messages.
 
 After activating the HydroMT python environment, the HydroMT ``build`` method can be run from the command line. 
 To check its options run:

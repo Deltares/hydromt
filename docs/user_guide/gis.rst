@@ -4,7 +4,6 @@
 GIS methods
 ===========
 
-.. _raster:
+.. toctree::
 
-Raster methods
-==============
+    Example: Working with raster data <../_examples/working_with_raster.ipynb>
