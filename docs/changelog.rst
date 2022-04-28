@@ -10,6 +10,7 @@ Unreleased
 
 Added
 ^^^^^
+- New raster method for adding gdal_compliant() attributes to xarray object.
 
 Changed
 ^^^^^^^

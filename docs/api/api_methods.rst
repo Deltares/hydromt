@@ -93,6 +93,7 @@ General methods
    DataArray.raster.reset_spatial_dims_attrs
    DataArray.raster.identical_grid
    DataArray.raster.aligned_grid
+   DataArray.raster.gdal_compliant
    DataArray.raster.idx_to_xy
    DataArray.raster.xy_to_idx
    DataArray.raster.rowcol

@@ -14,6 +14,7 @@ from os.path import join
 from pathlib import Path
 import rasterio
 from rasterio.transform import xy
+from osgeo import gdal
 
 from hydromt import raster
 
@@ -57,6 +58,28 @@ def test_crs():
     da.raster.set_crs("epsg:4326")
     assert da.raster.crs.is_valid
     assert da.raster.crs.to_epsg() == 4326
+
+
+def test_gdal(tmpdir):
+    da = raster.full_from_transform(*testdata[0], name="test")
+    # Add crs
+    da.attrs.update(crs=4326)
+    da.raster.set_crs()
+    # Update gdal compliant attrs
+    da1 = da.raster.gdal_compliant(rename_dims=True, force_sn=True)
+    assert raster.GEO_MAP_COORD in da1.coords
+    assert da1.raster.dims == ("lat", "lon")
+    assert da1.raster.res[1] > 0
+    # Update without rename and SN orientation
+    da = da.raster.gdal_compliant(rename_dims=False, force_sn=False)
+    assert da.raster.dims == ("y", "x")
+    assert da.raster.res[1] < 0
+    # Write to netcdf and reopen with gdal
+    fn_nc = str(tmpdir.join("gdal_test.nc"))
+    da.to_netcdf(fn_nc)
+    info = gdal.Info(fn_nc)
+    ds = gdal.Open(fn_nc)
+    assert da[raster.GEO_MAP_COORD].attrs["crs_wkt"] == ds.GetProjection()
 
 
 def test_attrs_errors(rioda):

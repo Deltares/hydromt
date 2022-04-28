@@ -441,6 +441,45 @@ class XRasterBase(XGeoBase):
             and np.logical_and.reduce((w <= w1, s <= s1, e >= e1, n >= n1))
         )
 
+    def gdal_compliant(self, rename_dims=True, force_sn=False):
+        """Updates attributes to get GDAL compliant NetCDF files.
+
+        Arguments
+        ----------
+        rename_dims: bool, optional
+            If True, rename x_dim and y_dim to standard names depending on the CRS
+            (x/y for projected and lat/lon for geographic).
+        force_sn: bool, optional
+            If True, forces the dataset to have South -> North orientation.
+
+        Returns
+        -------
+        ojb_out: xr.Dataset or xr.DataArray
+            GDAL compliant object
+        """
+        obj_out = self._obj
+        crs = obj_out.raster.crs
+        if (
+            obj_out.raster.res[1] < 0 and force_sn
+        ):  # write data with South -> North orientation
+            obj_out = obj_out.raster.flipud()
+        x_dim, y_dim, x_attrs, y_attrs = gis_utils.axes_attrs(crs)
+        if rename_dims:
+            obj_out = obj_out.rename(
+                {obj_out.raster.x_dim: x_dim, obj_out.raster.y_dim: y_dim}
+            )
+        else:
+            x_dim = obj_out.raster.x_dim
+            y_dim = obj_out.raster.y_dim
+        obj_out[x_dim].attrs.update(x_attrs)
+        obj_out[y_dim].attrs.update(y_attrs)
+        obj_out = obj_out.drop_vars(["spatial_ref"], errors="ignore")
+        obj_out.rio.write_crs(crs, inplace=True)
+        obj_out.rio.write_transform(obj_out.raster.transform, inplace=True)
+        obj_out.raster.set_spatial_dims()
+
+        return obj_out
+
     def transform_bounds(self, dst_crs, densify_pts=21):
         """Transform bounds from object to destination CRS.
 
@@ -1200,7 +1239,7 @@ class RasterDataArray(XRasterBase):
             self.set_nodata(nodata)
         return nodata
 
-    def set_nodata(self, nodata=None):
+    def set_nodata(self, nodata=None, logger=logger):
         """Set the nodata value as CF compliant attribute of the DataArray.
 
         Arguments
@@ -1214,8 +1253,13 @@ class RasterDataArray(XRasterBase):
             nodata = self._obj.rio.nodata
             if nodata is None:
                 nodata = self._obj.rio.encoded_nodata
-        self._obj.rio.set_nodata(nodata, inplace=True)
-        self._obj.rio.write_nodata(nodata, inplace=True)
+        # Only numerical nodata values are supported
+        if np.issubdtype(type(nodata), np.number):
+            self._obj.rio.set_nodata(nodata, inplace=True)
+            self._obj.rio.write_nodata(nodata, inplace=True)
+        else:
+            logger.warning("No numerical nodata value found, skipping set_nodata")
+            self._obj.attrs.pop("_FillValue", None)
 
     def mask_nodata(self, fill_value=np.nan):
         """Mask nodata values with fill_value (default np.nan).
@@ -1234,7 +1278,7 @@ class RasterDataArray(XRasterBase):
         if self.nodata is not None:
             da_masked = self._obj.where(mask != 0, self.nodata)
         else:
-            logger.warn("Nodata value missing, skipping mask")
+            logger.warning("Nodata value missing, skipping mask")
             da_masked = self._obj
         return da_masked
 
