@@ -42,8 +42,8 @@ from conda-forge in a clean environment, see `installation guide. <https://delta
 HydroMT model plugins
 ---------------------
 HydroMT is commonly used in combination with a **model plugin** which 
-provides an implementation of the model API for specific model software. 
-Known models for which a plugin has been developed include:
+provides a HydroMT implementation for specific model software. 
+Known model plugins include:
 
 * hydromt_wflow_: A framework for distributed rainfall-runoff (wflow_sbm) sediment transport (wflow_sediment) modelling.
 * hydromt_delwaq_: A framework for water quality (D-Water Quality) and emissions (D-Emissions) modelling.

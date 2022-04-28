@@ -1,37 +1,78 @@
-.. _cli_build:
+.. _model_build:
 
 Building a model
 ================
 
-To build a complete model from scratch using available data the ``build`` command can be used.
-The interface is identical for each model, but the configuration file has different 
-options (see documentation of the individual models). The mandatory :ref:`region <region>`
-argument describes the region of interest. The build method will start by running the component in which
-the model grid (if applicable) is defined for the region, usually the `setup_basemaps` method.
-The configuration file should listing all the components that the user wants to include during the build. 
+To build a complete model from scratch using available data the ``build`` method can be used.
+The build method is identical for all :ref:`HydroMT model plugins <plugins>`, 
+but the model methods (i.e. sections and options in the .ini configuration file) are different for each model.
+
+**Steps in brief:**
+
+1) Prepare or use an existing **data catalog** with all the required data sources, see :ref:`working with data <get_data>`
+2) Define your **model region**, see the overview of :ref:`region options <region>`. 
+3) Prepare a **model configuration** which describes the complete pipeline to build your model: see :ref:`model configuration <model_config>`.
+4) **Build** you model using the CLI or Python interface
+
+.. _cli_build:
+
+From CLI
+--------
+
+The ``hydromt build`` command line interface (CLI) method can be run from the command line after the right conda environment is activated. 
+The HydroMT core package itself does not contain an implementation for a specific model. 
+To actually build a specific model the HydroMT plugin for that model needs to be installed.
+
+To check which HydroMT model plugins are installed, do:
+
+.. code-block:: console
+
+    hydromt --models
+    
+
+**Example usage**
+
+The following line of code builds a SFINCS model for a region defined by a bounding box ``bbox`` and based on the model methods 
+in the ``sfincs_config.ini`` file and the data sources in the ``data_catalog.yml`` file.
+
+.. code-block:: console
+
+    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini -d /path/to/data_catalog.yml -v
+
 
 .. Tip::
     
-    The verbosity of the log messages can be increased with `-v` for info and `-vv` for debug messages.
+    The verbosity of the log messages can be increased with ``-v`` for info and ``-vv`` for debug messages.
 
-After activating the HydroMT python environment, the HydroMT ``build`` method can be run from the command line. 
-To check its options run:
+**Overview of options**
+
+To check all options do:
 
 .. code-block:: console
 
     hydromt build --help
 
+.. include:: ../_generated/cli_build.rst
+
+.. _python_build:
+
+From Python
+-----------
+
+All HydroMT models have a :py:func:`~hydromt.Model.build` method which can be used when building models from Python.
+The data catalog yaml files and logging have to be set when initializing the model. 
+The configuration file can be parsed using :py:func:`~hydromt.config.configread` and passed to the build method using the ``opt`` argument.
+
 **Example usage**
 
-.. code-block:: console
+To create the same SFINCS model as shown above in the CLI example the following block of Python code is required.
 
-    To build a wflow model for a subbasin using and point coordinates snapped to cells with stream order >= 4
-    hydromt build wflow /path/to/model_root "{'subbasin': [-7.24, 62.09], 'strord': 4}" -i /path/to/wflow_config.ini
+.. code-block::  python
 
-
-    To build a sfincs model based on a bbox (for Texel)
-    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini
-
-**Further options**
-
-.. include:: ../_generated/cli_build.rst
+    from hydromt_sfincs import SfincsModel
+    from hydromt.config import configread
+    data_libs = [r'/path/to/data_catalog.yml']
+    model_root = r'/path/to/model_root
+    opt=configread(r'/path/to/sfincs_config.ini')  # parse .ini configuration
+    mod = SfincsModel(model_root, data_libs=data_libs)  # initialize model with default logger
+    mod.build(region={'bbox': [4.6891,52.9750,4.9576,53.1994]}, opt=opt)

@@ -18,7 +18,7 @@ From the user side, HydroMT is organized in the following way:
 
 | **Configuration**
 | The complete building or updating process of a model can be configured in a single configuration *.ini* file. 
-  This file describes the full pipeline of model setup components and their arguments. The components vary per 
+  This file describes the full pipeline of model methods and their arguments. The model methods vary per 
   model :ref:`plugin <plugins>` and are documented for each at their respective documentation websites.
 
 | **Command Line Interface (CLI)**

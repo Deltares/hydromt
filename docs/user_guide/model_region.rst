@@ -3,13 +3,15 @@
 Region options
 --------------
 
-A user can define the region of interest based on general geospatial or hydrographic area using one of the following options:
+A user can define the region of interest based on general geospatial or hydrographic area using a geospatial or hydrographic region definition.
+The syntax is interpreted using the :py:meth:`~hydromt.workflows.basin_mask.parse_region` method. 
+For hydrographic regions see also the `delineate basins <../_examples/delineate_basin.ipynb>`_ example and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry` method.
 
 .. NOTE::
 
     All x and y coordinates in the *point* and *bbox* are in the EPSG:4326 (WGS84) coordinate reference system.
 
-Geospatial region
+Geospatial region   
 ^^^^^^^^^^^^^^^^^
 
     Bounding box (bbox): ``{'bbox': [xmin, ymin, xmax, ymax]}``
@@ -99,8 +101,5 @@ combined with stream arguments.
     To only select interbasins based on the outlet location of entire basins use ``'outlets': true``
 
     ``{'interbasin': [xmin, ymin, xmax, ymax], 'outlets': true}``
-
-See also the `hydrographic regions <../_examples/delineate_basin.ipynb>`_ example and the 
-:py:meth:`~hydromt.workflows.basin_mask.parse_region` and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry` methods.
 
 .. image:: ../_static/region.png

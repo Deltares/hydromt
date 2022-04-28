@@ -548,3 +548,23 @@ Statistics and performance metrics
    stats.skills.mse
    stats.skills.rmse
 
+=========
+Utilities
+=========
+
+Configuration files
+===================
+
+.. autosummary::
+   :toctree: _generated
+   
+   config.configread
+   config.configwrite
+
+Logging
+=======
+
+.. autosummary::
+   :toctree: _generated
+   
+   log.setuplog

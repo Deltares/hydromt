@@ -1,18 +1,16 @@
 
 .. _existing_catalog:
 
-Using a pre-defined Data Catalog
-================================
+Pre-defined data catalogs
+=========================
 
-The documentation contains a list of (global) datasets which can be used with various HydroMT models and workflows. 
-The deltares_data catalog is only available within the Deltares network. However a selection of this data for a the 
-Piave basin (north Italy) is available online and will be downloaded to ``~/.hydromt_data/`` if selected or when no data catalog is provided. 
-Local or other datasets can also be included by extending the data catalog with new .yml files. 
-
-Pre-defined Data Catalogs
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
+This pages contains a list of (global) datasets which can be used with various HydroMT models and workflows. 
 Below are drop down lists with datasets per pre-defined data catalog for use with HydroMT. 
 The summary per dataset contains links to the online source and available literature. 
+
+The ``deltares_data`` catalog is only available within the Deltares network. However a selection of this data for a the 
+Piave basin (north Italy) is available online and will be downloaded to ``~/.hydromt_data/`` if when no data catalog is provided. 
+Local or other datasets can also be included by extending the data catalog with new .yml :ref:`data catalog files <data_yaml>`. 
+In the future we will provide mode data catalogs with openly data sources.
 
 .. include:: ../_generated/deltares_data.rst

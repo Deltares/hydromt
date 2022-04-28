@@ -12,8 +12,33 @@ FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 from . import __version__
 
 
-def setuplog(name="hydromt", path=None, log_level=20, fmt=FMT, append=True):
-    """Set-up the logging on sys.stdout"""
+def setuplog(
+    name: str = "hydromt",
+    path: str = None,
+    log_level: int = 20,
+    fmt: str = FMT,
+    append: bool = True,
+) -> logging.Logger:
+    f"""Set-up the logging on sys.stdout and file if path is given.
+
+    Parameters
+    ----------
+    name : str, optional
+        logger name, by default "hydromt"
+    path : str, optional
+        path to logfile, by default None
+    log_level : int, optional
+        Log level [0-50], by default 20 (info)
+    fmt : str, optional
+        log message formatter, by default {FMT}
+    append : bool, optional
+        Wether to append (True) or overwrite (False) to a logfile at path, by default True
+
+    Returns
+    -------
+    logging.Logger
+        _description_
+    """
     logger = logging.getLogger(name)
     for _ in range(len(logger.handlers)):
         logger.handlers.pop().close()  # remove and close existing handlers

@@ -48,8 +48,8 @@ Plugins
         Delft-FIAT plugin :octicon:`link-external`
 
 
-About the models
-----------------
+About the model software
+------------------------
 
 - Wflow_ is Deltares' solution for modelling hydrological processes, allowing users to account 
   for precipitation, interception, snow accumulation and melt, evapotranspiration, soil water, 

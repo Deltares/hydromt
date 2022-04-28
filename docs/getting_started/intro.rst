@@ -9,7 +9,7 @@ Getting started
         :link: installation_guide
         :link-type: ref
         
-        :octicon:`settings;10em`
+        :octicon:`gear;10em`
         +++
         Installation guide
 

@@ -59,7 +59,7 @@ opt_cli = click.option(
     "--opt",
     multiple=True,
     callback=cli_utils.parse_opt,
-    help="Component specific keyword arguments, see the setup_<component> method "
+    help="Method specific keyword arguments, see the method documentation "
     "of the specific model for more information about the arguments.",
 )
 
@@ -145,7 +145,7 @@ def build(
     verbose,
     quiet,
 ):
-    """Build models from source data.
+    """Build models from scratch.
 
     \b
     Example usage:
@@ -153,15 +153,11 @@ def build(
 
     \b
     To build a wflow model for a subbasin using and point coordinates snapped to cells with stream order >= 4
-    hydromt build wflow /path/to/model_root "{'subbasin': [-7.24, 62.09], 'strord': 4}" -i /path/to/wflow_config.ini
+    hydromt build wflow /path/to/model_root "{'subbasin': [-7.24, 62.09], 'strord': 4}" -i /path/to/wflow_config.ini -d /path/to/data_catalog.yml -v
 
     \b
-    To build a wflow model based on basin ID
-    hydromt build wflow /path/to/model_root "{'basin': 230001006}"
-
-    \b
-    To build a sfincs model based on a bbox (for Texel)
-    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"
+    To build a sfincs model based on a bbox
+    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini -d /path/to/data_catalog.yml -v
 
     """
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -224,7 +220,7 @@ def build(
     "-c",
     "--components",
     multiple=True,
-    help="Model components from ini file to run",
+    help="Model methods from ini file to run",
 )
 @opt_cli
 @opt_config
@@ -245,12 +241,12 @@ def update(
     --------------
 
     \b
-    Update (overwrite) landuse-landcover maps in a wflow model
-    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt source_name=vito
+    Update (overwrite!) landuse-landcover based maps in a Wflow model
+    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
 
     \b
-    Update reservoir maps based on default settings in a wflow model and write to new directory
-    hydromt update wflow /path/to/model_root -o /path/to/model_out -c setup_reservoirs
+    Update Wflow model components outlined in an .ini configuration file and write the model to a directory
+    hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.ini -d /path/to/data_catalog.yml -v
     """
     # logger
     mode = "r+" if model_root == model_out else "r"
