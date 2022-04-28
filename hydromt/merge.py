@@ -12,6 +12,7 @@ def merge(
     dst_crs=None,
     dst_bounds=None,
     dst_res=None,
+    align=True,
     mask=None,
     merge_method="first",
     **kwargs,
@@ -32,6 +33,8 @@ def merge(
         Bounding box [xmin, ymin, xmax, ymax] of destination grid
     dst_res: float
         Resolution of destination grid
+    align : bool, optional
+        If True, align grid with dst_res
     mask: geopands.GeoDataFrame, optional
         Mask of destination area of interest.
         Used to determine dst_crs, dst_bounds and dst_res if missing.
@@ -99,13 +102,16 @@ def merge(
         raise ValueError("dst_bounds and dst_res not understood without dst_crs.")
     idx0 = 0
     if mask is not None and (dst_res is None or dst_crs is None):
-        # select array with largest overlap if mask is given
+        # select array with largest overlap of valid cells if mask
         areas = []
         for da in data_arrays:
-            p1 = da.raster.box.unary_union.buffer(0)
-            p0 = mask.to_crs(da.raster.crs).unary_union.buffer(0)
-            areas.append(p1.intersection(p0).area)
+            da_clipped = da.raster.clip_geom(geom=mask, mask=True)
+            n = da_clipped.raster.mask_nodata().notnull().sum().load().item()
+            areas.append(n)
         idx0 = np.argmax(areas)
+        # if single layer with overlap of valid cells: return clip
+        if np.sum(np.array(areas) > 0) == 1:
+            return data_arrays[idx0].raster.clip_geom(mask)
     da0 = data_arrays[idx0]  # used for default dst_crs and dst_res
     # dst CRS
     if dst_crs is None:
@@ -126,7 +132,14 @@ def merge(
     dst_res = (x_res, -y_res)  # NOTE: y_res is multiplied with -1 in rasterio!
     # dst bounds
     if dst_bounds is None and mask is not None:
-        w, s, e, n = mask.to_crs(dst_crs).total_bounds
+        w, s, e, n = mask.to_crs(dst_crs).buffer(2 * abs(x_res)).total_bounds
+        # align with da0 grid
+        w0, s0, e0, n0 = da0.raster.bounds
+        w = w0 + np.round((w - w0) / abs(x_res)) * abs(x_res)
+        n = n0 + np.round((n - n0) / abs(y_res)) * abs(y_res)
+        e = w + int(round((e - w) / abs(x_res))) * abs(x_res)
+        s = n - int(round((n - s) / abs(y_res))) * abs(y_res)
+        align = False  # don't align with resolution
     elif dst_bounds is None:
         for i, da in enumerate(data_arrays):
             if i == 0:
@@ -147,9 +160,10 @@ def merge(
     height = int(round((n - s) / abs(y_res)))
     transform = rasterio.transform.from_bounds(*dst_bounds, width, height)
     # align with dst_res
-    transform, width, height = rasterio.warp.aligned_target(
-        transform, width, height, dst_res
-    )
+    if align:
+        transform, width, height = rasterio.warp.aligned_target(
+            transform, width, height, dst_res
+        )
 
     # creat output array
     nodata = da0.raster.nodata
