@@ -75,6 +75,39 @@ def test_parser():
         _parse_data_dict({"test1": {"alias": "test"}})
 
 
+def test_resolve_path(tmpdir):
+    # create dummy files
+    for variable in ["precip", "temp"]:
+        for year in [2020, 2021]:
+            with open(
+                join(tmpdir, "{unknown_key}_" + f"{variable}_{year}.nc"), "w"
+            ) as f:
+                f.write("")
+    # create data catalog for these files
+    dd = {
+        "test": {
+            "data_type": "RasterDataset",
+            "driver": "netcdf",
+            "path": join(tmpdir, "{unknown_key}_{variable}_{year}.nc"),
+        }
+    }
+    cat = DataCatalog()
+    cat.from_dict(dd)
+    # test
+    assert len(cat["test"].resolve_paths()) == 4
+    assert len(cat["test"].resolve_paths(variables=["precip"])) == 2
+    assert (
+        len(
+            cat["test"].resolve_paths(
+                variables=["precip"], time_tuple=("2021-03-01", "2021-05-01")
+            )
+        )
+        == 1
+    )
+    with pytest.raises(FileNotFoundError, match="No such file found:"):
+        cat["test"].resolve_paths(variables=["waves"])
+
+
 def test_data_catalog_io(tmpdir):
     data_catalog = DataCatalog()
     # read / write
@@ -82,6 +115,8 @@ def test_data_catalog_io(tmpdir):
     data_catalog.to_yml(fn_yml)
     data_catalog1 = DataCatalog(data_libs=fn_yml)
     assert data_catalog.to_dict() == data_catalog1.to_dict()
+    # test print
+    print(data_catalog["merit_hydro"])
 
 
 def test_data_catalog(tmpdir):

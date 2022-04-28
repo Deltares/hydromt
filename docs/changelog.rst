@@ -20,9 +20,11 @@ Changed
 - In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, automatic renaming of single variable datasets based on the variables argument will be deprecated
 - Interpolate missing values based on D4 neighbors of missing value cells only. This largely improves the performance without loosing accuracy.
   Changes have been observed when `nearest` method is used but this should not impact quality of the interpolation.
+- New source_names argument to DataCatalog.to_yml
 
 Fixed
 ^^^^^
+- Fixed DataAdapter.resolve_paths with unknown keys #121
 - Fixed the WGS84 datum in the gis_utils.utm_crs method.
 
 Deprecated

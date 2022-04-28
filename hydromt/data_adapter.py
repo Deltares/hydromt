@@ -9,6 +9,7 @@ from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 from itertools import product
 import copy
 from pathlib import Path
+from typing import Tuple
 import numpy as np
 import xarray as xr
 import geopandas as gpd
@@ -24,6 +25,7 @@ import shutil
 from distutils.version import LooseVersion
 import itertools
 import warnings
+from string import Formatter
 
 from . import gis_utils, io
 
@@ -262,7 +264,7 @@ class DataCatalog(object):
         if mark_used:
             self._used_data.extend(list(data_dict.keys()))
 
-    def to_yml(self, path, root="auto", used_only=False):
+    def to_yml(self, path, root="auto", source_names=[], used_only=False):
         """Write data catalog to yml format.
 
         Parameters
@@ -272,22 +274,36 @@ class DataCatalog(object):
         root: str, Path, optional
             Global root for all relative paths in yml file.
             If "auto" the data source paths are relative to the yml output ``path``.
+        source_names: list, optional
+            List of source names to export; ignored if `used_only=True`
         used_only: bool
-            If True, export only data entries kept in used_data list.
+            If True, export only data entries kept in used_data list, by default False.
         """
+        source_names = self._used_data if used_only else source_names
+        yml_dir = os.path.dirname(path)
         if root == "auto":
-            # set paths relative to yml file
-            root = os.path.dirname(path)
-            d = self.to_dict(root=root)
-            d.pop("root", None)  # remove absolute root path
-        else:
-            source_names = self._used_data if used_only else []
-            d = self.to_dict(root=root, source_names=source_names)
+            root = yml_dir
+        d = self.to_dict(root=root, source_names=source_names)
+        if str(root) == yml_dir:
+            d.pop("root", None)  # remove root if it equals the yml_dir
         with open(path, "w") as f:
             yaml.dump(d, f, default_flow_style=False)
 
     def to_dict(self, source_names=[], root=None):
-        """Return data catalog in dictionary format"""
+        """Export the data catalog to a dictionary.
+
+        Parameters
+        ----------
+        source_names : list, optional
+            List of source names to export
+        root : str, Path, optional
+            Global root for all relative paths in yml file.
+
+        Returns
+        -------
+        dict
+            data catalog dictionary
+        """
         sources_out = dict()
         if root is not None:
             root = os.path.abspath(root)
@@ -335,6 +351,8 @@ class DataCatalog(object):
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
+        source_names: list, optional
+            List of source names to export
         unit_conversion: boolean, optional
             If False skip unit conversion when parsing data from file, by default True.
 
@@ -773,30 +791,52 @@ class DataAdapter(object, metaclass=ABCMeta):
         return source
 
     def __str__(self):
-        return pprint.pformat(self.summary())
+        return yaml.dump(self.to_dict())
 
     def __repr__(self):
         return self.__str__()
 
-    def resolve_paths(self, time_tuple=None, variables=None):
-        """Returns list of paths. Resolve {year}, {month} and {variable} keywords
-        in self.path based 'time_tuple' and 'variables' arguments"""
+    def resolve_paths(self, time_tuple: Tuple = None, variables: list = None):
+        """Resolve {year}, {month} and {variable} keywords
+        in self.path based on 'time_tuple' and 'variables' arguments
+
+        Parameters
+        ----------
+        time_tuple : tuple of str, optional
+            Start and end data in string format understood by :py:func:`pandas.to_timedelta`, by default None
+        variables : list of str, optional
+            List of variable names, by default None
+
+        Returns
+        -------
+        List:
+            list of filenames matching the path pattern given date range and variables
+        """
         yr, mth = "*", "*"
         vrs = ["*"]
         dates = [""]
         fns = []
-        if time_tuple is not None and "{year" in str(self.path):
+        path = str(self.path)
+        known_keys = ["year", "month", "variable"]
+        keys = [i[1] for i in Formatter().parse(path) if i[1] is not None]
+        # double unknown keys to escape these when formatting
+        for key in [key for key in keys if key not in known_keys]:
+            path = path.replace("{" + key + "}", "{{" + key + "}}")
+        # resolve dates: month & year keys
+        if time_tuple is not None and "year" in keys:
             dt = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
             trange = pd.to_datetime(list(time_tuple)) - dt
-            freq = "m" if "{month" in str(self.path) else "a"
+            freq = "m" if "month" in keys else "a"
             dates = pd.period_range(*trange, freq=freq)
-        if variables is not None and "{variable" in str(self.path):
+        # resolve variables
+        if variables is not None and "variable" in keys:
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
         for date, var in product(dates, vrs):
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            path = str(self.path).format(year=yr, month=mth, variable=var)
+            path = path.format(year=yr, month=mth, variable=var)
+            # FIXME: glob won't work with other than local file systems; use fsspec instead
             fns.extend(glob.glob(path))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {self.path}")
