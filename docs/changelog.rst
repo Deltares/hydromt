@@ -11,13 +11,24 @@ Unreleased
 Added
 ^^^^^
 - New raster method for adding gdal_compliant() attributes to xarray object.
+- Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
+- Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
 
 Changed
 ^^^^^^^
+- In build or update methods, the setup_config component is not forced to run first anymore but according to order of the components in the ini config (opt dict).
+- In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, variables can now also be a str as well as a list of strings.
+- In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, automatic renaming of single variable datasets based on the variables argument will be deprecated
+- Interpolate missing values based on D4 neighbors of missing value cells only. This largely improves the performance without loosing accuracy.
+  Changes have been observed when `nearest` method is used but this should not impact quality of the interpolation.
 
 Fixed
 ^^^^^
 - Fixed the WGS84 datum in the gis_utils.utm_crs method.
+
+Deprecated
+^^^^^^^^^^
+- Automatic renaming of single var dataset if variables is provided in get_rasterdataset. Data catalog should be used instead.
 
 v0.4.5 (16 February 2022)
 -------------------------
