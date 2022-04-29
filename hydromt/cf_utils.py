@@ -1,54 +1,185 @@
 import os, logging, zipfile
+from os.path import isfile, basename, abspath, join, dirname, isdir
 from pathlib import Path
 from typing import List, Set, Dict, Tuple, Optional, Callable
 import re
 import shutil
+import requests
 import glob
+import logging
+import pandas as pd
 
-logger = logging.getLogger("Utils")
-logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-class Utils:
-    @staticmethod
-    def get_logger(
-        log_dir_path: str, log_name: str, log_level: logging.Logger = logging.INFO
+class FewsUtils(object):
+    # root URL of the template CF Config file of Delft-FEWS
+    _url = (
+        r"https://repos.deltares.nl/repos/BE_Case_Studies/CF_configbase/initialstart/"
+    )
+
+    def __init__(self, fews_root, template_path=None, logger=logger):
+        """Object containing utils functions and properties to a FEWS application.
+
+        Can be inked to an existing application or start from a local template, or the templates from
+        the Delft-FEWS CF application stored at url "https://repos.deltares.nl/repos/BE_Case_Studies/CF_configbase/initialstart/"
+
+        Arguments
+        ---------
+        fews_root: str, Path
+            Path to the FEWS application root. If it does not exist will use local template in template_path or download
+            from url.
+        template_path: str, Path, optional
+            Path to FEWS template files. If not provided, will download an inital start
+            template of the FEWS CF application.
+        """
+        self.logger = logger
+        if not isdir(fews_root):
+            self.logger.warning(
+                f"FEWS config not found at {fews_root}, downloading from template"
+            )
+            self.from_initialstart(fews_root, template_path=template_path)
+
+        # Initialise different subfolders path
+        self.fews_root = fews_root
+        self.state_path = self.get_dir(fews_root, ["Config", "ColdStateFiles"])
+        self.display_path = self.get_dir(fews_root, ["Config", "DisplayConfigFiles"])
+        self.import_path = self.get_dir(fews_root, ["Import"])
+        self.map_path = self.get_dir(fews_root, ["Config", "MapLayerFiles"])
+        self.module_path = self.get_dir(fews_root, ["Config", "ModuleDataSetFiles"])
+        self.region_path = self.get_dir(fews_root, ["Config", "RegionConfigFiles"])
+
+        # List of templated config files and path
+        self.template_configfiles = {
+            "Grids": self.region_path,
+            "LocationSets": self.region_path,
+            "ModuleInstanceDescriptors": self.region_path,
+            "WorkflowDescriptors": self.region_path,
+        }
+        self.locationfiles = {"grids": join(self.map_path)}
+
+        # Initialise dictionnaries with the different models in the FEWS application
+        self._models = {}
+
+    @property
+    def models(self):
+        """Returns dictionary of Models in FEWS config."""
+        if len(self._models) == 0:
+            self._models = {}
+            # self.from_moduledata()  # try reading existing models in config todo implement
+        return self._models
+
+    @property
+    def keys(self):
+        """Returns list of data source names."""
+        return list(self.models.keys())
+
+    def __getitem__(self, key):
+        return self.models[key]
+
+    def __setitem__(self, key, value):
+        if key in self._models:
+            self.logger.warning(f"Overwriting data source {key}.")
+        return self._models.__setitem__(key, value)
+
+    def __iter__(self):
+        return self.models.__iter__()
+
+    def __len__(self):
+        return self.models.__len__()
+
+    def update(self, **kwargs):
+        """Add model sources."""
+        for k, v in kwargs.items():
+            self[k] = v
+
+    def add_modeldata(
+        self,
+        name,
+        scheme_version,
+        crs,
+        **kwargs,
     ):
-        """
-        Creates log file
-        :param log_dir_path: path where log file is written
-        :param log_name: name of the logger as shown in log file
-        :param log_level: default loglevel applied
-        :return: logger class
-        """
-        logger = logging.getLogger(log_name)
-        logger.setLevel(log_level)
-        log_path = os.path.join(log_dir_path, "{}_log.txt".format(log_name))
-        if os.path.exists(log_path):
-            os.remove(os.path.join(log_dir_path, "{}_log.txt".format(log_name)))
-        formatter = logging.Formatter(
-            "%(name)s - %(asctime)s %(levelname)s %(message)s"
-        )
-        ch = logging.StreamHandler()
-        ch.setLevel(log_level)
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
-        ch = logging.FileHandler(
-            os.path.join(log_dir_path, log_name + ".log"), mode="w"
-        )
-        ch.setLevel(log_level)
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
-        return logger
+        """Add model source based on dictionary.
 
-    @staticmethod
-    def get_dir(base: str, subfolders: List[str] = []) -> Path:
+        Parameters
+        ----------
+        name: dict
+            Dictionary of model_sources.
+        """
+        model_name, region_name, model_version = name.split(".")
+        model_dict = {
+            "model": model_name,
+            "region": region_name,
+            "mversion": model_version,
+            "sversion": scheme_version,
+            #'model_folder': join(f'scheme.{scheme_version}', name),
+            "crs": crs,
+        }
+        for k, v in kwargs.items():
+            if k == "shape":
+                rows, columns = v
+                model_dict["rows"] = rows
+                model_dict["columns"] = columns
+            elif k == "bounds":
+                xmin, ymin, xmax, ymax = v
+                model_dict["xmin"] = xmin
+                model_dict["ymin"] = ymin
+                model_dict["xmax"] = xmax
+                model_dict["ymax"] = ymax
+            else:
+                model_dict[k] = v
+
+        model_dict = {name: model_dict}
+        self.update(**model_dict)
+
+    def from_initialstart(self, fews_root, template_path=None):
+        """Download an inital start template of the FEWS CF application at url
+        "https://repos.deltares.nl/repos/BE_Case_Studies/CF_configbase/initialstart/"
+        and save it to fews_root.
+
+        Parameters
+        ----------
+        fews_root: str or Path
+            Path to the new FEWS configuration folder.
+        """
+        # prepare url and paths
+        url = rf"{self._url}"
+        folder = fews_root
+        if not isdir(folder):
+            os.makedirs(folder)
+        # Check if template_path is provided and if yes copy to fews_root
+        if template_path and isdir(template_path):
+            self.copy_basefiles(
+                source_dir=Path(template_path),
+                destination_dir=Path(fews_root),
+                dirs_exist_ok=True,
+            )
+        # download data
+        else:
+            with requests.get(url, stream=True) as r:
+                if r.status_code != 200:
+                    self.logger.error(f"CF templates not found at {url}")
+                    return
+                self.logger.info(f"Downloading file to {folder}")
+                with open(folder, "wb") as f:
+                    shutil.copyfileobj(r.raw, f)
+
+    def get_dir(self, base: str, subfolders: List[str] = []) -> Path:
         """
         Static methods returns WindowsPath-object of directory as listed in configuration, if needed supplemented with sub-folders.
-        Checks for folder existence and creates new if needed
-        :param base: base folder from which sub-folders are checked/created
-        :param subfolders: Fews-config subfolders
-        :return: WindowsPath-object
+        Checks for folder existence and creates new if needed.
+
+        Parameters
+        ----------
+        base: str
+            base folder from which sub-folders are checked/created
+        subfolders: list, Optional
+            Fews-config subfolders
+        Returns
+        -------
+        folder: Path
+            WindowsPath-object
         """
         if not Path(base).exists():
             Path(base).mkdir()
@@ -62,96 +193,7 @@ class Utils:
                     folder.mkdir()
             return folder
 
-    @staticmethod
-    def clean_dir(basedir: Path):
-        """
-        Cleans all files and sub-folders of directory
-        :param basedir: path - folder to clear
-        :return:
-        """
-        sub_dirs = [x for x in basedir.iterdir() if x.is_dir()]
-        for sub_dir in sub_dirs:
-            subsub_dirs = [x for x in sub_dir.iterdir() if x.is_dir()]
-            if len(subsub_dirs) > 0:
-                for subsub in subsub_dirs:
-                    for file in subsub.iterdir():
-                        file.unlink()
-                    subsub.rmdir()
-            for file in sub_dir.iterdir():
-                file.unlink()
-            sub_dir.rmdir()
-
-    @staticmethod
-    def create_zipfile(
-        outfile: Path,
-        files_to_append=List[str],
-        add_dir_name: str = None,
-        conditionalsuffix_sub_dir: Dict = {},
-    ):
-        """
-        Creates zipfile-object by adding files listed and write do destination path
-        :param outfile: path to output file
-        :param files_to_append: list of files to include in zip file
-        :param add_dir_name: add directory name when zipping
-        :param conditionalsuffix_sub_dir: add sub-directory name (dict value) when file suffix in dict keys,
-        only applied in combination with add_dir_name
-        :return:
-        """
-        zipObj = zipfile.ZipFile(outfile, "w", zipfile.ZIP_DEFLATED)
-        for fileObj in files_to_append:
-            if add_dir_name is None:
-                zipObj.write(filename=fileObj, arcname=fileObj.name)
-            if len(conditionalsuffix_sub_dir) > 0:
-                for fsuffix in conditionalsuffix_sub_dir:
-                    if fileObj.suffix == fsuffix:
-                        zipObj.write(
-                            filename=fileObj,
-                            arcname="{}/{}/{}".format(
-                                add_dir_name,
-                                conditionalsuffix_sub_dir[fsuffix],
-                                fileObj.name,
-                            ),
-                        )
-                    else:
-                        zipObj.write(
-                            filename=fileObj,
-                            arcname="{}/{}".format(add_dir_name, fileObj.name),
-                        )
-            else:
-                zipObj.write(
-                    filename=fileObj, arcname="{}/{}".format(add_dir_name, fileObj.name)
-                )
-        zipObj.close()
-
-    @staticmethod
-    def write_ini_file(sections: Dict, ini_file: Path):
-
-        """
-        Reads parameter file and returns dataframe with:
-        ID, NAME, SHORT_NAME, GROUP, TYPE, UNIT, VALUE_RESOLUTION
-        :param ini:
-        :return:
-        """
-        with open(ini_file, "w") as outf:
-            for section in sections:
-                outf.write("[" + section + "]\n")
-                for key in sections[section].keys():
-                    outf.write(key + "=" + sections[section][key] + "\n")
-
-    @staticmethod
-    def add_wgs84_projection_file(fname: Path):
-        """
-        Add missing projection file, expressed in WGS 1984
-        :param fname:
-        :return:
-        """
-        proj_str = 'GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]]'
-        proj_file = open(fname, "w")
-        proj_file.write(proj_str)
-        proj_file.close()
-
-    @staticmethod
-    def copy_basefiles(source_dir, destination_dir, dirs_exist_ok=True):
+    def copy_basefiles(self, source_dir, destination_dir, dirs_exist_ok=True):
         """
         Copies base configuration to a specific goal directory
         :param cf_baseconfig_path: path with base configuration
@@ -170,83 +212,155 @@ class Utils:
             dirs_exist_ok=dirs_exist_ok,
         )
 
-    @staticmethod
-    def replace_tags_by_file(source_file, destination_file, tag_dict, extensions):
+    def add_template_configfiles(self, model_source, model_templates=None):
+        """
+        Update and add template config files in model_templates folder to the fews root
+        for model_source instance.
+
+        Parameters
+        ----------
+        model_source: str
+            Model source in FewsUtils model catalog.
+        model_templates: str, Path, optional
+            Folde containing template config files for tag replacement. If not provided,
+            download from url.
+        """
+        model = self.models[model_source]
+        # Check if model_templates exist else download
+        if not isdir(model_templates):
+            # TODO download
+            return
+        files = glob.glob(join(model_templates, "*.xml"))
+        scheme = model.get("sversion")
+        mod = model.get("model")
+        region = model.get("region")
+        version = model.get("mversion")
+        for file in files:
+            filetype = basename(file).split("_")[0]
+            dest_folder = self.template_configfiles[filetype]
+            dest_file = join(
+                dest_folder,
+                f"scheme.{scheme}",
+                f"{filetype}_{mod}.{region}.{version}.xml",
+            )
+            self.replace_tags_by_file(
+                source_file=Path(file),
+                destination_file=Path(dest_file),
+                tag_dict=model,
+            )
+
+    def add_locationsfiles(self, model_source):
+        """
+        Update location files (csv) in the fews root
+        for model_source instance.
+
+        Parameters
+        ----------
+        model_source: str
+            Model source in FewsUtils model catalog.
+        """
+        model = self.models[model_source]
+        mod = model.get("model")
+        region = model.get("region")
+        mversion = model.get("mversion")
+        locid = f"{model}.{region}.{mversion}"
+        for fname, fpath in self.locationfiles:
+            fname = join(fpath, mod, f"{mod}_{fname}.csv")
+            if isfile(fname):
+                df = pd.read_csv(fname)
+                if locid not in df["ID"]:
+                    df = df.append({"ID": locid}, ignore_index=True)
+
+    def replace_tags_by_file(self, source_file, destination_file, tag_dict):
         """
         replaces tags in a source file templates and copies the filled source file to a destination file
         :param source_file: path to file that contains tags and therefore serves as template
         :param destination_file: path to file with tags from source file replaced by values
         :return: specific filled templates
         """
-
-        if Path(destination_file).suffix in extensions:
-            destination_file = destination_file.parents[0]
-
         assert source_file.exists(), f"Cannot find source file: {source_file}"
-        if not Path(destination_file).exists():
-            Path(destination_file).mkdir(parents=True)
+        if not isdir(os.path.dirname(destination_file)):
+            os.makedirs(os.path.dirname(destination_file))
 
         destination_file_add = shutil.copy(
             source_file, destination_file, follow_symlinks=True
         )
-        file_name = Path(destination_file_add).name
+        file_name = basename(destination_file_add)
 
         with open(destination_file_add, "r") as f:
             template = f.read()
             template_filled = template
             file_name_filled = file_name
             for key, value in tag_dict.items():
+                value = str(value)
                 file_name_filled = re.sub("{" + key + "}", value, file_name_filled)
                 template_filled = re.sub("{" + key + "}", value, template_filled)
-                with open(destination_file_add, "w") as ff:
-                    ff.write(template_filled)
+            with open(destination_file_add, "w") as ff:
+                ff.write(template_filled)
 
-        old_file_name = Path(destination_file / file_name)
-        new_file_name = Path(destination_file / file_name_filled)
+    # def write_ini_file(sections: Dict, ini_file: Path):
+    #     """
+    #     Reads parameter file and returns dataframe with:
+    #     ID, NAME, SHORT_NAME, GROUP, TYPE, UNIT, VALUE_RESOLUTION
+    #     :param ini:
+    #     :return:
+    #     """
+    #     with open(ini_file, "w") as outf:
+    #         for section in sections:
+    #             outf.write("[" + section + "]\n")
+    #             for key in sections[section].keys():
+    #                 outf.write(key + "=" + sections[section][key] + "\n")
 
-        if not Path(new_file_name).exists():
-            old_file_name.rename(new_file_name)
+    # def add_wgs84_projection_file(fname: Path):
+    #     """
+    #     Add missing projection file, expressed in WGS 1984
+    #     :param fname:
+    #     :return:
+    #     """
+    #     proj_str = 'GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]]'
+    #     proj_file = open(fname, "w")
+    #     proj_file.write(proj_str)
+    #     proj_file.close()
 
-    @staticmethod
-    def replace_tags_by_filetree(
-        source_dir_templ, destination_dir, tag_dict, extensions
-    ):
-        """
-        replaces tags in all source file templates in the file tree and save the filled templates in the respective destination pth
-        :param source_file: source file that contains tags and therefore serves as template
-        :param destination_file: file with tags from source file replaced by values
-        :return: all filled templates
-        """
-        assert (
-            source_dir_templ.exists()
-        ), f"Cannot find source directory for templates: {source_dir_templ}"
-        assert (
-            destination_dir.exists()
-        ), f"Cannot find destination directory: {destination_dir}"
+    # def replace_tags_by_filetree(
+    #     source_dir_templ, destination_dir, tag_dict, extensions
+    # ):
+    #     """
+    #     replaces tags in all source file templates in the file tree and save the filled templates in the respective destination pth
+    #     :param source_file: source file that contains tags and therefore serves as template
+    #     :param destination_file: file with tags from source file replaced by values
+    #     :return: all filled templates
+    #     """
+    #     assert (
+    #         source_dir_templ.exists()
+    #     ), f"Cannot find source directory for templates: {source_dir_templ}"
+    #     assert (
+    #         destination_dir.exists()
+    #     ), f"Cannot find destination directory: {destination_dir}"
 
-        tag_files = []
-        for path in source_dir_templ.rglob("*"):
-            if path.suffix in extensions:
-                tag_files.append(path)
+    #     tag_files = []
+    #     for path in source_dir_templ.rglob("*"):
+    #         if path.suffix in extensions:
+    #             tag_files.append(path)
 
-        for file_path in tag_files:
-            tag_files_paths_filled = file_path
-            for key, value in tag_dict.items():
-                if key in str(tag_files_paths_filled):
-                    tag_files_paths_filled = re.sub(
-                        "{" + key + "}", value, str(tag_files_paths_filled)
-                    )
-                    if not "{" in tag_files_paths_filled:
-                        source_file = file_path
-                        relative_path = os.path.relpath(source_file, source_dir_templ)
-                        destination_file = Path(destination_dir / relative_path)
-                        Utils.replace_tags_by_file(
-                            source_file, destination_file, tag_dict, extensions
-                        )
-                else:  # if no tag that needs to be replaced present in file_path
-                    if key == list(tag_dict)[-1]:
-                        source_file = file_path
-                        relative_path = os.path.relpath(source_file, source_dir_templ)
-                        destination_file = Path(destination_dir / relative_path)
-                        os.makedirs(os.path.dirname(destination_file), exist_ok=True)
-                        shutil.copy(source_file, destination_file, follow_symlinks=True)
+    #     for file_path in tag_files:
+    #         tag_files_paths_filled = file_path
+    #         for key, value in tag_dict.items():
+    #             if key in str(tag_files_paths_filled):
+    #                 tag_files_paths_filled = re.sub(
+    #                     "{" + key + "}", value, str(tag_files_paths_filled)
+    #                 )
+    #                 if not "{" in tag_files_paths_filled:
+    #                     source_file = file_path
+    #                     relative_path = os.path.relpath(source_file, source_dir_templ)
+    #                     destination_file = Path(destination_dir / relative_path)
+    #                     replace_tags_by_file(
+    #                         source_file, destination_file, tag_dict, extensions
+    #                     )
+    #             else:  # if no tag that needs to be replaced present in file_path
+    #                 if key == list(tag_dict)[-1]:
+    #                     source_file = file_path
+    #                     relative_path = os.path.relpath(source_file, source_dir_templ)
+    #                     destination_file = Path(destination_dir / relative_path)
+    #                     os.makedirs(os.path.dirname(destination_file), exist_ok=True)
+    #                     shutil.copy(source_file, destination_file, follow_symlinks=True)
