@@ -2,7 +2,6 @@
 """
 import typing
 import inspect
-import json
 
 from .models import ENTRYPOINTS
 from .data_catalog import DataCatalog
@@ -61,10 +60,10 @@ def get_model_components(model: str):
             if v.default == inspect._empty:  # required
                 components[name]["required"].append((k, type))
             else:  # optional
+                # TODO convert default value to string ?
                 components[name]["optional"].append((k, type, v.default))
 
     return components
-
 
 def get_datasets(data_catalog: str) -> dict:
     data_catalog = DataCatalog(data_catalog)
