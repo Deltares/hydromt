@@ -24,7 +24,7 @@ different model :ref:`plugins` and are documented for each at their respective d
 Model data components
 ---------------------
 
-#TODO
+#TODO create table with model components (staticmaps, staticgeoms, config, forcing, states, etc.)
 
 Supported models
 ----------------
@@ -37,5 +37,5 @@ For a list of supported models see the :ref:`plugins` page.
     model_build.rst
     model_update.rst
     model_clip.rst
-    model_region.rst
     model_config.rst
+    model_region.rst

@@ -7,32 +7,76 @@ HydroMT is a Python package that aims to facilitate the process of building mode
 by automating the process to go from raw data to model data. It is an interface between *user*, *data* and hydro
 *models*. 
 
-From the user side, HydroMT is organized in the following way:
+HydroMT is organized in the following way:
 
-| **Data Catalog**
-| HydroMT is data-agnostic through the *Data adapter* that reads a wide range of data formats 
-  and unifies the input data. HydroMT currently supports vector (*GeoDataFrame*), raster (*RasterDataset*)
-  and time-series data (*GeoDataset*) types. Datasets are listed in and passed to HydroMT in a user defined data catalog 
-  :ref:`yaml file <data_yaml>`. HydroMT also provides several pre-defined data catalogs with mostly global datasets that can be used as is, 
-  but note that not all data is openly accessible. 
+- **Input Data**
 
-| **Configuration**
-| The complete building or updating process of a model can be configured in a single configuration *.ini* file. 
-  This file describes the full pipeline of model methods and their arguments. The model methods vary per 
-  model :ref:`plugin <plugins>` and are documented for each at their respective documentation websites.
+  HydroMT is data-agnostic through the *Data adapter* that reads a wide range of data formats 
+  and unifies the input data, see :ref:`Working with data in HydroMT <get_data>`. 
+  Datasets are listed in and passed to HydroMT in a user defined data catalog :ref:`.yml file <data_yaml>`. 
+  HydroMT also provides several :ref:`pre-defined data catalogs <existing_catalog>` with mostly global datasets 
+  that can be used as is, but note that not all data is openly accessible. 
 
-| **Command Line Interface (CLI)**
-| The CLI is a high-level interface to HydroMT. It is used to run HydroMT methods such as 
+- **Models**
+
+  HydroMT defines a model-agnostic *Model API* which provides an common interface to data components of a model
+  such as (static) grids, vectors, forcing, states and simulation configuration, see :ref:`Working with models in HydroMT <model_main>`. 
+  Models can be :ref:`build from scratch <model_build>` or :ref:`updated <model_update>` based on a pipeline defined in a model configuration :ref:`*.ini* file <model_config>`. 
+  The Model API for each supported model and methods to build or update that model are implemented in :ref:`model plugins <plugins>` 
+  that need to be installed alongside HydroMT to work with a supported model. 
+  Available model methods vary per model plugin and are documented for each plugin at their respective documentation websites.
+
+- **Methods and workflow**
+
+  :ref:`Methods and workflows <methods_workflows>` are the engine of HydroMT. Methods provide the low-level functionality, only accessible through the Python interface, 
+  to do the required processing of common data types such as grid and vector data. Workflows combine several methods to go from raw input 
+  data to a model component. Examples of workflows include the delineation of hydrological basins (watersheds), conversion of landuse-landcover to model parameter maps, etc.
+
+A user can interact with HydroMT through the following interfaces:
+
+- **Command Line Interface (CLI)**
+
+  The CLI is a high-level interface to HydroMT. It is used to run HydroMT methods such as 
   :ref:`build <cli_build>`, :ref:`update <cli_update>` or :ref:`clip <cli_clip>`.
 
-| **Python Interface**
-| Most common functionalities can be called through the CLI. From the Python interface, however, the user
-  can interact directly with a model through the :ref:`Model API <model_interface>` that provides a general interface 
-  to the model schematization (*staticgeoms* and *staticmaps*), model *forcing*, model *states*, model *results* 
-  and model configuration (*config*). Furthermore, many methods for raster and vector GIS, 
-  hydrography and statists are available.
+- **Python Interface**
+
+  While most common functionalities can be called through the CLI, the Python interface offers more flexibility for advanced users.
+  It allows you to e.g. interact directly with a model through the :ref:`Model API <model_interface>` and apply the many 
+  methods and workflows available for raster and vector GIS processing, hydrography processing and statistics.
 
 .. image:: ../_static/Architecture_model_data_input.png
+
+
+.. _terminology:
+
+Terminology
+===========
+
+HydroMT and this documentation use a specific terminology to describe specific objects or processes.
+
+==============================  ======================================================================================
+Term                            Explanation
+==============================  ======================================================================================
+Command Line Interface (CLI)    high-level interface to HydroMT *build*, *update* and *clip* methods.
+Config (models)                 The model component which contains the model kernel simulation settings. In HydroMT, it is exposed in the model config attribute as a nested dictionary.
+Configuration (HydroMT)         (.ini) file describing the complete pipeline with all methods and their arguments to *build* or *update* a model.
+Data catalog                    A set of data sources available for HydroMT. It is build up from *yml* files containing one or more data sources with 
+                                information about how to read and optionally preprocess the data and meta-data about the data source.
+Data source                     Input data. To be processed by HydroMT, data sources are listed in yml files.
+Forcing                         The model component with (dynamic) forcing data (meteo or hydrological for example). In HydroMT, this is a dictionary of xarray DataArray that is updated
+                                each time a model *forcing* method is run (eg setup_precip_forcing for wflow).
+Model                           A set of files describing the schematization, forcing, states, simulation configuration and results for any supported model kernel.
+Model attributes                Direct properties of a model, such as the model root. They can be called when using HydroMT from python.
+Model component                 A model is described by HydroMT with the following components: staticmaps (regular grid data), staticgeoms (vector data), forcing, results, states, config
+Model plugin                    Model software for HydroMT can build and update models and analyze its simulation results. For example *wflow*, *sfincs* etc.
+Model kernel                    The model software to execute a model simulation. This is *not* part of any HydroMT plugin.
+Region                          Argument of the *build* and *clip* CLI methods that specifies the region of interest where the model should be prepared / which spatial subregion should be clipped.
+Staticgeoms                     The model component with static vector data. In HydroMT, this is a dictionary of GeoPandas GeoDataFrame that is updated
+                                when certain model methods are run.
+Staticmaps                      The model component with static gridded data such as land properties and model parameters. In HydroMT, this is a xarray DataSet that is updated
+                                when certain model methods are run.
+==============================  ======================================================================================
 
 .. toctree::
    :maxdepth: 2
@@ -41,6 +85,4 @@ From the user side, HydroMT is organized in the following way:
 
    data_main.rst
    model_main.rst
-   gis.rst
-   statistics.rst
-   terminology.rst  
+   methods_main.rst  

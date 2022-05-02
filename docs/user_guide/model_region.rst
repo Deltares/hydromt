@@ -1,9 +1,9 @@
 .. _region:
 
-Region options
---------------
+Defining a model region
+-----------------------
 
-A user can define the region of interest based on general geospatial or hydrographic area using a geospatial or hydrographic region definition.
+To setup a model for a specific region, you can define use several geospatial or hydrographic region definitions which are explained in this chapter.
 The syntax is interpreted using the :py:meth:`~hydromt.workflows.basin_mask.parse_region` method. 
 For hydrographic regions see also the `delineate basins <../_examples/delineate_basin.ipynb>`_ example and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry` method.
 

@@ -3,6 +3,8 @@
 Developer's guide
 =================
 
+# TODO review/update the Developer's guide based on latest insights. Extent on the code conventions section.
+
 Welcome to the HydroMT project. All contributions, bug reports, bug fixes, 
 documentation improvements, enhancements, and ideas are welcome. Here's how we work.
 

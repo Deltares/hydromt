@@ -1,6 +1,8 @@
 Roadmap
 =======
 
+#TODO: discuss / write the roadmap  
+
 .. NOTE::
 
     This roadmap is still under discussion
