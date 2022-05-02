@@ -773,7 +773,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         return source
 
     def __str__(self):
-        return pprint.pformat(self.summary())
+        return yaml.dump(self.to_dict())
 
     def __repr__(self):
         return self.__str__()
