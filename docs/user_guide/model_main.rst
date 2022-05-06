@@ -24,7 +24,47 @@ different model :ref:`plugins` and are documented for each at their respective d
 Model data components
 ---------------------
 
-#TODO create table with model components (staticmaps, staticgeoms, config, forcing, states, etc.)
+.. currentmodule:: hydromt
+
+A model is described by HydroMT with the following components:
+
+.. list-table::
+   :widths: 20 45 15
+   :header-rows: 1
+
+   * - Component
+     - Explanation
+     - API
+   * - Staticmaps
+     - Static gridded data
+     - :py:attr:`~Model.set_staticmaps`
+       :py:attr:`~Model.read_staticmaps`
+       :py:attr:`~Model.write_staticmaps`
+   * - Staticgeoms
+     - Static vector data
+     - :py:attr:`~Model.set_staticgeoms`
+       :py:attr:`~Model.read_staticgeoms`
+       :py:attr:`~Model.write_staticgeoms`
+   * - Forcing
+     - (Dynamic) forcing data (meteo or hydrological for example)
+     - :py:attr:`~Model.set_forcing`
+       :py:attr:`~Model.read_forcing`
+       :py:attr:`~Model.write_forcing`
+   * - Results
+     - Model output
+     - :py:attr:`~Model.set_results`
+       :py:attr:`~Model.read_results`
+   * - States
+     - Initial model conditions
+     - :py:attr:`~Model.set_states`
+       :py:attr:`~Model.read_states`
+       :py:attr:`~Model.write_states`
+   * - Config
+     - Settings to build or update a model
+     - :py:attr:`~Model.set_config`
+       :py:attr:`~Model.read_config`
+       :py:attr:`~Model.write_config`
+
 
 Supported models
 ----------------
