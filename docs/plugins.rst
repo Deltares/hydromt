@@ -54,7 +54,7 @@ About the model software
 - Wflow_ is Deltares' solution for modelling hydrological processes, allowing users to account 
   for precipitation, interception, snow accumulation and melt, evapotranspiration, soil water, 
   surface water and groundwater recharge in a fully distributed environment. 
-- SFINCS_ is the reduced-complexity model, designed for super-fast modelling of compound 
+- SFINCS_ is a reduced-complexity model, designed for super-fast modelling of compound
   flooding events in a dynamic way.
 - Delwaq_ is Deltares' water quality process library used to quantify point source and 
   diffuse emissions (D-Emissions) and model the fate and transport (D-Water Quality) 

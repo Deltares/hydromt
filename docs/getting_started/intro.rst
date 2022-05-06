@@ -56,7 +56,34 @@ Getting started
         
         :octicon:`file-media;10em`
         +++
-        User stories
+        User's stories
+
+    .. grid-item-card::
+        :text-align: center
+        :link: quick_overview
+        :link-type: ref
+
+        :octicon:`rocket;10em`
+        +++
+        Quick overview
+
+    .. grid-item-card::
+        :text-align: center
+        :link: faq
+        :link-type: ref
+
+        :octicon:`question;10em`
+        +++
+        FAQ
+
+    .. grid-item-card::
+        :text-align: center
+        :link: publications
+        :link-type: ref
+
+        :octicon:`mortar-board;10em`
+        +++
+        Publications
 
 
 .. toctree::

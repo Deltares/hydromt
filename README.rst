@@ -45,7 +45,7 @@ HydroMT is commonly used in combination with a **model plugin** which
 provides a HydroMT implementation for specific model software. 
 Known model plugins include:
 
-* hydromt_wflow_: A framework for distributed rainfall-runoff (wflow_sbm) sediment transport (wflow_sediment) modelling.
+* hydromt_wflow_: A framework for distributed rainfall-runoff (wflow_sbm) and sediment transport (wflow_sediment) modelling.
 * hydromt_delwaq_: A framework for water quality (D-Water Quality) and emissions (D-Emissions) modelling.
 * hydromt_sfincs_: A fast 2D hydrodynamic flood model.
 * hydromt_fiat_: A flood impact model.

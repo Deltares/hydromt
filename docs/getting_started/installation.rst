@@ -1,7 +1,7 @@
 .. _installation_guide:
 
 ==================
-Installation Guide
+Installation guide
 ==================
 
 Prerequisites
@@ -92,7 +92,7 @@ for example Python version 3.9 and GDAL 3.4.1 and the HydroMT-Wflow plugin:
 
 .. code-block:: console
 
-    $ mamba create -n hydromt -c conda-forge hydromt python=3.9 gdal=3.4.1 hydromt-wflow
+    $ mamba create -n hydromt -c conda-forge hydromt python=3.9 gdal=3.4.1 hydromt_wflow
 
 
 Install HydroMT in an existing environment
@@ -129,13 +129,13 @@ To be able to test and develop the HydroMT package see instructions in the :ref:
 
 Install HydroMT plugins
 ------------------------
-To use HydroMT to set up specific models, we  separate plugins are available as separate python packages. 
+To use HydroMT to set up specific models, we  separate plugins that are available as separate python packages.
 Most plugins are available on conda-forge and can be installed in the same environment. For instance, 
 to install HydroMT-Wflow in the environment where you have already install HydroMT do:
 
 .. code-block:: console
 
-    $ mamba install hydromt-wflow -c conda-forge
+    $ mamba install hydromt_wflow -c conda-forge
 
 For detailed instructions, please visit the plugin documentation pages, see :ref:`overview of plugins <plugins>`.
 

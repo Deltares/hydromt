@@ -12,7 +12,7 @@ Data
 
 .. _api_data_catalog:
 
-Data Catalog
+Data catalog
 ============
 
 General
@@ -95,7 +95,7 @@ Models
 Model API
 =========
 
-Class and Attributes
+Class and attributes
 --------------------
 
 .. autosummary::
@@ -491,7 +491,7 @@ Raster
    gis_utils.cellarea
    gis_utils.cellres
    
-CRS and Transform
+CRS and transform
 =================
 
 .. autosummary::

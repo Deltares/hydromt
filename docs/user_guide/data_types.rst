@@ -10,7 +10,7 @@ HydroMT currently supports the following data types:
 - :ref:`GeoDataset <GeoDataset>`: dynamic point location data
 
 Internally the RasterDataset and GeoDataset are represented by :py:class:`xarray.Dataset` objects 
-and GeoDataFrame by :py:class:`geopandas.GeoDataFrame`. We use drivers, typically from third-party
+and the GeoDataFrame by :py:class:`geopandas.GeoDataFrame`. We use drivers, typically from third-party
 packages and sometimes wrapped in HydroMT functions, to parse many different file formats to this 
 standardized internal data representation. 
 
@@ -283,7 +283,7 @@ GeoPackage spatial vector data
 Spatial vector data is parsed to a **GeoDataFrame** using the **vector** driver.
 For large spatial vector datasets we recommend the GeoPackage format as it includes a 
 spatial index for fast filtering of the data based on spatial location. An example is 
-shown below. Not that the rename, ``unit_mult``, ``unit_add`` and ``nodata`` options refer to
+shown below. Note that the rename, ``unit_mult``, ``unit_add`` and ``nodata`` options refer to
 columns of the attribute table in case of a GeoDataFrame.
 
 .. code-block:: yaml

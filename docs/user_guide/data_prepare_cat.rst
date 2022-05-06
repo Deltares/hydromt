@@ -83,7 +83,7 @@ A full list of **data source options** is given below
 Apart from the data entries, the yaml file also has **global options**:
 
 - **root** (optional): root folder for all the data sources in the yaml file. 
-  If not  provide the folder of where the yaml fil is located will be used as root.
+  If not provided the folder of where the yaml fil is located will be used as root.
   This is used in combination with each data source **path** argument to avoid repetition.
 
 
@@ -94,7 +94,7 @@ There are two convenience options the data catalog files to limit repetition bet
 - The ``placeholder`` argument can be used to generate multiple sources with a single entry in the data catalog file. If different files follow a logical
   nomenclature, multiple data sources can be defined by iterating through all possible combinations of the placeholders. The placeholder names should be given in the 
   source name and the path and its values listed under the placeholder argument, see example below with an *epoch* and *epsg* placeholders.
-- The ``alias`` argument can be used to define a data source under second short name, or to avoid repeating large sections with the same meta-data. 
+- The ``alias`` argument can be used to define a data source under a second short name, or to avoid repeating large sections with the same meta-data.
   If an alias is provided all information from the alias source is used to read the data except for the info that is overwritten by the current data source. 
   The alias source should also be provided in the same file. Note that this only works at the first level of arguments, if e.g. the rename option is used in 
   the current data source it overwrites all rename entries of the alias data source. In the example below *ghs_pop* is short for a specific version (epoch=2015; epsg=54009)

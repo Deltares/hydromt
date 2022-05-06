@@ -10,7 +10,7 @@ A data catalog can be initialized from one or more **yaml file(s)**, which conta
 as well as meta data for reproducibility.
 
 You can :ref:`explore and make use of pre-defined data catalogs <existing_catalog>` (primarily global data), 
-:ref:`prepare your own Data Catalog <own_catalog>` (e.g. to include local data) or use a combination of both. 
+:ref:`prepare your own data catalog <own_catalog>` (e.g. to include local data) or use a combination of both.
 
 .. TIP::
 
@@ -23,7 +23,7 @@ You can :ref:`explore and make use of pre-defined data catalogs <existing_catalo
 From CLI
 --------
 
-When using the HydroMT command line interface (CLI), one can provide data catalog by specifying the
+When using the HydroMT command line interface (CLI), one can provide a data catalog by specifying the
 path to the yaml file with the ``-d`` or ``--data`` option. 
 Multiple yaml files can be added by reusing the ``-d`` option.
 
@@ -59,7 +59,7 @@ For example to retrieve a raster dataset use :py:func:`~hydromt.DataCatalogget_r
     data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
     ds = data_cat.get_rasterdataset('source_name', bbox=[xmin, ymin, xmax, ymax])  # returns xarray.dataset
 
-More detail about reading `raster data  <../_examples/read_raster_data.ipynb>`_, 
+More details about reading `raster data  <../_examples/read_raster_data.ipynb>`_,
 `vector data  <../_examples/read_vector_data.ipynb>`_, 
 or geospatial time-series data is provided in the linked examples.
 

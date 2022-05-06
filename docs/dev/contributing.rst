@@ -33,7 +33,7 @@ HydroMT contains methods to build and analyze models in the hydrology sphere. We
 to build a modular framework in which data can be interchanged in workflows and 
 method and workflows can be reused between models. To achieve this we designed a 
 GeneralDataApapter to work with any type of regural gridded data in Xarray and vector
-data in geopandas. An abstract class for models is designed to create a unifor API for
+data in geopandas. An abstract class for models is designed to create a uniform API for
 different models.
 
 - I/O from the filesystem is achieved trough geopandas for vector data, methods in 
@@ -54,7 +54,7 @@ GitHub account. We follow the `GitHub workflow
 to allow many people to work together on the project.
 
 After discussing a new proposal or implementation in the issue tracker, you can start 
-working on the code. You write your code locally in a new branch HydroMT repo or in a 
+working on the code. You write your code locally in a new branch of the HydroMT repo or in a
 branch of a fork. Once you're done with your first iteration, you commit your code and 
 push to your HydroMT repository. 
 
@@ -65,7 +65,7 @@ To create a new branch after you've downloaded the latest changes in the project
     $ git pull 
     $ git checkout -b <name-of-branch>
 
-Develop your new code and keep while keeping track of the status and differences using:
+Develop your new code while keeping track of the status and differences using:
 
 .. code-block:: console
 

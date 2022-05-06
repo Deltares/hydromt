@@ -8,14 +8,14 @@ User's stories
 Compound flooding in Mozambique
 --------------------------------
 An integrated flood modelling (compound flood with riverine and coastal influence) was 
-developed for Mozambique based on global data with HydroMT. The wflow and SFINCS models 
+developed for Mozambique based on global data with HydroMT. The Wflow and SFINCS models
 were coupled offline using HydroMT to align the rivers at different resolutions and coordinate 
 reference systems, and to create automatic boundary conditions.
 
 .. image:: ../_static/mozambique_wflow_sfincs.png
 
 The models were run  and the Cyclone Idai (March 2019) event was analysed and compared with UNOSAT 
-flood extent data. ERA5 was used as precipitation input for both wflow and SFINCS in order to provide 
+flood extent data. ERA5 was used as precipitation input for both Wflow and SFINCS in order to provide
 discharge and GTSM waterlevels. Preliminary results of SFINCS flood depths (blue) are shown below.
 
 .. image:: ../_static/mozambique_result_flood.png
@@ -31,7 +31,7 @@ quality models were first prepared from global data and refined later using coll
 For the water quality model alone, more than forty emission input data were prepared using a combination 
 of global and local sources in various format using the HydroMT tool. These include global population 
 and cattle grids, local mines and industry locations, regional statistics for GDP or treatment infrastructures etc. 
-The wflow model was forced using local meteorological grids (PISCO). 
+The Wflow model was forced using local meteorological grids (PISCO).
 
 .. image:: ../_static/data_peru.png
 
