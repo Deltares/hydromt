@@ -42,7 +42,7 @@ Both ``-c`` and ``-opt`` can be used repeatedly in a single update.
 
 **Example usage**
 
-In the following example a Wflow model at ``/path/to/model`` is updated and the resulting written to a new directory ``/path/to/model_out`` 
+In the following example a Wflow model at ``/path/to/model`` is updated and the results are written to a new directory ``/path/to/model_out``.
 The pipeline with methods which are updated are outlined in the ``wflow_config.ini`` configuration file and used data sources
 in the ``data_catalog.yml`` catalog file.
 
@@ -53,7 +53,7 @@ in the ``data_catalog.yml`` catalog file.
 The following example updates (overwrites!) the landuse-landcover based staticmaps in a Wflow model with the ``setup_lulcmaps`` method 
 based on a the different landuse-landcover dataset according to ``setup_lulcmaps.lulc_fn=vito``. 
 The ``vito`` dataset must be defined in the ``data_catalog.yml`` catalog file.
-Note that no .ini file is used here but instead the methods and options are defined in update command.
+Note that no .ini file is used here but instead the methods and options are defined in the update command.
 
 .. code-block:: console
 
@@ -76,13 +76,13 @@ To check all options do:
 From Python
 -----------
 
-All HydroMT models have a :py:func:`~hydromt.Model.update` method which can be used when updating models from Python.
+All HydroMT models have an :py:func:`~hydromt.Model.update` method which can be used when updating models from Python.
 The data catalog yaml files and logging have to be set when initializing the model. 
 The configuration file can be parsed using :py:func:`~hydromt.config.configread` and passed to the build method using the ``opt`` argument.
 
 **Example usage**
 
-To update a Wflow model based on methods in a .ini file, as also shown in the first CLI example above, the following Python code is required. 
+To update a Wflow model based on methods in an .ini file, as also shown in the first CLI example above, the following Python code is required.
 Note that compared to building a model, the model should be initialized in read (if you save the output to a new root) 
 or append (if you update the model data in place) mode.
 

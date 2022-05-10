@@ -11,7 +11,7 @@ Skill statistics
 HydroMT provides different functions to apply :ref:`Model skill statistics <Statistics>` to compare model results with observations. 
 The following statistics are available:
 
-- Absolute and percentual Bias
+- Absolute and percentual bias
 - Nash-Sutcliffe model Efficiency (NSE) and log Nash-Sutcliffe model Efficiency (log-NSE)
 - Various versions of the Kling-Gupta model Efficiency (KGE)
 - Coefficient of determination (R-squared)
@@ -20,7 +20,7 @@ The following statistics are available:
 Example application
 ^^^^^^^^^^^^^^^^^^^
 
-As HydroMT provide methods to easily read the model results, applying a skill statistic just takes a few lines of code and can be 
+As HydroMT provides methods to easily read the model results, applying a skill statistic just takes a few lines of code and can be
 applied directly across all observation locations in your model.
 
 .. code-block:: console

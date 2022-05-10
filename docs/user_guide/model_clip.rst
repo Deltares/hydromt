@@ -3,14 +3,14 @@
 Clipping a model
 ================
 
-The ``clip`` method allows to clip a subregion from a existing model, including all static maps,
+The ``clip`` method allows to clip a subregion from an existing model, including all static maps,
 static geometries and forcing data.
 
 **Steps in brief:**
 
 1) You have an **existing model** schematization ready
 2) Define your **model subregion**, see the overview of :ref:`region options <region>`. 
-3) **Clip** you model using the CLI or Python interface
+3) **Clip** your model using the CLI or Python interface
 
 .. NOTE::
 
@@ -29,7 +29,7 @@ The ``hydromt clip`` command line intrefce (CLI) method can be run from the comm
 
 The following example clips a ``subbasin`` region (based on its outflow location) from an existing Wflow model 
 at `/path/to/model_root` and saves the output to `/path/to/model_destination`. The subbasin is defined based
-on an outflow location snapped to a stream order 4 river which based on a map called wflow_streamorder 
+on an outflow location snapped to a stream order 4 river which is based on a map called wflow_streamorder
 of the Wflow model. 
 
 .. code-block:: console

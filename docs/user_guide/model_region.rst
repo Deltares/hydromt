@@ -3,7 +3,7 @@
 Defining a model region
 -----------------------
 
-To setup a model for a specific region, you can define use several geospatial or hydrographic region definitions which are explained in this chapter.
+To setup a model for a specific region, you can use several geospatial or hydrographic region definitions which are explained in this chapter.
 The syntax is interpreted using the :py:meth:`~hydromt.workflows.basin_mask.parse_region` method. 
 For hydrographic regions see also the `delineate basins <../_examples/delineate_basin.ipynb>`_ example and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry` method.
 
@@ -98,7 +98,7 @@ combined with stream arguments.
 
     - ``{'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold, 'xy': [x, y]}``
 
-    To only select interbasins based on the outlet location of entire basins use ``'outlets': true``
+    To only select interbasins based on the outlet location of the entire basins use ``'outlets': true``
 
     ``{'interbasin': [xmin, ymin, xmax, ymax], 'outlets': true}``
 

@@ -9,9 +9,9 @@ in the configuration `.ini file <https://en.wikipedia.org/wiki/INI_file>`_
 
 **Steps in brief:**
 
-1) Start with a template of the :ref:`HydroMT model plugin <plugins>` which you want build / update a model. Templates can be found in the online documentation of each model plugin.
+1) Start with a template of the :ref:`HydroMT model plugin <plugins>` with which you want to build / update a model. Templates can be found in the online documentation of each model plugin.
 2) Edit / add / remove sections (i.e. methods) based on which components you want to build or adapt. The arguments of specific methods can be found in the API chapter in the online documentation of each model plugin.
-3) Save the configuration file and use in combination with the HydroMT :ref:`build <model_build>` and :ref:`update <model_update>` methods.
+3) Save the configuration file and use it in combination with the HydroMT :ref:`build <model_build>` and :ref:`update <model_update>` methods.
 
 .. NOTE::
 
@@ -29,12 +29,12 @@ define a **reproducible** model.
 
 HydroMT configuration file specifications and conventions:
 
-- HydroMT will execute each method (i.e. section) in the order it is provided in the ini file. 
+- HydroMT will execute each method (i.e. section) in the order it is provided in the .ini file.
 - Methods can be re-used by enumerating the methods by adding a number to the end (without underscore or space!).
   Although this is not enforced in the code, by convention we start enumerating the second call of each method with a number 2, the third call with a number 3 etc.
 - Arguments ending with ``_fn`` (short for filename) are by convention used to set a data source from the data catalog based on its source name, see :ref:`Working with data in HydroMT <get_data>`.
 
-An example ini file is shown below. Note that this ini file does not apply to any supported model plugin.
+An example .ini file is shown below. Note that this .ini file does not apply to any supported model plugin.
 
 .. code-block:: ini
 

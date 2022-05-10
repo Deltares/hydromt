@@ -13,15 +13,15 @@ HydroMT is organized in the following way:
 
   HydroMT is data-agnostic through the *Data adapter* that reads a wide range of data formats 
   and unifies the input data, see :ref:`Working with data in HydroMT <get_data>`. 
-  Datasets are listed in and passed to HydroMT in a user defined data catalog :ref:`.yml file <data_yaml>`. 
+  Datasets are listed and passed to HydroMT in a user defined data catalog :ref:`.yml file <data_yaml>`.
   HydroMT also provides several :ref:`pre-defined data catalogs <existing_catalog>` with mostly global datasets 
   that can be used as is, but note that not all data is openly accessible. 
 
 - **Models**
 
-  HydroMT defines a model-agnostic *Model API* which provides an common interface to data components of a model
+  HydroMT defines a model-agnostic *Model API* which provides a common interface to data components of a model
   such as (static) grids, vectors, forcing, states and simulation configuration, see :ref:`Working with models in HydroMT <model_main>`. 
-  Models can be :ref:`build from scratch <model_build>` or :ref:`updated <model_update>` based on a pipeline defined in a model configuration :ref:`*.ini* file <model_config>`. 
+  Models can be :ref:`built from scratch <model_build>` or :ref:`updated <model_update>` based on a pipeline defined in a model configuration :ref:`*.ini* file <model_config>`.
   The Model API for each supported model and methods to build or update that model are implemented in :ref:`model plugins <plugins>` 
   that need to be installed alongside HydroMT to work with a supported model. 
   Available model methods vary per model plugin and are documented for each plugin at their respective documentation websites.
