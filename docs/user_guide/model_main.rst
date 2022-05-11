@@ -12,10 +12,10 @@ HydroMT has the following high-level functionality for setting up models from ra
 * :ref:`updating a model <model_update>`: adding or changing model components of an existing model.
 * :ref:`clipping a model <model_clip>`: changing the spatial domain of an existing model (e.g. select subbasins from a larger model).
 
-The building and clipping methods required the user to provide a :ref:`region` of interest. HydroMT provides 
+The building and clipping methods required the user to provide a :ref:`region <region>` of interest. HydroMT provides 
 several options to define a region based on a geospatial or hydrographic region.
 
-The exact process of building or updating a model can be configured in a single configuration *.ini* file. 
+The exact process of building or updating a model can be configured in a single configuration :ref:`.ini file <model_config>`.
 This file describes the full pipeline of model methods and their arguments. The methods vary for the 
 different model :ref:`plugins` and are documented for each at their respective documentation websites.
 
@@ -26,7 +26,9 @@ Model data components
 
 .. currentmodule:: hydromt
 
-A model is described by HydroMT with the following components:
+Model data components are data attributes which together define a model instance and are identical for all models. 
+Each component represents a specific model component and is parsed to a specific Python data object that should adhere
+to certain specifications. An overview is given below.
 
 .. list-table::
    :widths: 20 45 15
@@ -37,33 +39,39 @@ A model is described by HydroMT with the following components:
      - API
    * - Staticmaps
      - Static gridded data
-     - :py:attr:`~Model.set_staticmaps`
-       :py:attr:`~Model.read_staticmaps`
-       :py:attr:`~Model.write_staticmaps`
+     - :py:attr:`~Model.staticmaps`
+       :py:func:`~Model.set_staticmaps`
+       :py:func:`~Model.read_staticmaps`
+       :py:func:`~Model.write_staticmaps`
    * - Staticgeoms
      - Static vector data
-     - :py:attr:`~Model.set_staticgeoms`
-       :py:attr:`~Model.read_staticgeoms`
-       :py:attr:`~Model.write_staticgeoms`
+     - :py:attr:`~Model.staticgeoms`
+       :py:func:`~Model.set_staticgeoms`
+       :py:func:`~Model.read_staticgeoms`
+       :py:func:`~Model.write_staticgeoms`
    * - Forcing
      - (Dynamic) forcing data (meteo or hydrological for example)
-     - :py:attr:`~Model.set_forcing`
-       :py:attr:`~Model.read_forcing`
-       :py:attr:`~Model.write_forcing`
+     - :py:attr:`~Model.forcing`
+       :py:func:`~Model.set_forcing`
+       :py:func:`~Model.read_forcing`
+       :py:func:`~Model.write_forcing`
    * - Results
      - Model output
-     - :py:attr:`~Model.set_results`
-       :py:attr:`~Model.read_results`
+     - :py:attr:`~Model.results`
+       :py:func:`~Model.set_results`
+       :py:func:`~Model.read_results`
    * - States
      - Initial model conditions
-     - :py:attr:`~Model.set_states`
-       :py:attr:`~Model.read_states`
-       :py:attr:`~Model.write_states`
+     - :py:attr:`~Model.states`
+       :py:func:`~Model.set_states`
+       :py:func:`~Model.read_states`
+       :py:func:`~Model.write_states`
    * - Config
-     - Settings to build or update a model
-     - :py:attr:`~Model.set_config`
-       :py:attr:`~Model.read_config`
-       :py:attr:`~Model.write_config`
+     - Settings for the model kernel simulation
+     - :py:attr:`~Model.config`
+       :py:func:`~Model.set_config`
+       :py:func:`~Model.read_config`
+       :py:func:`~Model.write_config`
 
 
 Supported models

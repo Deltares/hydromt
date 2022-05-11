@@ -89,7 +89,7 @@ Apart from the data entries, the yaml file also has **global options**:
 
 Placeholder and alias
 ---------------------
-There are two convenience options the data catalog files to limit repetition between data sources:
+There are two convenience options to limit repetition between data sources in data catalog files:
 
 - The ``placeholder`` argument can be used to generate multiple sources with a single entry in the data catalog file. If different files follow a logical
   nomenclature, multiple data sources can be defined by iterating through all possible combinations of the placeholders. The placeholder names should be given in the 

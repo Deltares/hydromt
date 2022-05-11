@@ -24,17 +24,17 @@ From CLI
 --------
 
 When using the HydroMT command line interface (CLI), one can provide a data catalog by specifying the
-path to the yaml file with the ``-d`` or ``--data`` option. 
+path to the yaml file with the ``-d (--data)`` option. 
 Multiple yaml files can be added by reusing the ``-d`` option.
 
 For example when using the :ref:`build <cli_build>` CLI method:
 
 .. code-block:: console
 
-    hydromt build MODEL REGION -d /path/to/data_catalog1.yml -d /path/to/data_catalog1.yml
+    hydromt build MODEL REGION -d /path/to/data_catalog1.yaml -d /path/to/data_catalog1.yaml
 
 A special exception is made for the Deltares data catalog which can be accessed with the 
-``--dd`` or ``--deltares-data`` flag (requires access to the Deltares P-drive).
+``--dd (--deltares-data)`` flag (requires access to the Deltares P-drive).
 
 .. code-block:: console
 
@@ -51,17 +51,16 @@ To read a dataset in Python using the HydroMT requires two steps:
 1) Initialize a :py:class:`~hydromt.data_adapter.DataCatalog` with references to user- or pre-defined data catalog yaml files
 2) Use :ref:`one of the DataCatalog.get_* methods <api_data_catalog_get>` to access (a temporal or spatial region of) the data.
 
-For example to retrieve a raster dataset use :py:func:`~hydromt.DataCatalogget_rasterdataset`:
+For example to retrieve a raster dataset use :py:func:`~hydromt.DataCatalog.get_rasterdataset`:
 
 .. code-block:: python
 
     import hydromt
-    data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
+    data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yaml')
     ds = data_cat.get_rasterdataset('source_name', bbox=[xmin, ymin, xmax, ymax])  # returns xarray.dataset
 
-More details about reading `raster data  <../_examples/read_raster_data.ipynb>`_,
-`vector data  <../_examples/read_vector_data.ipynb>`_, 
-or geospatial time-series data is provided in the linked examples.
+More details about reading `raster data  <../_examples/reading_raster_data.ipynb>`_ or
+`vector data  <../_examples/reading_vector_data.ipynb>`_ is provided in the linked examples.
 
 
 Related API references

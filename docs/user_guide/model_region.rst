@@ -50,7 +50,8 @@ To delineate the basin(s) touching a region or point location, users can supply 
     To filter basins, variable-threshold pairs to define streams can be used in combination with
     a bounding box or geometry file, e.g.: ``'uparea':30`` to filter based on streams with
     a minimum drainage area of 30 km2 or ``'strord':8`` to filter basins based on streams
-    with a minimal stream order of 8.
+    with a minimal stream order of 8. The variables should be available in the dataset on which
+    the delineation is based, e.g. Hydro MERIT.
 
     - ``{'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}``
 

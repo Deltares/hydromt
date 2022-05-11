@@ -7,38 +7,27 @@ use as a HydroMT tutorial.
 These examples can be run online or on your local machine. 
 To run these examples online press the **binder** badge above.
 
-To run these examples on your local machine you need a copy of the repository and an installation 
-of HydroMT including some additional packages. Please refer to the online :ref:`installation guide <installation_guide>`
-for more information about installing HydroMT.
+To run these examples on your local machine you need a copy of the repository and 
+an installation of HydroMT including some additional packages. The most reliable 
+way to do this installation is by creating a new environment as described below.
 
-First, clone the HydroMT github repository, this creates a local copy of the repository on your local machine.
+First, download and extract the `zipped HydroMT github repository <https://github.com/Deltares/hydromt/archive/refs/heads/main.zip>`_
 
-.. code-block:: console
+Then, navigate into the extracted ``hydromt`` folder and execute the following lines from the command line.
 
-  $ git clone https://github.com/Deltares/hydromt.git
-
-Then, navigate into the cloned ``hydromt`` folder:
-
-.. code-block:: console
-
-  $ cd hydromt/examples
-
-Create a conda environment based on the ``environment.yml`` in the binder folder and activate this environment: 
+Next, create a conda environment based on the ``environment.yml`` in the binder folder, 
+activate this environment and install the HydroMT version from downloaded files.
 
 .. code-block:: console
 
-  $ conda env create -f ../binder/environment.yml
+  $ conda env create -f binder/environment.yml
   $ conda activate hydromt
-
-Install the latest HydroMT version from cloned files into the environment.
-
-.. code-block:: console
-
   $ flit install --dep production
 
 Finally, start a jupyter notebook inside the ``examples`` folder and activated ``hydromt`` environment.
 
 .. code-block:: console
 
+  $ cd examples
   $ jupyter notebook
 

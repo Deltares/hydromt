@@ -53,8 +53,8 @@ Get data
 
 
 
-RasterDatasetAdapter
-====================
+RasterDataset
+=============
 
 .. autosummary::
    :toctree: _generated
@@ -64,8 +64,8 @@ RasterDatasetAdapter
    data_adapter.RasterDatasetAdapter.summary
    data_adapter.RasterDatasetAdapter.get_data
 
-GeoDatasetAdapter
-==================
+GeoDataset
+==========
 
 .. autosummary::
    :toctree: _generated
@@ -75,8 +75,8 @@ GeoDatasetAdapter
    data_adapter.GeoDatasetAdapter.summary
    data_adapter.GeoDatasetAdapter.get_data
 
-GeoDataFrameAdapter
-===================
+GeoDataFrame
+============
 
 .. autosummary::
    :toctree: _generated
@@ -117,6 +117,19 @@ High level methods
    Model.setup_region
    Model.setup_config
    Model.write_data_catalog
+
+Model components
+----------------
+
+.. autosummary::
+   :toctree: _generated
+
+   Model.config
+   Model.staticmaps
+   Model.staticgeoms
+   Model.forcing
+   Model.states
+   Model.results
 
 General methods
 ---------------

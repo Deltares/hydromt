@@ -23,8 +23,10 @@ Model configuration (.ini) file
 ------------------------------- 
 
 The .ini file has a simple syntax with sections and key-value pairs. In HydroMT sections corresponds with model methods
-and the key-value pair with the options of each method. When passed to the build or update CLI methods, HydroMT
-executes all methods in order as provided in the .ini file. As such the .ini file, in combination with a data catalog yaml file 
+and the key-value pair with the arguments of each method. For available methods and their arguments of a specific model, 
+please visit the :ref:`plugin documentation pages <plugins>`.
+When passed to the build or update CLI methods, HydroMT executes all methods in order as provided in the .ini file. 
+As such the .ini file, in combination with a data catalog yaml file 
 define a **reproducible** model.
 
 HydroMT configuration file specifications and conventions:

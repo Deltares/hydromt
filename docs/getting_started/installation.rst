@@ -22,8 +22,7 @@ Python and the `conda package manager`_. Differences to note, in a nutshell:
   default from the **conda-forge channel**.
 * Miniconda is a company driven (Anaconda) installer, installing by default
   from the **anaconda channel**.
-* Installing from the anaconda channel has certain (legal) `limitations
-  for "commercial use" <limitations>`_.
+* Installing from the anaconda channel has certain (legal) `limitations for commercial use <limitations>`_.
 
 Installing Mambaforge/Miniforge/Miniconda does not require administrative
 rights to your computer and doesn't interfere with any other Python
@@ -34,7 +33,7 @@ Dependencies
 
 The HydroMT Python package makes extensive use of the modern scientific Python
 ecosystem. The most important dependencies are listed here (for a complete list,
-see the pyproject.toml file). These dependencies are automatically installed when 
+see the pyproject.toml file in the repository root). These dependencies are automatically installed when 
 installing HydroMT with a package manager, such as conda or mamba.
 
 Data structures:
@@ -71,7 +70,7 @@ HydroMT is available from pypi and conda-forge, but we recommend installing from
 
 .. Note:: 
     
-    In the commands below you can exchange `mamba` for `conda`, see above for the difference between both.
+    In the commands below you can exchange `conda` for `mamba`, see above for the difference between both.
 
 Install HydroMT in a new environment
 ------------------------------------
@@ -83,16 +82,16 @@ To install HydroMT in a new environment called `hydromt` from the conda-forge ch
 
 .. code-block:: console
 
-    $ mamba create -n hydromt -c conda-forge hydromt
+    $ conda create -n hydromt -c conda-forge hydromt
 
-Then, activate the environment (as stated by mamba/conda) to start making use of HydroMT.
+Then, activate the environment (as stated by conda create) to start making use of HydroMT.
 
 Optionally, specific versions of python or other dependencies can be set and additional packages can be added,
 for example Python version 3.9 and GDAL 3.4.1 and the HydroMT-Wflow plugin:
 
 .. code-block:: console
 
-    $ mamba create -n hydromt -c conda-forge hydromt python=3.9 gdal=3.4.1 hydromt_wflow
+    $ conda create -n hydromt -c conda-forge hydromt python=3.9 gdal=3.4.1 hydromt_wflow
 
 
 Install HydroMT in an existing environment
@@ -103,7 +102,7 @@ Note that if some dependencies are not installed from conda-forge the installati
 
 .. code-block:: console
 
-    $ mamba install hydromt -c conda-forge
+    $ conda install hydromt -c conda-forge
 
 You can also install HydroMT **using pip** from pypi (not recommended):
 
@@ -118,27 +117,24 @@ Note that you might have to uninstall HydroMT first to successfully install from
 
     $ pip install git+https://github.com/Deltares/hydromt.git
 
-
-Developer installation
-----------------------
-
-To be able to test and develop the HydroMT package see instructions in the :ref:`Developer installation guide <dev_install>`.
-
-
 .. _plugin_install:
 
 Install HydroMT plugins
 ------------------------
 To use HydroMT to set up specific models, we  separate plugins that are available as separate python packages.
 Most plugins are available on conda-forge and can be installed in the same environment. For instance, 
-to install HydroMT-Wflow in the environment where you have already install HydroMT do:
+to install HydroMT-Wflow in the environment where you have already installed HydroMT do:
 
 .. code-block:: console
 
-    $ mamba install hydromt_wflow -c conda-forge
+    $ conda install hydromt_wflow -c conda-forge
 
 For detailed instructions, please visit the plugin documentation pages, see :ref:`overview of plugins <plugins>`.
 
+Developer installation
+----------------------
+
+To be able to test and develop the HydroMT package see instructions in the :ref:`Developer installation guide <dev_install>`.
 
 .. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
 .. _Mambaforge: https://github.com/conda-forge/miniforge#mambaforge

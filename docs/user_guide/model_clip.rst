@@ -55,7 +55,7 @@ From Python
 
 .. NOTE:: 
 
-    A general clip method for the Model class is currently not yet available and the Python signature of the might change in the future.
+    A general clip method for the model class is currently not yet available and its signature might change in the future.
 
 **Example usage**
 

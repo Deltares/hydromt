@@ -267,7 +267,7 @@ Vector data (GeoDataFrame)
    * - ``vector`` 
      - ESRI Shapefile, GeoPackage, GeoJSON, etc.
      - :py:meth:`~hydromt.io.open_vector` 
-     - Point, Line and Polygon geometries. Uses :py:meth:`geopandas.read_file`
+     - Point, Line and Polygon geometries. Uses :py:func:`geopandas.read_file`
    * - ``vector_table``
      - CSV, XY, and EXCEL. 
      - :py:meth:`~hydromt.io.open_vector`
@@ -309,8 +309,8 @@ Point vector from text delimited data
 
 Tabulated point vector data files can be parsed to a **GeoDataFrame** with the **vector_table** 
 driver. This driver reads CSV (or similar delimited text files), EXCEL and XY 
-(white-space delimited text file without headers) files. See this list of dimensions_ 
-name for recognized x and y column names.  
+(white-space delimited text file without headers) files. See this list of :ref:`dimension names <dimensions>`
+for recognized x and y column names.  
   
 A typical CSV point vector file is given below. A similar setup with headers
 can be used to read other text delimited files or excel files. 
@@ -458,7 +458,7 @@ For more options see the :py:meth:`~hydromt.io.open_geodataset` method.
 
 *Tabulated time series text file*
 
-This data is read using the :py:meth:`~hydromt.io.open_time-series_from_table` method. To 
+This data is read using the :py:meth:`~hydromt.io.open_timeseries_from_table` method. To 
 read the time stamps the :py:func:`pandas.to_datetime` method is used.
 
 .. code-block:: console

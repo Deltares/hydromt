@@ -8,7 +8,7 @@ Statistical methods
 Skill statistics
 ----------------
 
-HydroMT provides different functions to apply :ref:`Model skill statistics <Statistics>` to compare model results with observations. 
+HydroMT provides different functions to apply :ref:`model skill statistics <Statistics>` to compare model results with observations. 
 The following statistics are available:
 
 - Absolute and percentual bias
