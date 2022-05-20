@@ -34,9 +34,9 @@ How to use HydroMT?
 -------------------
 HydroMT can be used as a **command line** application, which provides commands to *build*,
 *update* and *clip* models with a single line, or **from python** to exploit its rich interface.
-You can learn more about how to use HydroMT in its `online documentation. <https://deltares.github.io/hydromt/preview/>`_
+You can learn more about how to use HydroMT in its `online documentation. <https://deltares.github.io/hydromt/latest/>`_
 For a smooth installing experience we recommend installing HydroMT and its dependencies 
-from conda-forge in a clean environment, see `installation guide. <https://deltares.github.io/hydromt/preview/getting_started/installation>`_
+from conda-forge in a clean environment, see `installation guide. <https://deltares.github.io/hydromt/latest/getting_started/installation>`_
 
 
 HydroMT model plugins
@@ -59,7 +59,7 @@ For publications, please cite our work using the DOI provided in the Zenodo badg
 How to contribute?
 -------------------
 If you find any issues in the code or documentation feel free to leave an issue on the `github issue tracker. <https://github.com/Deltares/hydromt/issues>`_
-You can find information about how to contribute to the HydroMT project at our `contributing page. <https://deltares.github.io/hydromt/preview/dev/contributing>`_
+You can find information about how to contribute to the HydroMT project at our `contributing page. <https://deltares.github.io/hydromt/latest/dev/contributing>`_
 
 HydroMT seeks active contribution from the (hydro) geoscientific community. 
 So far, it has been developed and tested with a range of `Deltares <https://www.deltares.nl/en/>`_ models, but 

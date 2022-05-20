@@ -20,9 +20,6 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
-      
-      # - name: Get tags
-      #   run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       - name: Setup environment
         uses: conda-incubator/setup-miniconda@v2
@@ -37,7 +34,6 @@ jobs:
       - name: Install hydromt
         run: flit install
 
-      # Move examples folder before make html for nbsphinx
       - name: Build docs
         run: |
           pushd docs
@@ -45,11 +41,10 @@ jobs:
           popd
 
       - name: Set doc version
-        # run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
-        run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("preview" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
+        run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
       
       - name: Upload to GitHub Pages
-        # if: ${{ github.event_name != 'pull_request'}}
+        if: ${{ github.event_name != 'pull_request'}}
         uses: peaceiris/actions-gh-pages@v3.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
