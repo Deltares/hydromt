@@ -28,7 +28,6 @@ dependencies = [
     "scipy",
     "xarray",
     "zarr",
-
 ]
 requires-python = ">=3.8" # fix tests to support older versions
 readme = "README.rst"
@@ -49,11 +48,14 @@ test = [
 	"responses",
 	"pytest>=2.7.3",
 	"pytest-cov",
+    "black",
 ]
 doc = [
-	"sphinx",
-	"sphinx_rtd_theme",
-	"black",
+	"nbsphinx",
+    "pydata-sphinx-theme",
+    "sphinx",
+    "sphinx_design",
+    "sphinx_autosummary_accessors",
 ]
 
 [project.urls]

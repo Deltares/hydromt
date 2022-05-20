@@ -80,10 +80,10 @@ Added
 Changed
 ^^^^^^^
 - bumped hydromt-artifacts version to v0.0.6
-- In model API build and update functions, if any write_* are called in the ini file (opt), 
-  the final self.write() call is skipped. This enables passing custom arguments to the write_ 
-  functions without double writing files or customizing the order in which write_ functions 
-  are called. If any write_ function is called we assume the user manages the writing and
+- In model API build and update functions, if any write* are called in the ini file (opt), 
+  the final self.write() call is skipped. This enables passing custom arguments to the write* 
+  functions without double writing files or customizing the order in which write* functions 
+  are called. If any write* function is called we assume the user manages the writing and
   a the global write method is skipped.
 - default GTiff lwz compression with DataCatalog.export_data method
 - rename DataAdapter.export_data to DataAdapter.to_file to avoid confusion with DataCatalog.export_data method
