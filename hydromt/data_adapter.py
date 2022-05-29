@@ -835,7 +835,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         for date, var in product(dates, vrs):
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            path1 = path.format(year=yr, month=mth, variable=var)
+            path1 = path.format(year=f"{yr:04}", month=f"{mth:02}", variable=var)
             # FIXME: glob won't work with other than local file systems; use fsspec instead
             fns.extend(glob.glob(path1))
         if len(fns) == 0:
