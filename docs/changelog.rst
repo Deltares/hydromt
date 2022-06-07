@@ -12,6 +12,7 @@ Added
 ^^^^^
 - Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
 - Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
+- Add function to calculate daily Penman-Monteith potential evaporation in forcing.py.  
 
 Changed
 ^^^^^^^

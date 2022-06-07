@@ -46,4 +46,5 @@ dependencies:
     - hydroengine
     - sphinx_design  # docs
     - sphinx_autosummary_accessors  # docs
+    - git+https://github.com/woodcrafty/PyETo.git
 
