@@ -1,23 +1,30 @@
 /* Override the default color set in the original theme */
 
-.navbar-light {
-    background: #080c80 !important;
+html[data-theme="light"] {
+    --pst-color-background: #fff !important;
+    --pst-color-on-background: #080c80 !important;
+    --pst-color-primary: #080c80 !important;
+}
+html[data-theme="dark"] {
+    --pst-color-border: #080c80 !important;
+    --pst-color-background: #080c80 !important;
+    --pst-color-on-background: #080c80 !important;
 }
 
-.bg-light {
-    background-color: #080c80 !important;
+div.admonition {
+    background-color:  #fff;
 }
 
-.navbar-brand p {
+.nav-link {
+    color: #8486c0 !important;
+}
+
+.navbar-nav>:hover>.nav-link {
     color: #fff !important;
 }
 
 img.icon-link-image {
     height: 2.5em !important;
-}
-
-.navbar-toggler-icon {
-    filter: invert(100%) ;
 }
 
 :root {
