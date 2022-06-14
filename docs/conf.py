@@ -226,6 +226,7 @@ html_context = {
     "github_repo": "hydromt",
     "github_version": "docs",  # FIXME
     "doc_path": "docs",
+    "default_mode": "light",
 }
 
 remove_from_toctrees = ["_generated/*"]
