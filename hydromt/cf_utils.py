@@ -249,7 +249,7 @@ class FewsUtils(object):
                 tag_dict=model,
             )
 
-    def add_locationsfiles(self, model_source):
+    def add_locationsfiles(self, model_source, model_templates):
         """
         Update location files (csv) in the fews root
         for model_source instance.
@@ -258,18 +258,25 @@ class FewsUtils(object):
         ----------
         model_source: str
             Model source in FewsUtils model catalog.
+        model_templates: str, Path, optional
+            Folde containing template config files for tag replacement. If not provided,
+            download from url.
         """
         model = self.models[model_source]
         mod = model.get("model")
         region = model.get("region")
         mversion = model.get("mversion")
-        locid = f"{model}.{region}.{mversion}"
-        for fname, fpath in self.locationfiles:
+        locid = f"{mod}.{region}.{mversion}"
+        for fname in self.locationfiles:
+            fpath = self.locationfiles[fname]
+            source_file = join(model_templates, f"{mod}_{fname}.csv")
             fname = join(fpath, mod, f"{mod}_{fname}.csv")
+            shutil.copy(source_file, fname)
             if isfile(fname):
-                df = pd.read_csv(fname)
+                df = pd.read_csv(fname, sep = ';')
                 if locid not in df["ID"]:
-                    df = df.append({"ID": locid}, ignore_index=True)
+                    df = df.append({"ID": locid}, ignore_index=True) # FIXME: where does this csv stored?
+                df.to_csv(fname, sep = ';', index = False)
 
     def replace_tags_by_file(self, source_file, destination_file, tag_dict):
         """
