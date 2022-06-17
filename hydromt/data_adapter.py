@@ -825,13 +825,15 @@ class DataAdapter(object, metaclass=ABCMeta):
         # Extract key formats
         format_keys = [i[2] for i in Formatter().parse(path) if i[1] is not None]
         # Store keys and keys format
-        format_dict = dict(zip(keys,format_keys))
+        format_dict = dict(zip(keys, format_keys))
         for key in known_keys:
-            if key not in format_dict: format_dict[key] = '' 
-        #Remove the format tags from the path
-        while '' in format_keys: format_keys.remove('')    
-        for key in format_keys: 
-            path = path.replace(':'+key, '')
+            if key not in format_dict:
+                format_dict[key] = ""
+        # Remove the format tags from the path
+        while "" in format_keys:
+            format_keys.remove("")
+        for key in format_keys:
+            path = path.replace(":" + key, "")
 
         # double unknown keys to escape these when formatting
         for key in [key for key in keys if key not in known_keys]:
@@ -849,7 +851,11 @@ class DataAdapter(object, metaclass=ABCMeta):
         for date, var in product(dates, vrs):
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            path1 = path.format(year="{:{}}".format(yr, format_dict["year"]), month="{:{}}".format(mth, format_dict["month"]), variable="{:{}}".format(var, format_dict["variable"]))
+            path1 = path.format(
+                year="{:{}}".format(yr, format_dict["year"]),
+                month="{:{}}".format(mth, format_dict["month"]),
+                variable="{:{}}".format(var, format_dict["variable"]),
+            )
             # FIXME: glob won't work with other than local file systems; use fsspec instead
             fns.extend(glob.glob(path1))
         if len(fns) == 0:
