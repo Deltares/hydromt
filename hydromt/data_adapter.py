@@ -368,6 +368,7 @@ class DataCatalog(object):
         # export data and update sources
         sources_out = {}
         for key, source in sources.items():
+            print(key)
             try:
                 # read slice of source and write to file
                 self.logger.debug(f"Exporting {key}.")
@@ -818,7 +819,6 @@ class DataAdapter(object, metaclass=ABCMeta):
         fns = []
         path = str(self.path)
         known_keys = ["year", "month", "variable"]
-        path0=path
 
         # Extract keys
         keys = [i[1] for i in Formatter().parse(path) if i[1] is not None]
@@ -831,7 +831,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         #Remove the format tags from the path
         while '' in format_keys: format_keys.remove('')    
         for key in format_keys: 
-            path0 = path0.replace(':'+key, '')
+            path = path.replace(':'+key, '')
 
         # double unknown keys to escape these when formatting
         for key in [key for key in keys if key not in known_keys]:
@@ -849,7 +849,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         for date, var in product(dates, vrs):
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            path1 = path0.format(year="{:{}}".format(yr, format_dict["year"]), month="{:{}}".format(mth, format_dict["month"]), variable="{:{}}".format(var, format_dict["variable"]))
+            path1 = path.format(year="{:{}}".format(yr, format_dict["year"]), month="{:{}}".format(mth, format_dict["month"]), variable="{:{}}".format(var, format_dict["variable"]))
             # FIXME: glob won't work with other than local file systems; use fsspec instead
             fns.extend(glob.glob(path1))
         if len(fns) == 0:
@@ -1281,7 +1281,7 @@ class GeoDatasetAdapter(DataAdapter):
         obj = self.get_data(
             bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
         )
-        if obj.vector.index.size == 0 or ("time" in obj and obj.time.size == 0):
+        if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
             return None, None
 
         if driver is None or driver == "netcdf":
