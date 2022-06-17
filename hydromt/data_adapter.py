@@ -826,6 +826,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         format_keys = [i[2] for i in Formatter().parse(path) if i[1] is not None]
         # Store keys and keys format
         format_dict = dict(zip(keys,format_keys))
+        for key in known_keys:
+            if key not in format_dict: format_dict[key] = '' 
         #Remove the format tags from the path
         while '' in format_keys: format_keys.remove('')    
         for key in format_keys: 
