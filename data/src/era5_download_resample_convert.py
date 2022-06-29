@@ -24,8 +24,9 @@ era5_variables = {
     "shww": "significant_height_of_wind_waves",
     "ro": "runoff",
     "pev": "potential_evaporation",
-    "10u": "10m_u_component_of_wind",
-    "10v": "10m_v_component_of_wind",
+    "u10": "10m_u_component_of_wind",
+    "v10": "10m_v_component_of_wind",
+    "d2m": "2m_dewpoint_temperature",
 }
 daily_attrs = {
     "tp": {
@@ -35,6 +36,7 @@ daily_attrs = {
     "tmin": {"units": "K", "long_name": "2 meter mininum temperature"},
     "tmax": {"units": "K", "long_name": "2 meter maximum temperature"},
     "t2m": {"units": "K", "long_name": "2 meter mean temperature"},
+    "d2m": {"units": "K", "long_name": "2 meter dewpoint temperature"},
     "msl": {
         "units": "Pa",
         "long_name": "Mean sea level pressure",
@@ -49,6 +51,16 @@ daily_attrs = {
     "tcwv": {
         "units": "kg m**-2",
         "long_name": "Total column water vapour",
+    },
+    "u10": {
+        "units": "m s**-1",
+        "long_name": "Neutral wind at 10 m u-component",
+        "standard_name": "10m_u_component_of_wind",
+    },
+    "v10": {
+        "units": "m s**-1",
+        "long_name": "Neutral wind at 10 m v-component",
+        "standard_name": "10m_v_component_of_wind",
     },
 }
 
@@ -618,7 +630,7 @@ if __name__ == "__main__":
     os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
     dask_kwargs = {"n_workers": 4, "processes": True}
 
-    save_zarr = False
+    save_zarr = True
     outdir = join(r"p:\wflow_global\hydromt_staging\era5")
 
     # meteo variables
@@ -627,7 +639,7 @@ if __name__ == "__main__":
     ddir_day = join(root, "era5_daily")
     zarr_hour = join(root, "era5.zarr")
     zarr_day = join(root, "era5_daily.zarr")
-    variables_hour = ["msl", "ssrd", "tp", "t2m", "tisr", "tcwv", "cape"]
+    variables_hour = ["msl", "ssrd", "tp", "t2m", "tisr", "tcwv", "u10", "v10", "d2m", "cape"]
     # NOTE: CAPE excluded from daily values, not sure how it is used and thus how to aggregate
     variables_day = variables_hour[:-1] + ["tmin", "tmax"]
 
@@ -642,6 +654,7 @@ if __name__ == "__main__":
         variables=variables_hour,
         dask_kwargs=dask_kwargs,
         move_to_ddir=True,
+        start_year=1979, 
     )
 
     print("resampling to daily values ..")
@@ -652,6 +665,7 @@ if __name__ == "__main__":
         variables=variables_hour,
         dask_kwargs=dask_kwargs,
         move_to_ddir=True,
+        start_year=1979,
     )
 
     if save_zarr:
@@ -660,6 +674,7 @@ if __name__ == "__main__":
             fn_zarr=zarr_hour,
             ddir=ddir_hour,
             variables=variables_hour,
+            start_date="19790101",
         )
 
         print("updating daily zarr..")
@@ -667,4 +682,5 @@ if __name__ == "__main__":
             fn_zarr=zarr_day,
             ddir=ddir_day,
             variables=variables_day,
+            start_date="19790101",
         )
