@@ -639,7 +639,18 @@ if __name__ == "__main__":
     ddir_day = join(root, "era5_daily")
     zarr_hour = join(root, "era5.zarr")
     zarr_day = join(root, "era5_daily.zarr")
-    variables_hour = ["msl", "ssrd", "tp", "t2m", "tisr", "tcwv", "u10", "v10", "d2m", "cape"]
+    variables_hour = [
+        "msl",
+        "ssrd",
+        "tp",
+        "t2m",
+        "tisr",
+        "tcwv",
+        "u10",
+        "v10",
+        "d2m",
+        "cape",
+    ]
     # NOTE: CAPE excluded from daily values, not sure how it is used and thus how to aggregate
     variables_day = variables_hour[:-1] + ["tmin", "tmax"]
 
