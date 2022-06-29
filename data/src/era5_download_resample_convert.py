@@ -630,7 +630,7 @@ if __name__ == "__main__":
     os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
     dask_kwargs = {"n_workers": 4, "processes": True}
 
-    save_zarr = True
+    save_zarr = False
     outdir = join(r"p:\wflow_global\hydromt_staging\era5")
 
     # meteo variables
@@ -654,7 +654,6 @@ if __name__ == "__main__":
         variables=variables_hour,
         dask_kwargs=dask_kwargs,
         move_to_ddir=True,
-        start_year=1979, 
     )
 
     print("resampling to daily values ..")
@@ -665,7 +664,6 @@ if __name__ == "__main__":
         variables=variables_hour,
         dask_kwargs=dask_kwargs,
         move_to_ddir=True,
-        start_year=1979,
     )
 
     if save_zarr:
@@ -674,7 +672,6 @@ if __name__ == "__main__":
             fn_zarr=zarr_hour,
             ddir=ddir_hour,
             variables=variables_hour,
-            start_date="19790101",
         )
 
         print("updating daily zarr..")
@@ -682,5 +679,4 @@ if __name__ == "__main__":
             fn_zarr=zarr_day,
             ddir=ddir_day,
             variables=variables_day,
-            start_date="19790101",
         )
