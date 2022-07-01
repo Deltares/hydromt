@@ -12,7 +12,7 @@ Added
 ^^^^^
 - Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
 - Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
-- Add function to calculate daily Penman-Monteith potential evaporation in forcing.py.  
+- Add function to calculate daily Penman-Monteith potential evaporation in forcing.py. Depending on the available variables, two options are defined ``penman-monteith_tdew`` (inputs: ['temp', 'temp_min', 'temp_max', 'wind_u', 'wind_v', 'temp_dew', 'kin', 'press_msl']) and ``penman-monteith_rh_simple`` (inputs: ['temp', 'temp_min', 'temp_max', 'wind', 'rh', 'kin']). 
 
 Changed
 ^^^^^^^

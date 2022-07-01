@@ -303,16 +303,32 @@ def pet(
                               )
     if "penman-monteith" in method:
         logger.info("Calculating Penman-Monteith ref evaporation")
-        pet_out = pet_penman_monteith(temp["temp"], 
-                                      temp["temp_min"], 
-                                      temp["temp_max"], 
-                                      ds_out["press"], 
-                                      ds_out["kin"], 
-                                      ds_out["wind"], 
-                                      ds_out["rh"], 
-                                      dem_model.where(dem_model.mask)
-                                      )
-        import pdb; pdb.set_trace()
+        if method == "penman-monteith_rh_simple": 
+            pet_out = pet_penman_monteith(temp["temp"], 
+                                        temp["temp_min"], 
+                                        temp["temp_max"], 
+                                        ds_out["press"], 
+                                        ds_out["kin"], 
+                                        ds_out["wind"], 
+                                        ds_out["rh"], 
+                                        dem_model.where(dem_model.mask),
+                                        "rh"
+                                        )
+        elif method == "penman-monteith_tdew":
+            pet_out = pet_penman_monteith(temp["temp"], 
+                                        temp["temp_min"], 
+                                        temp["temp_max"], 
+                                        ds_out["press"], 
+                                        ds_out["kin"], 
+                                        ds_out["wind"], 
+                                        ds_out["temp_dew"], 
+                                        dem_model.where(dem_model.mask),
+                                        "temp_dew"
+                                        )
+        else:
+            methods = ["debruin", "makking", "penman-monteith_rh_simple", "penman-monteith_tdew"]
+            ValueError(f"Unknown pet method, select from {methods}")
+
     # resample in time
     pet_out.name = "pet"
     pet_out.attrs.update(unit="mm")
@@ -455,7 +471,58 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
     pet = xr.where(pet > 0.0, pet, 0.0)
     return pet
 
-def pet_penman_monteith(temp, temp_min, temp_max, press, kin, wind, rh, elevtn):
+def penman_monteith(temp, temp_min, temp_max, press, kin, wind, var_for_avp, elevtn, doy, lat_rad, var_for_avp_name):
+    """
+    todo
+    """
+    #saturation vapor pressure svp [kPa] from temp [degC]
+    svp = pyeto.svp_from_t(temp)
+
+    #actual vapor pressure avp [kPa] from dewpoint temperature [degC]
+    if var_for_avp_name == "temp_dew":
+        avp = pyeto.avp_from_tdew(var_for_avp)
+    #actual vapor pressure avp [kPa] from relative humidity rh [%]
+    elif var_for_avp_name == "rh": 
+        svp_tmin = pyeto.svp_from_t(temp_min)
+        svp_tmax = pyeto.svp_from_t(temp_max)
+        avp = pyeto.avp_from_rhmean(svp_tmin, svp_tmax, var_for_avp)
+    else:
+        variables_avp=["temp_dew", "rh"]
+        ValueError(f"Unknown method to calculate avp, select from variables {variables_avp}")
+
+    #slope of the sat vapor pressure curve
+    delta_svp = pyeto.delta_svp(temp)
+
+    #psychrometric constant
+    #press already calculated from elevation (or if available directly)
+    psy = pyeto.psy_const(press/10) # in this formula press should be in kPa
+                        
+    #ned rad
+    #first calc extraterrestrial rad (et_rad) and clear sky radiation (cs_rad)
+    sol_dec = pyeto.sol_dec(doy)
+    sha = pyeto.sunset_hour_angle(lat_rad, sol_dec)
+    ird = pyeto.inv_rel_dist_earth_sun(doy)
+    et_rad = pyeto.et_rad(lat_rad, sol_dec, sha, ird)
+    cs_rad = pyeto.cs_rad(elevtn, et_rad)
+    #then longwave outgoing
+    long_out = pyeto.net_out_lw_rad(temp_min, temp_max, kin*86400/1e6, cs_rad, avp) # in this formula kin should be in [MJ m-2 day-1]
+
+    #then net rad
+    net_rad = pyeto.net_rad(kin*86400/1e6, long_out) # in this formula kin should be in [MJ m-2 day-1]
+
+    #now eto....
+    pet = pyeto.fao56_penman_monteith(
+                        net_rad, 
+                        pyeto.celsius2kelvin(temp),
+                        wind,
+                        svp, 
+                        avp, 
+                        delta_svp,
+                        psy                           
+                        )
+    return pet 
+
+def pet_penman_monteith(temp, temp_min, temp_max, press, kin, wind, var_for_avp, elevtn, var_for_avp_name):
     """Determnines Penman-Monteith daily reference evapotranspiration based on the available inputs. Using the pyeto package.
 
     Parameters
@@ -472,19 +539,18 @@ def pet_penman_monteith(temp, temp_min, temp_max, press, kin, wind, rh, elevtn):
         DataArray with global radiation [W m-2]
     wind : xarray.DataArray
         DataArray with wind speed at 2m above the surface [m s-1]
-    rh :  xarray.DataArray
-        DataArray with mean relative humidity [%]
+    var_for_avp :  xarray.DataArray
+        DataArray with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
     elevtn :  xarray.DataArray
         DataArray with elevation at model resolution [m]
+    var_for_avp_name: string
+        String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
     
     Returns
     --------
     pet : xarray.DataArray (lazy)
         reference evapotranspiration [mm d-1]
     """
-    #correct for neg values in rh and rh>100....
-    rh_corr1 = rh.where(rh<100,100)
-    rh_corr = rh_corr1.where(rh_corr1>0,0)
 
     #get day of year
     doy = kin.time.dt.dayofyear
@@ -501,148 +567,30 @@ def pet_penman_monteith(temp, temp_min, temp_max, press, kin, wind, rh, elevtn):
         )
     lat_rad = lat_rad["lat_rad"]
 
-    #saturation vapor pressure svp [kPa] from temp [degC]
-    svp = xr.apply_ufunc(pyeto.svp_from_t, 
-                        temp,
-                        dask = "parallelized",
-                        output_dtypes=[float],
-                        vectorize=True,
-                        keep_attrs=True,
-                        )
+    if var_for_avp_name == "rh":
+        #correct for neg values in rh and rh>100....
+        rh_corr1 = var_for_avp.where(var_for_avp<100,100)
+        rh_corr = rh_corr1.where(rh_corr1>0,0)
+        var_for_avp = rh_corr
 
-    svp_tmin = xr.apply_ufunc(pyeto.svp_from_t, 
-                        temp_min,
-                        dask = "parallelized",
-                        output_dtypes=[float],
-                        vectorize=True,
-                        keep_attrs=True,
-                        )
-
-    svp_tmax = xr.apply_ufunc(pyeto.svp_from_t, 
-                        temp_max,
-                        dask = "parallelized",
-                        output_dtypes=[float],
-                        vectorize=True,
-                        keep_attrs=True,
-                        )
-
-    #acutal vapor pressure avp [kPa] from relative humidity rh [%]
-    avp = xr.apply_ufunc(pyeto.avp_from_rhmean,
-                        svp_tmin.compute(), 
-                        svp_tmax.compute(), 
-                        # rh,
-                        rh_corr,
-                        dask = "parallelized",
-                        output_dtypes=[float],
-                        vectorize=True,
-                        keep_attrs=True,
-                        )
-
-    #slope of the sat vapor pressure curve
-    delta_svp = xr.apply_ufunc(pyeto.delta_svp,
-                            temp,
-                            dask = "parallelized",
-                            output_dtypes=[float],
-                            vectorize=True,                           
-                            keep_attrs=True,                           
-                            )
-
-    #psychrometric constant
-    #press already calculated from elevation (or if available directly)
-    psy = xr.apply_ufunc(pyeto.psy_const,
-                        press/10, # in this formula press should be in kPa
-                        dask = "parallelized",
-                        output_dtypes=[float],
-                        vectorize=True,
-                        keep_attrs=True,                           
-                        )
-                        
-    #ned rad
-    #first calc extraterrestrial rad (et_rad) and clear sky radiation (cs_rad)
-    sol_dec = xr.apply_ufunc(pyeto.sol_dec,
-                            doy,
-                            dask = "parallelized",
-                            output_dtypes=[float],
-                            vectorize=True,
-                            keep_attrs=True,                           
-                            )
-
-    sha = xr.apply_ufunc(pyeto.sunset_hour_angle,
-                        lat_rad, 
-                        sol_dec.compute(),
-                        dask = "parallelized",
-                        output_dtypes=[float],
-                        vectorize=True,
-                        keep_attrs=True,                           
-                        )
-                        
-    ird = xr.apply_ufunc(pyeto.inv_rel_dist_earth_sun,
-                        doy,
-                        dask = "parallelized",
-                        output_dtypes=[float],
-                        vectorize=True,
-                        keep_attrs=True,                           
-                        )
-
-    et_rad = xr.apply_ufunc(pyeto.et_rad,
-                            lat_rad, 
-                            sol_dec.compute(), 
-                            sha.compute(), 
-                            ird.compute(),
-                            dask = "parallelized",
-                            output_dtypes=[float],
-                            vectorize=True,
-                            keep_attrs=True,                           
-                            )
-                        
-    cs_rad = xr.apply_ufunc(pyeto.cs_rad,
-                            elevtn, 
-                            et_rad.compute(),
-                            dask = "parallelized",
-                            output_dtypes=[float],
-                            vectorize=True,
-                            keep_attrs=True,                           
-                            )
-
-    #then longwave outgoing
-    long_out = xr.apply_ufunc(pyeto.net_out_lw_rad,
+    pet = xr.apply_ufunc(penman_monteith,
+                            temp, 
                             temp_min, 
                             temp_max, 
-                            kin*86400/1e6, 
-                            cs_rad.compute(), 
-                            avp.compute(),
+                            press, 
+                            kin, 
+                            wind, 
+                            var_for_avp, 
+                            elevtn, 
+                            doy, 
+                            lat_rad,
+                            var_for_avp_name,
                             dask = "parallelized",
                             output_dtypes=[float],
                             vectorize=True,
-                            keep_attrs=True,                           
-                            )
-
-    #then net rad
-    net_rad = xr.apply_ufunc(pyeto.net_rad,
-                            kin*86400/1e6, 
-                            long_out.compute(),
-                            dask = "parallelized",
-                            output_dtypes=[float],
-                            vectorize=True,
-                            keep_attrs=True,                           
-                            )
-
-    #now eto....
-    pet = xr.apply_ufunc(pyeto.fao56_penman_monteith,
-                        net_rad.compute(),
-                        pyeto.celsius2kelvin(temp),
-                        wind,
-                        svp.compute(),
-                        avp.compute(),
-                        delta_svp.compute(),
-                        psy.compute(),
-                        dask = "parallelized",
-                        output_dtypes=[float],
-                        vectorize=True,
-                        keep_attrs=True,                           
+                            keep_attrs=True,
                         )
     return pet
-
 
 def resample_time(
     da,
