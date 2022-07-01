@@ -263,29 +263,31 @@ def pet(
         if "press_msl" in ds_out:
             ds_out = ds_out.rename({"press_msl": "press"})
         else:
-            #calculate pressure from elevation [kPa]
-            ds_out["press"] = xr.apply_ufunc(pyeto.atm_pressure,
-                                            dem_model.where(dem_model.mask),
-                                            dask = "parallelized",
-                                            output_dtypes=[float],
-                                            vectorize=True,
-                                            keep_attrs=True,                           
-                                            )
-            #convert to hPa to be consistent with press function calculation:
+            # calculate pressure from elevation [kPa]
+            ds_out["press"] = xr.apply_ufunc(
+                pyeto.atm_pressure,
+                dem_model.where(dem_model.mask),
+                dask="parallelized",
+                output_dtypes=[float],
+                vectorize=True,
+                keep_attrs=True,
+            )
+            # convert to hPa to be consistent with press function calculation:
             ds_out["press"] = ds_out["press"] * 10
-    
-    #compute wind from u and v components at 10m (for era5)
+
+    # compute wind from u and v components at 10m (for era5)
     if ("wind_u" in ds_out.data_vars) & ("wind_v" in ds_out.data_vars):
-        ds_out["wind_10m"] = np.sqrt(ds_out["wind_u"]**2 + ds_out["wind_v"]**2)
-        ds_out["wind"] = xr.apply_ufunc(pyeto.wind_speed_2m,
-                                        ds_out["wind_10m"],
-                                        10,
-                                        dask = "parallelized",
-                                        output_dtypes=[float],
-                                        vectorize=True,
-                                        keep_attrs=True,
-                                        )
-            
+        ds_out["wind_10m"] = np.sqrt(ds_out["wind_u"] ** 2 + ds_out["wind_v"] ** 2)
+        ds_out["wind"] = xr.apply_ufunc(
+            pyeto.wind_speed_2m,
+            ds_out["wind_10m"],
+            10,
+            dask="parallelized",
+            output_dtypes=[float],
+            vectorize=True,
+            keep_attrs=True,
+        )
+
     timestep = to_timedelta(ds).total_seconds()
     if method == "debruin":
         pet_out = pet_debruin(
@@ -296,37 +298,40 @@ def pet(
             timestep=timestep,
         )
     if method == "makkink":
-        pet_out = pet_makkink(temp,
-                              ds_out["press"], 
-                              ds_out["kin"], 
-                              timestep=timestep
-                              )
+        pet_out = pet_makkink(temp, ds_out["press"], ds_out["kin"], timestep=timestep)
     if "penman-monteith" in method:
         logger.info("Calculating Penman-Monteith ref evaporation")
-        if method == "penman-monteith_rh_simple": 
-            pet_out = pet_penman_monteith(temp["temp"], 
-                                        temp["temp_min"], 
-                                        temp["temp_max"], 
-                                        ds_out["press"], 
-                                        ds_out["kin"], 
-                                        ds_out["wind"], 
-                                        ds_out["rh"], 
-                                        dem_model.where(dem_model.mask),
-                                        "rh"
-                                        )
+        if method == "penman-monteith_rh_simple":
+            pet_out = pet_penman_monteith(
+                temp["temp"],
+                temp["temp_min"],
+                temp["temp_max"],
+                ds_out["press"],
+                ds_out["kin"],
+                ds_out["wind"],
+                ds_out["rh"],
+                dem_model.where(dem_model.mask),
+                "rh",
+            )
         elif method == "penman-monteith_tdew":
-            pet_out = pet_penman_monteith(temp["temp"], 
-                                        temp["temp_min"], 
-                                        temp["temp_max"], 
-                                        ds_out["press"], 
-                                        ds_out["kin"], 
-                                        ds_out["wind"], 
-                                        ds_out["temp_dew"], 
-                                        dem_model.where(dem_model.mask),
-                                        "temp_dew"
-                                        )
+            pet_out = pet_penman_monteith(
+                temp["temp"],
+                temp["temp_min"],
+                temp["temp_max"],
+                ds_out["press"],
+                ds_out["kin"],
+                ds_out["wind"],
+                ds_out["temp_dew"],
+                dem_model.where(dem_model.mask),
+                "temp_dew",
+            )
         else:
-            methods = ["debruin", "makking", "penman-monteith_rh_simple", "penman-monteith_tdew"]
+            methods = [
+                "debruin",
+                "makking",
+                "penman-monteith_rh_simple",
+                "penman-monteith_tdew",
+            ]
             ValueError(f"Unknown pet method, select from {methods}")
 
     # resample in time
@@ -471,58 +476,74 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
     pet = xr.where(pet > 0.0, pet, 0.0)
     return pet
 
-def penman_monteith(temp, temp_min, temp_max, press, kin, wind, var_for_avp, elevtn, doy, lat_rad, var_for_avp_name):
+
+def penman_monteith(
+    temp,
+    temp_min,
+    temp_max,
+    press,
+    kin,
+    wind,
+    var_for_avp,
+    elevtn,
+    doy,
+    lat_rad,
+    var_for_avp_name,
+):
     """
     todo
     """
-    #saturation vapor pressure svp [kPa] from temp [degC]
+    # saturation vapor pressure svp [kPa] from temp [degC]
     svp = pyeto.svp_from_t(temp)
 
-    #actual vapor pressure avp [kPa] from dewpoint temperature [degC]
+    # actual vapor pressure avp [kPa] from dewpoint temperature [degC]
     if var_for_avp_name == "temp_dew":
         avp = pyeto.avp_from_tdew(var_for_avp)
-    #actual vapor pressure avp [kPa] from relative humidity rh [%]
-    elif var_for_avp_name == "rh": 
+    # actual vapor pressure avp [kPa] from relative humidity rh [%]
+    elif var_for_avp_name == "rh":
         svp_tmin = pyeto.svp_from_t(temp_min)
         svp_tmax = pyeto.svp_from_t(temp_max)
         avp = pyeto.avp_from_rhmean(svp_tmin, svp_tmax, var_for_avp)
     else:
-        variables_avp=["temp_dew", "rh"]
-        ValueError(f"Unknown method to calculate avp, select from variables {variables_avp}")
+        variables_avp = ["temp_dew", "rh"]
+        ValueError(
+            f"Unknown method to calculate avp, select from variables {variables_avp}"
+        )
 
-    #slope of the sat vapor pressure curve
+    # slope of the sat vapor pressure curve
     delta_svp = pyeto.delta_svp(temp)
 
-    #psychrometric constant
-    #press already calculated from elevation (or if available directly)
-    psy = pyeto.psy_const(press/10) # in this formula press should be in kPa
-                        
-    #ned rad
-    #first calc extraterrestrial rad (et_rad) and clear sky radiation (cs_rad)
+    # psychrometric constant
+    # press already calculated from elevation (or if available directly)
+    psy = pyeto.psy_const(press / 10)  # in this formula press should be in kPa
+
+    # ned rad
+    # first calc extraterrestrial rad (et_rad) and clear sky radiation (cs_rad)
     sol_dec = pyeto.sol_dec(doy)
     sha = pyeto.sunset_hour_angle(lat_rad, sol_dec)
     ird = pyeto.inv_rel_dist_earth_sun(doy)
     et_rad = pyeto.et_rad(lat_rad, sol_dec, sha, ird)
     cs_rad = pyeto.cs_rad(elevtn, et_rad)
-    #then longwave outgoing
-    long_out = pyeto.net_out_lw_rad(temp_min, temp_max, kin*86400/1e6, cs_rad, avp) # in this formula kin should be in [MJ m-2 day-1]
+    # then longwave outgoing
+    long_out = pyeto.net_out_lw_rad(
+        temp_min, temp_max, kin * 86400 / 1e6, cs_rad, avp
+    )  # in this formula kin should be in [MJ m-2 day-1]
 
-    #then net rad
-    net_rad = pyeto.net_rad(kin*86400/1e6, long_out) # in this formula kin should be in [MJ m-2 day-1]
+    # then net rad
+    net_rad = pyeto.net_rad(
+        kin * 86400 / 1e6, long_out
+    )  # in this formula kin should be in [MJ m-2 day-1]
 
-    #now eto....
+    # now eto....
     pet = pyeto.fao56_penman_monteith(
-                        net_rad, 
-                        pyeto.celsius2kelvin(temp),
-                        wind,
-                        svp, 
-                        avp, 
-                        delta_svp,
-                        psy                           
-                        )
-    return pet 
+        net_rad, pyeto.celsius2kelvin(temp), wind, svp, avp, delta_svp, psy
+    )
+    return pet
 
-def pet_penman_monteith(temp, temp_min, temp_max, press, kin, wind, var_for_avp, elevtn, var_for_avp_name):
+
+def pet_penman_monteith(
+    temp, temp_min, temp_max, press, kin, wind, var_for_avp, elevtn, var_for_avp_name
+):
     """Determnines Penman-Monteith daily reference evapotranspiration based on the available inputs. Using the pyeto package.
 
     Parameters
@@ -545,52 +566,57 @@ def pet_penman_monteith(temp, temp_min, temp_max, press, kin, wind, var_for_avp,
         DataArray with elevation at model resolution [m]
     var_for_avp_name: string
         String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
-    
+
     Returns
     --------
     pet : xarray.DataArray (lazy)
         reference evapotranspiration [mm d-1]
     """
 
-    #get day of year
+    # get day of year
     doy = kin.time.dt.dayofyear
 
-    #latitude of each cell in radians
+    # latitude of each cell in radians
     lat_rad = xr.Dataset(
-        data_vars = dict(
-            lat_rad = (["y", "x"], pyeto.deg2rad(kin.y.values).reshape(len(kin.y),1).repeat(len(kin.x),1)),
+        data_vars=dict(
+            lat_rad=(
+                ["y", "x"],
+                pyeto.deg2rad(kin.y.values)
+                .reshape(len(kin.y), 1)
+                .repeat(len(kin.x), 1),
             ),
-        coords = dict(
-            y=kin.y,
-            x=kin.x),
-        attrs = dict(description="lat_rad")    
-        )
+        ),
+        coords=dict(y=kin.y, x=kin.x),
+        attrs=dict(description="lat_rad"),
+    )
     lat_rad = lat_rad["lat_rad"]
 
     if var_for_avp_name == "rh":
-        #correct for neg values in rh and rh>100....
-        rh_corr1 = var_for_avp.where(var_for_avp<100,100)
-        rh_corr = rh_corr1.where(rh_corr1>0,0)
+        # correct for neg values in rh and rh>100....
+        rh_corr1 = var_for_avp.where(var_for_avp < 100, 100)
+        rh_corr = rh_corr1.where(rh_corr1 > 0, 0)
         var_for_avp = rh_corr
 
-    pet = xr.apply_ufunc(penman_monteith,
-                            temp, 
-                            temp_min, 
-                            temp_max, 
-                            press, 
-                            kin, 
-                            wind, 
-                            var_for_avp, 
-                            elevtn, 
-                            doy, 
-                            lat_rad,
-                            var_for_avp_name,
-                            dask = "parallelized",
-                            output_dtypes=[float],
-                            vectorize=True,
-                            keep_attrs=True,
-                        )
+    pet = xr.apply_ufunc(
+        penman_monteith,
+        temp,
+        temp_min,
+        temp_max,
+        press,
+        kin,
+        wind,
+        var_for_avp,
+        elevtn,
+        doy,
+        lat_rad,
+        var_for_avp_name,
+        dask="parallelized",
+        output_dtypes=[float],
+        vectorize=True,
+        keep_attrs=True,
+    )
     return pet
+
 
 def resample_time(
     da,
