@@ -8,7 +8,7 @@ import requests
 import glob
 import logging
 import pandas as pd
-
+from .cf_xml_utils_extended import CfXmlUtilsExtended
 logger = logging.getLogger(__name__)
 
 
@@ -55,6 +55,8 @@ class FewsUtils(object):
             "LocationSets": self.region_path,
             "ModuleInstanceDescriptors": self.region_path,
             "WorkflowDescriptors": self.region_path,
+            "SpatialPlot": self.display_path,
+            "TopologyGroup": self.region_path,
         }
         self.locationfiles = {"grids": join(self.map_path)}
 
@@ -234,15 +236,16 @@ class FewsUtils(object):
         scheme = model.get("sversion")
         mod = model.get("model")
         region = model.get("region")
-        version = model.get("mversion")
+        mversion = model.get("mversion")
         for file in files:
             filetype = basename(file).split("_")[0]
             dest_folder = self.template_configfiles[filetype]
+            dest_filename = eval(f"f'{basename(file)}'")
             dest_file = join(
                 dest_folder,
                 f"scheme.{scheme}",
-                f"{filetype}_{mod}.{region}.{version}.xml",
-            )
+                dest_filename,
+            ) # use dest_filename to allow suffixes in filenames
             self.replace_tags_by_file(
                 source_file=Path(file),
                 destination_file=Path(dest_file),
@@ -269,14 +272,66 @@ class FewsUtils(object):
         locid = f"{mod}.{region}.{mversion}"
         for fname in self.locationfiles:
             fpath = self.locationfiles[fname]
-            source_file = join(model_templates, f"{mod}_{fname}.csv")
             fname = join(fpath, mod, f"{mod}_{fname}.csv")
-            shutil.copy(source_file, fname)
             if isfile(fname):
                 df = pd.read_csv(fname, sep = ';')
                 if locid not in df["ID"]:
                     df = df.append({"ID": locid}, ignore_index=True) # FIXME: where does this csv stored?
                 df.to_csv(fname, sep = ';', index = False)
+
+    def add_spatialplots(self, model_source):
+        """
+        Update SpatialDisplay.xml with spatial plots in the fews root
+        for model_source instance.
+
+        Parameters
+        ----------
+        model_source: str
+            Model source in FewsUtils model catalog.
+       """
+        t = CfXmlUtilsExtended(logger=logger)
+
+        model = self.models[model_source]
+        mod = model.get("model")
+        region = model.get("region")
+        scheme = model.get("sversion")
+        mversion = model.get("mversion")
+        fpath = self.template_configfiles["SpatialPlot"]
+
+        # model instance
+        fname = join(
+                fpath,
+                f"scheme.{scheme}",
+                f"SpatialPlot_{model_source}.xml",
+            )
+
+        # get the gridplotgroup ids
+        gridplotgroups = t.get_ids_from_xml(fname, 'gridPlotGroup')
+
+        #  SpatialDisplay.xml
+        fname = join(
+                fpath,
+                f"SpatialDisplay.xml",
+            )
+
+        # insert spatial extent
+        t.insert_extra_extent_into_spatial_display_xml(
+            spatial_display_file=fname,
+            region = region,
+            top = model.get("ymax"),
+            bottom = model.get("ymin"),
+            left = model.get("xmin"),
+            right = model.get("xmax"))
+
+
+        # inser gridplotgroup ids
+        for groupid in gridplotgroups:
+            t.append_gridplotgroup_to_spatial_display_xml(
+                spatial_display_file=fname,
+                groupId=groupid)
+
+
+
 
     def replace_tags_by_file(self, source_file, destination_file, tag_dict):
         """

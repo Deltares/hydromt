@@ -40,7 +40,7 @@ class CfXmlUtilsExtended():
         :param xsd_schema_name:
         :return:
         """
-        assert Path(xml_file).exists().is_file(), f'Cannot find file {xml_file}'
+        assert Path(xml_file).is_file(), f'Cannot find file {xml_file}'
 
         try:
             tree = ET.parse(xml_file)
@@ -49,11 +49,11 @@ class CfXmlUtilsExtended():
             msg = f'Parsing xml file {xml_file} raised Exception {e}'
             self.logger.error(msg)
             raise msg
-        has_schema = xml_root.find('{http://www.wldelft.nl/fews}' + xsd_schema_name)
-        assert len(has_schema) == 1, f'Schema of {xml_file} not as expected {xsd_schema_name}.xsd)'
+        has_schema = xml_root.tag ==  '{http://www.wldelft.nl/fews}%s' % xsd_schema_name
+        assert has_schema, f'Schema of {xml_file} not as expected {xsd_schema_name}.xsd)'
         return xml_root
 
-    def _add_child_with_text(parent, child, text):
+    def _add_child_with_text(self, parent, child, text):
         """Helper function to create a xml child element with text"""
 
         child = ET.SubElement(parent, child)
@@ -84,6 +84,21 @@ class CfXmlUtilsExtended():
         root = ET.Element('{{{}}}{}'.format(ns['xmlns'], schema_name), attributes)
 
         return root
+
+    def get_ids_from_xml(self, xml_file, element) -> list:
+        """
+        get a list of ids from each element
+
+        Parameters
+        ----------
+        xml_file: str
+            The xml file to parse.
+        element: str
+            name of the element whoes id will be found
+        """
+        tree = ET.parse(Path(xml_file))
+        return [e.attrib['name'] for e in tree.findall('''.//{*}%s''' % (element))]
+
 
     def _add_network_layergroup(self,layergroups: ET.Element, shape_files: List, region: str):
         """
@@ -227,7 +242,7 @@ class CfXmlUtilsExtended():
                     geomap.insert(elem_index + 1, self._new_extra_extent(region, top, bottom, left, right))
         return xml_root
 
-    def insert_extra_extent_into_spatial_display_xml(self, xml_root: ET.ElementTree,
+    def insert_extra_extent_into_spatial_display_xml(self, spatial_display_file: str,
                                                      region: str, top: str, bottom: str, left: str, right: str):
         """
         Function to add extra extent to geomap (after default extent) if region is not yet defined
@@ -239,6 +254,10 @@ class CfXmlUtilsExtended():
         :param right =  right of extent  in default geodatum as configured in SpatialDisplay
         :return: xml-object
         """
+
+        xml_root = self.get_xml_root(xml_file=spatial_display_file, xsd_schema_name='gridDisplay')
+
+        inserts = 0
         for default in xml_root.iter('{http://www.wldelft.nl/fews}defaults'):
             geomap = default.find('{http://www.wldelft.nl/fews}geoMap')
             if geomap is not None:
@@ -246,19 +265,23 @@ class CfXmlUtilsExtended():
                 if extra_extents is not None:
                     existing_extents = [extra_extent.attrib['id'] for extra_extent in extra_extents]
                     if not region in existing_extents:
-                        break
-                elem_index = self._get_index(geomap, geomap.find('{http://www.wldelft.nl/fews}defaultExtent'))
-                geomap.insert(elem_index + 1, self._new_extra_extent(region, top, bottom, left, right))
+                        elem_index = self._get_index(geomap, geomap.find('{http://www.wldelft.nl/fews}defaultExtent'))
+                        geomap.insert(elem_index + 1, self._new_extra_extent(region, "%.3f"%(top), "%.3f"%(bottom), "%.3f"%(left), "%.3f"%(right)))
+                        inserts += 1
+
+        if inserts > 0:
+            self.serialize_xml(xml_root, spatial_display_file)
+            return True
         return xml_root
 
-    def append_gridplotgroup_to_spatial_display_xml_object(self, spatial_display_file: str,
+    def append_gridplotgroup_to_spatial_display_xml(self, spatial_display_file: str,
                                                      groupId: str, ):
         """
         Appends gridplotgroups to the SpatialDisplay.xml
         :param xml_root:
         :return:
         """
-        xml_root = self._get_root(xml_file=spatial_display_file, xsd_schema_name='gridDisplay')
+        xml_root = self.get_xml_root(xml_file=spatial_display_file, xsd_schema_name='gridDisplay')
 
         inserts = 0
         gridplotgroups = xml_root.findall('{http://www.wldelft.nl/fews}gridPlotGroupId')
@@ -267,7 +290,7 @@ class CfXmlUtilsExtended():
             self._add_child_with_text(xml_root, 'gridPlotGroupId', f'{groupId}')
             inserts += 1
         if inserts > 0:
-            self._serialize_xml(xml_root, spatial_display_file)
+            self.serialize_xml(xml_root, spatial_display_file)
             return True
         return False
 
