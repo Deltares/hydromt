@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT"""
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 import enum
-import os
+import os, glob
 from os.path import join, isdir, isfile, abspath, dirname, basename
 from typing import List
 import xarray as xr
@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class Model(object, metaclass=ABCMeta):
     """General and basic API for models in HydroMT"""
+    print("Reading this!")
 
     # FIXME
     _DATADIR = ""  # path to the model data folder
@@ -34,7 +35,7 @@ class Model(object, metaclass=ABCMeta):
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
     # tell hydroMT which methods should receive the res and region arguments
-    _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
+    _CLI_ARGS = {"region": "setup_region", "res": "setup_basemaps"}
 
     def __init__(
         self,
@@ -402,19 +403,24 @@ class Model(object, metaclass=ABCMeta):
                 new_path = join(self._root, "hydromt.log")
                 log.add_filehandler(self.logger, new_path, log_level)
 
-    ## I/O
-
-    @abstractmethod
+    # I/O
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
         self.read_config()
         self.read_staticmaps()
+        self.read_staticgeoms()
+        self.read_forcing()
+        self.read_states()
+        self.logger.info("Model read")
 
-    @abstractmethod
     def write(self):
         """Method to write the complete model schematization and configuration to file."""
+        self.logger.info(f"Write model data to {self.root}")
         self.write_config()
         self.write_staticmaps()
+        self.write_staticgeoms()
+        self.write_forcing()
+        self.write_states()
 
     def _configread(self, fn):
         return config.configread(fn, abs_path=False)
@@ -470,7 +476,6 @@ class Model(object, metaclass=ABCMeta):
         self.logger.info(f"Writing model config to {fn}")
         self._configwrite(fn)
 
-    @abstractmethod
     def read_staticmaps(self):
         """Read staticmaps at <root/?/> and parse to xarray Dataset"""
         # to read gdal raster files use: hydromt.open_mfraster()
@@ -478,64 +483,130 @@ class Model(object, metaclass=ABCMeta):
         if not self._write:
             # start fresh in read-only mode
             self._staticmaps = xr.Dataset()
-        raise NotImplementedError()
+        if isfile(join(self.root, "staticmaps","staticmaps.nc")):
+            self._staticmaps = xr.open_dataset(join(self.root, "staticmaps","staticmaps.nc")) 
 
-    @abstractmethod
     def write_staticmaps(self):
         """Write staticmaps at <root/?/> in model ready format"""
         # to write to gdal raster files use: self.staticmaps.raster.to_mapstack()
         # to write to netcdf use: self.staticmaps.to_netcdf()
         if not self._write:
             raise IOError("Model opened in read-only mode")
-        raise NotImplementedError()
+        elif not self._staticmaps:
+            self.logger.warning("No maps to write - Exiting")
+            return
+        # filename
+        fn_default = join(self.root, "staticmaps","staticmaps.nc")
+        self.logger.info(f"Write staticmaps to {self.root}")
 
-    @abstractmethod
+        ds_out = self.staticmaps
+        ds_out.to_netcdf(fn_default)
+
+
     def read_staticgeoms(self):
         """Read staticgeoms at <root/?/> and parse to dict of geopandas"""
         if not self._write:
             # start fresh in read-only mode
             self._staticgeoms = dict()
-        raise NotImplementedError()
+        if isdir(join(self.root,"staticgeoms")):
+            fns = glob.glob(join(self.root,"staticgeoms", "*.geojson"))
+            if len(fns) > 1:
+                self.logger.info("Reading model staticgeom files.")
+            for fn in fns:
+                name = basename(fn).split(".")[0]
+                if name != "region": #Why is that
+                    self.set_staticgeoms(gpd.read_file(fn), name=name)
+        #raise NotImplementedError()
 
-    @abstractmethod
-    def write_staticgeoms(self):
+    def write_staticgeoms(self, **kwargs):
         """Write staticmaps at <root/?/> in model ready format"""
         # to write use self.staticgeoms[var].to_file()
         if not self._write:
             raise IOError("Model opened in read-only mode")
-        raise NotImplementedError()
+        elif not self._staticgeoms:
+            self.logger.warning("No model staticgeom to write - Exiting")
+            return
+        else:
+            self.logger.info("Write model staticgeom files")
+        
+        fn = join(self.root, "staticgeoms")
+        if not isdir(fn):
+            os.makedirs(fn)
 
-    @abstractmethod
+        driver="GeoJSON"  # fixed
+        # save to file
+        #variables = self._staticgeoms.keys()
+        for name, gdf in self._staticgeoms.items():
+            if gdf is None or len(gdf) == 0:
+                continue  # empty
+            gdf.to_file(join(fn, f"{name}.geojson"), driver=driver, **kwargs)        
+
     def read_forcing(self):
         """Read forcing at <root/?/> and parse to dict of xr.DataArray"""
         if not self._write:
             # start fresh in read-only mode
             self._forcing = dict()
-        raise NotImplementedError()
+        if isdir(join(self.root,"forcing")):
+            fns = glob.glob(join(self.root,"forcing", "*.nc"))
+            if len(fns) > 1:
+                self.logger.info("Reading model forcing files.")
+            for fn in fns:
+                name = basename(fn).split(".")[0]
+                self.set_forcing(xr.open_dataset(fn), name=name)
+        #raise NotImplementedError()
 
-    @abstractmethod
     def write_forcing(self):
         """write forcing at <root/?/> in model ready format"""
         if not self._write:
             raise IOError("Model opened in read-only mode")
-        raise NotImplementedError()
+        elif not self._forcing:
+            self.logger.warning("No model forcing to write - Exiting")
+            return
+        else:
+            self.logger.info("Write model forcing files")
 
-    @abstractmethod
+        fn = join(self.root, "forcing")
+        if not isdir(fn):
+            os.makedirs(fn)   
+
+        for name, ds in self._forcing.items():
+            if ds is None or len(ds) == 0:
+                continue  # empty
+            ds.to_netcdf(join(fn, f"{name}.nc")) 
+
     def read_states(self):
         """Read states at <root/?/> and parse to dict of xr.DataArray"""
         if not self._write:
             # start fresh in read-only mode
             self._states = dict()
-        raise NotImplementedError()
+        if isdir(join(self.root,"states")):
+            fns = glob.glob(join(self.root,"states", "*.nc"))
+            if len(fns) > 1:
+                self.logger.info("Reading model state files.")
+            for fn in fns:
+                name = basename(fn).split(".")[0]
+                self.set_states(xr.open_dataset(fn), name=name)
+        #raise NotImplementedError()
 
-    @abstractmethod
     def write_states(self):
         """write states at <root/?/> in model ready format"""
         if not self._write:
             raise IOError("Model opened in read-only mode")
-        raise NotImplementedError()
+        elif not self._states:
+            self.logger.warning("No model states to write - Exiting")
+            return
+        else:
+            self.logger.info("Write model states files")
 
-    @abstractmethod
+        fn = join(self.root, "states")
+        if not isdir(fn):
+            os.makedirs(fn)   
+
+        for name, ds in self._states.items():
+            if ds is None or len(ds) == 0:
+                continue  # empty
+            ds.to_netcdf(join(fn, f"{name}.nc")) 
+
     def read_results(self):
         """Read results at <root/?/> and parse to dict of xr.DataArray"""
         if not self._write:
@@ -543,7 +614,7 @@ class Model(object, metaclass=ABCMeta):
             self._results = dict()
         raise NotImplementedError()
 
-    ## model configuration
+    # model configuration
 
     @property
     def config(self):
@@ -640,7 +711,6 @@ class Model(object, metaclass=ABCMeta):
         return value
 
     ## model parameter maps, geometries and spatial properties
-
     @property
     def staticmaps(self):
         """xarray.Dataset representation of all static parameter maps"""
@@ -844,17 +914,21 @@ class Model(object, metaclass=ABCMeta):
     ## properties / methods below can be used directly in actual class
 
     @property
-    def crs(self):
+    def crs(self): #FIXME: Maybe crs should be 4326 if no staticmaps is present
         """Returns coordinate reference system embedded in staticmaps."""
-        return self.staticmaps.raster.crs
+        if len(self._staticmaps)>0:
+            _crs = self.staticmaps.raster.crs
+        else:
+            _crs = None
+        return _crs
 
     def set_crs(self, crs):
         """Embed coordinate reference system staticmaps metadata."""
         return self.staticmaps.raster.set_crs(crs)
 
     @property
-    def dims(self):
-        """Returns spatial dimension names of staticmaps."""
+    def dims(self): #FIXME: Should this be moved to GridModel? OR we add an error if not present?
+        """Returns spatial dimension names of staticmaps."""  
         return self.staticmaps.raster.dims
 
     @property
