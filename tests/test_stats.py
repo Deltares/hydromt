@@ -5,10 +5,11 @@ import pytest
 import numpy as np
 import xarray as xr
 
-from hydromt.stats import skills
+from hydromt.stats import skills, eva
 
 
-def test_skills(obsda):
+def test_skills(ts):
+    obsda = ts
     simda = obsda + 5.0
     assert np.isclose(skills.bias(simda, obsda).values, 5.0)
     assert np.isclose(skills.percentual_bias(simda, obsda).values, 0.1033)
@@ -25,3 +26,9 @@ def test_skills(obsda):
     assert np.isclose(skills.rsquared(simda, obsda).values, 1.0)
     assert np.isclose(skills.mse(simda, obsda).values, 9125.0)
     assert np.isclose(skills.rmse(simda, obsda).values, 95.5249)
+
+def test_peaks(ts):
+    # single year an max.
+    ts_am = eva.get_peaks(ts) # default: ev_type='BM', period='year'
+    assert ts_am.notnull().sum() == 1
+    assert ts_am.max() == ts.max()
