@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 class Model(object, metaclass=ABCMeta):
     """General and basic API for models in HydroMT"""
-    print("Reading this!")
 
     # FIXME
     _DATADIR = ""  # path to the model data folder
@@ -914,20 +913,16 @@ class Model(object, metaclass=ABCMeta):
     ## properties / methods below can be used directly in actual class
 
     @property
-    def crs(self): #FIXME: Maybe crs should be 4326 if no staticmaps is present
-        """Returns coordinate reference system embedded in staticmaps."""
-        if len(self._staticmaps)>0:
-            _crs = self.staticmaps.raster.crs
-        else:
-            _crs = None
-        return _crs
+    def crs(self): 
+        """Returns coordinate reference system embedded in staticgeoms."""
+        return self.staticgeoms["region"].crs
 
     def set_crs(self, crs):
         """Embed coordinate reference system staticmaps metadata."""
         return self.staticmaps.raster.set_crs(crs)
 
     @property
-    def dims(self): #FIXME: Should this be moved to GridModel? OR we add an error if not present?
+    def dims(self): #TODO: Right now does not give an error but decide what to do with this
         """Returns spatial dimension names of staticmaps."""  
         return self.staticmaps.raster.dims
 
