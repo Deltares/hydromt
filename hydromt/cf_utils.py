@@ -35,7 +35,7 @@ class FewsUtils(object):
         """
         self.logger = logger
         if not isdir(fews_root):
-            self.logger.warning(
+            self.logger.info(
                 f"FEWS config not found at {fews_root}, downloading from template"
             )
             self.from_initialstart(fews_root, template_path=template_path)
@@ -276,8 +276,8 @@ class FewsUtils(object):
             if isfile(fname):
                 df = pd.read_csv(fname, sep = ';')
                 if locid not in df["ID"]:
-                    df = df.append({"ID": locid}, ignore_index=True) # FIXME: where does this csv stored?
-                df.to_csv(fname, sep = ';', index = False)
+                    df = df.append({"ID": locid}, ignore_index=True)
+                df.drop_duplicates().to_csv(fname, sep = ';', index = False)
 
     def add_spatialplots(self, model_source):
         """
@@ -328,6 +328,58 @@ class FewsUtils(object):
         for groupid in gridplotgroups:
             t.append_gridplotgroup_to_spatial_display_xml(
                 spatial_display_file=fname,
+                groupId=groupid)
+
+
+    def add_topologygroups(self, model_source):
+        """
+        Update Topology.xml with spatial plots in the fews root
+        for model_source instance.
+
+        Parameters
+        ----------
+        model_source: str
+            Model source in FewsUtils model catalog.
+       """
+        t = CfXmlUtilsExtended(logger=logger)
+
+        model = self.models[model_source]
+        mod = model.get("model")
+        region = model.get("region")
+        scheme = model.get("sversion")
+        mversion = model.get("mversion")
+        fpath = self.template_configfiles["TopologyGroup"]
+
+        # model instance for forcing
+        fname = join(
+                fpath,
+                f"scheme.{scheme}",
+                f"TopologyGroup_{model_source}_forc.xml",
+            )
+
+        # get the gridplotgroup ids
+        groups = t.get_ids_from_xml(fname, 'group')
+
+        # model instance
+        fname = join(
+                fpath,
+                f"scheme.{scheme}",
+                f"TopologyGroup_{model_source}.xml",
+            )
+
+        # get the gridplotgroup ids
+        groups.extend(t.get_ids_from_xml(fname, 'group'))
+
+        #  SpatialDisplay.xml
+        fname = join(
+                fpath,
+                f"Topology.xml",
+            )
+
+        # insert groupid
+        for groupid in groups:
+            t.append_group_to_topology_xml(
+                topology_file=fname,
                 groupId=groupid)
 
 

@@ -97,8 +97,7 @@ class CfXmlUtilsExtended():
             name of the element whoes id will be found
         """
         tree = ET.parse(Path(xml_file))
-        return [e.attrib['name'] for e in tree.findall('''.//{*}%s''' % (element))]
-
+        return [e.attrib['id'] for e in tree.findall('''.//{*}%s''' % (element))]
 
     def _add_network_layergroup(self,layergroups: ET.Element, shape_files: List, region: str):
         """
@@ -186,7 +185,29 @@ class CfXmlUtilsExtended():
         """Helper function to serialize xml"""
         ET.ElementTree(root).write(file_name, encoding = 'UTF-8', xml_declaration = True)
 
-    def append_group_to_topology_xml_object(self, xml_root: ET.ElementTree, groupId: str, groupName: str):
+
+    def append_group_to_topology_xml(self,  topology_file: str, groupId: str):
+        """
+        Adds topologygroup to topology-xml file
+        :param topology_file: str Topology.xml file
+        :return:
+        """
+        xml_root = self.get_xml_root(xml_file=topology_file, xsd_schema_name='topology')
+
+        # find scheme
+        inserts = 0
+        groups = xml_root.findall('{http://www.wldelft.nl/fews}groupId')
+        groupids = [group.text for group in groups]
+        if not f'{groupId}' in groupids:
+            self._add_child_with_text(xml_root, 'groupId', f'{groupId}')
+            inserts += 1
+        if inserts > 0:
+            self.serialize_xml(xml_root, topology_file)
+            return True
+        return False
+
+
+    def append_group_to_topology_xml_object(self, xml_root: ET.Element, groupId: str, groupName: str):
         """
         Adds topologygroup to topology-xml-object
         :return:
@@ -204,7 +225,7 @@ class CfXmlUtilsExtended():
     def append_group_to_topologygroup_xml_object(self, xml_root: ET.ElementTree, parentgroupId: str,
                             childgroupId: str):
         """
-        adds topologygroup  to topology group object
+        adds topologygroup to topology group object
         :return: xml-object
         """
         try:
