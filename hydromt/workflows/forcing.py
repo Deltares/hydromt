@@ -526,13 +526,19 @@ def penman_monteith(
     cs_rad = pyeto.cs_rad(elevtn, et_rad)
     # then longwave outgoing
     long_out = pyeto.net_out_lw_rad(
-        temp_min, temp_max, kin * 86400 / 1e6, cs_rad, avp
+        pyeto.celsius2kelvin(temp_min),
+        pyeto.celsius2kelvin(temp_max),
+        kin * 86400 / 1e6,
+        cs_rad,
+        avp,
     )  # in this formula kin should be in [MJ m-2 day-1]
 
     # then net rad
-    net_rad = pyeto.net_rad(
-        kin * 86400 / 1e6, long_out
+    # first net rad short
+    net_rad_s = pyeto.net_in_sol_rad(
+        kin * 86400 / 1e6, albedo=0.23
     )  # in this formula kin should be in [MJ m-2 day-1]
+    net_rad = pyeto.net_rad(net_rad_s, long_out)
 
     # now eto....
     pet = pyeto.fao56_penman_monteith(
