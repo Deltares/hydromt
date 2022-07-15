@@ -40,3 +40,4 @@ class LumpedModel(Model):
     def write(self):
         """Method to write the complete model schematization and configuration to file."""
         super().write()
+#test
