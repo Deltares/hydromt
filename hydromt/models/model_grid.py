@@ -5,6 +5,7 @@ import xarray as xr
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
+from hydromt import workflows, flw, io
 
 from typing import List
 
@@ -40,3 +41,5 @@ class GridModel(Model):
     def write(self):
         """Method to write the complete model schematization and configuration to file."""
         super().write()
+    
+    def setup_
