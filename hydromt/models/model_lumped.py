@@ -76,6 +76,3 @@ class LumpedModel(Model):
 
 
 
-# need for zonalstatistics. Name of function = AreaAverage
-#test
-#test 2
