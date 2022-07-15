@@ -41,4 +41,4 @@ class LumpedModel(Model):
         """Method to write the complete model schematization and configuration to file."""
         super().write()
 
-# need for zonalstatistics. Name = areaAverage
+# need for zonalstatistics. Name of function = AreaAverage
