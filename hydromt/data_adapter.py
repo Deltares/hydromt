@@ -836,8 +836,13 @@ class DataAdapter(object, metaclass=ABCMeta):
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
             path1 = path.format(year=yr, month=mth, variable=var)
-            # FIXME: glob won't work with other than local file systems; use fsspec instead
-            fns.extend(glob.glob(path1))
+            if not glob.glob(
+                path1
+            ):  # Trying other formatting option for month (can be one or two digits)
+                path1 = path.format(year=yr, month=f"{mth:02}", variable=var)
+            fns.extend(
+                glob.glob(path1)
+            )  # FIXME: glob won't work with other than local file systems; use fsspec instead
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {self.path}")
         return list(set(fns))  # return unique paths
@@ -1267,7 +1272,7 @@ class GeoDatasetAdapter(DataAdapter):
         obj = self.get_data(
             bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
         )
-        if obj.vector.index.size == 0 or ("time" in obj and obj.time.size == 0):
+        if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
             return None, None
 
         if driver is None or driver == "netcdf":
