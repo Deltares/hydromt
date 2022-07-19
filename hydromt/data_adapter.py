@@ -9,6 +9,7 @@ from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 from itertools import product
 import copy
 from pathlib import Path
+from typing import Tuple
 import numpy as np
 import xarray as xr
 import geopandas as gpd
@@ -23,6 +24,8 @@ from urllib.parse import urlparse
 import shutil
 from distutils.version import LooseVersion
 import itertools
+import warnings
+from string import Formatter
 
 from . import gis_utils, io
 from .raster import GEO_MAP_COORD
@@ -185,14 +188,14 @@ class DataCatalog(object):
                 <key>: <value>
               crs: <crs>
               nodata:
-                <native_variable_name1>: <nodata>
+                <hydromt_variable_name1>: <nodata>
               rename:
                 <native_variable_name1>: <hydromt_variable_name1>
                 <native_variable_name2>: <hydromt_variable_name2>
               unit_add:
-                <native_variable_name1>: <float/int>
+                <hydromt_variable_name1>: <float/int>
               unit_mult:
-                <native_variable_name1>: <float/int>
+                <hydromt_variable_name1>: <float/int>
               meta:
                 source_url: <source_url>
                 source_version: <source_version>
@@ -245,8 +248,8 @@ class DataCatalog(object):
                     "crs": <crs>,
                     "nodata": <nodata>,
                     "rename": {<native_variable_name1>: <hydromt_variable_name1>},
-                    "unit_add": {<native_variable_name1>: <float/int>},
-                    "unit_mult": {<native_variable_name1>: <float/int>},
+                    "unit_add": {<hydromt_variable_name1>: <float/int>},
+                    "unit_mult": {<hydromt_variable_name1>: <float/int>},
                     "meta": {...},
                     "placeholders": {<placeholder_name_1>: <list of names>},
                 }
@@ -262,7 +265,7 @@ class DataCatalog(object):
         if mark_used:
             self._used_data.extend(list(data_dict.keys()))
 
-    def to_yml(self, path, root="auto", used_only=False):
+    def to_yml(self, path, root="auto", source_names=[], used_only=False):
         """Write data catalog to yml format.
 
         Parameters
@@ -272,22 +275,36 @@ class DataCatalog(object):
         root: str, Path, optional
             Global root for all relative paths in yml file.
             If "auto" the data source paths are relative to the yml output ``path``.
+        source_names: list, optional
+            List of source names to export; ignored if `used_only=True`
         used_only: bool
-            If True, export only data entries kept in used_data list.
+            If True, export only data entries kept in used_data list, by default False.
         """
+        source_names = self._used_data if used_only else source_names
+        yml_dir = os.path.dirname(path)
         if root == "auto":
-            # set paths relative to yml file
-            root = os.path.dirname(path)
-            d = self.to_dict(root=root)
-            d.pop("root", None)  # remove absolute root path
-        else:
-            source_names = self._used_data if used_only else []
-            d = self.to_dict(root=root, source_names=source_names)
+            root = yml_dir
+        d = self.to_dict(root=root, source_names=source_names)
+        if str(root) == yml_dir:
+            d.pop("root", None)  # remove root if it equals the yml_dir
         with open(path, "w") as f:
             yaml.dump(d, f, default_flow_style=False)
 
     def to_dict(self, source_names=[], root=None):
-        """Return data catalog in dictionary format"""
+        """Export the data catalog to a dictionary.
+
+        Parameters
+        ----------
+        source_names : list, optional
+            List of source names to export
+        root : str, Path, optional
+            Global root for all relative paths in yml file.
+
+        Returns
+        -------
+        dict
+            data catalog dictionary
+        """
         sources_out = dict()
         if root is not None:
             root = os.path.abspath(root)
@@ -335,6 +352,8 @@ class DataCatalog(object):
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
+        source_names: list, optional
+            List of source names to export
         unit_conversion: boolean, optional
             If False skip unit conversion when parsing data from file, by default True.
 
@@ -425,7 +444,7 @@ class DataCatalog(object):
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         align : float, optional
             Resolution to align the bounding box, by default None
-        variables : list of str, optional.
+        variables : str or list of str, optional.
             Names of RasterDataset variables to return. By default all dataset variables
             are returned.
         time_tuple : tuple of str, datetime, optional
@@ -494,7 +513,7 @@ class DataCatalog(object):
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
         align : float, optional
             Resolution to align the bounding box, by default None
-        variables : list of str, optional.
+        variables : str or list of str, optional.
             Names of GeoDataFrame columns to return. By default all columns are returned.
 
         Returns
@@ -559,7 +578,7 @@ class DataCatalog(object):
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
         align : float, optional
             Resolution to align the bounding box, by default None
-        variables : list of str, optional.
+        variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
         time_tuple : tuple of str, datetime, optional
@@ -695,7 +714,21 @@ def round_latlon(ds, decimals=5):
     return ds
 
 
-PREPROCESSORS = {"round_latlon": round_latlon}
+def to_datetimeindex(ds):
+    if ds.indexes["time"].dtype == "O":
+        ds["time"] = ds.indexes["time"].to_datetimeindex()
+    return ds
+
+
+def remove_duplicates(ds):
+    return ds.sel(time=~ds.get_index("time").duplicated())
+
+
+PREPROCESSORS = {
+    "round_latlon": round_latlon,
+    "to_datetimeindex": to_datetimeindex,
+    "remove_duplicates": remove_duplicates,
+}
 
 
 class DataAdapter(object, metaclass=ABCMeta):
@@ -759,31 +792,53 @@ class DataAdapter(object, metaclass=ABCMeta):
         return source
 
     def __str__(self):
-        return pprint.pformat(self.summary())
+        return yaml.dump(self.to_dict())
 
     def __repr__(self):
         return self.__str__()
 
-    def resolve_paths(self, time_tuple=None, variables=None):
-        """Returns list of paths. Resolve {year}, {month} and {variable} keywords
-        in self.path based 'time_tuple' and 'variables' arguments"""
+    def resolve_paths(self, time_tuple: Tuple = None, variables: list = None):
+        """Resolve {year}, {month} and {variable} keywords
+        in self.path based on 'time_tuple' and 'variables' arguments
+
+        Parameters
+        ----------
+        time_tuple : tuple of str, optional
+            Start and end data in string format understood by :py:func:`pandas.to_timedelta`, by default None
+        variables : list of str, optional
+            List of variable names, by default None
+
+        Returns
+        -------
+        List:
+            list of filenames matching the path pattern given date range and variables
+        """
         yr, mth = "*", "*"
         vrs = ["*"]
         dates = [""]
         fns = []
-        if time_tuple is not None and "{year" in str(self.path):
+        path = str(self.path)
+        known_keys = ["year", "month", "variable"]
+        keys = [i[1] for i in Formatter().parse(path) if i[1] is not None]
+        # double unknown keys to escape these when formatting
+        for key in [key for key in keys if key not in known_keys]:
+            path = path.replace("{" + key + "}", "{{" + key + "}}")
+        # resolve dates: month & year keys
+        if time_tuple is not None and "year" in keys:
             dt = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
             trange = pd.to_datetime(list(time_tuple)) - dt
-            freq = "m" if "{month" in str(self.path) else "a"
+            freq = "m" if "month" in keys else "a"
             dates = pd.period_range(*trange, freq=freq)
-        if variables is not None and "{variable" in str(self.path):
+        # resolve variables
+        if variables is not None and "variable" in keys:
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
         for date, var in product(dates, vrs):
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            path = str(self.path).format(year=yr, month=mth, variable=var)
-            fns.extend(glob.glob(path))
+            path1 = path.format(year=yr, month=mth, variable=var)
+            # FIXME: glob won't work with other than local file systems; use fsspec instead
+            fns.extend(glob.glob(path1))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {self.path}")
         return list(set(fns))  # return unique paths
@@ -962,6 +1017,10 @@ class RasterDatasetAdapter(DataAdapter):
 
         For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
         """
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
+
         kwargs = self.kwargs.copy()
         fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
 
@@ -987,9 +1046,19 @@ class RasterDatasetAdapter(DataAdapter):
         if GEO_MAP_COORD in ds_out.data_vars:
             ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
+        # transpose dims to get y and x dim last
+        x_dim = ds_out.raster.x_dim
+        y_dim = ds_out.raster.y_dim
+        ds_out = ds_out.transpose(..., y_dim, x_dim)
+
         # rename and select vars
         if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
             rm = {ds_out.raster.vars[0]: variables[0]}
+            if rm.keys() != rm.values():
+                warnings.warn(
+                    f"Automatic renaming of single var array will be deprecated, rename {rm} in the data catalog instead.",
+                    DeprecationWarning,
+                )
         else:
             rm = {k: v for k, v in self.rename.items() if k in ds_out}
         ds_out = ds_out.rename(rm)
@@ -1234,6 +1303,10 @@ class GeoDatasetAdapter(DataAdapter):
 
         For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataset`
         """
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
+
         kwargs = self.kwargs.copy()
         fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
 
@@ -1525,6 +1598,10 @@ class GeoDataFrameAdapter(DataAdapter):
 
         For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
         """
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
+
         kwargs = self.kwargs.copy()
         _ = self.resolve_paths()  # throw nice error if data not found
 

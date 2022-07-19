@@ -304,7 +304,7 @@ def open_geodataset(
         CRS mis-matches are resolved if given a GeoSeries or GeoDataFrame.
         Cannot be used with bbox.
     **kwargs
-        Key-word arguments passed to :py:meth:`geopandas.read_file` to read the point geometry file.
+        Key-word arguments passed to :py:func:`geopandas.read_file` to read the point geometry file.
 
     Returns
     -------

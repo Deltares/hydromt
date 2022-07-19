@@ -20,9 +20,6 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
-      
-      # - name: Get tags
-      #   run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       - name: Setup environment
         uses: conda-incubator/setup-miniconda@v2
@@ -37,18 +34,13 @@ jobs:
       - name: Install hydromt
         run: flit install
 
-      # Move examples folder before make html for nbsphinx
       - name: Build docs
         run: |
-          mv examples docs/examples/
           pushd docs
           make html
           popd
 
-      # This overrides the version "dev" with the proper version if we're building off a
-      # branch that's not master (which is confined to n.nn.x above) or on a tag.
       - name: Set doc version
-        if: ${{ github.event_name != 'push' || !contains(github.ref, 'master') }}
         run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
       
       - name: Upload to GitHub Pages
@@ -57,7 +49,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/_build/html
-          exclude_assets: '.buildinfo,_sources/*'
+          exclude_assets: '.buildinfo,_sources/*,_examples/*.ipynb'
           destination_dir: ./${{ env.DOC_VERSION }}
           keep_files: false
           full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages

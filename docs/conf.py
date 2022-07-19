@@ -19,8 +19,10 @@
 import os
 import sys
 import shutil
+import numpy as np
 import sphinx_autosummary_accessors
 from click.testing import CliRunner
+from distutils.dir_util import copy_tree
 
 # here = os.path.dirname(__file__)
 # sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
@@ -37,44 +39,88 @@ def cli2rst(output, fn):
             f.write(f"    {line}\n")
 
 
+def remove_dir_content(path: str) -> None:
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+
+
+def write_panel(f, name, content="", level=0, item="dropdown"):
+    pad = "".ljust(level * 3)
+    f.write(f"{pad}.. {item}:: {name}\n")
+    f.write("\n")
+    if content:
+        pad = "".ljust((level + 1) * 3)
+        for line in content.split("\n"):
+            f.write(f"{pad}{line}\n")
+        f.write("\n")
+
+
+def write_nested_dropdown(name, data_cat, note="", categories=[]):
+    df = data_cat.to_dataframe().sort_index().drop_duplicates("path")
+    with open(f"_generated/{name}.rst", mode="w") as f:
+        write_panel(f, name, note, level=0)
+        write_panel(f, "", level=1, item="tab-set")
+        for category in categories:
+            if category == "other":
+                sources = df.index[~np.isin(df["category"], categories)]
+            else:
+                sources = df.index[df["category"] == category]
+            if len(sources) > 0:
+                write_panel(f, category, level=2, item="tab-item")
+            for source in sources:
+                items = data_cat[source].summary().items()
+                summary = "\n".join([f":{k}: {v}" for k, v in items if k != "category"])
+                write_panel(f, source, summary, level=3)
+
+        write_panel(f, "all", level=2, item="tab-item")
+        for source in df.index.values:
+            items = data_cat[source].summary().items()
+            summary = "\n".join([f":{k}: {v}" for k, v in items])
+            write_panel(f, source, summary, level=3)
+
+
 # NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
 # -- Project information -----------------------------------------------------
 
-project = "hydromt"
+project = "HydroMT"
 copyright = "Deltares"
 author = "Dirk Eilander"
 
 # The short version which is displayed
 version = hydromt.__version__
 
-# -- Generate data catalog csv table to inlcude in docs -------
+
+# # -- Copy notebooks to include in docs -------
+if os.path.isdir("_examples"):
+    remove_dir_content("_examples")
+os.makedirs("_examples")
+copy_tree("../examples", "_examples")
+
+# # -- Generate panels rst files from data catalogs to include in docs -------
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
 
-data_catalog = DataCatalog(deltares_data=True)
-df = data_catalog.to_dataframe()
-df.index = [
-    f"`{k} <{url}>`__" if isinstance(url, str) else k
-    for k, url in zip(df.index, df["source_url"])
+categories = [
+    "geography",
+    "hydrography",
+    "landuse",
+    "hydro",
+    "meteo",
+    "ocean",
+    "socio-economic",
+    "topography",
+    "other",
 ]
-df["reference"] = [
-    f"`{k} <https://doi.org/{doi}>`__" if isinstance(doi, str) else k
-    for k, doi in zip(df["paper_ref"], df["paper_doi"])
-]
-df["source_license"] = [
-    k
-    if not isinstance(k, str)
-    else ((f"`Specific <{k}>`__") if k.startswith("https://") else k)
-    for k in df["source_license"]
-]
-df.index.name = "name (link)"
-cols = ["category", "data_type", "reference", "source_version", "source_license"]
-rm = {
-    "source_version": "version",
-    "source_license": "license",
-    "data_type": "data type",
-}
-df.loc[:, cols].rename(columns=rm).to_csv(r"_generated/data_sources.csv")
+
+# TODO add other data sources
+data_cat = hydromt.DataCatalog(deltares_data=True)
+note = "Only accessible when connected to the Deltares network."
+write_nested_dropdown("deltares_data", data_cat, note=note, categories=categories)
 
 # -- Generate cli help docs ----------------------------------------------
 
@@ -97,6 +143,7 @@ cli2rst(cli_clip.output, r"_generated/cli_clip.rst")
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx_design",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
@@ -145,7 +192,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 autodoc_member_order = "bysource"  # overwrite default alphabetical sort
 autoclass_content = "both"
 
@@ -153,13 +200,41 @@ autoclass_content = "both"
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {"style_external_links": True}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-html_context = {}
+html_css_files = ["theme-deltares.css"]
+html_theme_options = {
+    "show_nav_level": 2,
+    "navbar_align": "content",
+    "use_edit_page_button": True,
+    "icon_links": [
+        {
+            "name": "Deltares",
+            "url": "https://deltares.nl/en/",
+            "icon": "_static/deltares-white.svg",
+            "type": "local",
+        },
+    ],
+}
+
+html_context = {
+    "github_url": "https://github.com",  # or your GitHub Enterprise interprise
+    "github_user": "Deltares",
+    "github_repo": "hydromt",
+    "github_version": "docs",  # FIXME
+    "doc_path": "docs",
+}
+
+remove_from_toctrees = ["_generated/*"]
+
+# no sidebar in api section
+# html_sidebars = {
+#   "api": [],
+#   "_generated/*": []
+# }
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -173,11 +248,13 @@ html_context = {}
 #     ]
 # }
 
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "pyflwdir_doc"
+htmlhelp_basename = "hydromt_doc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -230,7 +307,7 @@ texinfo_documents = [
         "HydroMT Documentation",
         author,
         "HydroMT",
-        "Build and analyze hydrological models like a data-wizard.",
+        "Automated and reproducible model building and analysis",
         "Miscellaneous",
     ),
 ]
@@ -253,11 +330,27 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     # "numpy": ("https://numpy.org/doc/stable", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
     # "matplotlib": ("https://matplotlib.org/stable/", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
     "rasterio": ("https://rasterio.readthedocs.io/en/latest", None),
-    "geopandas": ("https://geopandas.org", None),
+    "geopandas": ("https://geopandas.org/en/stable", None),
     "xarray": ("https://xarray.pydata.org/en/stable", None),
 }
+
+# -- NBSPHINX --------------------------------------------------------------
+
+# This is processed by Jinja2 and inserted before each notebook
+nbsphinx_prolog = r"""
+{% set docname = env.doc2path(env.docname, base=None).split('\\')[-1].split('/')[-1] %}
+
+.. TIP::
+
+    .. raw:: html
+
+        <div>
+            For an interactive online version click here: 
+            <a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/{{ docname|e }}" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
+        </div>
+"""
