@@ -2,6 +2,7 @@
 """
 import typing
 import inspect
+import json
 
 from hydromt.models import ENTRYPOINTS
 
@@ -25,12 +26,13 @@ def get_model_components(model: str):
     model_class = ENTRYPOINTS[model].load()
     members = inspect.getmembers(model_class)
     components = {}
+    docs = []
     for name, member in members:
         if name.startswith("_") or name in _SKIP_METHODS or not callable(member):
             continue
         signature = inspect.signature(member)
         components[name] = {
-            # 'doc': member.__doc__,
+            'doc': member.__doc__,
             "required": [],
             "optional": [],
             "args": False,
@@ -51,8 +53,14 @@ def get_model_components(model: str):
                 components[name]["required"].append((k, type))
             else:  # optional
                 components[name]["optional"].append((k, type, v.default))
+                
     return components
 
 
-#%% test
-# get_model_components('wflow')
+
+# model_plugins = ['wflow', 'fiat', 'delwaq', 'sfincs']
+
+# for plugin in model_plugins:
+#     components = get_model_components(plugin)
+#     with open(f'{plugin}_api.json', 'w') as f:
+#         json.dump(components, f, indent=2)
