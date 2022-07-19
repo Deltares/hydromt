@@ -1271,7 +1271,7 @@ class GeoDatasetAdapter(DataAdapter):
         obj = self.get_data(
             bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
         )
-        if obj.vector.index.size == 0 or ("time" in obj and obj.time.size == 0):
+        if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
             return None, None
 
         if driver is None or driver == "netcdf":
