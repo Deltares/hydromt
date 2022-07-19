@@ -96,10 +96,10 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
-if os.path.isdir("_examples"):
-    remove_dir_content("_examples")
-os.makedirs("_examples")
-copy_tree("../examples", "_examples")
+# if os.path.isdir("_examples"):
+#     remove_dir_content("_examples")
+# os.makedirs("_examples")
+# copy_tree("../examples", "_examples")
 
 # # -- Generate panels rst files from data catalogs to include in docs -------
 if not os.path.isdir("_generated"):
@@ -193,6 +193,7 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
+html_logo = "_static/hydromt-logo.jpg"
 autodoc_member_order = "bysource"  # overwrite default alphabetical sort
 autoclass_content = "both"
 
@@ -212,20 +213,32 @@ html_theme_options = {
     "use_edit_page_button": True,
     "icon_links": [
         {
+            "name": "GitHub",
+            "url": "https://github.com/Deltares/hydromt",  # required
+            "icon": "fab fa-github-square",
+            "type": "fontawesome",
+        },
+        {
             "name": "Deltares",
-            "url": "https://deltares.nl/en/",
-            "icon": "_static/deltares-white.svg",
+            "url": "https://www.deltares.nl/en/",
+            "icon": "_static/deltares_icon2.jpg",
             "type": "local",
         },
     ],
+    "logo": {
+        "text": "HydroMT",
+        # "image_dark": "logo-dark.svg",
+    },
+    # "navbar_start": ["navbar-logo", "version-switcher"],
 }
 
 html_context = {
     "github_url": "https://github.com",  # or your GitHub Enterprise interprise
     "github_user": "Deltares",
     "github_repo": "hydromt",
-    "github_version": "docs",  # FIXME
+    "github_version": "main",  # FIXME
     "doc_path": "docs",
+    "default_mode": "light",
 }
 
 remove_from_toctrees = ["_generated/*"]
