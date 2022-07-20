@@ -10,11 +10,13 @@ Unreleased
 
 Added
 ^^^^^
+- New raster method for adding gdal_compliant() attributes to xarray object.
 - Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
 - Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
 
 Changed
 ^^^^^^^
+- Add rioxarray dependency to read raster data
 - In build or update methods, the setup_config component is not forced to run first anymore but according to order of the components in the ini config (opt dict).
 - In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, variables can now also be a str as well as a list of strings.
 - In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, automatic renaming of single variable datasets based on the variables argument will be deprecated

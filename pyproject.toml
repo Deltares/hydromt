@@ -25,6 +25,7 @@ dependencies = [
     "openpyxl",
     "rasterio",
     "requests",
+    "rioxarray",
     "scipy",
     "xarray",
     "zarr",
