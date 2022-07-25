@@ -96,10 +96,10 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
-# if os.path.isdir("_examples"):
-#     remove_dir_content("_examples")
-# os.makedirs("_examples")
-# copy_tree("../examples", "_examples")
+if os.path.isdir("_examples"):
+    remove_dir_content("_examples")
+os.makedirs("_examples")
+copy_tree("../examples", "_examples")
 
 # # -- Generate panels rst files from data catalogs to include in docs -------
 if not os.path.isdir("_generated"):
@@ -215,21 +215,20 @@ html_theme_options = {
         {
             "name": "GitHub",
             "url": "https://github.com/Deltares/hydromt",  # required
-            "icon": "fab fa-github-square",
-            "type": "fontawesome",
+            "icon": "https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg",
+            "type": "url",
         },
         {
             "name": "Deltares",
             "url": "https://www.deltares.nl/en/",
-            "icon": "_static/deltares_icon2.jpg",
+            "icon": "_static/deltares-blue.svg",
             "type": "local",
         },
     ],
     "logo": {
-        "text": "HydroMT",
-        # "image_dark": "logo-dark.svg",
+        "text": "HydroMT Core",
     },
-    # "navbar_start": ["navbar-logo", "version-switcher"],
+    "navbar_end": ["navbar-icon-links"], # remove dark mode switch
 }
 
 html_context = {
