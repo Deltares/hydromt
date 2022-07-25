@@ -28,7 +28,10 @@ def configread(
         cf = cf()
     cf.optionxform = str  # preserve capital letter
     with codecs.open(config_fn, "r", encoding=encoding) as fp:
-        cf.read_file(fp)
+        if noheader:
+            cf.read_file(add_header(fp))
+        else:
+            cf.read_file(fp)
     root = dirname(config_fn)
     cfdict = defaults.copy()
     for section in cf.sections():
@@ -56,6 +59,13 @@ def configread(
     return cfdict
 
 
+def add_header(f, header_name="dummy"):
+    """add header"""
+    yield "[{}]\n".format(header_name)
+    for line in f:
+        yield line
+
+
 def configwrite(config_fn, cfdict, encoding="utf-8", cf=None, noheader=False):
     """write model configuration to file"""
     _cfdict = cfdict.copy()
@@ -78,5 +88,15 @@ def configwrite(config_fn, cfdict, encoding="utf-8", cf=None, noheader=False):
                 except ValueError:
                     pass  # `value` path is not relative to root
     cf.read_dict(_cfdict)
-    with codecs.open(config_fn, "w", encoding=encoding) as fp:
-        cf.write(fp)
+    if noheader:
+        with codecs.open(config_fn, "w", encoding=encoding) as fp:
+            write_section(fp, 'dummy', _cfdict['dummy'], '=')
+    else:
+        with codecs.open(config_fn, "w", encoding=encoding) as fp:
+            cf.write(fp)
+
+def write_section(fp, section_name, section_items, delimiter):
+    """Write a single section to the specified `fp'."""
+    for key, value in section_items.items():
+        fp.write("{:<15} {:<1} {:<}\n".format(key, delimiter, value))
+    fp.write("\n")

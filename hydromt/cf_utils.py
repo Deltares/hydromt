@@ -9,6 +9,10 @@ import glob
 import logging
 import pandas as pd
 import win32com.client
+from hydromt.config import configread, configwrite
+from configparser import RawConfigParser
+from datetime import datetime
+import numpy as np
 from .cf_xml_utils_extended import CfXmlUtilsExtended
 
 logger = logging.getLogger(__name__)
@@ -462,6 +466,77 @@ class FewsUtils(object):
             left=model.get("xmin"),
             right=model.get("xmax"),
         )
+
+    def update_globalproperties(self, model_source, model_templates):
+        """
+        Update global.properties with T0 and extent for model_source instance.
+
+        Parameters
+        ----------
+        model_source: str
+            Model source in FewsUtils model catalog.
+         model_templates: str, Path, optional
+             Folde containing template global properties fper model
+        """
+
+        model = self.models[model_source]
+        mod = model.get("model")
+        region = model.get("region")
+        scheme = model.get("sversion")
+        mversion = model.get("mversion")
+        T0 = model.get("T0")
+        fpath = self.fews_root
+
+        # read global properties
+        fname = join(
+            fpath,
+            f"global.properties",
+        )
+        globalproperty = configread(
+            fname,
+            cf=RawConfigParser,
+            noheader=True,
+            abs_path=False,
+        )
+
+        # update T0
+        T0_format = "%d-%m-%Y"
+        globalproperty_T0 = datetime.strptime(
+            globalproperty.get("T0", datetime.strftime(datetime.today(), T0_format)),
+            T0_format,
+        )
+        if T0 is None:
+            T0 = datetime.today()
+        globalproperty_T0 = min(globalproperty_T0, T0)
+        globalproperty["T0"] = datetime.strftime(globalproperty_T0, T0_format)
+
+        # update bbox
+        xmin = globalproperty.get("BBOX_LEFT", np.inf)
+        ymin = globalproperty.get("BBOX_BOTTOM", np.inf)
+        xmax = globalproperty.get("BBOX_RIGHT", -np.inf)
+        ymax = globalproperty.get("BBOX_TOP", -np.inf)
+
+        globalproperty["BBOX_LEFT"] = min(xmin, model.get("xmin"))
+        globalproperty["BBOX_BOTTOM"] = min(ymin, model.get("ymin"))
+        globalproperty["BBOX_RIGHT"] = max(xmax, model.get("xmax"))
+        globalproperty["BBOX_TOP"] = max(ymax, model.get("ymax"))
+
+        # update others from template
+        fname_model = join(
+            model_templates,
+            f"wflow_global.properties",
+        )
+        globalproperty_model = configread(
+            fname_model,
+            cf=RawConfigParser,
+            noheader=True,
+            abs_path=False,
+        )
+        for k, v in globalproperty_model.items():
+            globalproperty[k] = v
+
+        # write global properties
+        configwrite(fname, globalproperty, cf=RawConfigParser, noheader=True)
 
     def replace_tags_by_file(self, source_file, destination_file, tag_dict):
         """
