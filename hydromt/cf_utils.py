@@ -49,6 +49,7 @@ class FewsUtils(object):
         self.map_path = self.get_dir(fews_root, ["Config", "MapLayerFiles"])
         self.module_path = self.get_dir(fews_root, ["Config", "ModuleDataSetFiles"])
         self.region_path = self.get_dir(fews_root, ["Config", "RegionConfigFiles"])
+        self.system_path = self.get_dir(fews_root, ["Config", "SystemConfigFiles"])
 
         # List of templated config files and path
         self.template_configfiles = {
@@ -382,6 +383,40 @@ class FewsUtils(object):
         # insert groupid
         for groupid in groups:
             t.append_group_to_topology_xml(topology_file=fname, groupId=groupid)
+
+    def update_explorer(self, model_source):
+        """
+        Update Exploer.xml with extent for model_source instance.
+
+        Parameters
+        ----------
+        model_source: str
+            Model source in FewsUtils model catalog.
+        """
+        t = CfXmlUtilsExtended(logger=logger)
+
+        model = self.models[model_source]
+        mod = model.get("model")
+        region = model.get("region")
+        scheme = model.get("sversion")
+        mversion = model.get("mversion")
+        fpath = self.system_path
+
+        # model instance
+        fname = join(
+            fpath,
+            f"Explorer.xml",
+        )
+
+        # insert spatial extent
+        t.insert_extra_extent_into_explorer_xml(
+            explorer_file=fname,
+            region=region,
+            top=model.get("ymax"),
+            bottom=model.get("ymin"),
+            left=model.get("xmin"),
+            right=model.get("xmax"),
+        )
 
     def replace_tags_by_file(self, source_file, destination_file, tag_dict):
         """

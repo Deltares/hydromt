@@ -290,18 +290,18 @@ class CfXmlUtilsExtended:
             self._add_child_with_text(nodes_tree, "groupId", childgroupId)
         return xml_root
 
-    def insert_extra_extent_into_explorer_xml_object(
+    def insert_extra_extent_into_explorer_xml(
         self,
-        xml_root: ET.ElementTree,
+        explorer_file: str,
         region: str,
-        top: str,
-        bottom: str,
-        left: str,
-        right: str,
+        top: float,
+        bottom: float,
+        left: float,
+        right: float,
     ):
         """
-        Function to add extra extent to geomap (after default extent) if region is not yet defined
-        :param fname =  filename, str to open, extend and save
+        Function to add extra extent to map (after default extent) if region is not yet defined
+        :param explorer_file =  filename, str to open, extend and save
         :param region =  region to add
         :param top =  top of extent in default geodatum as configured in Explorer
         :param bottom =  bottom of extent  in default geodatum as configured in Explorer
@@ -309,6 +309,9 @@ class CfXmlUtilsExtended:
         :param right =  right of extent  in default geodatum as configured in Explorer
         :return: xml-object
         """
+
+        xml_root = self.get_xml_root(xml_file=explorer_file, xsd_schema_name="explorer")
+
         geomap = xml_root.find("{http://www.wldelft.nl/fews}map")
         if len(geomap) > 0:
             extra_extents = geomap.findall("{http://www.wldelft.nl/fews}extraExtent")
@@ -322,18 +325,26 @@ class CfXmlUtilsExtended:
                     )
                     geomap.insert(
                         elem_index + 1,
-                        self._new_extra_extent(region, top, bottom, left, right),
+                        self._new_extra_extent(
+                            region,
+                            "%.3f" % (top),
+                            "%.3f" % (bottom),
+                            "%.3f" % (left),
+                            "%.3f" % (right),
+                        ),
                     )
-        return xml_root
+
+        self.serialize_xml(xml_root, explorer_file)
+        return None
 
     def insert_extra_extent_into_spatial_display_xml(
         self,
         spatial_display_file: str,
         region: str,
-        top: str,
-        bottom: str,
-        left: str,
-        right: str,
+        top: float,
+        bottom: float,
+        left: float,
+        right: float,
     ):
         """
         Function to add extra extent to geomap (after default extent) if region is not yet defined
