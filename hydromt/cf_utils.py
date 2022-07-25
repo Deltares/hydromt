@@ -218,7 +218,9 @@ class FewsUtils(object):
             dirs_exist_ok=dirs_exist_ok,
         )
 
-    def add_template_configfiles(self, model_source, model_templates=None):
+    def add_template_configfiles(
+        self, model_source, model_templates=None, variables=[]
+    ):
         """
         Update and add template config files in model_templates folder to the fews root
         for model_source instance.
@@ -230,17 +232,56 @@ class FewsUtils(object):
         model_templates: str, Path, optional
             Folde containing template config files for tag replacement. If not provided,
             download from url.
+        variables: list, optional
+            List of additional variables to add to SpatialDisplay.xml. Template should be available.
         """
         model = self.models[model_source]
         # Check if model_templates exist else download
         if not isdir(model_templates):
             # TODO download
             return
-        files = glob.glob(join(model_templates, "*.xml"))
         scheme = model.get("sversion")
         mod = model.get("model")
         region = model.get("region")
         mversion = model.get("mversion")
+
+        # First loop over variables to fill in the SpatialDisplay template before tag replacement
+        if len(variables) > 0:
+            # Copy and create a temporary template for model Saptial Display
+            sdis_fn = join(
+                model_templates,
+                f"SpatialPlot_{mod}_parameters",
+                "SpatialPlot_wflow.{region}.{mversion}_base.xml",
+            )
+            sdis_fn_temp = join(
+                model_templates, "SpatialPlot_wflow.{region}.{mversion}.xml"
+            )
+            shutil.copy(sdis_fn, sdis_fn_temp)
+            # Variable templates folder
+            var_fns = glob.glob(
+                join(
+                    model_templates,
+                    f"SpatialPlot_{mod}_parameters",
+                    "SpatialPlot_*.xml",
+                )
+            )
+            for var in variables:
+                # Read template file
+                var_fn = [f for f in var_fns if f.endswith(f"{var}.xml")]
+                if len(var_fn) > 0:
+                    varf = open(var_fn[0], "r")
+                    sdis = open(sdis_fn_temp, "a")
+                    sdis.write(varf.read())
+                    varf.close()
+                    sdis.close()
+            # Add two final lines
+            sdis = open(sdis_fn_temp, "a")
+            sdis.write("	</gridPlotGroup>\n")
+            sdis.write("</gridPlotGroups>")
+            sdis.close()
+
+        # Copy and tag replacement for each *.xml file in model_templates folder
+        files = glob.glob(join(model_templates, "*.xml"))
         for file in files:
             filename = basename(file)
             filetype = filename.split("_")[0]
@@ -256,6 +297,9 @@ class FewsUtils(object):
                 destination_file=Path(dest_file),
                 tag_dict=model,
             )
+        # Remove temporary spatial display template
+        if len(variables) > 0:
+            os.remove(sdis_fn_temp)
 
     def add_locationsfiles(self, model_source, model_templates):
         """
