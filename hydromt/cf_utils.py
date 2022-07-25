@@ -9,6 +9,7 @@ import glob
 import logging
 import pandas as pd
 from .cf_xml_utils_extended import CfXmlUtilsExtended
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,12 +52,14 @@ class FewsUtils(object):
 
         # List of templated config files and path
         self.template_configfiles = {
+            "Filters": self.region_path,
             "Grids": self.region_path,
             "LocationSets": self.region_path,
             "ModuleInstanceDescriptors": self.region_path,
-            "WorkflowDescriptors": self.region_path,
             "SpatialPlot": self.display_path,
             "TopologyGroup": self.region_path,
+            "WhatIfTemplates": self.region_path,
+            "WorkflowDescriptors": self.region_path,
         }
         self.locationfiles = {"grids": join(self.map_path)}
 
@@ -238,14 +241,15 @@ class FewsUtils(object):
         region = model.get("region")
         mversion = model.get("mversion")
         for file in files:
-            filetype = basename(file).split("_")[0]
+            filename = basename(file)
+            filetype = filename.split("_")[0]
             dest_folder = self.template_configfiles[filetype]
-            dest_filename = eval(f"f'{basename(file)}'")
+            # dest_filename = eval(f"f'{basename(file)}'")
             dest_file = join(
                 dest_folder,
                 f"scheme.{scheme}",
-                dest_filename,
-            ) # use dest_filename to allow suffixes in filenames
+                filename.format(region=region, mversion=version),
+            )
             self.replace_tags_by_file(
                 source_file=Path(file),
                 destination_file=Path(dest_file),
@@ -270,14 +274,14 @@ class FewsUtils(object):
         region = model.get("region")
         mversion = model.get("mversion")
         locid = f"{mod}.{region}.{mversion}"
-        for fname in self.locationfiles:
-            fpath = self.locationfiles[fname]
+        for fname, fpath in self.locationfiles:
+            # fpath = self.locationfiles[fname]
             fname = join(fpath, mod, f"{mod}_{fname}.csv")
             if isfile(fname):
-                df = pd.read_csv(fname, sep = ';')
+                df = pd.read_csv(fname, sep=";")
                 if locid not in df["ID"]:
                     df = df.append({"ID": locid}, ignore_index=True)
-                df.drop_duplicates().to_csv(fname, sep = ';', index = False)
+                df.drop_duplicates().to_csv(fname, sep=";", index=False)
 
     def add_spatialplots(self, model_source):
         """
@@ -288,7 +292,7 @@ class FewsUtils(object):
         ----------
         model_source: str
             Model source in FewsUtils model catalog.
-       """
+        """
         t = CfXmlUtilsExtended(logger=logger)
 
         model = self.models[model_source]
@@ -300,36 +304,35 @@ class FewsUtils(object):
 
         # model instance
         fname = join(
-                fpath,
-                f"scheme.{scheme}",
-                f"SpatialPlot_{model_source}.xml",
-            )
+            fpath,
+            f"scheme.{scheme}",
+            f"SpatialPlot_{model_source}.xml",
+        )
 
         # get the gridplotgroup ids
-        gridplotgroups = t.get_ids_from_xml(fname, 'gridPlotGroup')
+        gridplotgroups = t.get_ids_from_xml(fname, "gridPlotGroup")
 
         #  SpatialDisplay.xml
         fname = join(
-                fpath,
-                f"SpatialDisplay.xml",
-            )
+            fpath,
+            f"SpatialDisplay.xml",
+        )
 
         # insert spatial extent
         t.insert_extra_extent_into_spatial_display_xml(
             spatial_display_file=fname,
-            region = region,
-            top = model.get("ymax"),
-            bottom = model.get("ymin"),
-            left = model.get("xmin"),
-            right = model.get("xmax"))
-
+            region=region,
+            top=model.get("ymax"),
+            bottom=model.get("ymin"),
+            left=model.get("xmin"),
+            right=model.get("xmax"),
+        )
 
         # inser gridplotgroup ids
         for groupid in gridplotgroups:
             t.append_gridplotgroup_to_spatial_display_xml(
-                spatial_display_file=fname,
-                groupId=groupid)
-
+                spatial_display_file=fname, groupId=groupid
+            )
 
     def add_topologygroups(self, model_source):
         """
@@ -340,7 +343,7 @@ class FewsUtils(object):
         ----------
         model_source: str
             Model source in FewsUtils model catalog.
-       """
+        """
         t = CfXmlUtilsExtended(logger=logger)
 
         model = self.models[model_source]
@@ -352,38 +355,33 @@ class FewsUtils(object):
 
         # model instance for forcing
         fname = join(
-                fpath,
-                f"scheme.{scheme}",
-                f"TopologyGroup_{model_source}_forc.xml",
-            )
+            fpath,
+            f"scheme.{scheme}",
+            f"TopologyGroup_{model_source}_forc.xml",
+        )
 
         # get the gridplotgroup ids
-        groups = t.get_ids_from_xml(fname, 'group')
+        groups = t.get_ids_from_xml(fname, "group")
 
         # model instance
         fname = join(
-                fpath,
-                f"scheme.{scheme}",
-                f"TopologyGroup_{model_source}.xml",
-            )
+            fpath,
+            f"scheme.{scheme}",
+            f"TopologyGroup_{model_source}.xml",
+        )
 
         # get the gridplotgroup ids
-        groups.extend(t.get_ids_from_xml(fname, 'group'))
+        groups.extend(t.get_ids_from_xml(fname, "group"))
 
         #  SpatialDisplay.xml
         fname = join(
-                fpath,
-                f"Topology.xml",
-            )
+            fpath,
+            f"Topology.xml",
+        )
 
         # insert groupid
         for groupid in groups:
-            t.append_group_to_topology_xml(
-                topology_file=fname,
-                groupId=groupid)
-
-
-
+            t.append_group_to_topology_xml(topology_file=fname, groupId=groupid)
 
     def replace_tags_by_file(self, source_file, destination_file, tag_dict):
         """
