@@ -8,6 +8,7 @@ import requests
 import glob
 import logging
 import pandas as pd
+import win32com.client
 from .cf_xml_utils_extended import CfXmlUtilsExtended
 
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ class FewsUtils(object):
             self.from_initialstart(fews_root, template_path=template_path)
 
         # Initialise different subfolders path
-        self.fews_root = fews_root
+        self.fews_root = Path(fews_root)
         self.state_path = self.get_dir(fews_root, ["Config", "ColdStateFiles"])
         self.display_path = self.get_dir(fews_root, ["Config", "DisplayConfigFiles"])
         self.import_path = self.get_dir(fews_root, ["Import"])
@@ -488,6 +489,34 @@ class FewsUtils(object):
                 template_filled = re.sub("{" + key + "}", value, template_filled)
             with open(destination_file_add, "w") as ff:
                 ff.write(template_filled)
+
+    def create_cf_link(self, fews_binaries=None):
+        """ "
+        Creates a FEWS (CF) link to fews_root
+
+        Parameters
+        ----------
+        binaries_path: str, Path, optional
+            Path to FEWS binaries. If not provided assume FEWS bin folder in fews root.
+        """
+
+        if fews_binaries == None:
+            fews_binaries = join(self.fews_root, "bin")
+            self.logger.warning(
+                f"Use relative path to FEWS binaries {fews_binaries} to create FEWS .lnk application"
+            )
+
+        shell = win32com.client.Dispatch("WScript.Shell")
+
+        link_name = self.fews_root.name
+        link = str(self.fews_root.joinpath(str(link_name) + ".lnk"))
+        shortcut = shell.CreateShortCut(link)
+        shortcut.Targetpath = str(fews_binaries.joinpath("./windows/Delft-FEWS.exe"))
+
+        shortcut.Arguments = f"-Dregion.home=."
+        shortcut.save()
+
+    #    return link
 
     # def write_ini_file(sections: Dict, ini_file: Path):
     #     """
