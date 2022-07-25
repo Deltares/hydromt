@@ -248,7 +248,7 @@ class FewsUtils(object):
             dest_file = join(
                 dest_folder,
                 f"scheme.{scheme}",
-                filename.format(region=region, mversion=version),
+                filename.format(region=region, mversion=mversion),
             )
             self.replace_tags_by_file(
                 source_file=Path(file),
@@ -274,8 +274,8 @@ class FewsUtils(object):
         region = model.get("region")
         mversion = model.get("mversion")
         locid = f"{mod}.{region}.{mversion}"
-        for fname, fpath in self.locationfiles:
-            # fpath = self.locationfiles[fname]
+        for fname in self.locationfiles:
+            fpath = self.locationfiles[fname]
             fname = join(fpath, mod, f"{mod}_{fname}.csv")
             if isfile(fname):
                 df = pd.read_csv(fname, sep=";")
