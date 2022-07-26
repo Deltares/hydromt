@@ -228,7 +228,7 @@ html_theme_options = {
     "logo": {
         "text": "HydroMT Core",
     },
-    "navbar_end": ["navbar-icon-links"], # remove dark mode switch
+    "navbar_end": ["navbar-icon-links"],  # remove dark mode switch
 }
 
 html_context = {
