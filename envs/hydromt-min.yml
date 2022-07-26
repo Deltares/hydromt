@@ -25,6 +25,7 @@ dependencies:
   - python>=3.8
   - rasterio
   - requests
+  - rioxarray
   - rtree  # =0.9.3  issue with dll in newer vesions
   - scipy
   - xarray

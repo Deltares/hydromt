@@ -11,17 +11,42 @@ from ast import literal_eval
 import numpy as np
 import abc
 from pathlib import Path
+from typing import Union
 
 
 def configread(
-    config_fn,
-    encoding="utf-8",
-    cf=None,
-    defaults=dict(),
-    noheader=False,
-    abs_path=False,
-):
-    """read model configuration from file and parse to dictionary"""
+    config_fn: Union[Path, str],
+    encoding: str = "utf-8",
+    cf: ConfigParser = None,
+    defaults: dict = dict(),
+    noheader: bool = False,
+    abs_path: bool = False,
+) -> dict:
+    """Read configuration file and parse to (nested) dictionary.
+    Values are evaluated and if possible parsed into python int, float, list or boolean types.
+
+    Parameters
+    ----------
+    config_fn : Union[Path, str]
+        Path to configuration file
+    encoding : str, optional
+        File encoding, by default "utf-8"
+    cf : ConfigParser, optional
+        Alternative configuration parser, by default None
+    defaults : dict, optional
+        Nested dictionary with default options, by default dict()
+    noheader : bool, optional
+        Set true for a single-level configuration file with no headers, by default False
+    abs_path : bool, optional
+        If True, parse string values to an absolute path if the a file or folder with that
+        name (string value) relative to the config file exist, by default False
+
+    Returns
+    -------
+    cfdict : dict
+        Configuration dictionary. If the configuration contains headers,
+        the first level keys are the section headers, the second level option-value pairs.
+    """
     if cf is None:
         cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
     elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
@@ -56,8 +81,29 @@ def configread(
     return cfdict
 
 
-def configwrite(config_fn, cfdict, encoding="utf-8", cf=None, noheader=False):
-    """write model configuration to file"""
+def configwrite(
+    config_fn: Union[str, Path],
+    cfdict: dict,
+    encoding: str = "utf-8",
+    cf: ConfigParser = None,
+    noheader: bool = False,
+) -> None:
+    """_summary_
+
+    Parameters
+    ----------
+    config_fn : Union[Path, str]
+        Path to configuration file
+    cfdict : dict
+        Configuration dictionary. If the configuration contains headers,
+        the first level keys are the section headers, the second level option-value pairs.
+    encoding : str, optional
+        File encoding, by default "utf-8"
+    cf : ConfigParser, optional
+        Alternative configuration parser, by default None
+    noheader : bool, optional
+        Set true for a single-level configuration dictionary with no headers, by default False
+    """
     _cfdict = cfdict.copy()
     root = Path(dirname(config_fn))
     if cf is None:

@@ -28,6 +28,7 @@ import warnings
 from string import Formatter
 
 from . import gis_utils, io
+from .raster import GEO_MAP_COORD
 
 logger = logging.getLogger(__name__)
 
@@ -835,9 +836,9 @@ class DataAdapter(object, metaclass=ABCMeta):
         for date, var in product(dates, vrs):
             if hasattr(date, "month"):
                 yr, mth = date.year, date.month
-            path = path.format(year=yr, month=mth, variable=var)
+            path1 = path.format(year=yr, month=mth, variable=var)
             # FIXME: glob won't work with other than local file systems; use fsspec instead
-            fns.extend(glob.glob(path))
+            fns.extend(glob.glob(path1))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {self.path}")
         return list(set(fns))  # return unique paths
@@ -1028,7 +1029,7 @@ class RasterDatasetAdapter(DataAdapter):
             if "preprocess" in kwargs:
                 preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
                 kwargs.update(preprocess=preprocess)
-            ds_out = xr.open_mfdataset(fns, **kwargs)
+            ds_out = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
         elif self.driver == "zarr":
             if len(fns) > 1:
                 raise ValueError(
@@ -1042,6 +1043,8 @@ class RasterDatasetAdapter(DataAdapter):
             ds_out = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
+        if GEO_MAP_COORD in ds_out.data_vars:
+            ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
         # transpose dims to get y and x dim last
         x_dim = ds_out.raster.x_dim
@@ -1143,6 +1146,7 @@ class RasterDatasetAdapter(DataAdapter):
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
             ds_out[name] = xr.where(data_bool, da * m + a, nodata)
             ds_out[name].attrs.update(attrs)  # set original attributes
+            ds_out[name].raster.set_nodata(nodata)  # reset nodata in case of change
 
         # unit attributes
         # TODO: can we solve this with unit conversion or otherwise generalize meta
@@ -1267,7 +1271,7 @@ class GeoDatasetAdapter(DataAdapter):
         obj = self.get_data(
             bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
         )
-        if obj.vector.index.size == 0 or ("time" in obj and obj.time.size == 0):
+        if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
             return None, None
 
         if driver is None or driver == "netcdf":
@@ -1343,6 +1347,8 @@ class GeoDatasetAdapter(DataAdapter):
             geom = None  # already clipped
         else:
             raise ValueError(f"GeoDataset: Driver {self.driver} unknown")
+        if GEO_MAP_COORD in ds_out.data_vars:
+            ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
         # rename and select vars
         if variables and len(ds_out.vector.vars) == 1 and len(self.rename) == 0:
