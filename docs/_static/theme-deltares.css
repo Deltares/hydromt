@@ -1,35 +1,27 @@
 /* Override the default color set in the original theme */
 
-.navbar-light {
-    background: #080c80 !important;
-}
-
-.bg-light {
-    background-color: #080c80 !important;
-}
-
-.navbar-brand p {
-    color: #fff !important;
-}
-
-img.icon-link-image {
-    height: 2.5em !important;
-}
-
-.navbar-toggler-icon {
-    filter: invert(100%) ;
-}
-
-:root {
+html[data-theme="light"] {
+    /* NOTE: added after pydata v0.9 */
+    --pst-color-primary: #080c80 !important;
+    
+    /* hyperlinks */
+    --pst-color-link: rgb(13, 56, 224);
+    
+    /* navbar */
+    /* NOTE: does not work since v0.9 */
+    --pst-color-navbar-link: rgb(237, 237, 255);
+    --pst-color-navbar-link-hover: #fff;
+    --pst-color-navbar-link-active: #fff;
+    
     /* sphinx design */
+    /* NOTE: does not work since v0.9 */
     --sd-color-card-border-hover: #080c80;
     --sd-color-tabs-label-active: #080c80;
     --sd-color-tabs-label-hover: #080c80;
     --sd-color-tabs-underline-active: #080c80;
-    
-    /* hyperlinks */
-    --pst-color-link: 13, 56, 224;
-    --pst-color-navbar-link: 237, 237, 255;
-    --pst-color-navbar-link-hover: 255, 255, 255;
-    --pst-color-navbar-link-active: 255, 255, 255;
+}
+
+/* enlarge deltares & github icon size; only works with local/url svg files; not with fa icons */
+img.icon-link-image {
+    height: 2.5em !important;
 }

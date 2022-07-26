@@ -41,6 +41,7 @@ jobs:
           popd
 
       - name: Set doc version
+        # run: echo "DOC_VERSION=preview" >> $GITHUB_ENV
         run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
       
       - name: Upload to GitHub Pages
