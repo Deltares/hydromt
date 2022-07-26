@@ -11,10 +11,14 @@ import os
 import hydromt
 from hydromt.data_adapter import (
     DataAdapter,
-    DataCatalog,
     RasterDatasetAdapter,
+    
+)
+from hydromt.data_catalog import (
+    DataCatalog,
     _parse_data_dict,
 )
+
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 

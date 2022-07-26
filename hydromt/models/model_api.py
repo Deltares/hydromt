@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 import inspect
 
-from ..data_adapter import DataCatalog
+from ..data_catalog import DataCatalog
 from .. import config, log, workflows
 
 __all__ = ["Model"]

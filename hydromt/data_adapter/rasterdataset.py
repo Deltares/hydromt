@@ -8,7 +8,7 @@ import geopandas as gpd
 from shapely.geometry import box
 import warnings
 
-from data_adapter import DataAdapter, PREPROCESSORS
+from .data_adapter import DataAdapter, PREPROCESSORS
 from ..raster import GEO_MAP_COORD
 
 import logging

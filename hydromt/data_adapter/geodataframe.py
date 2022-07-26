@@ -5,7 +5,7 @@ import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 
-from data_adapter import DataAdapter
+from .data_adapter import DataAdapter
 
 import logging
 

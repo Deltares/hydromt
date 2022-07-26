@@ -29,7 +29,12 @@ from string import Formatter
 
 from . import gis_utils, io
 from .raster import GEO_MAP_COORD
-from .data_adapter import *
+from .data_adapter import (
+    DataAdapter, 
+    RasterDatasetAdapter,
+    GeoDatasetAdapter,
+    GeoDataFrameAdapter,
+)
 
 logger = logging.getLogger(__name__)
 

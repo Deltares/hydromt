@@ -7,7 +7,7 @@ import xarray as xr
 import geopandas as gpd
 from shapely.geometry import box
 
-from data_adapter import DataAdapter
+from .data_adapter import DataAdapter
 from ..raster import GEO_MAP_COORD
 
 import logging
