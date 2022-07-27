@@ -7,6 +7,7 @@ import os
 from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 import copy
 from pathlib import Path
+from typing import List
 import numpy as np
 import pandas as pd
 import yaml
@@ -14,7 +15,7 @@ import logging
 import requests
 from urllib.parse import urlparse
 import shutil
-from distutils.version import LooseVersion
+from packaging.version import Version
 import itertools
 
 from .data_adapter import (
@@ -32,55 +33,62 @@ __all__ = [
 
 
 class DataCatalog(object):
-    # root URL and version with data artifacts
-    # url = f"{_url}/download/{_version}/<filename>"
-    _url = r"https://github.com/DirkEilander/hydromt-artifacts/releases"
-    _version = "v0.0.6"  # latest version
+    # root URL with data_catalog file
+    _url = r"https://raw.githubusercontent.com/Deltares/hydromt/main/data/predefined_catalogs.yml"
+    _cache_dir = join(Path.home(), ".hydromt_data")
 
-    def __init__(self, data_libs=None, logger=logger, **artifact_keys):
+    def __init__(self, data_libs: List = [], logger=logger, **artifact_keys):
         """Catalog of DataAdapter sources to easily read from different files
         and keep track of files which have been accessed.
 
         Arguments
         ---------
         data_libs: (list of) str, Path, optional
-            One or more paths to yml files containing data sources which are parsed
-            to entries of the data catalog. By default the data catalog is initiated
-            without data entries. See :py:func:`~hydromt.data_catalog.DataCatalog.from_yml`
-            for accepted yml format.
+            One or more paths to data catalog yml files or names of predefined data catalogs.
+            By default the data catalog is initiated without data entries.
+            See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yml format.
         artifact_keys:
-            key-word arguments specifying the name and version of a hydroMT data artifact,
-            to get the latest version use `True` instead of a version. For instance,
-            to get the latest data catalog with Deltares Data use `deltares_data=True`;
-            to get the latest
-
+            Deprecated
         """
+        data_libs = np.atleast_1d(data_libs).tolist()
         self._sources = {}  # dictionary of DataAdapter
+        self._catalogs = {}  # dictionary of predefined Catalogs
         self._used_data = []
         self.logger = logger
+
+        # legacy code. to be removed
         for name, version in artifact_keys.items():
-            if version is None or not version:
-                continue
-            if isinstance(version, str) and LooseVersion(version) <= LooseVersion(
-                "v0.0.4"
-            ):
-                raise ValueError("The minimal support version is v0.0.5")
-            self.from_artifacts(name=name, version=version)
-        if data_libs is not None:
-            for path in np.atleast_1d(data_libs):
-                self.from_yml(path)
+            # TODO throw deprecation warning
+            lib = name
+            if isinstance(version, str):
+                lib += f"={version}"
+            data_libs = [lib] + data_libs
+
+        # parse data catalogs; both user and pre-defined
+        for name_or_path in data_libs:
+            if name_or_path.endswith(".yml"):  # user defined path
+                self.from_yml(name_or_path)
+            else:  # predefined
+                self.from_predefined_catalogs(name_or_path)
 
     @property
     def sources(self):
         """Returns dictionary of DataAdapter sources."""
         if len(self._sources) == 0:
-            self.from_artifacts()  # read artifacts by default
+            # read artifacts by default if no catalogs are provided
+            self.from_predefined_catalogs("artifact_data")
         return self._sources
 
     @property
     def keys(self):
         """Returns list of data source names."""
         return list(self.sources.keys())
+
+    @property
+    def predefined_catalogs(self):
+        if not self._catalogs:
+            self.set_predefined_catalogs()
+        return self._catalogs
 
     def __getitem__(self, key):
         return self.sources[key]
@@ -109,54 +117,68 @@ class DataCatalog(object):
         for k, v in kwargs.items():
             self[k] = v
 
-    def from_artifacts(self, name=None, version=None):
-        """Read a catalog file from https://github.com/DirkEilander/hydromt-artifacts releases.
+    def set_predefined_catalogs(self, urlpath=None):
+        # get predefined_catalogs
+        urlpath = self._url if urlpath is None else urlpath
+        self._catalogs = _yml_from_uri_or_path(urlpath)
+        return self._catalogs
 
-        If no name is provided the artifact sample data is downloaded and
-        stored to to {user_home}/.hydromt/{version}/
-
-        Parameters
-        ----------
-        name: str, optional
-            Catalog name. If None (default) sample data is downloaded.
-        version: str, optional
-            Release version. By default it takes the latest known release.
-        """
-        #
-        version = version if isinstance(version, str) else self._version
-        if name is None or name == "artifact_data":
-            # prepare url and paths
-            url = rf"{self._url}/download/{version}/data.tar.gz"
-            folder = join(Path.home(), ".hydromt_data", "data", version)
-            path_data = join(folder, "data.tar.gz")
-            path = join(folder, "data_catalog.yml")
-            if not isdir(folder):
-                os.makedirs(folder)
-            # download data
-            if not isfile(path_data):
-                with requests.get(url, stream=True) as r:
-                    if r.status_code != 200:
-                        self.logger.error(f"Artifact data {version} not found at {url}")
-                        return
-                    self.logger.info(f"Downloading file to {path_data}")
-                    with open(path_data, "wb") as f:
-                        shutil.copyfileobj(r.raw, f)
-            if not isfile(path):
-                self.logger.debug(f"Unpacking data from {path_data}")
-                shutil.unpack_archive(path_data, dirname(path_data))
-            self.logger.info(f"Adding sample data {version} from artifacts")
+    def from_predefined_catalogs(self, name, version="latest"):
+        if "=" in name:
+            name, version = name.split("=")[0], name.split("=")[-1]
+        if name not in self.predefined_catalogs:
+            raise ValueError(
+                f'Catalog with name "{name}" not found in predefined catalogs'
+            )
+        urlpath = self.predefined_catalogs[name].get("urlpath")
+        versions_dict = self.predefined_catalogs[name].get("versions")
+        if version == "latest":
+            versions = list(versions_dict.keys())
+            if len(versions) > 1:
+                version = versions[np.argmax([Version(v) for v in versions])]
+            else:
+                version = versions[0]
+        urlpath = urlpath.format(version=versions_dict.get(version, version))
+        if urlpath.split(".")[-1] in ["gz", "zip"]:
+            self.logger.info(f"Reading data catalog {name} {version} from archive")
+            self.from_archive(urlpath, name=name, version=version)
         else:
-            path = rf"{self._url}/download/{version}/{name}.yml"
-            self.logger.info(f"Adding {name} {version} sources from {path}")
-        self.from_yml(path)
+            self.logger.info(f"Reading data catalog {name} {version}")
+            self.from_yml(urlpath)
 
-    def from_yml(self, path, root=None, mark_used=False):
+    def from_archive(self, urlpath, version=None, name=None):
+        """Read a data archive including a data_catalog.yml file"""
+        name = basename(urlpath).split(".")[0] if name is None else name
+        root = join(self._cache_dir, name)
+        if version is not None:
+            root = join(root, version)
+        archive_fn = join(root, basename(urlpath))
+        yml_fn = join(root, "data_catalog.yml")
+        if not isdir(root):
+            os.makedirs(root)
+        # download data if url
+        if _uri_validator(urlpath) and not isfile(archive_fn):
+            with requests.get(urlpath, stream=True) as r:
+                if r.status_code != 200:
+                    self.logger.error(f"Data archive not found at {urlpath}")
+                    return
+                self.logger.info(f"Downloading data archive file to {archive_fn}")
+                with open(archive_fn, "wb") as f:
+                    shutil.copyfileobj(r.raw, f)
+        # unpack data
+        if not isfile(yml_fn):
+            self.logger.debug(f"Unpacking data from {archive_fn}")
+            shutil.unpack_archive(archive_fn, root)
+        # parse catalog
+        self.from_yml(yml_fn)
+
+    def from_yml(self, urlpath, root=None, mark_used=False):
         """Add data sources based on yml file.
 
         Parameters
         ----------
-        path: iterable of str, Path
-            Path(s) to data source yml files.
+        urlpath: str, Path
+            Path or url to data source yml files.
         root: str, Path, optional
             Global root for all relative paths in yml file(s).
         mark_used: bool
@@ -200,20 +222,24 @@ class DataCatalog(object):
                 <placeholder_name_1>: <list of names>
                 <placeholder_name_2>: <list of names>
         """
-        if uri_validator(path):
-            with requests.get(path, stream=True) as r:
-                if r.status_code != 200:
-                    raise IOError(f"URL {r.content}: {path}")
-                yml = yaml.load(r.text, Loader=yaml.FullLoader)
-        else:
-            with open(path, "r") as stream:
-                yml = yaml.load(stream, Loader=yaml.FullLoader)
-        # parse data
+        yml = _yml_from_uri_or_path(urlpath)
+        # parse metadata
+        meta = dict()
+        # legacy code with root/category at highest yml level
+        if "root" in yml:
+            meta.update(root=yml.pop("root"))
+        if "category" in yml:
+            meta.update(category=yml.pop("category"))
+        # read meta data
+        meta = yml.pop("meta", meta)
         if root is None:
-            root = yml.pop("root", dirname(path))
-        self.from_dict(yml, root=root, mark_used=mark_used)
+            root = meta.get("root", dirname(urlpath))
+        self.logger.info(f"Parsing data catalog from {urlpath}")
+        self.from_dict(
+            yml, root=root, category=meta.get("category", None), mark_used=mark_used
+        )
 
-    def from_dict(self, data_dict, root=None, mark_used=False):
+    def from_dict(self, data_dict, root=None, category=None, mark_used=False):
         """Add data sources based on dictionary.
 
         Parameters
@@ -222,6 +248,8 @@ class DataCatalog(object):
             Dictionary of data_sources.
         root: str, Path, optional
             Global root for all relative paths in `data_dict`.
+        category: str, optional
+            Global category for all sources in `data_dict`.
         mark_used: bool
             If True, append to used_data list.
 
@@ -253,7 +281,6 @@ class DataCatalog(object):
             }
 
         """
-        category = data_dict.pop("category", None)
         data_dict = _parse_data_dict(data_dict, root=root, category=category)
         self.update(**data_dict)
         if mark_used:
@@ -682,12 +709,24 @@ def _parse_data_dict(data_dict, root=None, category=None):
     return data
 
 
-def uri_validator(x):
+def _uri_validator(x):
     try:
         result = urlparse(x)
         return all([result.scheme, result.netloc])
     except:
         return False
+
+
+def _yml_from_uri_or_path(uri_or_path):
+    if _uri_validator(uri_or_path):
+        with requests.get(uri_or_path, stream=True) as r:
+            if r.status_code != 200:
+                raise IOError(f"URL {r.content}: {uri_or_path}")
+            yml = yaml.load(r.text, Loader=yaml.FullLoader)
+    else:
+        with open(uri_or_path, "r") as stream:
+            yml = yaml.load(stream, Loader=yaml.FullLoader)
+    return yml
 
 
 def _process_dict(d, logger=logger):
