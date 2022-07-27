@@ -6,6 +6,8 @@ from os.path import join
 import logging
 import warnings
 
+from hydromt import data_catalog
+
 ### Uncomment the following lines for building exe
 # import sys
 # exepath = sys.prefix
@@ -76,7 +78,7 @@ deltares_data_opt = click.option(
     "--deltares-data",
     is_flag=True,
     default=False,
-    help=f"Parse default deltares data yml from {data_adapter.DataCatalog()._url}",
+    help=f"Parse default deltares data yml from {data_catalog.DataCatalog()._url}",
 )
 
 ## MAIN

@@ -21,12 +21,12 @@ General
 .. autosummary::
    :toctree: _generated
 
-   data_adapter.DataCatalog
-   data_adapter.DataCatalog.sources
-   data_adapter.DataCatalog.keys
-   data_adapter.DataCatalog.to_dict
-   data_adapter.DataCatalog.to_dataframe
-   data_adapter.DataCatalog.to_yml
+   data_catalog.DataCatalog
+   data_catalog.DataCatalog.sources
+   data_catalog.DataCatalog.keys
+   data_catalog.DataCatalog.to_dict
+   data_catalog.DataCatalog.to_dataframe
+   data_catalog.DataCatalog.to_yml
 
 Add data sources
 ----------------
@@ -34,10 +34,10 @@ Add data sources
 .. autosummary::
    :toctree: _generated
 
-   data_adapter.DataCatalog.from_artifacts
-   data_adapter.DataCatalog.from_dict
-   data_adapter.DataCatalog.from_yml
-   data_adapter.DataCatalog.update
+   data_catalog.DataCatalog.from_artifacts
+   data_catalog.DataCatalog.from_dict
+   data_catalog.DataCatalog.from_yml
+   data_catalog.DataCatalog.update
 
 .. _api_data_catalog_get:
 
@@ -47,9 +47,9 @@ Get data
 .. autosummary::
    :toctree: _generated
 
-   data_adapter.DataCatalog.get_rasterdataset
-   data_adapter.DataCatalog.get_geodataset
-   data_adapter.DataCatalog.get_geodataframe
+   data_catalog.DataCatalog.get_rasterdataset
+   data_catalog.DataCatalog.get_geodataset
+   data_catalog.DataCatalog.get_geodataframe
 
 
 
