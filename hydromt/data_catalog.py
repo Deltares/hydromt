@@ -1,34 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""General data adapters for HydroMT"""
+"""DataCatalog module for HydroMT"""
 
-from abc import ABCMeta, abstractmethod
 import os
 from os.path import join, isdir, dirname, basename, isfile, abspath, exists
-from itertools import product
 import copy
 from pathlib import Path
-from typing import Tuple
 import numpy as np
-import xarray as xr
-import geopandas as gpd
-from shapely.geometry import box
 import pandas as pd
-import glob
 import yaml
-import pprint
 import logging
 import requests
 from urllib.parse import urlparse
 import shutil
 from distutils.version import LooseVersion
 import itertools
-import warnings
-from string import Formatter
 
-from . import gis_utils, io
-from .raster import GEO_MAP_COORD
 from .data_adapter import (
     DataAdapter,
     RasterDatasetAdapter,

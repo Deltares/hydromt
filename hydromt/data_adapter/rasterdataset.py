@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from os.path import join, isdir, dirname, basename, isfile, abspath, exists
+from os.path import join
 from .. import gis_utils, io
 import numpy as np
 import pandas as pd
