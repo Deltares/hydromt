@@ -90,11 +90,11 @@ class DataFrameAdapter(DataAdapter):
             Name of output file without extension.
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
+            of the DataFrame is returned.
         driver : str, optional
-            Driver to write file, e.g.: 'netcdf', 'zarr', by default None
+            Driver to write file, e.g.: 'csv', 'excel', by default None
         variables : list of str, optional
-            Names of GeoDataset variables to return. By default all dataset variables
+            Names of DataFrame columns to return. By default all columns
             are returned.
 
         Returns
@@ -140,7 +140,7 @@ class DataFrameAdapter(DataAdapter):
 
         if self.driver in ["csv"]:
             df = pd.read_csv(self.path, **kwargs)
-        elif self.driver in ["xls", "xlsx"]:
+        elif self.driver in ["xls", "xlsx", "excel"]:
             df = pd.read_excel(self.path, engine="openpyxl", **kwargs)
         elif self.driver in ["fwf"]:
             df = pd.read_fwf(self.path, **kwargs)

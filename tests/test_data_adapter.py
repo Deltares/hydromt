@@ -218,6 +218,13 @@ def test_dataframe(df, df_time, tmpdir):
     assert isinstance(fwf, pd.DataFrame)
     assert np.all(fwf == df)
 
+    fn_xlsx = str(tmpdir.join("test.xlsx"))
+    df.to_excel(fn_xlsx)
+    df2 = data_catalog.get_dataframe(
+        fn_xlsx, index_col=0)
+    assert isinstance(df2, pd.DataFrame)
+    assert np.all(df2 == df)
+
 def test_dataframe_time(df_time, tmpdir):
     # Test time df
     fn_df_ts = str(tmpdir.join("test_ts.csv"))
