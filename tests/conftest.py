@@ -31,6 +31,18 @@ def df():
     )
     return df
 
+@pytest.fixture
+def df_time():
+    df_time = pd.DataFrame(
+        {
+            "precip": [0, 1, 2, 3, 4],
+            "temp": [15, 16, 17, 18, 19],
+            "pet": [1, 2, 3, 4, 5],
+        },
+        index = pd.date_range(start="2007-01-01", end="2007-01-05", freq="D")
+    )
+    return df_time
+
 
 @pytest.fixture
 def geodf(df):
