@@ -12,7 +12,6 @@ import hydromt
 from hydromt.data_adapter import (
     DataAdapter,
     RasterDatasetAdapter,
-    
 )
 from hydromt.data_catalog import (
     DataCatalog,

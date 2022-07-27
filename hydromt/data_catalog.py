@@ -30,7 +30,7 @@ from string import Formatter
 from . import gis_utils, io
 from .raster import GEO_MAP_COORD
 from .data_adapter import (
-    DataAdapter, 
+    DataAdapter,
     RasterDatasetAdapter,
     GeoDatasetAdapter,
     GeoDataFrameAdapter,
@@ -623,6 +623,19 @@ class DataCatalog(object):
         )
         return obj
 
+    def get_dataframe(
+        self,
+        path_or_key,
+        bbox=None,
+        geom=None,
+        buffer=0,
+        variables=None,
+        time_tuple=None,
+        single_var_as_array=True,
+        **kwargs,
+    ):
+        return
+
 
 def _parse_data_dict(data_dict, root=None, category=None):
     """Parse data source dictionary."""
@@ -710,4 +723,3 @@ def abs_path(root, rel_path):
             rel_path = join(root, rel_path)
         path = Path(abspath(rel_path))
     return str(path)
-

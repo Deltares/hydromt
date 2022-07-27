@@ -15,6 +15,7 @@ __all__ = [
     "GeoDataFrameAdapter",
 ]
 
+
 class GeoDataFrameAdapter(DataAdapter):
     _DEFAULT_DRIVER = "vector"
     _DRIVERS = {

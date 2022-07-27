@@ -19,6 +19,7 @@ __all__ = [
     "RasterDatasetAdapter",
 ]
 
+
 class RasterDatasetAdapter(DataAdapter):
     _DEFAULT_DRIVER = "raster"
     _DRIVERS = {

@@ -18,6 +18,7 @@ __all__ = [
     "GeoDatasetAdapter",
 ]
 
+
 class GeoDatasetAdapter(DataAdapter):
     _DEFAULT_DRIVER = "vector"
     _DRIVERS = {
