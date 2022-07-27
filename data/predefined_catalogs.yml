@@ -1,8 +1,0 @@
-deltares_data:
-   version:
-     latest: main
-     v2022.5: b2c89b331a8bb1a86bffd4e956822e789865cf02
-artifact_data:
-   url: https://raw.githubusercontent.com/DirkEilander/hydromt-artifacts/<version>/data_catalog.yml
-   version:
-      latest: main
