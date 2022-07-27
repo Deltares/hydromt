@@ -16,6 +16,7 @@ Added
 
 Changed
 ^^^^^^^
+- splitted data_adapter.py into a  data_catalog and data_adapter submodule with py scripts per adapter
 - Add rioxarray dependency to read raster data
 - In build or update methods, the setup_config component is not forced to run first anymore but according to order of the components in the ini config (opt dict).
 - In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, variables can now also be a str as well as a list of strings.
