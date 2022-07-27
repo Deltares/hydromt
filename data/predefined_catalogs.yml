@@ -1,0 +1,8 @@
+deltares_data:
+   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/deltares_data.yml
+   versions:
+     v2022.5: main
+artifact_data:
+   urlpath: https://github.com/DirkEilander/hydromt-artifacts/releases/download/{version}/data.tar.gz
+   versions:
+      v0.0.6: v0.0.6
