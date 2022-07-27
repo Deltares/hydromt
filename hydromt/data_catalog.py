@@ -46,7 +46,7 @@ class DataCatalog(object):
         data_libs: (list of) str, Path, optional
             One or more paths to yml files containing data sources which are parsed
             to entries of the data catalog. By default the data catalog is initiated
-            without data entries. See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
+            without data entries. See :py:func:`~hydromt.data_catalog.DataCatalog.from_yml`
             for accepted yml format.
         artifact_keys:
             key-word arguments specifying the name and version of a hydroMT data artifact,

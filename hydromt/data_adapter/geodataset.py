@@ -123,7 +123,7 @@ class GeoDatasetAdapter(DataAdapter):
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataset`
+            Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
         obj = self.get_data(
             bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
@@ -159,7 +159,7 @@ class GeoDatasetAdapter(DataAdapter):
         """Returns a clipped, sliced and unified GeoDataset based on the properties
         of this GeoDatasetAdapter.
 
-        For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataset`
+        For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
         # If variable is string, convert to list
         if variables:

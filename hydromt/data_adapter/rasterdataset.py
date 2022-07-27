@@ -128,7 +128,7 @@ class RasterDatasetAdapter(DataAdapter):
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
+            Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
 
         try:
@@ -186,7 +186,7 @@ class RasterDatasetAdapter(DataAdapter):
         """Returns a clipped, sliced and unified RasterDataset based on the properties
         of this RasterDatasetAdapter.
 
-        For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_rasterdataset`
+        For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
         # If variable is string, convert to list
         if variables:

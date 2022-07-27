@@ -116,7 +116,7 @@ class GeoDataFrameAdapter(DataAdapter):
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
+            Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
         kwargs.pop("time_tuple", None)
         gdf = self.get_data(bbox=bbox, variables=variables, logger=logger)
@@ -160,7 +160,7 @@ class GeoDataFrameAdapter(DataAdapter):
         """Returns a clipped and unified GeoDataFrame (vector) based on the properties
         of this GeoDataFrameAdapter.
 
-        For a detailed description see: :py:func:`~hydromt.data_adapter.DataCatalog.get_geodataframe`
+        For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
         # If variable is string, convert to list
         if variables:
