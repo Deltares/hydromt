@@ -15,7 +15,7 @@ You can :ref:`explore and make use of pre-defined data catalogs <existing_catalo
 .. TIP::
 
     If no yaml file is provided to the CLI build or update methods or to :py:class:`~hydromt.data_catalog.DataCatalog`, 
-    HydroMT will use the data stored in the `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_ 
+    HydroMT will use the data stored in the :ref:`artifact_data <existing_catalog>` 
     which contains an extract of global data for a small region around the Piave river in Northern Italy.
 
 .. _get_data_cli: 

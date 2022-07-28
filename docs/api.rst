@@ -24,6 +24,7 @@ General
    data_catalog.DataCatalog
    data_catalog.DataCatalog.sources
    data_catalog.DataCatalog.keys
+   data_catalog.DataCatalog.predefined_catalogs
    data_catalog.DataCatalog.to_dict
    data_catalog.DataCatalog.to_dataframe
    data_catalog.DataCatalog.to_yml
@@ -34,9 +35,11 @@ Add data sources
 .. autosummary::
    :toctree: _generated
 
-   data_catalog.DataCatalog.from_artifacts
-   data_catalog.DataCatalog.from_dict
+   data_catalog.DataCatalog.set_predefined_catalogs
+   data_catalog.DataCatalog.from_predefined_catalogs
+   data_catalog.DataCatalog.from_archive
    data_catalog.DataCatalog.from_yml
+   data_catalog.DataCatalog.from_dict
    data_catalog.DataCatalog.update
 
 .. _api_data_catalog_get:
