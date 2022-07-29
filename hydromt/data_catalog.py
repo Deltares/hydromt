@@ -617,7 +617,6 @@ class DataCatalog(object):
         path_or_key,
         variables=None,
         time_tuple=None,
-        single_var_as_array=True,
         **kwargs,
     ):
         if path_or_key not in self.sources and exists(abspath(path_or_key)):
@@ -648,6 +647,7 @@ def _parse_data_dict(data_dict, root=None, category=None):
         "RasterDataset": RasterDatasetAdapter,
         "GeoDataFrame": GeoDataFrameAdapter,
         "GeoDataset": GeoDatasetAdapter,
+        "DataFrame": DataFrameAdapter,
     }
     # NOTE: shouldn't the kwarg overwrite the dict/yml ?
     if root is None:
@@ -714,9 +714,9 @@ def _process_dict(d, logger=logger):
             d[k] = _process_dict(v)
         elif _check_key and isinstance(v, Path):
             d[k] = str(v)  # path to string
-        elif not _check_key or not isinstance(v, (list, str, int, float, bool)):
-            d.pop(k)  # remove this entry
-            logger.debug(f'Removing non-serializable entry "{k}"')
+        # elif not _check_key or not isinstance(v, (list, str, int, float, bool)):
+        #     d.pop(k)  # remove this entry
+        #     logger.debug(f'Removing non-serializable entry "{k}"')
     return d
 
 
