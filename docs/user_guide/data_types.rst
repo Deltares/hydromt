@@ -518,3 +518,11 @@ throught the kwargs.
       driver: csv
       meta:
         category: parameter_mapping
+      kwargs:
+        header: null
+        index_col: 0
+        parse_dates: false
+
+.. note::
+    The yml-parser does not correctly parses `None` arguments. When this is required, the `null` argment should be used instead.
+    This is parsed to the Python code as a `None`.
