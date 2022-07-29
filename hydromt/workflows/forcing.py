@@ -491,7 +491,44 @@ def penman_monteith(
     var_for_avp_name,
 ):
     """
-    todo
+    Estimate daily reference evapotranspiration (ETo) from a hypothetical
+    short grass reference surface using the FAO-56 Penman-Monteith equation.
+
+    Actual vapor pressure is derived either from relative humidity or dewpoint temperature (depending on var_for_avp_name).
+
+    Based on equation 6 in Allen et al (1998) and using the functions provided by the Pyeto package  (https://pyeto.readthedocs.io/en/latest/index.html).
+    
+
+    Parameters
+    ----------
+    temp : ndarrays
+        ndarrays with daily temperature [°C]
+    temp_min : ndarrays
+        ndarrays with minimum daily temperature [°C]
+    temp_max : ndarrays
+        ndarrays with maximum daily temperature [°C]
+    press : ndarrays
+        ndarrays with pressure [hPa]
+    kin : ndarrays
+        ndarrays with global radiation [W m-2]
+    wind : ndarrays
+        ndarrays with wind speed at 2m above the surface [m s-1]
+    var_for_avp :  ndarrays
+        ndarrays with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
+    elevtn :  ndarrays
+        ndarrays with elevation at model resolution [m]
+    doy : int
+        day of year 
+    lat_rad : ndarrays
+        ndarray with latitude [radians]
+    var_for_avp_name: string
+        String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
+
+    Returns
+    --------
+    pet : ndarrays (lazy)
+        reference evapotranspiration [mm d-1]
+    
     """
     # saturation vapor pressure svp [kPa] from temp [degC]
     svp = pyeto.svp_from_t(temp)
@@ -524,10 +561,13 @@ def penman_monteith(
     ird = pyeto.inv_rel_dist_earth_sun(doy)
     et_rad = pyeto.et_rad(lat_rad, sol_dec, sha, ird)
     cs_rad = pyeto.cs_rad(elevtn, et_rad)
+    temp_min_kelvin = pyeto.celsius2kelvin(temp_min)
+    temp_max_kelvin = pyeto.celsius2kelvin(temp_max)
+    temp_kelvin = pyeto.celsius2kelvin(temp)
     # then longwave outgoing
     long_out = pyeto.net_out_lw_rad(
-        pyeto.celsius2kelvin(temp_min),
-        pyeto.celsius2kelvin(temp_max),
+        temp_min_kelvin,
+        temp_max_kelvin,
         kin * 86400 / 1e6,
         cs_rad,
         avp,
@@ -542,7 +582,7 @@ def penman_monteith(
 
     # now eto....
     pet = pyeto.fao56_penman_monteith(
-        net_rad, pyeto.celsius2kelvin(temp), wind, svp, avp, delta_svp, psy
+        net_rad, temp_kelvin, wind, svp, avp, delta_svp, psy, shf=0.0
     )
     return pet
 
