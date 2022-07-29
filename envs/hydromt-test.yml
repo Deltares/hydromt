@@ -32,3 +32,5 @@ dependencies:
   - scipy
   - xarray
   - zarr
+  - pip:
+    - git+https://github.com/woodcrafty/PyETo.git 

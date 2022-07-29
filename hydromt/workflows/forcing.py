@@ -3,6 +3,7 @@ import xarray as xr
 import numpy as np
 import re
 import logging
+import pyeto
 
 logger = logging.getLogger(__name__)
 
@@ -259,7 +260,34 @@ def pet(
             reproj_method=reproj_method,
         )
     else:
-        ds_out = ds_out.rename({"press_msl": "press"})
+        if "press_msl" in ds_out:
+            ds_out = ds_out.rename({"press_msl": "press"})
+        else:
+            # calculate pressure from elevation [kPa]
+            ds_out["press"] = xr.apply_ufunc(
+                pyeto.atm_pressure,
+                dem_model.where(dem_model.mask),
+                dask="parallelized",
+                output_dtypes=[float],
+                vectorize=True,
+                keep_attrs=True,
+            )
+            # convert to hPa to be consistent with press function calculation:
+            ds_out["press"] = ds_out["press"] * 10
+
+    # compute wind from u and v components at 10m (for era5)
+    if ("wind_u" in ds_out.data_vars) & ("wind_v" in ds_out.data_vars):
+        ds_out["wind_10m"] = np.sqrt(ds_out["wind_u"] ** 2 + ds_out["wind_v"] ** 2)
+        ds_out["wind"] = xr.apply_ufunc(
+            pyeto.wind_speed_2m,
+            ds_out["wind_10m"],
+            10,
+            dask="parallelized",
+            output_dtypes=[float],
+            vectorize=True,
+            keep_attrs=True,
+        )
+
     timestep = to_timedelta(ds).total_seconds()
     if method == "debruin":
         pet_out = pet_debruin(
@@ -271,6 +299,41 @@ def pet(
         )
     if method == "makkink":
         pet_out = pet_makkink(temp, ds_out["press"], ds_out["kin"], timestep=timestep)
+    if "penman-monteith" in method:
+        logger.info("Calculating Penman-Monteith ref evaporation")
+        if method == "penman-monteith_rh_simple":
+            pet_out = pet_penman_monteith(
+                temp["temp"],
+                temp["temp_min"],
+                temp["temp_max"],
+                ds_out["press"],
+                ds_out["kin"],
+                ds_out["wind"],
+                ds_out["rh"],
+                dem_model.where(dem_model.mask),
+                "rh",
+            )
+        elif method == "penman-monteith_tdew":
+            pet_out = pet_penman_monteith(
+                temp["temp"],
+                temp["temp_min"],
+                temp["temp_max"],
+                ds_out["press"],
+                ds_out["kin"],
+                ds_out["wind"],
+                ds_out["temp_dew"],
+                dem_model.where(dem_model.mask),
+                "temp_dew",
+            )
+        else:
+            methods = [
+                "debruin",
+                "makking",
+                "penman-monteith_rh_simple",
+                "penman-monteith_tdew",
+            ]
+            ValueError(f"Unknown pet method, select from {methods}")
+
     # resample in time
     pet_out.name = "pet"
     pet_out.attrs.update(unit="mm")
@@ -411,6 +474,193 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
     ep_joule = 0.65 * slope / (slope + gamma) * k_in
     pet = ((ep_joule / lam) * timestep).astype(np.float32)
     pet = xr.where(pet > 0.0, pet, 0.0)
+    return pet
+
+
+def penman_monteith(
+    temp,
+    temp_min,
+    temp_max,
+    press,
+    kin,
+    wind,
+    var_for_avp,
+    elevtn,
+    doy,
+    lat_rad,
+    var_for_avp_name,
+):
+    """
+    Estimate daily reference evapotranspiration (ETo) from a hypothetical
+    short grass reference surface using the FAO-56 Penman-Monteith equation.
+
+    Actual vapor pressure is derived either from relative humidity or dewpoint temperature (depending on var_for_avp_name).
+
+    Based on equation 6 in Allen et al (1998) and using the functions provided by the Pyeto package  (https://pyeto.readthedocs.io/en/latest/index.html).
+
+
+    Parameters
+    ----------
+    temp : ndarrays
+        ndarrays with daily temperature [°C]
+    temp_min : ndarrays
+        ndarrays with minimum daily temperature [°C]
+    temp_max : ndarrays
+        ndarrays with maximum daily temperature [°C]
+    press : ndarrays
+        ndarrays with pressure [hPa]
+    kin : ndarrays
+        ndarrays with global radiation [W m-2]
+    wind : ndarrays
+        ndarrays with wind speed at 2m above the surface [m s-1]
+    var_for_avp :  ndarrays
+        ndarrays with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
+    elevtn :  ndarrays
+        ndarrays with elevation at model resolution [m]
+    doy : int
+        day of year
+    lat_rad : ndarrays
+        ndarray with latitude [radians]
+    var_for_avp_name: string
+        String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
+
+    Returns
+    --------
+    pet : ndarrays (lazy)
+        reference evapotranspiration [mm d-1]
+
+    """
+    # saturation vapor pressure svp [kPa] from temp [degC]
+    svp = pyeto.svp_from_t(temp)
+
+    # actual vapor pressure avp [kPa] from dewpoint temperature [degC]
+    if var_for_avp_name == "temp_dew":
+        avp = pyeto.avp_from_tdew(var_for_avp)
+    # actual vapor pressure avp [kPa] from relative humidity rh [%]
+    elif var_for_avp_name == "rh":
+        svp_tmin = pyeto.svp_from_t(temp_min)
+        svp_tmax = pyeto.svp_from_t(temp_max)
+        avp = pyeto.avp_from_rhmean(svp_tmin, svp_tmax, var_for_avp)
+    else:
+        variables_avp = ["temp_dew", "rh"]
+        ValueError(
+            f"Unknown method to calculate avp, select from variables {variables_avp}"
+        )
+
+    # slope of the sat vapor pressure curve
+    delta_svp = pyeto.delta_svp(temp)
+
+    # psychrometric constant
+    # press already calculated from elevation (or if available directly)
+    psy = pyeto.psy_const(press / 10)  # in this formula press should be in kPa
+
+    # ned rad
+    # first calc extraterrestrial rad (et_rad) and clear sky radiation (cs_rad)
+    sol_dec = pyeto.sol_dec(doy)
+    sha = pyeto.sunset_hour_angle(lat_rad, sol_dec)
+    ird = pyeto.inv_rel_dist_earth_sun(doy)
+    et_rad = pyeto.et_rad(lat_rad, sol_dec, sha, ird)
+    cs_rad = pyeto.cs_rad(elevtn, et_rad)
+    temp_min_kelvin = pyeto.celsius2kelvin(temp_min)
+    temp_max_kelvin = pyeto.celsius2kelvin(temp_max)
+    temp_kelvin = pyeto.celsius2kelvin(temp)
+    # then longwave outgoing
+    long_out = pyeto.net_out_lw_rad(
+        temp_min_kelvin,
+        temp_max_kelvin,
+        kin * 86400 / 1e6,
+        cs_rad,
+        avp,
+    )  # in this formula kin should be in [MJ m-2 day-1]
+
+    # then net rad
+    # first net rad short
+    net_rad_s = pyeto.net_in_sol_rad(
+        kin * 86400 / 1e6, albedo=0.23
+    )  # in this formula kin should be in [MJ m-2 day-1]
+    net_rad = pyeto.net_rad(net_rad_s, long_out)
+
+    # now eto....
+    pet = pyeto.fao56_penman_monteith(
+        net_rad, temp_kelvin, wind, svp, avp, delta_svp, psy, shf=0.0
+    )
+    return pet
+
+
+def pet_penman_monteith(
+    temp, temp_min, temp_max, press, kin, wind, var_for_avp, elevtn, var_for_avp_name
+):
+    """Determnines Penman-Monteith daily reference evapotranspiration based on the available inputs. Using the pyeto package.
+
+    Parameters
+    ----------
+    temp : xarray.DataArray
+        DataArray with daily temperature [°C]
+    temp_min : xarray.DataArray
+        DataArray with minimum daily temperature [°C]
+    temp_max : xarray.DataArray
+        DataArray with maximum daily temperature [°C]
+    press : xarray.DataArray
+        DataArray with pressure [hPa]
+    kin : xarray.DataArray
+        DataArray with global radiation [W m-2]
+    wind : xarray.DataArray
+        DataArray with wind speed at 2m above the surface [m s-1]
+    var_for_avp :  xarray.DataArray
+        DataArray with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
+    elevtn :  xarray.DataArray
+        DataArray with elevation at model resolution [m]
+    var_for_avp_name: string
+        String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
+
+    Returns
+    --------
+    pet : xarray.DataArray (lazy)
+        reference evapotranspiration [mm d-1]
+    """
+
+    # get day of year
+    doy = kin.time.dt.dayofyear
+
+    # latitude of each cell in radians
+    lat_rad = xr.Dataset(
+        data_vars=dict(
+            lat_rad=(
+                ["y", "x"],
+                pyeto.deg2rad(kin.y.values)
+                .reshape(len(kin.y), 1)
+                .repeat(len(kin.x), 1),
+            ),
+        ),
+        coords=dict(y=kin.y, x=kin.x),
+        attrs=dict(description="lat_rad"),
+    )
+    lat_rad = lat_rad["lat_rad"]
+
+    if var_for_avp_name == "rh":
+        # correct for neg values in rh and rh>100....
+        rh_corr1 = var_for_avp.where(var_for_avp < 100, 100)
+        rh_corr = rh_corr1.where(rh_corr1 > 0, 0)
+        var_for_avp = rh_corr
+
+    pet = xr.apply_ufunc(
+        penman_monteith,
+        temp,
+        temp_min,
+        temp_max,
+        press,
+        kin,
+        wind,
+        var_for_avp,
+        elevtn,
+        doy,
+        lat_rad,
+        var_for_avp_name,
+        dask="parallelized",
+        output_dtypes=[float],
+        vectorize=True,
+        keep_attrs=True,
+    )
     return pet
 
 
