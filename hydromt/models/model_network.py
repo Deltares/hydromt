@@ -32,11 +32,24 @@ class NetworkModel(Model):
             data_libs=data_libs,
             logger=logger,
         )
+        
+        # placeholders
+        self._network = xr.Dataset() #xr.Dataset representation of all mesh parameter 
 
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
         super().read()
+        self.read_network()
+        # Other specifics to NetworkModel...
 
     def write(self):
         """Method to write the complete model schematization and configuration to file."""
         super().write()
+        self.write_network()
+        # Other specifics to NetworkModel...
+    
+
+
+
+    @property
+    def network(): #

@@ -45,7 +45,7 @@ class TestModel(Model):
             "basins": {"func": _rand_msk, "nodata": -1},
         }
         ds_base = _create_staticmaps(_maps, region["bbox"], res)
-        self.set_crs(crs)
+        #self.set_crs(crs) #This is done within _create_staticmaps() #TODO: remove in future versions?
         rmdict = {k: v for k, v in self._MAPS.items() if k in ds_base.data_vars}
         self.set_staticmaps(ds_base.rename(rmdict))
         if add_geom:

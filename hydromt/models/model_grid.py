@@ -39,11 +39,22 @@ class GridModel(Model):
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
         super().read()
+        self.read_grid()
 
     def write(self):
         """Method to write the complete model schematization and configuration to file."""
         super().write()
+        self.write_grid()
+
+    def read_grid(self):
+        #Placeholder - read_grid method will be moved here in future versions
+        super().read_grid()
     
+    def write_grid(self):
+        #Placeholder - write_grid method will be moved here in future versions
+        super().write_grid()
+    
+    #GridModel specific methods
     def setup_fromtable(self, path_or_key, fn_map, out_vars, **kwargs):
         """This function creates additional staticmaps layers based on a table reclassification
         
@@ -72,22 +83,22 @@ class GridModel(Model):
         # process landuse
         ds_maps = workflows.grid_maptable(
             da=da,
-            ds_like=self.staticmaps,
+            ds_like=self.grid,
             fn_map=fn_map,
             params=out_vars,
             logger=self.logger,
         )
         rmdict = {k: v for k, v in self._MAPS.items() if k in ds_maps.data_vars}
-        self.set_staticmaps(ds_maps.rename(rmdict))
+        self.set_grid(ds_maps.rename(rmdict))
 
     
     def setup_fromvector(self, key, col2raster="", rasterize_method="value"):
-        """Creates additional staticmaps based on a vector, located either in the data library or staticgeoms.
+        """Creates additional grid map based on a vector, located either in the data library or geoms.
 
-        Adds staticmaps model layers defined in key
+        Adds grid maps model layers defined in key
 
         Args:
-            key (str): value in either staticgeoms or the data catalog to extract the vector
+            key (str): value in either geoms or the data catalog to extract the vector
             col2raster (str, optional): name of column in the vector to use for rasterization. Defaults to "".
             rasterize_method (str, optional): Method to rasterize the vector ("value" or "fraction"). Defaults to "value".
         """
@@ -96,85 +107,99 @@ class GridModel(Model):
         self.logger.info(f"Preparing {key} parameter maps from vector.")
 
         #Vector sources can be from staticgeoms, data_catalog or fn
-        if key in self._staticgeoms.keys():
-            gdf = self._staticgeoms[key]
+        if key in self._geoms.keys():
+            gdf = self._geoms[key]
         elif key in self.data_catalog:
             gdf = self.data_catalog.get_geodataframe(key, geom=self.region, dst_crs=self.crs) #TODO: I think this is updated if gets a fn: ask
         else: 
-            self.logger.warning(f"Source '{key}' not found in staticgeoms nor data_catalog.")
+            self.logger.warning(f"Source '{key}' not found in geoms nor data_catalog.")
             return
         
         if gdf.empty:
-            self.logger.warning(f"No shapes of {key} found within region, setting to default value.") #TODO: check this
-
-            ds = self.hydromaps["basins"].copy() * 0.0 #TODO : fix this  
-            ds.attrs.update(_FillValue=0.0)
+            raise ValueError(f"No shapes of {key} found within region, exiting.")
         else:
             ds = workflows.vector_to_grid(
                 gdf=gdf,
-                ds_like=self.staticmaps,
+                ds_like=self.grid,
                 col_name=col2raster,
                 method=rasterize_method,
                 mask_name="mask",
                 logger=self.logger,
             )
-        self.set_staticmaps(ds.rename(key))
+        self.set_grid(ds.rename(key))
 
+    #TODO: grid and grid functions to be exported here later
 
+    #Properties for subclass GridModel 
+    @property
+    def crs(self): 
+        """Returns coordinate reference system embedded in region."""
+        return self.region.crs 
 
+    @property
+    def dims(self): 
+        """Returns spatial dimension names of grid."""  
+        return self.grid.raster.dims 
 
+    @property
+    def coords(self):
+        """Returns coordinates of grid."""
+        return self.grid.raster.coords
 
+    @property
+    def res(self):
+        """Returns coordinates of grid."""
+        return self.grid.raster.res
 
+    @property
+    def transform(self):
+        """Returns spatial transform grid."""
+        return self.grid.raster.transform
 
-   def setup_emission_vector(
-        self,
-        emission_fn,
-        col2raster="",
-        rasterize_method="value",
-    ):
-        """Setup emission map from vector data.
-        Adds model layer:
-        * **emission_fn** map: emission data map
-        Parameters
-        ----------
-        emission_fn : {'GDP_world'...}
-            Name of raster emission map source.
-        col2raster : str
-            Name of the column from the vector file to rasterize.
-            Can be left empty if the selected method is set to "fraction".
-        rasterize_method : str
-            Method to rasterize the vector data. Either {"value", "fraction"}.
-            If "value", the value from the col2raster is used directly in the raster.
-            If "fraction", the fraction of the grid cell covered by the vector file is returned.
+    @property
+    def width(self):
+        """Returns width of grid."""
+        return self.grid.raster.width
+
+    @property
+    def height(self):
+        """Returns height of grid."""
+        return self.grid.raster.height
+
+    @property
+    def shape(self):
+        """Returns shape of grid."""
+        return self.grid.raster.shape
+
+    @property
+    def bounds(self):
+        """Returns shape of grid."""
+        return self.grid.raster.bounds
+
+    @property
+    def region(self):
+        """Returns geometry of region of the model area of interest."""
+        region = gpd.GeoDataFrame() 
+        if "region" in self.geoms:
+            region = self.geoms["region"]
+        elif len(self.grid) > 0:
+            crs = self.grid.raster.crs 
+            if crs is None and crs.to_epsg() is not None:
+                crs = crs.to_epsg()  # not all CRS have an EPSG code
+            region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
+        return region
+
+    def test_model_grid(self): 
+        """Test compliance to model API instances.
+
+        Returns
+        -------
+        non_compliant: list
+            List of objects that are non-compliant with the model API structure.
         """
-        if emission_fn is None:
-            self.logger.warning(
-                "Source name set to None, skipping setup_emission_vector."
-            )
-            return
-        if emission_fn not in self.data_catalog:
-            self.logger.warning(
-                f"Invalid source '{emission_fn}', skipping setup_emission_vector."
-            )
-            return
+        non_compliant = []
+        # grid
+        if not isinstance(self.grid, xr.Dataset):
+            non_compliant.append("grid")
 
-        self.logger.info(f"Preparing '{emission_fn}' map.")
-        gdf_org = self.data_catalog.get_geodataframe(
-            emission_fn, geom=self.basins, dst_crs=self.crs
-        )
-        if gdf_org.empty:
-            self.logger.warning(
-                f"No shapes of {emission_fn} found within region, setting to default value."
-            )
-            ds_emi = self.hydromaps["basins"].copy() * 0.0
-            ds_emi.attrs.update(_FillValue=0.0)
-        else:
-            ds_emi = emissions.emission_vector(
-                gdf=gdf_org,
-                ds_like=self.staticmaps,
-                col_name=col2raster,
-                method=rasterize_method,
-                mask_name="mask",
-                logger=self.logger,
-            )
-        self.set_staticmaps(ds_emi.rename(emission_fn))
+        return non_compliant
