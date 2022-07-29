@@ -497,7 +497,7 @@ def penman_monteith(
     Actual vapor pressure is derived either from relative humidity or dewpoint temperature (depending on var_for_avp_name).
 
     Based on equation 6 in Allen et al (1998) and using the functions provided by the Pyeto package  (https://pyeto.readthedocs.io/en/latest/index.html).
-    
+
 
     Parameters
     ----------
@@ -518,7 +518,7 @@ def penman_monteith(
     elevtn :  ndarrays
         ndarrays with elevation at model resolution [m]
     doy : int
-        day of year 
+        day of year
     lat_rad : ndarrays
         ndarray with latitude [radians]
     var_for_avp_name: string
@@ -528,7 +528,7 @@ def penman_monteith(
     --------
     pet : ndarrays (lazy)
         reference evapotranspiration [mm d-1]
-    
+
     """
     # saturation vapor pressure svp [kPa] from temp [degC]
     svp = pyeto.svp_from_t(temp)
