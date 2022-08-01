@@ -13,6 +13,9 @@ from typing import List
 import logging
 import os
 
+from ..data_adapter import DataCatalog
+from .. import config, log, workflows
+
 __all__ = ["LumpedModel"]
 logger = logging.getLogger(__name__)
 
@@ -37,20 +40,28 @@ class LumpedModel(Model):
 
     def setup_response_unit_geom(
         self,
-        region=None,
-        basin_shapes_fn=None, #TODO get this from region
+        region,
         split_regions = False,
         split_method = "us_area",
         dem_fn = None,
-        **kwargs
+        **setup_region_kwargs
     ):
-        # parse basin shapes as geom if available
-        if not isinstance(basin_shapes_fn,type(None)) and split_regions==False:
-            gdf = self.data_catalog.get_geodataframe(
-                basin_shapes_fn,  
-                **kwargs
-                )
-            self.set_staticgeoms(gdf, 'response_unit_geom')
+        kind, region = workflows.parse_region(region, logger=self.logger)
+        
+        # if basin/catchment shapefiles are provided (through "geom": shapepath)
+        # take these shapes as computational elements (respone_unit_geom)
+        if kind in ["geom"]:
+            if split_regions==False:
+                geom = region["geom"]
+                if geom.crs is None:
+                    raise ValueError('Model region "geom" has no CRS')  
+                self.set_staticgeoms(geom, 'response_unit_geom')
+        else:
+            region = self.setup_region(
+                region,
+                hydrography_fn="merit_hydro",
+                basin_index_fn="merit_hydro_index",
+            )
 
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
