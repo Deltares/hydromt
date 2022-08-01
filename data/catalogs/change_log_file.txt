@@ -1,0 +1,32 @@
+==============================
+change log - deltares_data.yml
+==============================
+version: 2022.7
+
+added
+=====
+- README with conventions regarding data (download, storage, .yml)
+- change log file of deltares_data.yml
+- add new data sets
+	- alosdem_v3.2
+	- basin_atlas_level12_v10
+	- river_atlas_v10
+	- lake_atlas_pol_v10
+	- eobs_v24.0e
+	- eobs_v25.0e
+	- eobs_orography_v24.0e
+	- eobs_orography_v25.0e
+	- geo_dar_grand_v13_issues
+	- geo_dar_wada_et_al_2017_harmonized
+	- SM2RAIN_ASCAT_monthly_025_2007_2020
+	- SM2RAIN_ASCAT_monthly_05_2007_2020	
+changed
+=======
+- Apply convention specified in the README 
+	- ensure reasonable alphabetical order in data sets and components 
+	- implement right versioning convention _v where possible 
+        - apply consistent meta information 
+fixed 
+=====
+- enable versioning of yml.files 
+
