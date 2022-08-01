@@ -1,5 +1,7 @@
 import pytest
 import sys, os
+
+from pytz import NonExistentTimeError
 from .model_api import Model
 import xarray as xr
 import numpy as np
@@ -32,6 +34,23 @@ class LumpedModel(Model):
             data_libs=data_libs,
             logger=logger,
         )
+
+    def setup_response_unit_geom(
+        self,
+        region=None,
+        basin_shapes_fn=None, #TODO get this from region
+        split_regions = False,
+        split_method = "us_area",
+        dem_fn = None,
+        **kwargs
+    ):
+        # parse basin shapes as geom if available
+        if not isinstance(basin_shapes_fn,type(None)) and split_regions==False:
+            gdf = self.data_catalog.get_geodataframe(
+                basin_shapes_fn,  
+                **kwargs
+                )
+            self.set_staticgeoms(gdf, 'response_unit_geom')
 
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
