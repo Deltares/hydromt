@@ -20,6 +20,11 @@ raster data (3D): zarr
 data storage (p:/wflow_global/hydromt)
 ======================================
 
+data used by the geoserver:
+DO NOT CHAGE WITHOUT CONSULTATION
+- alosdem 
+- copdem 
+
 writung convention:
 - lower case 
 - with underscores
@@ -51,7 +56,6 @@ folder structure:
 	t2m
 	msl
 	...
-
        
 deltares_data_.yml
 ==================
