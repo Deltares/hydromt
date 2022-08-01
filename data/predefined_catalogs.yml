@@ -1,4 +1,8 @@
 deltares_data:
+   urlpath:
+   versions: 
+     v2022.7: main 
+deltares_data:
    urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/deltares_data.yml
    versions:
      v2022.5: main
