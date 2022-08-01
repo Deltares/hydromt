@@ -6,7 +6,7 @@ import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 
-from typing import List
+from typing import Tuple, Union, Optional
 
 import logging
 import os
@@ -34,7 +34,7 @@ class MeshModel(Model):
         )
 
         # placeholders
-        self._mesh = xr.Dataset() #xr.Dataset representation of all mesh parameter 
+        self._mesh = xr.Dataset()  # xr.Dataset representation of all mesh parameter
 
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
@@ -49,36 +49,40 @@ class MeshModel(Model):
         # Other specifics to MeshModel...
 
     @property
-    def mesh(self): #xr dataset
+    def mesh(self):
         """xarray.Dataset representation of all mesh parameters"""
-        #XU grid data type Xarray dataset with xu sampling. 
+        # XU grid data type Xarray dataset with xu sampling.
         if len(self._mesh) == 0:
             if self._read:
                 self.read_mesh()
         return self._mesh
 
     def read_mesh(self):
-        """Read mesh at <root/?/> and parse to xarray Dataset """
+        """Read mesh at <root/?/> and parse to xarray Dataset"""
         if not self._write:
             # start fresh in read-only mode
             self._mesh = xr.Dataset()
-        if isfile(join(self.root, "mesh","mesh.nc")): #Change of file not implemented yet
-            self._mesh = xr.open_dataset(join(self.root, "mesh","mesh.nc")) 
-    
+        if isfile(
+            join(self.root, "mesh", "mesh.nc")
+        ):  # Change of file not implemented yet
+            self._mesh = xr.open_dataset(join(self.root, "mesh", "mesh.nc"))
+
     def write_mesh(self):
-        """Write grid at <root/?/> in xarray.Dataset """
+        """Write grid at <root/?/> in xarray.Dataset"""
         if not self._write:
             raise IOError("Model opened in read-only mode")
         elif not self._mesh:
             self.logger.warning("No mesh to write - Exiting")
             return
         # filename
-        fn_default = join(self.root, "mesh","mesh.nc")
+        fn_default = join(self.root, "mesh", "mesh.nc")
         self.logger.info(f"Write mesh to {self.root}")
         ds_out = self.mesh
         ds_out.to_netcdf(fn_default)
-    
-    def set_mesh(self, data, name=None):
+
+    def set_mesh(
+        self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
+    ):
         """Add data to mesh object.
 
         -Describe specifics of the mesh object (for example related to the network and ugrid representation)
@@ -115,11 +119,11 @@ class MeshModel(Model):
                     if self._read:
                         self.logger.warning(f"Replacing mesh parameter: {dvar}")
                 self._mesh[dvar] = data[dvar]
-   
-    #Possible other properties: related to the network and ugrid representation
-    #....
 
-    def test_subclass_mesh(self): #TODO : check which parts are generic and which ones are type specific 
+    # Possible other properties: related to the network and ugrid representation
+    # ....
+
+    def test_subclass_mesh(self):
         """Test compliance to model Mesh instances.
 
         Returns
@@ -131,5 +135,5 @@ class MeshModel(Model):
         # Mesh instance
         if not isinstance(self.mesh, xr.Dataset):
             non_compliant.append("mesh")
-        
+
         return non_compliant

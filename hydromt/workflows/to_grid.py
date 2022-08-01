@@ -16,7 +16,7 @@ def grid_maptable(da, ds_like, fn_map, logger=logger, params=None):
     """Returns RasterData map and related parameter maps.
     The parameter maps are prepared based on the initial raster map and
     mapping table as provided in fn_map.
-    
+
     Parameters
     ----------
     da : xarray.DataArray
@@ -29,7 +29,9 @@ def grid_maptable(da, ds_like, fn_map, logger=logger, params=None):
         Dataset containing parameters maps at model resolution and region
     """
     # read csv with remapping values
-    df = pd.read_csv(fn_map, index_col=0, sep=",|;", engine="python", dtype=DTYPES) #TODO make dtype flexible
+    df = pd.read_csv(
+        fn_map, index_col=0, sep=",|;", engine="python", dtype=DTYPES
+    )  # TODO make dtype flexible
     # limit dtypes to avoid gdal errors downstream
     ddict = {"float64": np.float32, "int64": np.int32}
     dtypes = {c: ddict.get(str(df[c].dtype), df[c].dtype) for c in df.columns}
@@ -46,10 +48,10 @@ def grid_maptable(da, ds_like, fn_map, logger=logger, params=None):
     def reclass(x):
         return np.vectorize(d.get)(x, nodata)
 
-    da = da.raster.interpolate_na(method="nearest") #TODO: make this flexible
+    da = da.raster.interpolate_na(method="nearest")  # TODO: make this flexible
     # apply for each parameter
     for param in params:
-        method = RESAMPLING.get(param, "average") #TODO: make this flexible
+        method = RESAMPLING.get(param, "average")  # TODO: make this flexible
         values = df[param].values
         nodata = values[-1]  # NOTE values is set in last row
         d = dict(zip(keys, values))  # NOTE global param in reclass method
@@ -63,6 +65,7 @@ def grid_maptable(da, ds_like, fn_map, logger=logger, params=None):
         )  # then resample
 
     return ds_out
+
 
 def vector_to_grid(
     gdf,
@@ -108,7 +111,9 @@ def vector_to_grid(
         idx_valid = np.where(msktn.values.flatten() != msktn.raster.nodata)[0]
         gdf_grid = ds_like.raster.vector_grid().loc[idx_valid]
         gdf_grid["coverfrac"] = np.zeros(len(idx_valid))
-        gdf_grid["area"] = gdf_grid.to_crs(3857).area  # area calculation in projected crs   #TODO: ask why 3857 and not mod.crs
+        gdf_grid["area"] = gdf_grid.to_crs(
+            3857
+        ).area  # area calculation in projected crs   #TODO: ask why 3857 and not mod.crs
 
         # Calculate fraction per (vector) grid cell
         # Looping over each vector shape

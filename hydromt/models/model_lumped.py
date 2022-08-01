@@ -6,7 +6,7 @@ import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 
-from typing import List
+from typing import Tuple, Union, Optional
 
 import logging
 import os
@@ -33,6 +33,11 @@ class LumpedModel(Model):
             logger=logger,
         )
 
+        # placeholders
+        self._response_units = (
+            gpd.GeoDataFrame()
+        )  # representation of all response units OR maybe should be a dictionary with property and units key?
+
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
         super().read()
@@ -46,27 +51,14 @@ class LumpedModel(Model):
         # Other specifics to LumpedModel...
 
     @property
-    def response_units(self):  #TODO: name to be agreed by all
-        """xr.Dataset object (GeoDataSet) with a string object or tuple of the Geometry """
+    def response_units(self):  # TODO: name to be agreed by all
+        """xr.Dataset object (GeoDataSet) with a string object or tuple of the Geometry"""
         if not self._response_units:
             if self._read:
                 self.read_response_units()
-        return self._response_units   
-
-#Property - basin ID
-
-# object auxiliary? geoms and maps. to store 
-
-#Response_unit: one geodataframe
-#Property stored in another geodataframe
-    
+        return self._response_units
 
 
-# TODO: possible additional objects or properties
-# Having a time series of a Polygon - for now a single xarray.Dataset object. Could save a string object or tuple of the Geometry. BUT slow!
-# Could also link the ID of the gdf with staticgeoms. Could also be a geodataframe of two dimensions #--> property: xarray dataset that should match with a staticgeoms and check that index are mathcing 
-
-# In the future, make an issue to support polygon in the vector method. 
-
-
-
+# Property - basin ID
+# Response_unit: one geodataframe
+# Property stored in another geodataframe
