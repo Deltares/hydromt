@@ -42,9 +42,7 @@ def precip(
     if precip.raster.dim0 != "time":
         raise ValueError(f'First precip dim should be "time", not {precip.raster.dim0}')
     # downscale precip (lazy); global min of zero
-    p_out = xr.ufuncs.fmax(
-        precip.raster.reproject_like(da_like, method=reproj_method), 0
-    )
+    p_out = np.fmax(precip.raster.reproject_like(da_like, method=reproj_method), 0)
     # correct precip based on high-res monthly climatology
     if clim is not None:
         # make sure first dim is month
@@ -361,7 +359,7 @@ def pet_debruin(
         reference evapotranspiration
     """
     # saturation and actual vapour pressure at given temperature [Pa]
-    esat = 6.112 * xr.ufuncs.exp((17.67 * temp) / (temp + 243.5))
+    esat = 6.112 * np.exp((17.67 * temp) / (temp + 243.5))
     # slope of vapour pressure curve
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
@@ -401,7 +399,7 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
         reference evapotranspiration
     """
     # saturation and actual vapour pressure at given temperature [Pa]
-    esat = 6.112 * xr.ufuncs.exp((17.67 * temp) / (temp + 243.5))
+    esat = 6.112 * np.exp((17.67 * temp) / (temp + 243.5))
     # slope of vapour pressure curve
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
