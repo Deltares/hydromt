@@ -82,30 +82,34 @@ def test_resolve_path(tmpdir):
     # create dummy files
     for variable in ["precip", "temp"]:
         for year in [2020, 2021]:
-            with open(
-                join(tmpdir, "{unknown_key}_" + f"{variable}_{year}.nc"), "w"
-            ) as f:
-                f.write("")
+            for month in range(1, 13):
+                with open(
+                    join(
+                        tmpdir, "{unknown_key}_" + f"{variable}_{year}_{month:02d}.nc"
+                    ),
+                    "w",
+                ) as f:
+                    f.write("")
     # create data catalog for these files
     dd = {
         "test": {
             "data_type": "RasterDataset",
             "driver": "netcdf",
-            "path": join(tmpdir, "{unknown_key}_{variable}_{year}.nc"),
+            "path": join(tmpdir, "{unknown_key}_{variable}_{year}_{month}.nc"),
         }
     }
     cat = DataCatalog()
     cat.from_dict(dd)
     # test
-    assert len(cat["test"].resolve_paths()) == 4
-    assert len(cat["test"].resolve_paths(variables=["precip"])) == 2
+    assert len(cat["test"].resolve_paths()) == 48
+    assert len(cat["test"].resolve_paths(variables=["precip"])) == 24
     assert (
         len(
             cat["test"].resolve_paths(
                 variables=["precip"], time_tuple=("2021-03-01", "2021-05-01")
             )
         )
-        == 1
+        == 3
     )
     with pytest.raises(FileNotFoundError, match="No such file found:"):
         cat["test"].resolve_paths(variables=["waves"])
