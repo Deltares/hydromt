@@ -109,6 +109,18 @@ class LumpedModel(Model):
             one of  ["streamorder","us_area","pfafstetter","outlets"]
         hydrography_fn : str, optional
             name of hydrography dataset, by default "merit_hydro"
+        split_kwargs : dict, see below for combinations
+            split_method = "us_area"
+            split_kwargs = {'min_area':100}
+
+            split_method = "pfafstetter"
+            split_kwargs = {'depth':2, 'upa_min':100}
+
+            split_method = "streamorder"
+            split_kwargs = {'min_sto':8, 'mask':None}
+
+            split_method = "outlets"
+            split_kwargs = {'xy':_region['subbasin'], 'min_sto': 4}
 
         Returns
         -------
