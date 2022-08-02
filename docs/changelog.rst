@@ -30,6 +30,7 @@ Fixed
 - Fixed DataAdapter.resolve_paths with unknown keys #121
 - Fixed the WGS84 datum in the gis_utils.utm_crs method.
 - Fixed the predicate not being passed in get_geodataframe method.
+- Removed deprecated xr.ufuncs calls.
 
 Deprecated
 ^^^^^^^^^^
