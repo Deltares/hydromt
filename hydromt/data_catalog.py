@@ -558,6 +558,7 @@ class DataCatalog(object):
         geom: gpd.GeoDataFrame = None,
         buffer: Union[float, int] = 0,
         variables: Union[List, str] = None,
+        predicate: str = "intersects",
         **kwargs,
     ):
         """Returns a clipped and unified GeoDataFrame (vector) from the data catalog.
@@ -578,6 +579,10 @@ class DataCatalog(object):
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+        predicate : {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'}, optional
+            If predicate is provided, the GeoDataFrame is filtered by testing
+            the predicate function against each item. Requires bbox or mask.
+            By default 'intersects'
         align : float, optional
             Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
@@ -605,6 +610,7 @@ class DataCatalog(object):
             bbox=bbox,
             geom=geom,
             buffer=buffer,
+            predicate=predicate,
             variables=variables,
             logger=self.logger,
         )
