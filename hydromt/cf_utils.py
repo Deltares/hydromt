@@ -501,6 +501,8 @@ class FewsUtils(object):
 
         # update T0
         T0_format = "%d-%m-%Y"
+        if type(T0) == str:
+            T0 = pd.to_datetime(T0)
         globalproperty_T0 = datetime.strptime(
             globalproperty.get("T0", datetime.strftime(datetime.today(), T0_format)),
             T0_format,
