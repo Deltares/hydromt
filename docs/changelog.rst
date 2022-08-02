@@ -14,7 +14,7 @@ Added
 - Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
 - Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
 - New ``DataCatalog.from_predefined_catalogs`` and ``DataCatalog.from_archive`` to support predefined data catalogs and archive 
-  in a generic way throught the data/predefined_catalogs.yml file.
+  in a generic way through the data/predefined_catalogs.yml file.
 
 Changed
 ^^^^^^^

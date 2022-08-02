@@ -25,20 +25,33 @@ From CLI
 
 When using the HydroMT command line interface (CLI), one can provide a data catalog by specifying the
 path to the yaml file with the ``-d (--data)`` option. 
-Multiple yaml files can be added by reusing the ``-d`` option.
+Multiple yaml files can be added by reusing the ``-d`` option. If the yaml files have data sources with 
+the same name, the source from the last catalog in the list is used.
 
 For example when using the :ref:`build <cli_build>` CLI method:
 
 .. code-block:: console
 
-    hydromt build MODEL REGION -d /path/to/data_catalog1.yaml -d /path/to/data_catalog1.yaml
+    hydromt build MODEL REGION -d /path/to/data_catalog1.yaml -d /path/to/data_catalog2.yaml
 
 A special exception is made for the Deltares data catalog which can be accessed with the 
 ``--dd (--deltares-data)`` flag (requires access to the Deltares P-drive).
 
 .. code-block:: console
 
-    hydromt build MODEL REGION -dd
+    hydromt build MODEL REGION --dd
+
+Alternatively, you can also use names and versions of the :ref:`predefined data catalogs <existing_catalog>`.
+If no version is specified, the latest version available is used.
+
+.. code-block:: console
+
+    hydromt build MODEL REGION -d deltares_data=v2022.5 -d artifact_data
+
+.. NOTE::
+
+    When using several data catalogs, the order in which they are listed is important! If several catalogs contain
+    data sources with the same names, the sources from the last catalog in the list are used.
 
 
 .. _get_data_python: 

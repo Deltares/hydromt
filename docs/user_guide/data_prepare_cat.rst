@@ -56,12 +56,15 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
         paper_doi: doi
         category: category
 
-The yaml file has a **global meta-data section**:
+The yaml file has a global **meta** data section:
 
 - **version** (recommended): data catalog version; we recommend `calendar versioning <https://calver.org/>`
 - **root** (optional): root folder for all the data sources in the yaml file. 
-  If not provided the folder of where the yaml fil is located will be used as root.
+  If not provided the folder of where the yaml file is located will be used as root.
   This is used in combination with each data source **path** argument to avoid repetition.
+- **category** (optional): used if all data source in catalog belong to the same category. Usual categories within HydroMT are 
+  *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data* 
+  but the user is free to define its own categories.
 
 A full list of **data source options** is given below
 
