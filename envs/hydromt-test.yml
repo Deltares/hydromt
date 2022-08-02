@@ -28,6 +28,7 @@ dependencies:
   - pytest-benchmark # tests
   - requests
   - rasterio
+  - rioxarray
   - scipy
   - xarray
   - zarr

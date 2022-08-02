@@ -11,7 +11,7 @@ Preparing a Data Catalog
    the HydroMT :ref:`data conventions <data_convention>`, see examples below.
 
 A detailed description of the yaml file is given below.
-For more information see :py:meth:`~hydromt.data_adapter.DataCatalog.from_yml`
+For more information see :py:meth:`~hydromt.data_catalog.DataCatalog.from_yml`
 and examples per :ref:`data type <data_types>`
 
 .. _data_yaml:

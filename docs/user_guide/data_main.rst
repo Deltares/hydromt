@@ -14,7 +14,7 @@ You can :ref:`explore and make use of pre-defined data catalogs <existing_catalo
 
 .. TIP::
 
-    If no yaml file is provided to the CLI build or update methods or to :py:class:`~hydromt.data_adapter.DataCatalog`, 
+    If no yaml file is provided to the CLI build or update methods or to :py:class:`~hydromt.data_catalog.DataCatalog`, 
     HydroMT will use the data stored in the `hydromt-artifacts <https://github.com/DirkEilander/hydromt-artifacts>`_ 
     which contains an extract of global data for a small region around the Piave river in Northern Italy.
 
@@ -48,7 +48,7 @@ From Python
 
 To read a dataset in Python using the HydroMT requires two steps:
 
-1) Initialize a :py:class:`~hydromt.data_adapter.DataCatalog` with references to user- or pre-defined data catalog yaml files
+1) Initialize a :py:class:`~hydromt.data_catalog.DataCatalog` with references to user- or pre-defined data catalog yaml files
 2) Use :ref:`one of the DataCatalog.get_* methods <api_data_catalog_get>` to access (a temporal or spatial region of) the data.
 
 For example to retrieve a raster dataset use :py:func:`~hydromt.DataCatalog.get_rasterdataset`:

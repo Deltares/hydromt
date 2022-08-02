@@ -17,7 +17,7 @@ import warnings
 from pyproj import CRS
 from typing import Tuple, Union, Optional
 
-from ..data_adapter import DataCatalog
+from ..data_catalog import DataCatalog
 from .. import config, log, workflows
 
 __all__ = ["Model"]

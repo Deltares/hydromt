@@ -36,8 +36,11 @@ dependencies:
   - pytest-benchmark # tests
   - python>=3.7
   - rasterio
+  - rioxarray
+  - responses # tests
   - requests
   - scipy
+  - testpath  # tests
   - toml
   - sphinx # docs
   - xarray

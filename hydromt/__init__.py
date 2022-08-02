@@ -30,7 +30,7 @@ from . import cli, workflows, stats, flw, raster, vector
 # high-level methods
 from .models import *
 from .io import *
-from .data_adapter import *
+from .data_catalog import *
 
 # TODO remove after fixed in all plugins
 def __getattr__(name):
