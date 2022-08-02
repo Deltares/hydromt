@@ -1,4 +1,3 @@
-============
 hydromt-data
 ============
 
@@ -11,14 +10,14 @@ The data is only stored on the deltares server: p:/wflow_global/hydromt
 
 
 preferred data formats to dowonload
-===================================
+-----------------------------------
 vector data: geopackage or geobuf (because they condtain a spatial index and are therefore much faster)
 raster data (2D): cloud optimized geotiff
 raster data (3D): zarr
 
 
 data storage (p:/wflow_global/hydromt)
-======================================
+--------------------------------------
 
 data used by the geoserver:
 DO NOT CHAGE WITHOUT CONSULTATION
@@ -58,7 +57,7 @@ folder structure:
 	...
        
 deltares_data_.yml
-==================
+------------------
 - options: https://deltares.github.io/hydromt/latest/user_guide/data_prepare_cat.html
 - data conventions: https://deltares.github.io/hydromt/latest/user_guide/data_conventions.html
 
@@ -122,7 +121,7 @@ source_version:
 unit:
 	
 Register a new .yml version 
-===========================
+---------------------------
 
 - create new branch on github
 - make changes 
