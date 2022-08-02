@@ -76,10 +76,13 @@ data versioning:
 - e.g. eobs_v22.0e
 
 structure per data set: 
-- on top of the file put root: [root_path] (e.g. p:/wflow_global/hydromt)
 - use placeholders where possible 
 - order the data sets alphabetically
 - order the components of each data set alphbetically as follows: 
+
+meta: 
+  root: [root_path] (e.g. p:/wflow_global/hydromt)
+  version: [year.month] (e.g. 2022.7)
 
 [data_name]: 
   alias: [alias]

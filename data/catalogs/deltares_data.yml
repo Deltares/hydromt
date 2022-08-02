@@ -1,5 +1,7 @@
-root: p:/wflow_global/hydromt
-    
+meta:
+  root: p:/wflow_global/hydromt
+  version: 2022.7
+
 basin_atlas_level12_v10: 
   crs: 4326
   data_type: GeoDataFrame
@@ -1467,7 +1469,7 @@ SM2RAIN_ASCAT_monthly_025_v1.4:
       time: 84
   meta:
     category: meteo
-    notes: crs guessed as it is neither mentioned in the data not in the literature, 0.25-degree resolution
+    notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.25-degree resolution
     paper_doi: 10.5194/essd-11-1583-2019
     paper_ref: Brocca et al. (2019) 
     source_license: https://creativecommons.org/licenses/by/4.0/legalcode
@@ -1487,7 +1489,7 @@ SM2RAIN_ASCAT_monthly_05_v1.4:
       time: 84
   meta:
     category: meteo
-    notes: crs guessed as it is neither mentioned in the data not in the literature, 0.5-degree resolution
+    notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.5-degree resolution
     paper_doi: 10.5194/essd-11-1583-2019
     paper_ref: Brocca et al. (2019) 
     source_license: https://creativecommons.org/licenses/by/4.0/legalcode
