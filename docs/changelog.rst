@@ -10,21 +10,28 @@ Unreleased
 
 Added
 ^^^^^
+- New raster method for adding gdal_compliant() attributes to xarray object.
 - Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
 - Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
 
 Changed
 ^^^^^^^
+- splitted data_adapter.py into a  data_catalog and data_adapter submodule with py scripts per adapter
+- Add rioxarray dependency to read raster data
 - In build or update methods, the setup_config component is not forced to run first anymore but according to order of the components in the ini config (opt dict).
 - In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, variables can now also be a str as well as a list of strings.
 - In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, automatic renaming of single variable datasets based on the variables argument will be deprecated
 - Interpolate missing values based on D4 neighbors of missing value cells only. This largely improves the performance without loosing accuracy.
   Changes have been observed when `nearest` method is used but this should not impact quality of the interpolation.
+- New source_names argument to DataCatalog.to_yml
 
 Fixed
 ^^^^^
+- Fixed DataAdapter.resolve_paths with unknown keys #121
 - Fixed the WGS84 datum in the gis_utils.utm_crs method.
 - In merge.merge the grid is now aligned with input dataset with the largest overlap if no dst_bounds & dst_res are given.
+- Fixed the predicate not being passed in get_geodataframe method.
+- Removed deprecated xr.ufuncs calls.
 
 Deprecated
 ^^^^^^^^^^
@@ -79,10 +86,10 @@ Added
 Changed
 ^^^^^^^
 - bumped hydromt-artifacts version to v0.0.6
-- In model API build and update functions, if any write_* are called in the ini file (opt), 
-  the final self.write() call is skipped. This enables passing custom arguments to the write_ 
-  functions without double writing files or customizing the order in which write_ functions 
-  are called. If any write_ function is called we assume the user manages the writing and
+- In model API build and update functions, if any write* are called in the ini file (opt), 
+  the final self.write() call is skipped. This enables passing custom arguments to the write* 
+  functions without double writing files or customizing the order in which write* functions 
+  are called. If any write* function is called we assume the user manages the writing and
   a the global write method is skipped.
 - default GTiff lwz compression with DataCatalog.export_data method
 - rename DataAdapter.export_data to DataAdapter.to_file to avoid confusion with DataCatalog.export_data method

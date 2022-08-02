@@ -5,6 +5,7 @@ from abc import ABCMeta, abstractmethod
 import enum
 import os
 from os.path import join, isdir, isfile, abspath, dirname, basename
+from typing import List
 import xarray as xr
 import numpy as np
 import geopandas as gpd
@@ -13,7 +14,7 @@ import logging
 from pathlib import Path
 import inspect
 
-from ..data_adapter import DataCatalog
+from ..data_catalog import DataCatalog
 from .. import config, log, workflows
 
 __all__ = ["Model"]
@@ -37,20 +38,33 @@ class Model(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        root=None,
-        mode="w",
-        config_fn=None,
-        data_libs=None,
+        root: str = None,
+        mode: str = "w",
+        config_fn: str = None,
+        data_libs: List[str] = None,
         logger=logger,
         **artifact_keys,
     ):
+        """Initialize a model
+
+        Parameters
+        ----------
+        root : str, optional
+            Model root, by default None
+        mode : {'r','r+','w'}, optional
+            read/append/write mode, by default "w"
+        config_fn : str, optional
+            Model simulation configuration file, by default None.
+            Note that this is not the HydroMT model setup configuration file!
+        data_libs : List[str], optional
+            List of data catalog yaml files, by default None
+        """
         from . import ENTRYPOINTS  # load within method to avoid circular imports
 
         self.logger = logger
         ep = ENTRYPOINTS.get(self._NAME, None)
         version = ep.distro.version if ep is not None else ""
         dist = ep.distro.name if ep is not None else "unknown"
-        self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
 
         # link to data
         self.data_catalog = DataCatalog(
@@ -67,7 +81,8 @@ class Model(object, metaclass=ABCMeta):
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
-        self.set_root(root, mode)
+        self.set_root(root, mode)  # also creates hydromt.log file
+        self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
 
     def _check_get_opt(self, opt):
         """Check all opt keys and raise sensible error messages if unknown."""
@@ -83,26 +98,41 @@ class Model(object, metaclass=ABCMeta):
         return opt
 
     def _run_log_method(self, method, *args, **kwargs):
-        """Log method paramters before running a method"""
+        """Log method parameters before running a method"""
         method = method.strip("0123456789")
         func = getattr(self, method)
         signature = inspect.signature(func)
+        # combine user and default options
+        params = {}
         for i, (k, v) in enumerate(signature.parameters.items()):
-            v = kwargs.get(k, v.default)
-            if v is inspect.Parameter.empty:
-                if len(args) >= i + 1:
-                    v = args[i]
+            if k in ["args", "kwargs"]:
+                if k == "args":
+                    params[k] = args[i:]
                 else:
-                    continue
-            self.logger.info(f"{method}.{k}: {v}")
+                    params.update(**kwargs)
+            else:
+                v = kwargs.get(k, v.default)
+                if len(args) > i:
+                    v = args[i]
+                params[k] = v
+        # log options
+        for (k, v) in params.items():
+            if v is inspect._empty:
+                self.logger.error(f"missing required argument {k} for {method}")
+            else:
+                self.logger.info(f"{method}.{k}: {v}")
         return func(*args, **kwargs)
 
     def build(
         self, region: dict, res: float = None, write: bool = True, opt: dict = {}
     ):
         """Single method to build a model from scratch based on settings in `opt`.
-        Methods will be run one by one based on the order of appearance in `opt` (ini file)..
-        All model methods are supported incuding setup_*, read_* and write_*
+
+        Methods will be run one by one based on the order of appearance in `opt` (.ini configuration file).
+        All model methods are supported including setup_*, read_* and write_* methods.
+
+        If a write_* option is listed in `opt` (ini file) the full writing of the model at the end
+        of the update process is skipped.
 
         Parameters
         ----------
@@ -112,22 +142,24 @@ class Model(object, metaclass=ABCMeta):
         res: float, optional
             Model resolution. Use only if applicable to your model. By default None.
         write: bool, optional
-            Write the complete model schematization after setting up all model components.
-            By default True.
+            Write the complete model after executing all methods in opt, by default True.
         opt: dict, optional
-            Model build configuration. This is a nested dictionary where the first-level
-            keys are the names of model specific setup methods and the second-level
-            keys the arguments of the method:
+            Model build configuration. The configuration can be parsed from a
+            .ini file using :py:meth:`~hydromt.config.configread`.
+            This is a nested dictionary where the first-level keys are the names of model
+            specific (setup) methods and the second-level contain argument-value pairs of the method.
 
-            ```{
-                <name of method1>: {
-                    <argument1>: <value1>, <argument2>: <value2>
-                    }
-                <name of method2>: {
-                    ...
+            .. code-block:: text
+
+                {
+                    <name of method1>: {
+                        <argument1>: <value1>, <argument2>: <value2>
+                    },
+                    <name of method2>: {
+                        ...
                     }
                 }
-            }```
+
         """
         opt = self._check_get_opt(opt)
 
@@ -160,8 +192,10 @@ class Model(object, metaclass=ABCMeta):
 
     def update(self, model_out=None, write=True, opt=None):
         """Single method to update a model based the settings in `opt`.
-        Methods will be run one by one based on the order of appearance in `opt` (ini file).
-        All model methods are supported incuding setup_*, read_* and write_*
+
+        Methods will be run one by one based on the order of appearance in `opt` (ini configuration file).
+
+        All model methods are supported including setup_*, read_* and write_* methods.
         If a write_* option is listed in `opt` (ini file) the full writing of the model at the end
         of the update process is skipped.
 
@@ -174,18 +208,21 @@ class Model(object, metaclass=ABCMeta):
         write: bool, optional
             Write the updated model schematization to disk. By default True.
         opt: dict, optional
-            Model update configuration. This is a nested dictionary where the first-level
-            keys are the names of model specific setup methods and the second-level
-            keys the arguments of the method:
+            Model build configuration. The configuration can be parsed from a
+            .ini file using :py:meth:`~hydromt.config.configread`.
+            This is a nested dictionary where the first-level keys are the names of model
+            specific (setup) methods and the second-level contain argument-value pairs of the method.
 
-            ```{
-                <name of method1>: {
-                    <argument1>: <value1>, <argument2>: <value2>
+            .. code-block:: text
+
+                {
+                    <name of method1>: {
+                        <argument1>: <value1>, <argument2>: <value2>
+                    },
+                    <name of method2>: {
+                        ...
                     }
-                <name of method2>: {
-                    ...
-                    }
-            }```
+                }
         """
         opt = self._check_get_opt(opt)
 
@@ -311,16 +348,17 @@ class Model(object, metaclass=ABCMeta):
         return self._root
 
     def set_root(self, root, mode="w"):
-        """Initialized the model root.
-        In read mode it checks if the root exists.
-        In write mode in creates the required model folder structure
+        """Initialize the model root.
+
+        In read/append mode a check is done if the root exists.
+        In write mode the required model folder structure is created.
 
         Parameters
         ----------
         root : str, optional
             path to model root
         mode : {"r", "r+", "w"}, optional
-            read/write-only mode for model files
+            read/append/write mode for model files
         """
         if mode not in ["r", "r+", "w"]:
             raise ValueError(f'mode "{mode}" unknown, select from "r", "r+" or "w"')
@@ -347,13 +385,22 @@ class Model(object, metaclass=ABCMeta):
             if self._read and isfile(data_fn):
                 # read data and mark as used
                 self.data_catalog.from_yml(data_fn, mark_used=True)
-            # change output localtion of any logging file handlers
+            # remove old logging file handler and add new filehandler in root if it does not exist
+            has_log_file = False
+            log_level = 20  # default, but overwritten by the level of active loggers
             for i, h in enumerate(self.logger.handlers):
-                if hasattr(h, "baseFilename") and dirname(h.baseFilename) != self._root:
-                    self.logger.handlers.pop(i).close()  # remove handler and close file
-                    new_path = join(self._root, basename(h.baseFilename))
-                    log.add_filehandler(self.logger, new_path, h.level)
+                log_level = h.level
+                if hasattr(h, "baseFilename"):
+                    if dirname(h.baseFilename) != self._root:
+                        self.logger.handlers.pop(
+                            i
+                        ).close()  # remove handler and close file
+                    else:
+                        has_log_file = True
                     break
+            if not has_log_file:
+                new_path = join(self._root, "hydromt.log")
+                log.add_filehandler(self.logger, new_path, log_level)
 
     ## I/O
 
@@ -853,7 +900,7 @@ class Model(object, metaclass=ABCMeta):
             region = self.staticgeoms["region"]
         elif len(self.staticmaps) > 0:
             crs = self.crs
-            if crs is None and crs.to_epsg() is not None:
+            if crs is not None and crs.to_epsg() is not None:
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region

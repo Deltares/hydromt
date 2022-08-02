@@ -1,4 +1,4 @@
-"""HydroMT: Build and analyze models like a data-wizard!"""
+"""HydroMT: Automated and reproducible model building and analysis"""
 
 # version number without 'v' at start
 __version__ = "0.4.6.dev"
@@ -30,7 +30,7 @@ from . import cli, workflows, stats, flw, raster, vector
 # high-level methods
 from .models import *
 from .io import *
-from .data_adapter import *
+from .data_catalog import *
 
 # TODO remove after fixed in all plugins
 def __getattr__(name):

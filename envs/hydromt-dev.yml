@@ -28,6 +28,7 @@ dependencies:
   - pandas
   - pcraster # TODO make optional
   - pip
+  - pydata-sphinx-theme
   - pyflwdir>=0.5.3
   - pygeos>=0.8
   - pytest # tests
@@ -35,14 +36,17 @@ dependencies:
   - pytest-benchmark # tests
   - python>=3.7
   - rasterio
+  - rioxarray
+  - responses # tests
   - requests
   - scipy
+  - testpath  # tests
   - toml
   - sphinx # docs
-  - sphinx_rtd_theme # docs
   - xarray
   - zarr
   - pip:
     - hydroengine
-    - sphinx_autosummary_accessors
+    - sphinx_design  # docs
+    - sphinx_autosummary_accessors  # docs
 
