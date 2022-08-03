@@ -144,16 +144,18 @@ class DataAdapter(object, metaclass=ABCMeta):
                 path = path + key_str
                 keys.append(key)
         # resolve dates: month & year keys
-        dates, vrs = [None], [None]
+        dates, vrs, postfix = [None], [None], ""
         if time_tuple is not None:
             dt = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
             trange = pd.to_datetime(list(time_tuple)) - dt
-            freq = "m" if "month" in keys else "a"
+            freq, strf = ("m", "%Y-%m") if "month" in keys else ("a", "%Y")
             dates = pd.period_range(*trange, freq=freq)
+            postfix += "; date range: " + " - ".join([t.strftime(strf) for t in trange])
         # resolve variables
         if variables is not None:
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
+            postfix += f"; variables: {variables}"
         # get filenames with glob for all date / variable combinations
         # FIXME: glob won't work with other than local file systems; use fsspec instead
         for date, var in product(dates, vrs):
@@ -164,7 +166,7 @@ class DataAdapter(object, metaclass=ABCMeta):
                 fmt.update(variable=var)
             fns.extend(glob.glob(path.format(**fmt)))
         if len(fns) == 0:
-            raise FileNotFoundError(f"No such file found: {self.path}")
+            raise FileNotFoundError(f"No such file found: {path}{postfix}")
         return list(set(fns))  # return unique paths
 
     @abstractmethod

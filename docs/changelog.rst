@@ -13,6 +13,7 @@ Added
 - New raster method for adding gdal_compliant() attributes to xarray object.
 - Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
 - Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
+- Optional formatting for year and month variables in path of data sources.
 
 Changed
 ^^^^^^^
