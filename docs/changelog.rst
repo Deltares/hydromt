@@ -15,6 +15,7 @@ Added
 - Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
 - New ``DataCatalog.from_predefined_catalogs`` and ``DataCatalog.from_archive`` to support predefined data catalogs and archive 
   in a generic way through the data/predefined_catalogs.yml file.
+- Optional formatting for year and month variables in path of data sources.
 
 Changed
 ^^^^^^^
