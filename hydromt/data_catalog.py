@@ -78,7 +78,7 @@ class DataCatalog(object):
 
         # parse data catalogs; both user and pre-defined
         for name_or_path in data_libs:
-            if name_or_path.endswith(".yml"):  # user defined path
+            if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
                 self.from_yml(name_or_path)
             else:  # predefined
                 self.from_predefined_catalogs(name_or_path)
