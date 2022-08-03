@@ -987,9 +987,17 @@ class XRasterBase(XGeoBase):
         """
         gdf1 = gdf.copy()
         gdf1["mask"] = np.full(gdf.index.size, (not invert), dtype=np.uint8)
-        return self.rasterize(
-            gdf1, col_name="mask", all_touched=all_touched, nodata=invert, **kwargs
-        ).astype(bool)
+        da_out = self.rasterize(
+            gdf1,
+            col_name="mask",
+            all_touched=all_touched,
+            nodata=np.uint8(invert),
+            **kwargs,
+        )
+        da_out.attrs.pop(
+            "_FillValue", None
+        )  # remove nodata value before converting to boolean
+        return da_out.astype(bool)
 
     def vector_grid(self):
         """Return a geopandas GeoDataFrame with a box for each grid cell."""
@@ -1236,7 +1244,8 @@ class RasterDataArray(XRasterBase):
         nodata = self._obj.rio.nodata
         if nodata is None:
             nodata = self._obj.rio.encoded_nodata
-            self.set_nodata(nodata)
+            if nodata is not None:
+                self.set_nodata(nodata)
         return nodata
 
     def set_nodata(self, nodata=None, logger=logger):
