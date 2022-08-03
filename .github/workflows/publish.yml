@@ -68,8 +68,14 @@ jobs:
           environment-file: envs/hydromt-min.yml
           activate-environment: hydromt-min
 
+      - name: Conda info
+        run: |
+          conda info
+          conda list
+
       - name: Verify the built dist/wheel is valid
         run: |
+          conda activate hydromt-min
           python -m pip install dist/hydromt*.whl
           python -c 'from hydromt import __version__ as v; print(v)'
           hydromt --models
