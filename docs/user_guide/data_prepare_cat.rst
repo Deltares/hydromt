@@ -60,7 +60,11 @@ A full list of **data source options** is given below
   Relative paths are combined with the global ``root`` option of the yaml file (if available) or the directory of the yaml file itself. 
   To read multiple files in a single dataset (if supported by the driver) a string glob in the form of ``"path/to/my/files/*.nc"`` can be used.
   The filenames can be further specified with ``{variable}``, ``{year}`` and ``{month}`` keys to limit which files are being read 
-  based on the get_data request in the form of ``"path/to/my/files/{variable}_{year}_{month:02d}.nc"``
+  based on the get_data request in the form of ``"path/to/my/files/{variable}_{year}_{month}.nc"``. 
+  Note that ``month`` is by default *not* zero-padded (e.g. January 2012 is stored as ``"path/to/my/files/{variable}_2012_1.nc"``). 
+  Users can optionally add a formatting string to define how the key should be read. 
+  For example, in a path written as ``"path/to/my/files/{variable}_{year}_{month:02d}.nc"``, 
+  the month always has two digits and is zero-padded for Jan-Sep (e.g. January 2012 is stored as ``"path/to/my/files/{variable}_2012_01.nc"``).
 - **data_type** (required): type of input data. Either *RasterDataset*, *GeoDataset* or *GeoDataFrame*.
 - **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. 
 - **driver** (required): data_type specific driver to read a dataset, see overview below.

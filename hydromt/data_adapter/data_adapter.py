@@ -121,34 +121,51 @@ class DataAdapter(object, metaclass=ABCMeta):
         List:
             list of filenames matching the path pattern given date range and variables
         """
-        yr, mth = "*", "*"
-        vrs = ["*"]
-        dates = [""]
-        fns = []
-        path = str(self.path)
         known_keys = ["year", "month", "variable"]
-        keys = [i[1] for i in Formatter().parse(path) if i[1] is not None]
-        # double unknown keys to escape these when formatting
-        for key in [key for key in keys if key not in known_keys]:
-            path = path.replace("{" + key + "}", "{{" + key + "}}")
+        fns = []
+        keys = []
+        # rebuild path based on arguments and escape unknown keys
+        path = ""
+        for literal_text, key, fmt, _ in Formatter().parse(self.path):
+            path += literal_text
+            if key is None:
+                continue
+            key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
+            # remove unused fields
+            if key in ["year", "month"] and time_tuple is None:
+                path += "*"
+            elif key == "variable" and variables is None:
+                path += "*"
+            # escape unknown fields
+            elif key is not None and key not in known_keys:
+                path = path + "{" + key_str + "}"
+            else:
+                path = path + key_str
+                keys.append(key)
         # resolve dates: month & year keys
-        if time_tuple is not None and "year" in keys:
+        dates, vrs, postfix = [None], [None], ""
+        if time_tuple is not None:
             dt = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
             trange = pd.to_datetime(list(time_tuple)) - dt
-            freq = "m" if "month" in keys else "a"
+            freq, strf = ("m", "%Y-%m") if "month" in keys else ("a", "%Y")
             dates = pd.period_range(*trange, freq=freq)
+            postfix += "; date range: " + " - ".join([t.strftime(strf) for t in trange])
         # resolve variables
-        if variables is not None and "variable" in keys:
+        if variables is not None:
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
+            postfix += f"; variables: {variables}"
+        # get filenames with glob for all date / variable combinations
+        # FIXME: glob won't work with other than local file systems; use fsspec instead
         for date, var in product(dates, vrs):
-            if hasattr(date, "month"):
-                yr, mth = date.year, date.month
-            path1 = path.format(year=yr, month=mth, variable=var)
-            # FIXME: glob won't work with other than local file systems; use fsspec instead
-            fns.extend(glob.glob(path1))
+            fmt = {}
+            if date is not None:
+                fmt.update(year=date.year, month=date.month)
+            if var is not None:
+                fmt.update(variable=var)
+            fns.extend(glob.glob(path.format(**fmt)))
         if len(fns) == 0:
-            raise FileNotFoundError(f"No such file found: {self.path}")
+            raise FileNotFoundError(f"No such file found: {path}{postfix}")
         return list(set(fns))  # return unique paths
 
     @abstractmethod
