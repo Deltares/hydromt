@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
-from attr import field
 import numpy as np
 import pandas as pd
 import yaml
