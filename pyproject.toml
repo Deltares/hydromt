@@ -13,16 +13,16 @@ dependencies = [
     "bottleneck",
     "click",
     "dask",
-    "geopandas>=0.10",
     "entrypoints",
+    "geopandas>=0.10",
     "gdal>=3.1",
     "numba",
     "numpy",
     "netcdf4",
+    "openpyxl",
     "pandas",
     "pyflwdir>=0.5.4",
     "pygeos",
-    "openpyxl",
     "rasterio",
     "requests",
     "rioxarray",
@@ -45,11 +45,10 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 test = [
-	"testpath",
-	"responses",
+    "black",
 	"pytest>=2.7.3",
 	"pytest-cov",
-    "black",
+	"responses",
 ]
 doc = [
 	"nbsphinx",
