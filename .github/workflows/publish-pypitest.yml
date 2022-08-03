@@ -23,14 +23,14 @@ jobs:
           mamba-version: "*"
           channels: conda-forge,defaults
           channel-priority: true
-          environment-file: envs/hydromt-dev.yml
-          activate-environment: hydromt-dev
+          environment-file: envs/hydromt-min.yml
+          activate-environment: hydromt-min
 
       - name: Install hydromt
         run: pip install .
 
       - name: Get hydromt version
-        run: echo "PYTHON_VERSION=$(python -c 'from hydromt import __version__ as v; print(f'v{v}')" >> $GITHUB_ENV
+        run: echo "PYTHON_VERSION=$(python -c 'from hydromt import __version__ as v; print(f"v{v}")')" >> $GITHUB_ENV
       
       - name: Get git tag version
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
