@@ -38,7 +38,7 @@ jobs:
         run: |
           python -m twine check dist/*
           pwd
-          
+
       - uses: actions/upload-artifact@v3
         with:
           name: releases
@@ -68,14 +68,13 @@ jobs:
           activate-environment: hydromt-min
 
       - name: Verify the built dist/wheel is valid
-        # if: github.event_name == 'push'
         run: |
           python -m pip install dist/hydromt*.whl
           python -c 'from hydromt import __version__ as v; print(v)'
           hydromt --models
 
       - name: Publish package to TestPyPI
-        # if: github.event_name == 'push'
+        if: github.event_name == 'push'
         uses: pypa/gh-action-pypi-publish@v1.5.1
         with:
           user: __token__
