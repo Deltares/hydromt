@@ -380,7 +380,7 @@ class Model(object, metaclass=ABCMeta):
             # check directory
             elif not isdir(self._root):
                 raise IOError(f'model root not found at "{self._root}"')
-            # read hydromt_data yml file and add to data catalog
+            # read hydromt_data yaml file and add to data catalog
             data_fn = join(self._root, "hydromt_data.yml")
             if self._read and isfile(data_fn):
                 # read data and mark as used
@@ -428,8 +428,8 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         root: str, Path, optional
-            Global root for all relative paths in yml file.
-            If "auto" the data source paths are relative to the yml output ``path``.
+            Global root for all relative paths in yaml file.
+            If "auto" the data source paths are relative to the yaml output ``path``.
         used_only: bool
             If True, export only data entries kept in used_data list.
         """

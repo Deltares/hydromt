@@ -30,8 +30,11 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
 
 .. code-block:: yaml
 
+    meta:
+      version: version
+      root: /path/to/data_root/
     my_dataset:
-      path: /path/to/my_dataset.extension
+      path: /absolut_path/to/my_dataset.extension OR relative_path/to_my_dataset.extension
       data_type: RasterDataset/GeoDataset/GeoDataFrame
       driver: raster/raster_tindex/netcdf/zarr/vector/vector_table
       crs: EPSG/WKT
@@ -53,6 +56,15 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
         paper_doi: doi
         category: category
 
+The yaml file has a global **meta** data section:
+
+- **version** (recommended): data catalog version; we recommend `calendar versioning <https://calver.org/>`
+- **root** (optional): root folder for all the data sources in the yaml file. 
+  If not provided the folder of where the yaml file is located will be used as root.
+  This is used in combination with each data source **path** argument to avoid repetition.
+- **category** (optional): used if all data source in catalog belong to the same category. Usual categories within HydroMT are 
+  *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data* 
+  but the user is free to define its own categories.
 
 A full list of **data source options** is given below
 
@@ -84,12 +96,6 @@ A full list of **data source options** is given below
   Usual categories within HydroMT are *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data* 
   but the user is free to define its own categories. 
 
-Apart from the data entries, the yaml file also has **global options**:
-
-- **root** (optional): root folder for all the data sources in the yaml file. 
-  If not provided the folder of where the yaml fil is located will be used as root.
-  This is used in combination with each data source **path** argument to avoid repetition.
-
 
 Placeholder and alias
 ---------------------
@@ -103,6 +109,10 @@ There are two convenience options to limit repetition between data sources in da
   The alias source should also be provided in the same file. Note that this only works at the first level of arguments, if e.g. the rename option is used in 
   the current data source it overwrites all rename entries of the alias data source. In the example below *ghs_pop* is short for a specific version (epoch=2015; epsg=54009)
   of that dataset. 
+
+.. note::
+
+    Alias is deprecated and will be removed soon, see `github issue for more information <https://github.com/Deltares/hydromt/issues/148>`_
 
 .. code-block:: yaml
 

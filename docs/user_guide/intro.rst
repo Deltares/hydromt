@@ -14,7 +14,7 @@ HydroMT is organized in the following way:
 
   HydroMT is data-agnostic through the *Data Adapter* that reads a wide range of data formats 
   and unifies the input data, see :ref:`Working with data in HydroMT <get_data>`. 
-  Datasets are listed and passed to HydroMT in a user defined data catalog :ref:`.yaml file <data_yaml>`.
+  Datasets are listed and passed to HydroMT in a user defined data catalog :ref:`yaml file <data_yaml>`.
   HydroMT also provides several :ref:`pre-defined data catalogs <existing_catalog>` with mostly global datasets 
   that can be used as is, but note that not all data is openly accessible. 
 
@@ -64,10 +64,10 @@ Term                            Explanation
 Command Line Interface (CLI)    high-level interface to HydroMT *build*, *update* and *clip* methods.
 Configuration (HydroMT)         (.ini) file describing the complete pipeline with all methods and their arguments to 
                                 *build* or *update* a model.
-Data catalog                    A set of data sources available for HydroMT. It is build up from *yml* files containing 
+Data catalog                    A set of data sources available for HydroMT. It is build up from *yaml* files containing 
                                 one or more data sources with information about how to read and optionally preprocess 
                                 the data and meta-data about the data source.
-Data source                     Input data. To be processed by HydroMT, data sources are listed in yml files.
+Data source                     Input data. To be processed by HydroMT, data sources are listed in yaml files.
 Model                           A set of files describing the schematization, forcing, states, simulation configuration 
                                 and results for any supported model kernel.
 Model attributes                Direct properties of a model, such as the model root. They can be called when using 

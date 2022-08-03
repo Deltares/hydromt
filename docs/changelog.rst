@@ -13,6 +13,8 @@ Added
 - New raster method for adding gdal_compliant() attributes to xarray object.
 - Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
 - Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
+- New ``DataCatalog.from_predefined_catalogs`` and ``DataCatalog.from_archive`` to support predefined data catalogs and archive 
+  in a generic way through the data/predefined_catalogs.yml file.
 - Optional formatting for year and month variables in path of data sources.
 
 Changed
@@ -37,6 +39,7 @@ Fixed
 Deprecated
 ^^^^^^^^^^
 - Automatic renaming of single var dataset if variables is provided in get_rasterdataset. Data catalog should be used instead.
+- ``DataCatalog.from_artifacts``. Use ``DataCatalog.from_predefined_catalogs`` instead.
 
 v0.4.5 (16 February 2022)
 -------------------------
