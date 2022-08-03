@@ -53,22 +53,26 @@ class DataCatalog(object):
             By default the data catalog is initiated without data entries.
             See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yml format.
         artifact_keys:
-            Deprecated
+            Deprecated from version v0.5
         """
         if data_libs is None:  # legacy code. to be removed
             data_libs = []
-        elif isinstance(data_libs, str):
-            data_libs = [data_libs]
+        elif not isinstance(data_libs, list):  # make sure data_libs is a list
+            data_libs = np.atleast_1d(data_libs).tolist()
         self._sources = {}  # dictionary of DataAdapter
         self._catalogs = {}  # dictionary of predefined Catalogs
         self._used_data = []
         self.logger = logger
 
         # legacy code. to be removed
-        for name, version in artifact_keys.items():
-            # TODO throw deprecation warning
-            lib = name
-            if isinstance(version, str):
+        for lib, version in artifact_keys.items():
+            warnings.warn(
+                f"{lib}={version} as key-word argument is deprecated, add the predefined data catalog as string to the data_libs argument instead",
+                DeprecationWarning,
+            )
+            if not version:  # False or None
+                continue
+            elif isinstance(version, str):
                 lib += f"={version}"
             data_libs = [lib] + data_libs
 
@@ -131,7 +135,9 @@ class DataCatalog(object):
         self._catalogs = _yml_from_uri_or_path(urlpath)
         return self._catalogs
 
-    def from_artifacts(name: str = "artifact_data", version: str = None) -> None:
+    def from_artifacts(
+        self, name: str = "artifact_data", version: str = "latest"
+    ) -> None:
         """Deprecated method. Use :py:func:`hydromt.data_catalog.DataCatalog.from_predefined_catalogs` instead
 
         Parameters
@@ -156,7 +162,7 @@ class DataCatalog(object):
             )
         urlpath = self.predefined_catalogs[name].get("urlpath")
         versions_dict = self.predefined_catalogs[name].get("versions")
-        if version == "latest":
+        if version == "latest" or not isinstance(version, str):
             versions = list(versions_dict.keys())
             if len(versions) > 1:
                 version = versions[np.argmax([Version(v) for v in versions])]
@@ -250,6 +256,7 @@ class DataCatalog(object):
                 <placeholder_name_1>: <list of names>
                 <placeholder_name_2>: <list of names>
         """
+        self.logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
         # parse metadata
         meta = dict()
@@ -263,7 +270,6 @@ class DataCatalog(object):
         # TODO keep meta data!! Note only possible if yml files are not merged
         if root is None:
             root = meta.get("root", dirname(urlpath))
-        self.logger.info(f"Parsing data catalog from {urlpath}")
         self.from_dict(
             yml, root=root, category=meta.get("category", None), mark_used=mark_used
         )

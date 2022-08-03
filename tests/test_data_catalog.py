@@ -81,10 +81,10 @@ def test_data_catalog_io(tmpdir):
 
 
 def test_data_catalog(tmpdir):
-    data_catalog = DataCatalog()
+    data_catalog = DataCatalog(data_libs=None)  # NOTE: legacy code!
     # initialized with empty dict
     assert len(data_catalog._sources) == 0
-    # global data sources are automatically parsed
+    # global data sources from artifacts are automatically added
     assert len(data_catalog) > 0
     # test keys, getitem,
     keys = data_catalog.keys
@@ -100,6 +100,13 @@ def test_data_catalog(tmpdir):
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataAdapter"):
         data_catalog["test"] = "string"
+    # test artifact keys (NOTE: legacy code!)
+    data_catalog = DataCatalog(deltares_data=False)
+    assert len(data_catalog._sources) == 0
+    data_catalog.from_artifacts("deltares_data")
+    assert len(data_catalog._sources) > 0
+    with pytest.raises(IOError):
+        data_catalog = DataCatalog(deltares_data="unknown_version")
 
 
 def test_from_archive(tmpdir):
