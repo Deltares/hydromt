@@ -95,7 +95,7 @@ def test_resolve_path(tmpdir):
         "test": {
             "data_type": "RasterDataset",
             "driver": "netcdf",
-            "path": join(tmpdir, "{unknown_key}_{variable}_{year}_{month}.nc"),
+            "path": join(tmpdir, "{unknown_key}_{variable}_{year}_{month:02d}.nc"),
         }
     }
     cat = DataCatalog()
