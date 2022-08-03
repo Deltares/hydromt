@@ -49,9 +49,9 @@ class DataCatalog(object):
         Arguments
         ---------
         data_libs: (list of) str, Path, optional
-            One or more paths to data catalog yml files or names of predefined data catalogs.
+            One or more paths to data catalog yaml files or names of predefined data catalogs.
             By default the data catalog is initiated without data entries.
-            See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yml format.
+            See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yaml format.
         artifact_keys:
             Deprecated from version v0.5
         """
@@ -207,20 +207,20 @@ class DataCatalog(object):
     def from_yml(
         self, urlpath: Union[Path, str], root: str = None, mark_used: bool = False
     ) -> None:
-        """Add data sources based on yml file.
+        """Add data sources based on yaml file.
 
         Parameters
         ----------
         urlpath: str, Path
-            Path or url to data source yml files.
+            Path or url to data source yaml files.
         root: str, Path, optional
-            Global root for all relative paths in yml file(s).
+            Global root for all relative paths in yaml file(s).
         mark_used: bool
             If True, append to used_data list.
 
         Examples
         --------
-        A yml data entry is provided below, where all the text between <>
+        A yaml data entry is provided below, where all the text between <>
         should be filled by the user. Multiple data sources of the same
         data type should be grouped.  Currently the following data types are supported:
         {'RasterDataset', 'GeoDataset', 'GeoDataFrame'}. See the specific data adapters
@@ -334,15 +334,15 @@ class DataCatalog(object):
         source_names: List = [],
         used_only: bool = False,
     ) -> None:
-        """Write data catalog to yml format.
+        """Write data catalog to yaml format.
 
         Parameters
         ----------
         path: str, Path
-            yml output path.
+            yaml output path.
         root: str, Path, optional
-            Global root for all relative paths in yml file.
-            If "auto" the data source paths are relative to the yml output ``path``.
+            Global root for all relative paths in yaml file.
+            If "auto" the data source paths are relative to the yaml output ``path``.
         source_names: list, optional
             List of source names to export; ignored if `used_only=True`
         used_only: bool

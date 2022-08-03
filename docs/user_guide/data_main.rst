@@ -32,14 +32,7 @@ For example when using the :ref:`build <cli_build>` CLI method:
 
 .. code-block:: console
 
-    hydromt build MODEL REGION -d /path/to/data_catalog1.yaml -d /path/to/data_catalog2.yaml
-
-A special exception is made for the Deltares data catalog which can be accessed with the 
-``--dd (--deltares-data)`` flag (requires access to the Deltares P-drive).
-
-.. code-block:: console
-
-    hydromt build MODEL REGION --dd
+    hydromt build MODEL REGION -d /path/to/data_catalog1.yml -d /path/to/data_catalog2.yml
 
 Alternatively, you can also use names and versions of the :ref:`predefined data catalogs <existing_catalog>`.
 If no version is specified, the latest version available is used.
@@ -48,10 +41,18 @@ If no version is specified, the latest version available is used.
 
     hydromt build MODEL REGION -d deltares_data=v2022.5 -d artifact_data
 
+A special exception is made for the Deltares data catalog which can be accessed with the 
+``--dd (--deltares-data)`` flag (requires access to the Deltares P-drive).
+
+.. code-block:: console
+
+    hydromt build MODEL REGION --dd
+
 .. NOTE::
 
     When using several data catalogs, the order in which they are listed is important! If several catalogs contain
-    data sources with the same names, the sources from the last catalog in the list are used.
+    data sources with the same names, the sources from the last catalog in the list are used. 
+    If the ``--dd (--deltares-data)`` flag is used the deltares_data catalog is read first.
 
 
 .. _get_data_python: 
@@ -69,7 +70,7 @@ For example to retrieve a raster dataset use :py:func:`~hydromt.DataCatalog.get_
 .. code-block:: python
 
     import hydromt
-    data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yaml')
+    data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
     ds = data_cat.get_rasterdataset('source_name', bbox=[xmin, ymin, xmax, ymax])  # returns xarray.dataset
 
 More details about reading `raster data  <../_examples/reading_raster_data.ipynb>`_ or

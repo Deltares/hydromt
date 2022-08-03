@@ -68,7 +68,7 @@ data_opt = click.option(
     "-d",
     "--data",
     multiple=True,
-    help="Path to local yml data catalog file OR name of predefined data catalog.",
+    help="Path to local yaml data catalog file OR name of predefined data catalog.",
 )
 
 deltares_data_opt = click.option(
