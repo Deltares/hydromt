@@ -15,7 +15,7 @@ dependencies:
   - dask
   - descartes # to run examples
   - entrypoints
-  - flit>=3.2
+  - flit>=3.4
   - gdal>=3.1
   - geopandas>=0.10
   - jupyter # to run examples
@@ -46,7 +46,7 @@ dependencies:
   - xarray
   - zarr
   - pip:
-    - hydroengine
+    - hydroengine  # optional
     - sphinx_design  # docs
     - sphinx_autosummary_accessors  # docs
 

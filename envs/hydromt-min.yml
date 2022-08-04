@@ -10,7 +10,7 @@ dependencies:
   - click
   - dask
   - entrypoints
-  - flit>=3.2  # install
+  - flit>=3.4  # install
   - gdal>=3.1
   - geopandas>=0.10
   - netcdf4
