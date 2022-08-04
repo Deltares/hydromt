@@ -994,9 +994,8 @@ class XRasterBase(XGeoBase):
             nodata=np.uint8(invert),
             **kwargs,
         )
-        da_out.attrs.pop(
-            "_FillValue", None
-        )  # remove nodata value before converting to boolean
+        # remove nodata value before converting to boolean
+        da_out.attrs.pop("_FillValue", None)
         return da_out.astype(bool)
 
     def vector_grid(self):
