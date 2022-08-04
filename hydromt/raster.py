@@ -762,6 +762,50 @@ class XRasterBase(XGeoBase):
         ds_out["index"] = xr.IndexVariable("index", gdf.index.values[np.array(idx)])
 
         return ds_out
+    
+    def zonal_stats_per_class(self, gpd_shape: gpd.GeoDataFrame ,class_list: list, stat: str, class_dim_name='class'):
+        """Return statistic for each class in data array for each element in gpd_shape
+
+        Returns a xarray.Dataset with dimensions 'index' for the spatial elements
+        and saves the result for each class in seperate dimension. 
+
+        Parameters
+        ----------
+        darr : array.DataArray
+            data array with each grid cell representing a class listed in class_list
+        gpd_shape : geopandas.GeoDataFrame
+            geodataframe with the geometries to count over
+        class_list : list, range or list-like
+            list of all the classes to be counted
+        stat : str
+            stat method (see raster.zonal_stats for details)
+        class_dim_name : str, optional
+            name of the class dimension, by default 'class'
+
+        Returns
+        -------
+        xarray.Dataset
+            Dataset with dimensions 'index' for the spatial elements
+            and dimension 'class' for each class.
+            
+        Notes
+        -------
+        TODO: merge with raster.zonal_stats base function
+        """
+        darr = self._obj.copy()
+        zslist = []
+        for i in class_list:
+            single_class = darr.where(darr==i)
+            zstats = single_class.raster.zonal_stats(gpd_shape,stat)
+            var = list(zstats.keys())[0]
+            zslist.append(zstats[var].values)
+        
+        zstats_md = xr.Dataset(
+            data_vars= {
+                var:(["index",class_dim_name],np.array(zslist).transpose())
+            }
+        )
+        return zstats_md
 
     def clip_bbox(self, bbox, align=None, buffer=0):
         """Clip object based on a bounding box.
