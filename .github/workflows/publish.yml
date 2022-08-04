@@ -47,6 +47,9 @@ jobs:
   test-built-dist:
     needs: build-artifacts
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v3
@@ -75,7 +78,6 @@ jobs:
 
       - name: Verify the built dist/wheel is valid
         run: |
-          conda activate hydromt-min
           python -m pip install dist/hydromt*.whl
           python -c 'from hydromt import __version__ as v; print(v)'
           hydromt --models
