@@ -805,6 +805,7 @@ class XRasterBase(XGeoBase):
                 var:(["index",class_dim_name],np.array(zslist).transpose())
             }
         )
+        zstats_md[class_dim_name]=([class_dim_name],class_list)
         return zstats_md
 
     def clip_bbox(self, bbox, align=None, buffer=0):
