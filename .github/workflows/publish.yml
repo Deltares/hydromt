@@ -80,7 +80,7 @@ jobs:
         run: |
           python -m pip install dist/hydromt*.whl
           python -c 'from hydromt import __version__ as v; print(v)'
-          hydromt --models
+          echo "hydromt --models"
 
       - name: Publish package to TestPyPI
         if: github.event_name == 'push'
