@@ -1117,7 +1117,7 @@ gtsm_codec_reanalysis_{freq}_v1:
     source_license: https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
     source_url: https://doi.org/10.24381/cds.8c59054f
     source_version: v1
-  path: p:/11205028-c3s_435/01_data/01_Timeseries/timeseries2/{variable}/reanalysis_{variable}_{freq}_{year}_{month}_v1.nc
+  path: p:/11205028-c3s_435/01_data/01_Timeseries/timeseries2/{variable}/reanalysis_{variable}_{freq}_{year}_{month:02d}_v1.nc
   placeholders:
     freq: [10min, hourly, dailymax]
   rename:
