@@ -209,11 +209,11 @@ class RasterDatasetAdapter(DataAdapter):
                 )
             ds_out = xr.open_zarr(fns[0], **kwargs)
         elif self.driver == "raster_tindex":
-            if isinstance(self.nodata, np.numeric):
+            if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
             ds_out = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
         elif self.driver == "raster":  # rasterio files
-            if isinstance(self.nodata, np.numeric):
+            if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
             ds_out = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
