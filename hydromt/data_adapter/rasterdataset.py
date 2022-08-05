@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from os.path import join
-from unicodedata import numeric
 from .. import gis_utils, io
 import numpy as np
 import pandas as pd
