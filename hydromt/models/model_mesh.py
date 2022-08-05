@@ -1,12 +1,14 @@
 import pytest
 import sys, os
+from os.path import join, isfile
 from .model_api import Model
 import xarray as xr
+import xugrid as xu
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 
-from typing import Tuple, Union, Optional
+from typing import Tuple, Union, Optional, List
 
 import logging
 import os
@@ -34,7 +36,7 @@ class MeshModel(Model):
         )
 
         # placeholders
-        self._mesh = xr.Dataset()  # xr.Dataset representation of all mesh parameter
+        self._mesh = None  # xu.Dataset() does not work for now
 
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
@@ -52,23 +54,23 @@ class MeshModel(Model):
     def mesh(self):
         """xarray.Dataset representation of all mesh parameters"""
         # XU grid data type Xarray dataset with xu sampling.
-        if len(self._mesh) == 0:
+        if self._mesh is None:
             if self._read:
                 self.read_mesh()
         return self._mesh
 
     def read_mesh(self):
-        """Read mesh at <root/?/> and parse to xarray Dataset"""
+        """Read mesh at <root/?/> and parse to xugrid Dataset"""
         if not self._write:
             # start fresh in read-only mode
-            self._mesh = xr.Dataset()
+            self._mesh = xu.Dataset()
         if isfile(
             join(self.root, "mesh", "mesh.nc")
         ):  # Change of file not implemented yet
-            self._mesh = xr.open_dataset(join(self.root, "mesh", "mesh.nc"))
+            self._mesh = xu.open_dataset(join(self.root, "mesh", "mesh.nc"))
 
     def write_mesh(self):
-        """Write grid at <root/?/> in xarray.Dataset"""
+        """Write grid at <root/?/> in xugrid Dataset"""
         if not self._write:
             raise IOError("Model opened in read-only mode")
         elif not self._mesh:
@@ -78,10 +80,13 @@ class MeshModel(Model):
         fn_default = join(self.root, "mesh", "mesh.nc")
         self.logger.info(f"Write mesh to {self.root}")
         ds_out = self.mesh
-        ds_out.to_netcdf(fn_default)
+        ds_new = xu.UgridDataset(grid=ds_out.ugrid.grid)
+        ds_new.to_netcdf(fn_default)
 
     def set_mesh(
-        self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
+        self,
+        data: Union[xu.UgridDataArray, xu.UgridDataset],
+        name: Optional[str] = None,
     ):
         """Add data to mesh object.
 
@@ -89,18 +94,18 @@ class MeshModel(Model):
 
         Parameters
         ----------
-        data: xarray.DataArray or xarray.Dataset
+        data: xugrid.UgridDataArray or xugrid.UgridDataset
             new layer to add to mesh
         name: str, optional
             Name of new object layer, this is used to overwrite the name of a DataArray
             or to select a variable from a Dataset.
         """
         if name is None:
-            if isinstance(data, xr.DataArray) and data.name is not None:
+            if isinstance(data, xu.UgridDataArray) and data.name is not None:
                 name = data.name
-            elif not isinstance(data, xr.Dataset):
+            elif not isinstance(data, xu.UgridDataset):
                 raise ValueError("Setting a mesh parameter requires a name")
-        elif name is not None and isinstance(data, xr.Dataset):
+        elif name is not None and isinstance(data, xu.UgridDataset):
             data_vars = list(data.data_vars)
             if len(data_vars) == 1 and name not in data_vars:
                 data = data.rename_vars({data_vars[0]: name})
@@ -108,10 +113,10 @@ class MeshModel(Model):
                 raise ValueError("Name not found in DataSet")
             else:
                 data = data[[name]]
-        if isinstance(data, xr.DataArray):
+        if isinstance(data, xu.UgridDataArray):
             data.name = name
             data = data.to_dataset()
-        if len(self._mesh) == 0:  # new data
+        if self._mesh is None:  # new data
             self._mesh = data
         else:
             for dvar in data.data_vars.keys():
@@ -133,7 +138,8 @@ class MeshModel(Model):
         """
         non_compliant = []
         # Mesh instance
-        if not isinstance(self.mesh, xr.Dataset):
-            non_compliant.append("mesh")
+        if self.mesh is not None:
+            if not isinstance(self.mesh, xu.UgridDataset):
+                non_compliant.append("mesh")
 
         return non_compliant
