@@ -1,3 +1,4 @@
+# minimal environment to install hydromt and run examples
 name: hydromt
 
 channels:
@@ -5,16 +6,16 @@ channels:
 
 dependencies:
   - affine
-  - click
   - black
   - bottleneck
   - cartopy # to run examples
+  - click
   - dask
   - descartes # to run examples
   - entrypoints
-  - flit>=3.2
+  - flit>=3.4
   - gdal>=3.1
-  - geopandas
+  - geopandas>=0.10
   - jupyter # to run examples
   - netcdf4
   - matplotlib # to run examples
@@ -22,12 +23,15 @@ dependencies:
   - numpy
   - openpyxl
   - pandas
+  - pcraster # optional
   - pip
-  - pyflwdir>=0.5.0
+  - pyflwdir>=0.5.4
   - pygeos>=0.8
-  - python>=3.8
+  - python>=3.7
   - rasterio
   - requests
+  - rioxarray
   - scipy
+  - toml
   - xarray
   - zarr

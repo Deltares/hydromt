@@ -33,11 +33,11 @@ To check which HydroMT model plugins are installed, do:
 **Example usage**
 
 The following line of code builds a SFINCS model for a region defined by a bounding box ``bbox`` and based on the model methods 
-in the ``sfincs_config.ini`` file and the data sources in the ``data_catalog.yaml`` file.
+in the ``sfincs_config.ini`` file and the data sources in the ``data_catalog.yml`` file.
 
 .. code-block:: console
 
-    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini -d /path/to/data_catalog.yaml -v
+    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini -d /path/to/data_catalog.yml -v
 
 
 .. Tip::
@@ -71,7 +71,7 @@ To create the same SFINCS model as shown above in the CLI example the following 
 
     from hydromt_sfincs import SfincsModel
     from hydromt.config import configread
-    data_libs = [r'/path/to/data_catalog.yaml']
+    data_libs = [r'/path/to/data_catalog.yml']
     model_root = r'/path/to/model_root
     opt=configread(r'/path/to/sfincs_config.ini')  # parse .ini configuration
     mod = SfincsModel(model_root, data_libs=data_libs)  # initialize model with default logger

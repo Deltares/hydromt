@@ -101,10 +101,10 @@ if os.path.isdir("_examples"):
 os.makedirs("_examples")
 copy_tree("../examples", "_examples")
 
-# # -- Generate panels rst files from data catalogs to include in docs -------
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
 
+# # -- Generate panels rst files from data catalogs to include in docs -------
 categories = [
     "geography",
     "hydrography",
@@ -116,11 +116,18 @@ categories = [
     "topography",
     "other",
 ]
-
-# TODO add other data sources
-data_cat = hydromt.DataCatalog(deltares_data=True)
-note = "Only accessible when connected to the Deltares network."
-write_nested_dropdown("deltares_data", data_cat, note=note, categories=categories)
+data_cat = hydromt.DataCatalog()
+data_cat.set_predefined_catalogs(r"../data/predefined_catalogs.yml")
+predefined_catalogs = data_cat.predefined_catalogs
+for name in predefined_catalogs:
+    data_cat.from_predefined_catalogs(name)
+    note = predefined_catalogs[name].get("notes", "")
+    write_nested_dropdown(name, data_cat, note=note, categories=categories)
+    data_cat._sources = {}  # reset
+with open("_generated/predefined_catalogs.rst", "w") as f:
+    f.writelines(
+        [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
+    )
 
 # -- Generate cli help docs ----------------------------------------------
 
