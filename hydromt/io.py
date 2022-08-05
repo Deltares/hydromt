@@ -269,6 +269,8 @@ def open_raster_from_tindex(
     )
     # clip to extent
     ds_out = ds_out.raster.clip_geom(geom)
+    name = ".".join(basename(fn_tindex).split(".")[:-1])
+    ds_out = ds_out.rename({ds_out.raster.vars[0]: name})
     return ds_out  # dataset to be consitent with open_mfraster
 
 

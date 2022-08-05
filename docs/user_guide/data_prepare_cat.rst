@@ -30,8 +30,11 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
 
 .. code-block:: yaml
 
+    meta:
+      version: version
+      root: /path/to/data_root/
     my_dataset:
-      path: /path/to/my_dataset.extension
+      path: /absolut_path/to/my_dataset.extension OR relative_path/to_my_dataset.extension
       data_type: RasterDataset/GeoDataset/GeoDataFrame
       driver: raster/raster_tindex/netcdf/zarr/vector/vector_table
       crs: EPSG/WKT
@@ -53,6 +56,15 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
         paper_doi: doi
         category: category
 
+The yaml file has a global **meta** data section:
+
+- **version** (recommended): data catalog version; we recommend `calendar versioning <https://calver.org/>`
+- **root** (optional): root folder for all the data sources in the yaml file. 
+  If not provided the folder of where the yaml file is located will be used as root.
+  This is used in combination with each data source **path** argument to avoid repetition.
+- **category** (optional): used if all data source in catalog belong to the same category. Usual categories within HydroMT are 
+  *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data* 
+  but the user is free to define its own categories.
 
 A full list of **data source options** is given below
 
@@ -60,7 +72,11 @@ A full list of **data source options** is given below
   Relative paths are combined with the global ``root`` option of the yaml file (if available) or the directory of the yaml file itself. 
   To read multiple files in a single dataset (if supported by the driver) a string glob in the form of ``"path/to/my/files/*.nc"`` can be used.
   The filenames can be further specified with ``{variable}``, ``{year}`` and ``{month}`` keys to limit which files are being read 
-  based on the get_data request in the form of ``"path/to/my/files/{variable}_{year}_{month:02d}.nc"``
+  based on the get_data request in the form of ``"path/to/my/files/{variable}_{year}_{month}.nc"``. 
+  Note that ``month`` is by default *not* zero-padded (e.g. January 2012 is stored as ``"path/to/my/files/{variable}_2012_1.nc"``). 
+  Users can optionally add a formatting string to define how the key should be read. 
+  For example, in a path written as ``"path/to/my/files/{variable}_{year}_{month:02d}.nc"``, 
+  the month always has two digits and is zero-padded for Jan-Sep (e.g. January 2012 is stored as ``"path/to/my/files/{variable}_2012_01.nc"``).
 - **data_type** (required): type of input data. Either *RasterDataset*, *GeoDataset* or *GeoDataFrame*.
 - **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. 
 - **driver** (required): data_type specific driver to read a dataset, see overview below.
@@ -80,12 +96,6 @@ A full list of **data source options** is given below
   Usual categories within HydroMT are *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data* 
   but the user is free to define its own categories. 
 
-Apart from the data entries, the yaml file also has **global options**:
-
-- **root** (optional): root folder for all the data sources in the yaml file. 
-  If not provided the folder of where the yaml fil is located will be used as root.
-  This is used in combination with each data source **path** argument to avoid repetition.
-
 
 Placeholder and alias
 ---------------------
@@ -99,6 +109,10 @@ There are two convenience options to limit repetition between data sources in da
   The alias source should also be provided in the same file. Note that this only works at the first level of arguments, if e.g. the rename option is used in 
   the current data source it overwrites all rename entries of the alias data source. In the example below *ghs_pop* is short for a specific version (epoch=2015; epsg=54009)
   of that dataset. 
+
+.. note::
+
+    Alias is deprecated and will be removed soon, see `github issue for more information <https://github.com/Deltares/hydromt/issues/148>`_
 
 .. code-block:: yaml
 

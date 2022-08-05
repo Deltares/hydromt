@@ -7,11 +7,16 @@ html[data-theme="light"] {
     /* hyperlinks */
     --pst-color-link: rgb(13, 56, 224);
     
+    /* panels */
+    --pst-color-preformatted-border: #080c80 !important;
+    --pst-color-panel-background: #f0f0f075;
+
     /* navbar */
     /* NOTE: does not work since v0.9 */
     --pst-color-navbar-link: rgb(237, 237, 255);
     --pst-color-navbar-link-hover: #fff;
     --pst-color-navbar-link-active: #fff;
+
     
     /* sphinx design */
     /* NOTE: does not work since v0.9 */
