@@ -60,9 +60,12 @@ class LumpedModel(Model):
         ):  # Change of file not implemented yet
             ds = xr.open_dataset(join(self.root, "response_units", "response_units.nc"))
         if isfile(join(self.root, "response_units", "response_units.geoJSON")):
-            gdf = gpd.GeoDataFrame(join(self.root, "response_units", "response_units.geoJSON"))
-            self._response_units = ds.assign_coords(geometry = (["index"], gdf['geometry']))
-
+            gdf = gpd.GeoDataFrame(
+                join(self.root, "response_units", "response_units.geoJSON")
+            )
+            self._response_units = ds.assign_coords(
+                geometry=(["index"], gdf["geometry"])
+            )
 
     def write_response_units(self):
         """Write response_units at <root/?/> in xarray.Dataset and a GeoJSON of the geometry"""
@@ -75,11 +78,15 @@ class LumpedModel(Model):
         self.logger.info(f"Write response_units to {self.root}")
 
         ds_out = self.response_units
-        ds_out.drop('geometry').to_netcdf(join(self.root, "response_units", "response_units.nc"))
-        gdf = gpd.GeoDataFrame(ds_out[['geometry']].to_dataframe(), crs = self.crs)
+        ds_out.drop("geometry").to_netcdf(
+            join(self.root, "response_units", "response_units.nc")
+        )
+        gdf = gpd.GeoDataFrame(ds_out[["geometry"]].to_dataframe(), crs=self.crs)
         gdf.to_file(join(self.root, "response_units", "response_units.GeoJSON"))
 
-    def set_response_units(self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None):
+    def set_response_units(
+        self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
+    ):
         """Add data to response_units.
 
         All layers of repsonse_units must have identical spatial index.
@@ -108,7 +115,9 @@ class LumpedModel(Model):
         if isinstance(data, xr.DataArray):
             data.name = name
             data = data.to_dataset()
-        if np.all(len(self._response_units) == 0 and "geometry" in data.coords):  # new data with a geometry
+        if np.all(
+            len(self._response_units) == 0 and "geometry" in data.coords
+        ):  # new data with a geometry
             self._response_units = data
         else:
             for dvar in data.data_vars.keys():
@@ -118,13 +127,13 @@ class LumpedModel(Model):
                 self._response_units[dvar] = data[dvar]
 
     @property
-    def response_units(self):  
+    def response_units(self):
         """xr.Dataset object with an object of shapely object of the Geometry"""
         if not self._response_units:
             if self._read:
                 self.read_response_units()
         return self._response_units
-    
+
     @property
     def shape(self):
         return self._response_units.coords["index"].shape
