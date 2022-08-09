@@ -2,10 +2,9 @@
 """General and basic API for models in HydroMT"""
 
 from abc import ABCMeta
-import enum
 import os, glob
 from os.path import join, isdir, isfile, abspath, dirname, basename
-from typing import List
+from typing import Dict, List
 import xarray as xr
 import numpy as np
 import geopandas as gpd
@@ -75,38 +74,27 @@ class Model(object, metaclass=ABCMeta):
         )
 
         # placeholders
+        # metadata maps that can be at different resolutions #TODO> do we want read/write maps?
+        self._config = dict()  # nested dictionary
         self._geoms = (
             dict()
-        )  # dictionary of gdp.GeoDataFrame - renamed from previously staticgeoms
-        self._maps = (
-            dict()
-        )  # dictionary of xr.DataArray - metadata maps that can be at different resolutions #TODO> do we want read/write maps?
+        )  # dictionary of gdp.GeoDataFrame NOTE was staticgeoms in <=v0.5
+        self._maps = dict()  # dictionary of xr.DataArray
         self._forcing = dict()  # dictionary of xr.DataArray
-        self._config = dict()  # nested dictionary
         self._states = dict()  # dictionary of xr.DataArray
         self._results = dict()  # dictionary of xr.DataArray and/or xr.Dataset
-
         # To be deprecated in future versions!
-        # ensure compatibility with previous versions > staticmaps and staticgeoms to be renamed  in future versions
-        self._staticmaps = (
-            xr.Dataset()
-        )  # will be renamed grid and a Child class GridModel
-        self._staticgeoms = (
-            dict()
-        )  # dictionnary of gdp.GeoDataFrame > will be renamed geoms
+        self._staticmaps = xr.Dataset()
+
+        # file system
+        self._root = ""
+        self._read = True
+        self._write = False
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
         self.set_root(root, mode)  # also creates hydromt.log file
         self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
-
-    def _staticgeoms(self):
-        """dictionnary of gdp.GeoDataFrame - replaced by _geoms in future versions"""
-        warnings.warn(
-            'The "statigeoms" method will be deprecated in future versions, use  "geoms" instead.',
-            DeprecationWarning,
-        )
-        return self._geoms
 
     def _check_get_opt(self, opt):
         """Check all opt keys and raise sensible error messages if unknown."""
@@ -365,7 +353,7 @@ class Model(object, metaclass=ABCMeta):
         else:
             raise ValueError(f"model region argument not understood: {region}")
 
-        self.set_geoms(geom, name="region")  # TODO - Check this
+        self.set_geoms(geom, name="region")
 
         # This setup method returns region so that it can be wrapped for models which require
         # more information, e.g. grid RasterDataArray or xy coordinates.
@@ -456,12 +444,6 @@ class Model(object, metaclass=ABCMeta):
         self.write_forcing()
         self.write_states()
 
-    def _configread(self, fn: str):
-        return config.configread(fn, abs_path=False)
-
-    def _configwrite(self, fn: str):
-        return config.configwrite(fn, self.config)
-
     def write_data_catalog(
         self, root: Optional[Union[str, Path]] = None, used_only: bool = True
     ):
@@ -477,6 +459,12 @@ class Model(object, metaclass=ABCMeta):
         """
         path = join(self.root, "hydromt_data.yml")
         self.data_catalog.to_yml(path, root=root, used_only=used_only)
+
+    def _configread(self, fn: str):
+        return config.configread(fn, abs_path=False)
+
+    def _configwrite(self, fn: str):
+        return config.configwrite(fn, self.config)
 
     def read_config(self, config_fn: Optional[str] = None):
         """Parse config from file. If no config file found a default config file is
@@ -514,64 +502,57 @@ class Model(object, metaclass=ABCMeta):
         self.logger.info(f"Writing model config to {fn}")
         self._configwrite(fn)
 
-    def read_staticmaps(self):
+    def read_staticmaps(self, **kwargs):
         """Read staticmaps at <root/?/> and parse to xarray Dataset - to be deprecated in future versions"""
         # to read gdal raster files use: hydromt.open_mfraster()
         # to read netcdf use: xarray.open_dataset()
-        warnings.warn(
-            'The "read_staticmaps" method will be deprecated in future versions, use  "read_grid" instead.',
-            DeprecationWarning,
-        )
+        # warnings.warn(
+        #     'The "read_staticmaps" method will be deprecated in future versions, use  "read_grid" instead.',
+        #     DeprecationWarning,
+        # )
         if not self._write:
             # start fresh in read-only mode
             self._staticmaps = xr.Dataset()
-        if isfile(
-            join(self.root, "staticmaps", "staticmaps.nc")
-        ):  # Change of file not implemented yet
-            self._staticmaps = xr.open_dataset(
-                join(self.root, "staticmaps", "staticmaps.nc")
-            )
+        fn_default = join(self.root, "staticmaps", "staticmaps.nc")
+        if isfile(fn_default):
+            self.set_staticmaps(xr.open_dataset(fn_default, **kwargs))
 
-    def write_staticmaps(self):
+    def write_staticmaps(self, **kwargs):
         """Write staticmaps at <root/?/> in xarray.Dataset - to be deprecated in future versions"""
         # to write to gdal raster files use: self.staticmaps.raster.to_mapstack()
         # to write to netcdf use: self.staticmaps.to_netcdf()
-        warnings.warn(
-            'The "write_staticmaps" method will be deprecated in future versions, use  "write_staticmaps" instead.',
-            DeprecationWarning,
-        )
+        # warnings.warn(
+        #     'The "write_staticmaps" method will be deprecated in future versions, use  "write_grid" instead.',
+        #     DeprecationWarning,
+        # )
         if not self._write:
             raise IOError("Model opened in read-only mode")
         elif not self.staticmaps:
             self.logger.warning("No staticmaps to write - Exiting")
             return
+
         # filename
-        if not isdir(join(self.root, "staticmaps")):
-            os.makedirs(join(self.root, "staticmaps"))
-
         fn_default = join(self.root, "staticmaps", "staticmaps.nc")
+        if not isdir(dirname(fn_default)):
+            os.makedirs(dirname(fn_default))
+
         self.logger.info(f"Write staticmaps to {self.root}")
-
         ds_out = self.staticmaps
-        ds_out.to_netcdf(fn_default)
+        ds_out.to_netcdf(fn_default, **kwargs)
 
-    def read_geoms(self):
+    def read_geoms(self, **kwargs):
         """Read geoms at <root/?/> and parse to dict of geopandas. Used to be read_staticgeoms"""
         if not self._write:
             # start fresh in read-only mode
             self._geoms = dict()
-        if isdir(join(self.root, "staticgeoms")):
-            fns = glob.glob(join(self.root, "staticgeoms", "*.geojson"))
-        elif isdir(join(self.root, "geoms")):
-            fns = glob.glob(join(self.root, "geoms", "*.geojson"))
-        else:
-            fns = []
+        # read geojson files in both geoms and staticgeoms folder
+        fns = glob.glob(join(self.root, "*geoms", "*.geojson"))
         if len(fns) > 1:
             self.logger.info("Reading model geoms files.")
         for fn in fns:
             name = basename(fn).split(".")[0]
-            if name != "region":  # Why is that
-                self.set_geoms(gpd.read_file(fn), name=name)
+            # if name != "region":  # TODO Why is that
+            self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
 
     def read_staticgeoms(self):
         warnings.warn(
@@ -591,17 +572,18 @@ class Model(object, metaclass=ABCMeta):
         else:
             self.logger.info("Write model geoms files to GeoJSON")
 
-        fn = join(self.root, "geoms")
-        if not isdir(fn):
-            os.makedirs(fn)
+        dir = join(self.root, "geoms")
+        if not isdir(dir):
+            os.makedirs(dir)
 
-        driver = "GeoJSON"  # fixed
+        # TODO: make flexible based on driver-extension mapping
+        kwargs.update(driver="GeoJSON")  # fixed
+
         # save to file
-        # variables = self._staticgeoms.keys()
         for name, gdf in self._geoms.items():
             if gdf is None or len(gdf) == 0:
                 continue  # empty
-            gdf.to_file(join(fn, f"{name}.geojson"), driver=driver, **kwargs)
+            gdf.to_file(join(dir, f"{name}.geojson"), **kwargs)
 
     def write_staticgeoms(self, **kwargs):
         warnings.warn(
@@ -611,19 +593,18 @@ class Model(object, metaclass=ABCMeta):
         return self.write_geoms(**kwargs)
 
     def read_maps(self):
-        """Read forcing at <root/?/> and parse to dict of xr.DataArray or xr.DataSet"""
+        """Read forcing at <root/?/> and parse to dict of xr.DataArray or xr.Dataset"""
         if not self._write:
             # start fresh in read-only mode
             self._maps = dict()
-        if isdir(join(self.root, "maps")):
-            fns = glob.glob(join(self.root, "maps", "*.nc"))
-            if len(fns) > 1:
-                self.logger.info("Reading map files.")
-            for fn in fns:
-                name = basename(fn).split(".")[0]
-                self.set_maps(xr.open_dataset(fn), name=name)
+        fns = glob.glob(join(self.root, "maps", "*.nc"))
+        if len(fns) > 1:
+            self.logger.info("Reading map files.")
+        for fn in fns:
+            name = basename(fn).split(".")[0]
+            self.set_maps(xr.open_dataset(fn), name=name)
 
-    def write_maps(self):
+    def write_maps(self, **kwargs):
         """write auxiliary maps at <root/?/> as netcdf files"""
         if not self._write:
             raise IOError("Model opened in read-only mode")
@@ -633,27 +614,26 @@ class Model(object, metaclass=ABCMeta):
         else:
             self.logger.info("Write auxiliary maps files")
 
-        fn = join(self.root, "maps")
-        if not isdir(fn):
-            os.makedirs(fn)
+        dir = join(self.root, "maps")
+        if not isdir(dir):
+            os.makedirs(dir)
 
         for name, ds in self._maps.items():
             if ds is None or len(ds) == 0:
                 continue  # empty
-            ds.to_netcdf(join(fn, f"{name}.nc"))
+            ds.to_netcdf(join(dir, f"{name}.nc"), **kwargs)
 
-    def read_forcing(self):
+    def read_forcing(self, **kwargs):
         """Read forcing at <root/?/> and parse to dict of xr.DataArray"""
         if not self._write:
             # start fresh in read-only mode
             self._forcing = dict()
-        if isdir(join(self.root, "forcing")):
-            fns = glob.glob(join(self.root, "forcing", "*.nc"))
-            if len(fns) > 1:
-                self.logger.info("Reading model forcing files.")
-            for fn in fns:
-                name = basename(fn).split(".")[0]
-                self.set_forcing(xr.open_dataset(fn), name=name)
+        fns = glob.glob(join(self.root, "forcing", "*.nc"))
+        if len(fns) > 1:
+            self.logger.info("Reading model forcing files.")
+        for fn in fns:
+            name = basename(fn).split(".")[0]
+            self.set_forcing(xr.open_dataset(fn, **kwargs), name=name)
 
     def write_forcing(self):
         """write forcing at <root/?/> in model ready format"""
@@ -665,29 +645,28 @@ class Model(object, metaclass=ABCMeta):
         else:
             self.logger.info("Write model forcing files")
 
-        fn = join(self.root, "forcing")
-        if not isdir(fn):
-            os.makedirs(fn)
+        dir = join(self.root, "forcing")
+        if not isdir(dir):
+            os.makedirs(dir)
 
         for name, ds in self._forcing.items():
             if ds is None or len(ds) == 0:
                 continue  # empty
-            ds.to_netcdf(join(fn, f"{name}.nc"))
+            ds.to_netcdf(join(dir, f"{name}.nc"))
 
-    def read_states(self):
+    def read_states(self, **kwargs):
         """Read states at <root/?/> and parse to dict of xr.DataArray"""
         if not self._write:
             # start fresh in read-only mode
             self._states = dict()
-        if isdir(join(self.root, "states")):
-            fns = glob.glob(join(self.root, "states", "*.nc"))
-            if len(fns) > 1:
-                self.logger.info("Reading model state files.")
-            for fn in fns:
-                name = basename(fn).split(".")[0]
-                self.set_states(xr.open_dataset(fn), name=name)
+        fns = glob.glob(join(self.root, "states", "*.nc"))
+        if len(fns) > 1:
+            self.logger.info("Reading model state files.")
+        for fn in fns:
+            name = basename(fn).split(".")[0]
+            self.set_states(xr.open_dataset(fn, **kwargs), name=name)
 
-    def write_states(self):
+    def write_states(self, **kwargs):
         """write states at <root/?/> in xr.DataArray format"""
         if not self._write:
             raise IOError("Model opened in read-only mode")
@@ -697,21 +676,22 @@ class Model(object, metaclass=ABCMeta):
         else:
             self.logger.info("Write model states files")
 
-        fn = join(self.root, "states")
-        if not isdir(fn):
-            os.makedirs(fn)
+        dir = join(self.root, "states")
+        if not isdir(dir):
+            os.makedirs(dir)
 
         for name, ds in self._states.items():
             if ds is None or len(ds) == 0:
-                continue  # empty
-            ds.to_netcdf(join(fn, f"{name}.nc"))
+                continue  # empty # TODO throw warning or remove
+            ds.to_netcdf(join(dir, f"{name}.nc"), **kwargs)
 
     def read_results(self):
         """Read results at <root/?/> and parse to dict of xr.DataArray"""
         if not self._write:
             # start fresh in read-only mode
             self._results = dict()
-        raise NotImplementedError()  # TODO: we could also just completely remove it. What do you think?
+        # TODO: we could also just completely remove it. What do you think?
+        raise NotImplementedError()
 
     # model configuration
     @property
@@ -841,32 +821,11 @@ class Model(object, metaclass=ABCMeta):
         split_dataset: bool, optional
             If data is a xarray.Dataset, either add it as is to results or split it into several xarray.DataArrays.
         """
-        # check data dtype
-        dtypes = [xr.DataArray, xr.Dataset]
-        if not np.any([isinstance(data, t) for t in dtypes]):
-            raise ValueError("Data type not recognized")
-        if isinstance(data, xr.DataArray):
-            # NOTE name can be different from data.name !
-            if data.name is None and name is not None:
-                data.name = name
-            elif name is None and data.name is not None:
-                name = data.name
-            elif data.name is None and name is None:
-                raise ValueError("Name required for result DataArray.")
-            data = {name: data}
-        # Add to results
-        if isinstance(data, xr.Dataset) and not split_dataset:
-            if name is not None:
-                if name in self._maps:
-                    self.logger.warning(f"Replacing result: {name}")
-                self._maps[name] = data
-            else:
-                raise ValueError("Name required to add DataSet directly to results")
-        else:
-            for name in data:
-                if name in self._maps:
-                    self.logger.warning(f"Replacing result: {name}")
-                self._maps[name] = data[name]
+        data_dict = _check_data(data, name, split_dataset)
+        for name in data_dict:
+            if name in self._maps:
+                self.logger.warning(f"Replacing result: {name}")
+            self._maps[name] = data_dict[name]
 
     @property
     def staticmaps(self):
@@ -886,7 +845,7 @@ class Model(object, metaclass=ABCMeta):
         self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
     ):
         """
-        This method will be deprecated in future versions. See :py:meth:`~hydromt.models.model_grid.set_grid`
+        This method will be deprecated in future versions. See :py:meth:`~hydromt.models.GridModel.set_grid`
 
         Add data to staticmaps.
 
@@ -934,24 +893,13 @@ class Model(object, metaclass=ABCMeta):
                 self._staticmaps[dvar] = data[dvar]
 
     @property
-    def geoms(self):
-        """geopandas.GeoDataFrame representation of all model geometries - previously called staticgeoms"""
-        if not self._geoms:
-            if self._read:
-                self.read_geoms()
+    def _staticgeoms(self):
+        """see geoms property for details"""
+        warnings.warn(
+            'The "staticgeoms" method will be deprecated in future versions, use  "geoms" instead.',
+            DeprecationWarning,
+        )
         return self._geoms
-
-    def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
-        """Add geom to geoms - previously called staticgeoms"""
-        gtypes = [gpd.GeoDataFrame, gpd.GeoSeries]
-        if not np.any([isinstance(geom, t) for t in gtypes]):
-            raise ValueError(
-                "First parameter map(s) should be geopandas.GeoDataFrame or geopandas.GeoSeries"
-            )
-        if name in self._geoms:
-            if self._read:
-                self.logger.warning(f"Replacing geom: {name}")
-        self._geoms[name] = geom
 
     @property
     def staticgeoms(self):
@@ -973,8 +921,28 @@ class Model(object, metaclass=ABCMeta):
         return self.set_geoms(geom, name)
 
     @property
-    def forcing(self):
-        """dict of xarray.dataarray representation of all forcing"""
+    def geoms(self):
+        """geopandas.GeoDataFrame representation of all model geometries - previously called staticgeoms"""
+        if not self._geoms:
+            if self._read:
+                self.read_geoms()
+        return self._geoms
+
+    def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
+        """Add geom to geoms - previously called staticgeoms"""
+        gtypes = [gpd.GeoDataFrame, gpd.GeoSeries]
+        if not np.any([isinstance(geom, t) for t in gtypes]):
+            raise ValueError(
+                "First parameter map(s) should be geopandas.GeoDataFrame or geopandas.GeoSeries"
+            )
+        if name in self._geoms:
+            if self._read:
+                self.logger.warning(f"Replacing geom: {name}")
+        self._geoms[name] = geom
+
+    @property
+    def forcing(self) -> Dict:
+        """Model forcing. Returns dict of xarray.DataArray"""
         if not self._forcing:
             if self._read:
                 self.read_forcing()
@@ -994,27 +962,15 @@ class Model(object, metaclass=ABCMeta):
         name: str, optional
             Variable name, only in case data is of type DataArray
         """
-        # check dataset dtype
-        dtypes = [xr.DataArray, xr.Dataset]
-        if not np.any([isinstance(data, t) for t in dtypes]):
-            raise ValueError("Data type not recognized")
-        if isinstance(data, xr.DataArray):
-            # NOTE name can be different from data.name !
-            if data.name is None and name is not None:
-                data.name = name
-            elif name is None and data.name is not None:
-                name = data.name
-            elif data.name is None and name is None:
-                raise ValueError("Name required for forcing DataArray.")
-            data = {name: data}
-        for name in data:
+        data_dict = _check_data(data, name)
+        for name in data_dict:
             if name in self._forcing:
                 self.logger.warning(f"Replacing forcing: {name}")
-            self._forcing[name] = data[name]
+            self._forcing[name] = data_dict[name]
 
     @property
-    def states(self):
-        """dict xarray.dataarray representation of all states"""
+    def states(self) -> Dict:
+        """Model states. Returns dict of xarray.DataArray"""
         if not self._states:
             if self._read:
                 self.read_states()
@@ -1034,27 +990,15 @@ class Model(object, metaclass=ABCMeta):
         name: str, optional
             Variable name, only in case data is of type DataArray
         """
-        # check dataset dtype
-        dtypes = [xr.DataArray, xr.Dataset]
-        if not np.any([isinstance(data, t) for t in dtypes]):
-            raise ValueError("Data type not recognized")
-        if isinstance(data, xr.DataArray):
-            # NOTE name can be different from data.name !
-            if data.name is None and name is not None:
-                data.name = name
-            elif name is None and data.name is not None:
-                name = data.name
-            elif data.name is None and name is None:
-                raise ValueError("Name required for forcing DataArray.")
-            data = {name: data}
-        for name in data:
+        data_dict = _check_data(data, name)
+        for name in data_dict:
             if name in self._states:
                 self.logger.warning(f"Replacing state: {name}")
-            self._states[name] = data[name]
+            self._states[name] = data_dict[name]
 
     @property
     def results(self):
-        """dict xarray.dataarray representation of model results"""
+        """Model results. Returns dict of xarray.DataArray"""
         if not self._results:
             if self._read:
                 self.read_results()
@@ -1084,32 +1028,11 @@ class Model(object, metaclass=ABCMeta):
         split_dataset: bool, optional
             If data is a xarray.Dataset, either add it as is to results or split it into several xarray.DataArrays.
         """
-        # check data dtype
-        dtypes = [xr.DataArray, xr.Dataset]
-        if not np.any([isinstance(data, t) for t in dtypes]):
-            raise ValueError("Data type not recognized")
-        if isinstance(data, xr.DataArray):
-            # NOTE name can be different from data.name !
-            if data.name is None and name is not None:
-                data.name = name
-            elif name is None and data.name is not None:
-                name = data.name
-            elif data.name is None and name is None:
-                raise ValueError("Name required for result DataArray.")
-            data = {name: data}
-        # Add to results
-        if isinstance(data, xr.Dataset) and not split_dataset:
-            if name is not None:
-                if name in self._results:
-                    self.logger.warning(f"Replacing result: {name}")
-                self._results[name] = data
-            else:
-                raise ValueError("Name required to add DataSet directly to results")
-        else:
-            for name in data:
-                if name in self._results:
-                    self.logger.warning(f"Replacing result: {name}")
-                self._results[name] = data[name]
+        data_dict = _check_data(data, name, split_dataset)
+        for name in data_dict:
+            if name in self._results:
+                self.logger.warning(f"Replacing result: {name}")
+            self._results[name] = data_dict[name]
 
     ## properties / methods below can be used directly in actual class
     @property
@@ -1128,14 +1051,10 @@ class Model(object, metaclass=ABCMeta):
     @property
     def dims(self) -> Tuple:
         """Returns spatial dimension names of staticmaps."""
-        warnings.warn(
-            'This "staticmaps" property will be deprecated in future versions, use  "grid" instead.',
-            DeprecationWarning,
-        )
         return self.staticmaps.raster.dims
 
     @property
-    def coords(self) -> dict:
+    def coords(self) -> Dict:
         """Returns coordinates of staticmaps."""
         warnings.warn(
             'This "staticmaps" property will be deprecated in future versions, use  "grid" instead.',
@@ -1210,33 +1129,40 @@ class Model(object, metaclass=ABCMeta):
                 '"region" is currently set from staticmaps. In future versions, "staticmaps" will be changed for "grid" and become deprecated , use  "grid" instead.',
                 DeprecationWarning,
             )
-            crs = self.crs  # TODO: self.staticmaps.raster.crs
+            crs = self.crs  # changed from self.staticmaps.raster.crs
             if crs is None and crs.to_epsg() is not None:
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region
 
-    def test_model_api(
-        self,
-    ):  # TODO : This will have to be updated to remove staticmaps and staticgeoms
-        """Test compliance to model API instances.
+    def test_model_api(self):
+        warnings.warn(
+            '"test_model_api" is now part of the internal API, use "_test_model_api" instead.',
+            DeprecationWarning,
+        )
+        return self._test_model_api()
+
+    def _test_model_api(self) -> List:
+        """Test compliance with HydroMT Model API.
 
         Returns
         -------
         non_compliant: list
-            List of objects that are non-compliant with the model API structure.
+            List of model components that are non-compliant with the model API structure.
         """
         non_compliant = []
-        # Staticmaps
-        if not isinstance(self.staticmaps, xr.Dataset):
-            non_compliant.append("staticmaps")
-        # Staticgeoms
-        if not isinstance(self.staticgeoms, dict):
-            non_compliant.append("staticgeoms")
-        elif self.staticgeoms:  # non-empty dict
-            for name, geom in self.staticgeoms.items():
+        # Region -> every model should have a region
+        if not isinstance(self.region, gpd.GeoDataFrame):
+            non_compliant.append("region")
+        elif not isinstance(self.crs, CRS):  # only if region
+            non_compliant.append("crs")
+        # Geoms
+        if not isinstance(self.geoms, dict):
+            non_compliant.append("geoms")
+        elif self.geoms:  # non-empty dict
+            for name, geom in self.geoms.items():
                 if not isinstance(geom, gpd.GeoDataFrame):
-                    non_compliant.append(f"staticgeoms.{name}")
+                    non_compliant.append(f"geoms.{name}")
         # Forcing
         if not isinstance(self.forcing, dict):
             non_compliant.append("forcing")
@@ -1264,3 +1190,29 @@ class Model(object, metaclass=ABCMeta):
                     non_compliant.append(f"results.{name}")
 
         return non_compliant
+
+
+def _check_data(
+    data: Union[xr.DataArray, xr.Dataset],
+    name: Optional[str] = None,
+    split_dataset=False,
+) -> Dict:
+    if isinstance(data, xr.DataArray):
+        # NOTE name can be different from data.name !
+        if data.name is None and name is not None:
+            data.name = name
+        elif name is None and data.name is not None:
+            name = data.name
+        elif data.name is None and name is None:
+            raise ValueError("Name required for DataArray.")
+        data = {name: data}
+    elif isinstance(data, xr.Dataset):  # return dict for consistency
+        if split_dataset:
+            data = {name: data[name] for name in data.data_vars}
+        elif name is None:
+            raise ValueError("Name required for Dataset.")
+        else:
+            data = {name: data}
+    else:
+        raise ValueError(f'Data type "{type(data).__name__}" not recognized')
+    return data

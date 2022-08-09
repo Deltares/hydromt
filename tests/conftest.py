@@ -4,6 +4,7 @@ import pandas as pd
 import geopandas as gpd
 import xarray as xr
 
+from hydromt import Model, GridModel
 from hydromt import raster, vector, gis_utils
 import pyflwdir
 
@@ -127,3 +128,26 @@ def obsda():
     )
     da.raster.set_crs(4326)
     return da
+
+
+@pytest.fixture
+def model(demda, world, obsda):
+    mod = Model()
+    mod.setup_region({"geom": demda.raster.box})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_staticmaps(demda, "elevtn")  # will be deprecated
+    mod.set_geoms(world, "world")
+    mod.set_forcing(obsda, "waterlevel")
+    mod.set_states(demda, "zsini")
+    mod.set_results(obsda, "zs")
+    return mod
+
+
+@pytest.fixture
+def grid_model(demda, flwda):
+    mod = GridModel()
+    mod.setup_region({"geom": demda.raster.box})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_grid(demda, "elevtn")
+    mod.set_grid(flwda, "flwdir")
+    return mod

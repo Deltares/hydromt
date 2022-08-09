@@ -76,4 +76,5 @@ exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 [tool.pytest.ini_options]
 filterwarnings = [
     "ignore:distutils Version classes are deprecated:DeprecationWarning",
+    "ignore:getargs:DeprecationWarning", # The 'u' format is deprecated. Use 'U' instead.
 ]

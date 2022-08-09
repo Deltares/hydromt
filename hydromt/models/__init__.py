@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """HydroMT models API"""
 import sys
-from .model_api import Model
+from .model_api import *
+from .model_grid import *
 from . import model_plugins
 
 
