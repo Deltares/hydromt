@@ -101,10 +101,10 @@ if os.path.isdir("_examples"):
 os.makedirs("_examples")
 copy_tree("../examples", "_examples")
 
-# # -- Generate panels rst files from data catalogs to include in docs -------
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
 
+# # -- Generate panels rst files from data catalogs to include in docs -------
 categories = [
     "geography",
     "hydrography",
@@ -116,11 +116,18 @@ categories = [
     "topography",
     "other",
 ]
-
-# TODO add other data sources
-data_cat = hydromt.DataCatalog(deltares_data=True)
-note = "Only accessible when connected to the Deltares network."
-write_nested_dropdown("deltares_data", data_cat, note=note, categories=categories)
+data_cat = hydromt.DataCatalog()
+data_cat.set_predefined_catalogs(r"../data/predefined_catalogs.yml")
+predefined_catalogs = data_cat.predefined_catalogs
+for name in predefined_catalogs:
+    data_cat.from_predefined_catalogs(name)
+    note = predefined_catalogs[name].get("notes", "")
+    write_nested_dropdown(name, data_cat, note=note, categories=categories)
+    data_cat._sources = {}  # reset
+with open("_generated/predefined_catalogs.rst", "w") as f:
+    f.writelines(
+        [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
+    )
 
 # -- Generate cli help docs ----------------------------------------------
 
@@ -193,6 +200,7 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
+html_logo = "_static/hydromt-logo.jpg"
 autodoc_member_order = "bysource"  # overwrite default alphabetical sort
 autoclass_content = "both"
 
@@ -212,20 +220,31 @@ html_theme_options = {
     "use_edit_page_button": True,
     "icon_links": [
         {
+            "name": "GitHub",
+            "url": "https://github.com/Deltares/hydromt",  # required
+            "icon": "https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg",
+            "type": "url",
+        },
+        {
             "name": "Deltares",
-            "url": "https://deltares.nl/en/",
-            "icon": "_static/deltares-white.svg",
+            "url": "https://www.deltares.nl/en/",
+            "icon": "_static/deltares-blue.svg",
             "type": "local",
         },
     ],
+    "logo": {
+        "text": "HydroMT Core",
+    },
+    "navbar_end": ["navbar-icon-links"],  # remove dark mode switch
 }
 
 html_context = {
     "github_url": "https://github.com",  # or your GitHub Enterprise interprise
     "github_user": "Deltares",
     "github_repo": "hydromt",
-    "github_version": "docs",  # FIXME
+    "github_version": "main",  # FIXME
     "doc_path": "docs",
+    "default_mode": "light",
 }
 
 remove_from_toctrees = ["_generated/*"]

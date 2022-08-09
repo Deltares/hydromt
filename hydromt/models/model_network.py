@@ -6,7 +6,7 @@ import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 
-from typing import List
+from typing import Tuple, Union, Optional
 
 import logging
 import os
@@ -32,9 +32,9 @@ class NetworkModel(Model):
             data_libs=data_libs,
             logger=logger,
         )
-        
+
         # placeholders
-        self._network = xr.Dataset() #xr.Dataset representation of all mesh parameter 
+        self._network = xr.Dataset()  # xr.Dataset representation of all mesh parameter
 
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
@@ -47,9 +47,16 @@ class NetworkModel(Model):
         super().write()
         self.write_network()
         # Other specifics to NetworkModel...
-    
 
+    def read_network(self):
+        raise NotImplementedError()  # TODO: needs to be written
 
+    def write_network(self):
+        raise NotImplementedError()  # TODO: needs to be written
+
+    def set_networks(self):
+        raise NotImplementedError()  # TODO: needs to be written
 
     @property
-    def network(): #
+    def network(self):
+        raise NotImplementedError()  # TODO: needs to be written
