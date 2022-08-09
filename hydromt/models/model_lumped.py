@@ -61,7 +61,71 @@ class LumpedModel(Model):
         self._response_units = (
             xr.Dataset()
         )  # representation of all response units. Geometry defined as coordinate "geometry"
+    
+    def setup_response_unit(
+        self,
+        split_regions = False,
+        split_method = "us_area",
+        hydrography_fn = "merit_hydro",
+        **kwargs
+        ):
+        """
+        This component sets up the region and response units.
+        
+        """
+
+        if len(self.region) == 0:
+            raise ValueError("No region defined. Define :py:meth:`~hydromt.models.model_api.setup_region`")
+        
+        if not split_regions:
+            self.set_response_units(self._geoms['region'])
+            self.logger.info(f"setup_response_unit.split_regions set to False. response_units set up")
+        
+        if split_regions:
+            self.logger.info(f"setup_response_unit.split_regions set to True. Deriving response_units based on hydrography")
             
+            ds = self.data_catalog.get_rasterdataset(hydrography_fn, geom = self.region)
+            ds_response_units = workflows.hydrography_to_basins(
+                ds,
+                self.region,
+                split_method,
+                **kwargs
+            )
+            self.set_response_units(ds_response_units)
+    
+    def setup_downstream_links(
+        self,
+        hydrography_fn="merit_hydro",
+        ):
+        """Link basins from upstream to downstream based on flow direction map
+
+        Args:
+            outflow_gpd (gpd.GeoDataFrame): point geometries of the subbasin outlets
+            hydrography_fn (str, optional): Hydrography dataset, must include flwdir variable.
+            Defaults to "merit_hydro".
+
+        Returns:
+            np.array: array of downstream link ids
+        """
+        outflow_gpd = workflows.ru_geometry_to_gpd(self.response_units,geometry_name='outlet_geometry')
+        basins_gpd =  workflows.ru_geometry_to_gpd(self.response_units)       
+        ds = self.data_catalog.get_rasterdataset(hydrography_fn, geom=self.region)
+        flwdir = flw.flwdir_from_da(ds["flwdir"], ftype="d8")#, mask= workflows.make_ds_mask(ds, basins_gpd, col_name='value'))
+        rasterized_map = ds.raster.rasterize(basins_gpd, col_name='value')
+
+        # TODO: make one function in flw.py
+        dwn_basin = flwdir.downstream(rasterized_map.values.flatten()).reshape(ds.raster.shape)
+        da_out = xr.DataArray(
+                data=dwn_basin,
+                coords=ds.raster.coords,
+                dims=ds.raster.dims,
+            )
+        da_out.raster.set_nodata(0)
+        da_out.raster.set_crs(ds.raster.crs)
+        basins_downstream = da_out.raster.sample(outflow_gpd)
+        basins_downstream = basins_downstream.drop(['x','y','spatial_ref'])
+        self.set_response_units(basins_downstream, name='down_id')
+    
     def read(self):
         """Method to read the complete model schematization and configuration from file."""
         super().read()
@@ -101,11 +165,16 @@ class LumpedModel(Model):
         self.logger.info(f"Write response_units to {self.root}")
 
         ds_out = self.response_units
-        ds_out.drop("geometry").to_netcdf(
+        # coordinates that hold geometries
+        corl = list(ds_out.coords)
+        geom_coords = [v for v in corl if 'geometry' in v]
+        # drop items that are objects
+        ds_out.drop(geom_coords).drop(["crs","spatial_ref"]).to_netcdf(
             join(self.root, "response_units", "response_units.nc")
         )
-        gdf = gpd.GeoDataFrame(ds_out[["geometry"]].to_dataframe(), crs=self.crs)
-        gdf.to_file(join(self.root, "response_units", "response_units.GeoJSON"))
+        for g in geom_coords:
+            gdf = workflows.ru_geometry_to_gpd(ds_out, geometry_name = g)
+            gdf.to_file(join(self.root, "response_units", g+".GeoJSON"))
 
     def set_response_units(
         self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
