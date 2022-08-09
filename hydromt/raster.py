@@ -763,7 +763,7 @@ class XRasterBase(XGeoBase):
 
         return ds_out
     
-    def zonal_stats_per_class(self, gpd_shape: gpd.GeoDataFrame ,class_list: list, stat: str, class_dim_name='class'):
+    def zonal_stats_per_class(self, gpd_shape: gpd.GeoDataFrame ,class_list: list, stat: str, class_dim_name='class',all_touched=False):
         """Return statistic for each class in data array for each element in gpd_shape
 
         Returns a xarray.Dataset with dimensions 'index' for the spatial elements
@@ -796,7 +796,7 @@ class XRasterBase(XGeoBase):
         zslist = []
         for i in class_list:
             single_class = darr.where(darr==i)
-            zstats = single_class.raster.zonal_stats(gpd_shape,stat)
+            zstats = single_class.raster.zonal_stats(gpd_shape,stat,all_touched=all_touched)
             var = list(zstats.keys())[0]
             zslist.append(zstats[var].values)
         
