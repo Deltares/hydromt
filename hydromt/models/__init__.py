@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 """HydroMT models API"""
 import sys
+from .. import _has_xugrid
+
 from .model_api import *
 from .model_grid import *
+
+if _has_xugrid():
+    from .model_mesh import *
 from . import model_plugins
 
 

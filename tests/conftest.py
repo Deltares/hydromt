@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
+from shapely.geometry import box
 
 from hydromt import Model, GridModel
 from hydromt import raster, vector, gis_utils
@@ -131,6 +132,16 @@ def obsda():
 
 
 @pytest.fixture
+def demuda():
+    import xugrid as xu
+
+    uds = xu.data.adh_san_diego()
+    uda = uds["elevation"]
+    uda.ugrid.grid.set_crs(epsg=2230)
+    return uda
+
+
+@pytest.fixture
 def model(demda, world, obsda):
     mod = Model()
     mod.setup_region({"geom": demda.raster.box})
@@ -150,4 +161,18 @@ def grid_model(demda, flwda):
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_grid(demda, "elevtn")
     mod.set_grid(flwda, "flwdir")
+    return mod
+
+
+@pytest.fixture
+def mesh_model(demuda):
+    from hydromt import MeshModel
+
+    mod = MeshModel()
+    region = gpd.GeoDataFrame(
+        geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.crs
+    )
+    mod.setup_region({"geom": region})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_mesh(demuda, "elevtn")
     return mod

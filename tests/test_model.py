@@ -4,6 +4,7 @@
 import pytest
 import xarray as xr
 from hydromt.models.model_api import _check_data
+from hydromt import _has_xugrid
 
 
 def test_check_data(demda):
@@ -36,3 +37,9 @@ def test_gridmodel(grid_model):
     non_compliant = grid_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # grid specific attributes
+
+
+@pytest.mark.skipif(not _has_xugrid(), reason="Xugrid not installed.")
+def test_meshmodel(mesh_model):
+    non_compliant = mesh_model._test_model_api()
+    assert len(non_compliant) == 0, non_compliant
