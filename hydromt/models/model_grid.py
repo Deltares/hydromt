@@ -65,19 +65,28 @@ class GridMixin(object):
             new map layer to add to grid
         name: str, optional
             Name of new map layer, this is used to overwrite the name of a DataArray
-            or to select a variable from a Dataset.
+            and ignored if data is a Dataset
         """
         # NOTE: variables in a dataset are not longer renamed as used to be the case in set_staticmaps
         if isinstance(data, np.ndarray):
             if data.shape != self.grid.raster.shape:
                 raise ValueError("Shape of data and grid maps do not match")
             data = xr.DataArray(dims=self.grid.raster.dims, data=data, name=name)
-        ds = xr.merge(_check_data(data, name).values())
-        for dvar in ds.data_vars:
+        if isinstance(data, xr.DataArray):
+            if name is not None:  # rename
+                data.name = name
+            elif data.name is None:
+                raise ValueError(
+                    "unable to set an unnamed DataArray without providing an explicit name"
+                )
+            data = data.to_dataset()
+        elif not isinstance(data, xr.Dataset):
+            raise ValueError(f"cannot set data of type {type(data).__name__}")
+        for dvar in data.data_vars:
             if dvar in self._grid:
                 if self._read:
                     self.logger.warning(f"Replacing grid map: {dvar}")
-            self._grid[dvar] = ds[dvar]
+            self._grid[dvar] = data[dvar]
 
 
 class GridModel(Model, GridMixin):
@@ -109,6 +118,7 @@ class GridModel(Model, GridMixin):
         self.write_grid()
 
     # GridModel specific methods
+    # TODO rename to setup_grid_from_table
     def setup_fromtable(self, path_or_key: str, fn_map: str, out_vars: List, **kwargs):
         """This function creates additional staticmaps layers based on a table reclassification
 

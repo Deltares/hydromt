@@ -803,13 +803,9 @@ class Model(object, metaclass=ABCMeta):
         name: Optional[str] = None,
         split_dataset: Optional[bool] = False,
     ):
-        """Add auxiliary data to maps attribute which is a dictionary of xarray.DataArray and/or xarray.Dataset.
+        """Add auxiliary data to maps.
 
-        The dictionary key is taken from the variable name. In case of a DataArray
-        without name, the name can be passed using the optional name argument. In case of
-        a Dataset, the dictionary key is passed using the name argument.
-
-        Dataset can either be added as is to the dictionary (default) or split into several
+        Dataset can either be added as is (default) or split into several
         DataArrays using the split_dataset argument.
 
         Arguments
@@ -929,7 +925,17 @@ class Model(object, metaclass=ABCMeta):
         return self._geoms
 
     def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
-        """Add geom to geoms - previously called staticgeoms"""
+        """Add data to the geoms attribute.
+
+        Arguments
+        ---------
+        geoms: geopandas.GeoDataFrame or geopandas.GeoSeries
+            New geometry data to add
+        name: str, optional
+            Results name, required if data is xarray.Dataset is and split_dataset=False.
+        split_dataset: bool, optional
+            If True (default), split a Dataset to store each variable as a DataArray.
+        """
         gtypes = [gpd.GeoDataFrame, gpd.GeoSeries]
         if not np.any([isinstance(geom, t) for t in gtypes]):
             raise ValueError(
@@ -942,27 +948,30 @@ class Model(object, metaclass=ABCMeta):
 
     @property
     def forcing(self) -> Dict:
-        """Model forcing. Returns dict of xarray.DataArray"""
+        """Model forcing. Returns dict of xarray.DataArray or xarray.Dataset"""
         if not self._forcing:
             if self._read:
                 self.read_forcing()
         return self._forcing
 
     def set_forcing(
-        self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
+        self,
+        data: Union[xr.DataArray, xr.Dataset],
+        name: Optional[str] = None,
+        split_dataset: Optional[bool] = True,
     ):
-        """Add data to forcing attribute which is a dictionary of xarray.DataArray.
-        The dictionary key is taken from the variable name. In case of a DataArray
-        without name, the name can be passed using the optional name argument.
+        """Add data to forcing attribute.
 
         Arguments
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
         name: str, optional
-            Variable name, only in case data is of type DataArray
+            Results name, required if data is xarray.Dataset is and split_dataset=False.
+        split_dataset: bool, optional
+            If True (default), split a Dataset to store each variable as a DataArray.
         """
-        data_dict = _check_data(data, name)
+        data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
             if name in self._forcing:
                 self.logger.warning(f"Replacing forcing: {name}")
@@ -977,20 +986,23 @@ class Model(object, metaclass=ABCMeta):
         return self._states
 
     def set_states(
-        self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
+        self,
+        data: Union[xr.DataArray, xr.Dataset],
+        name: Optional[str] = None,
+        split_dataset: Optional[bool] = True,
     ):
-        """Add data to states attribute which is a dictionary of xarray.DataArray.
-        The dictionary key is taken from the variable name. In case of a DataArray
-        without name, the name can be passed using the optional name argument.
+        """Add data to states attribute.
 
         Arguments
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
         name: str, optional
-            Variable name, only in case data is of type DataArray
+            Results name, required if data is xarray.Dataset and split_dataset=False.
+        split_dataset: bool, optional
+            If True (default), split a Dataset to store each variable as a DataArray.
         """
-        data_dict = _check_data(data, name)
+        data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
             if name in self._states:
                 self.logger.warning(f"Replacing state: {name}")
@@ -1010,13 +1022,9 @@ class Model(object, metaclass=ABCMeta):
         name: Optional[str] = None,
         split_dataset: Optional[bool] = False,
     ):
-        """Add data to results attribute which is a dictionary of xarray.DataArray and/or xarray.Dataset.
+        """Add data to results attribute.
 
-        The dictionary key is taken from the variable name. In case of a DataArray
-        without name, the name can be passed using the optional name argument. In case of
-        a Dataset, the dictionary key is passed using the name argument.
-
-        Dataset can either be added as is to the dictionary (default) or split into several
+        Dataset can either be added as is (default) or split into several
         DataArrays using the split_dataset argument.
 
         Arguments
@@ -1024,9 +1032,9 @@ class Model(object, metaclass=ABCMeta):
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
         name: str, optional
-            Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
+            Results name, required if data is xarray.Dataset and split_dataset=False.
         split_dataset: bool, optional
-            If data is a xarray.Dataset, either add it as is to results or split it into several xarray.DataArrays.
+            If True (False by default), split a Dataset to store each variable as a DataArray.
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
@@ -1195,7 +1203,7 @@ class Model(object, metaclass=ABCMeta):
 def _check_data(
     data: Union[xr.DataArray, xr.Dataset],
     name: Optional[str] = None,
-    split_dataset=False,
+    split_dataset=True,
 ) -> Dict:
     if isinstance(data, xr.DataArray):
         # NOTE name can be different from data.name !
