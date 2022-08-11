@@ -4,7 +4,7 @@ import pandas as pd
 import geopandas as gpd
 import xarray as xr
 
-from hydromt import Model, GridModel, LumpedModel
+from hydromt import Model, GridModel, LumpedModel, NetworkModel
 from hydromt import raster, vector, gis_utils
 import pyflwdir
 
@@ -166,4 +166,11 @@ def lumped_model(ts, geodf):
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
     mod.set_response_units(da)
+    return mod
+
+
+@pytest.fixture
+def network_model():
+    mod = NetworkModel()
+    # TODO set data and attributes of mod
     return mod

@@ -89,3 +89,15 @@ def test_lumpedmodel(lumped_model, tmpdir):
     equal, errors, components = lumped_model._test_equal(model1)
     assert equal, errors
     assert np.all([c in components for c in ["response_units"]])
+
+
+def test_networkmodel(network_model, tmpdir):
+    network_model.set_root(str(tmpdir), mode="r+")
+    with pytest.raises(NotImplementedError):
+        network_model.read(["network"])
+    with pytest.raises(NotImplementedError):
+        network_model.write(["network"])
+    with pytest.raises(NotImplementedError):
+        network_model.set_network()
+    with pytest.raises(NotImplementedError):
+        network_model.network
