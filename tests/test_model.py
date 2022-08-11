@@ -3,6 +3,7 @@
 
 import pytest
 import xarray as xr
+import numpy as np
 from hydromt.models.model_api import _check_data
 from hydromt.models import Model
 
@@ -32,14 +33,28 @@ def test_model(model, tmpdir):
         non_compliant.append("staticmaps")
     assert len(non_compliant) == 0, non_compliant
     # write model
-    root = str(tmpdir.join("model"))
-    model.set_root(root, mode="w")
+    model.set_root(str(tmpdir), mode="w")
     model.write()
     # read model
-    mod1 = Model(root, mode="r")
-    mod1.read()
-    # TODO check if identical
-
+    model1 = Model(str(tmpdir), mode="r")
+    model1.read()
+    # check if equal
+    model._results = {}  # reset results for comparison
+    equal, errors, components = model._test_equal(model1)
+    assert equal, errors
+    comp = [
+        "config",
+        "crs",
+        "forcing",
+        "geoms",
+        "maps",
+        "region",
+        "results",
+        "states",
+        "staticgeoms",
+        "staticmaps",
+    ]
+    assert np.all([c in components for c in comp])
 
 def test_gridmodel(grid_model):
     non_compliant = grid_model._test_model_api()
