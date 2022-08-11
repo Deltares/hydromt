@@ -9,63 +9,122 @@ To test specific sources run:
 """
 
 import sys
+from typing import Union, Optional, Callable, Any
 import os
 import geopandas as gpd
 import time
 from hydromt import DataCatalog
+from hydromt.log import setuplog
 from hydromt.data_adapter import (
     RasterDatasetAdapter,
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
 )
-from hydromt.log import setuplog
+
+# from https://www.fuzzingbook.org/html/Timeout.html
+class GenericTimeout:
+    """Execute a code block raising a timeout."""
+
+    def __init__(self, timeout: Union[int, float]) -> None:
+        """
+        Constructor. Interrupt execution after `timeout` seconds.
+        """
+
+        self.seconds_before_timeout = timeout
+        self.original_trace_function: Optional[Callable] = None
+        self.end_time: Optional[float] = None
+
+    def check_time(self, frame, event: str, arg) -> Callable:
+        """Tracing function"""
+        if self.original_trace_function is not None:
+            self.original_trace_function(frame, event, arg)
+
+        current_time = time.time()
+        if self.end_time and current_time >= self.end_time:
+            raise TimeoutError(
+                f"Timeout after {self.seconds_before_timeout:.0f} seconds"
+            )
+
+        return self.check_time
+
+    def __enter__(self) -> Any:
+        """Begin of `with` block"""
+        start_time = time.time()
+        self.end_time = start_time + self.seconds_before_timeout
+
+        self.original_trace_function = sys.gettrace()
+        sys.settrace(self.check_time)
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb) -> Optional[bool]:
+        """End of `with` block"""
+        self.cancel()
+        return None
+
+    def cancel(self) -> None:
+        """Cancel timeout"""
+        sys.settrace(self.original_trace_function)
+
+
+def test_source(data_cat, name, **kwargs):
+    # TODO: add available time slice to catalog to limit reading ..
+    source = data_cat[name]
+    bbox = [-3.25, 6.91, 9.43, 14.28]
+    if isinstance(source, RasterDatasetAdapter):
+        ds = data_cat.get_rasterdataset(name, bbox=bbox, **kwargs)
+        # load slice of data
+        if ds.raster.dim0 is not None:
+            ds = ds.isel({ds.raster.dim0: -1}).squeeze()
+        ds.isel({ds.raster.x_dim: slice(-100), ds.raster.y_dim: slice(-100)}).load()
+    elif isinstance(source, GeoDataFrameAdapter):
+        gdf = data_cat.get_geodataframe(name, bbox=bbox, **kwargs)
+        assert isinstance(gdf, gpd.GeodataFrame)
+    elif isinstance(source, GeoDatasetAdapter):
+        ds = data_cat.get_geodataset(name, bbox=bbox, **kwargs)
+        # load slice of data
+        if coord in ds.coords:
+            if coord == ds.vector.index_dim:
+                ds = ds.isel({coord: slice(-100)})
+            else:
+                ds = ds.isel({coord: -1}).squeeze()
+        ds = ds.load()
+    return
+
 
 if __name__ == "__main__":
-    logger = setuplog("test_catalog", log_level=10)
+    logger = setuplog(
+        "test_catalog", path="./test_catalog.log", append=False, log_level=10
+    )
+    timeout_sec = 30
 
     # read data catalog
     fn = sys.argv[1]
     if not os.path.isabs(fn):
         fn = os.path.join(os.path.dirname(__file__), fn)
-    cat = DataCatalog(fn, logger=logger)
+    data_cat = DataCatalog(fn, logger=logger)
 
     # get names of data sources to test; by default all
     if len(sys.argv) == 3:
         sources = sys.argv[2].split(",")
     else:
-        sources = cat.sources
+        sources = data_cat.sources
 
+    # test sources
+    failed = []
     for name in sources:
-        source = cat.sources[name]
-        kwargs = {}
-        # TODO: add available time slice to catalog to limit reading ..
+
         try:
-            t0 = time.time()
-            if isinstance(source, RasterDatasetAdapter):
-                ds = cat.get_rasterdataset(name)
-                # test if correct spatial dims
-                ds.raster.set_spatial_dims()
-                # load slice of data
-                if ds.raster.dim0 is not None:
-                    ds = ds.isel({ds.raster.dim0: -1})
-                ds[-100:, -100:].load()  # always 2D data
-            elif isinstance(source, GeoDataFrameAdapter):
-                if source.driver == "vector":
-                    kwargs.update(rows=10)  # test for small slice
-                gdf = cat.get_geodataframe(name, **kwargs)
-                assert isinstance(gdf, gpd.GeodataFrame)
-            elif isinstance(source, GeoDatasetAdapter):
-                ds = cat.get_geodataset(name)
-                # test if correct spatial dims
-                ds.vector.set_spatial_dims()
-                # load slice of data
-                if coord in ds.coords:
-                    if coord == ds.vector.index_dim:
-                        continue
-                    ds = ds.isel({coord: -1})
-                ds[-100:].load()  # always 1D data
-            dt = time.time() - t0
-            logger.info(f"{name}: PASSED ({dt:0.1f} sec)")
+            with GenericTimeout(timeout_sec):
+                t0 = time.time()
+                test_source(data_cat, name)
+                dt = time.time() - t0
+                logger.info(f"{name}: PASSED ({dt:0.1f} sec)")
         except Exception as e:
             logger.error(f"{name}: FAILED")
             logger.error(e)
+            failed.append(name)
+
+    if len(failed) > 0:
+        logger.error(f"{len(failed)}/{len(sources)} data sources failed: {failed}")
+    else:
+        logger.info(f"{len(sources)} sources succesful")

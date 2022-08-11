@@ -16,7 +16,7 @@ basin_atlas_level12_v10:
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
     source_version: 10
-  path: hydrography/basin_atlas_v10.gdb
+  path: hydrography/hydro_atlas/basin_atlas_v10.gpkg
   
 river_atlas_v10: 
   crs: 4326
@@ -30,7 +30,7 @@ river_atlas_v10:
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
     source_version: 10
-  path: hydrography/river_atlas_v10.gdb
+  path: hydrography/hydro_atlas/river_atlas_v10.gpkg
   rename:    
     dis_m3_pyr: Dis_avg
 
@@ -48,7 +48,7 @@ lake_atlas_pol_v10:
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
     source_version: 10
-  path: hydrography/lake_atlas_v10.gdb
+  path: hydrography/hydro_atlas/lake_atlas_v10.gpkg
   rename:  
     dis_m3_pyr: Dis_avg
  
