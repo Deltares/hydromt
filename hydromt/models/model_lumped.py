@@ -1,22 +1,130 @@
-import pytest
-import sys, os
-from .model_api import Model
+# -*- coding: utf-8 -*-
+"""HydroMT LumpedModel class definition"""
+
 import xarray as xr
 import numpy as np
 import geopandas as gpd
-from shapely.geometry import box
-from os.path import join, dirname, basename, isfile, isdir
-
-from typing import Tuple, Union, Optional
-
-import logging
 import os
+from os.path import join, isfile, isdir, dirname
+from typing import Union, Optional, List
+import logging
 
-__all__ = ["LumpedModel"]
+from .model_api import Model
+
+__all__ = ["LumpedModel", "LumpedMixin"]
 logger = logging.getLogger(__name__)
 
 
-class LumpedModel(Model):
+class LumpedMixin:
+    _response_units = xr.Dataset()
+
+    @property
+    def response_units(self) -> xr.Dataset:
+        """Model response unit (lumped) data. Returns xr.Dataset geometry coordinate."""
+        if not self._response_units:
+            if self._read:
+                self.read_response_units()
+        return self._response_units
+
+    def set_response_units(
+        self,
+        data: Union[xr.DataArray, xr.Dataset, np.ndarray],
+        name: Optional[str] = None,
+    ) -> None:
+        """Add data to response_units.
+
+        All layers of response_units must have identical spatial index.
+
+        Parameters
+        ----------
+        data: xarray.DataArray or xarray.Dataset
+            new data to add to response_units
+        name: str, optional
+            Name of new data, this is used to overwrite the name of a DataArray
+            or to select a variable from a Dataset.
+        """
+        name_required = isinstance(data, np.ndarray) or (
+            isinstance(data, xr.DataArray) and data.name is None
+        )
+        if name is None and name_required:
+            raise ValueError(f"Unable to set {type(data).__name__} data without a name")
+        if isinstance(data, np.ndarray) and "geometry" in self._response_units:
+            # TODO: index name is hard coded. Using GeoDataset.index property once ready
+            index = self._response_units["index"]
+            if data.size != index.size and data.ndim == 1:
+                raise ValueError(
+                    "Size of data and number of response_units do not match"
+                )
+            data = xr.DataArray(dims=["index"], data=data)
+        if isinstance(data, xr.DataArray):
+            if name is not None:  # rename
+                data.name = name
+            data = data.to_dataset()
+        elif not isinstance(data, xr.Dataset):
+            raise ValueError(f"cannot set data of type {type(data).__name__}")
+        for dvar in data.data_vars:
+            if dvar in self._response_units:
+                self.logger.warning(f"Replacing response_units variable: {dvar}")
+            # TODO: check on index coordinate before merging
+            self._response_units[dvar] = data[dvar]
+
+    def read_response_units(
+        self,
+        fn: str = "response_units/response_units.nc",
+        fn_geom: str = "response_units/response_units.geojson",
+        **kwargs,
+    ) -> None:
+        """Read model response units from combined netcdf file at <root>/<fn> and geojson file at <root>/<fn_geom>.
+        The netcdf file contains the attribute data and the geojson file the geometry vector data.
+
+        key-word arguments are passed to :py:func:`xarray.open_dataset`
+
+        Parameters
+        ----------
+        fn : str, optional
+            netcdf filename relative to model root, by default 'response_units/response_units.nc'
+        fn_geom : str, optional
+            geojson filename relative to model root, by default 'response_units/response_units.geojson'
+        """
+        ds = xr.merge(self._read_nc(fn, **kwargs).values())
+        if isfile(join(self.root, fn_geom)):
+            gdf = gpd.read_file(join(self.root, fn_geom))
+            # TODO: index name is hard coded. Using GeoDataset.index property once ready
+            ds = ds.assign_coords(geometry=(["index"], gdf["geometry"]))
+        self.set_response_units(ds)
+
+    def write_response_units(
+        self,
+        fn: str = "response_units/response_units.nc",
+        fn_geom: str = "response_units/response_units.geojson",
+        **kwargs,
+    ):
+        """Write model response units to combined netcdf file at <root>/<fn> and geojson file at <root>/<fn_geom>.
+        The netcdf file contains the attribute data and the geojson file the geometry vector data.
+
+        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+
+        Parameters
+        ----------
+        fn : str, optional
+            netcdf filename relative to model root, by default 'response_units/response_units.nc'
+        fn_geom : str, optional
+            geojson filename relative to model root, by default 'response_units/response_units.geojson'
+        """
+        nc_dict = dict()
+        if len(self._response_units) > 0:
+            # write geometry
+            ds = self._response_units
+            gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=self.crs)
+            if not isdir(dirname(join(self.root, fn_geom))):
+                os.makedirs(dirname(join(self.root, fn_geom)))
+            gdf.to_file(join(self.root, fn_geom), driver="GeoJSON")
+            # _write_nc requires dict - use dummy key
+            nc_dict.update({"response_units": ds.drop_vars("geometry")})
+        self._write_nc(nc_dict, fn, **kwargs)
+
+
+class LumpedModel(Model, LumpedMixin):
     def __init__(
         self,
         root: str = None,
@@ -34,106 +142,45 @@ class LumpedModel(Model):
             logger=logger,
         )
 
-        # placeholders
-        self._response_units = (
-            xr.Dataset()
-        )  # representation of all response units. Geometry defined as coordinate "geometry"
-
-    def read(self):
-        """Method to read the complete model schematization and configuration from file."""
-        super().read()
-        self.read_response_units()
-        # Other specifics to LumpedModel...
-
-    def write(self):
-        """Method to write the complete model schematization and configuration to file."""
-        super().write()
-        self.write_response_units()
-        # Other specifics to LumpedModel...
-
-    def read_response_units(self):
-        if not self._write:
-            # start fresh in read-only mode
-            self._response_units = xr.Dataset()
-        if isfile(
-            join(self.root, "response_units", "response_units.nc")
-        ):  # Change of file not implemented yet
-            ds = xr.open_dataset(join(self.root, "response_units", "response_units.nc"))
-        if isfile(join(self.root, "response_units", "response_units.geoJSON")):
-            gdf = gpd.GeoDataFrame(
-                join(self.root, "response_units", "response_units.geoJSON")
-            )
-            self._response_units = ds.assign_coords(
-                geometry=(["index"], gdf["geometry"])
-            )
-
-    def write_response_units(self):
-        """Write response_units at <root/?/> in xarray.Dataset and a GeoJSON of the geometry"""
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
-        elif not self._response_units:
-            self.logger.warning("No response_units data to write - Exiting")
-            return
-        # filename
-        self.logger.info(f"Write response_units to {self.root}")
-
-        ds_out = self.response_units
-        ds_out.drop("geometry").to_netcdf(
-            join(self.root, "response_units", "response_units.nc")
-        )
-        gdf = gpd.GeoDataFrame(ds_out[["geometry"]].to_dataframe(), crs=self.crs)
-        gdf.to_file(join(self.root, "response_units", "response_units.GeoJSON"))
-
-    def set_response_units(
-        self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
-    ):
-        """Add data to response_units.
-
-        All layers of repsonse_units must have identical spatial index.
+    def read(
+        self,
+        components: List = [
+            "config",
+            "maps",
+            "response_units",
+            "geoms",
+            "forcing",
+            "states",
+            "results",
+        ],
+    ) -> None:
+        """Read the complete model schematization and configuration from model files.
 
         Parameters
         ----------
-        data: xarray.DataArray or xarray.Dataset
-            new data to add to response_units
-        name: str, optional
-            Name of new data, this is used to overwrite the name of a DataArray
-            or to select a variable from a Dataset.
+        components : List, optional
+            List of model components to read, each should have an associated read_<component> method.
+            By default ['config', 'maps', 'response_units', 'geoms', 'forcing', 'states', 'results']
         """
-        if name is None:
-            if isinstance(data, xr.DataArray) and data.name is not None:
-                name = data.name
-            elif not isinstance(data, xr.Dataset):
-                raise ValueError("Setting a layer requires a name")
-        elif name is not None and isinstance(data, xr.Dataset):
-            data_vars = list(data.data_vars)
-            if len(data_vars) == 1 and name not in data_vars:
-                data = data.rename_vars({data_vars[0]: name})
-            elif name not in data_vars:
-                raise ValueError("Name not found in DataSet")
-            else:
-                data = data[[name]]
-        if isinstance(data, xr.DataArray):
-            data.name = name
-            data = data.to_dataset()
-        if np.all(
-            len(self._response_units) == 0 and "geometry" in data.coords
-        ):  # new data with a geometry
-            self._response_units = data
-        else:
-            for dvar in data.data_vars.keys():
-                if dvar in self._response_units:
-                    if self._read:
-                        self.logger.warning(f"Replacing data for: {dvar}")
-                self._response_units[dvar] = data[dvar]
+        super().read(components=components)
 
-    @property
-    def response_units(self):
-        """xr.Dataset object with an object of shapely object of the Geometry"""
-        if not self._response_units:
-            if self._read:
-                self.read_response_units()
-        return self._response_units
+    def write(
+        self,
+        components: List = [
+            "config",
+            "maps",
+            "response_units",
+            "geoms",
+            "forcing",
+            "states",
+        ],
+    ) -> None:
+        """Write the complete model schematization and configuration to model files.
 
-    @property
-    def shape(self):
-        return self._response_units.coords["index"].shape
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to write, each should have an associated write_<component> method.
+            By default ['config', 'maps', 'response_units', 'geoms', 'forcing', 'states']
+        """
+        super().write(components=components)

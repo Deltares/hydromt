@@ -5,7 +5,7 @@ import pytest
 import xarray as xr
 import numpy as np
 from hydromt.models.model_api import _check_data
-from hydromt.models import Model, GridModel
+from hydromt.models import Model, GridModel, LumpedModel
 
 
 def test_check_data(demda):
@@ -74,3 +74,18 @@ def test_gridmodel(grid_model, tmpdir):
     equal, errors, components = grid_model._test_equal(model1)
     assert equal, errors
     assert np.all([c in components for c in ["grid"]])
+
+
+def test_lumpedmodel(lumped_model, tmpdir):
+    non_compliant = lumped_model._test_model_api()
+    assert len(non_compliant) == 0, non_compliant
+    # write model
+    lumped_model.set_root(str(tmpdir), mode="w")
+    lumped_model.write()
+    # read model
+    model1 = LumpedModel(str(tmpdir), mode="r")
+    model1.read()
+    # check if equal
+    equal, errors, components = lumped_model._test_equal(model1)
+    assert equal, errors
+    assert np.all([c in components for c in ["response_units"]])

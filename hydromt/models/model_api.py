@@ -697,8 +697,7 @@ class Model(object, metaclass=ABCMeta):
                 data = xr.DataArray(dims=self.dims, data=data, name=name).to_dataset()
             for dvar in data.data_vars.keys():
                 if dvar in self._staticmaps:
-                    if self._read:
-                        self.logger.warning(f"Replacing staticmap: {dvar}")
+                    self.logger.warning(f"Replacing staticmap: {dvar}")
                 self._staticmaps[dvar] = data[dvar]
 
     def read_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
@@ -730,6 +729,7 @@ class Model(object, metaclass=ABCMeta):
         """
         nc_dict = dict()
         if len(self._staticmaps) > 0:
+            # _write_nc requires dict - use dummy key
             nc_dict.update({"staticmaps": self._staticmaps})
         self._write_nc(nc_dict, fn, **kwargs)
 
@@ -761,8 +761,7 @@ class Model(object, metaclass=ABCMeta):
                 "First parameter map(s) should be geopandas.GeoDataFrame or geopandas.GeoSeries"
             )
         if name in self._geoms:
-            if self._read:
-                self.logger.warning(f"Replacing geom: {name}")
+            self.logger.warning(f"Replacing geom: {name}")
         self._geoms[name] = geom
 
     def read_geoms(self, fn: str = "geoms/*.geojson", **kwargs) -> None:
@@ -1138,54 +1137,54 @@ class Model(object, metaclass=ABCMeta):
 
     @property
     def coords(self) -> Dict:
-        """Returns coordinates of staticmaps.
+        """Returns the coordinates of model staticmaps.
         ..NOTE: will be deprecated in future versions"""
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.coords
 
     @property
     def res(self) -> Tuple:
-        """Returns coordinates of staticmaps.
+        """Returns the resolution of the model staticmaps.
         ..NOTE: will be deprecated in future versions"""
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.res
 
     @property
     def transform(self):
-        """Returns spatial transform staticmaps.
+        """Returns the geospatial transform of the model staticmaps.
         ..NOTE: will be deprecated in future versions"""
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.transform
 
     @property
     def width(self):
-        """Returns width of staticmaps.
+        """Returns the width of the model staticmaps.
         ..NOTE: will be deprecated in future versions"""
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.width
 
     @property
     def height(self):
-        """Returns height of staticmaps.
+        """Returns the height of the model staticmaps.
         ..NOTE: will be deprecated in future versions"""
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.height
 
     @property
     def shape(self) -> Tuple:
-        """Returns shape of staticmaps.
+        """Returns the shape of the model staticmaps.
         ..NOTE: will be deprecated in future versions"""
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.shape
 
     @property
     def bounds(self) -> Tuple:
-        """Returns bounds of region."""
+        """Returns the bounding box of the model region."""
         return self.region.total_bounds
 
     @property
     def region(self) -> gpd.GeoDataFrame:
-        """Returns geometry of region of the model area of interest."""
+        """Returns the geometry of the model area of interest."""
         region = gpd.GeoDataFrame()
         if "region" in self.geoms:
             region = self.geoms["region"]

@@ -30,6 +30,45 @@ class GridMixin(object):
                 self.read_grid()
         return self._grid
 
+    def set_grid(
+        self,
+        data: Union[xr.DataArray, xr.Dataset, np.ndarray],
+        name: Optional[str] = None,
+    ):
+        """Add data to grid.
+
+        All layers of grid must have identical spatial coordinates.
+
+        Parameters
+        ----------
+        data: xarray.DataArray or xarray.Dataset
+            new map layer to add to grid
+        name: str, optional
+            Name of new map layer, this is used to overwrite the name of a DataArray
+            and ignored if data is a Dataset
+        """
+        # NOTE: variables in a dataset are not longer renamed as used to be the case in set_staticmaps
+        name_required = isinstance(data, np.ndarray) or (
+            isinstance(data, xr.DataArray) and data.name is None
+        )
+        if name is None and name_required:
+            raise ValueError(f"Unable to set {type(data).__name__} data without a name")
+        if isinstance(data, np.ndarray):
+            if data.shape != self.grid.raster.shape:
+                raise ValueError("Shape of data and grid maps do not match")
+            data = xr.DataArray(dims=self.grid.raster.dims, data=data, name=name)
+        if isinstance(data, xr.DataArray):
+            if name is not None:  # rename
+                data.name = name
+            data = data.to_dataset()
+        elif not isinstance(data, xr.Dataset):
+            raise ValueError(f"cannot set data of type {type(data).__name__}")
+        for dvar in data.data_vars:
+            if dvar in self._grid:
+                if self._read:
+                    self.logger.warning(f"Replacing grid map: {dvar}")
+            self._grid[dvar] = data[dvar]
+
     def read_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
         """Read model grid data at <root>/<fn> and add to grid property
 
@@ -55,48 +94,9 @@ class GridMixin(object):
         """
         nc_dict = dict()
         if len(self._grid) > 0:
-            nc_dict.update(
-                {"grid": self._grid}
-            )  # _write_nc requires dict - use dummy key
+            # _write_nc requires dict - use dummy key
+            nc_dict.update({"grid": self._grid})
         self._write_nc(nc_dict, fn, **kwargs)
-
-    def set_grid(
-        self,
-        data: Union[xr.DataArray, xr.Dataset, np.ndarray],
-        name: Optional[str] = None,
-    ):
-        """Add data to grid.
-
-        All layers of grid must have identical spatial coordinates.
-
-        Parameters
-        ----------
-        data: xarray.DataArray or xarray.Dataset
-            new map layer to add to grid
-        name: str, optional
-            Name of new map layer, this is used to overwrite the name of a DataArray
-            and ignored if data is a Dataset
-        """
-        # NOTE: variables in a dataset are not longer renamed as used to be the case in set_staticmaps
-        if isinstance(data, np.ndarray):
-            if data.shape != self.grid.raster.shape:
-                raise ValueError("Shape of data and grid maps do not match")
-            data = xr.DataArray(dims=self.grid.raster.dims, data=data, name=name)
-        if isinstance(data, xr.DataArray):
-            if name is not None:  # rename
-                data.name = name
-            elif data.name is None:
-                raise ValueError(
-                    "unable to set an unnamed DataArray without providing an explicit name"
-                )
-            data = data.to_dataset()
-        elif not isinstance(data, xr.Dataset):
-            raise ValueError(f"cannot set data of type {type(data).__name__}")
-        for dvar in data.data_vars:
-            if dvar in self._grid:
-                if self._read:
-                    self.logger.warning(f"Replacing grid map: {dvar}")
-            self._grid[dvar] = data[dvar]
 
 
 class GridModel(Model, GridMixin):
@@ -240,26 +240,26 @@ class GridModel(Model, GridMixin):
 
     # Properties for subclass GridModel
     @property
-    def res(self) -> Tuple:
-        """Returns coordinates of grid."""
+    def res(self) -> Tuple[float, float]:
+        """Returns the resolution of the model grid."""
         if len(self._grid) > 0:
             return self.grid.raster.res
 
     @property
     def transform(self):
-        """Returns spatial transform grid."""
+        """Returns spatial transform of the model grid."""
         if len(self._grid) > 0:
             return self.grid.raster.transform
 
     @property
-    def bounds(self) -> tuple:
-        """Returns shape of grid."""
+    def bounds(self) -> List[float]:
+        """Returns the bounding box of the model grid."""
         if len(self._grid) > 0:
             return self.grid.raster.bounds
 
     @property
     def region(self) -> gpd.GeoDataFrame:
-        """Returns geometry of region of the model area of interest."""
+        """Returns the geometry of the model area of interest."""
         region = gpd.GeoDataFrame()
         if "region" in self.geoms:
             region = self.geoms["region"]

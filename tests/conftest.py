@@ -4,7 +4,7 @@ import pandas as pd
 import geopandas as gpd
 import xarray as xr
 
-from hydromt import Model, GridModel
+from hydromt import Model, GridModel, LumpedModel
 from hydromt import raster, vector, gis_utils
 import pyflwdir
 
@@ -150,4 +150,20 @@ def grid_model(demda, flwda):
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_grid(demda, "elevtn")
     mod.set_grid(flwda, "flwdir")
+    return mod
+
+
+@pytest.fixture
+def lumped_model(ts, geodf):
+    mod = LumpedModel()
+    mod.setup_region({"bbox": geodf.total_bounds})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    da = xr.DataArray(
+        ts,
+        dims=["index", "time"],
+        coords={"index": ts.index, "time": ts.columns},
+        name="zs",
+    )
+    da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
+    mod.set_response_units(da)
     return mod
