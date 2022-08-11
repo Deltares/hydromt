@@ -44,6 +44,7 @@ dependencies:
   - toml
   - sphinx # docs
   - xarray
+  - xugrid # optional for mesh
   - zarr
   - pip:
     - hydroengine  # optional

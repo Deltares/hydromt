@@ -29,4 +29,5 @@ dependencies:
   - rioxarray
   - scipy
   - xarray
+  - xugrid # optional for mesh
   - zarr

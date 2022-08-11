@@ -24,6 +24,15 @@ except ImportError:
     HAS_PCRASTER = False
 
 
+def _has_xugrid():
+    try:
+        import xugrid
+
+        return True
+    except ImportError:
+        return False
+
+
 # submoduls
 from . import cli, workflows, stats, flw, raster, vector
 

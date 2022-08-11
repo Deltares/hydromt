@@ -6,6 +6,7 @@ import xarray as xr
 import numpy as np
 from hydromt.models.model_api import _check_data
 from hydromt.models import Model, GridModel, LumpedModel
+from hydromt import _has_xugrid
 
 
 def test_check_data(demda):
@@ -101,3 +102,9 @@ def test_networkmodel(network_model, tmpdir):
         network_model.set_network()
     with pytest.raises(NotImplementedError):
         network_model.network
+
+
+@pytest.mark.skipif(not _has_xugrid(), reason="Xugrid not installed.")
+def test_meshmodel(mesh_model):
+    non_compliant = mesh_model._test_model_api()
+    assert len(non_compliant) == 0, non_compliant
