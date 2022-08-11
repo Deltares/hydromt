@@ -167,7 +167,7 @@ def grid_model(demda, flwda):
 @pytest.fixture
 def lumped_model(ts, geodf):
     mod = LumpedModel()
-    mod.setup_region({"bbox": geodf.total_bounds})
+    # mod.setup_region({"bbox": geodf.total_bounds})
     mod.setup_config(**{"header": {"setting": "value"}})
     da = xr.DataArray(
         ts,
@@ -192,10 +192,10 @@ def mesh_model(demuda):
     from hydromt import MeshModel
 
     mod = MeshModel()
-    region = gpd.GeoDataFrame(
-        geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.crs
-    )
-    mod.setup_region({"geom": region})
+    # region = gpd.GeoDataFrame(
+    #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.crs
+    # )
+    # mod.setup_region({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(demuda, "elevtn")
     return mod

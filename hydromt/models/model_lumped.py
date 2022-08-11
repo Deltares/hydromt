@@ -8,6 +8,7 @@ import os
 from os.path import join, isfile, isdir, dirname
 from typing import Union, Optional, List
 import logging
+from shapely.geometry import box
 
 from .model_api import Model
 
@@ -91,6 +92,8 @@ class LumpedMixin:
             gdf = gpd.read_file(join(self.root, fn_geom))
             # TODO: index name is hard coded. Using GeoDataset.index property once ready
             ds = ds.assign_coords(geometry=(["index"], gdf["geometry"]))
+            if gdf.crs is not None:  # parse crs
+                ds = ds.rio.write_crs(gdf.crs)
         self.set_response_units(ds)
 
     def write_response_units(
@@ -115,7 +118,7 @@ class LumpedMixin:
         if len(self._response_units) > 0:
             # write geometry
             ds = self._response_units
-            gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=self.crs)
+            gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
             if not isdir(dirname(join(self.root, fn_geom))):
                 os.makedirs(dirname(join(self.root, fn_geom)))
             gdf.to_file(join(self.root, fn_geom), driver="GeoJSON")
@@ -184,3 +187,15 @@ class LumpedModel(Model, LumpedMixin):
             By default ['config', 'maps', 'response_units', 'geoms', 'forcing', 'states']
         """
         super().write(components=components)
+
+    @property
+    def region(self) -> gpd.GeoDataFrame:
+        """Returns the geometry of the model area of interest."""
+        region = gpd.GeoDataFrame()
+        if "region" in self.geoms:
+            region = self.geoms["region"]
+        elif len(self.response_units) > 0:
+            ds = self.response_units
+            gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
+            region = gpd.GeoDataFrame(geometry=[box(*gdf.total_bounds)], crs=gdf.crs)
+        return region

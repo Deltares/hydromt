@@ -4,6 +4,7 @@
 import pytest
 import xarray as xr
 import numpy as np
+import geopandas as gpd
 from hydromt.models.model_api import _check_data
 from hydromt.models import Model, GridModel, LumpedModel
 from hydromt import _has_xugrid
@@ -59,6 +60,7 @@ def test_model(model, tmpdir):
 
 
 def test_gridmodel(grid_model, tmpdir):
+    assert isinstance(grid_model.region, gpd.GeoDataFrame)
     non_compliant = grid_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # grid specific attributes
@@ -78,6 +80,7 @@ def test_gridmodel(grid_model, tmpdir):
 
 
 def test_lumpedmodel(lumped_model, tmpdir):
+    assert isinstance(lumped_model.region, gpd.GeoDataFrame)
     non_compliant = lumped_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
@@ -105,6 +108,19 @@ def test_networkmodel(network_model, tmpdir):
 
 
 @pytest.mark.skipif(not _has_xugrid(), reason="Xugrid not installed.")
-def test_meshmodel(mesh_model):
+def test_meshmodel(mesh_model, tmpdir):
+    from hydromt.models import MeshModel
+
+    assert isinstance(mesh_model.region, gpd.GeoDataFrame)
     non_compliant = mesh_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
+    # write model
+    mesh_model.set_root(str(tmpdir), mode="w")
+    mesh_model.write()
+    # read model
+    model1 = MeshModel(str(tmpdir), mode="r")
+    model1.read()
+    # check if equal
+    equal, errors, components = mesh_model._test_equal(model1)
+    assert equal, errors
+    assert np.all([c in components for c in ["mesh"]])

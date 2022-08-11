@@ -1190,8 +1190,8 @@ class Model(object, metaclass=ABCMeta):
             region = self.geoms["region"]
         # For now stays here but change to grid in GridModel
         elif len(self.staticmaps) > 0:
-            crs = self.crs  # changed from self.staticmaps.raster.crs
-            if crs is None and crs.to_epsg() is not None:
+            crs = self.staticmaps.raster.crs
+            if crs is None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region

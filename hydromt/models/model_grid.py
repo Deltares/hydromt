@@ -265,7 +265,7 @@ class GridModel(Model, GridMixin):
             region = self.geoms["region"]
         elif len(self.grid) > 0:
             crs = self.grid.raster.crs
-            if crs is None and crs.to_epsg() is not None:
+            if crs is None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region
