@@ -5,7 +5,7 @@ import pytest
 import xarray as xr
 import numpy as np
 from hydromt.models.model_api import _check_data
-from hydromt.models import Model
+from hydromt.models import Model, GridModel
 
 
 def test_check_data(demda):
@@ -56,7 +56,21 @@ def test_model(model, tmpdir):
     ]
     assert np.all([c in components for c in comp])
 
-def test_gridmodel(grid_model):
+
+def test_gridmodel(grid_model, tmpdir):
     non_compliant = grid_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # grid specific attributes
+    assert np.all(grid_model.res == grid_model.grid.raster.res)
+    assert np.all(grid_model.bounds == grid_model.grid.raster.bounds)
+    assert np.all(grid_model.transform == grid_model.grid.raster.transform)
+    # write model
+    grid_model.set_root(str(tmpdir), mode="w")
+    grid_model.write()
+    # read model
+    model1 = GridModel(str(tmpdir), mode="r")
+    model1.read()
+    # check if equal
+    equal, errors, components = grid_model._test_equal(model1)
+    assert equal, errors
+    assert np.all([c in components for c in ["grid"]])
