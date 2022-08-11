@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 """HydroMT models API"""
 import sys
-from .. import _has_xugrid
 
 from .model_api import *
 from .model_grid import *
+from .model_lumped import *
+from .model_network import *
+from . import model_plugins
+
+from .. import _has_xugrid
 
 if _has_xugrid():
     from .model_mesh import *
-from . import model_plugins
-
 
 # dictionary with entry points (not yet loaded!)
 ENTRYPOINTS = model_plugins.discover()
