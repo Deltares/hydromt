@@ -426,25 +426,60 @@ class Model(object, metaclass=ABCMeta):
                 log.add_filehandler(self.logger, new_path, log_level)
 
     # I/O
-    def read(self):
-        """Method to read the complete model schematization and configuration from file."""
-        self.read_config()
-        self.read_maps()  # New property - auxiliary maps - can be of various resolution.
-        self.read_staticmaps()  # previously staticmaps - to be removed in future version
-        self.read_geoms()  # previously staticgeoms
-        self.read_forcing()
-        self.read_states()
-        self.logger.info("Model read")
+    def read(
+        self,
+        components: List = [
+            "config",
+            "maps",
+            "staticmaps",
+            "geoms",
+            "forcing",
+            "states",
+            "results",
+        ],
+    ) -> None:
+        """Read the complete model schematization and configuration from model files.
 
-    def write(self):
-        """Method to write the complete model schematization and configuration to file."""
-        self.logger.info(f"Write model data to {self.root}")
-        self.write_config()
-        self.write_maps()  # New property - auxiliary maps - can be of various resolution.
-        self.write_geoms()  # previously staticgeoms
-        self.write_staticmaps()  # previously staticmaps - to be removed in future version
-        self.write_forcing()
-        self.write_states()
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to read, each should have an associated read_<component> method.
+            By default ['config', 'maps', 'staticmaps', 'geoms', 'forcing', 'states', 'results']
+        """
+        self.logger.info(f"Reading model data from {self.root}")
+        for component in components:
+            if not hasattr(self, f"read_{component}"):
+                raise AttributeError(
+                    f"{type(self).__name__} does not have read_{component}"
+                )
+            getattr(self, f"read_{component}")()
+
+    def write(
+        self,
+        components: List = [
+            "maps",
+            "staticmaps",
+            "geoms",
+            "forcing",
+            "states",
+            "config",
+        ],
+    ) -> None:
+        """Write the complete model schematization and configuration to model files.
+
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to write, each should have an associated write_<component> method.
+            By default ['config', 'maps', 'staticmaps', 'geoms', 'forcing', 'states']
+        """
+        self.logger.info(f"Writing model data to {self.root}")
+        for component in components:
+            if not hasattr(self, f"write_{component}"):
+                raise AttributeError(
+                    f"{type(self).__name__} does not have write_{component}"
+                )
+            getattr(self, f"write_{component}")()
 
     def write_data_catalog(
         self, root: Optional[Union[str, Path]] = None, used_only: bool = True
@@ -606,8 +641,8 @@ class Model(object, metaclass=ABCMeta):
         ..NOTE: will be deprecated in future versions and replaced by `grid`
         """
         warnings.warn(
-            'The "staticmaps" property of the Model class will be deprecated in future versions, '
-            'use  "grid" of the GridModel class instead.',
+            "The staticmaps property of the Model class will be deprecated in future versions, "
+            "use the grid property of the GridModel class instead.",
             DeprecationWarning,
         )
         if len(self._staticmaps) == 0:
@@ -634,7 +669,7 @@ class Model(object, metaclass=ABCMeta):
             or to select a variable from a Dataset.
         """
         warnings.warn(
-            'The "set_staticmaps" method will be deprecated in future versions, use  "set_grid" instead.',
+            "The set_staticmaps method will be deprecated in future versions, use set_grid instead.",
             DeprecationWarning,
         )
         if name is None:
@@ -693,7 +728,10 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root, by default 'staticmaps/staticmaps.nc'
         """
-        self._write_nc({"staticmaps": self._staticmaps}, fn, **kwargs)
+        nc_dict = dict()
+        if len(self._staticmaps) > 0:
+            nc_dict.update({"staticmaps": self._staticmaps})
+        self._write_nc(nc_dict, fn, **kwargs)
 
     # model geometry files
     @property
@@ -778,7 +816,7 @@ class Model(object, metaclass=ABCMeta):
     def _staticgeoms(self):
         # temporary property to throw warning is accessed
         warnings.warn(
-            'The "staticgeoms" method will be deprecated in future versions, use  "geoms" instead.',
+            "The staticgeoms method will be deprecated in future versions, use geoms instead.",
             DeprecationWarning,
         )
         return self._geoms
@@ -791,14 +829,14 @@ class Model(object, metaclass=ABCMeta):
     def set_staticgeoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
         """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.set_geoms`"""
         warnings.warn(
-            'The "set_staticgeoms" method will be deprecated in future versions, use  "set_geoms" instead.',
+            "The set_staticgeoms method will be deprecated in future versions, use set_geoms instead.",
             DeprecationWarning,
         )
         return self.set_geoms(geom, name)
 
     def read_staticgeoms(self):
         warnings.warn(
-            'The "read_staticgeoms" method will be deprecated in future versions, use  "read_geoms" instead.',
+            'The read_staticgeoms" method will be deprecated in future versions, use read_geoms instead.',
             DeprecationWarning,
         )
         return self.read_geoms(fn="staticgeoms/*.geojson")
@@ -1044,7 +1082,7 @@ class Model(object, metaclass=ABCMeta):
     ) -> None:
         if not self._write:
             raise IOError("Model opened in read-only mode")
-        if not self._maps:
+        if len(nc_dict) == 0:
             self.logger.info("No data found - exiting")
         for name, ds in nc_dict.items():
             if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
@@ -1151,13 +1189,8 @@ class Model(object, metaclass=ABCMeta):
         region = gpd.GeoDataFrame()
         if "region" in self.geoms:
             region = self.geoms["region"]
-        elif (
-            len(self.staticmaps) > 0
-        ):  # For now stays here but change to grid in GridModel
-            warnings.warn(
-                '"region" is currently set from staticmaps. In future versions, "staticmaps" will be changed for "grid" and become deprecated , use  "grid" instead.',
-                DeprecationWarning,
-            )
+        # For now stays here but change to grid in GridModel
+        elif len(self.staticmaps) > 0:
             crs = self.crs  # changed from self.staticmaps.raster.crs
             if crs is None and crs.to_epsg() is not None:
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
@@ -1239,8 +1272,10 @@ class Model(object, metaclass=ABCMeta):
             List of tested components
 
         """
+
         def _isprop(mod, p):
             return isinstance(getattr(type(mod), p, None), property)
+
         assert isinstance(other, type(self))
         components = [p for p in dir(self) if _isprop(self, p)]
         components_other = [p for p in dir(other) if _isprop(other, p)]
