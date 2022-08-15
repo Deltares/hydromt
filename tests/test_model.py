@@ -9,6 +9,8 @@ from hydromt.models.model_api import _check_data
 from hydromt.models import Model, GridModel, LumpedModel
 from hydromt import _has_xugrid
 
+from .conftest import TestAuxModel
+
 
 def test_check_data(demda):
     data_dict = _check_data(demda.copy(), "elevtn")
@@ -56,6 +58,22 @@ def test_model(model, tmpdir):
         "staticmaps",
     ]
     assert np.all([c in components for c in comp])
+
+
+def test_auxmapsmixin(auxmap_model, tmpdir):
+    assert len(auxmap_model.auxmaps) == 1
+    non_compliant = auxmap_model._test_model_api()
+    assert len(non_compliant) == 0, non_compliant
+    # write model
+    auxmap_model.set_root(str(tmpdir), mode="w")
+    auxmap_model.write(components=["config", "geoms", "auxmaps"])
+    # read model
+    model1 = TestAuxModel(str(tmpdir), mode="r")
+    model1.read(components=["config", "geoms", "auxmaps"])
+    # check if equal
+    equal, errors, components = auxmap_model._test_equal(model1)
+    assert equal, errors
+    assert np.all([c in components for c in ["auxmaps"]])
 
 
 def test_gridmodel(grid_model, tmpdir):

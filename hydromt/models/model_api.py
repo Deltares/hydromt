@@ -80,7 +80,7 @@ class AuxmapsMixin(object):
         for name, ds in ncs.items():
             self.set_auxmaps(ds, name=name)
 
-    def write_maps(self, fn="auxmaps/{name}.nc", **kwargs) -> None:
+    def write_auxmaps(self, fn="auxmaps/{name}.nc", **kwargs) -> None:
         """Write auxmaps to netcdf file at <root>/<fn>
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`

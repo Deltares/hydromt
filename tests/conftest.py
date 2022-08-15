@@ -6,8 +6,13 @@ import xarray as xr
 from shapely.geometry import box
 
 from hydromt import Model, GridModel, LumpedModel, NetworkModel
+from hydromt.models.model_api import AuxmapsMixin
 from hydromt import raster, vector, gis_utils
 import pyflwdir
+
+
+class TestAuxModel(Model, AuxmapsMixin):
+    _NAME = "testauxmodel"
 
 
 @pytest.fixture
@@ -151,6 +156,15 @@ def model(demda, world, obsda):
     mod.set_forcing(obsda, "waterlevel")
     mod.set_states(demda, "zsini")
     mod.set_results(obsda, "zs")
+    return mod
+
+
+@pytest.fixture
+def auxmap_model(demda):
+    mod = TestAuxModel()
+    mod.setup_region({"geom": demda.raster.box})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_auxmaps(demda, "elevtn")
     return mod
 
 
