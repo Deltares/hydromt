@@ -100,6 +100,10 @@ class GridMixin(object):
 
 
 class GridModel(Model, GridMixin):
+
+    # TODO: add here "res": "setup_region" or "res": "setup_grid" when genereic method is available
+    _CLI_ARGS = {"region": "setup_region"}
+
     def __init__(
         self,
         root: str = None,
@@ -121,7 +125,6 @@ class GridModel(Model, GridMixin):
         self,
         components: List = [
             "config",
-            "maps",
             "grid",
             "geoms",
             "forcing",
@@ -141,7 +144,7 @@ class GridModel(Model, GridMixin):
 
     def write(
         self,
-        components: List = ["config", "maps", "grid", "geoms", "forcing", "states"],
+        components: List = ["config", "grid", "geoms", "forcing", "states"],
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 

@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class NetworkModel(Model):
+
+    _CLI_ARGS = {"region": "setup_region"}
+
     def __init__(
         self,
         root: str = None,
@@ -36,7 +39,6 @@ class NetworkModel(Model):
         self,
         components: List = [
             "config",
-            "maps",
             "network",
             "geoms",
             "forcing",
@@ -58,7 +60,6 @@ class NetworkModel(Model):
         self,
         components: List = [
             "config",
-            "maps",
             "network",
             "geoms",
             "forcing",

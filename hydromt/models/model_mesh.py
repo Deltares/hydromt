@@ -111,6 +111,9 @@ class MeshMixin(object):
 
 
 class MeshModel(Model, MeshMixin):
+
+    _CLI_ARGS = {"region": "setup_region"}
+
     def __init__(
         self,
         root: str = None,
@@ -132,7 +135,6 @@ class MeshModel(Model, MeshMixin):
         self,
         components: List = [
             "config",
-            "maps",
             "mesh",
             "geoms",
             "forcing",
@@ -152,7 +154,7 @@ class MeshModel(Model, MeshMixin):
 
     def write(
         self,
-        components: List = ["config", "maps", "mesh", "geoms", "forcing", "states"],
+        components: List = ["config", "mesh", "geoms", "forcing", "states"],
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 

@@ -49,7 +49,6 @@ def test_model(model, tmpdir):
         "crs",
         "forcing",
         "geoms",
-        "maps",
         "region",
         "results",
         "states",

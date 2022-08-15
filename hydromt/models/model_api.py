@@ -26,6 +26,74 @@ __all__ = ["Model"]
 logger = logging.getLogger(__name__)
 
 
+class AuxmapsMixin(object):
+    # mixin class to add an auxiliary maps object
+    # contains maps needed for model building but not model data
+    _auxmaps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
+
+    # model auxiliary map files
+    @property
+    def auxmaps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
+        """Auxillary model maps. Returns dict of xarray.DataArray or xarray.Dataset"""
+        if len(self._auxmaps) == 0:
+            if self._read:
+                self.read_auxmaps()
+        return self._auxmaps
+
+    def set_auxmaps(
+        self,
+        data: Union[xr.DataArray, xr.Dataset],
+        name: Optional[str] = None,
+        split_dataset: Optional[bool] = False,
+    ):
+        """Add auxiliary data to maps.
+
+        Dataset can either be added as is (default) or split into several
+        DataArrays using the split_dataset argument.
+
+        Arguments
+        ---------
+        data: xarray.Dataset or xarray.DataArray
+            New forcing data to add
+        name: str, optional
+            Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
+        split_dataset: bool, optional
+            If data is a xarray.Dataset, either add it as is to results or split it into several xarray.DataArrays.
+        """
+        data_dict = _check_data(data, name, split_dataset)
+        for name in data_dict:
+            if name in self._auxmaps:
+                self.logger.warning(f"Replacing result: {name}")
+            self._auxmaps[name] = data_dict[name]
+
+    def read_auxmaps(self, fn: str = "auxmaps/*.nc", **kwargs) -> None:
+        """Read auxillary model map at <root>/<fn> and add to maps property
+
+        key-word arguments are passed to :py:func:`xarray.open_dataset`
+
+        Parameters
+        ----------
+        fn : str, optional
+            filename relative to model root, may wildcards, by default "auxmaps/*.nc"
+        """
+        ncs = self._read_nc(fn, **kwargs)
+        for name, ds in ncs.items():
+            self.set_auxmaps(ds, name=name)
+
+    def write_maps(self, fn="auxmaps/{name}.nc", **kwargs) -> None:
+        """Write auxmaps to netcdf file at <root>/<fn>
+
+        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+
+        Parameters
+        ----------
+        fn : str, optional
+            filename relative to model root and should contain a {name} placeholder,
+            by default 'auxmaps/{name}.nc'
+        """
+        self._write_nc(self._auxmaps, fn, **kwargs)
+
+
 class Model(object, metaclass=ABCMeta):
     """General and basic API for models in HydroMT"""
 
@@ -38,7 +106,8 @@ class Model(object, metaclass=ABCMeta):
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
     # tell hydroMT which methods should receive the res and region arguments
-    _CLI_ARGS = {"region": "setup_region", "res": "setup_basemaps"}
+    # TODO: change it back to setup_region and no res --> deprecation
+    _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
 
     def __init__(
         self,
@@ -81,12 +150,12 @@ class Model(object, metaclass=ABCMeta):
         self._geoms = (
             dict()
         )  # dictionary of gdp.GeoDataFrame NOTE was staticgeoms in <=v0.5
-        self._maps = dict()  # dictionary of xr.DataArray
-        self._forcing = dict()  # dictionary of xr.DataArray
-        self._states = dict()  # dictionary of xr.DataArray
+        self._forcing = dict()  # dictionary of xr.DataArray and/or xr.Dataset
+        self._states = dict()  # dictionary of xr.DataArray and/or xr.Dataset
         self._results = dict()  # dictionary of xr.DataArray and/or xr.Dataset
         # To be deprecated in future versions!
         self._staticmaps = xr.Dataset()
+        self._staticgeoms = dict()
 
         # file system
         self._root = ""
@@ -430,7 +499,6 @@ class Model(object, metaclass=ABCMeta):
         self,
         components: List = [
             "config",
-            "maps",
             "staticmaps",
             "geoms",
             "forcing",
@@ -457,7 +525,6 @@ class Model(object, metaclass=ABCMeta):
     def write(
         self,
         components: List = [
-            "maps",
             "staticmaps",
             "geoms",
             "forcing",
@@ -750,10 +817,8 @@ class Model(object, metaclass=ABCMeta):
         ---------
         geoms: geopandas.GeoDataFrame or geopandas.GeoSeries
             New geometry data to add
-        name: str, optional
-            Results name, required if data is xarray.Dataset is and split_dataset=False.
-        split_dataset: bool, optional
-            If True (default), split a Dataset to store each variable as a DataArray.
+        name: str
+            Geometry name.
         """
         gtypes = [gpd.GeoDataFrame, gpd.GeoSeries]
         if not np.any([isinstance(geom, t) for t in gtypes]):
@@ -811,18 +876,23 @@ class Model(object, metaclass=ABCMeta):
             gdf.to_file(_fn, **kwargs)
 
     # OLD model geometry files; TODO remove
-    @property
-    def _staticgeoms(self):
-        # temporary property to throw warning is accessed
-        warnings.warn(
-            "The staticgeoms method will be deprecated in future versions, use geoms instead.",
-            DeprecationWarning,
-        )
-        return self._geoms
+    # @property
+    # def _staticgeoms(self):
+    #     # temporary property to throw warning is accessed
+    #     warnings.warn(
+    #         "The staticgeoms method will be deprecated in future versions, use geoms instead.",
+    #         DeprecationWarning,
+    #     )
+    #     return self._geoms
 
     @property
     def staticgeoms(self):
         """This property will be deprecated in future versions, use :py:meth:`~hydromt.Model.geom`"""
+        warnings.warn(
+            "The staticgeoms method will be deprecated in future versions, use geoms instead.",
+            DeprecationWarning,
+        )
+        self._staticgeoms = self._geoms
         return self._staticgeoms
 
     def set_staticgeoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
@@ -847,68 +917,6 @@ class Model(object, metaclass=ABCMeta):
         )
         return self.write_geoms(fn="staticgeoms/{name}.geojson")
 
-    # model auxillary map files
-    @property
-    def maps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Auxillary model maps. Returns dict of xarray.DataArray or xarray.Dataset"""
-        if len(self._maps) == 0:
-            if self._read:
-                self.read_maps()
-        return self._maps
-
-    def set_maps(
-        self,
-        data: Union[xr.DataArray, xr.Dataset],
-        name: Optional[str] = None,
-        split_dataset: Optional[bool] = False,
-    ):
-        """Add auxiliary data to maps.
-
-        Dataset can either be added as is (default) or split into several
-        DataArrays using the split_dataset argument.
-
-        Arguments
-        ---------
-        data: xarray.Dataset or xarray.DataArray
-            New forcing data to add
-        name: str, optional
-            Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
-        split_dataset: bool, optional
-            If data is a xarray.Dataset, either add it as is to results or split it into several xarray.DataArrays.
-        """
-        data_dict = _check_data(data, name, split_dataset)
-        for name in data_dict:
-            if name in self._maps:
-                self.logger.warning(f"Replacing result: {name}")
-            self._maps[name] = data_dict[name]
-
-    def read_maps(self, fn: str = "maps/*.nc", **kwargs) -> None:
-        """Read auxillary model map at <root>/<fn> and add to maps property
-
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, may wildcards, by default "maps/*.nc"
-        """
-        ncs = self._read_nc(fn, **kwargs)
-        for name, ds in ncs.items():
-            self.set_maps(ds, name=name)
-
-    def write_maps(self, fn="maps/{name}.nc", **kwargs) -> None:
-        """Write maps to netcdf file at <root>/<fn>
-
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root and should contain a {name} placeholder,
-            by default 'maps/{name}.nc'
-        """
-        self._write_nc(self._maps, fn, **kwargs)
-
     # model forcing files
     @property
     def forcing(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
@@ -922,7 +930,7 @@ class Model(object, metaclass=ABCMeta):
         self,
         data: Union[xr.DataArray, xr.Dataset],
         name: Optional[str] = None,
-        split_dataset: Optional[bool] = True,
+        split_dataset: Optional[bool] = False,
     ):
         """Add data to forcing attribute.
 
@@ -1188,12 +1196,18 @@ class Model(object, metaclass=ABCMeta):
         region = gpd.GeoDataFrame()
         if "region" in self.geoms:
             region = self.geoms["region"]
-        # For now stays here but change to grid in GridModel
+        # TODO: For now stays here but move to grid in GridModel and delete
         elif len(self.staticmaps) > 0:
+            warnings.warn(
+                'Defining "region" based on staticmaps will be deprecated. Either use use region from GridModel or define your own method.',
+                DeprecationWarning,
+            )
             crs = self.staticmaps.raster.crs
             if crs is None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
-            region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
+            region = gpd.GeoDataFrame(
+                geometry=[box(*self.staticmaps.raster.bounds)], crs=crs
+            )
         return region
 
     # test methods
@@ -1253,13 +1267,15 @@ class Model(object, metaclass=ABCMeta):
 
         return non_compliant
 
-    def _test_equal(self, other) -> Tuple[bool, Dict]:
+    def _test_equal(self, other, skip_component=["root"]) -> Tuple[bool, Dict]:
         """Test if two models including their data components are equal
 
         Parameters
         ----------
         other : Model (or subclass)
             Model to compare against
+        skip_component: list
+            List of components to skip when testing equality. By default root.
 
         Returns
         -------
@@ -1279,6 +1295,9 @@ class Model(object, metaclass=ABCMeta):
         components = [p for p in dir(self) if _isprop(self, p)]
         components_other = [p for p in dir(other) if _isprop(other, p)]
         assert components == components_other
+        for cp in skip_component:
+            if cp in components:
+                components.remove(cp)
         errors = {}
         for prop in components:
             errors.update(

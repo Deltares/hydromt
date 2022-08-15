@@ -128,6 +128,9 @@ class LumpedMixin:
 
 
 class LumpedModel(Model, LumpedMixin):
+
+    _CLI_ARGS = {"region": "setup_region"}
+
     def __init__(
         self,
         root: str = None,
@@ -149,7 +152,6 @@ class LumpedModel(Model, LumpedMixin):
         self,
         components: List = [
             "config",
-            "maps",
             "response_units",
             "geoms",
             "forcing",
@@ -171,7 +173,6 @@ class LumpedModel(Model, LumpedMixin):
         self,
         components: List = [
             "config",
-            "maps",
             "response_units",
             "geoms",
             "forcing",
