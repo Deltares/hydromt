@@ -930,7 +930,7 @@ class Model(object, metaclass=ABCMeta):
         self,
         data: Union[xr.DataArray, xr.Dataset],
         name: Optional[str] = None,
-        split_dataset: Optional[bool] = False,
+        split_dataset: Optional[bool] = True,
     ):
         """Add data to forcing attribute.
 
