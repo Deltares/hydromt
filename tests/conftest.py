@@ -190,6 +190,7 @@ def lumped_model(ts, geodf):
         name="zs",
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
+    da.vector.set_crs(geodf.crs)
     mod.set_response_units(da)
     return mod
 
