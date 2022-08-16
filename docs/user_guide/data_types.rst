@@ -469,6 +469,8 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
     <time2>, <value>, <value>
     ...
 
+.. _DataFrame: 
+
 2D tabular data (DataFrame)
 ---------------------------
 
