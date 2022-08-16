@@ -8,6 +8,7 @@ import xarray as xr
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
+from pyproj import CRS
 
 from .model_api import Model
 from .. import workflows
@@ -253,6 +254,12 @@ class GridModel(Model, GridMixin):
         """Returns spatial transform of the model grid."""
         if len(self._grid) > 0:
             return self.grid.raster.transform
+
+    @property
+    def crs(self) -> Union[CRS, None]:
+        """Returns coordinate reference system embedded in the model grid."""
+        if len(self._grid) > 0:
+            return CRS(self._grid.raster.crs)
 
     @property
     def bounds(self) -> List[float]:

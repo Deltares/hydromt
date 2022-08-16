@@ -1128,13 +1128,18 @@ class Model(object, metaclass=ABCMeta):
     @property
     def crs(self) -> Union[CRS, None]:
         """Returns coordinate reference system embedded in region."""
-        return self.region.crs
+        if len(self._staticmaps) > 0:
+            return CRS(self.staticmaps.raster.crs)
+        else:
+            return self.region.crs
 
     def set_crs(self, crs) -> None:
         warnings.warn(
             '"set_crs" is deprecated. Please set the crs of all model components instead.',
             DeprecationWarning,
         )
+        if len(self._staticmaps) > 0:
+            return self.staticmaps.raster.set_crs(crs)
 
     @property
     def dims(self) -> Tuple:
@@ -1188,7 +1193,10 @@ class Model(object, metaclass=ABCMeta):
     @property
     def bounds(self) -> Tuple:
         """Returns the bounding box of the model region."""
-        return self.region.total_bounds
+        if len(self._staticmaps) > 0:
+            return self.staticmaps.raster.bounds
+        else:
+            return self.region.total_bounds
 
     @property
     def region(self) -> gpd.GeoDataFrame:
