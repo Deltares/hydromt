@@ -196,8 +196,4 @@ class MeshModel(Model, MeshMixin):
         non_compliant: list
             List of objects that are non-compliant with the model API structure.
         """
-        non_compliant = super()._test_model_api()
-        # Mesh instance
-        if self.mesh is not None and not isinstance(self.mesh, xu.UgridDataset):
-            non_compliant.append("mesh")
-        return non_compliant
+        return super()._test_model_api({"mesh": xu.UgridDataset})

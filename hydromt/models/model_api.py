@@ -4,7 +4,6 @@
 from abc import ABCMeta
 import os, glob
 from os.path import join, isdir, isfile, abspath, dirname, basename
-from typing import Dict, List
 import xarray as xr
 import numpy as np
 import geopandas as gpd
@@ -15,7 +14,8 @@ from pathlib import Path
 import inspect
 import warnings
 from pyproj import CRS
-from typing import Tuple, Union, Optional
+import typing
+from typing import Any, Dict, List, Tuple, Union, Optional
 
 from ..data_catalog import DataCatalog
 from .. import config, log, workflows
@@ -172,12 +172,7 @@ class Model(object, metaclass=ABCMeta):
         for method in opt.keys():
             m = method.strip("0123456789")
             if not callable(getattr(self, m, None)):
-                if not hasattr(self, m) and hasattr(self, f"setup_{m}"):
-                    raise DeprecationWarning(
-                        f'Use full name "setup_{method}" instead of "{method}"'
-                    )
-                else:
-                    raise ValueError(f'Model {self._NAME} has no method "{method}"')
+                raise ValueError(f'Model {self._NAME} has no method "{method}"')
         return opt
 
     def _run_log_method(self, method, *args, **kwargs):
@@ -200,9 +195,7 @@ class Model(object, metaclass=ABCMeta):
                 params[k] = v
         # log options
         for (k, v) in params.items():
-            if v is inspect._empty:
-                self.logger.error(f"missing required argument {k} for {method}")
-            else:
+            if v is not inspect._empty:
                 self.logger.info(f"{method}.{k}: {v}")
         return func(*args, **kwargs)
 
@@ -281,7 +274,7 @@ class Model(object, metaclass=ABCMeta):
         self,
         model_out: Optional[Union[str, Path]] = None,
         write: Optional[bool] = True,
-        opt: Optional[dict] = None,
+        opt: Dict = {},
     ):
         """Single method to update a model based the settings in `opt`.
 
@@ -429,6 +422,14 @@ class Model(object, metaclass=ABCMeta):
         # This setup method returns region so that it can be wrapped for models which require
         # more information, e.g. grid RasterDataArray or xy coordinates.
         return region
+
+    # TODO remove
+    # placeholder to make make sure build with the current _CLI_ARGS does not raise an error
+    def setup_basemaps(self, *args, **kwargs):
+        warnings.warn(
+            "The setup_basemaps method is not implemented.",
+            UserWarning,
+        )
 
     ## file system
 
@@ -681,7 +682,7 @@ class Model(object, metaclass=ABCMeta):
             if isfile(config_fn):
                 cfdict = self._configread(config_fn)
                 self.logger.debug(f"{prefix} config read from {config_fn}")
-            elif not self._read:  # do not throw error for missing default config
+            elif not self._read and prefix != "Default":  # skip for missing default
                 self.logger.error(f"{prefix} config file not found at {config_fn}")
         self._config = cfdict
 
@@ -1226,52 +1227,39 @@ class Model(object, metaclass=ABCMeta):
         )
         return self._test_model_api()
 
-    def _test_model_api(self) -> List:
+    def _test_model_api(self, update_api: Dict = {}) -> List:
         """Test compliance with HydroMT Model API.
+
+        Parameters
+        ----------
+        update_api: dict
+            update the Model API with additional components and type hints. by default {}
+            e.g.: {'grid': xr.Dataset} or {'response_units':  Union[xr.DataArray, xr.Dataset]}
 
         Returns
         -------
         non_compliant: list
             List of model components that are non-compliant with the model API structure.
         """
+        _api = {
+            "region": gpd.GeoDataFrame,
+            "crs": CRS,
+            "geoms": Dict[str, gpd.GeoDataFrame],
+            "config": Dict[str, Any],
+            "forcing": Dict[str, Union[xr.DataArray, xr.Dataset]],
+            "states": Dict[str, Union[xr.DataArray, xr.Dataset]],
+            "results": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        }
+        _api.update(**update_api)
+
         non_compliant = []
-        # Region -> every model should have a region
-        if not isinstance(self.region, gpd.GeoDataFrame):
-            non_compliant.append("region")
-        elif not isinstance(self.crs, CRS):  # only if region
-            non_compliant.append("crs")
-        # Geoms
-        if not isinstance(self.geoms, dict):
-            non_compliant.append("geoms")
-        elif self.geoms:  # non-empty dict
-            for name, geom in self.geoms.items():
-                if not isinstance(geom, gpd.GeoDataFrame):
-                    non_compliant.append(f"geoms.{name}")
-        # Forcing
-        if not isinstance(self.forcing, dict):
-            non_compliant.append("forcing")
-        elif self.forcing:  # non-empty dict
-            for name, data in self.forcing.items():
-                if not isinstance(data, xr.DataArray):
-                    non_compliant.append(f"forcing.{name}")
-        # Config
-        if not isinstance(self.config, dict):
-            non_compliant.append("config")
-        # States
-        if not isinstance(self.states, dict):
-            non_compliant.append("states")
-        elif self.states:  # non-empty dict
-            for name, data in self.states.items():
-                if not isinstance(data, xr.DataArray):
-                    non_compliant.append(f"states.{name}")
-        # Results
-        if not isinstance(self.results, dict):
-            non_compliant.append("results")
-        elif self.results:  # non-empty dict
-            dtypes = [xr.DataArray, xr.Dataset]
-            for name, data in self.results.items():
-                if not np.any([isinstance(data, t) for t in dtypes]):
-                    non_compliant.append(f"results.{name}")
+        for component, dtype in _api.items():
+            obj = getattr(self, component, None)
+            try:
+                assert obj is not None
+                _assert_isinstance(obj, dtype, component)
+            except AssertionError as err:
+                non_compliant.append(str(err))
 
         return non_compliant
 
@@ -1338,6 +1326,23 @@ def _check_data(
     else:
         raise ValueError(f'Data type "{type(data).__name__}" not recognized')
     return data
+
+
+def _assert_isinstance(obj: Any, dtype: Any, name: str = ""):
+    """Check if obj match typing or class (dtype)"""
+    args = typing.get_args(dtype)
+    _cls = typing.get_origin(dtype)
+    if len(args) == 0 and dtype != Any and dtype is not None:
+        assert isinstance(obj, dtype), name
+    elif _cls == Union:
+        assert isinstance(obj, args), name
+    elif _cls is not None:
+        assert isinstance(obj, _cls), name
+    # recursive check of dtype dict keys and values
+    if len(args) > 0 and _cls is dict:
+        for key, val in obj.items():
+            _assert_isinstance(key, args[0], f"{name}.{str(key)}")
+            _assert_isinstance(val, args[1], f"{name}.{str(key)}")
 
 
 def _check_equal(a, b, name="") -> Dict[str, str]:

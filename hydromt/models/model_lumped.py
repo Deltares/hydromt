@@ -6,7 +6,7 @@ import numpy as np
 import geopandas as gpd
 import os
 from os.path import join, isfile, isdir, dirname
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict
 import logging
 from shapely.geometry import box
 
@@ -200,3 +200,15 @@ class LumpedModel(Model, LumpedMixin):
             gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
             region = gpd.GeoDataFrame(geometry=[box(*gdf.total_bounds)], crs=gdf.crs)
         return region
+
+    def _test_model_api(self) -> List:
+        """Test compliance with HydroMT GridModel API.
+
+        Returns
+        -------
+        non_compliant: list
+            List of model components that are non-compliant with the model API structure.
+        """
+        return super()._test_model_api(
+            {"response_units": Union[xr.DataArray, xr.Dataset]}
+        )

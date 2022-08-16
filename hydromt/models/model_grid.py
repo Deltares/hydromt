@@ -102,7 +102,7 @@ class GridMixin(object):
 
 class GridModel(Model, GridMixin):
 
-    # TODO: add here "res": "setup_region" or "res": "setup_grid" when genereic method is available
+    # TODO: add here "res": "setup_region" or "res": "setup_grid" when generic method is available
     _CLI_ARGS = {"region": "setup_region"}
 
     def __init__(
@@ -288,8 +288,4 @@ class GridModel(Model, GridMixin):
         non_compliant: list
             List of model components that are non-compliant with the model API structure.
         """
-        non_compliant = super()._test_model_api()
-        # grid
-        if not isinstance(self.grid, xr.Dataset):
-            non_compliant.append("grid")
-        return non_compliant
+        return super()._test_model_api({"grid": xr.Dataset})
