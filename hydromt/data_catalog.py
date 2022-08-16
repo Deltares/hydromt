@@ -410,8 +410,8 @@ class DataCatalog(object):
     def export_data(
         self,
         data_root: Union[Path, str],
-        bbox: List,
-        time_tuple: Tuple,
+        bbox: List = None,
+        time_tuple: Tuple = None,
         source_names: List = [],
         unit_conversion: bool = True,
     ) -> None:

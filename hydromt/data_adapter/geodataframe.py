@@ -89,7 +89,7 @@ class GeoDataFrameAdapter(DataAdapter):
         self,
         data_root,
         data_name,
-        bbox,
+        bbox=None,
         driver=None,
         variables=None,
         logger=logger,

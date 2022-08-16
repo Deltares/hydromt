@@ -8,6 +8,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "DataFrameAdapter",
+]
+
 
 class DataFrameAdapter(DataAdapter):
     _DEFAULT_DRIVER = "csv"
@@ -47,13 +51,13 @@ class DataFrameAdapter(DataAdapter):
             dataframe columns using a dictionary with variable (column) keys. The nodata
             values are only applied to columns with numeric data.
         rename: dict, optional
-            Mapping of native data source variable to output source variable name as
+            Mapping of native column names to output column names as
             required by hydroMT.
         unit_mult, unit_add: dict, optional
             Scaling multiplication and addition to change to map from the native data unit
             to the output data unit as required by hydroMT.
         meta: dict, optional
-            Metadata information of dataset, prefably containing the following keys:
+            Metadata information of dataframe, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
         **kwargs
             Additional key-word arguments passed to the driver.
@@ -74,13 +78,13 @@ class DataFrameAdapter(DataAdapter):
         self,
         data_root,
         data_name,
-        time_tuple,
         driver=None,
         variables=None,
+        time_tuple=None,
         logger=logger,
         **kwargs,
     ):
-        """Save data slice to file.
+        """Save dataframe slice to file.
 
         Parameters
         ----------
@@ -88,14 +92,14 @@ class DataFrameAdapter(DataAdapter):
             Path to output folder
         data_name : str
             Name of output file without extension.
-        time_tuple : tuple of str, datetime, optional
-            Start and end date of period of interest. By default the entire time period
-            of the DataFrame is returned.
         driver : str, optional
             Driver to write file, e.g.: 'csv', 'excel', by default None
         variables : list of str, optional
             Names of DataFrame columns to return. By default all columns
             are returned.
+        time_tuple : tuple of str, datetime, optional
+            Start and end date of period of interest. By default the entire time period
+            of the DataFrame is returned.
 
         Returns
         -------
@@ -104,7 +108,14 @@ class DataFrameAdapter(DataAdapter):
         driver: str
             Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
-        obj = self.get_data(time_tuple=time_tuple, variables=variables, logger=logger)
+        kwargs.pop("bbox", None)
+        try:
+            obj = self.get_data(
+                time_tuple=time_tuple, variables=variables, logger=logger
+            )
+        except IndexError as err:  # out of bounds for time
+            logger.warning(str(err))
+            return None, None
 
         if driver is None or driver == "csv":
             # always write netcdf
@@ -184,15 +195,13 @@ class DataFrameAdapter(DataAdapter):
                 df[name] = df[name] * m + a
 
         # clip time slice
-        if time_tuple is not None:
-            if np.dtype(df.index).type == np.datetime64:
-                logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
-                df = df[df.index.slice_indexer(*time_tuple)]
-                if df.size == 0:
-                    raise ValueError(f"DataFrame: Time slice out of range.")
-            else:
-                raise ValueError("DataFrame: No time index found in dataframe.")
+        if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
+            logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
+            df = df[df.index.slice_indexer(*time_tuple)]
+            if df.size == 0:
+                raise IndexError(f"DataFrame: Time slice out of range.")
 
         # set meta data
         df.attrs.update(self.meta)
+
         return df

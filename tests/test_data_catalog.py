@@ -6,7 +6,7 @@ from os.path import join, abspath
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
-from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
+from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter, DataFrameAdapter
 from hydromt.data_catalog import (
     DataCatalog,
     _parse_data_dict,
@@ -164,5 +164,53 @@ def test_export_global_datasets(tmpdir):
     for key, source in data_catalog1.sources.items():
         source_type = type(source).__name__
         dtypes = DTYPES[source_type]
+        obj = source.get_data()
+        assert isinstance(obj, dtypes), key
+
+
+def test_export_dataframe(tmpdir, df, df_time):
+    # Write two csv files
+    fn_df = str(tmpdir.join("test.csv"))
+    df.to_csv(fn_df)
+    fn_df_time = str(tmpdir.join("test_ts.csv"))
+    df_time.to_csv(fn_df_time)
+
+    # Test to_file method (needs reading)
+    data_dict = {
+        "test_df": {
+            "path": fn_df,
+            "driver": "csv",
+            "data_type": "DataFrame",
+            "kwargs": {
+                "index_col": 0,
+            },
+        },
+        "test_df_ts": {
+            "path": fn_df_time,
+            "driver": "csv",
+            "data_type": "DataFrame",
+            "kwargs": {
+                "index_col": 0,
+                "parse_dates": True,
+            },
+        },
+    }
+
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(data_dict)
+
+    data_catalog.export_data(
+        str(tmpdir),
+        time_tuple=("2010-02-01", "2010-02-14"),
+        bbox=[11.70, 45.35, 12.95, 46.70],
+    )
+    data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
+    assert len(data_catalog1) == 1
+
+    data_catalog.export_data(str(tmpdir))
+    data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
+    assert len(data_catalog1) == 2
+    for key, source in data_catalog1.sources.items():
+        dtypes = pd.DataFrame
         obj = source.get_data()
         assert isinstance(obj, dtypes), key
