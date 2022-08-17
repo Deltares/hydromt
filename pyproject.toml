@@ -27,7 +27,7 @@ dependencies = [
     "rasterio",
     "requests",
     "rioxarray",
-    "shapely=1.8.2", # temp version pin see geopandas#2531
+    "shapely==1.8.2", # temp version pin see geopandas#2531
     "scipy",
     "xarray",
     "zarr",
