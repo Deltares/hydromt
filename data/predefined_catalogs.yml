@@ -15,3 +15,8 @@ artifact_data:
    versions:
       v0.0.6: v0.0.6
    notes: This data archive contains a sample dataset for the Piave basin (North Italy) to be used for tests and docs/demo purposes.
+parameters_data:
+   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/parameters_data.yml
+   versions:
+     v2022.8: d88cc47bd4ecc83de38c00aa554a7d48ad23ec23
+   notes: This data contains tables with model parameters estimates.

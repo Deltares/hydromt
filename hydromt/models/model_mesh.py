@@ -183,33 +183,36 @@ class MeshModel(Model, MeshMixin):
                 self.logger.info(f"An existing 2D grid is used to prepare 2D mesh.")
 
                 ds = xr.open_dataset(mesh2d_fn, mask_and_scale=False)
-                topologies = ds.ugrid_roles.topology
-                for topology in topologies:
-                    topodim = ds[topology].attrs["topology_dimension"]
-                    if topodim != 2:  # chek if 2d mesh file else throw error
-                        raise NotImplementedError(
-                            f"{mesh2d_fn} cannot be opened. Please check if the existing grid is "
-                            f"an 2D mesh and not 1D2D mesh. This option is not yet available for 1D2D meshes."
-                        )
-
-                # Continues with a 2D grid
-                mesh2d = xu.UgridDataset(ds)
-                # Check crs and reproject to model crs
-                if crs is None:
-                    crs = 4326
-                if ds.rio.crs is not None:  # parse crs
-                    mesh2d.ugrid.grid.set_crs(ds.rio.crs)
-                else:
-                    # Assume model crs
-                    self.logger.warning(
-                        f"Mesh data from {mesh2d_fn} doesn't have a CRS. Assuming crs option {crs}"
-                    )
-                    mesh2d.ugrid.grid.set_crs(crs)
-                mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
+            elif isinstance(mesh2d_fn, xr.Dataset):
+                ds = mesh2d_fn
             else:
                 raise ValueError(
                     f"Region 'mesh' file {mesh2d_fn} not found, please check"
                 )
+            topologies = ds.ugrid_roles.topology
+            for topology in topologies:
+                topodim = ds[topology].attrs["topology_dimension"]
+                if topodim != 2:  # chek if 2d mesh file else throw error
+                    raise NotImplementedError(
+                        f"{mesh2d_fn} cannot be opened. Please check if the existing grid is "
+                        f"an 2D mesh and not 1D2D mesh. This option is not yet available for 1D2D meshes."
+                    )
+
+            # Continues with a 2D grid
+            mesh2d = xu.UgridDataset(ds)
+            # Check crs and reproject to model crs
+            if crs is None:
+                crs = 4326
+            if ds.rio.crs is not None:  # parse crs
+                mesh2d.ugrid.grid.set_crs(ds.rio.crs)
+            else:
+                # Assume model crs
+                self.logger.warning(
+                    f"Mesh data from {mesh2d_fn} doesn't have a CRS. Assuming crs option {crs}"
+                )
+                mesh2d.ugrid.grid.set_crs(crs)
+            mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
+            
 
             # Reproject to user crs option if needed
             if mesh2d.ugrid.grid.crs != crs and crs is not None:
@@ -224,6 +227,7 @@ class MeshModel(Model, MeshMixin):
         resampling_method: Optional[str] = "mean",
         variables: Optional[list] = None,
         all_touched: Optional[bool] = True,
+        fill_nodata: Optional[str] = None,
     ) -> None:
         """
         This component adds data variable(s) from ``raster_fn`` to mesh object.
@@ -248,6 +252,9 @@ class MeshModel(Model, MeshMixin):
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
+        fill_nodata : str, optional
+            If specified, fills no data values using fill_nodata method. AVailable methods 
+            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         """
         self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
         # Read raster data and select variables
@@ -256,6 +263,9 @@ class MeshModel(Model, MeshMixin):
         )
         if isinstance(ds, xr.DataArray):
             ds = ds.to_dataset()
+        
+        if fill_nodata is not None:
+            ds = ds.raster.interpolate_na(method=fill_nodata)
 
         # Convert mesh grid as geodataframe for sampling
         # Reprojection happens to gdf inside of zonal_stats method
@@ -277,6 +287,7 @@ class MeshModel(Model, MeshMixin):
         mapping_variables: list,
         resampling_method: Optional[Union[str, list]] = "mean",
         all_touched: Optional[bool] = True,
+        fill_nodata: Optional[str] = None,
         **kwargs,
     ) -> None:
         """
@@ -293,12 +304,12 @@ class MeshModel(Model, MeshMixin):
         Parameters
         ----------
         raster_fn: str
-            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variable/time in
+            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
             hydromt.data_catalog.get_rasterdataset method
         raster_mapping_fn: str
             Source name of mapping table of raster_fn in data_catalog.
         mapping_variables: list
-            List of mapping_variables from rasert_mapping_fn table to add to mesh.
+            List of mapping_variables from rasert_mapping_fn table to add to mesh. Index column should match values in raster_fn.
         resampling_method: str/list, optional
             Method to sample from raster data to mesh. Can be a list per variable in ``mapping_variables`` or a
             single method for all. By default mean for all mapping_variables. Options include
@@ -307,6 +318,9 @@ class MeshModel(Model, MeshMixin):
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
+        fill_nodata : str, optional
+            If specified, fills no data values using fill_nodata method. AVailable methods 
+            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         """
         self.logger.info(
             f"Preparing mesh data from mapping {mapping_variables} values in {raster_mapping_fn} to raster source {raster_fn}"
@@ -315,12 +329,17 @@ class MeshModel(Model, MeshMixin):
         da = self.data_catalog.get_rasterdataset(
             raster_fn, geom=self.region, buffer=2, **kwargs
         )
+        if not isinstance(da, xr.DataArray):
+            raise ValueError(f"raster_fn {raster_fn} for mapping should be a single variable. Please select one using 'variable' argument in setup_auxmaps_from_rastermapping")
         df_vars = self.data_catalog.get_dataframe(
             raster_mapping_fn, variables=mapping_variables
         )
 
+        if fill_nodata is not None:
+            ds = ds.raster.interpolate_na(method=fill_nodata)
+
         # Mapping function
-        ds_vars = da.raster.reclassify(df_vars, methods=resampling_method)
+        ds_vars = da.raster.reclassify(reclass_table=df_vars, method='exact')
 
         # Convert mesh grid as geodataframe for sampling
         # Reprojection happens to gdf inside of zonal_stats method

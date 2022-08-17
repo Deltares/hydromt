@@ -5,8 +5,9 @@ import geopandas as gpd
 import xarray as xr
 from shapely.geometry import box
 
-from hydromt import Model, GridModel, LumpedModel, NetworkModel
+from hydromt import Model, GridModel, LumpedModel, NetworkModel, data_catalog
 from hydromt.models.model_api import AuxmapsMixin
+from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
 
@@ -145,6 +146,21 @@ def demuda():
     uda.ugrid.grid.set_crs(epsg=2230)
     return uda
 
+@pytest.fixture
+def griduda():
+    import xugrid as xu
+
+    bbox = [12.0, 46.40, 12.10, 46.50]  # Piava river
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    da = data_catalog.get_rasterdataset("merit_hydro", bbox=bbox, variables="elevtn")
+    gdf_da = da.raster.vectorize()
+    gdf_da.index.name = "mesh2d_nFaces"
+    uda = xu.UgridDataset.from_geodataframe(gdf_da)
+    uda = uda["value"]
+    uda.name = "elevtn"
+
+    return uda
+
 
 @pytest.fixture
 def model(demda, world, obsda):
@@ -160,11 +176,14 @@ def model(demda, world, obsda):
 
 
 @pytest.fixture
-def auxmap_model(demda):
-    mod = TestAuxModel()
-    mod.setup_region({"geom": demda.raster.box})
+def auxmap_model():
+    mod = TestAuxModel(data_libs=["parameters_data", "artifact_data"])
+    bbox = [11.70, 45.35, 12.95, 46.70]  # Piava river
+    mod.setup_region({"bbox": bbox})
     mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_auxmaps(demda, "elevtn")
+    mod.setup_auxmaps_from_raster(raster_fn="merit_hydro", name="hydrography", variables=["elevtn", "flwdir"])
+    mod.setup_auxmaps_from_raster(raster_fn="vito", name="landuse", fill_nodata='nearest')
+    mod.setup_auxmaps_from_rastermapping(raster_fn="vito", raster_mapping_fn="vito_mapping", mapping_variables=["roughness_manning"])
     return mod
 
 
@@ -213,4 +232,5 @@ def mesh_model(demuda):
     # mod.setup_region({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(demuda, "elevtn")
+    
     return mod

@@ -61,7 +61,9 @@ def test_model(model, tmpdir):
 
 
 def test_auxmapsmixin(auxmap_model, tmpdir):
-    assert len(auxmap_model.auxmaps) == 1
+    assert len(auxmap_model.auxmaps) == 4
+    assert "manning_roughness" in auxmap_model.auxmaps
+    assert isinstance(auxmap_model.auxmaps["hydrography"], xr.Dataset)
     non_compliant = auxmap_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
@@ -141,3 +143,23 @@ def test_meshmodel(mesh_model, tmpdir):
     equal, errors, components = mesh_model._test_equal(model1)
     assert equal, errors
     assert np.all([c in components for c in ["mesh"]])
+
+@pytest.mark.skipif(not _has_xugrid(), reason="Xugrid not installed.")
+def test_meshmodel_setup(griduda, tmpdir):
+    from hydromt.models import MeshModel
+
+    mod = MeshModel(data_libs=["parameters_data", "artifact_data"])
+    mod.setup_config(**{"header": {"setting": "value"}})
+    region = {"mesh": griduda}
+    mod.setup_mesh(region, crs=4326)
+    mod.region
+    mod.setup_mesh_from_raster("vito")
+    mod.setup_mesh_from_rastermapping(
+        raster_fn = "vito", 
+        raster_mapping_fn = "vito_mapping",
+        mapping_variables=["roughness_manning"],
+        resampling_method="median",
+        fill_nodata=True,
+    )
+    assert "vito" in mod.mesh.data_vars
+    assert "manning_roughness" in mod.mesh.data_vars

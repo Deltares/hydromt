@@ -13,6 +13,7 @@ import os
 from os.path import join, basename, dirname, isdir
 import numpy as np
 from shapely.geometry import box
+import pandas as pd
 import geopandas as gpd
 import xarray as xr
 import dask
@@ -789,6 +790,44 @@ class XRasterBase(XGeoBase):
         ds_out["index"] = xr.IndexVariable("index", gdf.index.values[np.array(idx)])
 
         return ds_out
+    
+    def reclassify(self, reclass_table: pd.DataFrame, method: str = 'exact'):
+        """ Reclass columns in df from raster map (DataArray).
+        
+        Arguments
+        ---------
+        reclass_table : pd.DataFrame
+            Tables with parameter names and values in columns and values in obj as index.
+        method : str, optional
+            Reclassification method. For now only 'exact' for one-on-one cell value mapping.
+        
+        Returns
+        -------
+        ds_out: xr.Dataset
+            Output dataset with a variable for each column in reclass_table. 
+        """
+        # Exact reclass method
+        def reclass_exact(x):
+            return np.vectorize(d.get)(x, np.nan)
+        da = self._obj.copy()
+        ds_out = xr.Dataset(coords=da.coords, dims=da.dims)
+
+        keys = reclass_table.index.values
+        params = reclass_table.columns
+        # apply for each parameter
+        for param in params:
+            values = reclass_table[param].values
+            d = dict(zip(keys, values))
+            da_param = xr.apply_ufunc(
+                reclass_exact, da, dask="parallelized", output_dtypes=[values.dtype]
+            )
+            da_param.attrs.update(_FillValue=np.nan)
+            ds_out[param] = da_param
+        
+        return ds_out
+        
+
+
 
     def clip_bbox(self, bbox, align=None, buffer=0):
         """Clip object based on a bounding box.
