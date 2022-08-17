@@ -19,9 +19,12 @@ class MeshMixin(object):
     # placeholders
     # We cannot initialize an empty xu.UgridDataArray
     _mesh = None
+    _API = {
+        "mesh": Union[xu.UgridDataArray, xu.UgridDataset],
+    }
 
     @property
-    def mesh(self):
+    def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
         """Model mesh data. Returns a xarray.Dataset."""
         # XU grid data type Xarray dataset with xu sampling.
         if self._mesh is None:
@@ -187,13 +190,3 @@ class MeshModel(Model, MeshMixin):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region
-
-    def _test_model_api(self) -> List:
-        """Test compliance with HydroMT MeshModel API.
-
-        Returns
-        -------
-        non_compliant: list
-            List of objects that are non-compliant with the model API structure.
-        """
-        return super()._test_model_api({"mesh": xu.UgridDataset})

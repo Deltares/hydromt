@@ -30,7 +30,9 @@ class AuxmapsMixin(object):
     # mixin class to add an auxiliary maps object
     # contains maps needed for model building but not model data
     _auxmaps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
-
+    _API = {
+        "auxmaps": Dict[str, Union[xr.DataArray, xr.Dataset]],
+    }
     # model auxiliary map files
     @property
     def auxmaps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
@@ -109,6 +111,16 @@ class Model(object, metaclass=ABCMeta):
     # TODO: change it back to setup_region and no res --> deprecation
     _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
 
+    _API = {
+        "crs": CRS,
+        "config": Dict[str, Any],
+        "geoms": Dict[str, gpd.GeoDataFrame],
+        "forcing": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "region": gpd.GeoDataFrame,
+        "results": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "states": Dict[str, Union[xr.DataArray, xr.Dataset]],
+    }
+
     def __init__(
         self,
         root: Optional[str] = None,
@@ -166,6 +178,15 @@ class Model(object, metaclass=ABCMeta):
         self._config_fn = self._CONF if config_fn is None else config_fn
         self.set_root(root, mode)  # also creates hydromt.log file
         self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
+
+    @property
+    def api(self) -> Dict:
+        """Return all model components and their data types"""
+        _api = self._API.copy()
+        # loop over parent and mixin classes and update API
+        for base_cls in self.__class__.__bases__:
+            _api.update(getattr(base_cls, "_API", {}))
+        return _api
 
     def _check_get_opt(self, opt):
         """Check all opt keys and raise sensible error messages if unknown."""
@@ -1127,7 +1148,7 @@ class Model(object, metaclass=ABCMeta):
 
     ## properties / methods below can be used directly in actual class
     @property
-    def crs(self) -> Union[CRS, None]:
+    def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
         if len(self._staticmaps) > 0:
             return CRS(self.staticmaps.raster.crs)
@@ -1227,33 +1248,16 @@ class Model(object, metaclass=ABCMeta):
         )
         return self._test_model_api()
 
-    def _test_model_api(self, update_api: Dict = {}) -> List:
+    def _test_model_api(self) -> List:
         """Test compliance with HydroMT Model API.
-
-        Parameters
-        ----------
-        update_api: dict
-            update the Model API with additional components and type hints. by default {}
-            e.g.: {'grid': xr.Dataset} or {'response_units':  Union[xr.DataArray, xr.Dataset]}
 
         Returns
         -------
         non_compliant: list
             List of model components that are non-compliant with the model API structure.
         """
-        _api = {
-            "region": gpd.GeoDataFrame,
-            "crs": CRS,
-            "geoms": Dict[str, gpd.GeoDataFrame],
-            "config": Dict[str, Any],
-            "forcing": Dict[str, Union[xr.DataArray, xr.Dataset]],
-            "states": Dict[str, Union[xr.DataArray, xr.Dataset]],
-            "results": Dict[str, Union[xr.DataArray, xr.Dataset]],
-        }
-        _api.update(**update_api)
-
         non_compliant = []
-        for component, dtype in _api.items():
+        for component, dtype in self.api.items():
             obj = getattr(self, component, None)
             try:
                 assert obj is not None
@@ -1279,17 +1283,10 @@ class Model(object, metaclass=ABCMeta):
             True if equal
         errors: dict
             Dictionary with errors per model component which is not equal
-        components: list
-            List of tested components
-
         """
-
-        def _isprop(mod, p):
-            return isinstance(getattr(type(mod), p, None), property)
-
         assert isinstance(other, type(self))
-        components = [p for p in dir(self) if _isprop(self, p)]
-        components_other = [p for p in dir(other) if _isprop(other, p)]
+        components = list(self.api.keys())
+        components_other = list(other.api.keys())
         assert components == components_other
         for cp in skip_component:
             if cp in components:
@@ -1299,7 +1296,7 @@ class Model(object, metaclass=ABCMeta):
             errors.update(
                 **_check_equal(getattr(self, prop), getattr(other, prop), prop)
             )
-        return len(errors) == 0, errors, components
+        return len(errors) == 0, errors
 
 
 def _check_data(
@@ -1346,8 +1343,8 @@ def _assert_isinstance(obj: Any, dtype: Any, name: str = ""):
 
 
 def _check_equal(a, b, name="") -> Dict[str, str]:
-    """Recursive test of model property.
-    Returns dict with property name and associated error message."""
+    """Recursive test of model components.
+    Returns dict with component name and associated error message."""
     errors = {}
     try:
         assert isinstance(b, type(a)), "property types do not match"

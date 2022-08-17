@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 class LumpedMixin:
     _response_units = xr.Dataset()
+    _API = {
+        "response_units": xr.Dataset,
+    }
 
     @property
     def response_units(self) -> xr.Dataset:
@@ -200,15 +203,3 @@ class LumpedModel(Model, LumpedMixin):
             gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
             region = gpd.GeoDataFrame(geometry=[box(*gdf.total_bounds)], crs=gdf.crs)
         return region
-
-    def _test_model_api(self) -> List:
-        """Test compliance with HydroMT GridModel API.
-
-        Returns
-        -------
-        non_compliant: list
-            List of model components that are non-compliant with the model API structure.
-        """
-        return super()._test_model_api(
-            {"response_units": Union[xr.DataArray, xr.Dataset]}
-        )

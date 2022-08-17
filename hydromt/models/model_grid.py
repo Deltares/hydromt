@@ -21,6 +21,9 @@ class GridMixin(object):
     # placeholders
     # xr.Dataset representation of all static parameter maps at the same resolution and bounds - renamed from staticmaps
     _grid = xr.Dataset()
+    _API = {
+        "grid": xr.Dataset,
+    }
 
     @property
     def grid(self):
@@ -194,13 +197,3 @@ class GridModel(Model, GridMixin):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region
-
-    def _test_model_api(self) -> List:
-        """Test compliance with HydroMT GridModel API.
-
-        Returns
-        -------
-        non_compliant: list
-            List of model components that are non-compliant with the model API structure.
-        """
-        return super()._test_model_api({"grid": xr.Dataset})

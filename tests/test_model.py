@@ -31,11 +31,12 @@ def test_check_data(demda):
         _check_data({"wrong": "type"})
 
 
-def test_test_model_api(model):
+def test_model_api(grid_model):
+    assert np.all(np.isin(["grid", "geoms"], list(grid_model.api.keys())))
     # add some wrong data
-    model._geoms.update({"wrong_geom": xr.Dataset()})
-    model._forcing.update({"test": gpd.GeoDataFrame()})
-    non_compliant = model._test_model_api()
+    grid_model._geoms.update({"wrong_geom": xr.Dataset()})
+    grid_model._forcing.update({"test": gpd.GeoDataFrame()})
+    non_compliant = grid_model._test_model_api()
     assert non_compliant == ["geoms.wrong_geom", "forcing.test"]
 
 
@@ -51,7 +52,8 @@ def test_run_log_method():
 
 def test_model(model, tmpdir):
     # Staticmaps -> moved from _test_model_api as it is deprecated
-    non_compliant = model._test_model_api({"staticmaps": xr.Dataset})
+    model._API.update({"staticmaps": xr.Dataset})
+    non_compliant = model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
     model.set_root(str(tmpdir), mode="w")
@@ -61,20 +63,8 @@ def test_model(model, tmpdir):
     model1.read()
     # check if equal
     model._results = {}  # reset results for comparison
-    equal, errors, components = model._test_equal(model1)
+    equal, errors = model._test_equal(model1)
     assert equal, errors
-    comp = [
-        "config",
-        "crs",
-        "forcing",
-        "geoms",
-        "region",
-        "results",
-        "states",
-        "staticgeoms",
-        "staticmaps",
-    ]
-    assert np.all([c in components for c in comp])
     # region from staticmaps
     model._geoms.pop("region")
     assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
@@ -154,6 +144,7 @@ def test_config(model, tmpdir):
 
 
 def test_auxmapsmixin(auxmap_model, tmpdir):
+    assert "auxmaps" in auxmap_model.api
     assert len(auxmap_model.auxmaps) == 1
     non_compliant = auxmap_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
@@ -164,13 +155,12 @@ def test_auxmapsmixin(auxmap_model, tmpdir):
     model1 = TestAuxModel(str(tmpdir), mode="r")
     model1.read(components=["config", "geoms", "auxmaps"])
     # check if equal
-    equal, errors, components = auxmap_model._test_equal(model1)
+    equal, errors = auxmap_model._test_equal(model1)
     assert equal, errors
-    assert np.all([c in components for c in ["auxmaps"]])
 
 
 def test_gridmodel(grid_model, tmpdir):
-    assert isinstance(grid_model.region, gpd.GeoDataFrame)
+    assert "grid" in grid_model.api
     non_compliant = grid_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # grid specific attributes
@@ -184,13 +174,12 @@ def test_gridmodel(grid_model, tmpdir):
     model1 = GridModel(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors, components = grid_model._test_equal(model1)
+    equal, errors = grid_model._test_equal(model1)
     assert equal, errors
-    assert np.all([c in components for c in ["grid"]])
 
 
 def test_lumpedmodel(lumped_model, tmpdir):
-    assert isinstance(lumped_model.region, gpd.GeoDataFrame)
+    assert "response_units" in lumped_model.api
     non_compliant = lumped_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
@@ -200,9 +189,8 @@ def test_lumpedmodel(lumped_model, tmpdir):
     model1 = LumpedModel(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors, components = lumped_model._test_equal(model1)
+    equal, errors = lumped_model._test_equal(model1)
     assert equal, errors
-    assert np.all([c in components for c in ["response_units"]])
 
 
 def test_networkmodel(network_model, tmpdir):
@@ -221,7 +209,7 @@ def test_networkmodel(network_model, tmpdir):
 def test_meshmodel(mesh_model, tmpdir):
     from hydromt.models import MeshModel
 
-    assert isinstance(mesh_model.region, gpd.GeoDataFrame)
+    assert "mesh" in mesh_model.api
     non_compliant = mesh_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
@@ -231,6 +219,5 @@ def test_meshmodel(mesh_model, tmpdir):
     model1 = MeshModel(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors, components = mesh_model._test_equal(model1)
+    equal, errors = mesh_model._test_equal(model1)
     assert equal, errors
-    assert np.all([c in components for c in ["mesh"]])
