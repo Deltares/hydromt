@@ -47,7 +47,7 @@ class AuxmapsMixin(object):
         data: Union[xr.DataArray, xr.Dataset],
         name: Optional[str] = None,
         split_dataset: Optional[bool] = False,
-    ):
+    ) -> None:
         """Add auxiliary data to maps.
 
         Dataset can either be added as is (default) or split into several
@@ -824,7 +824,7 @@ class Model(object, metaclass=ABCMeta):
 
     # model geometry files
     @property
-    def geoms(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
+    def geoms(self) -> Dict[str, Union[gpd.GeoDataFrame, gpd.GeoSeries]]:
         """Model geometries. Returns dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
         ..NOTE: previously call staticgeoms."""
         if not self._geoms:
@@ -898,14 +898,6 @@ class Model(object, metaclass=ABCMeta):
             gdf.to_file(_fn, **kwargs)
 
     # OLD model geometry files; TODO remove
-    # @property
-    # def _staticgeoms(self):
-    #     # temporary property to throw warning is accessed
-    #     warnings.warn(
-    #         "The staticgeoms method will be deprecated in future versions, use geoms instead.",
-    #         DeprecationWarning,
-    #     )
-    #     return self._geoms
 
     @property
     def staticgeoms(self):
@@ -1260,7 +1252,7 @@ class Model(object, metaclass=ABCMeta):
         for component, dtype in self.api.items():
             obj = getattr(self, component, None)
             try:
-                assert obj is not None
+                assert obj is not None, component
                 _assert_isinstance(obj, dtype, component)
             except AssertionError as err:
                 non_compliant.append(str(err))
