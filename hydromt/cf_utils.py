@@ -14,6 +14,7 @@ from configparser import RawConfigParser
 from datetime import datetime
 import numpy as np
 from .cf_xml_utils_extended import CfXmlUtilsExtended
+from hydromt.data_catalog import DataCatalog
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +119,15 @@ class FewsUtils(object):
         name: dict
             Dictionary of model_sources.
         """
+        # get source version
+        dc = DataCatalog(deltares_data=True)
+        eobs = [sources for sources in dc.sources if "eobs_v" in sources]
+        versions = []
+        for version in eobs:
+            version = version[6:-1]
+            versions.append(version)
+        latest_version = max(versions)
+
         model_name, region_name, model_version = name.split(".")
         model_dict = {
             "model": model_name,
@@ -126,6 +136,7 @@ class FewsUtils(object):
             "sversion": scheme_version,
             #'model_folder': join(f'scheme.{scheme_version}', name),
             "crs": crs,
+            "source_version": latest_version,
         }
         for k, v in kwargs.items():
             if k == "shape":
@@ -410,7 +421,7 @@ class FewsUtils(object):
             f"TopologyGroup_{model_source}_forc.xml",
         )
 
-        # get the gridplotgroup ids
+        # get the topologygroup ids
         groups = t.get_ids_from_xml(fname, "group")
 
         # model instance
@@ -420,10 +431,10 @@ class FewsUtils(object):
             f"TopologyGroup_{model_source}.xml",
         )
 
-        # get the gridplotgroup ids
+        # get the topologygroup ids
         groups.extend(t.get_ids_from_xml(fname, "group"))
 
-        #  SpatialDisplay.xml
+        #  Topology.xml
         fname = join(
             fpath,
             f"Topology.xml",
