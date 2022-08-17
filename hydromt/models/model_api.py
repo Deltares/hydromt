@@ -4,7 +4,6 @@
 from abc import ABCMeta
 import os, glob
 from os.path import join, isdir, isfile, abspath, dirname, basename
-from typing import Dict, List
 import xarray as xr
 import numpy as np
 import geopandas as gpd
@@ -15,7 +14,8 @@ from pathlib import Path
 import inspect
 import warnings
 from pyproj import CRS
-from typing import Tuple, Union, Optional
+import typing
+from typing import Any, Dict, List, Tuple, Union, Optional
 
 from ..data_catalog import DataCatalog
 from .. import config, log, workflows
@@ -30,6 +30,9 @@ class AuxmapsMixin(object):
     # mixin class to add an auxiliary maps object
     # contains maps needed for model building but not model data
     _auxmaps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
+    _API = {
+        "auxmaps": Dict[str, Union[xr.DataArray, xr.Dataset]],
+    }
 
     # auxiliary map files setup methods
     def setup_auxmaps_from_raster(
@@ -212,6 +215,16 @@ class Model(object, metaclass=ABCMeta):
     # TODO: change it back to setup_region and no res --> deprecation
     _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
 
+    _API = {
+        "crs": CRS,
+        "config": Dict[str, Any],
+        "geoms": Dict[str, gpd.GeoDataFrame],
+        "forcing": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "region": gpd.GeoDataFrame,
+        "results": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "states": Dict[str, Union[xr.DataArray, xr.Dataset]],
+    }
+
     def __init__(
         self,
         root: Optional[str] = None,
@@ -270,17 +283,21 @@ class Model(object, metaclass=ABCMeta):
         self.set_root(root, mode)  # also creates hydromt.log file
         self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
 
+    @property
+    def api(self) -> Dict:
+        """Return all model components and their data types"""
+        _api = self._API.copy()
+        # loop over parent and mixin classes and update API
+        for base_cls in self.__class__.__bases__:
+            _api.update(getattr(base_cls, "_API", {}))
+        return _api
+
     def _check_get_opt(self, opt):
         """Check all opt keys and raise sensible error messages if unknown."""
         for method in opt.keys():
             m = method.strip("0123456789")
             if not callable(getattr(self, m, None)):
-                if not hasattr(self, m) and hasattr(self, f"setup_{m}"):
-                    raise DeprecationWarning(
-                        f'Use full name "setup_{method}" instead of "{method}"'
-                    )
-                else:
-                    raise ValueError(f'Model {self._NAME} has no method "{method}"')
+                raise ValueError(f'Model {self._NAME} has no method "{method}"')
         return opt
 
     def _run_log_method(self, method, *args, **kwargs):
@@ -303,9 +320,7 @@ class Model(object, metaclass=ABCMeta):
                 params[k] = v
         # log options
         for (k, v) in params.items():
-            if v is inspect._empty:
-                self.logger.error(f"missing required argument {k} for {method}")
-            else:
+            if v is not inspect._empty:
                 self.logger.info(f"{method}.{k}: {v}")
         return func(*args, **kwargs)
 
@@ -384,7 +399,7 @@ class Model(object, metaclass=ABCMeta):
         self,
         model_out: Optional[Union[str, Path]] = None,
         write: Optional[bool] = True,
-        opt: Optional[dict] = None,
+        opt: Dict = {},
     ):
         """Single method to update a model based the settings in `opt`.
 
@@ -532,6 +547,14 @@ class Model(object, metaclass=ABCMeta):
         # This setup method returns region so that it can be wrapped for models which require
         # more information, e.g. grid RasterDataArray or xy coordinates.
         return region
+
+    # TODO remove
+    # placeholder to make make sure build with the current _CLI_ARGS does not raise an error
+    def setup_basemaps(self, *args, **kwargs):
+        warnings.warn(
+            "The setup_basemaps method is not implemented.",
+            UserWarning,
+        )
 
     ## file system
 
@@ -784,7 +807,7 @@ class Model(object, metaclass=ABCMeta):
             if isfile(config_fn):
                 cfdict = self._configread(config_fn)
                 self.logger.debug(f"{prefix} config read from {config_fn}")
-            elif not self._read:  # do not throw error for missing default config
+            elif not self._read and prefix != "Default":  # skip for missing default
                 self.logger.error(f"{prefix} config file not found at {config_fn}")
         self._config = cfdict
 
@@ -1229,15 +1252,20 @@ class Model(object, metaclass=ABCMeta):
 
     ## properties / methods below can be used directly in actual class
     @property
-    def crs(self) -> Union[CRS, None]:
+    def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
-        return self.region.crs
+        if len(self._staticmaps) > 0:
+            return CRS(self.staticmaps.raster.crs)
+        else:
+            return self.region.crs
 
     def set_crs(self, crs) -> None:
         warnings.warn(
             '"set_crs" is deprecated. Please set the crs of all model components instead.',
             DeprecationWarning,
         )
+        if len(self._staticmaps) > 0:
+            return self.staticmaps.raster.set_crs(crs)
 
     @property
     def dims(self) -> Tuple:
@@ -1291,7 +1319,10 @@ class Model(object, metaclass=ABCMeta):
     @property
     def bounds(self) -> Tuple:
         """Returns the bounding box of the model region."""
-        return self.region.total_bounds
+        if len(self._staticmaps) > 0:
+            return self.staticmaps.raster.bounds
+        else:
+            return self.region.total_bounds
 
     @property
     def region(self) -> gpd.GeoDataFrame:
@@ -1330,43 +1361,13 @@ class Model(object, metaclass=ABCMeta):
             List of model components that are non-compliant with the model API structure.
         """
         non_compliant = []
-        # Region -> every model should have a region
-        if not isinstance(self.region, gpd.GeoDataFrame):
-            non_compliant.append("region")
-        elif not isinstance(self.crs, CRS):  # only if region
-            non_compliant.append("crs")
-        # Geoms
-        if not isinstance(self.geoms, dict):
-            non_compliant.append("geoms")
-        elif self.geoms:  # non-empty dict
-            for name, geom in self.geoms.items():
-                if not isinstance(geom, gpd.GeoDataFrame):
-                    non_compliant.append(f"geoms.{name}")
-        # Forcing
-        if not isinstance(self.forcing, dict):
-            non_compliant.append("forcing")
-        elif self.forcing:  # non-empty dict
-            for name, data in self.forcing.items():
-                if not isinstance(data, xr.DataArray):
-                    non_compliant.append(f"forcing.{name}")
-        # Config
-        if not isinstance(self.config, dict):
-            non_compliant.append("config")
-        # States
-        if not isinstance(self.states, dict):
-            non_compliant.append("states")
-        elif self.states:  # non-empty dict
-            for name, data in self.states.items():
-                if not isinstance(data, xr.DataArray):
-                    non_compliant.append(f"states.{name}")
-        # Results
-        if not isinstance(self.results, dict):
-            non_compliant.append("results")
-        elif self.results:  # non-empty dict
-            dtypes = [xr.DataArray, xr.Dataset]
-            for name, data in self.results.items():
-                if not np.any([isinstance(data, t) for t in dtypes]):
-                    non_compliant.append(f"results.{name}")
+        for component, dtype in self.api.items():
+            obj = getattr(self, component, None)
+            try:
+                assert obj is not None
+                _assert_isinstance(obj, dtype, component)
+            except AssertionError as err:
+                non_compliant.append(str(err))
 
         return non_compliant
 
@@ -1386,17 +1387,10 @@ class Model(object, metaclass=ABCMeta):
             True if equal
         errors: dict
             Dictionary with errors per model component which is not equal
-        components: list
-            List of tested components
-
         """
-
-        def _isprop(mod, p):
-            return isinstance(getattr(type(mod), p, None), property)
-
         assert isinstance(other, type(self))
-        components = [p for p in dir(self) if _isprop(self, p)]
-        components_other = [p for p in dir(other) if _isprop(other, p)]
+        components = list(self.api.keys())
+        components_other = list(other.api.keys())
         assert components == components_other
         for cp in skip_component:
             if cp in components:
@@ -1406,7 +1400,7 @@ class Model(object, metaclass=ABCMeta):
             errors.update(
                 **_check_equal(getattr(self, prop), getattr(other, prop), prop)
             )
-        return len(errors) == 0, errors, components
+        return len(errors) == 0, errors
 
 
 def _check_data(
@@ -1435,9 +1429,26 @@ def _check_data(
     return data
 
 
+def _assert_isinstance(obj: Any, dtype: Any, name: str = ""):
+    """Check if obj match typing or class (dtype)"""
+    args = typing.get_args(dtype)
+    _cls = typing.get_origin(dtype)
+    if len(args) == 0 and dtype != Any and dtype is not None:
+        assert isinstance(obj, dtype), name
+    elif _cls == Union:
+        assert isinstance(obj, args), name
+    elif _cls is not None:
+        assert isinstance(obj, _cls), name
+    # recursive check of dtype dict keys and values
+    if len(args) > 0 and _cls is dict:
+        for key, val in obj.items():
+            _assert_isinstance(key, args[0], f"{name}.{str(key)}")
+            _assert_isinstance(val, args[1], f"{name}.{str(key)}")
+
+
 def _check_equal(a, b, name="") -> Dict[str, str]:
-    """Recursive test of model property.
-    Returns dict with property name and associated error message."""
+    """Recursive test of model components.
+    Returns dict with component name and associated error message."""
     errors = {}
     try:
         assert isinstance(b, type(a)), "property types do not match"

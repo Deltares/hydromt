@@ -22,9 +22,12 @@ class MeshMixin(object):
     # placeholders
     # We cannot initialize an empty xu.UgridDataArray
     _mesh = None
+    _API = {
+        "mesh": Union[xu.UgridDataArray, xu.UgridDataset],
+    }
 
     @property
-    def mesh(self):
+    def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
         """Model mesh data. Returns a xarray.Dataset."""
         # XU grid data type Xarray dataset with xu sampling.
         if self._mesh is None:
@@ -425,17 +428,3 @@ class MeshModel(Model, MeshMixin):
         """Returns geometry of mesh as a gpd.GeoDataFrame"""
         if self._mesh is not None:
             return self._mesh.ugrid.grid.to_geodataframe()
-
-    def _test_model_api(self) -> List:
-        """Test compliance with HydroMT MeshModel API.
-
-        Returns
-        -------
-        non_compliant: list
-            List of objects that are non-compliant with the model API structure.
-        """
-        non_compliant = super()._test_model_api()
-        # Mesh instance
-        if self.mesh is not None and not isinstance(self.mesh, xu.UgridDataset):
-            non_compliant.append("mesh")
-        return non_compliant

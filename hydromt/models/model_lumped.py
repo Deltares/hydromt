@@ -6,7 +6,7 @@ import numpy as np
 import geopandas as gpd
 import os
 from os.path import join, isfile, isdir, dirname
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict
 import logging
 from shapely.geometry import box
 
@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 class LumpedMixin:
     _response_units = xr.Dataset()
+    _API = {
+        "response_units": xr.Dataset,
+    }
 
     @property
     def response_units(self) -> xr.Dataset:
