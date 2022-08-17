@@ -5,6 +5,7 @@ import inspect
 import json
 
 from hydromt.models import ENTRYPOINTS
+from hydromt import DataCatalog
 
 
 def get_model_components(model: str):
@@ -56,7 +57,12 @@ def get_model_components(model: str):
                 
     return components
 
+# def get_data_catalog(data_catalog_name):
+#     data_catalog = DataCatalog()
+#     print(data_catalog.predefined_catalogs)
 
+# get_data_catalog("deltares_data")
+# print(DataCatalog.predefined_catalogs)
 
 # model_plugins = ['wflow', 'fiat', 'delwaq', 'sfincs']
 

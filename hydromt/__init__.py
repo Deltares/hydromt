@@ -5,6 +5,8 @@ __version__ = "0.4.6.dev"
 
 import geopandas as gpd
 import warnings
+from typing import Union
+from pathlib import Path
 
 # required for accessor style documentation
 from xarray import DataArray, Dataset
@@ -43,3 +45,7 @@ def __getattr__(name):
         )
         return model_plugins.load(ep)
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+RasterDatasetSource = Union[str, Path]
+GeoDatasetSource = Union[str, Path]
+GeoDataframeSource = Union[str, Path]
