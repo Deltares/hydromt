@@ -8,6 +8,7 @@
 deltares_data:
    urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/deltares_data.yml
    versions:
+     v2022.7: main 
      v2022.5: d88cc47bd4ecc83de38c00aa554a7d48ad23ec23
    notes: This data is only accessible when connected to the Deltares network.
 artifact_data:
