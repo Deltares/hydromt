@@ -6,8 +6,13 @@ import xarray as xr
 from shapely.geometry import box
 
 from hydromt import Model, GridModel, LumpedModel, NetworkModel
+from hydromt.models.model_api import AuxmapsMixin
 from hydromt import raster, vector, gis_utils
 import pyflwdir
+
+
+class TestAuxModel(Model, AuxmapsMixin):
+    _NAME = "testauxmodel"
 
 
 @pytest.fixture
@@ -155,6 +160,15 @@ def model(demda, world, obsda):
 
 
 @pytest.fixture
+def auxmap_model(demda):
+    mod = TestAuxModel()
+    mod.setup_region({"geom": demda.raster.box})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_auxmaps(demda, "elevtn")
+    return mod
+
+
+@pytest.fixture
 def grid_model(demda, flwda):
     mod = GridModel()
     mod.setup_region({"geom": demda.raster.box})
@@ -167,7 +181,7 @@ def grid_model(demda, flwda):
 @pytest.fixture
 def lumped_model(ts, geodf):
     mod = LumpedModel()
-    mod.setup_region({"bbox": geodf.total_bounds})
+    # mod.setup_region({"bbox": geodf.total_bounds})
     mod.setup_config(**{"header": {"setting": "value"}})
     da = xr.DataArray(
         ts,
@@ -176,6 +190,7 @@ def lumped_model(ts, geodf):
         name="zs",
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
+    da.vector.set_crs(geodf.crs)
     mod.set_response_units(da)
     return mod
 
@@ -192,10 +207,10 @@ def mesh_model(demuda):
     from hydromt import MeshModel
 
     mod = MeshModel()
-    region = gpd.GeoDataFrame(
-        geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.crs
-    )
-    mod.setup_region({"geom": region})
+    # region = gpd.GeoDataFrame(
+    #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.crs
+    # )
+    # mod.setup_region({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(demuda, "elevtn")
     return mod
