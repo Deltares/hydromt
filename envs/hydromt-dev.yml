@@ -26,6 +26,7 @@ dependencies:
   - numpy
   - openpyxl
   - pandas
+  - packaging
   - pcraster # optional
   - pip
   - pydata-sphinx-theme  # docs
@@ -42,6 +43,7 @@ dependencies:
   - scipy
   - testpath  # tests
   - toml
+  - shapely=1.8.2  # temp version pin see geopandas#2531
   - sphinx # docs
   - xarray
   - xugrid # optional for mesh
