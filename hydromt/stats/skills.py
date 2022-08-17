@@ -190,9 +190,10 @@ def spearman_rank_correlation(sim, obs, dim="time"):
 def kge_non_parametric(sim, obs, dim="time"):
     """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series with decomposed scores
 
-    .. ref::
-    Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
-    a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
+    .. ref:
+
+        Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
+        a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
 
     Parameters
     ----------
@@ -226,9 +227,10 @@ def kge_non_parametric(sim, obs, dim="time"):
 def kge_non_parametric_flood(sim, obs, dim="time"):
     """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series optimized for flood peaks using Pearson (see Pool et al., 2018)
 
-    .. ref::
-    Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
-    a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
+    .. ref:
+
+        Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
+        a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
 
     Parameters
     ----------
@@ -344,7 +346,8 @@ def rmse(sim, obs, dim="time"):
 def kge(sim, obs, dim="time"):
     """Returns the Kling-Gupta Efficiency (KGE) of two time series
 
-        .. ref::
+    .. ref:
+
         Gupta, Kling, Yilmaz, Martinez, 2009, Decomposition of the mean
         squared error and NSE performance criteria: Implications for improving
         hydrological modelling.
@@ -378,7 +381,8 @@ def kge(sim, obs, dim="time"):
 def kge_2012(sim, obs, dim="time"):
     """Returns the Kling-Gupta Efficiency (KGE, 2012) of two time series
 
-        .. ref::
+    .. ref:
+
         Kling, H., Fuchs, M., & Paulin, M. (2012). Runoff conditions in the
         upper Danube basin under an ensemble of climate change scenarios.
         Journal of Hydrology, 424, 264-277, doi:10.1016/j.jhydrol.2012.01.011.

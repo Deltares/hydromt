@@ -33,7 +33,7 @@ def get_model_components(model: str):
             continue
         signature = inspect.signature(member)
         components[name] = {
-            'doc': member.__doc__,
+            "doc": member.__doc__,
             "required": [],
             "optional": [],
             "args": False,
@@ -54,8 +54,9 @@ def get_model_components(model: str):
                 components[name]["required"].append((k, type))
             else:  # optional
                 components[name]["optional"].append((k, type, v.default))
-                
+
     return components
+
 
 # def get_data_catalog(data_catalog_name):
 #     data_catalog = DataCatalog()

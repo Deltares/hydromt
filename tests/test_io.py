@@ -5,13 +5,13 @@ import pytest
 import numpy as np
 import pandas as pd
 import xarray as xr
+import rasterio
+import rioxarray
+import hydromt
 import os
 import glob
 from os.path import join
 from pathlib import Path
-import rasterio
-
-import hydromt
 from hydromt import raster
 
 

@@ -1,21 +1,21 @@
+# note that these are the developer dependencies,
+# if you only want the user dependencies, see
+# dependencies in pyproj.toml
 name: hydromt-dev
 
 channels:
   - conda-forge
 
-# note that these are the developer dependencies,
-# if you only want the user dependencies, see
-# install_requires in setup.py
 dependencies:
   - affine
-  - click
   - black
   - bottleneck
   - cartopy # to run examples
+  - click
   - dask
   - descartes # to run examples
   - entrypoints
-  - flit>=3.2
+  - flit>=3.4
   - gdal>=3.1
   - geopandas>=0.10
   - jupyter # to run examples
@@ -26,23 +26,28 @@ dependencies:
   - numpy
   - openpyxl
   - pandas
-  - pcraster # TODO make optional
+  - pcraster # optional
   - pip
-  - pyflwdir>=0.5.3
+  - pydata-sphinx-theme  # docs
+  - pyflwdir>=0.5.4
   - pygeos>=0.8
   - pytest # tests
   - pytest-cov # tests
   - pytest-benchmark # tests
   - python>=3.7
   - rasterio
+  - responses # tests
   - requests
+  - rioxarray
   - scipy
+  - testpath  # tests
   - toml
   - sphinx # docs
-  - sphinx_rtd_theme # docs
   - xarray
+  - xugrid # optional for mesh
   - zarr
   - pip:
-    - hydroengine
-    - sphinx_autosummary_accessors
+    - hydroengine  # optional
+    - sphinx_design  # docs
+    - sphinx_autosummary_accessors  # docs
 

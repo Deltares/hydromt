@@ -1,6 +1,6 @@
 {
-    "title": "hydroMT",
-    "description": "Build and analyze models like a data-wizard!",
+    "title": "HydroMT",
+    "description": "Automated and reproducible model building and analysis",
     "upload_type": "software",
     "creators": [
         {

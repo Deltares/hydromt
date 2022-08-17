@@ -5,6 +5,7 @@ import click
 from os.path import join
 import logging
 import warnings
+import numpy as np
 
 ### Uncomment the following lines for building exe
 # import sys
@@ -15,7 +16,7 @@ import warnings
 ###
 
 from . import cli_utils
-from .. import log, data_adapter
+from .. import log
 from ..models import ENTRYPOINTS, model_plugins
 from .. import __version__
 
@@ -59,7 +60,7 @@ opt_cli = click.option(
     "--opt",
     multiple=True,
     callback=cli_utils.parse_opt,
-    help="Component specific keyword arguments, see the setup_<component> method "
+    help="Method specific keyword arguments, see the method documentation "
     "of the specific model for more information about the arguments.",
 )
 
@@ -67,8 +68,7 @@ data_opt = click.option(
     "-d",
     "--data",
     multiple=True,
-    type=click.Path(resolve_path=True, file_okay=True),
-    help="File path to yml data sources file. See documentation for required yml file format.",
+    help="Path to local yaml data catalog file OR name of predefined data catalog.",
 )
 
 deltares_data_opt = click.option(
@@ -76,7 +76,7 @@ deltares_data_opt = click.option(
     "--deltares-data",
     is_flag=True,
     default=False,
-    help=f"Parse default deltares data yml from {data_adapter.DataCatalog()._url}",
+    help='Shortcut to add the "deltares_data" catalog',
 )
 
 ## MAIN
@@ -145,7 +145,7 @@ def build(
     verbose,
     quiet,
 ):
-    """Build models from source data.
+    """Build models from scratch.
 
     \b
     Example usage:
@@ -153,15 +153,11 @@ def build(
 
     \b
     To build a wflow model for a subbasin using and point coordinates snapped to cells with stream order >= 4
-    hydromt build wflow /path/to/model_root "{'subbasin': [-7.24, 62.09], 'strord': 4}" -i /path/to/wflow_config.ini
+    hydromt build wflow /path/to/model_root "{'subbasin': [-7.24, 62.09], 'strord': 4}" -i /path/to/wflow_config.ini -d deltares_data -d /path/to/data_catalog.yml -v
 
     \b
-    To build a wflow model based on basin ID
-    hydromt build wflow /path/to/model_root "{'basin': 230001006}"
-
-    \b
-    To build a sfincs model based on a bbox (for Texel)
-    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"
+    To build a sfincs model based on a bbox
+    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini -d /path/to/data_catalog.yml -v
 
     """
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -174,14 +170,14 @@ def build(
             'The "build-base" flag has been deprecated, modify the ini file instead.',
             DeprecationWarning,
         )
-    if len(data) > 0:
-        logger.info(f"Additional data sources: {data}")
     logger.info(f"User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
-    kwargs.update(deltares_data=dd)
-    if data:  # overwrite data_libs from config [global] section with command line
-        kwargs.update(data_libs=data)
+    # parse data catalog options from global section in config and cli options
+    data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
+    data_libs += list(data)  # add data catalogs from cli
+    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+        data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         if model not in _models:
             raise ValueError(f"Model unknown : {model}, select from {_models}")
@@ -190,6 +186,7 @@ def build(
             root=model_root,
             mode="w",
             logger=logger,
+            data_libs=data_libs,
             **kwargs,
         )
         # build model
@@ -224,7 +221,7 @@ def build(
     "-c",
     "--components",
     multiple=True,
-    help="Model components from ini file to run",
+    help="Model methods from ini file to run",
 )
 @opt_cli
 @opt_config
@@ -245,12 +242,12 @@ def update(
     --------------
 
     \b
-    Update (overwrite) landuse-landcover maps in a wflow model
-    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt source_name=vito
+    Update (overwrite!) landuse-landcover based maps in a Wflow model
+    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
 
     \b
-    Update reservoir maps based on default settings in a wflow model and write to new directory
-    hydromt update wflow /path/to/model_root -o /path/to/model_out -c setup_reservoirs
+    Update Wflow model components outlined in an .ini configuration file and write the model to a directory
+    hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.ini -d /path/to/data_catalog.yml -v
     """
     # logger
     mode = "r+" if model_root == model_out else "r"
@@ -259,16 +256,16 @@ def update(
     logger.info(f"Updating {model} model at {model_root} ({mode}).")
     logger.info(f"Output dir: {model_out}")
     # parse settings
-    if len(data) > 0:
-        logger.info(f"Additional data sources: {data}")
     if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
         opt = {components[0]: opt}
     logger.info(f"User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
-    kwargs.update(deltares_data=dd)
-    if data:  # overwrite data_libs from config [global] section with command line
-        kwargs.update(data_libs=data)
+    # parse data catalog options from global section in config and cli options
+    data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
+    data_libs += list(data)  # add data catalogs from cli
+    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+        data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         if model not in _models:
             raise ValueError(f"Model unknown : {model}, select from {_models}")
@@ -276,6 +273,7 @@ def update(
         mod = model_plugins.load(ENTRYPOINTS[model], logger=logger)(
             root=model_root,
             mode=mode,
+            data_libs=data_libs,
             logger=logger,
             **kwargs,
         )
