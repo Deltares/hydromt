@@ -1,0 +1,12 @@
+alosdem_v3.2:
+  crs: 4326
+  data_type: RasterDataset
+  driver: raster
+  meta:
+    category: topography
+    notes: renaming and units might require some revision, horizontal resoluation of approx. 30 meters
+    source_author: JAXA's AW3D30
+    source_license: https://earth.jaxa.jp/en/data/policy/
+    source_url: https://portal.opentopography.org/raster?opentopoID=OTALOS.112016.4326.2, https://www.eorc.jaxa.jp/ALOS/en/dataset/aw3d30/aw3d30_e.htm
+    source_version: 3.2
+  path: topography/alosdem/alosdem.vrt
