@@ -11,6 +11,7 @@ unreleased
 
 Added
 -----
+- Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
 
 Changed
 -------
@@ -30,7 +31,7 @@ Added
 - New raster method for adding gdal_compliant() attributes to xarray object.
 - Function ``to_datetimeindex`` in available preprocess functions for xr.open_dataset in the data adapter.
 - Function ``remove_duplicates`` in available preprocess functions for xr.open_dataset in the data adapter.
-- New ``DataCatalog.from_predefined_catalogs`` and ``DataCatalog.from_archive`` to support predefined data catalogs and archive 
+- New ``DataCatalog.from_predefined_catalogs`` and ``DataCatalog.from_archive`` to support predefined data catalogs and archive
   in a generic way through the data/predefined_catalogs.yml file.
 - Optional formatting for year and month variables in path of data sources.
 

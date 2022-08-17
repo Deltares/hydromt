@@ -28,6 +28,7 @@ General
    data_catalog.DataCatalog.to_dict
    data_catalog.DataCatalog.to_dataframe
    data_catalog.DataCatalog.to_yml
+   data_catalog.DataCatalog.export_data
 
 Add data sources
 ----------------
@@ -63,9 +64,10 @@ RasterDataset
    :toctree: _generated
 
    data_adapter.RasterDatasetAdapter
-   data_adapter.RasterDatasetAdapter.to_dict
    data_adapter.RasterDatasetAdapter.summary
    data_adapter.RasterDatasetAdapter.get_data
+   data_adapter.RasterDatasetAdapter.to_dict
+   data_adapter.RasterDatasetAdapter.to_file
 
 GeoDataset
 ==========
@@ -74,9 +76,10 @@ GeoDataset
    :toctree: _generated
 
    data_adapter.GeoDatasetAdapter
-   data_adapter.GeoDatasetAdapter.to_dict
    data_adapter.GeoDatasetAdapter.summary
    data_adapter.GeoDatasetAdapter.get_data
+   data_adapter.GeoDatasetAdapter.to_dict
+   data_adapter.GeoDatasetAdapter.to_file
 
 GeoDataFrame
 ============
@@ -85,9 +88,22 @@ GeoDataFrame
    :toctree: _generated
 
    data_adapter.GeoDataFrameAdapter
-   data_adapter.GeoDataFrameAdapter.to_dict
    data_adapter.GeoDataFrameAdapter.summary
    data_adapter.GeoDataFrameAdapter.get_data
+   data_adapter.GeoDataFrameAdapter.to_dict
+   data_adapter.GeoDataFrameAdapter.to_file
+
+DataFrame
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   data_adapter.DataFrameAdapter
+   data_adapter.DataFrameAdapter.summary
+   data_adapter.DataFrameAdapter.get_data
+   data_adapter.DataFrameAdapter.to_dict
+   data_adapter.DataFrameAdapter.to_file
 
 .. _model_api:
 
