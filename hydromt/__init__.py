@@ -54,4 +54,3 @@ def __getattr__(name):
         )
         return model_plugins.load(ep)
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
-

@@ -4,8 +4,8 @@ import typing
 import inspect
 import json
 
-from hydromt.models import ENTRYPOINTS
-from hydromt import DataCatalog
+from .models import ENTRYPOINTS
+from .data_catalog import DataCatalog
 
 
 def get_model_components(model: str):
@@ -22,7 +22,15 @@ def get_model_components(model: str):
         dict of model components with their arguments
     """
     _DEFAULT_TYPE = "str"
-    _EXCEPTED_TYPES = ["int", "float", "str", "bool"]
+    _EXCEPTED_TYPES = [
+        "int",
+        "float",
+        "str",
+        "bool",
+        "RasterDatasetSource",
+        "GeoDatasetSource",
+        "GeoDataframeSource",
+    ]
     _SKIP_METHODS = ["build", "update", "clip"]
     model_class = ENTRYPOINTS[model].load()
     members = inspect.getmembers(model_class)
@@ -58,16 +66,19 @@ def get_model_components(model: str):
     return components
 
 
-# def get_data_catalog(data_catalog_name):
-#     data_catalog = DataCatalog()
-#     print(data_catalog.predefined_catalogs)
-
-# get_data_catalog("deltares_data")
-# print(DataCatalog.predefined_catalogs)
-
-# model_plugins = ['wflow', 'fiat', 'delwaq', 'sfincs']
-
-# for plugin in model_plugins:
-#     components = get_model_components(plugin)
-#     with open(f'{plugin}_api.json', 'w') as f:
-#         json.dump(components, f, indent=2)
+def get_datasets(data_catalog: str) -> dict:
+    data_catalog = DataCatalog(data_catalog)
+    datasets = data_catalog.sources
+    dataset_sources = {
+        "RasterDatasetSource": [],
+        "GeoDatasetSource": [],
+        "GeoDataframeSource": [],
+    }
+    for k, v in datasets.items():
+        if v.data_type == "RasterDataset":
+            dataset_sources["RasterDatasetSource"].append(k)
+        elif v.data_type == "GeoDataFrame":
+            dataset_sources["GeoDataframeSource"].append(k)
+        elif v.data_type == "GeoDataset":
+            dataset_sources["GeoDatasetSource"].append(k)
+    return dataset_sources
