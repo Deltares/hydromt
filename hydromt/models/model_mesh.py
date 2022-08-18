@@ -192,7 +192,9 @@ class MeshModel(Model, MeshMixin):
                 raise ValueError(
                     f"Region 'mesh' file {mesh2d_fn} not found, please check"
                 )
-            topologies = ds.ugrid_roles.topology
+            topologies = [
+                k for k in ds.data_vars if ds[k].attrs.get("cf_role") == "mesh_topology"
+            ]
             for topology in topologies:
                 topodim = ds[topology].attrs["topology_dimension"]
                 if topodim != 2:  # chek if 2d mesh file else throw error
@@ -215,7 +217,6 @@ class MeshModel(Model, MeshMixin):
                 )
                 mesh2d.ugrid.grid.set_crs(crs)
             mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
-            
 
             # Reproject to user crs option if needed
             if mesh2d.ugrid.grid.crs != crs and crs is not None:
@@ -230,7 +231,7 @@ class MeshModel(Model, MeshMixin):
         resampling_method: Optional[str] = "mean",
         variables: Optional[list] = None,
         all_touched: Optional[bool] = True,
-        fill_nodata: Optional[str] = None,
+        fill_method: Optional[str] = None,
     ) -> None:
         """
         This component adds data variable(s) from ``raster_fn`` to mesh object.
@@ -255,8 +256,8 @@ class MeshModel(Model, MeshMixin):
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
-        fill_nodata : str, optional
-            If specified, fills no data values using fill_nodata method. AVailable methods 
+        fill_method : str, optional
+            If specified, fills no data values using fill_nodata method. AVailable methods
             are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         """
         self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
@@ -266,9 +267,9 @@ class MeshModel(Model, MeshMixin):
         )
         if isinstance(ds, xr.DataArray):
             ds = ds.to_dataset()
-        
-        if fill_nodata is not None:
-            ds = ds.raster.interpolate_na(method=fill_nodata)
+
+        if fill_method is not None:
+            ds = ds.raster.interpolate_na(method=fill_method)
 
         # Convert mesh grid as geodataframe for sampling
         # Reprojection happens to gdf inside of zonal_stats method
@@ -276,10 +277,10 @@ class MeshModel(Model, MeshMixin):
             gdf=self.mesh_gdf, stats=resampling_method, all_touched=all_touched
         )
         # Rename variables
-        rm_dict = {f"{var}_{resampling_method}": var for var in ds.raster.data_vars}
+        rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
         ds_sample = ds_sample.rename(rm_dict)
         # Convert to UgridDataset
-        uds_sample = xu.UgridDataSet(ds_sample, grid=self.mesh.grids)
+        uds_sample = xu.UgridDataset(ds_sample, grid=self.mesh.grid)
 
         self.set_mesh(uds_sample)
 
@@ -322,7 +323,7 @@ class MeshModel(Model, MeshMixin):
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
         fill_nodata : str, optional
-            If specified, fills no data values using fill_nodata method. AVailable methods 
+            If specified, fills no data values using fill_nodata method. AVailable methods
             are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         """
         self.logger.info(
@@ -333,7 +334,9 @@ class MeshModel(Model, MeshMixin):
             raster_fn, geom=self.region, buffer=2, **kwargs
         )
         if not isinstance(da, xr.DataArray):
-            raise ValueError(f"raster_fn {raster_fn} for mapping should be a single variable. Please select one using 'variable' argument in setup_auxmaps_from_rastermapping")
+            raise ValueError(
+                f"raster_fn {raster_fn} for mapping should be a single variable. Please select one using 'variable' argument in setup_auxmaps_from_rastermapping"
+            )
         df_vars = self.data_catalog.get_dataframe(
             raster_mapping_fn, variables=mapping_variables
         )
@@ -342,13 +345,13 @@ class MeshModel(Model, MeshMixin):
             ds = ds.raster.interpolate_na(method=fill_nodata)
 
         # Mapping function
-        ds_vars = da.raster.reclassify(reclass_table=df_vars, method='exact')
+        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
 
         # Convert mesh grid as geodataframe for sampling
         # Reprojection happens to gdf inside of zonal_stats method
         ds_sample = ds_vars.raster.zonal_stats(
             gdf=self.mesh_gdf,
-            stats=np.unique(np.at_lest1d(resampling_method)),
+            stats=np.unique(np.atleast_1d(resampling_method)),
             all_touched=all_touched,
         )
         # Rename variables
@@ -356,12 +359,12 @@ class MeshModel(Model, MeshMixin):
             resampling_method = np.repeat(resampling_method, len(mapping_variables))
         rm_dict = {
             f"{var}_{mtd}": var
-            for var, mtd in zip((mapping_variables, resampling_method))
+            for var, mtd in zip(mapping_variables, resampling_method)
         }
         ds_sample = ds_sample.rename(rm_dict)
-        ds_sample = ds_sample[[mapping_variables]]
+        ds_sample = ds_sample[mapping_variables]
         # Convert to UgridDataset
-        uds_sample = xu.UgridDataSet(ds_sample, grid=self.mesh.grids)
+        uds_sample = xu.UgridDataset(ds_sample, grid=self.mesh.grid)
 
         self.set_mesh(uds_sample)
 
@@ -427,4 +430,5 @@ class MeshModel(Model, MeshMixin):
     def mesh_gdf(self) -> gpd.GeoDataFrame:
         """Returns geometry of mesh as a gpd.GeoDataFrame"""
         if self._mesh is not None:
-            return self._mesh.ugrid.grid.to_geodataframe()
+            name = [n for n in self.mesh.data_vars][0]  # works better on a DataArray
+            return self._mesh[name].ugrid.to_geodataframe()

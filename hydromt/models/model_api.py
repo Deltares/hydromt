@@ -26,20 +26,23 @@ __all__ = ["Model"]
 logger = logging.getLogger(__name__)
 
 
-class AuxmapsMixin(object):
+class AuxmapsMixin:
     # mixin class to add an auxiliary maps object
     # contains maps needed for model building but not model data
-    _auxmaps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
     _API = {
         "auxmaps": Dict[str, Union[xr.DataArray, xr.Dataset]],
     }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._auxmaps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
 
     # auxiliary map files setup methods
     def setup_auxmaps_from_raster(
         self,
         raster_fn: str,
         variables: Optional[list] = None,
-        fill_nodata: Optional[str] = None,
+        fill_method: Optional[str] = None,
         name: Optional[str] = None,
         split_dataset: Optional[bool] = False,
     ) -> None:
@@ -58,8 +61,8 @@ class AuxmapsMixin(object):
             Source name of raster data in data_catalog.
         variables: list, optional
             List of variables to add to auxmaps from raster_fn. By default all.
-        fill_nodata : str, optional
-            If specified, fills no data values using fill_nodata method. Available methods 
+        fill_method : str, optional
+            If specified, fills no data values using fill_nodata method. Available methods
             are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         name: str, optional
             Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
@@ -71,21 +74,18 @@ class AuxmapsMixin(object):
         ds = self.data_catalog.get_rasterdataset(
             raster_fn, geom=self.region, buffer=2, variables=variables
         )
-        #Select variables
-        if variables is not None:
-            ds = ds[variables]
         # Fill nodata
-        if fill_nodata is not None:
-            ds = ds.raster.interpolate_na(method=fill_nodata)
+        if fill_method is not None:
+            ds = ds.raster.interpolate_na(method=fill_method)
         # Add to auxmaps
         self.set_auxmaps(ds, name=name, split_dataset=split_dataset)
-    
+
     def setup_auxmaps_from_rastermapping(
         self,
         raster_fn: str,
         raster_mapping_fn: str,
         mapping_variables: list,
-        fill_nodata: Optional[str] = None,
+        fill_method: Optional[str] = None,
         name: Optional[str] = None,
         split_dataset: Optional[bool] = False,
         **kwargs,
@@ -109,8 +109,8 @@ class AuxmapsMixin(object):
             Source name of mapping table of raster_fn in data_catalog.
         mapping_variables: list
             List of mapping_variables from raster_mapping_fn table to add to mesh. Index column should match values in raster_fn.
-        fill_nodata : str, optional
-            If specified, fills no data values using fill_nodata method. Available methods 
+        fill_method : str, optional
+            If specified, fills no data values using fill_nodata method. Available methods
             are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         name: str, optional
             Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
@@ -125,15 +125,17 @@ class AuxmapsMixin(object):
             raster_fn, geom=self.region, buffer=2, **kwargs
         )
         if not isinstance(da, xr.DataArray):
-            raise ValueError(f"raster_fn {raster_fn} for mapping should be a single variable. Please select one using 'variable' argument in setup_auxmaps_from_rastermapping")
+            raise ValueError(
+                f"raster_fn {raster_fn} for mapping should be a single variable. Please select one using 'variable' argument in setup_auxmaps_from_rastermapping"
+            )
         df_vars = self.data_catalog.get_dataframe(
             raster_mapping_fn, variables=mapping_variables
         )
         # Fill nodata
-        if fill_nodata is not None:
-            ds = ds.raster.interpolate_na(method=fill_nodata)
+        if fill_method is not None:
+            ds = ds.raster.interpolate_na(method=fill_method)
         # Mapping function
-        ds_vars = da.raster.reclassify(reclass_table=df_vars, method='exact')
+        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
         # Add to auxmaps
         self.set_auxmaps(ds_vars, name=name, split_dataset=split_dataset)
 
@@ -1467,3 +1469,10 @@ def _check_equal(a, b, name="") -> Dict[str, str]:
     except AssertionError as e:
         errors.update({name: e})
     return errors
+
+
+class AuxmapModel(AuxmapsMixin, Model):
+    _NAME = "testauxmodel"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

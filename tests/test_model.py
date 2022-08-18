@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT"""
 
-from os.path import isfile, join
+from os.path import join, dirname, abspath, isfile
 import pytest
 import xarray as xr
 import numpy as np
 import geopandas as gpd
 from hydromt.models.model_api import _check_data
 from hydromt.models import Model, GridModel, LumpedModel
+from hydromt.models.model_api import AuxmapsMixin, AuxmapModel
 from hydromt import _has_xugrid
 
-from .conftest import TestAuxModel
+# from .conftest import TestAuxModel
+DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 
 def test_check_data(demda):
@@ -145,20 +147,47 @@ def test_config(model, tmpdir):
 
 def test_auxmapsmixin(auxmap_model, tmpdir):
     assert "auxmaps" in auxmap_model.api
-    assert len(auxmap_model.auxmaps) == 4
-    assert "manning_roughness" in auxmap_model.auxmaps
-    assert isinstance(auxmap_model.auxmaps["hydrography"], xr.Dataset)
+    assert len(auxmap_model.auxmaps) == 1
     non_compliant = auxmap_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
     auxmap_model.set_root(str(tmpdir), mode="w")
     auxmap_model.write(components=["config", "geoms", "auxmaps"])
     # read model
-    model1 = TestAuxModel(str(tmpdir), mode="r")
+    model1 = AuxmapModel(str(tmpdir), mode="r")
     model1.read(components=["config", "geoms", "auxmaps"])
     # check if equal
     equal, errors = auxmap_model._test_equal(model1)
     assert equal, errors
+
+
+def test_auxmapsmixin_setup(tmpdir):
+    dc_param_fn = join(DATADIR, "model_parameters", "parameters_data.yml")
+    # class AuxModel(Model, AuxmapsMixin):
+    #     _NAME = "auxmodel"
+    mod = AuxmapModel(data_libs=["artifact_data", dc_param_fn], mode="w")
+    bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
+    mod.setup_region({"bbox": bbox})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.setup_auxmaps_from_raster(
+        raster_fn="merit_hydro", name="hydrography", variables=["elevtn", "flwdir"]
+    )
+    mod.setup_auxmaps_from_raster(raster_fn="vito", fill_method="nearest")
+    mod.setup_auxmaps_from_rastermapping(
+        raster_fn="vito",
+        raster_mapping_fn="vito_mapping",
+        mapping_variables=["roughness_manning"],
+        split_dataset=True,
+    )
+
+    assert len(mod.auxmaps) == 3
+    assert "roughness_manning" in mod.auxmaps
+    assert len(mod.auxmaps["hydrography"].data_vars) == 2
+    non_compliant = mod._test_model_api()
+    assert len(non_compliant) == 0, non_compliant
+    # write model
+    mod.set_root(str(tmpdir), mode="w")
+    mod.write(components=["config", "geoms", "auxmaps"])
 
 
 def test_gridmodel(grid_model, tmpdir):
@@ -224,22 +253,23 @@ def test_meshmodel(mesh_model, tmpdir):
     equal, errors = mesh_model._test_equal(model1)
     assert equal, errors
 
+
 @pytest.mark.skipif(not _has_xugrid(), reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, tmpdir):
     from hydromt.models import MeshModel
 
-    mod = MeshModel(data_libs=["parameters_data", "artifact_data"])
+    dc_param_fn = join(DATADIR, "model_parameters", "parameters_data.yml")
+    mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})
-    region = {"mesh": griduda}
+    region = {"mesh": griduda.ugrid.to_dataset()}
     mod.setup_mesh(region, crs=4326)
     mod.region
     mod.setup_mesh_from_raster("vito")
     mod.setup_mesh_from_rastermapping(
-        raster_fn = "vito", 
-        raster_mapping_fn = "vito_mapping",
+        raster_fn="vito",
+        raster_mapping_fn="vito_mapping",
         mapping_variables=["roughness_manning"],
-        resampling_method="median",
-        fill_nodata=True,
+        resampling_method="mean",
     )
     assert "vito" in mod.mesh.data_vars
-    assert "manning_roughness" in mod.mesh.data_vars
+    assert "roughness_manning" in mod.mesh.data_vars
