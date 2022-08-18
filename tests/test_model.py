@@ -6,9 +6,8 @@ import pytest
 import xarray as xr
 import numpy as np
 import geopandas as gpd
-from hydromt.models.model_api import _check_data
+from hydromt.models.model_api import _check_data, AuxmapsModel
 from hydromt.models import Model, GridModel, LumpedModel
-from hydromt.models.model_api import AuxmapsMixin, AuxmapModel
 from hydromt import _has_xugrid
 
 # from .conftest import TestAuxModel
@@ -154,7 +153,7 @@ def test_auxmapsmixin(auxmap_model, tmpdir):
     auxmap_model.set_root(str(tmpdir), mode="w")
     auxmap_model.write(components=["config", "geoms", "auxmaps"])
     # read model
-    model1 = AuxmapModel(str(tmpdir), mode="r")
+    model1 = AuxmapsModel(str(tmpdir), mode="r")
     model1.read(components=["config", "geoms", "auxmaps"])
     # check if equal
     equal, errors = auxmap_model._test_equal(model1)
@@ -165,7 +164,7 @@ def test_auxmapsmixin_setup(tmpdir):
     dc_param_fn = join(DATADIR, "model_parameters", "parameters_data.yml")
     # class AuxModel(Model, AuxmapsMixin):
     #     _NAME = "auxmodel"
-    mod = AuxmapModel(data_libs=["artifact_data", dc_param_fn], mode="w")
+    mod = AuxmapsModel(data_libs=["artifact_data", dc_param_fn], mode="w")
     bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
     mod.setup_region({"bbox": bbox})
     mod.setup_config(**{"header": {"setting": "value"}})

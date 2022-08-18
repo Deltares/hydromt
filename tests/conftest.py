@@ -4,14 +4,12 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
-from shapely.geometry import box
 
-from hydromt import Model, GridModel, LumpedModel, NetworkModel, data_catalog
-from hydromt.models.model_api import AuxmapsMixin, AuxmapModel
+from hydromt import Model, GridModel, LumpedModel, NetworkModel
+from hydromt.models.model_api import AuxmapsModel
 from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
-
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
@@ -191,7 +189,7 @@ def model(demda, world, obsda):
 
 @pytest.fixture
 def auxmap_model(demda):
-    mod = AuxmapModel()
+    mod = AuxmapsModel()
     mod.setup_region({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_auxmaps(demda, "elevtn")

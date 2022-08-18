@@ -71,7 +71,7 @@ class RasterDatasetAdapter(DataAdapter):
             Scaling multiplication and addition to change to map from the native data unit
             to the output data unit as required by hydroMT.
         meta: dict, optional
-            Metadata information of dataset, prefably containing the following keys:
+            Metadata information of dataset, preferably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path) based on placeholder values
@@ -208,9 +208,12 @@ class RasterDatasetAdapter(DataAdapter):
                 )
             ds_out = xr.open_zarr(fns[0], **kwargs)
         elif self.driver == "raster_tindex":
-            kwargs.update(nodata=self.nodata)
+            if np.issubdtype(type(self.nodata), np.number):
+                kwargs.update(nodata=self.nodata)
             ds_out = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
         elif self.driver == "raster":  # rasterio files
+            if np.issubdtype(type(self.nodata), np.number):
+                kwargs.update(nodata=self.nodata)
             ds_out = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")

@@ -12,15 +12,18 @@ from shapely.geometry import box
 
 from .model_api import Model
 
-__all__ = ["LumpedModel", "LumpedMixin"]
+__all__ = ["LumpedModel"]
 logger = logging.getLogger(__name__)
 
 
 class LumpedMixin:
-    _response_units = xr.Dataset()
     _API = {
         "response_units": xr.Dataset,
     }
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._response_units = xr.Dataset()
 
     @property
     def response_units(self) -> xr.Dataset:
@@ -130,7 +133,7 @@ class LumpedMixin:
         self._write_nc(nc_dict, fn, **kwargs)
 
 
-class LumpedModel(Model, LumpedMixin):
+class LumpedModel(LumpedMixin, Model):
 
     _CLI_ARGS = {"region": "setup_region"}
 
