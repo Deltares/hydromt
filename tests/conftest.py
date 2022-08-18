@@ -5,8 +5,7 @@ import pandas as pd
 import geopandas as gpd
 import xarray as xr
 
-from hydromt import Model, GridModel, LumpedModel, NetworkModel
-from hydromt.models.model_api import AuxmapsModel
+from hydromt import Model, GridModel, LumpedModel, NetworkModel, AuxmapsModel
 from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
