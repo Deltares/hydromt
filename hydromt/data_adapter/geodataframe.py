@@ -4,7 +4,7 @@ import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 import logging
-from typing import Union
+from typing import Union, NewType
 from pathlib import Path
 
 from .data_adapter import DataAdapter
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["GeoDataFrameAdapter", "GeoDataframeSource"]
 
-GeoDataframeSource = Union[str, Path]
+GeoDataframeSource = NewType("GeoDataframeSource", Union[str, Path])
 
 
 class GeoDataFrameAdapter(DataAdapter):

@@ -6,7 +6,7 @@ import xarray as xr
 import geopandas as gpd
 from shapely.geometry import box
 import logging
-from typing import Union
+from typing import Union, NewType
 from pathlib import Path
 
 from .. import gis_utils, io
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["GeoDatasetAdapter", "GeoDatasetSource"]
 
-GeoDatasetSource = Union[str, Path]
+GeoDatasetSource = NewType("GeoDatasetSource", Union[str, Path])
 
 
 class GeoDatasetAdapter(DataAdapter):
