@@ -29,10 +29,14 @@ logger = logging.getLogger(__name__)
 class AuxmapsMixin(object):
     # mixin class to add an auxiliary maps object
     # contains maps needed for model building but not model data
-    _auxmaps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
     _API = {
         "auxmaps": Dict[str, Union[xr.DataArray, xr.Dataset]],
     }
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._auxmaps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
+
     # model auxiliary map files
     @property
     def auxmaps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
@@ -1355,3 +1359,22 @@ def _check_equal(a, b, name="") -> Dict[str, str]:
     except AssertionError as e:
         errors.update({name: e})
     return errors
+
+
+class AuxmapsModel(AuxmapsMixin, Model):
+    def __init__(
+        self,
+        root: str = None,
+        mode: str = "w",
+        config_fn: str = None,
+        data_libs: List[str] = None,
+        logger=logger,
+    ):
+        # Initialize with the Model class
+        super().__init__(
+            root=root,
+            mode=mode,
+            config_fn=config_fn,
+            data_libs=data_libs,
+            logger=logger,
+        )

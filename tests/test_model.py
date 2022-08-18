@@ -6,11 +6,9 @@ import pytest
 import xarray as xr
 import numpy as np
 import geopandas as gpd
-from hydromt.models.model_api import _check_data
+from hydromt.models.model_api import _check_data, AuxmapsModel
 from hydromt.models import Model, GridModel, LumpedModel
 from hydromt import _has_xugrid
-
-from .conftest import TestAuxModel
 
 
 def test_check_data(demda):
@@ -152,7 +150,7 @@ def test_auxmapsmixin(auxmap_model, tmpdir):
     auxmap_model.set_root(str(tmpdir), mode="w")
     auxmap_model.write(components=["config", "geoms", "auxmaps"])
     # read model
-    model1 = TestAuxModel(str(tmpdir), mode="r")
+    model1 = AuxmapsModel(str(tmpdir), mode="r")
     model1.read(components=["config", "geoms", "auxmaps"])
     # check if equal
     equal, errors = auxmap_model._test_equal(model1)
