@@ -11,7 +11,6 @@ from shapely.geometry import box
 
 from ..raster import GEO_MAP_COORD
 from .model_api import Model
-from .. import workflows
 
 __all__ = ["MeshModel"]
 logger = logging.getLogger(__name__)
@@ -27,6 +26,150 @@ class MeshMixin(object):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._mesh = None
+
+    ## general setup methods
+    def setup_mesh_from_raster(
+        self,
+        raster_fn: str,
+        variables: Optional[list] = None,
+        fill_method: Optional[str] = None,
+        resampling_method: Optional[str] = "mean",
+        all_touched: Optional[bool] = True,
+    ) -> None:
+        """
+        This component adds data variable(s) from ``raster_fn`` to mesh object.
+
+        Raster data is interpolated to the mesh grid using the ``resampling_method``.
+        If raster is a dataset, all variables will be added unless ``variables`` list is specified.
+
+        Adds model layers:
+
+        * **raster.name** mesh: data from raster_fn
+
+        Parameters
+        ----------
+        raster_fn: str
+            Source name of raster data in data_catalog.
+        variables: list, optional
+            List of variables to add to mesh from raster_fn. By default all.
+        fill_method : str, optional
+            If specified, fills no data values using fill_nodata method. AVailable methods
+            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        resampling_method: str, optional
+            Method to sample from raster data to mesh. By default mean. Options include
+            {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
+        all_touched : bool, optional
+            If True, all pixels touched by geometries will used to define the sample.
+            If False, only pixels whose center is within the geometry or that are
+            selected by Bresenham's line algorithm will be used. By default True.
+        """
+        self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
+        # Read raster data and select variables
+        ds = self.data_catalog.get_rasterdataset(
+            raster_fn, geom=self.region, buffer=2, variables=variables
+        )
+        if isinstance(ds, xr.DataArray):
+            ds = ds.to_dataset()
+
+        if fill_method is not None:
+            ds = ds.raster.interpolate_na(method=fill_method)
+
+        # Convert mesh grid as geodataframe for sampling
+        # Reprojection happens to gdf inside of zonal_stats method
+        ds_sample = ds.raster.zonal_stats(
+            gdf=self.mesh_gdf, stats=resampling_method, all_touched=all_touched
+        )
+        # Rename variables
+        rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
+        ds_sample = ds_sample.rename(rm_dict)
+        # Convert to UgridDataset
+        uds_sample = xu.UgridDataset(ds_sample, grid=self.mesh.grid)
+
+        self.set_mesh(uds_sample)
+
+    def setup_mesh_from_rastermapping(
+        self,
+        raster_fn: str,
+        raster_mapping_fn: str,
+        mapping_variables: list,
+        fill_nodata: Optional[str] = None,
+        resampling_method: Optional[Union[str, list]] = "mean",
+        all_touched: Optional[bool] = True,
+        **kwargs,
+    ) -> None:
+        """
+        This component adds data variable(s) to mesh object by combining values in ``raster_mapping_fn`` to spatial layer ``raster_fn``.
+
+        The ``mapping_variables`` rasters are first created by mapping variables values from ``raster_mapping_fn`` to value in the
+        ``raster_fn`` grid.
+        Mapping variables data are then interpolated to the mesh grid using ``resampling_method``.
+
+        Adds model layers:
+
+        * **mapping_variables** mesh: data from raster_mapping_fn spatially ditributed with raster_fn
+
+        Parameters
+        ----------
+        raster_fn: str
+            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
+            hydromt.data_catalog.get_rasterdataset method
+        raster_mapping_fn: str
+            Source name of mapping table of raster_fn in data_catalog.
+        mapping_variables: list
+            List of mapping_variables from rasert_mapping_fn table to add to mesh. Index column should match values in raster_fn.
+        fill_nodata : str, optional
+            If specified, fills no data values using fill_nodata method. AVailable methods
+            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        resampling_method: str/list, optional
+            Method to sample from raster data to mesh. Can be a list per variable in ``mapping_variables`` or a
+            single method for all. By default mean for all mapping_variables. Options include
+            {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
+        all_touched : bool, optional
+            If True, all pixels touched by geometries will used to define the sample.
+            If False, only pixels whose center is within the geometry or that are
+            selected by Bresenham's line algorithm will be used. By default True.
+        """
+        self.logger.info(
+            f"Preparing mesh data from mapping {mapping_variables} values in {raster_mapping_fn} to raster source {raster_fn}"
+        )
+        # Read raster data and mapping table
+        da = self.data_catalog.get_rasterdataset(
+            raster_fn, geom=self.region, buffer=2, **kwargs
+        )
+        if not isinstance(da, xr.DataArray):
+            raise ValueError(
+                f"raster_fn {raster_fn} for mapping should be a single variable. Please select one using 'variable' argument in setup_auxmaps_from_rastermapping"
+            )
+        df_vars = self.data_catalog.get_dataframe(
+            raster_mapping_fn, variables=mapping_variables
+        )
+
+        if fill_nodata is not None:
+            ds = ds.raster.interpolate_na(method=fill_nodata)
+
+        # Mapping function
+        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
+
+        # Convert mesh grid as geodataframe for sampling
+        # Reprojection happens to gdf inside of zonal_stats method
+        ds_sample = ds_vars.raster.zonal_stats(
+            gdf=self.mesh_gdf,
+            stats=np.unique(np.atleast_1d(resampling_method)),
+            all_touched=all_touched,
+        )
+        # Rename variables
+        if isinstance(resampling_method, str):
+            resampling_method = np.repeat(resampling_method, len(mapping_variables))
+        rm_dict = {
+            f"{var}_{mtd}": var
+            for var, mtd in zip(mapping_variables, resampling_method)
+        }
+        ds_sample = ds_sample.rename(rm_dict)
+        ds_sample = ds_sample[mapping_variables]
+        # Convert to UgridDataset
+        uds_sample = xu.UgridDataset(ds_sample, grid=self.mesh.grid)
+
+        self.set_mesh(uds_sample)
 
     @property
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
@@ -226,149 +369,6 @@ class MeshModel(MeshMixin, Model):
                 mesh2d.ugrid.grid.to_crs(self.crs)
 
             self.set_mesh(mesh2d)
-
-    def setup_mesh_from_raster(
-        self,
-        raster_fn: str,
-        resampling_method: Optional[str] = "mean",
-        variables: Optional[list] = None,
-        all_touched: Optional[bool] = True,
-        fill_method: Optional[str] = None,
-    ) -> None:
-        """
-        This component adds data variable(s) from ``raster_fn`` to mesh object.
-
-        Raster data is interpolated to the mesh grid using the ``resampling_method``.
-        If raster is a dataset, all variables will be added unless ``variables`` list is specified.
-
-        Adds model layers:
-
-        * **raster.name** mesh: data from raster_fn
-
-        Parameters
-        ----------
-        raster_fn: str
-            Source name of raster data in data_catalog.
-        resampling_method: str, optional
-            Method to sample from raster data to mesh. By default mean. Options include
-            {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
-        variables: list, optional
-            List of variables to add to mesh from raster_fn. By default all.
-        all_touched : bool, optional
-            If True, all pixels touched by geometries will used to define the sample.
-            If False, only pixels whose center is within the geometry or that are
-            selected by Bresenham's line algorithm will be used. By default True.
-        fill_method : str, optional
-            If specified, fills no data values using fill_nodata method. AVailable methods
-            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
-        """
-        self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
-        # Read raster data and select variables
-        ds = self.data_catalog.get_rasterdataset(
-            raster_fn, geom=self.region, buffer=2, variables=variables
-        )
-        if isinstance(ds, xr.DataArray):
-            ds = ds.to_dataset()
-
-        if fill_method is not None:
-            ds = ds.raster.interpolate_na(method=fill_method)
-
-        # Convert mesh grid as geodataframe for sampling
-        # Reprojection happens to gdf inside of zonal_stats method
-        ds_sample = ds.raster.zonal_stats(
-            gdf=self.mesh_gdf, stats=resampling_method, all_touched=all_touched
-        )
-        # Rename variables
-        rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
-        ds_sample = ds_sample.rename(rm_dict)
-        # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grid=self.mesh.grid)
-
-        self.set_mesh(uds_sample)
-
-    def setup_mesh_from_rastermapping(
-        self,
-        raster_fn: str,
-        raster_mapping_fn: str,
-        mapping_variables: list,
-        resampling_method: Optional[Union[str, list]] = "mean",
-        all_touched: Optional[bool] = True,
-        fill_nodata: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        """
-        This component adds data variable(s) to mesh object by combining values in ``raster_mapping_fn`` to spatial layer ``raster_fn``.
-
-        The ``mapping_variables`` rasters are first created by mapping variables values from ``raster_mapping_fn`` to value in the
-        ``raster_fn`` grid.
-        Mapping variables data are then interpolated to the mesh grid using ``resampling_method``.
-
-        Adds model layers:
-
-        * **mapping_variables** mesh: data from raster_mapping_fn spatially ditributed with raster_fn
-
-        Parameters
-        ----------
-        raster_fn: str
-            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
-            hydromt.data_catalog.get_rasterdataset method
-        raster_mapping_fn: str
-            Source name of mapping table of raster_fn in data_catalog.
-        mapping_variables: list
-            List of mapping_variables from rasert_mapping_fn table to add to mesh. Index column should match values in raster_fn.
-        resampling_method: str/list, optional
-            Method to sample from raster data to mesh. Can be a list per variable in ``mapping_variables`` or a
-            single method for all. By default mean for all mapping_variables. Options include
-            {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
-        all_touched : bool, optional
-            If True, all pixels touched by geometries will used to define the sample.
-            If False, only pixels whose center is within the geometry or that are
-            selected by Bresenham's line algorithm will be used. By default True.
-        fill_nodata : str, optional
-            If specified, fills no data values using fill_nodata method. AVailable methods
-            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
-        """
-        self.logger.info(
-            f"Preparing mesh data from mapping {mapping_variables} values in {raster_mapping_fn} to raster source {raster_fn}"
-        )
-        # Read raster data and mapping table
-        da = self.data_catalog.get_rasterdataset(
-            raster_fn, geom=self.region, buffer=2, **kwargs
-        )
-        if not isinstance(da, xr.DataArray):
-            raise ValueError(
-                f"raster_fn {raster_fn} for mapping should be a single variable. Please select one using 'variable' argument in setup_auxmaps_from_rastermapping"
-            )
-        df_vars = self.data_catalog.get_dataframe(
-            raster_mapping_fn, variables=mapping_variables
-        )
-
-        if fill_nodata is not None:
-            ds = ds.raster.interpolate_na(method=fill_nodata)
-
-        # Mapping function
-        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
-
-        # Convert mesh grid as geodataframe for sampling
-        # Reprojection happens to gdf inside of zonal_stats method
-        ds_sample = ds_vars.raster.zonal_stats(
-            gdf=self.mesh_gdf,
-            stats=np.unique(np.atleast_1d(resampling_method)),
-            all_touched=all_touched,
-        )
-        # Rename variables
-        if isinstance(resampling_method, str):
-            resampling_method = np.repeat(resampling_method, len(mapping_variables))
-        rm_dict = {
-            f"{var}_{mtd}": var
-            for var, mtd in zip(mapping_variables, resampling_method)
-        }
-        ds_sample = ds_sample.rename(rm_dict)
-        ds_sample = ds_sample[mapping_variables]
-        # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grid=self.mesh.grid)
-
-        self.set_mesh(uds_sample)
 
     ## I/O
     def read(

@@ -64,6 +64,9 @@ class AuxmapsMixin:
         # Fill nodata
         if fill_method is not None:
             ds = ds.raster.interpolate_na(method=fill_method)
+        # Reprojection
+        if ds.rio.crs != self.crs:
+            ds = ds.raster.reproject(dst_crs=self.crs)
         # Add to auxmaps
         self.set_auxmaps(ds, name=name, split_dataset=split_dataset)
 
@@ -123,6 +126,9 @@ class AuxmapsMixin:
             ds = ds.raster.interpolate_na(method=fill_method)
         # Mapping function
         ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
+        # Reprojection
+        if ds_vars.rio.crs != self.crs:
+            ds_vars = ds_vars.raster.reproject(dst_crs=self.crs)
         # Add to auxmaps
         self.set_auxmaps(ds_vars, name=name, split_dataset=split_dataset)
 
