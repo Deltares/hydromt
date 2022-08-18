@@ -12,16 +12,24 @@ unreleased
 Added
 -----
 - Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
+- New submodelclasses in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``, ``AuxmapsModel``
+- New mixin classes created for model specific object: ``GridMixin`` for self.grid, ``LumpedMixin`` for self.response_units, ``MeshMixin`` for self.mesh,
+  ``AuxmapsMixin`` for self.auxmaps
+- New high-level object: self.auxmaps for storing auxiliary regular rasters data (can use different resolution).
+- Auxmaps generic setup methods: ``AuxmapsMixin.setup_auxmaps_from_raster`` and ``AuxmapsMixin.setup_auxmaps_from_rastermapping``
+- Mesh generic setup methods: ``MeshModel.setup_mesh``, ``MeshMixin.setup_auxmaps_from_raster`` and ``MeshMixin.setup_auxmaps_from_rastermapping``
 
 Changed
 -------
+- self.staticgeoms object and methods renamed to self.geoms
+- self.staticmaps object and methods renamed to self.grid and moved into GridModel and GridMixin
 
 Fixed
 -----
 
 Deprecated
 ----------
-
+- self.staticgeoms and self.staticmaps are deprecated.
 
 v0.5.0 (4 August 2022)
 ======================
