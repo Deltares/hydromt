@@ -815,6 +815,13 @@ class XRasterBase(XGeoBase):
 
         keys = reclass_table.index.values
         params = reclass_table.columns
+        # limit dtypes to avoid gdal errors downstream
+        ddict = {"float64": np.float32, "int64": np.int32}
+        dtypes = {
+            c: ddict.get(str(reclass_table[c].dtype), reclass_table[c].dtype)
+            for c in reclass_table.columns
+        }
+        reclass_table = reclass_table.astype(dtypes)
         # apply for each parameter
         for param in params:
             values = reclass_table[param].values

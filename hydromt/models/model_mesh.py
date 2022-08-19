@@ -7,10 +7,11 @@ import numpy as np
 import xarray as xr
 import xugrid as xu
 import geopandas as gpd
-from shapely.geometry import box
+from shapely.geometry import box, Polygon
 
 from ..raster import GEO_MAP_COORD
 from .model_api import Model
+from .. import workflows
 
 __all__ = ["MeshModel"]
 logger = logging.getLogger(__name__)
@@ -287,8 +288,8 @@ class MeshModel(MeshMixin, Model):
         self,
         region: dict,
         crs: int = None,
-        # resolution : float = 100.0,
-    ) -> None:
+        res: float = 100.0,
+    ) -> xu.UgridDataset:
         """Creates an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
         An 2D unstructured mesh will be created as 2D rectangular grid from a geometry (geom_fn) or bbox. If an existing
         2D mesh is given, then no new mesh will be generated
@@ -315,15 +316,54 @@ class MeshModel(MeshMixin, Model):
         resolution: float, optional
             Resolution used to generate 2D mesh. By default a value of 100 m is applied.
 
+        Returns
+        -------
+        mesh2d : xu.UgridDataset
+            Generated mesh2d.
+
         """
         self.logger.info(f"Preparing 2D mesh.")
 
         if "mesh" not in region:
-            raise NotImplementedError(
-                "For now only 'mesh' argument and a 2D mesh file is supported in setup_mesh2d."
-            )
-            # kind, region = workflows.parse_region(region, logger=self.logger)
-            # TODO generate mesh based on geom/bbox options and resolution
+            kind, region = workflows.parse_region(region, logger=self.logger)
+            if kind == "bbox":
+                bbox = region["bbox"]
+                geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+            elif kind == "geom":
+                geom = region["geom"]
+                if geom.crs is None:
+                    raise ValueError('Model region "geom" has no CRS')
+            else:
+                raise ValueError(
+                    f"Region for mesh must of kind [bbox, geom, mesh], kind {kind} not understood."
+                )
+            # Generate grid based on res for region bbox
+            xmin, ymin, xmax, ymax = geom.total_bounds
+            length = (xmax - xmin) / res
+            wide = (ymax - ymin) / res
+            cols = list(np.arange(xmin, xmax + wide, wide))
+            rows = list(np.arange(ymin, ymax + length, length))
+            polygons = []
+            for x in cols[:-1]:
+                for y in rows[:-1]:
+                    polygons.append(
+                        Polygon(
+                            [
+                                (x, y),
+                                (x + wide, y),
+                                (x + wide, y + length),
+                                (x, y + length),
+                            ]
+                        )
+                    )
+            grid = gpd.GeoDataFrame({"geometry": polygons}, crs=geom.crs)
+            # If needed clip to geom
+            if kind != "bbox":
+                grid = grid.overlay(geom, how="intersection").explode().reset_index()
+            # Create mesh from grid
+            grid.index.name = "mesh2d_nFaces"
+            mesh2d = xu.UgridDataset.from_geodataframe(grid)
+            mesh2d.ugrid.grid.set_crs(grid.crs)
 
         else:
             mesh2d_fn = region["mesh"]
@@ -363,12 +403,16 @@ class MeshModel(MeshMixin, Model):
                 mesh2d.ugrid.grid.set_crs(crs)
             mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
 
-            # Reproject to user crs option if needed
-            if mesh2d.ugrid.grid.crs != crs and crs is not None:
-                self.logger.info(f"Reprojecting mesh to crs {crs}")
-                mesh2d.ugrid.grid.to_crs(self.crs)
+        # Reproject to user crs option if needed
+        if mesh2d.ugrid.grid.crs != crs and crs is not None:
+            self.logger.info(f"Reprojecting mesh to crs {crs}")
+            mesh2d.ugrid.grid.to_crs(self.crs)
 
-            self.set_mesh(mesh2d)
+        self.set_mesh(mesh2d)
+
+        # This setup method returns region so that it can be wrapped for models which require
+        # more information
+        return mesh2d
 
     ## I/O
     def read(
