@@ -670,7 +670,7 @@ if __name__ == "__main__":
 
     # hydro / ocean
     # NOTE these are kept in different ddir
-    variables_hour, ddir_hour = ['shww'], r'p:\wflow_global\hydromt\ocean\era5'
+    variables_hour, ddir_hour = ["shww"], r"p:\wflow_global\hydromt\ocean\era5"
 
     print(f"downloading ..")
     update_hourly_nc(
