@@ -1,18 +1,16 @@
+# minimal environment to install hydromt
 name: hydromt-min
 
 channels:
   - conda-forge
 
-# note that these are the developer dependencies,
-# if you only want the user dependencies, see
-# install_requires in setup.py
 dependencies:
   - affine
   - bottleneck
   - click
   - dask
   - entrypoints
-  - flit>=3.2
+  - flit>=3.4  # install
   - gdal>=3.1
   - geopandas>=0.10
   - netcdf4
@@ -20,13 +18,14 @@ dependencies:
   - numpy
   - openpyxl
   - pandas
-  - pyflwdir>=0.5.3
+  - packaging
+  - pip  # install
+  - pyflwdir>=0.5.4
   - pygeos>=0.8
   - python>=3.8
   - rasterio
   - requests
   - rioxarray
-  - rtree  # =0.9.3  issue with dll in newer vesions
   - scipy
   - xarray
   - zarr

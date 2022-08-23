@@ -21,12 +21,14 @@ General
 .. autosummary::
    :toctree: _generated
 
-   data_adapter.DataCatalog
-   data_adapter.DataCatalog.sources
-   data_adapter.DataCatalog.keys
-   data_adapter.DataCatalog.to_dict
-   data_adapter.DataCatalog.to_dataframe
-   data_adapter.DataCatalog.to_yml
+   data_catalog.DataCatalog
+   data_catalog.DataCatalog.sources
+   data_catalog.DataCatalog.keys
+   data_catalog.DataCatalog.predefined_catalogs
+   data_catalog.DataCatalog.to_dict
+   data_catalog.DataCatalog.to_dataframe
+   data_catalog.DataCatalog.to_yml
+   data_catalog.DataCatalog.export_data
 
 Add data sources
 ----------------
@@ -34,10 +36,12 @@ Add data sources
 .. autosummary::
    :toctree: _generated
 
-   data_adapter.DataCatalog.from_artifacts
-   data_adapter.DataCatalog.from_dict
-   data_adapter.DataCatalog.from_yml
-   data_adapter.DataCatalog.update
+   data_catalog.DataCatalog.set_predefined_catalogs
+   data_catalog.DataCatalog.from_predefined_catalogs
+   data_catalog.DataCatalog.from_archive
+   data_catalog.DataCatalog.from_yml
+   data_catalog.DataCatalog.from_dict
+   data_catalog.DataCatalog.update
 
 .. _api_data_catalog_get:
 
@@ -47,9 +51,9 @@ Get data
 .. autosummary::
    :toctree: _generated
 
-   data_adapter.DataCatalog.get_rasterdataset
-   data_adapter.DataCatalog.get_geodataset
-   data_adapter.DataCatalog.get_geodataframe
+   data_catalog.DataCatalog.get_rasterdataset
+   data_catalog.DataCatalog.get_geodataset
+   data_catalog.DataCatalog.get_geodataframe
 
 
 
@@ -60,9 +64,10 @@ RasterDataset
    :toctree: _generated
 
    data_adapter.RasterDatasetAdapter
-   data_adapter.RasterDatasetAdapter.to_dict
    data_adapter.RasterDatasetAdapter.summary
    data_adapter.RasterDatasetAdapter.get_data
+   data_adapter.RasterDatasetAdapter.to_dict
+   data_adapter.RasterDatasetAdapter.to_file
 
 GeoDataset
 ==========
@@ -71,9 +76,10 @@ GeoDataset
    :toctree: _generated
 
    data_adapter.GeoDatasetAdapter
-   data_adapter.GeoDatasetAdapter.to_dict
    data_adapter.GeoDatasetAdapter.summary
    data_adapter.GeoDatasetAdapter.get_data
+   data_adapter.GeoDatasetAdapter.to_dict
+   data_adapter.GeoDatasetAdapter.to_file
 
 GeoDataFrame
 ============
@@ -82,9 +88,22 @@ GeoDataFrame
    :toctree: _generated
 
    data_adapter.GeoDataFrameAdapter
-   data_adapter.GeoDataFrameAdapter.to_dict
    data_adapter.GeoDataFrameAdapter.summary
    data_adapter.GeoDataFrameAdapter.get_data
+   data_adapter.GeoDataFrameAdapter.to_dict
+   data_adapter.GeoDataFrameAdapter.to_file
+
+DataFrame
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   data_adapter.DataFrameAdapter
+   data_adapter.DataFrameAdapter.summary
+   data_adapter.DataFrameAdapter.get_data
+   data_adapter.DataFrameAdapter.to_dict
+   data_adapter.DataFrameAdapter.to_file
 
 .. _model_api:
 

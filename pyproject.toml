@@ -1,5 +1,5 @@
 [build-system]
-requires = ["flit_core >=3.2.0,<4"]
+requires = ["flit_core >=3.4.0,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
@@ -13,19 +13,21 @@ dependencies = [
     "bottleneck",
     "click",
     "dask",
-    "geopandas>=0.10",
     "entrypoints",
+    "geopandas>=0.10",
     "gdal>=3.1",
-    "numba",
     "numpy",
     "netcdf4",
+    "openpyxl",
+    "packaging",
     "pandas",
     "pyflwdir>=0.5.4",
+    "pyproj",
     "pygeos",
-    "openpyxl",
     "rasterio",
     "requests",
     "rioxarray",
+    "shapely==1.8.2", # temp version pin see geopandas#2531
     "scipy",
     "xarray",
     "zarr",
@@ -45,11 +47,10 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 test = [
-	"testpath",
-	"responses",
+    "black",
 	"pytest>=2.7.3",
 	"pytest-cov",
-    "black",
+	"responses",
 ]
 doc = [
 	"nbsphinx",
@@ -77,4 +78,8 @@ exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 [tool.pytest.ini_options]
 filterwarnings = [
     "ignore:distutils Version classes are deprecated:DeprecationWarning",
+    "ignore:getargs:DeprecationWarning", # The 'u' format is deprecated. Use 'U' instead.
+    "ignore:The *staticgeoms:DeprecationWarning", 
+    "ignore:The *staticmaps:DeprecationWarning", 
+    "ignore:The set_staticmaps:DeprecationWarning", 
 ]
