@@ -3,7 +3,10 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
+from shapely.geometry import box
 
+from hydromt import Model, GridModel, LumpedModel, NetworkModel
+from hydromt.models.model_api import AuxmapsModel
 from hydromt import raster, vector, gis_utils
 import pyflwdir
 
@@ -30,6 +33,19 @@ def df():
         }
     )
     return df
+
+
+@pytest.fixture
+def df_time():
+    df_time = pd.DataFrame(
+        {
+            "precip": [0, 1, 2, 3, 4],
+            "temp": [15, 16, 17, 18, 19],
+            "pet": [1, 2, 3, 4, 5],
+        },
+        index=pd.date_range(start="2007-01-01", end="2007-01-05", freq="D"),
+    )
+    return df_time
 
 
 @pytest.fixture
@@ -127,3 +143,83 @@ def obsda():
     )
     da.raster.set_crs(4326)
     return da
+
+
+@pytest.fixture
+def demuda():
+    import xugrid as xu
+
+    uds = xu.data.adh_san_diego()
+    uda = uds["elevation"]
+    uda.ugrid.grid.set_crs(epsg=2230)
+    return uda
+
+
+@pytest.fixture
+def model(demda, world, obsda):
+    mod = Model()
+    mod.setup_region({"geom": demda.raster.box})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_staticmaps(demda, "elevtn")  # will be deprecated
+    mod.set_geoms(world, "world")
+    mod.set_forcing(obsda, "waterlevel")
+    mod.set_states(demda, "zsini")
+    mod.set_results(obsda, "zs")
+    return mod
+
+
+@pytest.fixture
+def auxmap_model(demda):
+    mod = AuxmapsModel()
+    mod.setup_region({"geom": demda.raster.box})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_auxmaps(demda, "elevtn")
+    return mod
+
+
+@pytest.fixture
+def grid_model(demda, flwda):
+    mod = GridModel()
+    mod.setup_region({"geom": demda.raster.box})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_grid(demda, "elevtn")
+    mod.set_grid(flwda, "flwdir")
+    return mod
+
+
+@pytest.fixture
+def lumped_model(ts, geodf):
+    mod = LumpedModel()
+    # mod.setup_region({"bbox": geodf.total_bounds})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    da = xr.DataArray(
+        ts,
+        dims=["index", "time"],
+        coords={"index": ts.index, "time": ts.columns},
+        name="zs",
+    )
+    da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
+    da.vector.set_crs(geodf.crs)
+    mod.set_response_units(da)
+    return mod
+
+
+@pytest.fixture
+def network_model():
+    mod = NetworkModel()
+    # TODO set data and attributes of mod
+    return mod
+
+
+@pytest.fixture
+def mesh_model(demuda):
+    from hydromt import MeshModel
+
+    mod = MeshModel()
+    # region = gpd.GeoDataFrame(
+    #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.crs
+    # )
+    # mod.setup_region({"geom": region})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_mesh(demuda, "elevtn")
+    return mod

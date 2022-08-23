@@ -8,15 +8,16 @@ HydroMT currently supports the following data types:
 - :ref:`RasterDataset <RasterDataset>`: static and dynamic raster (or gridded) data 
 - :ref:`GeoDataFrame <GeoDataFrame>`: static vector data 
 - :ref:`GeoDataset <GeoDataset>`: dynamic point location data
+- :ref:`DataFrame <DataFrame>`: 2D tabular data
 
-Internally the RasterDataset and GeoDataset are represented by :py:class:`xarray.Dataset` objects 
-and the GeoDataFrame by :py:class:`geopandas.GeoDataFrame`. We use drivers, typically from third-party
-packages and sometimes wrapped in HydroMT functions, to parse many different file formats to this 
-standardized internal data representation. 
+Internally the RasterDataset and GeoDataset are represented by :py:class:`xarray.Dataset` objects,
+the GeoDataFrame by :py:class:`geopandas.GeoDataFrame`, and the DataFrame by 
+:py:class:`pandas.DataFrame`. We use drivers, typically from third-party packages and sometimes 
+wrapped in HydroMT functions, to parse many different file formats to this standardized internal 
+data representation. 
 
 .. note::
 
-    Tabulated data without a spatial component such as mapping tables are planned to be added. 
     Please contact us through the issue list if you would like to add other drivers.
 
 .. _dimensions: 
@@ -467,3 +468,63 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
     <time1>, <value>, <value>
     <time2>, <value>, <value>
     ...
+
+.. _DataFrame: 
+
+2D tabular data (DataFrame)
+---------------------------
+
+.. _dataframe_formats:
+
+.. list-table::
+   :widths: 17, 25, 28, 30
+   :header-rows: 1
+
+   * - Driver
+     - File formats
+     - Method
+     - Comments
+   * - ``csv`` 
+     - Comma-separated files (or using another delimiter)
+     - :py:func:`pandas.read_csv`
+     - See :py:func:`pandas.read_csv` for all 
+   * - ``excel`` 
+     - Excel files
+     - :py:func:`pandas.read_excel`
+     - If required, provide a sheet name through kwargs
+   * - ``fwf`` 
+     - Fixed width delimited text files
+     - :py:func:`pandas.read_fwf`
+     - The formatting of these files can either be inferred or defined by the user, both through the kwargs.
+
+
+.. note::
+
+    Only 2-dimensional data tables are supported, please contact us through the issue list if you would like to have support for n-dimensional tables.
+
+
+Supported files
+^^^^^^^^^^^^^^^
+
+The DataFrameAdapter is quite flexible in supporting different types of tabular data formats. All drivers allow for flexible reading of 
+files: for example both mapping tables and time series data are supported. Please note that for timeseries, the kwargs need to be used to 
+set the correct column for indexing, and formatting and parsing of datetime-strings. See the relevant pandas function for which arguments
+can be used. Also note that the **csv** driver is not restricted to comma-separated files, as the delimiter can be given to the reader 
+throught the kwargs.
+
+.. code-block:: yaml
+
+    observations:
+      path: data/lulc/globcover_mapping.csv
+      data_type: DataFrame
+      driver: csv
+      meta:
+        category: parameter_mapping
+      kwargs:
+        header: null
+        index_col: 0
+        parse_dates: false
+
+.. note::
+    The yml-parser does not correctly parses `None` arguments. When this is required, the `null` argment should be used instead.
+    This is parsed to the Python code as a `None`.

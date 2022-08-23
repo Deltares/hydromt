@@ -1,25 +1,116 @@
-import pytest
-import sys, os
-from os.path import join, dirname, basename, isfile, isdir
-from .model_api import Model
+# -*- coding: utf-8 -*-
+"""HydroMT GridModel class definition"""
+
+from typing import Dict, List, Tuple, Union, Optional
+import logging
+from os.path import join, isfile
 import xarray as xr
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
+from pyproj import CRS
 
-# from hydromt import workflows, flw, io
-from .. import config, log, workflows
-
-from typing import List
-
-import logging
-import os
+from .model_api import Model
+from .. import workflows
 
 __all__ = ["GridModel"]
 logger = logging.getLogger(__name__)
 
 
-class GridModel(Model):
+class GridMixin(object):
+    # placeholders
+    # xr.Dataset representation of all static parameter maps at the same resolution and bounds - renamed from staticmaps
+    _API = {
+        "grid": xr.Dataset,
+    }
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._grid = xr.Dataset()
+
+    @property
+    def grid(self):
+        """Model static maps. Returns xarray.Dataset.
+        Previously called staticmaps."""
+        if len(self._grid) == 0:
+            if self._read:
+                self.read_grid()
+        return self._grid
+
+    def set_grid(
+        self,
+        data: Union[xr.DataArray, xr.Dataset, np.ndarray],
+        name: Optional[str] = None,
+    ):
+        """Add data to grid.
+
+        All layers of grid must have identical spatial coordinates.
+
+        Parameters
+        ----------
+        data: xarray.DataArray or xarray.Dataset
+            new map layer to add to grid
+        name: str, optional
+            Name of new map layer, this is used to overwrite the name of a DataArray
+            and ignored if data is a Dataset
+        """
+        # NOTE: variables in a dataset are not longer renamed as used to be the case in set_staticmaps
+        name_required = isinstance(data, np.ndarray) or (
+            isinstance(data, xr.DataArray) and data.name is None
+        )
+        if name is None and name_required:
+            raise ValueError(f"Unable to set {type(data).__name__} data without a name")
+        if isinstance(data, np.ndarray):
+            if data.shape != self.grid.raster.shape:
+                raise ValueError("Shape of data and grid maps do not match")
+            data = xr.DataArray(dims=self.grid.raster.dims, data=data, name=name)
+        if isinstance(data, xr.DataArray):
+            if name is not None:  # rename
+                data.name = name
+            data = data.to_dataset()
+        elif not isinstance(data, xr.Dataset):
+            raise ValueError(f"cannot set data of type {type(data).__name__}")
+        for dvar in data.data_vars:
+            if dvar in self._grid:
+                if self._read:
+                    self.logger.warning(f"Replacing grid map: {dvar}")
+            self._grid[dvar] = data[dvar]
+
+    def read_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
+        """Read model grid data at <root>/<fn> and add to grid property
+
+        key-word arguments are passed to :py:func:`xarray.open_dataset`
+
+        Parameters
+        ----------
+        fn : str, optional
+            filename relative to model root, by default 'grid/grid.nc'
+        """
+        for ds in self._read_nc(fn, **kwargs).values():
+            self.set_grid(ds)
+
+    def write_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
+        """Write model grid data to netcdf file at <root>/<fn>
+
+        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+
+        Parameters
+        ----------
+        fn : str, optional
+            filename relative to model root, by default 'grid/grid.nc'
+        """
+        nc_dict = dict()
+        if len(self._grid) > 0:
+            # _write_nc requires dict - use dummy key
+            nc_dict.update({"grid": self._grid})
+        self._write_nc(nc_dict, fn, **kwargs)
+
+
+class GridModel(GridMixin, Model):
+
+    # TODO: add here "res": "setup_region" or "res": "setup_grid" when generic method is available
+    _CLI_ARGS = {"region": "setup_region"}
+
     def __init__(
         self,
         root: str = None,
@@ -37,253 +128,75 @@ class GridModel(Model):
             logger=logger,
         )
 
-        # placeholders
-        self._grid = (
-            xr.Dataset()
-        )  # xr.Dataset representation of all static parameter maps at the same resolution and bounds - renamed from staticmaps
-
-    def read(self):
-        """Method to read the complete model schematization and configuration from file."""
-        super().read()
-        self.read_grid()
-
-    def write(self):
-        """Method to write the complete model schematization and configuration to file."""
-        super().write()
-        self.write_grid()
-
-    def read_grid(self):
-        """Read grid at <root/?/> and parse to xarray Dataset - previously called read_staticmaps"""
-        # to read gdal raster files use: hydromt.open_mfraster()
-        # to read netcdf use: xarray.open_dataset()
-        if not self._write:
-            # start fresh in read-only mode
-            self._grid = xr.Dataset()
-        if isfile(
-            join(self.root, "staticmaps", "staticmaps.nc")
-        ):  # Change of file not implemented yet
-            self._grid = xr.open_dataset(join(self.root, "staticmaps", "staticmaps.nc"))
-        if isfile(join(self.root, "grid", "grid.nc")):
-            self._grid = xr.open_dataset(join(self.root, "grid", "grid.nc"))
-
-    def write_grid(self):
-        """Write grid at <root/?/> in xarray.Dataset - previously write_staticmaps"""
-        # to write to gdal raster files use: self.staticmaps.raster.to_mapstack()
-        # to write to netcdf use: self.staticmaps.to_netcdf()
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
-        elif not self._grid:
-            self.logger.warning("No grid maps to write - Exiting")
-            return
-        # filename
-        fn_default = join(self.root, "grid", "grid.nc")
-        self.logger.info(f"Write grid maps to {self.root}")
-
-        ds_out = self.grid
-        ds_out.to_netcdf(fn_default)
-
-    def set_grid(
-        self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
-    ):
-        """Add data to grid.
-
-        All layers of grid must have identical spatial coordinates.
+    def read(
+        self,
+        components: List = [
+            "config",
+            "grid",
+            "geoms",
+            "forcing",
+            "states",
+            "results",
+        ],
+    ) -> None:
+        """Read the complete model schematization and configuration from model files.
 
         Parameters
         ----------
-        data: xarray.DataArray or xarray.Dataset
-            new map layer to add to grid
-        name: str, optional
-            Name of new map layer, this is used to overwrite the name of a DataArray
-            or to select a variable from a Dataset.
+        components : List, optional
+            List of model components to read, each should have an associated read_<component> method.
+            By default ['config', 'maps', 'grid', 'geoms', 'forcing', 'states', 'results']
         """
-        if name is None:
-            if isinstance(data, xr.DataArray) and data.name is not None:
-                name = data.name
-            elif not isinstance(data, xr.Dataset):
-                raise ValueError("Setting a map requires a name")
-        elif name is not None and isinstance(data, xr.Dataset):
-            data_vars = list(data.data_vars)
-            if len(data_vars) == 1 and name not in data_vars:
-                data = data.rename_vars({data_vars[0]: name})
-            elif name not in data_vars:
-                raise ValueError("Name not found in DataSet")
-            else:
-                data = data[[name]]
-        if isinstance(data, xr.DataArray):
-            data.name = name
-            data = data.to_dataset()
-        if len(self._grid) == 0:  # new data
-            self._grid = data
-        else:
-            if isinstance(data, np.ndarray):
-                if data.shape != self.shape:
-                    raise ValueError("Shape of data and grid maps do not match")
-                data = xr.DataArray(dims=self.dims, data=data, name=name).to_dataset()
-            for dvar in data.data_vars.keys():
-                if dvar in self._grid:
-                    if self._read:
-                        self.logger.warning(f"Replacing grid map: {dvar}")
-                self._grid[dvar] = data[dvar]
+        super().read(components=components)
 
-    # GridModel specific methods
-    def setup_fromtable(self, path_or_key: str, fn_map: str, out_vars: List, **kwargs):
-        """This function creates additional staticmaps layers based on a table reclassification
-
-        Adds model layers defined in out_vars
-
-        Args:
-            path_or_key (str): Name of RasterDataset in DataCatalog file (.yml).
-            mapping_fn (str): Path to a mapping csv file from RasterDataset to parameter values in out_vars.
-            out_vars (List): List of parameters to keep.
-            **kwargs: if the RasterDataset has multiple variables, select the correct variable
-        """
-        self.logger.info(f"Preparing {out_vars} parameter maps from raster.")
-
-        if not isfile(
-            fn_map
-        ):  # TODO - makefn_map flexible with the DataCatalog as well
-            self.logger.error(
-                f"Mapping file not found: {fn_map}"
-            )  # TODO ask diff between logger.error and RaiseValueError (will log.error stop the code?)
-            return
-
-        # read RasterDataset map to DataArray
-        da = self.data_catalog.get_rasterdataset(
-            path_or_key, geom=self.region, buffer=2, **kwargs
-        )  # TODO - ask about why buffer is 2  #variables=["landuse"]
-
-        if not isinstance(da, xr.DataArray):
-            raise ValueError(
-                "RasterData has multiple variables, please specify variable to select"
-            )
-
-        # process landuse
-        ds_maps = workflows.grid_maptable(
-            da=da,
-            ds_like=self.grid,
-            fn_map=fn_map,
-            params=out_vars,
-            logger=self.logger,
-        )
-        rmdict = {k: v for k, v in self._MAPS.items() if k in ds_maps.data_vars}
-        self.set_grid(ds_maps.rename(rmdict))
-
-    def setup_fromvector(
+    def write(
         self,
-        key: str,
-        col2raster: Optional[str] = "",
-        rasterize_method: Optional[str] = "value",
-    ):
-        """Creates additional grid map based on a vector, located either in the data library or geoms.
+        components: List = ["config", "grid", "geoms", "forcing", "states"],
+    ) -> None:
+        """Write the complete model schematization and configuration to model files.
 
-        Adds grid maps model layers defined in key
-
-        Args:
-            key (str): value in either geoms or the data catalog to extract the vector
-            col2raster (str, optional): name of column in the vector to use for rasterization. Defaults to "".
-            rasterize_method (str, optional): Method to rasterize the vector ("value" or "fraction"). Defaults to "value".
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to write, each should have an associated write_<component> method.
+            By default ['config', 'maps', 'grid', 'geoms', 'forcing', 'states']
         """
-
-        self.logger.info(f"Preparing {key} parameter maps from vector.")
-
-        # Vector sources can be from staticgeoms, data_catalog or fn
-        if key in self._geoms.keys():
-            gdf = self._geoms[key]
-        elif key in self.data_catalog:
-            gdf = self.data_catalog.get_geodataframe(
-                key, geom=self.region, dst_crs=self.crs
-            )  # TODO: I think this is updated if gets a fn: ask
-        else:
-            self.logger.warning(f"Source '{key}' not found in geoms nor data_catalog.")
-            return
-
-        if gdf.empty:
-            raise ValueError(f"No shapes of {key} found within region, exiting.")
-        else:
-            ds = workflows.vector_to_grid(
-                gdf=gdf,
-                ds_like=self.grid,
-                col_name=col2raster,
-                method=rasterize_method,
-                mask_name="mask",
-                logger=self.logger,
-            )
-        self.set_grid(ds.rename(key))
+        super().write(components=components)
 
     # Properties for subclass GridModel
     @property
-    def grid(self):
-        """xarray.Dataset representation of all static parameter maps - previously called staticmaps"""
-        if len(self._grid) == 0:
-            if self._read:
-                self.read_grid()
-        return self._grid
-
-    @property
-    def dims(self) -> tuple:
-        """Returns spatial dimension names of grid."""
-        return self.grid.raster.dims
-
-    @property
-    def coords(self) -> dict:
-        """Returns coordinates of grid."""
-        return self.grid.raster.coords
-
-    @property
-    def res(self) -> tuple:
-        """Returns coordinates of grid."""
-        return self.grid.raster.res
+    def res(self) -> Tuple[float, float]:
+        """Returns the resolution of the model grid."""
+        if len(self._grid) > 0:
+            return self.grid.raster.res
 
     @property
     def transform(self):
-        """Returns spatial transform grid."""
-        return self.grid.raster.transform
+        """Returns spatial transform of the model grid."""
+        if len(self._grid) > 0:
+            return self.grid.raster.transform
 
     @property
-    def width(self):
-        """Returns width of grid."""
-        return self.grid.raster.width
+    def crs(self) -> Union[CRS, None]:
+        """Returns coordinate reference system embedded in the model grid."""
+        if len(self._grid) > 0:
+            return CRS(self._grid.raster.crs)
 
     @property
-    def height(self):
-        """Returns height of grid."""
-        return self.grid.raster.height
-
-    @property
-    def shape(self) -> tuple:
-        """Returns shape of grid."""
-        return self.grid.raster.shape
-
-    @property
-    def bounds(self) -> tuple:
-        """Returns shape of grid."""
-        return self.grid.raster.bounds
+    def bounds(self) -> List[float]:
+        """Returns the bounding box of the model grid."""
+        if len(self._grid) > 0:
+            return self.grid.raster.bounds
 
     @property
     def region(self) -> gpd.GeoDataFrame:
-        """Returns geometry of region of the model area of interest."""
+        """Returns the geometry of the model area of interest."""
         region = gpd.GeoDataFrame()
         if "region" in self.geoms:
             region = self.geoms["region"]
         elif len(self.grid) > 0:
             crs = self.grid.raster.crs
-            if crs is None and crs.to_epsg() is not None:
+            if crs is None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region
-
-    def test_model_grid(self):
-        """Test compliance to model API instances.
-
-        Returns
-        -------
-        non_compliant: list
-            List of objects that are non-compliant with the model API structure.
-        """
-        non_compliant = []
-        # grid
-        if not isinstance(self.grid, xr.Dataset):
-            non_compliant.append("grid")
-
-        return non_compliant

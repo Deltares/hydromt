@@ -149,6 +149,8 @@ def parse_region(region, logger=logger):
 
 def _parse_region_value(value):
     kwarg = {}
+    if isinstance(value, np.ndarray):
+        value = value.tolist()  # array to list
     if isinstance(value, list):
         if np.all([isinstance(p0, int) and abs(p0) > 180 for p0 in value]):  # all int
             kwarg = dict(basid=value)

@@ -45,9 +45,10 @@ def create_response_unit_ds(response_units_gdf):
             index = (["index"],response_units_gdf['value']),
             geometry = (["index"], response_units_gdf['geometry']),
             outlet_geometry = (["index"], response_units_gdf['outlet_geometry']),
-            crs = ([],response_units_gdf.crs)
         ),
     )
+    if response_units_gdf.crs is not None:  # parse crs
+        ds = ds.rio.write_crs(response_units_gdf.crs)
     ds['index']=(["index"],response_units_gdf['value'])
     return ds
 
@@ -79,7 +80,7 @@ def ru_geometry_to_gpd(ru_ds, index=None, geometry_name = 'geometry'):
     else:
         unit_df = pd.DataFrame(data=dict(geometry=geometries,value=indexes),
                                 index=indexes)
-    unit_gpd = gpd.GeoDataFrame(unit_df, crs = str(ru_ds.crs.values))
+    unit_gpd = gpd.GeoDataFrame(unit_df, crs = ru_ds.rio.crs)
     return unit_gpd
 
 def hydrography_to_basins(

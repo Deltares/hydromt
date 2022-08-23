@@ -1,21 +1,19 @@
-import pytest
-import sys, os
-from .model_api import Model
+# -*- coding: utf-8 -*-
+"""HydroMT NetworkModel class definition"""
+
 import xarray as xr
-import numpy as np
-import geopandas as gpd
-from shapely.geometry import box
-
-from typing import Tuple, Union, Optional
-
 import logging
-import os
+from typing import List
+from .model_api import Model
 
 __all__ = ["NetworkModel"]
 logger = logging.getLogger(__name__)
 
 
 class NetworkModel(Model):
+
+    _CLI_ARGS = {"region": "setup_region"}
+
     def __init__(
         self,
         root: str = None,
@@ -34,29 +32,60 @@ class NetworkModel(Model):
         )
 
         # placeholders
-        self._network = xr.Dataset()  # xr.Dataset representation of all mesh parameter
+        # TODO decide on data type
+        self._network = xr.Dataset()  # xr.Dataset representation of all network data
 
-    def read(self):
-        """Method to read the complete model schematization and configuration from file."""
-        super().read()
-        self.read_network()
-        # Other specifics to NetworkModel...
+    def read(
+        self,
+        components: List = [
+            "config",
+            "network",
+            "geoms",
+            "forcing",
+            "states",
+            "results",
+        ],
+    ) -> None:
+        """Read the complete model schematization and configuration from model files.
 
-    def write(self):
-        """Method to write the complete model schematization and configuration to file."""
-        super().write()
-        self.write_network()
-        # Other specifics to NetworkModel...
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to read, each should have an associated read_<component> method.
+            By default ['config', 'maps', 'network', 'geoms', 'forcing', 'states', 'results']
+        """
+        super().read(components=components)
 
-    def read_network(self):
-        raise NotImplementedError()  # TODO: needs to be written
+    def write(
+        self,
+        components: List = [
+            "config",
+            "network",
+            "geoms",
+            "forcing",
+            "states",
+        ],
+    ) -> None:
+        """Write the complete model schematization and configuration to model files.
 
-    def write_network(self):
-        raise NotImplementedError()  # TODO: needs to be written
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to write, each should have an associated write_<component> method.
+            By default ['config', 'maps', 'network', 'geoms', 'forcing', 'states']
+        """
+        super().write(components=components)
 
-    def set_networks(self):
-        raise NotImplementedError()  # TODO: needs to be written
-
+    # TODO: make NetworkMixin class with following properties/methods
     @property
     def network(self):
-        raise NotImplementedError()  # TODO: needs to be written
+        raise NotImplementedError()
+
+    def set_network(self):
+        raise NotImplementedError()
+
+    def read_network(self):
+        raise NotImplementedError()
+
+    def write_network(self):
+        raise NotImplementedError()
