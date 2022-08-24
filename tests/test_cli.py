@@ -2,8 +2,10 @@
 
 import pytest
 from click.testing import CliRunner
+import numpy as np
 from hydromt import __version__
 from hydromt.cli.main import main as hydromt_cli
+from hydromt.cli import api as hydromt_api
 
 
 def test_cli(tmpdir):
@@ -54,3 +56,21 @@ def test_cli(tmpdir):
     )
     with pytest.raises(NotImplementedError):
         raise r.exception
+
+
+def test_api():
+    # datasets
+    assert "artifact_data" in hydromt_api.get_predifined_catalogs()
+    datasets = hydromt_api.get_datasets("artifact_data")
+    assert isinstance(datasets, dict)
+    assert isinstance(datasets["RasterDatasetSource"], list)
+
+    # models
+    components = hydromt_api.get_model_components(
+        "lumped_model", component_types=["write"]
+    )
+    name = "write_response_units"
+    assert name in components
+    assert np.all([k.startswith("write") for k in components])
+    keys = ["doc", "required", "optional", "kwargs"]
+    assert np.all([k in components[name] for k in keys])
