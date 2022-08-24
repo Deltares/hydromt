@@ -33,6 +33,15 @@ def _has_xugrid():
         return False
 
 
+def _has_pyeto():
+    try:
+        import pyeto
+
+        return True
+    except ImportError:
+        return False
+
+
 # submoduls
 from . import cli, workflows, stats, flw, raster, vector
 

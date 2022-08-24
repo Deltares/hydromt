@@ -3,7 +3,10 @@ import xarray as xr
 import numpy as np
 import re
 import logging
-import pyeto
+from .. import _has_pyeto
+
+if _has_pyeto:
+    import pyeto
 
 logger = logging.getLogger(__name__)
 
@@ -260,7 +263,7 @@ def pet(
     else:
         if "press_msl" in ds_out:
             ds_out = ds_out.rename({"press_msl": "press"})
-        else:
+        elif _has_pyeto:
             # calculate pressure from elevation [kPa]
             ds_out["press"] = xr.apply_ufunc(
                 pyeto.atm_pressure,
@@ -272,19 +275,15 @@ def pet(
             )
             # convert to hPa to be consistent with press function calculation:
             ds_out["press"] = ds_out["press"] * 10
+        else:
+            raise ValueError(
+                "If 'press' is supplied and 'press_correction' is used, the pyeto package must be installed."
+            )
 
     # compute wind from u and v components at 10m (for era5)
     if ("wind_u" in ds_out.data_vars) & ("wind_v" in ds_out.data_vars):
         ds_out["wind_10m"] = np.sqrt(ds_out["wind_u"] ** 2 + ds_out["wind_v"] ** 2)
-        ds_out["wind"] = xr.apply_ufunc(
-            pyeto.wind_speed_2m,
-            ds_out["wind_10m"],
-            10,
-            dask="parallelized",
-            output_dtypes=[float],
-            vectorize=True,
-            keep_attrs=True,
-        )
+        ds_out["wind"] = ds_out["wind_10m"] * (4.87 / np.log((67.8 * 10) - 5.42))
 
     timestep = to_timedelta(ds).total_seconds()
     if method == "debruin":
@@ -295,9 +294,9 @@ def pet(
             ds_out["kout"],
             timestep=timestep,
         )
-    if method == "makkink":
+    elif method == "makkink":
         pet_out = pet_makkink(temp, ds_out["press"], ds_out["kin"], timestep=timestep)
-    if "penman-monteith" in method:
+    elif "penman-monteith" in method and _has_pyeto:
         logger.info("Calculating Penman-Monteith ref evaporation")
         if method == "penman-monteith_rh_simple":
             pet_out = pet_penman_monteith(
@@ -331,6 +330,10 @@ def pet(
                 "penman-monteith_tdew",
             ]
             ValueError(f"Unknown pet method, select from {methods}")
+    else:
+        raise ValueError(
+            "The pyeto package must be installed to use penman-monteith methods to compute PET."
+        )
 
     # resample in time
     pet_out.name = "pet"
