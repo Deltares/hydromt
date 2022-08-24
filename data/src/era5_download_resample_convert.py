@@ -679,8 +679,6 @@ if __name__ == "__main__":
         variables=variables_hour,
         dask_kwargs=dask_kwargs,
         move_to_ddir=True,
-        start_year=1979,
-        end_year=2021,
     )
 
     print("resampling to daily values ..")
