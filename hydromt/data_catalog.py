@@ -26,6 +26,7 @@ from .data_adapter import (
     RasterDatasetAdapter,
     GeoDatasetAdapter,
     GeoDataFrameAdapter,
+    DataFrameAdapter,
 )
 
 logger = logging.getLogger(__name__)
@@ -409,8 +410,8 @@ class DataCatalog(object):
     def export_data(
         self,
         data_root: Union[Path, str],
-        bbox: List,
-        time_tuple: Tuple,
+        bbox: List = None,
+        time_tuple: Tuple = None,
         source_names: List = [],
         unit_conversion: bool = True,
     ) -> None:
@@ -699,15 +700,29 @@ class DataCatalog(object):
     def get_dataframe(
         self,
         path_or_key,
-        bbox=None,
-        geom=None,
-        buffer=0,
         variables=None,
         time_tuple=None,
-        single_var_as_array=True,
         **kwargs,
     ):
-        return
+        if path_or_key not in self.sources and exists(abspath(path_or_key)):
+            path = str(abspath(path_or_key))
+            name = basename(path_or_key).split(".")[0]
+            self.update(**{name: DataFrameAdapter(path=path, **kwargs)})
+        elif path_or_key in self.sources:
+            name = path_or_key
+        else:
+            raise FileNotFoundError(f"No such file or catalog key: {path_or_key}")
+        self._used_data.append(name)
+        source = self.sources[name]
+        self.logger.info(
+            f"DataCatalog: Getting {name} DataFrame {source.driver} data from {source.path}"
+        )
+        obj = source.get_data(
+            variables=variables,
+            time_tuple=time_tuple,
+            logger=self.logger,
+        )
+        return obj
 
 
 def _parse_data_dict(
@@ -719,6 +734,7 @@ def _parse_data_dict(
         "RasterDataset": RasterDatasetAdapter,
         "GeoDataFrame": GeoDataFrameAdapter,
         "GeoDataset": GeoDatasetAdapter,
+        "DataFrame": DataFrameAdapter,
     }
     # NOTE: shouldn't the kwarg overwrite the dict/yml ?
     if root is None:
@@ -797,9 +813,9 @@ def _process_dict(d: Dict, logger=logger) -> Dict:
             d[k] = _process_dict(v)
         elif _check_key and isinstance(v, Path):
             d[k] = str(v)  # path to string
-        elif not _check_key or not isinstance(v, (list, str, int, float, bool)):
-            d.pop(k)  # remove this entry
-            logger.debug(f'Removing non-serializable entry "{k}"')
+        # elif not _check_key or not isinstance(v, (list, str, int, float, bool)):
+        #     d.pop(k)  # remove this entry
+        #     logger.debug(f'Removing non-serializable entry "{k}"')
     return d
 
 

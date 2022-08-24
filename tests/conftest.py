@@ -6,13 +6,9 @@ import xarray as xr
 from shapely.geometry import box
 
 from hydromt import Model, GridModel, LumpedModel, NetworkModel
-from hydromt.models.model_api import AuxmapsMixin
+from hydromt.models.model_api import AuxmapsModel
 from hydromt import raster, vector, gis_utils
 import pyflwdir
-
-
-class TestAuxModel(Model, AuxmapsMixin):
-    _NAME = "testauxmodel"
 
 
 @pytest.fixture
@@ -37,6 +33,19 @@ def df():
         }
     )
     return df
+
+
+@pytest.fixture
+def df_time():
+    df_time = pd.DataFrame(
+        {
+            "precip": [0, 1, 2, 3, 4],
+            "temp": [15, 16, 17, 18, 19],
+            "pet": [1, 2, 3, 4, 5],
+        },
+        index=pd.date_range(start="2007-01-01", end="2007-01-05", freq="D"),
+    )
+    return df_time
 
 
 @pytest.fixture
@@ -161,7 +170,7 @@ def model(demda, world, obsda):
 
 @pytest.fixture
 def auxmap_model(demda):
-    mod = TestAuxModel()
+    mod = AuxmapsModel()
     mod.setup_region({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_auxmaps(demda, "elevtn")

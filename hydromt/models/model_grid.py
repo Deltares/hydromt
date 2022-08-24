@@ -13,17 +13,20 @@ from pyproj import CRS
 from .model_api import Model
 from .. import workflows
 
-__all__ = ["GridModel", "GridMixin"]
+__all__ = ["GridModel"]
 logger = logging.getLogger(__name__)
 
 
 class GridMixin(object):
     # placeholders
     # xr.Dataset representation of all static parameter maps at the same resolution and bounds - renamed from staticmaps
-    _grid = xr.Dataset()
     _API = {
         "grid": xr.Dataset,
     }
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._grid = xr.Dataset()
 
     @property
     def grid(self):
@@ -103,7 +106,7 @@ class GridMixin(object):
         self._write_nc(nc_dict, fn, **kwargs)
 
 
-class GridModel(Model, GridMixin):
+class GridModel(GridMixin, Model):
 
     # TODO: add here "res": "setup_region" or "res": "setup_grid" when generic method is available
     _CLI_ARGS = {"region": "setup_region"}

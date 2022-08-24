@@ -1,4 +1,4 @@
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Tuple
 import logging
 import os
 from os.path import join, isdir, dirname, isfile
@@ -7,21 +7,23 @@ import xugrid as xu
 import geopandas as gpd
 from shapely.geometry import box
 
-from hydromt.raster import GEO_MAP_COORD
-
+from ..raster import GEO_MAP_COORD
 from .model_api import Model
 
-__all__ = ["MeshModel", "MeshMixin"]
+__all__ = ["MeshModel"]
 logger = logging.getLogger(__name__)
 
 
 class MeshMixin(object):
     # placeholders
     # We cannot initialize an empty xu.UgridDataArray
-    _mesh = None
     _API = {
         "mesh": Union[xu.UgridDataArray, xu.UgridDataset],
     }
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._mesh = None
 
     @property
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
@@ -36,7 +38,7 @@ class MeshMixin(object):
         self,
         data: Union[xu.UgridDataArray, xu.UgridDataset],
         name: Optional[str] = None,
-    ):
+    ) -> None:
         """Add data to mesh.
 
         All layers of mesh have identical spatial coordinates in Ugrid conventions.
@@ -113,7 +115,7 @@ class MeshMixin(object):
         ds_out.to_netcdf(_fn, **kwargs)
 
 
-class MeshModel(Model, MeshMixin):
+class MeshModel(MeshMixin, Model):
 
     _CLI_ARGS = {"region": "setup_region"}
 
@@ -173,7 +175,7 @@ class MeshModel(Model, MeshMixin):
 
     # MeshModel properties
     @property
-    def bounds(self) -> tuple:
+    def bounds(self) -> Tuple:
         """Returns model mesh bounds."""
         if self._mesh is not None:
             return self._mesh.ugrid.grid.bounds
