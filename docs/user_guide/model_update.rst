@@ -45,20 +45,20 @@ Both ``-c`` and ``-opt`` can be used repeatedly in a single update.
 
 In the following example a Wflow model at ``/path/to/model`` is updated and the results are written to a new directory ``/path/to/model_out``.
 The pipeline with methods which are updated are outlined in the ``wflow_config.ini`` configuration file and used data sources
-in the ``data_catalog.yaml`` catalog file.
+in the ``data_catalog.yml`` catalog file.
 
 .. code-block:: console
 
-    hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.ini -d /path/to/data_catalog.yaml -v
+    hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.ini -d /path/to/data_catalog.yml -v
 
 The following example updates (overwrites!) the landuse-landcover based staticmaps in a Wflow model with the ``setup_lulcmaps`` method 
 based on a the different landuse-landcover dataset according to ``setup_lulcmaps.lulc_fn=vito``. 
-The ``vito`` dataset must be defined in the ``data_catalog.yaml`` catalog file.
+The ``vito`` dataset must be defined in the ``data_catalog.yml`` catalog file.
 Note that no .ini file is used here but instead the methods and options are defined in the update command.
 
 .. code-block:: console
 
-    hydromt update wflow /path/to/model_root -c setup_lulcmaps -c write_staticmaps --opt setup_lulcmaps.lulc_fn=vito -d /path/to/data_catalog.yaml -v
+    hydromt update wflow /path/to/model_root -c setup_lulcmaps -c write_staticmaps --opt setup_lulcmaps.lulc_fn=vito -d /path/to/data_catalog.yml -v
 
 
 **Overview of options**
@@ -91,7 +91,7 @@ or append (if you update the model data in place) mode.
 
     from hydromt_wflow import WflowModel
     from hydromt.config import configread
-    data_libs = [r'/path/to/data_catalog.yaml']
+    data_libs = [r'/path/to/data_catalog.yml']
     opt=configread(r'/path/to/wflow_config.ini')  # parse .ini configuration
     mod = WflowModel(r'/path/to/model_root', data_libs=data_libs, mode='r')  # initialize model with default logger in read mode
     mod.update(model_out=r'/path/to/model_out', opt=opt)
@@ -103,7 +103,7 @@ the updated model use the :py:func:`~hydromt.Model.set_root` method (not shown i
 .. code-block::  python
 
     from hydromt_wflow import WflowModel
-    data_libs = [r'/path/to/data_catalog.yaml']  # this catalog contains the 'vito' data source
+    data_libs = [r'/path/to/data_catalog.yml']  # this catalog contains the 'vito' data source
     mod = WflowModel(r'/path/to/model_root', data_libs=data_libs, mode='r+')  # initialize model with default logger in append mode
     mod.setup_lulcmaps(lulc_fn='vito')
     mod.write_staticmaps()  # write static maps component with updated lulc maps

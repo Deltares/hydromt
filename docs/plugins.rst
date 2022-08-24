@@ -21,7 +21,7 @@ Plugins
         :link: https://deltares.github.io/hydromt_sfincs/
         :link-type: url
         
-        :octicon:`package-dependents;10em`
+        .. image:: _static/SFINCS_logo.png
 
         +++
         SFINCS plugin :octicon:`link-external`
