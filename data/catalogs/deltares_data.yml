@@ -1,6 +1,6 @@
 meta:
   root: p:/wflow_global/hydromt
-  version: 2022.7
+  version: 2022.8
 
 basin_atlas_level12_v10: 
   crs: 4326
@@ -468,6 +468,7 @@ era5_daily:
     source_version: ERA5 daily data on pressure levels
   path: meteo/era5_daily/nc_merged/era5_*_daily.nc
   rename:
+    d2m: temp_dew
     msl: press_msl
     ssrd: kin
     t2m: temp
@@ -475,13 +476,17 @@ era5_daily:
     tmax: temp_max
     tmin: temp_min
     tp: precip
+    u10: wind10_u
+    v10: wind10_v
   unit_add:
     temp: -273.15
+    temp_dew: -273.15
     temp_max: -273.15
     temp_min: -273.15
   unit_mult:
     kin: 0.000277778
     kout: 0.000277778
+    ssr: 0.000277778
     press_msl: 0.01
 
 era5_daily_zarr:
@@ -515,16 +520,21 @@ era5_hourly:
     source_version: ERA5 hourly data on pressure levels
   path: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
   rename:
+    d2m: temp_dew
     msl: press_msl
     ssrd: kin
     t2m: temp
     tisr: kout
     tp: precip
+    u10: wind10_u
+    v10: wind10_v
   unit_add:
     temp: -273.15
+    temp_dew: -273.15
   unit_mult:
     kin: 0.000277778
     kout: 0.000277778
+    ssr: 0.000277778
     precip: 1000
     press_msl: 0.01
     
