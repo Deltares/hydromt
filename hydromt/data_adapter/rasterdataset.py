@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
 
-RasterDatasetSource = NewType('RasterDatasetSource', Union[str, Path])
+RasterDatasetSource = NewType("RasterDatasetSource", Union[str, Path])
 
 
 class RasterDatasetAdapter(DataAdapter):

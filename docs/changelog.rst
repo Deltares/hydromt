@@ -12,6 +12,7 @@ unreleased
 Added
 -----
 - Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
+- A HydroMT API to get info about model components and dataset for the dashboard. `PR #118 <https://github.com/Deltares/hydromt/pull/118>`_
 
 Changed
 -------
