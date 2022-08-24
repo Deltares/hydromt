@@ -642,7 +642,7 @@ if __name__ == "__main__":
     os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
     dask_kwargs = {"n_workers": 4, "processes": True}
 
-    save_zarr = True
+    save_zarr = False
     outdir = join(r"p:\wflow_global\hydromt_staging\era5")
 
     # meteo variables
@@ -670,7 +670,7 @@ if __name__ == "__main__":
 
     # hydro / ocean
     # NOTE these are kept in different ddir
-    variables_hour, ddir_hour = ["shww"], r"p:\wflow_global\hydromt\ocean\era5"
+    # variables_hour, ddir_hour = ["shww"], r"p:\wflow_global\hydromt\ocean\era5"
 
     print(f"downloading ..")
     update_hourly_nc(
