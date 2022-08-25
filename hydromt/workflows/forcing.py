@@ -7,7 +7,7 @@ from typing import Union
 
 from .. import _has_pyeto
 
-if _has_pyeto:
+if _has_pyeto():
     import pyeto
 
 logger = logging.getLogger(__name__)
@@ -344,7 +344,7 @@ def pet(
     else:
         if "press_msl" in ds_out:
             ds_out = ds_out.rename({"press_msl": "press"})
-        elif _has_pyeto:
+        elif _has_pyeto():
             # calculate pressure from elevation [kPa]
             ds_out["press"] = xr.apply_ufunc(
                 pyeto.atm_pressure,
@@ -376,7 +376,7 @@ def pet(
         )
     elif method == "makkink":
         pet_out = pet_makkink(temp, ds_out["press"], ds_out["kin"], timestep=timestep)
-    elif "penman-monteith" in method and _has_pyeto:
+    elif "penman-monteith" in method and _has_pyeto():
         logger.info("Calculating Penman-Monteith ref evaporation")
         # Add wind
         # compute wind from u and v components at 10m (for era5)
@@ -426,7 +426,7 @@ def pet(
                 "penman-monteith_rh_simple",
                 "penman-monteith_tdew",
             ]
-            ValueError(f"Unknown pet method, select from {methods}")
+            raise ValueError(f"Unknown pet method, select from {methods}")
     else:
         raise ValueError(
             "The pyeto package must be installed to use penman-monteith methods to compute PET."
@@ -641,7 +641,7 @@ def penman_monteith(
         avp = pyeto.avp_from_rhmean(svp_tmin, svp_tmax, var_for_avp)
     else:
         variables_avp = ["temp_dew", "rh"]
-        ValueError(
+        raise ValueError(
             f"Unknown method to calculate avp, select from variables {variables_avp}"
         )
 
