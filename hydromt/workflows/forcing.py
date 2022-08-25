@@ -6,6 +6,7 @@ import logging
 from typing import Union
 
 from .. import _has_pyeto
+
 if _has_pyeto:
     import pyeto
 
@@ -204,6 +205,7 @@ def press(
         )
     return press_out
 
+
 def wind(
     da_model: Union[xr.DataArray, xr.Dataset],
     wind: xr.DataArray = None,
@@ -250,10 +252,10 @@ def wind(
         wind = np.sqrt(np.power(wind_u, 2) + np.power(wind_v, 2))
     elif wind is None:
         raise ValueError("Either wind or wind_u and wind_v varibales must be supplied.")
-    
+
     if wind.raster.dim0 != "time":
         raise ValueError(f'First wind dim should be "time", not {wind.raster.dim0}')
-    
+
     # compute wind at 2 meters altitude
     if altitude_correction:
         wind = wind * (4.87 / np.log((67.8 * altitude) - 5.42))
@@ -264,10 +266,9 @@ def wind(
     wind_out.attrs.update(unit="m s-1")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
-        wind_out = resample_time(
-            wind_out, freq, conserve_mass=False, **resample_kwargs
-        )
+        wind_out = resample_time(wind_out, freq, conserve_mass=False, **resample_kwargs)
     return wind_out
+
 
 def pet(
     ds,
@@ -275,6 +276,8 @@ def pet(
     dem_model,
     method="debruin",
     press_correction=False,
+    wind_correction=True,
+    wind_altitude=10,
     reproj_method="nearest_index",
     lapse_rate=-0.0065,
     freq=None,
@@ -291,8 +294,8 @@ def pet(
 
         * Required variables: {"temp", "press" or "press_msl", "kin"}
         * additional variables for debruin: {"kout"}
-        * additional variables for penman-monteith_rh_simple: {"temp_min", "temp_max", "wind_10m" or "wind_u"+"wind_v", "rh"}
-        * additional variables for penman-monteith_tdew: {"temp_min", "temp_max", "wind_10m" or "wind_u"+"wind_v", "temp_dew"}
+        * additional variables for penman-monteith_rh_simple: {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "rh"}
+        * additional variables for penman-monteith_tdew: {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "temp_dew"}
     temp : xarray.DataArray
         DataArray with temperature on model grid resolution [°C]
     dem_model : xarray.DataArray
@@ -302,6 +305,10 @@ def pet(
         Potential evapotranspiration method.
     press_correction : bool, default False
         If True pressure is corrected, based on elevation data of `dem_model`
+    wind_altitude: float, optional
+        ALtitude of wind speed data. By default 10m.
+    wind_correction: str, optional
+       If True wind speed is re-calculated to wind speed at 2 meters using original `wind_altitude`.
     freq : str, Timedelta, default None
         output frequency of timedimension
     resample_kwargs:
@@ -320,10 +327,12 @@ def pet(
         raise ValueError("All input variables have same time index.")
     if not temp.raster.identical_grid(dem_model):
         raise ValueError("Temp variable should be on model grid.")
-    
+
     # resample input to model grid
     # Start with kin and press (used by all methods)
-    ds_out = ds["kin"].raster.reproject_like(dem_model, method=reproj_method).to_dataset()
+    ds_out = (
+        ds["kin"].raster.reproject_like(dem_model, method=reproj_method).to_dataset()
+    )
     if press_correction:
         ds_out["press"] = press(
             ds["press_msl"],
@@ -355,7 +364,9 @@ def pet(
     timestep = to_timedelta(ds).total_seconds()
     if method == "debruin":
         # Add kout
-        ds_out["kout"] = ds["kout"].raster.reproject_like(dem_model, method=reproj_method)
+        ds_out["kout"] = ds["kout"].raster.reproject_like(
+            dem_model, method=reproj_method
+        )
         pet_out = pet_debruin(
             temp,
             ds_out["press"],
@@ -371,18 +382,18 @@ def pet(
         # compute wind from u and v components at 10m (for era5)
         if ("wind_u" in ds.data_vars) & ("wind_v" in ds.data_vars):
             ds_out["wind"] = wind(
-                dem_model
-                wind_u = ds_out["wind_u"],
-                wind_v = ds_out["wind_v"],
-                altitude = 10,
-                altitude_correction = True,
+                da_model=dem_model,
+                wind_u=ds_out["wind_u"],
+                wind_v=ds_out["wind_v"],
+                altitude=wind_altitude,
+                altitude_correction=wind_correction,
             )
         else:
             ds_out["wind"] = wind(
-                dem_model
-                wind = ds_out["wind_10m"],
-                altitude = 10,
-                altitude_correction = True,
+                da_model=dem_model,
+                wind=ds_out["wind"],
+                altitude=wind_altitude,
+                altitude_correction=wind_correction,
             )
         if method == "penman-monteith_rh_simple":
             pet_out = pet_penman_monteith(

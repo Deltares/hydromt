@@ -9,6 +9,7 @@ dependencies:
   - black  # test
   - bottleneck
   - click
+  - coverage == 6.4 # tests
   - dask
   - entrypoints
   - gdal>=3.1

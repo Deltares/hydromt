@@ -13,6 +13,7 @@ Added
 -----
 - Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
 - Add function to calculate daily Penman-Monteith potential evaporation in forcing.py. Depending on the available variables, two options are defined ``penman-monteith_tdew`` (inputs: ['temp', 'temp_min', 'temp_max', 'wind_u', 'wind_v', 'temp_dew', 'kin', 'press_msl']) and ``penman-monteith_rh_simple`` (inputs: ['temp', 'temp_min', 'temp_max', 'wind', 'rh', 'kin']). 
+- New ``wind`` function in workflows.forcing to combine wind_u and wind_v and additioannly convert to wind at 2 meters altitude.
 
 Changed
 -------
