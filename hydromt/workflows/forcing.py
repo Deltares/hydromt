@@ -3,8 +3,9 @@ import xarray as xr
 import numpy as np
 import re
 import logging
-from .. import _has_pyeto
+from typing import Union
 
+from .. import _has_pyeto
 if _has_pyeto:
     import pyeto
 
@@ -203,6 +204,70 @@ def press(
         )
     return press_out
 
+def wind(
+    da_model: Union[xr.DataArray, xr.Dataset],
+    wind: xr.DataArray = None,
+    wind_u: xr.DataArray = None,
+    wind_v: xr.DataArray = None,
+    altitude: float = 10,
+    altitude_correction: bool = False,
+    freq: pd.Timedelta = None,
+    reproj_method: str = "nearest_index",
+    resample_kwargs: dict = {},
+    logger=logger,
+):
+    """Lazy reprojection of wind speed to model grid and resampling of time dimension to frequency.
+
+    Either provide wind speed directly or both wind_u and wind_v components.
+
+    Parameters
+    ----------
+    wind: xarray.DataArray
+        DataArray of wind speed forcing [m s-1]
+    wind_u: xarray.DataArray
+        DataArray of U component of wind speed forcing [m s-1]
+    wind_v: xarray.DataArray
+        DataArray of V component of wind speed forcing [m s-1]
+    da_model: xarray.DataArray
+        DataArray of the target resolution and projection
+    altitude: float, optional
+        ALtitude of wind speed data. By default 10m.
+    altitude_correction: str, optional
+       If True wind speed is re-calculated to wind speed at 2 meters using original `altitude`.
+    freq: str, Timedelta
+        output frequency of timedimension
+    reproj_method: str, optional
+        Method for spatital reprojection of precip, by default 'nearest_index'
+    resample_kwargs:
+        Additional key-word arguments (e.g. label, closed) for time resampling method
+
+    Returns
+    --------
+    wind_out: xarray.DataArray (lazy)
+        processed wind forcing
+    """
+    if wind_u is not None and wind_v is not None:
+        wind = np.sqrt(np.power(wind_u, 2) + np.power(wind_v, 2))
+    elif wind is None:
+        raise ValueError("Either wind or wind_u and wind_v varibales must be supplied.")
+    
+    if wind.raster.dim0 != "time":
+        raise ValueError(f'First wind dim should be "time", not {wind.raster.dim0}')
+    
+    # compute wind at 2 meters altitude
+    if altitude_correction:
+        wind = wind * (4.87 / np.log((67.8 * altitude) - 5.42))
+    # downscale wind (lazy)
+    wind_out = wind.raster.reproject_like(da_model, method=reproj_method)
+    # resample time
+    wind_out.name = "wind"
+    wind_out.attrs.update(unit="m s-1")
+    if freq is not None:
+        resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
+        wind_out = resample_time(
+            wind_out, freq, conserve_mass=False, **resample_kwargs
+        )
+    return wind_out
 
 def pet(
     ds,
@@ -222,13 +287,18 @@ def pet(
     Parameters
     ----------
     ds : xarray.Dataset
-        Dataset with pressure [hPa], global radiation [W m-2], TOA incident solar radiation [W m-2]
+        Dataset with climate variables: pressure [hPa], global radiation [W m-2], TOA incident solar radiation [W m-2], wind [m s-1]
+
+        * Required variables: {"temp", "press" or "press_msl", "kin"}
+        * additional variables for debruin: {"kout"}
+        * additional variables for penman-monteith_rh_simple: {"temp_min", "temp_max", "wind_10m" or "wind_u"+"wind_v", "rh"}
+        * additional variables for penman-monteith_tdew: {"temp_min", "temp_max", "wind_10m" or "wind_u"+"wind_v", "temp_dew"}
     temp : xarray.DataArray
-        DataArray with temperature [°C]
+        DataArray with temperature on model grid resolution [°C]
     dem_model : xarray.DataArray
         DataArray of the target resolution and projection, contains elevation
         data
-    method : {'debruin', 'makkink'}
+    method : {'debruin', 'makkink', "penman-monteith_rh_simple", "penman-monteith_tdew"}
         Potential evapotranspiration method.
     press_correction : bool, default False
         If True pressure is corrected, based on elevation data of `dem_model`
@@ -250,8 +320,10 @@ def pet(
         raise ValueError("All input variables have same time index.")
     if not temp.raster.identical_grid(dem_model):
         raise ValueError("Temp variable should be on model grid.")
+    
     # resample input to model grid
-    ds_out = ds.raster.reproject_like(dem_model, method=reproj_method)
+    # Start with kin and press (used by all methods)
+    ds_out = ds["kin"].raster.reproject_like(dem_model, method=reproj_method).to_dataset()
     if press_correction:
         ds_out["press"] = press(
             ds["press_msl"],
@@ -280,13 +352,10 @@ def pet(
                 "If 'press' is supplied and 'press_correction' is used, the pyeto package must be installed."
             )
 
-    # compute wind from u and v components at 10m (for era5)
-    if ("wind_u" in ds_out.data_vars) & ("wind_v" in ds_out.data_vars):
-        ds_out["wind_10m"] = np.sqrt(ds_out["wind_u"] ** 2 + ds_out["wind_v"] ** 2)
-        ds_out["wind"] = ds_out["wind_10m"] * (4.87 / np.log((67.8 * 10) - 5.42))
-
     timestep = to_timedelta(ds).total_seconds()
     if method == "debruin":
+        # Add kout
+        ds_out["kout"] = ds["kout"].raster.reproject_like(dem_model, method=reproj_method)
         pet_out = pet_debruin(
             temp,
             ds_out["press"],
@@ -298,6 +367,23 @@ def pet(
         pet_out = pet_makkink(temp, ds_out["press"], ds_out["kin"], timestep=timestep)
     elif "penman-monteith" in method and _has_pyeto:
         logger.info("Calculating Penman-Monteith ref evaporation")
+        # Add wind
+        # compute wind from u and v components at 10m (for era5)
+        if ("wind_u" in ds.data_vars) & ("wind_v" in ds.data_vars):
+            ds_out["wind"] = wind(
+                dem_model
+                wind_u = ds_out["wind_u"],
+                wind_v = ds_out["wind_v"],
+                altitude = 10,
+                altitude_correction = True,
+            )
+        else:
+            ds_out["wind"] = wind(
+                dem_model
+                wind = ds_out["wind_10m"],
+                altitude = 10,
+                altitude_correction = True,
+            )
         if method == "penman-monteith_rh_simple":
             pet_out = pet_penman_monteith(
                 temp["temp"],
