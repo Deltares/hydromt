@@ -1,20 +1,17 @@
 from multiprocessing.sharedctypes import Value
-import pytest
-import sys, os
+import  os
 
-from pytz import NonExistentTimeError
 from .model_api import Model
 import xarray as xr
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 
-from typing import Tuple, Union, Optional, List
+from typing import Union, Optional, List
 
 import logging
 from os.path import join, isfile
-from ..data_adapter import DataAdapter
-from .. import config, log, workflows, flw
+from .. import workflows, flw
 
 # -*- coding: utf-8 -*-
 """HydroMT LumpedModel class definition"""
