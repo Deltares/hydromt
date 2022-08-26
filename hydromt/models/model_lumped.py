@@ -1,30 +1,15 @@
-from multiprocessing.sharedctypes import Value
-import  os
-
-from .model_api import Model
-import xarray as xr
-import numpy as np
-import geopandas as gpd
-from shapely.geometry import box
-
-from typing import Union, Optional, List
-
-import logging
-from os.path import join, isfile
-from .. import workflows, flw
-
 # -*- coding: utf-8 -*-
 """HydroMT LumpedModel class definition"""
 
+import  os
+from os.path import join, isfile, isdir, dirname
 import xarray as xr
 import numpy as np
 import geopandas as gpd
-import os
-from os.path import join, isfile, isdir, dirname
 from typing import Union, Optional, List, Dict
-import logging
-from shapely.geometry import box
 
+import logging
+from .. import workflows, flw
 from .model_api import Model
 
 __all__ = ["LumpedModel"]
