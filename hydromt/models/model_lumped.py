@@ -231,7 +231,7 @@ class LumpedModel(LumpedMixin, Model):
         """
 
         if len(self.region) == 0:
-            raise ValueError("No region defined. Define :py:meth:`~hydromt.models.model_api.setup_region`")
+            raise ValueError("No region defined. Define region first with setup_region.")
         
         if not split_regions:
             self.set_response_units(self._geoms['region'])
