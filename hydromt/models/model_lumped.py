@@ -7,6 +7,7 @@ import xarray as xr
 import numpy as np
 import geopandas as gpd
 from typing import Union, Optional, List, Dict
+from shapely.geometry import box
 
 import logging
 from .. import workflows, flw
@@ -165,6 +166,57 @@ class LumpedModel(LumpedMixin, Model):
             data_libs=data_libs,
             logger=logger,
         )
+    
+    def read(
+        self,
+        components: List = [
+            "config",
+            "response_units",
+            "geoms",
+            "forcing",
+            "states",
+            "results",
+        ],
+    ) -> None:
+        """Read the complete model schematization and configuration from model files.
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to read, each should have an associated read_<component> method.
+            By default ['config', 'maps', 'response_units', 'geoms', 'forcing', 'states', 'results']
+        """
+        super().read(components=components)
+
+    def write(
+        self,
+        components: List = [
+            "config",
+            "response_units",
+            "geoms",
+            "forcing",
+            "states",
+        ],
+    ) -> None:
+        """Write the complete model schematization and configuration to model files.
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to write, each should have an associated write_<component> method.
+            By default ['config', 'maps', 'response_units', 'geoms', 'forcing', 'states']
+        """
+        super().write(components=components)
+
+    @property
+    def region(self) -> gpd.GeoDataFrame:
+        """Returns the geometry of the model area of interest."""
+        region = gpd.GeoDataFrame()
+        if "region" in self.geoms:
+            region = self.geoms["region"]
+        elif len(self.response_units) > 0:
+            ds = self.response_units
+            gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
+            region = gpd.GeoDataFrame(geometry=[box(*gdf.total_bounds)], crs=gdf.crs)
+        return region
     
     def setup_response_unit(
         self,
