@@ -807,8 +807,8 @@ class XRasterBase(XGeoBase):
             Output dataset with a variable for each column in reclass_table.
         """
         # Exact reclass method
-        def reclass_exact(x):
-            return np.vectorize(d.get)(x, np.nan)
+        def reclass_exact(x, ddict):
+            return np.vectorize(ddict.get)(x, np.nan)
 
         da = self._obj.copy()
         ds_out = xr.Dataset(coords=da.coords)
@@ -827,11 +827,14 @@ class XRasterBase(XGeoBase):
             values = reclass_table[param].values
             d = dict(zip(keys, values))
             da_param = xr.apply_ufunc(
-                reclass_exact, da, dask="parallelized", output_dtypes=[values.dtype]
+                reclass_exact,
+                da,
+                dask="parallelized",
+                output_dtypes=[values.dtype],
+                kwargs={"ddict": d},
             )
             da_param.attrs.update(_FillValue=np.nan)
             ds_out[param] = da_param
-
         return ds_out
 
     def clip_bbox(self, bbox, align=None, buffer=0):
