@@ -32,7 +32,7 @@ class AuxmapsMixin:
         fill_method: Optional[str] = None,
         name: Optional[str] = None,
         split_dataset: Optional[bool] = False,
-    ) -> None:
+    ) -> Union[xr.DataArray, xr.Dataset]:
         """
         This component adds data variable(s) from ``raster_fn`` to auxmaps object.
 
@@ -55,6 +55,11 @@ class AuxmapsMixin:
             Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
         split_dataset: bool, optional
             If data is a xarray.Dataset, either add it as is to auxmaps or split it into several xarray.DataArrays.
+
+        Returns
+        -------
+        ds: xr.DataArray, xr.Dataset
+            Auxmaps data sliced, interpolated and reprojected.
         """
         self.logger.info(f"Preparing auxmaps data from raster source {raster_fn}")
         # Read raster data and select variables
@@ -70,6 +75,8 @@ class AuxmapsMixin:
         # Add to auxmaps
         self.set_auxmaps(ds, name=name, split_dataset=split_dataset)
 
+        return ds
+
     def setup_auxmaps_from_rastermapping(
         self,
         raster_fn: str,
@@ -79,7 +86,7 @@ class AuxmapsMixin:
         name: Optional[str] = None,
         split_dataset: Optional[bool] = False,
         **kwargs,
-    ) -> None:
+    ) -> Union[xr.DataArray, xr.Dataset]:
         """
         This component adds data variable(s) to auxmaps object by combining values in ``raster_mapping_fn`` to spatial layer ``raster_fn``.
 
@@ -106,6 +113,11 @@ class AuxmapsMixin:
             Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
         split_dataset: bool, optional
             If data is a xarray.Dataset, either add it as is to auxmaps or split it into several xarray.DataArrays.
+
+        Returns
+        -------
+        ds_vars: xr.DataArray, xr.Dataset
+            Auxmaps data sliced, interpolated and reprojected.
         """
         self.logger.info(
             f"Preparing mesh data from mapping {mapping_variables} values in {raster_mapping_fn} to raster source {raster_fn}"
@@ -131,6 +143,8 @@ class AuxmapsMixin:
             ds_vars = ds_vars.raster.reproject(dst_crs=self.crs)
         # Add to auxmaps
         self.set_auxmaps(ds_vars, name=name, split_dataset=split_dataset)
+
+        return ds_vars
 
     # model auxiliary map files
     @property
