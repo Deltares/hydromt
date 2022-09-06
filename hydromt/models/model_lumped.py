@@ -1,33 +1,16 @@
-from multiprocessing.sharedctypes import Value
-import pytest
-import sys, os
-
-from pytz import NonExistentTimeError
-from .model_api import Model
-import xarray as xr
-import numpy as np
-import geopandas as gpd
-from shapely.geometry import box
-
-from typing import Tuple, Union, Optional, List
-
-import logging
-from os.path import join, isfile
-from ..data_adapter import DataAdapter
-from .. import config, log, workflows, flw
-
 # -*- coding: utf-8 -*-
 """HydroMT LumpedModel class definition"""
 
+import  os
+from os.path import join, isfile, isdir, dirname
 import xarray as xr
 import numpy as np
 import geopandas as gpd
-import os
-from os.path import join, isfile, isdir, dirname
 from typing import Union, Optional, List, Dict
-import logging
 from shapely.geometry import box
 
+import logging
+from .. import workflows, flw
 from .model_api import Model
 
 __all__ = ["LumpedModel"]
@@ -184,6 +167,57 @@ class LumpedModel(LumpedMixin, Model):
             logger=logger,
         )
     
+    def read(
+        self,
+        components: List = [
+            "config",
+            "response_units",
+            "geoms",
+            "forcing",
+            "states",
+            "results",
+        ],
+    ) -> None:
+        """Read the complete model schematization and configuration from model files.
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to read, each should have an associated read_<component> method.
+            By default ['config', 'maps', 'response_units', 'geoms', 'forcing', 'states', 'results']
+        """
+        super().read(components=components)
+
+    def write(
+        self,
+        components: List = [
+            "config",
+            "response_units",
+            "geoms",
+            "forcing",
+            "states",
+        ],
+    ) -> None:
+        """Write the complete model schematization and configuration to model files.
+        Parameters
+        ----------
+        components : List, optional
+            List of model components to write, each should have an associated write_<component> method.
+            By default ['config', 'maps', 'response_units', 'geoms', 'forcing', 'states']
+        """
+        super().write(components=components)
+
+    @property
+    def region(self) -> gpd.GeoDataFrame:
+        """Returns the geometry of the model area of interest."""
+        region = gpd.GeoDataFrame()
+        if "region" in self.geoms:
+            region = self.geoms["region"]
+        elif len(self.response_units) > 0:
+            ds = self.response_units
+            gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
+            region = gpd.GeoDataFrame(geometry=[box(*gdf.total_bounds)], crs=gdf.crs)
+        return region
+    
     def setup_response_unit(
         self,
         split_regions = False,
@@ -197,7 +231,7 @@ class LumpedModel(LumpedMixin, Model):
         """
 
         if len(self.region) == 0:
-            raise ValueError("No region defined. Define :py:meth:`~hydromt.models.model_api.setup_region`")
+            raise ValueError("No region defined. Define region first with setup_region.")
         
         if not split_regions:
             self.set_response_units(self._geoms['region'])
