@@ -116,8 +116,8 @@ def hydrography_to_basins(
         --------
         https://deltares.github.io/pyflwdir/latest/basins.html
         """        
-        ds = ds.raster.clip_geom(region, mask=True)
-        flwdir = flw.flwdir_from_da(ds["flwdir"], ftype="d8")
+        ds_clip = ds.raster.clip_geom(region, mask=True)
+        flwdir = flw.flwdir_from_da(ds['flwdir'], ftype='d8', mask=ds_clip.mask)
         
         split_method_lst = ["streamorder","us_area","pfafstetter","outlets"]
         if split_method not in split_method_lst:
