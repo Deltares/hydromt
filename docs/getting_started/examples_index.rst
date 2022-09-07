@@ -16,13 +16,7 @@ Data and DataCatalog:
 
 * `Reading raster data <../_examples/reading_raster_data.ipynb>`_
 * `Reading vector data <../_examples/reading_vector_data.ipynb>`_
-* `Exporting data <../examples/export_data.ipynb>`_
-
-Working with models:
-********************
-
-* `Working with models from CLI <../_examples/working_with_models_basics.ipynb>`_
-* `Working with models in python <../_examples/working_with_models.ipynb>`_
+* `Reading point location data <../_examples/reading_point_data.ipynb>`_
 
 GIS operations:
 ***************
