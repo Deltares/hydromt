@@ -11,7 +11,7 @@ import hydromt
 logger = logging.getLogger(__name__)
 
 __all__ = ["make_ds_mask", "hydrography_to_basins","create_response_unit_ds",
-           "ru_geometry_to_gpd", "fracs", "ds_class_mode"]
+           "ru_geometry_to_gpd", "fracs", "ds_class_mode", "gpd_to_response_unit"]
 
 
 def make_ds_mask(ds, gdf, col_name='value'):
@@ -52,6 +52,37 @@ def create_response_unit_ds(response_units_gdf):
     ds['index']=(["index"],response_units_gdf['value'])
     return ds
 
+def gpd_to_response_unit(
+        gpd,
+        index_col = 'index',
+        geometry_col = 'geometry',
+        add_all_variables = True,
+        other_geoms=dict(),
+        variables=dict()
+    ):
+    ds = xr.Dataset(
+        coords=dict(
+            index = (["index"],gpd[index_col]),
+            geometry = (["index"], gpd[geometry_col]),
+        ),
+    )
+    if add_all_variables:
+        variables=dict()
+        for col in gpd.columns:
+            if col is not (geometry_col or index_col):
+                variables[col]=col
+    
+    for coordname, coordvaluecol in other_geoms.items():
+        ds = ds.assign_coords(coords={coordname:(["index"], gpd[coordvaluecol])})
+        
+    for varname, varvaluecol in variables.items():
+        ds[varname] = xr.Variable(dims=["index"],data=gpd[varvaluecol])
+    
+    if gpd.crs is not None:  # parse crs
+        ds = ds.rio.write_crs(gpd.crs)
+    
+    return ds
+
 def fracs(ds,varname,dimname):
     """Return fraction(al cover) over dimension of variable"""
     fracs = ds[varname] / ds[varname].sum(dim=dimname)
@@ -60,7 +91,7 @@ def fracs(ds,varname,dimname):
 def ds_class_mode(ds,varname,dimname):
     dout = xr.Dataset({
         varname+'_mode': (["index"]  , 
-                 [ds[dimname].values[i] for i in ds[varname].argmax(dim=dimname).data])
+                 [ds[dimname].values[i] for i in ds[varname].argmax(dim=dimname,skipna=True).data])
     })
     return dout
 

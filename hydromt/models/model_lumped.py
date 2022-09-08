@@ -221,6 +221,7 @@ class LumpedModel(LumpedMixin, Model):
     def setup_response_unit(
         self,
         split_regions = False,
+        index_col = "index",
         split_method = "us_area",
         hydrography_fn = "merit_hydro",
         **kwargs
@@ -234,8 +235,8 @@ class LumpedModel(LumpedMixin, Model):
             raise ValueError("No region defined. Define region first with setup_region.")
         
         if not split_regions:
-            self.set_response_units(self._geoms['region'])
-            self.logger.info(f"setup_response_unit.split_regions set to False. response_units set up")
+            ds_response_units = workflows.gpd_to_response_unit(self.region,index_col=index_col)
+            self.logger.info(f"setup_response_unit.split_regions set to False. response_units set up from region geometries")
         
         if split_regions:
             self.logger.info(f"setup_response_unit.split_regions set to True. Deriving response_units based on hydrography")
@@ -247,7 +248,7 @@ class LumpedModel(LumpedMixin, Model):
                 split_method,
                 **kwargs
             )
-            self.set_response_units(ds_response_units)
+        self.set_response_units(ds_response_units)
     
     def setup_downstream_links(
         self,
