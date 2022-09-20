@@ -5,8 +5,6 @@ __version__ = "0.5.1.dev"
 
 import geopandas as gpd
 import warnings
-from typing import Union
-from pathlib import Path
 
 # required for accessor style documentation
 from xarray import DataArray, Dataset
