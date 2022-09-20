@@ -53,7 +53,7 @@ def get_model_components(
             continue
         signature = inspect.signature(member)
         components[name] = {
-            "doc": member.__doc__,
+            "doc": inspect.getdoc(member),
             "required": [],
             "optional": [],
             "kwargs": False,

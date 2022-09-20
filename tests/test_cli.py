@@ -6,6 +6,7 @@ import numpy as np
 from hydromt import __version__
 from hydromt.cli.main import main as hydromt_cli
 from hydromt.cli import api as hydromt_api
+from hydromt.models import ENTRYPOINTS
 
 
 def test_cli(tmpdir):
@@ -58,13 +59,16 @@ def test_cli(tmpdir):
         raise r.exception
 
 
-def test_api():
+def test_api_datasets():
     # datasets
     assert "artifact_data" in hydromt_api.get_predifined_catalogs()
     datasets = hydromt_api.get_datasets("artifact_data")
     assert isinstance(datasets, dict)
     assert isinstance(datasets["RasterDatasetSource"], list)
 
+
+@pytest.mark.skipif("lumped_model" not in ENTRYPOINTS, reason="HydroMT not installed.")
+def test_api_model_components():
     # models
     components = hydromt_api.get_model_components(
         "lumped_model", component_types=["write"]
