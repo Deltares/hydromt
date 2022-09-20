@@ -232,7 +232,7 @@ class Model(object, metaclass=ABCMeta):
         opt: Optional[dict] = {},
     ):
         """Single method to build a model from scratch based on settings in `opt`.
-        
+
         Methods will be run one by one based on the order of appearance in `opt` (.ini configuration file).
         All model methods are supported including setup_*, read_* and write_* methods.
 
