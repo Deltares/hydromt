@@ -18,6 +18,7 @@ Changed
 
 Fixed
 -----
+- Bug in backward compatibility of staticgeoms (not read automatically). `Issue #190 <https://github.com/Deltares/hydromt/issues/190>`_
 
 Deprecated
 ----------
