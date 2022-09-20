@@ -31,7 +31,8 @@ class MapsMixin:
         variables: Optional[List] = None,
         fill_method: Optional[str] = None,
         name: Optional[str] = None,
-        split_dataset: Optional[bool] = False,
+        reproject_method: Optional[str] = None,
+        split_dataset: Optional[bool] = True,
     ) -> List[str]:
         """
         This component adds data variable(s) from ``raster_fn`` to maps object.
@@ -49,12 +50,14 @@ class MapsMixin:
         variables: list, optional
             List of variables to add to maps from raster_fn. By default all.
         fill_method : str, optional
-            If specified, fills no data values using fill_nodata method. Available methods
-            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+            If specified, fills nodata values using fill_nodata method.
+            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         name: str, optional
-            Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
+            Name of new maps variable, only in case split_dataset=False.
+        reproject_method: str, optional
+            See rasterio.warp.reproject for existing methods, by default the data is not reprojected (None).
         split_dataset: bool, optional
-            If data is a xarray.Dataset, either add it as is to maps or split it into several xarray.DataArrays.
+            If data is a xarray.Dataset split it into several xarray.DataArrays (default).
 
         Returns
         -------
@@ -68,59 +71,59 @@ class MapsMixin:
             geom=self.region,
             buffer=2,
             variables=variables,
-            # single_var_as_array=False,
+            single_var_as_array=False,
         )
         # Fill nodata
         if fill_method is not None:
             ds = ds.raster.interpolate_na(method=fill_method)
         # Reprojection
-        if ds.rio.crs != self.crs:
-            ds = ds.raster.reproject(dst_crs=self.crs)
+        if ds.rio.crs != self.crs and reproject_method is not None:
+            ds = ds.raster.reproject(dst_crs=self.crs, method=reproject_method)
         # Add to maps
         self.set_maps(ds, name=name, split_dataset=split_dataset)
 
-        return [ds.name] if isinstance(ds, xr.DataArray) else list(ds.data_vars.keys())
+        return list(ds.data_vars.keys())
 
-    def setup_maps_from_rastermapping(
+    def setup_maps_from_raster_reclass(
         self,
         raster_fn: str,
-        raster_mapping_fn: str,
-        mapping_variables: List,
+        reclass_table_fn: str,
+        reclass_variables: List,
         variable: Optional[str] = None,
         fill_method: Optional[str] = None,
+        reproject_method: Optional[str] = None,
         name: Optional[str] = None,
-        split_dataset: Optional[bool] = False,
+        split_dataset: Optional[bool] = True,
         **kwargs,
     ) -> List[str]:
         """
-        This component adds data variable(s) to the maps component by combining values in ``raster_mapping_fn`` to spatial layer ``raster_fn``.
-
-        The ``mapping_variables`` rasters are first created by mapping variables values from ``raster_mapping_fn`` to value in the
-        ``raster_fn`` grid.
+        This component adds data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 
-        * **mapping_variables** maps: data from raster_mapping_fn spatially distributed with raster_fn
+        * **reclass_variables** maps: reclassified raster data
 
         Parameters
         ----------
         raster_fn: str
             Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
             :py:meth:`hydromt.data_catalog.get_rasterdataset` method.
-        raster_mapping_fn: str
-            Source name of mapping table of raster_fn in data_catalog.
-        mapping_variables: list
-            List of mapping_variables from raster_mapping_fn table to add to mesh. Index column should match values in raster_fn.
+        reclass_table_fn: str
+            Source name of reclassification table of `raster_fn` in data_catalog.
+        reclass_variables: list
+            List of reclass_variables from reclass_table_fn table to add to maps. Index column should match values in `raster_fn`.
         variable: str, optional
             Name of raster dataset variable to use. This is only required when reading datasets with multiple variables.
             By default None.
         fill_method : str, optional
-            If specified, fills no data values using fill_nodata method. Available methods
-            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+            If specified, fills nodata values in `raster_fn` using fill_nodata method before reclassifying.
+            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        reproject_method: str, optional
+            See rasterio.warp.reproject for existing methods, by default the data is not reprojected (None).
         name: str, optional
-            Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
+            Name of new maps variable, only in case split_dataset=False.
         split_dataset: bool, optional
-            If data is a xarray.Dataset, either add it as is to maps or split it into several xarray.DataArrays.
+            If data is a xarray.Dataset split it into several xarray.DataArrays (default).
 
         Returns
         -------
@@ -128,19 +131,19 @@ class MapsMixin:
             Names of added model map layers
         """
         self.logger.info(
-            f"Preparing mesh data from mapping {mapping_variables} values in {raster_mapping_fn} to raster source {raster_fn}"
+            f"Preparing map data by reclassifying the data in {raster_fn} based on {reclass_table_fn}"
         )
-        # Read raster data and mapping table
+        # Read raster data and remapping table
         da = self.data_catalog.get_rasterdataset(
             raster_fn, geom=self.region, buffer=2, **kwargs
         )
         if not isinstance(da, xr.DataArray):
             raise ValueError(
-                f"raster_fn {raster_fn} for mapping should be a single variable. "
-                "Please select one using 'variable' argument in setup_maps_from_rastermapping"
+                f"raster_fn {raster_fn} should be a single variable. "
+                "Please select one using the 'variable' argument"
             )
         df_vars = self.data_catalog.get_dataframe(
-            raster_mapping_fn, variables=mapping_variables
+            reclass_table_fn, variables=reclass_variables
         )
         # Fill nodata
         if fill_method is not None:
@@ -148,7 +151,7 @@ class MapsMixin:
         # Mapping function
         ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
         # Reprojection
-        if ds_vars.rio.crs != self.crs:
+        if ds_vars.rio.crs != self.crs and reproject_method is not None:
             ds_vars = ds_vars.raster.reproject(dst_crs=self.crs)
         # Add to maps
         self.set_maps(ds_vars, name=name, split_dataset=split_dataset)
@@ -168,7 +171,7 @@ class MapsMixin:
         self,
         data: Union[xr.DataArray, xr.Dataset],
         name: Optional[str] = None,
-        split_dataset: Optional[bool] = False,
+        split_dataset: Optional[bool] = True,
     ) -> None:
         """Add raster data to the maps component.
 
@@ -182,7 +185,7 @@ class MapsMixin:
         name: str, optional
             Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
         split_dataset: bool, optional
-            If data is a xarray.Dataset, either add it as is to maps or split it into several xarray.DataArrays.
+            If data is a xarray.Dataset split it into several xarray.DataArrays (default).
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:

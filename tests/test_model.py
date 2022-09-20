@@ -6,6 +6,7 @@ import pytest
 import xarray as xr
 import numpy as np
 import geopandas as gpd
+from shapely.geometry import polygon
 from hydromt.models.model_api import _check_data
 from hydromt.models import Model, GridModel, LumpedModel
 from hydromt.models.model_maps_mixin import MapsModel
@@ -167,13 +168,16 @@ def test_mapsmixin_setup(tmpdir):
     mod.setup_region({"bbox": bbox})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.setup_maps_from_raster(
-        raster_fn="merit_hydro", name="hydrography", variables=["elevtn", "flwdir"]
+        raster_fn="merit_hydro",
+        name="hydrography",
+        variables=["elevtn", "flwdir"],
+        split_dataset=False,
     )
     mod.setup_maps_from_raster(raster_fn="vito", fill_method="nearest")
-    mod.setup_maps_from_rastermapping(
+    mod.setup_maps_from_raster_reclass(
         raster_fn="vito",
-        raster_mapping_fn="vito_mapping",
-        mapping_variables=["roughness_manning"],
+        reclass_table_fn="vito_mapping",
+        reclass_variables=["roughness_manning"],
         split_dataset=True,
     )
 
@@ -252,21 +256,25 @@ def test_meshmodel(mesh_model, tmpdir):
 
 
 @pytest.mark.skipif(not _has_xugrid(), reason="Xugrid not installed.")
-def test_meshmodel_setup(griduda, tmpdir):
+def test_meshmodel_setup(griduda, world, tmpdir):
     from hydromt.models import MeshModel
 
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})
-    region = {"mesh": griduda.ugrid.to_dataset()}
-    mod.setup_mesh(region, crs=4326)
+    region = {"geom": world[world.name == "Italy"]}
+    mod.setup_mesh(region, res=10000, crs=3857)
     mod.region
-    mod.setup_mesh_from_raster("vito")
-    mod.setup_mesh_from_rastermapping(
+
+    region = {"mesh": griduda.ugrid.to_dataset()}
+    mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
+    mod1.setup_mesh(region)
+    mod1.setup_mesh_from_raster("vito")
+    assert "vito" in mod1.mesh.data_vars
+    mod1.setup_mesh_from_raster_reclass(
         raster_fn="vito",
-        raster_mapping_fn="vito_mapping",
-        mapping_variables=["roughness_manning"],
+        reclass_table_fn="vito_mapping",
+        reclass_variables=["roughness_manning"],
         resampling_method="mean",
     )
-    assert "vito" in mod.mesh.data_vars
-    assert "roughness_manning" in mod.mesh.data_vars
+    assert "roughness_manning" in mod1.mesh.data_vars

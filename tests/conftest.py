@@ -162,10 +162,11 @@ def demuda():
 def griduda():
     import xugrid as xu
 
-    bbox = [12.05, 46.45, 12.10, 46.50]  # Piava river
+    bbox = [12.09, 46.49, 12.10, 46.50]  # Piava river
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     da = data_catalog.get_rasterdataset("merit_hydro", bbox=bbox, variables="elevtn")
-    gdf_da = da.raster.vectorize()
+    gdf_da = da.raster.vector_grid()
+    gdf_da["value"] = da.values.flatten()
     gdf_da.index.name = "mesh2d_nFaces"
     uda = xu.UgridDataset.from_geodataframe(gdf_da)
     uda = uda["value"]

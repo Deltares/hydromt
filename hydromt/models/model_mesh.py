@@ -88,11 +88,11 @@ class MeshMixin(object):
 
         self.set_mesh(uds_sample)
 
-    def setup_mesh_from_rastermapping(
+    def setup_mesh_from_raster_reclass(
         self,
         raster_fn: str,
-        raster_mapping_fn: str,
-        mapping_variables: list,
+        reclass_table_fn: str,
+        reclass_variables: list,
         variable: Optional[str] = None,
         fill_nodata: Optional[str] = None,
         resampling_method: Optional[Union[str, list]] = "mean",
@@ -100,42 +100,40 @@ class MeshMixin(object):
         **kwargs,
     ) -> None:
         """
-        This component adds data variable(s) to mesh object by combining values in ``raster_mapping_fn`` to spatial layer ``raster_fn``.
+        This component adds data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
-        The ``mapping_variables`` rasters are first created by mapping variables values from ``raster_mapping_fn`` to value in the
-        ``raster_fn`` grid.
-        Mapping variables data are then interpolated to the mesh grid using ``resampling_method``.
+        The reclassified raster data are subsequently interpolated to the mesh using ``resampling_method``.
 
         Adds model layers:
 
-        * **mapping_variables** mesh: data from raster_mapping_fn spatially distributed with raster_fn
+        * **reclass_variables** mesh: reclassified raster data interpolated to the model mesh
 
         Parameters
         ----------
         raster_fn: str
             Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
             :py:meth:`hydromt.data_catalog.get_rasterdataset` method
-        raster_mapping_fn: str
-            Source name of mapping table of raster_fn in data_catalog.
-        mapping_variables: list
-            List of mapping_variables from raster_mapping_fn table to add to mesh. Index column should match values in raster_fn.
+        reclass_table_fn: str
+            Source name of reclassification table of raster_fn in data_catalog.
+        reclass_variables: list
+            List of reclass_variables from reclass_table_fn table to add to mesh. Index column should match values in raster_fn.
         variable: str, optional
             Name of raster dataset variable to use. This is only required when reading datasets with multiple variables.
             By default None.
-        fill_nodata : str, optional
-            If specified, fills no data values using fill_nodata method. AVailable methods
-            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
-        resampling_method: str/list, optional
-            Method to sample from raster data to mesh. Can be a list per variable in ``mapping_variables`` or a
-            single method for all. By default mean for all mapping_variables. Options include
-            {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
+        fill_method : str, optional
+            If specified, fills nodata values in `raster_fn` using fill_nodata method before reclassifying.
+            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        resampling_method: str, list, optional
+            Method to sample from raster data to mesh. Can be a list per variable in ``reclass_variables`` or a
+            single method for all. By default mean for all reclass_variables.
+            Options include {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
         all_touched : bool, optional
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
         """
         self.logger.info(
-            f"Preparing mesh data from mapping {mapping_variables} values in {raster_mapping_fn} to raster source {raster_fn}"
+            f"Preparing mesh data by reclassifying the data in {raster_fn} based on {reclass_table_fn}."
         )
         # Read raster data and mapping table
         da = self.data_catalog.get_rasterdataset(
@@ -143,11 +141,11 @@ class MeshMixin(object):
         )
         if not isinstance(da, xr.DataArray):
             raise ValueError(
-                f"raster_fn {raster_fn} for mapping should be a single variable. "
-                "Please select one using 'variable' argument in setup_mesh_from_rastermapping"
+                f"raster_fn {raster_fn} should be a single variable raster. "
+                "Please select one using the 'variable' argument"
             )
         df_vars = self.data_catalog.get_dataframe(
-            raster_mapping_fn, variables=mapping_variables
+            reclass_table_fn, variables=reclass_variables
         )
 
         if fill_nodata is not None:
@@ -165,13 +163,13 @@ class MeshMixin(object):
         )
         # Rename variables
         if isinstance(resampling_method, str):
-            resampling_method = np.repeat(resampling_method, len(mapping_variables))
+            resampling_method = np.repeat(resampling_method, len(reclass_variables))
         rm_dict = {
             f"{var}_{mtd}": var
-            for var, mtd in zip(mapping_variables, resampling_method)
+            for var, mtd in zip(reclass_variables, resampling_method)
         }
         ds_sample = ds_sample.rename(rm_dict)
-        ds_sample = ds_sample[mapping_variables]
+        ds_sample = ds_sample[reclass_variables]
         # Convert to UgridDataset
         uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
 
@@ -269,7 +267,7 @@ class MeshMixin(object):
 
 class MeshModel(MeshMixin, Model):
 
-    _CLI_ARGS = {"region": "setup_mesh"}
+    _CLI_ARGS = {"region": "setup_mesh", "res": "setup_mesh"}
 
     def __init__(
         self,
@@ -292,8 +290,8 @@ class MeshModel(MeshMixin, Model):
     def setup_mesh(
         self,
         region: dict,
+        res: Optional[float] = None,
         crs: int = None,
-        res: float = 100.0,
     ) -> xu.UgridDataset:
         """Creates an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
         An 2D unstructured mesh will be created as 2D rectangular grid from a geometry (geom_fn) or bbox. If an existing
@@ -316,10 +314,10 @@ class MeshModel(MeshMixin, Model):
             * {'geom': 'path/to/polygon_geometry'}
 
             * {'mesh': 'path/to/2dmesh_file'}
+        res: float
+            Resolution used to generate 2D mesh [unit of the CRS], required if region is not based on 'mesh'.
         crs : EPSG code, int, optional
             Optional EPSG code of the model. If None using the one from region, and else 4326.
-        resolution: float, optional
-            Resolution used to generate 2D mesh. By default a value of 100 m is applied.
 
         Returns
         -------
@@ -330,6 +328,8 @@ class MeshModel(MeshMixin, Model):
         self.logger.info(f"Preparing 2D mesh.")
 
         if "mesh" not in region:
+            if not isinstance(res, (int, float)):
+                raise ValueError("res argument required")
             kind, region = workflows.parse_region(region, logger=self.logger)
             if kind == "bbox":
                 bbox = region["bbox"]
@@ -342,29 +342,31 @@ class MeshModel(MeshMixin, Model):
                 raise ValueError(
                     f"Region for mesh must of kind [bbox, geom, mesh], kind {kind} not understood."
                 )
+            if crs is not None:
+                geom = geom.to_crs(crs)
             # Generate grid based on res for region bbox
             xmin, ymin, xmax, ymax = geom.total_bounds
-            length = (xmax - xmin) / res
-            wide = (ymax - ymin) / res
-            cols = list(np.arange(xmin, xmax + wide, wide))
-            rows = list(np.arange(ymin, ymax + length, length))
-            polygons = []
-            for x in cols[:-1]:
-                for y in rows[:-1]:
-                    polygons.append(
-                        Polygon(
-                            [
-                                (x, y),
-                                (x + wide, y),
-                                (x + wide, y + length),
-                                (x, y + length),
-                            ]
-                        )
-                    )
-            grid = gpd.GeoDataFrame({"geometry": polygons}, crs=geom.crs)
+            # note we flood the number of faces within bounds
+            ncol = int((xmax - xmin) // res)
+            nrow = int((ymax - ymin) // res)
+            dx, dy = res, -res
+            faces = []
+            for i in range(nrow):
+                top = ymax + i * dy
+                bottom = ymax + (i + 1) * dy
+                for j in range(ncol):
+                    left = xmin + j * dx
+                    right = xmin + (j + 1) * dx
+                    faces.append(box(left, bottom, right, top))
+            grid = gpd.GeoDataFrame(geometry=faces, crs=geom.crs)
             # If needed clip to geom
             if kind != "bbox":
-                grid = grid.overlay(geom, how="intersection").explode().reset_index()
+                # TODO: grid.intersects(geom) does not seem to work ?
+                grid = grid.loc[
+                    gpd.sjoin(
+                        grid, geom, how="left", op="intersects"
+                    ).index_right.notna()
+                ].reset_index()
             # Create mesh from grid
             grid.index.name = "mesh2d_nFaces"
             mesh2d = xu.UgridDataset.from_geodataframe(grid)
