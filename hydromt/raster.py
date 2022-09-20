@@ -1924,6 +1924,28 @@ class RasterDataset(XRasterBase):
                 )
         return ds
 
+    def interpolate_na(self, method: str = "nearest", **kwargs):
+        """Interpolate missing data
+
+        Arguments
+        ----------
+        method: {'linear', 'nearest', 'cubic', 'rio_idw'}, optional
+            {'linear', 'nearest', 'cubic'} use :py:meth:`scipy.interpolate.griddata`;
+            'rio_idw' applies inverse distance weighting based on :py:meth:`rasterio.fill.fillnodata`.
+        **kwargs
+            Additional key-word arguments are passed to :py:meth:`rasterio.fill.fillnodata`,
+            only used in combination with `method='rio_idw'`
+
+        Returns
+        -------
+        xarray.Dataset
+            Filled object
+        """
+        ds_out = xr.Dataset(attrs=self._obj.attrs)
+        for var in self.vars:
+            ds_out[var] = self._obj[var].raster.interpolate_na(method=method, **kwargs)
+        return ds_out
+
     def reproject_like(self, other, method="nearest"):
         """Reproject a Dataset object to match the resolution, projection,
         and region of ``other``.

@@ -5,7 +5,8 @@ import pandas as pd
 import geopandas as gpd
 import xarray as xr
 
-from hydromt import Model, GridModel, LumpedModel, NetworkModel, AuxmapsModel
+from hydromt import Model, GridModel, LumpedModel, NetworkModel
+from hydromt.models.model_maps_mixin import MapsModel
 from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
@@ -187,11 +188,11 @@ def model(demda, world, obsda):
 
 
 @pytest.fixture
-def auxmap_model(demda):
-    mod = AuxmapsModel()
+def map_model(demda):
+    mod = MapsModel()
     mod.setup_region({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_auxmaps(demda, "elevtn")
+    mod.set_maps(demda, "elevtn")
     return mod
 
 
