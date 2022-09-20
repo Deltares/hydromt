@@ -84,7 +84,7 @@ class MeshMixin(object):
         rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
         ds_sample = ds_sample.rename(rm_dict)
         # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grid=self.mesh.grid)
+        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
 
         self.set_mesh(uds_sample)
 
@@ -168,7 +168,7 @@ class MeshMixin(object):
         ds_sample = ds_sample.rename(rm_dict)
         ds_sample = ds_sample[mapping_variables]
         # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grid=self.mesh.grid)
+        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
 
         self.set_mesh(uds_sample)
 
@@ -256,9 +256,9 @@ class MeshMixin(object):
         self.logger.debug(f"Writing file {fn}")
         # ds_new = xu.UgridDataset(grid=ds_out.ugrid.grid) # bug in xugrid?
         ds_out = self.mesh.ugrid.to_dataset()
-        if self.mesh.ugrid.crs is not None:
+        if self.mesh.ugrid.grid.crs is not None:
             # save crs to spatial_ref coordinate
-            ds_out = ds_out.rio.write_crs(self.mesh.ugrid.crs)
+            ds_out = ds_out.rio.write_crs(self.mesh.ugrid.grid.crs)
         ds_out.to_netcdf(_fn, **kwargs)
 
 
@@ -466,7 +466,7 @@ class MeshModel(MeshMixin, Model):
         if "region" in self.geoms:
             region = self.geoms["region"]
         elif self.mesh is not None:
-            crs = self.mesh.ugrid.crs
+            crs = self.mesh.ugrid.grid.crs
             if crs is None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
