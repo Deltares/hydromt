@@ -11,7 +11,7 @@ from hydromt.models import Model, GridModel, LumpedModel, AuxmapsModel
 from hydromt import _has_xugrid
 
 # from .conftest import TestAuxModel
-DATADIR = join(dirname(abspath(__file__)), "..", "data")
+DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 def test_check_data(demda):
@@ -161,7 +161,7 @@ def test_auxmapsmixin(auxmap_model, tmpdir):
 
 
 def test_auxmapsmixin_setup(tmpdir):
-    dc_param_fn = join(DATADIR, "model_parameters", "parameters_data.yml")
+    dc_param_fn = join(DATADIR, "parameters_data.yml")
     # class AuxModel(Model, AuxmapsMixin):
     #     _NAME = "auxmodel"
     mod = AuxmapsModel(data_libs=["artifact_data", dc_param_fn], mode="w")
@@ -257,7 +257,7 @@ def test_meshmodel(mesh_model, tmpdir):
 def test_meshmodel_setup(griduda, tmpdir):
     from hydromt.models import MeshModel
 
-    dc_param_fn = join(DATADIR, "model_parameters", "parameters_data.yml")
+    dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})
     region = {"mesh": griduda.ugrid.to_dataset()}

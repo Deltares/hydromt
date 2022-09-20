@@ -10,4 +10,4 @@ vito_mapping:
     category: landuse
     source_info: landuse parameters based on vito classification (https://land.copernicus.eu/global/products/lc)
     source_version: 1.0
-  path: ../model_parameters/vito_mapping.csv
+  path: vito_mapping.csv

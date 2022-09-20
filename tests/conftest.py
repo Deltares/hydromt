@@ -10,7 +10,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
 
-DATADIR = join(dirname(abspath(__file__)), "..", "data")
+DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture
