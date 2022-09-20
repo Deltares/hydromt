@@ -67,6 +67,11 @@ Source = "https://github.com/Deltares/hydromt"
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
 
+[project.entry-points."hydromt.models"]
+lumped_model = "hydromt.models.model_lumped:LumpedModel"
+grid_model = "hydromt.models.model_grid:GridModel"
+mesh_model = "hydromt.models.model_mesh:MeshModel"
+
 [tool.black]
 line-length = 88
 target-version = ['py37']

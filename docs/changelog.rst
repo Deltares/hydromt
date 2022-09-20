@@ -12,6 +12,8 @@ unreleased
 Added
 -----
 - Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
+- API calls to get info about model components and dataset for the dashboard. `PR #118 <https://github.com/Deltares/hydromt/pull/118>`_
+- Added entrypoints for lumped_model, mesh_model, grid_model
 
 Changed
 -------
@@ -19,6 +21,7 @@ Changed
 Fixed
 -----
 - Bug in backward compatibility of staticgeoms (not read automatically). `Issue #190 <https://github.com/Deltares/hydromt/issues/190>`_
+- Direct import of xarray.core.resample. `Issue #189 <https://github.com/Deltares/hydromt/issues/189>`_
 
 Deprecated
 ----------
