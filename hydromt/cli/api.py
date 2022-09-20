@@ -31,7 +31,7 @@ def get_model_components(
         model components types to return, by default ['read','write','setup']
     """
     _DEFAULT_TYPE = "str"
-    _EXCEPTED_TYPES = [
+    _EXPECTED_TYPES = [
         "int",
         "float",
         "str",
@@ -68,7 +68,7 @@ def get_model_components(
             if typing.get_origin(annotation) == typing.Union:
                 annotation = typing.get_args(v.annotation)[0]
             type = getattr(annotation, "__name__", _DEFAULT_TYPE)
-            type = type if type in _EXCEPTED_TYPES else _DEFAULT_TYPE
+            type = type if type in _EXPECTED_TYPES else _DEFAULT_TYPE
             if v.default == inspect._empty:  # required
                 components[name]["required"].append((k, type))
             else:  # optional
