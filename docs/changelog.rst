@@ -20,6 +20,7 @@ Changed
 
 Fixed
 -----
+- Direct import of xarray.core.resample. `Issue #189 <https://github.com/Deltares/hydromt/issues/189>`_
 
 Deprecated
 ----------
