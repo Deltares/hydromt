@@ -93,6 +93,7 @@ class MeshMixin(object):
         raster_fn: str,
         raster_mapping_fn: str,
         mapping_variables: list,
+        variable: Optional[str] = None,
         fill_nodata: Optional[str] = None,
         resampling_method: Optional[Union[str, list]] = "mean",
         all_touched: Optional[bool] = True,
@@ -107,17 +108,20 @@ class MeshMixin(object):
 
         Adds model layers:
 
-        * **mapping_variables** mesh: data from raster_mapping_fn spatially ditributed with raster_fn
+        * **mapping_variables** mesh: data from raster_mapping_fn spatially distributed with raster_fn
 
         Parameters
         ----------
         raster_fn: str
             Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
-            hydromt.data_catalog.get_rasterdataset method
+            :py:meth:`hydromt.data_catalog.get_rasterdataset` method
         raster_mapping_fn: str
             Source name of mapping table of raster_fn in data_catalog.
         mapping_variables: list
-            List of mapping_variables from rasert_mapping_fn table to add to mesh. Index column should match values in raster_fn.
+            List of mapping_variables from raster_mapping_fn table to add to mesh. Index column should match values in raster_fn.
+        variable: str, optional
+            Name of raster dataset variable to use. This is only required when reading datasets with multiple variables.
+            By default None.
         fill_nodata : str, optional
             If specified, fills no data values using fill_nodata method. AVailable methods
             are {'linear', 'nearest', 'cubic', 'rio_idw'}.
@@ -135,11 +139,12 @@ class MeshMixin(object):
         )
         # Read raster data and mapping table
         da = self.data_catalog.get_rasterdataset(
-            raster_fn, geom=self.region, buffer=2, **kwargs
+            raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
         )
         if not isinstance(da, xr.DataArray):
             raise ValueError(
-                f"raster_fn {raster_fn} for mapping should be a single variable. Please select one using 'variable' argument in setup_auxmaps_from_rastermapping"
+                f"raster_fn {raster_fn} for mapping should be a single variable. "
+                "Please select one using 'variable' argument in setup_mesh_from_rastermapping"
             )
         df_vars = self.data_catalog.get_dataframe(
             raster_mapping_fn, variables=mapping_variables
