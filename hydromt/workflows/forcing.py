@@ -1,5 +1,6 @@
 import pandas as pd
 import xarray as xr
+import xarray.core.resample
 import numpy as np
 import re
 import logging

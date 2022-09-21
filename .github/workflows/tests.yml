@@ -35,6 +35,9 @@ jobs:
          conda info
          conda list
 
+      - name: Install hydromt # required for entrypoints test
+        run: pip install -e .
+
       - name: Test
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
