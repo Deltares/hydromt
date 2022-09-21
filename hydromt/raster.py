@@ -13,6 +13,7 @@ import os
 from os.path import join, basename, dirname, isdir
 import numpy as np
 from shapely.geometry import box
+import pandas as pd
 import geopandas as gpd
 import xarray as xr
 import dask
@@ -396,9 +397,9 @@ class XRasterBase(XGeoBase):
         if len(extra_dims) == 1:
             dims = tuple(extra_dims) + dims
             self.set_attrs(dim0=extra_dims[0])
-        elif len(extra_dims) == 0:
-            self.set_attrs(dim0=None)
-        else:
+        # elif len(extra_dims) == 0:
+        #    self.set_attrs(dim0=None)
+        elif len(extra_dims) > 1:
             raise ValueError("Only 2D and 3D data arrays supported.")
         if isinstance(self._obj, xr.Dataset):
             check = np.all([self._obj[name].dims == dims for name in self.vars])
@@ -788,6 +789,52 @@ class XRasterBase(XGeoBase):
         ds_out = xr.concat(dss, "index")
         ds_out["index"] = xr.IndexVariable("index", gdf.index.values[np.array(idx)])
 
+        return ds_out
+
+    def reclassify(self, reclass_table: pd.DataFrame, method: str = "exact"):
+        """Reclass columns in df from raster map (DataArray).
+
+        Arguments
+        ---------
+        reclass_table : pd.DataFrame
+            Tables with parameter names and values in columns and values in obj as index.
+        method : str, optional
+            Reclassification method. For now only 'exact' for one-on-one cell value mapping.
+
+        Returns
+        -------
+        ds_out: xr.Dataset
+            Output dataset with a variable for each column in reclass_table.
+        """
+        # Exact reclass method
+        def reclass_exact(x, ddict):
+            return np.vectorize(ddict.get)(x, np.nan)
+
+        da = self._obj.copy()
+        ds_out = xr.Dataset(coords=da.coords)
+
+        keys = reclass_table.index.values
+        params = reclass_table.columns
+        # limit dtypes to avoid gdal errors downstream
+        ddict = {"float64": np.float32, "int64": np.int32}
+        dtypes = {
+            c: ddict.get(str(reclass_table[c].dtype), reclass_table[c].dtype)
+            for c in reclass_table.columns
+        }
+        reclass_table = reclass_table.astype(dtypes)
+        # apply for each parameter
+        for param in params:
+            values = reclass_table[param].values
+            d = dict(zip(keys, values))
+            da_param = xr.apply_ufunc(
+                reclass_exact,
+                da,
+                dask="parallelized",
+                output_dtypes=[values.dtype],
+                kwargs={"ddict": d},
+            )
+            da_param.attrs.update(_FillValue=np.nan)
+            ds_out[param] = da_param
         return ds_out
 
     def clip_bbox(self, bbox, align=None, buffer=0):
@@ -1876,6 +1923,28 @@ class RasterDataset(XRasterBase):
                     method=method[var], **reproj_kwargs
                 )
         return ds
+
+    def interpolate_na(self, method: str = "nearest", **kwargs):
+        """Interpolate missing data
+
+        Arguments
+        ----------
+        method: {'linear', 'nearest', 'cubic', 'rio_idw'}, optional
+            {'linear', 'nearest', 'cubic'} use :py:meth:`scipy.interpolate.griddata`;
+            'rio_idw' applies inverse distance weighting based on :py:meth:`rasterio.fill.fillnodata`.
+        **kwargs
+            Additional key-word arguments are passed to :py:meth:`rasterio.fill.fillnodata`,
+            only used in combination with `method='rio_idw'`
+
+        Returns
+        -------
+        xarray.Dataset
+            Filled object
+        """
+        ds_out = xr.Dataset(attrs=self._obj.attrs)
+        for var in self.vars:
+            ds_out[var] = self._obj[var].raster.interpolate_na(method=method, **kwargs)
+        return ds_out
 
     def reproject_like(self, other, method="nearest"):
         """Reproject a Dataset object to match the resolution, projection,

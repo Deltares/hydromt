@@ -295,10 +295,11 @@ def test_interpolate_na():
         da0.raster.interpolate_na(method="rio_idw", max_search_distance=3)
         != da0.raster.nodata
     )
-    assert np.all(da0.expand_dims("t").raster.interpolate_na() != da0.raster.nodata)
-    da2 = da0.astype(np.int32)  # this removes the nodata value ...
-    da2.raster.set_nodata(-9999)
-    assert da2.raster.interpolate_na().dtype == np.int32
+    da2 = da0.copy()  # adding extra dims to spatial_ref is done inplace
+    assert np.all(da2.expand_dims("t").raster.interpolate_na() != da0.raster.nodata)
+    da3 = da0.astype(np.int32)  # this removes the nodata value ...
+    da3.raster.set_nodata(-9999)
+    assert da3.raster.interpolate_na().dtype == np.int32
 
 
 def test_vector_grid(rioda):

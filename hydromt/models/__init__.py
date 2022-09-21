@@ -7,7 +7,6 @@ from .model_grid import *
 from .model_lumped import *
 from .model_network import *
 from . import model_plugins
-
 from .. import _has_xugrid
 
 if _has_xugrid():
