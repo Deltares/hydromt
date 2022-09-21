@@ -8,7 +8,7 @@ from typing import Dict, List, Union, Optional
 
 from .model_api import Model, _check_data
 
-__all__ = [""]
+__all__ = []
 
 logger = logging.getLogger(__name__)
 
