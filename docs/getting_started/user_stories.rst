@@ -14,7 +14,7 @@ reference systems, and to create automatic boundary conditions.
 
 .. image:: ../_static/mozambique_wflow_sfincs.png
 
-The models were run  and the Cyclone Idai (March 2019) event was analysed and compared with UNOSAT 
+The models were run and the Cyclone Idai (March 2019) event was analysed and compared with UNOSAT 
 flood extent data. ERA5 was used as precipitation input for both Wflow and SFINCS in order to provide
 discharge and GTSM waterlevels. Preliminary results of SFINCS flood depths (blue) are shown below.
 

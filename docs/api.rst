@@ -111,18 +111,16 @@ DataFrame
 Models
 ======
 
-Model API
-=========
-
-Class and attributes
---------------------
-
+Classes
+=======
 .. autosummary::
    :toctree: _generated
 
    Model
+   GridModel
+   LumpedModel
 
-High level methods
+High level methods 
 ------------------
 
 .. autosummary::
@@ -144,11 +142,16 @@ Model components
    :toctree: _generated
 
    Model.config
-   Model.staticmaps
-   Model.staticgeoms
+   Model.maps
+   Model.geoms
    Model.forcing
    Model.states
    Model.results
+   Model.staticmaps
+   Model.staticgeoms
+
+   GridModel.grid
+   LumpedModel.response_units
 
 General methods
 ---------------
@@ -179,6 +182,14 @@ General methods
 
    Model.set_results
    Model.read_results
+
+   GridModel.set_grid
+   GridModel.read_grid
+   GridModel.write_grid
+
+   LumpedModel.set_response_units
+   LumpedModel.read_response_units
+   LumpedModel.write_response_units
 
 =========
 Workflows

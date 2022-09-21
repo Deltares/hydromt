@@ -21,11 +21,11 @@ HydroMT is organized in the following way:
 - **Models**
 
   HydroMT defines a model-agnostic *Model API* which provides a common interface to data components of a model
-  such as (static) grids, vectors, forcing, states and simulation configuration, see :ref:`Working with models in HydroMT <model_main>`. 
+  such as (static) grids, vectors, mesh, forcing, states and simulation configuration, see :ref:`Working with models in HydroMT <model_main>`. 
   Models can be :ref:`built from scratch <model_build>` or :ref:`updated <model_update>` based on a pipeline defined in a model configuration :ref:`.ini file <model_config>`.
-  The Model API for each supported model and methods to build or update that model are implemented in :ref:`model plugins <plugins>` 
-  that need to be installed alongside HydroMT to work with a supported model. 
-  Available model methods vary per model plugin and are documented for each plugin at their respective documentation websites.
+  The Model API supports different generalized (e.g. gridded, lumped and mesh models) and specific (plugins) model classes and methods to build or update that model. The :ref:`model plugins <plugins>` 
+  need to be installed alongside HydroMT to work with a supported model. Available model methods vary per model plugin and model classes and and 
+  are documented for each plugin at their respective documentation websites and on the :ref:`API reference <api_reference>`, respectively.
 
 - **Methods and workflow**
 
@@ -69,12 +69,20 @@ Data catalog                    A set of data sources available for HydroMT. It 
                                 the data and meta-data about the data source.
 Data source                     Input data. To be processed by HydroMT, data sources are listed in yaml files.
 Model                           A set of files describing the schematization, forcing, states, simulation configuration 
-                                and results for any supported model kernel.
+                                and results for any supported model kernel and model classes. The final set of files is 
+                                dependent on the model type (grid, lumped or mesh model for examples) or the model plugin. 
+Model class                     A model instance can be instantiated from different model schematization concepts. Generalized
+                                model classes currently supported within HydroMT are Grid Model (distributed models), Lumped Model 
+                                (semi-distributed), Mesh Model (unstructured grid) and in the future 
+                                Network Model (object-based model, for example open/closed channel drainage). Specific 
+                                model classes for specific softwares have been implemented as plugins, see Model plugin.
 Model attributes                Direct properties of a model, such as the model root. They can be called when using 
                                 HydroMT from python.
-Model component                 A model is described by HydroMT with the following components: staticmaps (regular grid data), 
-                                staticgeoms (vector data), forcing, results, states, config
-Model plugin                    Model software for HydroMT can build and update models and analyze its simulation results. 
+Model component                 A model is described by HydroMT with the following components: staticmaps (previous to v0.5.9), 
+                                geoms (vector data), forcing, results, states, config, maps (optional), grid (for a grid model), response_units
+                                (for a lumped model), mesh (for a mesh model). Specific model components can also result from the model plugin. 
+                                For the generalized model class, each model components are save to common formats (netcdf files for grid, GeoJSON files for geoms). 
+Model plugin                    Model software for which HydroMT can build and update models and analyze its simulation results. 
                                 For example *wflow*, *sfincs* etc.
 Model kernel                    The model software to execute a model simulation. This is *not* part of any HydroMT plugin.
 Region                          Argument of the *build* and *clip* CLI methods that specifies the region of interest where 
