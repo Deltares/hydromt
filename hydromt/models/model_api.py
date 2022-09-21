@@ -910,6 +910,9 @@ class Model(object, metaclass=ABCMeta):
             "The staticgeoms method will be deprecated in future versions, use geoms instead.",
             DeprecationWarning,
         )
+        if not self._geoms:
+            if self._read:
+                self.read_staticgeoms()
         self._staticgeoms = self._geoms
         return self._staticgeoms
 
