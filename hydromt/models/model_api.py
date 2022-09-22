@@ -26,80 +26,6 @@ __all__ = ["Model"]
 logger = logging.getLogger(__name__)
 
 
-class AuxmapsMixin(object):
-    # mixin class to add an auxiliary maps object
-    # contains maps needed for model building but not model data
-    _API = {
-        "auxmaps": Dict[str, Union[xr.DataArray, xr.Dataset]],
-    }
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self._auxmaps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
-
-    # model auxiliary map files
-    @property
-    def auxmaps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Auxillary model maps. Returns dict of xarray.DataArray or xarray.Dataset"""
-        if len(self._auxmaps) == 0:
-            if self._read:
-                self.read_auxmaps()
-        return self._auxmaps
-
-    def set_auxmaps(
-        self,
-        data: Union[xr.DataArray, xr.Dataset],
-        name: Optional[str] = None,
-        split_dataset: Optional[bool] = False,
-    ) -> None:
-        """Add auxiliary data to maps.
-
-        Dataset can either be added as is (default) or split into several
-        DataArrays using the split_dataset argument.
-
-        Arguments
-        ---------
-        data: xarray.Dataset or xarray.DataArray
-            New forcing data to add
-        name: str, optional
-            Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
-        split_dataset: bool, optional
-            If data is a xarray.Dataset, either add it as is to results or split it into several xarray.DataArrays.
-        """
-        data_dict = _check_data(data, name, split_dataset)
-        for name in data_dict:
-            if name in self._auxmaps:
-                self.logger.warning(f"Replacing result: {name}")
-            self._auxmaps[name] = data_dict[name]
-
-    def read_auxmaps(self, fn: str = "auxmaps/*.nc", **kwargs) -> None:
-        """Read auxillary model map at <root>/<fn> and add to maps property
-
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, may wildcards, by default "auxmaps/*.nc"
-        """
-        ncs = self._read_nc(fn, **kwargs)
-        for name, ds in ncs.items():
-            self.set_auxmaps(ds, name=name)
-
-    def write_auxmaps(self, fn="auxmaps/{name}.nc", **kwargs) -> None:
-        """Write auxmaps to netcdf file at <root>/<fn>
-
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root and should contain a {name} placeholder,
-            by default 'auxmaps/{name}.nc'
-        """
-        self._write_nc(self._auxmaps, fn, **kwargs)
-
-
 class Model(object, metaclass=ABCMeta):
     """General and basic API for models in HydroMT"""
 
@@ -910,6 +836,9 @@ class Model(object, metaclass=ABCMeta):
             "The staticgeoms method will be deprecated in future versions, use geoms instead.",
             DeprecationWarning,
         )
+        if not self._geoms:
+            if self._read:
+                self.read_staticgeoms()
         self._staticgeoms = self._geoms
         return self._staticgeoms
 
@@ -1359,22 +1288,3 @@ def _check_equal(a, b, name="") -> Dict[str, str]:
     except AssertionError as e:
         errors.update({name: e})
     return errors
-
-
-class AuxmapsModel(AuxmapsMixin, Model):
-    def __init__(
-        self,
-        root: str = None,
-        mode: str = "w",
-        config_fn: str = None,
-        data_libs: List[str] = None,
-        logger=logger,
-    ):
-        # Initialize with the Model class
-        super().__init__(
-            root=root,
-            mode=mode,
-            config_fn=config_fn,
-            data_libs=data_libs,
-            logger=logger,
-        )

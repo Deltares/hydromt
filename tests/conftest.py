@@ -1,14 +1,17 @@
 import pytest
+from os.path import join, dirname, abspath
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
-from shapely.geometry import box
 
 from hydromt import Model, GridModel, LumpedModel, NetworkModel
-from hydromt.models.model_api import AuxmapsModel
+from hydromt.models.model_maps_mixin import MapsModel
+from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
+
+DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture
@@ -156,6 +159,23 @@ def demuda():
 
 
 @pytest.fixture
+def griduda():
+    import xugrid as xu
+
+    bbox = [12.09, 46.49, 12.10, 46.50]  # Piava river
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    da = data_catalog.get_rasterdataset("merit_hydro", bbox=bbox, variables="elevtn")
+    gdf_da = da.raster.vector_grid()
+    gdf_da["value"] = da.values.flatten()
+    gdf_da.index.name = "mesh2d_nFaces"
+    uda = xu.UgridDataset.from_geodataframe(gdf_da)
+    uda = uda["value"]
+    uda.name = "elevtn"
+
+    return uda
+
+
+@pytest.fixture
 def model(demda, world, obsda):
     mod = Model()
     mod.setup_region({"geom": demda.raster.box})
@@ -169,11 +189,11 @@ def model(demda, world, obsda):
 
 
 @pytest.fixture
-def auxmap_model(demda):
-    mod = AuxmapsModel()
+def map_model(demda):
+    mod = MapsModel()
     mod.setup_region({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_auxmaps(demda, "elevtn")
+    mod.set_maps(demda, "elevtn")
     return mod
 
 
@@ -217,9 +237,10 @@ def mesh_model(demuda):
 
     mod = MeshModel()
     # region = gpd.GeoDataFrame(
-    #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.crs
+    #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.grid.crs
     # )
     # mod.setup_region({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(demuda, "elevtn")
+
     return mod

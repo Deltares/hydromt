@@ -594,7 +594,7 @@ esa_worldcover_2020_v100:
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.5571936
     source_version: v100
-  path: landuse/esa-worldcover/esa-worldcover.vrt
+  path: landuse/esa_worldcover/esa-worldcover.vrt
 
 fabdem:
   crs: 4326
