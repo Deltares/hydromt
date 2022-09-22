@@ -12,7 +12,7 @@ import os
 import glob
 from os.path import join
 from pathlib import Path
-from hydromt import raster
+from hydromt import raster, _compat
 
 
 def test_open_vector(tmpdir, df, geodf, world):
@@ -200,7 +200,7 @@ def test_rasterio_errors(tmpdir, rioda):
         da0.to_dataset().raster.to_mapstack(root=str(tmpdir), driver="unknown")
 
 
-@pytest.mark.skipif(not hydromt.HAS_PCRASTER, reason="PCRaster not installed.")
+@pytest.mark.skipif(not _compat.HAS_PCRASTER, reason="PCRaster not installed.")
 def test_io_pcr(tmpdir):
     # test write ldd with clone
     da = raster.full_from_transform(

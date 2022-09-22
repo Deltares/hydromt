@@ -7,9 +7,9 @@ from .model_grid import *
 from .model_lumped import *
 from .model_network import *
 from . import model_plugins
-from .. import _has_xugrid
+from .. import _compat
 
-if _has_xugrid():
+if _compat.HAS_XUGRID:
     from .model_mesh import *
 
 # dictionary with entry points (not yet loaded!)

@@ -11,7 +11,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
 
-DATADIR = join(dirname(abspath(__file__)), "data")
+# DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def df_time():
 @pytest.fixture
 def geodf(df):
     gdf = gpd.GeoDataFrame(
-        data=df.drop(columns=["longitude", "latitude"]),
+        data=df.copy().drop(columns=["longitude", "latitude"]),
         geometry=gpd.points_from_xy(df["longitude"], df["latitude"]),
         crs=4326,
     )
@@ -71,7 +71,7 @@ def world():
 def ts(geodf):
     dates = pd.date_range("01-01-2000", "12-31-2000", name="time")
     ts = pd.DataFrame(
-        index=geodf.index,
+        index=geodf.index.values,
         columns=dates,
         data=np.random.rand(geodf.index.size, dates.size),
     )
