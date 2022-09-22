@@ -9,7 +9,8 @@ import xarray as xr
 import hydromt
 import logging
 
-from hydromt.workflows.basin_mask import get_basin_geometry, parse_region
+from hydromt.workflows.basin_mask import get_basin_geometry, parse_region, _parse_region_value, _check_size
+from hydromt import raster
 
 logger = logging.getLogger("tets_basin")
 
@@ -64,6 +65,8 @@ def test_region(tmpdir, world, geodf, rioda):
     assert region.get("basid") == [1001, 1002, 1003, 1004, 1005]
     region = {"basin": 101}
     kind, region = parse_region(region)
+    assert kind == "basin"
+    assert region.get("basid") == 101
 
     # bbox
     region = {"outlet": [0.0, -5.0, 3.0, 0.0]}
@@ -83,6 +86,31 @@ def test_region(tmpdir, world, geodf, rioda):
     region = {"interbasin": geodf}
     kind, region = parse_region(region)
     assert "xy" in region
+
+
+def test_region_value():
+    array = np.array([1001, 1002, 1003, 1004, 1005])
+    kwarg = _parse_region_value(array)
+    assert kwarg.get("basid") == array.tolist()
+    xy = (1.0, -1.0)
+    kwarg = _parse_region_value(xy)
+    assert kwarg.get("xy") ==  xy
+    root = "./"
+    kwarg = _parse_region_value(root)
+    assert kwarg.get("root") == root
+
+
+def test_check_size(caplog):
+    test_raster = raster.full_from_transform(
+        transform=[0.5, 0.0, 3.0, 0.0, -0.5, -9.0],
+        shape=(13000, 13000),
+        nodata=-1,
+        name="test",
+        crs=4326)
+    _check_size(test_raster)
+    assert "Loading very large spatial domain to derive a subbasin. " 
+    "Provide initial 'bounds' if this takes too long." in caplog.text    
+    
 
 
 def test_basin():
