@@ -9,6 +9,7 @@ import xarray as xr
 import hydromt
 from hydromt.models import MODELS
 import logging
+import warnings
 
 from hydromt.workflows.basin_mask import get_basin_geometry, parse_region, _parse_region_value, _check_size
 from hydromt import raster
@@ -112,7 +113,7 @@ def test_check_size(caplog):
     
 
 
-def test_basin():
+def test_basin(caplog):
     data_catalog = hydromt.DataCatalog(logger=logger)
     ds = data_catalog.get_rasterdataset("merit_hydro")
     gdf_bas_index = data_catalog.get_geodataframe("merit_hydro_index")
@@ -227,3 +228,35 @@ def test_basin():
         outlets=True,
     )
     assert gdf_bas.index.size == 180
+
+    with pytest.warns(DeprecationWarning) as record:        
+        gdf_bas, gdf_out = get_basin_geometry(
+        ds,
+        kind="outlet"
+    )
+    assert len(record) == 1
+    assert record[0].message.args[0] == 'kind="outlets" has been deprecated, use outlets=True in combination with kind="basin" or kind="interbasin" instead.'
+
+    with pytest.raises(ValueError):
+        gdf_bas, gdf_out = get_basin_geometry(
+        ds,
+        kind="watershed"
+    )
+    
+    with pytest.raises(ValueError):        
+        gdf_bas, gdf_out = get_basin_geometry(
+        ds,
+        kind="basin",
+        stream_kwargs={"within": True}
+    )
+    with pytest.raises(ValueError):        
+        gdf_bas, gdf_out = get_basin_geometry(
+        ds,
+        kind="interbasin",        
+    )
+
+
+
+
+        
+        
