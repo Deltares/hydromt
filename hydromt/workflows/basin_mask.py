@@ -11,6 +11,7 @@ from shapely.geometry import box
 from sklearn.neighbors import VALID_METRICS
 import xarray as xr
 import logging
+import warnings
 
 # local
 from ..io import open_raster
@@ -256,16 +257,16 @@ def get_basin_geometry(
     if kind == "outlet":
         outlets = True
         kind = "basin"
-        logger.warning(
+        warnings.warn(
             'kind="outlets" has been deprecated, use outlets=True in combination with '
-            ' kind="basin" or kind="interbasin" instead.',
+            'kind="basin" or kind="interbasin" instead.',
             DeprecationWarning,
         )
     elif kind not in kind_lst:
         msg = f"Unknown kind: {kind}, select from {kind_lst}."
         raise ValueError(msg)
     if bool(stream_kwargs.pop("within", False)):
-        logger.warning(
+        warnings.warn(
             '"within" stream argument has been deprecated.', DeprecationWarning
         )
 
