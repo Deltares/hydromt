@@ -158,6 +158,7 @@ Model components
    MeshModel.mesh
    GridModel.grid
    LumpedModel.response_units
+   MeshModel.mesh
 
 General methods
 ---------------
@@ -201,19 +202,9 @@ General methods
    LumpedModel.read_response_units
    LumpedModel.write_response_units
 
-.. _setup_methods:
-
-Setup methods
--------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.setup_config
-   Model.setup_region
-   Model.setup_maps_from_raster
-   Model.setup_maps_from_raster_reclass
-
+   MeshModel.set_mesh
+   MeshModel.read_mesh
+   MeshModel.write_mesh
 
 =========
 Workflows

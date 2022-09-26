@@ -177,7 +177,7 @@ class MeshMixin(object):
 
     @property
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
-        """Model mesh data. Returns a xarray.Dataset."""
+        """Model static mesh data. Returns a xarray.Dataset."""
         # XU grid data type Xarray dataset with xu sampling.
         if self._mesh is None:
             if self._read:
@@ -266,6 +266,7 @@ class MeshMixin(object):
 
 
 class MeshModel(MeshMixin, Model):
+    """Model class Mesh Model for mesh models in HydroMT"""
 
     _CLI_ARGS = {"region": "setup_mesh", "res": "setup_mesh"}
 
@@ -277,7 +278,7 @@ class MeshModel(MeshMixin, Model):
         data_libs: List[str] = None,
         logger=logger,
     ):
-        # Initialize with the Model class
+        # Initialize the submodel class Mesh Model for mesh models in HydroMT
         super().__init__(
             root=root,
             mode=mode,

@@ -1,4 +1,4 @@
-.. _get_data:
+.. _get_overview:
 
 Overview data
 =============
