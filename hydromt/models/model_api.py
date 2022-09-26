@@ -922,6 +922,7 @@ class Model(object, metaclass=ABCMeta):
         return self.set_geoms(geom, name)
 
     def read_staticgeoms(self):
+        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.read_geoms`"""
         warnings.warn(
             'The read_staticgeoms" method will be deprecated in future versions, use read_geoms instead.',
             DeprecationWarning,
@@ -929,6 +930,7 @@ class Model(object, metaclass=ABCMeta):
         return self.read_geoms(fn="staticgeoms/*.geojson")
 
     def write_staticgeoms(self):
+        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.write_geoms`"""
         warnings.warn(
             'The "write_staticgeoms" method will be deprecated in future versions, use  "write_geoms" instead.',
             DeprecationWarning,

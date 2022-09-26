@@ -119,6 +119,7 @@ Classes
    Model
    GridModel
    LumpedModel
+   MeshModel
 
 High level methods 
 ------------------
@@ -152,6 +153,7 @@ Model components
 
    GridModel.grid
    LumpedModel.response_units
+   MeshModel.mesh
 
 General methods
 ---------------
@@ -190,6 +192,10 @@ General methods
    LumpedModel.set_response_units
    LumpedModel.read_response_units
    LumpedModel.write_response_units
+
+   MeshModel.set_mesh
+   MeshModel.read_mesh
+   MeshModel.write_mesh
 
 =========
 Workflows

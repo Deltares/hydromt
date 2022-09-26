@@ -30,7 +30,7 @@ class GridMixin(object):
 
     @property
     def grid(self):
-        """Model static maps. Returns xarray.Dataset.
+        """Model static gridded data. Returns xarray.Dataset.
         Previously called staticmaps."""
         if len(self._grid) == 0:
             if self._read:
@@ -107,6 +107,7 @@ class GridMixin(object):
 
 
 class GridModel(GridMixin, Model):
+    """Model class Grid Model for gridded models in HydroMT"""
 
     # TODO: add here "res": "setup_region" or "res": "setup_grid" when generic method is available
     _CLI_ARGS = {"region": "setup_region"}
@@ -119,7 +120,7 @@ class GridModel(GridMixin, Model):
         data_libs: List[str] = None,
         logger=logger,
     ):
-        # Initialize with the Model class
+        # Initialize the submodel class Grid Model for gridded models in HydroMT
         super().__init__(
             root=root,
             mode=mode,
