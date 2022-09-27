@@ -9,7 +9,7 @@ import geopandas as gpd
 from shapely.geometry import polygon
 from hydromt.models.model_api import _check_data
 from hydromt.models import Model, GridModel, LumpedModel
-from hydromt import _has_xugrid
+from hydromt import _compat
 
 DATADIR = join(dirname(abspath(__file__)), "data")
 
@@ -236,7 +236,7 @@ def test_networkmodel(network_model, tmpdir):
         network_model.network
 
 
-@pytest.mark.skipif(not _has_xugrid(), reason="Xugrid not installed.")
+@pytest.mark.skipif(not _compat.HAS_XUGRID, reason="Xugrid not installed.")
 def test_meshmodel(mesh_model, tmpdir):
     from hydromt.models import MeshModel
 
@@ -254,7 +254,7 @@ def test_meshmodel(mesh_model, tmpdir):
     assert equal, errors
 
 
-@pytest.mark.skipif(not _has_xugrid(), reason="Xugrid not installed.")
+@pytest.mark.skipif(not _compat.HAS_XUGRID, reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, world, tmpdir):
     from hydromt.models import MeshModel
 
