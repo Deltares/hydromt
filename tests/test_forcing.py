@@ -25,14 +25,12 @@ def test_precip():
 
     # Testing with clim argument
     p_clim = cat.get_rasterdataset("worldclim")
-    p_clim.raster.set_nodata(
-        -999.0
-    )  # give it a nodata value in the datacatalog >> issue to create for the data artifacts
+    # give it a nodata value in the datacatalog >> issue to create for the data artifacts
+    p_clim.raster.set_nodata(-999.0)
 
     pout_clim = precip(p_precip, grid, clim=p_clim)
-    assert (
-        pout_clim.values != p_clim.values
-    )  # the values have changed. Could check if the value itself is correct
+    # the values have changed. Could check if the value itself is correct
+    assert pout_clim.values != p_clim.values
 
     # Testing with freq argument
     pout_freq = precip(p_precip, grid, freq="H")

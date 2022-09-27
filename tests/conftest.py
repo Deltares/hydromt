@@ -6,7 +6,6 @@ import geopandas as gpd
 import xarray as xr
 
 from hydromt import Model, GridModel, LumpedModel, NetworkModel
-from hydromt.models.model_maps_mixin import MapsModel
 from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
@@ -182,18 +181,10 @@ def model(demda, world, obsda):
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_staticmaps(demda, "elevtn")  # will be deprecated
     mod.set_geoms(world, "world")
+    mod.set_maps(demda, "elevtn")
     mod.set_forcing(obsda, "waterlevel")
     mod.set_states(demda, "zsini")
     mod.set_results(obsda, "zs")
-    return mod
-
-
-@pytest.fixture
-def map_model(demda):
-    mod = MapsModel()
-    mod.setup_region({"geom": demda.raster.box})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_maps(demda, "elevtn")
     return mod
 
 

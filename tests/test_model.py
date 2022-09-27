@@ -9,7 +9,6 @@ import geopandas as gpd
 from shapely.geometry import polygon
 from hydromt.models.model_api import _check_data
 from hydromt.models import Model, GridModel, LumpedModel
-from hydromt.models.model_maps_mixin import MapsModel
 from hydromt import _has_xugrid
 
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -145,25 +144,25 @@ def test_config(model, tmpdir):
     assert str(model.get_config("global.file", abs_path=True)) == fn
 
 
-def test_mapsmixin(map_model, tmpdir):
-    assert "maps" in map_model.api
-    assert len(map_model.maps) == 1
-    non_compliant = map_model._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
-    # write model
-    map_model.set_root(str(tmpdir), mode="w")
-    map_model.write(components=["config", "geoms", "maps"])
-    # read model
-    model1 = MapsModel(str(tmpdir), mode="r")
-    model1.read(components=["config", "geoms", "maps"])
-    # check if equal
-    equal, errors = map_model._test_equal(model1)
-    assert equal, errors
+# def test_maps(model, tmpdir):
+#     assert "maps" in model.api
+#     assert len(model.maps) == 1
+#     non_compliant = model._test_model_api()
+#     assert len(non_compliant) == 0, non_compliant
+#     # write model
+#     model.set_root(str(tmpdir), mode="w")
+#     model.write(components=["config", "geoms", "maps"])
+#     # read model
+#     model1 = Model(str(tmpdir), mode="r")
+#     model1.read(components=["config", "geoms", "maps"])
+#     # check if equal
+#     equal, errors = model._test_equal(model1)
+#     assert equal, errors
 
 
-def test_mapsmixin_setup(tmpdir):
+def test_maps_setup(tmpdir):
     dc_param_fn = join(DATADIR, "parameters_data.yml")
-    mod = MapsModel(data_libs=["artifact_data", dc_param_fn], mode="w")
+    mod = Model(data_libs=["artifact_data", dc_param_fn], mode="w")
     bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
     mod.setup_region({"bbox": bbox})
     mod.setup_config(**{"header": {"setting": "value"}})
