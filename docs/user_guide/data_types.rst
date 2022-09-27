@@ -1,7 +1,7 @@
 .. _data_types: 
 
 Supported data types
---------------------
+====================
 
 HydroMT currently supports the following data types:
 

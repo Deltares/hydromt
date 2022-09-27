@@ -24,8 +24,8 @@ HydroMT is organized in the following way:
   such as (static) grids, vectors, mesh, forcing, states and simulation configuration, see :ref:`Working with models in HydroMT <model_main>`. 
   Models can be :ref:`built from scratch <model_build>` or :ref:`updated <model_update>` based on a pipeline defined in a model configuration :ref:`.ini file <model_config>`.
   The Model API supports different generalized (e.g. gridded, lumped and mesh models) and specific (plugins) model classes and methods to build or update that model. The :ref:`model plugins <plugins>` 
-  need to be installed alongside HydroMT to work with a supported model. Available model methods vary per model plugin and model classes and and 
-  are documented for each plugin at their respective documentation websites and on the :ref:`API reference <api_reference>`, respectively.
+  needs to be installed alongside HydroMT to work with a supported model. Available model methods vary per model class and plugin and 
+  are documented in the :ref:`API reference <setup_methods>` and for each plugin at their respective documentation websites, respectively.
 
 - **Methods and workflow**
 
@@ -43,8 +43,8 @@ A user can interact with HydroMT through the following interfaces:
 - **Python Interface**
 
   While most common functionalities can be called through the CLI, the Python interface offers more flexibility for advanced users.
-  It allows you to e.g. interact directly with a model through the :ref:`Model API <model_interface>` and apply the many 
-  methods and workflows available. Please find all available functions :ref:`here <api_reference>`
+  It allows you to e.g. interact directly with a model component :ref:`Model API <model_interface>` and apply the many 
+  methods and workflows available. Please find all available functions :ref:`API reference <api_reference>`
 
 .. figure:: ../_static/Architecture_model_data_input.png
 
@@ -66,24 +66,23 @@ Configuration (HydroMT)         (.ini) file describing the complete pipeline wit
                                 *build* or *update* a model.
 Data catalog                    A set of data sources available for HydroMT. It is build up from *yaml* files containing 
                                 one or more data sources with information about how to read and optionally preprocess 
-                                the data and meta-data about the data source.
-Data source                     Input data. To be processed by HydroMT, data sources are listed in yaml files.
+                                the data and contains meta-data about the data source.
+Data source                     Input data to be processed by HydroMT. Data sources are listed in yaml files.
 Model                           A set of files describing the schematization, forcing, states, simulation configuration 
                                 and results for any supported model kernel and model classes. The final set of files is 
                                 dependent on the model type (grid, lumped or mesh model for examples) or the model plugin. 
 Model class                     A model instance can be instantiated from different model schematization concepts. Generalized
                                 model classes currently supported within HydroMT are Grid Model (distributed models), Lumped Model 
-                                (semi-distributed), Mesh Model (unstructured grid) and in the future 
-                                Network Model (object-based model, for example open/closed channel drainage). Specific 
-                                model classes for specific softwares have been implemented as plugins, see Model plugin.
+                                (semi-distributed), Mesh Model (unstructured) and in the future 
+                                Network Model (relational model). Specific model classes for specific softwares have been implemented 
+                                as plugins, see Model plugin.
 Model attributes                Direct properties of a model, such as the model root. They can be called when using 
                                 HydroMT from python.
-Model component                 A model is described by HydroMT with the following components: staticmaps (previous to v0.5.9), 
-                                geoms (vector data), forcing, results, states, config, maps (optional), grid (for a grid model), response_units
-                                (for a lumped model), mesh (for a mesh model). Specific model components can also result from the model plugin. 
-                                For the generalized model class, each model components are save to common formats (netcdf files for grid, GeoJSON files for geoms). 
+Model component                 A model is described by HydroMT with the following components: maps, 
+                                geoms (vector data), forcing, results, states, config, grid (for a grid model), response_units
+                                (for a lumped model), mesh (for a mesh model). 
 Model plugin                    Model software for which HydroMT can build and update models and analyze its simulation results. 
-                                For example *wflow*, *sfincs* etc.
+                                For example *Wflow*, *SFINCS* etc.
 Model kernel                    The model software to execute a model simulation. This is *not* part of any HydroMT plugin.
 Region                          Argument of the *build* and *clip* CLI methods that specifies the region of interest where 
                                 the model should be prepared / which spatial subregion should be clipped.
@@ -92,8 +91,34 @@ Region                          Argument of the *build* and *clip* CLI methods t
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Table of Contents
+   :caption: Working with data in HydroMT
 
-   data_main.rst
-   model_main.rst
-   methods_main.rst  
+   data_overview.rst
+   data_prepare_cat.rst
+   data_types.rst
+   data_existing_cat.rst
+   data_conventions.rst
+   ../_examples/reading_raster_data.ipynb
+   ../_examples/reading_vector_data.ipynb
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Working with models in HydroMT
+   
+   model_overview.rst
+   model_build.rst
+   model_update.rst
+   model_clip.rst
+   model_config.rst
+   model_region.rst
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Methods and workflows
+
+   methods_main.rst
+   methods_stats.rst
+   ../_examples/delineate_basin.ipynb
+   ../_examples/working_with_raster.ipynb
