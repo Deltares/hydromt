@@ -4,6 +4,15 @@ Getting started
 .. grid:: 3
     :gutter: 1 
 
+    .. grid-item-card::
+        :text-align: center
+        :link: quick_overview
+        :link-type: ref
+
+        :octicon:`rocket;10em`
+        +++
+        Quick overview
+
     .. grid-item-card:: 
         :text-align: center
         :link: installation_guide
@@ -22,14 +31,14 @@ Getting started
         +++
         User guide
 
-    .. grid-item-card:: 
+    .. grid-item-card::
         :text-align: center
-        :link: plugins
+        :link: faq
         :link-type: ref
-        
-        :octicon:`package-dependents;10em`
+
+        :octicon:`question;10em`
         +++
-        Model plugins
+        FAQ
 
     .. grid-item-card:: 
         :text-align: center
@@ -60,24 +69,6 @@ Getting started
 
     .. grid-item-card::
         :text-align: center
-        :link: quick_overview
-        :link-type: ref
-
-        :octicon:`rocket;10em`
-        +++
-        Quick overview
-
-    .. grid-item-card::
-        :text-align: center
-        :link: faq
-        :link-type: ref
-
-        :octicon:`question;10em`
-        +++
-        FAQ
-
-    .. grid-item-card::
-        :text-align: center
         :link: publications
         :link-type: ref
 
@@ -85,15 +76,23 @@ Getting started
         +++
         Publications
 
+    .. grid-item-card:: 
+        :text-align: center
+        :link: plugins
+        :link-type: ref
+        
+        :octicon:`package-dependents;10em`
+        +++
+        Model plugins
 
 .. toctree::
    :caption: Table of Contents
    :maxdepth: 2
    :hidden:
 
-   installation.rst
    quick_overview.rst
+   installation.rst
+   faq.rst
    examples_index.rst
    user_stories.rst
-   faq.rst
    publications.rst

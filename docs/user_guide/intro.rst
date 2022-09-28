@@ -12,26 +12,41 @@ HydroMT is organized in the following way:
 
 - **Input Data**
 
-  HydroMT is data-agnostic through the *Data Adapter* that reads a wide range of data formats 
-  and unifies the input data, see :ref:`Working with data in HydroMT <get_data>`. 
+  HydroMT is data-agnostic through the *Data Adapter*, which reads a wide range of data formats 
+  and unifies the input data .
   Datasets are listed and passed to HydroMT in a user defined data catalog :ref:`yaml file <data_yaml>`.
   HydroMT also provides several :ref:`pre-defined data catalogs <existing_catalog>` with mostly global datasets 
-  that can be used as is, but note that not all data is openly accessible. 
-
+  that can be used as is, although not all datasets in these catalogs are openly accessible. 
+  Currently, four different types of input data are supported and represented by a specific Python 
+  data object by HydroMT: gridded datasets such as DEMs or gridded spatially distributed rainfall datasets 
+  (represented by :ref:`RasterDataset <RasterDataset>` objects); tables for e.g. reclassification to convert 
+  land classes use into roughness values (represented by :ref:`DataFrame <DataFrame>` objects); 
+  vector datasets such as administrative units or river center lines (represented by 
+  :ref:`GeoDataFrame <GeoDataFrame>` objects); and time series with associated geolocations such as 
+  observations of discharge (represented by :ref:`GeoDataset <GeoDataset>` objects). 
+  
 - **Models**
 
-  HydroMT defines a model-agnostic *Model API* which provides a common interface to data components of a model
-  such as (static) grids, vectors, mesh, forcing, states and simulation configuration, see :ref:`Working with models in HydroMT <model_main>`. 
-  Models can be :ref:`built from scratch <model_build>` or :ref:`updated <model_update>` based on a pipeline defined in a model configuration :ref:`.ini file <model_config>`.
-  The Model API supports different generalized (e.g. gridded, lumped and mesh models) and specific (plugins) model classes and methods to build or update that model. The :ref:`model plugins <plugins>` 
-  needs to be installed alongside HydroMT to work with a supported model. Available model methods vary per model class and plugin and 
-  are documented in the :ref:`API reference <setup_methods>` and for each plugin at their respective documentation websites, respectively.
-
+  HydroMT defines any model through the model-agnostic *Model API* based on several components: 
+  maps, geometries, forcing, results, states and the model simulation configuration. 
+  For different types of general model classes additional model components (e.g. *response units* 
+  for lumped or semi-distributed models). Each component is represented with a specific Python 
+  data object to provide a common interface to different model software. 
+  Models can be :ref:`built from scratch <model_build>`, and :ref:`existing models can be updated <model_update>` 
+  based on a pipeline of methods defined in a model configuration :ref:`ini file <model_config>`.
+  While HydroMT provides several general model classes which can readily be used, 
+  it can also be tailored to specific model software through a plugin infrastructure. 
+  These :ref:`plugins <plugins>` have the same interface, but with model-specific file readers and writers and workflows. 
+  
 - **Methods and workflow**
 
-  :ref:`Methods and workflows <methods_workflows>` are the engine of HydroMT. Methods provide the low-level functionality, only accessible through the Python interface, 
-  to do the required processing of common data types such as grid and vector data. Workflows combine several methods to go from raw input 
-  data to a model component. Examples of workflows include the delineation of hydrological basins (watersheds), conversion of landuse-landcover to model parameter maps, etc.
+  :ref:`Methods and workflows <methods_workflows>` are the engine of HydroMT, indicated by the gear wheels in the figure below. 
+  Methods provide the low-level functionality such as GIS rasterization, reprojection or zonal statistics. 
+  Workflows combine several methods to transform data to a model layer. 
+  Examples of workflows include the delineation of hydrological basins (watersheds), and conversion of 
+  landuse-landcover data to model parameter maps. Workflows are implemented for the data types mentioned 
+  above to allow reusing common workflows between HydroMT plugins for different model software.
+
 
 A user can interact with HydroMT through the following interfaces:
 
