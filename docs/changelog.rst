@@ -13,7 +13,7 @@ Added
 -----
 - Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
 - API calls to get info about model components and dataset for the dashboard. `PR #118 <https://github.com/Deltares/hydromt/pull/118>`_
-- New submodelclasses in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``, ``MapsModel``
+- New submodelclasses in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``
 - Added entrypoints for lumped_model, mesh_model, grid_model
 - New mixin classes created for model specific object: ``GridMixin`` for self.grid, ``LumpedMixin`` for self.response_units, ``MeshMixin`` for self.mesh,
   ``MapsMixin`` for self.maps

@@ -111,18 +111,16 @@ DataFrame
 Models
 ======
 
-Model API
-=========
-
-Class and attributes
---------------------
-
+Classes
+=======
 .. autosummary::
    :toctree: _generated
 
    Model
+   GridModel
+   LumpedModel
 
-High level methods
+High level methods 
 ------------------
 
 .. autosummary::
@@ -133,8 +131,6 @@ High level methods
    Model.build
    Model.update
    Model.set_root
-   Model.setup_region
-   Model.setup_config
    Model.write_data_catalog
 
 Model components
@@ -144,11 +140,15 @@ Model components
    :toctree: _generated
 
    Model.config
-   Model.staticmaps
-   Model.staticgeoms
+   Model.maps
+   Model.geoms
    Model.forcing
    Model.states
    Model.results
+
+   MeshModel.mesh
+   GridModel.grid
+   LumpedModel.response_units
 
 General methods
 ---------------
@@ -161,13 +161,13 @@ General methods
    Model.read_config
    Model.write_config
 
-   Model.set_staticmaps
-   Model.read_staticmaps
-   Model.write_staticmaps
+   Model.set_maps
+   Model.read_maps
+   Model.write_maps
 
-   Model.set_staticgeoms
-   Model.read_staticgeoms
-   Model.write_staticgeoms
+   Model.set_geoms
+   Model.read_geoms
+   Model.write_geoms
 
    Model.set_forcing
    Model.read_forcing
@@ -179,6 +179,32 @@ General methods
 
    Model.set_results
    Model.read_results
+
+   MeshModel.set_mesh
+   MeshModel.read_mesh
+   MeshModel.write_mesh
+
+   GridModel.set_grid
+   GridModel.read_grid
+   GridModel.write_grid
+
+   LumpedModel.set_response_units
+   LumpedModel.read_response_units
+   LumpedModel.write_response_units
+
+.. _setup_methods:
+
+Setup methods
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   Model.setup_config
+   Model.setup_region
+   Model.setup_maps_from_raster
+   Model.setup_maps_from_raster_reclass
+
 
 =========
 Workflows

@@ -1,7 +1,7 @@
 .. _get_data:
 
-Working with data in HydroMT  
-============================
+Overview data
+=============
 
 The best way to provide data to HydroMT is by using a **data catalog**. The goal of this 
 data catalog is to provide simple and standardized access to (large) datasets. 
@@ -86,13 +86,3 @@ For related functions see:
  - :ref:`DataCatalog.get_* methods <api_data_catalog_get>`
  - :ref:`data reading-methods <open_methods>`
 
-
-.. toctree::
-    :hidden:
-
-    data_prepare_cat.rst
-    data_types.rst
-    data_existing_cat.rst
-    data_conventions.rst
-    ../_examples/reading_raster_data.ipynb
-    ../_examples/reading_vector_data.ipynb

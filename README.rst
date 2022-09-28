@@ -32,23 +32,23 @@ and **model- and data-agnostic** through a common model and data interface.
 
 How to use HydroMT?
 -------------------
-HydroMT can be used as a **command line** application, which provides commands to *build*,
-*update* and *clip* models with a single line, or **from python** to exploit its rich interface.
+HydroMT can be used as a **command line** application (CLI) which provides commands to *build*,
+*update* and *clip* models with a single line, or **from Python** to exploit its rich interface.
 You can learn more about how to use HydroMT in its `online documentation. <https://deltares.github.io/hydromt/latest/>`_
-For a smooth installing experience we recommend installing HydroMT and its dependencies 
+For a smooth installing experience, we recommend installing HydroMT and its dependencies 
 from conda-forge in a clean environment, see `installation guide. <https://deltares.github.io/hydromt/latest/getting_started/installation>`_
 
 
 HydroMT model plugins
 ---------------------
 HydroMT is commonly used in combination with a **model plugin** which 
-provides a HydroMT implementation for specific model software. 
+provides a HydroMT implementation for specific model software. Using the plugins allows to prepare a ready-to-run set of input files from raw geoscientific datasets and analyse model results in a fast and reproducible way. 
 Known model plugins include:
 
 * hydromt_wflow_: A framework for distributed rainfall-runoff (wflow_sbm) and sediment transport (wflow_sediment) modelling.
 * hydromt_delwaq_: A framework for water quality (D-Water Quality) and emissions (D-Emissions) modelling.
-* hydromt_sfincs_: A fast 2D hydrodynamic flood model.
-* hydromt_fiat_: A flood impact model.
+* hydromt_sfincs_: A fast 2D hydrodynamic flood model (SFINCS).
+* hydromt_fiat_: A flood impact model (FIAT).
 
 
 How to cite?
