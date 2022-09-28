@@ -1,71 +1,747 @@
-@manual{gdal2020,
-  title = {{{GDAL}}/{{OGR}} Geospatial Data Abstraction Software Library},
-  author = {{GDAL/OGR contributors}},
-  year = {2020},
-  organization = {{Open Source Geospatial Foundation}},
-  type = {Manual}
+@TECHREPORT{Undrr2022,
+  title       = "Global Assessment Report on Disaster Risk Reduction 2022: Our
+                 World at Risk: Transforming Governance for a Resilient Future",
+  author      = "{UNDRR}",
+  institution = "United Nations Office for Disaster Risk Reduction",
+  year        =  2022
 }
 
-@article{gillies2007,
-  title = {Shapely: Manipulation and Analysis of Geometric Objects},
-  author = {Gillies, Sean and others},
-  year = {2007},
-  organization = {{toblerity.org}}
+% The entry below contains non-ASCII chars that could not be converted
+% to a LaTeX equivalent.
+@ARTICLE{Hawker2022,
+  title     = "A 30 m global map of elevation with forests and buildings
+               removed",
+  author    = "Hawker, Laurence and Uhe, Peter and Paulo, Luntadila and Sosa,
+               Jeison and Savage, James and Sampson, Christopher and Neal,
+               Jeffrey",
+  abstract  = "Elevation data are fundamental to many applications, especially
+               in geosciences. The latest global elevation data contains forest
+               and building artifacts that limit its usefulness for
+               applications that require precise terrain heights, in particular
+               flood simulation. Here, we use machine learning to remove
+               buildings and forests from the Copernicus Digital Elevation
+               Model to produce, for the first time, a global map of elevation
+               with buildings and forests removed at 1 arc second (∼30 m) grid
+               spacing. We train our correction algorithm on a unique set of
+               reference elevation data from 12 countries, covering a wide
+               range of climate zones and urban extents. Hence, this approach
+               has much wider applicability compared to previous DEMs trained
+               on data from a single country. Our method reduces mean absolute
+               vertical error in built-up areas from 1.61 to 1.12 m, and in
+               forests from 5.15 to 2.88 m. The new elevation map is more
+               accurate than existing global elevation maps and will strengthen
+               applications and models where high quality global terrain
+               information is required.",
+  journal   = "Environ. Res. Lett.",
+  publisher = "IOP Publishing",
+  volume    =  17,
+  number    =  2,
+  pages     = "024016",
+  month     =  feb,
+  year      =  2022,
+  language  = "en"
 }
 
-@article{gillies2011,
-  title = {Fiona Is {{OGR}}'s Neat, Nimble, No-Nonsense {{API}}},
-  author = {Gillies, Sean and others},
-  year = {2011},
-  organization = {{Toblerity}}
+@ARTICLE{Neal2021,
+  title     = "Estimating river channel bathymetry in large scale flood
+               inundation models",
+  author    = "Neal, Jeffrey and Hawker, Laurence and Savage, James and Durand,
+               Michael and Bates, Paul and Sampson, Christopher",
+  abstract  = "Abstract Flood inundation modeling across large data sparse
+               areas has been increasing in recent years, driven by a desire to
+               provide hazard information for a wider range of locations. The
+               sophistication of these models has steadily advanced over the
+               past decade due to improvements in remote sensing and modeling
+               capability. There are now several global flood models (GFMs)
+               that seek to simulate water surface dynamics across all rivers
+               and floodplains regardless of data scarcity. However, flood
+               models in data sparse areas lack river bathymetry because this
+               cannot be observed remotely, meaning that a variety of methods
+               for approximating river bathymetry have been developed from
+               uniform flow or downstream hydraulic geometry theory. We argue
+               that bathymetry estimation in these models should follow
+               gradually varying flow theory to account for both uniform and
+               nonuniform flows. We demonstrate that existing methods for
+               bathymetry estimation in GFMs are only accurate for kinematic
+               water surface profiles and are unable to simulate unbiased water
+               surface profiles for reaches with diffusive or shallow water
+               wave properties. The use of gradually varied flow theory to
+               estimate bathymetry in a GFM reduced model error compared to a
+               target water surface profile by 66\% and eliminated bias due to
+               backwater effects. For a large-scale test case in Mozambique
+               this reduced flood extents by 40\% and floodplain storage by
+               79\% at the 5 years return period. The wet bias associated with
+               uniform flow derived channels could have significant
+               implications for modeling the role floodplains play in
+               attenuating river discharges, potentially overstating their
+               role.",
+  journal   = "Water Resour. Res.",
+  publisher = "American Geophysical Union (AGU)",
+  volume    =  57,
+  number    =  5,
+  month     =  may,
+  year      =  2021,
+  copyright = "http://onlinelibrary.wiley.com/termsAndConditions\#vor",
+  language  = "en"
 }
 
-@article{harris2020,
-  title = {Array Programming with {{NumPy}}},
-  author = {Harris, Charles R. and Millman, K. Jarrod and {van der Walt}, St{\'e}fan J. and Gommers, Ralf and Virtanen, Pauli and Cournapeau, David and Wieser, Eric and Taylor, Julian and Berg, Sebastian and Smith, Nathaniel J. and Kern, Robert and Picus, Matti and Hoyer, Stephan and {van Kerkwijk}, Marten H. and Brett, Matthew and Haldane, Allan and {del R{\'i}o}, Jaime Fern{\'a}ndez and Wiebe, Mark and Peterson, Pearu and {G{\'e}rard-Marchant}, Pierre and Sheppard, Kevin and Reddy, Tyler and Weckesser, Warren and Abbasi, Hameer and Gohlke, Christoph and Oliphant, Travis E.},
-  year = {2020},
-  month = sep,
-  volume = {585},
-  pages = {357--362},
-  publisher = {{Nature Publishing Group}},
-  issn = {1476-4687},
-  doi = {10.1038/s41586-020-2649-2},
-  abstract = {Array programming provides a powerful, compact and expressive syntax for accessing, manipulating and operating on data in vectors, matrices and higher-dimensional arrays. NumPy is the primary array programming library for the Python language. It has an essential role in research analysis pipelines in fields as diverse as physics, chemistry, astronomy, geoscience, biology, psychology, materials science, engineering, finance and economics. For example, in astronomy, NumPy was an important part of the software stack used in the discovery of gravitational waves1 and in the first imaging of a black hole2. Here we review how a few fundamental array concepts lead to a simple and powerful programming paradigm for organizing, exploring and analysing scientific data. NumPy is the foundation upon which the scientific Python ecosystem is constructed. It is so pervasive that several projects, targeting audiences with specialized needs, have developed their own NumPy-like interfaces and array objects. Owing to its central position in the ecosystem, NumPy increasingly acts as an interoperability layer between such array computation libraries and, together with its application programming interface (API), provides a flexible framework to support the next decade of scientific and industrial analysis.},
-  copyright = {2020 The Author(s)},
-  file = {C\:\\Users\\Jon\\Zotero\\storage\\LJFXY3JC\\Harris et al. - 2020 - Array programming with NumPy.pdf;C\:\\Users\\Jon\\Zotero\\storage\\DBPDTYJG\\s41586-020-2649-2.html},
-  journal = {Nature},
-  language = {en},
-  number = {7825}
+@ARTICLE{White2020,
+  title     = "Toward reproducible environmental modeling for decision support:
+               A worked example",
+  author    = "White, Jeremy T and Foster, Linzy K and Fienen, Michael N and
+               Knowling, Matthew J and Hemmings, Brioch and Winterle, James R",
+  journal   = "Front. Earth Sci.",
+  publisher = "Frontiers Media SA",
+  volume    =  8,
+  month     =  feb,
+  year      =  2020,
+  copyright = "https://creativecommons.org/licenses/by/4.0/"
 }
 
-@article{hunter2007,
-  title = {Matplotlib: {{A 2D}} Graphics Environment},
-  author = {Hunter, J. D.},
-  year = {2007},
-  volume = {9},
-  pages = {90--95},
-  publisher = {{IEEE COMPUTER SOC}},
-  doi = {10.1109/MCSE.2007.55},
-  abstract = {Matplotlib is a 2D graphics package used for Python for application development, interactive scripting, and publication-quality image generation across user interfaces and operating systems.},
-  journal = {Computing in Science \& Engineering},
-  number = {3}
+@ARTICLE{Hall2022,
+  title     = "A hydrologist's guide to open science",
+  author    = "Hall, Caitlyn A and Saia, Sheila M and Popp, Andrea L and
+               Dogulu, Nilay and Schymanski, Stanislaus J and Drost, Niels and
+               van Emmerik, Tim and Hut, Rolf",
+  abstract  = "Abstract. Open, accessible, reusable, and reproducible
+               hydrologic research can have a significant positive impact on
+               the scientific community and broader society. While more
+               individuals and organizations within the hydrology community are
+               embracing open science practices, technical (e.g., limited
+               coding experience), resource (e.g., open access fees), and
+               social (e.g., fear of weaknesses being exposed or ideas being
+               scooped) challenges remain. Furthermore, there are a growing
+               number of constantly evolving open science tools, resources, and
+               initiatives that can be overwhelming. These challenges and the
+               ever-evolving nature of the open science landscape may seem
+               insurmountable for hydrologists interested in pursuing open
+               science. Therefore, we propose the general ``Open Hydrology
+               Principles'' to guide individual and community progress toward
+               open science for research and education and the ``Open Hydrology
+               Practical Guide'' to improve the accessibility of currently
+               available tools and approaches. We aim to inform and empower
+               hydrologists as they transition to open, accessible, reusable,
+               and reproducible research. We discuss the benefits as well as
+               common open science challenges and how hydrologists can overcome
+               them. The Open Hydrology Principles and Open Hydrology Practical
+               Guide reflect our knowledge of the current state of open
+               hydrology; we recognize that recommendations and suggestions
+               will evolve and expand with emerging open science
+               infrastructures, workflows, and research experiences. Therefore,
+               we encourage hydrologists all over the globe to join in and help
+               advance open science by contributing to the living version of
+               this document and by sharing open hydrology resources in the
+               community-supported repository
+               (https://open-hydrology.github.io, last access: 1 February
+               2022).",
+  journal   = "Hydrol. Earth Syst. Sci.",
+  publisher = "Copernicus GmbH",
+  volume    =  26,
+  number    =  3,
+  pages     = "647--664",
+  month     =  feb,
+  year      =  2022,
+  copyright = "https://creativecommons.org/licenses/by/4.0/",
+  language  = "en"
 }
 
-@misc{jordahl2020,
-  title = {Geopandas/Geopandas: V0.8.1},
-  author = {Jordahl, Kelsey and den Bossche, Joris Van and Fleischmann, Martin and Wasserman, Jacob and McBride, James and Gerard, Jeffrey and Tratner, Jeff and Perry, Matthew and Badaracco, Adrian Garcia and Farmer, Carson and Hjelle, Geir Arne and Snow, Alan D. and Cochran, Micah and Gillies, Sean and Culbertson, Lucas and Bartos, Matt and Eubank, Nick and {maxalbert} and Bilogur, Aleksey and Rey, Sergio and Ren, Christopher and {Arribas-Bel}, Dani and Wasser, Leah and Wolf, Levi John and Journois, Martin and Wilson, Joshua and Greenhall, Adam and Holdgraf, Chris and {Filipe} and Leblanc, Fran{\c c}ois},
-  year = {2020},
-  doi = {10.5281/zenodo.3946761},
-  howpublished = {Zenodo}
+@ARTICLE{Van_Ormondt2020,
+  title    = "Delft Dashboard: a quick set-up tool for hydrodynamic models",
+  author   = "van Ormondt, Maarten and Nederhoff, Kees and van Dongeren, Ap",
+  abstract = "The open-source program Delft Dashboard (DDB) is a graphical user
+              interface designed to quickly create, edit input parameters and
+              visualize model inputs for a number of hydrodynamic models, using
+              private or publicly available local and global datasets. It
+              includes a number of toolboxes that facilitate the generation of
+              spatially varying inputs. These include new model schematizations
+              (grids, bathymetry, boundary conditions, etc.), cyclonic wind
+              fields and initial tsunami waves. The use of DDB can have
+              significant benefits. It can save modellers considerable time and
+              effort. Furthermore, the automated nature of both data collection
+              and pre-processing within the program reduces the likelihood of
+              errors that could occur when setting up models manually. Three
+              case studies are presented: simulation of tides in the North Sea,
+              storm surge and wave modelling under tropical cyclone conditions
+              and the simulation of a tsunami. The test cases show that models
+              created with DDB can be set up efficiently while maintaining a
+              predictive skill that is only slightly lower than that of
+              extensively calibrated models.",
+  journal  = "Journal of Hydroinformatics",
+  volume   =  22,
+  number   =  3,
+  pages    = "510--527",
+  month    =  feb,
+  year     =  2020
+}
+
+@ARTICLE{Bakker2016,
+  title    = "Scripting {MODFLOW} Model Development Using Python and {FloPy}",
+  author   = "Bakker, M and Post, V and Langevin, C D and Hughes, J D and
+              White, J T and Starn, J J and Fienen, M N",
+  abstract = "Graphical user interfaces (GUIs) are commonly used to construct
+              and postprocess numerical groundwater flow and transport models.
+              Scripting model development with the programming language Python
+              is presented here as an alternative approach. One advantage of
+              Python is that there are many packages available to facilitate
+              the model development process, including packages for plotting,
+              array manipulation, optimization, and data analysis. For
+              MODFLOW-based models, the FloPy package was developed by the
+              authors to construct model input files, run the model, and read
+              and plot simulation results. Use of Python with the available
+              scientific packages and FloPy facilitates data exploration,
+              alternative model evaluations, and model analyses that can be
+              difficult to perform with GUIs. Furthermore, Python scripts are a
+              complete, transparent, and repeatable record of the modeling
+              process. The approach is introduced with a simple FloPy example
+              to create and postprocess a MODFLOW model. A more complicated
+              capture-fraction analysis with a real-world model is presented to
+              demonstrate the types of analyses that can be performed using
+              Python and FloPy.",
+  journal  = "Ground Water",
+  volume   =  54,
+  number   =  5,
+  pages    = "733--739",
+  month    =  sep,
+  year     =  2016,
+  language = "en"
+}
+
+@UNPUBLISHED{Van_Engelen2022,
+  title       = "Reproducible large-scale groundwater modelling projects using
+                 the {iMOD} Python package",
+  author      = "van Engelen, Joeri and Delsman, Joost and Bootsma, Huite",
+  abstract    = "IntroductionScripting has many benefits for groundwater model
+                 development: scripts form transparent reproducible steps and
+                 enable easy automation of many tasks. The Python scientific
+                 ecosystem provides a wealth of open source libraries and make
+                 Python particularly suited for model development. However, we
+                 require additional tools to create reproducible large-scale
+                 groundwater model projects.Handling the large scale -- iMOD
+                 PythonRegional models in the Netherlands are characterized by
+                 large size of input and output files; FloPy (Bakker et al.
+                 2016) is not especially tailored to such use. We've built the
+                 iMOD Python package on top of modern Python packages such as
+                 xarray (Hoyer \& Hamman, 2017) to provide greater convenience
+                 and performance. Xarray labels dimensions with coordinates for
+                 geospatial datasets, supports out of memory computation, reads
+                 and writes NetCDF files. The iMOD Python package
+                 (https://gitlab.com/deltares/imod/imod-python) provides the
+                 connection to model specific file formats (iMOD \& MODFLOW6)
+                 and a number of additional utilities such as efficient
+                 regridding, GIS operations, and visualization.Reproducible
+                 projects -- Git, DVC \& SnakemakeOur goal is to make entire
+                 model projects reproducible. Scripting succeeds in making
+                 individual steps of the complex model development process
+                 reproducible, but not completely. We use Snakemake (K{\"o}ster
+                 \& Rahmann, 2012) as workflow manager to rally individual
+                 scripts into an explicit workflow. Snakemake automatically
+                 determines dependencies between the different steps, and will
+                 detect which part of a workflow needs to be executed when e.g.
+                 some input data or steps change. Code and data version control
+                 keeps track of the history project. It functions as a log book
+                 of past decisions, but also allows reverting the project to a
+                 previous state with one command, which allows for an easy
+                 comparison between the results of two versions of the project.
+                 This is crucial for projects with a multiple-year duration
+                 and/or projects with multiple contributors. Online code
+                 repositories allow sharing of files, and further support
+                 collaboration with issue boards and by making code
+                 browsable.In this presentation we will present a reproducible
+                 project of a regional model, using open-source tools. The
+                 project is shared on Gitlab
+                 (https://gitlab.com/deltares/imod/california\_model), where a
+                 user can pull the code to their machine, using the version
+                 control software Git (Chacon \& Staub, 2014). Consequently,
+                 the user can fetch the data onto their machine with data
+                 version control software DVC (https://dvc.org/). The complete
+                 workflow from raw data to 3D images of the model output
+                 heavily relies on iMOD Python and is executed with
+                 Snakemake.ReferencesBakker, M., Post, V., Langevin, C. D.,
+                 Hughes, J. D., White, J. T., Starn, J. J., \& Fienen, M. N.
+                 (2016). Scripting MODFLOW Model Development Using Python and
+                 FloPy. Groundwater. https://doi.org/10.1111/gwat.12413Chacon,
+                 S., \& Straub, B. (2014). Pro Git. Pro Git (2nd ed.). Apress.
+                 https://doi.org/10.1007/978-1-4302-1834-0Hoyer, S., \& Hamman,
+                 J. J. (2017). xarray: N-D labeled Arrays and Datasets in
+                 Python. Journal of Open Research Software, 5, 1--6.
+                 https://doi.org/10.5334/jors.148K{\"o}ster, J., \& Rahmann, S.
+                 (2012). Snakemake-a scalable bioinformatics workflow engine.
+                 Bioinformatics, 28(19), 2520--2522.
+                 https://doi.org/10.1093/bioinformatics/bts480",
+  number      = "EGU22-5510",
+  institution = "Copernicus Meetings",
+  month       =  mar,
+  year        =  2022,
+  conference  = "EGU General Assembly 2022"
+}
+
+@MISC{Harbaugh2005,
+  title     = "{MODFLOW-2005} : the {U.S}. Geological Survey modular
+               ground-water model--the ground-water flow process",
+  booktitle = "Techniques and Methods",
+  author    = "Harbaugh, Arlen W",
+  publisher = "US Geological Survey",
+  year      =  2005
+}
+
+@ARTICLE{Sosa2020,
+  title     = "A toolbox to quickly prepare flood inundation models for
+               {LISFLOOD-FP} simulations",
+  author    = "Sosa, Jeison and Sampson, Chris and Smith, Andy and Neal,
+               Jeffrey C and Bates, Paul D",
+  journal   = "Environ. Modell. Softw.",
+  publisher = "Elsevier Ltd",
+  volume    =  123,
+  number    = "August 2019",
+  pages     = "104561",
+  year      =  2020,
+  keywords  = "Large-scale,Continental-scale,Modelling,Toolbox,Hy"
+}
+
+@ARTICLE{Bates2010,
+  title     = "A simple inertial formulation of the shallow water equations for
+               efficient two-dimensional flood inundation modelling",
+  author    = "Bates, Paul D and Horritt, Matthew S and Fewtrell, Timothy J",
+  abstract  = "This paper describes the development of a new set of equations
+               derived from 1D shallow water theory for use in 2D storage cell
+               inundation models where flows in the x and y Cartesian
+               directions are decoupled. The new equation set is designed to be
+               solved explicitly at very low computational cost, and is here
+               tested against a suite of four test cases of increasing
+               complexity. In each case the predicted water depths compare
+               favourably to analytical solutions or to simulation results from
+               the diffusive storage cell code of Hunter et al. (2005). For the
+               most complex test involving the fine spatial resolution
+               simulation of flow in a topographically complex urban area the
+               Root Mean Squared Difference between the new formulation and the
+               model of Hunter et al. is ~1cm. However, unlike diffusive
+               storage cell codes where the stable time step scales with
+               (1/??x)2, the new equation set developed here represents shallow
+               water wave propagation and so the stability is controlled by the
+               Courant-Freidrichs-Lewy condition such that the stable time step
+               instead scales with 1/??x. This allows use of a stable time step
+               that is 1-3 orders of magnitude greater for typical cell sizes
+               than that possible with diffusive storage cell models and
+               results in commensurate reductions in model run times. For the
+               tests reported in this paper the maximum speed up achieved over
+               a diffusive storage cell model was 1120??, although the actual
+               value seen will depend on model resolution and water surface
+               gradient. Solutions using the new equation set are shown to be
+               grid-independent for the conditions considered and to have an
+               intuitively correct sensitivity to friction, however small
+               instabilities and increased errors on predicted depth were noted
+               when Manning's n=0.01. The new equations are likely to find
+               widespread application in many types of flood inundation
+               modelling and should provide a useful additional tool, alongside
+               more established model formulations, for a variety of flood risk
+               management studies. ?? 2010 Elsevier B.V.",
+  journal   = "J. Hydrol.",
+  publisher = "Elsevier B.V.",
+  volume    =  387,
+  number    = "1-2",
+  pages     = "33--45",
+  month     =  jun,
+  year      =  2010,
+  keywords  = "Flood propagation; Hydraulic modelling; Inundation modelling;
+               Shallow water flow; hydrodynamic model"
 }
 
 
+@UNPUBLISHED{Van_Verseveld2022,
+  title     = "Wflow\_sbm v0.6.1, a spatially distributed hydrologic model:
+               from global data to local applications",
+  author    = "van Verseveld, Willem J and Weerts, Albrecht H and Visser,
+               Martijn and Buitink, Joost and Imhoff, Ruben O and Boisgontier,
+               H{\'e}l{\`e}ne and Bouaziz, Laur{\`e}ne and Eilander, Dirk and
+               Hegnauer, Mark and ten Velden, Corine and Russell, Bobby",
+  abstract  = "Abstract. The wflow\_sbm hydrologic model, recently released by
+               Deltares, as part of the Wflow.jl (v0.6.1) modelling framework
+               is being used to better understand and potentially address
+               multiple operational and water resources planning challenges
+               from catchment scale, national scale to continental and global
+               scale. Wflow.jl is a free and open-source distributed hydrologic
+               modelling framework written in the Julia programming language.
+               The development of wflow\_sbm, the model structure, equations
+               and functionalitities are described in detail, including example
+               applications of wflow\_sbm. The wflow\_sbm model aims to strike
+               a balance between low-resolution, low-complexity and
+               high-resolution, high-complexity hydrologic models. Most
+               wflow\_sbm parameters are based on physical characteristics or
+               processes and at the same time wflow\_sbm has a runtime
+               performance well suited for large-scale high-resolution model
+               applications. Wflow\_sbm models can be set a priori for any
+               catchment with the Python tool HydroMT-Wflow based on globally
+               available datasets and through the use of point-scale
+               (pedo)transfer functions and suitable upscaling rules and
+               generally results in a satisfactory (0.4 $\geq$ Kling-Gupta
+               Efficiency (KGE)",
+  journal   = "Geoscientific Model Development Discussions",
+  month     =  aug,
+  year      =  2022,
+  copyright = "https://creativecommons.org/licenses/by/4.0/"
+}
 
-@misc{snow2020,
-  title = {Pyproj4/Pyproj: 2.6.1 {{Release}}},
-  author = {Snow, Alan D. and Whitaker, Jeff and Cochran, Micah and den Bossche, Joris Van and Mayo, Chris and {de Kloe}, Jos and Karney, Charles and Ouzounoudis, George and Dearing, Justin and Lostis, Guillaume and {Heitor} and {Filipe} and May, Ryan and Itkin, Mikhail and Couwenberg, Bas and Berardinelli, Greg and Badger, The Gitter and Eubank, Nick and Dunphy, Michael and Brett, Matthew and Raspaud, Martin and {da Costa}, Marco Aur{\'e}lio and Evers, Kristian and Ranalli, Joe and {de Maeyer}, Jakob and Popov, Eduard and Gohlke, Christoph and Willoughby, Chris and Barker, Chris and Wiedemann, Bernhard M.},
-  year = {2020},
-  month = may,
-  doi = {10.5281/zenodo.3783866},
-  howpublished = {Zenodo}
+
+@ARTICLE{Sperna_Weiland2021,
+  title    = "Estimating Regionalized Hydrological Impacts of Climate Change
+              Over Europe by {Performance-Based} Weighting of {CORDEX}
+              Projections",
+  author   = "Sperna Weiland, Frederiek C and Visser, Robrecht D and Greve,
+              Peter and Bisselink, Berny and Brunner, Lukas and Weerts,
+              Albrecht H",
+  abstract = "Ensemble projections of future changes in discharge over Europe
+              show large variation. Several methods for performance-based
+              weighting exist that have the potential to increase the
+              robustness of the change signal. Here we use future projections
+              of an ensemble of three hydrological models forced with climate
+              datasets from the Coordinated Downscaling Experiment - European
+              Domain (EURO-CORDEX). The experiment is set-up for nine river
+              basins spread over Europe that hold different climate and
+              catchment characteristics. We evaluate the ensemble consistency
+              and apply two weighting approaches; the Climate model Weighting
+              by Independence and Performance (ClimWIP) that focuses on
+              meteorological variables and the Reliability Ensemble Averaging
+              (REA) in our study applied to discharge statistics per basin. For
+              basins with a strong climate signal, in Southern and Northern
+              Europe, the consistency in the set of projections is large. For
+              rivers in Central Europe the differences between models become
+              more pronounced. Both weighting approaches assign high weights to
+              single General Circulation Models (GCMs). The ClimWIP method
+              results in ensemble mean weighted changes that differ only
+              slightly from the non-weighted mean. The REA method influences
+              the weighted mean more, but the weights highly vary from basin to
+              basin. We see that high weights obtained through past good
+              performance can provide deviating projections for the future. It
+              is not apparent that the GCM signal dominates the overall change
+              signal, i.e., there is no strong intra GCM consistency. However,
+              both weighting methods favored projections from the same GCM.",
+  journal  = "Frontiers in Water",
+  volume   =  3,
+  year     =  2021
+}
+
+@UNPUBLISHED{Aerts2021,
+  title     = "Large-sample assessment of spatial scaling effects of the
+               distributed wflow\_sbm hydrological model shows that finer
+               spatial resolution does not necessarily lead to better
+               streamflow estimates",
+  author    = "Aerts, Jerom P M and Hut, Rolf W and van de Giesen, Nick C and
+               Drost, Niels and van Verseveld, Willem J and Weerts, Albrecht H
+               and Hazenberg, Pieter",
+  abstract  = "Abstract. Distributed hydrological modelling moves into the
+               realm of hyper-resolution modelling. This results in a plethora
+               of scaling related challenges that remain unsolved. In light of
+               model result interpretation, finer resolution output might
+               implicate to the user an increase in understanding of the
+               complex interplay of heterogeneity within the hydrological
+               system. Here we investigate spatial scaling in the realm of
+               hyper-resolution by evaluating the streamflow estimates of the
+               distributed wflow\_sbm hydrological model based on 454 basins
+               from the large-sample CAMELS data set. Model instances were
+               derived at 3 spatial resolutions, namely 3 km, 1 km, and 200 m.
+               The results show that a finer spatial resolution does not
+               necessarily lead to better streamflow estimates at the basin
+               outlet. Statistical testing of the objective function
+               distributions (KGE score) of the 3 model instances show only a
+               statistical difference between the 3 km and 200 m streamflow
+               estimates. However, results indicate strong locality in scaling
+               behaviour between model instances expressed by differences in
+               KGE scores of on average 0.22. This demonstrates the presence of
+               scaling behavior throughout the domain and indicates where
+               locality in results is strong. The results of this study open up
+               research paths that can investigate the changes in flux and
+               state partitioning due to spatial scaling. This will help
+               further understand the challenges that need to be resolved for
+               hyper resolution hydrological modelling.",
+  journal   = "Hydrol. Earth Syst. Sci.",
+  pages     = "1--28",
+  month     =  dec,
+  year      =  2021,
+  copyright = "https://creativecommons.org/licenses/by/4.0/",
+  language  = "en"
+}
+
+@ARTICLE{Rusli2021,
+  title    = "Estimating water balance components and their uncertainty bounds
+              in highly groundwater-dependent and data-scarce area: An example
+              for the Upper Citarum basin",
+  author   = "Rusli, S R and Weerts, A H and Taufiq, A and Bense, V F",
+  abstract = "Study region Upper region of the Citarum basin in Indonesia.
+              Study focus Assessing water balance components in data-scarce
+              regions using different approaches could result in different
+              outcomes. In the upper reaches of the Citarum River in West Java,
+              Indonesia, for example, many previous studies found the
+              groundwater storage to be depleting, while GRACE identifies a
+              contrasting trend of increasing groundwater storage change.
+              Therefore, in this study, we aim to improve the accuracy of water
+              balance components estimates in the Upper Citarum basin. Firstly,
+              we estimate groundwater abstraction volumes based on population
+              size and a review of literature. Estimates of the other water
+              balance components, namely the rainfall, actual evaporation,
+              discharge, and groundwater storage change are derived from
+              various global datasets and available measurements. We also use a
+              distributed hydrological model, wflow\_sbm, to yield additional
+              estimates of discharge and actual evaporation. We compare each
+              basin water balance estimate and quantify the uncertainty of some
+              components using the Extended Triple Collocation (ETC) method.
+              New hydrological insights for the region ETC application on four
+              different rainfall estimates suggests a preference of using
+              CHIRPS product in the study area as it delivers r2 of 0.56 and
+              RMSE of 6.52 mm/day, compared to estimates from rainfall station
+              (r2=0.39, RMSE = 8.57 mm/day), SACA\&D (r2=0.29, RMSE = 10.46
+              mm/day), and TRMM (r2=0.56, RMSE = 8.61 mm/day). With CHIRPS
+              rainfall forcing, wflow\_sbm model estimates of average daily
+              actual evaporation and discharge are obtained. The results for
+              actual evaporation (2.67 mm/day) are plausible with a narrow
+              difference of less than 0.50 mm/day among other estimates. The
+              simulated discharge results in a daily average of 5.38 mm/day,
+              estimated between observation data (3.65 mm/day) and GloFAS-ERA5
+              product (6.12 mm/day). Combining precipitation, actual
+              evaporation, and discharge with a groundwater abstraction
+              estimate of 0.57 mm/day, the wflow\_sbm-based groundwater storage
+              change is estimated at a daily storage depletion of 0.82 mm/day.
+              Using GLEAM actual evaporation estimates (3.13 mm/day) and
+              observed daily discharge, on the other hand, results in surplus
+              water of 0.45 mm/day for groundwater storage change. These
+              results demonstrate the high uncertainty in capturing subsurface
+              hydrological processes, although the groundwater storage change
+              estimates are found close to the estimates based upon GRACE
+              gravimetric satellite data of 0.25 mm/day, with a variance of
+              1.57 mm/day. To aid in estimating current and future basin-scale
+              groundwater level changes to support operational water management
+              and policy in the Citarum basin, considering the massive
+              groundwater abstraction, a focus on subsurface hydrological
+              components quantification is of great importance for future
+              research.",
+  journal  = "Journal of Hydrology: Regional Studies",
+  volume   =  37,
+  pages    = "100911",
+  month    =  oct,
+  year     =  2021,
+  keywords = "Water balance components estimate; Wflow\_sbm model; Extended
+              triple collocation; Groundwater storage change estimate;
+              Data-scarce region; Upper Citarum basin"
+}
+
+@ARTICLE{Leijnse2021,
+  title    = "Modeling compound flooding in coastal systems using a
+              computationally efficient reduced-physics solver: Including
+              fluvial, pluvial, tidal, wind- and wave-driven processes",
+  author   = "Leijnse, Tim and van Ormondt, Maarten and Nederhoff, Kees and van
+              Dongeren, Ap",
+  abstract = "SFINCS, a new reduced-physics solver to compute compound flooding
+              in coastal systems due to fluvial, pluvial, tidal, wind- and
+              wave-driven processes in a computationally efficient way, is
+              presented and validated for a number of verification and
+              application cases. The model solves simplified equations of mass
+              and momentum, which are driven by storm surge and wave boundary
+              conditions, precipitation rates and upstream river discharges. It
+              includes spatially-varying infiltration and bed roughness terms
+              as well as an absorbing-generating seaward boundary to enable
+              wave-driven flooding. Furthermore, advection and wind stress
+              terms can be included. We demonstrate for the application case of
+              hurricane impact on Jacksonville (Florida, USA) that the observed
+              flooding was a combination of fluvial, pluvial, tidal and
+              wind-driven flooding and that this can be modeled well using the
+              reduced-physics solver. We show that the addition of an advection
+              term to the momentum equations is necessary to model shock flows
+              such as dam breaks but also incident broken waves. Thus,
+              wave-driven flooding can be modeled with high computational
+              efficiency and adequate accuracy as demonstrated for the case of
+              Hernani (the Philippines). The model results show the potential
+              of achieving good accuracy at limited computational expense.",
+  journal  = "Coast. Eng.",
+  volume   =  163,
+  pages    = "103796",
+  year     =  2021,
+  keywords = "Compound flooding; Flooding; Reduced-physics solver; SFINCS;
+              Tropical cyclones; Wave-driven flooding"
+}
+
+@ARTICLE{Eilander2022-nhess,
+  title     = "A globally-applicable framework for compound flood hazard
+               modeling",
+  author    = "Eilander, Dirk and Couasnon, Ana{\"\i}s and Leijnse, Tim and
+               Ikeuchi, Hiroaki and Yamazaki, Dai and Muis, Sanne and Dullaart,
+               Job and Winsemius, Hessel C and Ward, Philip J",
+  abstract  = "Abstract. Coastal river deltas are susceptible to flooding from
+               pluvial, fluvial, and coastal flood drivers. Compound floods,
+               which result from the co-occurrence of two or more of these
+               drivers, typically exacerbate impacts compared to floods from a
+               single driver. While several global flood models have been
+               developed, these do not account for compound flooding. Local
+               scale compound flood models provide state-of-the-art analyses
+               but are hard to scale up as these typically are based on local
+               datasets. Hence, there is a need for globally-applicable
+               compound flood hazard modeling. We develop, validate and apply a
+               framework for compound flood hazard modeling, which consists of
+               the local high-resolution 2D hydrodynamic flood model SFINCS,
+               which is automatically set up from global datasets and loosely
+               coupled with a global hydrodynamic river routing and flood
+               model, as well as a global surge and tide model to account for
+               interactions between all drivers. To test the framework, we
+               simulate two historical compound flood events, cyclones Idai and
+               Eloise, in the Sofala province of Mozambique, and compare the
+               flood extent to observations from remote sensing and to the
+               global quasi 2D CaMa-Flood model. The results show that while
+               the global and local model have similar skill in terms of the
+               critical success index, they result in rather different flood
+               maps. On the one hand, the local model has a higher hit ratio
+               due to the representation of direct coastal and pluvial flooding
+               (rain on grid) and a higher floodplain connectivity. It also
+               shows a faster response to coastal drivers within the estuaries
+               and more realistic flood depth maps. On the other hand, the
+               local model has a higher false alarm ratio, which is partly
+               explained by the inclusion of direct pluvial flooding without
+               sufficient representation of small scale (subgrid) drainage
+               capacity. To showcase a possible application of the framework,
+               we also determine the dominant flood drivers and transition
+               zones between flood drivers for both events. These vary
+               significantly between both events because of differences in the
+               magnitude of and time lag between the flood drivers. We argue
+               that a wide range of plausible events should be investigated to
+               get a robust understanding of compound flood interactions, which
+               is important to understand for flood adaptation, preparedness,
+               and response. As the model setup and coupling is automated,
+               reproducible, and globally applicable, the presented framework
+               is a promising step forward towards large scale compound flood
+               hazard modeling.",
+  journal   = "EGUsphere",
+  publisher = "Copernicus GmbH",
+  pages     = "1--40",
+  month     =  apr,
+  year      =  2022,
+  language  = "en"
+}
+
+% The entry below contains non-ASCII chars that could not be converted
+% to a LaTeX equivalent.
+@ARTICLE{Imhoff2020,
+  title    = "Scaling {Point‐Scale} (Pedo)transfer Functions to Seamless
+              {Large‐Domain} Parameter Estimates for {High‐Resolution}
+              Distributed Hydrologic Modeling: An Example for the Rhine River",
+  author   = "Imhoff, R O and van Verseveld, W J and van Osnabrugge, B and
+              Weerts, A H",
+  abstract = "Abstract Moving towards high-resolution gridded hydrologic models
+              asks for novel parametrization approaches. A high-resolution
+              conceptual hydrologic model (wflow\_sbm) was parameterized for
+              the Rhine basin in Europe based on point-scale
+              (pedo)transfer-functions, without further calibration of
+              effective model parameters on discharge. Parameters were
+              estimated on the data resolution, followed by upscaling of
+              parameter fields to the model resolution. The method was tested
+              using a 6-hourly time step at four model resolutions (1.2, 2.4,
+              3.6 and 4.8 km), followed by a validation with discharge
+              observations and a comparison with actual evapotranspiration
+              (ETact) estimates from an independent model (DMET LSA SAF).
+              Additionally, the scalability of parameter fields and simulated
+              fluxes was tested. Validation of simulated discharges yielded
+              KGE-values ranging from 0.6 to 0.9, except for the Alps where a
+              volume bias caused lower performance. Catchment averaged temporal
+              ETact dynamics were comparable with independent ET estimates (KGE
+              $\approx$ 0.7), although wflow\_sbm model simulations were on
+              average 115 mm y-1 higher. Spatially, the two models were less in
+              agreement (SPAEF = 0.10), especially around the Rhine valley.
+              Consistent parameter fields were obtained and by running the
+              model at the different resolutions, preserved ETact fluxes were
+              found across the scales. For recharge, fluxes were less
+              consistent with relative errors around 30\% for regions with high
+              drainage densities. However, catchment averaged fluxes were
+              better preserved. Routed discharge in headwaters was not
+              consistent across scales, although simulations for the main Rhine
+              River were. Better processing (scale independent) of the river
+              and drainage network may overcome this issue.",
+  journal  = "Water Resour. Res.",
+  volume   =  56,
+  number   =  4,
+  pages    = "1--28",
+  month    =  apr,
+  year     =  2020
+}
+
+@ARTICLE{Hoyer2017,
+  title     = "xarray: {N-D} labeled Arrays and Datasets in Python",
+  author    = "Hoyer, Stephan and Hamman, Joe",
+  abstract  = "xarray is an open source project and Python package that
+               provides a toolkit and data structures for N-dimensional labeled
+               arrays. Our approach combines an application programing
+               interface (API) inspired by pandas with the Common Data Model
+               for self-described scientific data. Key features of the xarray
+               package include label-based indexing and arithmetic,
+               interoperability with the core scientific Python packages (e.g.,
+               pandas, NumPy, Matplotlib), out-of-core computation on datasets
+               that don't fit into memory, a wide range of serialization and
+               input/output (I/O) options, and advanced multi-dimensional data
+               manipulation tools such as group-by and resampling. xarray, as a
+               data model and analytics toolkit, has been widely adopted in the
+               geoscience community but is also used more broadly for
+               multi-dimensional data analysis in physics, machine learning and
+               finance.",
+  journal   = "J. Open Res. Softw.",
+  publisher = "Ubiquity Press, Ltd.",
+  volume    =  5,
+  number    =  1,
+  pages     = "10",
+  month     =  apr,
+  year      =  2017,
+  copyright = "http://creativecommons.org/licenses/by/4.0",
+  language  = "en"
+}
+
+@MISC{Dask_Development_Team2016,
+  title     = "Dask: Library for dynamic task scheduling",
+  author    = "{Dask Development Team}",
+  publisher = "Desk Development Team",
+  year      =  2016
+}
+
+@MISC{Gillies2013,
+  title  = "Rasterio: geospatial raster {I/O} for Python programmers",
+  author = "Gillies, S",
+  year   =  2013
+}
+
+@MISC{Snow2022,
+  title     = "corteva/rioxarray: 0.11.1 Release",
+  author    = "Snow, Alan D and Brochart, David and Raspaud, Martin and Bell,
+               Ray and {RichardScottOZ} and Chegini, Taher and Amici,
+               Alessandro and Braun, R{\'e}mi and Annex, Andrew and Hoese,
+               David and Bunt, Fred and {GBallesteros} and Hamman, Joe and
+               Zehner, Markus and Cordeiro, Mauricio and Henderson, Scott and
+               Miller, Seth and Badger, The Gitter and Augspurger, Tom and
+               {apiwat-chantawibul} and {Pmallas}",
+  publisher = "Zenodo",
+  month     =  apr,
+  year      =  2022
+}
+
+@MISC{Jordahl2021,
+  title  = "geopandas/geopandas: v0.10.2",
+  author = "Jordahl, Kelsey and Van den Bossche, Joris and Fleischmann, Martin
+            and McBride, James and Wasserman, Jacob and Badaracco, Adrian
+            Garcia and Gerard, Jeffrey and Snow, Alan D and Tratner, Jeff and
+            Perry, Matthew and Farmer, Carson and Hjelle, Geir Arne and
+            Cochran, Micah and Gillies, Sean and Culbertson, Lucas and Bartos,
+            Matt and Ward, Brendan and Caria, Giacomo and Taves, Mike and
+            Eubank, Nick and {sangarshanan} and Flavin, John and Richards, Matt
+            and Rey, Sergio and {maxalbert} and Bilogur, Aleksey and Ren,
+            Christopher and Arribas-Bel, Dani and Mesejo-Le{\'o}n, Daniel and
+            Wasser, Leah",
+  month  =  oct,
+  year   =  2021
+}
+
+@MISC{Eilander2022,
+  title  = "{pyFlwDir}: Fast methods to work with hydro- and topography data in
+            pure Python",
+  author = "Eilander, Dirk",
+  month  =  feb,
+  year   =  2022
+}
+
+@MISC{GDALOGR_contributors2022,
+  title       = "{GDAL/OGR} Geospatial Data Abstraction software Library",
+  author      = "{GDAL/OGR contributors}",
+  institution = "Open Source Geospatial Foundation",
+  year        =  2022
 }
