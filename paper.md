@@ -15,6 +15,8 @@ authors:
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: Hélène Boisgontier
     affiliation: 1
+  - name: Mark Hegnauer
+    affiliation: 1
 affiliations:
  - name: Deltares, The Netherlands
    index: 1
