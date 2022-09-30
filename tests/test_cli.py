@@ -3,10 +3,10 @@
 import pytest
 from click.testing import CliRunner
 import numpy as np
+import os
 from hydromt import __version__
 from hydromt.cli.main import main as hydromt_cli
 from hydromt.cli import api as hydromt_api
-from hydromt.models import ENTRYPOINTS
 
 
 def test_cli(tmpdir):
@@ -17,7 +17,7 @@ def test_cli(tmpdir):
 
     r = CliRunner().invoke(hydromt_cli, "--models")
     assert r.exit_code == 0
-    assert r.output.startswith("hydroMT model plugins:")
+    assert r.output.startswith("model plugins")
 
     r = CliRunner().invoke(hydromt_cli, "--help")
     assert r.exit_code == 0
@@ -38,22 +38,35 @@ def test_cli(tmpdir):
         "Usage: main clip [OPTIONS] MODEL MODEL_ROOT MODEL_DESTINATION REGION"
     )
 
+    root = str(tmpdir.join("grid_model_region"))
     r = CliRunner().invoke(
         hydromt_cli,
-        ["build", "model", str(tmpdir), "{'subbasin': [-7.24, 62.09], 'strord': 4}"],
+        ["build", "grid_model", root, "{'bbox': [12.05,45.30,12.85,45.65]}", "-vv"],
     )
-    with pytest.raises(ValueError, match="Model unknown"):
+    assert os.path.isfile(os.path.join(root, "geoms", "region.geojson"))
+
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "build",
+            "test_model",
+            str(tmpdir),
+            "{'subbasin': [-7.24, 62.09], 'strord': 4}",
+        ],
+    )
+    with pytest.raises(ValueError, match="Unknown model"):
         raise r.exception
 
     r = CliRunner().invoke(
         hydromt_cli,
-        ["update", "model", str(tmpdir), "-c", "component", "--opt", "key=value"],
+        ["update", "test_model", str(tmpdir), "-c", "component", "--opt", "key=value"],
     )
-    with pytest.raises(ValueError, match="Model unknown"):
+    with pytest.raises(ValueError, match="Unknown model"):
         raise r.exception
 
     r = CliRunner().invoke(
-        hydromt_cli, ["clip", "model", str(tmpdir), str(tmpdir), "{'bbox': [1,2,3,4]}"]
+        hydromt_cli,
+        ["clip", "test_model", str(tmpdir), str(tmpdir), "{'bbox': [1,2,3,4]}"],
     )
     with pytest.raises(NotImplementedError):
         raise r.exception
@@ -67,7 +80,6 @@ def test_api_datasets():
     assert isinstance(datasets["RasterDatasetSource"], list)
 
 
-@pytest.mark.skipif("lumped_model" not in ENTRYPOINTS, reason="HydroMT not installed.")
 def test_api_model_components():
     # models
     components = hydromt_api.get_model_components(

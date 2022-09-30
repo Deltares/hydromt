@@ -33,8 +33,9 @@ dependencies:
   - pyflwdir>=0.5.4
   - pygeos>=0.8
   - pytest # tests
-  - pytest-cov # tests
   - pytest-benchmark # tests
+  - pytest-cov # tests
+  - pytest-mock # tests
   - python>=3.7
   - rasterio
   - responses # tests
