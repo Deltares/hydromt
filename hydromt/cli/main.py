@@ -174,7 +174,7 @@ def build(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
-        mod = MODELS[model](
+        mod = MODELS.load(model)(
             root=model_root,
             mode="w",
             logger=logger,
@@ -260,7 +260,7 @@ def update(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
-        mod = MODELS[model](
+        mod = MODELS.load(model)(
             root=model_root,
             mode=mode,
             data_libs=data_libs,
@@ -335,7 +335,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     if model != "wflow":
         raise NotImplementedError("Clip function only implemented for wflow model.")
     try:
-        mod = MODELS[model](root=model_root, mode="r", logger=logger)
+        mod = MODELS.load(model)(root=model_root, mode="r", logger=logger)
         logger.info("Reading model to clip")
         mod.read()
         mod.set_root(model_destination, mode="w")

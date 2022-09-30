@@ -78,9 +78,10 @@ class Model(object, metaclass=ABCMeta):
         from . import MODELS  # avoid circular import
 
         self.logger = logger
-        ep = MODELS.eps.get(self._NAME, None)
-        version = ep.distro.version if ep is not None else "NA"
-        dist = ep.distro.name if ep is not None else "unknown"
+        dist, version = "unknown", "NA"
+        if self._NAME in MODELS:
+            ep = MODELS[self._NAME]
+            dist, version = ep.distro.name, ep.distro.version
 
         # link to data
         self.data_catalog = DataCatalog(
