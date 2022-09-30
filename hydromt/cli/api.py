@@ -5,7 +5,7 @@ from typing import List, Dict, Union
 import typing
 import inspect
 
-from ..models import ENTRYPOINTS
+from ..models import MODELS
 from ..data_catalog import DataCatalog
 
 
@@ -40,7 +40,7 @@ def get_model_components(
         "GeoDatasetSource",
         "GeoDataframeSource",
     ]
-    model_class = ENTRYPOINTS[model].load()
+    model_class = MODELS[model]
     members = inspect.getmembers(model_class)
     components = {}
     docs = []

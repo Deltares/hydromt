@@ -111,6 +111,14 @@ DataFrame
 Models
 ======
 
+Discovery
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelCatalog
+
 Classes
 =======
 .. autosummary::
@@ -119,6 +127,7 @@ Classes
    Model
    GridModel
    LumpedModel
+   MeshModel
 
 High level methods 
 ------------------

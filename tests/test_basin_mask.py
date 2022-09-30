@@ -7,6 +7,7 @@ import numpy as np
 import geopandas as gpd
 import xarray as xr
 import hydromt
+from hydromt.models import MODELS
 import logging
 
 from hydromt.workflows.basin_mask import get_basin_geometry, parse_region
@@ -19,16 +20,14 @@ def test_region(tmpdir, world, geodf, rioda):
     region = {"region": [0.0, -1.0]}
     with pytest.raises(ValueError, match=r"Region key .* not understood.*"):
         parse_region(region)
-    from hydromt.models import MODELS
 
-    if len(MODELS) > 0:
-        model = [x for x in MODELS][0]
-        root = str(tmpdir.join(model)) + "_test_region"
-        if not os.path.isdir(root):
-            os.mkdir(root)
-        region = {model: root}
-        kind, region = parse_region(region)
-        assert kind == "model"
+    model = MODELS.generic[0]
+    root = str(tmpdir.join(model)) + "_test_region"
+    if not os.path.isdir(root):
+        os.mkdir(root)
+    region = {model: root}
+    kind, region = parse_region(region)
+    assert kind == "model"
 
     # geom
     region = {"geom": world}

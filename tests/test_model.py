@@ -8,10 +8,52 @@ import numpy as np
 import geopandas as gpd
 from shapely.geometry import polygon
 from hydromt.models.model_api import _check_data
-from hydromt.models import Model, GridModel, LumpedModel
+from hydromt.models import Model, GridModel, LumpedModel, MODELS, model_plugins
+import hydromt.models.model_plugins
 from hydromt import _compat
+from entrypoints import EntryPoint, Distribution
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+def test_plugins(mocker):
+    distro = Distribution("hydromt", "x.x.x")
+    ep_lst = [
+        EntryPoint.from_string("hydromt.models.model_api:Model", "test_model", distro)
+    ]
+    mocker.patch("hydromt.models.model_plugins._discover", return_value=ep_lst)
+    eps = model_plugins.get_plugin_eps()
+    assert "test_model" in eps
+    assert isinstance(eps["test_model"], EntryPoint)
+
+
+def test_plugin_duplicates(mocker):
+    ep_lst = model_plugins.get_general_eps().values()
+    mocker.patch("hydromt.models.model_plugins._discover", return_value=ep_lst)
+    eps = model_plugins.get_plugin_eps()
+    assert len(eps) == 0
+
+
+def test_load():
+    with pytest.raises(ValueError, match="Model plugin type not recognized"):
+        model_plugins.load(
+            EntryPoint.from_string("hydromt.data_catalog:DataCatalog", "error")
+        )
+    with pytest.raises(ImportError, match="Error while loading model plugin"):
+        model_plugins.load(
+            EntryPoint.from_string("hydromt.models:DataCatalog", "error")
+        )
+
+
+def test_global_models():
+    keys = list(model_plugins.LOCAL_EPS.keys())
+    assert isinstance(MODELS[keys[0]], EntryPoint)
+    assert issubclass(MODELS.load(keys[0]), Model)
+    assert keys[0] in MODELS.__str__()
+    assert all([k in MODELS for k in keys])  # eps
+    assert all([k in MODELS.cls for k in keys])
+    with pytest.raises(ValueError, match="Unknown model"):
+        MODELS["unknown"]
 
 
 def test_check_data(demda):
