@@ -40,7 +40,7 @@ def get_model_components(
         "GeoDatasetSource",
         "GeoDataframeSource",
     ]
-    model_class = MODELS[model]
+    model_class = MODELS.load(model)
     members = inspect.getmembers(model_class)
     components = {}
     docs = []

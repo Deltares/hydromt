@@ -11,7 +11,7 @@ unreleased
 
 Added
 -----
-- ModelCatalog to discover generic and plugin model classes. `ISSUE #201 <https://github.com/Deltares/hydromt/issues/201>`_
+- ModelCatalog to discover generic and plugin model classes. `PR #202 <https://github.com/Deltares/hydromt/pull/202>`_
 - Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
 - API calls to get info about model components and dataset for the dashboard. `PR #118 <https://github.com/Deltares/hydromt/pull/118>`_
 - New submodelclasses in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``
