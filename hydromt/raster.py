@@ -180,7 +180,58 @@ class XGeoBase(object):
     @property
     def crs(self):
         """Return Coordinate Reference System as :py:meth:`pyproj.CRS` object."""
-        return self._obj.rio.crs
+        if "crs_wkt" not in self.attrs:
+            self.set_crs()
+        if "crs_wkt" in self.attrs:
+            return pyproj.CRS.from_user_input(self.attrs["crs_wkt"])
+
+    def set_crs(self, input_crs=None):
+        """Set the Coordinate Reference System.
+
+        Arguments
+        ----------
+        input_crs: int, dict, or str, optional
+            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
+        """
+        crs_names = ["crs_wkt", "crs", "epsg"]
+        names = list(self._obj.coords.keys())
+        if isinstance(self._obj, xr.Dataset):
+            names = names + list(self._obj.data_vars.keys())
+        # user defined
+        if input_crs is not None:
+            input_crs = pyproj.CRS.from_user_input(input_crs)
+        # look in grid_mapping and data variable attributes
+        else:
+            for name in crs_names:
+                # check default > GEO_MAP_COORDS attrs
+                crs = self._obj.coords[GEO_MAP_COORD].attrs.get(name, None)
+                if crs is None:  # global attrs
+                    crs = self._obj.attrs.pop(name, None)
+                for var in names:  # data var and coords attrs
+                    if name in self._obj[var].attrs:
+                        crs = self._obj[var].attrs.pop(name)
+                        break
+                if crs is not None:
+                    # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
+                    crs = crs.strip("+init=") if isinstance(crs, str) else crs
+                    try:
+                        input_crs = pyproj.CRS.from_user_input(crs)
+                        break
+                    except:
+                        pass
+        if input_crs is not None:
+            grid_map_attrs = input_crs.to_cf()
+            crs_wkt = input_crs.to_wkt()
+            grid_map_attrs["spatial_ref"] = crs_wkt
+            grid_map_attrs["crs_wkt"] = crs_wkt
+            self.set_attrs(**grid_map_attrs)
+
+
+class XRasterBase(XGeoBase):
+    """This is the base class for a Raster GIS extensions for xarray"""
+
+    def __init__(self, xarray_obj):
+        super(XRasterBase, self).__init__(xarray_obj)
 
     @property
     def x_dim(self):
@@ -248,43 +299,6 @@ class XGeoBase(object):
         if check_x == False or check_y == False:
             raise ValueError("raster only applies to regular grids")
 
-    def set_crs(self, input_crs=None):
-        """Set the Coordinate Reference System.
-
-        Arguments
-        ----------
-        input_crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
-        """
-        crs_names = ["crs_wkt", "crs", "epsg"]
-        names = list(self._obj.coords.keys())
-        if isinstance(self._obj, xr.Dataset):
-            names = names + self.vars
-        # user defined
-        if input_crs is not None:
-            input_crs = CRS.from_user_input(input_crs)
-        # look in grid_mapping and data variable attributes
-        else:
-            for name in crs_names:
-                # check default > GEO_MAP_COORDS attrs
-                crs = self._obj.coords[GEO_MAP_COORD].attrs.get(name, None)
-                if crs is None:  # global attrs
-                    crs = self._obj.attrs.pop(name, None)
-                for var in names:  # data var and coords attrs
-                    if name in self._obj[var].attrs:
-                        crs = self._obj[var].attrs.pop(name)
-                        break
-                if crs is not None:
-                    # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
-                    crs = crs.strip("+init=") if isinstance(crs, str) else crs
-                    try:
-                        input_crs = CRS.from_user_input(crs)
-                        break
-                    except:
-                        pass
-        if input_crs is not None:
-            self._obj.rio.write_crs(input_crs, inplace=True)
-
     def reset_spatial_dims_attrs(self):
         """Reset spatial dimension names and attributes to make CF-compliant
         Requires CRS attribute."""
@@ -297,13 +311,6 @@ class XGeoBase(object):
         _da[y_dim].attrs.update(y_attrs)
         _da.raster.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
         return _da
-
-
-class XRasterBase(XGeoBase):
-    """This is the base class for a Raster GIS extensions for xarray"""
-
-    def __init__(self, xarray_obj):
-        super(XRasterBase, self).__init__(xarray_obj)
 
     @property
     def dim0(self):
