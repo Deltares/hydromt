@@ -19,10 +19,9 @@ dependencies:
   - gdal>=3.1
   - geopandas>=0.10
   - jupyter # to run examples
-  - netcdf4
   - matplotlib # to run examples
   - nbsphinx # docs notebook examples
-  - numba
+  - netcdf4
   - numpy
   - openpyxl
   - pandas
@@ -32,6 +31,7 @@ dependencies:
   - pydata-sphinx-theme  # docs
   - pyflwdir>=0.5.4
   - pygeos>=0.8
+  - pyproj
   - pytest # tests
   - pytest-cov # tests
   - pytest-benchmark # tests
@@ -43,7 +43,7 @@ dependencies:
   - scipy
   - testpath  # tests
   - toml
-  - shapely=1.8.2  # temp version pin see geopandas#2531
+  - shapely
   - sphinx # docs
   - xarray
   - xugrid>=0.1.5 # optional for mesh
