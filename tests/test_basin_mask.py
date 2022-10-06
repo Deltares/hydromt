@@ -11,7 +11,12 @@ from hydromt.models import MODELS
 import logging
 import warnings
 
-from hydromt.workflows.basin_mask import get_basin_geometry, parse_region, _parse_region_value, _check_size
+from hydromt.workflows.basin_mask import (
+    get_basin_geometry,
+    parse_region,
+    _parse_region_value,
+    _check_size,
+)
 from hydromt import raster
 
 logger = logging.getLogger("tets_basin")
@@ -94,7 +99,7 @@ def test_region_value():
     assert kwarg.get("basid") == array.tolist()
     xy = (1.0, -1.0)
     kwarg = _parse_region_value(xy)
-    assert kwarg.get("xy") ==  xy
+    assert kwarg.get("xy") == xy
     root = "./"
     kwarg = _parse_region_value(root)
     assert kwarg.get("root") == root
@@ -106,11 +111,11 @@ def test_check_size(caplog):
         shape=(13000, 13000),
         nodata=-1,
         name="test",
-        crs=4326)
+        crs=4326,
+    )
     _check_size(test_raster)
-    assert "Loading very large spatial domain to derive a subbasin. " 
-    "Provide initial 'bounds' if this takes too long." in caplog.text    
-    
+    assert "Loading very large spatial domain to derive a subbasin. "
+    "Provide initial 'bounds' if this takes too long." in caplog.text
 
 
 def test_basin(caplog):
@@ -229,34 +234,23 @@ def test_basin(caplog):
     )
     assert gdf_bas.index.size == 180
 
-    with pytest.warns(DeprecationWarning) as record:        
-        gdf_bas, gdf_out = get_basin_geometry(
-        ds,
-        kind="outlet"
-    )
+    with pytest.warns(DeprecationWarning) as record:
+        gdf_bas, gdf_out = get_basin_geometry(ds, kind="outlet")
     assert len(record) == 1
-    assert record[0].message.args[0] == 'kind="outlets" has been deprecated, use outlets=True in combination with kind="basin" or kind="interbasin" instead.'
+    assert (
+        record[0].message.args[0]
+        == 'kind="outlets" has been deprecated, use outlets=True in combination with kind="basin" or kind="interbasin" instead.'
+    )
+
+    with pytest.raises(ValueError):
+        gdf_bas, gdf_out = get_basin_geometry(ds, kind="watershed")
 
     with pytest.raises(ValueError):
         gdf_bas, gdf_out = get_basin_geometry(
-        ds,
-        kind="watershed"
-    )
-    
-    with pytest.raises(ValueError):        
+            ds, kind="basin", stream_kwargs={"within": True}
+        )
+    with pytest.raises(ValueError):
         gdf_bas, gdf_out = get_basin_geometry(
-        ds,
-        kind="basin",
-        stream_kwargs={"within": True}
-    )
-    with pytest.raises(ValueError):        
-        gdf_bas, gdf_out = get_basin_geometry(
-        ds,
-        kind="interbasin",        
-    )
-
-
-
-
-        
-        
+            ds,
+            kind="interbasin",
+        )
