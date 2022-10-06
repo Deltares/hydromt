@@ -8,9 +8,9 @@ from pathlib import Path
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
-from sklearn.neighbors import VALID_METRICS
 import xarray as xr
 import logging
+import warnings
 
 # local
 from ..io import open_raster
@@ -256,16 +256,16 @@ def get_basin_geometry(
     if kind == "outlet":
         outlets = True
         kind = "basin"
-        logger.warning(
+        warnings.warn(
             'kind="outlets" has been deprecated, use outlets=True in combination with '
-            ' kind="basin" or kind="interbasin" instead.',
+            'kind="basin" or kind="interbasin" instead.',
             DeprecationWarning,
         )
     elif kind not in kind_lst:
         msg = f"Unknown kind: {kind}, select from {kind_lst}."
         raise ValueError(msg)
     if bool(stream_kwargs.pop("within", False)):
-        logger.warning(
+        warnings.warn(
             '"within" stream argument has been deprecated.', DeprecationWarning
         )
 
@@ -312,7 +312,7 @@ def get_basin_geometry(
             if "basid" not in gdf_bas.columns:
                 raise ValueError("Basin geometries does not have 'basid' column.")
         if gdf_bas.crs != ds.raster.crs:
-            logger.warn("Basin geometries CRS does not match the input raster CRS.")
+            logger.warning("Basin geometries CRS does not match the input raster CRS.")
             gdf_bas = gdf_bas.to_crs(ds.raster.crs)
 
     ## BASINS
@@ -321,7 +321,7 @@ def get_basin_geometry(
         if basins_name not in ds:
             if gdf_bas is not None:
                 gdf_bas = None
-                logger.warn(
+                logger.warning(
                     "Basin geometries ignored as no corresponding basin map is provided."
                 )
             _check_size(ds, logger)
@@ -382,7 +382,7 @@ def get_basin_geometry(
                     total_bounds = gdf_bas.total_bounds
                 ds = ds[dvars].raster.clip_bbox(total_bounds, buffer=0)
             elif np.any(gdf_match):
-                logger.warn("No matching basin IDs found in basin geometries.")
+                logger.warning("No matching basin IDs found in basin geometries.")
         # get full basin mask and use this mask ds_basin incl flow direction raster
         _mask = np.isin(ds[basins_name], basid)
         if not np.any(_mask > 0):
