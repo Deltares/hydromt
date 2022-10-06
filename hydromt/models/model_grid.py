@@ -120,7 +120,7 @@ class GridModel(GridMixin, Model):
         data_libs: List[str] = None,
         logger=logger,
     ):
-        # Initialize the submodel class Grid Model for gridded models in HydroMT
+        """Initialize a GridModel for distributed models with a regular grid."""
         super().__init__(
             root=root,
             mode=mode,

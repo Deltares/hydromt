@@ -278,7 +278,7 @@ class MeshModel(MeshMixin, Model):
         data_libs: List[str] = None,
         logger=logger,
     ):
-        # Initialize the submodel class Mesh Model for mesh models in HydroMT
+        """Initialize a MeshModel for distributed models with an unstructured grid."""
         super().__init__(
             root=root,
             mode=mode,
