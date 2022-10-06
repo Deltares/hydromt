@@ -119,6 +119,7 @@ Classes
    Model
    GridModel
    LumpedModel
+   MeshModel
 
 High level methods 
 ------------------
