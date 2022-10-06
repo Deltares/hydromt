@@ -56,7 +56,7 @@ class Model(object, metaclass=ABCMeta):
         root: Optional[str] = None,
         mode: Optional[str] = "w",
         config_fn: Optional[str] = None,
-        data_libs: Optional[List[str]] = None,
+        data_libs: Union[List, str] = [],
         logger=logger,
         **artifact_keys,
     ):
