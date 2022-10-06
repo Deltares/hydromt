@@ -3,35 +3,10 @@
 # version number without 'v' at start
 __version__ = "0.5.1.dev"
 
-import geopandas as gpd
 import warnings
 
 # required for accessor style documentation
 from xarray import DataArray, Dataset
-
-try:
-    import pygeos
-
-    gpd.options.use_pygeos = True
-except ImportError:
-    pass
-
-try:
-    import pcraster as pcr
-
-    HAS_PCRASTER = True
-except ImportError:
-    HAS_PCRASTER = False
-
-
-def _has_xugrid():
-    try:
-        import xugrid
-
-        return True
-    except ImportError:
-        return False
-
 
 # submoduls
 from . import cli, workflows, stats, flw, raster, vector

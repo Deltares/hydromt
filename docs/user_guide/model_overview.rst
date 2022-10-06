@@ -1,7 +1,7 @@
-.. _model_overview:
+.. _model_main:
 
-Overview
-==============================
+Overview models
+===============
 
 High level functionality
 ------------------------
@@ -48,14 +48,14 @@ to certain specifications. These specification are class dependent. An overview 
 The table below lists model components common to all model classes
 
 .. list-table::
-   :widths: 20 45 15
+   :widths: 15 25 20
    :header-rows: 1
 
    * - Component
      - Explanation
      - API
    * - maps
-     - Auxiliary data maps
+     - Map data (resolution and CRS may vary between maps)
      - | :py:attr:`~Model.maps`
        | :py:func:`~Model.set_maps`
        | :py:func:`~Model.read_maps`
@@ -94,30 +94,30 @@ The table below lists model components common to all model classes
 For each generalized model class, the respective components exist:
 
 .. list-table::
-   :widths: 20 20 25 15
+   :widths: 15 20 25 20
    :header-rows: 1
 
    * - Component
-     - Explanation
      - Model class
+     - Explanation
      - API
    * - grid
-     - Static gridded data
      - GridModel
+     - Static gridded data with on unified grid
      - | :py:attr:`~GridModel.grid` 
        | :py:func:`~GridModel.set_grid`
        | :py:func:`~GridModel.read_grid`
        | :py:func:`~GridModel.write_grid`
    * - response_units
-     - Static lumped data over the response_units  
      - LumpedModel
+     - Static lumped data over the response_units  
      - | :py:attr:`~LumpedModel.response_units`
        | :py:func:`~LumpedModel.set_response_units`
        | :py:func:`~LumpedModel.read_response_units`
        | :py:func:`~LumpedModel.write_response_units`
    * - mesh
-     - Static mesh data
      - MeshModel 
+     - Static mesh data
      - | :py:attr:`~MeshModel.mesh` 
        | :py:func:`~MeshModel.set_mesh`
        | :py:func:`~MeshModel.read_mesh`
@@ -127,25 +127,6 @@ For each generalized model class, the respective components exist:
 
 .. NOTE::
 
-    Prior to v0.5.9, the following model components were available. They have been deprecated and will no longer be supported in future versions
-
-.. list-table::
-   :widths: 20 45 15
-   :header-rows: 1
-
-   * - Component 
-     - Explanation
-     - API
-   * - Staticmaps
-     - Static gridded data
-     - :py:attr:`~Model.staticmaps`
-       :py:func:`~Model.set_staticmaps`
-       :py:func:`~Model.read_staticmaps`
-       :py:func:`~Model.write_staticmaps`
-   * - Staticgeoms
-     - Static vector data
-     - :py:attr:`~Model.staticgeoms`
-       :py:func:`~Model.set_staticgeoms`
-       :py:func:`~Model.read_staticgeoms`
-       :py:func:`~Model.write_staticgeoms`
-
+    Prior to v0.5.9, the *staticmaps* and *staticgeoms* components were available. 
+    *staticmaps* is replaced with *grid* in GridModel, 
+    whereas *staticgeoms* is renamed to *geoms* for consistency but still available in the Model class.

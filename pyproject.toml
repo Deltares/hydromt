@@ -27,7 +27,7 @@ dependencies = [
     "rasterio",
     "requests",
     "rioxarray",
-    "shapely==1.8.2", # temp version pin see geopandas#2531
+    "shapely",
     "scipy",
     "xarray",
     "zarr",
@@ -67,6 +67,11 @@ Source = "https://github.com/Deltares/hydromt"
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
 
+[project.entry-points."hydromt.models"]
+lumped_model = "hydromt.models.model_lumped:LumpedModel"
+grid_model = "hydromt.models.model_grid:GridModel"
+mesh_model = "hydromt.models.model_mesh:MeshModel"
+
 [tool.black]
 line-length = 88
 target-version = ['py37']
@@ -76,6 +81,7 @@ include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 filterwarnings = [
     "ignore:distutils Version classes are deprecated:DeprecationWarning",
     "ignore:getargs:DeprecationWarning", # The 'u' format is deprecated. Use 'U' instead.

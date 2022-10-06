@@ -1,7 +1,7 @@
 .. _get_overview:
 
-Overview and Usage 
-============================
+Overview data
+=============
 
 The best way to provide data to HydroMT is by using a **data catalog**. The goal of this 
 data catalog is to provide simple and standardized access to (large) datasets. 
