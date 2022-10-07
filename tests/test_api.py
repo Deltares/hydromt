@@ -5,7 +5,7 @@ import numpy as np
 from hydromt.cli.api import *
 
 
-def test_get_region():    
+def test_get_region():
     region = {"basin": [12.111195, 46.088866]}  # Piave basin
     region_geom = get_region(region=region)
     assert isinstance(region_geom, str)
@@ -21,10 +21,7 @@ def test_get_region():
         ValueError,
         match="Only basin, subbasin, and interbasin are accepted region definitions",
     ):
-        get_region(
-            region={"bbox": [4.416504, 51.597548, 6.256714, 52.281602]}
-            
-        )
+        get_region(region={"bbox": [4.416504, 51.597548, 6.256714, 52.281602]})
 
 
 def test_api_datasets():
