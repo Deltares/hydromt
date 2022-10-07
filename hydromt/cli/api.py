@@ -4,9 +4,14 @@
 from typing import List, Dict, Union
 import typing
 import inspect
+import logging
 
 from ..models import ENTRYPOINTS
 from ..data_catalog import DataCatalog
+from .. import workflows, log
+from hydromt.gis_utils import utm_crs
+
+logger = logging.getLogger(__name__)
 
 
 def get_model_components(
@@ -120,3 +125,51 @@ def get_predifined_catalogs() -> Dict:
 
     """
     return DataCatalog().predefined_catalogs
+
+
+def get_region(
+    region: dict,
+    data_libs: Union[List, str],
+    hydrography_fn: str = "merit_hydro",
+    basin_index_fn: str = "merit_hydro_index",
+) -> str:
+    """Get jsonified basin/subbasin/interbasin geometry that includes area as a property
+
+    Parameters
+    ----------
+    region : dict
+        dictionary containing region definition
+
+    Returns
+    -------
+    geom: str
+        Geojson of geodataframe
+    """
+    data_catalog = DataCatalog(data_libs, logger=logger)
+    kind, region = workflows.parse_region(region, logger=logger)
+    # NOTE: kind=outlet is deprecated!
+    if kind in ["basin", "subbasin", "interbasin", "outlet"]:
+        # retrieve global hydrography data (lazy!)
+        ds_org = data_catalog.get_rasterdataset(hydrography_fn)
+        if "bounds" not in region:
+            region.update(basin_index=data_catalog[basin_index_fn])
+        # get basin geometry
+        geom, xy = workflows.get_basin_geometry(
+            ds=ds_org,
+            kind=kind,
+            logger=logger,
+            **region,
+        )
+        # region.update(xy=xy)
+        geom_bbox = geom.geometry.total_bounds
+        projected_crs = utm_crs(geom_bbox)
+        org_crs = geom.crs
+        geom = geom.to_crs(crs=projected_crs)
+        geom["area"] = geom["geometry"].area
+        geom = geom.to_crs(crs=org_crs)
+
+        return geom.to_json()
+    else:
+        raise ValueError(
+            "Only basin, subbasin, and interbasin are accepted region definitions"
+        )
