@@ -129,7 +129,7 @@ def get_predifined_catalogs() -> Dict:
 
 def get_region(
     region: dict,
-    data_libs: Union[List, str],
+    data_libs: Union[List, str] = None,
     hydrography_fn: str = "merit_hydro",
     basin_index_fn: str = "merit_hydro_index",
 ) -> str:
@@ -145,7 +145,10 @@ def get_region(
     geom: str
         Geojson of geodataframe
     """
-    data_catalog = DataCatalog(data_libs, logger=logger)
+    if data_libs:
+        data_catalog = DataCatalog(data_libs, logger=logger)
+    else:
+        data_catalog = DataCatalog(logger=logger)
     kind, region = workflows.parse_region(region, logger=logger)
     # NOTE: kind=outlet is deprecated!
     if kind in ["basin", "subbasin", "interbasin", "outlet"]:
