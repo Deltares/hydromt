@@ -10,7 +10,7 @@ from shapely.geometry import polygon
 from hydromt.models.model_api import _check_data
 from hydromt.models import Model, GridModel, LumpedModel, MODELS, model_plugins
 import hydromt.models.model_plugins
-from hydromt import _compat
+import hydromt._compat
 from entrypoints import EntryPoint, Distribution
 
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -45,9 +45,12 @@ def test_load():
         )
 
 
-def test_global_models():
+# test both with and without xugrid
+@pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
+def test_global_models(mocker, has_xugrid):
+    mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
     keys = list(model_plugins.LOCAL_EPS.keys())
-    if not _compat.HAS_XUGRID:
+    if not hydromt._compat.HAS_XUGRID:
         keys.remove("mesh_model")
     assert isinstance(MODELS[keys[0]], EntryPoint)
     assert issubclass(MODELS.load(keys[0]), Model)
@@ -280,10 +283,9 @@ def test_networkmodel(network_model, tmpdir):
         network_model.network
 
 
-@pytest.mark.skipif(not _compat.HAS_XUGRID, reason="Xugrid not installed.")
+@pytest.mark.skipif(not hydromt._compat.HAS_XUGRID, reason="Xugrid not installed.")
 def test_meshmodel(mesh_model, tmpdir):
-    from hydromt.models import MeshModel
-
+    MeshModel = MODELS.load("mesh_model")
     assert "mesh" in mesh_model.api
     non_compliant = mesh_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
@@ -298,10 +300,9 @@ def test_meshmodel(mesh_model, tmpdir):
     assert equal, errors
 
 
-@pytest.mark.skipif(not _compat.HAS_XUGRID, reason="Xugrid not installed.")
+@pytest.mark.skipif(not hydromt._compat.HAS_XUGRID, reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, world, tmpdir):
-    from hydromt.models import MeshModel
-
+    MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})
