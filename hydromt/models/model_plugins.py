@@ -64,6 +64,7 @@ def load(ep, module=None, logger=logger):
         logger.debug(
             f"Loaded model plugin '{ep.name} = {ep.module_name}.{ep.object_name}' ({ep.distro.version})"
         )
+        return model_class
     except (ModuleNotFoundError, AttributeError) as err:
         logger.exception(f"Error while loading entrypoint {ep.name}: {str(err)}")
-    return model_class
+        return None
