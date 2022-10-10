@@ -8,10 +8,57 @@ import numpy as np
 import geopandas as gpd
 from shapely.geometry import polygon
 from hydromt.models.model_api import _check_data
-from hydromt.models import Model, GridModel, LumpedModel
-from hydromt import _compat
+from hydromt.models import Model, GridModel, LumpedModel, MODELS, model_plugins
+import hydromt.models.model_plugins
+import hydromt._compat
+from entrypoints import EntryPoint, Distribution
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+def test_plugins(mocker):
+    distro = Distribution("hydromt", "x.x.x")
+    ep_lst = [
+        EntryPoint.from_string("hydromt.models.model_api:Model", "test_model", distro)
+    ]
+    mocker.patch("hydromt.models.model_plugins._discover", return_value=ep_lst)
+    eps = model_plugins.get_plugin_eps()
+    assert "test_model" in eps
+    assert isinstance(eps["test_model"], EntryPoint)
+
+
+def test_plugin_duplicates(mocker):
+    ep_lst = model_plugins.get_general_eps().values()
+    mocker.patch("hydromt.models.model_plugins._discover", return_value=ep_lst)
+    eps = model_plugins.get_plugin_eps()
+    assert len(eps) == 0
+
+
+def test_load():
+    with pytest.raises(ValueError, match="Model plugin type not recognized"):
+        model_plugins.load(
+            EntryPoint.from_string("hydromt.data_catalog:DataCatalog", "error")
+        )
+    with pytest.raises(ImportError, match="Error while loading model plugin"):
+        model_plugins.load(
+            EntryPoint.from_string("hydromt.models:DataCatalog", "error")
+        )
+
+
+# test both with and without xugrid
+@pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
+def test_global_models(mocker, has_xugrid):
+    mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
+    keys = list(model_plugins.LOCAL_EPS.keys())
+    if not hydromt._compat.HAS_XUGRID:
+        keys.remove("mesh_model")
+    assert isinstance(MODELS[keys[0]], EntryPoint)
+    assert issubclass(MODELS.load(keys[0]), Model)
+    assert keys[0] in MODELS.__str__()
+    assert all([k in MODELS for k in keys])  # eps
+    assert all([k in MODELS.cls for k in keys])
+    with pytest.raises(ValueError, match="Unknown model"):
+        MODELS["unknown"]
 
 
 def test_check_data(demda):
@@ -236,10 +283,9 @@ def test_networkmodel(network_model, tmpdir):
         network_model.network
 
 
-@pytest.mark.skipif(not _compat.HAS_XUGRID, reason="Xugrid not installed.")
+@pytest.mark.skipif(not hydromt._compat.HAS_XUGRID, reason="Xugrid not installed.")
 def test_meshmodel(mesh_model, tmpdir):
-    from hydromt.models import MeshModel
-
+    MeshModel = MODELS.load("mesh_model")
     assert "mesh" in mesh_model.api
     non_compliant = mesh_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
@@ -254,10 +300,9 @@ def test_meshmodel(mesh_model, tmpdir):
     assert equal, errors
 
 
-@pytest.mark.skipif(not _compat.HAS_XUGRID, reason="Xugrid not installed.")
+@pytest.mark.skipif(not hydromt._compat.HAS_XUGRID, reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, world, tmpdir):
-    from hydromt.models import MeshModel
-
+    MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})

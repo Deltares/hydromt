@@ -111,6 +111,14 @@ DataFrame
 Models
 ======
 
+Discovery
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelCatalog
+
 Classes
 =======
 .. autosummary::

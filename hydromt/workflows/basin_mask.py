@@ -16,7 +16,7 @@ import warnings
 from ..io import open_raster
 from ..flw import flwdir_from_da, basin_map, stream_map, outlet_map
 from ..data_adapter import GeoDataFrameAdapter
-from ..models import ENTRYPOINTS, model_plugins
+from ..models import MODELS
 
 logger = logging.getLogger(__name__)
 
@@ -115,8 +115,8 @@ def parse_region(region, logger=logger):
     }
     kind = next(iter(kwargs))  # first key of region
     value0 = kwargs.pop(kind)
-    if kind in ENTRYPOINTS:
-        model_class = model_plugins.load(ENTRYPOINTS[kind], logger=logger)
+    if kind in MODELS:
+        model_class = MODELS.load(kind)
         kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
         kind = "model"
     elif kind == "grid":
@@ -125,7 +125,7 @@ def parse_region(region, logger=logger):
         elif isinstance(value0, (xr.Dataset, xr.DataArray)):
             kwargs = dict(grid=value0)
     elif kind not in options:
-        k_lst = '", "'.join(list(options.keys()) + list(ENTRYPOINTS.keys()))
+        k_lst = '", "'.join(list(options.keys()) + list(MODELS))
         raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
     else:
         kwarg = _parse_region_value(value0)

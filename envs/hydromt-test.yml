@@ -23,8 +23,9 @@ dependencies:
   - pygeos>=0.8
   - pyproj
   - pytest # tests
-  - pytest-cov # tests
   - pytest-benchmark # tests
+  - pytest-cov # tests
+  - pytest-mock # tests
   - rasterio
   - requests
   - rioxarray

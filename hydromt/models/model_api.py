@@ -75,12 +75,13 @@ class Model(object, metaclass=ABCMeta):
         data_libs : List[str], optional
             List of data catalog yaml files, by default None
         """
-        from . import ENTRYPOINTS  # load within method to avoid circular imports
+        from . import MODELS  # avoid circular import
 
         self.logger = logger
-        ep = ENTRYPOINTS.get(self._NAME, None)
-        version = ep.distro.version if ep is not None else ""
-        dist = ep.distro.name if ep is not None else "unknown"
+        dist, version = "unknown", "NA"
+        if self._NAME in MODELS:
+            ep = MODELS[self._NAME]
+            dist, version = ep.distro.name, ep.distro.version
 
         # link to data
         self.data_catalog = DataCatalog(
