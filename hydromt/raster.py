@@ -397,8 +397,8 @@ class XRasterBase(XGeoBase):
         if len(extra_dims) == 1:
             dims = tuple(extra_dims) + dims
             self.set_attrs(dim0=extra_dims[0])
-        # elif len(extra_dims) == 0:
-        #    self.set_attrs(dim0=None)
+        elif len(extra_dims) == 0:
+            self._obj.coords[GEO_MAP_COORD].attrs.pop("dim0", None)
         elif len(extra_dims) > 1:
             raise ValueError("Only 2D and 3D data arrays supported.")
         if isinstance(self._obj, xr.Dataset):
