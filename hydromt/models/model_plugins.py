@@ -82,14 +82,13 @@ def load(ep, logger=logger) -> Model:
     """
     _str = f"{ep.name} = {ep.module_name}.{ep.object_name}"
     try:
-        # plugins[ep.name] = ep.load()
         model_class = ep.load()
         if not issubclass(model_class, Model):
             raise ValueError(f"Model plugin type not recognized '{_str}'")
         logger.debug(f"Loaded model plugin {_str}")
+        return model_class
     except (ModuleNotFoundError, AttributeError) as err:
         raise ImportError(f"Error while loading model plugin '{_str}' ({err})")
-    return model_class
 
 
 class ModelCatalog:

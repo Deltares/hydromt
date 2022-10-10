@@ -134,6 +134,7 @@ class LumpedMixin:
 
 
 class LumpedModel(LumpedMixin, Model):
+    """Model class Lumped Model for lumped models in HydroMT"""
 
     _CLI_ARGS = {"region": "setup_region"}
 
@@ -145,7 +146,7 @@ class LumpedModel(LumpedMixin, Model):
         data_libs: List[str] = None,
         logger=logger,
     ):
-        # Initialize with the Model class
+        """Initialize a LumpedModel for lumped and semi-distributed models."""
         super().__init__(
             root=root,
             mode=mode,

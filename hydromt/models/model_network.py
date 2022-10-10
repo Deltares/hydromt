@@ -22,7 +22,7 @@ class NetworkModel(Model):
         data_libs: List[str] = None,
         logger=logger,
     ):
-        # Initialize with the Model class
+        """Initialize a NetworkModel for network models."""
         super().__init__(
             root=root,
             mode=mode,
