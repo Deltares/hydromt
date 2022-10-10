@@ -29,10 +29,9 @@ def get_general_eps() -> Dict:
     eps = {}
     distro = Distribution("hydromt", __version__)
     for name, epstr in LOCAL_EPS.items():
-        if name != "mesh_model":
-            eps[name] = EntryPoint.from_string(epstr, name, distro)
-        elif name == "mesh_model" and _compat.HAS_XUGRID:
-            eps[name] = EntryPoint.from_string(epstr, name, distro)
+        if name == "mesh_model" and not _compat.HAS_XUGRID:
+            continue
+        eps[name] = EntryPoint.from_string(epstr, name, distro)
     return eps
 
 
