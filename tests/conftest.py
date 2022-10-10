@@ -224,7 +224,7 @@ def network_model():
 
 @pytest.fixture
 def mesh_model(demuda):
-    MeshModel = MODELS.load("mesh_model")
+    mod = MODELS.load("mesh_model")()
     # region = gpd.GeoDataFrame(
     #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.grid.crs
     # )
