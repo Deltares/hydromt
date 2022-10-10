@@ -47,6 +47,8 @@ def test_load():
 
 def test_global_models():
     keys = list(model_plugins.LOCAL_EPS.keys())
+    if not _compat.HAS_XUGRID:
+        keys.remove("mesh_model")
     assert isinstance(MODELS[keys[0]], EntryPoint)
     assert issubclass(MODELS.load(keys[0]), Model)
     assert keys[0] in MODELS.__str__()

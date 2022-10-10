@@ -3,6 +3,7 @@ import logging
 from typing import Dict, Iterator, List
 from .. import __version__
 from .model_api import Model
+from .. import _compat
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,10 @@ def get_general_eps() -> Dict:
     eps = {}
     distro = Distribution("hydromt", __version__)
     for name, epstr in LOCAL_EPS.items():
-        eps[name] = EntryPoint.from_string(epstr, name, distro)
+        if name != "mesh_model":
+            eps[name] = EntryPoint.from_string(epstr, name, distro)
+        elif name == "mesh_model" and _compat.HAS_XUGRID:
+            eps[name] = EntryPoint.from_string(epstr, name, distro)
     return eps
 
 
