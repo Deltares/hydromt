@@ -37,7 +37,7 @@ def river_width(
     rivwth : np.ndarray
         Average width per segment in gdf_stream
     """
-    assert da_rivmask.raster.crs.is_projected
+    assert da_rivmask.raster.crs.is_projected, "projected CRS required; reproject da_rivmask using raster.reproject"
     gdf_stream = gdf_stream.copy()
     # get/check river length
     if "rivlen" not in gdf_stream.columns:
