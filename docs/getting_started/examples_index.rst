@@ -17,6 +17,7 @@ Reading data:
 * `Reading raster data <../_examples/reading_raster_data.ipynb>`_
 * `Reading vector data <../_examples/reading_vector_data.ipynb>`_
 * `Reading point location data <../_examples/reading_point_data.ipynb>`_
+* `Reading point location data <../_examples/reading_point_data.ipynb>`_
 
 GIS operations:
 ***************
