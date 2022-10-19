@@ -82,12 +82,12 @@ def test_source(data_cat, name, **kwargs):
     elif isinstance(source, GeoDatasetAdapter):
         ds = data_cat.get_geodataset(name, bbox=bbox, **kwargs)
         # load slice of data
-        for coord in ds.coords: #shouldn't that be for instead of if?
+        for coord in ds.coords:  # shouldn't that be for instead of if?
             if coord == ds.vector.index_dim:
                 ds = ds.isel({coord: slice(-50)})
             else:
                 ds = ds.isel({coord: -1}).squeeze()
-        ds = ds.load() #not used if outside loop, musn't it be inside ine
+        ds = ds.load()  # not used if outside loop, musn't it be inside ine
     return
 
 
@@ -102,7 +102,6 @@ if __name__ == "__main__":
     if not os.path.isabs(fn):
         fn = os.path.join(os.path.dirname(__file__), fn)
     data_cat = DataCatalog(fn, logger=logger)
-
 
     # get names of data sources to test; by default all
     if len(sys.argv) == 3:
