@@ -5,6 +5,7 @@ import pytest
 from os.path import join, dirname, abspath
 import numpy as np
 import geopandas as gpd
+import pandas as pd
 import xarray as xr
 import hydromt
 
@@ -106,3 +107,78 @@ def test_geodataframe(geodf, tmpdir):
     assert np.all(gdf1 == geodf)
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_geodataframe("no_file.geojson")
+
+
+def test_dataframe(df, df_time, tmpdir):
+    # Test reading csv
+    fn_df = str(tmpdir.join("test.csv"))
+    df.to_csv(fn_df)
+    data_catalog = DataCatalog()
+    df1 = data_catalog.get_dataframe(fn_df, index_col=0)
+    assert isinstance(df1, pd.DataFrame)
+    assert np.all(df1 == df)
+
+    # Test FWF support
+    fn_fwf = str(tmpdir.join("test.txt"))
+    df.to_string(fn_fwf, index=False)
+    fwf = data_catalog.get_dataframe(fn_fwf, driver="fwf", colspecs="infer")
+    assert isinstance(fwf, pd.DataFrame)
+    assert np.all(fwf == df)
+
+    fn_xlsx = str(tmpdir.join("test.xlsx"))
+    df.to_excel(fn_xlsx)
+    df2 = data_catalog.get_dataframe(fn_xlsx, index_col=0)
+    assert isinstance(df2, pd.DataFrame)
+    assert np.all(df2 == df)
+
+
+def test_dataframe_time(df_time, tmpdir):
+    # Test time df
+    fn_df_ts = str(tmpdir.join("test_ts.csv"))
+    df_time.to_csv(fn_df_ts)
+    data_catalog = DataCatalog()
+    dfts1 = data_catalog.get_dataframe(fn_df_ts, index_col=0, parse_dates=True)
+    assert isinstance(dfts1, pd.DataFrame)
+    assert np.all(dfts1 == df_time)
+
+    # Test renaming
+    rename = {
+        "precip": "P",
+        "temp": "T",
+        "pet": "ET",
+    }
+    dfts2 = data_catalog.get_dataframe(
+        fn_df_ts, index_col=0, parse_dates=True, rename=rename
+    )
+    assert np.all(list(dfts2.columns) == list(rename.values()))
+
+    # Test unit add/multiply
+    unit_mult = {
+        "precip": 0.75,
+        "temp": 2,
+        "pet": 1,
+    }
+    unit_add = {
+        "precip": 0,
+        "temp": -1,
+        "pet": 2,
+    }
+    dfts3 = data_catalog.get_dataframe(
+        fn_df_ts, index_col=0, parse_dates=True, unit_mult=unit_mult, unit_add=unit_add
+    )
+    # Do checks
+    for var in df_time.columns:
+        assert np.all(df_time[var] * unit_mult[var] + unit_add[var] == dfts3[var])
+
+    # Test timeslice
+    dfts4 = data_catalog.get_dataframe(
+        fn_df_ts, index_col=0, parse_dates=True, time_tuple=("2007-01-02", "2007-01-04")
+    )
+    assert len(dfts4) == 3
+
+    # Test variable slice
+    vars_slice = ["precip", "temp"]
+    dfts5 = data_catalog.get_dataframe(
+        fn_df_ts, index_col=0, parse_dates=True, variables=vars_slice
+    )
+    assert np.all(dfts5.columns == vars_slice)

@@ -1,11 +1,16 @@
 import pytest
+from os.path import join, dirname, abspath
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
 
+from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
+from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
+
+# DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture
@@ -33,9 +38,22 @@ def df():
 
 
 @pytest.fixture
+def df_time():
+    df_time = pd.DataFrame(
+        {
+            "precip": [0, 1, 2, 3, 4],
+            "temp": [15, 16, 17, 18, 19],
+            "pet": [1, 2, 3, 4, 5],
+        },
+        index=pd.date_range(start="2007-01-01", end="2007-01-05", freq="D"),
+    )
+    return df_time
+
+
+@pytest.fixture
 def geodf(df):
     gdf = gpd.GeoDataFrame(
-        data=df.drop(columns=["longitude", "latitude"]),
+        data=df.copy().drop(columns=["longitude", "latitude"]),
         geometry=gpd.points_from_xy(df["longitude"], df["latitude"]),
         crs=4326,
     )
@@ -52,7 +70,7 @@ def world():
 def ts(geodf):
     dates = pd.date_range("01-01-2000", "12-31-2000", name="time")
     ts = pd.DataFrame(
-        index=geodf.index,
+        index=geodf.index.values,
         columns=dates,
         data=np.random.rand(geodf.index.size, dates.size),
     )
@@ -127,3 +145,90 @@ def obsda():
     )
     da.raster.set_crs(4326)
     return da
+
+
+@pytest.fixture
+def demuda():
+    import xugrid as xu
+
+    uds = xu.data.adh_san_diego()
+    uda = uds["elevation"]
+    uda.ugrid.grid.set_crs(epsg=2230)
+    return uda
+
+
+@pytest.fixture
+def griduda():
+    import xugrid as xu
+
+    bbox = [12.09, 46.49, 12.10, 46.50]  # Piava river
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    da = data_catalog.get_rasterdataset("merit_hydro", bbox=bbox, variables="elevtn")
+    gdf_da = da.raster.vector_grid()
+    gdf_da["value"] = da.values.flatten()
+    gdf_da.index.name = "mesh2d_nFaces"
+    uda = xu.UgridDataset.from_geodataframe(gdf_da)
+    uda = uda["value"]
+    uda.name = "elevtn"
+
+    return uda
+
+
+@pytest.fixture
+def model(demda, world, obsda):
+    mod = Model()
+    mod.setup_region({"geom": demda.raster.box})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_staticmaps(demda, "elevtn")  # will be deprecated
+    mod.set_geoms(world, "world")
+    mod.set_maps(demda, "elevtn")
+    mod.set_forcing(obsda, "waterlevel")
+    mod.set_states(demda, "zsini")
+    mod.set_results(obsda, "zs")
+    return mod
+
+
+@pytest.fixture
+def grid_model(demda, flwda):
+    mod = GridModel()
+    mod.setup_region({"geom": demda.raster.box})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_grid(demda, "elevtn")
+    mod.set_grid(flwda, "flwdir")
+    return mod
+
+
+@pytest.fixture
+def lumped_model(ts, geodf):
+    mod = LumpedModel()
+    # mod.setup_region({"bbox": geodf.total_bounds})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    da = xr.DataArray(
+        ts,
+        dims=["index", "time"],
+        coords={"index": ts.index, "time": ts.columns},
+        name="zs",
+    )
+    da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
+    da.vector.set_crs(geodf.crs)
+    mod.set_response_units(da)
+    return mod
+
+
+@pytest.fixture
+def network_model():
+    mod = NetworkModel()
+    # TODO set data and attributes of mod
+    return mod
+
+
+@pytest.fixture
+def mesh_model(demuda):
+    mod = MODELS.load("mesh_model")()
+    # region = gpd.GeoDataFrame(
+    #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.grid.crs
+    # )
+    # mod.setup_region({"geom": region})
+    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.set_mesh(demuda, "elevtn")
+    return mod

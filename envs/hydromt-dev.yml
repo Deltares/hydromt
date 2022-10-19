@@ -19,21 +19,23 @@ dependencies:
   - gdal>=3.1
   - geopandas>=0.10
   - jupyter # to run examples
-  - netcdf4
   - matplotlib # to run examples
   - nbsphinx # docs notebook examples
-  - numba
+  - netcdf4
   - numpy
   - openpyxl
   - pandas
+  - packaging
   - pcraster # optional
   - pip
   - pydata-sphinx-theme  # docs
   - pyflwdir>=0.5.4
   - pygeos>=0.8
+  - pyproj
   - pytest # tests
-  - pytest-cov # tests
   - pytest-benchmark # tests
+  - pytest-cov # tests
+  - pytest-mock # tests
   - python>=3.7
   - rasterio
   - responses # tests
@@ -42,8 +44,10 @@ dependencies:
   - scipy
   - testpath  # tests
   - toml
+  - shapely
   - sphinx # docs
   - xarray
+  - xugrid>=0.1.5 # optional for mesh
   - zarr
   - pip:
     - hydroengine  # optional

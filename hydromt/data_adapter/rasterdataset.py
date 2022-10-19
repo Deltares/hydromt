@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 from os.path import join
-from .. import gis_utils, io
 import numpy as np
 import pandas as pd
 import xarray as xr
 import geopandas as gpd
 from shapely.geometry import box
 import warnings
+import logging
+from typing import Union, NewType
+from pathlib import Path
 
+from .. import gis_utils, io
 from .data_adapter import DataAdapter, PREPROCESSORS
 from ..raster import GEO_MAP_COORD
 
-import logging
 
 logger = logging.getLogger(__name__)
 
-__all__ = [
-    "RasterDatasetAdapter",
-]
+__all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
+
+RasterDatasetSource = NewType("RasterDatasetSource", Union[str, Path])
 
 
 class RasterDatasetAdapter(DataAdapter):
@@ -97,8 +99,8 @@ class RasterDatasetAdapter(DataAdapter):
         self,
         data_root,
         data_name,
-        bbox,
-        time_tuple,
+        bbox=None,
+        time_tuple=None,
         driver=None,
         variables=None,
         logger=logger,

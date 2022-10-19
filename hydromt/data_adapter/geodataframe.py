@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 from os.path import join
-from .. import io
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
+import logging
+from typing import Union, NewType
+from pathlib import Path
 
 from .data_adapter import DataAdapter
+from .. import io
 
-import logging
 
 logger = logging.getLogger(__name__)
 
-__all__ = [
-    "GeoDataFrameAdapter",
-]
+__all__ = ["GeoDataFrameAdapter", "GeoDataframeSource"]
+
+GeoDataframeSource = NewType("GeoDataframeSource", Union[str, Path])
 
 
 class GeoDataFrameAdapter(DataAdapter):
@@ -89,7 +91,7 @@ class GeoDataFrameAdapter(DataAdapter):
         self,
         data_root,
         data_name,
-        bbox,
+        bbox=None,
         driver=None,
         variables=None,
         logger=logger,
