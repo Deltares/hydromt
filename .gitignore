@@ -83,8 +83,11 @@ examples/tmp*
 =======
 examples/tmpdir
 examples/data_extract
+<<<<<<< HEAD
 examples/data_catalog_extract.yml
 >>>>>>> bbfe27db (added export_data notebook fixes #218)
+=======
+>>>>>>> ad85692c (Remove relative path in export_data)
 
 # pyenv
 .python-version
