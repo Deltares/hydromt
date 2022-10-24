@@ -11,11 +11,12 @@ List of examples
 
 For a static (non-interactive) view of the examples follow one of the links below:
 
-Reading data:
-*************
+Data and DataCatalog:
+*********************
 
 * `Reading raster data <../_examples/reading_raster_data.ipynb>`_
 * `Reading vector data <../_examples/reading_vector_data.ipynb>`_
+* `Exporting data <../examples/export_data.ipynb>`_
 
 GIS operations:
 ***************
