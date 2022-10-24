@@ -6,6 +6,21 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+Unreleased
+==========
+
+Added
+-----
+
+Changed
+-------
+
+Fixed
+-----
+
+Deprecated
+----------
+
 v0.6.0 (24 October 2022)
 ========================
 
