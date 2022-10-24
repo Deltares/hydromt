@@ -46,11 +46,15 @@ Fixed
 -----
 - Bug in backward compatibility of staticgeoms (not read automatically). `Issue #190 <https://github.com/Deltares/hydromt/issues/190>`_
 - Direct import of xarray.core.resample. `Issue #189 <https://github.com/Deltares/hydromt/issues/189>`_
-- Bug in dim0 attribute of raster, removed instead of set to None if no dim0 `Issue #210 <https://github.com/Deltares/hydromt/issues/210>`
+- Bug in dim0 attribute of raster, removed instead of set to None if no dim0 `Issue #210 <https://github.com/Deltares/hydromt/issues/210>`_
 
 Deprecated
 ----------
 - self.staticgeoms and self.staticmaps are deprecated.
+
+Documentation
+-------------
+- added **export_data** example notebook `Issue #218 <https://github.com/Deltares/hydromt/issues/218>`_
 
 v0.5.0 (4 August 2022)
 ======================

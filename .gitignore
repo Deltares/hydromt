@@ -78,7 +78,13 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 examples/.ipynb_checkpoints
+<<<<<<< HEAD
 examples/tmp*
+=======
+examples/tmpdir
+examples/data_extract
+examples/data_catalog_extract.yml
+>>>>>>> bbfe27db (added export_data notebook fixes #218)
 
 # pyenv
 .python-version
