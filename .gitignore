@@ -80,7 +80,6 @@ target/
 examples/.ipynb_checkpoints
 examples/tmpdir
 examples/data_extract
-examples/data_catalog_extract.yml
 
 # pyenv
 .python-version
