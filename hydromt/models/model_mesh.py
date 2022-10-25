@@ -269,6 +269,7 @@ class MeshModel(MeshMixin, Model):
     """Model class Mesh Model for mesh models in HydroMT"""
 
     _CLI_ARGS = {"region": "setup_mesh", "res": "setup_mesh"}
+    _NAME = "mesh_model"
 
     def __init__(
         self,
