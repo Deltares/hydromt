@@ -164,7 +164,10 @@ def test_rasterize(rioda):
     assert mask.dtype == bool
     assert np.all(mask)
     with pytest.raises(ValueError, match="No shapes found"):
-        rioda.raster.rasterize(gpd.GeoDataFrame())
+        rioda.raster.rasterize(
+            gdf=gpd.GeoDataFrame(geometry=[box(-5, 2, -3, 4)], crs=rioda.raster.crs),
+            sindex=True,
+        )
 
 
 def test_vectorize():
