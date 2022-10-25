@@ -78,9 +78,10 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 examples/.ipynb_checkpoints
-examples/tmp*
-examples/data_extract
-examples/data_catalog_extract.yml
+examples/tmpdir
+examples/grid_model
+examples/grid_model_build
+examples/grid_model_build.ini
 
 # pyenv
 .python-version

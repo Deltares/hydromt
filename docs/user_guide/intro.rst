@@ -128,6 +128,7 @@ Region                          Argument of the *build* and *clip* CLI methods t
    model_clip.rst
    model_config.rst
    model_region.rst
+   ../_examples/working_with_models.ipynb
 
 .. toctree::
    :maxdepth: 2
