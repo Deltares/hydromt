@@ -25,8 +25,8 @@ We recommend using the `Mambaforge <https://github.com/conda-forge/miniforge#mam
 
 2 - Download the content of the HydroMT github repository
 *********************************************************
-To run the exercices, you will need to download the content of the hydromt repository locally. You can either do a
-`manual download <https://github.com/Deltares/hydromt/archive/refs/heads/main.zip>`_ and extract the content of the dowloaded ZIP folder 
+To run the exercises, you will need to download the content of the HydroMT repository locally. You can either do a
+`manual download <https://github.com/Deltares/hydromt/archive/refs/heads/main.zip>`_ and extract the content of the downloaded ZIP folder 
 **or** clone the repository locally:
 
 .. code-block:: console
@@ -36,7 +36,7 @@ To run the exercices, you will need to download the content of the hydromt repos
 
 3 - Install HydroMT and the other python dependencies in a separate Python environment
 **************************************************************************************
-The last step is to install all the python dependencies required to run the notebooks, including of course hydromt. All required dependencies can be found
+The last step is to install all the python dependencies required to run the notebooks, including HydroMT. All required dependencies can be found
 in the `environment.yml <https://github.com/Deltares/hydromt/blob/main/binder/environment.yml>`_ file. 
 
 First navigate into the extracted ``hydromt`` folder (where the binder and examples folder are located). Create a new *hydromt* environment using the environment.yml file 
@@ -45,7 +45,7 @@ in the binder folder (you can exchange mamba/conda in the example below):
 .. code-block:: console
 
   $ cd hydromt
-  $ conda env create -f binder/environment.yml
+  $ mamba env create -f binder/environment.yml
 
 4 - Running the examples
 ************************
