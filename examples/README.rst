@@ -7,27 +7,54 @@ use as a HydroMT tutorial.
 These examples can be run online or on your local machine. 
 To run these examples online press the **binder** badge above.
 
+Local installation
+------------------
+
 To run these examples on your local machine you need a copy of the repository and 
 an installation of HydroMT including some additional packages. The most reliable 
 way to do this installation is by creating a new environment as described below.
 
-First, download and extract the `zipped HydroMT github repository <https://github.com/Deltares/hydromt/archive/refs/heads/main.zip>`_
+1 - Install python and conda/mamba
+**********************************
+If not already done, you'll need Python 3.8 or greater and a package manager such as conda or mamba. These package managers help you to install (Python) packages and 
+`manage environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ such that different installations do not conflict.
 
-Then, navigate into the extracted ``hydromt`` folder and execute the following lines from the command line.
+We recommend using the `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_ Python distribution. This installs Python and the 
+`mamba package manager <https://github.com/mamba-org/mamba>`_. `Miniforge <https://github.com/conda-forge/miniforge>`_ and 
+`Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ will install Python and the `conda package manager <https://docs.conda.io/en/latest/>`_.
 
-Next, create a conda environment based on the ``environment.yml`` in the binder folder, 
-activate this environment and install the HydroMT version from downloaded files.
+2 - Download the content of the HydroMT github repository
+*********************************************************
+To run the exercices, you will need to download the content of the hydromt repository locally. You can either do a
+`manual download <https://github.com/Deltares/hydromt/archive/refs/heads/main.zip>`_ and extract the content of the dowloaded ZIP folder 
+**or** clone the repository locally:
 
 .. code-block:: console
 
-  $ conda env create -f binder/environment.yml
-  $ conda activate hydromt
-  $ flit install --dep production
+  $ git clone https://github.com/Deltares/hydromt.git
 
+
+3 - Install HydroMT and the other python dependencies in a separate Python environment
+**************************************************************************************
+The last step is to install all the python dependencies required to run the notebooks, including of course hydromt. All required dependencies can be found
+in the `environment.yml <https://github.com/Deltares/hydromt/blob/main/binder/environment.yml>`_ file. 
+
+First navigate into the extracted ``hydromt`` folder (where the binder and examples folder are located). Create a new *hydromt* environment using the environment.yml file 
+in the binder folder (you can exchange mamba/conda in the example below):
+
+.. code-block:: console
+
+  $ cd hydromt
+  $ conda env create -f binder/environment.yml
+
+4 - Running the examples
+************************
 Finally, start a jupyter notebook inside the ``examples`` folder and activated ``hydromt`` environment.
 
 .. code-block:: console
 
+  $ conda activate hydromt
   $ cd examples
   $ jupyter notebook
+
 
