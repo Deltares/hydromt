@@ -78,8 +78,7 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 examples/.ipynb_checkpoints
-examples/tmpdir
-examples/data_extract
+examples/tmp*
 
 # pyenv
 .python-version
