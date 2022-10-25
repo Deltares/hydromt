@@ -1278,7 +1278,7 @@ class Model(object, metaclass=ABCMeta):
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
         if len(self._staticmaps) > 0:
-            return CRS(self.staticmaps.raster.crs)
+            return self.staticmaps.raster.crs
         else:
             return self.region.crs
 

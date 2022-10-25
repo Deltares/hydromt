@@ -17,6 +17,7 @@ Changed
 
 Fixed
 -----
+- All CRS objects are from pyproj library (instead of rasterio.crs submodule) `PR #230 <https://github.com/Deltares/hydromt/pull/230>`_
 
 Deprecated
 ----------
