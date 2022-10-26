@@ -50,6 +50,7 @@ test = [
     "black",
 	"pytest>=2.7.3",
 	"pytest-cov",
+    "pytest-mock",
 	"responses",
 ]
 doc = [
