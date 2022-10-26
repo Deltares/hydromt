@@ -21,6 +21,10 @@ Fixed
 Deprecated
 ----------
 
+Documentation
+-------------
+- added **working_with_models** example notebook `Issue #221 <https://github.com/Deltares/hydromt/issues/221>`_
+
 v0.6.0 (24 October 2022)
 ========================
 
