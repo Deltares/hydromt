@@ -16,6 +16,7 @@ Data and DataCatalog:
 
 * `Reading raster data <../_examples/reading_raster_data.ipynb>`_
 * `Reading vector data <../_examples/reading_vector_data.ipynb>`_
+* `Reading geospatial point time-series <../_examples/reading_point_data.ipynb>`_
 * `Exporting data <../examples/export_data.ipynb>`_
 
 Working with models:
