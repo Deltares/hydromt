@@ -20,5 +20,6 @@ Reading data:
 GIS operations:
 ***************
 
-* `Delineate basins <../_examples/delineate_basin.ipynb>`_
 * `Working with raster data <../_examples/working_with_raster.ipynb>`_
+* `Working with flow direction data <../_examples/working_with_flow_directions.ipynb>`_
+* `Delineate basins <../_examples/delineate_basin.ipynb>`_
