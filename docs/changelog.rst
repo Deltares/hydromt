@@ -23,8 +23,10 @@ Deprecated
 
 Documentation
 -------------
-- added **working_with_models** example notebook `Issue #221 <https://github.com/Deltares/hydromt/issues/221>`_
-- added **export_data** example notebook `Issue #218 <https://github.com/Deltares/hydromt/issues/218>`_
+- added **working_with_models** example notebook `PR #229 <https://github.com/Deltares/hydromt/pull/229>`_
+- added **export_data** example notebook `PR #222 <https://github.com/Deltares/hydromt/pull/222>`_
+- added **reading_point_data** example notebook `PR #216 <https://github.com/Deltares/hydromt/pull/216>`_
+- added **working_with_flow_directions** example notebook `PR #231 <https://github.com/Deltares/hydromt/pull/231>`_
 
 
 v0.6.0 (24 October 2022)
