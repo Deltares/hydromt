@@ -6,8 +6,29 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-unreleased
+Unreleased
 ==========
+
+Added
+-----
+
+Changed
+-------
+
+Fixed
+-----
+
+Deprecated
+----------
+
+Documentation
+-------------
+- added **working_with_models** example notebook `Issue #221 <https://github.com/Deltares/hydromt/issues/221>`_
+- added **export_data** example notebook `Issue #218 <https://github.com/Deltares/hydromt/issues/218>`_
+
+
+v0.6.0 (24 October 2022)
+========================
 
 Added
 -----
@@ -31,7 +52,7 @@ Fixed
 -----
 - Bug in backward compatibility of staticgeoms (not read automatically). `Issue #190 <https://github.com/Deltares/hydromt/issues/190>`_
 - Direct import of xarray.core.resample. `Issue #189 <https://github.com/Deltares/hydromt/issues/189>`_
-- Bug in dim0 attribute of raster, removed instead of set to None if no dim0 `Issue #210 <https://github.com/Deltares/hydromt/issues/210>`
+- Bug in dim0 attribute of raster, removed instead of set to None if no dim0 `Issue #210 <https://github.com/Deltares/hydromt/issues/210>`_
 
 Deprecated
 ----------
