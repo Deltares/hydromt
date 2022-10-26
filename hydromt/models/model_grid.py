@@ -20,9 +20,7 @@ logger = logging.getLogger(__name__)
 class GridMixin(object):
     # placeholders
     # xr.Dataset representation of all static parameter maps at the same resolution and bounds - renamed from staticmaps
-    _API = {
-        "grid": xr.Dataset,
-    }
+    _API = {"grid": xr.Dataset}
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -111,6 +109,7 @@ class GridModel(GridMixin, Model):
 
     # TODO: add here "res": "setup_region" or "res": "setup_grid" when generic method is available
     _CLI_ARGS = {"region": "setup_region"}
+    _NAME = "grid_model"
 
     def __init__(
         self,
