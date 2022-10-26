@@ -6,8 +6,29 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-unreleased
+Unreleased
 ==========
+
+Added
+-----
+
+Changed
+-------
+
+Fixed
+-----
+
+Deprecated
+----------
+
+Documentation
+-------------
+- added **working_with_models** example notebook `Issue #221 <https://github.com/Deltares/hydromt/issues/221>`_
+- added **export_data** example notebook `Issue #218 <https://github.com/Deltares/hydromt/issues/218>`_
+
+
+v0.6.0 (24 October 2022)
+========================
 
 Added
 -----
@@ -36,10 +57,6 @@ Fixed
 Deprecated
 ----------
 - self.staticgeoms and self.staticmaps are deprecated.
-
-Documentation
--------------
-- added **export_data** example notebook `Issue #218 <https://github.com/Deltares/hydromt/issues/218>`_
 
 v0.5.0 (4 August 2022)
 ======================
