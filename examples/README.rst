@@ -60,7 +60,7 @@ Alternatively, you can run the notebooks from `Visual Studio Code <https://code.
 .. code-block:: console
 
   $ conda activate hydromt
-  $ cd examples
+  $ cd hydromt/examples
   $ jupyter notebook
 
 
