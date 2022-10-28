@@ -106,9 +106,13 @@ def test_model(model, tmpdir):
     # write model
     model.set_root(str(tmpdir), mode="w")
     model.write()
+    with pytest.raises(IOError, match="Model opened in write-only mode"):
+        model.read()
     # read model
     model1 = Model(str(tmpdir), mode="r")
     model1.read()
+    with pytest.raises(IOError, match="Model opened in read-only mode"):
+        model1.write()
     # check if equal
     model._results = {}  # reset results for comparison
     equal, errors = model._test_equal(model1)
