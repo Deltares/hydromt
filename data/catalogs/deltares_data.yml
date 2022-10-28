@@ -1154,7 +1154,7 @@ hydro_lakes:
     notes: HydroLAKES.v10_extract
     source_author: Arjen Haag
     source_version: 1.0
-  path: hydrography/lakes/lake-db.gpkg
+  path: hydrography/lakes/lake-db.fgb
   rename:
     Depth_avg: Depth_avg
     Dis_avg: Dis_avg
@@ -1176,7 +1176,7 @@ hydro_reservoirs:
     source_author: Alessia Matano
     source_version: 1.0
   nodata: -99
-  path: hydrography/reservoirs/reservoir-db.gpkg
+  path: hydrography/reservoirs/reservoir-db.fgb
   rename:
     Depth_avg: Depth_avg
     Dis_avg: Dis_avg
@@ -1319,7 +1319,7 @@ merit_hydro_index_v1.0:
     paper_doi: 10.5194/hess-2020-582
     paper_ref: Eilander et al. (in review)
     source_license: CC-BY-NC 4.0
-  path: topography/merit_hydro/basin_index.gpkg
+  path: topography/merit_hydro/basin_index.fgb
 
 merit_hydro_patch:
   alias: merit_hydro_patch_v1.0
@@ -1421,7 +1421,7 @@ rgi_v0.6:
     source_license: CC BY 4.0
     source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
     source_version: 6.0
-  path: hydrography/rgi/rgi.gpkg
+  path: hydrography/rgi/rgi.fgb
   rename:
     C3S_ID: C3S_id
     GLIMSID: GLIMS_id
@@ -1438,7 +1438,7 @@ rivers_lin2019_v1:
     source_license: CC-BY-NC 4.0
     source_url: https://zenodo.org/record/3552776#.YVbOrppByUk
     source_version: 1
-  path: hydrography/rivers_lin2019/rivers_ge30m.gpkg
+  path: hydrography/rivers_lin2019/rivers_ge30m.fgb
   rename:
     width_m: rivwth
     Q2: qbankfull

@@ -5,6 +5,14 @@ Change log predefined datasets
 deltares_data 
 =============
 
+version: 2022.10
+----------------
+
+changed
+^^^^^^^
+- convert GeoPackage files to FlatGeoBuf for cloud compatibility
+
+
 version: 2022.7
 ---------------
 
