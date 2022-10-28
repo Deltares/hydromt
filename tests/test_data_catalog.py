@@ -72,10 +72,13 @@ def test_parser():
 def test_data_catalog_io(tmpdir):
     data_catalog = DataCatalog()
     # read / write
-    fn_yml = str(tmpdir.join("test.yml"))
+    fn_yml = join(tmpdir, "test.yml")
     data_catalog.to_yml(fn_yml)
     data_catalog1 = DataCatalog(data_libs=fn_yml)
     assert data_catalog.to_dict() == data_catalog1.to_dict()
+    # test that no file is written for empty DataCatalog
+    fn_yml = join(tmpdir, "test1.yml")
+    DataCatalog(fallback_lib=None).to_yml(fn_yml)
     # test print
     print(data_catalog["merit_hydro"])
 
@@ -100,6 +103,8 @@ def test_data_catalog(tmpdir):
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataAdapter"):
         data_catalog["test"] = "string"
+    # check that no sources are loaded if fallback_lib is None
+    assert not DataCatalog(fallback_lib=None).sources
     # test artifact keys (NOTE: legacy code!)
     data_catalog = DataCatalog(deltares_data=False)
     assert len(data_catalog._sources) == 0

@@ -9,6 +9,7 @@ import geopandas as gpd
 from shapely.geometry import polygon
 from hydromt.models.model_api import _check_data
 from hydromt.models import Model, GridModel, LumpedModel, MODELS, model_plugins
+from hydromt.data_catalog import DataCatalog
 import hydromt.models.model_plugins
 import hydromt._compat
 from entrypoints import EntryPoint, Distribution
@@ -96,6 +97,31 @@ def test_run_log_method():
     model._geoms = {}
     model._run_log_method("setup_region", region=region)  # kwargs
     assert "region" in model._geoms
+
+
+def test_write_data_catalog(tmpdir):
+    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
+    sources = list(model.data_catalog.sources.keys())
+    data_lib_fn = join(model.root, "hydromt_data.yml")
+    # used_only=True -> no file written
+    model.write_data_catalog()
+    assert not isfile(data_lib_fn)
+    # write with single source
+    model.data_catalog._used_data.append(sources[0])
+    model.write_data_catalog()
+    assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:1]
+    # write to different file
+    data_lib_fn1 = join(tmpdir, "hydromt_data2.yml")
+    model.write_data_catalog(data_lib_fn=data_lib_fn1)
+    assert isfile(data_lib_fn1)
+    # append source
+    model1 = Model(root=model.root, data_libs=["artifact_data"], mode="r+")
+    model1.data_catalog._used_data.append(sources[1])
+    model1.write_data_catalog(append=False)
+    assert list(DataCatalog(data_lib_fn).sources.keys()) == [sources[1]]
+    model1.data_catalog._used_data.append(sources[0])
+    model1.write_data_catalog(append=True)
+    assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
 
 
 def test_model(model, tmpdir):
@@ -193,22 +219,6 @@ def test_config(model, tmpdir):
     model.set_config("global.file", "test.file")
     assert str(model.get_config("global.file")) == "test.file"
     assert str(model.get_config("global.file", abs_path=True)) == fn
-
-
-# def test_maps(model, tmpdir):
-#     assert "maps" in model.api
-#     assert len(model.maps) == 1
-#     non_compliant = model._test_model_api()
-#     assert len(non_compliant) == 0, non_compliant
-#     # write model
-#     model.set_root(str(tmpdir), mode="w")
-#     model.write(components=["config", "geoms", "maps"])
-#     # read model
-#     model1 = Model(str(tmpdir), mode="r")
-#     model1.read(components=["config", "geoms", "maps"])
-#     # check if equal
-#     equal, errors = model._test_equal(model1)
-#     assert equal, errors
 
 
 def test_maps_setup(tmpdir):

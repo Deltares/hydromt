@@ -436,11 +436,6 @@ class Model(object, metaclass=ABCMeta):
             # check directory
             elif not isdir(self._root):
                 raise IOError(f'model root not found at "{self._root}"')
-            # read hydromt_data yaml file and add to data catalog
-            data_fn = join(self._root, "hydromt_data.yml")
-            if self._read and isfile(data_fn):
-                # read data and mark as used
-                self.data_catalog.from_yml(data_fn, mark_used=True)
             # remove old logging file handler and add new filehandler in root if it does not exist
             has_log_file = False
             log_level = 20  # default, but overwritten by the level of active loggers
@@ -515,20 +510,42 @@ class Model(object, metaclass=ABCMeta):
             getattr(self, f"write_{component}")()
 
     def write_data_catalog(
-        self, root: Optional[Union[str, Path]] = None, used_only: bool = True
+        self,
+        root: Optional[Union[str, Path]] = None,
+        data_lib_fn: Union[str, Path] = "hydromt_data.yml",
+        used_only: bool = True,
+        append: bool = True,
     ):
-        """Write the data catalog to `hydromt_data.yml`
+        """Write the data catalog to data_lib_fn
 
         Parameters
         ----------
         root: str, Path, optional
             Global root for all relative paths in yaml file.
             If "auto" the data source paths are relative to the yaml output ``path``.
-        used_only: bool
-            If True, export only data entries kept in used_data list.
+        data_lib_fn: str, Path, optional
+            Path of output yml file, absolute or relative to the model root, by default "hydromt_data.yml".
+        used_only: bool, optional
+            If True, export only data entries kept in used_data list. By default True
+        append: bool, optional
+            If True, append to an existing
         """
-        path = join(self.root, "hydromt_data.yml")
-        self.data_catalog.to_yml(path, root=root, used_only=used_only)
+        path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
+        cat = DataCatalog(logger=self.logger, fallback_lib=None)
+        # read hydromt_data yaml file and add to data catalog
+        if self._read and isfile(path) and append:
+            cat.from_yml(path)
+        # update data catalog with new used sources
+        source_names = (
+            self.data_catalog._used_data
+            if used_only
+            else list(self.data_catalog.sources.keys())
+        )
+        if len(source_names) > 0:
+            cat.from_dict(self.data_catalog.to_dict(source_names=source_names))
+        if cat.sources:
+            self._assert_write_mode
+            cat.to_yml(path, root=root)
 
     # model configuration
     @property
