@@ -14,6 +14,8 @@ Added
 
 Changed
 -------
+- strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- do not automatically read hydromt_data.yml file in model root `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 
 Fixed
 -----

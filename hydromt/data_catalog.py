@@ -7,7 +7,7 @@ import os
 from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 import copy
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Optional
 import warnings
 import numpy as np
 import pandas as pd
@@ -42,7 +42,11 @@ class DataCatalog(object):
     _cache_dir = join(Path.home(), ".hydromt_data")
 
     def __init__(
-        self, data_libs: Union[List, str] = [], logger=logger, **artifact_keys
+        self,
+        data_libs: Union[List, str] = [],
+        fallback_lib: Optional[str] = "artifact_data",
+        logger=logger,
+        **artifact_keys,
     ) -> None:
         """Catalog of DataAdapter sources to easily read from different files
         and keep track of files which have been accessed.
@@ -53,6 +57,9 @@ class DataCatalog(object):
             One or more paths to data catalog yaml files or names of predefined data catalogs.
             By default the data catalog is initiated without data entries.
             See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yaml format.
+        fallback_lib:
+            Name of pre-defined data catalog to read if no data_libs are provided, by default 'artifact_data'.
+            If None, no default data catalog is used.
         artifact_keys:
             Deprecated from version v0.5
         """
@@ -63,6 +70,7 @@ class DataCatalog(object):
         self._sources = {}  # dictionary of DataAdapter
         self._catalogs = {}  # dictionary of predefined Catalogs
         self._used_data = []
+        self._fallback_lib = fallback_lib
         self.logger = logger
 
         # legacy code. to be removed
@@ -87,9 +95,9 @@ class DataCatalog(object):
     @property
     def sources(self) -> Dict:
         """Returns dictionary of DataAdapter sources."""
-        if len(self._sources) == 0:
+        if len(self._sources) == 0 and self._fallback_lib is not None:
             # read artifacts by default if no catalogs are provided
-            self.from_predefined_catalogs("artifact_data")
+            self.from_predefined_catalogs(self._fallback_lib)
         return self._sources
 
     @property
@@ -332,7 +340,7 @@ class DataCatalog(object):
         self,
         path: Union[str, Path],
         root: str = "auto",
-        source_names: List = [],
+        source_names: Optional[List] = None,
         used_only: bool = False,
     ) -> None:
         """Write data catalog to yaml format.
@@ -345,7 +353,8 @@ class DataCatalog(object):
             Global root for all relative paths in yaml file.
             If "auto" the data source paths are relative to the yaml output ``path``.
         source_names: list, optional
-            List of source names to export; ignored if `used_only=True`
+            List of source names to export, by default None in which case all sources are exported.
+            This argument is ignored if `used_only=True`.
         used_only: bool
             If True, export only data entries kept in used_data list, by default False.
         """
@@ -353,19 +362,24 @@ class DataCatalog(object):
         yml_dir = os.path.dirname(path)
         if root == "auto":
             root = yml_dir
-        d = self.to_dict(root=root, source_names=source_names)
+        data_dict = self.to_dict(root=root, source_names=source_names)
         if str(root) == yml_dir:
-            d.pop("root", None)  # remove root if it equals the yml_dir
-        with open(path, "w") as f:
-            yaml.dump(d, f, default_flow_style=False)
+            data_dict.pop("root", None)  # remove root if it equals the yml_dir
+        if data_dict:
+            with open(path, "w") as f:
+                yaml.dump(data_dict, f, default_flow_style=False)
+        else:
+            self.logger.info("The data catalog is empty, no yml file is written.")
 
-    def to_dict(self, source_names: List = [], root: Union[Path, str] = None) -> Dict:
+    def to_dict(
+        self, source_names: Optional[List] = None, root: Union[Path, str] = None
+    ) -> Dict:
         """Export the data catalog to a dictionary.
 
         Parameters
         ----------
         source_names : list, optional
-            List of source names to export
+            List of source names to export, by default None in which case all sources are exported.
         root : str, Path, optional
             Global root for all relative paths in yml file.
 
@@ -380,7 +394,7 @@ class DataCatalog(object):
             sources_out["root"] = root
             root_drive = os.path.splitdrive(root)[0]
         for name, source in self.sources.items():
-            if len(source_names) > 0 and name not in source_names:
+            if source_names is not None and name not in source_names:
                 continue
             source_dict = source.to_dict()
             if root is not None:
