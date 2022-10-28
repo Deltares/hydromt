@@ -147,10 +147,10 @@ def test_export_global_datasets(tmpdir):
         "GeoDatasetAdapter": (xr.DataArray, xr.Dataset),
         "GeoDataFrameAdapter": gpd.GeoDataFrame,
     }
-    bbox = [11.70, 45.35, 12.95, 46.70]  # Piava river
-    time_tuple = ("2010-02-01", "2010-02-14")
+    bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
+    time_tuple = ("2010-02-10", "2010-02-15")
     data_catalog = DataCatalog()  # read artifacts by default
-    sns = [
+    source_names = [
         "era5",
         "grwl_mask",
         "modis_lai",
@@ -158,14 +158,23 @@ def test_export_global_datasets(tmpdir):
         "grdc",
         "corine",
         "gtsmv3_eu_era5",
-        "hydro_lakes",
-        "eobs",
     ]
     data_catalog.export_data(
-        str(tmpdir), bbox=bbox, time_tuple=time_tuple, source_names=sns
+        tmpdir,
+        bbox=bbox,
+        time_tuple=time_tuple,
+        source_names=source_names,
+        meta={"version": 1},
     )
-
-    data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
+    data_lib_fn = join(tmpdir, "data_catalog.yml")
+    # check if meta is written
+    with open(data_lib_fn, "r") as f:
+        yml_list = f.readlines()
+    assert yml_list[0].strip() == "meta:"
+    assert yml_list[1].strip() == "version: 1"
+    assert yml_list[2].strip().startswith("root:")
+    # check if data is parsed correctly
+    data_catalog1 = DataCatalog(data_lib_fn)
     for key, source in data_catalog1.sources.items():
         source_type = type(source).__name__
         dtypes = DTYPES[source_type]

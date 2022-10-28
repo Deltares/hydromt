@@ -19,6 +19,7 @@ Changed
 
 Fixed
 -----
+- fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 
 Deprecated
 ----------

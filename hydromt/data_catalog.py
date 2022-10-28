@@ -342,6 +342,7 @@ class DataCatalog(object):
         root: str = "auto",
         source_names: Optional[List] = None,
         used_only: bool = False,
+        meta: Dict = {},
     ) -> None:
         """Write data catalog to yaml format.
 
@@ -351,28 +352,33 @@ class DataCatalog(object):
             yaml output path.
         root: str, Path, optional
             Global root for all relative paths in yaml file.
-            If "auto" the data source paths are relative to the yaml output ``path``.
+            If "auto" (default) the data source paths are relative to the yaml output ``path``.
         source_names: list, optional
             List of source names to export, by default None in which case all sources are exported.
             This argument is ignored if `used_only=True`.
-        used_only: bool
+        used_only: bool, optional
             If True, export only data entries kept in used_data list, by default False.
+        meta: dict, optional
+            key-value pairs to add to the data catalog meta section, such as 'version', by default empty.
         """
         source_names = self._used_data if used_only else source_names
-        yml_dir = os.path.dirname(path)
+        yml_dir = os.path.dirname(abspath(path))
         if root == "auto":
             root = yml_dir
-        data_dict = self.to_dict(root=root, source_names=source_names)
+        data_dict = self.to_dict(root=root, source_names=source_names, meta=meta)
         if str(root) == yml_dir:
             data_dict.pop("root", None)  # remove root if it equals the yml_dir
         if data_dict:
             with open(path, "w") as f:
-                yaml.dump(data_dict, f, default_flow_style=False)
+                yaml.dump(data_dict, f, default_flow_style=False, sort_keys=False)
         else:
             self.logger.info("The data catalog is empty, no yml file is written.")
 
     def to_dict(
-        self, source_names: Optional[List] = None, root: Union[Path, str] = None
+        self,
+        source_names: Optional[List] = None,
+        root: Union[Path, str] = None,
+        meta: dict = {},
     ) -> Dict:
         """Export the data catalog to a dictionary.
 
@@ -382,6 +388,8 @@ class DataCatalog(object):
             List of source names to export, by default None in which case all sources are exported.
         root : str, Path, optional
             Global root for all relative paths in yml file.
+        meta: dict, optional
+            key-value pairs to add to the data catalog meta section, such as 'version', by default empty.
 
         Returns
         -------
@@ -390,10 +398,10 @@ class DataCatalog(object):
         """
         sources_out = dict()
         if root is not None:
-            root = os.path.abspath(root)
-            sources_out["root"] = root
+            root = abspath(root)
+            meta.update(**{"root": root})
             root_drive = os.path.splitdrive(root)[0]
-        for name, source in self.sources.items():
+        for name, source in sorted(self.sources.items()):  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
             source_dict = source.to_dict()
@@ -410,6 +418,8 @@ class DataCatalog(object):
             # remove non serializable entries to prevent errors
             source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
             sources_out.update({name: source_dict})
+        if meta:
+            sources_out = {"meta": meta, **sources_out}
         return sources_out
 
     def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
@@ -428,6 +438,7 @@ class DataCatalog(object):
         time_tuple: Tuple = None,
         source_names: List = [],
         unit_conversion: bool = True,
+        meta: Dict = {},
     ) -> None:
         """Export a data slice of each dataset and a data_catalog.yml file to disk.
 
@@ -444,8 +455,10 @@ class DataCatalog(object):
             List of source names to export
         unit_conversion: boolean, optional
             If False skip unit conversion when parsing data from file, by default True.
-
+        meta: dict, optional
+            key-value pairs to add to the data catalog meta section, such as 'version', by default empty.
         """
+        data_root = abspath(data_root)
         if not os.path.isdir(data_root):
             os.makedirs(data_root)
 
@@ -494,7 +507,7 @@ class DataCatalog(object):
         data_catalog_out = DataCatalog()
         data_catalog_out._sources = sources_out
         fn = join(data_root, "data_catalog.yml")
-        data_catalog_out.to_yml(fn, root="auto")
+        data_catalog_out.to_yml(fn, root="auto", meta=meta)
 
     def get_rasterdataset(
         self,
