@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class LumpedMixin:
-    _API = {
-        "response_units": xr.Dataset,
-    }
+    _API = {"response_units": xr.Dataset}
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -137,6 +135,7 @@ class LumpedModel(LumpedMixin, Model):
     """Model class Lumped Model for lumped models in HydroMT"""
 
     _CLI_ARGS = {"region": "setup_region"}
+    _NAME = "lumped_model"
 
     def __init__(
         self,

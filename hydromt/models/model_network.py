@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 class NetworkModel(Model):
 
     _CLI_ARGS = {"region": "setup_region"}
+    _NAME = "network_model"
 
     def __init__(
         self,
