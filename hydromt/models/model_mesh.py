@@ -179,9 +179,8 @@ class MeshMixin(object):
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
         """Model static mesh data. Returns a xarray.Dataset."""
         # XU grid data type Xarray dataset with xu sampling.
-        if self._mesh is None:
-            if self._read:
-                self.read_mesh()
+        if self._mesh is None and self._read:
+            self.read_mesh()
         return self._mesh
 
     def set_mesh(
@@ -230,6 +229,7 @@ class MeshMixin(object):
         fn : str, optional
             filename relative to model root, by default 'mesh/mesh.nc'
         """
+        self._assert_read_mode
         for ds in self._read_nc(fn, **kwargs).values():
             uds = xu.UgridDataset(ds)
             if ds.rio.crs is not None:  # parse crs
@@ -247,11 +247,10 @@ class MeshMixin(object):
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         """
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
-        elif self._mesh is None:
-            self.logger.warning("No mesh to write - Exiting")
+        if self._mesh is None:
+            self.logger.debug("No mesh data found, skip writing.")
             return
+        self._assert_write_mode
         # filename
         _fn = join(self.root, fn)
         if not isdir(dirname(_fn)):
