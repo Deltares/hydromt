@@ -17,22 +17,16 @@ import numpy as np
 
 from . import cli_utils
 from .. import log
-from ..models import ENTRYPOINTS, model_plugins
+from ..models import MODELS
 from .. import __version__
 
 logger = logging.getLogger(__name__)
-
-_models = list(ENTRYPOINTS.keys())
 
 
 def print_models(ctx, param, value):
     if not value:
         return {}
-    mod_lst = []
-    for name, ep in ENTRYPOINTS.items():
-        mod_lst.append(f"{name} (v{ep.distro.version})")
-    mods = ", ".join(mod_lst)
-    click.echo(f"hydroMT model plugins: {mods:s}")
+    click.echo(f"{MODELS}")
     ctx.exit()
 
 
@@ -179,10 +173,8 @@ def build(
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
-        if model not in _models:
-            raise ValueError(f"Model unknown : {model}, select from {_models}")
         # initialize model and create folder structure
-        mod = model_plugins.load(ENTRYPOINTS[model], logger=logger)(
+        mod = MODELS.load(model)(
             root=model_root,
             mode="w",
             logger=logger,
@@ -267,10 +259,8 @@ def update(
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
-        if model not in _models:
-            raise ValueError(f"Model unknown : {model}, select from {_models}")
         # initialize model and create folder structure
-        mod = model_plugins.load(ENTRYPOINTS[model], logger=logger)(
+        mod = MODELS.load(model)(
             root=model_root,
             mode=mode,
             data_libs=data_libs,
@@ -345,11 +335,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     if model != "wflow":
         raise NotImplementedError("Clip function only implemented for wflow model.")
     try:
-        if model not in _models:
-            raise ValueError(f"Model unknown : {model}, select from {_models}")
-        mod = model_plugins.load(ENTRYPOINTS[model], logger=logger)(
-            root=model_root, mode="r", logger=logger
-        )
+        mod = MODELS.load(model)(root=model_root, mode="r", logger=logger)
         logger.info("Reading model to clip")
         mod.read()
         mod.set_root(model_destination, mode="w")

@@ -5,13 +5,12 @@ import pandas as pd
 import geopandas as gpd
 import xarray as xr
 
-from hydromt import Model, GridModel, LumpedModel, NetworkModel
-from hydromt.models.model_maps_mixin import MapsModel
+from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
 from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
 
-DATADIR = join(dirname(abspath(__file__)), "data")
+# DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture
@@ -54,7 +53,7 @@ def df_time():
 @pytest.fixture
 def geodf(df):
     gdf = gpd.GeoDataFrame(
-        data=df.drop(columns=["longitude", "latitude"]),
+        data=df.copy().drop(columns=["longitude", "latitude"]),
         geometry=gpd.points_from_xy(df["longitude"], df["latitude"]),
         crs=4326,
     )
@@ -71,7 +70,7 @@ def world():
 def ts(geodf):
     dates = pd.date_range("01-01-2000", "12-31-2000", name="time")
     ts = pd.DataFrame(
-        index=geodf.index,
+        index=geodf.index.values,
         columns=dates,
         data=np.random.rand(geodf.index.size, dates.size),
     )
@@ -182,18 +181,10 @@ def model(demda, world, obsda):
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_staticmaps(demda, "elevtn")  # will be deprecated
     mod.set_geoms(world, "world")
+    mod.set_maps(demda, "elevtn")
     mod.set_forcing(obsda, "waterlevel")
     mod.set_states(demda, "zsini")
     mod.set_results(obsda, "zs")
-    return mod
-
-
-@pytest.fixture
-def map_model(demda):
-    mod = MapsModel()
-    mod.setup_region({"geom": demda.raster.box})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_maps(demda, "elevtn")
     return mod
 
 
@@ -233,14 +224,11 @@ def network_model():
 
 @pytest.fixture
 def mesh_model(demuda):
-    from hydromt import MeshModel
-
-    mod = MeshModel()
+    mod = MODELS.load("mesh_model")()
     # region = gpd.GeoDataFrame(
     #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.grid.crs
     # )
     # mod.setup_region({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(demuda, "elevtn")
-
     return mod

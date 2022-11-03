@@ -6,7 +6,7 @@ import typing
 import inspect
 import logging
 
-from ..models import ENTRYPOINTS
+from ..models import MODELS
 from ..data_catalog import DataCatalog
 from .. import workflows, log
 from hydromt.gis_utils import utm_crs
@@ -45,7 +45,7 @@ def get_model_components(
         "GeoDatasetSource",
         "GeoDataframeSource",
     ]
-    model_class = ENTRYPOINTS[model].load()
+    model_class = MODELS.load(model)
     members = inspect.getmembers(model_class)
     components = {}
     docs = []

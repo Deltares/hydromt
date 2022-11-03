@@ -6,14 +6,42 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-unreleased
+Unreleased
 ==========
 
 Added
 -----
+
+Changed
+-------
+- strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- do not automatically read hydromt_data.yml file in model root `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+
+Fixed
+-----
+- fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+
+Deprecated
+----------
+
+Documentation
+-------------
+- added **working_with_models** example notebook `PR #229 <https://github.com/Deltares/hydromt/pull/229>`_
+- added **export_data** example notebook `PR #222 <https://github.com/Deltares/hydromt/pull/222>`_
+- added **reading_point_data** example notebook `PR #216 <https://github.com/Deltares/hydromt/pull/216>`_
+- added **working_with_flow_directions** example notebook `PR #231 <https://github.com/Deltares/hydromt/pull/231>`_
+- added **prep_data_catalog** example notebook `PR #232 <https://github.com/Deltares/hydromt/pull/232>`_
+
+
+v0.6.0 (24 October 2022)
+========================
+
+Added
+-----
+- ModelCatalog to discover generic and plugin model classes. `PR #202 <https://github.com/Deltares/hydromt/pull/202>`_
 - Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
 - API calls to get info about model components and dataset for the dashboard. `PR #118 <https://github.com/Deltares/hydromt/pull/118>`_
-- New submodelclasses in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``, ``MapsModel``
+- New submodelclasses in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``
 - Added entrypoints for lumped_model, mesh_model, grid_model
 - New mixin classes created for model specific object: ``GridMixin`` for self.grid, ``LumpedMixin`` for self.response_units, ``MeshMixin`` for self.mesh,
   ``MapsMixin`` for self.maps
@@ -30,6 +58,7 @@ Fixed
 -----
 - Bug in backward compatibility of staticgeoms (not read automatically). `Issue #190 <https://github.com/Deltares/hydromt/issues/190>`_
 - Direct import of xarray.core.resample. `Issue #189 <https://github.com/Deltares/hydromt/issues/189>`_
+- Bug in dim0 attribute of raster, removed instead of set to None if no dim0 `Issue #210 <https://github.com/Deltares/hydromt/issues/210>`_
 
 Deprecated
 ----------

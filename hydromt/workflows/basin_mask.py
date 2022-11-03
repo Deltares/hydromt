@@ -8,7 +8,6 @@ from pathlib import Path
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
-from sklearn.neighbors import VALID_METRICS
 import xarray as xr
 import logging
 import warnings
@@ -17,7 +16,7 @@ import warnings
 from ..io import open_raster
 from ..flw import flwdir_from_da, basin_map, stream_map, outlet_map
 from ..data_adapter import GeoDataFrameAdapter
-from ..models import ENTRYPOINTS, model_plugins
+from ..models import MODELS
 
 logger = logging.getLogger(__name__)
 
@@ -116,8 +115,8 @@ def parse_region(region, logger=logger):
     }
     kind = next(iter(kwargs))  # first key of region
     value0 = kwargs.pop(kind)
-    if kind in ENTRYPOINTS:
-        model_class = model_plugins.load(ENTRYPOINTS[kind], logger=logger)
+    if kind in MODELS:
+        model_class = MODELS.load(kind)
         kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
         kind = "model"
     elif kind == "grid":
@@ -126,7 +125,7 @@ def parse_region(region, logger=logger):
         elif isinstance(value0, (xr.Dataset, xr.DataArray)):
             kwargs = dict(grid=value0)
     elif kind not in options:
-        k_lst = '", "'.join(list(options.keys()) + list(ENTRYPOINTS.keys()))
+        k_lst = '", "'.join(list(options.keys()) + list(MODELS))
         raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
     else:
         kwarg = _parse_region_value(value0)
@@ -313,7 +312,7 @@ def get_basin_geometry(
             if "basid" not in gdf_bas.columns:
                 raise ValueError("Basin geometries does not have 'basid' column.")
         if gdf_bas.crs != ds.raster.crs:
-            logger.warn("Basin geometries CRS does not match the input raster CRS.")
+            logger.warning("Basin geometries CRS does not match the input raster CRS.")
             gdf_bas = gdf_bas.to_crs(ds.raster.crs)
 
     ## BASINS
@@ -322,7 +321,7 @@ def get_basin_geometry(
         if basins_name not in ds:
             if gdf_bas is not None:
                 gdf_bas = None
-                logger.warn(
+                logger.warning(
                     "Basin geometries ignored as no corresponding basin map is provided."
                 )
             _check_size(ds, logger)
@@ -383,7 +382,7 @@ def get_basin_geometry(
                     total_bounds = gdf_bas.total_bounds
                 ds = ds[dvars].raster.clip_bbox(total_bounds, buffer=0)
             elif np.any(gdf_match):
-                logger.warn("No matching basin IDs found in basin geometries.")
+                logger.warning("No matching basin IDs found in basin geometries.")
         # get full basin mask and use this mask ds_basin incl flow direction raster
         _mask = np.isin(ds[basins_name], basid)
         if not np.any(_mask > 0):

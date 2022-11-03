@@ -1,0 +1,9 @@
+waterlevels_txt:
+  path: stations.csv
+  data_type: GeoDataset
+  driver: vector
+  crs: 4326
+  kwargs:
+    fn_data: stations_data.csv
+  rename:
+    stations_data: waterlevel

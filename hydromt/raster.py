@@ -31,7 +31,7 @@ import pyproj
 import logging
 import rioxarray
 
-from . import gis_utils, HAS_PCRASTER
+from . import gis_utils, _compat
 
 logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
@@ -397,8 +397,8 @@ class XRasterBase(XGeoBase):
         if len(extra_dims) == 1:
             dims = tuple(extra_dims) + dims
             self.set_attrs(dim0=extra_dims[0])
-        # elif len(extra_dims) == 0:
-        #    self.set_attrs(dim0=None)
+        elif len(extra_dims) == 0:
+            self._obj.coords[GEO_MAP_COORD].attrs.pop("dim0", None)
         elif len(extra_dims) > 1:
             raise ValueError("Only 2D and 3D data arrays supported.")
         if isinstance(self._obj, xr.Dataset):
@@ -1712,7 +1712,7 @@ class RasterDataArray(XRasterBase):
             count = da_out[dim0].size
             da_out = da_out.sortby(dim0)
         # write
-        if driver.lower() == "pcraster" and HAS_PCRASTER:
+        if driver.lower() == "pcraster" and _compat.HAS_PCRASTER:
             for i in range(count):
                 if dim0:
                     bname = basename(raster_path).split(".")[0]
@@ -2066,7 +2066,7 @@ class RasterDataset(XRasterBase):
         if not isdir(root):
             os.makedirs(root)
         with tempfile.TemporaryDirectory() as tmpdir:
-            if driver == "PCRaster" and HAS_PCRASTER:
+            if driver == "PCRaster" and _compat.HAS_PCRASTER:
                 clone_path = gis_utils.write_clone(
                     tmpdir,
                     gdal_transform=self.transform.to_gdal(),

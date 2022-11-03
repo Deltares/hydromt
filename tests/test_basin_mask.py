@@ -7,6 +7,7 @@ import numpy as np
 import geopandas as gpd
 import xarray as xr
 import hydromt
+from hydromt.models import MODELS
 import logging
 import warnings
 
@@ -26,16 +27,14 @@ def test_region(tmpdir, world, geodf, rioda):
     region = {"region": [0.0, -1.0]}
     with pytest.raises(ValueError, match=r"Region key .* not understood.*"):
         parse_region(region)
-    from hydromt.models import MODELS
 
-    if len(MODELS) > 0:
-        model = [x for x in MODELS][0]
-        root = str(tmpdir.join(model)) + "_test_region"
-        if not os.path.isdir(root):
-            os.mkdir(root)
-        region = {model: root}
-        kind, region = parse_region(region)
-        assert kind == "model"
+    model = MODELS.generic[0]
+    root = str(tmpdir.join(model)) + "_test_region"
+    if not os.path.isdir(root):
+        os.mkdir(root)
+    region = {model: root}
+    kind, region = parse_region(region)
+    assert kind == "model"
 
     # geom
     region = {"geom": world}
@@ -113,6 +112,7 @@ def test_check_size(caplog):
         nodata=-1,
         name="test",
         crs=4326,
+        lazy=True,  # create lazy dask array instead of numpy array
     )
     _check_size(test_raster)
     assert "Loading very large spatial domain to derive a subbasin. "
@@ -235,13 +235,9 @@ def test_basin(caplog):
     )
     assert gdf_bas.index.size == 180
 
-    with pytest.warns(DeprecationWarning) as record:
+    msg = 'kind="outlets" has been deprecated, use outlets=True in combination with kind="basin" or kind="interbasin" instead.'
+    with pytest.warns(DeprecationWarning, match=msg) as record:
         gdf_bas, gdf_out = get_basin_geometry(ds, kind="outlet")
-    assert len(record) == 1
-    assert (
-        record[0].message.args[0]
-        == 'kind="outlets" has been deprecated, use outlets=True in combination with kind="basin" or kind="interbasin" instead.'
-    )
 
     with pytest.raises(ValueError):
         gdf_bas, gdf_out = get_basin_geometry(ds, kind="watershed")
