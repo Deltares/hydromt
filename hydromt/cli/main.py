@@ -165,7 +165,7 @@ def build(
             DeprecationWarning,
         )
     logger.info(f"User settings:")
-    opt = cli_utils.parse_merge_config(config, opt_cli=opt)
+    opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
@@ -251,7 +251,7 @@ def update(
     if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
         opt = {components[0]: opt}
     logger.info(f"User settings:")
-    opt = cli_utils.parse_merge_config(config, opt_cli=opt)
+    opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global

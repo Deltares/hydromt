@@ -74,7 +74,7 @@ def parse_json(ctx, param, value):
 ### general parsing methods ##
 
 
-def parse_merge_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
+def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
     """Parse config from ini `path` and combine with command line options `opt_cli`"""
     opt = {}
     if path is not None and isfile(path):
