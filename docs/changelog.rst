@@ -17,6 +17,7 @@ Changed
 
 Fixed
 -----
+- fixed reading lists and none with config `PR #246 <https://github.com/Deltares/hydromt/pull/246>`_
 
 Deprecated
 ----------
