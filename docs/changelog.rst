@@ -14,10 +14,13 @@ Added
 
 Changed
 -------
+- strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- do not automatically read hydromt_data.yml file in model root `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 
 Fixed
 -----
-- fixed reading lists and none with config `PR #246 <https://github.com/Deltares/hydromt/pull/246>`_
+- fix reading lists and none with config `PR #246 <https://github.com/Deltares/hydromt/pull/246>`_
+- fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 
 Deprecated
 ----------
