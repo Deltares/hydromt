@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from os.path import join
+import fsspec
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -33,6 +34,7 @@ class RasterDatasetAdapter(DataAdapter):
         self,
         path,
         driver=None,
+        filesystem="local",
         crs=None,
         nodata=None,
         rename={},
@@ -60,6 +62,9 @@ class RasterDatasetAdapter(DataAdapter):
             for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
+        filesystem: {'local', 'gcs'}, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            By default, local.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
             or wkt (str). Only used if the data has no native CRS.
@@ -83,6 +88,7 @@ class RasterDatasetAdapter(DataAdapter):
         super().__init__(
             path=path,
             driver=driver,
+            filesystem=filesystem,
             crs=crs,
             nodata=nodata,
             rename=rename,
@@ -204,11 +210,24 @@ class RasterDatasetAdapter(DataAdapter):
                 kwargs.update(preprocess=preprocess)
             ds_out = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
         elif self.driver == "zarr":
-            if len(fns) > 1:
-                raise ValueError(
-                    "RasterDataset: Opening multiple zarr data files is not supported."
-                )
-            ds_out = xr.open_zarr(fns[0], **kwargs)
+            # if len(fns) > 1:
+            #    raise ValueError(
+            #        "RasterDataset: Opening multiple zarr data files is not supported."
+            #    )
+            if "preprocess" in kwargs:  # for zarr preprocess is done after reading
+                preprocess = PREPROCESSORS.get(kwargs.pop("preprocess"), None)
+                do_preprocess = True
+            ds_lst = []
+            for fn in fns:
+                if "mapper" in kwargs:
+                    mapper_type = kwargs.pop("mapper")
+                    if mapper_type == "fsspec":
+                        fn = fsspec.get_mapper(fn)
+                ds = xr.open_zarr(fn, **kwargs)
+                if do_preprocess:
+                    ds = preprocess(ds)
+                ds_lst.append(ds)
+            ds_out = xr.merge(ds_lst)
         elif self.driver == "raster_tindex":
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)

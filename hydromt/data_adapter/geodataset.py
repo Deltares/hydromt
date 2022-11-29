@@ -31,6 +31,7 @@ class GeoDatasetAdapter(DataAdapter):
         self,
         path,
         driver=None,
+        filesystem="local",
         crs=None,
         nodata=None,
         rename={},
@@ -57,6 +58,9 @@ class GeoDatasetAdapter(DataAdapter):
             for 'netcdf' :py:func:`xarray.open_mfdataset`.
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
+        filesystem: {'local', 'gcs'}, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            By default, local.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
             or wkt (str). Only used if the data has no native CRS.
@@ -80,6 +84,7 @@ class GeoDatasetAdapter(DataAdapter):
         super().__init__(
             path=path,
             driver=driver,
+            filesystem=filesystem,
             crs=crs,
             nodata=nodata,
             rename=rename,

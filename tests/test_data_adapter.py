@@ -14,6 +14,7 @@ from hydromt.data_catalog import (
 )
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
+CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 
 
 def test_resolve_path(tmpdir):
@@ -63,6 +64,25 @@ def test_rasterdataset(rioda, tmpdir):
     assert np.all(da1 == rioda)
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_rasterdataset("no_file.tif")
+
+
+def test_rasterdataset_remote(tmpdir):
+    # TODO switch to pre-defined catalogs when pushed to main
+    catalog_fn = join(CATALOGDIR, "remote_data.yml")
+    data_catalog = DataCatalog(data_libs=[catalog_fn])
+    ds = data_catalog.get_rasterdataset(
+        "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
+        variables=["precip", "temp"],
+        time_tuple=(("1990-01-01", "1990-06-01")),
+    )
+    fn_nc = str(tmpdir.join("test.nc"))
+    ds.to_netcdf(fn_nc)
+    # Check reading and some preprocess
+    assert "precip" in ds
+    assert not np.any(ds[ds.raster.x_dim] > 180)
+    # Write and compare
+    ds1 = data_catalog.get_rasterdataset(fn_nc)
+    assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
 
 
 def test_geodataset(geoda, geodf, ts, tmpdir):

@@ -237,12 +237,16 @@ class DataCatalog(object):
 
         .. code-block:: console
 
-            root: <path>
-            category: <category>
+            meta:
+              root: <path>
+              remote: <remote>
+              category: <category>
+              version: <version>
             <name>:
               path: <path>
               data_type: <data_type>
               driver: <driver>
+              filesystem: <filesystem>
               kwargs:
                 <key>: <value>
               crs: <crs>
@@ -277,10 +281,16 @@ class DataCatalog(object):
         # read meta data
         meta = yml.pop("meta", meta)
         # TODO keep meta data!! Note only possible if yml files are not merged
-        if root is None:
+        # Infer from meta if files are located locally or remotely with the remote flag, if remote root can stay None
+        remote = meta.get("remote", False)
+        if root is None and not remote:
             root = meta.get("root", dirname(urlpath))
         self.from_dict(
-            yml, root=root, category=meta.get("category", None), mark_used=mark_used
+            yml,
+            root=root,
+            category=meta.get("category", None),
+            mark_used=mark_used,
+            remote=remote,
         )
 
     def from_dict(
@@ -289,6 +299,7 @@ class DataCatalog(object):
         root: Union[str, Path] = None,
         category: str = None,
         mark_used: bool = False,
+        remote: bool = False,
     ) -> None:
         """Add data sources based on dictionary.
 
@@ -302,6 +313,8 @@ class DataCatalog(object):
             Global category for all sources in `data_dict`.
         mark_used: bool
             If True, append to used_data list.
+        remote: bool
+            Idicates if data_sources are local or remote files. By default False for local files.
 
         Examples
         --------
@@ -316,6 +329,7 @@ class DataCatalog(object):
                     "path": <path>,
                     "data_type": <data_type>,
                     "driver": <driver>,
+                    "filesystem": <filesystem>,
                     "kwargs": {<key>: <value>},
                     "crs": <crs>,
                     "nodata": <nodata>,
@@ -331,7 +345,9 @@ class DataCatalog(object):
             }
 
         """
-        data_dict = _parse_data_dict(data_dict, root=root, category=category)
+        data_dict = _parse_data_dict(
+            data_dict, root=root, category=category, remote=remote
+        )
         self.update(**data_dict)
         if mark_used:
             self._used_data.extend(list(data_dict.keys()))
@@ -497,6 +513,7 @@ class DataCatalog(object):
                     source.unit_add = unit_add
                 source.path = fn_out
                 source.driver = driver
+                source.filesystem = "local"
                 source.kwargs = {}
                 source.rename = {}
                 sources_out[key] = source
@@ -753,7 +770,10 @@ class DataCatalog(object):
 
 
 def _parse_data_dict(
-    data_dict: Dict, root: Union[Path, str] = None, category: str = None
+    data_dict: Dict,
+    root: Union[Path, str] = None,
+    category: str = None,
+    remote: bool = False,
 ) -> Dict:
     """Parse data source dictionary."""
     # link yml keys to adapter classes
@@ -787,7 +807,12 @@ def _parse_data_dict(
         elif data_type not in ADAPTERS:
             raise ValueError(f"{name}: Data type {data_type} unknown")
         adapter = ADAPTERS.get(data_type)
-        path = abs_path(root, source.pop("path"))
+        # Only for local files
+        if not remote:
+            path = abs_path(root, source.pop("path"))
+        # For remote keep the path as is
+        else:
+            path = source.pop("path")
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)

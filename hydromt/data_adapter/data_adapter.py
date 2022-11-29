@@ -2,8 +2,11 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import pandas as pd
+import xarray as xr
 import yaml
 import glob
+from fsspec.implementations import local
+import gcsfs
 from string import Formatter
 from typing import Tuple
 from itertools import product
@@ -32,10 +35,55 @@ def remove_duplicates(ds):
     return ds.sel(time=~ds.get_index("time").duplicated())
 
 
+def set_lon_lat_time_axis(ds):
+    """
+    Function to harmonise lon-lat-time axis
+    Where needed:
+        - lon: Convert longitude coordinates from 0-360 to -180-180
+        - lat: Do N->S orientation instead of S->N
+        - time: Convert to datetimeindex
+
+    Parameters
+    ----------
+    ds: xr.DataSet
+        DataSet with forcing data
+
+    Returns
+    -------
+    ds: xr.DataSet
+        DataSet with converted longitude-latitude-time coordinates
+    """
+    # Longitude
+    x_dim = ds.raster.x_dim
+    lons = ds[x_dim].values
+    if np.any(lons > 180):
+        ds[x_dim] = xr.Variable(x_dim, np.where(lons > 180, lons - 360, lons))
+        ds = ds.sortby(x_dim)
+    # Latitude
+    y_dim = ds.raster.y_dim
+    if np.diff(ds[y_dim].values)[0] > 0:
+        ds = ds.reindex({y_dim: ds[y_dim][::-1]})
+    # Final check for lat-lon
+    assert (
+        np.diff(ds[y_dim].values)[0] < 0 and np.diff(ds[x_dim].values)[0] > 0
+    ), "orientation not N->S & W->E after get_data preprocess set_lon_lat_axis"
+    # Time
+    if ds.indexes["time"].dtype == "O":
+        ds = to_datetimeindex(ds)
+
+    return ds
+
+
 PREPROCESSORS = {
     "round_latlon": round_latlon,
     "to_datetimeindex": to_datetimeindex,
     "remove_duplicates": remove_duplicates,
+    "set_lon_lat_time_axis": set_lon_lat_time_axis,
+}
+
+FILESYSTEMS = {
+    "local": local.LocalFileSystem(),
+    "gcs": gcsfs.GCSFileSystem(),
 }
 
 
@@ -49,6 +97,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self,
         path,
         driver,
+        filesystem="local",
         crs=None,
         nodata=None,
         rename={},
@@ -67,6 +116,7 @@ class DataAdapter(object, metaclass=ABCMeta):
                 str(path).split(".")[-1].lower(), self._DEFAULT_DRIVER
             )
         self.driver = driver
+        self.filesystem = filesystem
         self.kwargs = kwargs
         # data adapter arguments
         self.crs = crs
@@ -156,16 +206,26 @@ class DataAdapter(object, metaclass=ABCMeta):
             vrs = [mv_inv.get(var, var) for var in variables]
             postfix += f"; variables: {variables}"
         # get filenames with glob for all date / variable combinations
-        # FIXME: glob won't work with other than local file systems; use fsspec instead
+        try:
+            fs = FILESYSTEMS.get(self.filesystem)
+        except:
+            raise ValueError(
+                f"Unknown or unsupported filesystem {self.filesystem}. Use one of {FILESYSTEMS.keys()}"
+            )
         for date, var in product(dates, vrs):
             fmt = {}
             if date is not None:
                 fmt.update(year=date.year, month=date.month)
             if var is not None:
                 fmt.update(variable=var)
-            fns.extend(glob.glob(path.format(**fmt)))
+            fns.extend(fs.glob(path.format(**fmt)))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {path}{postfix}")
+        # FIXME: glob with GCS filesystem can loose the beginning of the path (eg gs://)
+        if self.filesystem == "gcs":
+            # Find the missing letters and add at the beginning of each fns
+            prefix = path.split("://")[0]
+            fns = [f"{prefix}://{f}" for f in fns]
         return list(set(fns))  # return unique paths
 
     @abstractmethod

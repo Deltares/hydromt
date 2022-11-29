@@ -11,6 +11,11 @@ deltares_data:
      v2022.7: main 
      v2022.5: d88cc47bd4ecc83de38c00aa554a7d48ad23ec23
    notes: This data is only accessible when connected to the Deltares network.
+remote_data:
+   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/remote_data.yml
+   versions:
+     v2022.12: main 
+   notes: This data uses remotely stored and accessible datasets.
 artifact_data:
    urlpath: https://github.com/DirkEilander/hydromt-artifacts/releases/download/{version}/data.tar.gz
    versions:

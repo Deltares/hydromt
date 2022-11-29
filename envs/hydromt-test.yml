@@ -11,6 +11,7 @@ dependencies:
   - click
   - dask
   - entrypoints
+  - gcsfs
   - gdal>=3.1
   - geopandas>=0.10
   - netcdf4

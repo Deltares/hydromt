@@ -11,11 +11,18 @@ Unreleased
 
 Added
 -----
+- new predefined catalog for remote data ``remote_data``.
+- support for remote data with a yml meta flag for ``remote`` and a per source new ``filesystem`` attribute.
+  Supported filesystems are [local, gcs].
+- support for CMIP6 dataset.
+- new preprocess function ``set_lon_lat_time_axis`` for manipulation of array dimensions.
 
 Changed
 -------
 - strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 - do not automatically read hydromt_data.yml file in model root `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- RasterDataset zarr driver: possiblility to read from several zarr stores. The datasets are then merged and ``preprocess`` can 
+  be applied similar to netcdf driver.
 
 Fixed
 -----

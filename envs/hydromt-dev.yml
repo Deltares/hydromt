@@ -16,6 +16,7 @@ dependencies:
   - descartes # to run examples
   - entrypoints
   - flit>=3.4
+  - gcsfs
   - gdal>=3.1
   - geopandas>=0.10
   - jupyter # to run examples
