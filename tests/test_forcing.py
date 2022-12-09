@@ -1,17 +1,12 @@
 import pandas as pd
 import xarray as xr
 import numpy as np
+import pyet
 import re
 import logging
 from typing import Union
 
-from .. import _has_pyeto
-
-if _has_pyeto():
-    import pyeto
-
 logger = logging.getLogger(__name__)
-
 
 def precip(
     precip,
@@ -575,6 +570,90 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
     return pet
 
 
+def pm_fao56(
+    t,
+    tmax,
+    tmin,
+    press,
+    kin,
+    wind,
+    d2m,
+    dem,
+    lat,
+    var
+    ):
+    """
+    Reference evaporation blabla
+
+    Parameters
+    ----------
+
+    t : xarray.DataArray
+        Daily mean temperature
+    tmax : xarray.DataArray
+
+    tmin : xarray.DataArray
+    press : xarray.DataArray
+    kin : xarray.DataArray
+    wind : xarray.DataArray
+    d2m : xarray.DataArray
+    dem : xarray.DataArray
+    lat : xarray.DataArray
+    var : str
+
+    Returns
+    -------
+
+    nog meer dingen
+    """
+
+    # Vapor pressure
+    svp = pyet.calc_es(
+        tmean=t,
+        tmax=tmax,
+        tmin=tmin
+        )
+
+    if var == "dew":
+        avp = pyet.calc_e0(tmean=dew)
+    elif var == "rh":
+        avp = pyet.calc_ea(tmax=tmax,tmin=tmin,rh=dew)
+
+    # Net radition
+    dates = pyet.utils.get_index(kin)
+    er = pyet.extraterrestrial_r(dates,lat)
+    csr = pyet.calc_rso(er, dem)
+
+    swr = pyet.calc_rad_short(
+        kin * (86400 / 1e6) 
+        )
+
+    lwr = pyet.calc_rad_long(
+        kin * (86400 / 1e6),
+        tmax=t_max,
+        tmin=t_min,
+        rso=csr,
+        ea=avp
+        )
+
+    nr = swr - lwr
+
+    # Penman Monteith FAO-56
+
+    pressure = pyet.calc_press(dem, press / 10)
+    gamma = pyet.calc_psy(pressure)
+    dlt = pyet.calc_vpc(t)
+
+    gamma1 = (gamma * (1 + 0.34 * wind))
+
+    den = dlt + gamma1
+    num1 = (0.408 * dlt * (nr - 0)) / den
+    num2 = (gamma * (es - ea) * 900 * wind / (t + 273)) / den
+    pet = num1 + num2
+    pet = pyet.utils.clip_zeros(pet, clip_zero)
+
+    return pet.rename("PM_FAO_56")
+
 def penman_monteith(
     temp,
     temp_min,
@@ -842,3 +921,8 @@ def freq_to_timedelta(freq):
 
     # Convert str to datetime.timedelta
     return pd.to_timedelta(freq)
+
+
+    if __name__ == "__main__":
+        from hydromt.workflows.forcing import pet
+        pass
