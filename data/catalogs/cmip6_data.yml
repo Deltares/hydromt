@@ -1,5 +1,4 @@
 meta:
-  remote: true
   version: 2022.12
 cmip6_{model}_historical_{member}_{timestep}:
   crs: 4326
@@ -9,9 +8,8 @@ cmip6_{model}_historical_{member}_{timestep}:
   kwargs:
     drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
     decode_times: true
-    preprocess: set_lon_lat_time_axis
+    preprocess: harmonise_dims
     consolidated: true
-    mapper: fsspec
   meta:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
@@ -33,7 +31,7 @@ cmip6_{model}_historical_{member}_{timestep}:
 #    'EC-Earth-Consortium/EC-Earth3-CC', 'MPI-M/ICON-ESM-LR'] # other models but were regridded to irregular grid for lat
     member: ['r1i1p1f1']
     timestep: ['day', 'Amon']
-  path: gs://cmip6/CMIP6/CMIP/{model}/historical/{member}/{timestep}/{variable}/*/*/
+  path: gs://cmip6/CMIP6/CMIP/{model}/historical/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
     tas: temp
@@ -53,9 +51,8 @@ cmip6_{model}_ssp119_{member}_{timestep}:
   kwargs:
     drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
     decode_times: true
-    preprocess: set_lon_lat_time_axis
+    preprocess: harmonise_dims
     consolidated: true
-    mapper: fsspec
   meta:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
@@ -69,7 +66,7 @@ cmip6_{model}_ssp119_{member}_{timestep}:
 #    'EC-Earth-Consortium/EC-Earth3-Veg-LR'] # other models but were regridded to irregular grid for lat
     member: ['r1i1p1f1']
     timestep: ['day','Amon']
-  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp119/{member}/{timestep}/{variable}/*/*/
+  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp119/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
     tas: temp
@@ -89,9 +86,8 @@ cmip6_{model}_ssp126_{member}_{timestep}:
   kwargs:
     drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
     decode_times: true
-    preprocess: set_lon_lat_time_axis
+    preprocess: harmonise_dims
     consolidated: true
-    mapper: fsspec
   meta:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
@@ -108,7 +104,7 @@ cmip6_{model}_ssp126_{member}_{timestep}:
 #    'NCAR/CESM2-WACCM','CSIRO-ARCCSS/ACCESS-CM2'] # other models but were regridded to irregular grid for lat or time outofbounds
     member: ['r1i1p1f1']
     timestep: ['day','Amon']
-  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp126/{member}/{timestep}/{variable}/*/*/
+  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp126/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
     tas: temp
@@ -128,9 +124,8 @@ cmip6_{model}_ssp245_{member}_{timestep}:
   kwargs:
     drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
     decode_times: true
-    preprocess: set_lon_lat_time_axis
+    preprocess: harmonise_dims
     consolidated: true
-    mapper: fsspec
   meta:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
@@ -148,7 +143,7 @@ cmip6_{model}_ssp245_{member}_{timestep}:
 #    'CAS/FGOALS-g3','MIROC/MIROC6','KIOST/KIOST-ESM','CCCR-IITM/IITM-ESM'] # other models but were regridded to irregular grid for lat
     member: ['r1i1p1f1']
     timestep: ['day','Amon']
-  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp245/{member}/{timestep}/{variable}/*/*/
+  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp245/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
     tas: temp
@@ -168,9 +163,8 @@ cmip6_{model}_ssp370_{member}_{timestep}:
   kwargs:
     drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
     decode_times: true
-    preprocess: set_lon_lat_time_axis
+    preprocess: harmonise_dims
     consolidated: true
-    mapper: fsspec
   meta:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
@@ -188,7 +182,7 @@ cmip6_{model}_ssp370_{member}_{timestep}:
 #    'CAS/FGOALS-g3','MIROC/MIROC6','CCCR-IITM/IITM-ESM'] # other models but were regridded to irregular grid for lat
     member: ['r1i1p1f1']
     timestep: ['day','Amon']
-  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp370/{member}/{timestep}/{variable}/*/*/
+  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp370/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
     tas: temp
@@ -208,9 +202,8 @@ cmip6_{model}_ssp434_{member}_{timestep}:
   kwargs:
     drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
     decode_times: true
-    preprocess: set_lon_lat_time_axis
+    preprocess: harmonise_dims
     consolidated: true
-    mapper: fsspec
   meta:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
@@ -223,7 +216,7 @@ cmip6_{model}_ssp434_{member}_{timestep}:
 #    model: ['CCCma/CanESM5'] # other models but were regridded to irregular grid for lat
     member: ['r1i1p1f1']
     timestep: ['day','Amon']
-  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp434/{member}/{timestep}/{variable}/*/*/
+  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp434/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
     tas: temp
@@ -243,9 +236,8 @@ cmip6_{model}_ssp460_{member}_{timestep}:
   kwargs:
     drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
     decode_times: true
-    preprocess: set_lon_lat_time_axis
+    preprocess: harmonise_dims
     consolidated: true
-    mapper: fsspec
   meta:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
@@ -258,7 +250,7 @@ cmip6_{model}_ssp460_{member}_{timestep}:
 #    model: ['CCCma/CanESM5'] # other models but were regridded to irregular grid for lat
     member: ['r1i1p1f1']
     timestep: ['day','Amon']
-  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp460/{member}/{timestep}/{variable}/*/*/
+  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp460/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
     tas: temp
@@ -278,9 +270,8 @@ cmip6_{model}_ssp585_{member}_{timestep}:
   kwargs:
     drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
     decode_times: true
-    preprocess: set_lon_lat_time_axis
+    preprocess: harmonise_dims
     consolidated: true
-    mapper: fsspec
   meta:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
@@ -298,7 +289,7 @@ cmip6_{model}_ssp585_{member}_{timestep}:
 #    'CSIRO-ARCCSS/ACCESS-CM2','CSIRO/ACCESS-ESM1-5'] # other models but were regridded to irregular grid for lat or time outofbounds
     member: ['r1i1p1f1']
     timestep: ['day','Amon']
-  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp585/{member}/{timestep}/{variable}/*/*/
+  path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp585/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
     tas: temp

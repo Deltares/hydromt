@@ -15,6 +15,7 @@ dependencies = [
     "dask",
     "entrypoints",
     "geopandas>=0.10",
+    "gcsfs",
     "gdal>=3.1",
     "numpy",
     "netcdf4",
@@ -29,6 +30,7 @@ dependencies = [
     "rioxarray",
     "shapely",
     "scipy",
+    "universal_pathlib",
     "xarray",
     "zarr",
 ]

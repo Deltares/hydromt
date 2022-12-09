@@ -5,6 +5,7 @@ import pandas as pd
 import xarray as xr
 import yaml
 import glob
+from upath import UPath
 from fsspec.implementations import local
 import gcsfs
 from string import Formatter
@@ -35,9 +36,9 @@ def remove_duplicates(ds):
     return ds.sel(time=~ds.get_index("time").duplicated())
 
 
-def set_lon_lat_time_axis(ds):
+def harmonise_dims(ds):
     """
-    Function to harmonise lon-lat-time axis
+    Function to harmonise lon-lat-time dimensions
     Where needed:
         - lon: Convert longitude coordinates from 0-360 to -180-180
         - lat: Do N->S orientation instead of S->N
@@ -46,12 +47,12 @@ def set_lon_lat_time_axis(ds):
     Parameters
     ----------
     ds: xr.DataSet
-        DataSet with forcing data
+        DataSet with dims to harmonise
 
     Returns
     -------
     ds: xr.DataSet
-        DataSet with converted longitude-latitude-time coordinates
+        DataSet with harmonised longitude-latitude-time dimensions
     """
     # Longitude
     x_dim = ds.raster.x_dim
@@ -78,7 +79,7 @@ PREPROCESSORS = {
     "round_latlon": round_latlon,
     "to_datetimeindex": to_datetimeindex,
     "remove_duplicates": remove_duplicates,
-    "set_lon_lat_time_axis": set_lon_lat_time_axis,
+    "harmonise_dims": harmonise_dims,
 }
 
 FILESYSTEMS = {
@@ -219,13 +220,29 @@ class DataAdapter(object, metaclass=ABCMeta):
             if var is not None:
                 fmt.update(variable=var)
             fns.extend(fs.glob(path.format(**fmt)))
+            # path_fmt = path.format(**fmt)
+            # # for pathlib.glob need to pass the * args in the pattern instead of whole path
+            # if '*' in path_fmt:
+            #     path_parent = UPath(path_fmt.split("*")[0])
+            #     if not path_parent.is_dir():
+            #         path_parent = path_parent.parent
+            #     #paths = [p for p in path_parent.glob(path_fmt.lstrip(str(path_parent)))]
+            #     path_end = UPath(path_fmt).parts[len(path_parent.parts):]
+            #     # pathlib.Path._flavour.sep is not officially part of the API...
+            #     paths = [p for p in path_parent.glob(path_parent._flavour.sep.join(path_end))]
+            #     fns.extend(paths)
+            # else:
+            #     p = UPath(path_fmt)
+            #     if p.exists():
+            #         fns.extend([p])
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {path}{postfix}")
-        # FIXME: glob with GCS filesystem can loose the beginning of the path (eg gs://)
-        if self.filesystem == "gcs":
-            # Find the missing letters and add at the beginning of each fns
-            prefix = path.split("://")[0]
-            fns = [f"{prefix}://{f}" for f in fns]
+        # With some fs like gcfs or s3fs, the first part of the past is not returned properly with glob
+        if not str(UPath(fns[0])).startswith(str(UPath(path))[0:2]):
+            # Assumes it's the first part of the path that is not correctly parsed with gcsfs, s3fs etc.
+            last_parent = UPath(path).parents[-1]
+            # add the rest of the path
+            fns = [last_parent.joinpath(*UPath(fn).parts[1:]) for fn in fns]
         return list(set(fns))  # return unique paths
 
     @abstractmethod

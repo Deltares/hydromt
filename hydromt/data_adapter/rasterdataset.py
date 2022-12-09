@@ -219,10 +219,10 @@ class RasterDatasetAdapter(DataAdapter):
                 do_preprocess = True
             ds_lst = []
             for fn in fns:
-                if "mapper" in kwargs:
-                    mapper_type = kwargs.pop("mapper")
-                    if mapper_type == "fsspec":
-                        fn = fsspec.get_mapper(fn)
+                # if "mapper" in kwargs:
+                #    mapper_type = kwargs.pop("mapper")
+                #    if mapper_type == "fsspec":
+                #        mapper = fsspec.get_mapper(str(fn))
                 ds = xr.open_zarr(fn, **kwargs)
                 if do_preprocess:
                     ds = preprocess(ds)

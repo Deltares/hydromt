@@ -239,7 +239,6 @@ class DataCatalog(object):
 
             meta:
               root: <path>
-              remote: <remote>
               category: <category>
               version: <version>
             <name>:
@@ -281,16 +280,13 @@ class DataCatalog(object):
         # read meta data
         meta = yml.pop("meta", meta)
         # TODO keep meta data!! Note only possible if yml files are not merged
-        # Infer from meta if files are located locally or remotely with the remote flag, if remote root can stay None
-        remote = meta.get("remote", False)
-        if root is None and not remote:
+        if root is None:
             root = meta.get("root", dirname(urlpath))
         self.from_dict(
             yml,
             root=root,
             category=meta.get("category", None),
             mark_used=mark_used,
-            remote=remote,
         )
 
     def from_dict(
@@ -299,7 +295,6 @@ class DataCatalog(object):
         root: Union[str, Path] = None,
         category: str = None,
         mark_used: bool = False,
-        remote: bool = False,
     ) -> None:
         """Add data sources based on dictionary.
 
@@ -313,8 +308,6 @@ class DataCatalog(object):
             Global category for all sources in `data_dict`.
         mark_used: bool
             If True, append to used_data list.
-        remote: bool
-            Idicates if data_sources are local or remote files. By default False for local files.
 
         Examples
         --------
@@ -346,7 +339,9 @@ class DataCatalog(object):
 
         """
         data_dict = _parse_data_dict(
-            data_dict, root=root, category=category, remote=remote
+            data_dict,
+            root=root,
+            category=category,
         )
         self.update(**data_dict)
         if mark_used:
@@ -773,7 +768,6 @@ def _parse_data_dict(
     data_dict: Dict,
     root: Union[Path, str] = None,
     category: str = None,
-    remote: bool = False,
 ) -> Dict:
     """Parse data source dictionary."""
     # link yml keys to adapter classes
@@ -808,11 +802,10 @@ def _parse_data_dict(
             raise ValueError(f"{name}: Data type {data_type} unknown")
         adapter = ADAPTERS.get(data_type)
         # Only for local files
-        if not remote:
-            path = abs_path(root, source.pop("path"))
-        # For remote keep the path as is
-        else:
-            path = source.pop("path")
+        path = source.pop("path")
+        # if remote path, keep as is else call abs_path method to solve local files
+        if not _uri_validator(path):
+            path = abs_path(root, path)
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)

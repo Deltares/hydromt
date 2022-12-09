@@ -66,9 +66,9 @@ def test_rasterdataset(rioda, tmpdir):
         data_catalog.get_rasterdataset("no_file.tif")
 
 
-def test_rasterdataset_remote(tmpdir):
+def test_rasterdataset_cmip6(tmpdir):
     # TODO switch to pre-defined catalogs when pushed to main
-    catalog_fn = join(CATALOGDIR, "remote_data.yml")
+    catalog_fn = join(CATALOGDIR, "cmip6_data.yml")
     data_catalog = DataCatalog(data_libs=[catalog_fn])
     ds = data_catalog.get_rasterdataset(
         "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",

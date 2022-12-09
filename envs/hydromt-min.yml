@@ -11,6 +11,7 @@ dependencies:
   - dask
   - entrypoints
   - flit>=3.4  # install
+  - gcsfs
   - gdal>=3.1
   - geopandas>=0.10
   - netcdf4
@@ -25,6 +26,7 @@ dependencies:
   - rasterio
   - requests
   - rioxarray
+  - universal_pathlib
   - scipy
   - shapely
   - xarray

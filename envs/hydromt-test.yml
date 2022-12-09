@@ -31,6 +31,7 @@ dependencies:
   - rioxarray
   - scipy
   - shapely
+  - universal_pathlib
   - xarray
   - xugrid>=0.1.5 # optional for mesh
   - zarr

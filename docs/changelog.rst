@@ -11,11 +11,10 @@ Unreleased
 
 Added
 -----
-- new predefined catalog for remote data ``remote_data``.
-- support for remote data with a yml meta flag for ``remote`` and a per source new ``filesystem`` attribute.
-  Supported filesystems are [local, gcs].
+- new predefined catalog for cmip6 data stored on google cloud ``cmip6_data``.
+- support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs].
 - support for CMIP6 dataset.
-- new preprocess function ``set_lon_lat_time_axis`` for manipulation of array dimensions.
+- new preprocess function ``harmonise_dims`` for manipulation and harmonisation of array dimensions.
 
 Changed
 -------

@@ -44,6 +44,7 @@ dependencies:
   - scipy
   - testpath  # tests
   - toml
+  - universal_pathlib
   - shapely
   - sphinx # docs
   - xarray
