@@ -1,6 +1,7 @@
 import pandas as pd
 import xarray as xr
 import numpy as np
+import pyet
 import re
 import logging
 from typing import Union
@@ -574,6 +575,93 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
     pet = xr.where(pet > 0.0, pet, 0.0)
     return pet
 
+def pm_fao56(
+    temp,
+    temp_max,
+    temp_min,
+    press,
+    kin,
+    wind,
+    d2m,
+    dem,
+    var
+    ):
+    """
+    Reference evaporation blabla
+
+    Parameters
+    ----------
+
+    t : xarray.DataArray
+        Daily mean temperature
+    tmax : xarray.DataArray
+
+    tmin : xarray.DataArray
+    press : xarray.DataArray
+    kin : xarray.DataArray
+    wind : xarray.DataArray
+    d2m : xarray.DataArray
+    dem : xarray.DataArray
+    lat : xarray.DataArray
+    var : str
+
+    Returns
+    -------
+
+    nog meer dingen
+    """
+    # Precalculated variables:
+    lat = (kin.latitude*(np.pi/180))
+
+    # Vapor pressure
+    svp = pyet.calc_es(
+        tmean=temp,
+        tmax=temp_max,
+        tmin=temp_min
+        )
+
+    if var == "temp_dew":
+        avp = pyet.calc_e0(tmean=d2m)
+    elif var == "rh":
+        avp = pyet.calc_ea(
+            tmax=temp_max,
+            tmin=temp_min,
+            rh=d2m
+            )
+
+    # Net radiation
+    dates = pyet.utils.get_index(kin)
+    er = pyet.extraterrestrial_r(dates,lat)
+    csr = pyet.calc_rso(er, dem)
+
+    swr = pyet.calc_rad_short(
+        kin * (86400 / 1e6) 
+        )
+
+    lwr = pyet.calc_rad_long(
+        kin * (86400 / 1e6),
+        tmax=temp_max,
+        tmin=temp_min,
+        rso=csr,
+        ea=avp
+        )
+
+    nr = swr - lwr
+
+    # Penman Monteith FAO-56
+    pressure = pyet.calc_press(dem, press / 10)
+    gamma = pyet.calc_psy(pressure)
+    dlt = pyet.calc_vpc(temp)
+
+    gamma1 = (gamma * (1 + 0.34 * wind))
+
+    den = dlt + gamma1
+    num1 = (0.408 * dlt * (nr - 0)) / den
+    num2 = (gamma * (svp - avp) * 900 * wind / (temp + 273)) / den
+    pet = num1 + num2
+    pet = pyet.utils.clip_zeros(pet, True)
+
+    return pet.rename("PM_FAO_56")
 
 def penman_monteith(
     temp,
@@ -721,19 +809,7 @@ def pet_penman_monteith(
     doy = kin.time.dt.dayofyear
 
     # latitude of each cell in radians
-    lat_rad = xr.Dataset(
-        data_vars=dict(
-            lat_rad=(
-                ["y", "x"],
-                pyeto.deg2rad(kin.y.values)
-                .reshape(len(kin.y), 1)
-                .repeat(len(kin.x), 1),
-            ),
-        ),
-        coords=dict(y=kin.y, x=kin.x),
-        attrs=dict(description="lat_rad"),
-    )
-    lat_rad = lat_rad["lat_rad"]
+    lat_rad = (kin.latitude*(np.pi/180))
 
     if var_for_avp_name == "rh":
         # correct for neg values in rh and rh>100....
