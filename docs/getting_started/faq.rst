@@ -21,11 +21,11 @@ of the method name. For instance, the second time that you use the setup_config 
 the sequence in which these are in the .ini file determines the sequence in which these are called.
 
  | **Q**: How can I just write specific :ref:`model data component <model_interface>` 
-   (i.e.: staticmaps, staticgeoms, forcing, config or states) instead of the all model data when updating?
+   (i.e.: grid, geoms, forcing, config or states) instead of the all model data when updating?
 
 Each model plugin implements a combined `write()` method that writes the entire model and is 
 called by default at the end of a build or update. If you however add a write method 
-(e.g. `write_staticmaps`, `write_forcing`, `write_config`, etc.) to the .ini file the call to the 
+(e.g. `write_grid` for a Grid model, `write_forcing`, `write_config`, etc.) to the .ini file the call to the 
 general write method is disabled and only the selected model data attributes are written.
 
  | **Q**: Can I define more than one data catalog when building / updating models?

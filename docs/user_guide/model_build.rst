@@ -20,8 +20,8 @@ From CLI
 --------
 
 The ``hydromt build`` command line interface (CLI) method can be run from the command line after the right conda environment is activated. 
-The HydroMT core package itself does not contain an implementation for a specific model. 
-To actually build a specific model the associated :ref:`HydroMT plugin <plugins>` needs to be installed.
+The HydroMT core package contain implementation for generalized model classes. Specific model implementation for softwares have to be built
+from associated :ref:`HydroMT plugin <plugins>` that needs to be installed to your Python environment.
 
 To check which HydroMT model plugins are installed, do:
 
@@ -39,6 +39,12 @@ in the ``sfincs_config.ini`` file and the data sources in the ``data_catalog.yml
 
     hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini -d /path/to/data_catalog.yml -v
 
+The following line of code builds a SFINCS model for a region defined by a bounding box ``bbox`` and based on the model methods 
+in the ``grid_model_config.ini`` file and the data sources in the ``data_catalog.yml`` file.
+
+.. code-block:: console
+
+    hydromt build grid_model /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/grid_model_config.ini -d /path/to/data_catalog.yml -v
 
 .. Tip::
     
@@ -75,4 +81,16 @@ To create the same SFINCS model as shown above in the CLI example the following 
     model_root = r'/path/to/model_root
     opt=configread(r'/path/to/sfincs_config.ini')  # parse .ini configuration
     mod = SfincsModel(model_root, data_libs=data_libs)  # initialize model with default logger
+    mod.build(region={'bbox': [4.6891,52.9750,4.9576,53.1994]}, opt=opt)
+
+To create the same gridded model:
+
+.. code-block::  python
+
+    from hydromt.models.model_grid import GridModel
+    from hydromt.config import configread
+    data_libs = [r'/path/to/data_catalog.yml']
+    model_root = r'/path/to/model_root
+    opt=configread(r'/path/to/grid_model_config.ini')  # parse .ini configuration
+    mod = GridModel(model_root, data_libs=data_libs)  # initialize model with default logger
     mod.build(region={'bbox': [4.6891,52.9750,4.9576,53.1994]}, opt=opt)
