@@ -30,7 +30,7 @@ dependencies:
   - pip
   - pydata-sphinx-theme  # docs
   - pyflwdir>=0.5.4
-  - pygeos>=0.8
+  - pygeos>=0.8 # optional dependency for mesh
   - pyproj
   - pytest # tests
   - pytest-cov # tests

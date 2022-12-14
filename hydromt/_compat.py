@@ -2,17 +2,18 @@ __all__ = ["HAS_PCRASTER", "HAS_XUGRID"]
 
 HAS_XUGRID = False
 HAS_PCRASTER = False
+HAS_PYGEOS = False
 
 try:
     import pygeos
-    import geopandas as gpd
 
-    gpd.options.use_pygeos = True
+    HAS_PYGEOS = True
+
 except ImportError:
     pass
 
 try:
-    import pcraster as pcr
+    import pcraster
 
     HAS_PCRASTER = True
 

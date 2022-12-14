@@ -3,11 +3,6 @@
 # version number without 'v' at start
 __version__ = "0.6.1.dev"
 
-import warnings
-
-# required for accessor style documentation
-from xarray import DataArray, Dataset
-
 # submoduls
 from . import cli, workflows, stats, flw, raster, vector
 
@@ -15,3 +10,6 @@ from . import cli, workflows, stats, flw, raster, vector
 from .models import *
 from .io import *
 from .data_catalog import *
+
+# required for accessor style documentation
+from xarray import DataArray, Dataset

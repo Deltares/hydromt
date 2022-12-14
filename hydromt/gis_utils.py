@@ -8,16 +8,14 @@ import xarray as xr
 import rasterio
 from rasterio.crs import CRS
 from rasterio.transform import Affine
-from osgeo import gdal
 import geopandas as gpd
 from shapely.geometry.base import BaseGeometry
 from shapely.geometry import box
-import pygeos
-import tempfile
 import logging
 from pyflwdir import core_conversion, core_d8, core_ldd
 from pyflwdir import gis_utils as gis
 from typing import Optional, Tuple
+from . import _compat
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 
@@ -184,10 +182,9 @@ def nearest(
         raise NotImplementedError("Mixed geometry dataframes are not yet supported.")
     if gdf1.crs != gdf2.crs:
         pnts = pnts.to_crs(gdf2.crs)
-    # find nearest using pygeos
-    # NOTE: requires geopandas 0.10
-    other = pygeos.from_shapely(pnts.geometry.values)
-    idx = gdf2.sindex.nearest(other, return_all=False)[1]
+    # find nearest
+    # NOTE: does not require pygeos since shapely v2.0; changed in v0.6.1
+    idx = gdf2.sindex.nearest(pnts.geometry.values, return_all=False)[1]
     # get distance in meters
     gdf2_nearest = gdf2.iloc[idx]
     if gdf2_nearest.crs.is_geographic:
@@ -443,6 +440,8 @@ def spread2d(
 
 def write_clone(tmpdir, gdal_transform, wkt_projection, shape):
     """write pcraster clone file to a tmpdir using gdal"""
+    from osgeo import gdal
+
     gdal.AllRegister()
     driver1 = gdal.GetDriverByName("GTiff")
     driver2 = gdal.GetDriverByName("PCRaster")
@@ -499,10 +498,11 @@ def write_map(
     ValueError
         if invalid ldd
     """
-    try:
-        import pcraster as pcr
-    except ImportError:
+    if not _compat.HAS_PCRASTER:
         raise ImportError("The pcraster package is required to write map files")
+    import tempfile
+    import pcraster as pcr
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # deal with pcr clone map
         if clone_path is None:
