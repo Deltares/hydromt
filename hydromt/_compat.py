@@ -1,7 +1,8 @@
-__all__ = ["HAS_PCRASTER", "HAS_XUGRID"]
+__all__ = ["HAS_PCRASTER", "HAS_XUGRID", "HAS_PYET"]
 
 HAS_XUGRID = False
 HAS_PCRASTER = False
+HAS_PYET = False
 
 try:
     import pygeos
@@ -19,11 +20,18 @@ try:
 except ImportError:
     pass
 
-
 try:
     import xugrid
 
     HAS_XUGRID = True
 
 except ImportError:
+    pass
+
+try:
+    import pyet
+
+    HAS_PYET = True
+
+except ModuleNotFoundError:
     pass

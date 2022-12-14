@@ -2,14 +2,14 @@ import pandas as pd
 import xarray as xr
 import xarray.core.resample
 import numpy as np
-import pyet
 import re
 import logging
 from typing import Union
 
-from .. import _has_pyeto
+from .._compat import HAS_PYET
 
-if _has_pyeto():
+if HAS_PYET:
+    import pyet
     import pyeto
 
 logger = logging.getLogger(__name__)
@@ -273,19 +273,19 @@ def wind(
 
 
 def pet(
-    ds,
-    temp,
-    dem_model,
-    method="debruin",
-    press_correction=False,
-    wind_correction=True,
-    wind_altitude=10,
-    reproj_method="nearest_index",
-    lapse_rate=-0.0065,
-    freq=None,
-    resample_kwargs={},
+    ds: xarray.Dataset,
+    temp: xarray.DataArray,
+    dem_model: xarray.DataArray,
+    method: str ="debruin",
+    press_correction: bool=False,
+    wind_correction: bool=True,
+    wind_altitude: float=10,
+    reproj_method: str="nearest_index",
+    lapse_rate: float=-0.0065,
+    freq: str=None,
+    resample_kwargs: dict={},
     logger=logger,
-):
+    ) -> xarray.DataArray:
 
     """Determines reference evapotranspiration (lazy reprojection on model grid and resampling of time dimension to frequency).
 
@@ -344,23 +344,18 @@ def pet(
             reproj_method=reproj_method,
         )
     else:
-        if "press_msl" in ds_out:
-            ds_out = ds_out.rename({"press_msl": "press"})
-        elif _has_pyeto():
+        if "press_msl" in ds:
+            ds_out["press"] = (
+                ds["press_msl"].raster.reproject_like(dem_model, method=reproj_method)
+                )
+        elif HAS_PYET:
             # calculate pressure from elevation [kPa]
-            ds_out["press"] = xr.apply_ufunc(
-                pyeto.atm_pressure,
-                dem_model.where(dem_model.mask),
-                dask="parallelized",
-                output_dtypes=[float],
-                vectorize=True,
-                keep_attrs=True,
-            )
+            ds_out["press"] = pyet.calc_press(dem_model)
             # convert to hPa to be consistent with press function calculation:
             ds_out["press"] = ds_out["press"] * 10
         else:
-            raise ValueError(
-                "If 'press' is supplied and 'press_correction' is used, the pyeto package must be installed."
+            raise ModuleNotFoundError(
+                "If 'press' is supplied and 'press_correction' is not used, the pyet package must be installed."
             )
 
     timestep = to_timedelta(ds).total_seconds()
@@ -378,49 +373,49 @@ def pet(
         )
     elif method == "makkink":
         pet_out = pet_makkink(temp, ds_out["press"], ds_out["kin"], timestep=timestep)
-    elif "penman-monteith" in method and _has_pyeto():
+    elif "penman-monteith" in method:
         logger.info("Calculating Penman-Monteith ref evaporation")
         # Add wind
         # compute wind from u and v components at 10m (for era5)
-        if ("wind_u" in ds.data_vars) & ("wind_v" in ds.data_vars):
+        if ("u10" in ds.data_vars) & ("v10" in ds.data_vars):
             ds_out["wind"] = wind(
                 da_model=dem_model,
-                wind_u=ds_out["wind_u"],
-                wind_v=ds_out["wind_v"],
+                wind_u=ds["u10"],
+                wind_v=ds["v10"],
                 altitude=wind_altitude,
                 altitude_correction=wind_correction,
             )
         else:
             ds_out["wind"] = wind(
                 da_model=dem_model,
-                wind=ds_out["wind"],
+                wind=ds["wind"],
                 altitude=wind_altitude,
                 altitude_correction=wind_correction,
             )
         if method == "penman-monteith_rh_simple":
-            pet_out = pet_penman_monteith(
-                temp["temp"],
-                temp["temp_min"],
-                temp["temp_max"],
-                ds_out["press"],
+            pet_out = pm_fao56(
+                ds["temp"].raster.reproject_like(dem_model,method=reproj_method),
+                ds["temp_max"].raster.reproject_like(dem_model,method=reproj_method),
+                ds["temp_min"].raster.reproject_like(dem_model,method=reproj_method),
+                ds_out["press"]/10,
                 ds_out["kin"],
                 ds_out["wind"],
-                ds_out["rh"],
-                dem_model.where(dem_model.mask),
+                ds["rh"].raster.reproject_like(dem_model,method=reproj_method),
+                dem_model,
                 "rh",
-            )
+                )
         elif method == "penman-monteith_tdew":
-            pet_out = pet_penman_monteith(
-                temp["temp"],
-                temp["temp_min"],
-                temp["temp_max"],
-                ds_out["press"],
+            pet_out = pm_fao56(
+                ds["temp"].raster.reproject_like(dem_model,method=reproj_method),
+                ds["temp_max"].raster.reproject_like(dem_model,method=reproj_method),
+                ds["temp_min"].raster.reproject_like(dem_model,method=reproj_method),
+                ds_out["press"]/10,
                 ds_out["kin"],
                 ds_out["wind"],
-                ds_out["temp_dew"],
-                dem_model.where(dem_model.mask),
+                ds["d2m"].raster.reproject_like(dem_model,method=reproj_method),
+                dem_model,
                 "temp_dew",
-            )
+                )   
         else:
             methods = [
                 "debruin",
@@ -429,10 +424,6 @@ def pet(
                 "penman-monteith_tdew",
             ]
             raise ValueError(f"Unknown pet method, select from {methods}")
-    else:
-        raise ValueError(
-            "The pyeto package must be installed to use penman-monteith methods to compute PET."
-        )
 
     # resample in time
     pet_out.name = "pet"
@@ -441,7 +432,6 @@ def pet(
         resample_kwargs.update(upsampling="bfill", downsampling="sum", logger=logger)
         pet_out = resample_time(pet_out, freq, conserve_mass=True, **resample_kwargs)
     return pet_out
-
 
 def press_correction(
     dem_model, g=9.80665, R_air=8.3144621, Mo=0.0289644, lapse_rate=-0.0065
@@ -577,48 +567,66 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
     return pet
 
 def pm_fao56(
-    temp,
-    temp_max,
-    temp_min,
-    press,
-    kin,
-    wind,
-    d2m,
-    dem,
-    var
-    ):
+    temp: xarray.DataArray,
+    temp_max: xarray.DataArray,
+    temp_min: xarray.DataArray,
+    press: xarray.DataArray,
+    kin: xarray.DataArray,
+    wind: xarray.DataArray,
+    d2m: xarray.DataArray,
+    dem: xarray.DataArray,
+    var: str = "temp_dew"
+    ) -> xarray.DataArray:
     """
-    Reference evaporation blabla
+    Estimate daily reference evapotranspiration (ETo) from a hypothetical
+    short grass reference surface using the FAO-56 Penman-Monteith equation.
+
+    Actual vapor pressure is derived either from relative humidity or dewpoint temperature (depending on var_for_avp_name).
+
+    Based on equation 6 in Allen et al (1998) and using the functions provided by the pyet package ()
 
     Parameters
     ----------
-
-    t : xarray.DataArray
-        Daily mean temperature
-    tmax : xarray.DataArray
-
-    tmin : xarray.DataArray
+    temp : xarray.DataArray
+        DataArray with daily temperature [°C]
+    temp_max : xarray.DataArray
+        DataArray with maximum daily temperature [°C]
+    temp_min : xarray.DataArray
+        DataArray with minimum daily temperature [°C]
     press : xarray.DataArray
+        DataArray with pressure [hPa]
     kin : xarray.DataArray
+        DataArray with global radiation [W m-2]
     wind : xarray.DataArray
+        DataArray with wind speed at 2m above the surface [m s-1]
     d2m : xarray.DataArray
+        DataArray with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
     dem : xarray.DataArray
-    lat : xarray.DataArray
-    var : str
-
+        DataArray with elevation at model resolution [m]
+    var : str, optional
+        String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
+    
     Returns
     -------
-
-    nog meer dingen
+    xarray.DataArray
+        DataArray with the estimated daily reference evapotranspiration [mm d-1]
+    
+    Raises
+    ------
+    ModuleNotFoundError
+        In case the pyet module is not installed
+    
     """
+    # Small check for libraries
+    if not HAS_PYET:
+        raise ModuleNotFoundError("Penman-Monteith FAO-56 requires the 'pyet' library")
+
     # Precalculated variables:
     lat = (kin.latitude*(np.pi/180))
 
     # Vapor pressure
-    svp = pyet.calc_es(
-        tmean=temp,
-        tmax=temp_max,
-        tmin=temp_min
+    svp = pyet.calc_e0(
+        tmean=temp
         )
 
     if var == "temp_dew":
@@ -646,198 +654,21 @@ def pm_fao56(
         rso=csr,
         ea=avp
         )
-
     nr = swr - lwr
 
     # Penman Monteith FAO-56
-    pressure = pyet.calc_press(dem, press / 10)
-    gamma = pyet.calc_psy(pressure)
+    gamma = pyet.calc_psy(press)
     dlt = pyet.calc_vpc(temp)
 
     gamma1 = (gamma * (1 + 0.34 * wind))
 
     den = dlt + gamma1
     num1 = (0.408 * dlt * (nr - 0)) / den
-    num2 = (gamma * (svp - avp) * 900 * wind / (temp + 273)) / den
+    num2 = (gamma * (svp - avp) * 900 * wind / (temp + 273.15)) / den
     pet = num1 + num2
     pet = pyet.utils.clip_zeros(pet, True)
 
     return pet.rename("PM_FAO_56")
-
-def penman_monteith(
-    temp,
-    temp_min,
-    temp_max,
-    press,
-    kin,
-    wind,
-    var_for_avp,
-    elevtn,
-    doy,
-    lat_rad,
-    var_for_avp_name,
-):
-    """
-    Estimate daily reference evapotranspiration (ETo) from a hypothetical
-    short grass reference surface using the FAO-56 Penman-Monteith equation.
-
-    Actual vapor pressure is derived either from relative humidity or dewpoint temperature (depending on var_for_avp_name).
-
-    Based on equation 6 in Allen et al (1998) and using the functions provided by the Pyeto package  (https://pyeto.readthedocs.io/en/latest/index.html).
-
-
-    Parameters
-    ----------
-    temp : ndarrays
-        ndarrays with daily temperature [°C]
-    temp_min : ndarrays
-        ndarrays with minimum daily temperature [°C]
-    temp_max : ndarrays
-        ndarrays with maximum daily temperature [°C]
-    press : ndarrays
-        ndarrays with pressure [hPa]
-    kin : ndarrays
-        ndarrays with global radiation [W m-2]
-    wind : ndarrays
-        ndarrays with wind speed at 2m above the surface [m s-1]
-    var_for_avp :  ndarrays
-        ndarrays with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
-    elevtn :  ndarrays
-        ndarrays with elevation at model resolution [m]
-    doy : int
-        day of year
-    lat_rad : ndarrays
-        ndarray with latitude [radians]
-    var_for_avp_name: string
-        String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
-
-    Returns
-    --------
-    pet : ndarrays (lazy)
-        reference evapotranspiration [mm d-1]
-
-    """
-    # saturation vapor pressure svp [kPa] from temp [degC]
-    svp = pyeto.svp_from_t(temp)
-
-    # actual vapor pressure avp [kPa] from dewpoint temperature [degC]
-    if var_for_avp_name == "temp_dew":
-        avp = pyeto.avp_from_tdew(var_for_avp)
-    # actual vapor pressure avp [kPa] from relative humidity rh [%]
-    elif var_for_avp_name == "rh":
-        svp_tmin = pyeto.svp_from_t(temp_min)
-        svp_tmax = pyeto.svp_from_t(temp_max)
-        avp = pyeto.avp_from_rhmean(svp_tmin, svp_tmax, var_for_avp)
-    else:
-        variables_avp = ["temp_dew", "rh"]
-        raise ValueError(
-            f"Unknown method to calculate avp, select from variables {variables_avp}"
-        )
-
-    # slope of the sat vapor pressure curve
-    delta_svp = pyeto.delta_svp(temp)
-
-    # psychrometric constant
-    # press already calculated from elevation (or if available directly)
-    psy = pyeto.psy_const(press / 10)  # in this formula press should be in kPa
-
-    # ned rad
-    # first calc extraterrestrial rad (et_rad) and clear sky radiation (cs_rad)
-    sol_dec = pyeto.sol_dec(doy)
-    sha = pyeto.sunset_hour_angle(lat_rad, sol_dec)
-    ird = pyeto.inv_rel_dist_earth_sun(doy)
-    et_rad = pyeto.et_rad(lat_rad, sol_dec, sha, ird)
-    cs_rad = pyeto.cs_rad(elevtn, et_rad)
-    temp_min_kelvin = pyeto.celsius2kelvin(temp_min)
-    temp_max_kelvin = pyeto.celsius2kelvin(temp_max)
-    temp_kelvin = pyeto.celsius2kelvin(temp)
-    # then longwave outgoing
-    long_out = pyeto.net_out_lw_rad(
-        temp_min_kelvin,
-        temp_max_kelvin,
-        kin * 86400 / 1e6,
-        cs_rad,
-        avp,
-    )  # in this formula kin should be in [MJ m-2 day-1]
-
-    # then net rad
-    # first net rad short
-    net_rad_s = pyeto.net_in_sol_rad(
-        kin * 86400 / 1e6, albedo=0.23
-    )  # in this formula kin should be in [MJ m-2 day-1]
-    net_rad = pyeto.net_rad(net_rad_s, long_out)
-
-    # now eto....
-    pet = pyeto.fao56_penman_monteith(
-        net_rad, temp_kelvin, wind, svp, avp, delta_svp, psy, shf=0.0
-    )
-    return pet
-
-
-def pet_penman_monteith(
-    temp, temp_min, temp_max, press, kin, wind, var_for_avp, elevtn, var_for_avp_name
-):
-    """Determnines Penman-Monteith daily reference evapotranspiration based on the available inputs. Using the pyeto package.
-
-    Parameters
-    ----------
-    temp : xarray.DataArray
-        DataArray with daily temperature [°C]
-    temp_min : xarray.DataArray
-        DataArray with minimum daily temperature [°C]
-    temp_max : xarray.DataArray
-        DataArray with maximum daily temperature [°C]
-    press : xarray.DataArray
-        DataArray with pressure [hPa]
-    kin : xarray.DataArray
-        DataArray with global radiation [W m-2]
-    wind : xarray.DataArray
-        DataArray with wind speed at 2m above the surface [m s-1]
-    var_for_avp :  xarray.DataArray
-        DataArray with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
-    elevtn :  xarray.DataArray
-        DataArray with elevation at model resolution [m]
-    var_for_avp_name: string
-        String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
-
-    Returns
-    --------
-    pet : xarray.DataArray (lazy)
-        reference evapotranspiration [mm d-1]
-    """
-
-    # get day of year
-    doy = kin.time.dt.dayofyear
-
-    # latitude of each cell in radians
-    lat_rad = (kin.latitude*(np.pi/180))
-
-    if var_for_avp_name == "rh":
-        # correct for neg values in rh and rh>100....
-        rh_corr1 = var_for_avp.where(var_for_avp < 100, 100)
-        rh_corr = rh_corr1.where(rh_corr1 > 0, 0)
-        var_for_avp = rh_corr
-
-    pet = xr.apply_ufunc(
-        penman_monteith,
-        temp,
-        temp_min,
-        temp_max,
-        press,
-        kin,
-        wind,
-        var_for_avp,
-        elevtn,
-        doy,
-        lat_rad,
-        var_for_avp_name,
-        dask="parallelized",
-        output_dtypes=[float],
-        vectorize=True,
-        keep_attrs=True,
-    )
-    return pet
-
 
 def resample_time(
     da,
@@ -848,7 +679,7 @@ def resample_time(
     downsampling="mean",
     conserve_mass=True,
     logger=logger,
-):
+    ):
     """Resample data to destination frequency.
     Skip if input data already at output frequency.
 

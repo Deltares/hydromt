@@ -3,7 +3,7 @@
 import pytest
 from hydromt.data_catalog import DataCatalog
 from hydromt.raster import full_from_transform
-from hydromt.workflows.forcing import precip
+from hydromt.workflows.forcing import precip, pet
 import pandas as pd
 import xarray as xr
 
@@ -38,4 +38,19 @@ def test_precip():
 
 def test_pet():
     cat = DataCatalog()
-    et_data = cat.get_rasterdataset("era5_daily_zarr")  
+    et_data = cat.get_rasterdataset("era5_daily_zarr")
+    et_data["d2m"] -= 273.15
+    dem = cat.get_rasterdataset("era5_orography")
+
+    peto = pet(
+        et_data
+        w["temp"]
+        dem,
+        method="penman-monteith_tdew"
+        )
+
+    assert peto.raster.shape == dem.raster.shape
+
+
+
+
