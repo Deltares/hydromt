@@ -10,7 +10,6 @@ from .._compat import HAS_PYET
 
 if HAS_PYET:
     import pyet
-    import pyeto
 
 logger = logging.getLogger(__name__)
 
