@@ -1,4 +1,3 @@
-# set environment for use of pygeos before import geopandas
 import pytest
 from os.path import join, dirname, abspath
 import numpy as np

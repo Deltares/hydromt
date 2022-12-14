@@ -17,6 +17,10 @@ from pyflwdir import gis_utils as gis
 from typing import Optional, Tuple
 from . import _compat
 
+if _compat.HAS_PYGEOS:
+    import pygeos
+
+
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 
 logger = logging.getLogger(__name__)
@@ -187,7 +191,7 @@ def nearest(
     if not _compat.SHAPELY_GE_20 and not _compat.HAS_PYGEOS:
         raise ImportError("This functionality requires shapely >= v2.0")
     elif _compat.HAS_PYGEOS:
-        other = _compat.pygeos.from_shapely(pnts.geometry.values)
+        other = pygeos.from_shapely(pnts.geometry.values)
     else:
         other = pnts.geometry.values
     idx = gdf2.sindex.nearest(other, return_all=False)[1]

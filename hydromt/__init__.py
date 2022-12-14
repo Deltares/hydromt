@@ -3,7 +3,7 @@
 # version number without 'v' at start
 __version__ = "0.6.1.dev"
 
-# submoduls
+# submodules
 from . import cli, workflows, stats, flw, raster, vector
 
 # high-level methods
