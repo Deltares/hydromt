@@ -184,7 +184,13 @@ def nearest(
         pnts = pnts.to_crs(gdf2.crs)
     # find nearest
     # NOTE: does not require pygeos since shapely v2.0; changed in v0.6.1
-    idx = gdf2.sindex.nearest(pnts.geometry.values, return_all=False)[1]
+    if not _compat.SHAPELY_GE_20 and not _compat.HAS_PYGEOS:
+        raise ImportError("This functionality requires shapely >= v2.0")
+    elif _compat.HAS_PYGEOS:
+        other = _compat.pygeos.from_shapely(pnts.geometry.values)
+    else:
+        other = pnts.geometry.values
+    idx = gdf2.sindex.nearest(other, return_all=False)[1]
     # get distance in meters
     gdf2_nearest = gdf2.iloc[idx]
     if gdf2_nearest.crs.is_geographic:

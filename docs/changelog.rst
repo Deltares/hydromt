@@ -23,6 +23,7 @@ Fixed
 
 Deprecated
 ----------
+- Move pygeos to optional dependencies in favor of shapely 2.0.
 
 Documentation
 -------------

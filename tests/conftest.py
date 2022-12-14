@@ -1,11 +1,8 @@
 # set environment for use of pygeos before import geopandas
 import pytest
-import os
 from os.path import join, dirname, abspath
 import numpy as np
 import pandas as pd
-
-os.environ["USE_PYGEOS"] = "0"
 import geopandas as gpd
 import xarray as xr
 
