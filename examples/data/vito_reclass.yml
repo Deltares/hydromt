@@ -1,0 +1,8 @@
+vito_reclass:
+  data_type: DataFrame
+  driver: csv
+  kwargs:
+    index_col: 0
+  meta:
+    notes: reclass table for manning values 
+  path: vito_reclass.csv

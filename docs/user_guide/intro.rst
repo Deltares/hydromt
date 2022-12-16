@@ -115,6 +115,9 @@ Region                          Argument of the *build* and *clip* CLI methods t
    data_conventions.rst
    ../_examples/reading_raster_data.ipynb
    ../_examples/reading_vector_data.ipynb
+   ../_examples/reading_point_data.ipynb
+   ../_examples/prep_data_catalog.ipynb
+   ../_examples/export_data.ipynb
 
 .. toctree::
    :maxdepth: 2
@@ -127,6 +130,9 @@ Region                          Argument of the *build* and *clip* CLI methods t
    model_clip.rst
    model_config.rst
    model_region.rst
+   ../_examples/working_with_models_basics.ipynb
+   ../_examples/working_with_models.ipynb
+   ../_examples/delineate_basin.ipynb
 
 .. toctree::
    :maxdepth: 2
@@ -135,5 +141,5 @@ Region                          Argument of the *build* and *clip* CLI methods t
 
    methods_main.rst
    methods_stats.rst
-   ../_examples/delineate_basin.ipynb
    ../_examples/working_with_raster.ipynb
+   ../_examples/working_with_flow_directions.ipynb

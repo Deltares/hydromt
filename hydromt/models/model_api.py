@@ -3,7 +3,7 @@
 
 from abc import ABCMeta
 import os, glob
-from os.path import join, isdir, isfile, abspath, dirname, basename
+from os.path import join, isdir, isfile, abspath, dirname, basename, isabs
 import xarray as xr
 import numpy as np
 import geopandas as gpd
@@ -57,7 +57,7 @@ class Model(object, metaclass=ABCMeta):
         root: Optional[str] = None,
         mode: Optional[str] = "w",
         config_fn: Optional[str] = None,
-        data_libs: Optional[List[str]] = None,
+        data_libs: Union[List, str] = [],
         logger=logger,
         **artifact_keys,
     ):
@@ -75,12 +75,13 @@ class Model(object, metaclass=ABCMeta):
         data_libs : List[str], optional
             List of data catalog yaml files, by default None
         """
-        from . import ENTRYPOINTS  # load within method to avoid circular imports
+        from . import MODELS  # avoid circular import
 
         self.logger = logger
-        ep = ENTRYPOINTS.get(self._NAME, None)
-        version = ep.distro.version if ep is not None else ""
-        dist = ep.distro.name if ep is not None else "unknown"
+        dist, version = "unknown", "NA"
+        if self._NAME in MODELS:
+            ep = MODELS[self._NAME]
+            dist, version = ep.distro.name, ep.distro.version
 
         # link to data
         self.data_catalog = DataCatalog(
@@ -324,7 +325,7 @@ class Model(object, metaclass=ABCMeta):
             For a complete overview of all region options,
             see :py:function:~hydromt.workflows.basin_mask.parse_region
         hydrography_fn : str
-            Name of data source for basemap parameters.
+            Name of data source for hydrography data.
             FIXME describe data requirements
         basin_index_fn : str
             Name of data source with basin (bounding box) geometries associated with
@@ -392,6 +393,16 @@ class Model(object, metaclass=ABCMeta):
             raise ValueError("Root unknown, use set_root method")
         return self._root
 
+    @property
+    def _assert_write_mode(self):
+        if not self._write:
+            raise IOError("Model opened in read-only mode")
+
+    @property
+    def _assert_read_mode(self):
+        if not self._read:
+            raise IOError("Model opened in write-only mode")
+
     def set_root(self, root: Optional[str], mode: Optional[str] = "w"):
         """Initialize the model root.
 
@@ -425,11 +436,6 @@ class Model(object, metaclass=ABCMeta):
             # check directory
             elif not isdir(self._root):
                 raise IOError(f'model root not found at "{self._root}"')
-            # read hydromt_data yaml file and add to data catalog
-            data_fn = join(self._root, "hydromt_data.yml")
-            if self._read and isfile(data_fn):
-                # read data and mark as used
-                self.data_catalog.from_yml(data_fn, mark_used=True)
             # remove old logging file handler and add new filehandler in root if it does not exist
             has_log_file = False
             log_level = 20  # default, but overwritten by the level of active loggers
@@ -504,27 +510,50 @@ class Model(object, metaclass=ABCMeta):
             getattr(self, f"write_{component}")()
 
     def write_data_catalog(
-        self, root: Optional[Union[str, Path]] = None, used_only: bool = True
+        self,
+        root: Optional[Union[str, Path]] = None,
+        data_lib_fn: Union[str, Path] = "hydromt_data.yml",
+        used_only: bool = True,
+        append: bool = True,
     ):
-        """Write the data catalog to `hydromt_data.yml`
+        """Write the data catalog to data_lib_fn
 
         Parameters
         ----------
         root: str, Path, optional
             Global root for all relative paths in yaml file.
             If "auto" the data source paths are relative to the yaml output ``path``.
-        used_only: bool
-            If True, export only data entries kept in used_data list.
+        data_lib_fn: str, Path, optional
+            Path of output yml file, absolute or relative to the model root, by default "hydromt_data.yml".
+        used_only: bool, optional
+            If True, export only data entries kept in used_data list. By default True
+        append: bool, optional
+            If True, append to an existing
         """
-        path = join(self.root, "hydromt_data.yml")
-        self.data_catalog.to_yml(path, root=root, used_only=used_only)
+        path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
+        cat = DataCatalog(logger=self.logger, fallback_lib=None)
+        # read hydromt_data yaml file and add to data catalog
+        if self._read and isfile(path) and append:
+            cat.from_yml(path)
+        # update data catalog with new used sources
+        source_names = (
+            self.data_catalog._used_data
+            if used_only
+            else list(self.data_catalog.sources.keys())
+        )
+        if len(source_names) > 0:
+            cat.from_dict(self.data_catalog.to_dict(source_names=source_names))
+        if cat.sources:
+            self._assert_write_mode
+            cat.to_yml(path, root=root)
 
     # model configuration
     @property
     def config(self) -> Dict[str, Union[Dict, str]]:
         """Model configuration. Returns a (nested) dictionary"""
+        # initialize default config if in write-mode
         if not self._config:
-            self.read_config()  # initialize default config
+            self.read_config()
         return self._config
 
     def set_config(self, *args):
@@ -644,8 +673,7 @@ class Model(object, metaclass=ABCMeta):
         self, config_name: Optional[str] = None, config_root: Optional[str] = None
     ):
         """Write config to <root/config_fn>"""
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
+        self._assert_write_mode
         if config_name is not None:
             self._config_fn = config_name
         elif self._config_fn is None:
@@ -667,9 +695,8 @@ class Model(object, metaclass=ABCMeta):
             "use the grid property of the GridModel class instead.",
             DeprecationWarning,
         )
-        if len(self._staticmaps) == 0:
-            if self._read:
-                self.read_staticmaps()
+        if len(self._staticmaps) == 0 and self._read:
+            self.read_staticmaps()
         return self._staticmaps
 
     def set_staticmaps(
@@ -734,6 +761,7 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root, by default "staticmaps/staticmaps.nc"
         """
+        self._assert_read_mode
         for ds in self._read_nc(fn, **kwargs).values():
             self.set_staticmaps(ds)
 
@@ -749,11 +777,13 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root, by default 'staticmaps/staticmaps.nc'
         """
-        nc_dict = dict()
-        if len(self._staticmaps) > 0:
-            # _write_nc requires dict - use dummy key
-            nc_dict.update({"staticmaps": self._staticmaps})
-        self._write_nc(nc_dict, fn, **kwargs)
+        if len(self._staticmaps) == 0:
+            self.logger.debug("No staticmaps data found, skip writing.")
+        else:
+            self._assert_write_mode
+            # _write_nc requires dict - use dummy 'staticmaps' key
+            nc_dict = {"staticmaps": self._staticmaps}
+            self._write_nc(nc_dict, fn, **kwargs)
 
     # map files setup methods
     def setup_maps_from_raster(
@@ -893,9 +923,8 @@ class Model(object, metaclass=ABCMeta):
     @property
     def maps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model maps. Returns dict of xarray.DataArray or xarray.Dataset"""
-        if len(self._maps) == 0:
-            if self._read:
-                self.read_maps()
+        if len(self._maps) == 0 and self._read:
+            self.read_maps()
         return self._maps
 
     def set_maps(
@@ -934,6 +963,7 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root, may wildcards, by default "maps/*.nc"
         """
+        self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_maps(ds, name=name)
@@ -949,16 +979,19 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root and should contain a {name} placeholder,
             by default 'maps/{name}.nc'
         """
-        self._write_nc(self._maps, fn, **kwargs)
+        if len(self._maps) == 0:
+            self.logger.debug("No maps data found, skip writing.")
+        else:
+            self._assert_write_mode
+            self._write_nc(self._maps, fn, **kwargs)
 
     # model geometry files
     @property
     def geoms(self) -> Dict[str, Union[gpd.GeoDataFrame, gpd.GeoSeries]]:
         """Model geometries. Returns dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
         ..NOTE: previously call staticgeoms."""
-        if not self._geoms:
-            if self._read:
-                self.read_geoms()
+        if not self._geoms and self._read:
+            self.read_geoms()
         return self._geoms
 
     def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
@@ -990,6 +1023,7 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root, may wildcards, by default "geoms/*.nc"
         """
+        self._assert_read_mode
         fns = glob.glob(join(self.root, fn))
         for fn in fns:
             name = basename(fn).split(".")[0]
@@ -1007,16 +1041,15 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root and should contain a {name} placeholder,
             by default 'geoms/{name}.geojson'
         """
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
-        elif not self._geoms:
-            self.logger.warning("No model geoms to write - Exiting")
+        if len(self._geoms) == 0:
+            self.logger.debug("No geoms data found, skip writing.")
             return
+        self._assert_write_mode
         if "driver" not in kwargs:
             kwargs.update(driver="GeoJSON")  # default
         for name, gdf in self._geoms.items():
             if not isinstance(gdf, (gpd.GeoDataFrame, gpd.GeoSeries)) or len(gdf) == 0:
-                self.logger.error(
+                self.logger.warning(
                     f"{name} object of type {type(gdf).__name__} not recognized"
                 )
                 continue
@@ -1035,9 +1068,8 @@ class Model(object, metaclass=ABCMeta):
             "The staticgeoms method will be deprecated in future versions, use geoms instead.",
             DeprecationWarning,
         )
-        if not self._geoms:
-            if self._read:
-                self.read_staticgeoms()
+        if not self._geoms and self._read:
+            self.read_staticgeoms()
         self._staticgeoms = self._geoms
         return self._staticgeoms
 
@@ -1050,6 +1082,7 @@ class Model(object, metaclass=ABCMeta):
         return self.set_geoms(geom, name)
 
     def read_staticgeoms(self):
+        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.read_geoms`"""
         warnings.warn(
             'The read_staticgeoms" method will be deprecated in future versions, use read_geoms instead.',
             DeprecationWarning,
@@ -1057,6 +1090,7 @@ class Model(object, metaclass=ABCMeta):
         return self.read_geoms(fn="staticgeoms/*.geojson")
 
     def write_staticgeoms(self):
+        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.write_geoms`"""
         warnings.warn(
             'The "write_staticgeoms" method will be deprecated in future versions, use  "write_geoms" instead.',
             DeprecationWarning,
@@ -1067,9 +1101,8 @@ class Model(object, metaclass=ABCMeta):
     @property
     def forcing(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model forcing. Returns dict of xarray.DataArray or xarray.Dataset"""
-        if not self._forcing:
-            if self._read:
-                self.read_forcing()
+        if not self._forcing and self._read:
+            self.read_forcing()
         return self._forcing
 
     def set_forcing(
@@ -1105,6 +1138,7 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root, may wildcards, by default "forcing/*.nc"
         """
+        self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_forcing(ds, name=name)
@@ -1120,15 +1154,18 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root and should contain a {name} placeholder,
             by default 'forcing/{name}.nc'
         """
-        self._write_nc(self._forcing, fn, **kwargs)
+        if len(self._forcing) == 0:
+            self.logger.debug("No forcing data found, skip writing.")
+        else:
+            self._assert_write_mode
+            self._write_nc(self._forcing, fn, **kwargs)
 
     # model state files
     @property
     def states(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model states. Returns dict of xarray.DataArray or xarray.Dataset"""
-        if not self._states:
-            if self._read:
-                self.read_states()
+        if not self._states and self._read:
+            self.read_states()
         return self._states
 
     def set_states(
@@ -1164,6 +1201,7 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root, may wildcards, by default "states/*.nc"
         """
+        self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_states(ds, name=name)
@@ -1179,15 +1217,18 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root and should contain a {name} placeholder,
             by default 'states/{name}.nc'
         """
-        self._write_nc(self._states, fn, **kwargs)
+        if len(self._states) == 0:
+            self.logger.debug("No states data found, skip writing.")
+        else:
+            self._assert_write_mode
+            self._write_nc(self._states, fn, **kwargs)
 
     # model results files; NOTE we don't have a write_results method (that's up to the model kernel)
     @property
     def results(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model results.  Returns dict of xarray.DataArray or xarray.Dataset"""
-        if not self._results:
-            if self._read:
-                self.read_results()
+        if not self._results and self._read:
+            self.read_results()
         return self._results
 
     def set_results(
@@ -1226,6 +1267,7 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root, may wildcards, by default "results/*.nc"
         """
+        self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_results(ds, name=name)
@@ -1233,10 +1275,6 @@ class Model(object, metaclass=ABCMeta):
     def _write_nc(
         self, nc_dict: Dict[str, Union[xr.DataArray, xr.Dataset]], fn, **kwargs
     ) -> None:
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
-        if len(nc_dict) == 0:
-            self.logger.info("No data found - exiting")
         for name, ds in nc_dict.items():
             if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
                 self.logger.error(

@@ -27,7 +27,7 @@ dependencies = [
     "rasterio",
     "requests",
     "rioxarray",
-    "shapely==1.8.2", # temp version pin see geopandas#2531
+    "shapely",
     "scipy",
     "xarray",
     "zarr",
@@ -50,6 +50,7 @@ test = [
     "black",
 	"pytest>=2.7.3",
 	"pytest-cov",
+    "pytest-mock",
 	"responses",
 ]
 doc = [
@@ -66,11 +67,6 @@ Source = "https://github.com/Deltares/hydromt"
 
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
-
-[project.entry-points."hydromt.models"]
-lumped_model = "hydromt.models.model_lumped:LumpedModel"
-grid_model = "hydromt.models.model_grid:GridModel"
-mesh_model = "hydromt.models.model_mesh:MeshModel"
 
 [tool.black]
 line-length = 88

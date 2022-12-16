@@ -105,20 +105,31 @@ DataFrame
    data_adapter.DataFrameAdapter.to_dict
    data_adapter.DataFrameAdapter.to_file
 
-.. _model_api:
 
 ======
 Models
 ======
 
-Classes
-=======
+Discovery
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelCatalog
+
+
+.. _model_api:
+
+Model
+=====
+
+Note that the base Model attributes and methods are available to all models.
+
 .. autosummary::
    :toctree: _generated
 
    Model
-   GridModel
-   LumpedModel
 
 High level methods 
 ------------------
@@ -133,8 +144,19 @@ High level methods
    Model.set_root
    Model.write_data_catalog
 
-Model components
+Model attributes
 ----------------
+
+.. autosummary::
+   :toctree: _generated
+
+   Model.crs
+   Model.region
+   Model.api
+
+
+Model components and attributes
+-------------------------------
 
 .. autosummary::
    :toctree: _generated
@@ -145,10 +167,6 @@ Model components
    Model.forcing
    Model.states
    Model.results
-
-   MeshModel.mesh
-   GridModel.grid
-   LumpedModel.response_units
 
 General methods
 ---------------
@@ -180,18 +198,6 @@ General methods
    Model.set_results
    Model.read_results
 
-   MeshModel.set_mesh
-   MeshModel.read_mesh
-   MeshModel.write_mesh
-
-   GridModel.set_grid
-   GridModel.read_grid
-   GridModel.write_grid
-
-   LumpedModel.set_response_units
-   LumpedModel.read_response_units
-   LumpedModel.write_response_units
-
 .. _setup_methods:
 
 Setup methods
@@ -204,6 +210,138 @@ Setup methods
    Model.setup_region
    Model.setup_maps_from_raster
    Model.setup_maps_from_raster_reclass
+
+
+.. _grid_model_api:
+
+GridModel
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   GridModel
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GridModel.grid
+   GridModel.crs
+   GridModel.region
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GridModel.set_grid
+   GridModel.read_grid
+   GridModel.write_grid
+
+Setup methods
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GridModel.setup_config
+   GridModel.setup_region
+   GridModel.setup_maps_from_raster
+   GridModel.setup_maps_from_raster_reclass
+
+
+.. _lumped_model_api:
+
+LumpedModel
+===========
+
+.. autosummary::
+   :toctree: _generated
+
+   LumpedModel
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   LumpedModel.response_units
+   LumpedModel.crs
+   LumpedModel.region
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   LumpedModel.set_response_units
+   LumpedModel.read_response_units
+   LumpedModel.write_response_units
+
+Setup methods
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   LumpedModel.setup_config
+   LumpedModel.setup_region
+   LumpedModel.setup_maps_from_raster
+   LumpedModel.setup_maps_from_raster_reclass
+
+
+.. _mesh_model_api:
+
+MeshModel
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshModel
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshModel.mesh
+   MeshModel.crs
+   MeshModel.region
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshModel.set_mesh
+   MeshModel.read_mesh
+   MeshModel.write_mesh
+
+
+Setup methods
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshModel.setup_config
+   MeshModel.setup_region
+   MeshModel.setup_maps_from_raster
+   MeshModel.setup_maps_from_raster_reclass
+
 
 
 =========

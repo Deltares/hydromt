@@ -14,7 +14,6 @@ dependencies:
   - gdal>=3.1
   - geopandas>=0.10
   - netcdf4
-  - numba
   - numpy
   - openpyxl
   - pandas
@@ -22,14 +21,15 @@ dependencies:
   - pcraster # optional
   - pyflwdir>=0.5.4
   - pygeos>=0.8
+  - pyproj
   - pytest # tests
   - pytest-cov # tests
-  - pytest-benchmark # tests
+  - pytest-mock # tests
   - rasterio
   - requests
   - rioxarray
   - scipy
-  - shapely=1.8.2  # temp version pin see geopandas#2531
+  - shapely
   - xarray
   - xugrid>=0.1.5 # optional for mesh
   - zarr

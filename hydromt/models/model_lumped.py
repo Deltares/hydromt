@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class LumpedMixin:
-    _API = {
-        "response_units": xr.Dataset,
-    }
+    _API = {"response_units": xr.Dataset}
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -28,9 +26,8 @@ class LumpedMixin:
     @property
     def response_units(self) -> xr.Dataset:
         """Model response unit (lumped) data. Returns xr.Dataset geometry coordinate."""
-        if not self._response_units:
-            if self._read:
-                self.read_response_units()
+        if not self._response_units and self._read:
+            self.read_response_units()
         return self._response_units
 
     def set_response_units(
@@ -93,6 +90,7 @@ class LumpedMixin:
         fn_geom : str, optional
             geojson filename relative to model root, by default 'response_units/response_units.geojson'
         """
+        self._assert_read_mode
         ds = xr.merge(self._read_nc(fn, **kwargs).values())
         if isfile(join(self.root, fn_geom)):
             gdf = gpd.read_file(join(self.root, fn_geom))
@@ -120,22 +118,26 @@ class LumpedMixin:
         fn_geom : str, optional
             geojson filename relative to model root, by default 'response_units/response_units.geojson'
         """
-        nc_dict = dict()
-        if len(self._response_units) > 0:
-            # write geometry
-            ds = self._response_units
-            gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
-            if not isdir(dirname(join(self.root, fn_geom))):
-                os.makedirs(dirname(join(self.root, fn_geom)))
-            gdf.to_file(join(self.root, fn_geom), driver="GeoJSON")
-            # _write_nc requires dict - use dummy key
-            nc_dict.update({"response_units": ds.drop_vars("geometry")})
+        if len(self._response_units) == 0:
+            self.logger.debug("No response_units data found, skip writing.")
+            return
+        self._assert_write_mode
+        # write geometry
+        ds = self._response_units
+        gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
+        if not isdir(dirname(join(self.root, fn_geom))):
+            os.makedirs(dirname(join(self.root, fn_geom)))
+        gdf.to_file(join(self.root, fn_geom), driver="GeoJSON")
+        # _write_nc requires dict - use dummy key
+        nc_dict = {"response_units": ds.drop_vars("geometry")}
         self._write_nc(nc_dict, fn, **kwargs)
 
 
 class LumpedModel(LumpedMixin, Model):
+    """Model class Lumped Model for lumped models in HydroMT"""
 
     _CLI_ARGS = {"region": "setup_region"}
+    _NAME = "lumped_model"
 
     def __init__(
         self,
@@ -145,7 +147,7 @@ class LumpedModel(LumpedMixin, Model):
         data_libs: List[str] = None,
         logger=logger,
     ):
-        # Initialize with the Model class
+        """Initialize a LumpedModel for lumped and semi-distributed models."""
         super().__init__(
             root=root,
             mode=mode,

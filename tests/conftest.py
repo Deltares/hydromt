@@ -5,7 +5,7 @@ import pandas as pd
 import geopandas as gpd
 import xarray as xr
 
-from hydromt import Model, GridModel, LumpedModel, NetworkModel
+from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
 from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
 import pyflwdir
@@ -224,14 +224,11 @@ def network_model():
 
 @pytest.fixture
 def mesh_model(demuda):
-    from hydromt import MeshModel
-
-    mod = MeshModel()
+    mod = MODELS.load("mesh_model")()
     # region = gpd.GeoDataFrame(
     #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.grid.crs
     # )
     # mod.setup_region({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(demuda, "elevtn")
-
     return mod

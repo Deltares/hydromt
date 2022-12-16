@@ -8,10 +8,58 @@ import numpy as np
 import geopandas as gpd
 from shapely.geometry import polygon
 from hydromt.models.model_api import _check_data
-from hydromt.models import Model, GridModel, LumpedModel
-from hydromt import _compat
+from hydromt.models import Model, GridModel, LumpedModel, MODELS, model_plugins
+from hydromt.data_catalog import DataCatalog
+import hydromt.models.model_plugins
+import hydromt._compat
+from entrypoints import EntryPoint, Distribution
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+def test_plugins(mocker):
+    distro = Distribution("hydromt", "x.x.x")
+    ep_lst = [
+        EntryPoint.from_string("hydromt.models.model_api:Model", "test_model", distro)
+    ]
+    mocker.patch("hydromt.models.model_plugins._discover", return_value=ep_lst)
+    eps = model_plugins.get_plugin_eps()
+    assert "test_model" in eps
+    assert isinstance(eps["test_model"], EntryPoint)
+
+
+def test_plugin_duplicates(mocker):
+    ep_lst = model_plugins.get_general_eps().values()
+    mocker.patch("hydromt.models.model_plugins._discover", return_value=ep_lst)
+    eps = model_plugins.get_plugin_eps()
+    assert len(eps) == 0
+
+
+def test_load():
+    with pytest.raises(ValueError, match="Model plugin type not recognized"):
+        model_plugins.load(
+            EntryPoint.from_string("hydromt.data_catalog:DataCatalog", "error")
+        )
+    with pytest.raises(ImportError, match="Error while loading model plugin"):
+        model_plugins.load(
+            EntryPoint.from_string("hydromt.models:DataCatalog", "error")
+        )
+
+
+# test both with and without xugrid
+@pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
+def test_global_models(mocker, has_xugrid):
+    mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
+    keys = list(model_plugins.LOCAL_EPS.keys())
+    if not hydromt._compat.HAS_XUGRID:
+        keys.remove("mesh_model")
+    assert isinstance(MODELS[keys[0]], EntryPoint)
+    assert issubclass(MODELS.load(keys[0]), Model)
+    assert keys[0] in MODELS.__str__()
+    assert all([k in MODELS for k in keys])  # eps
+    assert all([k in MODELS.cls for k in keys])
+    with pytest.raises(ValueError, match="Unknown model"):
+        MODELS["unknown"]
 
 
 def test_check_data(demda):
@@ -51,6 +99,31 @@ def test_run_log_method():
     assert "region" in model._geoms
 
 
+def test_write_data_catalog(tmpdir):
+    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
+    sources = list(model.data_catalog.sources.keys())
+    data_lib_fn = join(model.root, "hydromt_data.yml")
+    # used_only=True -> no file written
+    model.write_data_catalog()
+    assert not isfile(data_lib_fn)
+    # write with single source
+    model.data_catalog._used_data.append(sources[0])
+    model.write_data_catalog()
+    assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:1]
+    # write to different file
+    data_lib_fn1 = join(tmpdir, "hydromt_data2.yml")
+    model.write_data_catalog(data_lib_fn=data_lib_fn1)
+    assert isfile(data_lib_fn1)
+    # append source
+    model1 = Model(root=model.root, data_libs=["artifact_data"], mode="r+")
+    model1.data_catalog._used_data.append(sources[1])
+    model1.write_data_catalog(append=False)
+    assert list(DataCatalog(data_lib_fn).sources.keys()) == [sources[1]]
+    model1.data_catalog._used_data.append(sources[0])
+    model1.write_data_catalog(append=True)
+    assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
+
+
 def test_model(model, tmpdir):
     # Staticmaps -> moved from _test_model_api as it is deprecated
     model._API.update({"staticmaps": xr.Dataset})
@@ -59,9 +132,13 @@ def test_model(model, tmpdir):
     # write model
     model.set_root(str(tmpdir), mode="w")
     model.write()
+    with pytest.raises(IOError, match="Model opened in write-only mode"):
+        model.read()
     # read model
     model1 = Model(str(tmpdir), mode="r")
     model1.read()
+    with pytest.raises(IOError, match="Model opened in read-only mode"):
+        model1.write()
     # check if equal
     model._results = {}  # reset results for comparison
     equal, errors = model._test_equal(model1)
@@ -144,22 +221,6 @@ def test_config(model, tmpdir):
     assert str(model.get_config("global.file", abs_path=True)) == fn
 
 
-# def test_maps(model, tmpdir):
-#     assert "maps" in model.api
-#     assert len(model.maps) == 1
-#     non_compliant = model._test_model_api()
-#     assert len(non_compliant) == 0, non_compliant
-#     # write model
-#     model.set_root(str(tmpdir), mode="w")
-#     model.write(components=["config", "geoms", "maps"])
-#     # read model
-#     model1 = Model(str(tmpdir), mode="r")
-#     model1.read(components=["config", "geoms", "maps"])
-#     # check if equal
-#     equal, errors = model._test_equal(model1)
-#     assert equal, errors
-
-
 def test_maps_setup(tmpdir):
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = Model(data_libs=["artifact_data", dc_param_fn], mode="w")
@@ -236,10 +297,9 @@ def test_networkmodel(network_model, tmpdir):
         network_model.network
 
 
-@pytest.mark.skipif(not _compat.HAS_XUGRID, reason="Xugrid not installed.")
+@pytest.mark.skipif(not hydromt._compat.HAS_XUGRID, reason="Xugrid not installed.")
 def test_meshmodel(mesh_model, tmpdir):
-    from hydromt.models import MeshModel
-
+    MeshModel = MODELS.load("mesh_model")
     assert "mesh" in mesh_model.api
     non_compliant = mesh_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
@@ -254,10 +314,9 @@ def test_meshmodel(mesh_model, tmpdir):
     assert equal, errors
 
 
-@pytest.mark.skipif(not _compat.HAS_XUGRID, reason="Xugrid not installed.")
+@pytest.mark.skipif(not hydromt._compat.HAS_XUGRID, reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, world, tmpdir):
-    from hydromt.models import MeshModel
-
+    MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})
