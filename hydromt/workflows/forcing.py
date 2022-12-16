@@ -157,7 +157,6 @@ def press(
     dem_model,
     lapse_correction=True,
     freq=None,
-    reproj_method="nearest_index",
     lapse_rate=-0.0065,
     resample_kwargs={},
     logger=logger,
@@ -190,21 +189,21 @@ def press(
     if press.raster.dim0 != "time":
         raise ValueError(f'First press dim should be "time", not {press.raster.dim0}')
     # downscale pressure (lazy)
-    press_out = press.raster.reproject_like(dem_model, method=reproj_method)
+    # press_out = press.raster.reproject_like(dem_model, method=reproj_method)
     # correct temperature based on high-res DEM
     if lapse_correction:
         # calculate downscaling addition
         press_factor = press_correction(dem_model, lapse_rate=lapse_rate)
-        press_out = press_out * press_factor
+        press = press * press_factor
     # resample time
-    press_out.name = "press"
-    press_out.attrs.update(unit="hPa")
+    press.name = "press"
+    press.attrs.update(unit="hPa")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
-        press_out = resample_time(
-            press_out, freq, conserve_mass=False, **resample_kwargs
+        press = resample_time(
+            press, freq, conserve_mass=False, **resample_kwargs
         )
-    return press_out
+    return press
 
 
 def wind(
@@ -215,7 +214,6 @@ def wind(
     altitude: float = 10,
     altitude_correction: bool = False,
     freq: pd.Timedelta = None,
-    reproj_method: str = "nearest_index",
     resample_kwargs: dict = {},
     logger=logger,
 ):
@@ -260,16 +258,13 @@ def wind(
     # compute wind at 2 meters altitude
     if altitude_correction:
         wind = wind * (4.87 / np.log((67.8 * altitude) - 5.42))
-    # downscale wind (lazy)
-    wind_out = wind.raster.reproject_like(da_model, method=reproj_method)
     # resample time
-    wind_out.name = "wind"
-    wind_out.attrs.update(unit="m s-1")
+    wind.name = "wind"
+    wind.attrs.update(unit="m s-1")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
-        wind_out = resample_time(wind_out, freq, conserve_mass=False, **resample_kwargs)
-    return wind_out
-
+        wind = resample_time(wind, freq, conserve_mass=False, **resample_kwargs)
+    return wind
 
 def pet(
     ds: xarray.Dataset,
@@ -280,7 +275,7 @@ def pet(
     wind_correction: bool=True,
     wind_altitude: float=10,
     reproj_method: str="nearest_index",
-    lapse_rate: float=-0.0065,
+    # lapse_rate: float=-0.0065,
     freq: str=None,
     resample_kwargs: dict={},
     logger=logger,
@@ -330,12 +325,11 @@ def pet(
         raise ValueError("Temp variable should be on model grid.")
 
     # resample input to model grid
-    # Start with kin and press (used by all methods)
-    ds_out = (
-        ds["kin"].raster.reproject_like(dem_model, method=reproj_method).to_dataset()
-    )
+    ds = ds.raster.reproject_like(dem_model, method=reproj_method)
+    
+    # Process bands like 'pressure' and 'wind'
     if press_correction:
-        ds_out["press"] = press(
+        ds["press"] = press(
             ds["press_msl"],
             dem_model,
             lapse_correction=press_correction,
@@ -344,14 +338,12 @@ def pet(
         )
     else:
         if "press_msl" in ds:
-            ds_out["press"] = (
-                ds["press_msl"].raster.reproject_like(dem_model, method=reproj_method)
-                )
+            ds = ds.rename({"press_msl":"press"})
         elif HAS_PYET:
             # calculate pressure from elevation [kPa]
-            ds_out["press"] = pyet.calc_press(dem_model)
+            ds["press"] = pyet.calc_press(dem_model)
             # convert to hPa to be consistent with press function calculation:
-            ds_out["press"] = ds_out["press"] * 10
+            ds["press"] = ds["press"] * 10
         else:
             raise ModuleNotFoundError(
                 "If 'press' is supplied and 'press_correction' is not used, the pyet package must be installed."
@@ -359,25 +351,21 @@ def pet(
 
     timestep = to_timedelta(ds).total_seconds()
     if method == "debruin":
-        # Add kout
-        ds_out["kout"] = ds["kout"].raster.reproject_like(
-            dem_model, method=reproj_method
-        )
         pet_out = pet_debruin(
             temp,
-            ds_out["press"],
-            ds_out["kin"],
-            ds_out["kout"],
+            ds["press"],
+            ds["kin"],
+            ds["kout"],
             timestep=timestep,
         )
     elif method == "makkink":
-        pet_out = pet_makkink(temp, ds_out["press"], ds_out["kin"], timestep=timestep)
+        pet_out = pet_makkink(temp, ds["press"], ds["kin"], timestep=timestep)
     elif "penman-monteith" in method:
         logger.info("Calculating Penman-Monteith ref evaporation")
         # Add wind
         # compute wind from u and v components at 10m (for era5)
         if ("u10" in ds.data_vars) & ("v10" in ds.data_vars):
-            ds_out["wind"] = wind(
+            ds["wind"] = wind(
                 da_model=dem_model,
                 wind_u=ds["u10"],
                 wind_v=ds["v10"],
@@ -385,7 +373,7 @@ def pet(
                 altitude_correction=wind_correction,
             )
         else:
-            ds_out["wind"] = wind(
+            ds["wind"] = wind(
                 da_model=dem_model,
                 wind=ds["wind"],
                 altitude=wind_altitude,
@@ -393,25 +381,25 @@ def pet(
             )
         if method == "penman-monteith_rh_simple":
             pet_out = pm_fao56(
-                ds["temp"].raster.reproject_like(dem_model,method=reproj_method),
-                ds["temp_max"].raster.reproject_like(dem_model,method=reproj_method),
-                ds["temp_min"].raster.reproject_like(dem_model,method=reproj_method),
-                ds_out["press"]/10,
-                ds_out["kin"],
-                ds_out["wind"],
-                ds["rh"].raster.reproject_like(dem_model,method=reproj_method),
+                ds["temp"],
+                ds["temp_max"],
+                ds["temp_min"],
+                ds["press"]/10,
+                ds["kin"],
+                ds["wind"],
+                ds["rh"],
                 dem_model,
                 "rh",
                 )
         elif method == "penman-monteith_tdew":
             pet_out = pm_fao56(
-                ds["temp"].raster.reproject_like(dem_model,method=reproj_method),
-                ds["temp_max"].raster.reproject_like(dem_model,method=reproj_method),
-                ds["temp_min"].raster.reproject_like(dem_model,method=reproj_method),
-                ds_out["press"]/10,
-                ds_out["kin"],
-                ds_out["wind"],
-                ds["d2m"].raster.reproject_like(dem_model,method=reproj_method),
+                ds["temp"],
+                ds["temp_max"],
+                ds["temp_min"],
+                ds["press"]/10,
+                ds["kin"],
+                ds["wind"],
+                ds["d2m"],
                 dem_model,
                 "temp_dew",
                 )   
