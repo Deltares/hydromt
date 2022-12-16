@@ -11,6 +11,7 @@ Unreleased
 
 Added
 -----
+- Penman Monteith FAO-56 based on the `pyet` module
 
 Changed
 -------
@@ -20,6 +21,7 @@ Changed
 Fixed
 -----
 - fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- fixed `pet` (workflows.forcing), variables are now defined correctly
 
 Deprecated
 ----------

@@ -411,6 +411,7 @@ Computation methods
 
    workflows.forcing.pet_debruin
    workflows.forcing.pet_makkink
+   workflows.forcing.pm_fao56
 
 =======================
 Reading/writing methods
