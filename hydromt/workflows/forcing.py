@@ -270,20 +270,21 @@ def wind(
         wind_out = resample_time(wind_out, freq, conserve_mass=False, **resample_kwargs)
     return wind_out
 
+
 def pet(
     ds: xarray.Dataset,
     temp: xarray.DataArray,
     dem_model: xarray.DataArray,
-    method: str ="debruin",
-    press_correction: bool=False,
-    wind_correction: bool=True,
-    wind_altitude: float=10,
-    reproj_method: str="nearest_index",
+    method: str = "debruin",
+    press_correction: bool = False,
+    wind_correction: bool = True,
+    wind_altitude: float = 10,
+    reproj_method: str = "nearest_index",
     # lapse_rate: float=-0.0065,
-    freq: str=None,
-    resample_kwargs: dict={},
+    freq: str = None,
+    resample_kwargs: dict = {},
     logger=logger,
-    ) -> xarray.DataArray:
+) -> xarray.DataArray:
 
     """Determines reference evapotranspiration (lazy reprojection on model grid and resampling of time dimension to frequency).
 
@@ -330,7 +331,7 @@ def pet(
 
     # resample input to model grid
     ds = ds.raster.reproject_like(dem_model, method=reproj_method)
-    
+
     # Process bands like 'pressure' and 'wind'
     if press_correction:
         ds["press"] = press(
@@ -342,7 +343,7 @@ def pet(
         )
     else:
         if "press_msl" in ds:
-            ds = ds.rename({"press_msl":"press"})
+            ds = ds.rename({"press_msl": "press"})
         elif HAS_PYET:
             # calculate pressure from elevation [kPa]
             ds["press"] = pyet.calc_press(dem_model)
@@ -388,25 +389,25 @@ def pet(
                 ds["temp"],
                 ds["temp_max"],
                 ds["temp_min"],
-                ds["press"]/10,
+                ds["press"] / 10,
                 ds["kin"],
                 ds["wind"],
                 ds["rh"],
                 dem_model,
                 "rh",
-                )
+            )
         elif method == "penman-monteith_tdew":
             pet_out = pm_fao56(
                 ds["temp"],
                 ds["temp_max"],
                 ds["temp_min"],
-                ds["press"]/10,
+                ds["press"] / 10,
                 ds["kin"],
                 ds["wind"],
                 ds["d2m"],
                 dem_model,
                 "temp_dew",
-                )   
+            )
         else:
             methods = [
                 "debruin",
@@ -423,6 +424,7 @@ def pet(
         resample_kwargs.update(upsampling="bfill", downsampling="sum", logger=logger)
         pet_out = resample_time(pet_out, freq, conserve_mass=True, **resample_kwargs)
     return pet_out
+
 
 def press_correction(
     dem_model, g=9.80665, R_air=8.3144621, Mo=0.0289644, lapse_rate=-0.0065
@@ -557,6 +559,7 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
     pet = xr.where(pet > 0.0, pet, 0.0)
     return pet
 
+
 def pm_fao56(
     temp: xarray.DataArray,
     temp_max: xarray.DataArray,
@@ -566,8 +569,8 @@ def pm_fao56(
     wind: xarray.DataArray,
     d2m: xarray.DataArray,
     dem: xarray.DataArray,
-    var: str = "temp_dew"
-    ) -> xarray.DataArray:
+    var: str = "temp_dew",
+) -> xarray.DataArray:
     """
     Estimate daily reference evapotranspiration (ETo) from a hypothetical
     short grass reference surface using the FAO-56 Penman-Monteith equation.
@@ -596,62 +599,50 @@ def pm_fao56(
         DataArray with elevation at model resolution [m]
     var : str, optional
         String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
-    
+
     Returns
     -------
     xarray.DataArray
         DataArray with the estimated daily reference evapotranspiration [mm d-1]
-    
+
     Raises
     ------
     ModuleNotFoundError
         In case the pyet module is not installed
-    
+
     """
     # Small check for libraries
     if not HAS_PYET:
         raise ModuleNotFoundError("Penman-Monteith FAO-56 requires the 'pyet' library")
 
     # Precalculated variables:
-    lat = (kin.latitude*(np.pi/180))
+    lat = kin.latitude * (np.pi / 180)
 
     # Vapor pressure
-    svp = pyet.calc_e0(
-        tmean=temp
-        )
+    svp = pyet.calc_e0(tmean=temp)
 
     if var == "temp_dew":
         avp = pyet.calc_e0(tmean=d2m)
     elif var == "rh":
-        avp = pyet.calc_ea(
-            tmax=temp_max,
-            tmin=temp_min,
-            rh=d2m
-            )
+        avp = pyet.calc_ea(tmax=temp_max, tmin=temp_min, rh=d2m)
 
     # Net radiation
     dates = pyet.utils.get_index(kin)
-    er = pyet.extraterrestrial_r(dates,lat)
+    er = pyet.extraterrestrial_r(dates, lat)
     csr = pyet.calc_rso(er, dem)
 
-    swr = pyet.calc_rad_short(
-        kin * (86400 / 1e6) 
-        )
+    swr = pyet.calc_rad_short(kin * (86400 / 1e6))
 
     lwr = pyet.calc_rad_long(
-        kin * (86400 / 1e6),
-        tmax=temp_max,
-        tmin=temp_min,
-        rso=csr,
-        ea=avp
-        )
+        kin * (86400 / 1e6), tmax=temp_max, tmin=temp_min, rso=csr, ea=avp
+    )
     nr = swr - lwr
 
     # Penman Monteith FAO-56
     gamma = pyet.calc_psy(press)
     dlt = pyet.calc_vpc(temp)
 
-    gamma1 = (gamma * (1 + 0.34 * wind))
+    gamma1 = gamma * (1 + 0.34 * wind)
 
     den = dlt + gamma1
     num1 = (0.408 * dlt * (nr - 0)) / den
@@ -660,6 +651,7 @@ def pm_fao56(
     pet = pyet.utils.clip_zeros(pet, True)
 
     return pet.rename("PM_FAO_56")
+
 
 def resample_time(
     da,
@@ -670,7 +662,7 @@ def resample_time(
     downsampling="mean",
     conserve_mass=True,
     logger=logger,
-    ):
+):
     """Resample data to destination frequency.
     Skip if input data already at output frequency.
 
