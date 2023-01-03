@@ -157,6 +157,7 @@ def press(
     dem_model,
     lapse_correction=True,
     freq=None,
+    reproj_method="nearest_index",
     lapse_rate=-0.0065,
     resample_kwargs={},
     logger=logger,
@@ -189,21 +190,21 @@ def press(
     if press.raster.dim0 != "time":
         raise ValueError(f'First press dim should be "time", not {press.raster.dim0}')
     # downscale pressure (lazy)
-    # press_out = press.raster.reproject_like(dem_model, method=reproj_method)
+    press_out = press.raster.reproject_like(dem_model, method=reproj_method)
     # correct temperature based on high-res DEM
     if lapse_correction:
         # calculate downscaling addition
         press_factor = press_correction(dem_model, lapse_rate=lapse_rate)
-        press = press * press_factor
+        press_out = press_out * press_factor
     # resample time
-    press.name = "press"
-    press.attrs.update(unit="hPa")
+    press_out.name = "press"
+    press_out.attrs.update(unit="hPa")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
-        press = resample_time(
-            press, freq, conserve_mass=False, **resample_kwargs
+        press_out = resample_time(
+            press_out, freq, conserve_mass=False, **resample_kwargs
         )
-    return press
+    return press_out
 
 
 def wind(
@@ -214,6 +215,7 @@ def wind(
     altitude: float = 10,
     altitude_correction: bool = False,
     freq: pd.Timedelta = None,
+    reproj_method: str = "nearest_index",
     resample_kwargs: dict = {},
     logger=logger,
 ):
@@ -258,13 +260,15 @@ def wind(
     # compute wind at 2 meters altitude
     if altitude_correction:
         wind = wind * (4.87 / np.log((67.8 * altitude) - 5.42))
+    # downscale wind (lazy)
+    wind_out = wind.raster.reproject_like(da_model, method=reproj_method)
     # resample time
-    wind.name = "wind"
-    wind.attrs.update(unit="m s-1")
+    wind_out.name = "wind"
+    wind_out.attrs.update(unit="m s-1")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
-        wind = resample_time(wind, freq, conserve_mass=False, **resample_kwargs)
-    return wind
+        wind_out = resample_time(wind_out, freq, conserve_mass=False, **resample_kwargs)
+    return wind_out
 
 def pet(
     ds: xarray.Dataset,
