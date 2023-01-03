@@ -35,4 +35,4 @@ dependencies:
   - xugrid>=0.1.5 # optional for mesh
   - zarr
   - pip:
-    - git+https://github.com/woodcrafty/PyETo.git # optional for Penman Monteith PET
+    - pyet # optional for Penman Monteith PET
