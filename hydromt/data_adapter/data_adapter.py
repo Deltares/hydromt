@@ -105,7 +105,7 @@ class DataAdapter(object, metaclass=ABCMeta):
     def __repr__(self):
         return self.__str__()
 
-    def resolve_paths(self, time_tuple: Tuple = None, variables: list = None):
+    def resolve_paths(self, time_tuple: Tuple = None, zoom_level: list = None ,variables: list = None):
         """Resolve {year}, {month} and {variable} keywords
         in self.path based on 'time_tuple' and 'variables' arguments
 
@@ -113,6 +113,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         ----------
         time_tuple : tuple of str, optional
             Start and end data in string format understood by :py:func:`pandas.to_timedelta`, by default None
+        zoom_level : list of int, optional
+
         variables : list of str, optional
             List of variable names, by default None
 
@@ -121,7 +123,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         List:
             list of filenames matching the path pattern given date range and variables
         """
-        known_keys = ["year", "month", "variable"]
+        known_keys = ["year", "month", "zoom_level", "variable"]
         fns = []
         keys = []
         # rebuild path based on arguments and escape unknown keys
@@ -133,6 +135,8 @@ class DataAdapter(object, metaclass=ABCMeta):
             key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
             # remove unused fields
             if key in ["year", "month"] and time_tuple is None:
+                path += "*"
+            elif key == "zoom_level" and zoom_level is None:
                 path += "*"
             elif key == "variable" and variables is None:
                 path += "*"
@@ -157,10 +161,12 @@ class DataAdapter(object, metaclass=ABCMeta):
             postfix += f"; variables: {variables}"
         # get filenames with glob for all date / variable combinations
         # FIXME: glob won't work with other than local file systems; use fsspec instead
-        for date, var in product(dates, vrs):
+        for date, zm, var in product(dates, zoom_level, vrs):
             fmt = {}
             if date is not None:
                 fmt.update(year=date.year, month=date.month)
+            if zm is not None:
+                fmt.update(zoom_level=zm)
             if var is not None:
                 fmt.update(variable=var)
             fns.extend(glob.glob(path.format(**fmt)))

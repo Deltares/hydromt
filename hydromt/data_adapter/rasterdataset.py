@@ -179,6 +179,7 @@ class RasterDatasetAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
+        zoom_level=None,
         align=None,
         variables=None,
         time_tuple=None,
@@ -195,7 +196,7 @@ class RasterDatasetAdapter(DataAdapter):
             variables = np.atleast_1d(variables).tolist()
 
         kwargs = self.kwargs.copy()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
+        fns = self.resolve_paths(time_tuple=time_tuple, zoom_level=zoom_level ,variables=variables)
 
         # read using various readers
         if self.driver in ["netcdf"]:  # TODO complete list
