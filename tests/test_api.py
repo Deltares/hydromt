@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 from hydromt.cli.api import *
-
+from hydromt.models.model_plugins import get_plugin_eps
 
 def test_get_region():
     region = {"basin": [12.111195, 46.088866]}  # Piave basin
@@ -32,7 +32,7 @@ def test_api_datasets():
     assert isinstance(datasets["RasterDatasetSource"], list)
 
 
-@pytest.mark.skipif("lumped_model" not in ENTRYPOINTS, reason="HydroMT not installed.")
+@pytest.mark.skipif("lumped_model" not in get_plugin_eps().keys(), reason="HydroMT not installed.")
 def test_api_model_components():
     # models
     components = get_model_components("lumped_model", component_types=["write"])
