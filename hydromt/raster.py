@@ -1660,7 +1660,7 @@ class RasterDataArray(XRasterBase):
         root: str,
         px: int,
         zoomlevels: list = [],
-        ):
+    ):
         """Export rasterdataset to tiles in a xyz structure
 
         Parameters
@@ -1690,21 +1690,21 @@ class RasterDataArray(XRasterBase):
         mdim = min(self._obj.shape)
         if px > mdim:
             raise ValueError("")
-        nzl = int(np.ceil((np.log10(mdim/px)/np.log10(2))))
-        pxs = [px*2**num for num in range(nzl)]
+        nzl = int(np.ceil((np.log10(mdim / px) / np.log10(2))))
+        pxs = [px * 2**num for num in range(nzl)]
 
         # Clean up zoomlevels list
-        zoomlevels = [x for x in zoomlevels if x <= len(pxs)-1]
+        zoomlevels = [x for x in zoomlevels if x <= len(pxs) - 1]
 
         def tile_window(px):
             # Basic stuff
             nr, nc = self._obj.shape
             lu = product(range(0, nc, px), range(0, nr, px))
             ## create the window
-            for l,u in lu:
-                h = min(px,nr-u)
-                w = min(px,nc-l)
-                yield (l,u,w,h)
+            for l, u in lu:
+                h = min(px, nr - u)
+                w = min(px, nc - l)
+                yield (l, u, w, h)
 
         for zl in zoomlevels:
             sd = f"{root}\\{zl}"
@@ -1712,30 +1712,29 @@ class RasterDataArray(XRasterBase):
             # Write the raster paths to a text file
             file = open(f"{sd}\\tilelist.txt", "w")
 
-            for l,u,w,h in tile_window(pxs[zl]):
-                col = int(np.ceil(l/pxs[zl]))
-                row = int(np.ceil(u/pxs[zl]))
+            for l, u, w, h in tile_window(pxs[zl]):
+                col = int(np.ceil(l / pxs[zl]))
+                row = int(np.ceil(u / pxs[zl]))
                 ssd = "{}\\{}".format(sd, col)
 
                 folder(ssd)
 
                 # create temp tile
-                temp = self._obj[u:u+h,l:l+w].load()
+                temp = self._obj[u : u + h, l : l + w].load()
                 # temp = self._obj.isel({self.y_dim:slice(u,u+h), self.x_dim: slice(l,l+w)})
                 if zl != 0:
-                    dst_transform = temp.raster.transform * temp.raster.transform.scale(2**zl)
+                    dst_transform = temp.raster.transform * temp.raster.transform.scale(
+                        2**zl
+                    )
                     temp = temp.raster.reproject(
-                        dst_transform = dst_transform,
-                        dst_width = int(w/(2**zl)),
-                        dst_height = int(h/(2**zl)),
+                        dst_transform=dst_transform,
+                        dst_width=int(w / (2**zl)),
+                        dst_height=int(h / (2**zl)),
                         method="average",
                         # dst_crs=self.crs,
                     )
 
-                temp.raster.to_raster(
-                    f"{ssd}\\{mName}_{col}_{row}.tif",
-                    driver="GTiff"
-                    )
+                temp.raster.to_raster(f"{ssd}\\{mName}_{col}_{row}.tif", driver="GTiff")
 
                 file.write(f"{ssd}\\{mName}_{col}_{row}.tif\n")
 
@@ -1743,11 +1742,16 @@ class RasterDataArray(XRasterBase):
 
             file.close()
             # Create a vrt using GDAL
-            subprocess.run([f"{PYTHON_PATH}\\Library\\bin\\gdalbuildvrt.exe", "-input_file_list",
-            f"{sd}\\tilelist.txt", f"{sd}\\{mName}.vrt"]
+            subprocess.run(
+                [
+                    f"{PYTHON_PATH}\\Library\\bin\\gdalbuildvrt.exe",
+                    "-input_file_list",
+                    f"{sd}\\tilelist.txt",
+                    f"{sd}\\{mName}.vrt",
+                ]
             )
         # Write a quick yaml for the database
-        with open(f"{root}\\..\\{mName}.yml","w") as w:
+        with open(f"{root}\\..\\{mName}.yml", "w") as w:
             w.write(f"{mName}:\n")
             crs = self.crs.to_epsg()
             w.write(f"  crs: {crs}\n")

@@ -105,7 +105,9 @@ class DataAdapter(object, metaclass=ABCMeta):
     def __repr__(self):
         return self.__str__()
 
-    def resolve_paths(self, time_tuple: Tuple = None, zoom_level: list = None ,variables: list = None):
+    def resolve_paths(
+        self, time_tuple: Tuple = None, zoom_level: list = None, variables: list = None
+    ):
         """Resolve {year}, {month} and {variable} keywords
         in self.path based on 'time_tuple' and 'variables' arguments
 
