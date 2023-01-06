@@ -10,6 +10,7 @@ to xarray datasets/dataarrays.
 """
 
 import os
+import sys
 from os.path import join, basename, dirname, isdir
 import numpy as np
 from shapely.geometry import box
@@ -18,6 +19,7 @@ import geopandas as gpd
 import xarray as xr
 import dask
 from affine import Affine
+from itertools import product
 from rasterio.crs import CRS
 import rasterio.warp
 import rasterio.fill
@@ -29,6 +31,7 @@ from scipy import ndimage
 import tempfile
 import pyproj
 import logging
+import subprocess
 import rioxarray
 
 from . import gis_utils, _compat
@@ -37,6 +40,7 @@ logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
 YDIMS = ("y", "latitude", "lat")
 GEO_MAP_COORD = "spatial_ref"
+PYTHON_PATH = os.path.dirname(sys.executable)
 
 
 def full_like(other, nodata=None, lazy=False):
@@ -1650,6 +1654,106 @@ class RasterDataArray(XRasterBase):
             attrs=self._obj.attrs,
         )
         return interp_array
+
+    def to_xyz(
+        self,
+        root: str,
+        px: int,
+        zoomlevels: list = [],
+        ):
+        """Export rasterdataset to tiles in a xyz structure
+
+        Parameters
+        ----------
+        root : str
+            Path where the database will be saved
+            Database yml will be put one directory above
+        px : int
+            Amount of pixels per tile
+        zoomlevels : list, optional
+            Zoom levels to be put in the database
+
+        Raises
+        ------
+        ValueError
+            Amount of pixels can not be larger than the original dataset
+        """
+
+        mName = os.path.normpath(os.path.basename(root))
+
+        def folder(path):
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+        folder(root)
+
+        mdim = min(self._obj.shape)
+        if px > mdim:
+            raise ValueError("")
+        nzl = int(np.ceil((np.log10(mdim/px)/np.log10(2))))
+        pxs = [px*2**num for num in range(nzl)]
+
+        # Clean up zoomlevels list
+        zoomlevels = [x for x in zoomlevels if x <= len(pxs)-1]
+
+        def tile_window(px):
+            # Basic stuff
+            nr, nc = self._obj.shape
+            lu = product(range(0, nc, px), range(0, nr, px))
+            ## create the window
+            for l,u in lu:
+                h = min(px,nr-u)
+                w = min(px,nc-l)
+                yield (l,u,w,h)
+
+        for zl in zoomlevels:
+            sd = f"{root}\\{zl}"
+            folder(sd)
+            # Write the raster paths to a text file
+            file = open(f"{sd}\\tilelist.txt", "w")
+
+            for l,u,w,h in tile_window(pxs[zl]):
+                col = int(np.ceil(l/pxs[zl]))
+                row = int(np.ceil(u/pxs[zl]))
+                ssd = "{}\\{}".format(sd, col)
+
+                folder(ssd)
+
+                # create temp tile
+                temp = self._obj[u:u+h,l:l+w].load()
+                # temp = self._obj.isel({self.y_dim:slice(u,u+h), self.x_dim: slice(l,l+w)})
+                if zl != 0:
+                    dst_transform = temp.raster.transform * temp.raster.transform.scale(2**zl)
+                    temp = temp.raster.reproject(
+                        dst_transform = dst_transform,
+                        dst_width = int(w/(2**zl)),
+                        dst_height = int(h/(2**zl)),
+                        method="average",
+                        # dst_crs=self.crs,
+                    )
+
+                temp.raster.to_raster(
+                    f"{ssd}\\{mName}_{col}_{row}.tif",
+                    driver="GTiff"
+                    )
+
+                file.write(f"{ssd}\\{mName}_{col}_{row}.tif\n")
+
+                del temp
+
+            file.close()
+            # Create a vrt using GDAL
+            subprocess.run([f"{PYTHON_PATH}\\Library\\bin\\gdalbuildvrt.exe", "-input_file_list",
+            f"{sd}\\tilelist.txt", f"{sd}\\{mName}.vrt"]
+            )
+        # Write a quick yaml for the database
+        with open(f"{root}\\..\\{mName}.yml","w") as w:
+            w.write(f"{mName}:\n")
+            crs = self.crs.to_epsg()
+            w.write(f"  crs: {crs}\n")
+            w.write("  data_type: RasterDataset\n")
+            w.write("  driver: raster\n")
+            w.write(f"  path: {mName}/{{zoom_level}}/{mName}.vrt\n")
 
     def to_raster(
         self,
