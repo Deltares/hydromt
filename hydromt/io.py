@@ -60,7 +60,7 @@ def open_raster(
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
     # keep only 2D DataArray
-    da = xr.open_dataset(filename, **kwargs)["data"].squeeze(drop=True)
+    da = xr.open_dataarray(filename, **kwargs).squeeze(drop=True)
     # set missing _FillValue
     if mask_nodata:
         da.raster.set_nodata(np.nan)
