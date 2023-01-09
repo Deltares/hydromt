@@ -56,7 +56,7 @@ class DataCatalog(object):
         data_libs: (list of) str, Path, optional
             One or more paths to data catalog yaml files or names of predefined data catalogs.
             By default the data catalog is initiated without data entries.
-            See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yaml format.
+            See :py:func:`~hydromt.data_catalog.DataCatalog.from_yml` for accepted yaml format.
         fallback_lib:
             Name of pre-defined data catalog to read if no data_libs are provided, by default 'artifact_data'.
             If None, no default data catalog is used.
