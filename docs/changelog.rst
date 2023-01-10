@@ -11,6 +11,7 @@ Unreleased
 
 Added
 -----
+- write raster (DataArray) to tiles in xyz stucture
 
 Changed
 -------
