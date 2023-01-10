@@ -439,6 +439,7 @@ Raster writing methods
    :template: autosummary/accessor_method.rst
    :toctree: _generated
 
+   DataArray.raster.to_xyz
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
 
