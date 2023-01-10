@@ -106,7 +106,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         return self.__str__()
 
     def resolve_paths(
-        self, time_tuple: Tuple = None, zoom_level: list = None, variables: list = None
+        self, time_tuple: Tuple = None, zoom_level: int = None, variables: list = None
     ):
         """Resolve {year}, {month} and {variable} keywords
         in self.path based on 'time_tuple' and 'variables' arguments
@@ -156,9 +156,6 @@ class DataAdapter(object, metaclass=ABCMeta):
             freq, strf = ("m", "%Y-%m") if "month" in keys else ("a", "%Y")
             dates = pd.period_range(*trange, freq=freq)
             postfix += "; date range: " + " - ".join([t.strftime(strf) for t in trange])
-        # Resolve Zoom Level
-        if not zoom_level:
-            zoom_level = [None]
         # resolve variables
         if variables is not None:
             mv_inv = {v: k for k, v in self.rename.items()}
@@ -166,12 +163,14 @@ class DataAdapter(object, metaclass=ABCMeta):
             postfix += f"; variables: {variables}"
         # get filenames with glob for all date / variable combinations
         # FIXME: glob won't work with other than local file systems; use fsspec instead
-        for date, zm, var in product(dates, zoom_level, vrs):
-            fmt = {}
+        fmt = {}
+        # update based on zoomlevel (size = 1)
+        if zoom_level is not None:
+            fmt.update(zoom_level=zoom_level)
+        # update based on dates and variables  (size >= 1)
+        for date, var in product(dates, vrs):
             if date is not None:
                 fmt.update(year=date.year, month=date.month)
-            if zm is not None:
-                fmt.update(zoom_level=zm)
             if var is not None:
                 fmt.update(variable=var)
             fns.extend(glob.glob(path.format(**fmt)))
