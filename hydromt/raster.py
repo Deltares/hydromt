@@ -40,8 +40,6 @@ logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
 YDIMS = ("y", "latitude", "lat")
 GEO_MAP_COORD = "spatial_ref"
-PYTHON_PATH = os.path.dirname(sys.executable)
-
 
 def full_like(other, nodata=None, lazy=False):
     """Return a full object with the same grid and geospatial attributes as ``other``.
@@ -1710,7 +1708,7 @@ class RasterDataArray(XRasterBase):
             sd = f"{root}\\{zl}"
             folder(sd)
             # Write the raster paths to a text file
-            file = open(f"{sd}\\tilelist.txt", "w")
+            file = open(f"{sd}\\filelist.txt", "w")
 
             for l, u, w, h in tile_window(pxs[zl]):
                 col = int(np.ceil(l / pxs[zl]))
@@ -1742,14 +1740,7 @@ class RasterDataArray(XRasterBase):
 
             file.close()
             # Create a vrt using GDAL
-            subprocess.run(
-                [
-                    f"{PYTHON_PATH}\\Library\\bin\\gdalbuildvrt.exe",
-                    "-input_file_list",
-                    f"{sd}\\tilelist.txt",
-                    f"{sd}\\{mName}.vrt",
-                ]
-            )
+            gis_utils.create_vrt(sd, mName)
         # Write a quick yaml for the database
         with open(f"{root}\\..\\{mName}.yml", "w") as w:
             w.write(f"{mName}:\n")
