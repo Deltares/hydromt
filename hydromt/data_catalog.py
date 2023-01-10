@@ -514,7 +514,7 @@ class DataCatalog(object):
         path_or_key: str,
         bbox: List = None,
         geom: gpd.GeoDataFrame = None,
-        zoom_level: Union[List, int] = 0,
+        zoom_level: int = None,
         buffer: Union[float, int] = 0,
         align: bool = None,
         variables: Union[List, str] = None,
@@ -542,6 +542,8 @@ class DataCatalog(object):
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
+        zoom_level : int, optional
+            Zoom level of the xyz tile dataset (0 is base level)
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         align : float, optional
