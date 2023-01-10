@@ -547,13 +547,14 @@ def write_map(
             with rasterio.open(raster_path, "r+") as dst:
                 dst.crs = crs
 
+
 def create_vrt(path: str, fname: str):
     subprocess.run(
-                [
-                    f"{PYTHON_PATH}\\Library\\bin\\gdalbuildvrt.exe",
-                    "-input_file_list",
-                    f"{path}\\filelist.txt",
-                    f"{path}\\{fname}.vrt",
-                ]
-            )
+        [
+            f"{PYTHON_PATH}\\Library\\bin\\gdalbuildvrt.exe",
+            "-input_file_list",
+            f"{path}\\filelist.txt",
+            f"{path}\\{fname}.vrt",
+        ]
+    )
     return None

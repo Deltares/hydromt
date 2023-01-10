@@ -41,6 +41,7 @@ XDIMS = ("x", "longitude", "lon", "long")
 YDIMS = ("y", "latitude", "lat")
 GEO_MAP_COORD = "spatial_ref"
 
+
 def full_like(other, nodata=None, lazy=False):
     """Return a full object with the same grid and geospatial attributes as ``other``.
 
