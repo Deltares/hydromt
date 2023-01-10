@@ -156,6 +156,9 @@ class DataAdapter(object, metaclass=ABCMeta):
             freq, strf = ("m", "%Y-%m") if "month" in keys else ("a", "%Y")
             dates = pd.period_range(*trange, freq=freq)
             postfix += "; date range: " + " - ".join([t.strftime(strf) for t in trange])
+        # Resolve Zoom Level
+        if not zoom_level:
+            zoom_level = [None]
         # resolve variables
         if variables is not None:
             mv_inv = {v: k for k, v in self.rename.items()}
