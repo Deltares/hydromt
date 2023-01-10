@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """gis related convience functions. More in pyflwdir.gis_utils"""
-from os.path import join, isfile
+from os.path import dirname, join, isfile
+import sys
+import subprocess
 import numpy as np
 import xarray as xr
 import rasterio
@@ -93,6 +95,7 @@ GDAL_DRIVER_CODE_MAP = {
     "xyz": "XYZ",
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
+PYTHON_PATH = dirname(sys.executable)
 
 ## GEOM functions
 
@@ -543,3 +546,14 @@ def write_map(
         if crs is not None:
             with rasterio.open(raster_path, "r+") as dst:
                 dst.crs = crs
+
+def create_vrt(path: str, fname: str):
+    subprocess.run(
+                [
+                    f"{PYTHON_PATH}\\Library\\bin\\gdalbuildvrt.exe",
+                    "-input_file_list",
+                    f"{path}\\filelist.txt",
+                    f"{path}\\{fname}.vrt",
+                ]
+            )
+    return None
