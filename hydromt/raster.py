@@ -1751,6 +1751,170 @@ class RasterDataArray(XRasterBase):
             w.write("  driver: raster\n")
             w.write(f"  path: {mName}/{{zoom_level}}/{mName}.vrt\n")
 
+    def to_osm(
+        self,
+        root: str,
+        bbox: tuple,
+        zl: int,
+        ):
+
+        assert self._obj.ndim == 2, "Blyat!"
+        obj = self._obj.transpose(self.y_dim, self.x_dim)
+
+        mName = os.path.normpath(os.path.basename(root))
+
+        def folder(path):
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+        folder(root)
+        
+        r =obj.coords[obj.dims[0]]
+        c = obj.coords[obj.dims[1]]
+        dres = abs(float(r[1] -r[0]))
+        minx = float(c[0] - 0.5*dres)
+        miny = float(r[-1] - 0.5*dres)
+        maxx = float(c[-1] + 0.5*dres)
+        maxy = float(r[0] + 0.5*dres)
+        del c
+        del r
+        nzl = int(np.ceil((np.log10(360 / (dres*256)) / np.log10(2))))
+
+        if zl > nzl:
+            pass
+
+        def tile_window(zl, minx, miny, maxx, maxy):
+            # Basic stuff
+            dx =  (360 / (2**zl))
+            # Origin displacement
+            odx = np.floor(abs(-180-minx)/dx)
+            ody = np.floor(abs(90-maxy)/dx)
+
+            # Set the new origin
+            minx = -180 + odx*dx
+            maxy = 90 - ody*dx
+            
+            # Create window generator
+            lu = product(np.arange(minx, maxx, dx), np.arange(maxy, miny, -dx))
+            for l, u in lu:
+                col = int(odx + (l-minx)/dx)
+                row = int(ody + (maxy-u)/dx)
+                yield Affine(dx/256,0,l,0,-dx/256,u), col, row
+
+        zl = 1
+        sd = f"{root}\\{zl}"
+        folder(sd)
+        file = open(f"{sd}\\filelist.txt", "w")
+
+        for transform, col, row in tile_window(zl, minx, miny, maxx, maxy):
+            ssd = f"{sd}\\{col}"
+            folder(ssd)
+
+            temp = obj.load()
+            temp = temp.raster.reproject(
+                dst_transform = transform,
+                dst_width = 256,
+                dst_height = 256,
+                )
+
+            temp.raster.to_raster(f"{ssd}\\{mName}_{col}_{row}.tif", driver="GTiff")
+
+            file.write(f"{ssd}\\{mName}_{col}_{row}.tif\n")
+
+            del temp
+
+        file.close()
+
+        gis_utils.create_vrt(sd, mName)
+
+    def to_osm2(
+        self,
+        root: str,
+        bbox: tuple,
+        zl: int,
+        ):
+
+        assert self._obj.ndim == 2, "Blyat!"
+        obj = self._obj.transpose(self.y_dim, self.x_dim)
+
+        mName = os.path.normpath(os.path.basename(root))
+
+        def folder(path):
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+        folder(root)
+        
+        r =obj.coords[obj.dims[0]]
+        c = obj.coords[obj.dims[1]]
+        dres = abs(float(r[1] -r[0]))
+        minx = float(c[0] - 0.5*dres)
+        miny = float(r[-1] - 0.5*dres)
+        maxx = float(c[-1] + 0.5*dres)
+        maxy = float(r[0] + 0.5*dres)
+        del c
+        del r
+        
+        transformer = pyproj.Transformer.from_crs(4326, 3857)
+        minx, miny = map(
+            max,
+            zip(transformer.transform(miny,minx),[-20037508.34]*2)
+        )
+        maxx, maxy = map(
+            min,
+            zip(transformer.transform(maxy,maxx),[20037508.34]*2)
+        )
+        nzl = int(np.ceil((np.log10(360 / (dres*256)) / np.log10(2))))
+
+        if zl > nzl:
+            zl = nzl
+
+        def tile_window(zl, minx, miny, maxx, maxy):
+            # Basic stuff
+            dx =  ((20037508.34*2) / (2**zl))
+            # Origin displacement
+            odx = np.floor(abs(-20037508.34-minx)/dx)
+            ody = np.floor(abs(20037508.34-maxy)/dx)
+
+            # Set the new origin
+            minx = -20037508.34 + odx*dx
+            maxy = 20037508.34 - ody*dx
+            
+            # Create window generator
+            lu = product(np.arange(minx, maxx, dx), np.arange(maxy, miny, -dx))
+            for l, u in lu:
+                col = int(odx + (l-minx)/dx)
+                row = int(ody + (maxy-u)/dx)
+                yield Affine(dx/256,0,l,0,-dx/256,u), col, row
+
+
+        for zlvl in range(zl):
+            sd = f"{root}\\{zlvl}"
+            folder(sd)
+            file = open(f"{sd}\\filelist.txt", "w")
+
+            for transform, col, row in tile_window(zlvl, minx, miny, maxx, maxy):
+                ssd = f"{sd}\\{col}"
+                folder(ssd)
+
+                temp = obj.load()
+                temp = temp.raster.reproject(
+                    dst_transform = transform,
+                    dst_crs = 3857,
+                    dst_width = 256,
+                    dst_height = 256,
+                    )
+
+                temp.raster.to_raster(f"{ssd}\\{mName}_{col}_{row}.tif", driver="GTiff")
+
+                file.write(f"{ssd}\\{mName}_{col}_{row}.tif\n")
+
+                del temp
+
+            file.close()
+
+            gis_utils.create_vrt(sd, mName)
+
     def to_raster(
         self,
         raster_path,
