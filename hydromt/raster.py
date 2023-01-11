@@ -1756,7 +1756,7 @@ class RasterDataArray(XRasterBase):
         root: str,
         bbox: tuple,
         zl: int,
-        ):
+    ):
 
         assert self._obj.ndim == 2, "Blyat!"
         obj = self._obj.transpose(self.y_dim, self.x_dim)
@@ -1768,38 +1768,38 @@ class RasterDataArray(XRasterBase):
                 os.makedirs(path)
 
         folder(root)
-        
-        r =obj.coords[obj.dims[0]]
+
+        r = obj.coords[obj.dims[0]]
         c = obj.coords[obj.dims[1]]
-        dres = abs(float(r[1] -r[0]))
-        minx = float(c[0] - 0.5*dres)
-        miny = float(r[-1] - 0.5*dres)
-        maxx = float(c[-1] + 0.5*dres)
-        maxy = float(r[0] + 0.5*dres)
+        dres = abs(float(r[1] - r[0]))
+        minx = float(c[0] - 0.5 * dres)
+        miny = float(r[-1] - 0.5 * dres)
+        maxx = float(c[-1] + 0.5 * dres)
+        maxy = float(r[0] + 0.5 * dres)
         del c
         del r
-        nzl = int(np.ceil((np.log10(360 / (dres*256)) / np.log10(2))))
+        nzl = int(np.ceil((np.log10(360 / (dres * 256)) / np.log10(2))))
 
         if zl > nzl:
             pass
 
         def tile_window(zl, minx, miny, maxx, maxy):
             # Basic stuff
-            dx =  (360 / (2**zl))
+            dx = 360 / (2**zl)
             # Origin displacement
-            odx = np.floor(abs(-180-minx)/dx)
-            ody = np.floor(abs(90-maxy)/dx)
+            odx = np.floor(abs(-180 - minx) / dx)
+            ody = np.floor(abs(90 - maxy) / dx)
 
             # Set the new origin
-            minx = -180 + odx*dx
-            maxy = 90 - ody*dx
-            
+            minx = -180 + odx * dx
+            maxy = 90 - ody * dx
+
             # Create window generator
             lu = product(np.arange(minx, maxx, dx), np.arange(maxy, miny, -dx))
             for l, u in lu:
-                col = int(odx + (l-minx)/dx)
-                row = int(ody + (maxy-u)/dx)
-                yield Affine(dx/256,0,l,0,-dx/256,u), col, row
+                col = int(odx + (l - minx) / dx)
+                row = int(ody + (maxy - u) / dx)
+                yield Affine(dx / 256, 0, l, 0, -dx / 256, u), col, row
 
         zl = 1
         sd = f"{root}\\{zl}"
@@ -1812,10 +1812,10 @@ class RasterDataArray(XRasterBase):
 
             temp = obj.load()
             temp = temp.raster.reproject(
-                dst_transform = transform,
-                dst_width = 256,
-                dst_height = 256,
-                )
+                dst_transform=transform,
+                dst_width=256,
+                dst_height=256,
+            )
 
             temp.raster.to_raster(f"{ssd}\\{mName}_{col}_{row}.tif", driver="GTiff")
 
@@ -1832,7 +1832,7 @@ class RasterDataArray(XRasterBase):
         root: str,
         bbox: tuple,
         zl: int,
-        ):
+    ):
 
         assert self._obj.ndim == 2, "Blyat!"
         obj = self._obj.transpose(self.y_dim, self.x_dim)
@@ -1844,49 +1844,44 @@ class RasterDataArray(XRasterBase):
                 os.makedirs(path)
 
         folder(root)
-        
-        r =obj.coords[obj.dims[0]]
+
+        r = obj.coords[obj.dims[0]]
         c = obj.coords[obj.dims[1]]
-        dres = abs(float(r[1] -r[0]))
-        minx = float(c[0] - 0.5*dres)
-        miny = float(r[-1] - 0.5*dres)
-        maxx = float(c[-1] + 0.5*dres)
-        maxy = float(r[0] + 0.5*dres)
+        dres = abs(float(r[1] - r[0]))
+        minx = float(c[0] - 0.5 * dres)
+        miny = float(r[-1] - 0.5 * dres)
+        maxx = float(c[-1] + 0.5 * dres)
+        maxy = float(r[0] + 0.5 * dres)
         del c
         del r
-        
+
         transformer = pyproj.Transformer.from_crs(4326, 3857)
         minx, miny = map(
-            max,
-            zip(transformer.transform(miny,minx),[-20037508.34]*2)
+            max, zip(transformer.transform(miny, minx), [-20037508.34] * 2)
         )
-        maxx, maxy = map(
-            min,
-            zip(transformer.transform(maxy,maxx),[20037508.34]*2)
-        )
-        nzl = int(np.ceil((np.log10(360 / (dres*256)) / np.log10(2))))
+        maxx, maxy = map(min, zip(transformer.transform(maxy, maxx), [20037508.34] * 2))
+        nzl = int(np.ceil((np.log10(360 / (dres * 256)) / np.log10(2))))
 
         if zl > nzl:
             zl = nzl
 
         def tile_window(zl, minx, miny, maxx, maxy):
             # Basic stuff
-            dx =  ((20037508.34*2) / (2**zl))
+            dx = (20037508.34 * 2) / (2**zl)
             # Origin displacement
-            odx = np.floor(abs(-20037508.34-minx)/dx)
-            ody = np.floor(abs(20037508.34-maxy)/dx)
+            odx = np.floor(abs(-20037508.34 - minx) / dx)
+            ody = np.floor(abs(20037508.34 - maxy) / dx)
 
             # Set the new origin
-            minx = -20037508.34 + odx*dx
-            maxy = 20037508.34 - ody*dx
-            
+            minx = -20037508.34 + odx * dx
+            maxy = 20037508.34 - ody * dx
+
             # Create window generator
             lu = product(np.arange(minx, maxx, dx), np.arange(maxy, miny, -dx))
             for l, u in lu:
-                col = int(odx + (l-minx)/dx)
-                row = int(ody + (maxy-u)/dx)
-                yield Affine(dx/256,0,l,0,-dx/256,u), col, row
-
+                col = int(odx + (l - minx) / dx)
+                row = int(ody + (maxy - u) / dx)
+                yield Affine(dx / 256, 0, l, 0, -dx / 256, u), col, row
 
         for zlvl in range(zl):
             sd = f"{root}\\{zlvl}"
@@ -1899,11 +1894,11 @@ class RasterDataArray(XRasterBase):
 
                 temp = obj.load()
                 temp = temp.raster.reproject(
-                    dst_transform = transform,
-                    dst_crs = 3857,
-                    dst_width = 256,
-                    dst_height = 256,
-                    )
+                    dst_transform=transform,
+                    dst_crs=3857,
+                    dst_width=256,
+                    dst_height=256,
+                )
 
                 temp.raster.to_raster(f"{ssd}\\{mName}_{col}_{row}.tif", driver="GTiff")
 
