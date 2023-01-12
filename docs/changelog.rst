@@ -12,6 +12,7 @@ Unreleased
 Added
 -----
 - write raster (DataArray) to tiles in xyz stucture
+- write raster (DataArray) to tiles according to osm
 - add zoom_level to named arguments of path in the data catalog, to keep a single data source for the same data at different resolutions
 - add function in gis_utils to write '.vrt' using GDAL
 - fix bug related to opening named raster files #200
