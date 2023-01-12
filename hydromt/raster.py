@@ -1754,11 +1754,25 @@ class RasterDataArray(XRasterBase):
     def to_osm(
         self,
         root: str,
-        bbox: tuple,
         zl: int,
+        bbox: tuple = (),
     ):
+        """Generate tiles from raster according to the osm scheme
 
-        assert self._obj.ndim == 2, "Blyat!"
+        Parameters
+        ----------
+        root : str
+            Path to folder where the database will be created
+        zl : int
+            Maximum zoom level of the database
+            Everyting is generated incrementally up until this level
+            E.g. zl = 8, levels generated: 0 to 7
+        bbox : tuple, optional
+            Bounding Box in the objects crs
+
+        """
+
+        assert self._obj.ndim == 2, "Only 2d datasets are accepted..."
         obj = self._obj.transpose(self.y_dim, self.x_dim)
 
         mName = os.path.normpath(os.path.basename(root))
@@ -1767,100 +1781,27 @@ class RasterDataArray(XRasterBase):
             if not os.path.exists(path):
                 os.makedirs(path)
 
+        def transform_res(dres, transformer):
+            return transformer.transform(0, dres)[0]
+
         folder(root)
 
-        r = obj.coords[obj.dims[0]]
-        c = obj.coords[obj.dims[1]]
-        dres = abs(float(r[1] - r[0]))
-        minx = float(c[0] - 0.5 * dres)
-        miny = float(r[-1] - 0.5 * dres)
-        maxx = float(c[-1] + 0.5 * dres)
-        maxy = float(r[0] + 0.5 * dres)
-        del c
-        del r
-        nzl = int(np.ceil((np.log10(360 / (dres * 256)) / np.log10(2))))
-
-        if zl > nzl:
-            pass
-
-        def tile_window(zl, minx, miny, maxx, maxy):
-            # Basic stuff
-            dx = 360 / (2**zl)
-            # Origin displacement
-            odx = np.floor(abs(-180 - minx) / dx)
-            ody = np.floor(abs(90 - maxy) / dx)
-
-            # Set the new origin
-            minx = -180 + odx * dx
-            maxy = 90 - ody * dx
-
-            # Create window generator
-            lu = product(np.arange(minx, maxx, dx), np.arange(maxy, miny, -dx))
-            for l, u in lu:
-                col = int(odx + (l - minx) / dx)
-                row = int(ody + (maxy - u) / dx)
-                yield Affine(dx / 256, 0, l, 0, -dx / 256, u), col, row
-
-        zl = 1
-        sd = f"{root}\\{zl}"
-        folder(sd)
-        file = open(f"{sd}\\filelist.txt", "w")
-
-        for transform, col, row in tile_window(zl, minx, miny, maxx, maxy):
-            ssd = f"{sd}\\{col}"
-            folder(ssd)
-
-            temp = obj.load()
-            temp = temp.raster.reproject(
-                dst_transform=transform,
-                dst_width=256,
-                dst_height=256,
+        dres = abs(self._obj.raster.res[0])
+        if bbox:
+            minx, miny, maxx, maxy = bbox
+        else:
+            minx, miny, maxx, maxy = self._obj.raster.transform_bounds(
+                dst_crs=self._obj.raster.crs
             )
 
-            temp.raster.to_raster(f"{ssd}\\{mName}_{col}_{row}.tif", driver="GTiff")
-
-            file.write(f"{ssd}\\{mName}_{col}_{row}.tif\n")
-
-            del temp
-
-        file.close()
-
-        gis_utils.create_vrt(sd, mName)
-
-    def to_osm2(
-        self,
-        root: str,
-        bbox: tuple,
-        zl: int,
-    ):
-
-        assert self._obj.ndim == 2, "Blyat!"
-        obj = self._obj.transpose(self.y_dim, self.x_dim)
-
-        mName = os.path.normpath(os.path.basename(root))
-
-        def folder(path):
-            if not os.path.exists(path):
-                os.makedirs(path)
-
-        folder(root)
-
-        r = obj.coords[obj.dims[0]]
-        c = obj.coords[obj.dims[1]]
-        dres = abs(float(r[1] - r[0]))
-        minx = float(c[0] - 0.5 * dres)
-        miny = float(r[-1] - 0.5 * dres)
-        maxx = float(c[-1] + 0.5 * dres)
-        maxy = float(r[0] + 0.5 * dres)
-        del c
-        del r
-
-        transformer = pyproj.Transformer.from_crs(4326, 3857)
+        transformer = pyproj.Transformer.from_crs(self._obj.raster.crs.to_epsg(), 3857)
         minx, miny = map(
             max, zip(transformer.transform(miny, minx), [-20037508.34] * 2)
         )
         maxx, maxy = map(min, zip(transformer.transform(maxy, maxx), [20037508.34] * 2))
-        nzl = int(np.ceil((np.log10(360 / (dres * 256)) / np.log10(2))))
+
+        dres = transform_res(dres, transformer)
+        nzl = int(np.ceil((np.log10((20037508.34 * 2) / (dres * 256)) / np.log10(2))))
 
         if zl > nzl:
             zl = nzl
@@ -1900,15 +1841,23 @@ class RasterDataArray(XRasterBase):
                     dst_height=256,
                 )
 
-                temp.raster.to_raster(f"{ssd}\\{mName}_{col}_{row}.tif", driver="GTiff")
+                temp.raster.to_raster(f"{ssd}\\{row}.tif", driver="GTiff")
 
-                file.write(f"{ssd}\\{mName}_{col}_{row}.tif\n")
+                file.write(f"{ssd}\\{row}.tif\n")
 
                 del temp
 
             file.close()
 
             gis_utils.create_vrt(sd, mName)
+        # Write a quick yaml for the database
+        with open(f"{root}\\..\\{mName}.yml", "w") as w:
+            w.write(f"{mName}:\n")
+            crs = 3857
+            w.write(f"  crs: {crs}\n")
+            w.write("  data_type: RasterDataset\n")
+            w.write("  driver: raster\n")
+            w.write(f"  path: {mName}/{{zoom_level}}/{mName}.vrt\n")
 
     def to_raster(
         self,
