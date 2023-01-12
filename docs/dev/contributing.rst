@@ -30,9 +30,9 @@ If you found a bug or an issue you would like to tackle or contribute to a new d
 submitting a pull request:
 1. Create an issue following the :ref:`issue conventions <Issue conventions>`
 2. Follow the :ref:`Git conventions <Git conventions>` to create a new branch where you develop your new code
-3. Run black before committing your changes, see  :ref:`code format <Code format>`. This does not apply for the changelog, see next point.
-4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request and pull request number. See for example the
-  `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`__
+3. If your code provides new functionalities, make sure you provide tests as explained :ref:`here <Test and CI>`
+4. Run black before committing your changes, see  :ref:`code format <Code format>`. 
+5. Update docs/changelog.rst file with a summary of your changes and a link to your pull request and pull request number. See for example the `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`__
 
 Git conventions
 ---------------
