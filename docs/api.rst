@@ -440,6 +440,7 @@ Raster writing methods
    :toctree: _generated
 
    DataArray.raster.to_xyz
+   DataArray.raster.to_osm
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
 
