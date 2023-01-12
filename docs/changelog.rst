@@ -11,6 +11,7 @@ Unreleased
 
 Added
 -----
+- New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
 
 Changed
 -------
