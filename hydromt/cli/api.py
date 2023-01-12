@@ -177,10 +177,8 @@ def get_region(
         # region.update(xy=xy)
         geom_bbox = geom.geometry.total_bounds
         projected_crs = utm_crs(geom_bbox)
-        org_crs = geom.crs
-        geom = geom.to_crs(crs=projected_crs)
-        geom["area"] = geom["geometry"].area
-        geom = geom.to_crs(crs=org_crs)
+        geom_projected = geom.to_crs(crs=projected_crs)
+        geom["area"] = geom_projected["geometry"].area
 
         return geom.to_json()
     else:

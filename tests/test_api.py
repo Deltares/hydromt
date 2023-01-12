@@ -33,9 +33,6 @@ def test_api_datasets():
     assert isinstance(datasets["RasterDatasetSource"], list)
 
 
-@pytest.mark.skipif(
-    "lumped_model" not in get_plugin_eps().keys(), reason="HydroMT not installed."
-)
 def test_api_model_components():
     # models
     components = get_model_components("lumped_model", component_types=["write"])
