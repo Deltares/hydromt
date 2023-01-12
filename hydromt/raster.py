@@ -1733,9 +1733,9 @@ class RasterDataArray(XRasterBase):
                         # dst_crs=self.crs,
                     )
 
-                temp.raster.to_raster(f"{ssd}\\{mName}_{col}_{row}.tif", driver="GTiff")
+                temp.raster.to_raster(f"{ssd}\\{row}.tif", driver="GTiff")
 
-                file.write(f"{ssd}\\{mName}_{col}_{row}.tif\n")
+                file.write(f"{ssd}\\{row}.tif\n")
 
                 del temp
 
