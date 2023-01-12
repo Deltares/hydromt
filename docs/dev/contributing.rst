@@ -26,13 +26,15 @@ are especially helpful!
 Checklist pull requests
 -----------------------
 
-If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure that you have done the following before
-submitting a pull request:
-1. Create an issue following the :ref:`issue conventions <Issue conventions>`
-2. Follow the :ref:`Git conventions <Git conventions>` to create a new branch where you develop your new code
-3. If your code provides new functionalities, make sure you provide tests as explained :ref:`here <Test and CI>`
-4. Run black before committing your changes, see  :ref:`code format <Code format>`. 
-5. Update docs/changelog.rst file with a summary of your changes and a link to your pull request and pull request number. See for example the `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`__
+If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure do the following steps:
+1. If it does not yet exist, create an issue following the :ref:`issue conventions <Issue conventions>`
+2. Create a new branch where you develop your new code, see also :ref:`Git conventions <Git conventions>` 
+3. Run black before committing your changes, see  :ref:`code format <Code format>`. This does only apply for *.py files. For *ipynb files make sure that you have cleared all results.
+4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the
+  `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`__
+5. Push your commits to the github repository and open a draft pull request. Potentially, ask other contributors for feedback.
+6. Once you're satisfied with the changes mark the pull request as "as ready for review" and ask another contributor to review the code. The review should cover the implementation as well as steps 2-4.
+7. Merge the pull request once the review has been approved.
 
 Git conventions
 ---------------
