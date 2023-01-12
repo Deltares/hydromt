@@ -139,6 +139,17 @@ def get_region(
     ----------
     region : dict
         dictionary containing region definition
+    data_libs : (list of) str, Path, optional
+        One or more paths to data catalog yaml files or names of predefined data catalogs.
+        By default the data catalog is initiated without data entries.
+        See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yaml format.
+    hydrography_fn : str
+        Name of data source for hydrography data.
+    basin_index_fn : str
+        Name of data source with basin (bounding box) geometries associated with
+            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
+            based on a (sub)(inter)basins without a 'bounds' argument.
+
 
     Returns
     -------
