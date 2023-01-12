@@ -11,17 +11,19 @@ from ast import literal_eval
 import numpy as np
 import abc
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict, List
 
 
 def configread(
     config_fn: Union[Path, str],
     encoding: str = "utf-8",
     cf: ConfigParser = None,
-    defaults: dict = dict(),
+    defaults: Dict = dict(),
     noheader: bool = False,
     abs_path: bool = False,
-) -> dict:
+    skip_eval: bool = False,
+    skip_eval_sections: List = ["setup_config"],
+) -> Dict:
     """Read configuration file and parse to (nested) dictionary.
     Values are evaluated and if possible parsed into python int, float, list or boolean types.
 
@@ -40,6 +42,11 @@ def configread(
     abs_path : bool, optional
         If True, parse string values to an absolute path if the a file or folder with that
         name (string value) relative to the config file exist, by default False
+    skip_eval: bool, optional
+        Skip evaluating argument values for python types, by default False
+    skip_eval_sections: list, optional
+        These sections are not evaluated for python types or absolute paths
+        if abs_path=True, by default ['update_config']
 
     Returns
     -------
@@ -59,23 +66,28 @@ def configread(
     for section in cf.sections():
         if section not in cfdict:
             cfdict[section] = dict()  # init
-        sdict = dict()
+        # evaluate ini items to parse to python default objects:
+        if skip_eval or section in skip_eval_sections:
+            cfdict[section].update(dict(cf.items(section)))
+            continue  # do not evaluate
+        # numbers, tuples, lists, dicts, sets, booleans, and None
         for key, value in cf.items(section):
             try:
-                v = literal_eval(value)
-                assert not isinstance(v, tuple)  #  prevent tuples from being parsed
-                value = v
+                value = literal_eval(value)
             except Exception:
                 pass
+            if isinstance(value, str) and len(value) == 0:
+                value = None
             if abs_path:
                 if isinstance(value, str) and exists(join(root, value)):
                     value = Path(abspath(join(root, value)))
-                elif isinstance(value, list) and np.all(
-                    [exists(join(root, v)) for v in value]
+                elif (
+                    isinstance(value, list)
+                    and all([isinstance(v, str) for v in value])
+                    and all([exists(join(root, v)) for v in value])
                 ):
                     value = [Path(abspath(join(root, v))) for v in value]
-            sdict[key] = value
-        cfdict[section].update(**sdict)
+            cfdict[section].update({key: value})
     if noheader and "dummy" in cfdict:
         cfdict = cfdict["dummy"]
     return cfdict
