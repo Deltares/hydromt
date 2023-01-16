@@ -110,12 +110,11 @@ def flwdir(demda):
 
 @pytest.fixture
 def flwda(flwdir):
-    xcoords, ycoords = gis_utils.affine_to_coords(flwdir.transform, flwdir.shape)
     da = xr.DataArray(
         name="flwdir",
         data=flwdir.to_array("d8"),
         dims=("y", "x"),
-        coords={"y": ycoords, "x": xcoords},
+        coords=gis_utils.affine_to_coords(flwdir.transform, flwdir.shape),
         attrs=dict(_FillValue=247),
     )
     da.raster.set_crs(3785)

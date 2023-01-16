@@ -6,29 +6,47 @@ import numpy as np
 import geopandas as gpd
 import xarray as xr
 from shapely.geometry import box, Point, LineString
-from rasterio import features
 import dask
-import os
-import glob
-from os.path import join
-from pathlib import Path
-import rasterio
-from rasterio.transform import xy
 from osgeo import gdal
+from affine import Affine
+from rasterio.transform import array_bounds
 
 from hydromt import raster
 
-testdata = [
-    ([0.5, 0.0, 3.0, 0.0, -0.5, -9.0], (4, 6)),
-    ([0.2, 0.0, 3.0, 0.0, 0.25, -11.0], (8, 15)),
-    ([-0.2, 0.0, 6.0, 0.0, 0.5, -11.0], (2, 8, 15)),
+# origin, rotation, res, shape, internal_bounds
+tests = [
+    ((3, -9), 0, (0.5, -0.5), (4, 6), (3, -9, 6, -11)),
+    ((3, -11), 0, (0.2, 0.25), (8, 15), (3, -11, 6, -9)),
+    ((6, -11), 0, (-0.2, 0.5), (2, 8, 15), (6, -11, 3, -7)),
+    ((0, 0), 30, (2, 1), (12, 8), (-6, 0, 13.856406460551018, 18.39230484541326)),
 ]
+
+
+def get_transform(
+    origin: tuple[float, float], rotation: float, res: tuple[float, float]
+) -> Affine:
+    return Affine.translation(*origin) * Affine.rotation(rotation) * Affine.scale(*res)
+
+
+testdata = [(get_transform(*d[:3]), d[-2]) for d in tests]
+
+
+@pytest.mark.parametrize("origin, rotation, res, shape, bounds", tests)
+def test_raster_properties(origin, rotation, res, shape, bounds):
+    transform = get_transform(origin, rotation, res)
+    da = raster.full_from_transform(transform, shape, name="test")
+    assert np.allclose(transform, da.raster.transform)
+    assert np.allclose(rotation, da.raster.rotation)
+    assert np.allclose(res, da.raster.res)
+    assert np.allclose(bounds, da.raster.internal_bounds)
+    # assert
 
 
 @pytest.mark.parametrize("transform, shape", testdata)
 def test_attrs(transform, shape):
     # checks on raster spatial attributes
     da = raster.full_from_transform(transform, shape, name="test")
+    da.drop(raster.GEO_MAP_COORD)  # reset attrs
     assert isinstance(da.raster.attrs, dict)
     assert raster.GEO_MAP_COORD in da.coords
     assert da.raster.dims == ("y", "x")
@@ -37,7 +55,6 @@ def test_attrs(transform, shape):
     assert da.raster.width == da["x"].size
     assert da.raster.height == da["y"].size
     assert da.raster.size == da["x"].size * da["y"].size
-    assert np.all(np.isclose(da.raster.res, (transform[0], transform[4])))
     assert da.raster.shape == shape[-2:]
     assert "_FillValue" in da.attrs
     assert np.isnan(da.raster.nodata)
@@ -103,6 +120,11 @@ def test_attrs_errors(rioda):
 
 
 def test_from_numpy_full_like():
+    # test full with rotated grid
+    da_rot = raster.full_from_transform(*testdata[-1], nodata=-1, name="test")
+    da_rot1 = raster.full(da_rot.raster.coords, nodata=-1, name="test")
+    assert da_rot1.raster.identical_grid(da_rot1)
+    # test with normal grid
     da = raster.full_from_transform(*testdata[0], nodata=-1, name="test")
     da0 = raster.full_like(da)
     da1 = raster.RasterDataArray.from_numpy(
@@ -142,14 +164,14 @@ def test_from_numpy_full_like():
 def test_idx(transform, shape):
     da = raster.full_from_transform(transform, shape, name="test")
     size = np.multiply(*da.raster.shape)
-    row, col = da.raster.height - 1, da.raster.width - 1
-    assert xy(da.raster.transform, 0, 0) == da.raster.idx_to_xy(0)
-    assert xy(da.raster.transform, row, col) == da.raster.idx_to_xy(size - 1)
+    xs, ys = da.raster.xcoords.values.ravel(), da.raster.ycoords.values.ravel()
+    assert np.allclose(([xs[0]], [ys[0]]), da.raster.idx_to_xy(0))
+    assert np.allclose(([xs[-1]], [ys[-1]]), da.raster.idx_to_xy(size - 1))
     assert np.all(np.isnan(da.raster.idx_to_xy(size, mask_outside=True)))
     with pytest.raises(ValueError, match="outside domain"):
         da.raster.idx_to_xy(size)
-    assert da.raster.xy_to_idx(da.raster.xcoords[0], da.raster.ycoords[0]) == 0
-    assert da.raster.xy_to_idx(da.raster.xcoords[-1], da.raster.ycoords[-1]) == size - 1
+    assert da.raster.xy_to_idx(xs[0], ys[0]) == 0
+    assert da.raster.xy_to_idx(xs[-1], ys[-1]) == size - 1
     assert np.all(da.raster.xy_to_idx(-999, -999, mask_outside=True) == -1)
     with pytest.raises(ValueError, match="outside domain"):
         da.raster.xy_to_idx(-999, -999)
@@ -187,14 +209,18 @@ def test_vectorize():
 @pytest.mark.parametrize("transform, shape", testdata)
 def test_clip(transform, shape):
     # create rasterdataarray with crs
-    da = raster.full_from_transform(transform, shape, name="test", crs=4326)
-    # create gdf covering half raster
+    da = raster.full_from_transform(transform, shape, nodata=1, name="test", crs=4326)
+    da.raster.set_nodata(0)
+    # create gdf covering approx half raster
     w, s, _, n = da.raster.bounds
-    i = int(round(da.raster.shape[-1] / 2))
-    e = da.raster.xcoords.values[i] + da.raster.res[0] / 2.0
+    e, _ = da.raster.transform * (shape[1] // 2, shape[0] // 2)
     gdf = gpd.GeoDataFrame(geometry=[box(w, s, e, n)], crs=da.raster.crs)
     # test bbox
     da_clip0 = da.raster.clip_bbox(gdf.total_bounds)
+    if da.raster.rotation != 0:
+        da_mask = da_clip0.coords["mask"]
+        assert da_mask.any("x").all() and da_mask.any("y").all()
+        return
     assert np.all(np.isclose(da_clip0.raster.bounds, gdf.total_bounds))
     # test bbox - buffer
     da_clip = da.raster.clip_bbox(gdf.total_bounds, buffer=da.raster.width)
@@ -216,9 +242,9 @@ def test_clip(transform, shape):
 
 
 def test_clip_errors(rioda):
-    with pytest.raises(ValueError, match="Mask should be xarray.DataArray type."):
+    with pytest.raises(ValueError, match="da_mask should be xarray.DataArray type."):
         rioda.raster.clip_mask(rioda.values)
-    with pytest.raises(ValueError, match="Mask shape invalid."):
+    with pytest.raises(ValueError, match="da_mask shape invalid."):
         rioda.raster.clip_mask(rioda.isel({"x": slice(1, -1)}))
     with pytest.raises(ValueError, match="Invalid mask."):
         rioda.raster.clip_mask(xr.zeros_like(rioda))
