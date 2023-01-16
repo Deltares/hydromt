@@ -9,7 +9,9 @@ import geopandas as gpd
 import geopandas.array as geoarray
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
+from osgeo import osr
 import pyproj
+import shapely
 import logging
 
 from hydromt import gis_utils, raster
@@ -313,6 +315,117 @@ class GeoDataset(GeoBase):
         super(GeoDataset, self).__init__(xarray_obj)
 
     @staticmethod
+    def ogr_compliant(ds: xr.Dataset):
+        """Create a ogr compliant version of a xarray Dataset
+
+        Parameters
+        ----------
+        ds : xarray.Dataset
+            Dataset containing geospatial data
+
+        Returns
+        -------
+        xarray.Dataset
+            ogr compliant
+        """
+
+        _linkTable = {
+            int: "Integer64",
+            float: "Real",
+            str: "String",
+        }
+
+        def Type(val):
+            try:
+                s = eval(val)
+            except Exception:
+                s = val
+            return type(s)
+
+        def FieldType(lst):
+            if float or np.float64 in lst:
+                type = float
+            else:
+                type = int
+            if str in lst:
+                type = str
+            return type
+
+        wkt = [g.wkt for g in ds.geometry.values]
+
+        ## Determine Geometry type
+        from osgeo.ogr import CreateGeometryFromWkt
+
+        geom_types = [CreateGeometryFromWkt(g).GetGeometryName() for g in wkt]
+
+        if len(set(geom_types)) > 1:
+            i = ["MULTI" in g for g in geom_types].index(True)
+            geom_type = geom_types[i]
+        else:
+            geom_type = geom_types[0]
+
+        del geom_types
+
+        ## Create the geometry DataArray
+        ogc_wkt = xr.DataArray(
+            data=wkt,
+            dims="record",
+            attrs={
+                "long_name": "Geometry as ISO WKT",
+                "grid_mapping": "crs",
+            },
+        )
+
+        # Set spatial reference
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(ds.geo.crs.to_epsg())
+
+        crs = xr.DataArray(
+            data=int(0),
+            attrs={
+                "long_name": "CRS definition",
+                "crs_wkt": srs.ExportToWkt(),
+                "spatial_ref": srs.ExportToWkt(),
+            },
+        )
+
+        out_ds = xr.Dataset({"ogc_wkt": ogc_wkt})
+
+        out_ds = out_ds.assign({"crs": crs})
+
+        for fld_header, da in ds.data_vars.items():
+            types = tuple(map(Type, da.values))
+
+            fld_type = FieldType(types)
+
+            temp_da = xr.DataArray(
+                data=da.values,
+                dims="record",
+                attrs={
+                    "ogr_field_name": f"{fld_header}",
+                    "ogr_field_type": _linkTable[fld_type],
+                },
+            )
+
+            if fld_type == str:
+                temp_da.attrs.update({"ogr_field_width": 100})
+            out_ds = out_ds.assign({f"{fld_header}": temp_da})
+
+            del temp_da
+
+        from osgeo import __version__ as GDAL_verion
+
+        out_ds = out_ds.assign_attrs(
+            {
+                "Conventions": "CF-1.6",
+                "GDAL": f"GDAL {GDAL_verion}",
+                "ogr_geometry_field": "ogc_wkt",
+                "ogr_layer_type": f"{geom_type}",
+            }
+        )
+        return out_ds
+
+    @staticmethod
     def from_gdf(gdf):
         """Creates Dataset with geospatial coordinates. The Dataset values are
         reindexed to the gdf index.
@@ -344,6 +457,39 @@ class GeoDataset(GeoBase):
     def from_dataset(ds, crs=None, geom_name=None, x_name=None, y_name=None):
         ds.geo.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
         ds.geo.set_crs(crs)
+        return ds
+
+    @staticmethod
+    def from_nc(nc: str):
+        """Create GeoDataset from ogr compliant netCDF4 file
+
+        Parameters
+        ----------
+        nc : str
+            Path to the netCDF4 file
+
+        Returns
+        -------
+        xarray.Dataset
+            Dataset containing the geospatial data and attributes
+        """
+        temp = xr.open_dataset(nc)
+        geom = [shapely.wkt.loads(g) for g in temp.ogc_wkt.values]
+
+        ds = xr.Dataset(
+            coords={
+                "index": temp.record.values,
+                "geometry": ("index", geom),
+                "spatial_ref": temp.crs,
+            }
+        )
+
+        for key, da in temp.drop_vars(["ogc_wkt", "crs"]).data_vars.items():
+            temp_da = xr.DataArray(data=da.values, dims="index")
+            ds = ds.assign({key: temp_da})
+
+        ds.geo.set_crs(pyproj.CRS.from_wkt(temp.crs.crs_wkt))
+
         return ds
 
     def add_data(self, data_vars, coords=None, index_dim=None):
@@ -380,6 +526,27 @@ class GeoDataset(GeoBase):
             self.index_dim, ...
         )
         return xr.merge([self._obj, ds_data])
+
+    def to_nc(
+        self,
+        root: str,
+        fname: str,
+    ):
+        """Export geodataset vectordata to an ogr compliant netCDF4 file
+
+        Parameters
+        ----------
+        root : str
+            Directory in which the file is written to
+        fname: : str
+            Name of the file
+        """
+
+        temp = self.ogr_compliant(self._obj)
+
+        temp.to_netcdf(f"{root}\\{fname}.nc", engine="netcdf4")
+
+        del temp
 
 
 def points_to_coords(
@@ -436,3 +603,5 @@ def gdf_to_xarray(gdf, keep_cols):
 
 # #%%
 # ds
+
+# %%
