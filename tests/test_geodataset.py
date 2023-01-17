@@ -25,12 +25,18 @@ def dummy_shp():
     return gdf
 
 
-def test_vector(dummy_shp):
+def test_vector(tmpdir, dummy_shp):
+    path = str(tmpdir)
 
     # Create a geodataset and an ogr compliant version of it
     gd = GeoDataset.from_gdf(dummy_shp)
     oc = GeoDataset.ogr_compliant(gd)
 
+    # Assert some ogr compliant stuff
     assert oc.ogr_layer_type == "MULTIPOLYGON"
     assert list(oc.dims)[0] == "record"
     assert len(oc.Roman) == 2
+
+    # Write and load
+    gd.geo.to_nc(f"{path}", fname="dummy_ogr")
+    gd_nc = GeoDataset.from_nc(f"{path}\\dummy_ogr.nc")
