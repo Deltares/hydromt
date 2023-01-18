@@ -314,14 +314,8 @@ class GeoDataset(GeoBase):
     def __init__(self, xarray_obj):
         super(GeoDataset, self).__init__(xarray_obj)
 
-    @staticmethod
-    def ogr_compliant(ds: xr.Dataset):
+    def ogr_compliant(self):
         """Create a ogr compliant version of a xarray Dataset
-
-        Parameters
-        ----------
-        ds : xarray.Dataset
-            Dataset containing geospatial data
 
         Returns
         -------
@@ -351,7 +345,7 @@ class GeoDataset(GeoBase):
                 type = str
             return type
 
-        wkt = [g.wkt for g in ds.geometry.values]
+        wkt = [g.wkt for g in self._obj.geometry.values]
 
         ## Determine Geometry type
         from osgeo.ogr import CreateGeometryFromWkt
@@ -378,7 +372,7 @@ class GeoDataset(GeoBase):
 
         # Set spatial reference
         srs = osr.SpatialReference()
-        srs.ImportFromEPSG(ds.geo.crs.to_epsg())
+        srs.ImportFromEPSG(self.crs.to_epsg())
 
         crs = xr.DataArray(
             data=int(0),
@@ -393,7 +387,7 @@ class GeoDataset(GeoBase):
 
         out_ds = out_ds.assign({"crs": crs})
 
-        for fld_header, da in ds.data_vars.items():
+        for fld_header, da in self._obj.data_vars.items():
             types = tuple(map(Type, da.values))
 
             fld_type = FieldType(types)
@@ -460,12 +454,12 @@ class GeoDataset(GeoBase):
         return ds
 
     @staticmethod
-    def from_nc(nc: str):
+    def from_nc(path: str):
         """Create GeoDataset from ogr compliant netCDF4 file
 
         Parameters
         ----------
-        nc : str
+        path : str
             Path to the netCDF4 file
 
         Returns
@@ -473,7 +467,7 @@ class GeoDataset(GeoBase):
         xarray.Dataset
             Dataset containing the geospatial data and attributes
         """
-        temp = xr.open_dataset(nc)
+        temp = xr.open_dataset(path)
         geom = [shapely.wkt.loads(g) for g in temp.ogc_wkt.values]
 
         ds = xr.Dataset(
@@ -529,8 +523,8 @@ class GeoDataset(GeoBase):
 
     def to_nc(
         self,
-        root: str,
-        fname: str,
+        path: str,
+        **kwargs,
     ):
         """Export geodataset vectordata to an ogr compliant netCDF4 file
 
@@ -542,9 +536,9 @@ class GeoDataset(GeoBase):
             Name of the file
         """
 
-        temp = self.ogr_compliant(self._obj)
+        temp = self.ogr_compliant()
 
-        temp.to_netcdf(f"{root}\\{fname}.nc", engine="netcdf4")
+        temp.to_netcdf(path, engine="netcdf4")
 
         del temp
 
