@@ -107,7 +107,7 @@ class GeoBase(raster.XGeoBase):
     ):
         breakpoint()
         self._discover_geom(geom_name=geom_name, index_dim=index_dim)
-        if "geom_name" not in self.attrs:
+        if "geom_name" in self.attrs:
             self._discover_xy(x_name=x_name, y_name=y_name, index_dim=index_dim)
         elif "geom_name" not in self.attrs:
             raise ValueError("No geometry data found. Provide the  geo.set_geometry")
