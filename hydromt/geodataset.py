@@ -15,14 +15,45 @@ import shapely
 import logging
 
 from hydromt import gis_utils, raster
+from hydromt.raster import XDIMS, YDIMS
+
+from osgeo import __version__ as GDAL_verion
 
 logger = logging.getLogger(__name__)
+
+def Type(val):
+    # try:
+    #     s = eval(val)
+    # except Exception:
+    #     s = val
+    return type(val)
+
+def FieldType(lst):
+    if float or np.float64 in lst:
+        type = float
+    else:
+        type = int
+    if str in lst:
+        type = str
+    return type
+
+_linkTable = {
+    int: "Integer64",
+    float: "Real",
+    str: "String",
+}
 
 #%%
 class GeoBase(raster.XGeoBase):
     def __init__(self, xarray_obj):
         super(GeoBase, self).__init__(xarray_obj)
-        self._geometry = None  # placeholder
+        self.set_meta()
+        self._geom_dims = {
+            "geometry": ("geometry",),
+            "wkt": ("ogc_wkt",),
+            "lonlat": (self.x_dim, self.y_dim),
+            None: None,
+        }
 
     @property
     def _all_names(self):
@@ -41,104 +72,23 @@ class GeoBase(raster.XGeoBase):
                 names.append(name)
         return names
 
-    def _discover_xy(self, x_name=None, y_name=None, index_dim=None):
-        """Set the spatial and index dimensions of the object.
-
-        Arguments
-        ----------
-        x_name, y_name, index_dim: str, optional
-            The name of the x, y and index dimensions.
-        """
-        # infer x dim
-        if x_name is None:
-            for name in raster.XDIMS:
-                if name in self._obj:
-                    dim0 = (
-                        index_dim if index_dim is not None else self._obj[name].dims[0]
-                    )
-                    if self._obj[name].ndim == 1 and self._obj[name].dims[0] == dim0:
-                        x_name = name
-                        index_dim = dim0
-                        break
-        # infer y dim
-        if y_name is None and x_name is not None:
-            for name in raster.YDIMS:
-                if name in self._obj:
-                    if self._obj[name].dims[0] == index_dim:
-                        y_name = name
-                        break
-        if (
-            x_name is not None
-            and y_name is not None
-            and self._obj[x_name].ndim == 1
-            and self._obj[x_name].dims == self._obj[y_name].dims
-        ):
-            self.set_attrs(x_name=x_name)
-            self.set_attrs(y_name=y_name)
-            self.set_attrs(index_dim=index_dim)
+    def set_meta(self):
+        self.x_dim = None
+        self.y_dim = None
+        self.index_dim = list(self._obj.dims)[0]
+        if any([item in XDIMS for item in self._all_names]):
+            self.dtype = "lonlat"
+            xind = [item in XDIMS for item in self._all_names].index(True)
+            self.x_dim = self._all_names[xind]
+            yind = [item in YDIMS for item in self._all_names].index(True)
+            self.y_dim = self._all_names[yind]
+            self.index_dim = list(self._obj[self.x_dim].dims)[0]
+        elif "ogc_wkt" in self._all_names:
+            self.dtype = "wkt" 
+        elif "geometry" in self._all_names:
+            self.dtype = "geometry"
         else:
-            self.attrs.pop("x_name", None)
-            self.attrs.pop("y_name", None)
-            self.attrs.pop("index_dim", None)
-
-    def _discover_geom(self, geom_name=None, index_dim=None):
-        # infer geom dim
-        if geom_name is None:
-            names = self._geom_names
-            if index_dim is not None:
-                names = [name for name in names if self._obj[name].dims[0] == index_dim]
-            if "geometry" in names:
-                geom_name = "geometry"
-            elif len(names) >= 1:
-                geom_name = names[0]
-        if (
-            geom_name is not None
-            and geom_name in self._obj
-            and len(self._obj[geom_name].dims) == 1
-        ):
-            self.set_attrs(geom_name=geom_name)
-            self.set_attrs(index_dim=self._obj[geom_name].dims[0])
-        else:
-            self.attrs.pop("geom_name", None)
-            self.attrs.pop("index_dim", None)
-
-    def set_spatial_dims(
-        self, geom_name=None, x_name=None, y_name=None, index_dim=None
-    ):
-        breakpoint()
-        self._discover_geom(geom_name=geom_name, index_dim=index_dim)
-        if "geom_name" in self.attrs:
-            self._discover_xy(x_name=x_name, y_name=y_name, index_dim=index_dim)
-        elif "geom_name" not in self.attrs:
-            raise ValueError("No geometry data found. Provide the  geo.set_geometry")
-
-    @property
-    def geom_name(self):
-        if self.get_attrs("geom_name") not in self._obj.dims:
-            self.set_spatial_dims()
-        if "geom_name" in self.attrs:
-            return self.attrs["geom_name"]
-
-    @property
-    def x_name(self):
-        if self.get_attrs("x_name") not in self._obj.dims:
-            self.set_spatial_dims()
-        if "x_name" in self.attrs:
-            return self.attrs["x_name"]
-
-    @property
-    def y_name(self):
-        if self.get_attrs("y_name") not in self._obj.dims:
-            self.set_spatial_dims()
-        if "y_name" in self.attrs:
-            return self.attrs["y_name"]
-
-    @property
-    def index_dim(self):
-        if self.get_attrs("index_dim") not in self._obj.dims:
-            self.set_spatial_dims()
-        if "index_dim" in self.attrs:
-            return self.attrs["index_dim"]
+            self.dtype = None
 
     @property
     def index(self):
@@ -149,203 +99,36 @@ class GeoBase(raster.XGeoBase):
         return self._obj[self.index_dim].size
 
     @property
-    def geometry(self):
-        if (
-            self._geometry is None
-            or self._geometry.size != self.length
-            or self._geometry.crs != self.crs
-        ):
-            if self.geom_name is not None:
-                geoms = self._obj[self.geom_name].values
-                self._geometry = geoarray.from_shapely(geoms, crs=self.crs)
-            elif self.x_name is not None and self.y_name is not None:
-                self._geometry = geoarray.points_from_xy(
-                    self._obj[self.x_name].values,
-                    self._obj[self.y_name].values,
-                    crs=self.crs,
-                )
-        return self._geometry
-
-    @property
     def bounds(self):
         """Return the bounds (xmin, ymin, xmax, ymax) of the object."""
         return self.geometry.total_bounds
 
-    def to_gdf(self, reducer=None):
-        """Return geopandas GeoDataFrame with Point geometry based on Dataset
-        coordinates. If a reducer is passed the Dataset variables are reduced along
-        the all non-index dimensions and to a GeoDataFrame column.
-
-        Arguments
-        ---------
-        reducer: callable
-            input to ``xarray.DataArray.reducer`` func argument
-
-        Returns
-        -------
-        gdf: geopandas.GeoDataFrame
-            GeoDataFrame
-        """
-        gdf = gpd.GeoDataFrame(index=self.index, geometry=self.geometry, crs=self.crs)
-        gdf.index.name = self.index_dim
-        sdims = [self.y_name, self.x_name, self.index_dim, "geometry"]
-        for name in self._all_names:
-            dims = self._obj[name].dims
-            if name not in sdims:
-                # keep 1D variables with matching index_dim
-                if len(dims) == 1 and dims[0] == self.index_dim:
-                    gdf[name] = self._obj[name].values
-                # keep reduced data variables
-                elif reducer is not None and self.index_dim in self._obj[name].dims:
-                    rdims = [
-                        dim for dim in self._obj[name].dims if dim != self.index_dim
-                    ]
-                    gdf[name] = self._obj[name].reduce(reducer, rdim=dims)
-        return gdf
-
-    def to_crs(self, dst_crs):
-        """Transform spatial coordinates to a new coordinate reference system.
-
-        The ``crs`` attribute on the current GeoDataArray must be set.
-
-        Arguments
-        ----------
-        dst_crs: int, dict, or str, optional
-            Accepts EPSG codes (int or str); proj (str or dict) or wkt (str)
-
-        Returns
-        -------
-        da: xarray.DataArray
-            DataArray with transformed geospatial coordinates
-        """
-        if self.crs is None:
-            raise ValueError("Source CRS is missing. Use da.vector.set_crs(crs) first.")
-        obj = self._obj.copy()
-        geoms = self.geometry.to_crs(pyproj.CRS.from_user_input(dst_crs))
-        if self.x_name and self.y_name:
-            obj = obj.assign_coords(
-                points_to_coords(
-                    geoms,
-                    x_name=self.x_name,
-                    y_name=self.y_name,
-                    index_dim=self.index_dim,
-                )
+    @property
+    def geometry(self):
+        if self.dtype is None:
+            raise ValueError("Unknown geometry format in Dataset")
+        if self.dtype == "geometry":
+            geoms = self._obj.geometry.values
+            return geoarray.from_shapely(geoms, crs=self.crs)
+        elif self.dtype == "lonlat":
+            return geoarray.points_from_xy(
+                self._obj[self.x_dim].values,
+                self._obj[self.y_dim].values,
+                crs=self.crs,
             )
-        if self.geom_name:
-            obj = obj.assign_coords(
-                {self.geom_name: xr.Variable(self.index_dim, geoms)}
+        elif self.dtype == "wkt":
+            return geoarray.from_wkt(
+                self._obj.ogc_wkt.values,
+                crs=self.crs,
             )
-        obj.geo._geometry = geoms
-        obj.geo.set_crs(dst_crs)
-        return obj
 
-    def clip_geom(self, geom, predicate="intersects"):
-        """Select all geometries that intersect with the input geometry.
-
-        Arguments
-        ---------
-        geom : geopandas.GeoDataFrame/Series,
-            A geometry defining the area of interest.
-        predicate : {None, 'intersects', 'within', 'contains', \
-                     'overlaps', 'crosses', 'touches'}, optional
-            If predicate is provided, the input geometry is tested
-            using the predicate function against each item in the
-            index whose extent intersects the envelope of the input geometry:
-            predicate(input_geometry, tree_geometry).
-        
-        Returns
-        -------
-        da: xarray.DataArray
-            Clipped DataArray
-        """
-        idx = gis_utils.filter_gdf(self.geometry, geom=geom, predicate="intersects")
-        return self._obj.isel({self.index_dim: idx})
-
-    def clip_bbox(self, bbox, buffer=None):
-        """Select point locations to bounding box.
-
-        Arguments
-        ----------
-        bbox: tuple of floats
-            (xmin, ymin, xmax, ymax) bounding box
-        buffer: float, optional
-            buffer around bbox in crs units, None by default.
-
-        Returns
-        -------
-        da: xarray.DataArray
-            Clipped DataArray
-        """
-        if buffer is not None:
-            bbox = np.atleast_1d(bbox)
-            bbox[:2] -= buffer
-            bbox[2:] += buffer
-        idx = gis_utils.filter_gdf(self.geometry, bbox=bbox, predicate="intersects")
-        return self._obj.isel({self.index_dim: idx})
-
-    def to_wkt(self):
-        obj = self._obj.copy()
-        for name in self._geom_names:
-            geoms = geoarray.to_wkt(ds_cities.geo.geometry)
-            obj[self.geom_name] = xr.Variable(self.index_dim, geoms)
-        return obj
-
-    def to_netcdf(self, path, **kwargs):
-        self.to_wkt().to_netcdf(path, **kwargs)
-
-    def to_file(self, path, **kwargs):
-        self.to_gdf.to_file()
-
-
-@xr.register_dataarray_accessor("geo")
-class GeoDataset(GeoBase):
-    def __init__(self, xarray_obj):
-        super(GeoDataset, self).__init__(xarray_obj)
-
-    @staticmethod
-    def from_dataset(ds, crs=None, geom_name=None, x_name=None, y_name=None):
-        ds.geo.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
-        ds.geo.set_crs(crs)
-        return ds
-
-
-@xr.register_dataset_accessor("geo")
-class GeoDataset(GeoBase):
-    def __init__(self, xarray_obj):
-        super(GeoDataset, self).__init__(xarray_obj)
-
+    # Internal conversion and selection methods
+    # i.e. produces xarray.Dataset/ xarray.DataArray
     def ogr_compliant(self):
-        """Create a ogr compliant version of a xarray Dataset
-
-        Returns
-        -------
-        xarray.Dataset
-            ogr compliant
+        """
         """
 
-        _linkTable = {
-            int: "Integer64",
-            float: "Real",
-            str: "String",
-        }
-
-        def Type(val):
-            try:
-                s = eval(val)
-            except Exception:
-                s = val
-            return type(s)
-
-        def FieldType(lst):
-            if float or np.float64 in lst:
-                type = float
-            else:
-                type = int
-            if str in lst:
-                type = str
-            return type
-
-        wkt = [g.wkt for g in self._obj.geometry.values]
+        wkt = [g.wkt for g in self.geometry]
 
         ## Determine Geometry type
         from osgeo.ogr import CreateGeometryFromWkt
@@ -366,28 +149,301 @@ class GeoDataset(GeoBase):
             dims="record",
             attrs={
                 "long_name": "Geometry as ISO WKT",
-                "grid_mapping": "crs",
+                "grid_mapping": "spatial_ref",
             },
         )
 
         # Set spatial reference
-        srs = osr.SpatialReference()
-        srs.ImportFromEPSG(self.crs.to_epsg())
+        # srs = pyproj.CRS.from_epsg(self.crs.to_epsg())
 
-        crs = xr.DataArray(
-            data=int(0),
-            attrs={
-                "long_name": "CRS definition",
-                "crs_wkt": srs.ExportToWkt(),
-                "spatial_ref": srs.ExportToWkt(),
+        # crs = xr.DataArray(
+        #     data=int(1),
+        #     attrs={
+        #         "long_name": "CRS definition",
+        #         "crs_wkt": srs.to_wkt(),
+        #         "spatial_ref": srs.to_wkt(),
+        #     },
+        # )
+
+        return ogc_wkt, geom_type
+
+    def to_crs(self, dst_crs):
+        """Transform spatial coordinates to a new coordinate reference system.
+
+        The ``crs`` attribute on the current GeoDataArray must be set.
+
+        Arguments
+        ----------
+        dst_crs: int, dict, or str, optional
+            Accepts EPSG codes (int or str); proj (str or dict) or wkt (str)
+
+        Returns
+        -------
+        da: xarray.DataArray
+            DataArray with transformed geospatial coordinates
+        """
+        if self.crs is None:
+            raise ValueError("Source CRS is missing. Use da.vector.set_crs(crs) first.")
+        obj = self._obj.copy()
+        geoms = self.geometry.to_crs(pyproj.CRS.from_user_input(dst_crs))
+        
+        obj = obj.drop_vars(self._geom_dims[self.dtype])
+
+        obj = obj.assign_coords({"geometry": geoms})
+        obj.vector.set_meta()
+        obj.vector.set_crs(dst_crs)
+        return obj
+
+    def to_lonlat(self):
+        pass
+
+    def clip_geom(self, geom, predicate="intersects"):
+        """Select all geometries that intersect with the input geometry.
+
+        Arguments
+        ---------
+        geom : geopandas.GeoDataFrame/Series,
+            A geometry defining the area of interest.
+        predicate : {None, 'intersects', 'within', 'contains', \
+                     'overlaps', 'crosses', 'touches'}, optional
+            If predicate is provided, the input geometry is tested
+            using the predicate function against each item in the
+            index whose extent intersects the envelope of the input geometry:
+            predicate(input_geometry, tree_geometry).
+        
+        Returns
+        -------
+        da: xarray.DataArray
+            Clipped DataArray
+        """
+        idx = gis_utils.filter_gdf(self.geometry, geom=geom, predicate=predicate)
+        return self._obj.isel({self.index_dim: idx})
+
+    def clip_bbox(self, bbox, crs=4326, buffer=None):
+        """Select point locations to bounding box.
+
+        Arguments
+        ----------
+        bbox: tuple of floats
+            (xmin, ymin, xmax, ymax) bounding box
+        buffer: float, optional
+            buffer around bbox in crs units, None by default.
+
+        Returns
+        -------
+        da: xarray.DataArray
+            Clipped DataArray
+        """
+        if buffer is not None:
+            bbox = np.atleast_1d(bbox)
+            bbox[:2] -= buffer
+            bbox[2:] += buffer
+        idx = gis_utils.filter_gdf(self.to_gdf(), bbox=bbox, crs=crs, predicate="intersects")
+        return self._obj.isel({self.index_dim: idx})
+
+    # Constructers
+    # i.e. from other datatypes or files
+
+
+    ## Output methods
+    ## Either writes to files or other data types
+    def to_gdf(self, reducer=None):
+        """Return geopandas GeoDataFrame with Point geometry based on Dataset
+        coordinates. If a reducer is passed the Dataset variables are reduced along
+        the all non-index dimensions and to a GeoDataFrame column.
+
+        Arguments
+        ---------
+        reducer: callable
+            input to ``xarray.DataArray.reducer`` func argument
+
+        Returns
+        -------
+        gdf: geopandas.GeoDataFrame
+            GeoDataFrame
+        """
+        gdf = gpd.GeoDataFrame(index=self.index, geometry=self.geometry, crs=self.crs)
+        gdf.index.name = self.index_dim
+        sdims = [self.y_dim, self.x_dim, self.index_dim, *self._geom_dims[self.dtype]]
+        for name in self._all_names:
+            dims = self._obj[name].dims
+            if name not in sdims:
+                # keep 1D variables with matching index_dim
+                if len(dims) == 1 and dims[0] == self.index_dim:
+                    gdf[name] = self._obj[name].values
+                # keep reduced data variables
+                elif reducer is not None and self.index_dim in self._obj[name].dims:
+                    rdims = [
+                        dim for dim in self._obj[name].dims if dim != self.index_dim
+                    ]
+                    gdf[name] = self._obj[name].reduce(reducer, rdim=dims)
+        return gdf
+
+    def to_netcdf(
+        self,
+        path: str,
+        **kwargs,
+    ):
+        """Export geodataset vectordata to an ogr compliant netCDF4 file
+
+        Parameters
+        ----------
+        root : str
+            Directory in which the file is written to
+        fname: : str
+            Name of the file
+        """
+
+        temp = self.ogr_compliant()
+
+        temp.to_netcdf(path, engine="netcdf4", **kwargs)
+
+        del temp
+
+@xr.register_dataarray_accessor("vector")
+class GeoDataArray(GeoBase):
+    def __init__(self, xarray_obj):
+        super(GeoDataArray, self).__init__(xarray_obj)
+
+    # Internal conversion and selection methods
+    # i.e. produces xarray.Dataset/ xarray.DataArray
+    def ogr_compliant(self):
+        """Create a ogr compliant version of a xarray DataArray
+        Note(!): The result will not be a DataArray
+
+        Returns
+        -------
+        xarray.Dataset
+            ogr compliant
+        """
+
+        ogc_wkt, geom_type = super().ogr_compliant()
+        
+        out_ds = xr.Dataset()
+
+        out_ds = out_ds.assign_coords(
+            {
+                "ogc_wkt": ogc_wkt,
             },
         )
 
-        out_ds = xr.Dataset({"ogc_wkt": ogc_wkt})
+        out_ds.vector.set_crs(self.crs.to_epsg())
 
-        out_ds = out_ds.assign({"crs": crs})
+        types = tuple(map(Type, self._obj.values))
+
+        fld_type = FieldType(types)
+
+        if self._obj.name is None: name = "value"
+        else: name = self._obj.name
+
+        temp_da = xr.DataArray(
+            data = self._obj.values,
+            dims = "record",
+            attrs={
+                    "ogr_field_name": f"{name}",
+                    "ogr_field_type": _linkTable[fld_type],
+                },
+            )
+
+        if fld_type == str:
+            temp_da.attrs.update({"ogr_field_width": 100})
+        out_ds = out_ds.assign({f"{name}": temp_da})
+
+        del temp_da
+
+        out_ds = out_ds.assign_attrs(
+            {
+                "Conventions": "CF-1.6",
+                "GDAL": f"GDAL {GDAL_verion}",
+                "ogr_geometry_field": "ogc_wkt",
+                "ogr_layer_type": f"{geom_type}",
+            }
+        )
+        return out_ds
+
+    # Constructers
+    # i.e. from other datatypes or files
+    @staticmethod
+    def from_dataset(ds, crs=None):
+        ds.vector.set_crs(crs)
+        return ds
+
+    @staticmethod
+    def from_netcdf(path: str):
+
+        temp = xr.open_dataarray(path)
+        geoms = [shapely.wkt.loads(g) for g in temp.ogc_wkt.values]
+
+        da = xr.DataArray(
+            data = temp.values,
+            dims = "index",
+            coords = {
+                "geometry": ("index", geoms),
+            },
+            name = temp.name,
+        )
+
+        da.vector.set_crs(pyproj.CRS.from_wkt(temp.spatial_ref.crs_wkt))
+
+        return da
+
+    ## Output methods
+    ## Either writes to files or other data types
+    def to_gdf(self, reducer=None):
+        """Return geopandas GeoDataFrame with Point geometry based on DataArray
+        coordinates. If a reducer is passed the DataArray variables are reduced along
+        the all non-index dimensions and to a GeoDataFrame column.
+
+        Arguments
+        ---------
+        reducer: callable
+            input to ``xarray.DataArray.reducer`` func argument
+
+        Returns
+        -------
+        gdf: geopandas.GeoDataFrame
+            GeoDataFrame
+        """
+        gdf = super().to_gdf(reducer)
+
+        if self._obj.name is None: name = "value"
+        else: name = self._obj.name
+
+        gdf[name] = self._obj.values
+
+        return gdf
+
+@xr.register_dataset_accessor("vector")
+class GeoDataset(GeoBase):
+    def __init__(self, xarray_obj):
+        super(GeoDataset, self).__init__(xarray_obj)
+
+    # Internal conversion and selection methods
+    # i.e. produces xarray.Dataset/ xarray.DataArray
+    def ogr_compliant(self):
+        """Create a ogr compliant version of a xarray Dataset
+
+        Returns
+        -------
+        xarray.Dataset
+            ogr compliant
+        """
+
+        ogc_wkt, geom_type = super().ogr_compliant()
+
+        out_ds = xr.Dataset()
+
+        out_ds = out_ds.assign_coords(
+            {"ogc_wkt": ogc_wkt},
+            )
+
+        # Set the spatial reference with the
+        # set_crs form the GeoBase class
+        out_ds.vector.set_crs(self.crs.to_epsg())
 
         for fld_header, da in self._obj.data_vars.items():
+            if not len(self._obj.dims) == 1 and list(self._obj.dims)[0] == self.index_dim:
+                continue
             types = tuple(map(Type, da.values))
 
             fld_type = FieldType(types)
@@ -407,8 +463,6 @@ class GeoDataset(GeoBase):
 
             del temp_da
 
-        from osgeo import __version__ as GDAL_verion
-
         out_ds = out_ds.assign_attrs(
             {
                 "Conventions": "CF-1.6",
@@ -419,6 +473,8 @@ class GeoDataset(GeoBase):
         )
         return out_ds
 
+    # Constructers
+    # i.e. from other datatypes or filess
     @staticmethod
     def from_gdf(gdf):
         """Creates Dataset with geospatial coordinates. The Dataset values are
@@ -444,17 +500,17 @@ class GeoDataset(GeoBase):
             raise ValueError(f"gdf data type not understood {type(gdf)}")
         geom_name = gdf.geometry.name
         ds = gdf.to_xarray().set_coords(geom_name)
-        ds.geo.set_crs(gdf.crs)
+        ds.vector.set_crs(gdf.crs)
         return ds
 
     @staticmethod
-    def from_dataset(ds, crs=None, geom_name=None, x_name=None, y_name=None):
-        ds.geo.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
-        ds.geo.set_crs(crs)
+    def from_dataset(ds, crs=None, geom_name=None, x_dim=None, y_dim=None):
+        ds.vector.set_spatial_dims(geom_name=geom_name, x_dim=x_dim, y_dim=y_dim)
+        ds.vector.set_crs(crs)
         return ds
 
     @staticmethod
-    def from_nc(path: str):
+    def from_netcdf(path: str):
         """Create GeoDataset from ogr compliant netCDF4 file
 
         Parameters
@@ -468,13 +524,13 @@ class GeoDataset(GeoBase):
             Dataset containing the geospatial data and attributes
         """
         temp = xr.open_dataset(path)
-        geom = [shapely.wkt.loads(g) for g in temp.ogc_wkt.values]
+        geoms = [shapely.wkt.loads(g) for g in temp.ogc_wkt.values]
 
         ds = xr.Dataset(
             coords={
                 "index": temp.record.values,
-                "geometry": ("index", geom),
-                "spatial_ref": temp.crs,
+                "geometry": ("index", geoms),
+                "spatial_ref": temp.spatial_ref,
             }
         )
 
@@ -482,7 +538,7 @@ class GeoDataset(GeoBase):
             temp_da = xr.DataArray(data=da.values, dims="index")
             ds = ds.assign({key: temp_da})
 
-        ds.geo.set_crs(pyproj.CRS.from_wkt(temp.crs.crs_wkt))
+        ds.vector.set_crs(pyproj.CRS.from_wkt(temp.spatial_ref.crs_wkt))
 
         return ds
 
@@ -520,82 +576,6 @@ class GeoDataset(GeoBase):
             self.index_dim, ...
         )
         return xr.merge([self._obj, ds_data])
-
-    def to_nc(
-        self,
-        path: str,
-        **kwargs,
-    ):
-        """Export geodataset vectordata to an ogr compliant netCDF4 file
-
-        Parameters
-        ----------
-        root : str
-            Directory in which the file is written to
-        fname: : str
-            Name of the file
-        """
-
-        temp = self.ogr_compliant()
-
-        temp.to_netcdf(path, engine="netcdf4")
-
-        del temp
-
-
-def points_to_coords(
-    geometry: geoarray.GeometryArray, x_name="x", y_name="y", index_dim="index"
-):
-    """Returns coordinate dictionary with xarray IndexVariables based on point geometries."""
-    if not np.all(geometry.geom_type == "Point"):
-        raise ValueError("geometry may only contain points.")
-    coords = {
-        index_dim: xr.IndexVariable(index_dim, np.arange(geometry.size, dtype="int")),
-        x_name: xr.IndexVariable(index_dim, geometry.x),
-        y_name: xr.IndexVariable(index_dim, geometry.y),
-    }
-    return coords
-
-
-def gdf_to_xarray(gdf, keep_cols):
-    geom_col = gdf.geometry.name
-    crs = gdf.crs
-    index_col = "index" if gdf.index.name is None else gdf.index.name
-    geom_coord = xr.Variable(index_col, GeometryArray2(gdf.geometry.values, crs=crs))  #
-    ds = gdf.drop(
-        columns=geom_col
-    ).to_xarray()  # .assign_coords(**{geom_col: gdf.geometry.values})
-
-
-# #%%
-# df = pd.DataFrame(
-#     {
-#         "city": ["Buenos Aires", "Brasilia", "Santiago", "Bogota", "Caracas"],
-#         "country": ["Argentina", "Brazil", "Chile", "Colombia", "Venezuela"],
-#         "latitude": [-34.58, -15.78, -33.45, 4.60, 10.48],
-#         "longitude": [-58.66, -47.91, -70.66, -74.08, -66.86],
-#     }
-# )
-# df.to_xarray().geo.geometry
-# #%%
-# ds_cities = GeoDataset.from_dataset(df.to_xarray(), crs=4326)
-# gdf_cities = ds_cities.geo.to_gdf()
-# ds_cities = ds_cities.geo.to_crs(3857)
-# ds_cities
-
-# #%%
-# gdf = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
-# ds = GeoDataset.from_gdf(gdf)
-# ds
-
-# #%%
-# GeoDataset.from_gdf(gdf['geometry']).geo.add_data(gdf.drop(columns='geometry').to_xarray())
-
-# #%%
-# ds_cities.geo.clip_geom(gdf[gdf['name']=='Venezuela'].geometry)
-# ds_cities.geo.to_crs(4326).geo.clip_bbox(gdf[gdf['name']=='Venezuela'].total_bounds)
-
-# #%%
-# ds
-
-# %%
+    
+    ## Output methods
+    ## Either writes to files or other data types

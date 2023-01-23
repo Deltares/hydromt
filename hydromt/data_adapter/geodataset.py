@@ -217,7 +217,7 @@ class GeoDatasetAdapter(DataAdapter):
         ds_out = ds_out.rename(rm)
         # check spatial dims and make sure all are set as coordinates
         try:
-            ds_out.vector.set_spatial_dims()
+            # ds_out.vector.set_spatial_dims()
             idim = ds_out.vector.index_dim
             if idim not in ds_out:  # set coordinates for index dimension if missing
                 ds_out[idim] = xr.IndexVariable(idim, np.arange(ds_out.dims[idim]))

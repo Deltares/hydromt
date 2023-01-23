@@ -254,7 +254,7 @@ class GeoBase(raster.XGeoBase):
         return self._obj.isel({self.index_dim: idx})
 
 
-@xr.register_dataarray_accessor("vector")
+@xr.register_dataarray_accessor("vector2")
 class GeoDataArray(GeoBase):
     """This is a vector extension for xarray.DataArray 1D time series data
     with geographical location information"""
@@ -358,7 +358,7 @@ class GeoDataArray(GeoBase):
         raise NotImplementedError()
 
 
-@xr.register_dataset_accessor("vector")
+@xr.register_dataset_accessor("vector2")
 class GeoDataset(GeoBase):
     """This is a vector extension for xarray.Dataset 1D time series data
     with geographical location information"""
