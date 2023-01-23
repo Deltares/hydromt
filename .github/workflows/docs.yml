@@ -26,8 +26,8 @@ jobs:
         with:
           python-version: "3.10"
           mamba-version: "*"
-          channels: conda-forge
-          channel-priority: true
+          channels: conda-forge, defaults
+          channel-priority: strict
           environment-file: envs/hydromt-dev.yml
           activate-environment: hydromt-dev
 
