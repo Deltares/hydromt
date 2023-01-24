@@ -17,7 +17,7 @@ import logging
 from hydromt import gis_utils, raster
 from hydromt.raster import XDIMS, YDIMS
 
-from osgeo import __version__ as GDAL_verion
+from osgeo import __version__ as GDAL_VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +37,24 @@ def FieldType(lst):
         type = str
     return type
 
+def DeterGeomType(wkt):
+    from osgeo.ogr import CreateGeometryFromWkt
+    geom_types = [CreateGeometryFromWkt(g).GetGeometryName() for g in wkt]
+
+    if len(set(geom_types)) > 1:
+        i = ["MULTI" in g for g in geom_types].index(True)
+        geom_type = geom_types[i]
+    else:
+        geom_type = geom_types[0]
+    del geom_types
+    return geom_type
+
 _linkTable = {
     int: "Integer64",
     float: "Real",
     str: "String",
 }
 
-#%%
 class GeoBase(raster.XGeoBase):
     def __init__(self, xarray_obj):
         super(GeoBase, self).__init__(xarray_obj)
@@ -73,6 +84,15 @@ class GeoBase(raster.XGeoBase):
         return names
 
     def set_meta(self):
+        """Determines the meta of the GeoDataset/ GeoDataArray
+        Is invoked at Dataset/ DataArray creaton.
+
+        INCLUDES
+        --------
+        object.x_dim
+        object.y_dim
+        object.index_dim
+        """
         self.x_dim = None
         self.y_dim = None
         self.index_dim = list(self._obj.dims)[0]
@@ -92,10 +112,12 @@ class GeoBase(raster.XGeoBase):
 
     @property
     def index(self):
+        """Return the index values"""
         return self._obj[self.index_dim]
 
     @property
     def length(self):
+        """Return the length of the index array"""
         return self._obj[self.index_dim].size
 
     @property
@@ -104,7 +126,19 @@ class GeoBase(raster.XGeoBase):
         return self.geometry.total_bounds
 
     @property
-    def geometry(self):
+    def geometry(self) -> geoarray:
+        """_summary_
+
+        Returns
+        -------
+        geoarray
+            Array containing geometries
+
+        Raises
+        ------
+        ValueError
+            Unknown geometry format
+        """
         if self.dtype is None:
             raise ValueError("Unknown geometry format in Dataset")
         if self.dtype == "geometry":
@@ -131,17 +165,7 @@ class GeoBase(raster.XGeoBase):
         wkt = [g.wkt for g in self.geometry]
 
         ## Determine Geometry type
-        from osgeo.ogr import CreateGeometryFromWkt
-
-        geom_types = [CreateGeometryFromWkt(g).GetGeometryName() for g in wkt]
-
-        if len(set(geom_types)) > 1:
-            i = ["MULTI" in g for g in geom_types].index(True)
-            geom_type = geom_types[i]
-        else:
-            geom_type = geom_types[0]
-
-        del geom_types
+        geom_type = DeterGeomType(wkt)
 
         ## Create the geometry DataArray
         ogc_wkt = xr.DataArray(
@@ -179,7 +203,7 @@ class GeoBase(raster.XGeoBase):
 
         Returns
         -------
-        da: xarray.DataArray
+        xr.DataArray
             DataArray with transformed geospatial coordinates
         """
         if self.crs is None:
@@ -194,8 +218,42 @@ class GeoBase(raster.XGeoBase):
         obj.vector.set_crs(dst_crs)
         return obj
 
-    def to_lonlat(self):
-        pass
+    def to_xy(self) -> xr.Dataset:
+        """Converts Dataset/ DataArray to x,y structure
+
+        Returns
+        -------
+        xr.Dataset
+            x,y
+
+        Raises
+        ------
+        ValueError
+            Input data must be POINT geometries or POINT WKT-strings
+        """
+
+        geoms = self.geometry
+        
+        geom_type = DeterGeomType(
+            [g.wkt for g in geoms]
+        )
+
+        if geom_type != "POINT":
+            del geoms
+            raise ValueError("Input data must be POINT geometries or POINT WKT-strings")
+
+        obj = self._obj.copy()
+        obj = obj.drop_vars(self._geom_dims[self.dtype])
+        x,y = zip(*[(p.x,p.y) for p in geoms])
+        del geoms
+        obj = obj.assign_coords(
+            {
+                "x": (self.index_dim, list(x)),
+                "y": (self.index_dim, list(y)),
+            },
+        )
+        obj.vector.set_meta()
+        return obj  
 
     def clip_geom(self, geom, predicate="intersects"):
         """Select all geometries that intersect with the input geometry.
@@ -243,7 +301,8 @@ class GeoBase(raster.XGeoBase):
 
     # Constructers
     # i.e. from other datatypes or files
-
+    def from_gdf():
+        pass
 
     ## Output methods
     ## Either writes to files or other data types
@@ -282,6 +341,7 @@ class GeoBase(raster.XGeoBase):
     def to_netcdf(
         self,
         path: str,
+        ogr_compliant: bool =  False,
         **kwargs,
     ):
         """Export geodataset vectordata to an ogr compliant netCDF4 file
@@ -290,15 +350,32 @@ class GeoBase(raster.XGeoBase):
         ----------
         root : str
             Directory in which the file is written to
+        ogr_compliant : bool
+            write the netCDF4 file in an ogr compliant format
+            This makes it readable as a vector file in e.g. QGIS
         fname: : str
             Name of the file
         """
 
-        temp = self.ogr_compliant()
+        if ogr_compliant:
+            temp = self.ogr_compliant()
 
+            temp.to_netcdf(path, engine="netcdf4", **kwargs)
+
+            del temp
+            return None
+        
+        temp = self._obj.copy()
+        if self.dtype == "geometry":
+            temp = temp.assign_coords(
+                {
+                    "ogc_wkt": [g.wkt for g in temp.geometry.values],
+                },
+            )
+            temp = temp.drop_vars(["geometry"])
         temp.to_netcdf(path, engine="netcdf4", **kwargs)
+        return None
 
-        del temp
 
 @xr.register_dataarray_accessor("vector")
 class GeoDataArray(GeoBase):
@@ -307,13 +384,13 @@ class GeoDataArray(GeoBase):
 
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
-    def ogr_compliant(self):
+    def ogr_compliant(self, reducer=None) -> xr.Dataset:
         """Create a ogr compliant version of a xarray DataArray
         Note(!): The result will not be a DataArray
 
         Returns
         -------
-        xarray.Dataset
+        xr.Dataset
             ogr compliant
         """
 
@@ -336,6 +413,14 @@ class GeoDataArray(GeoBase):
         if self._obj.name is None: name = "value"
         else: name = self._obj.name
 
+        values = None
+        if not len(self._obj.dims) == 1 and list(self._obj.dims)[0] == self.index_dim:
+            if reducer is not None:
+                idd = self._obj.dims.index(self.index_dim)
+                reduced_dims = list(range(len(self._obj.dims)))
+                reduced_dims.remove(idd)
+                values = reducer(self._obj.values, axis=tuple(reduced_dims))
+
         temp_da = xr.DataArray(
             data = self._obj.values,
             dims = "record",
@@ -354,7 +439,7 @@ class GeoDataArray(GeoBase):
         out_ds = out_ds.assign_attrs(
             {
                 "Conventions": "CF-1.6",
-                "GDAL": f"GDAL {GDAL_verion}",
+                "GDAL": f"GDAL {GDAL_VERSION}",
                 "ogr_geometry_field": "ogc_wkt",
                 "ogr_layer_type": f"{geom_type}",
             }
@@ -364,12 +449,24 @@ class GeoDataArray(GeoBase):
     # Constructers
     # i.e. from other datatypes or files
     @staticmethod
-    def from_dataset(ds, crs=None):
+    def from_dataset(ds, crs=None) -> xr.Dataset:
         ds.vector.set_crs(crs)
         return ds
 
     @staticmethod
-    def from_netcdf(path: str):
+    def from_netcdf(path: str) -> xr.DataArray:
+        """_summary_
+
+        Parameters
+        ----------
+        path : str
+            _description_
+
+        Returns
+        -------
+        xr.DataArray
+            _description_
+        """
 
         temp = xr.open_dataarray(path)
         geoms = [shapely.wkt.loads(g) for g in temp.ogc_wkt.values]
@@ -389,7 +486,7 @@ class GeoDataArray(GeoBase):
 
     ## Output methods
     ## Either writes to files or other data types
-    def to_gdf(self, reducer=None):
+    def to_gdf(self, reducer=None) -> gpd.GeoDataFrame:
         """Return geopandas GeoDataFrame with Point geometry based on DataArray
         coordinates. If a reducer is passed the DataArray variables are reduced along
         the all non-index dimensions and to a GeoDataFrame column.
@@ -401,7 +498,7 @@ class GeoDataArray(GeoBase):
 
         Returns
         -------
-        gdf: geopandas.GeoDataFrame
+        gdf: gpd.GeoDataFrame
             GeoDataFrame
         """
         gdf = super().to_gdf(reducer)
@@ -420,12 +517,12 @@ class GeoDataset(GeoBase):
 
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
-    def ogr_compliant(self):
+    def ogr_compliant(self, reducer=None) -> xr.Dataset:
         """Create a ogr compliant version of a xarray Dataset
 
         Returns
         -------
-        xarray.Dataset
+        xr.Dataset
             ogr compliant
         """
 
@@ -442,14 +539,27 @@ class GeoDataset(GeoBase):
         out_ds.vector.set_crs(self.crs.to_epsg())
 
         for fld_header, da in self._obj.data_vars.items():
-            if not len(self._obj.dims) == 1 and list(self._obj.dims)[0] == self.index_dim:
+            values = None
+            if not self.index_dim in da.dims:
                 continue
-            types = tuple(map(Type, da.values))
+            if not len(da.dims) == 1:                
+                if reducer is not None:
+                    idd = da.dims.index(self.index_dim)
+                    reduced_dims = list(range(len(da.dims)))
+                    reduced_dims.remove(idd)
+                    values = reducer(da.values, axis=tuple(reduced_dims))
+                else:
+                    continue
+
+            if values is None:
+                values = da.values
+
+            types = tuple(map(Type, values))
 
             fld_type = FieldType(types)
 
             temp_da = xr.DataArray(
-                data=da.values,
+                data=values,
                 dims="record",
                 attrs={
                     "ogr_field_name": f"{fld_header}",
@@ -461,12 +571,12 @@ class GeoDataset(GeoBase):
                 temp_da.attrs.update({"ogr_field_width": 100})
             out_ds = out_ds.assign({f"{fld_header}": temp_da})
 
-            del temp_da
+            del temp_da, values
 
         out_ds = out_ds.assign_attrs(
             {
                 "Conventions": "CF-1.6",
-                "GDAL": f"GDAL {GDAL_verion}",
+                "GDAL": f"GDAL {GDAL_VERSION}",
                 "ogr_geometry_field": "ogc_wkt",
                 "ogr_layer_type": f"{geom_type}",
             }
@@ -476,7 +586,7 @@ class GeoDataset(GeoBase):
     # Constructers
     # i.e. from other datatypes or filess
     @staticmethod
-    def from_gdf(gdf):
+    def from_gdf(gdf: gpd.GeoDataFrame) -> xr.Dataset:
         """Creates Dataset with geospatial coordinates. The Dataset values are
         reindexed to the gdf index.
 
@@ -489,7 +599,7 @@ class GeoDataset(GeoBase):
 
         Returns
         -------
-        ds: xarray.Dataset
+        xr.Dataset
             Dataset with geospatial coordinates
         """
         if isinstance(gdf, gpd.GeoSeries):
@@ -504,13 +614,13 @@ class GeoDataset(GeoBase):
         return ds
 
     @staticmethod
-    def from_dataset(ds, crs=None, geom_name=None, x_dim=None, y_dim=None):
+    def from_dataset(ds, crs=None, geom_name=None, x_dim=None, y_dim=None) -> xr.Dataset:
         ds.vector.set_spatial_dims(geom_name=geom_name, x_dim=x_dim, y_dim=y_dim)
         ds.vector.set_crs(crs)
         return ds
 
     @staticmethod
-    def from_netcdf(path: str):
+    def from_netcdf(path: str) -> xr.Dataset:
         """Create GeoDataset from ogr compliant netCDF4 file
 
         Parameters
@@ -520,7 +630,7 @@ class GeoDataset(GeoBase):
 
         Returns
         -------
-        xarray.Dataset
+        xr.Dataset
             Dataset containing the geospatial data and attributes
         """
         temp = xr.open_dataset(path)
@@ -579,3 +689,4 @@ class GeoDataset(GeoBase):
     
     ## Output methods
     ## Either writes to files or other data types
+# %%
