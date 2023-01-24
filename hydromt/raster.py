@@ -13,7 +13,7 @@ import os
 from os.path import join, basename, dirname, isdir
 from typing import Any, Optional
 import numpy as np
-from shapely.geometry import box
+from shapely.geometry import box, Polygon
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
@@ -231,6 +231,13 @@ class XGeoBase(object):
                 if key.startswith(self.x_dim):
                     xcoords = self._obj.coords[key]
                     break
+        if xcoords.ndim == 2 and list(xcoords.dims).index(self.x_dim) != 1:
+            raise ValueError(
+                "Invalid raster: dimension order wrong. Fix using"
+                f'".transpose(..., {self.y_dim}, {self.x_dim})"'
+            )
+        if xcoords.size < 2 or (xcoords.ndim == 2 and xcoords.shape[1] < 2):
+            raise ValueError(f"Invalid raster: less than 2 cells in x_dim {self.x_dim}")
         return xcoords
 
     @property
@@ -242,6 +249,13 @@ class XGeoBase(object):
                 if key.startswith(self.y_dim):
                     ycoords = self._obj.coords[key]
                     break
+        if ycoords.ndim == 2 and list(ycoords.dims).index(self.y_dim) != 0:
+            raise ValueError(
+                "Invalid raster: dimension order wrong. Fix using"
+                f'".transpose(..., {self.y_dim}, {self.x_dim})"'
+            )
+        if ycoords.size < 2 or (ycoords.ndim == 2 and ycoords.shape[0] < 2):
+            raise ValueError(f"Invalid raster: less than 2 cells in y_dim {self.y_dim}")
         return ycoords
 
     def set_spatial_dims(self, x_dim=None, y_dim=None) -> None:
@@ -424,40 +438,50 @@ class XRasterBase(XGeoBase):
     def box(self) -> gpd.GeoDataFrame:
         """Return :py:meth:`~geopandas.GeoDataFrame` of bounding box"""
         crs = self.crs
-        if crs is None and crs.to_epsg() is not None:
+        if crs is not None and crs.to_epsg() is not None:
             crs = crs.to_epsg()  # not all CRS have an EPSG code
-        return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
+        transform = self.transform
+        rs = np.array([0, self.height, self.height, 0, 0])
+        cs = np.array([0, 0, self.width, self.width, 0])
+        xs, ys = transform * (cs, rs)
+        return gpd.GeoDataFrame(geometry=[Polygon([*zip(xs, ys)])], crs=crs)
 
     @property
     def res(self) -> tuple[float, float]:
-        """Return resolution (x, y) tuple."""
+        """Return resolution (x, y) tuple.
+        NOTE: rotated rasters with a negative dx are not supported
+        """
         xs, ys = self.xcoords.data, self.ycoords.data
         dx, dy = 0, 0
         if xs.ndim == 1:
             dx = xs[1] - xs[0]
             dy = ys[1] - ys[0]
-            # assert np.allclose(np.diff(ys), dy)
-            # assert np.allclose(np.diff(xs), dx)
         elif xs.ndim == 2:
             ddx0 = xs[1, 0] - xs[0, 0]
             ddy0 = ys[1, 0] - ys[0, 0]
             ddx1 = xs[0, 1] - xs[0, 0]
             ddy1 = ys[0, 1] - ys[0, 0]
-            dy = np.sign(ys[1, 0] - ys[0, 0]) * math.hypot(ddx0, ddy0)
-            dx = np.sign(xs[0, 1] - xs[0, 0]) * math.hypot(ddx1, ddy1)
-            # assert np.allclose(np.diff(ys, axis=1), ddy1)
-            # assert np.allclose(np.diff(xs, axis=0), ddx0)
+            dx = math.hypot(ddx1, ddy1)  # always positive!
+            dy = math.hypot(ddx0, ddy0)
+            if ddx1 <= 0 or ddy0 <= 0 and not (ddx1 <= 0 and ddy0 <= 0):
+                dy = -1 * dy
         return dx, dy
 
     @property
     def rotation(self) -> float:
-        """Return rotation of grid (degree)"""
+        """Return rotation of grid (degree)
+        NOTE: rotated rasters with a negative dx are not supported
+        """
         xs, ys = self.xcoords.data, self.ycoords.data
         rot = 0
         if xs.ndim == 2:
             ddx1 = xs[0, -1] - xs[0, 0]
             ddy1 = ys[0, -1] - ys[0, 0]
             rot = math.degrees(math.atan(ddy1 / ddx1))
+            if ddx1 < 0:
+                rot = 180 + rot
+            elif ddy1 < 0:
+                rot = 360 + rot
         return rot
 
     @property
@@ -470,16 +494,12 @@ class XRasterBase(XGeoBase):
             x0, y0 = xs[0] - dx / 2, ys[0] - dy / 2
         elif xs.ndim == 2:
             alpha = math.radians(self.rotation)
-            beta = math.atan(abs(dx / dy))
+            beta = math.atan(dx / dy)
             c = math.hypot(dx, dy) / 2.0
             a = c * math.sin(beta - alpha)
             b = c * math.cos(beta - alpha)
-            if (dy < 0 or dx < 0) and not (dy < 0 and dx < 0):
-                x0 = xs[0, 0] - np.sign(dx) * b
-                y0 = ys[0, 0] - a
-            else:
-                x0 = xs[0, 0] - a
-                y0 = ys[0, 0] - np.sign(dy) * b
+            x0 = xs[0, 0] - np.sign(dy) * a
+            y0 = ys[0, 0] - np.sign(dy) * b
         return x0, y0
 
     def _check_dimensions(self) -> None:
@@ -829,26 +849,18 @@ class XRasterBase(XGeoBase):
             return {var: f"{var}_{stat}" for var in ds.raster.vars}
 
         def gen_zonal_stat(ds, geoms, stats, all_touched=False):
-            a, b, _, d, e, _, _, _, _ = tuple(ds.raster.transform)
-            dims = (ds.raster.x_dim, ds.raster.y_dim)
+            dims = (ds.raster.y_dim, ds.raster.x_dim)
             for i, geom in enumerate(geoms):
                 # add buffer to work with point geometries
-                ds1 = ds.raster.clip_bbox(geom.bounds, buffer=1).raster.mask_nodata()
-                if np.any(np.asarray(ds1.raster.shape) == 0):
+                ds1 = ds.raster.clip_bbox(geom.bounds, buffer=2).raster.mask_nodata()
+                if np.any(np.asarray(ds1.raster.shape) < 2):
                     continue
-                # transform based on ds resolution as ds1 resolution cannot be
-                # calculated in case of x/y dimension with length one
-                c, f = (
-                    ds1.raster.xcoords.values[0] - a / 2.0,
-                    ds1.raster.ycoords.values[0] - e / 2.0,
-                )
-                transform = Affine(a, b, c, d, e, f)
                 mask = full(ds1.raster.coords, nodata=0, dtype=np.uint8)
                 features.rasterize(
                     [(geom, 1)],
                     out_shape=mask.raster.shape,
                     fill=0,
-                    transform=transform,
+                    transform=mask.raster.transform,
                     out=mask.data,
                     all_touched=all_touched,
                 )
@@ -987,6 +999,8 @@ class XRasterBase(XGeoBase):
         if self.rotation != 0:
             # NOTE not sure what is expected when clipping a rotated grid with a bbox
             # this keeps the largest grid where all row / col have at least one cell inside the bbox
+            w, e = min(x0, x1), max(x0, x1)
+            s, n = min(y0, y1), max(y0, y1)
             gdf_mask = gpd.GeoDataFrame(geometry=[box(w, s, e, n)], crs=self.crs)
             da_mask = self.geometry_mask(gdf_mask)
             return self.clip_mask(da_mask)
@@ -1013,7 +1027,7 @@ class XRasterBase(XGeoBase):
         if not da_mask.raster.shape == self.shape:
             raise ValueError("da_mask shape invalid.")
         mask_bin = (da_mask.values != 0).astype(np.uint8)
-        if not np.any(mask_bin):
+        if np.sum(mask_bin) == 0:
             raise ValueError("Invalid mask.")
         row_slice, col_slice = ndimage.find_objects(mask_bin)[0]
         self._obj.coords["mask"] = xr.Variable(self.dims, mask_bin)  # TODO remove!
@@ -1160,18 +1174,16 @@ class XRasterBase(XGeoBase):
         return da_out.astype(bool)
 
     def vector_grid(self):
-        """Return a geopandas GeoDataFrame with a box for each grid cell."""
-        w, _, _, n = self.bounds
-        dx, dy = self.res
+        """Return a geopandas GeoDataFrame with a geometry for each grid cell."""
+        transform = self.transform
         nrow, ncol = self.shape
         cells = []
         for i in range(nrow):
-            top = n + i * dy
-            bottom = n + (i + 1) * dy
+            rs = np.array([i, i + 1, i + 1, i, i])
             for j in range(ncol):
-                left = w + j * dx
-                right = w + (j + 1) * dx
-                cells.append(box(left, bottom, right, top))
+                cs = np.array([j, j, j + 1, j + 1, j])
+                xs, ys = transform * (cs, rs)
+                cells.append(Polygon([*zip(xs, ys)]))
         return gpd.GeoDataFrame(geometry=cells, crs=self.crs)
 
     def area_grid(self, dtype=np.float32):
@@ -1663,8 +1675,7 @@ class RasterDataArray(XRasterBase):
         if self.aligned_grid(other):
             da = self.clip_bbox(other.raster.bounds)
         elif not self.identical_grid(other):
-            dst_bbox = other.raster.transform_bounds(self.crs)
-            da = self.clip_bbox(dst_bbox, buffer=2).raster.reproject(
+            da = self.reproject(
                 dst_crs=other.raster.crs,
                 dst_transform=other.raster.transform,
                 dst_width=other.raster.width,
@@ -2126,8 +2137,7 @@ class RasterDataset(XRasterBase):
         if self.aligned_grid(other):
             ds = self.clip_bbox(other.raster.bounds)
         elif not self.identical_grid(other):
-            dst_bbox = other.raster.transform_bounds(self.crs)
-            ds = self.clip_bbox(dst_bbox, buffer=2).raster.reproject(
+            ds = self.reproject(
                 dst_crs=other.raster.crs,
                 dst_transform=other.raster.transform,
                 dst_width=other.raster.width,

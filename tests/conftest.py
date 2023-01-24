@@ -1,16 +1,13 @@
-import pytest
-from os.path import join, dirname, abspath
 import numpy as np
 import pandas as pd
+import pyflwdir
+import pytest
 import geopandas as gpd
 import xarray as xr
 
 from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
 from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
-import pyflwdir
-
-# DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture

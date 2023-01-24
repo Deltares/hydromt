@@ -11,14 +11,24 @@ from osgeo import gdal
 from affine import Affine
 from rasterio.transform import array_bounds
 
+from hydromt import open_raster, gis_utils
 from hydromt import raster
 
 # origin, rotation, res, shape, internal_bounds
+# NOTE a rotated grid with a negative dx is not supported
 tests = [
     ((3, -9), 0, (0.5, -0.5), (4, 6), (3, -9, 6, -11)),
     ((3, -11), 0, (0.2, 0.25), (8, 15), (3, -11, 6, -9)),
     ((6, -11), 0, (-0.2, 0.5), (2, 8, 15), (6, -11, 3, -7)),
     ((0, 0), 30, (2, 1), (12, 8), (-6, 0, 13.856406460551018, 18.39230484541326)),
+    (
+        (-10, 3),
+        170,
+        (2, -1),
+        (7, 8),
+        (-25.75692404819533, 12.672025113756337, -8.78446275633149, 3.0),
+    ),
+    ((-2, -3), 270, (2, -5), (3, 2), (-17.0, -3.0, -2.0, -7.0)),
 ]
 
 
@@ -28,18 +38,19 @@ def get_transform(
     return Affine.translation(*origin) * Affine.rotation(rotation) * Affine.scale(*res)
 
 
-testdata = [(get_transform(*d[:3]), d[-2]) for d in tests]
+testdata = [(get_transform(*d[:3]), d[-2]) for d in tests[:4]]
 
 
 @pytest.mark.parametrize("origin, rotation, res, shape, bounds", tests)
 def test_raster_properties(origin, rotation, res, shape, bounds):
     transform = get_transform(origin, rotation, res)
-    da = raster.full_from_transform(transform, shape, name="test")
-    assert np.allclose(transform, da.raster.transform)
+    da = raster.full_from_transform(transform, shape, name="test", crs=4326)
     assert np.allclose(rotation, da.raster.rotation)
     assert np.allclose(res, da.raster.res)
+    assert np.allclose(origin, da.raster.origin)
+    assert np.allclose(transform, da.raster.transform)
+    assert np.allclose(da.raster.box.total_bounds, da.raster.bounds)
     assert np.allclose(bounds, da.raster.internal_bounds)
-    # assert
 
 
 @pytest.mark.parametrize("transform, shape", testdata)
@@ -385,3 +396,36 @@ def test_zonal_stats():
         da.raster.zonal_stats(gdf, "asdf")
     with pytest.raises(IndexError, match="All geometries outside raster domain"):
         da.raster.zonal_stats(gdf.iloc[1:2], "mean")
+
+
+@pytest.mark.parametrize("transform, shape", testdata[-2:])
+def test_rotated(transform, shape, tmpdir):
+    da = raster.full_from_transform(transform, shape, nodata=-1, name="test")
+    da.raster.set_crs(4326)
+    da[:] = 1
+    # test I/O
+    fn = str(tmpdir.join("rotated.tif"))
+    da.raster.to_raster(fn)
+    assert da.raster.identical_grid(open_raster(fn))
+    # test rasterize
+    gdf = da.raster.vector_grid()
+    gdf["value"] = np.arange(gdf.index.size).astype(np.float32)
+    da2 = da.raster.rasterize(gdf, col_name="value", nodata=-1)
+    assert np.all(da2.values.flatten() == gdf["value"])
+    # test vectorize
+    gdf2 = da2.raster.vectorize().sort_values("value")
+    gdf2.index = gdf2.index.astype(int)
+    gpd.testing.assert_geodataframe_equal(
+        gdf, gdf2, check_less_precise=True, check_dtype=False
+    )
+    # test sample
+    idxs = np.array([2, 7])
+    pnts = gpd.points_from_xy(*da.raster.idx_to_xy(idxs))
+    gdf_pnts = gpd.GeoDataFrame(geometry=pnts, crs=4326)
+    assert np.all(idxs == da2.raster.sample(gdf_pnts))
+    # zonal stat
+    assert np.all(idxs == da2.raster.zonal_stats(gdf_pnts, ["mean"])["value_mean"])
+    # test reproject to non-rotated utm grid
+    dst_crs = gis_utils.parse_crs("utm", da.raster.bounds)
+    da2_reproj = da2.raster.reproject(dst_crs=dst_crs)
+    assert np.all(da2.raster.box.intersects(da2_reproj.raster.box.to_crs(4326)))

@@ -538,7 +538,7 @@ class DataCatalog(object):
             Data catalog key. If a path to a raster file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
+            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         buffer : int, optional
@@ -608,7 +608,7 @@ class DataCatalog(object):
             Data catalog key. If a path to a vector file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
+            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         buffer : float, optional
@@ -678,7 +678,7 @@ class DataCatalog(object):
             Data catalog key. If a path to a file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
+            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         buffer : float, optional
