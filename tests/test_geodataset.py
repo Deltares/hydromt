@@ -30,7 +30,7 @@ def test_vector(tmpdir, dummy_shp):
 
     # Create a geodataset and an ogr compliant version of it
     gd = GeoDataset.from_gdf(dummy_shp)
-    oc = gd.geo.ogr_compliant()
+    oc = gd.vector.ogr_compliant()
 
     # Assert some ogr compliant stuff
     assert oc.ogr_layer_type == "MULTIPOLYGON"
@@ -38,5 +38,6 @@ def test_vector(tmpdir, dummy_shp):
     assert len(oc.Roman) == 2
 
     # Write and load
-    gd.geo.to_nc(f"{path}\\dummy_ogr.nc")
-    gd_nc = GeoDataset.from_nc(f"{path}\\dummy_ogr.nc")
+    gd.vector.to_netcdf(f"{path}\\dummy_ogr.nc", ogr_compliant=True)
+    gd_nc = GeoDataset.from_netcdf(f"{path}\\dummy_ogr.nc")
+    pass

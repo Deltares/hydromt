@@ -469,7 +469,7 @@ class GeoDataArray(GeoBase):
         """
 
         temp = xr.open_dataarray(path)
-        geoms = [shapely.wkt.loads(g) for g in temp.ogc_wkt.values]
+        geoms = temp.vector.geometry
 
         da = xr.DataArray(
             data = temp.values,
@@ -634,7 +634,7 @@ class GeoDataset(GeoBase):
             Dataset containing the geospatial data and attributes
         """
         temp = xr.open_dataset(path)
-        geoms = [shapely.wkt.loads(g) for g in temp.ogc_wkt.values]
+        geoms = temp.vector.geometry
 
         ds = xr.Dataset(
             coords={
@@ -644,7 +644,12 @@ class GeoDataset(GeoBase):
             }
         )
 
-        for key, da in temp.drop_vars(["ogc_wkt", "crs"]).data_vars.items():
+        for key, da in temp.drop_vars(
+            [
+                *temp.vector._geom_dims[temp.vector.dtype], 
+                "spatial_ref",
+            ]
+            ).data_vars.items():
             temp_da = xr.DataArray(data=da.values, dims="index")
             ds = ds.assign({key: temp_da})
 
