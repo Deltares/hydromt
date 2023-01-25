@@ -72,10 +72,13 @@ def test_parser():
 def test_data_catalog_io(tmpdir):
     data_catalog = DataCatalog()
     # read / write
-    fn_yml = str(tmpdir.join("test.yml"))
+    fn_yml = join(tmpdir, "test.yml")
     data_catalog.to_yml(fn_yml)
     data_catalog1 = DataCatalog(data_libs=fn_yml)
     assert data_catalog.to_dict() == data_catalog1.to_dict()
+    # test that no file is written for empty DataCatalog
+    fn_yml = join(tmpdir, "test1.yml")
+    DataCatalog(fallback_lib=None).to_yml(fn_yml)
     # test print
     print(data_catalog["merit_hydro"])
 
@@ -100,6 +103,8 @@ def test_data_catalog(tmpdir):
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataAdapter"):
         data_catalog["test"] = "string"
+    # check that no sources are loaded if fallback_lib is None
+    assert not DataCatalog(fallback_lib=None).sources
     # test artifact keys (NOTE: legacy code!)
     data_catalog = DataCatalog(deltares_data=False)
     assert len(data_catalog._sources) == 0
@@ -142,10 +147,10 @@ def test_export_global_datasets(tmpdir):
         "GeoDatasetAdapter": (xr.DataArray, xr.Dataset),
         "GeoDataFrameAdapter": gpd.GeoDataFrame,
     }
-    bbox = [11.70, 45.35, 12.95, 46.70]  # Piava river
-    time_tuple = ("2010-02-01", "2010-02-14")
+    bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
+    time_tuple = ("2010-02-10", "2010-02-15")
     data_catalog = DataCatalog()  # read artifacts by default
-    sns = [
+    source_names = [
         "era5",
         "grwl_mask",
         "modis_lai",
@@ -153,14 +158,23 @@ def test_export_global_datasets(tmpdir):
         "grdc",
         "corine",
         "gtsmv3_eu_era5",
-        "hydro_lakes",
-        "eobs",
     ]
     data_catalog.export_data(
-        str(tmpdir), bbox=bbox, time_tuple=time_tuple, source_names=sns
+        tmpdir,
+        bbox=bbox,
+        time_tuple=time_tuple,
+        source_names=source_names,
+        meta={"version": 1},
     )
-
-    data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
+    data_lib_fn = join(tmpdir, "data_catalog.yml")
+    # check if meta is written
+    with open(data_lib_fn, "r") as f:
+        yml_list = f.readlines()
+    assert yml_list[0].strip() == "meta:"
+    assert yml_list[1].strip() == "version: 1"
+    assert yml_list[2].strip().startswith("root:")
+    # check if data is parsed correctly
+    data_catalog1 = DataCatalog(data_lib_fn)
     for key, source in data_catalog1.sources.items():
         source_type = type(source).__name__
         dtypes = DTYPES[source_type]
