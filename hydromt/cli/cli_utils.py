@@ -79,7 +79,7 @@ def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
     opt = {}
     if path is not None and isfile(path):
         opt = config.configread(
-            path, abs_path=True, skip_eval_sections=["setup_config"]
+            path, abs_path=True, skip_abspath_sections=["setup_config"]
         )
     elif path is not None:
         raise IOError(f"Config not found at {path}")
