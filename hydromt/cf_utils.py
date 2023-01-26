@@ -415,14 +415,15 @@ class FewsUtils(object):
         fpath = self.template_configfiles["TopologyGroup"]
 
         # model instance for forcing
-        fname = join(
-            fpath,
-            f"scheme.{scheme}",
-            f"TopologyGroup_{model_source}_forc.xml",
-        )
+        ## commented out because topology group for forcing is not used at the moment
+#        fname = join(
+#            fpath,
+#            f"scheme.{scheme}",
+#            f"TopologyGroup_{model_source}_forc.xml",
+#        )
 
-        # get the topologygroup ids
-        groups = t.get_ids_from_xml(fname, "group")
+#        # get the topologygroup ids
+#        groups = t.get_ids_from_xml(fname, "group")
 
         # model instance
         fname = join(
@@ -432,7 +433,8 @@ class FewsUtils(object):
         )
 
         # get the topologygroup ids
-        groups.extend(t.get_ids_from_xml(fname, "group"))
+#        groups.extend(t.get_ids_from_xml(fname, "group"))
+        groups = t.get_ids_from_xml(fname, "group")
 
         #  Topology.xml
         fname = join(
@@ -446,7 +448,7 @@ class FewsUtils(object):
 
     def update_explorer(self, model_source):
         """
-        Update Exploer.xml with extent for model_source instance.
+        Update Explorer.xml with extent for model_source instance.
 
         Parameters
         ----------
