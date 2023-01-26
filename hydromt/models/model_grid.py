@@ -20,9 +20,7 @@ logger = logging.getLogger(__name__)
 class GridMixin(object):
     # placeholders
     # xr.Dataset representation of all static parameter maps at the same resolution and bounds - renamed from staticmaps
-    _API = {
-        "grid": xr.Dataset,
-    }
+    _API = {"grid": xr.Dataset}
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -32,9 +30,8 @@ class GridMixin(object):
     def grid(self):
         """Model static gridded data. Returns xarray.Dataset.
         Previously called staticmaps."""
-        if len(self._grid) == 0:
-            if self._read:
-                self.read_grid()
+        if len(self._grid) == 0 and self._read:
+            self.read_grid()
         return self._grid
 
     def set_grid(
@@ -86,6 +83,7 @@ class GridMixin(object):
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         """
+        self._assert_read_mode
         for ds in self._read_nc(fn, **kwargs).values():
             self.set_grid(ds)
 
@@ -99,11 +97,12 @@ class GridMixin(object):
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         """
-        nc_dict = dict()
-        if len(self._grid) > 0:
-            # _write_nc requires dict - use dummy key
-            nc_dict.update({"grid": self._grid})
-        self._write_nc(nc_dict, fn, **kwargs)
+        if len(self._grid) == 0:
+            self.logger.debug("No grid data found, skip writing.")
+        else:
+            self._assert_write_mode
+            # _write_nc requires dict - use dummy 'grid' key
+            self._write_nc({"grid": self._grid}, fn, **kwargs)
 
 
 class GridModel(GridMixin, Model):
@@ -111,6 +110,7 @@ class GridModel(GridMixin, Model):
 
     # TODO: add here "res": "setup_region" or "res": "setup_grid" when generic method is available
     _CLI_ARGS = {"region": "setup_region"}
+    _NAME = "grid_model"
 
     def __init__(
         self,
