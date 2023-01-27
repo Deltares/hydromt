@@ -11,6 +11,7 @@ Unreleased
 
 Added
 -----
+- New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
 
 Changed
 -------
@@ -19,6 +20,7 @@ Changed
 
 Fixed
 -----
+- fix reading lists and none with config `PR #246 <https://github.com/Deltares/hydromt/pull/246>`_
 - fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 
 Deprecated
