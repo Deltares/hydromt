@@ -26,7 +26,7 @@ dependencies = [
     "rasterio",
     "requests",
     "rioxarray",
-    "shapely",
+    "shapely>=2.0.0",
     "scipy",
     "xarray",
     "zarr",
@@ -46,7 +46,6 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 all = [
-    "pygeos",
     "pcraster",
     "xugrid",
 ]

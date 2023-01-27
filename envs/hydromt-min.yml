@@ -25,6 +25,6 @@ dependencies:
   - requests
   - rioxarray
   - scipy
-  - shapely
+  - shapely>=2.0.0
   - xarray
   - zarr
