@@ -124,6 +124,9 @@ def test_write_data_catalog(tmpdir):
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Defining "region" based on staticmaps:DeprecationWarning'
+)
 def test_model(model, tmpdir):
     # Staticmaps -> moved from _test_model_api as it is deprecated
     model._API.update({"staticmaps": xr.Dataset})
