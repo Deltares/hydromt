@@ -2,8 +2,6 @@ example_csv_data:
   path: example_csv_data.csv
   data_type: DataFrame
   driver: csv
-  
-dummy_excel_data:
-  path: dummy_excel_data.xlsx
-  data_type: DataFrame
-  driver: xlsx
+  kwargs:
+    parse_dates: true
+    index_col: time
