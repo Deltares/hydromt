@@ -205,7 +205,7 @@ class MeshMixin(object):
             )
         if isinstance(data, xu.UgridDataArray):
             if name is not None:
-                data.name = name
+                data = data.rename(name)
             elif data.name is None:
                 raise ValueError(
                     f"Cannot set mesh from {str(type(data).__name__)} without a name."
