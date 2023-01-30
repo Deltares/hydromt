@@ -3,6 +3,11 @@
 # version number without 'v' at start
 __version__ = "0.6.1.dev"
 
+# Set environment variables (this will be temporary)
+import os
+
+os.environ["USE_PYGEOS"] = "0"
+
 # submodules
 from . import cli, workflows, stats, flw, raster, vector
 
