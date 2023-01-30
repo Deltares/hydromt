@@ -154,8 +154,7 @@ class Model(object, metaclass=ABCMeta):
 
     def build(
         self,
-        region: dict,
-        res: Optional[float] = None,
+        region: Optional[dict] = {},
         write: Optional[bool] = True,
         opt: Optional[dict] = {},
     ):
@@ -202,16 +201,6 @@ class Model(object, metaclass=ABCMeta):
             opt = {self._CLI_ARGS["region"]: {}, **opt}
         # update region method kwargs with region
         opt[self._CLI_ARGS["region"]].update(region=region)
-        # update res method kwargs with res (optional)
-        if res is not None:
-            if self._CLI_ARGS["res"] not in opt:
-                m = self._CLI_ARGS["res"]
-                self.logger.warning(
-                    f'"res" argument ignored as the "{m}" is not in the model build configuration.'
-                )
-            else:
-                opt[self._CLI_ARGS["res"]].update(res=res)
-
         # then loop over other methods
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write() call
@@ -416,7 +405,7 @@ class Model(object, metaclass=ABCMeta):
         mode : {"r", "r+", "w"}, optional
             read/append/write mode for model files
         """
-        if mode not in ["r", "r+", "w"]:
+        if mode not in ["r", "r+", "w", "w+"]:
             raise ValueError(f'mode "{mode}" unknown, select from "r", "r+" or "w"')
         # old_root = getattr(self, "_root", None)
         self._root = root if root is None else abspath(root)
