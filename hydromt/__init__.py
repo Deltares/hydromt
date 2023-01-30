@@ -4,6 +4,7 @@
 __version__ = "0.6.1.dev"
 
 # Set environment variables (this will be temporary)
+# to use shapely 2.0 in favor of pygeos (if installed)
 import os
 
 os.environ["USE_PYGEOS"] = "0"

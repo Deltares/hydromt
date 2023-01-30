@@ -20,6 +20,7 @@ dependencies:
   - packaging
   - pcraster # optional
   - pyflwdir>=0.5.4
+  - pygeos # optional dep of xugrid, required for mesh
   - pyproj
   - pytest # tests
   - pytest-cov # tests
