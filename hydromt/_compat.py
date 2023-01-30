@@ -1,21 +1,23 @@
-__all__ = ["HAS_PCRASTER", "HAS_XUGRID"]
+from packaging.version import Version
+
+__all__ = []
 
 HAS_XUGRID = False
 HAS_PCRASTER = False
+HAS_SHAPELY20 = False
 
 try:
-    import pygeos
-    import geopandas as gpd
+    from shapely import __version__ as SH_VERSION
 
-    gpd.options.use_pygeos = True
+    if Version(SH_VERSION) >= Version("2.0.0"):
+        HAS_SHAPELY20 = True
 except ImportError:
     pass
 
 try:
-    import pcraster as pcr
+    import pcraster
 
     HAS_PCRASTER = True
-
 except ImportError:
     pass
 
@@ -24,6 +26,5 @@ try:
     import xugrid
 
     HAS_XUGRID = True
-
 except ImportError:
     pass
