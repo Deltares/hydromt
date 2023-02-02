@@ -3,15 +3,19 @@
 # version number without 'v' at start
 __version__ = "0.6.1.dev"
 
-import warnings
+# Set environment variables (this will be temporary)
+# to use shapely 2.0 in favor of pygeos (if installed)
+import os
 
-# required for accessor style documentation
-from xarray import DataArray, Dataset
+os.environ["USE_PYGEOS"] = "0"
 
-# submoduls
+# submodules
 from . import cli, workflows, stats, flw, raster, vector
 
 # high-level methods
 from .models import *
 from .io import *
 from .data_catalog import *
+
+# required for accessor style documentation
+from xarray import DataArray, Dataset

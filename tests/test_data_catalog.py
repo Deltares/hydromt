@@ -83,6 +83,7 @@ def test_data_catalog_io(tmpdir):
     print(data_catalog["merit_hydro"])
 
 
+@pytest.mark.filterwarnings('ignore:"from_artifacts" is deprecated:DeprecationWarning')
 def test_data_catalog(tmpdir):
     data_catalog = DataCatalog(data_libs=None)  # NOTE: legacy code!
     # initialized with empty dict
