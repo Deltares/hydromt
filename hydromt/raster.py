@@ -1696,8 +1696,9 @@ class RasterDataArray(XRasterBase):
                 x_dim=other.raster.x_dim, y_dim=other.raster.y_dim
             )
         # make sure coordinates are identical!
-        da[other.raster.x_dim] = other.raster.xcoords
-        da[other.raster.y_dim] = other.raster.ycoords
+        xcoords, ycoords = other.raster.xcoords, other.raster.ycoords
+        da[xcoords.name] = xcoords
+        da[ycoords.name] = ycoords
         return da
 
     def reindex2d(self, index, dst_nodata=None):
