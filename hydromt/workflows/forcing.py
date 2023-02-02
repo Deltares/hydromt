@@ -304,6 +304,7 @@ def pet(
         data
     method : {'debruin', 'makkink', "penman-monteith_rh_simple", "penman-monteith_tdew"}
         Potential evapotranspiration method.
+        if penman-monteith is used, requires the installation of the pyet package.
     press_correction : bool, default False
         If True pressure is corrected, based on elevation data of `dem_model`
     wind_altitude: float, optional
@@ -369,11 +370,11 @@ def pet(
         logger.info("Calculating Penman-Monteith ref evaporation")
         # Add wind
         # compute wind from u and v components at 10m (for era5)
-        if ("u10" in ds.data_vars) & ("v10" in ds.data_vars):
+        if ("wind10_u" in ds.data_vars) & ("wind10_v" in ds.data_vars):
             ds["wind"] = wind(
                 da_model=dem_model,
-                wind_u=ds["u10"],
-                wind_v=ds["v10"],
+                wind_u=ds["wind10_u"],
+                wind_v=ds["wind10_v"],
                 altitude=wind_altitude,
                 altitude_correction=wind_correction,
             )
@@ -386,9 +387,9 @@ def pet(
             )
         if method == "penman-monteith_rh_simple":
             pet_out = pm_fao56(
-                ds["temp"],
-                ds["temp_max"],
-                ds["temp_min"],
+                temp["temp"], 
+                temp["temp_max"],
+                temp["temp_min"],
                 ds["press"] / 10,
                 ds["kin"],
                 ds["wind"],
@@ -398,13 +399,13 @@ def pet(
             )
         elif method == "penman-monteith_tdew":
             pet_out = pm_fao56(
-                ds["temp"],
-                ds["temp_max"],
-                ds["temp_min"],
+                temp["temp"], 
+                temp["temp_max"],
+                temp["temp_min"],
                 ds["press"] / 10,
                 ds["kin"],
                 ds["wind"],
-                ds["d2m"],
+                ds["temp_dew"],
                 dem_model,
                 "temp_dew",
             )
@@ -567,7 +568,7 @@ def pm_fao56(
     press: xarray.DataArray,
     kin: xarray.DataArray,
     wind: xarray.DataArray,
-    d2m: xarray.DataArray,
+    temp_dew: xarray.DataArray,
     dem: xarray.DataArray,
     var: str = "temp_dew",
 ) -> xarray.DataArray:
@@ -593,7 +594,7 @@ def pm_fao56(
         DataArray with global radiation [W m-2]
     wind : xarray.DataArray
         DataArray with wind speed at 2m above the surface [m s-1]
-    d2m : xarray.DataArray
+    temp_dew : xarray.DataArray
         DataArray with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
     dem : xarray.DataArray
         DataArray with elevation at model resolution [m]
@@ -603,7 +604,7 @@ def pm_fao56(
     Returns
     -------
     xarray.DataArray
-        DataArray with the estimated daily reference evapotranspiration [mm d-1]
+        DataArray with the estimated daily reference evapotranspiration pet [mm d-1]
 
     Raises
     ------
@@ -616,31 +617,33 @@ def pm_fao56(
         raise ModuleNotFoundError("Penman-Monteith FAO-56 requires the 'pyet' library")
 
     # Precalculated variables:
-    lat = kin.latitude * (np.pi / 180)
+    lat = kin[kin.raster.y_dim] * (np.pi / 180) #latitude in radians 
 
     # Vapor pressure
     svp = pyet.calc_e0(tmean=temp)
 
     if var == "temp_dew":
-        avp = pyet.calc_e0(tmean=d2m)
+        avp = pyet.calc_e0(tmean=temp_dew)
     elif var == "rh":
-        avp = pyet.calc_ea(tmax=temp_max, tmin=temp_min, rh=d2m)
+        avp = pyet.calc_e0(tmax=temp_max, tmin=temp_min, rh=temp_dew)
 
     # Net radiation
-    dates = pyet.utils.get_index(kin)
-    er = pyet.extraterrestrial_r(dates, lat)
-    csr = pyet.calc_rso(er, dem)
+    dates = pyet.utils.get_index(kin) 
+    er = pyet.extraterrestrial_r(dates, lat) # Extraterrestrial daily radiation [MJ m-2 d-1]
+    csr = pyet.calc_rso(er, dem) # Clear-sky solar radiation [MJ m-2 day-1]
 
-    swr = pyet.calc_rad_short(kin * (86400 / 1e6))
+    #Net shortwave radiation [MJ m-2 d-1]
+    swr = pyet.calc_rad_short(kin * (86400 / 1e6)) 
 
+    # Net longwave radiation [MJ m-2 d-1]
     lwr = pyet.calc_rad_long(
         kin * (86400 / 1e6), tmax=temp_max, tmin=temp_min, rso=csr, ea=avp
     )
-    nr = swr - lwr
+    nr = swr - lwr #daily net radiation 
 
     # Penman Monteith FAO-56
-    gamma = pyet.calc_psy(press)
-    dlt = pyet.calc_vpc(temp)
+    gamma = pyet.calc_psy(press) # psychrometric constant
+    dlt = pyet.calc_vpc(temp) # Slope of saturation vapour pressure curve at air Temperature [kPa °C-1].
 
     gamma1 = gamma * (1 + 0.34 * wind)
 
@@ -650,7 +653,7 @@ def pm_fao56(
     pet = num1 + num2
     pet = pyet.utils.clip_zeros(pet, True)
 
-    return pet.rename("PM_FAO_56")
+    return pet.rename("pet")
 
 
 def resample_time(
