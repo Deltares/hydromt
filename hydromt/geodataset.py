@@ -11,55 +11,14 @@ import pyproj
 import logging
 
 from hydromt import gis_utils, raster
-from hydromt.raster import XDIMS, YDIMS
-
-from osgeo import __version__ as GDAL_VERSION
 
 logger = logging.getLogger(__name__)
-
-
-def Type(val):
-    # try:
-    #     s = eval(val)
-    # except Exception:
-    #     s = val
-    return type(val)
-
-
-def FieldType(lst):
-    if float or np.float64 in lst:
-        type = float
-    else:
-        type = int
-    if str in lst:
-        type = str
-    return type
-
-
-def DeterGeomType(wkt):
-    from osgeo.ogr import CreateGeometryFromWkt
-
-    geom_types = [CreateGeometryFromWkt(g).GetGeometryName() for g in wkt]
-
-    if len(set(geom_types)) > 1:
-        i = ["MULTI" in g for g in geom_types].index(True)
-        geom_type = geom_types[i]
-    else:
-        geom_type = geom_types[0]
-    del geom_types
-    return geom_type
-
-
-_linkTable = {
-    int: "Integer64",
-    float: "Real",
-    str: "String",
-}
 
 
 class GeoBase(raster.XGeoBase):
     def __init__(self, xarray_obj):
         super(GeoBase, self).__init__(xarray_obj)
+        self._geometry = None
 
     @property
     def _all_names(self):
@@ -121,12 +80,12 @@ class GeoBase(raster.XGeoBase):
         ):
             self.set_attrs(x_name=x_name)
             self.set_attrs(y_name=y_name)
-            self.set_attrs(geom_type="xy")
+            self.set_attrs(geom_format="xy")
             self.set_attrs(index_dim=index_dim)
         else:
             self.attrs.pop("x_name", None)
             self.attrs.pop("y_name", None)
-            self.attrs.pop("geom_type", None)
+            self.attrs.pop("geom_format", None)
             self.attrs.pop("index_dim", None)
 
     def _discover_geom(self, geom_name=None, index_dim=None):
@@ -149,11 +108,11 @@ class GeoBase(raster.XGeoBase):
 
         if geom_name is not None:
             self.set_attrs(geom_name=geom_name)
-            self.set_attrs(geom_type=types[names.index(geom_name)])
+            self.set_attrs(geom_format=types[names.index(geom_name)])
             self.set_attrs(index_dim=self._obj[geom_name].dims[0])
         else:
             self.attrs.pop("geom_name", None)
-            self.attrs.pop("geom_type", None)
+            self.attrs.pop("geom_format", None)
             self.attrs.pop("index_dim", None)
 
     def set_spatial_dims(
@@ -162,69 +121,24 @@ class GeoBase(raster.XGeoBase):
         x_name=None,
         y_name=None,
         index_dim=None,
-        geom_type=None,
+        geom_format=None,
     ):
-        if geom_type != "xy":
+        if geom_format != "xy":
             self._discover_geom(geom_name=geom_name, index_dim=index_dim)
+            self.attrs.pop("x_name", None)
+            self.attrs.pop("y_name", None)
         if "geom_name" not in self.attrs:
             self._discover_xy(x_name=x_name, y_name=y_name, index_dim=index_dim)
+            self.attrs.pop("geom_name", None)
         elif "geom_name" not in self.attrs:
             raise ValueError("No geometry data found.")
 
-    def set_geometry(
-        self,
-        geometry: GeoSeries,
-        geom_type="geom",
-        geom_name="geometry",
-        x_name="x",
-        y_name="y",
-        index_dim=None,
-        drop_old_geometry=True,
-    ) -> Union[xr.DataArray, xr.Dataset]:
-        if index_dim is None:
-            index_dim = self.index_dim
-        if geometry.size != self.size:
-            raise ValueError(
-                f'The sizes of geometry and index dim "{index_dim}" do not match'
-            )
-        if not isinstance(geometry, GeoSeries):
-            raise ValueError(f"geometry should be a GeoSeries object")
-        obj = self._obj
-
-        if drop_old_geometry:
-            for name in ["x_name", "y_name", "geom_name"]:
-                if name in self.attrs and self.attrs[name] in obj:
-                    obj = obj.drop_vars(self.attrs[name])
-                    obj.vector.attrs.pop(name)
-
-        if geom_type in ["geom", "wkt"]:
-            if geom_name in self._all_names:
-                obj = obj.drop_vars(geom_name)
-            if geom_type == "geom":
-                obj = obj.assign_coords({geom_name: (index_dim, geometry.values)})
-            else:
-                obj = obj.assign_coords(
-                    {geom_name: (index_dim, geometry.to_wkt().values)}
-                )
-            obj.vector.set_spatial_dims(index_dim=index_dim, geom_name=geom_name)
-        elif geom_type == "xy":
-            obj = obj.assign_coords(
-                {
-                    x_name: (self.index_dim, geometry.x.values),
-                    y_name: (self.index_dim, geometry.y.values),
-                },
-            )
-            obj.vector.set_spatial_dims(
-                index_dim=index_dim, x_name=x_name, y_name=y_name
-            )
-        return obj
-
     @property
-    def geom_type(self):
-        if self.get_attrs("geom_type") not in self._obj.dims:
+    def geom_format(self):
+        if self.get_attrs("geom_format") not in self._obj.dims:
             self.set_spatial_dims()
-        if "geom_type" in self.attrs:
-            return self.attrs["geom_type"]
+        if "geom_format" in self.attrs:
+            return self.attrs["geom_format"]
 
     @property
     def geom_name(self):
@@ -232,6 +146,18 @@ class GeoBase(raster.XGeoBase):
             self.set_spatial_dims()
         if "geom_name" in self.attrs:
             return self.attrs["geom_name"]
+
+    @property
+    def geom_type(self):
+        """Return geometry type"""
+        geom_types = self.geometry.type.values
+        if len(set(geom_types)) > 1:
+            # TODO: can we safely assume there is multi geom?
+            i = ["MULTI" in g for g in geom_types].index(True)
+            geom_type = geom_types[i]
+        else:
+            geom_type = geom_types[0]
+        return geom_type
 
     @property
     def x_name(self):
@@ -253,6 +179,20 @@ class GeoBase(raster.XGeoBase):
             self.set_spatial_dims()
         if "index_dim" in self.attrs:
             return self.attrs["index_dim"]
+
+    @property
+    def time_dim(self):
+        """Time dimension name."""
+        dim = self.get_attrs("time_dim")
+        if dim not in self._obj.dims or np.dtype(self._obj[dim]).type != np.datetime64:
+            self.set_attrs(time_dim=None)
+            tdims = []
+            for dim in self._obj.dims:
+                if np.dtype(self._obj[dim]).type == np.datetime64:
+                    tdims.append(dim)
+            if len(tdims) == 1:
+                self.set_attrs(time_dim=tdims[0])
+        return self.get_attrs("time_dim")
 
     @property
     def index(self):
@@ -278,7 +218,9 @@ class GeoBase(raster.XGeoBase):
         GeoSeries
             A Series object with shapely geometries
         """
-        gtype = self.geom_type
+        if self._geometry is not None and self._geometry.index.size == self.size:
+            return self._geometry
+        gtype = self.geom_format
         if gtype not in ["geom", "xy", "wkt"]:
             raise ValueError("No valid geometry found in object.")
         if gtype == "geom":
@@ -301,70 +243,91 @@ class GeoBase(raster.XGeoBase):
                 crs=self.crs,
             )
         geoms.index.name = self.index_dim
+        self._geometry = geoms
         return geoms
+
+    def update_geometry(
+        self,
+        geometry: GeoSeries = None,
+        geom_format: str = None,
+        geom_name: str = None,
+        x_name: str = None,
+        y_name: str = None,
+        replace: bool = True,
+    ):
+        if geom_format is None:
+            geom_format = self.geom_format
+        if geometry is None:
+            geometry = self.geometry
+        elif not isinstance(geometry, GeoSeries):
+            raise ValueError(f"geometry should be a GeoSeries object")
+        elif geometry.size != self.size:
+            raise ValueError(
+                f'The sizes of geometry and index dim "{self.index_dim}" do not match'
+            )
+
+        # update geometry and drop old
+        drop_vars = []
+        if self.geom_format != geom_format:
+            if geom_format != "xy":
+                drop_vars = [self.x_name, self.y_name]
+            else:
+                drop_vars = [self.geom_name]
+
+        index_dim = self.index_dim
+        if geom_format == "geom":
+            if geom_name is None:
+                geom_name = self.attrs.get("geom_name", "geometry")
+            elif self.geom_name != geom_name:
+                drop_vars.append(self.geom_name)
+            coords = {geom_name: (self.index_dim, geometry.values)}
+        elif geom_format == "wkt":
+            if geom_name is None:
+                geom_name = self.attrs.get("geom_name", "ogc_wkt")
+            elif self.geom_name != geom_name:
+                drop_vars.append(self.geom_name)
+            coords = {geom_name: (self.index_dim, geometry.to_wkt().values)}
+        elif geom_format == "xy":
+            if x_name is None:
+                x_name = self.attrs.get("x_name", "x")
+            elif self.x_name != x_name:
+                drop_vars.append(self.x_name)
+            if y_name is None:
+                y_name = self.attrs.get("y_name", "y")
+            elif self.y_name != y_name:
+                drop_vars.append(self.y_name)
+            coords = {
+                x_name: (self.index_dim, geometry.x.values),
+                y_name: (self.index_dim, geometry.y.values),
+            }
+        obj = self._obj.copy()
+        if replace:
+            obj = obj.drop_vars(drop_vars, errors="ignore")
+        obj = obj.assign_coords(coords)
+
+        # reset spatial dims
+        obj.vector._geometry = geometry
+        obj.vector.set_spatial_dims(
+            index_dim=index_dim,
+            geom_format=geom_format,
+            geom_name=geom_name,
+            x_name=x_name,
+            y_name=y_name,
+        )
+        obj.vector.set_crs(geometry.crs)
+        return obj
 
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
-    def ogr_compliant(self):
-        """ """
-
-        wkt = self.geometry.to_wkt()
-
-        ## Determine Geometry type
-        geom_type = DeterGeomType(wkt)
-
-        ## Create the geometry DataArray
-        # TODO add coords?
-        ogc_wkt = xr.DataArray(
-            data=wkt,
-            dims="record",
-            attrs={
-                "long_name": "Geometry as ISO WKT",
-                "grid_mapping": "spatial_ref",
-            },
-        )
-
-        # Set spatial reference
-        # srs = pyproj.CRS.from_epsg(self.crs.to_epsg())
-
-        # crs = xr.DataArray(
-        #     data=int(1),
-        #     attrs={
-        #         "long_name": "CRS definition",
-        #         "crs_wkt": srs.to_wkt(),
-        #         "spatial_ref": srs.to_wkt(),
-        #     },
-        # )
-
-        return ogc_wkt, geom_type
-
-    def to_crs(self, dst_crs):
-        """Transform spatial coordinates to a new coordinate reference system.
-
-        The ``crs`` attribute on the current GeoDataArray must be set.
-
-        Arguments
-        ----------
-        dst_crs: int, dict, or str, optional
-            Accepts EPSG codes (int or str); proj (str or dict) or wkt (str)
+    def to_geom(self, geom_name) -> Union[xr.DataArray, xr.Dataset]:
+        """Converts Dataset/ DataArray with xy or wkt geometries to shapely Geometries.
 
         Returns
         -------
-        xr.DataArray
-            DataArray with transformed geospatial coordinates
+        xr.Dataset
+            Dataset with new geometry coordinates
         """
-        if self.crs is None:
-            raise ValueError("Source CRS is missing. Use da.vector.set_crs(crs) first.")
-        geoms = self.geometry.to_crs(pyproj.CRS.from_user_input(dst_crs))
-        obj = self.set_geometry(
-            geoms,
-            geom_type=self.geom_type,
-            geom_name=self.geom_name,
-            y_name=self.y_name,
-            x_name=self.x_name,
-        )
-        obj.vector.set_crs(dst_crs)
-        return obj
+        return self.update_geometry(geom_format="geom", geom_name=geom_name)
 
     def to_xy(self, x_name="x", y_name="y") -> Union[xr.DataArray, xr.Dataset]:
         """Converts Dataset/ DataArray with Point geometries to x,y structure.
@@ -374,11 +337,11 @@ class GeoBase(raster.XGeoBase):
         xr.Dataset
             Dataset with new x, y coordinates
         """
-        return self.set_geometry(
-            self.geometry, geom_type="xy", y_name=y_name, x_name=x_name
-        )
+        return self.update_geometry(geom_format="xy", x_name=x_name, y_name=y_name)
 
-    def to_wkt(self) -> Union[xr.DataArray, xr.Dataset]:
+    def to_wkt(
+        self, ogr_compliant=False, reducer=None, drop_vars=True
+    ) -> Union[xr.DataArray, xr.Dataset]:
         """Converts geometries in Dataset/DataArray to wkt strings.
 
         Returns
@@ -386,8 +349,65 @@ class GeoBase(raster.XGeoBase):
         xr.Dataset
             Dataset with new ogc_wkt coordinate
         """
-        return self.set_geometry(self.geometry, geom_type="wkt", geom_name="ogc_wkt")
+        # ogr compliant naming and attrs
+        obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
+        obj["ogc_wkt"].attrs = {
+            "long_name": "Geometry as ISO WKT",
+            "grid_mapping": "spatial_ref",
+        }
+        if ogr_compliant:
+            index_dim = self.index_dim
+            if isinstance(obj, xr.DataArray):
+                if obj.name is None:
+                    obj.name = "data"
+                obj = obj.to_dataset()
 
+            # reduce data variables
+            if reducer is not None:
+                rdims = [dim for dim in obj.dims if dim != index_dim]
+                obj = obj.reduce(reducer, dim=rdims)
+
+            # reset crs and add attrs
+            obj = obj.drop_vars("spatial_ref", errors="ignore")
+            obj.vector.set_crs(self.crs)
+            obj = obj.assign_attrs(
+                {
+                    "Conventions": "CF-1.6",
+                    # "GDAL": f"GDAL {GDAL_VERSION}",
+                    "ogr_geometry_field": "ogc_wkt",
+                    "ogr_layer_type": f"{self.geom_type}",
+                }
+            )
+
+            # loop over variables and set meta data
+            dtypes = {"i": "Integer64", "f": "Real", "U": "String"}
+            for name in obj.data_vars:
+                # set ogr meta data
+                dtype = dtypes.get(obj[name].dtype.kind, None)
+                if dtype is not None:
+                    obj[name].attrs.update(
+                        {
+                            "ogr_field_name": f"{name}",
+                            "ogr_field_type": dtype,
+                        }
+                    )
+                    if dtype == "String":
+                        obj[name].attrs.update(
+                            {
+                                "ogr_field_width": obj[name].dtype.itemsize,
+                            }
+                        )
+
+                # keep only 1D variables with known dtype and matching index_dim
+                dims = obj[name].dims
+                matching_index = len(dims) == 1 and dims[0] == index_dim
+                if drop_vars and (dtype is None or not matching_index):
+                    drop = [dim for dim in dims if dim != index_dim] + [name]
+                    obj = obj.drop_vars(drop, errors="ignore")
+
+        return obj
+
+    ## clip
     def clip_geom(self, geom, predicate="intersects"):
         """Select all geometries that intersect with the input geometry.
 
@@ -430,9 +450,31 @@ class GeoBase(raster.XGeoBase):
             bbox[:2] -= buffer
             bbox[2:] += buffer
         idx = gis_utils.filter_gdf(
-            self.to_gdf(), bbox=bbox, crs=crs, predicate="intersects"
+            self.geometry, bbox=bbox, crs=crs, predicate="intersects"
         )
         return self._obj.isel({self.index_dim: idx})
+
+    ## wrap GeoSeries functions
+    # TODO write general wrapper
+    def to_crs(self, dst_crs):
+        """Transform spatial coordinates to a new coordinate reference system.
+
+        The ``crs`` attribute on the current GeoDataArray must be set.
+
+        Arguments
+        ----------
+        dst_crs: int, dict, or str, optional
+            Accepts EPSG codes (int or str); proj (str or dict) or wkt (str)
+
+        Returns
+        -------
+        xr.DataArray
+            DataArray with transformed geospatial coordinates
+        """
+        if self.crs is None:
+            raise ValueError("Source CRS is missing. Use da.vector.set_crs(crs) first.")
+        geometry = self.geometry.to_crs(pyproj.CRS.from_user_input(dst_crs))
+        return self.update_geometry(geometry)
 
     # Constructers
     # i.e. from other datatypes or files
@@ -441,8 +483,11 @@ class GeoBase(raster.XGeoBase):
         if isinstance(gdf, GeoSeries):
             gdf = gdf.to_frame("geometry")
         geom_name = gdf._geometry_column_name
+        index_dim = gdf.index.name
+        if index_dim is None:
+            gdf.index.name = "index"
         ds = gdf.to_xarray().set_coords(geom_name)
-        ds.vector.set_meta()
+        ds.vector.set_spatial_dims(geom_name=geom_name, index_dim=index_dim)
         ds.vector.set_crs(gdf.crs)
         return ds
 
@@ -483,6 +528,7 @@ class GeoBase(raster.XGeoBase):
         self,
         path: str,
         ogr_compliant: bool = False,
+        reducer=None,
         **kwargs,
     ):
         """Export geodataset vectordata to an ogr compliant netCDF4 file
@@ -495,12 +541,10 @@ class GeoBase(raster.XGeoBase):
             write the netCDF4 file in an ogr compliant format
             This makes it readable as a vector file in e.g. QGIS
         """
-
-        if ogr_compliant:
-            self.ogr_compliant().to_netcdf(path, engine="netcdf4", **kwargs)
-
-        if self.geom_type == "geom":
-            self.to_wkt().to_netcdf(path, engine="netcdf4", **kwargs)
+        self.to_wkt(
+            ogr_compliant=ogr_compliant,
+            reducer=reducer,
+        ).to_netcdf(path, engine="netcdf4", **kwargs)
 
 
 @xr.register_dataarray_accessor("vector")
@@ -508,77 +552,17 @@ class GeoDataArray(GeoBase):
     def __init__(self, xarray_obj):
         super(GeoDataArray, self).__init__(xarray_obj)
 
-    # Internal conversion and selection methods
-    # i.e. produces xarray.Dataset/ xarray.DataArray
-    def ogr_compliant(self, reducer=None) -> xr.Dataset:
-        """Create a ogr compliant version of a xarray DataArray
-        Note(!): The result will not be a DataArray
-
-        Returns
-        -------
-        xr.Dataset
-            ogr compliant
-        """
-
-        ogc_wkt, geom_type = super().ogr_compliant()
-
-        out_ds = xr.Dataset()
-
-        out_ds = out_ds.assign_coords(
-            {
-                "ogc_wkt": ogc_wkt,
-            },
-        )
-
-        out_ds.vector.set_crs(self.crs.to_epsg())
-
-        types = tuple(map(Type, self._obj.values))
-
-        fld_type = FieldType(types)
-
-        if self._obj.name is None:
-            name = "value"
-        else:
-            name = self._obj.name
-
-        values = None
-        if not len(self._obj.dims) == 1 and list(self._obj.dims)[0] == self.index_dim:
-            if reducer is not None:
-                idd = self._obj.dims.index(self.index_dim)
-                reduced_dims = list(range(len(self._obj.dims)))
-                reduced_dims.remove(idd)
-                values = reducer(self._obj.values, axis=tuple(reduced_dims))
-
-        temp_da = xr.DataArray(
-            data=self._obj.values,
-            dims="record",
-            attrs={
-                "ogr_field_name": f"{name}",
-                "ogr_field_type": _linkTable[fld_type],
-            },
-        )
-
-        if fld_type == str:
-            temp_da.attrs.update({"ogr_field_width": 100})
-        out_ds = out_ds.assign({f"{name}": temp_da})
-
-        del temp_da
-
-        out_ds = out_ds.assign_attrs(
-            {
-                "Conventions": "CF-1.6",
-                "GDAL": f"GDAL {GDAL_VERSION}",
-                "ogr_geometry_field": "ogc_wkt",
-                "ogr_layer_type": f"{geom_type}",
-            }
-        )
-        return out_ds
-
     # Constructers
     # i.e. from other datatypes or files
     @staticmethod
     def from_netcdf(
-        path: str, geom_name=None, x_name=None, y_name=None, crs=None, **kwargs
+        path: str,
+        parse_geom=True,
+        geom_name=None,
+        x_name=None,
+        y_name=None,
+        crs=None,
+        **kwargs,
     ) -> xr.DataArray:
         """_summary_
 
@@ -593,46 +577,13 @@ class GeoDataArray(GeoBase):
             _description_
         """
 
-        da_tmp = xr.open_dataarray(path, **kwargs)
-        da_tmp.vector.set_spatial_dims(
-            geom_name=geom_name, x_name=x_name, y_name=y_name
-        )
-        # force to geom_type "geom"
-        da = da_tmp.vector.set_geometry(
-            geometry=da_tmp.vector.geometry,
-            geom_type="geom",
-            geom_name=da_tmp.attrs.get("geom_name", "geometry"),
-        )
+        da = xr.open_dataarray(path, **kwargs)
+        da.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
+        # force to geom_format "geom"
+        if parse_geom:
+            da = da.vector.update_geometry(geom_format="gome", replace=True)
         da.vector.set_crs(crs=crs)  # try to parse from netcdf if None
         return da
-
-    ## Output methods
-    ## Either writes to files or other data types
-    def to_gdf(self, reducer=None) -> gpd.GeoDataFrame:
-        """Return geopandas GeoDataFrame with Point geometry based on DataArray
-        coordinates. If a reducer is passed the DataArray variables are reduced along
-        the all non-index dimensions and to a GeoDataFrame column.
-
-        Arguments
-        ---------
-        reducer: callable
-            input to ``xarray.DataArray.reducer`` func argument
-
-        Returns
-        -------
-        gdf: gpd.GeoDataFrame
-            GeoDataFrame
-        """
-        gdf = super().to_gdf(reducer)
-
-        if self._obj.name is None:
-            name = "value"
-        else:
-            name = self._obj.name
-
-        gdf[name] = self._obj.values
-
-        return gdf
 
 
 @xr.register_dataset_accessor("vector")
@@ -642,76 +593,10 @@ class GeoDataset(GeoBase):
 
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
-    def ogr_compliant(self, reducer=None) -> xr.Dataset:
-        """Create a ogr compliant version of a xarray Dataset
-
-        Returns
-        -------
-        xr.Dataset
-            ogr compliant
-        """
-
-        ogc_wkt, geom_type = super().ogr_compliant()
-
-        out_ds = xr.Dataset()
-
-        out_ds = out_ds.assign_coords(
-            {"ogc_wkt": ogc_wkt},
-        )
-
-        # Set the spatial reference with the
-        # set_crs form the GeoBase class
-        out_ds.vector.set_crs(self.crs.to_epsg())
-
-        for fld_header, da in self._obj.data_vars.items():
-            values = None
-            if not self.index_dim in da.dims:
-                continue
-            if not len(da.dims) == 1:
-                if reducer is not None:
-                    idd = da.dims.index(self.index_dim)
-                    reduced_dims = list(range(len(da.dims)))
-                    reduced_dims.remove(idd)
-                    values = reducer(da.values, axis=tuple(reduced_dims))
-                else:
-                    continue
-
-            if values is None:
-                values = da.values
-
-            types = tuple(map(Type, values))
-
-            fld_type = FieldType(types)
-
-            temp_da = xr.DataArray(
-                data=values,
-                dims="record",
-                attrs={
-                    "ogr_field_name": f"{fld_header}",
-                    "ogr_field_type": _linkTable[fld_type],
-                },
-            )
-
-            if fld_type == str:
-                temp_da.attrs.update({"ogr_field_width": 100})
-            out_ds = out_ds.assign({f"{fld_header}": temp_da})
-
-            del temp_da, values
-
-        out_ds = out_ds.assign_attrs(
-            {
-                "Conventions": "CF-1.6",
-                "GDAL": f"GDAL {GDAL_VERSION}",
-                "ogr_geometry_field": "ogc_wkt",
-                "ogr_layer_type": f"{geom_type}",
-            }
-        )
-        return out_ds
-
     # Constructers
     # i.e. from other datatypes or filess
     @staticmethod
-    def from_gdf(gdf: gpd.GeoDataFrame, geom_type="geom") -> xr.Dataset:
+    def from_gdf(gdf: gpd.GeoDataFrame, geom_format="geom") -> xr.Dataset:
         """Creates Dataset with geospatial coordinates. The Dataset values are
         reindexed to the gdf index.
 
@@ -735,13 +620,19 @@ class GeoDataset(GeoBase):
             raise ValueError(f"gdf data type not understood {type(gdf)}")
         geom_name = gdf.geometry.name
         ds = gdf.to_xarray().set_coords(geom_name)
-        ds.vector.set_spatial_dims(geom_name=geom_name, geom_type=geom_type)
+        ds.vector.set_spatial_dims(geom_name=geom_name, geom_format=geom_format)
         ds.vector.set_crs(gdf.crs)
         return ds
 
     @staticmethod
     def from_netcdf(
-        path: str, geom_name=None, x_name=None, y_name=None, crs=None, **kwargs
+        path: str,
+        parse_geom=True,
+        geom_name=None,
+        x_name=None,
+        y_name=None,
+        crs=None,
+        **kwargs,
     ) -> xr.Dataset:
         """Create GeoDataset from ogr compliant netCDF4 file
 
@@ -755,55 +646,10 @@ class GeoDataset(GeoBase):
         xr.Dataset
             Dataset containing the geospatial data and attributes
         """
-        ds_tmp = xr.open_dataset(path, **kwargs)
-        ds_tmp.vector.set_spatial_dims(
-            geom_name=geom_name, x_name=x_name, y_name=y_name
-        )
-        ds = ds_tmp.vector.set_geometry(
-            geometry=ds_tmp.vector.geometry,
-            geom_type="geom",
-            geom_name=ds_tmp.attrs.get("geom_name", "geometry"),
-        )
+        ds = xr.open_dataset(path, **kwargs)
+        ds.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
+        # force geom_format= 'geom'
+        if parse_geom:
+            ds = ds.vector.update_geometry(geom_format="geom", replace=True)
         ds.vector.set_crs(crs)  # try to parse from netcdf if None
         return ds
-
-    def add_data(self, data_vars, coords=None, index_dim=None):
-        """Align data along index axis and data to GeoDataset
-
-        Arguments
-        ---------
-        data_vars: dict-like, DataArray or Dataset
-            A mapping from variable names to `xarray.DataArray` objects.
-            See :py:func:`xarray.Dataset` for all options.
-            Additionally, it accepts `xarray.DataArray` with name property and `xarray.Dataset`.
-        coords: sequence or dict of array_like, optional
-            Coordinates (tick labels) to use for indexing along each dimension.
-        index_dim: str, optional
-            Name of index dimension in data_vars
-
-        Returns
-        -------
-        ds: xarray.Dataset
-            merged dataset
-        """
-        if isinstance(data_vars, xr.DataArray) and data_vars.name is not None:
-            data_vars = data_vars.to_dataset()
-        if isinstance(data_vars, xr.Dataset):
-            ds_data = data_vars
-        else:
-            ds_data = xr.Dataset(data_vars, coords=coords)
-        # check if any data array contain index_dim
-        if self.index_dim not in ds_data.dims and index_dim in ds_data:
-            ds_data = ds_data.rename({index_dim: self.index_dim})
-        elif self.index_dim not in ds_data.dims:
-            raise ValueError(f"Index dimension {self.index_dim} not found in dataset.")
-        ds_data = ds_data.reindex({self.index_dim: self.index}).transpose(
-            self.index_dim, ...
-        )
-        return xr.merge([self._obj, ds_data])
-
-    ## Output methods
-    ## Either writes to files or other data types
-
-
-# %%
