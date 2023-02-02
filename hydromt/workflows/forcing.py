@@ -388,7 +388,7 @@ def pet(
             )
         if method == "penman-monteith_rh_simple":
             pet_out = pm_fao56(
-                temp["temp"], 
+                temp["temp"],
                 temp["temp_max"],
                 temp["temp_min"],
                 ds["press"] / 10,
@@ -400,7 +400,7 @@ def pet(
             )
         elif method == "penman-monteith_tdew":
             pet_out = pm_fao56(
-                temp["temp"], 
+                temp["temp"],
                 temp["temp_max"],
                 temp["temp_min"],
                 ds["press"] / 10,
@@ -618,7 +618,7 @@ def pm_fao56(
         raise ModuleNotFoundError("Penman-Monteith FAO-56 requires the 'pyet' library")
 
     # Precalculated variables:
-    lat = kin[kin.raster.y_dim] * (np.pi / 180) #latitude in radians 
+    lat = kin[kin.raster.y_dim] * (np.pi / 180)  # latitude in radians
 
     # Vapor pressure
     svp = pyet.calc_e0(tmean=temp)
@@ -629,22 +629,26 @@ def pm_fao56(
         avp = pyet.calc_e0(tmax=temp_max, tmin=temp_min, rh=temp_dew)
 
     # Net radiation
-    dates = pyet.utils.get_index(kin) 
-    er = pyet.extraterrestrial_r(dates, lat) # Extraterrestrial daily radiation [MJ m-2 d-1]
-    csr = pyet.calc_rso(er, dem) # Clear-sky solar radiation [MJ m-2 day-1]
+    dates = pyet.utils.get_index(kin)
+    er = pyet.extraterrestrial_r(
+        dates, lat
+    )  # Extraterrestrial daily radiation [MJ m-2 d-1]
+    csr = pyet.calc_rso(er, dem)  # Clear-sky solar radiation [MJ m-2 day-1]
 
-    #Net shortwave radiation [MJ m-2 d-1]
-    swr = pyet.calc_rad_short(kin * (86400 / 1e6)) 
+    # Net shortwave radiation [MJ m-2 d-1]
+    swr = pyet.calc_rad_short(kin * (86400 / 1e6))
 
     # Net longwave radiation [MJ m-2 d-1]
     lwr = pyet.calc_rad_long(
         kin * (86400 / 1e6), tmax=temp_max, tmin=temp_min, rso=csr, ea=avp
     )
-    nr = swr - lwr #daily net radiation 
+    nr = swr - lwr  # daily net radiation
 
     # Penman Monteith FAO-56
-    gamma = pyet.calc_psy(press) # psychrometric constant
-    dlt = pyet.calc_vpc(temp) # Slope of saturation vapour pressure curve at air Temperature [kPa °C-1].
+    gamma = pyet.calc_psy(press)  # psychrometric constant
+    dlt = pyet.calc_vpc(
+        temp
+    )  # Slope of saturation vapour pressure curve at air Temperature [kPa °C-1].
 
     gamma1 = gamma * (1 + 0.34 * wind)
 
