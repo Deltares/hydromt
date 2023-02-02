@@ -23,11 +23,10 @@ dependencies = [
     "pandas",
     "pyflwdir>=0.5.4",
     "pyproj",
-    "pygeos",
     "rasterio",
     "requests",
     "rioxarray",
-    "shapely",
+    "shapely>=2.0.0",
     "scipy",
     "xarray",
     "zarr",
@@ -46,6 +45,11 @@ classifiers = [
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
+all = [
+    "pcraster",
+    "xugrid",
+    "pygeos",
+]
 test = [
     "black",
 	"pytest>=2.7.3",
@@ -60,6 +64,7 @@ doc = [
     "sphinx_design",
     "sphinx_autosummary_accessors",
 ]
+
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
@@ -84,4 +89,6 @@ filterwarnings = [
     "ignore:The *staticgeoms:DeprecationWarning", 
     "ignore:The *staticmaps:DeprecationWarning", 
     "ignore:The set_staticmaps:DeprecationWarning", 
+    "ignore:Adding a predefined data catalog:DeprecationWarning",
+    "ignore:Shapely 2.0 is installed:UserWarning"
 ]

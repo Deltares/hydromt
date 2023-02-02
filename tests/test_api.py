@@ -3,7 +3,6 @@ import json
 import numpy as np
 
 from hydromt.cli.api import *
-from hydromt.models.model_plugins import get_plugin_eps
 
 
 def test_get_region():
