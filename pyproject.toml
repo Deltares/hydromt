@@ -48,6 +48,7 @@ dynamic = ['version', 'description']
 all = [
     "pcraster",
     "xugrid",
+    "pygeos",
 ]
 test = [
     "black",
@@ -89,4 +90,5 @@ filterwarnings = [
     "ignore:The *staticmaps:DeprecationWarning", 
     "ignore:The set_staticmaps:DeprecationWarning", 
     "ignore:Adding a predefined data catalog:DeprecationWarning",
+    "ignore:Shapely 2.0 is installed:UserWarning"
 ]

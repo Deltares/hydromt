@@ -3,8 +3,9 @@ from packaging.version import Version
 __all__ = []
 
 HAS_XUGRID = False
-HAS_PCRASTER = False
+HAS_PCRASTER = True  # don't check PCRASTER compat for now, see below
 HAS_SHAPELY20 = False
+HAS_PYGEOS = False
 
 try:
     from shapely import __version__ as SH_VERSION
@@ -15,11 +16,19 @@ except ImportError:
     pass
 
 try:
-    import pcraster
+    import pygeos
 
-    HAS_PCRASTER = True
+    HAS_PYGEOS = True
 except ImportError:
     pass
+
+# causes malloc / corrupted size errors on linux & github CI
+# try:
+#     import pcraster
+
+#     HAS_PCRASTER = True
+# except ImportError:
+#     pass
 
 
 try:

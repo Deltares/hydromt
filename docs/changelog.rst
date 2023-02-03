@@ -38,6 +38,7 @@ Documentation
 - added **reading_point_data** example notebook `PR #216 <https://github.com/Deltares/hydromt/pull/216>`_
 - added **working_with_flow_directions** example notebook `PR #231 <https://github.com/Deltares/hydromt/pull/231>`_
 - added **prep_data_catalog** example notebook `PR #232 <https://github.com/Deltares/hydromt/pull/232>`_
+- added **reading_tabular_data** example notebook `PR #216 <https://github.com/Deltares/hydromt/pull/217>`_
 
 
 v0.6.0 (24 October 2022)
