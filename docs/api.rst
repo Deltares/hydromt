@@ -515,6 +515,7 @@ General methods
    DataArray.raster.flipud
    DataArray.raster.area_grid
    DataArray.raster.density_grid
+   DataArray.raster.reclassify
 
 
 Nodata handling and interpolation

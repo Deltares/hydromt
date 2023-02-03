@@ -11,6 +11,7 @@ Unreleased
 
 Added
 -----
+- New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
 - write raster (DataArray) to tiles in xyz stucture
 - write raster (DataArray) to tiles according to osm
 - add zoom_level to named arguments of path in the data catalog, to keep a single data source for the same data at different resolutions
@@ -19,15 +20,19 @@ Added
 
 Changed
 -------
+- Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 `PR #258 <https://github.com/Deltares/hydromt/pull/258>`_
+- Changed shapely to require version '2.0.0' or later
 - strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 - do not automatically read hydromt_data.yml file in model root `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 
 Fixed
 -----
+- fix reading lists and none with config `PR #246 <https://github.com/Deltares/hydromt/pull/246>`_
 - fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 
 Deprecated
 ----------
+- Move pygeos to optional dependencies in favor of shapely 2.0.
 
 Documentation
 -------------
@@ -36,6 +41,7 @@ Documentation
 - added **reading_point_data** example notebook `PR #216 <https://github.com/Deltares/hydromt/pull/216>`_
 - added **working_with_flow_directions** example notebook `PR #231 <https://github.com/Deltares/hydromt/pull/231>`_
 - added **prep_data_catalog** example notebook `PR #232 <https://github.com/Deltares/hydromt/pull/232>`_
+- added **reading_tabular_data** example notebook `PR #216 <https://github.com/Deltares/hydromt/pull/217>`_
 
 
 v0.6.0 (24 October 2022)

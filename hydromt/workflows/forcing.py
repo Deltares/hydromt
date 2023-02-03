@@ -47,7 +47,8 @@ def precip(
     # correct precip based on high-res monthly climatology
     if clim is not None:
         # make sure first dim is month
-        clim = clim.rename({clim.raster.dim0: "month"})
+        if clim.raster.dim0 != "month":
+            clim = clim.rename({clim.raster.dim0: "month"})
         if not clim["month"].size == 12:
             raise ValueError("Precip climatology does not contain 12 months.")
         # set missings to NaN
