@@ -159,7 +159,6 @@ def test_model_build_update(tmpdir):
     model._NAME = "testmodel"
     model.build(
         region={"bbox": [12.05, 45.30, 12.85, 45.65]},
-        res=1,
         opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
     )
     assert "region" in model._geoms

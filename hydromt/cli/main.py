@@ -50,7 +50,7 @@ region_opt = click.option(
     "-r",
     "--region",
     type=str,
-    default= "{}",
+    default="{}",
     callback=cli_utils.parse_json,
     help="Set the region in which to search for data via a json."
     " e.g. {'subbasin': <path-to-file>, 'strord': 5}",
@@ -168,6 +168,9 @@ def build(
     logger.info(f"User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
+    # Set region to None if empty string json
+    if region.__len__() == 0:
+        region = None
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
@@ -175,9 +178,12 @@ def build(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
+        mode = "w"
+        if overwrite:
+            mode += "+"
         mod = MODELS.load(model)(
             root=model_root,
-            mode="w",
+            mode=mode,
             logger=logger,
             data_libs=data_libs,
             **kwargs,

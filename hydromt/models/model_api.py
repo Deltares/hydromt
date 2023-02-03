@@ -2,7 +2,8 @@
 """General and basic API for models in HydroMT"""
 
 from abc import ABCMeta
-import os, glob
+import os
+import glob
 from os.path import join, isdir, isfile, abspath, dirname, basename, isabs
 import xarray as xr
 import numpy as np
@@ -154,7 +155,7 @@ class Model(object, metaclass=ABCMeta):
 
     def build(
         self,
-        region: Optional[dict] = {},
+        region: Optional[dict] = None,
         write: Optional[bool] = True,
         opt: Optional[dict] = {},
     ):
@@ -171,8 +172,6 @@ class Model(object, metaclass=ABCMeta):
         region: dict
             Description of model region. See :py:meth:`~hydromt.workflows.parse_region`
             for all options.
-        res: float, optional
-            Model resolution. Use only if applicable to your model. By default None.
         write: bool, optional
             Write the complete model after executing all methods in opt, by default True.
         opt: dict, optional
@@ -196,11 +195,10 @@ class Model(object, metaclass=ABCMeta):
         opt = self._check_get_opt(opt)
 
         # merge cli region and res arguments with opt
-        # insert region method if it does not exist in opt
-        if self._CLI_ARGS["region"] not in opt:
-            opt = {self._CLI_ARGS["region"]: {}, **opt}
-        # update region method kwargs with region
-        opt[self._CLI_ARGS["region"]].update(region=region)
+        if region is not None:
+            if self._CLI_ARGS["region"] not in opt:
+                opt = {self._CLI_ARGS["region"]: {}, **opt}
+            opt[self._CLI_ARGS["region"]].update(region=region)
         # then loop over other methods
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write() call
@@ -406,22 +404,38 @@ class Model(object, metaclass=ABCMeta):
             read/append/write mode for model files
         """
         if mode not in ["r", "r+", "w", "w+"]:
-            raise ValueError(f'mode "{mode}" unknown, select from "r", "r+" or "w"')
+            raise ValueError(
+                f'mode "{mode}" unknown, select from "r", "r+", "w" or "w+"'
+            )
         # old_root = getattr(self, "_root", None)
         self._root = root if root is None else abspath(root)
         self._read = mode.startswith("r")
         self._write = mode != "r"
+        self._overwrite = mode == "w+"
         if root is not None:
             if self._write:
                 for name in self._FOLDERS:
                     path = join(self._root, name)
                     if not isdir(path):
                         os.makedirs(path)
-                    elif not self._read:
-                        self.logger.warning(
-                            "Model dir already exists and "
-                            f"files might be overwritten: {path}."
-                        )
+                    exts = set(
+                        [os.path.splitext(item)[1] for item in glob.glob(f"{path}\\*")]
+                    )
+                    for ext in ["", ".log", ".yml"]:
+                        if ext in exts:
+                            exts.remove(ext)
+                    if exts.__len__() != 0:
+                        if self._overwrite:
+                            self.logger.warning(
+                                "Model dir already exists and "
+                                f"files might be overwritten: {path}."
+                            )
+                        else:
+                            self.logger.error(
+                                "Model dir already exists and "
+                                f"cannot be overwritten: {path}."
+                            )
+                            raise IOError("Cannot overwrite, use '-o'")
             # check directory
             elif not isdir(self._root):
                 raise IOError(f'model root not found at "{self._root}"')

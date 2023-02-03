@@ -26,7 +26,7 @@ def test_cli(tmpdir):
 
     r = CliRunner().invoke(hydromt_cli, ["build", "--help"])
     assert r.exit_code == 0
-    assert r.output.startswith("Usage: main build [OPTIONS] MODEL MODEL_ROOT REGION")
+    assert r.output.startswith("Usage: main build [OPTIONS] MODEL MODEL_ROOT")
 
     r = CliRunner().invoke(hydromt_cli, ["update", "--help"])
     assert r.exit_code == 0
@@ -41,9 +41,23 @@ def test_cli(tmpdir):
     root = str(tmpdir.join("grid_model_region"))
     r = CliRunner().invoke(
         hydromt_cli,
-        ["build", "grid_model", root, "{'bbox': [12.05,45.30,12.85,45.65]}", "-vv"],
+        [
+            "build",
+            "grid_model",
+            root,
+            "-r",
+            "{'bbox': [12.05,45.30,12.85,45.65]}",
+            "-vv",
+        ],
     )
     assert os.path.isfile(os.path.join(root, "geoms", "region.geojson"))
+
+    root = str(tmpdir.join("empty_region"))
+    r = CliRunner().invoke(
+        hydromt_cli,
+        ["build", "grid_model", root, "-vv"],
+    )
+    assert r.exit_code == 0
 
     r = CliRunner().invoke(
         hydromt_cli,
@@ -51,6 +65,7 @@ def test_cli(tmpdir):
             "build",
             "test_model",
             str(tmpdir),
+            "-r",
             "{'subbasin': [-7.24, 62.09], 'strord': 4}",
         ],
     )
