@@ -40,10 +40,9 @@ def test_precip():
 def test_pet():
     cat = DataCatalog()
     et_data = cat.get_rasterdataset("era5_daily_zarr")
-    et_data["d2m"] -= 273.15
     dem = cat.get_rasterdataset("era5_orography").squeeze("time").drop("time")
 
-    peto = pet(et_data, et_data["temp"], dem, method="penman-monteith_tdew")
+    peto = pet(et_data, et_data, dem, method="penman-monteith_tdew")
 
     assert peto.raster.shape == dem.raster.shape
     np.testing.assert_almost_equal(peto.mean(), 0.57746, decimal=4)
