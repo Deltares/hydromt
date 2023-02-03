@@ -153,11 +153,11 @@ def build(
 
     \b
     To build a wflow model for a subbasin using and point coordinates snapped to cells with stream order >= 4
-    hydromt build wflow /path/to/model_root "{'subbasin': [-7.24, 62.09], 'strord': 4}" -i /path/to/wflow_config.ini -d deltares_data -d /path/to/data_catalog.yml -v
+    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini -r "{'subbasin': [-7.24, 62.09], 'strord': 4}" -d deltares_data -d /path/to/data_catalog.yml -v
 
     \b
     To build a sfincs model based on a bbox
-    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini -d /path/to/data_catalog.yml -v
+    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -d /path/to/data_catalog.yml -v
 
     """
     log_level = max(10, 30 - 10 * (verbose - quiet))
