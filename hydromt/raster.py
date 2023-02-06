@@ -1660,6 +1660,7 @@ class RasterDataArray(XRasterBase):
         root: str,
         px: int,
         zoomlevels: list = [],
+        fmt: str = "tif",
     ):
         """Export rasterdataset to tiles in a xyz structure
 
@@ -1733,10 +1734,15 @@ class RasterDataArray(XRasterBase):
                         method="average",
                         # dst_crs=self.crs,
                     )
-
-                temp.raster.to_raster(f"{ssd}\\{row}.tif", driver="GTiff")
-
-                file.write(f"{ssd}\\{row}.tif\n")
+                if fmt == "tif":
+                    temp.raster.to_raster(f"{ssd}\\{row}.tif", driver="GTiff")
+                elif fmt == "nc":
+                    temp = temp.raster.gdal_compliant()
+                    temp.to_netcdf(f"{ssd}\\{row}.nc", engine="netcdf4")
+                else:
+                    raise ValueError(f"Ouput format (fmt) should be 'tif' or 'nc' -> {fmt} given")
+                
+                file.write(f"{ssd}\\{row}.{fmt}\n")
 
                 del temp
 
