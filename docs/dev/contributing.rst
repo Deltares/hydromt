@@ -23,6 +23,19 @@ For bugs, please provide tracebacks and relevant log files to clarify the issue.
 `Minimal reproducible examples <https://stackoverflow.com/help/minimal-reproducible-example>`_, 
 are especially helpful!
 
+Checklist pull requests
+-----------------------
+
+If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure do the following steps:
+1. If it does not yet exist, create an issue following the :ref:`issue conventions <Issue conventions>`
+2. Create a new branch where you develop your new code, see also :ref:`Git conventions <Git conventions>` 
+3. Run black before committing your changes, see  :ref:`code format <Code format>`. This does only apply for *.py files. For *ipynb files make sure that you have cleared all results.
+4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the
+  `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`__
+5. Push your commits to the github repository and open a draft pull request. Potentially, ask other contributors for feedback.
+6. Once you're satisfied with the changes mark the pull request as "as ready for review" and ask another contributor to review the code. The review should cover the implementation as well as steps 2-4.
+7. Merge the pull request once the review has been approved.
+
 Git conventions
 ---------------
 
@@ -184,7 +197,7 @@ To automatically reformat your code:
 Test and CI
 -----------
 
-. We use `pytest <https://pytest.org>`__ for testing and `github actions <https://docs.github.com/en/actions>`_ for CI. 
+We use `pytest <https://pytest.org>`__ for testing and `github actions <https://docs.github.com/en/actions>`_ for CI. 
 - Unit tests are mandatory for new methods and workflows and integration tests are highly recommended for various 
 - All tests should be contained in the tests directory in functions named `test_*`.
 - We use `CodeCov <https://app.codecov.io/gh/Deltares/hydromt>`_ to monitor the coverage of the tests and aim for high (>90%) coverage. This is work in progress.
@@ -221,7 +234,7 @@ Creating a release
 
 1. Prepare the release by bumping the version number in the __init__.py and updating the docs/changelog.rst file
 2. First create a new release on github under https://github.com/Deltares/hydromt/releases. We use semantic versioning and describe the release based on the CHANGELOG.
-3. Make sure to update and clean your local git folder. This remmoves all files which are not tracked by git. 
+3. Make sure to update and clean your local git folder. This removes all files which are not tracked by git. 
 
 .. code-block:: console
 

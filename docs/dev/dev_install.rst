@@ -35,16 +35,7 @@ file contained in the repository:
     $ conda activate hydromt-dev
 
 Finally, create a developer installation of HydroMT:
-This is possible using the `flit <https://flit.readthedocs.io/en/latest/>`_ package and install command.
-
-For Windows:
 
 .. code-block:: console
 
-    $ flit install --pth-file
-
-For Linux:
-
-.. code-block:: console
-
-    $ flit install -s
+    $ pip install -e .

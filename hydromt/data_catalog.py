@@ -76,7 +76,8 @@ class DataCatalog(object):
         # legacy code. to be removed
         for lib, version in artifact_keys.items():
             warnings.warn(
-                f"{lib}={version} as key-word argument is deprecated, add the predefined data catalog as string to the data_libs argument instead",
+                "Adding a predefined data catalog as key-word argument is deprecated, "
+                f"add the catalog as '{lib}={version}' to the data_libs list instead.",
                 DeprecationWarning,
             )
             if not version:  # False or None
