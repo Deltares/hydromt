@@ -6,7 +6,7 @@ from os.path import join, isfile
 import numpy as np
 import xarray as xr
 import rasterio
-from rasterio.crs import CRS
+from pyproj import CRS
 from rasterio.transform import Affine
 import geopandas as gpd
 from shapely.geometry.base import BaseGeometry

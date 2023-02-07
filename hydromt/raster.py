@@ -18,7 +18,7 @@ import geopandas as gpd
 import xarray as xr
 import dask
 from affine import Affine
-from rasterio.crs import CRS
+from pyproj import CRS
 import rasterio.warp
 import rasterio.fill
 from rasterio import features
@@ -162,7 +162,8 @@ class XGeoBase(object):
         # create new coordinate with attributes in which to save x_dim, y_dim and crs.
         # other spatial properties are always calculated on the fly to ensure consistency with data
         if GEO_MAP_COORD not in self._obj.coords:
-            self._obj.coords[GEO_MAP_COORD] = xr.Variable((), 1)
+            # zero is used by rioxarray
+            self._obj.coords[GEO_MAP_COORD] = xr.Variable((), 0)
 
     @property
     def attrs(self):
@@ -501,7 +502,7 @@ class XRasterBase(XGeoBase):
         ----------
         dst_crs: CRS, str, int, or dict
             Target coordinate reference system, input to
-            :py:meth:`rasterio.crs.CRS.from_user_input`
+            :py:meth:`pyproj.CRS.from_user_input`
         densify_pts: uint, optional
             Number of points to add to each edge to account for nonlinear
             edges produced by the transform process.  Large numbers will produce
@@ -1079,9 +1080,8 @@ class XRasterBase(XGeoBase):
         if self.crs.is_geographic:
             data = gis_utils.reggrid_area(self.ycoords.values, self.xcoords.values)
         elif self.crs.is_projected:
-            xres = abs(self.res[0]) * self.crs.linear_units_factor[1]
-            yres = abs(self.res[1]) * self.crs.linear_units_factor[1]
-            data = np.full(self.shape, xres * yres)
+            ucf = rasterio.crs.CRS.from_user_input(self.crs).linear_units_factor[1]
+            data = np.full(self.shape, abs(self.res[0] * self.res[0]) * ucf**2)
         da_area = xr.DataArray(
             data=data.astype(dtype), coords=self.coords, dims=self.dims
         )
@@ -1105,9 +1105,8 @@ class XRasterBase(XGeoBase):
             area = self.area_grid()
 
         elif self.crs.is_projected:
-            xres = abs(self.res[0]) * self.crs.linear_units_factor[1]
-            yres = abs(self.res[1]) * self.crs.linear_units_factor[1]
-            area = xres * yres
+            ucf = rasterio.crs.CRS.from_user_input(self.crs).linear_units_factor[1]
+            area = abs(self.res[0] * self.res[0]) * ucf**2
 
         # Create a grid that contains the density in unit/m2 per grid cell.
         unit = self._obj.attrs.get("unit", "")

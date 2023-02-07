@@ -22,6 +22,7 @@ Changed
 
 Fixed
 -----
+- All CRS objects are from pyproj library (instead of rasterio.crs submodule) `PR #230 <https://github.com/Deltares/hydromt/pull/230>`_
 - fix reading lists and none with config `PR #246 <https://github.com/Deltares/hydromt/pull/246>`_
 - fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 

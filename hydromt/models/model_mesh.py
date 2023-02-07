@@ -233,7 +233,7 @@ class MeshMixin(object):
         for ds in self._read_nc(fn, **kwargs).values():
             uds = xu.UgridDataset(ds)
             if ds.rio.crs is not None:  # parse crs
-                uds.ugrid.grid.set_crs(ds.rio.crs)
+                uds.ugrid.grid.set_crs(ds.raster.crs)
                 uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
             self.set_mesh(uds)
 
@@ -402,7 +402,7 @@ class MeshModel(MeshMixin, Model):
             if crs is None:
                 crs = 4326
             if ds.rio.crs is not None:  # parse crs
-                mesh2d.ugrid.grid.set_crs(ds.rio.crs)
+                mesh2d.ugrid.grid.set_crs(ds.raster.crs)
             else:
                 # Assume model crs
                 self.logger.warning(
