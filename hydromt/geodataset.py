@@ -12,6 +12,8 @@ import logging
 
 from hydromt import gis_utils, raster
 
+from osgeo import __version__ as GDAL_VERSION
+
 logger = logging.getLogger(__name__)
 
 
@@ -319,6 +321,58 @@ class GeoBase(raster.XGeoBase):
 
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
+    def ogr_compliant(self, reducer = None):
+
+        obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
+        obj["ogc_wkt"].attrs = {
+            "long_name": "Geometry as ISO WKT",
+            "grid_mapping": "spatial_ref",
+        }
+        index_dim = self.index_dim
+
+        if isinstance(self._obj, xr.DataArray):
+            if self._obj.name is None:
+                self._obj.name = "values"
+            obj = obj.to_dataset()
+
+        if reducer is not None:
+            rdims = [dim for dim in obj.dims if dim != index_dim]
+            obj = obj.reduce(reducer, dim=rdims)
+
+        dtypes = {"i": "Integer64", "f": "Real", "U": "String"}
+        for name, da in obj.data_vars.items():
+            if not index_dim in da.dims:
+                continue
+            if reducer is not None:
+                rdims = [dim for dim in obj.dims if dim != index_dim]
+                obj[name] = obj[name].reduce(reducer, rdims)
+            # set ogr meta data
+            dtype = dtypes.get(obj[name].dtype.kind, None)
+            if dtype is not None:
+                obj[name].attrs.update(
+                    {
+                        "ogr_field_name": f"{name}",
+                        "ogr_field_type": dtype,
+                    }
+                )
+                if dtype == "String":
+                    obj[name].attrs.update(
+                        {
+                            "ogr_field_width": 100,
+                        }
+                    )
+        obj = obj.drop_vars("spatial_ref", errors="ignore")
+        obj.vector.set_crs(self.crs)
+        obj = obj.assign_attrs(
+            {
+                "Conventions": "CF-1.6",
+                "GDAL": f"GDAL {GDAL_VERSION}",
+                "ogr_geometry_field": "ogc_wkt",
+                "ogr_layer_type": f"{self.geom_type}",
+            }
+        )
+        return obj
+
     def to_geom(self, geom_name) -> Union[xr.DataArray, xr.Dataset]:
         """Converts Dataset/ DataArray with xy or wkt geometries to shapely Geometries.
 
@@ -340,7 +394,7 @@ class GeoBase(raster.XGeoBase):
         return self.update_geometry(geom_format="xy", x_name=x_name, y_name=y_name)
 
     def to_wkt(
-        self, ogr_compliant=False, reducer=None, drop_vars=True
+        self, ogr_compliant=False, reducer=None,
     ) -> Union[xr.DataArray, xr.Dataset]:
         """Converts geometries in Dataset/DataArray to wkt strings.
 
@@ -350,61 +404,10 @@ class GeoBase(raster.XGeoBase):
             Dataset with new ogc_wkt coordinate
         """
         # ogr compliant naming and attrs
-        obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
-        obj["ogc_wkt"].attrs = {
-            "long_name": "Geometry as ISO WKT",
-            "grid_mapping": "spatial_ref",
-        }
         if ogr_compliant:
-            index_dim = self.index_dim
-            if isinstance(obj, xr.DataArray):
-                if obj.name is None:
-                    obj.name = "data"
-                obj = obj.to_dataset()
-
-            # reduce data variables
-            if reducer is not None:
-                rdims = [dim for dim in obj.dims if dim != index_dim]
-                obj = obj.reduce(reducer, dim=rdims)
-
-            # reset crs and add attrs
-            obj = obj.drop_vars("spatial_ref", errors="ignore")
-            obj.vector.set_crs(self.crs)
-            obj = obj.assign_attrs(
-                {
-                    "Conventions": "CF-1.6",
-                    # "GDAL": f"GDAL {GDAL_VERSION}",
-                    "ogr_geometry_field": "ogc_wkt",
-                    "ogr_layer_type": f"{self.geom_type}",
-                }
-            )
-
-            # loop over variables and set meta data
-            dtypes = {"i": "Integer64", "f": "Real", "U": "String"}
-            for name in obj.data_vars:
-                # set ogr meta data
-                dtype = dtypes.get(obj[name].dtype.kind, None)
-                if dtype is not None:
-                    obj[name].attrs.update(
-                        {
-                            "ogr_field_name": f"{name}",
-                            "ogr_field_type": dtype,
-                        }
-                    )
-                    if dtype == "String":
-                        obj[name].attrs.update(
-                            {
-                                "ogr_field_width": obj[name].dtype.itemsize,
-                            }
-                        )
-
-                # keep only 1D variables with known dtype and matching index_dim
-                dims = obj[name].dims
-                matching_index = len(dims) == 1 and dims[0] == index_dim
-                if drop_vars and (dtype is None or not matching_index):
-                    drop = [dim for dim in dims if dim != index_dim] + [name]
-                    obj = obj.drop_vars(drop, errors="ignore")
-
+            obj = self.ogr_compliant(reducer=reducer)
+        else:
+            obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
         return obj
 
     ## clip
@@ -581,8 +584,8 @@ class GeoDataArray(GeoBase):
         da.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
         # force to geom_format "geom"
         if parse_geom:
-            da = da.vector.update_geometry(geom_format="gome", replace=True)
-        da.vector.set_crs(crs=crs)  # try to parse from netcdf if None
+            da = da.vector.update_geometry(geom_format="geom", replace=True)
+        da.vector.set_crs(input_crs=crs)  # try to parse from netcdf if None
         return da
 
 
