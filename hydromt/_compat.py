@@ -1,4 +1,4 @@
-__all__ = ["HAS_PCRASTER", "HAS_XUGRID"]
+__all__ = ["HAS_PCRASTER", "HAS_XUGRID", "HAS_GCSFS"]
 
 HAS_XUGRID = False
 HAS_PCRASTER = False
@@ -24,6 +24,14 @@ try:
     import xugrid
 
     HAS_XUGRID = True
+
+except ImportError:
+    pass
+
+try:
+    import gcsfs
+
+    HAS_GCSFS = True
 
 except ImportError:
     pass

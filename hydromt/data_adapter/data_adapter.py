@@ -7,10 +7,11 @@ import yaml
 import glob
 from upath import UPath
 from fsspec.implementations import local
-import gcsfs
 from string import Formatter
 from typing import Tuple
 from itertools import product
+
+from .. import _compat
 
 
 __all__ = [
@@ -84,8 +85,12 @@ PREPROCESSORS = {
 
 FILESYSTEMS = {
     "local": local.LocalFileSystem(),
-    "gcs": gcsfs.GCSFileSystem(),
 }
+# Add filesystems from optional dependencies
+if _compat.HAS_GCSFS:
+    import gcsfs
+
+    FILESYSTEMS["gcs"] = gcsfs.GCSFileSystem()
 
 
 class DataAdapter(object, metaclass=ABCMeta):
@@ -210,9 +215,14 @@ class DataAdapter(object, metaclass=ABCMeta):
         try:
             fs = FILESYSTEMS.get(self.filesystem)
         except:
-            raise ValueError(
-                f"Unknown or unsupported filesystem {self.filesystem}. Use one of {FILESYSTEMS.keys()}"
-            )
+            if filesystem == "gcs":
+                raise ModuleNotFoundError(
+                    "The gcsfs library is required to read data from gcs (Google Cloud Storage). Please install."
+                )
+            else:
+                raise ValueError(
+                    f"Unknown or unsupported filesystem {self.filesystem}. Use one of {FILESYSTEMS.keys()}"
+                )
         for date, var in product(dates, vrs):
             fmt = {}
             if date is not None:
