@@ -500,20 +500,28 @@ class GeoBase(raster.XGeoBase):
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
-        gdf = self.geometry.to_frame("geometry")
-        sdims = [self.y_name, self.x_name, self.index_dim, self.geom_name]
-        for name in self._all_names:
-            dims = self._obj[name].dims
+        if isinstance(self._obj, xr.DataArray):
+            if self._obj.name is None:
+                self._obj.name = "data"
+            obj = self._obj.to_dataset()
+        else:
+            obj = self._obj
+        gdf = obj.vector.geometry.to_frame("geometry")
+        sdims = [obj.vector.y_name, obj.vector.x_name, obj.vector.index_dim, obj.vector.geom_name]
+        for name in obj.vector._all_names:
+            dims = obj[name].dims
             if name not in sdims:
                 # keep 1D variables with matching index_dim
-                if len(dims) == 1 and dims[0] == self.index_dim:
-                    gdf[name] = self._obj[name].values
+                if len(dims) == 1 and dims[0] == obj.vector.index_dim:
+                    gdf[name] = obj[name].values
                 # keep reduced data variables
-                elif reducer is not None and self.index_dim in self._obj[name].dims:
+                elif (reducer is not None
+                    and obj.vector.index_dim in obj[name].dims):
                     rdims = [
-                        dim for dim in self._obj[name].dims if dim != self.index_dim
+                        dim for dim in obj[name].dims if dim != obj.vector.index_dim
                     ]
-                    gdf[name] = self._obj[name].reduce(reducer, dim=rdims)
+                    gdf[name] = obj[name].reduce(reducer, dim=rdims)
+        del obj
         return gdf
 
     def to_netcdf(
@@ -536,7 +544,9 @@ class GeoBase(raster.XGeoBase):
         if ogr_compliant:
             self.ogr_compliant(reducer=reducer).to_netcdf(path, engine="netcdf4", **kwargs)
         else:
-            self._obj.to_netcdf(path, engine="netcdf4", **kwargs)
+            obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
+            obj.to_netcdf(path, engine="netcdf4", **kwargs)
+            del obj
 
 @xr.register_dataarray_accessor("vector")
 class GeoDataArray(GeoBase):
@@ -546,17 +556,50 @@ class GeoDataArray(GeoBase):
     # Constructers
     # i.e. from other datatypes or files
     @staticmethod
-    def from_gdf(gdf: GeoSeries | GeoDataFrame) -> xr.Dataset:
-        if isinstance(gdf, GeoSeries):
-            gdf = gdf.to_frame("geometry")
-        geom_name = gdf._geometry_column_name
-        index_dim = gdf.index.name
+    def from_gdf(
+        gdf: gpd.GeoDataFrame,
+        data: np.array = None,
+        name: str = None,
+        coords: dict = None,
+        dims: tuple = None,
+        index_dim: str = None,
+        keep_cols: bool = True,
+    ) -> xr.DataArray:
         if index_dim is None:
-            gdf.index.name = "index"
-        ds = gdf.to_xarray().set_coords(geom_name)
-        ds.vector.set_spatial_dims(geom_name=geom_name, index_dim=index_dim)
-        ds.vector.set_crs(gdf.crs)
-        return ds
+            index_dim = gdf.index.name if gdf.index.name is not None else "index"
+        geom_name = gdf.geometry.name
+        if dims is None:
+            dims = (index_dim, )
+        if len(dims) <= data.shape.__len__():
+            dims += tuple([
+                f"dim{num}" for num in range(len(data.shape)-len(dims))
+            ])
+        elif dims.__len__() >= data.shape.__len__():
+            raise OverflowError(f"No of dimensions should not exceed those of\
+                 the data -> {dims.__len__()} vs {data.shape.__len__()}")
+        da = xr.DataArray(
+            data = data,
+            coords = coords,
+            dims = dims,
+        )
+        other = {}
+        if keep_cols:
+            hdrs = gdf.columns
+        else:
+            hdrs = [geom_name]
+        for hdr in hdrs:
+            other.update({hdr: (dims[0], gdf[hdr]),})
+        da = da.assign_coords(
+            other
+        )
+        if name is None:
+            name = "data"
+        da.name = name
+        if da.dims[0] != index_dim:
+            da = da.transpose(index_dim, ...)
+        da.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
+        da.vector.set_crs(gdf.crs)
+        return da
 
     @staticmethod
     def from_netcdf(
@@ -595,12 +638,27 @@ class GeoDataset(GeoBase):
     def __init__(self, xarray_obj):
         super(GeoDataset, self).__init__(xarray_obj)
 
+    # Properties
+    # Will probably be deleted in the future but now needed for compatibility
+    @property
+    def vars(self):
+        """list: Returns non-coordinate varibles"""
+        return list(self._obj.data_vars.keys())    
+
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
+    
     # Constructers
     # i.e. from other datatypes or filess
     @staticmethod
-    def from_gdf(gdf: gpd.GeoDataFrame, geom_format="geom") -> xr.Dataset:
+    def from_gdf(
+        gdf: gpd.GeoDataFrame, 
+        data_vars: dict = {} ,
+        coords: dict = None,
+        geom_format: str = "geom",
+        index_dim: str = None,
+        keep_cols: bool = True,
+        ) -> xr.Dataset:
         """Creates Dataset with geospatial coordinates. The Dataset values are
         reindexed to the gdf index.
 
@@ -619,11 +677,30 @@ class GeoDataset(GeoBase):
         if isinstance(gdf, GeoSeries):
             if gdf.name is None:
                 gdf.name = "geometry"
+            if gdf.index.name is None:
+                gdf.index.name = "index"
             gdf = gdf.to_frame()
         if not isinstance(gdf, GeoDataFrame):
             raise ValueError(f"gdf data type not understood {type(gdf)}")
+        if index_dim is None:
+            index_dim = gdf.index.name if gdf.index.name is not None else "index"
         geom_name = gdf.geometry.name
-        ds = gdf.to_xarray().set_coords(geom_name)
+        if not keep_cols:
+            gdf.drop(gdf.columns.drop(geom_name), axis=1, inplace=True)
+        ds = gdf.to_xarray().set_coords(gdf.columns)
+        if data_vars is not None and len(data_vars) > 0:
+            if isinstance(data_vars, xr.DataArray):
+                ds = ds.assign(data_vars.to_dataset())
+            elif isinstance(data_vars, xr.Dataset):
+                ds = ds.assign(data_vars)
+            else:
+                ds = ds.assign(
+                    xr.Dataset(
+                    data_vars,
+                    coords=coords,
+                    ) 
+                )
+        ds = ds.transpose(index_dim, ...)
         ds.vector.set_spatial_dims(geom_name=geom_name, geom_format=geom_format)
         ds.vector.set_crs(gdf.crs)
         return ds

@@ -70,7 +70,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
     fn_csv_locs = str(tmpdir.join("test_locs.xy"))
-    geoda.to_netcdf(fn_nc)
+    geoda.vector.to_netcdf(fn_nc)
     geodf.to_file(fn_gdf, driver="GeoJSON")
     ts.to_csv(fn_csv)
     hydromt.io.write_xy(fn_csv_locs, geodf)

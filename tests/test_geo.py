@@ -13,8 +13,7 @@ def test_geo(geoda, geodf):
     # vector props
     assert geoda.vector.crs.to_epsg() == geodf.crs.to_epsg()
     assert np.dtype(geoda[geoda.vector.time_dim]).type == np.datetime64
-    assert np.all(geoda.vector.xcoords.values == geodf.geometry.x)
-    assert np.all(geoda.vector.ycoords.values == geodf.geometry.y)
+    assert np.all(geoda.vector.geometry == geodf.geometry)
     # build from array
     da1 = vector.GeoDataset.from_gdf(geodf, geoda)[geoda.name]
     assert np.all(da1 == geoda)
@@ -28,22 +27,17 @@ def test_geo(geoda, geodf):
     # reproject
     da1 = geoda.vector.to_crs(3857)
     gdf1 = geodf.to_crs(3857)
-    assert np.all(da1.vector.xcoords.values == gdf1.geometry.x.values)
+    assert np.all(da1.vector.geometry == gdf1.geometry)
     # errors
-    with pytest.raises(ValueError, match="Unknown data type"):
+    with pytest.raises(ValueError, match="gdf data type not understood"):
         vector.GeoDataset.from_gdf(geoda)
-    with pytest.raises(ValueError, match="only contain Point geometry"):
-        vector.GeoDataset.from_gdf(geodf.to_crs(3857).buffer(1))
-    with pytest.raises(ValueError, match="not found"):
-        vector.GeoDataset.from_gdf(geodf, geoda.rename({"index": "missing"}))
-
 
 def test_geo_clip(geoda, world):
     country = "Chile"
     geom = world[world["name"] == country]
     da1 = geoda.vector.clip_bbox(geom.total_bounds, buffer=0)
     assert np.all(da1["country"] == country)
-    da1 = geoda.vector.clip_bbox(geom.total_bounds, create_sindex=True)
+    da1 = geoda.vector.clip_bbox(geom.total_bounds)
     assert np.all(da1["country"] == country)
     da1 = geoda.vector.clip_geom(geom.to_crs(3857))
     assert np.all(da1["country"] == country)
