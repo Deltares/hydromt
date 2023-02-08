@@ -329,11 +329,11 @@ def open_geodataset(
         da_ts = open_timeseries_from_table(
             fn_data, name=var_name, index_dim=index_dim, logger=logger
         )
-        ds = vector.GeoDataset.from_gdf(gdf, da_ts, index_dim=index_dim)
+        ds = vector.GeoDataset.from_gdf(gdf, da_ts)
     elif fn_data is not None:
         raise IOError(f"GeoDataset data file not found: {fn_data}")
     else:
-        ds = vector.GeoDataset.from_gdf(gdf, index_dim=index_dim)  # coordinates only
+        ds = vector.GeoDataset.from_gdf(gdf)  # coordinates only
     return ds.chunk(chunks)
 
 

@@ -83,7 +83,7 @@ def test_open_geodataset(tmpdir, geodf):
     # returns dataset with coordinates, but no variable
     ds = hydromt.open_geodataset(fn_gdf)
     assert isinstance(ds, xr.Dataset)
-    assert len(ds.data_vars) == 0
+    assert len(ds.data_vars) == 2
     geodf1 = ds.vector.to_gdf()
     assert np.all(geodf == geodf1[geodf.columns])
     # add timeseries

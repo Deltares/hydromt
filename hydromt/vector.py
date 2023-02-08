@@ -1,4 +1,3 @@
-""""""
 from __future__ import annotations
 from typing import Union
 import numpy as np
@@ -482,18 +481,7 @@ class GeoBase(raster.XGeoBase):
 
     # Constructers
     # i.e. from other datatypes or files
-    @staticmethod
-    def from_gdf(gdf: GeoSeries | GeoDataFrame) -> xr.Dataset:
-        if isinstance(gdf, GeoSeries):
-            gdf = gdf.to_frame("geometry")
-        geom_name = gdf._geometry_column_name
-        index_dim = gdf.index.name
-        if index_dim is None:
-            gdf.index.name = "index"
-        ds = gdf.to_xarray().set_coords(geom_name)
-        ds.vector.set_spatial_dims(geom_name=geom_name, index_dim=index_dim)
-        ds.vector.set_crs(gdf.crs)
-        return ds
+
 
     ## Output methods
     ## Either writes to files or other data types
@@ -557,6 +545,19 @@ class GeoDataArray(GeoBase):
 
     # Constructers
     # i.e. from other datatypes or files
+    @staticmethod
+    def from_gdf(gdf: GeoSeries | GeoDataFrame) -> xr.Dataset:
+        if isinstance(gdf, GeoSeries):
+            gdf = gdf.to_frame("geometry")
+        geom_name = gdf._geometry_column_name
+        index_dim = gdf.index.name
+        if index_dim is None:
+            gdf.index.name = "index"
+        ds = gdf.to_xarray().set_coords(geom_name)
+        ds.vector.set_spatial_dims(geom_name=geom_name, index_dim=index_dim)
+        ds.vector.set_crs(gdf.crs)
+        return ds
+
     @staticmethod
     def from_netcdf(
         path: str,
