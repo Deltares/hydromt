@@ -139,7 +139,7 @@ class DataAdapter(object, metaclass=ABCMeta):
             if key in ["year", "month"] and time_tuple is None:
                 path += "*"
             elif key == "zoom_level" and zoom_level is None:
-                path += "*"
+                path += "0"  # read highest (base) res by default
             elif key == "variable" and variables is None:
                 path += "*"
             # escape unknown fields
