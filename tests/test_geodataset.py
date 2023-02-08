@@ -1,4 +1,4 @@
-from hydromt.geodataset import GeoDataset
+from hydromt.vector import GeoDataset
 
 import pytest
 from geopandas import GeoDataFrame
@@ -33,8 +33,8 @@ def test_vector(tmpdir, dummy_shp):
     oc = gd.vector.ogr_compliant()
 
     # Assert some ogr compliant stuff
-    assert oc.ogr_layer_type == "MULTIPOLYGON"
-    assert list(oc.dims)[0] == "record"
+    assert oc.ogr_layer_type.upper() == "MULTIPOLYGON"
+    assert list(oc.dims)[0] == "index"
     assert len(oc.Roman) == 2
 
     # Write and load

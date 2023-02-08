@@ -1,28 +1,26 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Convenience methods for reading and writing point  objects.
-"""
-
+""""""
+from __future__ import annotations
+from typing import Union
 import numpy as np
-import geopandas as gpd
 import xarray as xr
-from shapely.geometry import box
+import geopandas as gpd
+from geopandas import GeoSeries, GeoDataFrame
+from shapely.geometry.base import BaseGeometry
+import shapely
 import pyproj
 import logging
 
-from . import gis_utils, raster
+from hydromt import gis_utils, raster
+
+from osgeo import __version__ as GDAL_VERSION
 
 logger = logging.getLogger(__name__)
 
 
 class GeoBase(raster.XGeoBase):
-    """This is a vector extension for xarray.DataArray 1D time series data
-    with geographical location information"""
-
     def __init__(self, xarray_obj):
         super(GeoBase, self).__init__(xarray_obj)
-        # placeholder
-        self._sindex = None
+        self._geometry = None
 
     @property
     def _all_names(self):
@@ -31,90 +29,159 @@ class GeoBase(raster.XGeoBase):
             names = names + [n for n in self._obj.data_vars]
         return names
 
-    @property
-    def x_dim(self):
-        # NOTE overwrites raster.XGeoBase.x_dim
-        if self.get_attrs("x_dim") not in self._all_names:
-            self.set_spatial_dims()
-        return self.attrs["x_dim"]
+    def _get_geom_names_types(self, geom_name: str = None) -> tuple[list, list]:
+        names, types = [], []
+        dvars = self._all_names if geom_name is None else [geom_name]
+        for name in dvars:
+            if self._obj[name].ndim == 1 and isinstance(
+                self._obj[name][0].values.item(), BaseGeometry
+            ):
+                names.append(name)
+                types.append("geom")
+            elif self._obj[name].ndim == 1 and isinstance(
+                self._obj[name][0].values.item(), str
+            ):
+                try:
+                    shapely.wkt.loads(self._obj[name][0].values.item())
+                    names.append(name)
+                    types.append("wkt")
+                except Exception:
+                    pass
+        return names, types
 
-    @property
-    def y_dim(self):
-        # NOTE overwrites raster.XGeoBase.y_dim
-        if self.get_attrs("y_dim") not in self._all_names:
-            self.set_spatial_dims()
-        return self.attrs["y_dim"]
-
-    def set_spatial_dims(self, x_dim=None, y_dim=None, index_dim=None):
+    def _discover_xy(self, x_name=None, y_name=None, index_dim=None):
         """Set the spatial and index dimensions of the object.
-
         Arguments
         ----------
-        x_dim, y_dim, index_dim: str, optional
+        x_name, y_name, index_dim: str, optional
             The name of the x, y and index dimensions.
         """
-        # NOTE overwrites raster.XGeoBase.set_spatial_dims
-        # infer x and index dims
-        _obj = self._obj
-        names = list(_obj.coords.keys())
-        if isinstance(_obj, xr.Dataset):
-            names = names + list(_obj.data_vars.keys())
-        if x_dim is None:
-            for dim in raster.XDIMS:
-                if dim in names:
-                    dim0 = index_dim if index_dim is not None else _obj[dim].dims[0]
-                    if _obj[dim0].dims[0] == dim0:
-                        x_dim = dim
+        # infer x dim
+        if x_name is None:
+            for name in raster.XDIMS:
+                if name in self._obj:
+                    dim0 = (
+                        index_dim if index_dim is not None else self._obj[name].dims[0]
+                    )
+                    if self._obj[name].ndim == 1 and self._obj[name].dims[0] == dim0:
+                        x_name = name
                         index_dim = dim0
                         break
-        if index_dim in _obj.dims and _obj[index_dim].dims[0] == index_dim:
+        # infer y dim
+        if y_name is None and x_name is not None:
+            for name in raster.YDIMS:
+                if name in self._obj:
+                    if self._obj[name].dims[0] == index_dim:
+                        y_name = name
+                        break
+        if (
+            x_name is not None
+            and y_name is not None
+            and self._obj[x_name].ndim == 1
+            and self._obj[x_name].dims == self._obj[y_name].dims
+        ):
+            self.set_attrs(x_name=x_name)
+            self.set_attrs(y_name=y_name)
+            self.set_attrs(geom_format="xy")
             self.set_attrs(index_dim=index_dim)
         else:
-            raise ValueError(
-                "index dimension not found. Use 'set_spatial_dims'"
-                + " functions with correct index_dim argument provided."
-            )
-        if x_dim in names and _obj[x_dim].dims[0] == index_dim:
-            self.set_attrs(x_dim=x_dim)
+            self.attrs.pop("x_name", None)
+            self.attrs.pop("y_name", None)
+            self.attrs.pop("geom_format", None)
+            self.attrs.pop("index_dim", None)
+
+    def _discover_geom(self, geom_name=None, index_dim=None):
+        # check /infer geom dim
+        names, types = self._get_geom_names_types(geom_name=geom_name)
+        if geom_name is None:
+            if index_dim is not None:
+                names = [name for name in names if self._obj[name].dims[0] == index_dim]
+            # priority for geometry named variable/coord
+            if "geometry" in names:
+                geom_name = "geometry"
+            # otherwise take first of type geom
+            elif len(names) >= 1:
+                idx = 0
+                if "geom" in types:
+                    idx = types.index("geom")
+                geom_name = names[idx]
+        elif geom_name not in names:
+            raise ValueError(f"{geom_name} variable not recognized as geometry.")
+
+        if geom_name is not None:
+            self.set_attrs(geom_name=geom_name)
+            self.set_attrs(geom_format=types[names.index(geom_name)])
+            self.set_attrs(index_dim=self._obj[geom_name].dims[0])
         else:
-            raise ValueError(
-                "x dimension not found. Use 'set_spatial_dims'"
-                + " functions with correct x_dim argument provided."
-            )
-        # infer y dim
-        if y_dim is None:
-            for dim in raster.YDIMS:
-                if dim in names:
-                    if _obj[dim].dims[0] == index_dim:
-                        y_dim = dim
-                        break
-        # set dims
-        if y_dim in names and _obj[y_dim].dims[0] == index_dim:
-            self.set_attrs(y_dim=y_dim)
-        else:
-            raise ValueError(
-                "y dimension not found. Use 'set_spatial_dims'"
-                + " functions with correct y_dim argument provided."
-            )
+            self.attrs.pop("geom_name", None)
+            self.attrs.pop("geom_format", None)
+            self.attrs.pop("index_dim", None)
+
+    def set_spatial_dims(
+        self,
+        geom_name=None,
+        x_name=None,
+        y_name=None,
+        index_dim=None,
+        geom_format=None,
+    ):
+        if geom_format != "xy":
+            self._discover_geom(geom_name=geom_name, index_dim=index_dim)
+            self.attrs.pop("x_name", None)
+            self.attrs.pop("y_name", None)
+        if "geom_name" not in self.attrs:
+            self._discover_xy(x_name=x_name, y_name=y_name, index_dim=index_dim)
+            self.attrs.pop("geom_name", None)
+        elif "geom_name" not in self.attrs:
+            raise ValueError("No geometry data found.")
 
     @property
-    def bounds(self):
-        """Return the bounds (xmin, ymin, xmax, ymax) of the object."""
-        xmin, xmax = self.xcoords.min(), self.xcoords.max()
-        ymin, ymax = self.ycoords.min(), self.ycoords.max()
-        return np.array([xmin, ymin, xmax, ymax])
+    def geom_format(self):
+        if self.get_attrs("geom_format") not in self._obj.dims:
+            self.set_spatial_dims()
+        if "geom_format" in self.attrs:
+            return self.attrs["geom_format"]
 
     @property
-    def total_bounds(self):
-        """Return the bounds (xmin, ymin, xmax, ymax) of the object."""
-        return self.bounds()  # mimic geopandas
+    def geom_name(self):
+        if self.get_attrs("geom_name") not in self._obj.dims:
+            self.set_spatial_dims()
+        if "geom_name" in self.attrs:
+            return self.attrs["geom_name"]
+
+    @property
+    def geom_type(self):
+        """Return geometry type"""
+        geom_types = self.geometry.type.values
+        if len(set(geom_types)) > 1:
+            # TODO: can we safely assume there is multi geom?
+            i = ["MULTI" in g.upper() for g in geom_types].index(True)
+            geom_type = geom_types[i]
+        else:
+            geom_type = geom_types[0]
+        del geom_types
+        return geom_type
+
+    @property
+    def x_name(self):
+        if self.get_attrs("x_name") not in self._obj.dims:
+            self.set_spatial_dims()
+        if "x_name" in self.attrs:
+            return self.attrs["x_name"]
+
+    @property
+    def y_name(self):
+        if self.get_attrs("y_name") not in self._obj.dims:
+            self.set_spatial_dims()
+        if "y_name" in self.attrs:
+            return self.attrs["y_name"]
 
     @property
     def index_dim(self):
-        """Index dimension name."""
         if self.get_attrs("index_dim") not in self._obj.dims:
             self.set_spatial_dims()
-        return self.attrs["index_dim"]
+        if "index_dim" in self.attrs:
+            return self.attrs["index_dim"]
 
     @property
     def time_dim(self):
@@ -122,117 +189,231 @@ class GeoBase(raster.XGeoBase):
         dim = self.get_attrs("time_dim")
         if dim not in self._obj.dims or np.dtype(self._obj[dim]).type != np.datetime64:
             self.set_attrs(time_dim=None)
-            _dims = self._obj.dims
-            tdims = [
-                dim for dim in _dims if np.dtype(self._obj[dim]).type == np.datetime64
-            ]
+            tdims = []
+            for dim in self._obj.dims:
+                if np.dtype(self._obj[dim]).type == np.datetime64:
+                    tdims.append(dim)
             if len(tdims) == 1:
                 self.set_attrs(time_dim=tdims[0])
         return self.get_attrs("time_dim")
 
     @property
     def index(self):
+        """Return the index values"""
         return self._obj[self.index_dim]
 
     @property
-    def sindex(self):
-        if self._sindex is None:
-            # TODO find out if/ how this works at antimeridian line
-            # TODO can we initiate this without geopandas in the middle?
-            self._sindex = self.to_gdf().sindex
-        return self._sindex
+    def size(self):
+        """Return the length of the index array"""
+        return self._obj[self.index_dim].size
 
     @property
-    def geometry(self):
-        return gpd.points_from_xy(self.xcoords, self.ycoords)
+    def bounds(self):
+        """Return the bounds (xmin, ymin, xmax, ymax) of the object."""
+        return self.geometry.total_bounds
 
     @property
-    def has_sindex(self):
-        """Check the existence of the spatial index without generating it.
-        Use the `.sindex` attribute on a GeoDataFrame or GeoSeries
-        to generate a spatial index if it does not yet exist,
-        which may take considerable time based on the underlying index
-        implementation.
-
-        Note that the underlying spatial index may not be fully
-        initialized until the first use.
-
-        See Also
-        ---------
-        GeoDataFrame.has_sindex
+    def geometry(self) -> GeoSeries:
+        """Return the geometry of the dataset or array as GeoSeries
 
         Returns
         -------
-        bool
-            `True` if the spatial index has been generated or
-            `False` if not.
+        GeoSeries
+            A Series object with shapely geometries
         """
-        return self._sindex is not None
+        if self._geometry is not None and self._geometry.index.size == self.size:
+            return self._geometry
+        gtype = self.geom_format
+        if gtype not in ["geom", "xy", "wkt"]:
+            raise ValueError("No valid geometry found in object.")
+        if gtype == "geom":
+            geoms = GeoSeries(
+                data=self._obj[self.geom_name].values,
+                index=self.index.values,
+                crs=self.crs,
+            )
+        elif gtype == "xy":
+            geoms = GeoSeries.from_xy(
+                x=self._obj[self.x_name].values,
+                y=self._obj[self.y_name].values,
+                index=self.index.values,
+                crs=self.crs,
+            )
+        elif gtype == "wkt":
+            geoms = GeoSeries.from_wkt(
+                data=self._obj[self.geom_name].values,
+                index=self.index.values,
+                crs=self.crs,
+            )
+        geoms.index.name = self.index_dim
+        self._geometry = geoms
+        return geoms
 
-    def to_crs(self, dst_crs):
-        """Transform spatial coordinates to a new coordinate reference system.
+    def update_geometry(
+        self,
+        geometry: GeoSeries = None,
+        geom_format: str = None,
+        geom_name: str = None,
+        x_name: str = None,
+        y_name: str = None,
+        replace: bool = True,
+    ):
+        if geom_format is None:
+            geom_format = self.geom_format
+        if geometry is None:
+            geometry = self.geometry
+        elif not isinstance(geometry, GeoSeries):
+            raise ValueError(f"geometry should be a GeoSeries object")
+        elif geometry.size != self.size:
+            raise ValueError(
+                f'The sizes of geometry and index dim "{self.index_dim}" do not match'
+            )
 
-        The ``crs`` attribute on the current GeoDataArray must be set.
+        # update geometry and drop old
+        drop_vars = []
+        if self.geom_format != geom_format:
+            if geom_format != "xy":
+                drop_vars = [self.x_name, self.y_name]
+            else:
+                drop_vars = [self.geom_name]
 
-        Arguments
-        ----------
-        dst_crs: int, dict, or str, optional
-            Accepts EPSG codes (int or str); proj (str or dict) or wkt (str)
+        index_dim = self.index_dim
+        if geom_format == "geom":
+            if geom_name is None:
+                geom_name = self.attrs.get("geom_name", "geometry")
+            elif self.geom_name != geom_name:
+                drop_vars.append(self.geom_name)
+            coords = {geom_name: (self.index_dim, geometry.values)}
+        elif geom_format == "wkt":
+            if geom_name is None:
+                geom_name = self.attrs.get("geom_name", "ogc_wkt")
+            elif self.geom_name != geom_name:
+                drop_vars.append(self.geom_name)
+            coords = {geom_name: (self.index_dim, geometry.to_wkt().values)}
+        elif geom_format == "xy":
+            if x_name is None:
+                x_name = self.attrs.get("x_name", "x")
+            elif self.x_name != x_name:
+                drop_vars.append(self.x_name)
+            if y_name is None:
+                y_name = self.attrs.get("y_name", "y")
+            elif self.y_name != y_name:
+                drop_vars.append(self.y_name)
+            coords = {
+                x_name: (self.index_dim, geometry.x.values),
+                y_name: (self.index_dim, geometry.y.values),
+            }
+        obj = self._obj.copy()
+        if replace:
+            obj = obj.drop_vars(drop_vars, errors="ignore")
+        obj = obj.assign_coords(coords)
 
-        Returns
-        -------
-        da: xarray.DataArray
-            DataArray with transformed geospatial coordinates
-        """
-        if self.crs is None:
-            raise ValueError("Source CRS is missing. Use da.vector.set_crs(crs) first.")
-        _obj = self._obj.copy()  # shallow
-        gdf = self.to_gdf().to_crs(pyproj.CRS.from_user_input(dst_crs))
-        # TODO rename depending on crs
-        _obj.vector.set_crs(dst_crs)
-        _obj[self.x_dim] = xr.IndexVariable(self.index_dim, gdf.geometry.x)
-        _obj[self.y_dim] = xr.IndexVariable(self.index_dim, gdf.geometry.y)
-        # reset spatial index
-        self._sindex = None
-        return _obj
+        # reset spatial dims
+        obj.vector._geometry = geometry
+        obj.vector.set_spatial_dims(
+            index_dim=index_dim,
+            geom_format=geom_format,
+            geom_name=geom_name,
+            x_name=x_name,
+            y_name=y_name,
+        )
+        obj.vector.set_crs(geometry.crs)
+        return obj
 
-    def clip_bbox(self, bbox, buffer=None, create_sindex=False):
-        """Select point locations to bounding box.
+    # Internal conversion and selection methods
+    # i.e. produces xarray.Dataset/ xarray.DataArray
+    def ogr_compliant(self, reducer = None):
 
-        Arguments
-        ----------
-        bbox: tuple of floats
-            (xmin, ymin, xmax, ymax) bounding box
-        buffer: float, optional
-            buffer around bbox in crs units, None by default.
-        create_sindex: bool, optional
-            Create spatial index to query the data if it does not yet exist, False by
-            default.
+        obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
+        obj["ogc_wkt"].attrs = {
+            "long_name": "Geometry as ISO WKT",
+            "grid_mapping": "spatial_ref",
+        }
+        index_dim = self.index_dim
 
-        Returns
-        -------
-        da: xarray.DataArray
-            Clipped DataArray
-        """
-        if buffer is not None:
-            bbox = np.atleast_1d(bbox)
-            bbox[:2] -= buffer
-            bbox[2:] += buffer
-        if not self.has_sindex and create_sindex == False:
-            w, s, e, n = bbox
-            idx = np.where(
-                np.logical_and(
-                    np.logical_and(self.xcoords >= w, self.xcoords <= e),
-                    np.logical_and(self.ycoords >= s, self.ycoords <= n),
+        if isinstance(self._obj, xr.DataArray):
+            if self._obj.name is None:
+                self._obj.name = "values"
+            obj = obj.to_dataset()
+
+        if reducer is not None:
+            rdims = [dim for dim in obj.dims if dim != index_dim]
+            obj = obj.reduce(reducer, dim=rdims)
+
+        dtypes = {"i": "Integer64", "f": "Real", "U": "String"}
+        for name, da in obj.data_vars.items():
+            if not index_dim in da.dims:
+                continue
+            if reducer is not None:
+                rdims = [dim for dim in obj.dims if dim != index_dim]
+                obj[name] = obj[name].reduce(reducer, rdims)
+            # set ogr meta data
+            dtype = dtypes.get(obj[name].dtype.kind, None)
+            if dtype is not None:
+                obj[name].attrs.update(
+                    {
+                        "ogr_field_name": f"{name}",
+                        "ogr_field_type": dtype,
+                    }
                 )
-            )[0]
+                if dtype == "String":
+                    obj[name].attrs.update(
+                        {
+                            "ogr_field_width": 100,
+                        }
+                    )
+        obj = obj.drop_vars("spatial_ref", errors="ignore")
+        obj.vector.set_crs(self.crs)
+        obj = obj.assign_attrs(
+            {
+                "Conventions": "CF-1.6",
+                "GDAL": f"GDAL {GDAL_VERSION}",
+                "ogr_geometry_field": "ogc_wkt",
+                "ogr_layer_type": f"{self.geom_type}",
+            }
+        )
+        return obj
+
+    def to_geom(self, geom_name) -> Union[xr.DataArray, xr.Dataset]:
+        """Converts Dataset/ DataArray with xy or wkt geometries to shapely Geometries.
+
+        Returns
+        -------
+        xr.Dataset
+            Dataset with new geometry coordinates
+        """
+        return self.update_geometry(geom_format="geom", geom_name=geom_name)
+
+    def to_xy(self, x_name="x", y_name="y") -> Union[xr.DataArray, xr.Dataset]:
+        """Converts Dataset/ DataArray with Point geometries to x,y structure.
+
+        Returns
+        -------
+        xr.Dataset
+            Dataset with new x, y coordinates
+        """
+        return self.update_geometry(geom_format="xy", x_name=x_name, y_name=y_name)
+
+    def to_wkt(
+        self, ogr_compliant=False, reducer=None,
+    ) -> Union[xr.DataArray, xr.Dataset]:
+        """Converts geometries in Dataset/DataArray to wkt strings.
+
+        Returns
+        -------
+        xr.Dataset
+            Dataset with new ogc_wkt coordinate
+        """
+        # ogr compliant naming and attrs
+        if ogr_compliant:
+            obj = self.ogr_compliant(reducer=reducer)
         else:
-            idx = self.sindex.intersection(bbox)
-        return self._obj.isel({self.index_dim: idx})
+            obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
+        return obj
 
+    ## clip
     def clip_geom(self, geom, predicate="intersects"):
-        """Select point locations to geometry. 
-
+        """Select all geometries that intersect with the input geometry.
 
         Arguments
         ---------
@@ -250,188 +431,72 @@ class GeoBase(raster.XGeoBase):
         da: xarray.DataArray
             Clipped DataArray
         """
-        idx = gis_utils.filter_gdf(self.to_gdf(), geom=geom, predicate=predicate)
+        idx = gis_utils.filter_gdf(self.geometry, geom=geom, predicate=predicate)
         return self._obj.isel({self.index_dim: idx})
 
-
-@xr.register_dataarray_accessor("vector2")
-class GeoDataArray(GeoBase):
-    """This is a vector extension for xarray.DataArray 1D time series data
-    with geographical location information"""
-
-    @staticmethod
-    def from_gdf(
-        gdf,
-        array_like,
-        coords=None,
-        dims=None,
-        name=None,
-        index_dim=None,
-        keep_cols=True,
-    ):
-        """Parse GeoDataFrame object with point geometries to DataArray with
-        geospatial attributes and merge with ``array_like`` data.
+    def clip_bbox(self, bbox, crs=4326, buffer=None):
+        """Select point locations to bounding box.
 
         Arguments
-        ---------
-        gdf: geopandas GeoDataFrame
-            Spatial coordinates. The index should match the array_like index_dim and the
-            geometry column may only contain Point geometries.
-        array_like: array_like
-            Values for this array. Must be an ``numpy.ndarray``, ndarray like,
-            or castable to an ``ndarray``. If a self-described xarray or pandas
-            object, attempts are made to use this array's metadata to fill in
-            other unspecified arguments. A view of the array's data is used
-            instead of a copy if possible.
-        coords: sequence or dict of array_like, optional
-            Coordinates (tick labels) to use for indexing along each dimension.
-        dims: hashable or sequence of hashable, optional
-            Name(s) of the data dimension(s). Must be either a hashable (only
-            for 1D data) or a sequence of hashables with length equal to the
-            number of dimensions. If this argument is omitted, dimension names
-            default to ``['dim_0', ... 'dim_n']``.
-        index_dim: str, optional
-            Name of index dimension of array_like
-        keep_cols: bool, optional
-            If True, keep gdf columns as extra coordinates in dataset
+        ----------
+        bbox: tuple of floats
+            (xmin, ymin, xmax, ymax) bounding box
+        buffer: float, optional
+            buffer around bbox in crs units, None by default.
 
         Returns
         -------
         da: xarray.DataArray
-            DataArray with geospatial coordinates
+            Clipped DataArray
         """
-        # map gdf to ds coordinates
-        scoords, index_dim = gdf_to_coords(gdf, index_dim, keep_cols)
-        # add data
-        da = xr.DataArray(array_like, dims=dims, coords=coords, name=name)
-        # check if all data array contain index_dim
-        if index_dim not in da.dims:
-            raise ValueError(f"Index dimension {index_dim} not found on DataArray.")
-        if np.dtype(da[index_dim]).type != np.dtype(gdf.index).type:
-            try:
-                da[index_dim] = da[index_dim].astype(np.dtype(gdf.index).type)
-            except TypeError:
-                raise TypeError(
-                    "DataArray and GeoDataFrame index datatypes do not match."
-                )
-        da = da.reindex({index_dim: gdf.index}).assign_coords(scoords)
-        # set geospatial attributes
-        da.vector.set_spatial_dims(x_dim="x", y_dim="y", index_dim=index_dim)
-        if gdf.crs is not None:
-            da.vector.set_crs(gdf.crs)
-        if da.dims[0] != index_dim:
-            da = da.transpose(index_dim, ...)
-        return da
+        if buffer is not None:
+            bbox = np.atleast_1d(bbox)
+            bbox[:2] -= buffer
+            bbox[2:] += buffer
+        idx = gis_utils.filter_gdf(
+            self.geometry, bbox=bbox, crs=crs, predicate="intersects"
+        )
+        return self._obj.isel({self.index_dim: idx})
 
-    def to_gdf(self, reducer=None):
-        """Return geopandas GeoDataFrame with Point geometry based on DataArray
-        coordinates. If a reducer is passed the DataArray values are reduced along
-        all non-index dimensions and saved in a column with same name as the GeoDataFrame.
+    ## wrap GeoSeries functions
+    # TODO write general wrapper
+    def to_crs(self, dst_crs):
+        """Transform spatial coordinates to a new coordinate reference system.
+
+        The ``crs`` attribute on the current GeoDataArray must be set.
 
         Arguments
-        ---------
-        reducer: callable
-            input to ``xarray.DataArray.reducer`` func argument
+        ----------
+        dst_crs: int, dict, or str, optional
+            Accepts EPSG codes (int or str); proj (str or dict) or wkt (str)
 
         Returns
         -------
-        gdf: geopandas.GeoDataFrame
-            GeoDataFrame
+        xr.DataArray
+            DataArray with transformed geospatial coordinates
         """
-        gdf = gpd.GeoDataFrame(index=self.index, geometry=self.geometry, crs=self.crs)
-        gdf.index.name = self.index_dim
-        # keep 1D variables with matching index_dim
-        sdims = [self.y_dim, self.x_dim, self.index_dim, "geometry"]
-        for name in self._obj.coords:
-            dims = self._obj[name].dims
-            if name not in sdims and len(dims) == 1 and dims[0] == self.index_dim:
-                gdf[name] = self._obj[name].values
-        # keep reduced data variable
-        if reducer is not None:
-            name = self._obj.name if self._obj.name is not None else "values"
-            dims = [dim for dim in self._obj.dims if dim != self.index_dim]
-            gdf[name] = self._obj.reduce(reducer, dim=dims)
-        return gdf
+        if self.crs is None:
+            raise ValueError("Source CRS is missing. Use da.vector.set_crs(crs) first.")
+        geometry = self.geometry.to_crs(pyproj.CRS.from_user_input(dst_crs))
+        return self.update_geometry(geometry)
 
-    def interpolate(self, ds_like, method):
-        # look at spatial index method for
-        raise NotImplementedError()
-
-
-@xr.register_dataset_accessor("vector2")
-class GeoDataset(GeoBase):
-    """This is a vector extension for xarray.Dataset 1D time series data
-    with geographical location information"""
-
-    def __init__(self, xarray_obj):
-        super(GeoDataset, self).__init__(xarray_obj)
-        # placeholder
-        self._sindex = None
-
+    # Constructers
+    # i.e. from other datatypes or files
     @staticmethod
-    def from_gdf(gdf, data_vars={}, coords=None, index_dim=None, keep_cols=True):
-        """Creates Dataset with geospatial coordinates. The Dataset values are
-        reindexed to the gdf index.
-
-        Arguments
-        ---------
-        gdf: geopandas GeoDataFrame
-            Spatial coordinates. The index should match the df index and the geometry
-            columun may only contain Point geometries. Additional columns are also
-            parsed to the xarray DataArray coordinates.
-        data_vars: dict-like, DataArray or Dataset
-            A mapping from variable names to `xarray.DataArray` objects.
-            See `xarray.Dataset` for all options.
-            Aditionally it accepts `xarray.DataArray` with name property and `xarray.Dataset`.
-        coords: sequence or dict of array_like, optional
-            Coordinates (tick labels) to use for indexing along each dimension.
-        index_dim: str, optional
-            Name of index dimension in data_vars
-        keep_cols: bool, optional
-            If True, keep gdf columns as extra coordinates in dataset
-
-        Returns
-        -------
-        da: xarray.Dataset
-            Dataset with geospatial coordinates
-        """
-        # map gdf to ds coordinates
-        scoords, index_dim = gdf_to_coords(gdf, index_dim, keep_cols)
-        # add data
-        if data_vars is not None and len(data_vars) > 0:
-            if isinstance(data_vars, xr.DataArray) and data_vars.name is not None:
-                data_vars = data_vars.to_dataset()
-            if isinstance(data_vars, xr.Dataset):
-                ds_data = data_vars
-            else:
-                ds_data = xr.Dataset(data_vars, coords=coords)
-            # check if any data array contain index_dim
-            if index_dim not in ds_data.dims:
-                raise ValueError(f"Index dimension {index_dim} not found in dataset.")
-            if np.dtype(ds_data[index_dim]).type != np.dtype(gdf.index).type:
-                try:
-                    ds_data[index_dim] = ds_data[index_dim].astype(
-                        np.dtype(gdf.index).type
-                    )
-                except TypeError:
-                    raise TypeError(
-                        "Dataset and GeoDataFrame index datatypes do not match."
-                    )
-            ds = ds_data.reindex({index_dim: gdf.index}).assign_coords(scoords)
-            ds = ds.transpose(index_dim, ...)
-        else:
-            ds = xr.Dataset(coords=scoords)
-        # set geospatial attributes
-        ds.vector.set_spatial_dims(x_dim="x", y_dim="y", index_dim=index_dim)
-        if gdf.crs is not None:
-            ds.vector.set_crs(gdf.crs)
+    def from_gdf(gdf: GeoSeries | GeoDataFrame) -> xr.Dataset:
+        if isinstance(gdf, GeoSeries):
+            gdf = gdf.to_frame("geometry")
+        geom_name = gdf._geometry_column_name
+        index_dim = gdf.index.name
+        if index_dim is None:
+            gdf.index.name = "index"
+        ds = gdf.to_xarray().set_coords(geom_name)
+        ds.vector.set_spatial_dims(geom_name=geom_name, index_dim=index_dim)
+        ds.vector.set_crs(gdf.crs)
         return ds
 
-    @property
-    def vars(self):
-        """list: Returns non-coordinate varibles"""
-        return list(self._obj.data_vars.keys())
-
+    ## Output methods
+    ## Either writes to files or other data types
     def to_gdf(self, reducer=None):
         """Return geopandas GeoDataFrame with Point geometry based on Dataset
         coordinates. If a reducer is passed the Dataset variables are reduced along
@@ -447,36 +512,147 @@ class GeoDataset(GeoBase):
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
-        gdf = gpd.GeoDataFrame(index=self.index, geometry=self.geometry, crs=self.crs)
-        gdf.index.name = self.index_dim
-        # keep 1D variables with matching index_dim
-        sdims = [self.y_dim, self.x_dim, self.index_dim, "geometry"]
-        for name in self._obj.reset_coords():
+        gdf = self.geometry.to_frame("geometry")
+        sdims = [self.y_name, self.x_name, self.index_dim, self.geom_name]
+        for name in self._all_names:
             dims = self._obj[name].dims
-            if name not in sdims and len(dims) == 1 and dims[0] == self.index_dim:
-                gdf[name] = self._obj[name].values
-        # keep reduced data variables
-        if reducer is not None:
-            for name in self.vars:
-                dims = [dim for dim in self._obj[name].dims if dim != self.index_dim]
-                gdf[name] = self._obj[name].reduce(reducer, dim=dims)
+            if name not in sdims:
+                # keep 1D variables with matching index_dim
+                if len(dims) == 1 and dims[0] == self.index_dim:
+                    gdf[name] = self._obj[name].values
+                # keep reduced data variables
+                elif reducer is not None and self.index_dim in self._obj[name].dims:
+                    rdims = [
+                        dim for dim in self._obj[name].dims if dim != self.index_dim
+                    ]
+                    gdf[name] = self._obj[name].reduce(reducer, dim=rdims)
         return gdf
 
+    def to_netcdf(
+        self,
+        path: str,
+        ogr_compliant: bool = False,
+        reducer=None,
+        **kwargs,
+    ):
+        """Export geodataset vectordata to an ogr compliant netCDF4 file
 
-def gdf_to_coords(gdf, index_dim=None, keep_cols=True):
-    """Returns coordinate dictionary of gdf"""
-    if not hasattr(gdf, "geometry"):
-        raise ValueError("Unknown data type for gdf, provide geopandas object.")
-    if not np.all(gdf.geometry.type == "Point"):
-        raise ValueError("gdf may only contain Point geometry.")
-    if index_dim is None:
-        index_dim = gdf.index.name if gdf.index.name is not None else "index"
-    coords = {
-        index_dim: xr.IndexVariable(index_dim, gdf.index),
-        "x": xr.IndexVariable(index_dim, gdf.geometry.x),
-        "y": xr.IndexVariable(index_dim, gdf.geometry.y),
-    }
-    if keep_cols:
-        for name in set(gdf.columns) - set(["geometry"]):
-            coords.update({name: xr.Variable(index_dim, gdf[name])})
-    return coords, index_dim
+        Parameters
+        ----------
+        path : str
+            Output path for netcdf file.
+        ogr_compliant : bool
+            write the netCDF4 file in an ogr compliant format
+            This makes it readable as a vector file in e.g. QGIS
+        """
+        if ogr_compliant:
+            self.ogr_compliant(reducer=reducer).to_netcdf(path, engine="netcdf4", **kwargs)
+        else:
+            self._obj.to_netcdf(path, engine="netcdf4", **kwargs)
+
+@xr.register_dataarray_accessor("vector")
+class GeoDataArray(GeoBase):
+    def __init__(self, xarray_obj):
+        super(GeoDataArray, self).__init__(xarray_obj)
+
+    # Constructers
+    # i.e. from other datatypes or files
+    @staticmethod
+    def from_netcdf(
+        path: str,
+        parse_geom=True,
+        geom_name=None,
+        x_name=None,
+        y_name=None,
+        crs=None,
+        **kwargs,
+    ) -> xr.DataArray:
+        """_summary_
+
+        Parameters
+        ----------
+        path : str
+            _description_
+
+        Returns
+        -------
+        xr.DataArray
+            _description_
+        """
+
+        da = xr.open_dataarray(path, **kwargs)
+        da.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
+        # force to geom_format "geom"
+        if parse_geom:
+            da = da.vector.update_geometry(geom_format="geom", replace=True)
+        da.vector.set_crs(input_crs=crs)  # try to parse from netcdf if None
+        return da
+
+
+@xr.register_dataset_accessor("vector")
+class GeoDataset(GeoBase):
+    def __init__(self, xarray_obj):
+        super(GeoDataset, self).__init__(xarray_obj)
+
+    # Internal conversion and selection methods
+    # i.e. produces xarray.Dataset/ xarray.DataArray
+    # Constructers
+    # i.e. from other datatypes or filess
+    @staticmethod
+    def from_gdf(gdf: gpd.GeoDataFrame, geom_format="geom") -> xr.Dataset:
+        """Creates Dataset with geospatial coordinates. The Dataset values are
+        reindexed to the gdf index.
+
+        Arguments
+        ---------
+        gdf: geopandas GeoDataFrame
+            Spatial coordinates. The index should match the df index and the geometry
+            columun may only contain Point geometries. Additional columns are also
+            parsed to the xarray DataArray coordinates.
+
+        Returns
+        -------
+        xr.Dataset
+            Dataset with geospatial coordinates
+        """
+        if isinstance(gdf, GeoSeries):
+            if gdf.name is None:
+                gdf.name = "geometry"
+            gdf = gdf.to_frame()
+        if not isinstance(gdf, GeoDataFrame):
+            raise ValueError(f"gdf data type not understood {type(gdf)}")
+        geom_name = gdf.geometry.name
+        ds = gdf.to_xarray().set_coords(geom_name)
+        ds.vector.set_spatial_dims(geom_name=geom_name, geom_format=geom_format)
+        ds.vector.set_crs(gdf.crs)
+        return ds
+
+    @staticmethod
+    def from_netcdf(
+        path: str,
+        parse_geom=True,
+        geom_name=None,
+        x_name=None,
+        y_name=None,
+        crs=None,
+        **kwargs,
+    ) -> xr.Dataset:
+        """Create GeoDataset from ogr compliant netCDF4 file
+
+        Parameters
+        ----------
+        path : str
+            Path to the netCDF4 file
+
+        Returns
+        -------
+        xr.Dataset
+            Dataset containing the geospatial data and attributes
+        """
+        ds = xr.open_dataset(path, **kwargs)
+        ds.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
+        # force geom_format= 'geom'
+        if parse_geom:
+            ds = ds.vector.update_geometry(geom_format="geom", replace=True)
+        ds.vector.set_crs(crs)  # try to parse from netcdf if None
+        return ds
