@@ -463,7 +463,18 @@ class XRasterBase(XGeoBase):
             ddy1 = ys[0, 1] - ys[0, 0]
             dx = math.hypot(ddx1, ddy1)  # always positive!
             dy = math.hypot(ddx0, ddy0)
-            if ddx1 <= 0 or ddy0 <= 0 and not (ddx1 <= 0 and ddy0 <= 0):
+            rot = self.rotation
+            acos = math.cos(math.radians(rot))
+            # find grid top-down orientation
+            if (
+                (acos < 0 and ddy0 > 0)
+                or (acos > 0 and ddy0 < 0)
+                or (
+                    ddy0 == 0
+                    and (np.isclose(rot, 270) and ddx0 < 0)
+                    or (np.isclose(rot, 90) and ddx0 > 0)
+                )
+            ):
                 dy = -1 * dy
         return dx, dy
 
@@ -630,9 +641,15 @@ class XRasterBase(XGeoBase):
         return bounds
 
     def flipud(self) -> xr.DataArray | xr.Dataset:
-        """Returns raster flipped along y-axis"""
-        yrev = list(reversed(self.ycoords))
-        return self._obj.reindex({self.y_dim: yrev})
+        """Returns raster flipped along y dimension"""
+        y_dim = self.y_dim
+        # NOTE don't use ycoords to work for rotated grids
+        yrev = self._obj[y_dim].values[::-1]
+        obj_filpud = self._obj.reindex({y_dim: yrev})
+        # y_dim is typically a dimension without coords in rotated grids
+        if y_dim not in self._obj:
+            obj_filpud = obj_filpud.drop_vars(y_dim)
+        return obj_filpud
 
     def rowcol(
         self, xs, ys, mask=None, mask_outside=False, nodata=-1
