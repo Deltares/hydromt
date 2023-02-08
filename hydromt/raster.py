@@ -647,7 +647,7 @@ class XRasterBase(XGeoBase):
         yrev = self._obj[y_dim].values[::-1]
         obj_filpud = self._obj.reindex({y_dim: yrev})
         # y_dim is typically a dimension without coords in rotated grids
-        if y_dim not in self._obj:
+        if y_dim not in self._obj.coords:
             obj_filpud = obj_filpud.drop_vars(y_dim)
         return obj_filpud
 
