@@ -51,7 +51,7 @@ def test_cli(tmpdir):
     assert os.path.isfile(os.path.join(root, "geoms", "region.geojson"))
 
     # test force overwrite
-    with pytest.raises(IOError, match="Model dir already exists"):
+    with pytest.raises(OSError, match="Model dir already exists"):
         r = CliRunner().invoke(hydromt_cli, cmd)
         raise r.exception
     r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])
