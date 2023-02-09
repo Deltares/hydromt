@@ -702,7 +702,7 @@ gdp_world_v1:
     source_author: Wilfred Altena
     source_license: CC BY-4.0
     source_version: 1.0
-  path: socio_economic/gdp_world/World_countries_GDPpcPPP.gpkg
+  path: socio_economic/gdp_world/World_countries_GDPpcPPP.fgb
   rename:
     GDP: gdp
   unit_mult:
@@ -1045,7 +1045,7 @@ grip_roads_v4:
     paper_doi: 10.1088/1748-9326/aabd42
     source_license: CC0-1.0
     source_version: v4
-  path: infrastructure/grip/GRIP4_world.gpkg
+  path: infrastructure/grip/GRIP4_world.fgb
   rename:
     GP_RTP: road_type
     GP_RCY: country_code
@@ -1062,7 +1062,7 @@ grwl_v1.01:
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.1297434
     source_version: 1.01
-  path: hydrography/grwl/GRWL_vector_V01.01/grwl.gpkg
+  path: hydrography/grwl/GRWL_vector_V01.01/grwl.fgb
 
 grwl_mask:
   alias: grwl_mask_v1.01
@@ -1386,7 +1386,7 @@ osm_coastlines_v20200109:
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
     source_version: 1.0
-  path: geography/osm/osm_coastlines-db.gpkg
+  path: geography/osm/osm_coastlines-db.fgb
   rename:
     fid: coastline_id
 
@@ -1403,7 +1403,7 @@ osm_landareas_v20200109:
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
     source_version: 1.0
-  path: geography/osm/osm_landareas-db.gpkg
+  path: geography/osm/osm_landareas-db.fgb
   rename:
     fid: land_id
 
@@ -1795,7 +1795,7 @@ wb_countries_v20200319:
     source_url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
     source_license: CC-BY 4.0
     timestamp: February 2020
-  path: geography/wb/WB_countries_Admin0.geojson
+  path: geography/wb/WB_countries_Admin0.fgb
   rename:
     ISO_A3: country_iso
     ISO_N3: country_code
