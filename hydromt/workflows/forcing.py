@@ -391,7 +391,7 @@ def pet(
                 temp["temp"],
                 temp["temp_max"],
                 temp["temp_min"],
-                ds["press"] / 10,
+                ds["press"],
                 ds["kin"],
                 ds["wind"],
                 ds["rh"],
@@ -403,7 +403,7 @@ def pet(
                 temp["temp"],
                 temp["temp_max"],
                 temp["temp_min"],
-                ds["press"] / 10,
+                ds["press"],
                 ds["kin"],
                 ds["wind"],
                 ds["temp_dew"],
@@ -645,7 +645,7 @@ def pm_fao56(
     nr = swr - lwr  # daily net radiation
 
     # Penman Monteith FAO-56
-    gamma = pyet.calc_psy(press)  # psychrometric constant
+    gamma = pyet.calc_psy(press / 10)  # psychrometric constant
     dlt = pyet.calc_vpc(
         temp
     )  # Slope of saturation vapour pressure curve at air Temperature [kPa °C-1].
