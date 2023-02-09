@@ -553,6 +553,18 @@ def write_map(
 
 
 def create_vrt(path: str, fname: str):
+    """Creates a .vrt file from a list op raster datasets
+
+    Parameters
+    ----------
+    path : str
+        path to the folder containing all the raster datasets
+        A file containing the list of all the raster datasets is needed
+        at this location.
+    fname : str
+        Name of the output vrt
+
+    """
     subprocess.run(
         [
             f"{PYTHON_PATH}\\Library\\bin\\gdalbuildvrt.exe",
