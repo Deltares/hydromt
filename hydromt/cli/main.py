@@ -52,8 +52,8 @@ region_opt = click.option(
     type=str,
     default="{}",
     callback=cli_utils.parse_json,
-    help="Set the region in which to search for data via a json."
-    " e.g. {'subbasin': <path-to-file>, 'strord': 5}",
+    help="Set the region for which to build the model,"
+    " e.g. {'subbasin': [-7.24, 62.09]}",
 )
 
 verbose_opt = click.option("--verbose", "-v", count=True, help="Increase verbosity.")
@@ -80,15 +80,15 @@ deltares_data_opt = click.option(
     "--deltares-data",
     is_flag=True,
     default=False,
-    help='Shortcut to add the "deltares_data" catalog',
+    help='Flag: Shortcut to add the "deltares_data" catalog',
 )
 
 overwrite_opt = click.option(
-    "-o",
-    "--overwrite",
+    "--fo",
+    "--force-overwrite",
     is_flag=True,
     default=False,
-    help="Flag: whether or not to overwrite existing files",
+    help="Flag: If provided overwrite existing model files",
 )
 
 ## MAIN
@@ -141,7 +141,7 @@ def build(
     region,
     data,
     dd,
-    overwrite,
+    fo,
     verbose,
     quiet,
 ):
@@ -169,7 +169,7 @@ def build(
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # Set region to None if empty string json
-    if region.__len__() == 0:
+    if len(region) == 0:
         region = None
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
@@ -178,9 +178,7 @@ def build(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
-        mode = "w"
-        if overwrite:
-            mode += "+"
+        mode = "w+" if fo else "w"
         mod = MODELS.load(model)(
             root=model_root,
             mode=mode,

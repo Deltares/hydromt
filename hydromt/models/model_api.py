@@ -403,6 +403,7 @@ class Model(object, metaclass=ABCMeta):
         mode : {"r", "r+", "w"}, optional
             read/append/write mode for model files
         """
+        ignore_ext = set([".log", ".yml"])
         if mode not in ["r", "r+", "w", "w+"]:
             raise ValueError(
                 f'mode "{mode}" unknown, select from "r", "r+", "w" or "w+"'
@@ -418,24 +419,24 @@ class Model(object, metaclass=ABCMeta):
                     path = join(self._root, name)
                     if not isdir(path):
                         os.makedirs(path)
-                    exts = set(
-                        [os.path.splitext(item)[1] for item in glob.glob(f"{path}\\*")]
-                    )
-                    for ext in ["", ".log", ".yml"]:
-                        if ext in exts:
-                            exts.remove(ext)
-                    if exts.__len__() != 0:
+                        continue
+                    # path already exists check files
+                    fns = glob.glob(f"{path}\\*.*")
+                    exts = set([os.path.splitext(fn)[1] for fn in fns])
+                    exts -= ignore_ext
+                    if len(exts) != 0:
                         if self._overwrite:
                             self.logger.warning(
                                 "Model dir already exists and "
                                 f"files might be overwritten: {path}."
                             )
                         else:
-                            self.logger.error(
-                                "Model dir already exists and "
-                                f"cannot be overwritten: {path}."
+                            msg = (
+                                f"Model dir already exists and cannot be overwritten: {path}."
+                                "Use 'mode=w+' to force overwrite existing files."
                             )
-                            raise IOError("Cannot overwrite, use '-o'")
+                            self.logger.error(msg)
+                            raise IOError(msg)
             # check directory
             elif not isdir(self._root):
                 raise IOError(f'model root not found at "{self._root}"')
