@@ -10,7 +10,6 @@ from hydromt.cli import api as hydromt_api
 
 
 def test_cli(tmpdir):
-
     r = CliRunner().invoke(hydromt_cli, "--version")
     assert r.exit_code == 0
     assert r.output.split()[-1] == __version__

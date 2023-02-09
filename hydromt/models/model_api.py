@@ -148,7 +148,7 @@ class Model(object, metaclass=ABCMeta):
                     v = args[i]
                 params[k] = v
         # log options
-        for (k, v) in params.items():
+        for k, v in params.items():
             if v is not inspect._empty:
                 self.logger.info(f"{method}.{k}: {v}")
         return func(*args, **kwargs)
