@@ -6,13 +6,8 @@ import numpy as np
 import geopandas as gpd
 import xarray as xr
 from shapely.geometry import box, Point, LineString
-from rasterio import features
 import dask
 import os
-import glob
-from os.path import join
-from pathlib import Path
-import rasterio
 from rasterio.transform import xy
 from osgeo import gdal
 
@@ -363,34 +358,35 @@ def test_zonal_stats():
 
 @pytest.fixture
 def dummy():
-    rast = raster.full_from_transform(
+    da = raster.full_from_transform(
         transform=[0.004166666666666666, 0.0, 0.0, 0.0, -0.004166666666666667, 0.0],
-        shape=(21600, 21600),
+        shape=(1024, 1000),
         nodata=-9999,
         name="dummy_tile_data",
         crs=4326,
     )
-    rast.values = np.random.randint(-5000, 5000, (21600, 21600))
-    return rast
+    return da
 
 
 def test_to_xyz(tmpdir, dummy):
     path = str(tmpdir)
     dummy.raster.to_xyz(
-        f"{path}\\dummy_xyz",
-        px=1024,
-        zoomlevels=[0],
+        os.path.join(path, "dummy_xyz"),
+        tile_size=256,
+        zoomlevels=[0, 2],
     )
-    f = open(f"{path}\\dummy_xyz\\0\\filelist.txt", "r")
-    assert len(f.readlines()) == 484
+    f = open(os.path.join(path, "dummy_xyz", "0", "filelist.txt"), "r")
+    assert len(f.readlines()) == 16
+    f = open(os.path.join(path, "dummy_xyz", "2", "filelist.txt"), "r")
+    assert len(f.readlines()) == 1
 
 
-def test_to_osm(tmpdir, dummy):
-    path = str(tmpdir)
-    dummy.raster.to_osm(
-        f"{path}\\dummy_osm",
-        zl=4,
-        bbox=(0, -45, 45, 0),
-    )
-    f = open(f"{path}\\dummy_osm\\3\\filelist.txt", "r")
-    assert len(f.readlines()) == 4
+# def test_to_osm(tmpdir, dummy):
+#     path = str(tmpdir)
+#     dummy.raster.to_osm(
+#         f"{path}\\dummy_osm",
+#         zl=4,
+#         bbox=(0, -45, 45, 0),
+#     )
+#     f = open(f"{path}\\dummy_osm\\3\\filelist.txt", "r")
+#     assert len(f.readlines()) == 4
