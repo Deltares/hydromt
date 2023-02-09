@@ -570,7 +570,7 @@ class GeoDataArray(GeoBase):
         geom_name = gdf.geometry.name
         if dims is None:
             dims = (index_dim, )
-        if len(dims) <= data.shape.__len__():
+        if dims.__len__() <= data.shape.__len__():
             dims += tuple([
                 f"dim{num}" for num in range(len(data.shape)-len(dims))
             ])
@@ -582,15 +582,23 @@ class GeoDataArray(GeoBase):
             coords = coords,
             dims = dims,
         )
-        other = {}
+        if index_dim not in da.dims:
+            raise ValueError(f"Index dimension {index_dim} not found on DataArray.")
+        if np.dtype(da[index_dim]).type != np.dtype(gdf.index).type:
+            try:
+                da[index_dim] = da[index_dim].astype(np.dtype(gdf.index).type)
+            except TypeError:
+                raise TypeError(
+                    "DataArray and GeoDataFrame index datatypes do not match."
+                )
         if keep_cols:
             hdrs = gdf.columns
         else:
             hdrs = [geom_name]
-        for hdr in hdrs:
-            other.update({hdr: (dims[0], gdf[hdr]),})
         da = da.assign_coords(
-            other
+            {
+                hdr: (dims[0], gdf[hdr]) for hdr in hdrs
+            }
         )
         if name is None:
             name = "data"
@@ -677,29 +685,38 @@ class GeoDataset(GeoBase):
         if isinstance(gdf, GeoSeries):
             if gdf.name is None:
                 gdf.name = "geometry"
-            if gdf.index.name is None:
-                gdf.index.name = "index"
             gdf = gdf.to_frame()
         if not isinstance(gdf, GeoDataFrame):
             raise ValueError(f"gdf data type not understood {type(gdf)}")
         if index_dim is None:
             index_dim = gdf.index.name if gdf.index.name is not None else "index"
         geom_name = gdf.geometry.name
+        if data_vars is not None and len(data_vars) > 0:
+            if isinstance(data_vars, xr.DataArray):
+               data_vars = data_vars.to_dataset()
+            elif isinstance(data_vars, xr.Dataset):
+                pass
+            else:
+                data_vars = xr.Dataset(
+                    data_vars,
+                    coords=coords,
+                    )
+            # check if any data array contain index_dim
+            if index_dim not in data_vars.dims:
+                raise ValueError(f"Index dimension {index_dim} not found in dataset.")
+            if np.dtype(data_vars[index_dim]).type != np.dtype(gdf.index).type:
+                try:
+                    data_vars[index_dim] = data_vars[index_dim].astype(
+                        np.dtype(gdf.index).type
+                    )
+                except TypeError:
+                    raise TypeError(
+                        "Dataset and GeoDataFrame index datatypes do not match."
+                    )
         if not keep_cols:
             gdf.drop(gdf.columns.drop(geom_name), axis=1, inplace=True)
         ds = gdf.to_xarray().set_coords(gdf.columns)
-        if data_vars is not None and len(data_vars) > 0:
-            if isinstance(data_vars, xr.DataArray):
-                ds = ds.assign(data_vars.to_dataset())
-            elif isinstance(data_vars, xr.Dataset):
-                ds = ds.assign(data_vars)
-            else:
-                ds = ds.assign(
-                    xr.Dataset(
-                    data_vars,
-                    coords=coords,
-                    ) 
-                )
+        ds = ds.assign(data_vars)
         ds = ds.transpose(index_dim, ...)
         ds.vector.set_spatial_dims(geom_name=geom_name, geom_format=geom_format)
         ds.vector.set_crs(gdf.crs)
