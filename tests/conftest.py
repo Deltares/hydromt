@@ -169,7 +169,7 @@ def griduda():
     gdf_da.index.name = "mesh2d_nFaces"
     uda = xu.UgridDataset.from_geodataframe(gdf_da)
     uda = uda["value"]
-    uda.name = "elevtn"
+    uda = uda.rename("elevtn")
 
     return uda
 

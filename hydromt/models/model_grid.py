@@ -30,9 +30,8 @@ class GridMixin(object):
     def grid(self):
         """Model static gridded data. Returns xarray.Dataset.
         Previously called staticmaps."""
-        if len(self._grid) == 0:
-            if self._read:
-                self.read_grid()
+        if len(self._grid) == 0 and self._read:
+            self.read_grid()
         return self._grid
 
     def set_grid(
@@ -84,6 +83,7 @@ class GridMixin(object):
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         """
+        self._assert_read_mode
         for ds in self._read_nc(fn, **kwargs).values():
             self.set_grid(ds)
 
@@ -97,11 +97,12 @@ class GridMixin(object):
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         """
-        nc_dict = dict()
-        if len(self._grid) > 0:
-            # _write_nc requires dict - use dummy key
-            nc_dict.update({"grid": self._grid})
-        self._write_nc(nc_dict, fn, **kwargs)
+        if len(self._grid) == 0:
+            self.logger.debug("No grid data found, skip writing.")
+        else:
+            self._assert_write_mode
+            # _write_nc requires dict - use dummy 'grid' key
+            self._write_nc({"grid": self._grid}, fn, **kwargs)
 
 
 class GridModel(GridMixin, Model):
