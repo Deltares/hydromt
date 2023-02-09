@@ -421,7 +421,7 @@ class Model(object, metaclass=ABCMeta):
                         os.makedirs(path)
                         continue
                     # path already exists check files
-                    fns = glob.glob(f"{path}\\*.*")
+                    fns = glob.glob(join(path, "*.*"))
                     exts = set([os.path.splitext(fn)[1] for fn in fns])
                     exts -= ignore_ext
                     if len(exts) != 0:
