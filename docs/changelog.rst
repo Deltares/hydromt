@@ -12,6 +12,7 @@ Unreleased
 Added
 -----
 - New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
+- Support for polygon and linestrings in wkt or shapely geometry formats in GeoDataset/GeoDataArray
 
 Changed
 -------
@@ -28,6 +29,7 @@ Fixed
 
 Deprecated
 ----------
+- `x_dim`, `y_dim`, and `total_bounds` attributes of GeoDataset/GeoDataArray are renamed to `x_name`, `y_name` and `bounds`
 - Move pygeos to optional dependencies in favor of shapely 2.0.
 
 Documentation

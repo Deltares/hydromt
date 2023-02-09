@@ -198,10 +198,12 @@ def nearest(
     return gdf2.index.values[idx], dst
 
 
-def filter_gdf(gdf, geom=None, bbox=None, crs=4326, predicate="intersects"):
+def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
     """Filter GeoDataFrame geometries based on geometry mask or bounding box."""
     gtypes = (gpd.GeoDataFrame, gpd.GeoSeries, BaseGeometry)
     if bbox is not None and geom is None:
+        if crs is None:
+            crs = gdf.crs
         geom = gpd.GeoSeries([box(*bbox)], crs=crs)
     elif geom is not None and not isinstance(geom, gtypes):
         raise ValueError(
