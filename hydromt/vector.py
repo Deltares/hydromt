@@ -321,7 +321,20 @@ class GeoBase(raster.XGeoBase):
 
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
-    def ogr_compliant(self, reducer=None):
+    def ogr_compliant(self, reducer=None) -> xr.Dataset:
+        """Creates a Dataset which is understood by ogr
+
+        Parameters
+        ----------
+        reducer : operator, optional
+            method by which multidimensional data is reduced to 1 dimensional
+            e.g. numpy.mean
+
+        Returns
+        -------
+        xr.Dataset
+            ogr compliant Dataset
+        """
         obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
         obj["ogc_wkt"].attrs = {
             "long_name": "Geometry as ISO WKT",
@@ -615,26 +628,36 @@ class GeoDataArray(GeoBase):
     @staticmethod
     def from_netcdf(
         path: str,
-        parse_geom=True,
-        geom_name=None,
-        x_name=None,
-        y_name=None,
-        crs=None,
+        parse_geom: bool = True,
+        geom_name: str =None,
+        x_name: str = None,
+        y_name: str = None,
+        crs: int = None,
         **kwargs,
     ) -> xr.DataArray:
-        """_summary_
+        """Read netcdf file as GeoDataArray
 
         Parameters
         ----------
         path : str
-            _description_
+            path to file
+        parse_geom : bool, optional
+            create geometry objects in place of existing geometry attr 
+        geom_name : str, optional
+            _description_, by default None
+        x_name : str, optional
+            Name of x coords array (only with point data)
+        y_name : str, optional
+            Name of y coords array (only with point data)
+        crs : int, optional
+            Projection of the data
+            If not given, it will be inferred.
 
         Returns
         -------
         xr.DataArray
-            _description_
+            DataArray with vector as accessor
         """
-
         da = xr.open_dataarray(path, **kwargs)
         da.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
         # force to geom_format "geom"
