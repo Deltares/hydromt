@@ -321,8 +321,7 @@ class GeoBase(raster.XGeoBase):
 
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
-    def ogr_compliant(self, reducer = None):
-
+    def ogr_compliant(self, reducer=None):
         obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
         obj["ogc_wkt"].attrs = {
             "long_name": "Geometry as ISO WKT",
@@ -394,7 +393,9 @@ class GeoBase(raster.XGeoBase):
         return self.update_geometry(geom_format="xy", x_name=x_name, y_name=y_name)
 
     def to_wkt(
-        self, ogr_compliant=False, reducer=None,
+        self,
+        ogr_compliant=False,
+        reducer=None,
     ) -> Union[xr.DataArray, xr.Dataset]:
         """Converts geometries in Dataset/DataArray to wkt strings.
 
@@ -482,7 +483,6 @@ class GeoBase(raster.XGeoBase):
     # Constructers
     # i.e. from other datatypes or files
 
-
     ## Output methods
     ## Either writes to files or other data types
     def to_gdf(self, reducer=None):
@@ -507,7 +507,12 @@ class GeoBase(raster.XGeoBase):
         else:
             obj = self._obj
         gdf = obj.vector.geometry.to_frame("geometry")
-        sdims = [obj.vector.y_name, obj.vector.x_name, obj.vector.index_dim, obj.vector.geom_name]
+        sdims = [
+            obj.vector.y_name,
+            obj.vector.x_name,
+            obj.vector.index_dim,
+            obj.vector.geom_name,
+        ]
         for name in obj.vector._all_names:
             dims = obj[name].dims
             if name not in sdims:
@@ -515,8 +520,7 @@ class GeoBase(raster.XGeoBase):
                 if len(dims) == 1 and dims[0] == obj.vector.index_dim:
                     gdf[name] = obj[name].values
                 # keep reduced data variables
-                elif (reducer is not None
-                    and obj.vector.index_dim in obj[name].dims):
+                elif reducer is not None and obj.vector.index_dim in obj[name].dims:
                     rdims = [
                         dim for dim in obj[name].dims if dim != obj.vector.index_dim
                     ]
@@ -542,11 +546,14 @@ class GeoBase(raster.XGeoBase):
             This makes it readable as a vector file in e.g. QGIS
         """
         if ogr_compliant:
-            self.ogr_compliant(reducer=reducer).to_netcdf(path, engine="netcdf4", **kwargs)
+            self.ogr_compliant(reducer=reducer).to_netcdf(
+                path, engine="netcdf4", **kwargs
+            )
         else:
             obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
             obj.to_netcdf(path, engine="netcdf4", **kwargs)
             del obj
+
 
 @xr.register_dataarray_accessor("vector")
 class GeoDataArray(GeoBase):
@@ -569,18 +576,18 @@ class GeoDataArray(GeoBase):
             index_dim = gdf.index.name if gdf.index.name is not None else "index"
         geom_name = gdf.geometry.name
         if dims is None:
-            dims = (index_dim, )
+            dims = (index_dim,)
         if dims.__len__() <= data.shape.__len__():
-            dims += tuple([
-                f"dim{num}" for num in range(len(data.shape)-len(dims))
-            ])
+            dims += tuple([f"dim{num}" for num in range(len(data.shape) - len(dims))])
         elif dims.__len__() >= data.shape.__len__():
-            raise OverflowError(f"No of dimensions should not exceed those of\
-                 the data -> {dims.__len__()} vs {data.shape.__len__()}")
+            raise OverflowError(
+                f"No of dimensions should not exceed those of\
+                 the data -> {dims.__len__()} vs {data.shape.__len__()}"
+            )
         da = xr.DataArray(
-            data = data,
-            coords = coords,
-            dims = dims,
+            data=data,
+            coords=coords,
+            dims=dims,
         )
         if index_dim not in da.dims:
             raise ValueError(f"Index dimension {index_dim} not found on DataArray.")
@@ -595,11 +602,7 @@ class GeoDataArray(GeoBase):
             hdrs = gdf.columns
         else:
             hdrs = [geom_name]
-        da = da.assign_coords(
-            {
-                hdr: (dims[0], gdf[hdr]) for hdr in hdrs
-            }
-        )
+        da = da.assign_coords({hdr: (dims[0], gdf[hdr]) for hdr in hdrs})
         if name is None:
             name = "data"
         da.name = name
@@ -651,22 +654,22 @@ class GeoDataset(GeoBase):
     @property
     def vars(self):
         """list: Returns non-coordinate varibles"""
-        return list(self._obj.data_vars.keys())    
+        return list(self._obj.data_vars.keys())
 
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
-    
+
     # Constructers
     # i.e. from other datatypes or filess
     @staticmethod
     def from_gdf(
-        gdf: gpd.GeoDataFrame, 
-        data_vars: dict = {} ,
+        gdf: gpd.GeoDataFrame,
+        data_vars: dict = {},
         coords: dict = None,
         geom_format: str = "geom",
         index_dim: str = None,
         keep_cols: bool = True,
-        ) -> xr.Dataset:
+    ) -> xr.Dataset:
         """Creates Dataset with geospatial coordinates. The Dataset values are
         reindexed to the gdf index.
 
@@ -693,14 +696,14 @@ class GeoDataset(GeoBase):
         geom_name = gdf.geometry.name
         if data_vars is not None and len(data_vars) > 0:
             if isinstance(data_vars, xr.DataArray):
-               data_vars = data_vars.to_dataset()
+                data_vars = data_vars.to_dataset()
             elif isinstance(data_vars, xr.Dataset):
                 pass
             else:
                 data_vars = xr.Dataset(
                     data_vars,
                     coords=coords,
-                    )
+                )
             # check if any data array contain index_dim
             if index_dim not in data_vars.dims:
                 raise ValueError(f"Index dimension {index_dim} not found in dataset.")

@@ -32,6 +32,7 @@ def test_geo(geoda, geodf):
     with pytest.raises(ValueError, match="gdf data type not understood"):
         vector.GeoDataset.from_gdf(geoda)
 
+
 def test_geo_clip(geoda, world):
     country = "Chile"
     geom = world[world["name"] == country]

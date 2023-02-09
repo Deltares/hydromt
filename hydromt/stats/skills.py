@@ -11,6 +11,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+
 # PERFORMANCE METRICS
 def bias(sim, obs, dim="time"):
     """Returns the bias between two time series.

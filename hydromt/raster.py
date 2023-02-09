@@ -815,6 +815,7 @@ class XRasterBase(XGeoBase):
         ds_out: xr.Dataset
             Output dataset with a variable for each column in reclass_table.
         """
+
         # Exact reclass method
         def reclass_exact(x, ddict):
             return np.vectorize(ddict.get)(x, np.nan)
