@@ -17,6 +17,7 @@ Added
 
 Changed
 -------
+- Support for rotated grids in RasterDataset/Array, with new rotation and origin properties `PR #272 <https://github.com/Deltares/hydromt/pull/272>`_
 - If the model root already contains files when setting root, this will cause an error unless force overwrite (mode='w+' or --fo/--force-overwrite) from command line `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
 - Removed resolution ('-r', '--res') from the hydromt build cli, made region (now '-r') an optional argument `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
 - Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 `PR #258 <https://github.com/Deltares/hydromt/pull/258>`_

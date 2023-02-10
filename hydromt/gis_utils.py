@@ -289,9 +289,9 @@ def meridian_offset(ds, x_name="x", bbox=None):
     lons = np.copy(ds[x_name].values)
     w, e = lons.min(), lons.max()
     if bbox is not None and bbox[0] < w and bbox[0] < -180:  # 180W - 180E > 360W - 0W
-        lons = np.where(lons > bbox[2], lons - 360, lons)
+        lons = np.where(lons > 0, lons - 360, lons)
     elif bbox is not None and bbox[2] > e and bbox[2] > 180:  # 180W - 180E > 0E-360E
-        lons = np.where(lons < bbox[0], lons + 360, lons)
+        lons = np.where(lons < 0, lons + 360, lons)
     elif e > 180:  # 0E-360E > 180W - 180E
         lons = np.where(lons > 180, lons - 360, lons)
     else:
@@ -304,8 +304,47 @@ def meridian_offset(ds, x_name="x", bbox=None):
 # TRANSFORM
 
 
-def affine_to_coords(transform, shape):
-    """Returs a raster axis with pixel center coordinates based on the transform.
+def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
+    """Returns a raster axis with pixel center coordinates based on the transform.
+
+    Parameters
+    ----------
+    transform : affine transform
+        Two dimensional affine transform for 2D linear mapping
+    shape : tuple of int
+        The height, width  of the raster.
+    x_dim, y_dim: str
+        The name of the x and y dimensions
+
+    Returns
+    -------
+    x, y coordinate arrays : dict of tuple with dims and coords
+    """
+    if not isinstance(transform, Affine):
+        transform = Affine(*transform)
+    height, width = shape
+    if transform.b == 0:
+        x_coords, _ = transform * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
+        _, y_coords = transform * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
+        coords = {
+            y_dim: (y_dim, y_coords),
+            x_dim: (x_dim, x_coords),
+        }
+    else:
+        x_coords, y_coords = (
+            transform
+            * transform.translation(0.5, 0.5)
+            * np.meshgrid(np.arange(width), np.arange(height))
+        )
+        coords = {
+            "yc": ((y_dim, x_dim), y_coords),
+            "xc": ((y_dim, x_dim), x_coords),
+        }
+    return coords
+
+
+def affine_to_meshgrid(transform, shape):
+    """Returns a mesgrid of pixel center coordinates based on the transform.
 
     Parameters
     ----------
@@ -316,13 +355,17 @@ def affine_to_coords(transform, shape):
 
     Returns
     -------
-    x, y coordinate arrays : tuple of ndarray of float
+    x_coords, y_coords: ndarray
+        2D arrays of x and y coordinates
     """
     if not isinstance(transform, Affine):
         transform = Affine(*transform)
     height, width = shape
-    x_coords, _ = transform * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
-    _, y_coords = transform * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
+    x_coords, y_coords = (
+        transform
+        * transform.translation(0.5, 0.5)
+        * np.meshgrid(np.arange(width), np.arange(height))
+    )
     return x_coords, y_coords
 
 
