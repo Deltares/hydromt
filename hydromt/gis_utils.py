@@ -312,6 +312,8 @@ def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
         Two dimensional affine transform for 2D linear mapping
     shape : tuple of int
         The height, width  of the raster.
+    x_dim, y_dim: str
+        The name of the x and y dimensions
 
     Returns
     -------
@@ -352,7 +354,8 @@ def affine_to_meshgrid(transform, shape):
 
     Returns
     -------
-    x, y coordinate arrays : dict of tuple with dims and coords
+    x_coords, y_cours: ndarray 
+        2D arrays of x and y coordinates
     """
     if not isinstance(transform, Affine):
         transform = Affine(*transform)

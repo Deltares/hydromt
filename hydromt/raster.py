@@ -35,8 +35,8 @@ import math
 from . import gis_utils, _compat
 
 logger = logging.getLogger(__name__)
-XDIMS = ("xc", "x", "longitude", "lon", "long")
-YDIMS = ("yc", "y", "latitude", "lat")
+XDIMS = ("x", "longitude", "lon", "long")
+YDIMS = ("y", "latitude", "lat")
 GEO_MAP_COORD = "spatial_ref"
 
 
@@ -110,6 +110,8 @@ def full(
         If True return DataArray with a dask rather than numpy array.
     shape: tuple, optional
         Length along (dim0, y, x) dimensions, of which the first is optional.
+    dims: tuple, optional
+        Name(s) of the data dimension(s). 
 
     Returns
     -------
@@ -1024,7 +1026,9 @@ class XRasterBase(XGeoBase):
         else:
             return self._obj.sel({self.x_dim: slice(x0, x1), self.y_dim: slice(y0, y1)})
 
-    def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
+    # TODO make consistent with clip_geom
+    # def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
+    def clip_mask(self, mask: xr.DataArray):
         """Clip object to region with mask values greater than zero.
 
         Arguments
@@ -1039,17 +1043,16 @@ class XRasterBase(XGeoBase):
         xarray.DataSet or DataArray
             Data clipped to mask
         """
-        if not isinstance(da_mask, xr.DataArray):
+        if not isinstance(mask, xr.DataArray):
             raise ValueError("da_mask should be xarray.DataArray type.")
-        if not da_mask.raster.shape == self.shape:
+        if not mask.raster.shape == self.shape:
             raise ValueError("da_mask shape invalid.")
-        mask_bin = (da_mask.values != 0).astype(np.uint8)
+        mask_bin = (mask.values != 0).astype(np.uint8)
         if np.sum(mask_bin) == 0:
             raise ValueError("Invalid mask.")
         row_slice, col_slice = ndimage.find_objects(mask_bin)[0]
         self._obj.coords["mask"] = xr.Variable(self.dims, mask_bin)  # TODO remove!
-        if mask:
-            self._obj = self._obj.raster.mask(self._obj.coords["mask"])
+        self._obj = self._obj.raster.mask(self._obj.coords["mask"])
         return self._obj.isel({self.x_dim: col_slice, self.y_dim: row_slice})
 
     def clip_geom(self, geom, align=None, buffer=0, mask=False):
