@@ -30,6 +30,11 @@ To check which HydroMT model plugins are installed, do:
     hydromt --models
     
 
+.. NOTE::
+    From version 0.7.0 onwards it is required to add a ``-r (--region)`` flag before REGION when defining a region with the CLI. 
+    Prior to this change the ``-r`` flag was reserved for resolution. 
+    Resolution for gridded models now have to be set in the .ini configuration files, e.g., under setup_basemaps for HydroMT-Wflow.
+
 **Example usage**
 
 The following line of code builds a SFINCS model for a region defined by a bounding box ``bbox`` and based on the model methods 
@@ -38,10 +43,6 @@ in the ``sfincs_config.ini`` file and the data sources in the ``data_catalog.yml
 .. code-block:: console
 
     hydromt build sfincs /path/to/model_root -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini -d /path/to/data_catalog.yml -v
-
-.. NOTE::
-    From version 0.7.0 onwards it is required to add a -r(--region) flag before REGION when defining a region with the CLI. 
-    Prior to this change the -r flag was reserved for resolution. Resolution has now been moved to the .ini configuration files as an argument for setup_basemaps.
 
 
 The following line of code builds a SFINCS model for a region defined by a bounding box ``bbox`` and based on the model methods 
