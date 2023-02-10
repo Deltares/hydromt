@@ -1,6 +1,6 @@
 meta:
   root: p:/wflow_global/hydromt
-  version: 2022.7
+  version: 2023.2
 
 basin_atlas_level12_v10: 
   crs: 4326
@@ -466,7 +466,7 @@ era5_daily:
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
     source_version: ERA5 daily data on pressure levels
-  path: meteo/era5_daily/nc_merged/era5_*_daily.nc
+  path: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
   rename:
     msl: press_msl
     ssrd: kin
@@ -513,7 +513,7 @@ era5_hourly:
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
     source_version: ERA5 hourly data on pressure levels
-  path: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
+  path: meteo/era5/{variable}/era5_{variable}_{year}*_hourly.nc
   rename:
     msl: press_msl
     ssrd: kin
