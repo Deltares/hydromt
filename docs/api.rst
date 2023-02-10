@@ -381,6 +381,7 @@ Data handling
    workflows.forcing.temp
    workflows.forcing.press
    workflows.forcing.pet
+   workflows.forcing.wind
 
 
 Correction methods
