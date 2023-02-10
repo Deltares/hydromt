@@ -1,0 +1,20 @@
+[setup_config]
+"header.settings" = "value"
+"timers.start" = "2010-02-05"
+"timers.end" = "2010-02-15"
+
+[setup_region]
+hydrography_fn = "merit_hydro"
+basin_index_fn = "merit_hydro_index"
+
+[setup_maps_from_raster]
+raster_fn = "merit_hydro_1k"
+variables = "elevtn"
+
+[setup_maps_from_raster_reclass]
+raster_fn = "vito"
+reclass_table_fn = "vito_reclass"
+reclass_variables = [ "manning",]
+
+[write]
+components = [ "config", "geoms", "maps",]

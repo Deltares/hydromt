@@ -1,0 +1,80 @@
+[global]
+data_libs = []
+
+[setup_config]
+starttime = "2010-01-01T00:00:00"
+endtime = "2010-03-31T00:00:00"
+timestepsecs = 86400
+"input.path_forcing" = "inmaps-era5-2010.nc"
+
+[setup_basemaps]
+hydrography_fn = "merit_hydro"
+basin_index_fn = "merit_hydro_index"
+upscale_method = "ihu"
+
+[setup_rivers]
+hydrography_fn = "merit_hydro"
+river_geom_fn = "rivers_lin2019_v1"
+river_upa = 30
+rivdph_method = "powlaw"
+min_rivdph = 1
+min_rivwth = 30
+slope_len = 2000
+smooth_len = 5000
+
+[setup_reservoirs]
+reservoirs_fn = "hydro_reservoirs"
+min_area = 1.0
+priority_jrc = true
+
+[setup_lakes]
+lakes_fn = "hydro_lakes"
+min_area = 10.0
+
+[setup_glaciers]
+glaciers_fn = "rgi"
+min_area = 1.0
+
+[setup_lulcmaps]
+lulc_fn = "globcover"
+
+[setup_laimaps]
+lai_fn = "modis_lai"
+
+[setup_soilmaps]
+soil_fn = "soilgrids"
+ptf_ksatver = "brakensiek"
+
+[setup_gauges]
+gauges_fn = "grdc"
+snap_to_river = true
+derive_subcatch = false
+
+[setup_precip_forcing]
+precip_fn = "era5_daily_zarr"
+precip_clim_fn = false
+
+[setup_temp_pet_forcing]
+temp_pet_fn = "era5_daily_zarr"
+press_correction = true
+temp_correction = true
+dem_forcing_fn = "era5_orography"
+pet_method = "debruin"
+skip_pet = false
+
+[setup_constant_pars]
+KsatHorFrac = 100
+Cfmax = 3.75653
+cf_soil = 0.038
+EoverR = 0.11
+InfiltCapPath = 5
+InfiltCapSoil = 600
+MaxLeakage = 0
+rootdistpar = -500
+TT = 0
+TTI = 2
+TTM = 0
+WHC = 0.1
+G_Cfmax = 5.3
+G_SIfrac = 0.002
+G_TT = 1.3
