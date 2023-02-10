@@ -479,6 +479,8 @@ Attributes
    DataArray.raster.bounds
    DataArray.raster.transform
    DataArray.raster.res
+   DataArray.raster.rotation
+   DataArray.raster.origin
    DataArray.raster.nodata
    DataArray.raster.dims
    DataArray.raster.coords
