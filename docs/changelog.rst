@@ -13,9 +13,12 @@ Added
 -----
 - New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
 - Support for polygon and linestrings in wkt or shapely geometry formats in GeoDataset/GeoDataArray
+- Added a 'Working with GeoDatasets' python notebook
 
 Changed
 -------
+- Revamped the GeoDataset (vector.py) to now work with geometry objects and wkt strings besides xy coordinates `PR #276 <https://github.com/Deltares/hydromt/pull/276>`_
+- GeoDataset can write to .nc that is compliant with ogr
 - Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 `PR #258 <https://github.com/Deltares/hydromt/pull/258>`_
 - Changed shapely to require version '2.0.0' or later
 - strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_

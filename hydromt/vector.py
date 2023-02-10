@@ -57,7 +57,7 @@ class GeoBase(raster.XGeoBase):
         # infer x dim
         if x_name is None:
             for name in raster.XDIMS:
-                if name in self._obj:
+                if name in self._all_names:
                     dim0 = (
                         index_dim if index_dim is not None else self._obj[name].dims[0]
                     )
@@ -68,7 +68,7 @@ class GeoBase(raster.XGeoBase):
         # infer y dim
         if y_name is None and x_name is not None:
             for name in raster.YDIMS:
-                if name in self._obj:
+                if name in self._all_names:
                     if self._obj[name].dims[0] == index_dim:
                         y_name = name
                         break
@@ -388,9 +388,12 @@ class GeoBase(raster.XGeoBase):
         index_dim = self.index_dim
 
         if isinstance(self._obj, xr.DataArray):
-            if self._obj.name is None:
-                self._obj.name = "values"
-            obj = obj.to_dataset()
+            if obj.name in obj.coords:
+                obj = obj.reset_coords(obj.name)
+            else:
+                if obj.name is None:
+                    obj.name = "data"
+                obj = obj.to_dataset()
 
         if reducer is not None:
             rdims = [dim for dim in obj.dims if dim != index_dim]
