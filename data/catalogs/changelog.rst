@@ -6,7 +6,12 @@ deltares_data
 =============
 
 version: 2023.2
----------------
+----------------
+
+changed
+^^^^^^^
+- convert GeoPackage files to FlatGeoBuf for cloud compatibility
+- fix ERA5 nc files to read from archive of combined yearly and monthly files
 
 added
 ^^^^^
