@@ -16,6 +16,12 @@ Added
 - New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
 - Support for polygon and linestrings in wkt or shapely geometry formats in GeoDataset/GeoDataArray
 - Added a 'Working with GeoDatasets' python notebook
+- experimental: support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs, s3].
+  Profile information can be passed in the data catalog ``kwargs`` under **storage_options**.
+- new predefined catalog for cmip6 data stored on Google Cloud Storage ``cmip6_data``. Requires dependency gcsfs.
+- new predefined catalog for public data stored on Amazon Web Services ``aws_data``. Requires dependency s3fs.
+- support for CMIP6 dataset.
+- new preprocess function ``harmonise_dims`` for manipulation and harmonisation of array dimensions.
 
 Changed
 -------
@@ -28,6 +34,8 @@ Changed
 - Changed shapely to require version '2.0.0' or later
 - strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 - do not automatically read hydromt_data.yml file in model root `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- RasterDataset zarr driver: possiblility to read from several zarr stores. The datasets are then merged and ``preprocess`` can 
+  be applied similar to netcdf driver.
 
 Fixed
 -----

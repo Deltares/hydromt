@@ -35,6 +35,7 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
       crs: EPSG/WKT
       data_type: RasterDataset/GeoDataset/GeoDataFrame
       driver: raster/raster_tindex/netcdf/zarr/vector/vector_table
+      filesystem: local/gcs/s3
       kwargs:
         key: value
       meta:
@@ -82,7 +83,10 @@ The following are **required data source arguments**:
 
 A full list of **optional data source arguments** is given below
 
-- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. 
+- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data.
+- **filesystem** (required if different than local): specify if the data is stored locally or remotely (e.g cloud). Supported filesystems are *local* for local data,
+  *gcs* for data stored on Google Cloud Storage, and *aws* for data stored on Amazon Web Services. Profile or authentication information can be passed to ``kwargs`` via 
+  *storage_options*.  
 - **kwargs**: pairs of key value arguments to pass to the driver specific open data method (eg xr.open_mfdataset for netdcf raster, see the full list below).
   Only used if not crs can be inferred from the input data.
 - **meta** (recommended): additional information on the dataset organized in a sub-list. 
@@ -105,3 +109,8 @@ A full list of **optional data source arguments** is given below
 .. note::
 
   The **alias** argument will be deprecated and should no longer be used, see `github issue for more information <https://github.com/Deltares/hydromt/issues/148>`_
+
+.. warning::
+
+  Using cloud data is still experimental and only supported for *DataFrame*, *RasterDataset* and *Geodataset* with *zarr*. *RasterDataset* with *raster* driver is also possible
+  but in case of multiple files (mosaic) we strongly recommend using a vrt file for speed and computation efficiency. 

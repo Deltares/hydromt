@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from os.path import join
 import numpy as np
 import pandas as pd
@@ -21,6 +22,7 @@ class DataFrameAdapter(DataAdapter):
         self,
         path,
         driver=None,
+        filesystem="local",
         nodata=None,
         rename={},
         unit_mult={},
@@ -45,6 +47,9 @@ class DataFrameAdapter(DataAdapter):
             :py:func:`~pandas.read_fwf`.
             By default the driver is inferred from the file extension and falls back to
             'csv' if unknown.
+        filesystem: {'local', 'gcs', 's3'}, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            By default, local.
         nodata: (dictionary) float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Multiple nodata values can be provided in a list and differentiated between
@@ -65,6 +70,7 @@ class DataFrameAdapter(DataAdapter):
         super().__init__(
             path=path,
             driver=driver,
+            filesystem=filesystem,
             nodata=nodata,
             rename=rename,
             unit_mult=unit_mult,
@@ -143,8 +149,18 @@ class DataFrameAdapter(DataAdapter):
         For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
 
+        # Extract storage_options from kwargs to instantiate fsspec object correctly
+        if "storage_options" in self.kwargs:
+            kwargs = self.kwargs["storage_options"]
+            # For s3, anonymous connection still requires --no-sign-request profile to read the data
+            # setting environment variable works
+            if "anon" in kwargs:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
+            else:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
+        _ = self.resolve_paths(**kwargs)  # throw nice error if data not found
+
         kwargs = self.kwargs.copy()
-        _ = self.resolve_paths()  # throw nice error if data not found
 
         # read and clip
         logger.info(f"DataFrame: Read {self.driver} data.")

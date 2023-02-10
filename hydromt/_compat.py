@@ -7,6 +7,8 @@ HAS_PCRASTER = True  # don't check PCRASTER compat for now, see below
 HAS_SHAPELY20 = False
 HAS_PYET = False
 HAS_PYGEOS = False
+HAS_GCSFS = False
+HAS_S3FS = False
 
 try:
     from shapely import __version__ as SH_VERSION
@@ -36,6 +38,22 @@ try:
     import xugrid
 
     HAS_XUGRID = True
+except ImportError:
+    pass
+
+try:
+    import gcsfs
+
+    HAS_GCSFS = True
+
+except ImportError:
+    pass
+
+try:
+    import s3fs
+
+    HAS_S3FS = True
+
 except ImportError:
     pass
 
