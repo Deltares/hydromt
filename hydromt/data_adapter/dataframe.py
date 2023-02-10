@@ -47,7 +47,7 @@ class DataFrameAdapter(DataAdapter):
             :py:func:`~pandas.read_fwf`.
             By default the driver is inferred from the file extension and falls back to
             'csv' if unknown.
-        filesystem: {'local', 'gcs'}, optional
+        filesystem: {'local', 'gcs', 's3'}, optional
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
         nodata: (dictionary) float, int, optional

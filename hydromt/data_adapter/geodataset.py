@@ -59,7 +59,7 @@ class GeoDatasetAdapter(DataAdapter):
             for 'netcdf' :py:func:`xarray.open_mfdataset`.
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
-        filesystem: {'local', 'gcs'}, optional
+        filesystem: {'local', 'gcs', 's3'}, optional
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
         crs: int, dict, or str, optional

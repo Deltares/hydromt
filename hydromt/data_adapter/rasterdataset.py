@@ -63,7 +63,7 @@ class RasterDatasetAdapter(DataAdapter):
             for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
-        filesystem: {'local', 'gcs'}, optional
+        filesystem: {'local', 'gcs', 's3'}, optional
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
         crs: int, dict, or str, optional

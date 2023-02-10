@@ -56,7 +56,7 @@ class GeoDataFrameAdapter(DataAdapter):
             for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
-        filesystem: {'local', 'gcs'}, optional
+        filesystem: {'local', 'gcs', 's3'}, optional
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
         crs: int, dict, or str, optional

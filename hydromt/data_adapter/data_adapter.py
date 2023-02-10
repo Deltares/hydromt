@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import yaml
-import glob
 from upath import UPath
 from fsspec.implementations import local
 from string import Formatter
@@ -13,10 +12,20 @@ from itertools import product
 
 from .. import _compat
 
-
 __all__ = [
     "DataAdapter",
 ]
+
+FILESYSTEMS = ["local"]
+# Add filesystems from optional dependencies
+if _compat.HAS_GCSFS:
+    import gcsfs
+
+    FILESYSTEMS.append("gcs")
+if _compat.HAS_S3FS:
+    import s3fs
+
+    FILESYSTEMS.append("s3")
 
 
 def round_latlon(ds, decimals=5):
@@ -82,17 +91,6 @@ PREPROCESSORS = {
     "remove_duplicates": remove_duplicates,
     "harmonise_dims": harmonise_dims,
 }
-
-FILESYSTEMS = ["local"]
-# Add filesystems from optional dependencies
-if _compat.HAS_GCSFS:
-    import gcsfs
-
-    FILESYSTEMS.append("gcs")
-if _compat.HAS_S3FS:
-    import s3fs
-
-    FILESYSTEMS.append("s3")
 
 
 class DataAdapter(object, metaclass=ABCMeta):
