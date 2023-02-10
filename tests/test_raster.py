@@ -76,15 +76,15 @@ def test_crs():
     # check crs
     da[raster.GEO_MAP_COORD].attrs = dict()
     da.attrs.update(crs=4326)
-    da.to_dataset().raster.set_crs()
-    assert da.raster.crs.to_epsg() == 4326
+    ds = da.to_dataset()
+    ds.raster.set_crs()
+    assert ds.raster.crs.to_epsg() == 4326
     da[raster.GEO_MAP_COORD].attrs = dict()
     da.attrs.update(crs="unknown", epsg=4326)
     da.raster.set_crs()
     assert da.raster.crs.to_epsg() == 4326
     da[raster.GEO_MAP_COORD].attrs = dict()
     da.raster.set_crs("epsg:4326")
-    assert da.raster.crs.is_valid
     assert da.raster.crs.to_epsg() == 4326
 
 

@@ -19,7 +19,7 @@ import geopandas as gpd
 import xarray as xr
 import dask
 from affine import Affine
-from rasterio.crs import CRS
+from pyproj import CRS
 import rasterio.warp
 import rasterio.fill
 from rasterio import features
@@ -190,7 +190,8 @@ class XGeoBase(object):
         # create new coordinate with attributes in which to save x_dim, y_dim and crs.
         # other spatial properties are always calculated on the fly to ensure consistency with data
         if GEO_MAP_COORD not in self._obj.coords:
-            self._obj.coords[GEO_MAP_COORD] = xr.Variable((), 1)
+            # zero is used by rioxarray
+            self._obj.coords[GEO_MAP_COORD] = xr.Variable((), 0)
 
     @property
     def attrs(self) -> dict:
@@ -208,7 +209,58 @@ class XGeoBase(object):
     @property
     def crs(self) -> CRS:
         """Return Coordinate Reference System as :py:meth:`pyproj.CRS` object."""
-        return self._obj.rio.crs
+        if "crs_wkt" not in self.attrs:
+            self.set_crs()
+        if "crs_wkt" in self.attrs:
+            return pyproj.CRS.from_user_input(self.attrs["crs_wkt"])
+
+    def set_crs(self, input_crs=None):
+        """Set the Coordinate Reference System.
+
+        Arguments
+        ----------
+        input_crs: int, dict, or str, optional
+            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
+        """
+        crs_names = ["crs_wkt", "crs", "epsg"]
+        names = list(self._obj.coords.keys())
+        if isinstance(self._obj, xr.Dataset):
+            names = names + list(self._obj.data_vars.keys())
+        # user defined
+        if input_crs is not None:
+            input_crs = pyproj.CRS.from_user_input(input_crs)
+        # look in grid_mapping and data variable attributes
+        else:
+            for name in crs_names:
+                # check default > GEO_MAP_COORDS attrs
+                crs = self._obj.coords[GEO_MAP_COORD].attrs.get(name, None)
+                if crs is None:  # global attrs
+                    crs = self._obj.attrs.pop(name, None)
+                for var in names:  # data var and coords attrs
+                    if name in self._obj[var].attrs:
+                        crs = self._obj[var].attrs.pop(name)
+                        break
+                if crs is not None:
+                    # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
+                    crs = crs.strip("+init=") if isinstance(crs, str) else crs
+                    try:
+                        input_crs = pyproj.CRS.from_user_input(crs)
+                        break
+                    except:
+                        pass
+        if input_crs is not None:
+            grid_map_attrs = input_crs.to_cf()
+            crs_wkt = input_crs.to_wkt()
+            grid_map_attrs["spatial_ref"] = crs_wkt
+            grid_map_attrs["crs_wkt"] = crs_wkt
+            self.set_attrs(**grid_map_attrs)
+
+
+class XRasterBase(XGeoBase):
+    """This is the base class for a Raster GIS extensions for xarray"""
+
+    def __init__(self, xarray_obj):
+        super(XRasterBase, self).__init__(xarray_obj)
 
     @property
     def x_dim(self) -> str:
@@ -302,44 +354,7 @@ class XGeoBase(object):
         if check_x == False or check_y == False:
             raise ValueError("raster only applies to regular grids")
 
-    def set_crs(self, input_crs: int | dict | str | CRS | None = None) -> None:
-        """Set the Coordinate Reference System.
-
-        Arguments
-        ----------
-        input_crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
-        """
-        crs_names = ["crs_wkt", "crs", "epsg"]
-        names = list(self._obj.coords.keys())
-        if isinstance(self._obj, xr.Dataset):
-            names = names + self.vars
-        # user defined
-        if input_crs is not None:
-            input_crs = CRS.from_user_input(input_crs)
-        # look in grid_mapping and data variable attributes
-        else:
-            for name in crs_names:
-                # check default > GEO_MAP_COORDS attrs
-                crs = self._obj.coords[GEO_MAP_COORD].attrs.get(name, None)
-                if crs is None:  # global attrs
-                    crs = self._obj.attrs.pop(name, None)
-                for var in names:  # data var and coords attrs
-                    if name in self._obj[var].attrs:
-                        crs = self._obj[var].attrs.pop(name)
-                        break
-                if crs is not None:
-                    # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
-                    crs = crs.strip("+init=") if isinstance(crs, str) else crs
-                    try:
-                        input_crs = CRS.from_user_input(crs)
-                        break
-                    except:
-                        pass
-        if input_crs is not None:
-            self._obj.rio.write_crs(input_crs, inplace=True)
-
-    def reset_spatial_dims_attrs(self) -> xr.DataArray | xr.Dataset:
+    def reset_spatial_dims_attrs(self):
         """Reset spatial dimension names and attributes to make CF-compliant
         Requires CRS attribute."""
         if self.crs is None:
@@ -352,13 +367,6 @@ class XGeoBase(object):
         _da[y_dim].attrs.update(y_attrs)
         _da.raster.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
         return _da
-
-
-class XRasterBase(XGeoBase):
-    """This is the base class for a Raster GIS extensions for xarray"""
-
-    def __init__(self, xarray_obj) -> None:
-        super(XRasterBase, self).__init__(xarray_obj)
 
     @property
     def dim0(self) -> str:
@@ -624,7 +632,7 @@ class XRasterBase(XGeoBase):
         ----------
         dst_crs: CRS, str, int, or dict
             Target coordinate reference system, input to
-            :py:meth:`rasterio.crs.CRS.from_user_input`
+            :py:meth:`pyproj.CRS.from_user_input`
         densify_pts: uint, optional
             Number of points to add to each edge to account for nonlinear
             edges produced by the transform process.  Large numbers will produce
@@ -1224,9 +1232,8 @@ class XRasterBase(XGeoBase):
         if self.crs.is_geographic:
             data = gis_utils.reggrid_area(self.ycoords.values, self.xcoords.values)
         elif self.crs.is_projected:
-            xres = abs(self.res[0]) * self.crs.linear_units_factor[1]
-            yres = abs(self.res[1]) * self.crs.linear_units_factor[1]
-            data = np.full(self.shape, xres * yres)
+            ucf = rasterio.crs.CRS.from_user_input(self.crs).linear_units_factor[1]
+            data = np.full(self.shape, abs(self.res[0] * self.res[0]) * ucf**2)
         da_area = xr.DataArray(
             data=data.astype(dtype), coords=self.coords, dims=self.dims
         )
@@ -1250,9 +1257,8 @@ class XRasterBase(XGeoBase):
             area = self.area_grid()
 
         elif self.crs.is_projected:
-            xres = abs(self.res[0]) * self.crs.linear_units_factor[1]
-            yres = abs(self.res[1]) * self.crs.linear_units_factor[1]
-            area = xres * yres
+            ucf = rasterio.crs.CRS.from_user_input(self.crs).linear_units_factor[1]
+            area = abs(self.res[0] * self.res[0]) * ucf**2
 
         # Create a grid that contains the density in unit/m2 per grid cell.
         unit = self._obj.attrs.get("unit", "")

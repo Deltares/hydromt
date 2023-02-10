@@ -6,7 +6,7 @@ from os.path import join, isfile
 import numpy as np
 import xarray as xr
 import rasterio
-from rasterio.crs import CRS
+from pyproj import CRS
 from rasterio.transform import Affine
 import geopandas as gpd
 from shapely.geometry.base import BaseGeometry
@@ -198,11 +198,13 @@ def nearest(
     return gdf2.index.values[idx], dst
 
 
-def filter_gdf(gdf, geom=None, bbox=None, predicate="intersects"):
+def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
     """Filter GeoDataFrame geometries based on geometry mask or bounding box."""
     gtypes = (gpd.GeoDataFrame, gpd.GeoSeries, BaseGeometry)
     if bbox is not None and geom is None:
-        geom = box(*bbox)
+        if crs is None:
+            crs = gdf.crs
+        geom = gpd.GeoSeries([box(*bbox)], crs=crs)
     elif geom is not None and not isinstance(geom, gtypes):
         raise ValueError(
             f"Unknown geometry mask type {type(geom).__name__}. "
