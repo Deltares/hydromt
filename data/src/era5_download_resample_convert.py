@@ -576,7 +576,6 @@ def update_zarr(
 
     print(f"writing to {fn_zarr}")
     for var in variables:
-
         # get start & end dates from files
         fns = join(ddir, var, f"era5_{var}_*.nc")
         if len(glob.glob(fns)) == 0:

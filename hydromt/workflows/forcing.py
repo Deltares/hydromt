@@ -286,7 +286,6 @@ def pet(
     resample_kwargs: dict = {},
     logger=logger,
 ) -> xarray.DataArray:
-
     """Determines reference evapotranspiration (lazy reprojection on model grid and resampling of time dimension to frequency).
 
     Parameters
@@ -458,7 +457,6 @@ def press_correction(
 
 
 def temp_correction(dem, lapse_rate=-0.0065):
-
     """Temperature correction based on elevation data.
 
     Parameters
