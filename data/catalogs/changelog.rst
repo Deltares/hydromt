@@ -5,6 +5,19 @@ Change log predefined datasets
 deltares_data 
 =============
 
+version: 2023.2
+---------------
+
+added
+^^^^^
+- Additional variables to era5 daily and hourly with name and unit conventions
+	- temp_dew: dewpoint temperature (degree C)
+	- wind10_u: 10m wind U-component (m s-1)
+	- wind10_v: 10m wind V-component (m s-1)
+	- ssr: surface net solar radiation (W m-2)
+	- tcc: total cloud cover (-)
+
+
 version: 2022.7
 ---------------
 

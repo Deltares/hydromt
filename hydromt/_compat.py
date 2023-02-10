@@ -5,6 +5,7 @@ __all__ = []
 HAS_XUGRID = False
 HAS_PCRASTER = True  # don't check PCRASTER compat for now, see below
 HAS_SHAPELY20 = False
+HAS_PYET = False
 HAS_PYGEOS = False
 
 try:
@@ -36,4 +37,12 @@ try:
 
     HAS_XUGRID = True
 except ImportError:
+    pass
+
+try:
+    import pyet
+
+    HAS_PYET = True
+
+except ModuleNotFoundError:
     pass
