@@ -11,6 +11,8 @@ Unreleased
 
 Added
 -----
+- New methods to compute PET in workflows.forcing.pet using Penman Monteith FAO-56 based on the `pyet` module. Available arguments are now
+  method = ['debruin', 'makkink', 'penman-monteith_rh_simple', 'penman-monteith_tdew'] `PR #266 <https://github.com/Deltares/hydromt/pull/266>`_
 - New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
 - experimental: support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs, s3].
   Profile information can be passed in the data catalog ``kwargs`` under **storage_options**.
@@ -32,6 +34,7 @@ Fixed
 -----
 - fix reading lists and none with config `PR #246 <https://github.com/Deltares/hydromt/pull/246>`_
 - fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- fixed `pet` (workflows.forcing), variables are now defined correctly
 
 Deprecated
 ----------

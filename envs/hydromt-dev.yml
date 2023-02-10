@@ -51,7 +51,7 @@ dependencies:
   - xugrid>=0.1.5 # optional for mesh
   - zarr
   - pip:
-    - hydroengine  # optional
+    - pyet
     - sphinx_design  # docs
     - sphinx_autosummary_accessors  # docs
 

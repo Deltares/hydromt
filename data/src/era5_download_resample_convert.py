@@ -27,6 +27,8 @@ era5_variables = {
     "u10": "10m_u_component_of_wind",
     "v10": "10m_v_component_of_wind",
     "d2m": "2m_dewpoint_temperature",
+    "ssr": "surface_net_solar_radiation",
+    "tcc": "total_cloud_cover",
 }
 daily_attrs = {
     "tp": {
@@ -61,6 +63,16 @@ daily_attrs = {
         "units": "m s**-1",
         "long_name": "Neutral wind at 10 m v-component",
         "standard_name": "10m_v_component_of_wind",
+    },
+    "ssr": {
+        "units": "J m**-2",
+        "long_name": "Surface net solar radiation",
+        "standard_name": "surface_net_downward_shortwave_flux",
+    },
+    "tcc": {
+        "units": "-",
+        "long_name": "Total cloud cover",
+        "standard_name": "cloud_area_fraction",
     },
 }
 
@@ -564,7 +576,6 @@ def update_zarr(
 
     print(f"writing to {fn_zarr}")
     for var in variables:
-
         # get start & end dates from files
         fns = join(ddir, var, f"era5_{var}_*.nc")
         if len(glob.glob(fns)) == 0:
@@ -649,6 +660,8 @@ if __name__ == "__main__":
         "u10",
         "v10",
         "d2m",
+        "ssr",
+        "tcc",
         "cape",
     ]
     # NOTE: CAPE excluded from daily values, not sure how it is used and thus how to aggregate
@@ -656,7 +669,7 @@ if __name__ == "__main__":
 
     # hydro / ocean
     # NOTE these are kept in different ddir
-    # variables_hour, ddir_hour = ['shww'], r'p:\wflow_global\hydromt\ocean\era5'
+    # variables_hour, ddir_hour = ["shww"], r"p:\wflow_global\hydromt\ocean\era5"
 
     print(f"downloading ..")
     update_hourly_nc(
