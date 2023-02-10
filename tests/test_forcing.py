@@ -3,14 +3,15 @@
 import pytest
 from hydromt.data_catalog import DataCatalog
 from hydromt.raster import full_from_transform
-from hydromt.workflows.forcing import precip
-import pandas as pd
+from hydromt.workflows.forcing import precip, pet
+import numpy as np
 import xarray as xr
+import hydromt._compat as compat
 
 
 def test_precip():
     cat = DataCatalog()
-    p_precip = cat.get_rasterdataset("era5", variables="precip")  # era horuly
+    p_precip = cat.get_rasterdataset("era5", variables="precip")  # era hourly
 
     # We create a more refined grid
     p_transform = p_precip.raster.transform
@@ -35,3 +36,15 @@ def test_precip():
     # Testing with freq argument
     pout_freq = precip(p_precip, grid, freq="H")
     assert pout_freq.sizes["time"] == 313
+
+
+@pytest.mark.skipif(not compat.HAS_PYET, reason="pyET not installed.")
+def test_pet():
+    cat = DataCatalog()
+    et_data = cat.get_rasterdataset("era5_daily_zarr")
+    dem = cat.get_rasterdataset("era5_orography").squeeze("time").drop("time")
+
+    peto = pet(et_data, et_data, dem, method="penman-monteith_tdew")
+
+    assert peto.raster.shape == dem.raster.shape
+    np.testing.assert_almost_equal(peto.mean(), 0.57746, decimal=4)

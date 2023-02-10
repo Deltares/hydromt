@@ -32,21 +32,21 @@ For example when using the :ref:`build <cli_build>` CLI method:
 
 .. code-block:: console
 
-    hydromt build MODEL REGION -d /path/to/data_catalog1.yml -d /path/to/data_catalog2.yml
+    hydromt build MODEL -r REGION -d /path/to/data_catalog1.yml -d /path/to/data_catalog2.yml
 
 Alternatively, you can also use names and versions of the :ref:`predefined data catalogs <existing_catalog>`.
 If no version is specified, the latest version available is used.
 
 .. code-block:: console
 
-    hydromt build MODEL REGION -d deltares_data=v2022.5 -d artifact_data
+    hydromt build MODEL -r REGION -d deltares_data=v2022.5 -d artifact_data
 
 A special exception is made for the Deltares data catalog which can be accessed with the 
 ``--dd (--deltares-data)`` flag (requires access to the Deltares P-drive).
 
 .. code-block:: console
 
-    hydromt build MODEL REGION --dd
+    hydromt build MODEL -r REGION --dd
 
 .. NOTE::
 

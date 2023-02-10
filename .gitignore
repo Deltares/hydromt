@@ -10,6 +10,7 @@ __pycache__/
 
 # Temporary
 tmp/
+sandbox/
 
 # Distribution / packaging
 .Python

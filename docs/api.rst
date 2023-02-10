@@ -381,6 +381,7 @@ Data handling
    workflows.forcing.temp
    workflows.forcing.press
    workflows.forcing.pet
+   workflows.forcing.wind
 
 
 Correction methods
@@ -411,6 +412,7 @@ Computation methods
 
    workflows.forcing.pet_debruin
    workflows.forcing.pet_makkink
+   workflows.forcing.pm_fao56
 
 =======================
 Reading/writing methods
@@ -477,6 +479,8 @@ Attributes
    DataArray.raster.bounds
    DataArray.raster.transform
    DataArray.raster.res
+   DataArray.raster.rotation
+   DataArray.raster.origin
    DataArray.raster.nodata
    DataArray.raster.dims
    DataArray.raster.coords
