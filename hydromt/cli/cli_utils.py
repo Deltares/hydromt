@@ -11,6 +11,7 @@ from typing import Union, Dict
 from pathlib import Path
 
 from .. import config
+from ..error import DeprecatedError
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,9 @@ def parse_json(ctx, param, value):
     if isfile(value):
         with open(value, "r") as f:
             kwargs = json.load(f)
+    # Catch old keyword for resulution "-r"
+    elif type(literal_eval(value)) in (float, int):
+        raise DeprecatedError("'-r' is used for region, resolution is deprecated")
     else:
         if value.strip("{").startswith("'"):
             value = value.replace("'", '"')

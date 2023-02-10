@@ -51,6 +51,7 @@ all = [
     "pcraster",
     "xugrid",
     "pygeos",
+    "pyet",
 ]
 test = [
     "black",

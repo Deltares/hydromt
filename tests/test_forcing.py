@@ -6,6 +6,7 @@ from hydromt.raster import full_from_transform
 from hydromt.workflows.forcing import precip, pet
 import numpy as np
 import xarray as xr
+import hydromt._compat as compat
 
 
 def test_precip():
@@ -37,6 +38,7 @@ def test_precip():
     assert pout_freq.sizes["time"] == 313
 
 
+@pytest.mark.skipif(not compat.HAS_PYET, reason="pyET not installed.")
 def test_pet():
     cat = DataCatalog()
     et_data = cat.get_rasterdataset("era5_daily_zarr")

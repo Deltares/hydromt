@@ -243,7 +243,8 @@ class GeoDatasetAdapter(DataAdapter):
             idim = ds_out.vector.index_dim
             if idim not in ds_out:  # set coordinates for index dimension if missing
                 ds_out[idim] = xr.IndexVariable(idim, np.arange(ds_out.dims[idim]))
-            coords = [ds_out.vector.x_dim, ds_out.vector.y_dim, idim]
+            coords = [ds_out.vector.x_name, ds_out.vector.y_name, idim]
+            coords = [item for item in coords if item is not None]
             ds_out = ds_out.set_coords(coords)
         except ValueError:
             raise ValueError(f"GeoDataset: No spatial coords found in data {self.path}")
@@ -264,12 +265,9 @@ class GeoDatasetAdapter(DataAdapter):
         if geom is not None:
             bbox = geom.to_crs(4326).total_bounds
         if ds_out.vector.crs.to_epsg() == 4326:
-            w, e = (
-                ds_out.vector.xcoords.values.min(),
-                ds_out.vector.xcoords.values.max(),
-            )
+            e = ds_out.vector.geometry.total_bounds[2]
             if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
-                ds_out = gis_utils.meridian_offset(ds_out, ds_out.vector.x_dim, bbox)
+                ds_out = gis_utils.meridian_offset(ds_out, ds_out.vector.x_name, bbox)
         if geom is not None:
             predicate = kwargs.pop("predicate", "intersects")
             ds_out = ds_out.vector.clip_geom(geom, predicate=predicate)

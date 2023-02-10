@@ -1,16 +1,13 @@
-import pytest
-from os.path import join, dirname, abspath
 import numpy as np
 import pandas as pd
+import pyflwdir
+import pytest
 import geopandas as gpd
 import xarray as xr
 
 from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
 from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
-import pyflwdir
-
-# DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture
@@ -110,12 +107,11 @@ def flwdir(demda):
 
 @pytest.fixture
 def flwda(flwdir):
-    xcoords, ycoords = gis_utils.affine_to_coords(flwdir.transform, flwdir.shape)
     da = xr.DataArray(
         name="flwdir",
         data=flwdir.to_array("d8"),
         dims=("y", "x"),
-        coords={"y": ycoords, "x": xcoords},
+        coords=gis_utils.affine_to_coords(flwdir.transform, flwdir.shape),
         attrs=dict(_FillValue=247),
     )
     da.raster.set_crs(3785)

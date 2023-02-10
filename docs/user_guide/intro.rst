@@ -143,4 +143,5 @@ Region                          Argument of the *build* and *clip* CLI methods t
    methods_main.rst
    methods_stats.rst
    ../_examples/working_with_raster.ipynb
+   ../_examples/working_with_geodatasets.ipynb
    ../_examples/working_with_flow_directions.ipynb
