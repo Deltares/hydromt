@@ -14,8 +14,13 @@ deltares_data:
 cmip6_data:
    urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/cmip6_data.yml
    versions:
-     v2022.12: main 
+     v2023.2: main 
    notes: This data uses CMIP6 data stored in Google Cloud Service.
+aws_data:
+   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/aws_data.yml
+   versions:
+     v2023.2: main 
+   notes: This data are stored in public Amazon Web Services.
 artifact_data:
    urlpath: https://github.com/DirkEilander/hydromt-artifacts/releases/download/{version}/data.tar.gz
    versions:

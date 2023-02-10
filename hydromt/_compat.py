@@ -1,4 +1,4 @@
-__all__ = ["HAS_PCRASTER", "HAS_XUGRID", "HAS_GCSFS"]
+__all__ = ["HAS_PCRASTER", "HAS_XUGRID", "HAS_GCSFS", "HAS_S3FS"]
 
 HAS_XUGRID = False
 HAS_PCRASTER = False
@@ -32,6 +32,14 @@ try:
     import gcsfs
 
     HAS_GCSFS = True
+
+except ImportError:
+    pass
+
+try:
+    import s3fs
+
+    HAS_S3FS = True
 
 except ImportError:
     pass

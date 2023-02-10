@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from os.path import join
 import numpy as np
 import pandas as pd
@@ -172,8 +173,24 @@ class GeoDatasetAdapter(DataAdapter):
         if variables:
             variables = np.atleast_1d(variables).tolist()
 
+        # Extract storage_options from kwargs to instantiate fsspec object correctly
+        if "storage_options" in self.kwargs and self.driver == "zarr":
+            kwargs = self.kwargs["storage_options"]
+            # For s3, anonymous connection still requires --no-sign-request profile to read the data
+            # setting environment variable works
+            if "anon" in kwargs:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
+            else:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
+        elif "storage_options" in self.kwargs:
+            raise NotImplementedError(
+                "Remote (cloud) GeoDataset only supported with driver zarr."
+            )
+        else:
+            kwargs = dict()
+        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables, **kwargs)
+
         kwargs = self.kwargs.copy()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
 
         # parse geom, bbox and buffer arguments
         clip_str = ""

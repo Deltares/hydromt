@@ -174,6 +174,12 @@ class GeoDataFrameAdapter(DataAdapter):
             variables = np.atleast_1d(variables).tolist()
 
         kwargs = self.kwargs.copy()
+        if "storage_options" in kwargs:
+            # not sure if storage options can be passed to fiona.open()
+            # for now throw NotImplemented Error
+            raise NotImplementedError(
+                "Remote file storage_options not implemented for GeoDataFrame"
+            )
         _ = self.resolve_paths()  # throw nice error if data not found
 
         # parse geom, bbox and buffer arguments
@@ -201,6 +207,7 @@ class GeoDataFrameAdapter(DataAdapter):
             # specific driver should be added to open_vector kwargs
             if "driver" not in kwargs and self.driver in ["csv", "xls", "xlsx", "xy"]:
                 kwargs.update(driver=self.driver)
+            # Check if file-object is required because of additional options
             gdf = io.open_vector(
                 self.path, crs=self.crs, geom=geom, predicate=predicate, **kwargs
             )

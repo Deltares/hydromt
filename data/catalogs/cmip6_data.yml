@@ -1,5 +1,5 @@
 meta:
-  version: 2022.12
+  version: 2023.2
 cmip6_{model}_historical_{member}_{timestep}:
   crs: 4326
   data_type: RasterDataset

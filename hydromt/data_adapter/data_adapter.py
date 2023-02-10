@@ -83,14 +83,16 @@ PREPROCESSORS = {
     "harmonise_dims": harmonise_dims,
 }
 
-FILESYSTEMS = {
-    "local": local.LocalFileSystem(),
-}
+FILESYSTEMS = ["local"]
 # Add filesystems from optional dependencies
 if _compat.HAS_GCSFS:
     import gcsfs
 
-    FILESYSTEMS["gcs"] = gcsfs.GCSFileSystem()
+    FILESYSTEMS.append("gcs")
+if _compat.HAS_S3FS:
+    import s3fs
+
+    FILESYSTEMS.append("s3")
 
 
 class DataAdapter(object, metaclass=ABCMeta):
@@ -161,7 +163,7 @@ class DataAdapter(object, metaclass=ABCMeta):
     def __repr__(self):
         return self.__str__()
 
-    def resolve_paths(self, time_tuple: Tuple = None, variables: list = None):
+    def resolve_paths(self, time_tuple: Tuple = None, variables: list = None, **kwargs):
         """Resolve {year}, {month} and {variable} keywords
         in self.path based on 'time_tuple' and 'variables' arguments
 
@@ -171,6 +173,8 @@ class DataAdapter(object, metaclass=ABCMeta):
             Start and end data in string format understood by :py:func:`pandas.to_timedelta`, by default None
         variables : list of str, optional
             List of variable names, by default None
+        **kwargs
+            key-word arguments are passed to fsspec FileSystem objects. Arguments depend on protocal (local, gcs, s3...).
 
         Returns
         -------
@@ -211,18 +215,9 @@ class DataAdapter(object, metaclass=ABCMeta):
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
             postfix += f"; variables: {variables}"
+
         # get filenames with glob for all date / variable combinations
-        try:
-            fs = FILESYSTEMS.get(self.filesystem)
-        except:
-            if filesystem == "gcs":
-                raise ModuleNotFoundError(
-                    "The gcsfs library is required to read data from gcs (Google Cloud Storage). Please install."
-                )
-            else:
-                raise ValueError(
-                    f"Unknown or unsupported filesystem {self.filesystem}. Use one of {FILESYSTEMS.keys()}"
-                )
+        fs = self.get_filesystem(**kwargs)
         for date, var in product(dates, vrs):
             fmt = {}
             if date is not None:
@@ -230,21 +225,6 @@ class DataAdapter(object, metaclass=ABCMeta):
             if var is not None:
                 fmt.update(variable=var)
             fns.extend(fs.glob(path.format(**fmt)))
-            # path_fmt = path.format(**fmt)
-            # # for pathlib.glob need to pass the * args in the pattern instead of whole path
-            # if '*' in path_fmt:
-            #     path_parent = UPath(path_fmt.split("*")[0])
-            #     if not path_parent.is_dir():
-            #         path_parent = path_parent.parent
-            #     #paths = [p for p in path_parent.glob(path_fmt.lstrip(str(path_parent)))]
-            #     path_end = UPath(path_fmt).parts[len(path_parent.parts):]
-            #     # pathlib.Path._flavour.sep is not officially part of the API...
-            #     paths = [p for p in path_parent.glob(path_parent._flavour.sep.join(path_end))]
-            #     fns.extend(paths)
-            # else:
-            #     p = UPath(path_fmt)
-            #     if p.exists():
-            #         fns.extend([p])
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {path}{postfix}")
         # With some fs like gcfs or s3fs, the first part of the past is not returned properly with glob
@@ -254,6 +234,31 @@ class DataAdapter(object, metaclass=ABCMeta):
             # add the rest of the path
             fns = [last_parent.joinpath(*UPath(fn).parts[1:]) for fn in fns]
         return list(set(fns))  # return unique paths
+
+    def get_filesystem(self, **kwargs):
+        """Return an initialised filesystem object based on self.filesystem and **kwargs"""
+        if self.filesystem == "local":
+            fs = local.LocalFileSystem(**kwargs)
+        elif self.filesystem == "gcs":
+            if _compat.HAS_GCSFS:
+                fs = gcsfs.GCSFileSystem(**kwargs)
+            else:
+                raise ModuleNotFoundError(
+                    "The gcsfs library is required to read data from gcs (Google Cloud Storage). Please install."
+                )
+        elif self.filesystem == "s3":
+            if _compat.HAS_S3FS:
+                fs = s3fs.S3FileSystem(**kwargs)
+            else:
+                raise ModuleNotFoundError(
+                    "The s3fs library is required to read data from s3 (Amazon Web Storage). Please install."
+                )
+        else:
+            raise ValueError(
+                f"Unknown or unsupported filesystem {self.filesystem}. Use one of {FILESYSTEMS}"
+            )
+
+        return fs
 
     @abstractmethod
     def get_data(self, bbox, geom, buffer):

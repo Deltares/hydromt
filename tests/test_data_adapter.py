@@ -66,7 +66,7 @@ def test_rasterdataset(rioda, tmpdir):
         data_catalog.get_rasterdataset("no_file.tif")
 
 
-def test_rasterdataset_cmip6(tmpdir):
+def test_gcs_cmip6(tmpdir):
     # TODO switch to pre-defined catalogs when pushed to main
     catalog_fn = join(CATALOGDIR, "cmip6_data.yml")
     data_catalog = DataCatalog(data_libs=[catalog_fn])
@@ -83,6 +83,18 @@ def test_rasterdataset_cmip6(tmpdir):
     # Write and compare
     ds1 = data_catalog.get_rasterdataset(fn_nc)
     assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
+
+
+def test_aws_copdem(tmpdir):
+    # TODO switch to pre-defined catalogs when pushed to main
+    catalog_fn = join(CATALOGDIR, "aws_data.yml")
+    data_catalog = DataCatalog(data_libs=[catalog_fn])
+    da = data_catalog.get_rasterdataset(
+        "esa_worldcover_2020_v100",
+        bbox=[12.0, 46.0, 12.5, 46.50],
+    )
+    assert da.name == "landuse"
+    assert da.max().values == 100
 
 
 def test_geodataset(geoda, geodf, ts, tmpdir):

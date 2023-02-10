@@ -11,8 +11,10 @@ Unreleased
 
 Added
 -----
-- new predefined catalog for cmip6 data stored on google cloud ``cmip6_data``.
-- support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs].
+- experimental: support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs, s3].
+  Profile information can be passed in the data catalog ``kwargs`` under **storage_options**.
+- new predefined catalog for cmip6 data stored on Google Cloud Storage ``cmip6_data``. Requires dependency gcsfs.
+- new predefined catalog for public data stored on Amazon Web Services ``aws_data``. Requires dependency s3fs.
 - support for CMIP6 dataset.
 - new preprocess function ``harmonise_dims`` for manipulation and harmonisation of array dimensions.
 
