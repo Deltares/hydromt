@@ -111,7 +111,7 @@ def full(
     shape: tuple, optional
         Length along (dim0, y, x) dimensions, of which the first is optional.
     dims: tuple, optional
-        Name(s) of the data dimension(s). 
+        Name(s) of the data dimension(s).
 
     Returns
     -------
@@ -1001,7 +1001,6 @@ class XRasterBase(XGeoBase):
             if crs != self.crs:
                 bbox = rasterio.warp.transform_bounds(crs, self.crs, *bbox)
         w, s, e, n = bbox
-
         if align is not None:
             align = abs(align)
             # align to grid
@@ -1009,52 +1008,54 @@ class XRasterBase(XGeoBase):
             s = (s // align) * align
             e = (e // align + 1) * align
             n = (n // align + 1) * align
-        xres, yres = self.res
-        y0, y1 = (n, s) if yres < 0 else (s, n)
-        x0, x1 = (e, w) if xres < 0 else (w, e)
-        if buffer > 0:
-            y0 -= yres * buffer
-            y1 += yres * buffer
-            x0 -= xres * buffer
-            x1 += xres * buffer
-        if self.rotation != 0:
-            # NOTE not sure what is expected when clipping a rotated grid with a bbox
-            # this keeps the largest grid where all row / col have at least one cell inside the bbox
-            w, e = min(x0, x1), max(x0, x1)
-            s, n = min(y0, y1), max(y0, y1)
-            gdf_mask = gpd.GeoDataFrame(geometry=[box(w, s, e, n)], crs=self.crs)
-            da_mask = self.geometry_mask(gdf_mask)
-            return self.clip_mask(da_mask)
+        if self.rotation > 1:  # update bbox based on clip to rotated box
+            gdf_bbox = gpd.GeoDataFrame(geometry=[box(w, s, e, n)], crs=self.crs).clip(
+                self.box
+            )
+            xs, ys = [w, e], [s, n]
+            if not np.all(gdf_bbox.is_empty):
+                xs, ys = zip(*gdf_bbox.dissolve().boundary[0].coords[:])
+            cs, rs = ~self.transform * (np.array(xs), np.array(ys))
+            c0 = max(round(int(cs.min() - buffer)), 0)
+            r0 = max(round(int(rs.min() - buffer)), 0)
+            c1 = int(round(cs.max() + buffer))
+            r1 = int(round(rs.max() + buffer))
+            return self._obj.isel(
+                {self.x_dim: slice(c0, c1), self.y_dim: slice(r0, r1)}
+            )
         else:
+            # TODO remove this part could also be based on row col just like the rotated
+            xres, yres = self.res
+            y0, y1 = (n, s) if yres < 0 else (s, n)
+            x0, x1 = (e, w) if xres < 0 else (w, e)
+            if buffer > 0:
+                y0 -= yres * buffer
+                y1 += yres * buffer
+                x0 -= xres * buffer
+                x1 += xres * buffer
             return self._obj.sel({self.x_dim: slice(x0, x1), self.y_dim: slice(y0, y1)})
 
     # TODO make consistent with clip_geom
-    # def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
-    def clip_mask(self, mask: xr.DataArray):
+    def clip_mask(self, mask):
         """Clip object to region with mask values greater than zero.
-
         Arguments
         ---------
-        da_mask : xarray.DataArray
+        mask : xarray.DataArray
             Mask array.
-        mask: bool, optional
-            Mask values outside geometry with the raster nodata value
-
         Returns
         -------
         xarray.DataSet or DataArray
             Data clipped to mask
         """
         if not isinstance(mask, xr.DataArray):
-            raise ValueError("da_mask should be xarray.DataArray type.")
+            raise ValueError("Mask should be xarray.DataArray type.")
         if not mask.raster.shape == self.shape:
-            raise ValueError("da_mask shape invalid.")
+            raise ValueError("Mask shape invalid.")
         mask_bin = (mask.values != 0).astype(np.uint8)
-        if np.sum(mask_bin) == 0:
+        if not np.any(mask_bin):
             raise ValueError("Invalid mask.")
         row_slice, col_slice = ndimage.find_objects(mask_bin)[0]
-        self._obj.coords["mask"] = xr.Variable(self.dims, mask_bin)  # TODO remove!
-        self._obj = self._obj.raster.mask(self._obj.coords["mask"])
+        self._obj.coords["mask"] = xr.Variable(self.dims, mask_bin)
         return self._obj.isel({self.x_dim: col_slice, self.y_dim: row_slice})
 
     def clip_geom(self, geom, align=None, buffer=0, mask=False):

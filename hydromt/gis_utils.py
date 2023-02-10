@@ -355,7 +355,7 @@ def affine_to_meshgrid(transform, shape):
 
     Returns
     -------
-    x_coords, y_cours: ndarray 
+    x_coords, y_coords: ndarray
         2D arrays of x and y coordinates
     """
     if not isinstance(transform, Affine):

@@ -226,36 +226,36 @@ def test_clip(transform, shape):
     w, s, _, n = da.raster.bounds
     e, _ = da.raster.transform * (shape[1] // 2, shape[0] // 2)
     gdf = gpd.GeoDataFrame(geometry=[box(w, s, e, n)], crs=da.raster.crs)
-    # test bbox
-    da_clip0 = da.raster.clip_bbox(gdf.total_bounds)
-    if da.raster.rotation != 0:
-        da_mask = da_clip0.coords["mask"]
-        assert da_mask.any("x").all() and da_mask.any("y").all()
-        return
-    assert np.all(np.isclose(da_clip0.raster.bounds, gdf.total_bounds))
     # test bbox - buffer
     da_clip = da.raster.clip_bbox(gdf.total_bounds, buffer=da.raster.width)
     assert np.all(np.isclose(da.raster.bounds, da_clip.raster.bounds))
+    # test bbox
+    da_clip0 = da.raster.clip_bbox(gdf.total_bounds)
+    # test geom
+    da_clip1 = da.raster.clip_geom(gdf)
+    assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
+    # test mask
+    da_clip1 = da.raster.clip_mask(da.raster.geometry_mask(gdf))
+    assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
+    # test geom - different crs
+    da_clip1 = da.raster.clip_geom(gdf.to_crs(3857))
+    assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
+
+    # these test are for non-rotated only
+    if da.raster.rotation != 0:
+        return
+    assert np.all(np.isclose(da_clip0.raster.bounds, gdf.total_bounds))
     # test bbox - align
     align = np.round(abs(da.raster.res[0] * 2), 2)
     da_clip = da.raster.clip_bbox(gdf.total_bounds, align=align)
     dalign = np.round(da_clip.raster.bounds[2], 2) % align
     assert np.isclose(dalign, 0) or np.isclose(dalign, align)
-    # test geom
-    da_clip1 = da.raster.clip_geom(gdf)
-    assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
-    # test geom - different crs
-    da_clip1 = da.raster.clip_geom(gdf.to_crs(3857))
-    assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
-    # test mask
-    da_clip1 = da.raster.clip_mask(da.raster.geometry_mask(gdf))
-    assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
 
 
 def test_clip_errors(rioda):
-    with pytest.raises(ValueError, match="da_mask should be xarray.DataArray type."):
+    with pytest.raises(ValueError, match="Mask should be xarray.DataArray type."):
         rioda.raster.clip_mask(rioda.values)
-    with pytest.raises(ValueError, match="da_mask shape invalid."):
+    with pytest.raises(ValueError, match="Mask shape invalid."):
         rioda.raster.clip_mask(rioda.isel({"x": slice(1, -1)}))
     with pytest.raises(ValueError, match="Invalid mask."):
         rioda.raster.clip_mask(xr.zeros_like(rioda))
