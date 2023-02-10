@@ -693,9 +693,9 @@ class GeoDataArray(GeoBase):
         geom_name = gdf.geometry.name
         # create DataArray from array_like data
         da = xr.DataArray(data=data, coords=coords, dims=dims)
-        # check dims
-        if dims is None:
-            da = da.rename({"dim_0": index_dim})
+        # check dims -> assume index dim is first dim if not provided
+        if dims is None and index_dim not in da.dims:
+            da = da.rename({list(da.dims)[0]: index_dim})
         if name is None:
             name = "data"
         da.name = name

@@ -584,9 +584,9 @@ Low level methods
    gis_utils.axes_attrs
    gis_utils.meridian_offset
 
-=============================
-Geospatial timeseries methods
-=============================
+==================
+GeoDataset methods
+==================
 
 High level methods
 ==================
