@@ -236,6 +236,8 @@ class RasterDatasetAdapter(DataAdapter):
             if "preprocess" in kwargs:  # for zarr preprocess is done after reading
                 preprocess = PREPROCESSORS.get(kwargs.pop("preprocess"), None)
                 do_preprocess = True
+            else:
+                do_preprocess = False
             ds_lst = []
             for fn in fns:
                 ds = xr.open_zarr(fn, **kwargs)
