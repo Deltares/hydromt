@@ -346,7 +346,8 @@ class XGeoBase(object):
             raise ValueError("CRS is missing. Use set_crs function to resolve.")
         _da = self._obj
         x_dim, y_dim, x_attrs, y_attrs = gis_utils.axes_attrs(self.crs)
-        _da = _da.rename({self.x_dim: x_dim, self.y_dim: y_dim})
+        if x_dim != self.x_dim or y_dim != self.y_dim:
+            _da = _da.rename({self.x_dim: x_dim, self.y_dim: y_dim})
         _da[x_dim].attrs.update(x_attrs)
         _da[y_dim].attrs.update(y_attrs)
         _da.raster.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
@@ -942,6 +943,7 @@ class XRasterBase(XGeoBase):
         ds_out: xr.Dataset
             Output dataset with a variable for each column in reclass_table.
         """
+
         # Exact reclass method
         def reclass_exact(x, ddict):
             return np.vectorize(ddict.get)(x, np.nan)

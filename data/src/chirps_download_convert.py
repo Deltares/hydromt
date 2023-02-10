@@ -56,7 +56,6 @@ def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
 
 
 def tifs_to_nc(folder, year):
-
     path = os.path.join(folder, str(year), f"chirps-v2.0.{year}*.tif*")
     nodata = -9999.0
     files = sorted(glob.glob(path))
@@ -67,7 +66,6 @@ def tifs_to_nc(folder, year):
     for i, f in enumerate(files):
         infile = gzip.open(f) if f.endswith("gz") else f
         with rasterio.open(infile) as src:
-
             print(f"processing file : {os.path.basename(f)}")
             data = src.read(1)
             src_profile = src.profile
@@ -115,7 +113,6 @@ def tifs_to_nc(folder, year):
 
 
 if __name__ == "__main__":
-
     outroot = r"p:\wflow_global\hydromt_staging\chirps"
 
     for year in range(2022, 2023):

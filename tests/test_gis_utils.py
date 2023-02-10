@@ -66,12 +66,7 @@ def test_gdf(world):
     country = world.iloc[[0], :].to_crs(3857)
     assert np.all(gu.filter_gdf(world, country) == 0)
     idx0 = gu.filter_gdf(world, bbox=[3, 51.5, 4, 52])[0]
-    assert (
-        world.iloc[
-            idx0,
-        ]["iso_a3"]
-        == "NLD"
-    )
+    assert world.iloc[idx0,]["iso_a3"] == "NLD"
     with pytest.raises(ValueError, match="Unknown geometry mask type"):
         gu.filter_gdf(world, geom=[3, 51.5, 4, 52])
 

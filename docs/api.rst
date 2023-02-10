@@ -381,6 +381,7 @@ Data handling
    workflows.forcing.temp
    workflows.forcing.press
    workflows.forcing.pet
+   workflows.forcing.wind
 
 
 Correction methods
@@ -411,6 +412,7 @@ Computation methods
 
    workflows.forcing.pet_debruin
    workflows.forcing.pet_makkink
+   workflows.forcing.pm_fao56
 
 =======================
 Reading/writing methods
@@ -513,6 +515,7 @@ General methods
    DataArray.raster.flipud
    DataArray.raster.area_grid
    DataArray.raster.density_grid
+   DataArray.raster.reclassify
 
 
 Nodata handling and interpolation

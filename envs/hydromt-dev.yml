@@ -30,7 +30,7 @@ dependencies:
   - pip
   - pydata-sphinx-theme  # docs
   - pyflwdir>=0.5.4
-  - pygeos>=0.8
+  - pygeos # optional dep of xugrid, required for mesh
   - pyproj
   - pytest # tests
   - pytest-cov # tests
@@ -43,13 +43,13 @@ dependencies:
   - scipy
   - testpath  # tests
   - toml
-  - shapely
+  - shapely>=2.0.0
   - sphinx # docs
   - xarray
   - xugrid>=0.1.5 # optional for mesh
   - zarr
   - pip:
-    - hydroengine  # optional
+    - pyet
     - sphinx_design  # docs
     - sphinx_autosummary_accessors  # docs
 

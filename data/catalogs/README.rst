@@ -15,7 +15,7 @@ The data is currently only stored on the deltares server: p:/wflow_global/hydrom
 
 preferred data formats to download
 -----------------------------------
-vector data: geopackage or geobuf (because they contain a spatial index and are therefore much faster)
+vector data: flatgeobuf (because they contain a spatial index and are therefore much faster)
 raster data (2D): cloud optimized geotiff
 raster data (3D): zarr
 

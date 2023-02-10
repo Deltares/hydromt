@@ -19,13 +19,12 @@ dependencies:
   - packaging
   - pip  # install
   - pyflwdir>=0.5.4
-  - pygeos>=0.8
   - pyproj
   - python>=3.8
   - rasterio
   - requests
   - rioxarray
   - scipy
-  - shapely
+  - shapely>=2.0.0
   - xarray
   - zarr

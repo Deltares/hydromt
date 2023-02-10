@@ -1,0 +1,7 @@
+example_csv_data:
+  path: example_csv_data.csv
+  data_type: DataFrame
+  driver: csv
+  kwargs:
+    parse_dates: true
+    index_col: time

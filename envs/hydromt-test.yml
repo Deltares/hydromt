@@ -9,6 +9,7 @@ dependencies:
   - black  # test
   - bottleneck
   - click
+  - coverage == 6.4 # tests
   - dask
   - entrypoints
   - gdal>=3.1
@@ -20,7 +21,7 @@ dependencies:
   - packaging
   - pcraster # optional
   - pyflwdir>=0.5.4
-  - pygeos>=0.8
+  - pygeos # optional dep of xugrid, required for mesh
   - pyproj
   - pytest # tests
   - pytest-cov # tests
@@ -29,7 +30,9 @@ dependencies:
   - requests
   - rioxarray
   - scipy
-  - shapely
+  - shapely>=2.0.0
   - xarray
   - xugrid>=0.1.5 # optional for mesh
   - zarr
+  - pip:
+    - pyet # optional for Penman Monteith PET
