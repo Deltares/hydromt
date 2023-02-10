@@ -11,10 +11,14 @@ Unreleased
 
 Added
 -----
+- New methods to compute PET in workflows.forcing.pet using Penman Monteith FAO-56 based on the `pyet` module. Available arguments are now
+  method = ['debruin', 'makkink', 'penman-monteith_rh_simple', 'penman-monteith_tdew'] `PR #266 <https://github.com/Deltares/hydromt/pull/266>`_
 - New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
 
 Changed
 -------
+- If the model root already contains files when setting root, this will cause an error unless force overwrite (mode='w+' or --fo/--force-overwrite) from command line `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
+- Removed resolution ('-r', '--res') from the hydromt build cli, made region (now '-r') an optional argument `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
 - Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 `PR #258 <https://github.com/Deltares/hydromt/pull/258>`_
 - Changed shapely to require version '2.0.0' or later
 - strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
@@ -24,10 +28,12 @@ Fixed
 -----
 - fix reading lists and none with config `PR #246 <https://github.com/Deltares/hydromt/pull/246>`_
 - fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- fixed `pet` (workflows.forcing), variables are now defined correctly
 
 Deprecated
 ----------
 - Move pygeos to optional dependencies in favor of shapely 2.0.
+- Resolution option in hydromt build cli
 
 Documentation
 -------------
