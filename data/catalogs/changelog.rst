@@ -46,3 +46,23 @@ changed
 fixed
 ^^^^^
 - enable versioning of yml.files
+
+cmip6_data
+==========
+
+version: 2023.2
+---------------
+
+added
+^^^^^
+- CMIP6 data from Google Cloud Storage. Only models and scenarios for which regular grids are available are listed
+
+aws_data
+========
+
+version: 2023.2
+---------------
+
+added
+^^^^^
+- ESA Worldcover v100 2020.

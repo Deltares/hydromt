@@ -62,6 +62,7 @@ def open_raster(
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
     if isinstance(filename, io.IOBase):  # file-like does not handle chunks
+        logger.warning("Removing chunks to read and load remote data.")
         kwargs.pop("chunks")
     # keep only 2D DataArray
     da = xr.open_dataset(filename, **kwargs)["data"].squeeze(drop=True)

@@ -12,6 +12,7 @@ dependencies:
   - coverage == 6.4 # tests
   - dask
   - entrypoints
+  - fsspec
   - gcsfs
   - gdal>=3.1
   - geopandas>=0.10
