@@ -17,6 +17,8 @@ Added
 
 Changed
 -------
+- If the model root already contains files when setting root, this will cause an error unless force overwrite (mode='w+' or --fo/--force-overwrite) from command line `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
+- Removed resolution ('-r', '--res') from the hydromt build cli, made region (now '-r') an optional argument `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
 - Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 `PR #258 <https://github.com/Deltares/hydromt/pull/258>`_
 - Changed shapely to require version '2.0.0' or later
 - strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
@@ -31,6 +33,7 @@ Fixed
 Deprecated
 ----------
 - Move pygeos to optional dependencies in favor of shapely 2.0.
+- Resolution option in hydromt build cli
 
 Documentation
 -------------
