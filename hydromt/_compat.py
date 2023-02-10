@@ -55,6 +55,9 @@ try:
     HAS_S3FS = True
 
 except ImportError:
+    pass
+
+try:
     import pyet
 
     HAS_PYET = True
