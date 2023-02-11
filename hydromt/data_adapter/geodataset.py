@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from os.path import join
 import numpy as np
 import pandas as pd
@@ -31,6 +32,7 @@ class GeoDatasetAdapter(DataAdapter):
         self,
         path,
         driver=None,
+        filesystem="local",
         crs=None,
         nodata=None,
         rename={},
@@ -56,6 +58,9 @@ class GeoDatasetAdapter(DataAdapter):
             for 'netcdf' :py:func:`xarray.open_mfdataset`.
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
+        filesystem: {'local', 'gcs', 's3'}, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            By default, local.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
             or wkt (str). Only used if the data has no native CRS.
@@ -79,6 +84,7 @@ class GeoDatasetAdapter(DataAdapter):
         super().__init__(
             path=path,
             driver=driver,
+            filesystem=filesystem,
             crs=crs,
             nodata=nodata,
             rename=rename,
@@ -165,8 +171,24 @@ class GeoDatasetAdapter(DataAdapter):
         if variables:
             variables = np.atleast_1d(variables).tolist()
 
+        # Extract storage_options from kwargs to instantiate fsspec object correctly
+        if "storage_options" in self.kwargs and self.driver == "zarr":
+            kwargs = self.kwargs["storage_options"]
+            # For s3, anonymous connection still requires --no-sign-request profile to read the data
+            # setting environment variable works
+            if "anon" in kwargs:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
+            else:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
+        elif "storage_options" in self.kwargs:
+            raise NotImplementedError(
+                "Remote (cloud) GeoDataset only supported with driver zarr."
+            )
+        else:
+            kwargs = dict()
+        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables, **kwargs)
+
         kwargs = self.kwargs.copy()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
 
         # parse geom, bbox and buffer arguments
         clip_str = ""
@@ -219,7 +241,8 @@ class GeoDatasetAdapter(DataAdapter):
             idim = ds_out.vector.index_dim
             if idim not in ds_out:  # set coordinates for index dimension if missing
                 ds_out[idim] = xr.IndexVariable(idim, np.arange(ds_out.dims[idim]))
-            coords = [ds_out.vector.x_dim, ds_out.vector.y_dim, idim]
+            coords = [ds_out.vector.x_name, ds_out.vector.y_name, idim]
+            coords = [item for item in coords if item is not None]
             ds_out = ds_out.set_coords(coords)
         except ValueError:
             raise ValueError(f"GeoDataset: No spatial coords found in data {self.path}")
@@ -240,12 +263,9 @@ class GeoDatasetAdapter(DataAdapter):
         if geom is not None:
             bbox = geom.to_crs(4326).total_bounds
         if ds_out.vector.crs.to_epsg() == 4326:
-            w, e = (
-                ds_out.vector.xcoords.values.min(),
-                ds_out.vector.xcoords.values.max(),
-            )
+            e = ds_out.vector.geometry.total_bounds[2]
             if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
-                ds_out = gis_utils.meridian_offset(ds_out, ds_out.vector.x_dim, bbox)
+                ds_out = gis_utils.meridian_offset(ds_out, ds_out.vector.x_name, bbox)
         if geom is not None:
             predicate = kwargs.pop("predicate", "intersects")
             ds_out = ds_out.vector.clip_geom(geom, predicate=predicate)

@@ -239,12 +239,15 @@ class DataCatalog(object):
 
         .. code-block:: console
 
-            root: <path>
-            category: <category>
+            meta:
+              root: <path>
+              category: <category>
+              version: <version>
             <name>:
               path: <path>
               data_type: <data_type>
               driver: <driver>
+              filesystem: <filesystem>
               kwargs:
                 <key>: <value>
               crs: <crs>
@@ -285,7 +288,10 @@ class DataCatalog(object):
         if root is None:
             root = meta.get("root", dirname(urlpath))
         self.from_dict(
-            yml, root=root, category=meta.get("category", None), mark_used=mark_used
+            yml,
+            root=root,
+            category=meta.get("category", None),
+            mark_used=mark_used,
         )
 
     def from_dict(
@@ -321,6 +327,7 @@ class DataCatalog(object):
                     "path": <path>,
                     "data_type": <data_type>,
                     "driver": <driver>,
+                    "filesystem": <filesystem>,
                     "kwargs": {<key>: <value>},
                     "crs": <crs>,
                     "nodata": <nodata>,
@@ -337,7 +344,11 @@ class DataCatalog(object):
             }
 
         """
-        data_dict = _parse_data_dict(data_dict, root=root, category=category)
+        data_dict = _parse_data_dict(
+            data_dict,
+            root=root,
+            category=category,
+        )
         self.update(**data_dict)
         if mark_used:
             self._used_data.extend(list(data_dict.keys()))
@@ -503,6 +514,7 @@ class DataCatalog(object):
                     source.unit_add = unit_add
                 source.path = fn_out
                 source.driver = driver
+                source.filesystem = "local"
                 source.kwargs = {}
                 source.rename = {}
                 sources_out[key] = source
@@ -546,7 +558,7 @@ class DataCatalog(object):
             Data catalog key. If a path to a raster file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
+            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         zoom_level : int, optional
@@ -620,7 +632,7 @@ class DataCatalog(object):
             Data catalog key. If a path to a vector file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
+            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         buffer : float, optional
@@ -690,7 +702,7 @@ class DataCatalog(object):
             Data catalog key. If a path to a file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
+            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         buffer : float, optional
@@ -765,7 +777,9 @@ class DataCatalog(object):
 
 
 def _parse_data_dict(
-    data_dict: Dict, root: Union[Path, str] = None, category: str = None
+    data_dict: Dict,
+    root: Union[Path, str] = None,
+    category: str = None,
 ) -> Dict:
     """Parse data source dictionary."""
     # link yml keys to adapter classes
@@ -799,7 +813,11 @@ def _parse_data_dict(
         elif data_type not in ADAPTERS:
             raise ValueError(f"{name}: Data type {data_type} unknown")
         adapter = ADAPTERS.get(data_type)
-        path = abs_path(root, source.pop("path"))
+        # Only for local files
+        path = source.pop("path")
+        # if remote path, keep as is else call abs_path method to solve local files
+        if not _uri_validator(path):
+            path = abs_path(root, path)
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)

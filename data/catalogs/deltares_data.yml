@@ -1,6 +1,6 @@
 meta:
   root: p:/wflow_global/hydromt
-  version: 2022.7
+  version: 2023.2
 
 basin_atlas_level12_v10: 
   crs: 4326
@@ -466,8 +466,9 @@ era5_daily:
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
     source_version: ERA5 daily data on pressure levels
-  path: meteo/era5_daily/nc_merged/era5_*_daily.nc
+  path: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
   rename:
+    d2m: temp_dew
     msl: press_msl
     ssrd: kin
     t2m: temp
@@ -475,13 +476,17 @@ era5_daily:
     tmax: temp_max
     tmin: temp_min
     tp: precip
+    u10: wind10_u
+    v10: wind10_v
   unit_add:
     temp: -273.15
+    temp_dew: -273.15
     temp_max: -273.15
     temp_min: -273.15
   unit_mult:
     kin: 0.000277778
     kout: 0.000277778
+    ssr: 0.000277778
     press_msl: 0.01
 
 era5_daily_zarr:
@@ -513,18 +518,23 @@ era5_hourly:
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
     source_version: ERA5 hourly data on pressure levels
-  path: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
+  path: meteo/era5/{variable}/era5_{variable}_{year}*_hourly.nc
   rename:
+    d2m: temp_dew
     msl: press_msl
     ssrd: kin
     t2m: temp
     tisr: kout
     tp: precip
+    u10: wind10_u
+    v10: wind10_v
   unit_add:
     temp: -273.15
+    temp_dew: -273.15
   unit_mult:
     kin: 0.000277778
     kout: 0.000277778
+    ssr: 0.000277778
     precip: 1000
     press_msl: 0.01
     
@@ -702,7 +712,7 @@ gdp_world_v1:
     source_author: Wilfred Altena
     source_license: CC BY-4.0
     source_version: 1.0
-  path: socio_economic/gdp_world/World_countries_GDPpcPPP.gpkg
+  path: socio_economic/gdp_world/World_countries_GDPpcPPP.fgb
   rename:
     GDP: gdp
   unit_mult:
@@ -1045,7 +1055,7 @@ grip_roads_v4:
     paper_doi: 10.1088/1748-9326/aabd42
     source_license: CC0-1.0
     source_version: v4
-  path: infrastructure/grip/GRIP4_world.gpkg
+  path: infrastructure/grip/GRIP4_world.fgb
   rename:
     GP_RTP: road_type
     GP_RCY: country_code
@@ -1062,7 +1072,7 @@ grwl_v1.01:
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.1297434
     source_version: 1.01
-  path: hydrography/grwl/GRWL_vector_V01.01/grwl.gpkg
+  path: hydrography/grwl/GRWL_vector_V01.01/grwl.fgb
 
 grwl_mask:
   alias: grwl_mask_v1.01
@@ -1154,7 +1164,7 @@ hydro_lakes:
     notes: HydroLAKES.v10_extract
     source_author: Arjen Haag
     source_version: 1.0
-  path: hydrography/lakes/lake-db.gpkg
+  path: hydrography/lakes/lake-db.fgb
   rename:
     Depth_avg: Depth_avg
     Dis_avg: Dis_avg
@@ -1176,7 +1186,7 @@ hydro_reservoirs:
     source_author: Alessia Matano
     source_version: 1.0
   nodata: -99
-  path: hydrography/reservoirs/reservoir-db.gpkg
+  path: hydrography/reservoirs/reservoir-db.fgb
   rename:
     Depth_avg: Depth_avg
     Dis_avg: Dis_avg
@@ -1319,7 +1329,7 @@ merit_hydro_index_v1.0:
     paper_doi: 10.5194/hess-2020-582
     paper_ref: Eilander et al. (in review)
     source_license: CC-BY-NC 4.0
-  path: topography/merit_hydro/basin_index.gpkg
+  path: topography/merit_hydro/basin_index.fgb
 
 merit_hydro_patch:
   alias: merit_hydro_patch_v1.0
@@ -1386,7 +1396,7 @@ osm_coastlines_v20200109:
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
     source_version: 1.0
-  path: geography/osm/osm_coastlines-db.gpkg
+  path: geography/osm/osm_coastlines-db.fgb
   rename:
     fid: coastline_id
 
@@ -1403,7 +1413,7 @@ osm_landareas_v20200109:
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
     source_version: 1.0
-  path: geography/osm/osm_landareas-db.gpkg
+  path: geography/osm/osm_landareas-db.fgb
   rename:
     fid: land_id
 
@@ -1421,7 +1431,7 @@ rgi_v0.6:
     source_license: CC BY 4.0
     source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
     source_version: 6.0
-  path: hydrography/rgi/rgi.gpkg
+  path: hydrography/rgi/rgi.fgb
   rename:
     C3S_ID: C3S_id
     GLIMSID: GLIMS_id
@@ -1438,7 +1448,7 @@ rivers_lin2019_v1:
     source_license: CC-BY-NC 4.0
     source_url: https://zenodo.org/record/3552776#.YVbOrppByUk
     source_version: 1
-  path: hydrography/rivers_lin2019/rivers_ge30m.gpkg
+  path: hydrography/rivers_lin2019/rivers_ge30m.fgb
   rename:
     width_m: rivwth
     Q2: qbankfull
@@ -1795,7 +1805,7 @@ wb_countries_v20200319:
     source_url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
     source_license: CC-BY 4.0
     timestamp: February 2020
-  path: geography/wb/WB_countries_Admin0.geojson
+  path: geography/wb/WB_countries_Admin0.fgb
   rename:
     ISO_A3: country_iso
     ISO_N3: country_code

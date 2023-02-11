@@ -11,30 +11,50 @@ Unreleased
 
 Added
 -----
+- New methods to compute PET in workflows.forcing.pet using Penman Monteith FAO-56 based on the `pyet` module. Available arguments are now
+  method = ['debruin', 'makkink', 'penman-monteith_rh_simple', 'penman-monteith_tdew'] `PR #266 <https://github.com/Deltares/hydromt/pull/266>`_
 - New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
-- write raster (DataArray) to tiles in xyz stucture
-- add zoom_level to named arguments of path in the data catalog, to keep a single data source for the same data at different resolutions
-- add function in gis_utils to write '.vrt' using GDAL
-- fix bug related to opening named raster files #200
+- write raster (DataArray) to tiles in xyz stucture with the RasterDataArray.to_xyz_tiles method
+- add zoom_level and zoom_res to DataCatalog.get_rasterdataset method
+- new write_vrt function in gis_utils to write '.vrt' using GDAL 
+- experimental: support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs, s3].
+  Profile information can be passed in the data catalog ``kwargs`` under **storage_options**.
+- new predefined catalog for cmip6 data stored on Google Cloud Storage ``cmip6_data``. Requires dependency gcsfs.
+- new predefined catalog for public data stored on Amazon Web Services ``aws_data``. Requires dependency s3fs.
+- support for CMIP6 dataset.
+- new DataCatalog preprocess function ``harmonise_dims`` for manipulation and harmonisation of array dimensions.
 
 Changed
 -------
+- Revamped the GeoDataset (vector.py) to now work with geometry objects and wkt strings besides xy coordinates `PR #276 <https://github.com/Deltares/hydromt/pull/276>`_
+- GeoDataset can write to .nc that is compliant with ogr
+- Support for rotated grids in RasterDataset/Array, with new rotation and origin properties `PR #272 <https://github.com/Deltares/hydromt/pull/272>`_
+- If the model root already contains files when setting root, this will cause an error unless force overwrite (mode='w+' or --fo/--force-overwrite) from command line `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
+- Removed resolution ('-r', '--res') from the hydromt build cli, made region (now '-r') an optional argument `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
 - Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 `PR #258 <https://github.com/Deltares/hydromt/pull/258>`_
 - Changed shapely to require version '2.0.0' or later
 - strict and consistent read/write mode policy `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
 - do not automatically read hydromt_data.yml file in model root `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- RasterDataset zarr driver: possiblility to read from several zarr stores. The datasets are then merged and ``preprocess`` can 
+  be applied similar to netcdf driver.
 
 Fixed
 -----
+- bug related to opening named raster files `#200 <https://github.com/Deltares/hydromt/issues/200>`_
+- All CRS objects are from pyproj library (instead of rasterio.crs submodule) `PR #230 <https://github.com/Deltares/hydromt/pull/230>`_
 - fix reading lists and none with config `PR #246 <https://github.com/Deltares/hydromt/pull/246>`_
 - fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section `PR #238 <https://github.com/Deltares/hydromt/pull/238>`_
+- fixed `pet` (workflows.forcing), variables are now defined correctly
 
 Deprecated
 ----------
+- `x_dim`, `y_dim`, and `total_bounds` attributes of GeoDataset/GeoDataArray are renamed to `x_name`, `y_name` and `bounds`
 - Move pygeos to optional dependencies in favor of shapely 2.0.
+- Resolution option in hydromt build cli
 
 Documentation
 -------------
+- Added **Working with GeoDatasets** python notebook
 - added **working_with_models** example notebook `PR #229 <https://github.com/Deltares/hydromt/pull/229>`_
 - added **export_data** example notebook `PR #222 <https://github.com/Deltares/hydromt/pull/222>`_
 - added **reading_point_data** example notebook `PR #216 <https://github.com/Deltares/hydromt/pull/216>`_

@@ -1,6 +1,8 @@
 from os.path import isfile, basename, abspath, join, dirname
+import io
 from pathlib import Path
 import glob
+from fsspec.implementations import local
 import pandas as pd
 import numpy as np
 import geopandas as gpd
@@ -35,7 +37,7 @@ def open_raster(
 
     Arguments
     ----------
-    filename : str, rasterio.DatasetReader, or rasterio.WarpedVRT
+    filename : str, path, file-like, rasterio.DatasetReader, or rasterio.WarpedVRT
         Path to the file to open. Or already open rasterio dataset.
     mask_nodata : bool, optional
         set nodata values to np.nan (xarray default nodata value)
@@ -59,6 +61,9 @@ def open_raster(
     )
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
+    if isinstance(filename, io.IOBase):  # file-like does not handle chunks
+        logger.warning("Removing chunks to read and load remote data.")
+        kwargs.pop("chunks")
     # keep only 2D DataArray
     da = xr.open_dataarray(filename, **kwargs).squeeze(drop=True)
     # set missing _FillValue
@@ -101,7 +106,7 @@ def open_mfraster(
 
     Arguments
     ----------
-    paths: str, list
+    paths: str, list of str/Path/file-like
         Paths to the rasterio/gdal files.
         Paths can be provided as list of paths or a path pattern string which is
         interpreted according to the rules used by the Unix shell. The variable name
@@ -153,7 +158,10 @@ def open_mfraster(
         da = open_raster(fn, chunks=chunks, **kwargs)
 
         # get name, attrs and index (if concat)
-        bname = basename(fn)
+        if hasattr(fn, "path"):  # file-like
+            bname = basename(fn.path)
+        else:
+            bname = basename(fn)
         if concat:
             # name based on basename until postfix or _
             vname = bname.split(".")[0].replace(postfix, "").split("_")[0]
@@ -329,11 +337,11 @@ def open_geodataset(
         da_ts = open_timeseries_from_table(
             fn_data, name=var_name, index_dim=index_dim, logger=logger
         )
-        ds = vector.GeoDataset.from_gdf(gdf, da_ts, index_dim=index_dim)
+        ds = vector.GeoDataset.from_gdf(gdf, da_ts)
     elif fn_data is not None:
         raise IOError(f"GeoDataset data file not found: {fn_data}")
     else:
-        ds = vector.GeoDataset.from_gdf(gdf, index_dim=index_dim)  # coordinates only
+        ds = vector.GeoDataset.from_gdf(gdf)  # coordinates only
     return ds.chunk(chunks)
 
 

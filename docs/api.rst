@@ -381,6 +381,7 @@ Data handling
    workflows.forcing.temp
    workflows.forcing.press
    workflows.forcing.pet
+   workflows.forcing.wind
 
 
 Correction methods
@@ -411,6 +412,7 @@ Computation methods
 
    workflows.forcing.pet_debruin
    workflows.forcing.pet_makkink
+   workflows.forcing.pm_fao56
 
 =======================
 Reading/writing methods
@@ -478,6 +480,8 @@ Attributes
    DataArray.raster.bounds
    DataArray.raster.transform
    DataArray.raster.res
+   DataArray.raster.rotation
+   DataArray.raster.origin
    DataArray.raster.nodata
    DataArray.raster.dims
    DataArray.raster.coords
@@ -585,9 +589,9 @@ Low level methods
    gis_utils.axes_attrs
    gis_utils.meridian_offset
 
-=============================
-Geospatial timeseries methods
-=============================
+==================
+GeoDataset methods
+==================
 
 High level methods
 ==================
@@ -598,8 +602,12 @@ High level methods
 
    DataArray.vector.from_gdf
    DataArray.vector.to_gdf
+   DataArray.vector.from_netcdf
+   DataArray.vector.to_netcdf
    Dataset.vector.from_gdf
-
+   Dataset.vector.to_gdf
+   Dataset.vector.from_netcdf
+   Dataset.vector.to_netcdf
 
 Attributes
 ==========
@@ -612,15 +620,48 @@ Attributes
    DataArray.vector.crs
    DataArray.vector.index_dim
    DataArray.vector.time_dim
-   DataArray.vector.y_dim
-   DataArray.vector.x_dim
-   DataArray.vector.xcoords
-   DataArray.vector.ycoords
+   DataArray.vector.x_name
+   DataArray.vector.y_name
+   DataArray.vector.geom_name
+   DataArray.vector.geom_type
+   DataArray.vector.geom_format
    DataArray.vector.index
    DataArray.vector.bounds
-   DataArray.vector.total_bounds
+   DataArray.vector.size
    DataArray.vector.sindex
    DataArray.vector.geometry
+   Dataset.vector.attrs
+   Dataset.vector.crs
+   Dataset.vector.index_dim
+   Dataset.vector.time_dim
+   Dataset.vector.x_name
+   Dataset.vector.y_name
+   Dataset.vector.geom_name
+   Dataset.vector.geom_type
+   Dataset.vector.geom_format
+   Dataset.vector.index
+   Dataset.vector.bounds
+   Dataset.vector.size
+   Dataset.vector.sindex
+   Dataset.vector.geometry
+
+Conversion
+==========
+
+.. autosummary::
+   :template: autosummary/accessor_method.rst
+   :toctree: _generated  
+
+   DataArray.vector.ogr_compliant
+   DataArray.vector.update_geometry
+   DataArray.vector.to_geom
+   DataArray.vector.to_xy
+   DataArray.vector.to_wkt
+   Dataset.vector.ogr_compliant
+   Dataset.vector.update_geometry
+   Dataset.vector.to_geom
+   Dataset.vector.to_xy
+   Dataset.vector.to_wkt
 
 General methods
 ===============
@@ -631,8 +672,8 @@ General methods
 
    DataArray.vector.set_crs
    DataArray.vector.set_spatial_dims
-   DataArray.vector.reset_spatial_dims_attrs
-
+   Dataset.vector.set_crs
+   Dataset.vector.set_spatial_dims
 
 Clip
 ====
@@ -643,6 +684,8 @@ Clip
 
    DataArray.vector.clip_bbox
    DataArray.vector.clip_geom
+   Dataset.vector.clip_bbox
+   Dataset.vector.clip_geom
 
 Reproject
 =========
@@ -652,6 +695,7 @@ Reproject
    :toctree: _generated
 
    DataArray.vector.to_crs
+   Dataset.vector.to_crs
 
 ======================
 Flow direction methods

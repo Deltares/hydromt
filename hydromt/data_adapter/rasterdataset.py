@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import os
 from os.path import join
+from fsspec.implementations import local
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -34,6 +36,7 @@ class RasterDatasetAdapter(DataAdapter):
         self,
         path,
         driver=None,
+        filesystem="local",
         crs=None,
         nodata=None,
         rename={},
@@ -60,6 +63,9 @@ class RasterDatasetAdapter(DataAdapter):
             for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
+        filesystem: {'local', 'gcs', 's3'}, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            By default, local.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
             or wkt (str). Only used if the data has no native CRS.
@@ -81,6 +87,7 @@ class RasterDatasetAdapter(DataAdapter):
         super().__init__(
             path=path,
             driver=driver,
+            filesystem=filesystem,
             crs=crs,
             nodata=nodata,
             rename=rename,
@@ -256,27 +263,64 @@ class RasterDatasetAdapter(DataAdapter):
                 lat = (bbox[1] + bbox[3]) / 2
             zoom_level = self._get_zoom_level(zoom_res, lat=lat, logger=logger)
 
-        kwargs = self.kwargs.copy()
+        # Extract storage_options from kwargs to instantiate fsspec object correctly
+        if "storage_options" in self.kwargs:
+            kwargs = self.kwargs["storage_options"]
+            # For s3, anonymous connection still requires --no-sign-request profile to read the data
+            # setting environment variable works
+            if "anon" in kwargs:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
+            else:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
+        else:
+            kwargs = dict()
+
         fns = self.resolve_paths(
-            time_tuple=time_tuple, zoom_level=zoom_level, variables=variables
+            time_tuple=time_tuple, zoom_level=zoom_level, variables=variables, **kwargs
         )
+
+        kwargs = self.kwargs.copy()
+        # zarr can use storage options directly, the rest should be converted to file-like objects
+        if "storage_options" in kwargs and self.driver == "raster":
+            storage_options = kwargs.pop("storage_options")
+            fs = self.get_filesystem(**storage_options)
+            fns = [fs.open(f) for f in fns]
 
         # read using various readers
         if self.driver in ["netcdf"]:  # TODO complete list
-            if "preprocess" in kwargs:
-                preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
-                kwargs.update(preprocess=preprocess)
-            ds_out = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
-        elif self.driver == "zarr":
-            if len(fns) > 1:
-                raise ValueError(
-                    "RasterDataset: Opening multiple zarr data files is not supported."
+            if self.filesystem == "local":
+                if "preprocess" in kwargs:
+                    preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
+                    kwargs.update(preprocess=preprocess)
+                ds_out = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
+            else:
+                raise NotImplementedError(
+                    "Remote (cloud) RasterDataset not supported with driver netcdf."
                 )
-            ds_out = xr.open_zarr(fns[0], **kwargs)
+        elif self.driver == "zarr":
+            if "preprocess" in kwargs:  # for zarr preprocess is done after reading
+                preprocess = PREPROCESSORS.get(kwargs.pop("preprocess"), None)
+                do_preprocess = True
+            else:
+                do_preprocess = False
+            ds_lst = []
+            for fn in fns:
+                ds = xr.open_zarr(fn, **kwargs)
+                if do_preprocess:
+                    ds = preprocess(ds)
+                ds_lst.append(ds)
+            ds_out = xr.merge(ds_lst)
         elif self.driver == "raster_tindex":
-            if np.issubdtype(type(self.nodata), np.number):
-                kwargs.update(nodata=self.nodata)
-            ds_out = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
+            if self.filesystem == "local":
+                if np.issubdtype(type(self.nodata), np.number):
+                    kwargs.update(nodata=self.nodata)
+                ds_out = io.open_raster_from_tindex(
+                    fns[0], bbox=bbox, geom=geom, **kwargs
+                )
+            else:
+                raise NotImplementedError(
+                    "Remote (cloud) RasterDataset not supported with driver raster_tindex."
+                )
         elif self.driver == "raster":  # rasterio files
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)

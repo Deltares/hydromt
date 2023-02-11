@@ -2,16 +2,30 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import pandas as pd
+import xarray as xr
 import yaml
-import glob
+from upath import UPath
+from fsspec.implementations import local
 from string import Formatter
 from typing import Tuple
 from itertools import product
 
+from .. import _compat
 
 __all__ = [
     "DataAdapter",
 ]
+
+FILESYSTEMS = ["local"]
+# Add filesystems from optional dependencies
+if _compat.HAS_GCSFS:
+    import gcsfs
+
+    FILESYSTEMS.append("gcs")
+if _compat.HAS_S3FS:
+    import s3fs
+
+    FILESYSTEMS.append("s3")
 
 
 def round_latlon(ds, decimals=5):
@@ -32,10 +46,50 @@ def remove_duplicates(ds):
     return ds.sel(time=~ds.get_index("time").duplicated())
 
 
+def harmonise_dims(ds):
+    """
+    Function to harmonise lon-lat-time dimensions
+    Where needed:
+        - lon: Convert longitude coordinates from 0-360 to -180-180
+        - lat: Do N->S orientation instead of S->N
+        - time: Convert to datetimeindex
+
+    Parameters
+    ----------
+    ds: xr.DataSet
+        DataSet with dims to harmonise
+
+    Returns
+    -------
+    ds: xr.DataSet
+        DataSet with harmonised longitude-latitude-time dimensions
+    """
+    # Longitude
+    x_dim = ds.raster.x_dim
+    lons = ds[x_dim].values
+    if np.any(lons > 180):
+        ds[x_dim] = xr.Variable(x_dim, np.where(lons > 180, lons - 360, lons))
+        ds = ds.sortby(x_dim)
+    # Latitude
+    y_dim = ds.raster.y_dim
+    if np.diff(ds[y_dim].values)[0] > 0:
+        ds = ds.reindex({y_dim: ds[y_dim][::-1]})
+    # Final check for lat-lon
+    assert (
+        np.diff(ds[y_dim].values)[0] < 0 and np.diff(ds[x_dim].values)[0] > 0
+    ), "orientation not N->S & W->E after get_data preprocess set_lon_lat_axis"
+    # Time
+    if ds.indexes["time"].dtype == "O":
+        ds = to_datetimeindex(ds)
+
+    return ds
+
+
 PREPROCESSORS = {
     "round_latlon": round_latlon,
     "to_datetimeindex": to_datetimeindex,
     "remove_duplicates": remove_duplicates,
+    "harmonise_dims": harmonise_dims,
 }
 
 
@@ -49,6 +103,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self,
         path,
         driver,
+        filesystem="local",
         crs=None,
         nodata=None,
         rename={},
@@ -67,6 +122,7 @@ class DataAdapter(object, metaclass=ABCMeta):
                 str(path).split(".")[-1].lower(), self._DEFAULT_DRIVER
             )
         self.driver = driver
+        self.filesystem = filesystem
         self.kwargs = kwargs
         # data adapter arguments
         self.crs = crs
@@ -107,7 +163,11 @@ class DataAdapter(object, metaclass=ABCMeta):
         return self.__str__()
 
     def resolve_paths(
-        self, time_tuple: Tuple = None, zoom_level: int = None, variables: list = None
+        self,
+        time_tuple: Tuple = None,
+        zoom_level: int = None,
+        variables: list = None,
+        **kwargs,
     ):
         """Resolve {year}, {month} and {variable} keywords
         in self.path based on 'time_tuple' and 'variables' arguments
@@ -120,6 +180,8 @@ class DataAdapter(object, metaclass=ABCMeta):
 
         variables : list of str, optional
             List of variable names, by default None
+        **kwargs
+            key-word arguments are passed to fsspec FileSystem objects. Arguments depend on protocal (local, gcs, s3...).
 
         Returns
         -------
@@ -163,8 +225,9 @@ class DataAdapter(object, metaclass=ABCMeta):
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
             postfix += f"; variables: {variables}"
+
         # get filenames with glob for all date / variable combinations
-        # FIXME: glob won't work with other than local file systems; use fsspec instead
+        fs = self.get_filesystem(**kwargs)
         fmt = {}
         # update based on zoomlevel (size = 1)
         if zoom_level is not None:
@@ -175,10 +238,41 @@ class DataAdapter(object, metaclass=ABCMeta):
                 fmt.update(year=date.year, month=date.month)
             if var is not None:
                 fmt.update(variable=var)
-            fns.extend(glob.glob(path.format(**fmt)))
+            fns.extend(fs.glob(path.format(**fmt)))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {path}{postfix}")
+        # With some fs like gcfs or s3fs, the first part of the past is not returned properly with glob
+        if not str(UPath(fns[0])).startswith(str(UPath(path))[0:2]):
+            # Assumes it's the first part of the path that is not correctly parsed with gcsfs, s3fs etc.
+            last_parent = UPath(path).parents[-1]
+            # add the rest of the path
+            fns = [last_parent.joinpath(*UPath(fn).parts[1:]) for fn in fns]
         return list(set(fns))  # return unique paths
+
+    def get_filesystem(self, **kwargs):
+        """Return an initialised filesystem object based on self.filesystem and **kwargs"""
+        if self.filesystem == "local":
+            fs = local.LocalFileSystem(**kwargs)
+        elif self.filesystem == "gcs":
+            if _compat.HAS_GCSFS:
+                fs = gcsfs.GCSFileSystem(**kwargs)
+            else:
+                raise ModuleNotFoundError(
+                    "The gcsfs library is required to read data from gcs (Google Cloud Storage). Please install."
+                )
+        elif self.filesystem == "s3":
+            if _compat.HAS_S3FS:
+                fs = s3fs.S3FileSystem(**kwargs)
+            else:
+                raise ModuleNotFoundError(
+                    "The s3fs library is required to read data from s3 (Amazon Web Storage). Please install."
+                )
+        else:
+            raise ValueError(
+                f"Unknown or unsupported filesystem {self.filesystem}. Use one of {FILESYSTEMS}"
+            )
+
+        return fs
 
     @abstractmethod
     def get_data(self, bbox, geom, buffer):
