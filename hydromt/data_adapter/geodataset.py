@@ -37,7 +37,6 @@ class GeoDatasetAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
-        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
@@ -86,7 +85,6 @@ class GeoDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
-            placeholders=placeholders,
             **kwargs,
         )
 

@@ -2,7 +2,7 @@
 """Tests for the hydromt.data_adapter submodule."""
 
 import pytest
-from os.path import join, dirname, abspath
+from os.path import join, dirname, abspath, isfile
 import numpy as np
 import geopandas as gpd
 import pandas as pd
@@ -21,19 +21,17 @@ def test_resolve_path(tmpdir):
     for variable in ["precip", "temp"]:
         for year in [2020, 2021]:
             for month in range(1, 13):
-                with open(
-                    join(
-                        tmpdir, "{unknown_key}_" + f"{variable}_{year}_{month:02d}.nc"
-                    ),
-                    "w",
-                ) as f:
+                fn = join(tmpdir, f"{{unknown_key}}_0_{variable}_{year}_{month:02d}.nc")
+                with open(fn, "w") as f:
                     f.write("")
     # create data catalog for these files
     dd = {
         "test": {
             "data_type": "RasterDataset",
             "driver": "netcdf",
-            "path": join(tmpdir, "{unknown_key}_{variable}_{year}_{month:02d}.nc"),
+            "path": join(
+                tmpdir, "{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc"
+            ),
         }
     }
     cat = DataCatalog()
@@ -41,14 +39,8 @@ def test_resolve_path(tmpdir):
     # test
     assert len(cat["test"].resolve_paths()) == 48
     assert len(cat["test"].resolve_paths(variables=["precip"])) == 24
-    assert (
-        len(
-            cat["test"].resolve_paths(
-                variables=["precip"], time_tuple=("2021-03-01", "2021-05-01")
-            )
-        )
-        == 3
-    )
+    kwargs = dict(variables=["precip"], time_tuple=("2021-03-01", "2021-05-01"))
+    assert len(cat["test"].resolve_paths(**kwargs)) == 3
     with pytest.raises(FileNotFoundError, match="No such file found:"):
         cat["test"].resolve_paths(variables=["waves"])
 
@@ -63,6 +55,30 @@ def test_rasterdataset(rioda, tmpdir):
     assert np.all(da1 == rioda)
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_rasterdataset("no_file.tif")
+
+
+def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
+    name = "test_zoom"
+    yml_dict = {
+        name: {
+            "crs": 4326,
+            "data_type": "RasterDataset",
+            "driver": "raster",
+            "path": "path/{zoom_level}/test.vrt",
+            "zoom_levels": {0: 0.1, 1: 0.3},
+        }
+    }
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(yml_dict)
+    assert data_catalog[name]._get_zoom_level(zoom_res=(0.3, "degree")) == 1
+    assert data_catalog[name]._get_zoom_level(zoom_res=(0.29, "degree")) == 0
+    assert data_catalog[name]._get_zoom_level(zoom_res=(0.1, "degree")) == 0
+    assert data_catalog[name]._get_zoom_level() == 0  # default to first
+    assert data_catalog[name]._get_zoom_level(zoom_res=1) == 0  # ounit meter by default
+    with pytest.raises(TypeError, match="zoom_res unit"):
+        data_catalog[name]._get_zoom_level(zoom_res=(1, "asfd"))
+    with pytest.raises(TypeError, match="zoom_res argument"):
+        data_catalog[name]._get_zoom_level(zoom_res=(1, "asfd", "asdf"))
 
 
 def test_geodataset(geoda, geodf, ts, tmpdir):

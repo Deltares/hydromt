@@ -55,7 +55,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         unit_mult={},
         unit_add={},
         meta={},
-        placeholders={},
+        zoom_levels={},
         **kwargs,
     ):
         # general arguments
@@ -74,6 +74,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.rename = rename
         self.unit_mult = unit_mult
         self.unit_add = unit_add
+        self.zoom_levels = zoom_levels
         # meta data
         self.meta = {k: v for k, v in meta.items() if v is not None}
 
@@ -139,7 +140,8 @@ class DataAdapter(object, metaclass=ABCMeta):
             if key in ["year", "month"] and time_tuple is None:
                 path += "*"
             elif key == "zoom_level" and zoom_level is None:
-                path += "0"  # read highest (base) res by default
+                # first (highest) zoomlevel by default
+                path += f"{self._get_zoom_level()}"
             elif key == "variable" and variables is None:
                 path += "*"
             # escape unknown fields

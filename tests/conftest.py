@@ -25,6 +25,18 @@ def rioda():
 
 
 @pytest.fixture
+def rioda_large():
+    da = raster.full_from_transform(
+        transform=[0.004166666666666666, 0.0, 0.0, 0.0, -0.004166666666666667, 0.0],
+        shape=(1024, 1000),
+        nodata=-9999,
+        name="test",
+        crs=4326,
+    )
+    return da
+
+
+@pytest.fixture
 def df():
     df = pd.DataFrame(
         {

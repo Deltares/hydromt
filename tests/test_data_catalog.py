@@ -60,6 +60,7 @@ def test_parser():
     dd_out = _parse_data_dict(dd, root=root)
     assert len(dd_out) == 6
     assert dd_out["test_a_1"].path == abspath(join(root, "data_1.tif"))
+    assert "placeholders" not in dd_out["test_a_1"].to_dict()
     # errors
     with pytest.raises(ValueError, match="Missing required path argument"):
         _parse_data_dict({"test": {}})

@@ -31,7 +31,7 @@ from scipy import ndimage
 import tempfile
 import pyproj
 import logging
-import subprocess
+import yaml
 import rioxarray
 
 from . import gis_utils, _compat
@@ -810,6 +810,7 @@ class XRasterBase(XGeoBase):
         ds_out: xr.Dataset
             Output dataset with a variable for each column in reclass_table.
         """
+
         # Exact reclass method
         def reclass_exact(x, ddict):
             return np.vectorize(ddict.get)(x, np.nan)
@@ -1655,8 +1656,8 @@ class RasterDataArray(XRasterBase):
         )
         return interp_array
 
-    def to_xyz(
-        self, root: str, tile_size: int, zoomlevels: list, driver="GTiff", **kwargs
+    def to_xyz_tiles(
+        self, root: str, tile_size: int, zoom_levels: list, driver="GTiff", **kwargs
     ):
         """Export rasterdataset to tiles in a xyz structure
 
@@ -1666,10 +1667,8 @@ class RasterDataArray(XRasterBase):
             Path where the database will be saved
             Database yml will be put one directory above
         tile_size : int
-            Amount of pixels per tile in one direction
-            This determines the shape of the tiles
-            E.g. tile_size = 256 -> shape = (256, 256)
-        zoomlevels : list
+            Number of pixels per tile in one direction
+        zoom_levels : list
             Zoom levels to be put in the database
         driver : str, optional
             GDAL driver (e.g., 'GTiff' for geotif files), or 'netcdf4' for netcdf files.
@@ -1696,7 +1695,8 @@ class RasterDataArray(XRasterBase):
         prev = 0
         nodata = self.nodata
         obj = self._obj.copy()
-        for zl in zoomlevels:
+        zls = {}
+        for zl in zoom_levels:
             diff = zl - prev
             pxzl = tile_size * (2 ** (diff))
 
@@ -1706,6 +1706,7 @@ class RasterDataArray(XRasterBase):
                 obj = obj.drop("band")
             x_dim, y_dim = obj.raster.x_dim, obj.raster.y_dim
             obj = obj.chunk({x_dim: pxzl, y_dim: pxzl})
+            dst_res = abs(obj.raster.res[-1]) * (2 ** (diff))
 
             if pxzl > min(obj.shape):
                 logger.warning(
@@ -1751,17 +1752,20 @@ class RasterDataArray(XRasterBase):
             # Create a vrt using GDAL
             gis_utils.create_vrt(sd, mName)
             prev = zl
+            zls.update({zl: dst_res})
             vrt = join(sd, f"{mName}.vrt")
             del obj
 
-        # Write a quick yaml for the database
-        with open(join(root, "..", f"{mName}.yml"), "w") as w:
-            w.write(f"{mName}:\n")
-            crs = self.crs.to_epsg()
-            w.write(f"  crs: {crs}\n")
-            w.write("  data_type: RasterDataset\n")
-            w.write("  driver: raster\n")
-            w.write(f"  path: {mName}/{{zoom_level}}/{mName}.vrt\n")
+        # Write a quick data catalog yaml
+        yml = {
+            "crs": self.crs.to_epsg(),
+            "data_type": "RasterDataset",
+            "driver": "raster",
+            "path": f"{mName}/{{zoom_level}}/{mName}.vrt",
+            "zoom_levels": zls,
+        }
+        with open(join(root, "..", f"{mName}.yml"), "w") as f:
+            yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
 
     # def to_osm(
     #     self,

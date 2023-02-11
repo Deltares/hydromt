@@ -356,29 +356,17 @@ def test_zonal_stats():
         da.raster.zonal_stats(gdf.iloc[1:2], "mean")
 
 
-@pytest.fixture
-def dummy():
-    da = raster.full_from_transform(
-        transform=[0.004166666666666666, 0.0, 0.0, 0.0, -0.004166666666666667, 0.0],
-        shape=(1024, 1000),
-        nodata=-9999,
-        name="dummy_tile_data",
-        crs=4326,
-    )
-    return da
-
-
-def test_to_xyz(tmpdir, dummy):
+def test_to_xyz_tiles(tmpdir, rioda_large):
     path = str(tmpdir)
-    dummy.raster.to_xyz(
+    rioda_large.raster.to_xyz_tiles(
         os.path.join(path, "dummy_xyz"),
         tile_size=256,
-        zoomlevels=[0, 2],
+        zoom_levels=[0, 2],
     )
-    f = open(os.path.join(path, "dummy_xyz", "0", "filelist.txt"), "r")
-    assert len(f.readlines()) == 16
-    f = open(os.path.join(path, "dummy_xyz", "2", "filelist.txt"), "r")
-    assert len(f.readlines()) == 1
+    with open(os.path.join(path, "dummy_xyz", "0", "filelist.txt"), "r") as f:
+        assert len(f.readlines()) == 16
+    with open(os.path.join(path, "dummy_xyz", "2", "filelist.txt"), "r") as f:
+        assert len(f.readlines()) == 1
 
 
 # def test_to_osm(tmpdir, dummy):
