@@ -9,7 +9,7 @@ from shapely.geometry import box, Point, LineString
 import dask
 from osgeo import gdal
 from affine import Affine
-from rasterio.transform import array_bounds
+import os
 
 from hydromt import open_raster, gis_utils
 from hydromt import raster

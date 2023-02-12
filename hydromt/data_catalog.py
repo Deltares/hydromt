@@ -480,7 +480,7 @@ class DataCatalog(object):
             os.makedirs(data_root)
 
         # create copy of data with selected source names
-        sources = copy.deepcopy(self._sources)
+        sources = copy.deepcopy(self.sources)
         if len(source_names) > 0:
             sources = {n: sources[n] for n in source_names}
 

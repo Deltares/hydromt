@@ -120,6 +120,7 @@ Region                          Argument of the *build* and *clip* CLI methods t
    ../_examples/reading_vector_data.ipynb
    ../_examples/reading_point_data.ipynb
    ../_examples/reading_tabular_data.ipynb
+   ../_examples/working_with_tiled_raster_data.ipynb
 
 .. toctree::
    :maxdepth: 2

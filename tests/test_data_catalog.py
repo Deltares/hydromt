@@ -2,7 +2,7 @@
 
 import os
 import pytest
-from os.path import join, abspath
+from os.path import join, abspath, dirname
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
@@ -11,6 +11,8 @@ from hydromt.data_catalog import (
     DataCatalog,
     _parse_data_dict,
 )
+
+CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 
 
 def test_parser():
@@ -72,6 +74,7 @@ def test_parser():
 
 def test_data_catalog_io(tmpdir):
     data_catalog = DataCatalog()
+    data_catalog.sources  # load artifact data as fallback
     # read / write
     fn_yml = join(tmpdir, "test.yml")
     data_catalog.to_yml(fn_yml)
@@ -90,7 +93,7 @@ def test_data_catalog(tmpdir):
     # initialized with empty dict
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
-    assert len(data_catalog) > 0
+    assert len(data_catalog.sources) > 0
     # test keys, getitem,
     keys = data_catalog.keys
     source = data_catalog[keys[0]]
@@ -135,6 +138,9 @@ def test_from_archive(tmpdir):
 
 def test_from_predefined_catalogs():
     data_catalog = DataCatalog()
+    data_catalog.set_predefined_catalogs(
+        join(CATALOGDIR, "..", "predefined_catalogs.yml")
+    )
     for name in data_catalog.predefined_catalogs:
         data_catalog.from_predefined_catalogs(f"{name}=latest")
         assert len(data_catalog._sources) > 0
