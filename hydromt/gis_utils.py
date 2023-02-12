@@ -3,6 +3,8 @@
 
 """gis related convience functions. More in pyflwdir.gis_utils"""
 from os.path import dirname, join, isfile
+import os
+import glob
 import sys
 import subprocess
 import numpy as np
@@ -597,25 +599,70 @@ def write_map(
                 dst.crs = crs
 
 
-def create_vrt(path: str, fname: str):
-    """Creates a .vrt file from a list op raster datasets
+def create_vrt(
+    fname: str,
+    txt_path: str = None,
+    files_path: str = None,
+    ext: list = [".tif"],
+    output: str = None,
+    ):
+    """Creates a .vrt file from a list op raster datasets by either
+    passing the list directly (txt_path) or by inferring it by passing 
+    a path containing wildcards (files_path) of the location(s) of the 
+    raster datasets
 
     Parameters
     ----------
-    path : str
-        path to the folder containing all the raster datasets
-        A file containing the list of all the raster datasets is needed
-        at this location.
     fname : str
         Name of the output vrt
+    txt_path : str, optional
+        Path to the text file containing the paths to the raster files
+    files_path : str, optional
+        Unix style path containing a pattern using wildcards (*)
+        n.b. this is without an extension
+        e.g. c:\\temp\\*\\* for all files in subfolders of 'c:\temp'
+    ext : list, optional
+        List of extensions to be sought after 
+    output : str, optional
+        Output directory
+        if not given a directory will be inferred from either 'txt_path' of 'files_path'
 
+    Raises
+    ------
+    ValueError
+        A Path is needed, either txt_path or files_path
     """
+    
+    if txt_path is None and files_path is None:
+        raise ValueError("Either 'txt_path' or 'files_path' is required -> None was given")
+
+    def create_folder(path):
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+    if txt_path is None:
+        files = []
+        for e in ext:
+            files += glob.glob(f"{files_path}{e}")
+        if output is None:
+            output = files_path.split("*")[0]
+        create_folder(output)
+        txt_path = join(output, "filelist.txt")
+        with open(txt_path, "w") as w:
+            for line in files:
+                w.write(f"{line}\n")
+
+    if output is None:
+        output = dirname(txt_path)
+    
+    create_folder(output)
+
     subprocess.run(
         [
-            f"{PYTHON_PATH}\\Library\\bin\\gdalbuildvrt.exe",
+            join(PYTHON_PATH, "Library", "bin", "gdalbuildvrt.exe"),
             "-input_file_list",
-            f"{path}\\filelist.txt",
-            f"{path}\\{fname}.vrt",
+            txt_path,
+            join(output, f"{fname}.vrt"),
         ]
     )
     return None

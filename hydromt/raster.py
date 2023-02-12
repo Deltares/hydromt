@@ -1912,7 +1912,8 @@ class RasterDataArray(XRasterBase):
             # Write the raster paths to a text file
             sd = join(root, f"{zl}")
             create_folder(sd)
-            file = open(join(sd, "filelist.txt"), "w")
+            txt_path = join(sd, "filelist.txt")
+            file = open(txt_path, "w")
 
             for l, u, w, h in tile_window(obj.shape, pxzl):
                 col = int(np.ceil(l / pxzl))
@@ -1946,7 +1947,7 @@ class RasterDataArray(XRasterBase):
 
             file.close()
             # Create a vrt using GDAL
-            gis_utils.create_vrt(sd, mName)
+            gis_utils.create_vrt(mName, txt_path=txt_path)
             prev = zl
             zls.update({zl: float(dst_res)})
             vrt = join(sd, f"{mName}.vrt")
