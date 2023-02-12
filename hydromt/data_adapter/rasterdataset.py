@@ -11,7 +11,6 @@ import warnings
 import logging
 from typing import Union, NewType
 from pathlib import Path
-from pyproj import CRS
 
 from .. import gis_utils, io
 from .data_adapter import DataAdapter, PREPROCESSORS
@@ -178,68 +177,12 @@ class RasterDatasetAdapter(DataAdapter):
 
         return fn_out, driver
 
-    def _get_zoom_level(
-        self, zoom_res: float | tuple = None, lat: float = 0, logger=logger
-    ) -> int:
-        """Return nearest smaller zoom level based on zoom resolutions defined in data catalog"""
-        # common pyproj crs axis units
-        known_units = ["degree", "metre", "US survey foot"]
-        if self.zoom_levels is None or len(self.zoom_levels) == 0:
-            logger.warning(f"No zoom levels available, default to zero")
-            return 0
-        zls = list(self.zoom_levels.keys())
-        if zoom_res is None:  # return first zoomlevel (assume these are ordered)
-            return next(iter(zls))
-        # parse zoom_res argument
-        unit = "metre"
-        if (
-            isinstance(zoom_res, tuple)
-            and isinstance(zoom_res[0], (int, float))
-            and isinstance(zoom_res[1], str)
-            and len(zoom_res) == 2
-        ):
-            zoom_res, unit = zoom_res
-            # covert 'meter' and foot to official pyproj units
-            unit = {"meter": "metre", "foot": "US survey foot"}.get(unit, unit)
-            if unit not in known_units:
-                raise TypeError(
-                    f"zoom_res unit {unit} not understood; should be one of {known_units}"
-                )
-        elif not isinstance(zoom_res, (int, float)):
-            raise TypeError(
-                f"zoom_res argument not understood: {zoom_res}; should be a float"
-            )
-        # convert zoom_res if different unit than crs
-        res = zoom_res
-        if self.crs:
-            crs = CRS.from_user_input(self.crs)
-            crs_unit = crs.axis_info[0].unit_name
-            if crs_unit != unit and crs_unit not in known_units:
-                raise NotImplementedError(
-                    f"no conversion available for {unit} to {crs_unit}"
-                )
-            if unit != crs_unit:
-                conversions = {
-                    "degree": np.hypot(*gis_utils.cellres(lat=lat)),
-                    "US survey foot": 0.3048,
-                }
-                res = res * conversions.get(unit, 1) / conversions.get(crs_unit, 1)
-        # find nearest smaller zoomlevel
-        eps = 1e-5  # allow for rounding errors
-        smaller = [x < (res + eps) for x in self.zoom_levels.values()]
-        zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
-        logger.info(
-            f"Getting data for zoom_level {zl} based on res {zoom_res} ({unit})"
-        )
-        return zl
-
     def get_data(
         self,
         bbox=None,
         geom=None,
         buffer=0,
         zoom_level=None,
-        zoom_res=None,
         align=None,
         variables=None,
         time_tuple=None,
@@ -255,28 +198,27 @@ class RasterDatasetAdapter(DataAdapter):
         if variables:
             variables = np.atleast_1d(variables).tolist()
 
-        if zoom_res:
-            lat = 0
-            if geom is not None:
-                lat = geom.to_crs(4326).centroid.y.item()
-            elif bbox is not None:
-                lat = (bbox[1] + bbox[3]) / 2
-            zoom_level = self._get_zoom_level(zoom_res, lat=lat, logger=logger)
-
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         if "storage_options" in self.kwargs:
-            kwargs = self.kwargs["storage_options"]
+            so_kwargs = self.kwargs["storage_options"]
             # For s3, anonymous connection still requires --no-sign-request profile to read the data
             # setting environment variable works
-            if "anon" in kwargs:
+            if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
         else:
-            kwargs = dict()
+            so_kwargs = dict()
 
+        # resolve path based on time, zoom level and/or variables
         fns = self.resolve_paths(
-            time_tuple=time_tuple, zoom_level=zoom_level, variables=variables, **kwargs
+            time_tuple=time_tuple,
+            variables=variables,
+            zoom_level=zoom_level,
+            geom=geom,
+            bbox=bbox,
+            logger=logger,
+            **so_kwargs,
         )
 
         kwargs = self.kwargs.copy()

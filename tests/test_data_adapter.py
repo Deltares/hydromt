@@ -102,15 +102,16 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     }
     data_catalog = DataCatalog()
     data_catalog.from_dict(yml_dict)
-    assert data_catalog[name]._get_zoom_level(zoom_res=(0.3, "degree")) == 1
-    assert data_catalog[name]._get_zoom_level(zoom_res=(0.29, "degree")) == 0
-    assert data_catalog[name]._get_zoom_level(zoom_res=(0.1, "degree")) == 0
-    assert data_catalog[name]._get_zoom_level() == 0  # default to first
-    assert data_catalog[name]._get_zoom_level(zoom_res=1) == 0  # ounit meter by default
-    with pytest.raises(TypeError, match="zoom_res unit"):
-        data_catalog[name]._get_zoom_level(zoom_res=(1, "asfd"))
-    with pytest.raises(TypeError, match="zoom_res argument"):
-        data_catalog[name]._get_zoom_level(zoom_res=(1, "asfd", "asdf"))
+    assert data_catalog[name]._parse_zoom_level() == 0  # default to first
+    assert data_catalog[name]._parse_zoom_level(zoom_level=1) == 1
+    assert data_catalog[name]._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
+    assert data_catalog[name]._parse_zoom_level(zoom_level=(0.29, "degree")) == 0
+    assert data_catalog[name]._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
+    assert data_catalog[name]._parse_zoom_level(zoom_level=(1, "meter")) == 0
+    with pytest.raises(TypeError, match="zoom_level unit"):
+        data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd"))
+    with pytest.raises(TypeError, match="zoom_level argument"):
+        data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
 
 
 def test_geodataset(geoda, geodf, ts, tmpdir):

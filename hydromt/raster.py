@@ -1948,7 +1948,7 @@ class RasterDataArray(XRasterBase):
             # Create a vrt using GDAL
             gis_utils.create_vrt(sd, mName)
             prev = zl
-            zls.update({zl: dst_res})
+            zls.update({zl: float(dst_res)})
             vrt = join(sd, f"{mName}.vrt")
             del obj
 

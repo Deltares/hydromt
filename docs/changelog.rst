@@ -15,7 +15,7 @@ Added
   method = ['debruin', 'makkink', 'penman-monteith_rh_simple', 'penman-monteith_tdew'] `PR #266 <https://github.com/Deltares/hydromt/pull/266>`_
 - New get_region method in cli/api.py that returns a geojson representation of the parsed region `PR #209 <https://github.com/Deltares/hydromt/pull/209>`_
 - write raster (DataArray) to tiles in xyz stucture with the RasterDataArray.to_xyz_tiles method
-- add zoom_level and zoom_res to DataCatalog.get_rasterdataset method
+- add zoom_level to DataCatalog.get_rasterdataset method
 - new write_vrt function in gis_utils to write '.vrt' using GDAL 
 - experimental: support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs, s3].
   Profile information can be passed in the data catalog ``kwargs`` under **storage_options**.
