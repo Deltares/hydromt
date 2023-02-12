@@ -605,6 +605,7 @@ def create_vrt(
     files_path: str = None,
     ext: list = [".tif"],
     output: str = None,
+    **kwargs
     ):
     """Creates a .vrt file from a list op raster datasets by either
     passing the list directly (txt_path) or by inferring it by passing 
@@ -626,6 +627,9 @@ def create_vrt(
     output : str, optional
         Output directory
         if not given a directory will be inferred from either 'txt_path' of 'files_path'
+    kwargs : optional
+        Extra keyword arguments for glob (combined with files_path)
+        e.g. recursive=True
 
     Raises
     ------
@@ -643,7 +647,7 @@ def create_vrt(
     if txt_path is None:
         files = []
         for e in ext:
-            files += glob.glob(f"{files_path}{e}")
+            files += glob.glob(f"{files_path}{e}", **kwargs)
         if output is None:
             output = files_path.split("*")[0]
         create_folder(output)
