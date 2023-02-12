@@ -1947,7 +1947,7 @@ class RasterDataArray(XRasterBase):
 
             file.close()
             # Create a vrt using GDAL
-            gis_utils.create_vrt(mName, txt_path=txt_path)
+            gis_utils.create_vrt(mName, file_list_path=txt_path)
             prev = zl
             zls.update({zl: float(dst_res)})
             vrt = join(sd, f"{mName}.vrt")

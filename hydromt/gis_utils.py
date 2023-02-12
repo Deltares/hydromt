@@ -96,7 +96,6 @@ GDAL_DRIVER_CODE_MAP = {
     "xyz": "XYZ",
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
-PYTHON_PATH = dirname(sys.executable)
 
 ## GEOM functions
 
@@ -601,32 +600,32 @@ def write_map(
 
 def create_vrt(
     fname: str,
-    txt_path: str = None,
+    file_list_path: str = None,
     files_path: str = None,
     ext: list = [".tif"],
     output: str = None,
-    **kwargs
-    ):
+    **kwargs,
+):
     """Creates a .vrt file from a list op raster datasets by either
-    passing the list directly (txt_path) or by inferring it by passing 
-    a path containing wildcards (files_path) of the location(s) of the 
+    passing the list directly (file_list_path) or by inferring it by passing
+    a path containing wildcards (files_path) of the location(s) of the
     raster datasets
 
     Parameters
     ----------
     fname : str
         Name of the output vrt
-    txt_path : str, optional
+    file_list_path : str, optional
         Path to the text file containing the paths to the raster files
     files_path : str, optional
         Unix style path containing a pattern using wildcards (*)
         n.b. this is without an extension
         e.g. c:\\temp\\*\\* for all files in subfolders of 'c:\temp'
     ext : list, optional
-        List of extensions to be sought after 
+        List of extensions to be sought after
     output : str, optional
         Output directory
-        if not given a directory will be inferred from either 'txt_path' of 'files_path'
+        if not given a directory will be inferred from either 'file_list_path' of 'files_path'
     kwargs : optional
         Extra keyword arguments for glob (combined with files_path)
         e.g. recursive=True
@@ -634,38 +633,40 @@ def create_vrt(
     Raises
     ------
     ValueError
-        A Path is needed, either txt_path or files_path
+        A Path is needed, either file_list_path or files_path
     """
-    
-    if txt_path is None and files_path is None:
-        raise ValueError("Either 'txt_path' or 'files_path' is required -> None was given")
+
+    if file_list_path is None and files_path is None:
+        raise ValueError(
+            "Either 'file_list_path' or 'files_path' is required -> None was given"
+        )
 
     def create_folder(path):
-            if not os.path.exists(path):
-                os.makedirs(path)
+        if not os.path.exists(path):
+            os.makedirs(path)
 
-    if txt_path is None:
+    if file_list_path is None:
         files = []
         for e in ext:
             files += glob.glob(f"{files_path}{e}", **kwargs)
         if output is None:
             output = files_path.split("*")[0]
         create_folder(output)
-        txt_path = join(output, "filelist.txt")
-        with open(txt_path, "w") as w:
+        file_list_path = join(output, "filelist.txt")
+        with open(file_list_path, "w") as w:
             for line in files:
                 w.write(f"{line}\n")
 
     if output is None:
-        output = dirname(txt_path)
-    
+        output = dirname(file_list_path)
+
     create_folder(output)
 
     subprocess.run(
         [
-            join(PYTHON_PATH, "Library", "bin", "gdalbuildvrt.exe"),
+            "gdalbuildvrt",
             "-input_file_list",
-            txt_path,
+            file_list_path,
             join(output, f"{fname}.vrt"),
         ]
     )

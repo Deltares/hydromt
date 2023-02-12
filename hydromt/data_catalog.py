@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """DataCatalog module for HydroMT"""
-
+from __future__ import annotations
 import os
 from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 import copy

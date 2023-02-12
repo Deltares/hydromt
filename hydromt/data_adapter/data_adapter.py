@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import pandas as pd
