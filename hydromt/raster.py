@@ -1887,7 +1887,7 @@ class RasterDataArray(XRasterBase):
                 w = min(px, nc - l)
                 yield (l, u, w, h)
 
-        vrt = None
+        vrt_fn = None
         prev = 0
         nodata = self.nodata
         obj = self._obj.copy()
@@ -1897,8 +1897,8 @@ class RasterDataArray(XRasterBase):
             pxzl = tile_size * (2 ** (diff))
 
             # read data from previous zoomlevel
-            if vrt is not None:
-                obj = xr.open_dataarray(vrt, engine="rasterio").squeeze("band")
+            if vrt_fn is not None:
+                obj = xr.open_dataarray(vrt_fn, engine="rasterio").squeeze("band")
                 obj = obj.drop("band")
             x_dim, y_dim = obj.raster.x_dim, obj.raster.y_dim
             obj = obj.chunk({x_dim: pxzl, y_dim: pxzl})
@@ -1947,10 +1947,10 @@ class RasterDataArray(XRasterBase):
 
             file.close()
             # Create a vrt using GDAL
-            gis_utils.create_vrt(mName, file_list_path=txt_path)
+            vrt_fn = join(sd, f"{mName}.vrt")
+            gis_utils.create_vrt(vrt_fn, file_list_path=txt_path)
             prev = zl
             zls.update({zl: float(dst_res)})
-            vrt = join(sd, f"{mName}.vrt")
             del obj
 
         # Write a quick data catalog yaml

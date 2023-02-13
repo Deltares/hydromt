@@ -599,12 +599,9 @@ def write_map(
 
 
 def create_vrt(
-    fname: str,
+    vrt_path: str,
     file_list_path: str = None,
     files_path: str = None,
-    ext: list = [".tif"],
-    output: str = None,
-    **kwargs,
 ):
     """Creates a .vrt file from a list op raster datasets by either
     passing the list directly (file_list_path) or by inferring it by passing
@@ -613,22 +610,14 @@ def create_vrt(
 
     Parameters
     ----------
-    fname : str
-        Name of the output vrt
+    vrt_path : str
+        Path of the output vrt
     file_list_path : str, optional
         Path to the text file containing the paths to the raster files
     files_path : str, optional
         Unix style path containing a pattern using wildcards (*)
         n.b. this is without an extension
-        e.g. c:\\temp\\*\\* for all files in subfolders of 'c:\temp'
-    ext : list, optional
-        List of extensions to be sought after
-    output : str, optional
-        Output directory
-        if not given a directory will be inferred from either 'file_list_path' of 'files_path'
-    kwargs : optional
-        Extra keyword arguments for glob (combined with files_path)
-        e.g. recursive=True
+        e.g. c:\\temp\\*\\*.tif for all tif files in subfolders of 'c:\temp'
 
     Raises
     ------
@@ -641,33 +630,21 @@ def create_vrt(
             "Either 'file_list_path' or 'files_path' is required -> None was given"
         )
 
-    def create_folder(path):
-        if not os.path.exists(path):
-            os.makedirs(path)
+    outdir = dirname(vrt_path)
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
 
     if file_list_path is None:
-        files = []
-        for e in ext:
-            files += glob.glob(f"{files_path}{e}", **kwargs)
-        if output is None:
-            output = files_path.split("*")[0]
-        create_folder(output)
-        file_list_path = join(output, "filelist.txt")
+        files = glob.glob(files_path)
+        if len(files) == 0:
+            raise IOError(f"No files found at {files_path}")
+        file_list_path = join(outdir, "filelist.txt")
         with open(file_list_path, "w") as w:
             for line in files:
                 w.write(f"{line}\n")
 
-    if output is None:
-        output = dirname(file_list_path)
-
-    create_folder(output)
-
-    subprocess.run(
-        [
-            "gdalbuildvrt",
-            "-input_file_list",
-            file_list_path,
-            join(output, f"{fname}.vrt"),
-        ]
-    )
+    # TODO ability to pass more options
+    # TODO find method to pass dir of gdalbuiltvrt on different OS
+    cmd = ["gdalbuildvrt", "-input_file_list", file_list_path, vrt_path]
+    subprocess.run(cmd)
     return None

@@ -432,6 +432,7 @@ def test_rotated(transform, shape, tmpdir):
 
 
 def test_to_xyz_tiles(tmpdir, rioda_large):
+    # NOTE: this method does not work in debug mode because of os.subprocess
     path = str(tmpdir)
     rioda_large.raster.to_xyz_tiles(
         os.path.join(path, "dummy_xyz"),
@@ -442,6 +443,21 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
         assert len(f.readlines()) == 16
     with open(os.path.join(path, "dummy_xyz", "2", "filelist.txt"), "r") as f:
         assert len(f.readlines()) == 1
+
+    # test create_vrt
+    vrt_fn = os.path.join(path, "dummy_xyz", "vrt", "zl0.vrt")
+    files_path = os.path.join(path, "dummy_xyz", "*", "*", "*.tif")
+    gis_utils.create_vrt(vrt_fn, files_path=files_path)
+    assert os.path.isfile(vrt_fn)
+    assert isinstance(open_raster(vrt_fn).load(), xr.DataArray)  # try reading
+    with pytest.raises(
+        ValueError, match="Either 'file_list_path' or 'files_path' is required"
+    ):
+        gis_utils.create_vrt(vrt_fn)
+    with pytest.raises(IOError, match="No files found at "):
+        gis_utils.create_vrt(
+            vrt_fn, files_path=os.path.join(path, "dummy_xyz", "*.abc")
+        )
 
 
 # def test_to_osm(tmpdir, dummy):
