@@ -425,7 +425,7 @@ class Model(object, metaclass=ABCMeta):
                     exts = set([os.path.splitext(fn)[1] for fn in fns])
                     exts -= ignore_ext
                     if len(exts) != 0:
-                        if self._overwrite:
+                        if mode.endswith("+"):
                             self.logger.warning(
                                 "Model dir already exists and "
                                 f"files might be overwritten: {path}."

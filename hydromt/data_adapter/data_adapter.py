@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import pandas as pd
 import xarray as xr
+import geopandas as gpd
 import yaml
 from upath import UPath
 from fsspec.implementations import local
 from string import Formatter
 from typing import Tuple
 from itertools import product
+from pyproj import CRS
+import logging
 
-from .. import _compat
+from .. import _compat, gis_utils
+
+logger = logging.getLogger(__name__)
+
 
 __all__ = [
     "DataAdapter",
@@ -110,7 +117,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         unit_mult={},
         unit_add={},
         meta={},
-        placeholders={},
+        zoom_levels={},
         **kwargs,
     ):
         # general arguments
@@ -130,6 +137,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.rename = rename
         self.unit_mult = unit_mult
         self.unit_add = unit_add
+        self.zoom_levels = zoom_levels
         # meta data
         self.meta = {k: v for k, v in meta.items() if v is not None}
 
@@ -161,7 +169,78 @@ class DataAdapter(object, metaclass=ABCMeta):
     def __repr__(self):
         return self.__str__()
 
-    def resolve_paths(self, time_tuple: Tuple = None, variables: list = None, **kwargs):
+    def _parse_zoom_level(
+        self,
+        zoom_level: int | tuple = None,
+        geom: gpd.GeoSeries = None,
+        bbox: list = None,
+        logger=logger,
+    ) -> int:
+        """Return nearest smaller zoom level based on zoom resolutions defined in data catalog"""
+        # common pyproj crs axis units
+        known_units = ["degree", "metre", "US survey foot"]
+        if self.zoom_levels is None or len(self.zoom_levels) == 0:
+            logger.warning(f"No zoom levels available, default to zero")
+            return 0
+        zls = list(self.zoom_levels.keys())
+        if zoom_level is None:  # return first zoomlevel (assume these are ordered)
+            return next(iter(zls))
+        # parse zoom_level argument
+        if (
+            isinstance(zoom_level, tuple)
+            and isinstance(zoom_level[0], (int, float))
+            and isinstance(zoom_level[1], str)
+            and len(zoom_level) == 2
+        ):
+            res, unit = zoom_level
+            # covert 'meter' and foot to official pyproj units
+            unit = {"meter": "metre", "foot": "US survey foot"}.get(unit, unit)
+            if unit not in known_units:
+                raise TypeError(
+                    f"zoom_level unit {unit} not understood; should be one of {known_units}"
+                )
+        elif not isinstance(zoom_level, int):
+            raise TypeError(
+                f"zoom_level argument not understood: {zoom_level}; should be a float"
+            )
+        else:
+            return zoom_level
+        if self.crs:
+            # convert res if different unit than crs
+            crs = CRS.from_user_input(self.crs)
+            crs_unit = crs.axis_info[0].unit_name
+            if crs_unit != unit and crs_unit not in known_units:
+                raise NotImplementedError(
+                    f"no conversion available for {unit} to {crs_unit}"
+                )
+            if unit != crs_unit:
+                lat = 0
+                if bbox is not None:
+                    lat = (bbox[1] + bbox[3]) / 2
+                elif geom is not None:
+                    lat = geom.to_crs(4326).centroid.y.item()
+                conversions = {
+                    "degree": np.hypot(*gis_utils.cellres(lat=lat)),
+                    "US survey foot": 0.3048,
+                }
+                res = res * conversions.get(unit, 1) / conversions.get(crs_unit, 1)
+        # find nearest smaller zoomlevel
+        eps = 1e-5  # allow for rounding errors
+        smaller = [x < (res + eps) for x in self.zoom_levels.values()]
+        zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
+        logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
+        return zl
+
+    def resolve_paths(
+        self,
+        time_tuple: tuple = None,
+        variables: list = None,
+        zoom_level: int | tuple = None,
+        geom: gpd.GeoSeries = None,
+        bbox: list = None,
+        logger=logger,
+        **kwargs,
+    ):
         """Resolve {year}, {month} and {variable} keywords
         in self.path based on 'time_tuple' and 'variables' arguments
 
@@ -171,6 +250,8 @@ class DataAdapter(object, metaclass=ABCMeta):
             Start and end data in string format understood by :py:func:`pandas.to_timedelta`, by default None
         variables : list of str, optional
             List of variable names, by default None
+        zoom_level : int | tuple, optional
+            zoom level of dataset, can be provided as tuple of (<zoom resolution>, <unit>)
         **kwargs
             key-word arguments are passed to fsspec FileSystem objects. Arguments depend on protocal (local, gcs, s3...).
 
@@ -179,7 +260,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         List:
             list of filenames matching the path pattern given date range and variables
         """
-        known_keys = ["year", "month", "variable"]
+        known_keys = ["year", "month", "zoom_level", "variable"]
         fns = []
         keys = []
         # rebuild path based on arguments and escape unknown keys
@@ -213,11 +294,21 @@ class DataAdapter(object, metaclass=ABCMeta):
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
             postfix += f"; variables: {variables}"
+        # parse zoom level
+        if "zoom_level" in keys:
+            # returns the first zoom_level if zoom_level is None
+            zoom_level = self._parse_zoom_level(
+                zoom_level=zoom_level, bbox=bbox, geom=geom, logger=logger
+            )
 
         # get filenames with glob for all date / variable combinations
         fs = self.get_filesystem(**kwargs)
+        fmt = {}
+        # update based on zoomlevel (size = 1)
+        if zoom_level is not None:
+            fmt.update(zoom_level=zoom_level)
+        # update based on dates and variables  (size >= 1)
         for date, var in product(dates, vrs):
-            fmt = {}
             if date is not None:
                 fmt.update(year=date.year, month=date.month)
             if var is not None:
@@ -225,6 +316,7 @@ class DataAdapter(object, metaclass=ABCMeta):
             fns.extend(fs.glob(path.format(**fmt)))
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {path}{postfix}")
+
         # With some fs like gcfs or s3fs, the first part of the past is not returned properly with glob
         if not str(UPath(fns[0])).startswith(str(UPath(path))[0:2]):
             # Assumes it's the first part of the path that is not correctly parsed with gcsfs, s3fs etc.

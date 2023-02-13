@@ -441,6 +441,7 @@ Raster writing methods
    :template: autosummary/accessor_method.rst
    :toctree: _generated
 
+   DataArray.raster.to_xyz_tiles
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
 
@@ -728,6 +729,7 @@ Raster
 .. autosummary::
    :toctree: _generated
 
+   gis_utils.create_vrt
    gis_utils.spread2d
    gis_utils.reggrid_area
    gis_utils.cellarea

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """DataCatalog module for HydroMT"""
-
+from __future__ import annotations
 import os
 from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 import copy
@@ -104,7 +104,7 @@ class DataCatalog(object):
     @property
     def keys(self) -> List:
         """Returns list of data source names."""
-        return list(self.sources.keys())
+        return list(self._sources.keys())
 
     @property
     def predefined_catalogs(self) -> Dict:
@@ -113,7 +113,7 @@ class DataCatalog(object):
         return self._catalogs
 
     def __getitem__(self, key: str) -> DataAdapter:
-        return self.sources[key]
+        return self._sources[key]
 
     def __setitem__(self, key: str, value: DataAdapter) -> None:
         if not isinstance(value, DataAdapter):
@@ -123,10 +123,10 @@ class DataCatalog(object):
         return self._sources.__setitem__(key, value)
 
     def __iter__(self):
-        return self.sources.__iter__()
+        return self._sources.__iter__()
 
     def __len__(self):
-        return self.sources.__len__()
+        return self._sources.__len__()
 
     def __repr__(self):
         return self.to_dataframe().__repr__()
@@ -142,6 +142,7 @@ class DataCatalog(object):
     def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
         # get predefined_catalogs
         urlpath = self._url if urlpath is None else urlpath
+        # TODO cache predefined catalogs
         self._catalogs = _yml_from_uri_or_path(urlpath)
         return self._catalogs
 
@@ -268,6 +269,9 @@ class DataCatalog(object):
               placeholders:
                 <placeholder_name_1>: <list of names>
                 <placeholder_name_2>: <list of names>
+              zoom_levels:
+                <zoom_level_1>: <resolution_1>
+                <zoom_level_2>: <resolution_2>
         """
         self.logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
@@ -332,6 +336,7 @@ class DataCatalog(object):
                     "unit_mult": {<hydromt_variable_name1>: <float/int>},
                     "meta": {...},
                     "placeholders": {<placeholder_name_1>: <list of names>},
+                    "zoom_levels": {<zoom_level_1>: <resolution_1>},
                 }
                 <name2>: {
                     ...
@@ -413,7 +418,7 @@ class DataCatalog(object):
             root = abspath(root)
             meta.update(**{"root": root})
             root_drive = os.path.splitdrive(root)[0]
-        for name, source in sorted(self.sources.items()):  # alphabetical order
+        for name, source in sorted(self._sources.items()):  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
             source_dict = source.to_dict()
@@ -437,7 +442,7 @@ class DataCatalog(object):
     def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
         """Return data catalog summary as DataFrame"""
         d = dict()
-        for name, source in self.sources.items():
+        for name, source in self._sources.items():
             if len(source_names) > 0 and name not in source_names:
                 continue
             d[name] = source.summary()
@@ -527,6 +532,7 @@ class DataCatalog(object):
         path_or_key: str,
         bbox: List = None,
         geom: gpd.GeoDataFrame = None,
+        zoom_level: int | tuple = None,
         buffer: Union[float, int] = 0,
         align: bool = None,
         variables: Union[List, str] = None,
@@ -554,6 +560,10 @@ class DataCatalog(object):
             (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
+        zoom_level : int, tuple, optional
+            Zoom level of the xyz tile dataset (0 is base level)
+            Using a tuple the zoom level can be specified as (<zoom_resolution>, <unit>),
+            e.g., (1000, 'meter')
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         align : float, optional
@@ -590,6 +600,7 @@ class DataCatalog(object):
             bbox=bbox,
             geom=geom,
             buffer=buffer,
+            zoom_level=zoom_level,
             align=align,
             variables=variables,
             time_tuple=time_tuple,
@@ -817,7 +828,8 @@ def _parse_data_dict(
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
         if "placeholders" in source:
-            options = source["placeholders"]
+            # pop avoid placeholders being passed to adapter
+            options = source.pop("placeholders")
             for combination in itertools.product(*options.values()):
                 path_n = path
                 name_n = name

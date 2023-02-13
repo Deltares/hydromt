@@ -65,7 +65,7 @@ def open_raster(
         logger.warning("Removing chunks to read and load remote data.")
         kwargs.pop("chunks")
     # keep only 2D DataArray
-    da = xr.open_dataset(filename, **kwargs)["data"].squeeze(drop=True)
+    da = xr.open_dataarray(filename, **kwargs).squeeze(drop=True)
     # set missing _FillValue
     if mask_nodata:
         da.raster.set_nodata(np.nan)

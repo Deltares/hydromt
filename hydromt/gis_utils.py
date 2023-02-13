@@ -2,7 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """gis related convience functions. More in pyflwdir.gis_utils"""
-from os.path import join, isfile
+from os.path import dirname, join, isfile
+import os
+import glob
+import sys
+import subprocess
 import numpy as np
 import xarray as xr
 import rasterio
@@ -592,3 +596,55 @@ def write_map(
         if crs is not None:
             with rasterio.open(raster_path, "r+") as dst:
                 dst.crs = crs
+
+
+def create_vrt(
+    vrt_path: str,
+    file_list_path: str = None,
+    files_path: str = None,
+):
+    """Creates a .vrt file from a list op raster datasets by either
+    passing the list directly (file_list_path) or by inferring it by passing
+    a path containing wildcards (files_path) of the location(s) of the
+    raster datasets
+
+    Parameters
+    ----------
+    vrt_path : str
+        Path of the output vrt
+    file_list_path : str, optional
+        Path to the text file containing the paths to the raster files
+    files_path : str, optional
+        Unix style path containing a pattern using wildcards (*)
+        n.b. this is without an extension
+        e.g. c:\\temp\\*\\*.tif for all tif files in subfolders of 'c:\temp'
+
+    Raises
+    ------
+    ValueError
+        A Path is needed, either file_list_path or files_path
+    """
+
+    if file_list_path is None and files_path is None:
+        raise ValueError(
+            "Either 'file_list_path' or 'files_path' is required -> None was given"
+        )
+
+    outdir = dirname(vrt_path)
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
+
+    if file_list_path is None:
+        files = glob.glob(files_path)
+        if len(files) == 0:
+            raise IOError(f"No files found at {files_path}")
+        file_list_path = join(outdir, "filelist.txt")
+        with open(file_list_path, "w") as w:
+            for line in files:
+                w.write(f"{line}\n")
+
+    # TODO ability to pass more options
+    # TODO find method to pass dir of gdalbuiltvrt on different OS
+    cmd = ["gdalbuildvrt", "-input_file_list", file_list_path, vrt_path]
+    subprocess.run(cmd)
+    return None

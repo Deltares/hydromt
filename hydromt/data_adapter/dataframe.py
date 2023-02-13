@@ -28,7 +28,6 @@ class DataFrameAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
-        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for 2D tabular data.
@@ -76,7 +75,6 @@ class DataFrameAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
-            placeholders=placeholders,
             **kwargs,
         )
 

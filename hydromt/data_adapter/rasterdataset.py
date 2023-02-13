@@ -43,7 +43,6 @@ class RasterDatasetAdapter(DataAdapter):
         unit_add={},
         units={},
         meta={},
-        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial raster data.
@@ -81,8 +80,6 @@ class RasterDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, preferably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
-        placeholders: dict, optional
-            Placeholders to expand yaml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -96,7 +93,6 @@ class RasterDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
-            placeholders=placeholders,
             **kwargs,
         )
         # TODO: see if the units argument can be solved with unit_mult/unit_add
@@ -186,6 +182,7 @@ class RasterDatasetAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
+        zoom_level=None,
         align=None,
         variables=None,
         time_tuple=None,
@@ -203,16 +200,26 @@ class RasterDatasetAdapter(DataAdapter):
 
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         if "storage_options" in self.kwargs:
-            kwargs = self.kwargs["storage_options"]
+            so_kwargs = self.kwargs["storage_options"]
             # For s3, anonymous connection still requires --no-sign-request profile to read the data
             # setting environment variable works
-            if "anon" in kwargs:
+            if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
         else:
-            kwargs = dict()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables, **kwargs)
+            so_kwargs = dict()
+
+        # resolve path based on time, zoom level and/or variables
+        fns = self.resolve_paths(
+            time_tuple=time_tuple,
+            variables=variables,
+            zoom_level=zoom_level,
+            geom=geom,
+            bbox=bbox,
+            logger=logger,
+            **so_kwargs,
+        )
 
         kwargs = self.kwargs.copy()
         # zarr can use storage options directly, the rest should be converted to file-like objects
