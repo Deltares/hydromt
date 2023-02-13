@@ -17,19 +17,20 @@ Added
 - write raster (DataArray) to tiles in xyz stucture with the RasterDataArray.to_xyz_tiles method
 - add zoom_level to DataCatalog.get_rasterdataset method
 - new write_vrt function in gis_utils to write '.vrt' using GDAL 
-- experimental: support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs, s3].
-  Profile information can be passed in the data catalog ``kwargs`` under **storage_options**.
 - new predefined catalog for cmip6 data stored on Google Cloud Storage ``cmip6_data``. Requires dependency gcsfs.
 - new predefined catalog for public data stored on Amazon Web Services ``aws_data``. Requires dependency s3fs.
 - support for CMIP6 dataset.
 - new DataCatalog preprocess function ``harmonise_dims`` for manipulation and harmonisation of array dimensions.
+- experimental: support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs, s3].
+  Profile information can be passed in the data catalog ``kwargs`` under **storage_options**.
+- experimental: new caching option for tiled rasterdatasets ('--cache' from command line) 
 
 Changed
 -------
 - Revamped the GeoDataset (vector.py) to now work with geometry objects and wkt strings besides xy coordinates `PR #276 <https://github.com/Deltares/hydromt/pull/276>`_
 - GeoDataset can write to .nc that is compliant with ogr
 - Support for rotated grids in RasterDataset/Array, with new rotation and origin properties `PR #272 <https://github.com/Deltares/hydromt/pull/272>`_
-- If the model root already contains files when setting root, this will cause an error unless force overwrite (mode='w+' or --fo/--force-overwrite) from command line `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
+- If the model root already contains files when setting root, this will cause an error unless force overwrite (mode='w+' or --fo/--force-overwrite from command line) `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
 - Removed resolution ('-r', '--res') from the hydromt build cli, made region (now '-r') an optional argument `PR #278 <https://github.com/Deltares/hydromt/pull/278>`_
 - Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 `PR #258 <https://github.com/Deltares/hydromt/pull/258>`_
 - Changed shapely to require version '2.0.0' or later

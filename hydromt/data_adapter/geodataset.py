@@ -290,7 +290,7 @@ class GeoDatasetAdapter(DataAdapter):
             if ds_out.time.size == 0:
                 logger.warning(f"GeoDataset: Time slice out of range.")
                 drop_vars = [v for v in ds_out.data_vars if "time" in ds_out[v].dims]
-                ds_out = ds_out.drop(drop_vars)
+                ds_out = ds_out.drop_vars(drop_vars)
 
         # set nodata value
         if self.nodata is not None:

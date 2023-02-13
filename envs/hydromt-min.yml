@@ -29,4 +29,5 @@ dependencies:
   - scipy
   - shapely>=2.0.0
   - xarray
+  - xmltodict
   - zarr

@@ -18,6 +18,13 @@ You can :ref:`explore and make use of pre-defined data catalogs <existing_catalo
     HydroMT will use the data stored in the :ref:`artifact_data <existing_catalog>` 
     which contains an extract of global data for a small region around the Piave river in Northern Italy.
 
+.. TIP::
+
+    Tiles of tiled rasterdatasets which are described by a .vrt file can be cached locally (starting from v0.7.0). 
+    The requested data tiles will by default be stored to ~/.hydromt_data.
+    To use this option from command line add `--cache` to the `hydromt build` or `hydromt update` commands
+    In Python the cache is a property of the DataCatalog and can be set at Initialization.
+
 .. _get_data_cli: 
 
 From CLI

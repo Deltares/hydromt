@@ -133,7 +133,8 @@ def test_from_archive(tmpdir):
     source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
     assert ".hydromt_data" in str(source0.path)
     # failed to download
-    assert data_catalog.from_archive("https://asdf.com/asdf.zip") == 404
+    with pytest.raises(ConnectionError, match="Data download failed"):
+        data_catalog.from_archive("https://asdf.com/asdf.zip")
 
 
 def test_from_predefined_catalogs():
