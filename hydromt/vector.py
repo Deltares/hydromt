@@ -692,13 +692,10 @@ class GeoDataArray(GeoBase):
             index_dim = gdf.index.name if gdf.index.name is not None else "index"
         geom_name = gdf.geometry.name
         # create DataArray from array_like data
-        da = xr.DataArray(data=data, coords=coords, dims=dims)
+        da = xr.DataArray(data=data, coords=coords, dims=dims, name=name)
         # check dims -> assume index dim is first dim if not provided
         if dims is None and index_dim not in da.dims:
             da = da.rename({list(da.dims)[0]: index_dim})
-        if name is None:
-            name = "data"
-        da.name = name
         # check if all data array contain index_dim
         if index_dim not in da.dims:
             raise ValueError(f"Index dimension {index_dim} not found on DataArray.")
