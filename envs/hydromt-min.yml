@@ -16,6 +16,7 @@ dependencies:
   - geopandas>=0.10
   - netcdf4
   - numpy
+  - openpyxl
   - pandas
   - packaging
   - pip  # install
@@ -25,8 +26,8 @@ dependencies:
   - rasterio
   - requests
   - rioxarray
-  - universal_pathlib
   - scipy
   - shapely>=2.0.0
+  - universal_pathlib
   - xarray
   - zarr
