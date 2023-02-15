@@ -1964,113 +1964,115 @@ class RasterDataArray(XRasterBase):
         with open(join(root, "..", f"{mName}.yml"), "w") as f:
             yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
 
-    # def to_osm(
-    #     self,
-    #     root: str,
-    #     zl: int,
-    #     bbox: tuple = (),
-    # ):
-    #     """Generate tiles from raster according to the osm scheme
+    def to_osm(
+        self,
+        root: str,
+        zl: int,
+        bbox: tuple = (),
+    ):
+        """Generate tiles from raster according to the osm scheme
 
-    #     Parameters
-    #     ----------
-    #     root : str
-    #         Path to folder where the database will be created
-    #     zl : int
-    #         Maximum zoom level of the database
-    #         Everyting is generated incrementally up until this level
-    #         E.g. zl = 8, levels generated: 0 to 7
-    #     bbox : tuple, optional
-    #         Bounding Box in the objects crs
+        Parameters
+        ----------
+        root : str
+            Path to folder where the database will be created
+        zl : int
+            Maximum zoom level of the database
+            Everyting is generated incrementally up until this level
+            E.g. zl = 8, levels generated: 0 to 7
+        bbox : tuple, optional
+            Bounding Box in the objects crs
 
-    #     """
+        """
 
-    #     assert self._obj.ndim == 2, "Only 2d datasets are accepted..."
-    #     obj = self._obj.transpose(self.y_dim, self.x_dim)
+        assert self._obj.ndim == 2, "Only 2d datasets are accepted..."
+        obj = self._obj.copy()
+        obj = obj.transpose(self.y_dim, self.x_dim)
+        obj = obj.raster.reproject(dst_crs=3857)
 
-    #     mName = os.path.normpath(os.path.basename(root))
+        mName = os.path.normpath(os.path.basename(root))
 
-    #     def create_folder(path):
-    #         if not os.path.exists(path):
-    #             os.makedirs(path)
+        def create_folder(path):
+            if not os.path.exists(path):
+                os.makedirs(path)
 
-    #     def transform_res(dres, transformer):
-    #         return transformer.transform(0, dres)[0]
+        def transform_res(dres, transformer):
+            return transformer.transform(0, dres)[0]
 
-    #     create_folder(root)
+        create_folder(root)
 
-    #     dres = abs(self._obj.raster.res[0])
-    #     if bbox:
-    #         minx, miny, maxx, maxy = bbox
-    #     else:
-    #         minx, miny, maxx, maxy = self._obj.raster.transform_bounds(
-    #             dst_crs=self._obj.raster.crs
-    #         )
+        dres = abs(self._obj.raster.res[0])
+        if bbox:
+            minx, miny, maxx, maxy = bbox
+        else:
+            minx, miny, maxx, maxy = self._obj.raster.transform_bounds(
+                dst_crs=self._obj.raster.crs
+            )
 
-    #     transformer = pyproj.Transformer.from_crs(self._obj.raster.crs.to_epsg(), 3857)
-    #     minx, miny = map(
-    #         max, zip(transformer.transform(miny, minx), [-20037508.34] * 2)
-    #     )
-    #     maxx, maxy = map(min, zip(transformer.transform(maxy, maxx), [20037508.34] * 2))
+        transformer = pyproj.Transformer.from_crs(self._obj.raster.crs.to_epsg(), 3857)
+        minx, miny = map(
+            max, zip(transformer.transform(miny, minx), [-20037508.34] * 2)
+        )
+        maxx, maxy = map(min, zip(transformer.transform(maxy, maxx), [20037508.34] * 2))
 
-    #     dres = transform_res(dres, transformer)
-    #     nzl = int(np.ceil((np.log10((20037508.34 * 2) / (dres * 256)) / np.log10(2))))
+        dres = transform_res(dres, transformer)
+        nzl = int(np.ceil((np.log10((20037508.34 * 2) / (dres * 256)) / np.log10(2))))
 
-    #     if zl > nzl:
-    #         zl = nzl
+        if zl > nzl:
+            zl = nzl
 
-    #     def tile_window(zl, minx, miny, maxx, maxy):
-    #         # Basic stuff
-    #         dx = (20037508.34 * 2) / (2**zl)
-    #         # Origin displacement
-    #         odx = np.floor(abs(-20037508.34 - minx) / dx)
-    #         ody = np.floor(abs(20037508.34 - maxy) / dx)
+        def tile_window(zl, minx, miny, maxx, maxy):
+            # Basic stuff
+            dx = (20037508.34 * 2) / (2**zl)
+            # Origin displacement
+            odx = np.floor(abs(-20037508.34 - minx) / dx)
+            ody = np.floor(abs(20037508.34 - maxy) / dx)
 
-    #         # Set the new origin
-    #         minx = -20037508.34 + odx * dx
-    #         maxy = 20037508.34 - ody * dx
+            # Set the new origin
+            minx = -20037508.34 + odx * dx
+            maxy = 20037508.34 - ody * dx
 
-    #         # Create window generator
-    #         lu = product(np.arange(minx, maxx, dx), np.arange(maxy, miny, -dx))
-    #         for l, u in lu:
-    #             col = int(odx + (l - minx) / dx)
-    #             row = int(ody + (maxy - u) / dx)
-    #             yield Affine(dx / 256, 0, l, 0, -dx / 256, u), col, row
+            # Create window generator
+            lu = product(np.arange(minx, maxx, dx), np.arange(maxy, miny, -dx))
+            for l, u in lu:
+                col = int(odx + (l - minx) / dx)
+                row = int(ody + (maxy - u) / dx)
+                yield Affine(dx / 256, 0, l, 0, -dx / 256, u), col, row
 
-    #     for zlvl in range(zl):
-    #         sd = f"{root}\\{zlvl}"
-    #         create_folder(sd)
-    #         file = open(f"{sd}\\filelist.txt", "w")
+        for zlvl in range(zl):
+            sd = f"{root}\\{zlvl}"
+            create_folder(sd)
+            file = open(f"{sd}\\filelist.txt", "w")
 
-    #         for transform, col, row in tile_window(zlvl, minx, miny, maxx, maxy):
-    #             ssd = f"{sd}\\{col}"
-    #             create_folder(ssd)
+            for transform, col, row in tile_window(zlvl, minx, miny, maxx, maxy):
+                ssd = f"{sd}\\{col}"
+                create_folder(ssd)
 
-    #             temp = obj.load()
-    #             temp = temp.raster.reproject(
-    #                 dst_transform=transform,
-    #                 dst_crs=3857,
-    #                 dst_width=256,
-    #                 dst_height=256,
-    #             )
+                temp = obj.load()
+                temp = temp.raster.reproject(
+                    dst_transform=transform,
+                    dst_crs=3857,
+                    dst_width=256,
+                    dst_height=256,
+                )
 
-    #             temp.raster.to_raster(f"{ssd}\\{row}.tif", driver="GTiff")
+                temp.raster.to_raster(f"{ssd}\\{row}.tif", driver="GTiff")
 
-    #             file.write(f"{ssd}\\{row}.tif\n")
+                file.write(f"{ssd}\\{row}.tif\n")
 
-    #             del temp
+                del temp
 
-    #         file.close()
+            file.close()
 
-    #         gis_utils.create_vrt(sd, mName)
-    #     # Write a quick yaml for the database
-    #     with open(f"{root}\\..\\{mName}.yml", "w") as w:
-    #         w.write(f"{mName}:\n")
-    #         crs = 3857
-    #         w.write(f"  crs: {crs}\n")
-    #         w.write("  data_type: RasterDataset\n")
-    #         w.write("  driver: raster\n")
-    #         w.write(f"  path: {mName}/{{zoom_level}}/{mName}.vrt\n")
+            gis_utils.create_vrt(sd, mName)
+        # Write a quick yaml for the database
+        with open(f"{root}\\..\\{mName}.yml", "w") as w:
+            w.write(f"{mName}:\n")
+            crs = 3857
+            w.write(f"  crs: {crs}\n")
+            w.write("  data_type: RasterDataset\n")
+            w.write("  driver: raster\n")
+            w.write(f"  path: {mName}/{{zoom_level}}/{mName}.vrt\n")
 
     def to_raster(
         self,
