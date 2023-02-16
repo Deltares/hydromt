@@ -38,6 +38,7 @@ dependencies:
   - universal_pathlib
   - xarray
   - xugrid>=0.1.5 # optional for mesh
+  - xmltodict
   - zarr
   - pip:
     - pyet # optional for Penman Monteith PET

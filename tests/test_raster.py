@@ -57,7 +57,7 @@ def test_raster_properties(origin, rotation, res, shape, bounds):
 def test_attrs(transform, shape):
     # checks on raster spatial attributes
     da = raster.full_from_transform(transform, shape, name="test")
-    da.drop(raster.GEO_MAP_COORD)  # reset attrs
+    da.drop_vars(raster.GEO_MAP_COORD)  # reset attrs
     assert isinstance(da.raster.attrs, dict)
     assert raster.GEO_MAP_COORD in da.coords
     assert da.raster.dims == ("y", "x")
@@ -443,21 +443,6 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
         assert len(f.readlines()) == 16
     with open(os.path.join(path, "dummy_xyz", "2", "filelist.txt"), "r") as f:
         assert len(f.readlines()) == 1
-
-    # test create_vrt
-    vrt_fn = os.path.join(path, "dummy_xyz", "vrt", "zl0.vrt")
-    files_path = os.path.join(path, "dummy_xyz", "*", "*", "*.tif")
-    gis_utils.create_vrt(vrt_fn, files_path=files_path)
-    assert os.path.isfile(vrt_fn)
-    assert isinstance(open_raster(vrt_fn).load(), xr.DataArray)  # try reading
-    with pytest.raises(
-        ValueError, match="Either 'file_list_path' or 'files_path' is required"
-    ):
-        gis_utils.create_vrt(vrt_fn)
-    with pytest.raises(IOError, match="No files found at "):
-        gis_utils.create_vrt(
-            vrt_fn, files_path=os.path.join(path, "dummy_xyz", "*.abc")
-        )
 
 
 # def test_to_osm(tmpdir, dummy):

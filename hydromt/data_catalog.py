@@ -16,7 +16,6 @@ import xarray as xr
 import yaml
 import logging
 import requests
-from urllib.parse import urlparse
 import shutil
 from packaging.version import Version
 import itertools
@@ -28,6 +27,7 @@ from .data_adapter import (
     GeoDataFrameAdapter,
     DataFrameAdapter,
 )
+from .data_adapter.caching import _uri_validator, _copyfile, HYDROMT_DATADIR
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +39,15 @@ __all__ = [
 class DataCatalog(object):
     # root URL with data_catalog file
     _url = r"https://raw.githubusercontent.com/Deltares/hydromt/main/data/predefined_catalogs.yml"
-    _cache_dir = join(Path.home(), ".hydromt_data")
+    _cache_dir = HYDROMT_DATADIR
 
     def __init__(
         self,
         data_libs: Union[List, str] = [],
         fallback_lib: Optional[str] = "artifact_data",
         logger=logger,
+        cache: bool = False,
+        cache_dir: str = None,
         **artifact_keys,
     ) -> None:
         """Catalog of DataAdapter sources to easily read from different files
@@ -60,6 +62,11 @@ class DataCatalog(object):
         fallback_lib:
             Name of pre-defined data catalog to read if no data_libs are provided, by default 'artifact_data'.
             If None, no default data catalog is used.
+        cache: bool, optional
+            Set to true to cache data locally before reading.
+            Currently only implemented for tiled rasterdatasets, by default False.
+        cache_dir: str, Path, optional
+            Folder root path to cach data to, by default ~/.hydromt_data
         artifact_keys:
             Deprecated from version v0.5
         """
@@ -72,6 +79,11 @@ class DataCatalog(object):
         self._used_data = []
         self._fallback_lib = fallback_lib
         self.logger = logger
+
+        # caching
+        self.cache = bool(cache)
+        if cache_dir is not None:
+            self._cache_dir = cache_dir
 
         # legacy code. to be removed
         for lib, version in artifact_keys.items():
@@ -201,13 +213,7 @@ class DataCatalog(object):
             os.makedirs(root)
         # download data if url
         if _uri_validator(str(urlpath)) and not isfile(archive_fn):
-            with requests.get(urlpath, stream=True) as r:
-                if r.status_code != 200:
-                    self.logger.error(f"Data archive not found at {urlpath}")
-                    return r.status_code
-                self.logger.info(f"Downloading data archive file to {archive_fn}")
-                with open(archive_fn, "wb") as f:
-                    shutil.copyfileobj(r.raw, f)
+            _copyfile(urlpath, archive_fn)
         # unpack data
         if not isfile(yml_fn):
             self.logger.debug(f"Unpacking data from {archive_fn}")
@@ -284,11 +290,13 @@ class DataCatalog(object):
             meta.update(category=yml.pop("category"))
         # read meta data
         meta = yml.pop("meta", meta)
+        catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
         # TODO keep meta data!! Note only possible if yml files are not merged
         if root is None:
-            root = meta.get("root", dirname(urlpath))
+            root = meta.get("root", os.path.dirname(urlpath))
         self.from_dict(
             yml,
+            catalog_name=catalog_name,
             root=root,
             category=meta.get("category", None),
             mark_used=mark_used,
@@ -297,6 +305,7 @@ class DataCatalog(object):
     def from_dict(
         self,
         data_dict: Dict,
+        catalog_name: str = "",
         root: Union[str, Path] = None,
         category: str = None,
         mark_used: bool = False,
@@ -307,6 +316,8 @@ class DataCatalog(object):
         ----------
         data_dict: dict
             Dictionary of data_sources.
+        catalog_name: str, optional
+            Name of data catalog
         root: str, Path, optional
             Global root for all relative paths in `data_dict`.
         category: str, optional
@@ -346,6 +357,7 @@ class DataCatalog(object):
         """
         data_dict = _parse_data_dict(
             data_dict,
+            catalog_name=catalog_name,
             root=root,
             category=category,
         )
@@ -605,6 +617,7 @@ class DataCatalog(object):
             variables=variables,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
+            cache_root=self._cache_dir if self.cache else None,
             logger=self.logger,
         )
         return obj
@@ -778,6 +791,7 @@ class DataCatalog(object):
 
 def _parse_data_dict(
     data_dict: Dict,
+    catalog_name: str = "",
     root: Union[Path, str] = None,
     category: str = None,
 ) -> Dict:
@@ -836,19 +850,19 @@ def _parse_data_dict(
                 for k, v in zip(options.keys(), combination):
                     path_n = path_n.replace("{" + k + "}", v)
                     name_n = name_n.replace("{" + k + "}", v)
-                data[name_n] = adapter(path=path_n, meta=meta, **source)
+                data[name_n] = adapter(
+                    path=path_n,
+                    name=name_n,
+                    catalog_name=catalog_name,
+                    meta=meta,
+                    **source,
+                )
         else:
-            data[name] = adapter(path=path, meta=meta, **source)
+            data[name] = adapter(
+                path=path, name=name, catalog_name=catalog_name, meta=meta, **source
+            )
 
     return data
-
-
-def _uri_validator(x: str) -> bool:
-    try:
-        result = urlparse(x)
-        return all([result.scheme, result.netloc])
-    except:
-        return False
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
