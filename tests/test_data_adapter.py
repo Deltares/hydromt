@@ -10,6 +10,7 @@ import xarray as xr
 import hydromt
 from hydromt import _compat as compat
 from hydromt.data_catalog import DataCatalog
+import glob
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -231,3 +232,17 @@ def test_dataframe_time(df_time, tmpdir):
         fn_df_ts, index_col=0, parse_dates=True, variables=vars_slice
     )
     assert np.all(dfts5.columns == vars_slice)
+
+
+def test_cache_vrt(tmpdir, rioda_large):
+    # write vrt data
+    name = "tiled"
+    root = str(tmpdir.join(name))
+    rioda_large.raster.to_xyz_tiles(
+        root=root,
+        tile_size=256,
+        zoom_levels=[0],
+    )
+    cat = DataCatalog(join(root, f"{name}.yml"), cache=True)
+    cat.get_rasterdataset(name)
+    assert len(glob.glob(join(cat._cache_dir, name, name, "*", "*", "*.tif"))) == 16

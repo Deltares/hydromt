@@ -110,6 +110,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         self,
         path,
         driver,
+        name="",  # optional for now
+        catalog_name="",  # optional for now
         filesystem="local",
         crs=None,
         nodata=None,
@@ -120,6 +122,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         zoom_levels={},
         **kwargs,
     ):
+        self.name = name
+        self.catalog_name = catalog_name
         # general arguments
         self.path = path
         # driver and driver keyword-arguments
@@ -159,6 +163,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         the data adapter."""
         source = dict(data_type=self.data_type)
         for k, v in vars(self).items():
+            if k in ["name", "catalog_name"]:
+                continue  # do not add these identifiers
             if v is not None and (not isinstance(v, dict) or len(v) > 0):
                 source.update({k: v})
         return source

@@ -1,11 +1,15 @@
-"""Test for hydromt.gis_utils submodule"""
+"""Test for hydromt.gu submodule"""
 
 import pytest
 import numpy as np
-from hydromt import gis_utils as gu
-from hydromt.raster import full_from_transform, RasterDataArray
+import os
 from rasterio.transform import from_origin
 from affine import Affine
+import xarray as xr
+
+from hydromt import gis_utils as gu
+from hydromt.raster import full_from_transform, RasterDataArray
+from hydromt.io import open_raster
 
 
 def test_crs():
@@ -101,3 +105,25 @@ def test_spread():
     assert ds_out["source_dst"].values[10, 10] == 0
     with pytest.raises(ValueError, match='"nodata" must be a finite value'):
         gu.spread2d(da_obs, nodata=np.nan)
+
+
+def test_create_vrt(tmpdir, rioda_large):
+    # NOTE: this method does not work in debug mode because of os.subprocess
+    path = str(tmpdir)
+    rioda_large.raster.to_xyz_tiles(
+        os.path.join(path, "dummy_xyz"),
+        tile_size=256,
+        zoom_levels=[0],
+    )
+    # test create_vrt
+    vrt_fn = os.path.join(path, "dummy_xyz", "vrt", "zl0.vrt")
+    files_path = os.path.join(path, "dummy_xyz", "*", "*", "*.tif")
+    gu.create_vrt(vrt_fn, files_path=files_path)
+    assert os.path.isfile(vrt_fn)
+    assert isinstance(open_raster(vrt_fn).load(), xr.DataArray)  # try reading
+    with pytest.raises(
+        ValueError, match="Either 'file_list_path' or 'files_path' is required"
+    ):
+        gu.create_vrt(vrt_fn)
+    with pytest.raises(IOError, match="No files found at "):
+        gu.create_vrt(vrt_fn, files_path=os.path.join(path, "dummy_xyz", "*.abc"))

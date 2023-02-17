@@ -42,7 +42,7 @@ def test_precip():
 def test_pet():
     cat = DataCatalog()
     et_data = cat.get_rasterdataset("era5_daily_zarr")
-    dem = cat.get_rasterdataset("era5_orography").squeeze("time").drop("time")
+    dem = cat.get_rasterdataset("era5_orography").squeeze("time", drop=True)
 
     peto = pet(et_data, et_data, dem, method="penman-monteith_tdew")
 

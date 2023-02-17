@@ -51,6 +51,7 @@ dependencies:
   - sphinx # docs
   - s3fs
   - xarray
+  - xmltodict
   - xugrid>=0.1.5 # optional for mesh
   - zarr
   - pip:
