@@ -91,6 +91,13 @@ overwrite_opt = click.option(
     help="Flag: If provided overwrite existing model files",
 )
 
+cache_opt = click.option(
+    "--cache",
+    is_flag=True,
+    default=False,
+    help="Flag: If provided cache tiled rasterdatasets",
+)
+
 ## MAIN
 
 
@@ -129,6 +136,7 @@ def main(ctx, models):  # , quiet, verbose):
 @data_opt
 @deltares_data_opt
 @overwrite_opt
+@cache_opt
 @verbose_opt
 @quiet_opt
 @click.pass_context
@@ -142,6 +150,7 @@ def build(
     data,
     dd,
     fo,
+    cache,
     verbose,
     quiet,
 ):
@@ -186,6 +195,7 @@ def build(
             data_libs=data_libs,
             **kwargs,
         )
+        mod.data_catalog.cache = cache
         # build model
         mod.build(region, opt=opt)
     except Exception as e:
@@ -214,6 +224,7 @@ def build(
     default=None,
     callback=lambda c, p, v: v if v else c.params["model_root"],
 )
+@opt_config
 @click.option(
     "-c",
     "--components",
@@ -221,14 +232,25 @@ def build(
     help="Model methods from ini file to run",
 )
 @opt_cli
-@opt_config
 @data_opt
 @deltares_data_opt
+@cache_opt
 @quiet_opt
 @verbose_opt
 @click.pass_context
 def update(
-    ctx, model, model_root, model_out, components, opt, data, dd, config, verbose, quiet
+    ctx,
+    model,
+    model_root,
+    model_out,
+    config,
+    components,
+    opt,
+    data,
+    dd,
+    cache,
+    verbose,
+    quiet,
 ):
     """Update a specific component of a model.
     Set an output directory to copy the edited model to a new folder, otherwise maps
@@ -272,6 +294,7 @@ def update(
             logger=logger,
             **kwargs,
         )
+        mod.data_catalog.cache = cache
         # keep only components + setup_config
         if len(components) > 0:
             opt0 = opt.get("setup_config", {})

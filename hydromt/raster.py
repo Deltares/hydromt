@@ -1898,8 +1898,9 @@ class RasterDataArray(XRasterBase):
 
             # read data from previous zoomlevel
             if vrt_fn is not None:
-                obj = xr.open_dataarray(vrt_fn, engine="rasterio").squeeze("band")
-                obj = obj.drop("band")
+                obj = xr.open_dataarray(vrt_fn, engine="rasterio").squeeze(
+                    "band", drop=True
+                )
             x_dim, y_dim = obj.raster.x_dim, obj.raster.y_dim
             obj = obj.chunk({x_dim: pxzl, y_dim: pxzl})
             dst_res = abs(obj.raster.res[-1]) * (2 ** (diff))
@@ -1947,7 +1948,7 @@ class RasterDataArray(XRasterBase):
 
             file.close()
             # Create a vrt using GDAL
-            vrt_fn = join(sd, f"{mName}.vrt")
+            vrt_fn = join(root, f"{mName}_zl{zl}.vrt")
             gis_utils.create_vrt(vrt_fn, file_list_path=txt_path)
             prev = zl
             zls.update({zl: float(dst_res)})
@@ -1958,10 +1959,10 @@ class RasterDataArray(XRasterBase):
             "crs": self.crs.to_epsg(),
             "data_type": "RasterDataset",
             "driver": "raster",
-            "path": f"{mName}/{{zoom_level}}/{mName}.vrt",
+            "path": f"{mName}_zl{{zoom_level}}.vrt",
             "zoom_levels": zls,
         }
-        with open(join(root, "..", f"{mName}.yml"), "w") as f:
+        with open(join(root, f"{mName}.yml"), "w") as f:
             yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
 
     # def to_osm(

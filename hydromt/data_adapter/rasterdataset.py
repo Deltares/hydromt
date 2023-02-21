@@ -14,6 +14,7 @@ from pathlib import Path
 
 from .. import gis_utils, io
 from .data_adapter import DataAdapter, PREPROCESSORS
+from .caching import cache_vrt_tiles
 from ..raster import GEO_MAP_COORD
 
 
@@ -187,6 +188,7 @@ class RasterDatasetAdapter(DataAdapter):
         variables=None,
         time_tuple=None,
         single_var_as_array=True,
+        cache_root=None,
         logger=logger,
     ):
         """Returns a clipped, sliced and unified RasterDataset based on the properties
@@ -264,6 +266,15 @@ class RasterDatasetAdapter(DataAdapter):
                     "Remote (cloud) RasterDataset not supported with driver raster_tindex."
                 )
         elif self.driver == "raster":  # rasterio files
+            if cache_root is not None and all([str(fn).endswith(".vrt") for fn in fns]):
+                cache_dir = join(cache_root, self.catalog_name, self.name)
+                fns_cached = []
+                for fn in fns:
+                    fn1 = cache_vrt_tiles(
+                        fn, geom=geom, cache_dir=cache_dir, logger=logger
+                    )
+                    fns_cached.append(fn1)
+                fns = fns_cached
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
             ds_out = io.open_mfraster(fns, logger=logger, **kwargs)

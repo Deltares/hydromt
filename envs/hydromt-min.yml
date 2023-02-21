@@ -30,4 +30,5 @@ dependencies:
   - shapely>=2.0.0
   - universal_pathlib
   - xarray
+  - xmltodict
   - zarr
