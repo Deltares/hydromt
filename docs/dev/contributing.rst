@@ -236,7 +236,7 @@ Creating a release
 2. Bump the version number (without "v"!) in the __init__.py, check and update the docs/changelog.rst file and add a short summary to the changelog for this version. 
    Check if all dependencies in the toml are up to date. Commit all changes
 3. Create a tag using `git tag <version>`, e.g. git tag v0.7.0
-4. Push your changes to github. This should trigger a test release to test.pypi.org
+4. Push your changes to github. To include the tag do `git push origin <version>`. This should trigger a test release to test.pypi.org
 5. If all tests and the test release have succeeded, merge de branch to main.
 6. Create a new release on github under https://github.com/Deltares/hydromt/releases. 
    Copy the content of the changelog for this version to descrige the release. This should trigger the release to PyPi.
