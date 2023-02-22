@@ -1065,7 +1065,7 @@ class XRasterBase(XGeoBase):
         if not da_mask.raster.shape == self.shape:
             raise ValueError("Mask shape invalid.")
         if mask:
-            return self._obj.where(da_mask)        
+            return self._obj.where(da_mask)
         mask_bin = (da_mask.values != 0).astype(np.uint8)
         if not np.any(mask_bin):
             raise ValueError("Invalid mask.")
