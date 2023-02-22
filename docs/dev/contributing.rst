@@ -239,7 +239,7 @@ Creating a release
 4. Push your changes to github. To include the tag do `git push origin <version>`. This should trigger a test release to test.pypi.org
 5. If all tests and the test release have succeeded, merge de branch to main.
 6. Create a new release on github under https://github.com/Deltares/hydromt/releases. 
-   Copy the content of the changelog for this version to descrige the release. This should trigger the release to PyPi.
+   Use the "generate release notes" button and copy the content of the changelog for this version on top of the release notes. This should trigger the release to PyPi.
 7. The new PyPi package will trigger a new PR to the `HydroMT feedstock repos of conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_. 
    Check if all dependencies are up to date and modify the PR if necessary. Merge the PR to release the new version on conda-forge.
 
