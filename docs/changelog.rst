@@ -6,8 +6,14 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-Unreleased
-==========
+v0.7.0
+======
+
+This release contains several major updates of the code. 
+Most noticable is the chagne in the ``hydromt build`` CLI, where made the region argument optional and deprecated the resolution option.
+We also did a major overhaul of the ``GeoDataset``` and the associated ``.vector`` asseccor to support any type of vector geometries (before only points).
+These two changes might require small changes to your code. More new features and details are listed below.
+
 
 Added
 -----
@@ -66,6 +72,11 @@ Documentation
 
 v0.6.0 (24 October 2022)
 ========================
+
+In this release, we updated the ``Model API``  by renaming staticgeoms to geoms, adding a new maps object and removing abstract methods. 
+We also added new general subclasses to Model: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``. 
+These new subclasses have their own objects (e.g. grid for GridModel representing regular grids which replaces the old staticmaps object). 
+More details in the list below:
 
 Added
 -----
