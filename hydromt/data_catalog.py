@@ -154,8 +154,21 @@ class DataCatalog(object):
     def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
         # get predefined_catalogs
         urlpath = self._url if urlpath is None else urlpath
-        # TODO cache predefined catalogs
-        self._catalogs = _yml_from_uri_or_path(urlpath)
+        cache_path = join(self._cache_dir, basename(urlpath))
+        try:
+            # download file locally; overwrite existing file
+            _copyfile(urlpath, cache_path)
+        except ConnectionError:  # if offline
+            self.logger.warning(
+                "Downloading the predefined catalogs failed; check your internet connection"
+            )
+            pass
+        if isfile(cache_path):
+            self._catalogs = _yml_from_uri_or_path(cache_path)
+        if self._catalogs is None:
+            raise ConnectionError(
+                "Predefined catalogs not found; check your internet connection."
+            )
         return self._catalogs
 
     def from_artifacts(
