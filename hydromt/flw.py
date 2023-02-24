@@ -213,8 +213,12 @@ def upscale_flwdir(
     # setup output DataArray
     ftype = flwdir.ftype
     dims = ds.raster.dims
-    xs, ys = gis_utils.affine_to_coords(flwdir_out.transform, flwdir_out.shape)
-    coords = {ds.raster.y_dim: ys, ds.raster.x_dim: xs}
+    coords = gis_utils.affine_to_coords(
+        flwdir_out.transform,
+        flwdir_out.shape,
+        x_dim=ds.raster.x_dim,
+        y_dim=ds.raster.y_dim,
+    )
     da_flwdir = xr.DataArray(
         name=flwdir_name,
         data=flwdir_out.to_array(ftype),

@@ -2,7 +2,7 @@
 
 import os
 import pytest
-from os.path import join, abspath
+from os.path import join, abspath, dirname
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
@@ -11,6 +11,8 @@ from hydromt.data_catalog import (
     DataCatalog,
     _parse_data_dict,
 )
+
+CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 
 
 def test_parser():
@@ -60,6 +62,7 @@ def test_parser():
     dd_out = _parse_data_dict(dd, root=root)
     assert len(dd_out) == 6
     assert dd_out["test_a_1"].path == abspath(join(root, "data_1.tif"))
+    assert "placeholders" not in dd_out["test_a_1"].to_dict()
     # errors
     with pytest.raises(ValueError, match="Missing required path argument"):
         _parse_data_dict({"test": {}})
@@ -71,6 +74,7 @@ def test_parser():
 
 def test_data_catalog_io(tmpdir):
     data_catalog = DataCatalog()
+    data_catalog.sources  # load artifact data as fallback
     # read / write
     fn_yml = join(tmpdir, "test.yml")
     data_catalog.to_yml(fn_yml)
@@ -89,7 +93,7 @@ def test_data_catalog(tmpdir):
     # initialized with empty dict
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
-    assert len(data_catalog) > 0
+    assert len(data_catalog.sources) > 0
     # test keys, getitem,
     keys = data_catalog.keys
     source = data_catalog[keys[0]]
@@ -129,11 +133,15 @@ def test_from_archive(tmpdir):
     source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
     assert ".hydromt_data" in str(source0.path)
     # failed to download
-    assert data_catalog.from_archive("https://asdf.com/asdf.zip") == 404
+    with pytest.raises(ConnectionError, match="Data download failed"):
+        data_catalog.from_archive("https://asdf.com/asdf.zip")
 
 
 def test_from_predefined_catalogs():
     data_catalog = DataCatalog()
+    data_catalog.set_predefined_catalogs(
+        join(CATALOGDIR, "..", "predefined_catalogs.yml")
+    )
     for name in data_catalog.predefined_catalogs:
         data_catalog.from_predefined_catalogs(f"{name}=latest")
         assert len(data_catalog._sources) > 0

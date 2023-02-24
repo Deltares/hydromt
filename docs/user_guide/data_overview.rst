@@ -18,6 +18,13 @@ You can :ref:`explore and make use of pre-defined data catalogs <existing_catalo
     HydroMT will use the data stored in the :ref:`artifact_data <existing_catalog>` 
     which contains an extract of global data for a small region around the Piave river in Northern Italy.
 
+.. TIP::
+
+    Tiles of tiled rasterdatasets which are described by a .vrt file can be cached locally (starting from v0.7.0). 
+    The requested data tiles will by default be stored to ~/.hydromt_data.
+    To use this option from command line add `--cache` to the `hydromt build` or `hydromt update` commands
+    In Python the cache is a property of the DataCatalog and can be set at Initialization.
+
 .. _get_data_cli: 
 
 From CLI
@@ -32,21 +39,21 @@ For example when using the :ref:`build <cli_build>` CLI method:
 
 .. code-block:: console
 
-    hydromt build MODEL REGION -d /path/to/data_catalog1.yml -d /path/to/data_catalog2.yml
+    hydromt build MODEL -r REGION -d /path/to/data_catalog1.yml -d /path/to/data_catalog2.yml
 
 Alternatively, you can also use names and versions of the :ref:`predefined data catalogs <existing_catalog>`.
 If no version is specified, the latest version available is used.
 
 .. code-block:: console
 
-    hydromt build MODEL REGION -d deltares_data=v2022.5 -d artifact_data
+    hydromt build MODEL -r REGION -d deltares_data=v2022.5 -d artifact_data
 
 A special exception is made for the Deltares data catalog which can be accessed with the 
 ``--dd (--deltares-data)`` flag (requires access to the Deltares P-drive).
 
 .. code-block:: console
 
-    hydromt build MODEL REGION --dd
+    hydromt build MODEL -r REGION --dd
 
 .. NOTE::
 

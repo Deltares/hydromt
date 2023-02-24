@@ -115,10 +115,12 @@ Region                          Argument of the *build* and *clip* CLI methods t
    data_conventions.rst
    ../_examples/prep_data_catalog.ipynb
    ../_examples/export_data.ipynb
+   ../_examples/tiling_raster_data.ipynb
    ../_examples/reading_raster_data.ipynb
    ../_examples/reading_vector_data.ipynb
    ../_examples/reading_point_data.ipynb
    ../_examples/reading_tabular_data.ipynb
+   ../_examples/working_with_tiled_raster_data.ipynb
 
 .. toctree::
    :maxdepth: 2
@@ -143,4 +145,5 @@ Region                          Argument of the *build* and *clip* CLI methods t
    methods_main.rst
    methods_stats.rst
    ../_examples/working_with_raster.ipynb
+   ../_examples/working_with_geodatasets.ipynb
    ../_examples/working_with_flow_directions.ipynb

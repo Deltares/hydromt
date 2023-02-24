@@ -31,6 +31,7 @@ class GeoDataFrameAdapter(DataAdapter):
         self,
         path,
         driver=None,
+        filesystem="local",
         crs=None,
         nodata=None,
         rename={},
@@ -55,6 +56,9 @@ class GeoDataFrameAdapter(DataAdapter):
             for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
+        filesystem: {'local', 'gcs', 's3'}, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            By default, local.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
             or wkt (str). Only used if the data has no native CRS.
@@ -78,6 +82,7 @@ class GeoDataFrameAdapter(DataAdapter):
         super().__init__(
             path=path,
             driver=driver,
+            filesystem=filesystem,
             crs=crs,
             nodata=nodata,
             rename=rename,
@@ -169,6 +174,12 @@ class GeoDataFrameAdapter(DataAdapter):
             variables = np.atleast_1d(variables).tolist()
 
         kwargs = self.kwargs.copy()
+        if "storage_options" in kwargs:
+            # not sure if storage options can be passed to fiona.open()
+            # for now throw NotImplemented Error
+            raise NotImplementedError(
+                "Remote file storage_options not implemented for GeoDataFrame"
+            )
         _ = self.resolve_paths()  # throw nice error if data not found
 
         # parse geom, bbox and buffer arguments
@@ -196,6 +207,7 @@ class GeoDataFrameAdapter(DataAdapter):
             # specific driver should be added to open_vector kwargs
             if "driver" not in kwargs and self.driver in ["csv", "xls", "xlsx", "xy"]:
                 kwargs.update(driver=self.driver)
+            # Check if file-object is required because of additional options
             gdf = io.open_vector(
                 self.path, crs=self.crs, geom=geom, predicate=predicate, **kwargs
             )

@@ -2,7 +2,8 @@
 """General and basic API for models in HydroMT"""
 
 from abc import ABCMeta
-import os, glob
+import os
+import glob
 from os.path import join, isdir, isfile, abspath, dirname, basename, isabs
 import xarray as xr
 import numpy as np
@@ -147,15 +148,14 @@ class Model(object, metaclass=ABCMeta):
                     v = args[i]
                 params[k] = v
         # log options
-        for (k, v) in params.items():
+        for k, v in params.items():
             if v is not inspect._empty:
                 self.logger.info(f"{method}.{k}: {v}")
         return func(*args, **kwargs)
 
     def build(
         self,
-        region: dict,
-        res: Optional[float] = None,
+        region: Optional[dict] = None,
         write: Optional[bool] = True,
         opt: Optional[dict] = {},
     ):
@@ -172,8 +172,6 @@ class Model(object, metaclass=ABCMeta):
         region: dict
             Description of model region. See :py:meth:`~hydromt.workflows.parse_region`
             for all options.
-        res: float, optional
-            Model resolution. Use only if applicable to your model. By default None.
         write: bool, optional
             Write the complete model after executing all methods in opt, by default True.
         opt: dict, optional
@@ -197,21 +195,10 @@ class Model(object, metaclass=ABCMeta):
         opt = self._check_get_opt(opt)
 
         # merge cli region and res arguments with opt
-        # insert region method if it does not exist in opt
-        if self._CLI_ARGS["region"] not in opt:
-            opt = {self._CLI_ARGS["region"]: {}, **opt}
-        # update region method kwargs with region
-        opt[self._CLI_ARGS["region"]].update(region=region)
-        # update res method kwargs with res (optional)
-        if res is not None:
-            if self._CLI_ARGS["res"] not in opt:
-                m = self._CLI_ARGS["res"]
-                self.logger.warning(
-                    f'"res" argument ignored as the "{m}" is not in the model build configuration.'
-                )
-            else:
-                opt[self._CLI_ARGS["res"]].update(res=res)
-
+        if region is not None:
+            if self._CLI_ARGS["region"] not in opt:
+                opt = {self._CLI_ARGS["region"]: {}, **opt}
+            opt[self._CLI_ARGS["region"]].update(region=region)
         # then loop over other methods
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write() call
@@ -416,23 +403,40 @@ class Model(object, metaclass=ABCMeta):
         mode : {"r", "r+", "w"}, optional
             read/append/write mode for model files
         """
-        if mode not in ["r", "r+", "w"]:
-            raise ValueError(f'mode "{mode}" unknown, select from "r", "r+" or "w"')
+        ignore_ext = set([".log", ".yml"])
+        if mode not in ["r", "r+", "w", "w+"]:
+            raise ValueError(
+                f'mode "{mode}" unknown, select from "r", "r+", "w" or "w+"'
+            )
         # old_root = getattr(self, "_root", None)
         self._root = root if root is None else abspath(root)
         self._read = mode.startswith("r")
         self._write = mode != "r"
+        self._overwrite = mode == "w+"
         if root is not None:
             if self._write:
                 for name in self._FOLDERS:
                     path = join(self._root, name)
                     if not isdir(path):
                         os.makedirs(path)
-                    elif not self._read:
-                        self.logger.warning(
-                            "Model dir already exists and "
-                            f"files might be overwritten: {path}."
-                        )
+                        continue
+                    # path already exists check files
+                    fns = glob.glob(join(path, "*.*"))
+                    exts = set([os.path.splitext(fn)[1] for fn in fns])
+                    exts -= ignore_ext
+                    if len(exts) != 0:
+                        if mode.endswith("+"):
+                            self.logger.warning(
+                                "Model dir already exists and "
+                                f"files might be overwritten: {path}."
+                            )
+                        else:
+                            msg = (
+                                f"Model dir already exists and cannot be overwritten: {path}."
+                                "Use 'mode=w+' to force overwrite existing files."
+                            )
+                            self.logger.error(msg)
+                            raise IOError(msg)
             # check directory
             elif not isdir(self._root):
                 raise IOError(f'model root not found at "{self._root}"')
@@ -1313,7 +1317,7 @@ class Model(object, metaclass=ABCMeta):
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
         if len(self._staticmaps) > 0:
-            return CRS(self.staticmaps.raster.crs)
+            return self.staticmaps.raster.crs
         else:
             return self.region.crs
 

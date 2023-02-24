@@ -11,10 +11,12 @@ dependencies:
   - dask
   - entrypoints
   - flit>=3.4  # install
+  - fsspec
   - gdal>=3.1
   - geopandas>=0.10
   - netcdf4
   - numpy
+  - openpyxl
   - pandas
   - packaging
   - pip  # install
@@ -26,5 +28,7 @@ dependencies:
   - rioxarray
   - scipy
   - shapely>=2.0.0
+  - universal_pathlib
   - xarray
+  - xmltodict
   - zarr

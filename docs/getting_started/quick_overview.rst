@@ -68,7 +68,7 @@ in the `wflow_test` folder. This Wflow model instance is ready to be `run with W
 
 .. code-block:: console
 
-    $ hydromt build wflow ./wflow_test "{'subbasin': [12.2051, 45.8331], 'strord': 4}" -vv -i build_wflow.ini
+    $ hydromt build wflow ./wflow_test -r "{'subbasin': [12.2051, 45.8331], 'strord': 4}" -vv -i build_wflow.ini
 
 .. _Wflow: https://deltares.github.io/Wflow.jl/dev
 .. _HydroMT-Wflow plugin: https://deltares.github.io/hydromt_wflow/

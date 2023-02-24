@@ -46,6 +46,16 @@ arg_baseroot = click.argument(
     type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
 )
 
+region_opt = click.option(
+    "-r",
+    "--region",
+    type=str,
+    default="{}",
+    callback=cli_utils.parse_json,
+    help="Set the region for which to build the model,"
+    " e.g. {'subbasin': [-7.24, 62.09]}",
+)
+
 verbose_opt = click.option("--verbose", "-v", count=True, help="Increase verbosity.")
 
 quiet_opt = click.option("--quiet", "-q", count=True, help="Decrease verbosity.")
@@ -70,7 +80,22 @@ deltares_data_opt = click.option(
     "--deltares-data",
     is_flag=True,
     default=False,
-    help='Shortcut to add the "deltares_data" catalog',
+    help='Flag: Shortcut to add the "deltares_data" catalog',
+)
+
+overwrite_opt = click.option(
+    "--fo",
+    "--force-overwrite",
+    is_flag=True,
+    default=False,
+    help="Flag: If provided overwrite existing model files",
+)
+
+cache_opt = click.option(
+    "--cache",
+    is_flag=True,
+    default=False,
+    help="Flag: If provided cache tiled rasterdatasets",
 )
 
 ## MAIN
@@ -105,37 +130,27 @@ def main(ctx, models):  # , quiet, verbose):
     type=str,
 )
 @arg_root
-@click.argument(
-    "REGION",
-    type=str,
-    callback=cli_utils.parse_json,
-)
-@click.option(
-    "-r",
-    "--res",
-    type=float,
-    default=None,
-    help=f"Model resolution in model src.",
-)
-@click.option("--build-base/--build-all", default=False, help="Deprecated!")
 @opt_cli
 @opt_config
+@region_opt
 @data_opt
 @deltares_data_opt
-@quiet_opt
+@overwrite_opt
+@cache_opt
 @verbose_opt
+@quiet_opt
 @click.pass_context
 def build(
     ctx,
     model,
     model_root,
-    region,
-    res,
-    build_base,
     opt,
     config,
+    region,
     data,
     dd,
+    fo,
+    cache,
     verbose,
     quiet,
 ):
@@ -147,11 +162,11 @@ def build(
 
     \b
     To build a wflow model for a subbasin using and point coordinates snapped to cells with stream order >= 4
-    hydromt build wflow /path/to/model_root "{'subbasin': [-7.24, 62.09], 'strord': 4}" -i /path/to/wflow_config.ini -d deltares_data -d /path/to/data_catalog.yml -v
+    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini -r "{'subbasin': [-7.24, 62.09], 'strord': 4}" -d deltares_data -d /path/to/data_catalog.yml -v
 
     \b
     To build a sfincs model based on a bbox
-    hydromt build sfincs /path/to/model_root "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -i /path/to/sfincs_config.ini -d /path/to/data_catalog.yml -v
+    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -d /path/to/data_catalog.yml -v
 
     """
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -159,14 +174,12 @@ def build(
         "build", join(model_root, "hydromt.log"), log_level=log_level, append=False
     )
     logger.info(f"Building instance of {model} model at {model_root}.")
-    if build_base:
-        warnings.warn(
-            'The "build-base" flag has been deprecated, modify the ini file instead.',
-            DeprecationWarning,
-        )
     logger.info(f"User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
+    # Set region to None if empty string json
+    if len(region) == 0:
+        region = None
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
@@ -174,15 +187,17 @@ def build(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
+        mode = "w+" if fo else "w"
         mod = MODELS.load(model)(
             root=model_root,
-            mode="w",
+            mode=mode,
             logger=logger,
             data_libs=data_libs,
             **kwargs,
         )
+        mod.data_catalog.cache = cache
         # build model
-        mod.build(region, res, opt=opt)
+        mod.build(region, opt=opt)
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
@@ -209,6 +224,7 @@ def build(
     default=None,
     callback=lambda c, p, v: v if v else c.params["model_root"],
 )
+@opt_config
 @click.option(
     "-c",
     "--components",
@@ -216,14 +232,25 @@ def build(
     help="Model methods from ini file to run",
 )
 @opt_cli
-@opt_config
 @data_opt
 @deltares_data_opt
+@cache_opt
 @quiet_opt
 @verbose_opt
 @click.pass_context
 def update(
-    ctx, model, model_root, model_out, components, opt, data, dd, config, verbose, quiet
+    ctx,
+    model,
+    model_root,
+    model_out,
+    config,
+    components,
+    opt,
+    data,
+    dd,
+    cache,
+    verbose,
+    quiet,
 ):
     """Update a specific component of a model.
     Set an output directory to copy the edited model to a new folder, otherwise maps
@@ -267,6 +294,7 @@ def update(
             logger=logger,
             **kwargs,
         )
+        mod.data_catalog.cache = cache
         # keep only components + setup_config
         if len(components) > 0:
             opt0 = opt.get("setup_config", {})

@@ -5,6 +5,24 @@ Change log predefined datasets
 deltares_data 
 =============
 
+version: 2023.2
+----------------
+
+changed
+^^^^^^^
+- convert GeoPackage files to FlatGeoBuf for cloud compatibility
+- fix ERA5 nc files to read from archive of combined yearly and monthly files
+
+added
+^^^^^
+- Additional variables to era5 daily and hourly with name and unit conventions
+	- temp_dew: dewpoint temperature (degree C)
+	- wind10_u: 10m wind U-component (m s-1)
+	- wind10_v: 10m wind V-component (m s-1)
+	- ssr: surface net solar radiation (W m-2)
+	- tcc: total cloud cover (-)
+
+
 version: 2022.7
 ---------------
 
@@ -33,3 +51,23 @@ changed
 fixed
 ^^^^^
 - enable versioning of yml.files
+
+cmip6_data
+==========
+
+version: 2023.2
+---------------
+
+added
+^^^^^
+- CMIP6 data from Google Cloud Storage. Only models and scenarios for which regular grids are available are listed
+
+aws_data
+========
+
+version: 2023.2
+---------------
+
+added
+^^^^^
+- ESA Worldcover v100 2020.

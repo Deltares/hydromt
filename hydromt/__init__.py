@@ -1,7 +1,7 @@
 """HydroMT: Automated and reproducible model building and analysis"""
 
 # version number without 'v' at start
-__version__ = "0.6.1.dev"
+__version__ = "0.7.1.dev"
 
 # Set environment variables (this will be temporary)
 # to use shapely 2.0 in favor of pygeos (if installed)

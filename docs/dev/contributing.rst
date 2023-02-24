@@ -232,25 +232,18 @@ A single test:
 Creating a release
 ------------------
 
-1. Prepare the release by bumping the version number in the __init__.py and updating the docs/changelog.rst file
-2. First create a new release on github under https://github.com/Deltares/hydromt/releases. We use semantic versioning and describe the release based on the CHANGELOG.
-3. Make sure to update and clean your local git folder. This removes all files which are not tracked by git. 
+1. Create a new branch with the name "release/<version>" where <version> is the version number, e.g. v0.7.0
+2. Bump the version number (without "v"!) in the __init__.py, check and update the docs/changelog.rst file and add a short summary to the changelog for this version. 
+   Check if all dependencies in the toml are up to date. Commit all changes
+3. Create a tag using `git tag <version>`, e.g. git tag v0.7.0
+4. Push your changes to github. To include the tag do `git push origin <version>`. This should trigger a test release to test.pypi.org
+5. If all tests and the test release have succeeded, merge de branch to main.
+6. Create a new release on github under https://github.com/Deltares/hydromt/releases. 
+   Use the "generate release notes" button and copy the content of the changelog for this version on top of the release notes. This should trigger the release to PyPi.
+7. The new PyPi package will trigger a new PR to the `HydroMT feedstock repos of conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_. 
+   Check if all dependencies are up to date and modify the PR if necessary. Merge the PR to release the new version on conda-forge.
 
-.. code-block:: console
 
-    $ git pull
-    $ git clean -xfd
+.. NOTE::
 
-4. Build wheels and sdist for the package and check the resulting files in the dist/ directory.
-
-.. code-block:: console
-
-    $ flit build
-
-5. Then use publish to pypi. It will prompt you for your username and password.
-
-.. code-block:: console
-
-    $ flit publish --repository pypi
-
-6. Bump the version number in __init__.py to the next release number with ".dev" postfix and push commit
+  In the next PR that get's merged into main, the version numbers in __init__.py and the changelog should be changed to the next release with ".dev" postfix.
