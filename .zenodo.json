@@ -1,6 +1,6 @@
 {
-    "title": "HydroMT",
-    "description": "Automated and reproducible model building and analysis",
+    "title": "HydroMT: Automated and reproducible model building and analysis",
+    "description": "Open source software package for automated, modular and reproducible model building and analysis.",
     "upload_type": "software",
     "creators": [
         {
