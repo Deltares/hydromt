@@ -3,15 +3,16 @@
 """
 config functions
 """
-
-import codecs
-from configparser import ConfigParser
-from os.path import dirname, join, abspath, exists
-from ast import literal_eval
-import numpy as np
-import abc
+from os.path import dirname, join, abspath, exists, splitext
 from pathlib import Path
 from typing import Union, Dict, List
+from ast import literal_eval
+import codecs
+import abc
+from configparser import ConfigParser
+from warnings import warn
+
+import tomli
 
 
 def configread(
@@ -58,6 +59,12 @@ def configread(
         Configuration dictionary. If the configuration contains headers,
         the first level keys are the section headers, the second level option-value pairs.
     """
+    if splitext(config_fn)[-1] == ".toml":
+        return parse_toml_config(config_fn, abs_path, defaults, skip_abspath_sections)
+    warn(
+        "Support for .ini configuration files will be deprecated",
+        PendingDeprecationWarning,
+    )
     if cf is None:
         cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
     elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
@@ -142,3 +149,30 @@ def configwrite(
     cf.read_dict(_cfdict)
     with codecs.open(config_fn, "w", encoding=encoding) as fp:
         cf.write(fp)
+
+
+def parse_toml_config(
+    config_fn: Union[Path, str],
+    abs_path: bool = False,
+    defaults: Dict = dict(),
+    skip_abspath_sections: List = ["setup_config"],
+) -> Dict:
+    with open(config_fn, "rb") as config_file:
+        toml_dict = tomli.load(config_file)
+    root = dirname(config_fn)
+    cfdict = defaults.copy()
+    for section in toml_dict.keys():
+        if section not in cfdict:
+            cfdict[section] = dict()
+        for key, value in toml_dict[section].items():
+            if abs_path and section not in skip_abspath_sections:
+                if isinstance(value, str) and exists(join(root, value)):
+                    value = Path(abspath(join(root, value)))
+                elif (
+                    isinstance(value, list)
+                    and all([isinstance(v, str) for v in value])
+                    and all([exists(join(root, v)) for v in value])
+                ):
+                    value = [Path(abspath(join(root, v))) for v in value]
+            cfdict[section].update({key: value})
+    return cfdict

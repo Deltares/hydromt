@@ -12,3 +12,4 @@ dependencies:
   - hydromt>=0.6
   - matplotlib
   - python=3.10
+  - tomli
