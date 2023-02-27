@@ -23,7 +23,7 @@ authors:
   - name: Anaïs Couasnon
     orcid: 0000-0001-9372-841X
     affiliation: "1, 2"
-  - name: Brendam Dalmijn
+  - name: Brendan Dalmijn
     affiliation: 1
   - name: Mark Hegnauer
     affiliation: 1
