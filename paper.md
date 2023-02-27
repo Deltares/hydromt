@@ -15,7 +15,26 @@ authors:
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: Hélène Boisgontier
     affiliation: 1
+  - name: Laurène J. E. Bouaziz
+    affiliation: 1
+    orcid: 0000-0003-0597-8051
+  - name: Joost Buitink
+    affiliation: 1
+  - name: Anaïs Couasnon
+    orcid: 0000-0001-9372-841X
+    affiliation: "1, 2"
   - name: Mark Hegnauer
+    affiliation: 1
+  - name: Brendam Dalmijn
+    affiliation: 1
+  - name: Tjalling de Jong
+    affiliation: 1
+  - name: Sibren Loos
+    affiliation: 1
+  - name: Indra Marth
+    affiliation: 1
+  - name: Willem van Verseveld
+    orcid: 0000-0003-3311-738X
     affiliation: 1
 affiliations:
  - name: Deltares, The Netherlands
