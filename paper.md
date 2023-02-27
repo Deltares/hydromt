@@ -66,6 +66,6 @@ HydroMT builds on many open source (Python) packages including Xarray [@Hoyer201
 
 # Acknowledgements
 
-We thank all contributors to the code and documentation so far: Huite Bootsma, Laurène Bouaziz, Joost Buitink, Anaïs Couasnon, Rinske Hutten, Tjalling de Jong, Tim Leijnse, Xiaohan Li, Sibren Loos, Indra Marth, Daan Rooze, Willem van Verseveld, Albrecht Weerts and Hessel Winsemius. The developments have been sponsored by Deltares Strategic Research funding and the Netherlands Organization for Scientific Research (NWO) in the form of a VIDI grant (Grant No. 016.161.324).
+The developments have been sponsored by Deltares Strategic Research funding, the Deltares Hydrology Product Line, and the Netherlands Organization for Scientific Research (NWO) in the form of a VIDI grant (Grant No. 016.161.324).
 
 # References
