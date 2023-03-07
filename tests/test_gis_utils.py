@@ -1,10 +1,15 @@
-"""Test for hydromt.gis_utils submodule"""
+"""Test for hydromt.gu submodule"""
 
 import pytest
 import numpy as np
+import os
+from rasterio.transform import from_origin
+from affine import Affine
+import xarray as xr
+
 from hydromt import gis_utils as gu
 from hydromt.raster import full_from_transform, RasterDataArray
-from rasterio.transform import from_origin
+from hydromt.io import open_raster
 
 
 def test_crs():
@@ -23,18 +28,33 @@ def test_crs():
 def test_transform():
     transform = from_origin(0, 90, 1, 1)
     shape = (180, 360)
-    xs, ys = gu.affine_to_coords(transform, shape)
+    coords = gu.affine_to_coords(transform, shape)
+    xs, ys = coords["x"][1], coords["y"][1]
     assert np.all(ys == 90 - np.arange(0.5, shape[0]))
     assert np.all(xs == np.arange(0.5, shape[1]))
 
     # offset for geographic crs
     da = full_from_transform(transform, shape, crs=4326)
+    assert np.allclose(da.raster.origin, np.array([0, 90]))
     da1 = gu.meridian_offset(da, x_name="x")
     assert da1.raster.bounds[0] == -180
     da2 = gu.meridian_offset(da1, x_name="x", bbox=[170, 0, 190, 10])
-    assert da2.raster.bounds[0] == 170
+    assert da2.raster.bounds[0] == 0
     da3 = gu.meridian_offset(da1, x_name="x", bbox=[-190, 0, -170, 10])
-    assert da3.raster.bounds[2] == -170
+    assert da3.raster.bounds[2] == 0
+
+
+def test_transform_rotation():
+    # with rotation
+    transform = Affine.rotation(30) * Affine.scale(1, 2)
+    shape = (10, 5)
+    coords = gu.affine_to_coords(transform, shape)
+    xs, ys = coords["xc"][1], coords["yc"][1]
+    assert xs.ndim == 2 and ys.ndim == 2
+    da = full_from_transform(transform, shape, crs=4326)
+    assert da.raster.x_dim == "x"
+    assert da.raster.xcoords.ndim == 2
+    assert np.allclose(transform, da.raster.transform)
 
 
 def test_area_res():
@@ -50,12 +70,7 @@ def test_gdf(world):
     country = world.iloc[[0], :].to_crs(3857)
     assert np.all(gu.filter_gdf(world, country) == 0)
     idx0 = gu.filter_gdf(world, bbox=[3, 51.5, 4, 52])[0]
-    assert (
-        world.iloc[
-            idx0,
-        ]["iso_a3"]
-        == "NLD"
-    )
+    assert world.iloc[idx0,]["iso_a3"] == "NLD"
     with pytest.raises(ValueError, match="Unknown geometry mask type"):
         gu.filter_gdf(world, geom=[3, 51.5, 4, 52])
 
@@ -90,3 +105,25 @@ def test_spread():
     assert ds_out["source_dst"].values[10, 10] == 0
     with pytest.raises(ValueError, match='"nodata" must be a finite value'):
         gu.spread2d(da_obs, nodata=np.nan)
+
+
+def test_create_vrt(tmpdir, rioda_large):
+    # NOTE: this method does not work in debug mode because of os.subprocess
+    path = str(tmpdir)
+    rioda_large.raster.to_xyz_tiles(
+        os.path.join(path, "dummy_xyz"),
+        tile_size=256,
+        zoom_levels=[0],
+    )
+    # test create_vrt
+    vrt_fn = os.path.join(path, "dummy_xyz", "vrt", "zl0.vrt")
+    files_path = os.path.join(path, "dummy_xyz", "*", "*", "*.tif")
+    gu.create_vrt(vrt_fn, files_path=files_path)
+    assert os.path.isfile(vrt_fn)
+    assert isinstance(open_raster(vrt_fn).load(), xr.DataArray)  # try reading
+    with pytest.raises(
+        ValueError, match="Either 'file_list_path' or 'files_path' is required"
+    ):
+        gu.create_vrt(vrt_fn)
+    with pytest.raises(IOError, match="No files found at "):
+        gu.create_vrt(vrt_fn, files_path=os.path.join(path, "dummy_xyz", "*.abc"))

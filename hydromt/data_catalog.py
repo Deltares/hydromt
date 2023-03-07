@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """DataCatalog module for HydroMT"""
-
+from __future__ import annotations
 import os
 from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 import copy
@@ -16,7 +16,6 @@ import xarray as xr
 import yaml
 import logging
 import requests
-from urllib.parse import urlparse
 import shutil
 from packaging.version import Version
 import itertools
@@ -28,6 +27,7 @@ from .data_adapter import (
     GeoDataFrameAdapter,
     DataFrameAdapter,
 )
+from .data_adapter.caching import _uri_validator, _copyfile, HYDROMT_DATADIR
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +39,15 @@ __all__ = [
 class DataCatalog(object):
     # root URL with data_catalog file
     _url = r"https://raw.githubusercontent.com/Deltares/hydromt/main/data/predefined_catalogs.yml"
-    _cache_dir = join(Path.home(), ".hydromt_data")
+    _cache_dir = HYDROMT_DATADIR
 
     def __init__(
         self,
         data_libs: Union[List, str] = [],
         fallback_lib: Optional[str] = "artifact_data",
         logger=logger,
+        cache: bool = False,
+        cache_dir: str = None,
         **artifact_keys,
     ) -> None:
         """Catalog of DataAdapter sources to easily read from different files
@@ -56,10 +58,15 @@ class DataCatalog(object):
         data_libs: (list of) str, Path, optional
             One or more paths to data catalog yaml files or names of predefined data catalogs.
             By default the data catalog is initiated without data entries.
-            See :py:func:`~hydromt.data_catalog.DataCatalog.from_yml` for accepted yaml format.
+            See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yaml format.
         fallback_lib:
             Name of pre-defined data catalog to read if no data_libs are provided, by default 'artifact_data'.
             If None, no default data catalog is used.
+        cache: bool, optional
+            Set to true to cache data locally before reading.
+            Currently only implemented for tiled rasterdatasets, by default False.
+        cache_dir: str, Path, optional
+            Folder root path to cach data to, by default ~/.hydromt_data
         artifact_keys:
             Deprecated from version v0.5
         """
@@ -73,10 +80,16 @@ class DataCatalog(object):
         self._fallback_lib = fallback_lib
         self.logger = logger
 
+        # caching
+        self.cache = bool(cache)
+        if cache_dir is not None:
+            self._cache_dir = cache_dir
+
         # legacy code. to be removed
         for lib, version in artifact_keys.items():
             warnings.warn(
-                f"{lib}={version} as key-word argument is deprecated, add the predefined data catalog as string to the data_libs argument instead",
+                "Adding a predefined data catalog as key-word argument is deprecated, "
+                f"add the catalog as '{lib}={version}' to the data_libs list instead.",
                 DeprecationWarning,
             )
             if not version:  # False or None
@@ -103,7 +116,7 @@ class DataCatalog(object):
     @property
     def keys(self) -> List:
         """Returns list of data source names."""
-        return list(self.sources.keys())
+        return list(self._sources.keys())
 
     @property
     def predefined_catalogs(self) -> Dict:
@@ -112,7 +125,7 @@ class DataCatalog(object):
         return self._catalogs
 
     def __getitem__(self, key: str) -> DataAdapter:
-        return self.sources[key]
+        return self._sources[key]
 
     def __setitem__(self, key: str, value: DataAdapter) -> None:
         if not isinstance(value, DataAdapter):
@@ -122,10 +135,10 @@ class DataCatalog(object):
         return self._sources.__setitem__(key, value)
 
     def __iter__(self):
-        return self.sources.__iter__()
+        return self._sources.__iter__()
 
     def __len__(self):
-        return self.sources.__len__()
+        return self._sources.__len__()
 
     def __repr__(self):
         return self.to_dataframe().__repr__()
@@ -141,6 +154,7 @@ class DataCatalog(object):
     def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
         # get predefined_catalogs
         urlpath = self._url if urlpath is None else urlpath
+        # TODO cache predefined catalogs
         self._catalogs = _yml_from_uri_or_path(urlpath)
         return self._catalogs
 
@@ -199,13 +213,7 @@ class DataCatalog(object):
             os.makedirs(root)
         # download data if url
         if _uri_validator(str(urlpath)) and not isfile(archive_fn):
-            with requests.get(urlpath, stream=True) as r:
-                if r.status_code != 200:
-                    self.logger.error(f"Data archive not found at {urlpath}")
-                    return r.status_code
-                self.logger.info(f"Downloading data archive file to {archive_fn}")
-                with open(archive_fn, "wb") as f:
-                    shutil.copyfileobj(r.raw, f)
+            _copyfile(urlpath, archive_fn)
         # unpack data
         if not isfile(yml_fn):
             self.logger.debug(f"Unpacking data from {archive_fn}")
@@ -237,12 +245,15 @@ class DataCatalog(object):
 
         .. code-block:: console
 
-            root: <path>
-            category: <category>
+            meta:
+              root: <path>
+              category: <category>
+              version: <version>
             <name>:
               path: <path>
               data_type: <data_type>
               driver: <driver>
+              filesystem: <filesystem>
               kwargs:
                 <key>: <value>
               crs: <crs>
@@ -264,6 +275,9 @@ class DataCatalog(object):
               placeholders:
                 <placeholder_name_1>: <list of names>
                 <placeholder_name_2>: <list of names>
+              zoom_levels:
+                <zoom_level_1>: <resolution_1>
+                <zoom_level_2>: <resolution_2>
         """
         self.logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
@@ -276,16 +290,22 @@ class DataCatalog(object):
             meta.update(category=yml.pop("category"))
         # read meta data
         meta = yml.pop("meta", meta)
+        catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
         # TODO keep meta data!! Note only possible if yml files are not merged
         if root is None:
-            root = meta.get("root", dirname(urlpath))
+            root = meta.get("root", os.path.dirname(urlpath))
         self.from_dict(
-            yml, root=root, category=meta.get("category", None), mark_used=mark_used
+            yml,
+            catalog_name=catalog_name,
+            root=root,
+            category=meta.get("category", None),
+            mark_used=mark_used,
         )
 
     def from_dict(
         self,
         data_dict: Dict,
+        catalog_name: str = "",
         root: Union[str, Path] = None,
         category: str = None,
         mark_used: bool = False,
@@ -296,6 +316,8 @@ class DataCatalog(object):
         ----------
         data_dict: dict
             Dictionary of data_sources.
+        catalog_name: str, optional
+            Name of data catalog
         root: str, Path, optional
             Global root for all relative paths in `data_dict`.
         category: str, optional
@@ -316,6 +338,7 @@ class DataCatalog(object):
                     "path": <path>,
                     "data_type": <data_type>,
                     "driver": <driver>,
+                    "filesystem": <filesystem>,
                     "kwargs": {<key>: <value>},
                     "crs": <crs>,
                     "nodata": <nodata>,
@@ -324,6 +347,7 @@ class DataCatalog(object):
                     "unit_mult": {<hydromt_variable_name1>: <float/int>},
                     "meta": {...},
                     "placeholders": {<placeholder_name_1>: <list of names>},
+                    "zoom_levels": {<zoom_level_1>: <resolution_1>},
                 }
                 <name2>: {
                     ...
@@ -331,7 +355,12 @@ class DataCatalog(object):
             }
 
         """
-        data_dict = _parse_data_dict(data_dict, root=root, category=category)
+        data_dict = _parse_data_dict(
+            data_dict,
+            catalog_name=catalog_name,
+            root=root,
+            category=category,
+        )
         self.update(**data_dict)
         if mark_used:
             self._used_data.extend(list(data_dict.keys()))
@@ -401,7 +430,7 @@ class DataCatalog(object):
             root = abspath(root)
             meta.update(**{"root": root})
             root_drive = os.path.splitdrive(root)[0]
-        for name, source in sorted(self.sources.items()):  # alphabetical order
+        for name, source in sorted(self._sources.items()):  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
             source_dict = source.to_dict()
@@ -425,7 +454,7 @@ class DataCatalog(object):
     def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
         """Return data catalog summary as DataFrame"""
         d = dict()
-        for name, source in self.sources.items():
+        for name, source in self._sources.items():
             if len(source_names) > 0 and name not in source_names:
                 continue
             d[name] = source.summary()
@@ -497,6 +526,7 @@ class DataCatalog(object):
                     source.unit_add = unit_add
                 source.path = fn_out
                 source.driver = driver
+                source.filesystem = "local"
                 source.kwargs = {}
                 source.rename = {}
                 sources_out[key] = source
@@ -514,6 +544,7 @@ class DataCatalog(object):
         path_or_key: str,
         bbox: List = None,
         geom: gpd.GeoDataFrame = None,
+        zoom_level: int | tuple = None,
         buffer: Union[float, int] = 0,
         align: bool = None,
         variables: Union[List, str] = None,
@@ -538,9 +569,13 @@ class DataCatalog(object):
             Data catalog key. If a path to a raster file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
+            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
+        zoom_level : int, tuple, optional
+            Zoom level of the xyz tile dataset (0 is base level)
+            Using a tuple the zoom level can be specified as (<zoom_resolution>, <unit>),
+            e.g., (1000, 'meter')
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         align : float, optional
@@ -577,10 +612,12 @@ class DataCatalog(object):
             bbox=bbox,
             geom=geom,
             buffer=buffer,
+            zoom_level=zoom_level,
             align=align,
             variables=variables,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
+            cache_root=self._cache_dir if self.cache else None,
             logger=self.logger,
         )
         return obj
@@ -608,7 +645,7 @@ class DataCatalog(object):
             Data catalog key. If a path to a vector file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
+            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         buffer : float, optional
@@ -678,7 +715,7 @@ class DataCatalog(object):
             Data catalog key. If a path to a file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
+            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         buffer : float, optional
@@ -753,7 +790,10 @@ class DataCatalog(object):
 
 
 def _parse_data_dict(
-    data_dict: Dict, root: Union[Path, str] = None, category: str = None
+    data_dict: Dict,
+    catalog_name: str = "",
+    root: Union[Path, str] = None,
+    category: str = None,
 ) -> Dict:
     """Parse data source dictionary."""
     # link yml keys to adapter classes
@@ -787,7 +827,11 @@ def _parse_data_dict(
         elif data_type not in ADAPTERS:
             raise ValueError(f"{name}: Data type {data_type} unknown")
         adapter = ADAPTERS.get(data_type)
-        path = abs_path(root, source.pop("path"))
+        # Only for local files
+        path = source.pop("path")
+        # if remote path, keep as is else call abs_path method to solve local files
+        if not _uri_validator(path):
+            path = abs_path(root, path)
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)
@@ -798,26 +842,27 @@ def _parse_data_dict(
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
         if "placeholders" in source:
-            options = source["placeholders"]
+            # pop avoid placeholders being passed to adapter
+            options = source.pop("placeholders")
             for combination in itertools.product(*options.values()):
                 path_n = path
                 name_n = name
                 for k, v in zip(options.keys(), combination):
                     path_n = path_n.replace("{" + k + "}", v)
                     name_n = name_n.replace("{" + k + "}", v)
-                data[name_n] = adapter(path=path_n, meta=meta, **source)
+                data[name_n] = adapter(
+                    path=path_n,
+                    name=name_n,
+                    catalog_name=catalog_name,
+                    meta=meta,
+                    **source,
+                )
         else:
-            data[name] = adapter(path=path, meta=meta, **source)
+            data[name] = adapter(
+                path=path, name=name, catalog_name=catalog_name, meta=meta, **source
+            )
 
     return data
-
-
-def _uri_validator(x: str) -> bool:
-    try:
-        result = urlparse(x)
-        return all([result.scheme, result.netloc])
-    except:
-        return False
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:

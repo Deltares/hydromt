@@ -35,6 +35,7 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
       crs: EPSG/WKT
       data_type: RasterDataset/GeoDataset/GeoDataFrame
       driver: raster/raster_tindex/netcdf/zarr/vector/vector_table
+      filesystem: local/gcs/s3
       kwargs:
         key: value
       meta:
@@ -49,6 +50,8 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
       path: /absolut_path/to/my_dataset.extension OR relative_path/to_my_dataset.extension
       placeholders: 
         [placeholder_key: [placeholder_values]]
+      zoom_levels: 
+        [zoom_level: zoom_resolution]
       rename:
         old_variable_name: new_variable_name   
       unit_add:
@@ -82,7 +85,10 @@ The following are **required data source arguments**:
 
 A full list of **optional data source arguments** is given below
 
-- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data. 
+- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data.
+- **filesystem** (required if different than local): specify if the data is stored locally or remotely (e.g cloud). Supported filesystems are *local* for local data,
+  *gcs* for data stored on Google Cloud Storage, and *aws* for data stored on Amazon Web Services. Profile or authentication information can be passed to ``kwargs`` via 
+  *storage_options*.  
 - **kwargs**: pairs of key value arguments to pass to the driver specific open data method (eg xr.open_mfdataset for netdcf raster, see the full list below).
   Only used if not crs can be inferred from the input data.
 - **meta** (recommended): additional information on the dataset organized in a sub-list. 
@@ -91,9 +97,15 @@ A full list of **optional data source arguments** is given below
   but the user is free to define its own categories. 
 - **nodata** (required if missing in the data): nodata value of the input data. For Raster- and GeoDatasets this is only used if not inferred from the original input data. 
   For GeoDataFrame provided nodata values are converted to nan values.
-- **placeholder**: this argument can be used to generate multiple sources with a single entry in the data catalog file. If different files follow a logical
+- **placeholder** (optional): this argument can be used to generate multiple sources with a single entry in the data catalog file. If different files follow a logical
   nomenclature, multiple data sources can be defined by iterating through all possible combinations of the placeholders. The placeholder names should be given in the 
   source name and the path and its values listed under the placeholder argument.
+  **zoom_level** (optional): this argument can be used for a *RasterDatasets* that contain multiple zoom levels of different resolution. 
+  It should contain a list of numeric zoom levels that correspond to the `zoom_level` key in file path, e.g.,  ``"path/to/my/files/{zoom_level}/data.tif"``
+  and corresponding resolution, expressed in the unit of the data crs. 
+  The *crs* argument is therefore required when using zoom_levels to correctly interpret the unit of the resolution. 
+  The required zoom level can be requested from HydroMT as argument to the `DataCatalog.get_rasterdataset` method, 
+  see `Reading tiled raster data with different zoom levels <../_examples/working_with_tiled_raster_data.ipynb>`_.
 - **rename**: pairs of variable names in the input data (*old_variable_name*) and the corresponding 
   :ref:`HydroMT variable naming conventions <data_convention>` and :ref:`recognized dimension names <dimensions>` (*new_variable_name*). 
 - **units** (optional and for *RasterDataset* only). specify the units of the input data: supported are [m3], [m], [mm], and [m3/s].
@@ -105,3 +117,8 @@ A full list of **optional data source arguments** is given below
 .. note::
 
   The **alias** argument will be deprecated and should no longer be used, see `github issue for more information <https://github.com/Deltares/hydromt/issues/148>`_
+
+.. warning::
+
+  Using cloud data is still experimental and only supported for *DataFrame*, *RasterDataset* and *Geodataset* with *zarr*. *RasterDataset* with *raster* driver is also possible
+  but in case of multiple files (mosaic) we strongly recommend using a vrt file for speed and computation efficiency. 

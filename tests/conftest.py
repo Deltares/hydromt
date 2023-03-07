@@ -1,16 +1,13 @@
-import pytest
-from os.path import join, dirname, abspath
 import numpy as np
 import pandas as pd
+import pyflwdir
+import pytest
 import geopandas as gpd
 import xarray as xr
 
 from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
 from hydromt.data_catalog import DataCatalog
 from hydromt import raster, vector, gis_utils
-import pyflwdir
-
-# DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture
@@ -22,6 +19,18 @@ def rioda():
         name="test",
         crs=4326,
     )
+
+
+@pytest.fixture
+def rioda_large():
+    da = raster.full_from_transform(
+        transform=[0.004166666666666666, 0.0, 0.0, 0.0, -0.004166666666666667, 0.0],
+        shape=(1024, 1000),
+        nodata=-9999,
+        name="test",
+        crs=4326,
+    )
+    return da
 
 
 @pytest.fixture
@@ -110,12 +119,11 @@ def flwdir(demda):
 
 @pytest.fixture
 def flwda(flwdir):
-    xcoords, ycoords = gis_utils.affine_to_coords(flwdir.transform, flwdir.shape)
     da = xr.DataArray(
         name="flwdir",
         data=flwdir.to_array("d8"),
         dims=("y", "x"),
-        coords={"y": ycoords, "x": xcoords},
+        coords=gis_utils.affine_to_coords(flwdir.transform, flwdir.shape),
         attrs=dict(_FillValue=247),
     )
     da.raster.set_crs(3785)
@@ -169,7 +177,7 @@ def griduda():
     gdf_da.index.name = "mesh2d_nFaces"
     uda = xu.UgridDataset.from_geodataframe(gdf_da)
     uda = uda["value"]
-    uda.name = "elevtn"
+    uda = uda.rename("elevtn")
 
     return uda
 

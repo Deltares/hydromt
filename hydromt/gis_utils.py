@@ -2,22 +2,25 @@
 # -*- coding: utf-8 -*-
 
 """gis related convience functions. More in pyflwdir.gis_utils"""
-from os.path import join, isfile
+from os.path import dirname, join, isfile
+import os
+import glob
+import sys
+import subprocess
 import numpy as np
 import xarray as xr
 import rasterio
-from rasterio.crs import CRS
+from pyproj import CRS
 from rasterio.transform import Affine
-from osgeo import gdal
 import geopandas as gpd
 from shapely.geometry.base import BaseGeometry
 from shapely.geometry import box
-import pygeos
-import tempfile
 import logging
 from pyflwdir import core_conversion, core_d8, core_ldd
 from pyflwdir import gis_utils as gis
 from typing import Optional, Tuple
+from . import _compat
+
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 
@@ -184,9 +187,11 @@ def nearest(
         raise NotImplementedError("Mixed geometry dataframes are not yet supported.")
     if gdf1.crs != gdf2.crs:
         pnts = pnts.to_crs(gdf2.crs)
-    # find nearest using pygeos
-    # NOTE: requires geopandas 0.10
-    other = pygeos.from_shapely(pnts.geometry.values)
+    # find nearest
+    # NOTE: requires shapely v2.0; changed in v0.6.1
+    if not _compat.HAS_SHAPELY20:
+        raise ImportError("Shapely >= 2.0.0 is required for execution")
+    other = pnts.geometry.values
     idx = gdf2.sindex.nearest(other, return_all=False)[1]
     # get distance in meters
     gdf2_nearest = gdf2.iloc[idx]
@@ -197,11 +202,13 @@ def nearest(
     return gdf2.index.values[idx], dst
 
 
-def filter_gdf(gdf, geom=None, bbox=None, predicate="intersects"):
+def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
     """Filter GeoDataFrame geometries based on geometry mask or bounding box."""
     gtypes = (gpd.GeoDataFrame, gpd.GeoSeries, BaseGeometry)
     if bbox is not None and geom is None:
-        geom = box(*bbox)
+        if crs is None:
+            crs = gdf.crs
+        geom = gpd.GeoSeries([box(*bbox)], crs=crs)
     elif geom is not None and not isinstance(geom, gtypes):
         raise ValueError(
             f"Unknown geometry mask type {type(geom).__name__}. "
@@ -288,9 +295,9 @@ def meridian_offset(ds, x_name="x", bbox=None):
     lons = np.copy(ds[x_name].values)
     w, e = lons.min(), lons.max()
     if bbox is not None and bbox[0] < w and bbox[0] < -180:  # 180W - 180E > 360W - 0W
-        lons = np.where(lons > bbox[2], lons - 360, lons)
+        lons = np.where(lons > 0, lons - 360, lons)
     elif bbox is not None and bbox[2] > e and bbox[2] > 180:  # 180W - 180E > 0E-360E
-        lons = np.where(lons < bbox[0], lons + 360, lons)
+        lons = np.where(lons < 0, lons + 360, lons)
     elif e > 180:  # 0E-360E > 180W - 180E
         lons = np.where(lons > 180, lons - 360, lons)
     else:
@@ -303,8 +310,47 @@ def meridian_offset(ds, x_name="x", bbox=None):
 # TRANSFORM
 
 
-def affine_to_coords(transform, shape):
-    """Returs a raster axis with pixel center coordinates based on the transform.
+def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
+    """Returns a raster axis with pixel center coordinates based on the transform.
+
+    Parameters
+    ----------
+    transform : affine transform
+        Two dimensional affine transform for 2D linear mapping
+    shape : tuple of int
+        The height, width  of the raster.
+    x_dim, y_dim: str
+        The name of the x and y dimensions
+
+    Returns
+    -------
+    x, y coordinate arrays : dict of tuple with dims and coords
+    """
+    if not isinstance(transform, Affine):
+        transform = Affine(*transform)
+    height, width = shape
+    if transform.b == 0:
+        x_coords, _ = transform * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
+        _, y_coords = transform * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
+        coords = {
+            y_dim: (y_dim, y_coords),
+            x_dim: (x_dim, x_coords),
+        }
+    else:
+        x_coords, y_coords = (
+            transform
+            * transform.translation(0.5, 0.5)
+            * np.meshgrid(np.arange(width), np.arange(height))
+        )
+        coords = {
+            "yc": ((y_dim, x_dim), y_coords),
+            "xc": ((y_dim, x_dim), x_coords),
+        }
+    return coords
+
+
+def affine_to_meshgrid(transform, shape):
+    """Returns a mesgrid of pixel center coordinates based on the transform.
 
     Parameters
     ----------
@@ -315,13 +361,17 @@ def affine_to_coords(transform, shape):
 
     Returns
     -------
-    x, y coordinate arrays : tuple of ndarray of float
+    x_coords, y_coords: ndarray
+        2D arrays of x and y coordinates
     """
     if not isinstance(transform, Affine):
         transform = Affine(*transform)
     height, width = shape
-    x_coords, _ = transform * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
-    _, y_coords = transform * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
+    x_coords, y_coords = (
+        transform
+        * transform.translation(0.5, 0.5)
+        * np.meshgrid(np.arange(width), np.arange(height))
+    )
     return x_coords, y_coords
 
 
@@ -443,6 +493,8 @@ def spread2d(
 
 def write_clone(tmpdir, gdal_transform, wkt_projection, shape):
     """write pcraster clone file to a tmpdir using gdal"""
+    from osgeo import gdal
+
     gdal.AllRegister()
     driver1 = gdal.GetDriverByName("GTiff")
     driver2 = gdal.GetDriverByName("PCRaster")
@@ -499,10 +551,11 @@ def write_map(
     ValueError
         if invalid ldd
     """
-    try:
-        import pcraster as pcr
-    except ImportError:
+    if not _compat.HAS_PCRASTER:
         raise ImportError("The pcraster package is required to write map files")
+    import tempfile
+    import pcraster as pcr
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # deal with pcr clone map
         if clone_path is None:
@@ -543,3 +596,55 @@ def write_map(
         if crs is not None:
             with rasterio.open(raster_path, "r+") as dst:
                 dst.crs = crs
+
+
+def create_vrt(
+    vrt_path: str,
+    file_list_path: str = None,
+    files_path: str = None,
+):
+    """Creates a .vrt file from a list op raster datasets by either
+    passing the list directly (file_list_path) or by inferring it by passing
+    a path containing wildcards (files_path) of the location(s) of the
+    raster datasets
+
+    Parameters
+    ----------
+    vrt_path : str
+        Path of the output vrt
+    file_list_path : str, optional
+        Path to the text file containing the paths to the raster files
+    files_path : str, optional
+        Unix style path containing a pattern using wildcards (*)
+        n.b. this is without an extension
+        e.g. c:\\temp\\*\\*.tif for all tif files in subfolders of 'c:\temp'
+
+    Raises
+    ------
+    ValueError
+        A Path is needed, either file_list_path or files_path
+    """
+
+    if file_list_path is None and files_path is None:
+        raise ValueError(
+            "Either 'file_list_path' or 'files_path' is required -> None was given"
+        )
+
+    outdir = dirname(vrt_path)
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
+
+    if file_list_path is None:
+        files = glob.glob(files_path)
+        if len(files) == 0:
+            raise IOError(f"No files found at {files_path}")
+        file_list_path = join(outdir, "filelist.txt")
+        with open(file_list_path, "w") as w:
+            for line in files:
+                w.write(f"{line}\n")
+
+    # TODO ability to pass more options
+    # TODO find method to pass dir of gdalbuiltvrt on different OS
+    cmd = ["gdalbuildvrt", "-input_file_list", file_list_path, vrt_path]
+    subprocess.run(cmd)
+    return None

@@ -15,7 +15,10 @@ dependencies:
   - dask
   - descartes # to run examples
   - entrypoints
+  - fiona == 1.8.22 # tmp pin because of incorrect CRS parsing
   - flit>=3.4
+  - fsspec
+  - gcsfs
   - gdal>=3.1
   - geopandas>=0.10
   - jupyter # to run examples
@@ -30,7 +33,7 @@ dependencies:
   - pip
   - pydata-sphinx-theme  # docs
   - pyflwdir>=0.5.4
-  - pygeos>=0.8
+  - pygeos # optional dep of xugrid, required for mesh
   - pyproj
   - pytest # tests
   - pytest-cov # tests
@@ -43,13 +46,16 @@ dependencies:
   - scipy
   - testpath  # tests
   - toml
-  - shapely
+  - universal_pathlib
+  - shapely>=2.0.0
   - sphinx # docs
+  - s3fs
   - xarray
+  - xmltodict
   - xugrid>=0.1.5 # optional for mesh
   - zarr
   - pip:
-    - hydroengine  # optional
+    - pyet
     - sphinx_design  # docs
     - sphinx_autosummary_accessors  # docs
 

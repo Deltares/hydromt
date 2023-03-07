@@ -10,7 +10,6 @@ from hydromt.cli import api as hydromt_api
 
 
 def test_cli(tmpdir):
-
     r = CliRunner().invoke(hydromt_cli, "--version")
     assert r.exit_code == 0
     assert r.output.split()[-1] == __version__
@@ -26,7 +25,7 @@ def test_cli(tmpdir):
 
     r = CliRunner().invoke(hydromt_cli, ["build", "--help"])
     assert r.exit_code == 0
-    assert r.output.startswith("Usage: main build [OPTIONS] MODEL MODEL_ROOT REGION")
+    assert r.output.startswith("Usage: main build [OPTIONS] MODEL MODEL_ROOT")
 
     r = CliRunner().invoke(hydromt_cli, ["update", "--help"])
     assert r.exit_code == 0
@@ -38,21 +37,9 @@ def test_cli(tmpdir):
         "Usage: main clip [OPTIONS] MODEL MODEL_ROOT MODEL_DESTINATION REGION"
     )
 
-    root = str(tmpdir.join("grid_model_region"))
     r = CliRunner().invoke(
         hydromt_cli,
-        ["build", "grid_model", root, "{'bbox': [12.05,45.30,12.85,45.65]}", "-vv"],
-    )
-    assert os.path.isfile(os.path.join(root, "geoms", "region.geojson"))
-
-    r = CliRunner().invoke(
-        hydromt_cli,
-        [
-            "build",
-            "test_model",
-            str(tmpdir),
-            "{'subbasin': [-7.24, 62.09], 'strord': 4}",
-        ],
+        ["build", "model", str(tmpdir), "{'subbasin': [-7.24, 62.09], 'strord': 4}"],
     )
     with pytest.raises(ValueError, match="Unknown model"):
         raise r.exception

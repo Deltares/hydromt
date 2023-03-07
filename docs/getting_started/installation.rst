@@ -53,7 +53,6 @@ Spatial and statistical operations:
 (Hydro-)Geospatial libraries:
 
 * `geopandas <https://geopandas.org/en/stable/>`__
-* `pygeos <https://pygeos.readthedocs.io/en/stable/>`__
 * `pyproj <https://pyproj4.github.io/pyproj/stable/>`__
 * `rasterio <https://rasterio.readthedocs.io/en/latest/>`__
 * `pyflwdir <https://deltares.github.io/pyflwdir/latest/>`__

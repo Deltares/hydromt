@@ -9,8 +9,12 @@ dependencies:
   - black  # test
   - bottleneck
   - click
+  - coverage == 6.4 # tests
   - dask
   - entrypoints
+  - fsspec
+  - gcsfs
+  - fiona == 1.8.22 # tmp pin because of incorrect CRS parsing
   - gdal>=3.1
   - geopandas>=0.10
   - netcdf4
@@ -20,7 +24,7 @@ dependencies:
   - packaging
   - pcraster # optional
   - pyflwdir>=0.5.4
-  - pygeos>=0.8
+  - pygeos # optional dep of xugrid, required for mesh
   - pyproj
   - pytest # tests
   - pytest-cov # tests
@@ -29,7 +33,12 @@ dependencies:
   - requests
   - rioxarray
   - scipy
-  - shapely
+  - shapely>=2.0.0
+  - s3fs
+  - universal_pathlib
   - xarray
   - xugrid>=0.1.5 # optional for mesh
+  - xmltodict
   - zarr
+  - pip:
+    - pyet # optional for Penman Monteith PET

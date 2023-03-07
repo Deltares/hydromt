@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import os
 from os.path import join
+from fsspec.implementations import local
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -12,6 +14,7 @@ from pathlib import Path
 
 from .. import gis_utils, io
 from .data_adapter import DataAdapter, PREPROCESSORS
+from .caching import cache_vrt_tiles
 from ..raster import GEO_MAP_COORD
 
 
@@ -33,6 +36,7 @@ class RasterDatasetAdapter(DataAdapter):
         self,
         path,
         driver=None,
+        filesystem="local",
         crs=None,
         nodata=None,
         rename={},
@@ -40,7 +44,6 @@ class RasterDatasetAdapter(DataAdapter):
         unit_add={},
         units={},
         meta={},
-        placeholders={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial raster data.
@@ -60,6 +63,9 @@ class RasterDatasetAdapter(DataAdapter):
             for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
+        filesystem: {'local', 'gcs', 's3'}, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            By default, local.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
             or wkt (str). Only used if the data has no native CRS.
@@ -75,21 +81,19 @@ class RasterDatasetAdapter(DataAdapter):
         meta: dict, optional
             Metadata information of dataset, preferably containing the following keys:
             {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
-        placeholders: dict, optional
-            Placeholders to expand yaml entry to multiple entries (name and path) based on placeholder values
         **kwargs
             Additional key-word arguments passed to the driver.
         """
         super().__init__(
             path=path,
             driver=driver,
+            filesystem=filesystem,
             crs=crs,
             nodata=nodata,
             rename=rename,
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
-            placeholders=placeholders,
             **kwargs,
         )
         # TODO: see if the units argument can be solved with unit_mult/unit_add
@@ -179,10 +183,12 @@ class RasterDatasetAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
+        zoom_level=None,
         align=None,
         variables=None,
         time_tuple=None,
         single_var_as_array=True,
+        cache_root=None,
         logger=logger,
     ):
         """Returns a clipped, sliced and unified RasterDataset based on the properties
@@ -194,26 +200,81 @@ class RasterDatasetAdapter(DataAdapter):
         if variables:
             variables = np.atleast_1d(variables).tolist()
 
+        # Extract storage_options from kwargs to instantiate fsspec object correctly
+        if "storage_options" in self.kwargs:
+            so_kwargs = self.kwargs["storage_options"]
+            # For s3, anonymous connection still requires --no-sign-request profile to read the data
+            # setting environment variable works
+            if "anon" in so_kwargs:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
+            else:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
+        else:
+            so_kwargs = dict()
+
+        # resolve path based on time, zoom level and/or variables
+        fns = self.resolve_paths(
+            time_tuple=time_tuple,
+            variables=variables,
+            zoom_level=zoom_level,
+            geom=geom,
+            bbox=bbox,
+            logger=logger,
+            **so_kwargs,
+        )
+
         kwargs = self.kwargs.copy()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables)
+        # zarr can use storage options directly, the rest should be converted to file-like objects
+        if "storage_options" in kwargs and self.driver == "raster":
+            storage_options = kwargs.pop("storage_options")
+            fs = self.get_filesystem(**storage_options)
+            fns = [fs.open(f) for f in fns]
 
         # read using various readers
         if self.driver in ["netcdf"]:  # TODO complete list
-            if "preprocess" in kwargs:
-                preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
-                kwargs.update(preprocess=preprocess)
-            ds_out = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
-        elif self.driver == "zarr":
-            if len(fns) > 1:
-                raise ValueError(
-                    "RasterDataset: Opening multiple zarr data files is not supported."
+            if self.filesystem == "local":
+                if "preprocess" in kwargs:
+                    preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
+                    kwargs.update(preprocess=preprocess)
+                ds_out = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
+            else:
+                raise NotImplementedError(
+                    "Remote (cloud) RasterDataset not supported with driver netcdf."
                 )
-            ds_out = xr.open_zarr(fns[0], **kwargs)
+        elif self.driver == "zarr":
+            if "preprocess" in kwargs:  # for zarr preprocess is done after reading
+                preprocess = PREPROCESSORS.get(kwargs.pop("preprocess"), None)
+                do_preprocess = True
+            else:
+                do_preprocess = False
+            ds_lst = []
+            for fn in fns:
+                ds = xr.open_zarr(fn, **kwargs)
+                if do_preprocess:
+                    ds = preprocess(ds)
+                ds_lst.append(ds)
+            ds_out = xr.merge(ds_lst)
         elif self.driver == "raster_tindex":
-            if np.issubdtype(type(self.nodata), np.number):
-                kwargs.update(nodata=self.nodata)
-            ds_out = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
+            if self.filesystem == "local":
+                if np.issubdtype(type(self.nodata), np.number):
+                    kwargs.update(nodata=self.nodata)
+                ds_out = io.open_raster_from_tindex(
+                    fns[0], bbox=bbox, geom=geom, **kwargs
+                )
+            else:
+                raise NotImplementedError(
+                    "Remote (cloud) RasterDataset not supported with driver raster_tindex."
+                )
         elif self.driver == "raster":  # rasterio files
+            if cache_root is not None and all([str(fn).endswith(".vrt") for fn in fns]):
+                cache_dir = join(cache_root, self.catalog_name, self.name)
+                fns_cached = []
+                for fn in fns:
+                    fn1 = cache_vrt_tiles(
+                        fn, geom=geom, cache_dir=cache_dir, logger=logger
+                    )
+                    fns_cached.append(fn1)
+                fns = fns_cached
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
             ds_out = io.open_mfraster(fns, logger=logger, **kwargs)

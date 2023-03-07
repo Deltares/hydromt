@@ -1,7 +1,7 @@
 import numpy as np
 import geopandas as gpd
 import rasterio
-from rasterio.crs import CRS
+from pyproj import CRS
 from shapely.geometry import box
 
 from .raster import full_from_transform

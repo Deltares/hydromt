@@ -11,6 +11,7 @@ dependencies:
   - dask
   - entrypoints
   - flit>=3.4  # install
+  - fsspec
   - gdal>=3.1
   - geopandas>=0.10
   - netcdf4
@@ -19,13 +20,14 @@ dependencies:
   - packaging
   - pip  # install
   - pyflwdir>=0.5.4
-  - pygeos>=0.8
   - pyproj
   - python>=3.8
   - rasterio
   - requests
   - rioxarray
   - scipy
-  - shapely
+  - shapely>=2.0.0
+  - universal_pathlib
   - xarray
+  - xmltodict
   - zarr

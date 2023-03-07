@@ -107,9 +107,14 @@ precip                        precipitation (rainfall+snowfall)                 
 temp                          average temperature                                                      [oC]
 temp_min                      minimum temperature                                                      [oC]
 temp_max                      maximum temperature                                                      [oC]
+temp_dew                      dewpoint temperature                                                     [oC]
 press_msl                     atmospheric pressure                                                     [hPa]
 kin                           shortwave incoming radiation                                             [W m-2]
 kout                          TOA incident solar radiation                                             [W m-2]
+ssr                           surface net solar radiation                                                  [W m-2]
+wind10_u                      10m wind U-component                                                     [m s-1]
+wind10_v                      10m wind V-component                                                     [m s-1]
+tcc                           total cloud cover                                                        [-]
 ============================  =======================================================================  ================
 
 Hydrology

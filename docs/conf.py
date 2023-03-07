@@ -114,13 +114,18 @@ categories = [
     "ocean",
     "socio-economic",
     "topography",
+    "climate",
     "other",
 ]
 data_cat = hydromt.DataCatalog()
 data_cat.set_predefined_catalogs(r"../data/predefined_catalogs.yml")
 predefined_catalogs = data_cat.predefined_catalogs
 for name in predefined_catalogs:
-    data_cat.from_predefined_catalogs(name)
+    try:
+        data_cat.from_predefined_catalogs(name)
+    except OSError as e:
+        print(e)
+        continue
     note = predefined_catalogs[name].get("notes", "")
     write_nested_dropdown(name, data_cat, note=note, categories=categories)
     data_cat._sources = {}  # reset
@@ -355,7 +360,7 @@ intersphinx_mapping = {
     # "dask": ("https://docs.dask.org/en/latest", None),
     "rasterio": ("https://rasterio.readthedocs.io/en/latest", None),
     "geopandas": ("https://geopandas.org/en/stable", None),
-    "xarray": ("https://xarray.pydata.org/en/stable", None),
+    "xarray": ("https://docs.xarray.dev/en/stable", None),
 }
 
 # -- NBSPHINX --------------------------------------------------------------

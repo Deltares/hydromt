@@ -124,6 +124,9 @@ def test_write_data_catalog(tmpdir):
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Defining "region" based on staticmaps:DeprecationWarning'
+)
 def test_model(model, tmpdir):
     # Staticmaps -> moved from _test_model_api as it is deprecated
     model._API.update({"staticmaps": xr.Dataset})
@@ -156,7 +159,6 @@ def test_model_build_update(tmpdir):
     model._NAME = "testmodel"
     model.build(
         region={"bbox": [12.05, 45.30, 12.85, 45.65]},
-        res=1,
         opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
     )
     assert "region" in model._geoms
@@ -297,7 +299,7 @@ def test_networkmodel(network_model, tmpdir):
         network_model.network
 
 
-@pytest.mark.skipif(not hydromt._compat.HAS_XUGRID, reason="Xugrid not installed.")
+@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_meshmodel(mesh_model, tmpdir):
     MeshModel = MODELS.load("mesh_model")
     assert "mesh" in mesh_model.api
@@ -314,7 +316,7 @@ def test_meshmodel(mesh_model, tmpdir):
     assert equal, errors
 
 
-@pytest.mark.skipif(not hydromt._compat.HAS_XUGRID, reason="Xugrid not installed.")
+@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, world, tmpdir):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
