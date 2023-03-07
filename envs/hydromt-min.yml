@@ -16,6 +16,7 @@ dependencies:
   - geopandas>=0.10
   - netcdf4
   - numpy
+  - openpyxl
   - pandas
   - packaging
   - pip  # install
