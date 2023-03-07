@@ -4,7 +4,7 @@
 HydroMT: Automated and reproducible model building and analysis
 ===============================================================
 
-|pypi| |conda forge| |docs_latest| |docs_stable| |codecov| |license| |doi| |binder|
+|pypi| |conda forge| |docs_latest| |docs_stable| |binder| |codecov| |license| |doi| |joss_paper|
 
 
 What is HydroMT?
@@ -53,7 +53,12 @@ Known model plugins include:
 
 How to cite?
 ------------
-For publications, please cite our work using the DOI provided in the Zenodo badge |doi| that points to the latest release.
+For publications, please cite our JOSS paper |joss_paper|
+
+::
+    Eilander et al., (2023). HydroMT: Automated and reproducible model building and analysis. Journal of Open Source Software, 8(83), 4897, https://doi.org/10.21105/joss.04897
+
+To cite a specific software version please use the DOI provided in the Zenodo badge |doi| that points to the latest release.
 
 
 How to contribute?
@@ -109,3 +114,6 @@ happy to discuss how it can be implemented for your model.
 .. |license| image:: https://img.shields.io/github/license/Deltares/hydromt?style=flat
     :alt: License
     :target: https://github.com/Deltares/hydromt/blob/main/LICENSE
+
+.. |joss_paper| image:: https://joss.theoj.org/papers/10.21105/joss.04897/status.svg
+   :target: https://doi.org/10.21105/joss.04897
