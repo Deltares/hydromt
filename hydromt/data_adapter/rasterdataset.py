@@ -146,10 +146,8 @@ class RasterDatasetAdapter(DataAdapter):
             return None, None
 
         if driver is None:
-            driver = self.driver
-            if driver in ["raster_tindex", "raster"]:
-                # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
-                driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
+            # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
+            driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
         # write using various writers
         if driver in ["netcdf"]:  # TODO complete list
             fn_out = join(data_root, f"{data_name}.nc")
