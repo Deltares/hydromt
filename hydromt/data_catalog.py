@@ -492,8 +492,8 @@ class DataCatalog(object):
             os.makedirs(data_root)
 
         # create copy of data with selected source names
+        source_vars = {}
         if len(source_names) > 0:
-            source_vars = {}
             sources = {}
             for name in source_names:
                 # deduce variables from name
@@ -502,6 +502,8 @@ class DataCatalog(object):
                     name = name.split("[")[0]
                     source_vars[name] = variables
                 sources[name] = copy.deepcopy(self.sources[name])
+        else:
+            sources = copy.deepcopy(self.sources)
 
         # export data and update sources
         sources_out = {}
