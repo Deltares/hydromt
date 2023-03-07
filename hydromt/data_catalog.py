@@ -492,13 +492,21 @@ class DataCatalog(object):
             os.makedirs(data_root)
 
         # create copy of data with selected source names
-        sources = copy.deepcopy(self.sources)
         if len(source_names) > 0:
-            sources = {n: sources[n] for n in source_names}
+            source_vars = {}
+            sources = {}
+            for name in source_names:
+                # deduce variables from name
+                if "[" in name:
+                    variables = name.split("[")[-1].split("]")[0].split(",")
+                    name = name.split("[")[0]
+                    source_vars[name] = variables
+                sources[name] = copy.deepcopy(self.sources[name])
 
         # export data and update sources
         sources_out = {}
         for key, source in sources.items():
+            postfix = f"_{'_'.join(source_vars[key])}" if key in source_vars else ""
             try:
                 # read slice of source and write to file
                 self.logger.debug(f"Exporting {key}.")
@@ -509,7 +517,8 @@ class DataCatalog(object):
                     source.unit_add = {}
                 fn_out, driver = source.to_file(
                     data_root=data_root,
-                    data_name=key,
+                    data_name=f"{key}{postfix}",
+                    variables=source_vars.get(key, None),
                     bbox=bbox,
                     time_tuple=time_tuple,
                     logger=self.logger,
@@ -529,7 +538,7 @@ class DataCatalog(object):
                 source.filesystem = "local"
                 source.kwargs = {}
                 source.rename = {}
-                sources_out[key] = source
+                sources_out[f"{key}{postfix}"] = source
             except FileNotFoundError:
                 self.logger.warning(f"{key} file not found at {source.path}")
 
