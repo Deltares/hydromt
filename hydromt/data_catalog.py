@@ -158,7 +158,7 @@ class DataCatalog(object):
         try:
             # download file locally; overwrite existing file
             _copyfile(urlpath, cache_path)
-        except ConnectionError:  # if offline
+        except Exception:  # if offline
             self.logger.warning(
                 "Downloading the predefined catalogs failed; check your internet connection"
             )
