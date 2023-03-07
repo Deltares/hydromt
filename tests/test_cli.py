@@ -37,9 +37,41 @@ def test_cli(tmpdir):
         "Usage: main clip [OPTIONS] MODEL MODEL_ROOT MODEL_DESTINATION REGION"
     )
 
+    root = str(tmpdir.join("grid_model_region"))
+    cmd = [
+        "build",
+        "grid_model",
+        root,
+        "-r",
+        "{'bbox': [12.05,45.30,12.85,45.65]}",
+        "-vv",
+    ]
+    r = CliRunner().invoke(hydromt_cli, cmd)
+    assert os.path.isfile(os.path.join(root, "geoms", "region.geojson"))
+
+    # test force overwrite
+    with pytest.raises(IOError, match="Model dir already exists"):
+        r = CliRunner().invoke(hydromt_cli, cmd)
+        raise r.exception
+    r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])
+    assert r.exit_code == 0
+
+    root = str(tmpdir.join("empty_region"))
     r = CliRunner().invoke(
         hydromt_cli,
-        ["build", "model", str(tmpdir), "{'subbasin': [-7.24, 62.09], 'strord': 4}"],
+        ["build", "grid_model", root, "-vv"],
+    )
+    assert r.exit_code == 0
+
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "build",
+            "test_model",
+            str(tmpdir),
+            "-r",
+            "{'subbasin': [-7.24, 62.09], 'strord': 4}",
+        ],
     )
     with pytest.raises(ValueError, match="Unknown model"):
         raise r.exception

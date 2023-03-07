@@ -93,14 +93,3 @@ For related functions see:
  - :ref:`DataCatalog.get_* methods <api_data_catalog_get>`
  - :ref:`data reading-methods <open_methods>`
 
-
-.. toctree::
-    :hidden:
-
-    data_prepare_cat.rst
-    data_types.rst
-    data_existing_cat.rst
-    data_conventions.rst
-    ../_examples/reading_raster_data.ipynb
-    ../_examples/reading_vector_data.ipynb
-    ../_examples/reading_point_data.ipynb
