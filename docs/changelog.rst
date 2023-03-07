@@ -15,6 +15,8 @@ Changed
 
 Added
 -----
+- Option to export individual variables from a data source and append to an existing data catalog in DataCatalog.export_data. PR #302
+
 
 Fixed
 -----

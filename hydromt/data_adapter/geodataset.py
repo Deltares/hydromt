@@ -132,7 +132,11 @@ class GeoDatasetAdapter(DataAdapter):
             Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
         obj = self.get_data(
-            bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
+            bbox=bbox,
+            time_tuple=time_tuple,
+            variables=variables,
+            logger=logger,
+            single_var_as_array=variables is None,
         )
         if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
             return None, None
@@ -140,10 +144,18 @@ class GeoDatasetAdapter(DataAdapter):
         if driver is None or driver == "netcdf":
             # always write netcdf
             driver = "netcdf"
-            fn_out = join(data_root, f"{data_name}.nc")
             dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.vector.vars
-            encoding = {k: {"zlib": True} for k in dvars}
-            obj.to_netcdf(fn_out, encoding=encoding)
+            if variables is None:
+                encoding = {k: {"zlib": True} for k in dvars}
+                fn_out = join(data_root, f"{data_name}.nc")
+                obj.to_netcdf(fn_out, encoding=encoding)
+            else:  # save per variable
+                if not os.path.isdir(join(data_root, data_name)):
+                    os.makedirs(join(data_root, data_name))
+                for var in dvars:
+                    fn_out = join(data_root, data_name, f"{var}.nc")
+                    obj[var].to_netcdf(fn_out, encoding={var: {"zlib": True}})
+                fn_out = join(data_root, data_name, "{variable}.nc")
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
             obj.to_zarr(fn_out, **kwargs)
