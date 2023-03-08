@@ -9,7 +9,7 @@ dependencies:
   - black  # test
   - bottleneck
   - click
-  - coverage == 6.4 # tests
+  - coverage # tests
   - dask
   - entrypoints
   - fsspec
