@@ -33,7 +33,7 @@ HydroMT is organized in the following way:
   for lumped or semi-distributed models). Each component is represented with a specific Python 
   data object to provide a common interface to different model software. 
   Models can be :ref:`built from scratch <model_build>`, and :ref:`existing models can be updated <model_update>` 
-  based on a pipeline of methods defined in a model configuration :ref:`ini file <model_config>`.
+  based on a pipeline of methods defined in a model configuration :ref:`toml or ini file <model_config>`.
   While HydroMT provides several general model classes which can readily be used, 
   it can also be tailored to specific model software through a plugin infrastructure. 
   These :ref:`plugins <plugins>` have the same interface, but with model-specific file readers and writers and workflows. 
