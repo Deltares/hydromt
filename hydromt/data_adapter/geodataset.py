@@ -158,6 +158,8 @@ class GeoDatasetAdapter(DataAdapter):
                 fn_out = join(data_root, data_name, "{variable}.nc")
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
+            if isinstance(obj, xr.DataArray):
+                obj = obj.to_dataset()
             obj.to_zarr(fn_out, **kwargs)
         else:
             raise ValueError(f"GeoDataset: Driver {driver} unknown.")
