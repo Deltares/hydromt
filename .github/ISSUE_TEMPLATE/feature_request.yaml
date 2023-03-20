@@ -8,7 +8,7 @@ body:
     id: checks
     attributes:
       label: Feature Type
-      description: Please check what type of feature request you would like to propose:
+      description: Please check what type of feature request you would like to propose.
       options:
         - label: >
             Adding new functionality to HydroMT
