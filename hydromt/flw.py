@@ -135,10 +135,10 @@ def d8_from_dem(
     assert nodata is not None and ~np.isnan(nodata)
     # burn in river if
     nodata_mask = da_elv == nodata
-    if gdf_stream:
+    if isinstance(gdf_stream, gpd.GeoDataFrame):
         if "uparea" not in gdf_stream.columns and "rivdph" not in gdf_stream.columns:
             gdf_stream = gdf_stream.assign(rivdph=rivdph)  # fixed depth
-        if "rivdph" not in gdf_stream.columns:
+        if "rivdph" in gdf_stream.columns:
             da_elv = da_elv - np.maximum(
                 0, da_elv.raster.rasterize(gdf_stream, col_name="rivdph", nodata=0)
             )
