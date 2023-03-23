@@ -22,7 +22,7 @@ body:
     attributes:
       label: Reproducible Example
       description: >
-        Please provide the code to reproduce the behavior:
+        Please provide a minimal, copy-pastable example to reproduce the behavior:
     validations:
       required: true
   - type: textarea
