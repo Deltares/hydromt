@@ -1,14 +1,14 @@
 import pytest
 from pathlib import Path
 from hydromt import config
-import toml
+import yaml
 
 
 def test_config(tmpdir):
     cfdict = {
         "section1": {
             "list": [1, 2, 3],
-            # "tuple": (1, "b"), seems unnecessary to test for tuple, testing parsing toml will fail if included
+            # "tuple": (1, "b"), # yaml cannot deal with tuple
             "bool": True,
             "str": "test",
             "int": 1,
@@ -26,9 +26,9 @@ def test_config(tmpdir):
         },
     }
     config_fn = tmpdir.join("config.ini")
-    config_fn2 = tmpdir.join("config.toml")
-    with open(config_fn2, "w") as toml_file:
-        toml.dump(cfdict, toml_file)
+    config_fn2 = tmpdir.join("config.yaml")
+    with open(config_fn2, "w") as yaml_file:
+        yaml.dump(cfdict, yaml_file)
     config.configwrite(config_fn, cfdict)
     # test for deprecation warning
     with pytest.deprecated_call():
@@ -43,14 +43,16 @@ def test_config(tmpdir):
     # return only str if skip_eval=True
     cfdict1 = config.configread(config_fn, skip_eval=True)
     for section in cfdict1:
+        print([val for val in cfdict1[section].values()])
+        print([type(val) for val in cfdict1[section].values()])
         assert all([isinstance(val, str) for val in cfdict1[section].values()])
     # do not evaluate a specific section
     cfdict1 = config.configread(config_fn, skip_eval_sections=["setup_config"])
     assert isinstance(cfdict1["setup_config"]["float"], str)
     cfdict2 = config.configread(config_fn2, abs_path=True)
-    cfdict["section1"].pop(
-        "None", None
-    )  # None is dropped from the dictionary when writing to toml
+    # cfdict["section1"].pop(
+    #     "None", None
+    # )  # None is dropped from the dictionary when writing to toml
     assert cfdict["section1"] == cfdict2["section1"]
     assert isinstance(cfdict2["section2"]["path"], Path)
     assert isinstance(cfdict2["section2"]["path1"], str)
