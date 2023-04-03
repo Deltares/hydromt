@@ -12,6 +12,7 @@ unreleased
 
 Changed
 -------
+- Support for yaml configuration files. The support for ini files will be deprecated in the future. PR #292
 
 Added
 -----
