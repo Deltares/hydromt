@@ -1,7 +1,9 @@
-import pytest
 from pathlib import Path
-from hydromt import config
+
+import pytest
 import yaml
+
+from hydromt import config
 
 
 def test_config(tmpdir):

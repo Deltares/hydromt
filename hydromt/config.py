@@ -12,7 +12,6 @@ import abc
 from configparser import ConfigParser
 from warnings import warn
 
-import tomli
 import yaml
 
 

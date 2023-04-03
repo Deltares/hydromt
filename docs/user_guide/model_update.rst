@@ -5,7 +5,7 @@ Updating a model
 
 To add or change one or more components of an existing model the ``update`` method can be used.
 The update method works identical for all :ref:`HydroMT model plugins <plugins>`, 
-but the model methods (i.e. sections and options in the :ref:`.ini configuration file <model_config>`) are different for each model.
+but the model methods (i.e. sections and options in the :ref:`.yaml configuration file <model_config>`) are different for each model.
 
 **Steps in brief:**
 
@@ -18,10 +18,10 @@ but the model methods (i.e. sections and options in the :ref:`.ini configuration
 
     By default all model data is written at the end of the update method. If your update however 
     only affects a certain model data (e.g. maps or forcing) you can add a write_* method 
-    (e.g. `write_maps`, `write_forcing`) to the .ini file and only these data will be written.
+    (e.g. `write_maps`, `write_forcing`) to the .yaml file and only these data will be written.
     
     Note that the model config is often changed as part of the a model method and `write_config` 
-    should thus be added to the .ini file to keep the model data and config consistent.
+    should thus be added to the .yaml file to keep the model data and config consistent.
 
 .. _cli_update:
 
@@ -33,28 +33,28 @@ The ``hydromt update`` command line interface (CLI) method can be run from the c
 By default, the model is updated in place, overwriting the existing model schematization. 
 To save a copy of the model provide a new output model root directory with the ``-o`` option.
 
-By default, all model methods in the .ini configuration file provided with ``-i`` will be updated. 
+By default, all model methods in the .yaml configuration file provided with ``-i`` will be updated. 
 To update only certain methods, the ``-c <method>`` option can be used to select methods 
-in combination with :ref:`.ini file <model_config>`.
-Besides the ini file, method arguments can be set from the CLI with ``--opt <method.argument=value>``.
-If used in combination with an .ini file, it will overwrite the same arguments in the .ini file. 
+in combination with :ref:`.yaml file <model_config>`.
+Besides the .yaml file, method arguments can be set from the CLI with ``--opt <method.argument=value>``.
+If used in combination with an .yaml file, it will overwrite the same arguments in the .yaml file. 
 Both ``-c`` and ``-opt`` can be used repeatedly in a single update.
 
 
 **Example usage**
 
 In the following example a Wflow model at ``/path/to/model`` is updated and the results are written to a new directory ``/path/to/model_out``.
-The pipeline with methods which are updated are outlined in the ``wflow_config.ini`` configuration file and used data sources
+The pipeline with methods which are updated are outlined in the ``wflow_config.yaml`` configuration file and used data sources
 in the ``data_catalog.yml`` catalog file.
 
 .. code-block:: console
 
-    hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.ini -d /path/to/data_catalog.yml -v
+    hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.yaml -d /path/to/data_catalog.yml -v
 
 The following example updates (overwrites!) the landuse-landcover based staticmaps in a Wflow model with the ``setup_lulcmaps`` method 
 based on a the different landuse-landcover dataset according to ``setup_lulcmaps.lulc_fn=vito``. 
 The ``vito`` dataset must be defined in the ``data_catalog.yml`` catalog file.
-Note that no .ini file is used here but instead the methods and options are defined in the update command.
+Note that no .yaml file is used here but instead the methods and options are defined in the update command.
 
 .. code-block:: console
 
@@ -83,7 +83,7 @@ The configuration file can be parsed using :py:func:`~hydromt.config.configread`
 
 **Example usage**
 
-To update a Wflow model based on methods in an .ini file, as also shown in the first CLI example above, the following Python code is required.
+To update a Wflow model based on methods in an .yaml file, as also shown in the first CLI example above, the following Python code is required.
 Note that compared to building a model, the model should be initialized in read (if you save the output to a new root) 
 or append (if you update the model data in place) mode.
 
@@ -92,7 +92,7 @@ or append (if you update the model data in place) mode.
     from hydromt_wflow import WflowModel
     from hydromt.config import configread
     data_libs = [r'/path/to/data_catalog.yml']
-    opt=configread(r'/path/to/wflow_config.ini')  # parse .ini configuration
+    opt=configread(r'/path/to/wflow_config.yaml')  # parse .yaml configuration
     mod = WflowModel(r'/path/to/model_root', data_libs=data_libs, mode='r')  # initialize model with default logger in read mode
     mod.update(model_out=r'/path/to/model_out', opt=opt)
 

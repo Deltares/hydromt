@@ -1,0 +1,26 @@
+setup_config:
+  header.settings: value
+  timers.end: '2010-02-15'
+  timers.start: '2010-02-05'
+
+setup_maps_from_raster:
+  fill_method: null
+  raster_fn: merit_hydro_1k
+  reproject_method: null
+  variables: elevtn
+
+setup_maps_from_raster_reclass:
+  raster_fn: vito
+  reclass_table_fn: vito_reclass
+  reclass_variables:
+  - manning
+
+setup_region:
+  basin_index_fn: merit_hydro_index
+  hydrography_fn: merit_hydro
+  
+write:
+  components:
+  - config
+  - geoms
+  - maps

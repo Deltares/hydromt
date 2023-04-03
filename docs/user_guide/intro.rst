@@ -44,7 +44,7 @@ HydroMT is organized in the following way:
   Python data object to provide a common interface to different model software. 
   Model instances can be :ref:`built from scratch <model_build>`, 
   and :ref:`existing models can be updated <model_update>` based on a pipeline of methods 
-  defined in a model configuration :ref:`ini file <model_config>`. While HydroMT provides 
+  defined in a model configuration :ref:`.yaml file <model_config>`. While HydroMT provides 
   several general model classes that can readily be used, it can also be tailored to specific 
   model software through a plugin infrastructure. These :ref:`plugins <plugins>` have the same interface, 
   but with model-specific file readers, writers and workflows. 
@@ -88,7 +88,7 @@ HydroMT and this documentation use a specific terminology to describe specific o
 Term                            Explanation
 ==============================  ======================================================================================
 Command Line Interface (CLI)    high-level interface to HydroMT *build*, *update* and *clip* methods.
-Configuration (HydroMT)         (.ini) file describing the complete pipeline with all methods and their arguments to 
+Configuration (HydroMT)         (.yaml) file describing the complete pipeline with all methods and their arguments to 
                                 *build* or *update* a model.
 Data catalog                    A set of data sources available for HydroMT. It is build up from *yaml* files containing 
                                 one or more data sources with information about how to read and optionally preprocess 
