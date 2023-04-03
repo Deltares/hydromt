@@ -139,24 +139,33 @@ class RasterDatasetAdapter(DataAdapter):
 
         try:
             obj = self.get_data(
-                bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
+                bbox=bbox,
+                time_tuple=time_tuple,
+                variables=variables,
+                logger=logger,
+                single_var_as_array=variables is None,
             )
         except IndexError as err:  # out of bounds
             logger.warning(str(err))
             return None, None
 
         if driver is None:
-            driver = self.driver
-            if driver in ["raster_tindex", "raster"]:
-                # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
-                driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
+            # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
+            driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
         # write using various writers
         if driver in ["netcdf"]:  # TODO complete list
-            fn_out = join(data_root, f"{data_name}.nc")
-            if "encoding" not in kwargs:
-                dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
-                kwargs.update(encoding={k: {"zlib": True} for k in dvars})
-            obj.to_netcdf(fn_out, **kwargs)
+            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
+            if variables is None:
+                encoding = {k: {"zlib": True} for k in dvars}
+                fn_out = join(data_root, f"{data_name}.nc")
+                obj.to_netcdf(fn_out, encoding=encoding, **kwargs)
+            else:  # save per variable
+                if not os.path.isdir(join(data_root, data_name)):
+                    os.makedirs(join(data_root, data_name))
+                for var in dvars:
+                    fn_out = join(data_root, data_name, f"{var}.nc")
+                    obj[var].to_netcdf(fn_out, encoding={var: {"zlib": True}}, **kwargs)
+                fn_out = join(data_root, data_name, "{variable}.nc")
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
             obj.to_zarr(fn_out, **kwargs)
