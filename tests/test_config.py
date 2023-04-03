@@ -32,7 +32,7 @@ def test_config(tmpdir):
     with open(config_fn2, "w") as yaml_file:
         yaml.dump(cfdict, yaml_file, sort_keys=False)
     config.configwrite(config_fn, cfdict)
-    config.configwrite(config_fn2, cfdict) # test configwrite with .yaml
+    config.configwrite(config_fn2, cfdict)  # test configwrite with .yaml
     # test for deprecation warning
     with pytest.deprecated_call():
         config.configread(config_fn=config_fn)
@@ -51,11 +51,10 @@ def test_config(tmpdir):
     cfdict1 = config.configread(config_fn, skip_eval_sections=["setup_config"])
     assert isinstance(cfdict1["setup_config"]["float"], str)
     cfdict2 = config.configread(config_fn2, abs_path=True)
-    
+
     assert cfdict["section1"] == cfdict2["section1"]
     assert isinstance(cfdict2["section2"]["path"], Path)
     assert isinstance(cfdict2["section2"]["path1"], str)
     # by default paths in setup_config are not evaluated
     assert isinstance(cfdict2["setup_config"]["path"], str)
     assert isinstance(cfdict2["setup_config"]["float"], float)
-    

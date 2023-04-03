@@ -157,7 +157,6 @@ def configwrite(
                     pass  # `value` path is not relative to root
     cf.read_dict(_cfdict)
     if splitext(config_fn)[-1] in [".yaml", ".yml"]:
-        
         write_yaml_config(config_fn, _cfdict)
     else:
         with codecs.open(config_fn, "w", encoding=encoding) as fp:
@@ -167,6 +166,7 @@ def configwrite(
 def read_yaml_config(config_fn: Union[Path, str]) -> dict:
     with open(config_fn, "rb") as f:
         return yaml.safe_load(f)
+
 
 def write_yaml_config(config_fn: Union[Path, str], cfdict: dict):
     with open(config_fn, "w") as f:
