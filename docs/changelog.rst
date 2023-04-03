@@ -12,6 +12,7 @@ unreleased
 
 Changed
 -------
+- Support for in-memory data like objects instead of source name or path in DataCatalog().get* methods. PR #313
 
 Added
 -----

@@ -158,7 +158,7 @@ def test_export_global_datasets(tmpdir):
     }
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
     time_tuple = ("2010-02-10", "2010-02-15")
-    data_catalog = DataCatalog()  # read artifacts by default
+    data_catalog = DataCatalog("artifact_data")  # read artifacts
     source_names = [
         "era5",
         "grwl_mask",
@@ -237,3 +237,43 @@ def test_export_dataframe(tmpdir, df, df_time):
         dtypes = pd.DataFrame
         obj = source.get_data()
         assert isinstance(obj, dtypes), key
+
+
+def test_get_data(df):
+    data_catalog = DataCatalog("artifact_data")  # read artifacts
+
+    # raster dataset using three different ways
+    da = data_catalog.get_rasterdataset(data_catalog["koppen_geiger"].path)
+    assert isinstance(da, xr.DataArray)
+    da = data_catalog.get_rasterdataset("koppen_geiger")
+    assert isinstance(da, xr.DataArray)
+    da = data_catalog.get_rasterdataset(da)
+    assert isinstance(da, xr.DataArray)
+    with pytest.raises(ValueError, match='Unknown raster data type "list"'):
+        data_catalog.get_rasterdataset([])
+
+    # vector dataset using three different ways
+    gdf = data_catalog.get_geodataframe(data_catalog["osm_coastlines"].path)
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    gdf = data_catalog.get_geodataframe("osm_coastlines")
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    gdf = data_catalog.get_geodataframe(gdf)
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    with pytest.raises(ValueError, match='Unknown vector data type "list"'):
+        data_catalog.get_geodataframe([])
+
+    # geodataset using three different ways
+    da = data_catalog.get_geodataset(data_catalog["gtsmv3_eu_era5"].path)
+    assert isinstance(da, xr.DataArray)
+    da = data_catalog.get_geodataset("gtsmv3_eu_era5")
+    assert isinstance(da, xr.DataArray)
+    da = data_catalog.get_geodataset(da)
+    assert isinstance(da, xr.DataArray)
+    with pytest.raises(ValueError, match='Unknown geo data type "list"'):
+        data_catalog.get_geodataset([])
+
+    # dataframe using single way
+    df = data_catalog.get_dataframe(df)
+    assert isinstance(df, pd.DataFrame)
+    with pytest.raises(ValueError, match='Unknown tabular data type "list"'):
+        data_catalog.get_dataframe([])
