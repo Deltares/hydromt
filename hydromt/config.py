@@ -60,13 +60,15 @@ def configread(
         the first level keys are the section headers, the second level option-value pairs.
     """
     if splitext(config_fn)[-1] in [".yaml", ".yml"]:
-        cf = parse_yaml_config(config_fn)
+        cf = read_yaml_config(config_fn)
+        yml = True
 
     else:
         warn(
             "Support for .ini configuration files will be deprecated",
             PendingDeprecationWarning,
         )
+        yml = False
         if cf is None:
             cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
         elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
@@ -88,10 +90,11 @@ def configread(
             continue  # do not evaluate
         # numbers, tuples, lists, dicts, sets, booleans, and None
         for key, value in cf[section].items():
-            try:
-                value = literal_eval(value)
-            except Exception:
-                pass
+            if not yml:
+                try:
+                    value = literal_eval(value)
+                except Exception:
+                    pass
             if isinstance(value, str) and len(value) == 0:
                 value = None
             if abs_path and section not in skip_abspath_sections:
@@ -134,6 +137,7 @@ def configwrite(
     """
     _cfdict = cfdict.copy()
     root = Path(dirname(config_fn))
+
     if cf is None:
         cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
     elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
@@ -152,10 +156,18 @@ def configwrite(
                 except ValueError:
                     pass  # `value` path is not relative to root
     cf.read_dict(_cfdict)
-    with codecs.open(config_fn, "w", encoding=encoding) as fp:
-        cf.write(fp)
+    if splitext(config_fn)[-1] in [".yaml", ".yml"]:
+        
+        write_yaml_config(config_fn, _cfdict)
+    else:
+        with codecs.open(config_fn, "w", encoding=encoding) as fp:
+            cf.write(fp)
 
 
-def parse_yaml_config(config_fn: Union[Path, str]) -> dict:
+def read_yaml_config(config_fn: Union[Path, str]) -> dict:
     with open(config_fn, "rb") as f:
         return yaml.safe_load(f)
+
+def write_yaml_config(config_fn: Union[Path, str], cfdict: dict):
+    with open(config_fn, "w") as f:
+        yaml.dump(cfdict, f, sort_keys=False)

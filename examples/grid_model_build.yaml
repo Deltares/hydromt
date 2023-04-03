@@ -3,6 +3,10 @@ setup_config:
   timers.end: '2010-02-15'
   timers.start: '2010-02-05'
 
+setup_region:
+  basin_index_fn: merit_hydro_index
+  hydrography_fn: merit_hydro
+
 setup_maps_from_raster:
   fill_method: null
   raster_fn: merit_hydro_1k
@@ -14,10 +18,6 @@ setup_maps_from_raster_reclass:
   reclass_table_fn: vito_reclass
   reclass_variables:
   - manning
-
-setup_region:
-  basin_index_fn: merit_hydro_index
-  hydrography_fn: merit_hydro
   
 write:
   components:
