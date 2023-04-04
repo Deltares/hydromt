@@ -9,6 +9,7 @@ import click
 from ast import literal_eval
 from typing import Union, Dict
 from pathlib import Path
+from warnings import warn
 
 from .. import config
 from ..error import DeprecatedError
@@ -82,6 +83,11 @@ def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
     """Parse config from ini `path` and combine with command line options `opt_cli`"""
     opt = {}
     if path is not None and isfile(path):
+        if str(path).endswith(".ini"):
+            warn(
+                "Support for .ini configuration files will be deprecated",
+                PendingDeprecationWarning,
+            )
         opt = config.configread(
             path, abs_path=True, skip_abspath_sections=["setup_config"]
         )
