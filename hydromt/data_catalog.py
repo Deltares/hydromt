@@ -468,6 +468,7 @@ class DataCatalog(object):
         source_names: List = [],
         unit_conversion: bool = True,
         meta: Dict = {},
+        append: bool = False,
     ) -> None:
         """Export a data slice of each dataset and a data_catalog.yml file to disk.
 
@@ -481,23 +482,44 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         source_names: list, optional
-            List of source names to export
+            List of source names to export, by default None in which case all sources are exported.
+            Specific variables can be selected by appending them to the source name in square brackets.
+            For example, to export all variables of 'source_name1' and only 'var1' and 'var2' of 'source_name'
+            use source_names=['source_name1', 'source_name2[var1,var2]']
         unit_conversion: boolean, optional
             If False skip unit conversion when parsing data from file, by default True.
         meta: dict, optional
             key-value pairs to add to the data catalog meta section, such as 'version', by default empty.
+        append: bool, optional
+            If True, append to existing data catalog, by default False.
         """
         data_root = abspath(data_root)
         if not os.path.isdir(data_root):
             os.makedirs(data_root)
 
         # create copy of data with selected source names
-        sources = copy.deepcopy(self.sources)
+        source_vars = {}
         if len(source_names) > 0:
-            sources = {n: sources[n] for n in source_names}
+            sources = {}
+            for name in source_names:
+                # deduce variables from name
+                if "[" in name:
+                    variables = name.split("[")[-1].split("]")[0].split(",")
+                    name = name.split("[")[0]
+                    source_vars[name] = variables
+                sources[name] = copy.deepcopy(self.sources[name])
+        else:
+            sources = copy.deepcopy(self.sources)
+
+        # read existing data catalog if it exists
+        fn = join(data_root, "data_catalog.yml")
+        if isfile(fn) and append:
+            self.logger.info(f"Appending existing data catalog {fn}")
+            sources_out = DataCatalog(fn).sources
+        else:
+            sources_out = {}
 
         # export data and update sources
-        sources_out = {}
         for key, source in sources.items():
             try:
                 # read slice of source and write to file
@@ -510,6 +532,7 @@ class DataCatalog(object):
                 fn_out, driver = source.to_file(
                     data_root=data_root,
                     data_name=key,
+                    variables=source_vars.get(key, None),
                     bbox=bbox,
                     time_tuple=time_tuple,
                     logger=self.logger,
@@ -529,6 +552,10 @@ class DataCatalog(object):
                 source.filesystem = "local"
                 source.kwargs = {}
                 source.rename = {}
+                if key in sources_out:
+                    self.logger.warning(
+                        f"{key} already exists in data catalog and is overwritten."
+                    )
                 sources_out[key] = source
             except FileNotFoundError:
                 self.logger.warning(f"{key} file not found at {source.path}")
@@ -536,7 +563,6 @@ class DataCatalog(object):
         # write data catalog to yml
         data_catalog_out = DataCatalog()
         data_catalog_out._sources = sources_out
-        fn = join(data_root, "data_catalog.yml")
         data_catalog_out.to_yml(fn, root="auto", meta=meta)
 
     def get_rasterdataset(

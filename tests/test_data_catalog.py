@@ -160,7 +160,7 @@ def test_export_global_datasets(tmpdir):
     time_tuple = ("2010-02-10", "2010-02-15")
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     source_names = [
-        "era5",
+        "era5[precip,temp]",
         "grwl_mask",
         "modis_lai",
         "osm_coastlines",
@@ -175,12 +175,20 @@ def test_export_global_datasets(tmpdir):
         source_names=source_names,
         meta={"version": 1},
     )
+    # test append and overwrite source
+    data_catalog.export_data(
+        tmpdir,
+        bbox=bbox,
+        source_names=["corine"],
+        append=True,
+        meta={"version": 2},
+    )
     data_lib_fn = join(tmpdir, "data_catalog.yml")
     # check if meta is written
     with open(data_lib_fn, "r") as f:
         yml_list = f.readlines()
     assert yml_list[0].strip() == "meta:"
-    assert yml_list[1].strip() == "version: 1"
+    assert yml_list[1].strip() == "version: 2"
     assert yml_list[2].strip().startswith("root:")
     # check if data is parsed correctly
     data_catalog1 = DataCatalog(data_lib_fn)

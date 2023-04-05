@@ -13,9 +13,12 @@ unreleased
 Changed
 -------
 - Support for in-memory data like objects instead of source name or path in DataCatalog().get* methods. PR #313
+- Support for yaml configuration files. The support for ini files will be deprecated in the future. PR #292
 
 Added
 -----
+- Option to export individual variables from a data source and append to an existing data catalog in DataCatalog.export_data. PR #302
+
 
 Fixed
 -----
