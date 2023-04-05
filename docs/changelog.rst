@@ -12,6 +12,7 @@ unreleased
 
 Changed
 -------
+- Support for in-memory data like objects instead of source name or path in DataCatalog().get* methods. PR #313
 - Support for yaml configuration files. The support for ini files will be deprecated in the future. PR #292
 
 Added
