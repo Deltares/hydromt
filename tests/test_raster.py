@@ -237,6 +237,8 @@ def test_clip(transform, shape):
     # test mask
     da_clip1 = da.raster.clip_mask(da.raster.geometry_mask(gdf))
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
+    da_clip1 = da.raster.clip_mask(da.raster.geometry_mask(gdf), mask=True)
+    assert np.all(np.isclose(da_clip1.raster.bounds, da.raster.bounds))
     # test geom - different crs
     da_clip1 = da.raster.clip_geom(gdf.to_crs(3857))
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
