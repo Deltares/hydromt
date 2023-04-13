@@ -198,14 +198,8 @@ def parse_abspath(
     """
 
     def _abspath(value, root):
-        if isinstance(value, str) and exists(join(root, value)):
+        if exists(join(root, value)):
             value = Path(abspath(join(root, value)))
-        elif (
-            isinstance(value, list)
-            and all([isinstance(v, str) for v in value])
-            and all([exists(join(root, v)) for v in value])
-        ):
-            value = [Path(abspath(join(root, v))) for v in value]
         return value
 
     # loop through n-level of dict
@@ -213,7 +207,9 @@ def parse_abspath(
         if isinstance(val, dict):
             if key not in skip_abspath_sections:
                 cfdict[key] = parse_abspath(val, root)
-        else:
+        elif isinstance(val, list) and all([isinstance(v, str) for v in val]):
+            cfdict[key] = [_abspath(v, root) for v in val]
+        elif isinstance(val, str):
             cfdict[key] = _abspath(val, root)
     return cfdict
 
