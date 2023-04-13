@@ -1047,26 +1047,22 @@ class XRasterBase(XGeoBase):
             return self._obj.sel({self.x_dim: slice(x0, x1), self.y_dim: slice(y0, y1)})
 
     # TODO make consistent with clip_geom
-    def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
+    def clip_mask(self, mask):
         """Clip object to region with mask values greater than zero.
         Arguments
         ---------
-        da_mask : xarray.DataArray
+        mask : xarray.DataArray
             Mask array.
-        mask: bool, optional
-            Mask values outside geometry with the raster nodata value
         Returns
         -------
         xarray.DataSet or DataArray
             Data clipped to mask
         """
-        if not isinstance(da_mask, xr.DataArray):
+        if not isinstance(mask, xr.DataArray):
             raise ValueError("Mask should be xarray.DataArray type.")
-        if not da_mask.raster.shape == self.shape:
+        if not mask.raster.shape == self.shape:
             raise ValueError("Mask shape invalid.")
-        if mask:
-            return self._obj.where(da_mask)
-        mask_bin = (da_mask.values != 0).astype(np.uint8)
+        mask_bin = (mask.values != 0).astype(np.uint8)
         if not np.any(mask_bin):
             raise ValueError("Invalid mask.")
         row_slice, col_slice = ndimage.find_objects(mask_bin)[0]
