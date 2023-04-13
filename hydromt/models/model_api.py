@@ -199,12 +199,14 @@ class Model(object, metaclass=ABCMeta):
             if self._CLI_ARGS["region"] not in opt:
                 opt = {self._CLI_ARGS["region"]: {}, **opt}
             opt[self._CLI_ARGS["region"]].update(region=region)
+
         # then loop over other methods
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write() call
             if method.startswith("write_"):
                 write = False
-            self._run_log_method(method, **opt[method])
+            kwargs = {} if opt[method] is None else opt[method]
+            self._run_log_method(method, **kwargs)
 
         # write
         if write:
@@ -275,7 +277,8 @@ class Model(object, metaclass=ABCMeta):
             # if any write_* functions are present in opt, skip the final self.write() call
             if method.startswith("write_"):
                 write = False
-            self._run_log_method(method, **opt[method])
+            kwargs = {} if opt[method] is None else opt[method]
+            self._run_log_method(method, **kwargs)
 
         # write
         if write:
