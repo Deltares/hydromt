@@ -6,11 +6,27 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+Unreleased
+==========
+
+Added
+-----
+
+Changed
+-------
+
+Fixed
+-----
+
+Deprecated
+----------
+
+
 v0.7.1 (14 April 2023)
 ======================
 
 This release contains several small updates of the code. 
-Most prominantly is the support for yml configuration files. 
+Most prominently is the support for yml configuration files. 
 
 Added
 -----
