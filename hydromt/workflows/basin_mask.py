@@ -162,11 +162,11 @@ def _parse_region_value(value):
         kwarg = dict(xy=value)
     elif isinstance(value, int):  # single int
         kwarg = dict(basid=value)
-    elif isinstance(value, str) and isfile(value):
+    elif isinstance(value, (str, Path)) and isfile(value):
         kwarg = dict(geom=gpd.read_file(value))
     elif isinstance(value, gpd.GeoDataFrame):  # geometry
         kwarg = dict(geom=value)
-    elif isinstance(value, str) and isdir(value):
+    elif isinstance(value, (str, Path)) and isdir(value):
         kwarg = dict(root=value)
     if "geom" in kwarg and np.all(kwarg["geom"].geometry.type == "Point"):
         xy = (
