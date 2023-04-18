@@ -1,5 +1,5 @@
 [build-system]
-requires = ["flit_core >=3.2.0,<3.3"]
+requires = ["flit_core >=3.4.0,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
@@ -13,28 +13,32 @@ dependencies = [
     "bottleneck",
     "click",
     "dask",
-    "geopandas>=0.10",
     "entrypoints",
+    "fsspec",
+    "geopandas>=0.10",
     "gdal>=3.1",
-    "numba",
     "numpy",
     "netcdf4",
-    "pandas",
-    "pyflwdir>=0.5.3",
-    "pygeos",
     "openpyxl",
+    "packaging",
+    "pandas",
+    "pyflwdir>=0.5.4",
+    "pyproj",
     "rasterio",
     "requests",
+    "rioxarray",
+    "shapely>=2.0.0",
     "scipy",
+    "universal_pathlib",
     "xarray",
+    "xmltodict",
     "zarr",
-
 ]
 requires-python = ">=3.8" # fix tests to support older versions
 readme = "README.rst"
 classifiers = [
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Hydrology",
@@ -44,17 +48,27 @@ classifiers = [
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
+all = [
+    "pcraster",
+    "xugrid",
+    "pygeos",
+    "pyet",
+]
 test = [
-	"testpath",
-	"responses",
+    "black",
 	"pytest>=2.7.3",
 	"pytest-cov",
+    "pytest-mock",
+	"responses",
 ]
 doc = [
-	"sphinx",
-	"sphinx_rtd_theme",
-	"black",
+	"nbsphinx",
+    "pydata-sphinx-theme",
+    "sphinx",
+    "sphinx_design",
+    "sphinx_autosummary_accessors",
 ]
+
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
@@ -70,3 +84,15 @@ target-version = ['py37']
 [tool.flit.sdist]
 include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore:distutils Version classes are deprecated:DeprecationWarning",
+    "ignore:getargs:DeprecationWarning", # The 'u' format is deprecated. Use 'U' instead.
+    "ignore:The *staticgeoms:DeprecationWarning", 
+    "ignore:The *staticmaps:DeprecationWarning", 
+    "ignore:The set_staticmaps:DeprecationWarning", 
+    "ignore:Adding a predefined data catalog:DeprecationWarning",
+    "ignore:Shapely 2.0 is installed:UserWarning"
+]

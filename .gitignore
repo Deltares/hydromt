@@ -8,6 +8,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Temporary
+tmp/
+sandbox/
+
 # Distribution / packaging
 .Python
 build/
@@ -48,6 +52,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+*.log
 
 # Translations
 *.mo
@@ -69,7 +74,7 @@ instance/
 # Sphinx documentation
 docs/_build/
 docs/_generated/
-docs/examples/examples
+docs/_examples
 
 # PyBuilder
 target/
@@ -77,6 +82,7 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 examples/.ipynb_checkpoints
+examples/tmp*
 
 # pyenv
 .python-version

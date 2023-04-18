@@ -1,6 +1,8 @@
 from os.path import isfile, basename, abspath, join, dirname
+import io
 from pathlib import Path
 import glob
+from fsspec.implementations import local
 import pandas as pd
 import numpy as np
 import geopandas as gpd
@@ -30,40 +32,55 @@ __all__ = [
 def open_raster(
     filename, mask_nodata=False, chunks={}, nodata=None, logger=logger, **kwargs
 ):
-    """Open a gdal-readable file with rasterio based on :py:meth:`xarray.open_rasterio`
-    and parse geospatial attributes.
+    """Open a gdal-readable file with rasterio based on
+    :py:meth:`rioxarray.open_rasterio`, but return squeezed DataArray.
 
     Arguments
     ----------
-    filename : str, rasterio.DatasetReader, or rasterio.WarpedVRT
+    filename : str, path, file-like, rasterio.DatasetReader, or rasterio.WarpedVRT
         Path to the file to open. Or already open rasterio dataset.
     mask_nodata : bool, optional
         set nodata values to np.nan (xarray default nodata value)
+    nodata: int, float, optional
+        Set nodata value if missing
     chunks : int, tuple or dict, optional
         Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or
         ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
         DataArray into a dask array.
     **kwargs
-        key-word arguments are passed to :py:meth:`xarray.open_rasterio`
+        key-word arguments are passed to :py:meth:`xarray.open_dataset` with
+        "rasterio" engine.
 
     Returns
     -------
     data : DataArray
-        The newly created DataArray.
+        DataArray
     """
-    da = xr.open_rasterio(filename, chunks=chunks, **kwargs)
-    da = da.squeeze().reset_coords(drop=True)  # drop band dimension if single layer
-    # additional hydromt.raster parsing
-    if da.raster.nodata is None:
+    kwargs.update(
+        masked=mask_nodata, default_name="data", engine="rasterio", chunks=chunks
+    )
+    if not mask_nodata:  # if mask_and_scale by default True in xarray ?
+        kwargs.update(mask_and_scale=False)
+    if isinstance(filename, io.IOBase):  # file-like does not handle chunks
+        logger.warning("Removing chunks to read and load remote data.")
+        kwargs.pop("chunks")
+    # keep only 2D DataArray
+    da = xr.open_dataarray(filename, **kwargs).squeeze(drop=True)
+    # set missing _FillValue
+    if mask_nodata:
+        da.raster.set_nodata(np.nan)
+    elif da.raster.nodata is None:
         if nodata is not None:
-            da.raster.set_nodata(nodata)  # overwrite nodata value
+            da.raster.set_nodata(nodata)
         else:
             logger.warning(f"nodata value missing for {filename}")
-    da.raster.set_crs()  # parse crs information
-    for k in raster.UNWANTED_RIO_ATTRS:
-        da.attrs.pop(k, None)
-    if mask_nodata:
-        da = da.raster.mask_nodata()
+    # there is no option for scaling but not masking ...
+    scale_factor = da.attrs.pop("scale_factor", 1)
+    add_offset = da.attrs.pop("add_offset", 0)
+    if not mask_nodata and (scale_factor != 1 or add_offset != 0):
+        raise NotImplementedError(
+            "scale and offset in combination with mask_nodata==False is not supported."
+        )
     return da
 
 
@@ -89,7 +106,7 @@ def open_mfraster(
 
     Arguments
     ----------
-    paths: str, list
+    paths: str, list of str/Path/file-like
         Paths to the rasterio/gdal files.
         Paths can be provided as list of paths or a path pattern string which is
         interpreted according to the rules used by the Unix shell. The variable name
@@ -125,7 +142,7 @@ def open_mfraster(
     """
     if concat and mosaic:
         raise ValueError("Only one of 'mosaic' or 'concat' can be True.")
-    prefix, postfix, _name = "", "", ""
+    prefix, postfix = "", ""
     if isinstance(paths, str):
         if "*" in paths:
             prefix, postfix = basename(paths).split(".")[0].split("*")
@@ -141,7 +158,10 @@ def open_mfraster(
         da = open_raster(fn, chunks=chunks, **kwargs)
 
         # get name, attrs and index (if concat)
-        bname = basename(fn)
+        if hasattr(fn, "path"):  # file-like
+            bname = basename(fn.path)
+        else:
+            bname = basename(fn)
         if concat:
             # name based on basename until postfix or _
             vname = bname.split(".")[0].replace(postfix, "").split("_")[0]
@@ -185,12 +205,20 @@ def open_mfraster(
                 da.coords[concat_dim] = xr.IndexVariable(concat_dim, index_lst)
                 da = da.sortby(concat_dim).transpose(concat_dim, ...)
                 da.attrs.update(da_lst[0].attrs)
-                da.attrs.update({"source_file": "; ".join(fn_attrs)})
         else:
             da = merge.merge(da_lst, **mosaic_kwargs)  # spatial merge
+            da.attrs.update({"source_file": "; ".join(fn_attrs)})
         ds = da.to_dataset()  # dataset for consistency
     else:
-        ds = xr.merge(da_lst)
+        ds = xr.merge(
+            da_lst
+        )  # , combine_attrs="drop") seems that with rioxarray drops all datarrays atrributes not just ds
+        ds.attrs = {}
+
+    # update spatial attributes
+    if da_lst[0].rio.crs is not None:
+        ds.rio.write_crs(da_lst[0].rio.crs, inplace=True)
+    ds.rio.write_transform(inplace=True)
     return ds
 
 
@@ -249,6 +277,8 @@ def open_raster_from_tindex(
     )
     # clip to extent
     ds_out = ds_out.raster.clip_geom(geom)
+    name = ".".join(basename(fn_tindex).split(".")[:-1])
+    ds_out = ds_out.rename({ds_out.raster.vars[0]: name})
     return ds_out  # dataset to be consitent with open_mfraster
 
 
@@ -288,7 +318,7 @@ def open_geodataset(
         CRS mis-matches are resolved if given a GeoSeries or GeoDataFrame.
         Cannot be used with bbox.
     **kwargs
-        Key-word arguments passed to :py:meth:`geopandas.read_file` to read the point geometry file.
+        Key-word arguments passed to :py:func:`geopandas.read_file` to read the point geometry file.
 
     Returns
     -------
@@ -307,11 +337,11 @@ def open_geodataset(
         da_ts = open_timeseries_from_table(
             fn_data, name=var_name, index_dim=index_dim, logger=logger
         )
-        ds = vector.GeoDataset.from_gdf(gdf, da_ts, index_dim=index_dim)
+        ds = vector.GeoDataset.from_gdf(gdf, da_ts)
     elif fn_data is not None:
         raise IOError(f"GeoDataset data file not found: {fn_data}")
     else:
-        ds = vector.GeoDataset.from_gdf(gdf, index_dim=index_dim)  # coordinates only
+        ds = vector.GeoDataset.from_gdf(gdf)  # coordinates only
     return ds.chunk(chunks)
 
 

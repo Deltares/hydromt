@@ -1,29 +1,17 @@
 # -*- coding: utf-8 -*-
 """HydroMT models API"""
-import sys
-from .model_api import Model
-from . import model_plugins
+from .model_api import *
+from .model_grid import *
+from .model_lumped import *
+from .model_network import *
+from .model_plugins import *
+from .. import _compat
 
+# NOTE: pygeos is still required in XUGRID;
+# remove requirement after https://github.com/Deltares/xugrid/issues/33
+if _compat.HAS_XUGRID and _compat.HAS_PYGEOS:
+    from .model_mesh import MeshModel
 
-# dictionary with entry points (not yet loaded!)
-ENTRYPOINTS = model_plugins.discover()
-PLUGINS = {ep.object_name: name for name, ep in ENTRYPOINTS.items()}
-
-# only load when requested
-def __getattr__(name):
-    thismodule = sys.modules[__name__]
-
-    # load a register all models
-    if name == "MODELS":
-        MODELS = {
-            ep.name: model_plugins.load(ep, thismodule) for ep in ENTRYPOINTS.values()
-        }
-        setattr(thismodule, name, MODELS)
-        return MODELS
-
-    # trick to allow import of plugin model class from hydromt core
-    # from hydromt.models import xxxxModel
-    elif name in PLUGINS:
-        model_class = model_plugins.load(ENTRYPOINTS[PLUGINS[name]])
-        return model_class
-    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+# expose global MODELS object which discovers and loads
+# any local generalized or plugin model class on-the-fly
+MODELS = ModelCatalog()

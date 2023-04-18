@@ -1,45 +1,21 @@
-"""HydroMT: Build and analyze models like a data-wizard!"""
+"""HydroMT: Automated and reproducible model building and analysis"""
 
 # version number without 'v' at start
-__version__ = "0.4.5.dev"
+__version__ = "0.7.2.dev0"
 
-import geopandas as gpd
-import warnings
+# Set environment variables (this will be temporary)
+# to use shapely 2.0 in favor of pygeos (if installed)
+import os
 
-# required for accessor style documentation
-from xarray import DataArray, Dataset
+os.environ["USE_PYGEOS"] = "0"
 
-try:
-    import pygeos
-
-    gpd.options.use_pygeos = True
-except ImportError:
-    pass
-
-try:
-    import pcraster as pcr
-
-    HAS_PCRASTER = True
-except ImportError:
-    HAS_PCRASTER = False
-
-
-# submoduls
+# submodules
 from . import cli, workflows, stats, flw, raster, vector
 
 # high-level methods
 from .models import *
 from .io import *
-from .data_adapter import *
+from .data_catalog import *
 
-# TODO remove after fixed in all plugins
-def __getattr__(name):
-    if name in PLUGINS:
-        ep = ENTRYPOINTS[PLUGINS[name]]
-        plugin_name = ep.module_name.split(".")[0]
-        warnings.warn(
-            f'"hydromt.{name}" will be deprecated, use "{plugin_name}.{name}" instead.',
-            DeprecationWarning,
-        )
-        return model_plugins.load(ep)
-    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+# required for accessor style documentation
+from xarray import DataArray, Dataset

@@ -1,8 +1,15 @@
 import pandas as pd
 import xarray as xr
+import xarray.core.resample
 import numpy as np
 import re
 import logging
+from typing import Union
+
+from .._compat import HAS_PYET
+
+if HAS_PYET:
+    import pyet
 
 logger = logging.getLogger(__name__)
 
@@ -42,13 +49,12 @@ def precip(
     if precip.raster.dim0 != "time":
         raise ValueError(f'First precip dim should be "time", not {precip.raster.dim0}')
     # downscale precip (lazy); global min of zero
-    p_out = xr.ufuncs.fmax(
-        precip.raster.reproject_like(da_like, method=reproj_method), 0
-    )
+    p_out = np.fmax(precip.raster.reproject_like(da_like, method=reproj_method), 0)
     # correct precip based on high-res monthly climatology
     if clim is not None:
         # make sure first dim is month
-        clim = clim.rename({clim.raster.dim0: "month"})
+        if clim.raster.dim0 != "month":
+            clim = clim.rename({clim.raster.dim0: "month"})
         if not clim["month"].size == 12:
             raise ValueError("Precip climatology does not contain 12 months.")
         # set missings to NaN
@@ -202,34 +208,109 @@ def press(
     return press_out
 
 
-def pet(
-    ds,
-    temp,
-    dem_model,
-    method="debruin",
-    press_correction=False,
-    reproj_method="nearest_index",
-    lapse_rate=-0.0065,
-    freq=None,
-    resample_kwargs={},
+def wind(
+    da_model: Union[xr.DataArray, xr.Dataset],
+    wind: xr.DataArray = None,
+    wind_u: xr.DataArray = None,
+    wind_v: xr.DataArray = None,
+    altitude: float = 10,
+    altitude_correction: bool = False,
+    freq: pd.Timedelta = None,
+    reproj_method: str = "nearest_index",
+    resample_kwargs: dict = {},
     logger=logger,
 ):
+    """Lazy reprojection of wind speed to model grid and resampling of time dimension to frequency.
 
+    Either provide wind speed directly or both wind_u and wind_v components.
+
+    Parameters
+    ----------
+    wind: xarray.DataArray
+        DataArray of wind speed forcing [m s-1]
+    wind_u: xarray.DataArray
+        DataArray of U component of wind speed forcing [m s-1]
+    wind_v: xarray.DataArray
+        DataArray of V component of wind speed forcing [m s-1]
+    da_model: xarray.DataArray
+        DataArray of the target resolution and projection
+    altitude: float, optional
+        ALtitude of wind speed data. By default 10m.
+    altitude_correction: str, optional
+       If True wind speed is re-calculated to wind speed at 2 meters using original `altitude`.
+    freq: str, Timedelta
+        output frequency of timedimension
+    reproj_method: str, optional
+        Method for spatital reprojection of precip, by default 'nearest_index'
+    resample_kwargs:
+        Additional key-word arguments (e.g. label, closed) for time resampling method
+
+    Returns
+    --------
+    wind_out: xarray.DataArray (lazy)
+        processed wind forcing
+    """
+    if wind_u is not None and wind_v is not None:
+        wind = np.sqrt(np.power(wind_u, 2) + np.power(wind_v, 2))
+    elif wind is None:
+        raise ValueError("Either wind or wind_u and wind_v varibales must be supplied.")
+
+    if wind.raster.dim0 != "time":
+        raise ValueError(f'First wind dim should be "time", not {wind.raster.dim0}')
+
+    # compute wind at 2 meters altitude
+    if altitude_correction:
+        wind = wind * (4.87 / np.log((67.8 * altitude) - 5.42))
+    # downscale wind (lazy)
+    wind_out = wind.raster.reproject_like(da_model, method=reproj_method)
+    # resample time
+    wind_out.name = "wind"
+    wind_out.attrs.update(unit="m s-1")
+    if freq is not None:
+        resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
+        wind_out = resample_time(wind_out, freq, conserve_mass=False, **resample_kwargs)
+    return wind_out
+
+
+def pet(
+    ds: xarray.Dataset,
+    temp: xarray.DataArray,
+    dem_model: xarray.DataArray,
+    method: str = "debruin",
+    press_correction: bool = False,
+    wind_correction: bool = True,
+    wind_altitude: float = 10,
+    reproj_method: str = "nearest_index",
+    # lapse_rate: float=-0.0065,
+    freq: str = None,
+    resample_kwargs: dict = {},
+    logger=logger,
+) -> xarray.DataArray:
     """Determines reference evapotranspiration (lazy reprojection on model grid and resampling of time dimension to frequency).
 
     Parameters
     ----------
     ds : xarray.Dataset
-        Dataset with pressure [hPa], global radiation [W m-2], TOA incident solar radiation [W m-2]
+        Dataset with climate variables: pressure [hPa], global radiation [W m-2], TOA incident solar radiation [W m-2], wind [m s-1]
+
+        * Required variables: {"temp", "press" or "press_msl", "kin"}
+        * additional variables for debruin: {"kout"}
+        * additional variables for penman-monteith_rh_simple: {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "rh"}
+        * additional variables for penman-monteith_tdew: {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "temp_dew"}
     temp : xarray.DataArray
-        DataArray with temperature [°C]
+        DataArray with temperature on model grid resolution [°C]
     dem_model : xarray.DataArray
         DataArray of the target resolution and projection, contains elevation
         data
-    method : {'debruin', 'makkink'}
+    method : {'debruin', 'makkink', "penman-monteith_rh_simple", "penman-monteith_tdew"}
         Potential evapotranspiration method.
+        if penman-monteith is used, requires the installation of the pyet package.
     press_correction : bool, default False
         If True pressure is corrected, based on elevation data of `dem_model`
+    wind_altitude: float, optional
+        ALtitude of wind speed data. By default 10m.
+    wind_correction: str, optional
+       If True wind speed is re-calculated to wind speed at 2 meters using original `wind_altitude`.
     freq : str, Timedelta, default None
         output frequency of timedimension
     resample_kwargs:
@@ -248,10 +329,13 @@ def pet(
         raise ValueError("All input variables have same time index.")
     if not temp.raster.identical_grid(dem_model):
         raise ValueError("Temp variable should be on model grid.")
+
     # resample input to model grid
-    ds_out = ds.raster.reproject_like(dem_model, method=reproj_method)
+    ds = ds.raster.reproject_like(dem_model, method=reproj_method)
+
+    # Process bands like 'pressure' and 'wind'
     if press_correction:
-        ds_out["press"] = press(
+        ds["press"] = press(
             ds["press_msl"],
             dem_model,
             lapse_correction=press_correction,
@@ -259,18 +343,81 @@ def pet(
             reproj_method=reproj_method,
         )
     else:
-        ds_out = ds_out.rename({"press_msl": "press"})
+        if "press_msl" in ds:
+            ds = ds.rename({"press_msl": "press"})
+        elif HAS_PYET:
+            # calculate pressure from elevation [kPa]
+            ds["press"] = pyet.calc_press(dem_model)
+            # convert to hPa to be consistent with press function calculation:
+            ds["press"] = ds["press"] * 10
+        else:
+            raise ModuleNotFoundError(
+                "If 'press' is supplied and 'press_correction' is not used, the pyet package must be installed."
+            )
+
     timestep = to_timedelta(ds).total_seconds()
     if method == "debruin":
         pet_out = pet_debruin(
             temp,
-            ds_out["press"],
-            ds_out["kin"],
-            ds_out["kout"],
+            ds["press"],
+            ds["kin"],
+            ds["kout"],
             timestep=timestep,
         )
-    if method == "makkink":
-        pet_out = pet_makkink(temp, ds_out["press"], ds_out["kin"], timestep=timestep)
+    elif method == "makkink":
+        pet_out = pet_makkink(temp, ds["press"], ds["kin"], timestep=timestep)
+    elif "penman-monteith" in method:
+        logger.info("Calculating Penman-Monteith ref evaporation")
+        # Add wind
+        # compute wind from u and v components at 10m (for era5)
+        if ("wind10_u" in ds.data_vars) & ("wind10_v" in ds.data_vars):
+            ds["wind"] = wind(
+                da_model=dem_model,
+                wind_u=ds["wind10_u"],
+                wind_v=ds["wind10_v"],
+                altitude=wind_altitude,
+                altitude_correction=wind_correction,
+            )
+        else:
+            ds["wind"] = wind(
+                da_model=dem_model,
+                wind=ds["wind"],
+                altitude=wind_altitude,
+                altitude_correction=wind_correction,
+            )
+        if method == "penman-monteith_rh_simple":
+            pet_out = pm_fao56(
+                temp["temp"],
+                temp["temp_max"],
+                temp["temp_min"],
+                ds["press"],
+                ds["kin"],
+                ds["wind"],
+                ds["rh"],
+                dem_model,
+                "rh",
+            )
+        elif method == "penman-monteith_tdew":
+            pet_out = pm_fao56(
+                temp["temp"],
+                temp["temp_max"],
+                temp["temp_min"],
+                ds["press"],
+                ds["kin"],
+                ds["wind"],
+                ds["temp_dew"],
+                dem_model,
+                "temp_dew",
+            )
+        else:
+            methods = [
+                "debruin",
+                "makking",
+                "penman-monteith_rh_simple",
+                "penman-monteith_tdew",
+            ]
+            raise ValueError(f"Unknown pet method, select from {methods}")
+
     # resample in time
     pet_out.name = "pet"
     pet_out.attrs.update(unit="mm")
@@ -310,7 +457,6 @@ def press_correction(
 
 
 def temp_correction(dem, lapse_rate=-0.0065):
-
     """Temperature correction based on elevation data.
 
     Parameters
@@ -361,11 +507,11 @@ def pet_debruin(
         reference evapotranspiration
     """
     # saturation and actual vapour pressure at given temperature [Pa]
-    esat = 6.112 * xr.ufuncs.exp((17.67 * temp) / (temp + 243.5))
+    esat = 6.112 * np.exp((17.67 * temp) / (temp + 243.5))
     # slope of vapour pressure curve
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
-    lam = (2.502 * 10 ** 6) - (2250.0 * temp)
+    lam = (2.502 * 10**6) - (2250.0 * temp)
     gamma = (cp * press) / (0.622 * lam)
     # compute ref. evaporation (with global radiation, therefore calling it potential)
     # in J m-2 over whole period
@@ -401,17 +547,116 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
         reference evapotranspiration
     """
     # saturation and actual vapour pressure at given temperature [Pa]
-    esat = 6.112 * xr.ufuncs.exp((17.67 * temp) / (temp + 243.5))
+    esat = 6.112 * np.exp((17.67 * temp) / (temp + 243.5))
     # slope of vapour pressure curve
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
-    lam = (2.502 * 10 ** 6) - (2250.0 * temp)
+    lam = (2.502 * 10**6) - (2250.0 * temp)
     gamma = (cp * press) / (0.622 * lam)
 
     ep_joule = 0.65 * slope / (slope + gamma) * k_in
     pet = ((ep_joule / lam) * timestep).astype(np.float32)
     pet = xr.where(pet > 0.0, pet, 0.0)
     return pet
+
+
+def pm_fao56(
+    temp: xarray.DataArray,
+    temp_max: xarray.DataArray,
+    temp_min: xarray.DataArray,
+    press: xarray.DataArray,
+    kin: xarray.DataArray,
+    wind: xarray.DataArray,
+    temp_dew: xarray.DataArray,
+    dem: xarray.DataArray,
+    var: str = "temp_dew",
+) -> xarray.DataArray:
+    """
+    Estimate daily reference evapotranspiration (ETo) from a hypothetical
+    short grass reference surface using the FAO-56 Penman-Monteith equation.
+
+    Actual vapor pressure is derived either from relative humidity or dewpoint temperature (depending on var_for_avp_name).
+
+    Based on equation 6 in Allen et al (1998) and using the functions provided by the pyet package ()
+
+    Parameters
+    ----------
+    temp : xarray.DataArray
+        DataArray with daily temperature [°C]
+    temp_max : xarray.DataArray
+        DataArray with maximum daily temperature [°C]
+    temp_min : xarray.DataArray
+        DataArray with minimum daily temperature [°C]
+    press : xarray.DataArray
+        DataArray with pressure [hPa]
+    kin : xarray.DataArray
+        DataArray with global radiation [W m-2]
+    wind : xarray.DataArray
+        DataArray with wind speed at 2m above the surface [m s-1]
+    temp_dew : xarray.DataArray
+        DataArray with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
+    dem : xarray.DataArray
+        DataArray with elevation at model resolution [m]
+    var : str, optional
+        String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
+
+    Returns
+    -------
+    xarray.DataArray
+        DataArray with the estimated daily reference evapotranspiration pet [mm d-1]
+
+    Raises
+    ------
+    ModuleNotFoundError
+        In case the pyet module is not installed
+
+    """
+    # Small check for libraries
+    if not HAS_PYET:
+        raise ModuleNotFoundError("Penman-Monteith FAO-56 requires the 'pyet' library")
+
+    # Precalculated variables:
+    lat = kin[kin.raster.y_dim] * (np.pi / 180)  # latitude in radians
+
+    # Vapor pressure
+    svp = pyet.calc_e0(tmean=temp)
+
+    if var == "temp_dew":
+        avp = pyet.calc_e0(tmean=temp_dew)
+    elif var == "rh":
+        avp = pyet.calc_e0(tmax=temp_max, tmin=temp_min, rh=temp_dew)
+
+    # Net radiation
+    dates = pyet.utils.get_index(kin)
+    er = pyet.extraterrestrial_r(
+        dates, lat
+    )  # Extraterrestrial daily radiation [MJ m-2 d-1]
+    csr = pyet.calc_rso(er, dem)  # Clear-sky solar radiation [MJ m-2 day-1]
+
+    # Net shortwave radiation [MJ m-2 d-1]
+    swr = pyet.calc_rad_short(kin * (86400 / 1e6))
+
+    # Net longwave radiation [MJ m-2 d-1]
+    lwr = pyet.calc_rad_long(
+        kin * (86400 / 1e6), tmax=temp_max, tmin=temp_min, rso=csr, ea=avp
+    )
+    nr = swr - lwr  # daily net radiation
+
+    # Penman Monteith FAO-56
+    gamma = pyet.calc_psy(press / 10)  # psychrometric constant
+    dlt = pyet.calc_vpc(
+        temp
+    )  # Slope of saturation vapour pressure curve at air Temperature [kPa °C-1].
+
+    gamma1 = gamma * (1 + 0.34 * wind)
+
+    den = dlt + gamma1
+    num1 = (0.408 * dlt * (nr - 0)) / den
+    num2 = (gamma * (svp - avp) * 900 * wind / (temp + 273.15)) / den
+    pet = num1 + num2
+    pet = pyet.utils.clip_zeros(pet, True)
+
+    return pet.rename("pet")
 
 
 def resample_time(

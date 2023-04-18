@@ -7,8 +7,12 @@ import json
 import logging
 import click
 from ast import literal_eval
+from typing import Union, Dict
+from pathlib import Path
+from warnings import warn
 
 from .. import config
+from ..error import DeprecatedError
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +63,9 @@ def parse_json(ctx, param, value):
     if isfile(value):
         with open(value, "r") as f:
             kwargs = json.load(f)
+    # Catch old keyword for resulution "-r"
+    elif type(literal_eval(value)) in (float, int):
+        raise DeprecatedError("'-r' is used for region, resolution is deprecated")
     else:
         if value.strip("{").startswith("'"):
             value = value.replace("'", '"')
@@ -69,16 +76,21 @@ def parse_json(ctx, param, value):
     return kwargs
 
 
-### general parsin methods ##
+### general parsing methods ##
 
 
-def parse_config(path=None, opt_cli=None):
+def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
+    """Parse config from ini `path` and combine with command line options `opt_cli`"""
     opt = {}
     if path is not None and isfile(path):
-        opt = config.configread(path, abs_path=True)
-        # make sure paths in config section are not abs paths
-        if "setup_config" in opt:
-            opt["setup_config"].update(config.configread(path).get("config", {}))
+        if str(path).endswith(".ini"):
+            warn(
+                "Support for .ini configuration files will be deprecated",
+                PendingDeprecationWarning,
+            )
+        opt = config.configread(
+            path, abs_path=True, skip_abspath_sections=["setup_config"]
+        )
     elif path is not None:
         raise IOError(f"Config not found at {path}")
     if opt_cli is not None:

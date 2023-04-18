@@ -6,6 +6,7 @@ import numpy as np
 import bottleneck
 
 
+
 def bias(sim: xr.DataArray, obs: xr.DataArray, dim: str = "time") -> xr.DataArray:
     """Returns the bias between two time series.
 
@@ -197,9 +198,10 @@ def kge_non_parametric(
     """Returns the Non Parametric Kling-Gupta Efficiency (KGE) of two
     time series with decomposed scores (Pool et al., 2018)
 
-    .. ref::
-    Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
-    a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
+    .. ref:
+
+        Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
+        a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
 
     Parameters
     ----------
@@ -236,9 +238,10 @@ def kge_non_parametric_flood(
     """Returns the Non Parametric Kling-Gupta Efficiency (KGE) of two time
     series optimized for flood peaks using Pearson correlation (Pool et al., 2018)
 
-    .. ref::
-    Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
-    a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
+    .. ref:
+
+        Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
+        a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
 
     Parameters
     ----------
@@ -353,7 +356,8 @@ def rmse(sim: xr.DataArray, obs: xr.DataArray, dim: str = "time") -> xr.DataArra
 def kge(sim: xr.DataArray, obs: xr.DataArray, dim: str = "time") -> xr.Dataset:
     """Returns the Kling-Gupta Efficiency (KGE) of two time series (Gupta et al. 2009)
 
-        .. ref::
+    .. ref:
+
         Gupta, Kling, Yilmaz, Martinez, 2009, Decomposition of the mean
         squared error and NSE performance criteria: Implications for improving
         hydrological modelling.
@@ -388,7 +392,8 @@ def kge_2012(sim: xr.DataArray, obs: xr.DataArray, dim: str = "time") -> xr.Data
     """Returns the Kling-Gupta Efficiency (KGE) of two time series based on
     Kling et al. (2012)
 
-        .. ref::
+    .. ref:
+
         Kling, H., Fuchs, M., & Paulin, M. (2012). Runoff conditions in the
         upper Danube basin under an ensemble of climate change scenarios.
         Journal of Hydrology, 424, 264-277, doi:10.1016/j.jhydrol.2012.01.011.
@@ -446,7 +451,7 @@ def _spearman_correlation(x: np.ndarray, y: np.ndarray) -> float:
 def _fdc_alpha(sim: np.ndarray, obs: np.ndarray, axis: int = -1) -> float:
     fdc_s = np.sort(sim, axis=axis) / (np.nanmean(sim, axis=axis) * len(sim))
     fdc_o = np.sort(obs, axis=axis) / (np.nanmean(obs, axis=axis) * len(obs))
-    return 1 - 0.5 * np.nanmean(np.abs(fdc_s - fdc_o))
+    return 1 - 0.5 * np.nansum(np.abs(fdc_s - fdc_o), axis=axis)
 
 
 def _bias(sim: np.ndarray, obs: np.ndarray, axis: int = -1) -> float:

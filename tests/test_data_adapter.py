@@ -2,47 +2,49 @@
 """Tests for the hydromt.data_adapter submodule."""
 
 import pytest
-from os.path import join, dirname, abspath
+from os.path import join, dirname, abspath, isfile, exists
 import numpy as np
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
 import xarray as xr
-import os
 import hydromt
-from hydromt.data_adapter import DataAdapter, DataCatalog
+from hydromt import _compat as compat
+from hydromt.data_catalog import DataCatalog
+from hydromt.data_adapter import GeoDatasetAdapter
+import glob
+import tempfile
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
+CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 
 
-def test_data_catalog_io(tmpdir):
-    data_catalog = DataCatalog()
-    # read / write
-    fn_yml = str(tmpdir.join("test.yml"))
-    data_catalog.to_yml(fn_yml)
-    data_catalog1 = DataCatalog(data_libs=fn_yml)
-    assert data_catalog.to_dict() == data_catalog1.to_dict()
-
-
-def test_data_catalog(tmpdir):
-    data_catalog = DataCatalog()
-    # initialized with empty dict
-    assert len(data_catalog._sources) == 0
-    # global data sources are automatically parsed
-    assert len(data_catalog) > 0
-    # test keys, getitem,
-    keys = data_catalog.keys
-    source = data_catalog[keys[0]]
-    assert isinstance(source, DataAdapter)
-    assert keys[0] in data_catalog
-    # add source from dict
-    data_dict = {keys[0]: source.to_dict()}
-    data_catalog.from_dict(data_dict)
-    # printers
-    assert isinstance(data_catalog.__repr__(), str)
-    assert isinstance(data_catalog._repr_html_(), str)
-    assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
-    with pytest.raises(ValueError, match="Value must be DataAdapter"):
-        data_catalog["test"] = "string"
+def test_resolve_path(tmpdir):
+    # create dummy files
+    for variable in ["precip", "temp"]:
+        for year in [2020, 2021]:
+            for month in range(1, 13):
+                fn = join(tmpdir, f"{{unknown_key}}_0_{variable}_{year}_{month:02d}.nc")
+                with open(fn, "w") as f:
+                    f.write("")
+    # create data catalog for these files
+    dd = {
+        "test": {
+            "data_type": "RasterDataset",
+            "driver": "netcdf",
+            "path": join(
+                tmpdir, "{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc"
+            ),
+        }
+    }
+    cat = DataCatalog()
+    cat.from_dict(dd)
+    # test
+    assert len(cat["test"].resolve_paths()) == 48
+    assert len(cat["test"].resolve_paths(variables=["precip"])) == 24
+    kwargs = dict(variables=["precip"], time_tuple=("2021-03-01", "2021-05-01"))
+    assert len(cat["test"].resolve_paths(**kwargs)) == 3
+    with pytest.raises(FileNotFoundError, match="No such file found:"):
+        cat["test"].resolve_paths(variables=["waves"])
 
 
 def test_rasterdataset(rioda, tmpdir):
@@ -57,12 +59,70 @@ def test_rasterdataset(rioda, tmpdir):
         data_catalog.get_rasterdataset("no_file.tif")
 
 
+@pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
+def test_gcs_cmip6(tmpdir):
+    # TODO switch to pre-defined catalogs when pushed to main
+    catalog_fn = join(CATALOGDIR, "gcs_cmip6_data.yml")
+    data_catalog = DataCatalog(data_libs=[catalog_fn])
+    ds = data_catalog.get_rasterdataset(
+        "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
+        variables=["precip", "temp"],
+        time_tuple=(("1990-01-01", "1990-06-01")),
+    )
+    fn_nc = str(tmpdir.join("test.nc"))
+    ds.to_netcdf(fn_nc)
+    # Check reading and some preprocess
+    assert "precip" in ds
+    assert not np.any(ds[ds.raster.x_dim] > 180)
+    # Write and compare
+    ds1 = data_catalog.get_rasterdataset(fn_nc)
+    assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
+
+
+@pytest.mark.skipif(not compat.HAS_S3FS, reason="S3FS not installed.")
+def test_aws_copdem(tmpdir):
+    # TODO switch to pre-defined catalogs when pushed to main
+    catalog_fn = join(CATALOGDIR, "aws_data.yml")
+    data_catalog = DataCatalog(data_libs=[catalog_fn])
+    da = data_catalog.get_rasterdataset(
+        "esa_worldcover_2020_v100",
+        bbox=[12.0, 46.0, 12.5, 46.50],
+    )
+    assert da.name == "landuse"
+    assert da.max().values == 100
+
+
+def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
+    name = "test_zoom"
+    yml_dict = {
+        name: {
+            "crs": 4326,
+            "data_type": "RasterDataset",
+            "driver": "raster",
+            "path": "path/{zoom_level}/test.vrt",
+            "zoom_levels": {0: 0.1, 1: 0.3},
+        }
+    }
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(yml_dict)
+    assert data_catalog[name]._parse_zoom_level() == 0  # default to first
+    assert data_catalog[name]._parse_zoom_level(zoom_level=1) == 1
+    assert data_catalog[name]._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
+    assert data_catalog[name]._parse_zoom_level(zoom_level=(0.29, "degree")) == 0
+    assert data_catalog[name]._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
+    assert data_catalog[name]._parse_zoom_level(zoom_level=(1, "meter")) == 0
+    with pytest.raises(TypeError, match="zoom_level unit"):
+        data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd"))
+    with pytest.raises(TypeError, match="zoom_level argument"):
+        data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
+
+
 def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
     fn_csv_locs = str(tmpdir.join("test_locs.xy"))
-    geoda.to_netcdf(fn_nc)
+    geoda.vector.to_netcdf(fn_nc)
     geodf.to_file(fn_gdf, driver="GeoJSON")
     ts.to_csv(fn_csv)
     hydromt.io.write_xy(fn_csv_locs, geodf)
@@ -84,6 +144,21 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     assert da3.vector.crs.to_epsg() == 4326
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_geodataset("no_file.geojson")
+    # Test nc file writing to file
+    with tempfile.TemporaryDirectory() as td:
+        GeoDatasetAdapter(fn_nc).to_file(
+            data_root=td, data_name="test", driver="netcdf"
+        )
+        GeoDatasetAdapter(fn_nc).to_file(
+            data_root=td, data_name="test1", driver="netcdf", variables="test1"
+        )
+        GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
+    with pytest.raises(ValueError, match="GeoDataset: Driver unknown_driver unknown."):
+        GeoDatasetAdapter(fn_nc).to_file(
+            data_root=td,
+            data_name="test",
+            driver="unknown_driver",
+        )
 
 
 def test_geodataframe(geodf, tmpdir):
@@ -101,47 +176,90 @@ def test_geodataframe(geodf, tmpdir):
         data_catalog.get_geodataframe("no_file.geojson")
 
 
-def test_deltares_sources():
-    data_catalog = DataCatalog(deltares_data="v0.0.5")
-    assert len(data_catalog._sources) > 0
-    source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
-    assert "wflow_global" in str(source0.path)
+def test_dataframe(df, df_time, tmpdir):
+    # Test reading csv
+    fn_df = str(tmpdir.join("test.csv"))
+    df.to_csv(fn_df)
+    data_catalog = DataCatalog()
+    df1 = data_catalog.get_dataframe(fn_df, index_col=0)
+    assert isinstance(df1, pd.DataFrame)
+    assert np.all(df1 == df)
+
+    # Test FWF support
+    fn_fwf = str(tmpdir.join("test.txt"))
+    df.to_string(fn_fwf, index=False)
+    fwf = data_catalog.get_dataframe(fn_fwf, driver="fwf", colspecs="infer")
+    assert isinstance(fwf, pd.DataFrame)
+    assert np.all(fwf == df)
+
+    fn_xlsx = str(tmpdir.join("test.xlsx"))
+    df.to_excel(fn_xlsx)
+    df2 = data_catalog.get_dataframe(fn_xlsx, index_col=0)
+    assert isinstance(df2, pd.DataFrame)
+    assert np.all(df2 == df)
 
 
-def test_artifact_sources():
-    data_catalog = DataCatalog(artifact_data="v0.0.5")
-    assert len(data_catalog._sources) > 0
-    source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
-    assert ".hydromt_data" in str(source0.path)
+def test_dataframe_time(df_time, tmpdir):
+    # Test time df
+    fn_df_ts = str(tmpdir.join("test_ts.csv"))
+    df_time.to_csv(fn_df_ts)
+    data_catalog = DataCatalog()
+    dfts1 = data_catalog.get_dataframe(fn_df_ts, index_col=0, parse_dates=True)
+    assert isinstance(dfts1, pd.DataFrame)
+    assert np.all(dfts1 == df_time)
 
-
-def test_export_global_datasets(tmpdir):
-    DTYPES = {
-        "RasterDatasetAdapter": (xr.DataArray, xr.Dataset),
-        "GeoDatasetAdapter": (xr.DataArray, xr.Dataset),
-        "GeoDataFrameAdapter": gpd.GeoDataFrame,
+    # Test renaming
+    rename = {
+        "precip": "P",
+        "temp": "T",
+        "pet": "ET",
     }
-    bbox = [11.70, 45.35, 12.95, 46.70]  # Piava river
-    time_tuple = ("2010-02-01", "2010-02-14")
-    data_catalog = DataCatalog()  # read artifacts by default
-    sns = [
-        "era5",
-        "grwl_mask",
-        "modis_lai",
-        "osm_coastlines",
-        "grdc",
-        "corine",
-        "gtsmv3_eu_era5",
-        "hydro_lakes",
-        "eobs",
-    ]
-    data_catalog.export_data(
-        str(tmpdir), bbox=bbox, time_tuple=time_tuple, source_names=sns
+    dfts2 = data_catalog.get_dataframe(
+        fn_df_ts, index_col=0, parse_dates=True, rename=rename
     )
+    assert np.all(list(dfts2.columns) == list(rename.values()))
 
-    data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
-    for key, source in data_catalog1.sources.items():
-        source_type = type(source).__name__
-        dtypes = DTYPES[source_type]
-        obj = source.get_data()
-        assert isinstance(obj, dtypes), key
+    # Test unit add/multiply
+    unit_mult = {
+        "precip": 0.75,
+        "temp": 2,
+        "pet": 1,
+    }
+    unit_add = {
+        "precip": 0,
+        "temp": -1,
+        "pet": 2,
+    }
+    dfts3 = data_catalog.get_dataframe(
+        fn_df_ts, index_col=0, parse_dates=True, unit_mult=unit_mult, unit_add=unit_add
+    )
+    # Do checks
+    for var in df_time.columns:
+        assert np.all(df_time[var] * unit_mult[var] + unit_add[var] == dfts3[var])
+
+    # Test timeslice
+    dfts4 = data_catalog.get_dataframe(
+        fn_df_ts, index_col=0, parse_dates=True, time_tuple=("2007-01-02", "2007-01-04")
+    )
+    assert len(dfts4) == 3
+
+    # Test variable slice
+    vars_slice = ["precip", "temp"]
+    dfts5 = data_catalog.get_dataframe(
+        fn_df_ts, index_col=0, parse_dates=True, variables=vars_slice
+    )
+    assert np.all(dfts5.columns == vars_slice)
+
+
+def test_cache_vrt(tmpdir, rioda_large):
+    # write vrt data
+    name = "tiled"
+    root = str(tmpdir.join(name))
+    rioda_large.raster.to_xyz_tiles(
+        root=root,
+        tile_size=256,
+        zoom_levels=[0],
+    )
+    cat = DataCatalog(join(root, f"{name}.yml"), cache=True)
+    cat.get_rasterdataset(name)
+    assert len(glob.glob(join(cat._cache_dir, name, name, "*", "*", "*.tif"))) == 16
