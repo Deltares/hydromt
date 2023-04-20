@@ -17,6 +17,7 @@ Changed
 
 Fixed
 -----
+- Order of renaming variables in get_rasterdataset for x,y dimensions. Issue #322
 
 Deprecated
 ----------

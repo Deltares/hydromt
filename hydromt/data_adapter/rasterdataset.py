@@ -292,11 +292,6 @@ class RasterDatasetAdapter(DataAdapter):
         if GEO_MAP_COORD in ds_out.data_vars:
             ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
-        # transpose dims to get y and x dim last
-        x_dim = ds_out.raster.x_dim
-        y_dim = ds_out.raster.y_dim
-        ds_out = ds_out.transpose(..., y_dim, x_dim)
-
         # rename and select vars
         if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
             rm = {ds_out.raster.vars[0]: variables[0]}
@@ -312,6 +307,11 @@ class RasterDatasetAdapter(DataAdapter):
             if np.any([var not in ds_out.data_vars for var in variables]):
                 raise ValueError(f"RasterDataset: Not all variables found: {variables}")
             ds_out = ds_out[variables]
+
+        # transpose dims to get y and x dim last
+        x_dim = ds_out.raster.x_dim
+        y_dim = ds_out.raster.y_dim
+        ds_out = ds_out.transpose(..., y_dim, x_dim)
 
         # clip tslice
         if (
