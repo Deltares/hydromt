@@ -1,7 +1,7 @@
 name: Feature Request
-description: Suggest an idea for HydroMT
-title: "ENHANCEMENT: "
-labels: [enhancement]
+description: Suggest an idea/enhancement for HydroMT
+title: "ENH: "
+labels: [enhancement, needs refinement]
 
 body:
   - type: checkboxes
