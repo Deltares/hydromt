@@ -143,14 +143,46 @@ def hydds(flwda, flwdir):
 
 
 @pytest.fixture
-def ts():
+def ts(): #TODO - change this back
     rng = np.random.default_rng(12345)
     da = xr.DataArray(
-        data=rng.random(size=365) * 100,
+        data=rng.random(size=365*40) * 100,
         dims=("time"),
-        coords={"time": pd.date_range(start="2020-01-01", periods=365, freq="1D")},
+        coords={"time": pd.date_range(start="2020-01-01", periods=365*40, freq="1D")},
         attrs=dict(_FillValue=-9999),
     )
+    da.raster.set_crs(4326)
+    return da
+
+@pytest.fixture
+def ts_gtsm():
+    #Data for two weeks at two stations with 10-min resolution
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    da = data_catalog.get_geodataset("gtsmv3_eu_era5")
+    da = da.sel(stations=[13670, 2792])
+    return da
+
+@pytest.fixture
+def ts_extremes():
+    rng = np.random.default_rng(12345)
+    normal = pd.DataFrame(rng.random(size=(365*100,2)) * 100, index = pd.date_range(start="2020-01-01", periods=365*100, freq="1D"))
+    ext = rng.gumbel(loc=100, scale=25, size=(200,2)) #Create extremes
+    #replace extremes in normal values
+    for i in range(2):
+        normal.loc[normal.nlargest(200, i).index, i] = ext[:,i].reshape(-1)
+    #normal.nlargest(200, 0).index
+    da = xr.DataArray(
+        #data=rng.gumbel(loc=100, scale=25, size=(100,2)),
+        data = normal.values,
+        dims=("time","stations"),
+        coords={"time": pd.date_range(start="1950-01-01", periods=365*100, freq="D"), 
+                "stations": [1,2]},
+        # coords={"time": pd.date_range(start="1950-01-01", periods=100, freq="AS"), 
+        #         "stations": [1,2]},
+        attrs=dict(_FillValue=-9999),
+    )
+    #Needed to run the function ...
+    # da = da.assign_coords({"extremes_rate": xr.Variable("stations", np.ones(len(da['stations'])))})
     da.raster.set_crs(4326)
     return da
 

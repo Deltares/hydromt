@@ -16,7 +16,7 @@ __all__ = [
     "fit_extremes",
 ]
 
-_RPS = np.array([2, 5, 10, 25, 50, 100, 250, 500])
+_RPS = np.array([2, 5, 10, 25, 50, 100, 250, 500]) # years
 _DISTS = {
     "POT": ["exp", "gpd"],
     "BM": ["gumb", "gev"],
@@ -44,7 +44,7 @@ def eva_idf(
     distribution : str, optional
         Short name of distribution, by default 'gumb'
     rps : np.ndarray, optional
-        Array of return periods, by default [1.5, 2, 5, 10, 20, 50, 100, 200, 500]
+        Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]
     **kwargs :
         key-word arguments passed to the :py:meth:`eva_block_maxima` method.
 
@@ -67,6 +67,62 @@ def eva_idf(
         kwargs.update(min_dist=dt_max)
     return eva_block_maxima(da1, distribution=distribution, rps=rps, **kwargs)
 
+def eva(
+    da: xr.DataArray,
+    ev_type: str = "BM",
+    min_dist: int = 0,
+    qthresh: float = 0.9,
+    period: str = "365.25D",
+    min_sample_size: int = 0,
+    distribution: Optional[str] = None,
+    rps: np.ndarray = _RPS,
+    criterium: str = "AIC",
+) -> xr.Dataset:
+
+    """Extreme value analysis based on block maxima (BM) or Peaks Over Threshold (POT).
+    The method selects the peaks, fits a distribution and calculates return values for
+    provided return periods.
+
+    Parameters
+    ----------
+    da : xr.DataArray
+        Timeseries data, must have a regular spaced 'time' dimension.
+    period : str, optional
+        Period string, by default "365.25D". See pandas.Timedelta for options.
+    min_dist : int, optional
+        Minimum distance between peaks measured in time steps, by default 0
+    min_sample_size : int, optional
+        Minimum number of finite values in a valid block, by default 0. Peaks of
+        invalid blocks are set to NaN.
+    distribution : str, optional
+        Short name of distribution. If None (default) the optimal block maxima
+        distribution ("gumb" or "gev") is selected based on `criterium`.
+    rps : np.ndarray, optional
+        Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]
+    criterium: {'AIC', 'AICc', 'BIC'}
+        Selection criterium, by default "AIC"
+
+    Returns
+    -------
+    xr.Dataset
+        Dataset with peaks timeseries, distribution name and parameters and return values.
+    """
+    da_peaks = get_peaks(
+        da,
+        ev_type = ev_type,
+        min_dist = min_dist,
+        qthresh = qthresh,
+        period = period,
+        min_sample_size = min_sample_size,
+    )
+    # fit distribution using lmom
+    da_params = fit_extremes(
+        da_peaks, ev_type=ev_type, distribution=distribution, criterium=criterium
+    )
+    # get return values
+    da_rps = get_return_value(da_params, rps=rps)
+    # combine data
+    return xr.merge([da_peaks, da_params, da_rps])
 
 def eva_block_maxima(
     da: xr.DataArray,
@@ -89,15 +145,15 @@ def eva_block_maxima(
     min_dist : int, optional
         Minimum distance between peaks measured in time steps, by default 0
     min_sample_size : int, optional
-        Minumimum number of finite values in a valid block, by default 0. Peaks of
+        Minimum number of finite values in a valid block, by default 0. Peaks of
         invalid blocks are set to NaN.
     distribution : str, optional
         Short name of distribution. If None (default) the optimal block maxima
         distribution ("gumb" or "gev") is selected based on `criterium`.
     rps : np.ndarray, optional
-        Array of return periods, by default [1.5, 2, 5, 10, 20, 50, 100, 200, 500]
+        Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]
     criterium: {'AIC', 'AICc', 'BIC'}
-        distrition selection criterium, by default "AIC"
+        Selection criterium, by default "AIC"
 
     Returns
     -------
@@ -186,8 +242,15 @@ def get_peaks(
 ) -> xr.DataArray:
     """Returns the timeseries with all but the peak values set to NaN.
 
-    By setting a minimum distance `min_dist` between peaks one make sure that the
-    peaks are independent, also in combination with block maxima.
+    For block maxima (BM) peaks, peaks are determined by finding the maximum within 
+    each period and then ensuring a minimum distance (min_dist) and minimum sample size 
+    (min_sample_size) per period. 
+
+    For Peaks Over Threshold (POT), peaks are determined solely based on the minimum 
+    distance between peaks. 
+
+    The average interarrival time (extreme_rates) is calculated by dividing the number of 
+    peaks by the total duration of the timeseries and converting it to a yearly rate.  
 
     Parameters
     ----------
@@ -202,13 +265,15 @@ def get_peaks(
     period : {'year', 'month', 'quarter', pandas.Timedelta}, optional
         Period string, by default "year".
     min_sample_size : int, optional
-        Minumimum number of finite values in a valid block, by default 0. Peaks of
+        Minimum number of finite values in a valid block, by default 0. Peaks of
         invalid bins are set to NaN.
 
     Returns
     -------
     xr.DataArray
-        Timeseries data with only peak values, all other values are set to NaN
+        Timeseries data with only peak values, all other values are set to NaN. 
+        Average interarrival time calculated based on the average number of peaks per year
+        and stored as "extreme_rates"
     """
 
     assert 0 < qthresh < 1.0, 'Quantile "qthresh" should be between (0,1)'
@@ -217,6 +282,7 @@ def get_peaks(
             f"Unknown ev_type {ev_type.upper()}, select from {_DISTS.keys()}."
         )
     bins = None
+    duration = (da["time"][-1]-da["time"][0]).dt.days/365.2425
     if period in ["year", "quarter", "month"]:
         bins = getattr(da["time"].dt, period).values
         nperiods = np.unique(bins).size  # FIXME
@@ -225,8 +291,10 @@ def get_peaks(
         bins = tstart.reindex_like(da, method="ffill").values.astype(float)
         nperiods = np.unique(bins).size
     if ev_type.upper() != "BM":
+        #TODO - Need to fix periods for POT!
         bins = None
         min_sample_size = 0
+        #Add nperiods
     func = lambda x: local_max_1d(
         x, min_dist=min_dist, bins=bins, min_sample_size=min_sample_size
     )
@@ -236,8 +304,9 @@ def get_peaks(
     peaks = da.where(lmax)
     if ev_type.upper() == "POT":
         peaks = da.where(peaks > da.quantile(qthresh, dim="time"))
-    # get extreme rate
-    da_rate = np.isfinite(peaks).sum("time") / nperiods
+    # TODO get extreme rate - this rate is peak rate per period!! not correct for later I think
+    #da_rate = np.isfinite(peaks).sum("time") / nperiods
+    da_rate = np.isfinite(peaks).sum("time") / duration
     peaks = peaks.assign_coords({"extremes_rate": da_rate})
     peaks.name = "peaks"
     return peaks
@@ -250,7 +319,7 @@ def get_return_value(da_params: xr.DataArray, rps: np.ndarray = _RPS) -> xr.Data
     Parameters
     ----------
     da_params : xr.DataArray
-        Short name and parameters of extreme value distribution.
+        Short name and parameters of extreme value distribution, see also :py:meth:`fit_extremes`.
     rps : np.ndarray, optional
         Array of return periods, by default [1.5, 2, 5, 10, 20, 50, 100, 200, 500]
 
@@ -311,12 +380,12 @@ def fit_extremes(
     da_peaks : xr.DataArray
         Timeseries data with only peak values, any other values are set to NaN
     distribution: {'gev', 'gpd', 'gumb', 'exp'}, optional
-        Short distribution name. If None (default) the optimal distrubtion is calculated
+        Short distribution name. If None (default) the optimal distribution is calculated
         based on `criterium`
     ev_type : {"POT", "BM"}
         Peaks over threshold (POT) or block maxima (BM) peaks, by default "BM"
     criterium: {'AIC', 'AICc', 'BIC'}
-        distrition selection criterium, by default "AIC"
+        Selection criterium, by default "AIC"
 
     Returns
     -------
@@ -389,7 +458,7 @@ def local_max_1d(
     min_dist : int, optional
         Minimum distance between peaks, by default 0
     min_sample_size : int, optional
-        minumum number of samples per block, by default 0
+        minimum number of samples per block, by default 0
 
     Returns
     -------
