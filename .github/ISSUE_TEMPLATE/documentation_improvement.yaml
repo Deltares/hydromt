@@ -1,7 +1,7 @@
 name: Documentation Improvement
 description: Report wrong or missing documentation
-title: "DOCUMENTATION: "
-labels: [documentation]
+title: "DOC: "
+labels: [documentation, needs refinement]
 
 body:
   - type: checkboxes
