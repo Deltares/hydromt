@@ -120,6 +120,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         unit_add={},
         meta={},
         zoom_levels={},
+        attrs={},
         **kwargs,
     ):
         self.name = name
@@ -144,6 +145,11 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.zoom_levels = zoom_levels
         # meta data
         self.meta = {k: v for k, v in meta.items() if v is not None}
+        # variable attributes
+        # for var in self.var:
+        #     self[var].attrs.update(**attrs[var])
+        self.attrs = {k:v for k,v in attrs.items() if v is not None}
+        
 
     @property
     def data_type(self):
