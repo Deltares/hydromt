@@ -143,7 +143,7 @@ def hydds(flwda, flwdir):
 
 
 @pytest.fixture
-def ts(): #TODO - change this back
+def ts(): 
     rng = np.random.default_rng(12345)
     da = xr.DataArray(
         data=rng.random(size=365*40) * 100,
@@ -152,14 +152,6 @@ def ts(): #TODO - change this back
         attrs=dict(_FillValue=-9999),
     )
     da.raster.set_crs(4326)
-    return da
-
-@pytest.fixture
-def ts_gtsm():
-    #Data for two weeks at two stations with 10-min resolution
-    data_catalog = DataCatalog(data_libs=["artifact_data"])
-    da = data_catalog.get_geodataset("gtsmv3_eu_era5")
-    da = da.sel(stations=[13670, 2792])
     return da
 
 @pytest.fixture

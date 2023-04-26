@@ -6,6 +6,7 @@ from scipy import stats
 from typing import Optional
 from numba import njit
 import dask
+#import warnings
 
 __all__ = [
     "eva_idf",
@@ -46,7 +47,7 @@ def eva_idf(
     rps : np.ndarray, optional
         Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]
     **kwargs :
-        key-word arguments passed to the :py:meth:`eva_block_maxima` method.
+        key-word arguments passed to the :py:meth:`eva` method.
 
     Returns
     -------
@@ -66,6 +67,7 @@ def eva_idf(
     if "min_dist" not in kwargs:
         kwargs.update(min_dist=dt_max)
     return eva_block_maxima(da1, distribution=distribution, rps=rps, **kwargs)
+    #return eva(da1, ev_type="BM", distribution=distribution, rps=rps, **kwargs)
 
 def eva(
     da: xr.DataArray,
@@ -87,16 +89,21 @@ def eva(
     ----------
     da : xr.DataArray
         Timeseries data, must have a regular spaced 'time' dimension.
+    ev_type: {"POT", "BM"}
+        Peaks over threshold (POT) or block maxima (BM) peaks, by default "BM"
     period : str, optional
         Period string, by default "365.25D". See pandas.Timedelta for options.
     min_dist : int, optional
         Minimum distance between peaks measured in time steps, by default 0
+    qthresh : float, optional
+        Quantile threshold used with peaks over threshold method, by default 0.9
     min_sample_size : int, optional
         Minimum number of finite values in a valid block, by default 0. Peaks of
         invalid blocks are set to NaN.
     distribution : str, optional
         Short name of distribution. If None (default) the optimal block maxima
-        distribution ("gumb" or "gev") is selected based on `criterium`.
+        distribution ("gumb" or "gev" for BM and "exp" or "gpd" for POT) is selected 
+        based on `criterium`.
     rps : np.ndarray, optional
         Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]
     criterium: {'AIC', 'AICc', 'BIC'}
@@ -321,7 +328,7 @@ def get_return_value(da_params: xr.DataArray, rps: np.ndarray = _RPS) -> xr.Data
     da_params : xr.DataArray
         Short name and parameters of extreme value distribution, see also :py:meth:`fit_extremes`.
     rps : np.ndarray, optional
-        Array of return periods, by default [1.5, 2, 5, 10, 20, 50, 100, 200, 500]
+        Array of return periods in years, by default [1.5, 2, 5, 10, 20, 50, 100, 200, 500]
 
     Returns
     -------
@@ -337,10 +344,15 @@ def get_return_value(da_params: xr.DataArray, rps: np.ndarray = _RPS) -> xr.Data
     assert "dparams" in da_params.dims
     assert "distribution" in da_params.reset_coords()  # coord or variable
     distributions = da_params["distribution"].load()
-    if "extremes_rate" in da_params:
-        extremes_rate = da_params["extremes_rate"].load()
-    else:
-        extremes_rate = 1.0
+    assert "extremes_rate" in da_params.reset_coords()  # coord or variable
+    extremes_rate = da_params["extremes_rate"].load()
+
+    #TODO remove this text!
+    # if "extremes_rate" in da_params:
+    #     extremes_rate = da_params["extremes_rate"].load()
+    # else:
+    #     extremes_rate = 1.0
+    # print("extremes_rate is ", extremes_rate)
 
     if da_params.ndim == 1:  # fix case of single dim
         da_params = da_params.expand_dims("index")
@@ -378,7 +390,9 @@ def fit_extremes(
     Parameters
     ----------
     da_peaks : xr.DataArray
-        Timeseries data with only peak values, any other values are set to NaN
+        Timeseries data with only peak values, any other values are set to NaN. The DataArray should 
+        contain as coordinate `extreme_rates` indicating the yearly rate of extreme events. If not provided,
+        this value is set to 1.0
     distribution: {'gev', 'gpd', 'gumb', 'exp'}, optional
         Short distribution name. If None (default) the optimal distribution is calculated
         based on `criterium`
@@ -399,6 +413,12 @@ def fit_extremes(
         raise ValueError(
             f"Unknown ev_type {ev_type.upper()}, select from {_DISTS.keys()}."
         )
+    
+    if "extremes_rate" not in da_peaks.reset_coords():  # coord or variable
+        print("Setting extremes_rates to 1.0") #This would be better with a logger I guess?
+        dim = list([d for d in da_peaks.dims if d != "time"]) 
+        #TODO - check how to add this
+        #da_peaks.assign_coords({"extremes_rate": xr.Variable(dims=dim, np.ones(len(dim)))})
 
     def _fitopt_1d(x, distributions=distributions, criterium=criterium):
         params, d = lmoment_fitopt(x, distributions=distributions, criterium=criterium)
@@ -430,8 +450,8 @@ def fit_extremes(
         dparams=xr.IndexVariable("dparams", ["shape", "loc", "scale"]),
         distribution=xr.IndexVariable(dims=dims, data=distributions),
     )
-    if "extremes_rate" in da_peaks:  # keep extremes_rate meta data
-        coords.update(extremes_rate=da_peaks["extremes_rate"])
+    # keep extremes_rate meta data
+    coords.update(extremes_rate=da_peaks["extremes_rate"])
     da_params = da_params.assign_coords(coords)
     return da_params.squeeze()
 
