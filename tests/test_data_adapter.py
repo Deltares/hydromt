@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.data_adapter submodule."""
 
+from multiprocessing import get_start_method
 import pytest
 from os.path import join, dirname, abspath, isfile, exists
 import numpy as np
@@ -10,7 +11,7 @@ import xarray as xr
 import hydromt
 from hydromt import _compat as compat
 from hydromt.data_catalog import DataCatalog
-from hydromt.data_adapter import GeoDatasetAdapter
+from hydromt.data_adapter import GeoDatasetAdapter, geodataset
 import glob
 import tempfile
 
@@ -176,6 +177,25 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
             data_name="test",
             driver="unknown_driver",
         )
+
+
+def test_geodataset_unit_attrs():
+    test_data_catalog = DataCatalog()
+    test_data_catalog.from_predefined_catalogs("artifact_data")
+    gtsm_dict = {
+        "gtsmv3_eu_era5": test_data_catalog.sources["gtsmv3_eu_era5"].to_dict()
+    }
+    attrs = {
+        "waterlevel": {
+            "long_name": "sea surface height above mean sea level",
+            "unit": "meters",
+        }
+    }
+    gtsm_dict["gtsmv3_eu_era5"].update(dict(attrs=attrs))
+    test_data_catalog.from_dict(gtsm_dict)
+    gtsm_geodataset = test_data_catalog.get_geodataset("gtsmv3_eu_era5")
+    assert gtsm_geodataset.attrs["long_name"] == attrs["waterlevel"]["long_name"]
+    assert gtsm_geodataset.attrs["unit"] == attrs["waterlevel"]["unit"]
 
 
 def test_geodataframe(geodf, tmpdir):

@@ -39,6 +39,7 @@ class GeoDatasetAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
+        attrs={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
@@ -91,6 +92,7 @@ class GeoDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            attrs=attrs,
             **kwargs,
         )
 
@@ -337,6 +339,13 @@ class GeoDatasetAdapter(DataAdapter):
         # return data array if single var
         if single_var_as_array and len(ds_out.vector.vars) == 1:
             ds_out = ds_out[ds_out.vector.vars[0]]
+
+        # Set variable attribute data
+        if isinstance(ds_out, xr.DataArray):
+            ds_out.attrs.update(self.attrs[ds_out.name])
+        else:
+            for k in self.attrs:
+                ds_out[k].attrs.update(**self.attrs[k])
 
         # set meta data
         ds_out.attrs.update(self.meta)

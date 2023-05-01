@@ -905,7 +905,7 @@ def _parse_data_dict(
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)
-        # Get unit attrs if given from source 
+        # Get unit attrs if given from source
         attrs = source.pop("attrs", {})
         # lower kwargs for backwards compatability
         # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
