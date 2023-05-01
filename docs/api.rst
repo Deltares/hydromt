@@ -254,6 +254,11 @@ Setup methods
    GridModel.setup_region
    GridModel.setup_maps_from_raster
    GridModel.setup_maps_from_raster_reclass
+   GridModel.setup_grid
+   GridModel.setup_grid_from_constant
+   GridModel.setup_grid_from_raster
+   GridModel.setup_grid_from_raster_reclass
+   GridModel.setup_grid_from_vector
 
 
 .. _lumped_model_api:
@@ -565,6 +570,7 @@ Transform
    :toctree: _generated
 
    DataArray.raster.rasterize
+   DataArray.raster.rasterize_geometry
    DataArray.raster.geometry_mask
    DataArray.raster.vectorize
    DataArray.raster.vector_grid

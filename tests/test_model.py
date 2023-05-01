@@ -272,6 +272,84 @@ def test_gridmodel(grid_model, tmpdir):
     assert equal, errors
 
 
+def test_gridmodel_setup(tmpdir):
+    # Initialize model
+    dc_param_fn = join(DATADIR, "parameters_data.yml")
+    mod = GridModel(
+        root=join(tmpdir, "grid_model"),
+        data_libs=["artifact_data", dc_param_fn],
+        mode="w",
+    )
+    # Add region
+    mod.setup_grid(
+        {"subbasin": [12.319, 46.320], "uparea": 50},
+        res=1000,
+        crs="utm",
+        hydrography_fn="merit_hydro",
+        basin_index_fn="merit_hydro_index",
+    )
+    # Add data with setup_* methods
+    mod.setup_grid_from_constant(
+        constant=0.01,
+        name="c1",
+        nodata=-99.0,
+    )
+    mod.setup_grid_from_constant(
+        constant=2,
+        name="c2",
+        dtype=np.int8,
+        nodata=-1,
+    )
+    mod.setup_grid_from_raster(
+        raster_fn="merit_hydro",
+        variables=["elevtn", "basins"],
+        reproject_method=["average", "mode"],
+        mask_name="grid",
+    )
+    mod.setup_grid_from_raster(
+        raster_fn="vito",
+        fill_method="nearest",
+        reproject_method="mode",
+        rmdict={"vito": "landuse"},
+    )
+    mod.setup_grid_from_raster_reclass(
+        raster_fn="vito",
+        reclass_table_fn="vito_mapping",
+        reclass_variables=["roughness_manning"],
+        reproject_method=["average"],
+    )
+    mod.setup_grid_from_vector(
+        vector_fn="hydro_lakes",
+        variables=["waterbody_id", "Depth_avg"],
+        nodata=[-1, -999.0],
+        rasterize_method="value",
+        rmdict={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
+    )
+    mod.setup_grid_from_vector(
+        vector_fn="hydro_lakes",
+        rasterize_method="fraction",
+        rmdict={"hydro_lakes": "water_frac"},
+    )
+
+    # Checks
+    import pdb
+
+    pdb.set_trace()
+    assert len(mod.grid) == 10
+    for v in ["grid", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
+        assert v in mod.grid
+    assert mod.grid["lake_depth"].raster.nodata == -999.0
+    assert np.unique(mod.grid["c2"]).size == 2
+    assert np.isin([-1, 2], np.unique(mod.grid["c2"])).all()
+
+    non_compliant = mod._test_model_api()
+    assert len(non_compliant) == 0, non_compliant
+
+    # write model
+    mod.set_root(str(tmpdir), mode="w")
+    mod.write(components=["geoms", "grid"])
+
+
 def test_lumpedmodel(lumped_model, tmpdir):
     assert "response_units" in lumped_model.api
     non_compliant = lumped_model._test_model_api()

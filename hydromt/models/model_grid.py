@@ -11,6 +11,7 @@ from shapely.geometry import box
 from pyproj import CRS
 
 from .model_api import Model
+from .. import raster, gis_utils, io
 from .. import workflows
 
 __all__ = ["GridModel"]
@@ -25,6 +26,340 @@ class GridMixin(object):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._grid = xr.Dataset()
+
+    # generic grid methods
+    def setup_grid_from_constant(
+        self,
+        constant: Union[int, float],
+        name: str,
+        dtype: Optional[str] = "float32",
+        nodata: Optional[Union[int, float]] = None,
+        mask_name: Optional[str] = "grid",
+    ) -> List[str]:
+        """
+        Adds a grid based on a constant value.
+
+        Parameters
+        ----------
+        constant: int, float
+            Constant value to fill grid with.
+        name: str
+            Name of grid.
+        dtype: str, optional
+            Data type of grid. By default 'float32'.
+        nodata: int, float, optional
+            Nodata value. By default infered from dtype.
+        mask_name: str, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'grid'. Use None to disable masking.
+
+        Returns
+        -------
+        list
+            Names of added model grid layer.
+        """
+        da = raster.full(
+            coords=self.grid.raster.coords,
+            nodata=nodata,
+            dtype=dtype,
+            name=name,
+            attrs={},
+            crs=self.crs,
+            lazy=False,
+        )
+        # Set nodata value
+        da.raster.set_nodata(nodata)
+        da = da.where(da != nodata, constant)
+        # Masking
+        if mask_name is not None:
+            if mask_name in self.grid:
+                da = da.raster.mask(self.grid[mask_name])
+        # Add to grid
+        self.set_grid(da)
+
+        return [name]
+
+    def setup_grid_from_raster(
+        self,
+        raster_fn: str,
+        variables: Optional[List] = None,
+        fill_method: Optional[str] = None,
+        reproject_method: Optional[Union[List, str]] = "nearest",
+        mask_name: Optional[str] = "grid",
+        rmdict: Optional[Dict] = dict(),
+    ) -> List[str]:
+        """
+        This component adds data variable(s) from ``raster_fn`` to grid object.
+
+        If raster is a dataset, all variables will be added unless ``variables`` list is specified.
+
+        Adds model layers:
+
+        * **raster.name** grid: data from raster_fn
+
+        Parameters
+        ----------
+        raster_fn: str
+            Source name of raster data in data_catalog.
+        variables: list, optional
+            List of variables to add to grid from raster_fn. By default all.
+        fill_method : str, optional
+            If specified, fills nodata values using fill_nodata method.
+            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        reproject_method: list, str, optional
+            See rasterio.warp.reproject for existing methods, by default 'nearest'.
+            Can provide a list corresponding to ``variables``.
+        mask_name: str, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'grid'. Use None to disable masking.
+        rmdict: dict, optional
+            Dictionary to rename variable names in reclass_variables before adding to grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+
+        Returns
+        -------
+        list
+            Names of added model map layers
+        """
+        self.logger.info(f"Preparing grid data from raster source {raster_fn}")
+        # Read raster data and select variables
+        ds = self.data_catalog.get_rasterdataset(
+            raster_fn,
+            geom=self.region,
+            buffer=2,
+            variables=variables,
+            single_var_as_array=False,
+        )
+        # Fill nodata
+        if fill_method is not None:
+            ds = ds.raster.interpolate_na(method=fill_method)
+        # Reprojection
+        # one reproject method for all variables
+        reproject_method = np.atleast_1d(reproject_method)
+        if len(reproject_method) == 1:
+            ds_out = ds.raster.reproject_like(self.grid, method=reproject_method[0])
+        # one reproject method per variable
+        elif len(reproject_method) == len(variables):
+            ds_list = []
+            for var, method in zip(variables, reproject_method):
+                ds_list.append(ds[var].raster.reproject_like(self.grid, method=method))
+            ds_out = xr.merge(ds_list)
+        else:
+            raise ValueError(
+                f"reproject_method should have length 1 or {len(variables)}"
+            )
+        # Masking
+        if mask_name is not None:
+            if mask_name in self.grid:
+                ds_out = ds_out.raster.mask(self.grid[mask_name])
+        # Add to grid
+        self.set_grid(ds_out.rename(rmdict))
+
+        return list(ds_out.data_vars.keys())
+
+    def setup_grid_from_raster_reclass(
+        self,
+        raster_fn: str,
+        reclass_table_fn: str,
+        reclass_variables: List,
+        variable: Optional[str] = None,
+        fill_method: Optional[str] = None,
+        reproject_method: Optional[Union[List, str]] = "nearest",
+        mask_name: Optional[str] = "grid",
+        rmdict: Optional[Dict] = dict(),
+        **kwargs,
+    ) -> List[str]:
+        """
+        This component adds data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+
+        Adds model layers:
+
+        * **reclass_variables** grid: reclassified raster data
+
+        Parameters
+        ----------
+        raster_fn: str
+            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
+            :py:meth:`hydromt.data_catalog.get_rasterdataset` method.
+        reclass_table_fn: str
+            Source name of reclassification table of `raster_fn` in data_catalog.
+        reclass_variables: list
+            List of reclass_variables from reclass_table_fn table to add to maps. Index column should match values in `raster_fn`.
+        variable: str, optional
+            Name of raster_fn dataset variable to use. This is only required when reading datasets with multiple variables.
+            By default None.
+        fill_method : str, optional
+            If specified, fills nodata values in `raster_fn` using fill_nodata method before reclassifying.
+            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        reproject_method: str, optional
+            See rasterio.warp.reproject for existing methods, by default "nearest".
+            Can provide a list corresponding to ``reclass_variables``.
+        mask_name: str, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'grid'. Use None to disable masking.
+        rmdict: dict, optional
+            Dictionary to rename variable names in reclass_variables before adding to grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+
+        Returns
+        -------
+        list
+            Names of added model grid layers
+        """
+        self.logger.info(
+            f"Preparing grid data by reclassifying the data in {raster_fn} based on {reclass_table_fn}"
+        )
+        # Read raster data and remapping table
+        da = self.data_catalog.get_rasterdataset(
+            raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
+        )
+        if not isinstance(da, xr.DataArray):
+            raise ValueError(
+                f"raster_fn {raster_fn} should be a single variable. "
+                "Please select one using the 'variable' argument"
+            )
+        df_vars = self.data_catalog.get_dataframe(
+            reclass_table_fn, variables=reclass_variables
+        )
+        # Fill nodata
+        if fill_method is not None:
+            ds = ds.raster.interpolate_na(method=fill_method)
+        # Mapping function
+        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
+        # Reprojection
+        # one reproject method for all variables
+        reproject_method = np.atleast_1d(reproject_method)
+        if len(reproject_method) == 1:
+            ds_vars = ds_vars.raster.reproject_like(
+                self.grid, method=reproject_method[0]
+            )
+        # one reproject method per variable
+        elif len(reproject_method) == len(reclass_variables):
+            ds_list = []
+            for var, method in zip(reclass_variables, reproject_method):
+                ds_list.append(
+                    ds_vars[var].raster.reproject_like(self.grid, method=method)
+                )
+            ds_vars = xr.merge(ds_list)
+        else:
+            raise ValueError(
+                f"reproject_method should have length 1 or {len(reclass_variables)}"
+            )
+        # Masking
+        if mask_name is not None:
+            if mask_name in self.grid:
+                ds_vars = ds_vars.raster.mask(self.grid[mask_name])
+        # Add to maps
+        self.set_grid(ds_vars.rename(rmdict))
+
+        return list(ds_vars.data_vars.keys())
+
+    def setup_grid_from_vector(
+        self,
+        vector_fn: str,
+        variables: Optional[Union[List, str]] = None,
+        nodata: Optional[Union[List, int, float]] = -1,
+        rasterize_method: Optional[str] = "value",
+        mask_name: Optional[str] = "grid",
+        rmdict: Optional[Dict] = dict(),
+        all_touched: Optional[bool] = True,
+    ) -> List[str]:
+        """
+        This component adds data variable(s) to grid object by rasterizing the data from ``vector_fn``.
+        Several type of rasterization are possible:
+            * "fraction": the fraction of the grid cell covered by the vector shape is returned.
+            * "area": the area of the grid cell covered by the vector shape is returned.
+            * "value": the value from the variables columns of vector_fn are used. If this is used, variables must be specified.
+
+        Parameters
+        ----------
+        vector_fn : str
+            Source name of vector data in data_catalog.
+        variables : List, str, optional
+            List of variables to add to grid from vector_fn. Required if rasterize_method is "value", by default None.
+        nodata : List, int, float, optional
+            No data value to use for rasterization, by default -1. If a list is provided, it should have the same length has variables.
+        rasterize_method : str, optional
+            Method to rasterize the vector data. Either {"value", "fraction", "area"}.
+            If "value", the value from the variables columns in vector_fn are used directly in the raster.
+            If "fraction", the fraction of the grid cell covered by the vector file is returned.
+            If "area", the area of the grid cell covered by the vector file is returned.
+        mask_name: str, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'grid'. Use None to disable masking.
+        rmdict: dict, optional
+            Dictionary to rename variable names in variables before adding to grid {'name_in_variables': 'name_in_grid'}.
+            To rename with method fraction or area use {'vector_fn': 'name_in_grid'}. By default empty.
+        all_touched : bool, optional
+            If True (default), all pixels touched by geometries will be burned in. If false, only
+            pixels whose center is within the polygon or that are selected by
+            Bresenham's line algorithm will be burned in.
+
+        Returns
+        -------
+        list
+            Names of added model grid layers
+        """
+        self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
+        gdf = self.data_catalog.get_geodataframe(
+            vector_fn, geom=self.region, dst_crs=self.crs
+        )
+        if gdf.empty:
+            self.logger.warning(
+                f"No shapes of {vector_fn} found within region, skipping setup_grid_from_vector."
+            )
+            return
+        # Check which method is used
+        if rasterize_method == "value":
+            vars = np.atleast_1d(variables)
+            nodata = np.atleast_1d(nodata)
+            # Check length of nodata
+            if len(nodata) != len(vars):
+                if len(nodata) == 1:
+                    nodata = np.repeat(nodata, len(vars))
+                else:
+                    raise ValueError(
+                        f"Length of nodata ({len(nodata)}) should be equal to 1 or length of variables ({len(vars)})."
+                    )
+            # Loop of variables and nodata
+            for var, nd in zip(vars, nodata):
+                # Rasterize
+                da = self.grid.raster.rasterize(
+                    gdf=gdf,
+                    col_name=var,
+                    nodata=nd,
+                    all_touched=all_touched,
+                )
+                # Rename
+                if var in rmdict.keys():
+                    var = rmdict[var]
+                # Masking
+                if mask_name is not None:
+                    if mask_name in self.grid:
+                        da = da.raster.mask(self.grid[mask_name])
+                self.set_grid(da.rename(var))
+
+            return variables
+
+        elif rasterize_method in ["fraction", "area"]:
+            name = f"{vector_fn}_{rasterize_method}"
+            # Rasterize
+            da = self.grid.raster.rasterize_geometry(
+                gdf=gdf,
+                method=rasterize_method,
+                mask_name=None,
+                name=name,
+                nodata=nodata,
+            )
+            # Rename
+            if vector_fn in rmdict.keys():
+                da.name = rmdict[vector_fn]
+            # Masking
+            if mask_name is not None:
+                if mask_name in self.grid:
+                    da = da.raster.mask(self.grid[mask_name])
+            self.set_grid(da)
+
+            return [name]
+
+        else:
+            raise ValueError(
+                f"rasterize_method {rasterize_method} not recognized. Use one of {'value', 'fraction', 'area'}."
+            )
 
     @property
     def grid(self):
@@ -108,8 +443,7 @@ class GridMixin(object):
 class GridModel(GridMixin, Model):
     """Model class Grid Model for gridded models in HydroMT"""
 
-    # TODO: add here "res": "setup_region" or "res": "setup_grid" when generic method is available
-    _CLI_ARGS = {"region": "setup_region"}
+    _CLI_ARGS = {"region": "setup_grid", "res": "setup_grid"}
     _NAME = "grid_model"
 
     def __init__(
@@ -129,6 +463,111 @@ class GridModel(GridMixin, Model):
             logger=logger,
         )
 
+    ## GENERIC SETUP METHODS
+    def setup_grid(
+        self,
+        region: dict,
+        res: Optional[float] = None,
+        crs: int = None,
+        hydrography_fn: Optional[str] = None,
+        basin_index_fn: Optional[str] = None,
+    ) -> xr.DataArray:
+        """Creates a 2D regular grid or reads an existing grid.
+        An 2D regular grid will be created from a geometry (geom_fn) or bbox. If an existing
+        grid is given, then no new grid will be generated.
+
+        Adds/Updates model layers:
+        * **grid** grid mask: add grid mask to grid object
+
+        Parameters
+        ----------
+        region : dict
+            Dictionary describing region of interest, e.g.:
+            * {'bbox': [xmin, ymin, xmax, ymax]}
+            * {'geom': 'path/to/polygon_geometry'}
+            * {'grid': 'path/to/grid_file'}
+            * {'basin': [x, y]}
+
+            Region must be of kind [grid, bbox, geom, basin, subbasin, interbasin].
+        res: float
+            Resolution used to generate 2D grid [unit of the CRS], required if region is not based on 'grid'.
+        crs : EPSG code, int, str optional
+            EPSG code of the model or "utm" to let hydromt find the closest projected crs. If None using the one from region.
+        hydrography_fn : str
+            Name of data source for hydrography data. Required if region is of kind 'basin', 'subbasin' or 'interbasin'.
+        basin_index_fn : str
+            Name of data source with basin (bounding box) geometries associated with
+            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
+            based on a (sub)(inter)basins without a 'bounds' argument.
+
+        Returns
+        -------
+        grid : xr.DataArray
+            Generated grid mask.
+        """
+        self.logger.info(f"Preparing 2D grid.")
+
+        kind = next(iter(region))  # first key of region
+        if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
+            if not isinstance(res, (int, float)):
+                raise ValueError("res argument required")
+            region = self.setup_region(
+                region,
+                hydrography_fn=hydrography_fn,
+                basin_index_fn=basin_index_fn,
+            )
+            geom = self.geoms["region"]
+            if crs is not None:
+                crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+                geom = geom.to_crs(crs)
+            # Generate grid based on res for region bbox
+            # TODO add warning on res value if crs is projected or not?
+            xmin, ymin, xmax, ymax = geom.total_bounds
+            xcoords = np.arange(xmin + res / 2, xmax - res / 2, res)
+            ycoords = np.arange(ymax - res / 2, ymin + res / 2, -res)
+        elif kind == "grid":
+            # Support more formats for grid input (netcdf, zarr, io.open_raster)
+            fn = region[kind]
+            if fn.endswith(".nc"):
+                da_like = xr.open_dataset(fn)
+            elif fn.endswith(".zarr"):
+                da_like = xr.open_zarr(fn)
+            else:
+                da_like = io.open_raster(fn)
+            # Get xycoords, geom
+            xcoords = da_like.raster.xcoords
+            ycoords = da_like.raster.ycoords
+            bbox = da_like.raster.vector_grid.total_bounds
+            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=da_like.raster.crs)
+            if crs is not None:
+                self.logger.warning(
+                    f"For region kind 'grid', the gris crs is used and not user-defined crs {crs}"
+                )
+            crs = da_like.raster.crs
+        else:
+            raise ValueError(
+                f"Region for grid must of kind [grid, bbox, geom, basin, subbasin, interbasin], kind {kind} not understood."
+            )
+        coords = {"y": ycoords, "x": xcoords}
+        # Generate grid using hydromt full method
+        grid = raster.full(
+            coords=coords,
+            nodata=1,
+            dtype=np.uint8,
+            name="grid",
+            attrs={},
+            crs=geom.crs,
+            lazy=False,
+        )
+        # Create geometry_mask with geom
+        grid = grid.raster.geometry_mask(geom, all_touched=True)
+        grid.name = "grid"
+
+        # Add region and grid to model
+        self.set_geoms(geom, "region")
+        self.set_grid(grid)
+
+    ## I/O
     def read(
         self,
         components: List = [
