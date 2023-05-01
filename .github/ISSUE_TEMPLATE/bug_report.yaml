@@ -1,7 +1,7 @@
 name: Bug Report
 description: Report incorrect behavior in the HydroMT library
 title: "BUG: "
-labels: [bug]
+labels: [bug, needs refinement]
 
 body:
   - type: checkboxes
