@@ -11,7 +11,7 @@ Unreleased
 
 Added
 -----
-- New generic methods for ``GridModel``: ``setup_grid``, ``setup_grid_from_constant``, ``setup_grid_from_raster``, ``setup_grid_from_raster_reclass``, ``setup_grid_from_vector``.
+- New generic methods for ``GridModel``: ``setup_grid``, ``setup_grid_from_constant``, ``setup_grid_from_raster``, ``setup_grid_from_raster_reclass``, ``setup_grid_from_vector``. PR #333
 - New raster method ``rasterize_geometry``.
 
 Changed

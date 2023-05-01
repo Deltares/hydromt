@@ -332,9 +332,6 @@ def test_gridmodel_setup(tmpdir):
     )
 
     # Checks
-    import pdb
-
-    pdb.set_trace()
     assert len(mod.grid) == 10
     for v in ["grid", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
         assert v in mod.grid

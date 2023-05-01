@@ -218,7 +218,7 @@ def test_rasterize_geometry(rioda):
     assert da.raster.nodata == 0
     assert np.round(da.values.max(), 4) <= 1.0
     # Count unique values in da
-    assert np.unique(np.round(da.values, 2)) == 3
+    assert np.unique(np.round(da.values, 2)).size == 3
     assert 0.25 in np.unique(np.round(da.values, 2))
 
     da2 = rioda.raster.rasterize_geometry(gdf, method="area")

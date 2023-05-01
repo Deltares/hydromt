@@ -3,7 +3,8 @@ setup_config:
   timers.end: '2010-02-15'
   timers.start: '2010-02-05'
 
-setup_region:
+setup_grid:
+  res: 0.0083333
   basin_index_fn: merit_hydro_index
   hydrography_fn: merit_hydro
 

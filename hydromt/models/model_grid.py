@@ -443,7 +443,7 @@ class GridMixin(object):
 class GridModel(GridMixin, Model):
     """Model class Grid Model for gridded models in HydroMT"""
 
-    _CLI_ARGS = {"region": "setup_grid", "res": "setup_grid"}
+    _CLI_ARGS = {"region": "setup_grid"}
     _NAME = "grid_model"
 
     def __init__(
@@ -510,7 +510,7 @@ class GridModel(GridMixin, Model):
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             if not isinstance(res, (int, float)):
-                raise ValueError("res argument required")
+                raise ValueError("res argument required for kind 'bbox', 'geom', 'basin', 'subbasin' or 'interbasin'")
             region = self.setup_region(
                 region,
                 hydrography_fn=hydrography_fn,
