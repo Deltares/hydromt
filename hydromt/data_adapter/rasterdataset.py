@@ -44,6 +44,7 @@ class RasterDatasetAdapter(DataAdapter):
         unit_add={},
         units={},
         meta={},
+        attrs={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial raster data.
@@ -94,6 +95,7 @@ class RasterDatasetAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            attrs=attrs,
             **kwargs,
         )
         # TODO: see if the units argument can be solved with unit_mult/unit_add
@@ -395,9 +397,8 @@ class RasterDatasetAdapter(DataAdapter):
             ds_out[name].raster.set_nodata(nodata)  # reset nodata in case of change
 
         # unit attributes
-        # TODO: can we solve this with unit conversion or otherwise generalize meta
-        for k in self.units:
-            ds_out[k].attrs.update(units=self.units[k])
+        for k in self.attrs:
+            ds_out[k].attrs.update(self.attrs[k])
 
         # return data array if single var
         if single_var_as_array and len(ds_out.raster.vars) == 1:

@@ -117,6 +117,23 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
         data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
 
 
+def test_rasterdataset_unit_attrs():
+    test_data_catalog = DataCatalog()
+    test_data_catalog.from_predefined_catalogs("artifact_data")
+    era5_dict = {"era5": test_data_catalog.sources["era5"].to_dict()}
+
+    attrs = {
+        "temp": {"unit": "degrees C", "long_name": "temperature"},
+        "temp_max": {"unit": "degrees C", "long_name": "maximum temperature"},
+        "temp_min": {"unit": "degrees C", "long_name": "minimum temperature"},
+    }
+    era5_dict["era5"].update(dict(attrs=attrs))
+    test_data_catalog.from_dict(era5_dict)
+    raster = test_data_catalog.get_rasterdataset("era5")
+    assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
+    assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
+
+
 def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
