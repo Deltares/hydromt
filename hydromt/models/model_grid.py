@@ -4,8 +4,10 @@
 from typing import Dict, List, Tuple, Union, Optional
 import logging
 from os.path import join, isfile
+from pathlib import Path
 import xarray as xr
 import numpy as np
+import pandas as pd
 import geopandas as gpd
 from shapely.geometry import box
 from pyproj import CRS
@@ -80,7 +82,7 @@ class GridMixin(object):
 
     def setup_grid_from_raster(
         self,
-        raster_fn: str,
+        raster_fn: Union[str, Path, xr.Dataset],
         variables: Optional[List] = None,
         fill_method: Optional[str] = None,
         reproject_method: Optional[Union[List, str]] = "nearest",
@@ -98,8 +100,10 @@ class GridMixin(object):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog.
+        raster_fn: str, Path, xr.Dataset
+            Data catalog key, path to raster file or raster xarray data object.
+            If a path to a raster file is provided it will be added
+            to the data_catalog with its name based on the file basename without extension.
         variables: list, optional
             List of variables to add to grid from raster_fn. By default all.
         fill_method : str, optional
@@ -156,8 +160,8 @@ class GridMixin(object):
 
     def setup_grid_from_raster_reclass(
         self,
-        raster_fn: str,
-        reclass_table_fn: str,
+        raster_fn: Union[str, Path, xr.DataArray],
+        reclass_table_fn: Union[str, Path, pd.DataFrame],
         reclass_variables: List,
         variable: Optional[str] = None,
         fill_method: Optional[str] = None,
@@ -175,11 +179,10 @@ class GridMixin(object):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
-            :py:meth:`hydromt.data_catalog.get_rasterdataset` method.
-        reclass_table_fn: str
-            Source name of reclassification table of `raster_fn` in data_catalog.
+        raster_fn: str, Path, xr.DataArray
+            Data catalog key, path to raster file or raster xarray data object. Should be a DataArray. Else use `variable` argument for selection.
+        reclass_table_fn: str, Path, pd.DataFrame
+            Data catalog key, path to tabular data file or tabular pandas dataframe object for the reclassification table of `raster_fn`.
         reclass_variables: list
             List of reclass_variables from reclass_table_fn table to add to maps. Index column should match values in `raster_fn`.
         variable: str, optional
@@ -251,7 +254,7 @@ class GridMixin(object):
 
     def setup_grid_from_vector(
         self,
-        vector_fn: str,
+        vector_fn: Union[str, Path, gpd.GeoDataFrame],
         variables: Optional[Union[List, str]] = None,
         nodata: Optional[Union[List, int, float]] = -1,
         rasterize_method: Optional[str] = "value",
@@ -268,8 +271,8 @@ class GridMixin(object):
 
         Parameters
         ----------
-        vector_fn : str
-            Source name of vector data in data_catalog.
+        vector_fn : str, Path, gpd.GeoDataFrame
+            Data catalog key, path to vector file or a vector geopandas object.
         variables : List, str, optional
             List of variables to add to grid from vector_fn. Required if rasterize_method is "value", by default None.
         nodata : List, int, float, optional
@@ -537,9 +540,9 @@ class GridModel(GridMixin, Model):
             else:
                 da_like = io.open_raster(fn)
             # Get xycoords, geom
-            xcoords = da_like.raster.xcoords
-            ycoords = da_like.raster.ycoords
-            bbox = da_like.raster.vector_grid.total_bounds
+            xcoords = da_like.raster.xcoords.values
+            ycoords = da_like.raster.ycoords.values
+            bbox = da_like.raster.vector_grid().total_bounds
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=da_like.raster.crs)
             if crs is not None:
                 self.logger.warning(
@@ -568,6 +571,8 @@ class GridModel(GridMixin, Model):
         # Add region and grid to model
         self.set_geoms(geom, "region")
         self.set_grid(grid)
+
+        return grid
 
     ## I/O
     def read(
