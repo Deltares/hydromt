@@ -4,24 +4,62 @@ setup_config:
   timers.start: '2010-02-05'
 
 setup_grid:
-  res: 0.0083333
+  res: 0.05
+  crs: 4326
   basin_index_fn: merit_hydro_index
   hydrography_fn: merit_hydro
 
-setup_maps_from_raster:
-  fill_method: null
-  raster_fn: merit_hydro_1k
-  reproject_method: null
-  variables: elevtn
+setup_grid_from_constant:
+  constant: 0.01
+  name: c1
+  dtype: float32
+  nodata: -99.0
 
-setup_maps_from_raster_reclass:
+setup_grid_from_raster:
+  raster_fn: merit_hydro_1k
+  variables: 
+  - elevtn
+  - basins
+  reproject_method:
+  - average
+  - mode
+
+setup_grid_from_raster2:
+  raster_fn: vito
+  fill_method: nearest
+  reproject_method: mode
+  rmdict:
+    vito: landuse
+
+setup_grid_from_raster_reclass:
   raster_fn: vito
   reclass_table_fn: vito_reclass
   reclass_variables:
   - manning
+  reproject_method:
+  - average
+
+setup_grid_from_vector:
+  vector_fn: hydro_lakes
+  variables:
+  - waterbody_id
+  - Depth_avg
+  nodata:
+  - -1
+  - -999.0
+  rasterize_method: value
+  rmdict:
+    waterbody_id: lake_id
+    Detph_avg: lake_depth
+
+setup_grid_from_vector2:
+  vector_fn: hydro_lakes
+  rasterize_method: fraction
+  rmdict:
+    hydro_lakes: water_frac
   
 write:
   components:
   - config
   - geoms
-  - maps
+  - grid

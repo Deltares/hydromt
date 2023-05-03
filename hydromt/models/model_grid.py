@@ -218,7 +218,7 @@ class GridMixin(object):
         )
         # Fill nodata
         if fill_method is not None:
-            ds = ds.raster.interpolate_na(method=fill_method)
+            da = da.raster.interpolate_na(method=fill_method)
         # Mapping function
         ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
         # Reprojection
@@ -510,7 +510,9 @@ class GridModel(GridMixin, Model):
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             if not isinstance(res, (int, float)):
-                raise ValueError("res argument required for kind 'bbox', 'geom', 'basin', 'subbasin' or 'interbasin'")
+                raise ValueError(
+                    "res argument required for kind 'bbox', 'geom', 'basin', 'subbasin' or 'interbasin'"
+                )
             region = self.setup_region(
                 region,
                 hydrography_fn=hydrography_fn,

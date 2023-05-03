@@ -314,6 +314,7 @@ def test_gridmodel_setup(tmpdir):
     )
     mod.setup_grid_from_raster_reclass(
         raster_fn="vito",
+        fill_method="nearest",
         reclass_table_fn="vito_mapping",
         reclass_variables=["roughness_manning"],
         reproject_method=["average"],
