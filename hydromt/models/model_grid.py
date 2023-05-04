@@ -115,7 +115,7 @@ class GridMixin(object):
         mask_name: str, optional
             Name of mask in self.grid to use for masking raster_fn. By default 'grid'. Use None to disable masking.
         rmdict: dict, optional
-            Dictionary to rename variable names in reclass_variables before adding to grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+            Dictionary to rename variable names in raster_fn before adding to grid {'name_in_raster_fn': 'name_in_grid'}. By default empty.
 
         Returns
         -------

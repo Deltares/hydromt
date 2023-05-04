@@ -7,6 +7,7 @@ import glob
 from os.path import join, isdir, isfile, abspath, dirname, basename, isabs
 import xarray as xr
 import numpy as np
+import pandas as pd
 import geopandas as gpd
 from geopandas.testing import assert_geodataframe_equal
 from shapely.geometry import box
@@ -795,7 +796,7 @@ class Model(object, metaclass=ABCMeta):
     # map files setup methods
     def setup_maps_from_raster(
         self,
-        raster_fn: str,
+        raster_fn: Union[str, Path, xr.Dataset],
         variables: Optional[List] = None,
         fill_method: Optional[str] = None,
         name: Optional[str] = None,
@@ -813,8 +814,8 @@ class Model(object, metaclass=ABCMeta):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog.
+        raster_fn: str, Path, xr.Dataset
+            Data catalog key, path to raster file or raster xarray data object.
         variables: list, optional
             List of variables to add to maps from raster_fn. By default all.
         fill_method : str, optional
@@ -854,8 +855,8 @@ class Model(object, metaclass=ABCMeta):
 
     def setup_maps_from_raster_reclass(
         self,
-        raster_fn: str,
-        reclass_table_fn: str,
+        raster_fn: Union[str, Path, xr.DataArray],
+        reclass_table_fn: Union[str, Path, pd.DataFrame],
         reclass_variables: List,
         variable: Optional[str] = None,
         fill_method: Optional[str] = None,
@@ -873,11 +874,10 @@ class Model(object, metaclass=ABCMeta):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
-            :py:meth:`hydromt.data_catalog.get_rasterdataset` method.
-        reclass_table_fn: str
-            Source name of reclassification table of `raster_fn` in data_catalog.
+        raster_fn: str, Path, xr.DataArray
+            Data catalog key, path to raster file or raster xarray data object. Should be a DataArray. Else use `variable` argument for selection.
+        reclass_table_fn: str, Path, pd.DataFrame
+            Data catalog key, path to tabular data file or tabular pandas dataframe object for the reclassification table of `raster_fn`.
         reclass_variables: list
             List of reclass_variables from reclass_table_fn table to add to maps. Index column should match values in `raster_fn`.
         variable: str, optional
@@ -903,7 +903,7 @@ class Model(object, metaclass=ABCMeta):
         )
         # Read raster data and remapping table
         da = self.data_catalog.get_rasterdataset(
-            raster_fn, geom=self.region, buffer=2, **kwargs
+            raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
         )
         if not isinstance(da, xr.DataArray):
             raise ValueError(
@@ -915,7 +915,7 @@ class Model(object, metaclass=ABCMeta):
         )
         # Fill nodata
         if fill_method is not None:
-            ds = ds.raster.interpolate_na(method=fill_method)
+            da = da.raster.interpolate_na(method=fill_method)
         # Mapping function
         ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
         # Reprojection

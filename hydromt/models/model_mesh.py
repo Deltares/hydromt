@@ -1,4 +1,4 @@
-from typing import Union, Optional, List, Tuple
+from typing import Union, Optional, List, Dict, Tuple
 import logging
 import os
 from os.path import join, isdir, dirname, isfile
@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import xarray as xr
 import xugrid as xu
+import pandas as pd
 import geopandas as gpd
 from shapely.geometry import box, Polygon
 
@@ -31,12 +32,13 @@ class MeshMixin(object):
     ## general setup methods
     def setup_mesh_from_raster(
         self,
-        raster_fn: str,
+        raster_fn: Union[str, Path, xr.Datarray, xr.Dataset],
         variables: Optional[list] = None,
         fill_method: Optional[str] = None,
         resampling_method: Optional[str] = "mean",
         all_touched: Optional[bool] = True,
-    ) -> None:
+        rmdict: Optional[Dict] = dict(),       
+    ) -> List[str]:
         """
         This component adds data variable(s) from ``raster_fn`` to mesh object.
 
@@ -49,8 +51,8 @@ class MeshMixin(object):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog.
+        raster_fn: str, Path, xr,DataArray, xr.Dataset
+            Data catalog key, path to raster file or raster xarray data object.
         variables: list, optional
             List of variables to add to mesh from raster_fn. By default all.
         fill_method : str, optional
@@ -63,6 +65,13 @@ class MeshMixin(object):
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
+        rmdict: dict, optional
+            Dictionary to rename variable names in raster_fn before adding to mesh {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
+        
+        Returns
+        -------
+        list
+            List of variables added to mesh.
         """
         self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
         # Read raster data and select variables
@@ -82,23 +91,26 @@ class MeshMixin(object):
         )
         # Rename variables
         rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
-        ds_sample = ds_sample.rename(rm_dict)
+        ds_sample = ds_sample.rename(rm_dict).rename(rmdict)
         # Convert to UgridDataset
         uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
 
         self.set_mesh(uds_sample)
 
+        return list(ds_sample.data_vars.keys())
+
     def setup_mesh_from_raster_reclass(
         self,
-        raster_fn: str,
-        reclass_table_fn: str,
+        raster_fn: Union[str, Path, xr.DataArray],
+        reclass_table_fn: Union[str, Path, pd.DataFrame],
         reclass_variables: list,
         variable: Optional[str] = None,
         fill_nodata: Optional[str] = None,
         resampling_method: Optional[Union[str, list]] = "mean",
         all_touched: Optional[bool] = True,
+        rmdict: Optional[Dict] = dict(),
         **kwargs,
-    ) -> None:
+    ) -> List[str]:
         """
         This component adds data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
@@ -110,11 +122,10 @@ class MeshMixin(object):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
-            :py:meth:`hydromt.data_catalog.get_rasterdataset` method
-        reclass_table_fn: str
-            Source name of reclassification table of raster_fn in data_catalog.
+        raster_fn: str, Path, xr.DataArray
+            Data catalog key, path to raster file or raster xarray data object. Should be a DataArray. Else use `variable` argument for selection.
+        reclass_table_fn: str, Path, pd.DataFrame
+            Data catalog key, path to tabular data file or tabular pandas dataframe object for the reclassification table of `raster_fn`.
         reclass_variables: list
             List of reclass_variables from reclass_table_fn table to add to mesh. Index column should match values in raster_fn.
         variable: str, optional
@@ -131,6 +142,8 @@ class MeshMixin(object):
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
+        rmdict: dict, optional
+            Dictionary to rename variable names in reclass_variables before adding to mesh {'name_in_reclass_table': 'name_in_mesh'}. By default empty.
         """
         self.logger.info(
             f"Preparing mesh data by reclassifying the data in {raster_fn} based on {reclass_table_fn}."
@@ -149,7 +162,7 @@ class MeshMixin(object):
         )
 
         if fill_nodata is not None:
-            ds = ds.raster.interpolate_na(method=fill_nodata)
+            da = da.raster.interpolate_na(method=fill_nodata)
 
         # Mapping function
         ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
@@ -168,12 +181,14 @@ class MeshMixin(object):
             f"{var}_{mtd}": var
             for var, mtd in zip(reclass_variables, resampling_method)
         }
-        ds_sample = ds_sample.rename(rm_dict)
+        ds_sample = ds_sample.rename(rm_dict).rename(rmdict)
         ds_sample = ds_sample[reclass_variables]
         # Convert to UgridDataset
         uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
 
         self.set_mesh(uds_sample)
+
+        return list(ds_sample.data_vars.keys())
 
     @property
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
