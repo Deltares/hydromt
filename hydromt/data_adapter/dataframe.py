@@ -28,6 +28,7 @@ class DataFrameAdapter(DataAdapter):
         unit_mult={},
         unit_add={},
         meta={},
+        attrs={},
         **kwargs,
     ):
         """Initiates data adapter for 2D tabular data.
@@ -75,6 +76,7 @@ class DataFrameAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            attrs=attrs,
             **kwargs,
         )
 
@@ -217,5 +219,10 @@ class DataFrameAdapter(DataAdapter):
 
         # set meta data
         df.attrs.update(self.meta)
+
+        # set column attributes
+        for col in self.attrs:
+            if col in df.columns:
+                df[col].attrs.update(**self.attrs[col])
 
         return df

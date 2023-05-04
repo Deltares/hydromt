@@ -341,11 +341,12 @@ class GeoDatasetAdapter(DataAdapter):
             ds_out = ds_out[ds_out.vector.vars[0]]
 
         # Set variable attribute data
-        if isinstance(ds_out, xr.DataArray):
-            ds_out.attrs.update(self.attrs[ds_out.name])
-        else:
-            for k in self.attrs:
-                ds_out[k].attrs.update(**self.attrs[k])
+        if self.attrs:
+            if isinstance(ds_out, xr.DataArray):
+                ds_out.attrs.update(self.attrs[ds_out.name])
+            else:
+                for k in self.attrs:
+                    ds_out[k].attrs.update(self.attrs[k])
 
         # set meta data
         ds_out.attrs.update(self.meta)

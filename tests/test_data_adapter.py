@@ -118,19 +118,16 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
         data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
 
 
-def test_rasterdataset_unit_attrs():
-    test_data_catalog = DataCatalog()
-    test_data_catalog.from_predefined_catalogs("artifact_data")
-    era5_dict = {"era5": test_data_catalog.sources["era5"].to_dict()}
-
+def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
+    era5_dict = {"era5": artifact_data.sources["era5"].to_dict()}
     attrs = {
         "temp": {"unit": "degrees C", "long_name": "temperature"},
         "temp_max": {"unit": "degrees C", "long_name": "maximum temperature"},
         "temp_min": {"unit": "degrees C", "long_name": "minimum temperature"},
     }
     era5_dict["era5"].update(dict(attrs=attrs))
-    test_data_catalog.from_dict(era5_dict)
-    raster = test_data_catalog.get_rasterdataset("era5")
+    artifact_data.from_dict(era5_dict)
+    raster = artifact_data.get_rasterdataset("era5")
     assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
@@ -179,12 +176,8 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
         )
 
 
-def test_geodataset_unit_attrs():
-    test_data_catalog = DataCatalog()
-    test_data_catalog.from_predefined_catalogs("artifact_data")
-    gtsm_dict = {
-        "gtsmv3_eu_era5": test_data_catalog.sources["gtsmv3_eu_era5"].to_dict()
-    }
+def test_geodataset_unit_attrs(artifact_data: DataCatalog):
+    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.sources["gtsmv3_eu_era5"].to_dict()}
     attrs = {
         "waterlevel": {
             "long_name": "sea surface height above mean sea level",
@@ -192,8 +185,8 @@ def test_geodataset_unit_attrs():
         }
     }
     gtsm_dict["gtsmv3_eu_era5"].update(dict(attrs=attrs))
-    test_data_catalog.from_dict(gtsm_dict)
-    gtsm_geodataset = test_data_catalog.get_geodataset("gtsmv3_eu_era5")
+    artifact_data.from_dict(gtsm_dict)
+    gtsm_geodataset = artifact_data.get_geodataset("gtsmv3_eu_era5")
     assert gtsm_geodataset.attrs["long_name"] == attrs["waterlevel"]["long_name"]
     assert gtsm_geodataset.attrs["unit"] == attrs["waterlevel"]["unit"]
 
@@ -211,6 +204,15 @@ def test_geodataframe(geodf, tmpdir):
     assert np.all(gdf1 == geodf)
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_geodataframe("no_file.geojson")
+
+
+def test_geodataframe_unit_attrs(artifact_data: DataCatalog):
+    gadm_level1 = {"gadm_level1": artifact_data.sources["gadm_level1"].to_dict()}
+    attrs = {"NAME_0": {"long_name": "Country names"}}
+    gadm_level1["gadm_level1"].update(dict(attrs=attrs))
+    artifact_data.from_dict(gadm_level1)
+    gadm_level1_gdf = artifact_data.get_geodataframe("gadm_level1")
+    assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
 
 
 def test_dataframe(df, df_time, tmpdir):
@@ -234,6 +236,27 @@ def test_dataframe(df, df_time, tmpdir):
     df2 = data_catalog.get_dataframe(fn_xlsx, index_col=0)
     assert isinstance(df2, pd.DataFrame)
     assert np.all(df2 == df)
+
+
+def test_dataframe_unit_attrs(artifact_data: DataCatalog, df: pd.DataFrame):
+    data_catalog_dir = dirname(artifact_data.sources["chelsa"].path)
+    df_path = join(data_catalog_dir, "cities.csv")
+    df.to_csv(df_path)
+    cities = {
+        "cities": {
+            "path": df_path,
+            "data_type": "DataFrame",
+            "driver": "csv",
+            "attrs": {
+                "city": {"long_name": "names of cities"},
+                "country": {"long_name": "names of countries"},
+            },
+        }
+    }
+    artifact_data.from_dict(cities)
+    cities_df = artifact_data.get_dataframe("cities")
+    assert cities_df["city"].attrs["long_name"] == "names of cities"
+    assert cities_df["country"].attrs["long_name"] == "names of countries"
 
 
 def test_dataframe_time(df_time, tmpdir):

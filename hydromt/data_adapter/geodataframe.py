@@ -39,6 +39,7 @@ class GeoDataFrameAdapter(DataAdapter):
         unit_add={},
         units={},
         meta={},
+        attrs={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial vector data.
@@ -89,6 +90,7 @@ class GeoDataFrameAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
+            attrs=attrs,
             **kwargs,
         )
 
@@ -256,4 +258,9 @@ class GeoDataFrameAdapter(DataAdapter):
 
         # set meta data
         gdf.attrs.update(self.meta)
+
+        # set column attributes
+        for col in self.attrs:
+            if col in gdf.columns:
+                gdf[col].attrs.update(**self.attrs[col])
         return gdf
