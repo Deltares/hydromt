@@ -11,6 +11,7 @@ Unreleased
 
 Added
 -----
+- Support for unit attributes for all data types in the DataCatalog. PR #334
 
 Changed
 -------
