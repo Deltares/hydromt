@@ -153,12 +153,14 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
             data_root=td, data_name="test1", driver="netcdf", variables="test1"
         )
         GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
-    with pytest.raises(ValueError, match="GeoDataset: Driver unknown_driver unknown."):
-        GeoDatasetAdapter(fn_nc).to_file(
-            data_root=td,
-            data_name="test",
-            driver="unknown_driver",
-        )
+        with pytest.raises(
+            ValueError, match="GeoDataset: Driver unknown_driver unknown."
+        ):
+            GeoDatasetAdapter(fn_nc).to_file(
+                data_root=td,
+                data_name="test",
+                driver="unknown_driver",
+            )
 
 
 def test_geodataframe(geodf, tmpdir):
