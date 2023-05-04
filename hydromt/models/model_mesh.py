@@ -32,12 +32,12 @@ class MeshMixin(object):
     ## general setup methods
     def setup_mesh_from_raster(
         self,
-        raster_fn: Union[str, Path, xr.Datarray, xr.Dataset],
+        raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
         variables: Optional[list] = None,
         fill_method: Optional[str] = None,
         resampling_method: Optional[str] = "mean",
         all_touched: Optional[bool] = True,
-        rmdict: Optional[Dict] = dict(),       
+        rmdict: Optional[Dict] = dict(),
     ) -> List[str]:
         """
         This component adds data variable(s) from ``raster_fn`` to mesh object.
@@ -51,7 +51,7 @@ class MeshMixin(object):
 
         Parameters
         ----------
-        raster_fn: str, Path, xr,DataArray, xr.Dataset
+        raster_fn: str, Path, xr.DataArray, xr.Dataset
             Data catalog key, path to raster file or raster xarray data object.
         variables: list, optional
             List of variables to add to mesh from raster_fn. By default all.
@@ -67,7 +67,7 @@ class MeshMixin(object):
             selected by Bresenham's line algorithm will be used. By default True.
         rmdict: dict, optional
             Dictionary to rename variable names in raster_fn before adding to mesh {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
-        
+
         Returns
         -------
         list
