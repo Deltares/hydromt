@@ -146,7 +146,7 @@ def test_model(model, tmpdir):
     model._results = {}  # reset results for comparison
     equal, errors = model._test_equal(model1)
     assert equal, errors
-    # region from staticmaps
+    # read region from staticmaps
     model._geoms.pop("region")
     assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
@@ -317,7 +317,7 @@ def test_meshmodel(mesh_model, tmpdir):
 
 
 @pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
-def test_meshmodel_setup(griduda, world, tmpdir):
+def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
