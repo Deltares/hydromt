@@ -26,7 +26,7 @@ def _uri_validator(uri: str) -> bool:
         return False
 
 
-def _copyfile(src, dst):
+def _copyfile(src, dst, chunk_size=1024):
     """Copy src file to dst. This method supports both online and local files."""
     if not isdir(dirname(dst)):
         os.makedirs(dirname(dst))
@@ -37,7 +37,9 @@ def _copyfile(src, dst):
                     f"Data download failed with status code {r.status_code}"
                 )
             with open(dst, "wb") as f:
-                shutil.copyfileobj(r.raw, f)
+                for chunk in r.iter_content(chunk_size=chunk_size):
+                    f.write(chunk)
+                # shutil.copyfileobj(r.raw, f)
     else:
         shutil.copyfile(src, dst)
 

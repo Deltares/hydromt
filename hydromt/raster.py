@@ -326,10 +326,13 @@ class XRasterBase(XGeoBase):
             The name of the y dimension.
         """
         _dims = list(self._obj.dims)
+        # Switch to lower case to compare to XDIMS and YDIMS
+        _dimslow = [d.lower() for d in _dims]
         if x_dim is None:
             for dim in XDIMS:
-                if dim in _dims:
-                    x_dim = dim
+                if dim in _dimslow:
+                    idim = _dimslow.index(dim)
+                    x_dim = _dims[idim]
                     break
         if x_dim and x_dim in _dims:
             self.set_attrs(x_dim=x_dim)
@@ -341,8 +344,9 @@ class XRasterBase(XGeoBase):
 
         if y_dim is None:
             for dim in YDIMS:
-                if dim in _dims:
-                    y_dim = dim
+                if dim in _dimslow:
+                    idim = _dimslow.index(dim)
+                    y_dim = _dims[idim]
                     break
         if y_dim and y_dim in _dims:
             self.set_attrs(y_dim=y_dim)
