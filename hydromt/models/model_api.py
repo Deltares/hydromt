@@ -672,6 +672,12 @@ class Model(object, metaclass=ABCMeta):
             if isfile(config_fn):
                 cfdict = self._configread(config_fn)
                 self.logger.debug(f"{prefix} config read from {config_fn}")
+            elif isfile(abspath(config_fn)):
+                cfdict = self._configread(abspath(config_fn))
+                self.logger.debug(f"{prefix} config read from {abspath(config_fn)}")
+            elif self.root is not None and isfile(join(self.root,config_fn)):
+                cfdict = self._configread(join(self.root,config_fn))
+                self.logger.debug(f"{prefix} config read from {join(self.root,config_fn)}")
             elif not self._read and prefix != "Default":  # skip for missing default
                 self.logger.error(f"{prefix} config file not found at {config_fn}")
         self._config = cfdict
