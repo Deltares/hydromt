@@ -4,6 +4,7 @@ import pyflwdir
 import pytest
 import geopandas as gpd
 import xarray as xr
+from shapely.geometry import box
 
 from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
 from hydromt.data_catalog import DataCatalog
@@ -156,16 +157,6 @@ def obsda():
 
 
 @pytest.fixture
-def demuda():
-    import xugrid as xu
-
-    uds = xu.data.adh_san_diego()
-    uda = uds["elevation"]
-    uda.ugrid.grid.set_crs(epsg=2230)
-    return uda
-
-
-@pytest.fixture
 def griduda():
     import xugrid as xu
 
@@ -178,6 +169,7 @@ def griduda():
     uda = xu.UgridDataset.from_geodataframe(gdf_da)
     uda = uda["value"]
     uda = uda.rename("elevtn")
+    uda.ugrid.grid.set_crs(epsg=gdf_da.crs.to_epsg())
 
     return uda
 
@@ -231,12 +223,12 @@ def network_model():
 
 
 @pytest.fixture
-def mesh_model(demuda):
+def mesh_model(griduda):
     mod = MODELS.load("mesh_model")()
-    # region = gpd.GeoDataFrame(
-    #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.grid.crs
-    # )
-    # mod.setup_region({"geom": region})
+    region = gpd.GeoDataFrame(
+        geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
+    )
+    mod.setup_region({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_mesh(demuda, "elevtn")
+    mod.set_mesh(griduda, "elevtn")
     return mod
