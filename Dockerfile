@@ -1,11 +1,10 @@
-FROM condaforge/mambaforge:23.1.0-1
+FROM condaforge/mambaforge:23.1.0-1 
 COPY . /hydromt
-
 WORKDIR /hydromt
 
+# SHELL ["/bin/bash","-c"]
+RUN mamba env create -f ./envs/hydromt-dev.yml 
+RUN mamba install hydromt -c conda-forge
 
-SHELL ["/bin/bash", "--login", "-c"]
-RUN mamba env create -f ./envs/hydromt-dev.yml && mamba init bash 
-cmd ["/bin/bash"]
-# RUN mamba activate hydromt-dev && pip install . 
+ENTRYPOINT ["mamba", "run", "-n","hydromt-dev", "hydromt"]
 # ENTRYPOINT ["python", "-m", "hydromt"]
