@@ -29,6 +29,7 @@ class DataFrameAdapter(DataAdapter):
         unit_add={},
         meta={},
         attrs={},
+        driver_kwargs={},
         **kwargs,
     ):
         """Initiates data adapter for 2D tabular data.
@@ -77,7 +78,8 @@ class DataFrameAdapter(DataAdapter):
             unit_add=unit_add,
             meta=meta,
             attrs=attrs,
-            **kwargs,
+            driver_kwargs=driver_kwargs,
+            kwargs=kwargs,
         )
 
     def to_file(
@@ -166,11 +168,11 @@ class DataFrameAdapter(DataAdapter):
         logger.info(f"DataFrame: Read {self.driver} data.")
 
         if self.driver in ["csv"]:
-            df = pd.read_csv(self.path, **kwargs)
+            df = pd.read_csv(self.path, **self.driver_kwargs)
         elif self.driver in ["xls", "xlsx", "excel"]:
-            df = pd.read_excel(self.path, engine="openpyxl", **kwargs)
+            df = pd.read_excel(self.path, engine="openpyxl", **self.driver_kwargs)
         elif self.driver in ["fwf"]:
-            df = pd.read_fwf(self.path, **kwargs)
+            df = pd.read_fwf(self.path, **self.driver_kwargs)
         else:
             raise IOError(f"DataFrame: driver {self.driver} unknown.")
 

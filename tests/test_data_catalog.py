@@ -40,7 +40,7 @@ def test_parser():
     dd_out = _parse_data_dict(dd)
     assert dd_out["test"].path == abspath(join(root, dd["test"]["path"]))
     # check if path in kwargs is also absolute
-    assert dd_out["test"].kwargs["fn"] == abspath(join(root, "test"))
+    assert dd_out["test"].driver_kwargs["fn"] == abspath(join(root, "test"))
     # alias
     dd = {
         "test": {

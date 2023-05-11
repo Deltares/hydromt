@@ -121,6 +121,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         meta={},
         zoom_levels={},
         attrs={},
+        driver_kwargs={},
         **kwargs,
     ):
         self.name = name
@@ -135,7 +136,9 @@ class DataAdapter(object, metaclass=ABCMeta):
             )
         self.driver = driver
         self.filesystem = filesystem
+        self.driver_kwargs = driver_kwargs
         self.kwargs = kwargs
+
         # data adapter arguments
         self.crs = crs
         self.nodata = nodata

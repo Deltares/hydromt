@@ -42,9 +42,9 @@ class RasterDatasetAdapter(DataAdapter):
         rename={},
         unit_mult={},
         unit_add={},
-        units={},
         meta={},
         attrs={},
+        driver_kwargs={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial raster data.
@@ -96,10 +96,8 @@ class RasterDatasetAdapter(DataAdapter):
             unit_add=unit_add,
             meta=meta,
             attrs=attrs,
-            **kwargs,
+            driver_kwargs=driver_kwargs,
         )
-        # TODO: see if the units argument can be solved with unit_mult/unit_add
-        self.units = units
 
     def to_file(
         self,

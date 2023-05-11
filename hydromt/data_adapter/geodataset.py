@@ -40,6 +40,7 @@ class GeoDatasetAdapter(DataAdapter):
         unit_add={},
         meta={},
         attrs={},
+        driver_kwargs={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial timeseries data.
@@ -93,7 +94,7 @@ class GeoDatasetAdapter(DataAdapter):
             unit_add=unit_add,
             meta=meta,
             attrs=attrs,
-            **kwargs,
+            driver_kwargs=driver_kwargs,
         )
 
     def to_file(

@@ -37,9 +37,9 @@ class GeoDataFrameAdapter(DataAdapter):
         rename={},
         unit_mult={},
         unit_add={},
-        units={},
         meta={},
         attrs={},
+        driver_kwargs={},
         **kwargs,
     ):
         """Initiates data adapter for geospatial vector data.
@@ -91,7 +91,7 @@ class GeoDataFrameAdapter(DataAdapter):
             unit_add=unit_add,
             meta=meta,
             attrs=attrs,
-            **kwargs,
+            driver_kwargs=driver_kwargs,
         )
 
     def to_file(

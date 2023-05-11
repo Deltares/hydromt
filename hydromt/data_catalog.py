@@ -909,7 +909,13 @@ def _parse_data_dict(
         attrs = source.pop("attrs", {})
         # lower kwargs for backwards compatability
         # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
-        source.update(**source.pop("kwargs", {}))
+        driver_kwargs = source.pop("kwargs", {})
+        for driver_kwarg in driver_kwargs:
+            if "fn" in driver_kwarg:
+                driver_kwargs.update(
+                    {driver_kwarg: abs_path(root, driver_kwargs[driver_kwarg])}
+                )
+        # source.update(**source.pop("kwargs", {}))
         for opt in source:
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
@@ -922,14 +928,17 @@ def _parse_data_dict(
                 for k, v in zip(options.keys(), combination):
                     path_n = path_n.replace("{" + k + "}", v)
                     name_n = name_n.replace("{" + k + "}", v)
-                data[name_n] = adapter(
-                    path=path_n,
-                    name=name_n,
-                    catalog_name=catalog_name,
-                    meta=meta,
-                    attrs=attrs,
-                    **source,
-                )
+
+                    data[name_n] = adapter(
+                        path=path_n,
+                        name=name_n,
+                        catalog_name=catalog_name,
+                        meta=meta,
+                        attrs=attrs,
+                        driver_kwargs=driver_kwargs,
+                        **source,  # key word arguments specific to certain adaptors
+                    )
+
         else:
             data[name] = adapter(
                 path=path,
@@ -937,6 +946,7 @@ def _parse_data_dict(
                 catalog_name=catalog_name,
                 meta=meta,
                 attrs=attrs,
+                driver_kwargs=driver_kwargs,
                 **source,
             )
 
