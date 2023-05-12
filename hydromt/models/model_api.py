@@ -672,7 +672,11 @@ class Model(object, metaclass=ABCMeta):
             if isfile(config_fn):
                 cfdict = self._configread(config_fn)
                 self.logger.debug(f"{prefix} config read from {config_fn}")
-            elif self._root is not None and not isabs(config_fn) and isfile(join(self._root, config_fn)):
+            elif (
+                self._root is not None
+                and not isabs(config_fn)
+                and isfile(join(self._root, config_fn))
+            ):
                 cfdict = self._configread(join(self.root, config_fn))
                 self.logger.debug(
                     f"{prefix} config read from {join(self.root,config_fn)}"
@@ -682,7 +686,7 @@ class Model(object, metaclass=ABCMeta):
                 self.logger.debug(f"{prefix} config read from {abspath(config_fn)}")
             else:  # skip for missing default
                 self.logger.error(f"{prefix} config file not found at {config_fn}")
-                
+
         self._config = cfdict
 
     def write_config(
