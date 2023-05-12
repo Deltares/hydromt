@@ -14,7 +14,6 @@ dependencies:
   - entrypoints
   - fsspec
   - gcsfs
-  - fiona == 1.8.22 # tmp pin because of incorrect CRS parsing
   - gdal>=3.1
   - geopandas>=0.10
   - netcdf4

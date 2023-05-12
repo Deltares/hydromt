@@ -15,7 +15,6 @@ dependencies:
   - dask
   - descartes # to run examples
   - entrypoints
-  - fiona == 1.8.22 # tmp pin because of incorrect CRS parsing
   - flit>=3.4
   - fsspec
   - gcsfs
