@@ -1,12 +1,15 @@
-FROM condaforge/mambaforge:23.1.0-1 
-COPY hydromt /hydromt/hydromt/
-COPY envs /hydromt/envs
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.6.4
+
+RUN apt-get update && apt-get install libgdal-dev gcc lzma-dev python3-dev python3-pip -y --fix-missing
+
+COPY hydromt /hydromt/hydromt
+COPY requirements.txt /hydromt/requirements.txt
 COPY README.rst /hydromt/
+COPY pyproject.toml /hydromt/pyproject.toml
 WORKDIR /hydromt
-RUN groupadd -r hydromt && useradd -r -g hydromt hydromt
 
-RUN mamba env create -f ./envs/hydromt-dev.yml 
-RUN mamba install hydromt -c conda-forge -y 
-USER hydromt 
 
-ENTRYPOINT ["mamba", "run", "-n","hydromt-dev", "hydromt"]
+RUN pip install -r requirements.txt
+RUN pip install .
+
+ENTRYPOINT ["hydromt"]
