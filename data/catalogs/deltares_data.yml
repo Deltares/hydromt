@@ -1,6 +1,6 @@
 meta:
   root: p:/wflow_global/hydromt
-  version: 2023.2
+  version: 2023.3
 
 basin_atlas_level12_v10: 
   crs: 4326
@@ -1303,10 +1303,11 @@ merit_hydro_ihu_30sec_v1.0:
       y: 6000
   meta:
     category: topography
-    paper_doi: 10.5281/zenodo.5166932
-    paper_ref: Eilander et al. (2020)
+    paper_doi: 10.5194/hess-2020-582
+    paper_ref: Eilander et al. (2021)
     source_license: ODC-By 1.0
     source_url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
+    source_doi: 10.5281/zenodo.5166932
     source_version: 1.0
   path: topography/merit_hydro_ihu/30sec/*.tif
   rename:
@@ -1318,6 +1319,17 @@ merit_hydro_ihu_30sec_v1.0:
     30sec_rivlen: rivlen
     30sec_rivslp: rivslp
 
+merit_hydro_ihu_index:
+  crs: 4326
+  data_type: GeoDataFrame
+  driver: vector
+  meta:
+    category: topography
+    paper_doi: 10.5194/hess-25-5287-2021
+    paper_ref: Eilander et al. (2021)
+    source_license: CC-BY-NC 4.0
+  path: topography/merit_hydro_ihu/30sec/basins.gpkg
+
 merit_hydro_index:
   alias: merit_hydro_index_v1.0
 merit_hydro_index_v1.0:
@@ -1326,8 +1338,8 @@ merit_hydro_index_v1.0:
   driver: vector
   meta:
     category: topography
-    paper_doi: 10.5194/hess-2020-582
-    paper_ref: Eilander et al. (in review)
+    paper_doi: 10.5194/hess-25-5287-2021
+    paper_ref: Eilander et al. (2021)
     source_license: CC-BY-NC 4.0
   path: topography/merit_hydro/basin_index.fgb
 

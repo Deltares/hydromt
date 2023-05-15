@@ -154,8 +154,21 @@ class DataCatalog(object):
     def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
         # get predefined_catalogs
         urlpath = self._url if urlpath is None else urlpath
-        # TODO cache predefined catalogs
-        self._catalogs = _yml_from_uri_or_path(urlpath)
+        cache_path = join(self._cache_dir, basename(urlpath))
+        try:
+            # download file locally; overwrite existing file
+            _copyfile(urlpath, cache_path)
+        except Exception:  # if offline
+            self.logger.warning(
+                "Downloading the predefined catalogs failed; check your internet connection"
+            )
+            pass
+        if isfile(cache_path):
+            self._catalogs = _yml_from_uri_or_path(cache_path)
+        if self._catalogs is None:
+            raise ConnectionError(
+                "Predefined catalogs not found; check your internet connection."
+            )
         return self._catalogs
 
     def from_artifacts(
@@ -468,6 +481,7 @@ class DataCatalog(object):
         source_names: List = [],
         unit_conversion: bool = True,
         meta: Dict = {},
+        append: bool = False,
     ) -> None:
         """Export a data slice of each dataset and a data_catalog.yml file to disk.
 
@@ -481,23 +495,44 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         source_names: list, optional
-            List of source names to export
+            List of source names to export, by default None in which case all sources are exported.
+            Specific variables can be selected by appending them to the source name in square brackets.
+            For example, to export all variables of 'source_name1' and only 'var1' and 'var2' of 'source_name'
+            use source_names=['source_name1', 'source_name2[var1,var2]']
         unit_conversion: boolean, optional
             If False skip unit conversion when parsing data from file, by default True.
         meta: dict, optional
             key-value pairs to add to the data catalog meta section, such as 'version', by default empty.
+        append: bool, optional
+            If True, append to existing data catalog, by default False.
         """
         data_root = abspath(data_root)
         if not os.path.isdir(data_root):
             os.makedirs(data_root)
 
         # create copy of data with selected source names
-        sources = copy.deepcopy(self.sources)
+        source_vars = {}
         if len(source_names) > 0:
-            sources = {n: sources[n] for n in source_names}
+            sources = {}
+            for name in source_names:
+                # deduce variables from name
+                if "[" in name:
+                    variables = name.split("[")[-1].split("]")[0].split(",")
+                    name = name.split("[")[0]
+                    source_vars[name] = variables
+                sources[name] = copy.deepcopy(self.sources[name])
+        else:
+            sources = copy.deepcopy(self.sources)
+
+        # read existing data catalog if it exists
+        fn = join(data_root, "data_catalog.yml")
+        if isfile(fn) and append:
+            self.logger.info(f"Appending existing data catalog {fn}")
+            sources_out = DataCatalog(fn).sources
+        else:
+            sources_out = {}
 
         # export data and update sources
-        sources_out = {}
         for key, source in sources.items():
             try:
                 # read slice of source and write to file
@@ -510,6 +545,7 @@ class DataCatalog(object):
                 fn_out, driver = source.to_file(
                     data_root=data_root,
                     data_name=key,
+                    variables=source_vars.get(key, None),
                     bbox=bbox,
                     time_tuple=time_tuple,
                     logger=self.logger,
@@ -529,6 +565,10 @@ class DataCatalog(object):
                 source.filesystem = "local"
                 source.kwargs = {}
                 source.rename = {}
+                if key in sources_out:
+                    self.logger.warning(
+                        f"{key} already exists in data catalog and is overwritten."
+                    )
                 sources_out[key] = source
             except FileNotFoundError:
                 self.logger.warning(f"{key} file not found at {source.path}")
@@ -536,12 +576,11 @@ class DataCatalog(object):
         # write data catalog to yml
         data_catalog_out = DataCatalog()
         data_catalog_out._sources = sources_out
-        fn = join(data_root, "data_catalog.yml")
         data_catalog_out.to_yml(fn, root="auto", meta=meta)
 
     def get_rasterdataset(
         self,
-        path_or_key: str,
+        data_like: Union[str, Path, xr.Dataset, xr.DataArray],
         bbox: List = None,
         geom: gpd.GeoDataFrame = None,
         zoom_level: int | tuple = None,
@@ -552,21 +591,21 @@ class DataCatalog(object):
         single_var_as_array: bool = True,
         **kwargs,
     ) -> xr.Dataset:
-        """Returns a clipped, sliced and unified RasterDataset from the data catalog.
+        """Returns a clipped, sliced and unified RasterDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` and `align` arguments.
         To slice the data to the time period of interest, provide the `time_tuple` argument.
-        To return only the dataset variables of interest and check their presence,
-        provide the `variables` argument.
+        To return only the dataset variables of interest provide the `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as :py:class:`xarray.DataArray` rather than :py:class:`xarray.Dataset`.
 
         Arguments
         ---------
-        path_or_key: str
-            Data catalog key. If a path to a raster file is provided it will be added
+        data_like: str, Path, xr.Dataset, xr.Datarray
+            Data catalog key, path to raster file or raster xarray data object.
+            If a path to a raster file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
@@ -595,14 +634,20 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             RasterDataset
         """
-        if path_or_key not in self.sources and exists(abspath(path_or_key)):
-            path = str(abspath(path_or_key))
-            name = basename(path_or_key).split(".")[0]
+        if isinstance(data_like, (xr.DataArray, xr.Dataset)):
+            return data_like
+        elif not isinstance(data_like, (str, Path)):
+            raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
+
+        if data_like not in self.sources and exists(abspath(data_like)):
+            path = str(abspath(data_like))
+            name = basename(data_like).split(".")[0]
             self.update(**{name: RasterDatasetAdapter(path=path, **kwargs)})
-        elif path_or_key in self.sources:
-            name = path_or_key
+        elif data_like in self.sources:
+            name = data_like
         else:
-            raise FileNotFoundError(f"No such file or catalog key: {path_or_key}")
+            raise FileNotFoundError(f"No such file or catalog key: {data_like}")
+
         self._used_data.append(name)
         source = self.sources[name]
         self.logger.info(
@@ -624,7 +669,7 @@ class DataCatalog(object):
 
     def get_geodataframe(
         self,
-        path_or_key: Union[str, Path],
+        data_like: Union[str, Path, gpd.GeoDataFrame],
         bbox: List = None,
         geom: gpd.GeoDataFrame = None,
         buffer: Union[float, int] = 0,
@@ -632,17 +677,17 @@ class DataCatalog(object):
         predicate: str = "intersects",
         **kwargs,
     ):
-        """Returns a clipped and unified GeoDataFrame (vector) from the data catalog.
+        """Returns a clipped and unified GeoDataFrame (vector).
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` and `align` arguments.
-        To return only the dataframe columns of interest and check their presence,
-        provide the `variables` argument.
+        To return only the dataframe columns of interest provide the `variables` argument.
 
         Arguments
         ---------
-        path_or_key: str
-            Data catalog key. If a path to a vector file is provided it will be added
+        data_like: str, Path, gpd.GeoDataFrame
+            Data catalog key, path to vector file or a vector geopandas object.
+            If a path to a vector file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
@@ -664,14 +709,20 @@ class DataCatalog(object):
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
-        if path_or_key not in self.sources and exists(abspath(path_or_key)):
-            path = str(abspath(path_or_key))
-            name = basename(path_or_key).split(".")[0]
+        if isinstance(data_like, gpd.GeoDataFrame):
+            return data_like
+        elif not isinstance(data_like, (str, Path)):
+            raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
+
+        if data_like not in self.sources and exists(abspath(data_like)):
+            path = str(abspath(data_like))
+            name = basename(data_like).split(".")[0]
             self.update(**{name: GeoDataFrameAdapter(path=path, **kwargs)})
-        elif path_or_key in self.sources:
-            name = path_or_key
+        elif data_like in self.sources:
+            name = data_like
         else:
-            raise FileNotFoundError(f"No such file or catalog key: {path_or_key}")
+            raise FileNotFoundError(f"No such file or catalog key: {data_like}")
+
         self._used_data.append(name)
         source = self.sources[name]
         self.logger.info(
@@ -689,7 +740,7 @@ class DataCatalog(object):
 
     def get_geodataset(
         self,
-        path_or_key: Union[Path, str],
+        data_like: Union[Path, str, xr.DataArray, xr.Dataset],
         bbox: List = None,
         geom: gpd.GeoDataFrame = None,
         buffer: Union[float, int] = 0,
@@ -698,21 +749,21 @@ class DataCatalog(object):
         single_var_as_array: bool = True,
         **kwargs,
     ) -> xr.Dataset:
-        """Returns a clipped, sliced and unified GeoDataset from the data catalog.
+        """Returns a clipped, sliced and unified GeoDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` and `align` arguments.
         To slice the data to the time period of interest, provide the `time_tuple` argument.
-        To return only the dataset variables of interest and check their presence,
-        provide the `variables` argument.
+        To return only the dataset variables of interest provide the `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as xarray.DataArray rather than Dataset.
 
         Arguments
         ---------
-        path_or_key: str
-            Data catalog key. If a path to a file is provided it will be added
+        data_like: str, Path, xr.Dataset, xr.DataArray
+            Data catalog key, path to geodataset file or geodataset xarray object.
+            If a path to a file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
@@ -737,14 +788,20 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             GeoDataset
         """
-        if path_or_key not in self.sources and exists(abspath(path_or_key)):
-            path = str(abspath(path_or_key))
-            name = basename(path_or_key).split(".")[0]
+        if isinstance(data_like, (xr.DataArray, xr.Dataset)):
+            return data_like
+        elif not isinstance(data_like, (str, Path)):
+            raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
+
+        if data_like not in self.sources and exists(abspath(data_like)):
+            path = str(abspath(data_like))
+            name = basename(data_like).split(".")[0]
             self.update(**{name: GeoDatasetAdapter(path=path, **kwargs)})
-        elif path_or_key in self.sources:
-            name = path_or_key
+        elif data_like in self.sources:
+            name = data_like
         else:
-            raise FileNotFoundError(f"No such file or catalog key: {path_or_key}")
+            raise FileNotFoundError(f"No such file or catalog key: {data_like}")
+
         self._used_data.append(name)
         source = self.sources[name]
         self.logger.info(
@@ -763,19 +820,45 @@ class DataCatalog(object):
 
     def get_dataframe(
         self,
-        path_or_key,
-        variables=None,
-        time_tuple=None,
+        data_like: Union[str, Path, pd.DataFrame],
+        variables: list = None,
+        time_tuple: tuple = None,
         **kwargs,
     ):
-        if path_or_key not in self.sources and exists(abspath(path_or_key)):
-            path = str(abspath(path_or_key))
-            name = basename(path_or_key).split(".")[0]
+        """Returns a unified and sliced DataFrame.
+
+        Parameters
+        ----------
+        data_like : str, Path, pd.DataFrame
+            Data catalog key, path to tabular data file or tabular pandas dataframe object.
+            If a path to a tabular data file is provided it will be added
+            to the data_catalog with its based on the file basename without extension.
+        variables : str or list of str, optional.
+            Names of GeoDataset variables to return. By default all dataset variables
+            are returned.
+        time_tuple : tuple of str, datetime, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned.
+
+        Returns
+        -------
+        pd.DataFrame
+            Tabular data
+        """
+        if isinstance(data_like, pd.DataFrame):
+            return data_like
+        elif not isinstance(data_like, (str, Path)):
+            raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
+
+        if data_like not in self.sources and exists(abspath(data_like)):
+            path = str(abspath(data_like))
+            name = basename(data_like).split(".")[0]
             self.update(**{name: DataFrameAdapter(path=path, **kwargs)})
-        elif path_or_key in self.sources:
-            name = path_or_key
+        elif data_like in self.sources:
+            name = data_like
         else:
-            raise FileNotFoundError(f"No such file or catalog key: {path_or_key}")
+            raise FileNotFoundError(f"No such file or catalog key: {data_like}")
+
         self._used_data.append(name)
         source = self.sources[name]
         self.logger.info(

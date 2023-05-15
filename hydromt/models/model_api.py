@@ -199,12 +199,14 @@ class Model(object, metaclass=ABCMeta):
             if self._CLI_ARGS["region"] not in opt:
                 opt = {self._CLI_ARGS["region"]: {}, **opt}
             opt[self._CLI_ARGS["region"]].update(region=region)
+
         # then loop over other methods
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write() call
             if method.startswith("write_"):
                 write = False
-            self._run_log_method(method, **opt[method])
+            kwargs = {} if opt[method] is None else opt[method]
+            self._run_log_method(method, **kwargs)
 
         # write
         if write:
@@ -275,7 +277,8 @@ class Model(object, metaclass=ABCMeta):
             # if any write_* functions are present in opt, skip the final self.write() call
             if method.startswith("write_"):
                 write = False
-            self._run_log_method(method, **opt[method])
+            kwargs = {} if opt[method] is None else opt[method]
+            self._run_log_method(method, **kwargs)
 
         # write
         if write:
@@ -669,8 +672,21 @@ class Model(object, metaclass=ABCMeta):
             if isfile(config_fn):
                 cfdict = self._configread(config_fn)
                 self.logger.debug(f"{prefix} config read from {config_fn}")
-            elif not self._read and prefix != "Default":  # skip for missing default
+            elif (
+                self._root is not None
+                and not isabs(config_fn)
+                and isfile(join(self._root, config_fn))
+            ):
+                cfdict = self._configread(join(self.root, config_fn))
+                self.logger.debug(
+                    f"{prefix} config read from {join(self.root,config_fn)}"
+                )
+            elif isfile(abspath(config_fn)):
+                cfdict = self._configread(abspath(config_fn))
+                self.logger.debug(f"{prefix} config read from {abspath(config_fn)}")
+            else:  # skip for missing default
                 self.logger.error(f"{prefix} config file not found at {config_fn}")
+
         self._config = cfdict
 
     def write_config(

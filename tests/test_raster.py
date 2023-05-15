@@ -111,7 +111,10 @@ def test_gdal(tmpdir):
 
 
 def test_attrs_errors(rioda):
-    rioda = rioda.rename({"x": "xxxx"})
+    rioda = rioda.rename({"x": "X"})
+    rioda.raster.set_spatial_dims()
+    assert rioda.raster.x_dim == "X"
+    rioda = rioda.rename({"X": "xxxx"})
     with pytest.raises(ValueError, match="dimension not found"):
         rioda.raster.set_spatial_dims()
     rioda = rioda.rename({"xxxx": "x", "y": "yyyy"})

@@ -168,25 +168,25 @@ class GridModel(GridMixin, Model):
     @property
     def res(self) -> Tuple[float, float]:
         """Returns the resolution of the model grid."""
-        if len(self._grid) > 0:
+        if len(self.grid) > 0:
             return self.grid.raster.res
 
     @property
     def transform(self):
         """Returns spatial transform of the model grid."""
-        if len(self._grid) > 0:
+        if len(self.grid) > 0:
             return self.grid.raster.transform
 
     @property
     def crs(self) -> Union[CRS, None]:
         """Returns coordinate reference system embedded in the model grid."""
-        if len(self._grid) > 0:
-            return CRS(self._grid.raster.crs)
+        if len(self.grid) > 0 and self.grid.raster.crs is not None:
+            return CRS(self.grid.raster.crs)
 
     @property
     def bounds(self) -> List[float]:
         """Returns the bounding box of the model grid."""
-        if len(self._grid) > 0:
+        if len(self.grid) > 0:
             return self.grid.raster.bounds
 
     @property
@@ -196,8 +196,13 @@ class GridModel(GridMixin, Model):
         if "region" in self.geoms:
             region = self.geoms["region"]
         elif len(self.grid) > 0:
-            crs = self.grid.raster.crs
-            if crs is None and hasattr(crs, "to_epsg"):
+            crs = self.crs
+            if crs is not None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         return region
+
+    def set_crs(self, crs: CRS) -> None:
+        """Set coordinate reference system of the model grid."""
+        if len(self.grid) > 0:
+            self.grid.raster.set_crs(crs)

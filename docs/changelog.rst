@@ -6,22 +6,38 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-
-unreleased
+Unreleased
 ==========
-
-Changed
--------
 
 Added
 -----
 
+Changed
+-------
+
 Fixed
 -----
+- Order of renaming variables in get_rasterdataset for x,y dimensions. PR #324
+
+Deprecated
+----------
 
 
-v0.7.0
-======
+v0.7.1 (14 April 2023)
+======================
+
+This release contains several small updates of the code. 
+Most prominently is the support for yml configuration files. 
+
+Added
+-----
+- Support for in-memory data like objects instead of source name or path in DataCatalog().get* methods. PR #313
+- Support for yaml configuration files. The support for ini files will be deprecated in the future. PR #292
+- Option to export individual variables from a data source and append to an existing data catalog in DataCatalog.export_data. PR #302
+
+
+v0.7.0 (22 February 2023)
+=========================
 
 This release contains several major updates of the code. These following updates might require small changes to your code:
  

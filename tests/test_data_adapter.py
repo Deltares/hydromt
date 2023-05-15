@@ -2,7 +2,7 @@
 """Tests for the hydromt.data_adapter submodule."""
 
 import pytest
-from os.path import join, dirname, abspath, isfile
+from os.path import join, dirname, abspath, isfile, exists
 import numpy as np
 import geopandas as gpd
 import pandas as pd
@@ -10,7 +10,9 @@ import xarray as xr
 import hydromt
 from hydromt import _compat as compat
 from hydromt.data_catalog import DataCatalog
+from hydromt.data_adapter import GeoDatasetAdapter
 import glob
+import tempfile
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -142,6 +144,23 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     assert da3.vector.crs.to_epsg() == 4326
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_geodataset("no_file.geojson")
+    # Test nc file writing to file
+    with tempfile.TemporaryDirectory() as td:
+        GeoDatasetAdapter(fn_nc).to_file(
+            data_root=td, data_name="test", driver="netcdf"
+        )
+        GeoDatasetAdapter(fn_nc).to_file(
+            data_root=td, data_name="test1", driver="netcdf", variables="test1"
+        )
+        GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
+    #     try:
+    #         GeoDatasetAdapter(fn_nc).to_file(
+    #             data_root=td, data_name="test", driver="unknown_driver"
+    #         )
+    #     except ValueError as e:
+    #         error = e.args[0]
+    # match = "GeoDataset: Driver unknown_driver unknown."
+    # assert match in error
 
 
 def test_geodataframe(geodf, tmpdir):
