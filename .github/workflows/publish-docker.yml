@@ -28,10 +28,17 @@ jobs:
             with:
                 username: ${{ secrets.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
+        - 
+            name: Docker meta
+            id: meta
+            uses: docker/metadata-action@v4
+            with:
+                images: deltares/hydromt
         -
             name: Build and push
             uses: docker/build-push-action@v4
             with:
                 context: .
                 push: true
-                tags: deltares/hydromt
+                tags: ${{ steps.meta.outputs.tags }}
+                labels: ${{ steps.meta.outputs.labels }}
