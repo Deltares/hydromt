@@ -281,12 +281,31 @@ def test_gridmodel_setup(tmpdir):
         mode="w",
     )
     # Add region
+    # Try first without adding mask variable
     mod.setup_grid(
         {"subbasin": [12.319, 46.320], "uparea": 50},
         res=1000,
         crs="utm",
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
+        add_mask=False,
+    )
+    assert "mask" not in mod.grid
+    assert mod.crs.to_epsg() == 32633
+    assert mod.grid.raster.dims == ("y", "x")
+    assert mod.grid.raster.shape == (43, 57)
+
+    # Reinitialise mod._grid to re-build
+    mod._grid = xr.Dataset()
+
+    # Try now with adding mask
+    mod.setup_grid(
+        {"subbasin": [12.319, 46.320], "uparea": 50},
+        res=1000,
+        crs="utm",
+        hydrography_fn="merit_hydro",
+        basin_index_fn="merit_hydro_index",
+        add_mask=True,
     )
     # Add data with setup_* methods
     mod.setup_grid_from_constant(
@@ -304,13 +323,13 @@ def test_gridmodel_setup(tmpdir):
         raster_fn="merit_hydro",
         variables=["elevtn", "basins"],
         reproject_method=["average", "mode"],
-        mask_name="grid",
+        mask_name="mask",
     )
     mod.setup_grid_from_raster(
         raster_fn="vito",
         fill_method="nearest",
         reproject_method="mode",
-        rmdict={"vito": "landuse"},
+        rename={"vito": "landuse"},
     )
     mod.setup_grid_from_raster_reclass(
         raster_fn="vito",
@@ -324,17 +343,17 @@ def test_gridmodel_setup(tmpdir):
         variables=["waterbody_id", "Depth_avg"],
         nodata=[-1, -999.0],
         rasterize_method="value",
-        rmdict={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
+        rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
     )
     mod.setup_grid_from_vector(
         vector_fn="hydro_lakes",
         rasterize_method="fraction",
-        rmdict={"hydro_lakes": "water_frac"},
+        rename={"hydro_lakes": "water_frac"},
     )
 
     # Checks
     assert len(mod.grid) == 10
-    for v in ["grid", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
+    for v in ["mask", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
         assert v in mod.grid
     assert mod.grid["lake_depth"].raster.nodata == -999.0
     assert np.unique(mod.grid["c2"]).size == 2

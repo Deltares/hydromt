@@ -37,7 +37,7 @@ class MeshMixin(object):
         fill_method: Optional[str] = None,
         resampling_method: Optional[str] = "mean",
         all_touched: Optional[bool] = True,
-        rmdict: Optional[Dict] = dict(),
+        rename: Optional[Dict] = dict(),
     ) -> List[str]:
         """
         HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to mesh object.
@@ -65,7 +65,7 @@ class MeshMixin(object):
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
-        rmdict: dict, optional
+        rename: dict, optional
             Dictionary to rename variable names in raster_fn before adding to mesh {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
 
         Returns
@@ -91,7 +91,7 @@ class MeshMixin(object):
         )
         # Rename variables
         rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
-        ds_sample = ds_sample.rename(rm_dict).rename(rmdict)
+        ds_sample = ds_sample.rename(rm_dict).rename(rename)
         # Convert to UgridDataset
         uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
 
@@ -108,7 +108,7 @@ class MeshMixin(object):
         fill_nodata: Optional[str] = None,
         resampling_method: Optional[Union[str, list]] = "mean",
         all_touched: Optional[bool] = True,
-        rmdict: Optional[Dict] = dict(),
+        rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
         """
@@ -142,7 +142,7 @@ class MeshMixin(object):
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
-        rmdict: dict, optional
+        rename: dict, optional
             Dictionary to rename variable names in reclass_variables before adding to mesh {'name_in_reclass_table': 'name_in_mesh'}. By default empty.
         """
         self.logger.info(
@@ -181,7 +181,7 @@ class MeshMixin(object):
             f"{var}_{mtd}": var
             for var, mtd in zip(reclass_variables, resampling_method)
         }
-        ds_sample = ds_sample.rename(rm_dict).rename(rmdict)
+        ds_sample = ds_sample.rename(rm_dict).rename(rename)
         ds_sample = ds_sample[reclass_variables]
         # Convert to UgridDataset
         uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)

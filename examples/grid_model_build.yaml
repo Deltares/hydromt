@@ -28,7 +28,7 @@ setup_grid_from_raster2:
   raster_fn: vito
   fill_method: nearest
   reproject_method: mode
-  rmdict:
+  rename:
     vito: landuse
 
 setup_grid_from_raster_reclass:
@@ -48,14 +48,14 @@ setup_grid_from_vector:
   - -1
   - -999.0
   rasterize_method: value
-  rmdict:
+  rename:
     waterbody_id: lake_id
     Detph_avg: lake_depth
 
 setup_grid_from_vector2:
   vector_fn: hydro_lakes
   rasterize_method: fraction
-  rmdict:
+  rename:
     hydro_lakes: water_frac
   
 write:

@@ -36,7 +36,7 @@ class GridMixin(object):
         name: str,
         dtype: Optional[str] = "float32",
         nodata: Optional[Union[int, float]] = None,
-        mask_name: Optional[str] = "grid",
+        mask_name: Optional[str] = "mask",
     ) -> List[str]:
         """
         HYDROMT CORE METHOD: Adds a grid based on a constant value.
@@ -52,7 +52,7 @@ class GridMixin(object):
         nodata: int, float, optional
             Nodata value. By default infered from dtype.
         mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'grid'. Use None to disable masking.
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
 
         Returns
         -------
@@ -86,8 +86,8 @@ class GridMixin(object):
         variables: Optional[List] = None,
         fill_method: Optional[str] = None,
         reproject_method: Optional[Union[List, str]] = "nearest",
-        mask_name: Optional[str] = "grid",
-        rmdict: Optional[Dict] = dict(),
+        mask_name: Optional[str] = "mask",
+        rename: Optional[Dict] = dict(),
     ) -> List[str]:
         """
         HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
@@ -113,8 +113,8 @@ class GridMixin(object):
             See rasterio.warp.reproject for existing methods, by default 'nearest'.
             Can provide a list corresponding to ``variables``.
         mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'grid'. Use None to disable masking.
-        rmdict: dict, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+        rename: dict, optional
             Dictionary to rename variable names in raster_fn before adding to grid {'name_in_raster_fn': 'name_in_grid'}. By default empty.
 
         Returns
@@ -154,7 +154,7 @@ class GridMixin(object):
             if mask_name in self.grid:
                 ds_out = ds_out.raster.mask(self.grid[mask_name])
         # Add to grid
-        self.set_grid(ds_out.rename(rmdict))
+        self.set_grid(ds_out.rename(rename))
 
         return list(ds_out.data_vars.keys())
 
@@ -166,8 +166,8 @@ class GridMixin(object):
         variable: Optional[str] = None,
         fill_method: Optional[str] = None,
         reproject_method: Optional[Union[List, str]] = "nearest",
-        mask_name: Optional[str] = "grid",
-        rmdict: Optional[Dict] = dict(),
+        mask_name: Optional[str] = "mask",
+        rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
         """
@@ -195,8 +195,8 @@ class GridMixin(object):
             See rasterio.warp.reproject for existing methods, by default "nearest".
             Can provide a list corresponding to ``reclass_variables``.
         mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'grid'. Use None to disable masking.
-        rmdict: dict, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+        rename: dict, optional
             Dictionary to rename variable names in reclass_variables before adding to grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
 
         Returns
@@ -248,7 +248,7 @@ class GridMixin(object):
             if mask_name in self.grid:
                 ds_vars = ds_vars.raster.mask(self.grid[mask_name])
         # Add to maps
-        self.set_grid(ds_vars.rename(rmdict))
+        self.set_grid(ds_vars.rename(rename))
 
         return list(ds_vars.data_vars.keys())
 
@@ -258,8 +258,8 @@ class GridMixin(object):
         variables: Optional[Union[List, str]] = None,
         nodata: Optional[Union[List, int, float]] = -1,
         rasterize_method: Optional[str] = "value",
-        mask_name: Optional[str] = "grid",
-        rmdict: Optional[Dict] = dict(),
+        mask_name: Optional[str] = "mask",
+        rename: Optional[Dict] = dict(),
         all_touched: Optional[bool] = True,
     ) -> List[str]:
         """
@@ -283,8 +283,8 @@ class GridMixin(object):
             If "fraction", the fraction of the grid cell covered by the vector file is returned.
             If "area", the area of the grid cell covered by the vector file is returned.
         mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'grid'. Use None to disable masking.
-        rmdict: dict, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+        rename: dict, optional
             Dictionary to rename variable names in variables before adding to grid {'name_in_variables': 'name_in_grid'}.
             To rename with method fraction or area use {'vector_fn': 'name_in_grid'}. By default empty.
         all_touched : bool, optional
@@ -328,8 +328,8 @@ class GridMixin(object):
                     all_touched=all_touched,
                 )
                 # Rename
-                if var in rmdict.keys():
-                    var = rmdict[var]
+                if var in rename.keys():
+                    var = rename[var]
                 # Masking
                 if mask_name is not None:
                     if mask_name in self.grid:
@@ -349,8 +349,8 @@ class GridMixin(object):
                 nodata=nodata,
             )
             # Rename
-            if vector_fn in rmdict.keys():
-                da.name = rmdict[vector_fn]
+            if vector_fn in rename.keys():
+                da.name = rename[vector_fn]
             # Masking
             if mask_name is not None:
                 if mask_name in self.grid:
@@ -405,11 +405,14 @@ class GridMixin(object):
             data = data.to_dataset()
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
-        for dvar in data.data_vars:
-            if dvar in self._grid:
-                if self._read:
-                    self.logger.warning(f"Replacing grid map: {dvar}")
-            self._grid[dvar] = data[dvar]
+        if len(self._grid) == 0:  # new data
+            self._grid = data
+        else:
+            for dvar in data.data_vars:
+                if dvar in self._grid:
+                    if self._read:
+                        self.logger.warning(f"Replacing grid map: {dvar}")
+                self._grid[dvar] = data[dvar]
 
     def read_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
         """Read model grid data at <root>/<fn> and add to grid property
@@ -474,6 +477,7 @@ class GridModel(GridMixin, Model):
         crs: int = None,
         hydrography_fn: Optional[str] = None,
         basin_index_fn: Optional[str] = None,
+        add_mask: bool = True,
     ) -> xr.DataArray:
         """
         HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
@@ -481,8 +485,8 @@ class GridModel(GridMixin, Model):
         An 2D regular grid will be created from a geometry (geom_fn) or bbox. If an existing
         grid is given, then no new grid will be generated.
 
-        Adds/Updates model layers:
-        * **grid** grid mask: add grid mask to grid object
+        Adds/Updates model layers (if add_mask):
+        * **mask** grid mask: add grid mask to grid object
 
         Parameters
         ----------
@@ -561,14 +565,18 @@ class GridModel(GridMixin, Model):
             coords=coords,
             nodata=1,
             dtype=np.uint8,
-            name="grid",
+            name="mask",
             attrs={},
             crs=geom.crs,
             lazy=False,
         )
         # Create geometry_mask with geom
         grid = grid.raster.geometry_mask(geom, all_touched=True)
-        grid.name = "grid"
+        grid.name = "mask"
+        # Remove mask variable mask from grid if not add_mask
+        if not add_mask:
+            grid = grid.to_dataset()
+            grid = grid.drop_vars("mask")
 
         # Add region and grid to model
         self.set_geoms(geom, "region")
@@ -628,7 +636,7 @@ class GridModel(GridMixin, Model):
     @property
     def crs(self) -> Union[CRS, None]:
         """Returns coordinate reference system embedded in the model grid."""
-        if len(self.grid) > 0 and self.grid.raster.crs is not None:
+        if self.grid.raster.crs is not None:
             return CRS(self.grid.raster.crs)
 
     @property
