@@ -804,7 +804,7 @@ class Model(object, metaclass=ABCMeta):
         split_dataset: Optional[bool] = True,
     ) -> List[str]:
         """
-        This component adds data variable(s) from ``raster_fn`` to maps object.
+        HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to maps object.
 
         If raster is a dataset, all variables will be added unless ``variables`` list is specified.
 
@@ -866,7 +866,7 @@ class Model(object, metaclass=ABCMeta):
         **kwargs,
     ) -> List[str]:
         """
-        This component adds data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 

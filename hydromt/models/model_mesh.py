@@ -40,7 +40,7 @@ class MeshMixin(object):
         rmdict: Optional[Dict] = dict(),
     ) -> List[str]:
         """
-        This component adds data variable(s) from ``raster_fn`` to mesh object.
+        HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to mesh object.
 
         Raster data is interpolated to the mesh grid using the ``resampling_method``.
         If raster is a dataset, all variables will be added unless ``variables`` list is specified.
@@ -112,7 +112,7 @@ class MeshMixin(object):
         **kwargs,
     ) -> List[str]:
         """
-        This component adds data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        HYDROMT CORE METHOD: Add data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         The reclassified raster data are subsequently interpolated to the mesh using ``resampling_method``.
 
@@ -309,7 +309,9 @@ class MeshModel(MeshMixin, Model):
         res: Optional[float] = None,
         crs: int = None,
     ) -> xu.UgridDataset:
-        """Creates an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
+        """
+        HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
+
         An 2D unstructured mesh will be created as 2D rectangular grid from a geometry (geom_fn) or bbox. If an existing
         2D mesh is given, then no new mesh will be generated
 

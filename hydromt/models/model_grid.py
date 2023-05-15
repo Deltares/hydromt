@@ -39,7 +39,7 @@ class GridMixin(object):
         mask_name: Optional[str] = "grid",
     ) -> List[str]:
         """
-        Adds a grid based on a constant value.
+        HYDROMT CORE METHOD: Adds a grid based on a constant value.
 
         Parameters
         ----------
@@ -90,7 +90,7 @@ class GridMixin(object):
         rmdict: Optional[Dict] = dict(),
     ) -> List[str]:
         """
-        This component adds data variable(s) from ``raster_fn`` to grid object.
+        HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
 
         If raster is a dataset, all variables will be added unless ``variables`` list is specified.
 
@@ -171,7 +171,7 @@ class GridMixin(object):
         **kwargs,
     ) -> List[str]:
         """
-        This component adds data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 
@@ -263,7 +263,7 @@ class GridMixin(object):
         all_touched: Optional[bool] = True,
     ) -> List[str]:
         """
-        This component adds data variable(s) to grid object by rasterizing the data from ``vector_fn``.
+        HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
         Several type of rasterization are possible:
             * "fraction": the fraction of the grid cell covered by the vector shape is returned.
             * "area": the area of the grid cell covered by the vector shape is returned.
@@ -475,7 +475,9 @@ class GridModel(GridMixin, Model):
         hydrography_fn: Optional[str] = None,
         basin_index_fn: Optional[str] = None,
     ) -> xr.DataArray:
-        """Creates a 2D regular grid or reads an existing grid.
+        """
+        HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
+
         An 2D regular grid will be created from a geometry (geom_fn) or bbox. If an existing
         grid is given, then no new grid will be generated.
 
