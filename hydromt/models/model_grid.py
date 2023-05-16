@@ -478,6 +478,7 @@ class GridModel(GridMixin, Model):
         hydrography_fn: Optional[str] = None,
         basin_index_fn: Optional[str] = None,
         add_mask: bool = True,
+        align: bool = True,
     ) -> xr.DataArray:
         """
         HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
@@ -504,10 +505,18 @@ class GridModel(GridMixin, Model):
             EPSG code of the model or "utm" to let hydromt find the closest projected crs. If None using the one from region.
         hydrography_fn : str
             Name of data source for hydrography data. Required if region is of kind 'basin', 'subbasin' or 'interbasin'.
+
+            * Required variables: ['flwdir'] and any other 'snapping' variable required to define the region.
+
+            * Optional variables: ['basins'] if the `region` is based on a (sub)(inter)basins without a 'bounds' argument.
         basin_index_fn : str
             Name of data source with basin (bounding box) geometries associated with
             the 'basins' layer of `hydrography_fn`. Only required if the `region` is
             based on a (sub)(inter)basins without a 'bounds' argument.
+        add_mask : bool, optional
+            Add mask variable to grid object, by default True.
+        align : bool, optional
+            If True (default), align target transform to resolution.
 
         Returns
         -------
@@ -518,47 +527,97 @@ class GridModel(GridMixin, Model):
 
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
-            if not isinstance(res, (int, float)):
-                raise ValueError(
-                    "res argument required for kind 'bbox', 'geom', 'basin', 'subbasin' or 'interbasin'"
-                )
-            region = self.setup_region(
-                region,
-                hydrography_fn=hydrography_fn,
-                basin_index_fn=basin_index_fn,
+            # Do not parse_region for grid as we want to allow for more (file) formats
+            kind, region = workflows.parse_region(region, logger=self.logger)
+        elif kind != "grid":
+            raise ValueError(
+                f"Region for grid must be of kind [grid, bbox, geom, basin, subbasin, interbasin], kind {kind} not understood."
             )
-            geom = self.geoms["region"]
+
+        # Derive xcoords, ycoords and geom for the different kind options
+        if kind in ["bbox", "geom"]:
+            if not isinstance(res, (int, float)):
+                raise ValueError("res argument required for kind 'bbox', 'geom'")
+            if kind == "bbox":
+                bbox = region["bbox"]
+                geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+            elif kind == "geom":
+                geom = region["geom"]
+                if geom.crs is None:
+                    raise ValueError('Model region "geom" has no CRS')
             if crs is not None:
                 crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
                 geom = geom.to_crs(crs)
             # Generate grid based on res for region bbox
             # TODO add warning on res value if crs is projected or not?
-            xmin, ymin, xmax, ymax = geom.total_bounds
-            xcoords = np.arange(xmin + res / 2, xmax - res / 2, res)
-            ycoords = np.arange(ymax - res / 2, ymin + res / 2, -res)
+            w, s, e, n = geom.total_bounds
+            if align:
+                align = abs(res)
+                # align grid
+                xmin = (w // align) * align
+                ymin = (s // align) * align
+                xmax = (e // align + 1) * align
+                ymax = (n // align + 1) * align
+            xcoords = np.arange(xmin, xmax, res)
+            ycoords = np.arange(ymax, ymin, -res)
+        elif kind in ["basin", "subbasin", "interbasin"]:
+            # retrieve global hydrography data (lazy!)
+            ds_hyd = self.data_catalog.get_rasterdataset(hydrography_fn)
+            if "bounds" not in region:
+                region.update(basin_index=self.data_catalog[basin_index_fn])
+            # get basin geometry
+            geom, xy = workflows.get_basin_geometry(
+                ds=ds_hyd,
+                kind=kind,
+                logger=self.logger,
+                **region,
+            )
+            # get ds_hyd again but clipped to geom, one variable is enough
+            ds_hyd = self.data_catalog.get_rasterdataset(
+                hydrography_fn, geom=geom, variables=["flwdir"]
+            )
+            if not isinstance(res, (int, float)):
+                self.logger.info(
+                    f"res argument not defined, using resolution of hydrography_fn {ds_hyd.raster.res}"
+                )
+                res = ds_hyd.raster.res
+            # Reproject ds_hyd based on crs and grid and align, method is not important only coords will be used
+            # TODO add warning on res value if crs is projected or not?
+            if res != ds_hyd.raster.res and crs != ds_hyd.raster.crs:
+                ds_hyd = ds_hyd.raster.reproject(
+                    dst_crs=crs,
+                    dst_res=res,
+                    align=align,
+                )
+            # Get xycoords, geom
+            xcoords = ds_hyd.raster.xcoords.values
+            ycoords = ds_hyd.raster.ycoords.values
+            if geom.crs != ds_hyd.raster.crs:
+                crs = ds_hyd.raster.crs
+                geom = geom.to_crs(crs)
         elif kind == "grid":
             # Support more formats for grid input (netcdf, zarr, io.open_raster)
             fn = region[kind]
-            if fn.endswith(".nc"):
-                da_like = xr.open_dataset(fn)
-            elif fn.endswith(".zarr"):
-                da_like = xr.open_zarr(fn)
+            if isinstance(fn, (xr.DataArray, xr.Dataset)):
+                da_like = fn
             else:
-                da_like = io.open_raster(fn)
+                if fn.endswith(".nc"):
+                    da_like = xr.open_dataset(fn)
+                elif fn.endswith(".zarr"):
+                    da_like = xr.open_zarr(fn)
+                else:
+                    da_like = io.open_raster(fn)
             # Get xycoords, geom
             xcoords = da_like.raster.xcoords.values
             ycoords = da_like.raster.ycoords.values
-            bbox = da_like.raster.vector_grid().total_bounds
-            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=da_like.raster.crs)
-            if crs is not None:
+            geom = da_like.raster.box
+            if crs is not None or res is not None:
                 self.logger.warning(
-                    f"For region kind 'grid', the gris crs is used and not user-defined crs {crs}"
+                    f"For region kind 'grid', the gris crs/res are used and not user-defined crs {crs} or res {res}"
                 )
             crs = da_like.raster.crs
-        else:
-            raise ValueError(
-                f"Region for grid must of kind [grid, bbox, geom, basin, subbasin, interbasin], kind {kind} not understood."
-            )
+
+        # Instantiate grid object
         coords = {"y": ycoords, "x": xcoords}
         # Generate grid using hydromt full method
         grid = raster.full(

@@ -272,6 +272,76 @@ def test_gridmodel(grid_model, tmpdir):
     assert equal, errors
 
 
+def test_setup_grid(tmpdir, demda):
+    # Initialize model
+    model = GridModel(
+        root=join(tmpdir, "grid_model"),
+        data_libs=["artifact_data"],
+        mode="w",
+    )
+    # wrong region kind
+    with pytest.raises(ValueError):
+        model.setup_grid({"lumped_model": "test_model"})
+    # bbox
+    with pytest.raises(
+        ValueError, match="res argument required for kind 'bbox', 'geom'"
+    ):
+        model.setup_grid({"bbox": [12.05, 45.30, 12.85, 45.65]})
+    model.setup_grid(
+        region={"bbox": [12.05, 45.30, 12.85, 45.65]},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    assert "mask" not in model.grid
+    assert model.crs.to_epsg() == 4326
+    assert model.grid.raster.dims == ("y", "x")
+    assert model.grid.raster.shape == (9, 17)
+    # TODO check if grid.raster.bounds should be equal to bbox in that particular case?
+    grid = model.grid
+    model._grid = xr.Dataset()  # remove old grid
+
+    # geom
+    region = model._geoms.pop("region")
+    model.setup_grid(
+        region={"geom": region},
+        res=0.05,
+        add_mask=False,
+    )
+    gpd.testing.assert_geodataframe_equal(region, model.region)
+    xr.testing.assert_allclose(grid, model.grid)
+    model._grid = xr.Dataset()  # remove old grid
+
+    model.setup_grid(
+        region={"geom": region},
+        res=10000,
+        crs="utm",
+        add_mask=True,
+    )
+    assert "mask" in model.grid
+    assert model.crs.to_epsg() == 32633
+    assert model.grid.raster.res == (10000, -10000)
+    model._grid = xr.Dataset()  # remove old grid
+
+    # grid
+    grid_fn = str(tmpdir.join("grid.tif"))
+    demda.raster.to_raster(grid_fn)
+    model.setup_grid({"grid": grid_fn})
+    assert np.all(demda.raster.bounds == model.region.total_bounds)
+    model._grid = xr.Dataset()  # remove old grid
+
+    # basin
+    model.setup_grid(
+        region={"subbasin": [12.319, 46.320], "uparea": 50},
+        res=1000,
+        crs="utm",
+        hydrography_fn="merit_hydro",
+        basin_index_fn="merit_hydro_index",
+    )
+    assert not np.all(model.grid["mask"].values == True)
+    assert model.grid.raster.shape == (47, 61)
+
+
 def test_gridmodel_setup(tmpdir):
     # Initialize model
     dc_param_fn = join(DATADIR, "parameters_data.yml")
@@ -281,28 +351,9 @@ def test_gridmodel_setup(tmpdir):
         mode="w",
     )
     # Add region
-    # Try first without adding mask variable
     mod.setup_grid(
         {"subbasin": [12.319, 46.320], "uparea": 50},
-        res=1000,
-        crs="utm",
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
-        add_mask=False,
-    )
-    assert "mask" not in mod.grid
-    assert mod.crs.to_epsg() == 32633
-    assert mod.grid.raster.dims == ("y", "x")
-    assert mod.grid.raster.shape == (43, 57)
-
-    # Reinitialise mod._grid to re-build
-    mod._grid = xr.Dataset()
-
-    # Try now with adding mask
-    mod.setup_grid(
-        {"subbasin": [12.319, 46.320], "uparea": 50},
-        res=1000,
-        crs="utm",
+        res=0.008333,
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
         add_mask=True,
