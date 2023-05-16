@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT"""
 
-from abc import ABCMeta
-import os
 import glob
-from os.path import join, isdir, isfile, abspath, dirname, basename, isabs
-import xarray as xr
-import numpy as np
-import geopandas as gpd
-from geopandas.testing import assert_geodataframe_equal
-from shapely.geometry import box
-import logging
-from pathlib import Path
 import inspect
-import warnings
-from pyproj import CRS
+import logging
+import os
 import typing
-from typing import Any, Dict, List, Tuple, Union, Optional
+import warnings
+from abc import ABCMeta
+from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ..data_catalog import DataCatalog
+import geopandas as gpd
+import numpy as np
+import xarray as xr
+from geopandas.testing import assert_geodataframe_equal
+from pyproj import CRS
+from shapely.geometry import box
+
 from .. import config, log, workflows
+from ..data_catalog import DataCatalog
 from ..raster import GEO_MAP_COORD
 
 __all__ = ["Model"]

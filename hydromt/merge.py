@@ -1,5 +1,5 @@
-import numpy as np
 import geopandas as gpd
+import numpy as np
 import rasterio
 from pyproj import CRS
 from shapely.geometry import box

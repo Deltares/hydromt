@@ -17,19 +17,20 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import sys
 import shutil
+import sys
+from distutils.dir_util import copy_tree
+
 import numpy as np
 import sphinx_autosummary_accessors
 from click.testing import CliRunner
-from distutils.dir_util import copy_tree
-
-# here = os.path.dirname(__file__)
-# sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
 
 import hydromt
 from hydromt import DataCatalog
 from hydromt.cli.main import main as hydromt_cli
+
+# here = os.path.dirname(__file__)
+# sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
 
 
 def cli2rst(output, fn):
@@ -374,7 +375,7 @@ nbsphinx_prolog = r"""
     .. raw:: html
 
         <div>
-            For an interactive online version click here: 
+            For an interactive online version click here:
             <a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/{{ docname|e }}" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
         </div>
 """

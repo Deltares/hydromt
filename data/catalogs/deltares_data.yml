@@ -1,8 +1,9 @@
+---
 meta:
   root: p:/wflow_global/hydromt
   version: 2023.3
 
-basin_atlas_level12_v10: 
+basin_atlas_level12_v10:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
@@ -10,31 +11,31 @@ basin_atlas_level12_v10:
     layer: BasinATLAS_v10_lev12
   meta:
     category: hydrography
-    notes: renaming and units might require some revision 
+    notes: renaming and units might require some revision
     paper_doi: 10.1038/s41597-019-0300-6
     paper_ref: Linke et al. (2019)
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
     source_version: 10
   path: hydrography/hydro_atlas/basin_atlas_v10.gpkg
-  
-river_atlas_v10: 
+
+river_atlas_v10:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
   meta:
     category: hydrography
-    notes: renaming and units might require some revision 
+    notes: renaming and units might require some revision
     paper_doi: 10.1038/s41597-019-0300-6
     paper_ref: Linke et al. (2019)
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
     source_version: 10
   path: hydrography/hydro_atlas/river_atlas_v10.gpkg
-  rename:    
+  rename:
     dis_m3_pyr: Dis_avg
 
-lake_atlas_pol_v10: 
+lake_atlas_pol_v10:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
@@ -42,18 +43,18 @@ lake_atlas_pol_v10:
     layer: LakeATLAS_v10_pol
   meta:
     category: hydrography
-    notes: renaming and units might require some revision 
+    notes: renaming and units might require some revision
     paper_doi: 10.1038/s41597-022-01425-z
     paper_ref: Lehner et al. (2022)
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
     source_version: 10
   path: hydrography/hydro_atlas/lake_atlas_v10.gpkg
-  rename:  
+  rename:
     dis_m3_pyr: Dis_avg
- 
+
 chelsa:
-  alias: chelsa_v1.2 
+  alias: chelsa_v1.2
 chelsa_v1.2:
   crs: 4326
   data_type: RasterDataset
@@ -138,8 +139,8 @@ copdem30_v2021.1:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    source_version: 2021_1
-  nodata: -9999  # copdem has no actual nodata, this is to suppress a missing nodata warning 
+    source_version: 2_0_2_1_1
+  nodata: -9999  # copdem has no actual nodata, this is to suppress a missing nodata warning
   path: topography/copdem/copdem.vrt
   rename:
     copdem: elevtn
@@ -148,7 +149,7 @@ copdem30_mask:
   alias: copdem30_mask_v2021.1
 copdem30_mask_v2021.1:
   data_type: RasterDataset
-  driver: raster  
+  driver: raster
   kwargs:
     chunks:
       x: 3600
@@ -157,8 +158,8 @@ copdem30_mask_v2021.1:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    source_version: 2021_1
-  nodata: -1  # copdem has no actual nodata, this is to suppress a missing nodata warning 
+    source_version: 2_0_2_1_1
+  nodata: -1  # copdem has no actual nodata, this is to suppress a missing nodata warning
   path: topography/copdem/copdem_mask.vrt
   rename:
     copdem_mask: mask
@@ -167,7 +168,7 @@ copdem30_masked:
   alias: copdem30_masked_v2021.1
 copdem30_masked_v2021.1:
   data_type: RasterDataset
-  driver: raster 
+  driver: raster
   kwargs:
     chunks:
       x: 3600
@@ -176,7 +177,7 @@ copdem30_masked_v2021.1:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    source_version: 2021_1
+    source_version: 2_0_2_1_1
   path: topography/copdem/copdem_masked.vrt
   rename:
     copdem_masked: elevtn
@@ -232,7 +233,7 @@ dtu10mdt_egm96:
     unit: m+EGM96
   path: topography/dtu10mdt/DTU10MDT_1min_egm96.tif
 
-eobs: 
+eobs:
   alias: eobs_v22.0e
 eobs_v22.0e:
   crs: 4326
@@ -459,8 +460,7 @@ era5_daily:
     parallel: true
   meta:
     category: meteo
-    notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
-      daily frequency
+    notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
@@ -537,7 +537,7 @@ era5_hourly:
     ssr: 0.000277778
     precip: 1000
     press_msl: 0.01
-    
+
 era5_hourly_zarr:
   alias: era5_hourly
   crs: 4326
@@ -675,7 +675,7 @@ gadm_level3_v3.6:
   path: geography/gadm/gadm36_levels.gpkg
   rename:
     fid: gadm_level3
-    
+
 gcn250:
   alias: gcn250_v1
 gcn250_v1:
@@ -707,8 +707,7 @@ gdp_world_v1:
   driver: vector
   meta:
     category: socio-economic
-    notes: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
-      and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
+    notes: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD) and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
     source_author: Wilfred Altena
     source_license: CC BY-4.0
     source_version: 1.0
@@ -831,7 +830,7 @@ globcover_2009_v2.3:
     source_url: http://due.esrin.esa.int/page_globcover.php
     source_version: v2.3
   path: landuse/globcover/GLOBCOVER_L4_200901_200912_V2.3.tif
-  
+
 glofas_era5_v31:
   crs: 4326
   data_type: RasterDataset
@@ -1248,7 +1247,7 @@ merit_v1.0.3:
   data_type: RasterDataset
   driver: netcdf
   kwargs:
-    drop_variables: 'projection'
+    drop_variables: projection
     chunks:
       lat: 6000
       lon: 6000
@@ -1384,8 +1383,7 @@ modis_mcd15a3h_v006:
     concat: true
   meta:
     category: landuse
-    notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the
-      period '2003-01-01', '2017-12-31'
+    notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the period '2003-01-01', '2017-12-31'
     paper_doi: 10.5067/MODIS/MCD15A3H.006
     paper_ref: Myneni et al (2015)
     source_license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
@@ -1495,11 +1493,11 @@ SM2RAIN_ASCAT_monthly_025_v1.4:
     category: meteo
     notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.25-degree resolution
     paper_doi: 10.5194/essd-11-1583-2019
-    paper_ref: Brocca et al. (2019) 
+    paper_ref: Brocca et al. (2019)
     source_license: https://creativecommons.org/licenses/by/4.0/legalcode
     source_url: https://zenodo.org/record/4570192#.YueKJWNByUl
   path: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_025_2007_2020.nc
-  rename: 
+  rename:
     rainfall: precip
 
 SM2RAIN_ASCAT_monthly_05_v1.4:
@@ -1515,13 +1513,13 @@ SM2RAIN_ASCAT_monthly_05_v1.4:
     category: meteo
     notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.5-degree resolution
     paper_doi: 10.5194/essd-11-1583-2019
-    paper_ref: Brocca et al. (2019) 
+    paper_ref: Brocca et al. (2019)
     source_license: https://creativecommons.org/licenses/by/4.0/legalcode
     source_url: https://zenodo.org/record/4570192#.YueKJWNByUl
   path: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_05_2007_2020.nc
-  rename: 
-    rainfall: precip    
-  
+  rename:
+    rainfall: precip
+
 soilgrids:
   alias: soilgrids_v1.0
 soilgrids_v1.0:
@@ -1534,14 +1532,10 @@ soilgrids_v1.0:
       y: 2400
   meta:
     category: soil
-    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
-      \ (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database\
-      \ distribution version 2.0, european commission and the European soil bureau\
-
-      \ network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van\
-      \ Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre:\
-      \ Response to european policy support  and public data requirements. Land Use\
-      \ Policy 29 (2), 329\xE2\u20AC\u201C338. \n"
+    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil
+      database distribution version 2.0, european commission and the European soil bureau\n network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos,
+      P., Van Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre: Response to european policy support  and public data requirements.
+      Land Use Policy 29 (2), 329â€“338. \n"
     paper_doi: 10.1371/journal.pone.0169748
     paper_ref: Hengl et al. (2017)
     source_license: ODbL
@@ -1627,13 +1621,10 @@ soilgrids_v2.0:
       y: 2400
   meta:
     category: soil
-    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
-      \ (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database\
-      \ distribution version 2.0, european commission and the European soil bureau\
-      \ network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van\
-      \ Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre:\
-      \ Response to european policy support  and public data requirements. Land Use\
-      \ Policy 29 (2), 329\xE2\u20AC\u201C338. \n"
+    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil
+      database distribution version 2.0, european commission and the European soil bureau network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos,
+      P., Van Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre: Response to european policy support  and public data requirements.
+      Land Use Policy 29 (2), 329â€“338. \n"
     paper_doi: https://doi.org/10.5194/soil-2020-65
     paper_ref: de Sousa et al. (2020)
     source_license: CC BY 4.0
@@ -1862,7 +1853,7 @@ worldpop_2020_constrained:
   path: socio_economic/worldpop/ppp_2020_constrained.vrt
   rename:
     ppp_2020_constrained: population
-    
+
 worldpop_2020_UNadj_constrained:
   alias: worldpop_2020_constrained
   path: socio_economic/worldpop/ppp_2020_UNadj_constrained.vrt

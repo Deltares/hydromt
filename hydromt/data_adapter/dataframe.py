@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
 from os.path import join
+
 import numpy as np
 import pandas as pd
-from .data_adapter import DataAdapter
 
-import logging
+from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 

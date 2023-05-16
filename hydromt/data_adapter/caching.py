@@ -1,15 +1,16 @@
-from affine import Affine
-from ast import literal_eval
-import geopandas as gpd
-from pathlib import Path
-from pyproj import CRS
-import numpy as np
-import os
-from os.path import isfile, dirname, isdir, join, basename
-import requests
-import shutil
-from urllib.parse import urlparse
 import logging
+import os
+import shutil
+from ast import literal_eval
+from os.path import basename, dirname, isdir, isfile, join
+from pathlib import Path
+from urllib.parse import urlparse
+
+import geopandas as gpd
+import numpy as np
+import requests
+from affine import Affine
+from pyproj import CRS
 
 logger = logging.getLogger(__name__)
 

@@ -1,16 +1,15 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
-import pytest
-from os.path import join, abspath, dirname
-import pandas as pd
+from os.path import abspath, dirname, join
+
 import geopandas as gpd
+import pandas as pd
+import pytest
 import xarray as xr
-from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter, DataFrameAdapter
-from hydromt.data_catalog import (
-    DataCatalog,
-    _parse_data_dict,
-)
+
+from hydromt.data_adapter import DataAdapter, DataFrameAdapter, RasterDatasetAdapter
+from hydromt.data_catalog import DataCatalog, _parse_data_dict
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 

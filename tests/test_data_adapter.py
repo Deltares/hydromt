@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.data_adapter submodule."""
 
-import pytest
-from os.path import join, dirname, abspath, isfile, exists
-import numpy as np
-import geopandas as gpd
-import pandas as pd
-import xarray as xr
-import hydromt
-from hydromt import _compat as compat
-from hydromt.data_catalog import DataCatalog
-from hydromt.data_adapter import GeoDatasetAdapter
 import glob
 import tempfile
+from os.path import abspath, dirname, exists, isfile, join
+
+import geopandas as gpd
+import numpy as np
+import pandas as pd
+import pytest
+import xarray as xr
+
+import hydromt
+from hydromt import _compat as compat
+from hydromt.data_adapter import GeoDatasetAdapter
+from hydromt.data_catalog import DataCatalog
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")

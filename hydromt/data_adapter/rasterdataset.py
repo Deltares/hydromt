@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
+import warnings
 from os.path import join
-from fsspec.implementations import local
+from pathlib import Path
+from typing import NewType, Union
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-import geopandas as gpd
+from fsspec.implementations import local
 from shapely.geometry import box
-import warnings
-import logging
-from typing import Union, NewType
-from pathlib import Path
 
 from .. import gis_utils, io
-from .data_adapter import DataAdapter, PREPROCESSORS
-from .caching import cache_vrt_tiles
 from ..raster import GEO_MAP_COORD
-
+from .caching import cache_vrt_tiles
+from .data_adapter import PREPROCESSORS, DataAdapter
 
 logger = logging.getLogger(__name__)
 
