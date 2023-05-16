@@ -14,7 +14,8 @@ import sys
 from os.path import join, basename, dirname, isdir
 from typing import Any, Optional
 import numpy as np
-from shapely.geometry import box, Polygon
+from shapely.geometry import box, Polygon, LineString
+import shapely
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
@@ -1211,18 +1212,56 @@ class XRasterBase(XGeoBase):
         da_out.attrs.pop("_FillValue", None)
         return da_out.astype(bool)
 
-    def vector_grid(self):
-        """Return a geopandas GeoDataFrame with a geometry for each grid cell."""
-        transform = self.transform
+    def vector_grid(self, geom_type: str = "polygon") -> gpd.GeoDataFrame:
+        """Return a vector representation of the grid.
+
+        Parameters
+        ----------
+        geom_type : str, optional
+            Type of geometry to return, by default 'polygon'
+            Available options are 'polygon', 'line', 'point'
+
+        Returns
+        -------
+        geopandas.GeoDataFrame
+            GeoDataFrame with grid geometries
+        """
+        if not hasattr(shapely, "from_ragged_array"):
+            raise ImportError("the vector_grid method requires shapely 2.0+")
         nrow, ncol = self.shape
-        cells = []
-        for i in range(nrow):
-            rs = np.array([i, i + 1, i + 1, i, i])
-            for j in range(ncol):
-                cs = np.array([j, j, j + 1, j + 1, j])
-                xs, ys = transform * (cs, rs)
-                cells.append(Polygon([*zip(xs, ys)]))
-        return gpd.GeoDataFrame(geometry=cells, crs=self.crs)
+        transform = self.transform
+        if geom_type.lower().startswith("polygon"):
+            # build a flattened list of coordinates for each cell
+            dr = np.array([0, 1, 1, 0, 0])
+            dc = np.array([0, 0, 1, 1, 0])
+            ii, jj = np.meshgrid(np.arange(0, nrow), np.arange(0, ncol))
+            coords = np.empty((nrow * ncol * 5, 2), dtype=np.float64)
+            coords[:, 0], coords[:, 1] = transform * (
+                (jj[:, :, None] + dr[None, None, :]).ravel(),
+                (ii[:, :, None] + dc[None, None, :]).ravel(),
+            )
+            # offsets of the first coordinate of each cell, index of cells
+            offsets = (
+                np.arange(0, nrow * ncol * 5 + 1, 5, dtype=np.int32),
+                np.arange(nrow * ncol + 1, dtype=np.int32),
+            )
+            # build the geometry array in a fast way
+            geoms = shapely.from_ragged_array(3, coords, offsets)  # type 3 is polygon
+        elif geom_type.lower().startswith("line"):  # line or linestring
+            geoms = []
+            # horizontal lines
+            for i in range(nrow + 1):
+                xs, ys = transform * (np.array([0, ncol]), np.array([i, i]))
+                geoms.append(LineString(zip(xs, ys)))
+            for i in range(ncol + 1):
+                xs, ys = transform * (np.array([i, i]), np.array([0, nrow]))
+                geoms.append(LineString(zip(xs, ys)))
+        elif geom_type.lower().startswith("point"):
+            x, y = gis_utils.affine_to_meshgrid(transform, (nrow, ncol))
+            geoms = gpd.points_from_xy(x.ravel(), y.ravel())
+        else:
+            raise ValueError(f"geom_type {geom_type} not recognized")
+        return gpd.GeoDataFrame(geometry=geoms, crs=self.crs)
 
     def area_grid(self, dtype=np.float32):
         """Returns the grid cell area [m2].
