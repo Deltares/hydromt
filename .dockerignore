@@ -1,6 +1,1 @@
-data
-docs
-examples
-joss_paper
-LICENSE
-tests
+__pycache__
