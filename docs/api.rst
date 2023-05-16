@@ -353,6 +353,17 @@ Setup methods
 Workflows
 =========
 
+Grid
+====
+
+.. autosummary::
+   :toctree: _generated
+
+   workflows.grid.grid_from_constant
+   workflows.grid.grid_from_raster
+   workflows.grid.grid_from_raster_reclass
+   workflows.grid.grid_from_vector
+
 
 Basin mask
 ==========

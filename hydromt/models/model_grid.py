@@ -59,22 +59,14 @@ class GridMixin(object):
         list
             Names of added model grid layer.
         """
-        da = raster.full(
-            coords=self.grid.raster.coords,
-            nodata=nodata,
-            dtype=dtype,
+        da = workflows.grid.grid_from_constant(
+            grid_like=self.grid,
+            constant=constant,
             name=name,
-            attrs={},
-            crs=self.crs,
-            lazy=False,
+            dtype=dtype,
+            nodata=nodata,
+            mask_name=mask_name,
         )
-        # Set nodata value
-        da.raster.set_nodata(nodata)
-        da = da.where(da != nodata, constant)
-        # Masking
-        if mask_name is not None:
-            if mask_name in self.grid:
-                da = da.raster.mask(self.grid[mask_name])
         # Add to grid
         self.set_grid(da)
 
@@ -131,30 +123,18 @@ class GridMixin(object):
             variables=variables,
             single_var_as_array=False,
         )
-        # Fill nodata
-        if fill_method is not None:
-            ds = ds.raster.interpolate_na(method=fill_method)
-        # Reprojection
-        # one reproject method for all variables
-        reproject_method = np.atleast_1d(reproject_method)
-        if len(reproject_method) == 1:
-            ds_out = ds.raster.reproject_like(self.grid, method=reproject_method[0])
-        # one reproject method per variable
-        elif len(reproject_method) == len(variables):
-            ds_list = []
-            for var, method in zip(variables, reproject_method):
-                ds_list.append(ds[var].raster.reproject_like(self.grid, method=method))
-            ds_out = xr.merge(ds_list)
-        else:
-            raise ValueError(
-                f"reproject_method should have length 1 or {len(variables)}"
-            )
-        # Masking
-        if mask_name is not None:
-            if mask_name in self.grid:
-                ds_out = ds_out.raster.mask(self.grid[mask_name])
+        # Data resampling
+        ds_out = workflows.grid.grid_from_raster(
+            grid_like=self.grid,
+            ds=ds,
+            variables=variables,
+            fill_method=fill_method,
+            reproject_method=reproject_method,
+            mask_name=mask_name,
+            rename=rename,
+        )
         # Add to grid
-        self.set_grid(ds_out.rename(rename))
+        self.set_grid(ds_out)
 
         return list(ds_out.data_vars.keys())
 
@@ -219,34 +199,17 @@ class GridMixin(object):
         df_vars = self.data_catalog.get_dataframe(
             reclass_table_fn, variables=reclass_variables
         )
-        # Fill nodata
-        if fill_method is not None:
-            da = da.raster.interpolate_na(method=fill_method)
-        # Mapping function
-        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
-        # Reprojection
-        # one reproject method for all variables
-        reproject_method = np.atleast_1d(reproject_method)
-        if len(reproject_method) == 1:
-            ds_vars = ds_vars.raster.reproject_like(
-                self.grid, method=reproject_method[0]
-            )
-        # one reproject method per variable
-        elif len(reproject_method) == len(reclass_variables):
-            ds_list = []
-            for var, method in zip(reclass_variables, reproject_method):
-                ds_list.append(
-                    ds_vars[var].raster.reproject_like(self.grid, method=method)
-                )
-            ds_vars = xr.merge(ds_list)
-        else:
-            raise ValueError(
-                f"reproject_method should have length 1 or {len(reclass_variables)}"
-            )
-        # Masking
-        if mask_name is not None:
-            if mask_name in self.grid:
-                ds_vars = ds_vars.raster.mask(self.grid[mask_name])
+        # Data resampling
+        ds_vars = workflows.grid.grid_from_raster_reclass(
+            grid_like=self.grid,
+            da=da,
+            reclass_table=df_vars,
+            reclass_variables=reclass_variables,
+            fill_method=fill_method,
+            reproject_method=reproject_method,
+            mask_name=mask_name,
+            rename=rename,
+        )
         # Add to maps
         self.set_grid(ds_vars.rename(rename))
 
@@ -306,63 +269,24 @@ class GridMixin(object):
                 f"No shapes of {vector_fn} found within region, skipping setup_grid_from_vector."
             )
             return
-        # Check which method is used
-        if rasterize_method == "value":
-            vars = np.atleast_1d(variables)
-            nodata = np.atleast_1d(nodata)
-            # Check length of nodata
-            if len(nodata) != len(vars):
-                if len(nodata) == 1:
-                    nodata = np.repeat(nodata, len(vars))
-                else:
-                    raise ValueError(
-                        f"Length of nodata ({len(nodata)}) should be equal to 1 or length of variables ({len(vars)})."
-                    )
-            # Loop of variables and nodata
-            for var, nd in zip(vars, nodata):
-                # Rasterize
-                da = self.grid.raster.rasterize(
-                    gdf=gdf,
-                    col_name=var,
-                    nodata=nd,
-                    all_touched=all_touched,
-                )
-                # Rename
-                if var in rename.keys():
-                    var = rename[var]
-                # Masking
-                if mask_name is not None:
-                    if mask_name in self.grid:
-                        da = da.raster.mask(self.grid[mask_name])
-                self.set_grid(da.rename(var))
+        # Data resampling
+        if vector_fn in rename.keys():
+            # In case of choosing a new name with area or fraction method pass the name directly
+            rename = rename[vector_fn]
+        ds = workflows.grid.grid_from_vector(
+            grid_like=self.grid,
+            gdf=gdf,
+            variables=variables,
+            nodata=nodata,
+            rasterize_method=rasterize_method,
+            mask_name=mask_name,
+            rename=rename,
+            all_touched=all_touched,
+        )
+        # Add to grid
+        self.set_grid(ds)
 
-            return variables
-
-        elif rasterize_method in ["fraction", "area"]:
-            name = f"{vector_fn}_{rasterize_method}"
-            # Rasterize
-            da = self.grid.raster.rasterize_geometry(
-                gdf=gdf,
-                method=rasterize_method,
-                mask_name=None,
-                name=name,
-                nodata=nodata,
-            )
-            # Rename
-            if vector_fn in rename.keys():
-                da.name = rename[vector_fn]
-            # Masking
-            if mask_name is not None:
-                if mask_name in self.grid:
-                    da = da.raster.mask(self.grid[mask_name])
-            self.set_grid(da)
-
-            return [name]
-
-        else:
-            raise ValueError(
-                f"rasterize_method {rasterize_method} not recognized. Use one of {'value', 'fraction', 'area'}."
-            )
+        return list(ds.data_vars.keys())
 
     @property
     def grid(self):
