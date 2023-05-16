@@ -31,6 +31,9 @@ jobs:
           environment-file: envs/hydromt-test.yml
           activate-environment: hydromt-test
 
+      - name: Check style # we wanna do cheap tests first
+        run: black --check . --config=pyproject.toml
+
       - name: Conda info
         run: |
           conda info
@@ -40,6 +43,3 @@ jobs:
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - uses: codecov/codecov-action@v1
-
-      - name: Check style
-        run: black --check .
