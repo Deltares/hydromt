@@ -1792,22 +1792,23 @@ class RasterDataArray(XRasterBase):
         return da_reproj.raster.reset_spatial_dims_attrs()
 
     def _interpolate_na(
-        self, src_data: np.ndarray, method: str = "nearest", **kwargs
+        self, src_data: np.ndarray, method: str = "nearest", extrapolate=False, **kwargs
     ) -> np.ndarray:
         """Returns interpolated array"""
         data_isnan = True if self.nodata is None else np.isnan(self.nodata)
         mask = ~np.isnan(src_data) if data_isnan else src_data != self.nodata
         if not mask.any() or mask.all():
             return src_data
-        if method == "rio_idw":  # NOTE: modifies src_data inplace
-            # NOTE this method might also extrapolate
-            interp_data = rasterio.fill.fillnodata(src_data.copy(), mask, **kwargs)
-        else:
+        if not (method == "rio_idw" and not extrapolate):
             # get valid cells D4-neighboring nodata cells to setup triangulation
             valid = np.logical_and(mask, ndimage.binary_dilation(~mask))
             xs, ys = self.xcoords.values, self.ycoords.values
             if xs.ndim == 1:
                 xs, ys = np.meshgrid(xs, ys)
+        if method == "rio_idw":
+            # NOTE: modifies src_data inplace
+            interp_data = rasterio.fill.fillnodata(src_data.copy(), mask, **kwargs)
+        else:
             # interpolate data at nodata cells only
             interp_data = src_data.copy()
             interp_data[~mask] = griddata(
@@ -1817,9 +1818,21 @@ class RasterDataArray(XRasterBase):
                 method=method,
                 fill_value=self.nodata,
             )
+        mask = ~np.isnan(interp_data) if data_isnan else src_data != self.nodata
+        if extrapolate and not np.all(mask):
+            # extrapolate data at remaining nodata cells based on nearest neighbor
+            interp_data[~mask] = griddata(
+                points=(xs[mask], ys[mask]),
+                values=interp_data[mask],
+                xi=(xs[~mask], ys[~mask]),
+                method="nearest",
+                fill_value=self.nodata,
+            )
         return interp_data
 
-    def interpolate_na(self, method: str = "nearest", **kwargs):
+    def interpolate_na(
+        self, method: str = "nearest", extrapolate: bool = False, **kwargs
+    ):
         """Interpolate missing data
 
         Arguments
@@ -1827,6 +1840,9 @@ class RasterDataArray(XRasterBase):
         method: {'linear', 'nearest', 'cubic', 'rio_idw'}, optional
             {'linear', 'nearest', 'cubic'} use :py:meth:`scipy.interpolate.griddata`;
             'rio_idw' applies inverse distance weighting based on :py:meth:`rasterio.fill.fillnodata`.
+            Default is 'nearest'.
+        extrapolate: bool, optional
+            If True, extrapolate data at remaining nodata cells after interpolation based on nearest neighbor.
         **kwargs
             Additional key-word arguments are passed to :py:meth:`rasterio.fill.fillnodata`,
             only used in combination with `method='rio_idw'`
@@ -1837,16 +1853,15 @@ class RasterDataArray(XRasterBase):
             Filled object
         """
         dim0 = self.dim0
+        kwargs.update(dict(method=method, extrapolate=extrapolate))
         if dim0:
             interp_data = np.empty(self._obj.shape, dtype=self._obj.dtype)
             for i, (_, sub_xds) in enumerate(self._obj.groupby(dim0)):
                 interp_data[i, ...] = self._interpolate_na(
-                    sub_xds.load().data, method=method, **kwargs
+                    sub_xds.load().data, **kwargs
                 )
         else:
-            interp_data = self._interpolate_na(
-                self._obj.load().data, method=method, **kwargs
-            )
+            interp_data = self._interpolate_na(self._obj.load().data, **kwargs)
         interp_array = xr.DataArray(
             name=self._obj.name,
             dims=self._obj.dims,
