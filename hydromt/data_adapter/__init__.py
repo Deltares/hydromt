@@ -2,7 +2,7 @@
 """HydroMT data adapter"""
 
 from .data_adapter import *
+from .dataframe import *
 from .geodataframe import *
 from .geodataset import *
 from .rasterdataset import *
-from .dataframe import *

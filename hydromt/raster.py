@@ -9,33 +9,36 @@ This module is an extension for xarray to provide rasterio capabilities
 to xarray datasets/dataarrays.
 """
 from __future__ import annotations
+
+import logging
+import math
 import os
 import sys
-from os.path import join, basename, dirname, isdir
+import tempfile
+from itertools import product
+from os.path import basename, dirname, isdir, join
 from typing import Any, Optional
-import numpy as np
-from shapely.geometry import box, Polygon
-import pandas as pd
-import geopandas as gpd
-import xarray as xr
+
 import dask
+import geopandas as gpd
+import numpy as np
+import pandas as pd
+import pyproj
+import rasterio.fill
+import rasterio.warp
+import rioxarray
+import xarray as xr
+import yaml
 from affine import Affine
 from pyproj import CRS
-from itertools import product
-import rasterio.warp
-import rasterio.fill
 from rasterio import features
 from rasterio.enums import Resampling
-from scipy.spatial import cKDTree
-from scipy.interpolate import griddata
 from scipy import ndimage
-import tempfile
-import pyproj
-import logging
-import yaml
-import rioxarray
-import math
-from . import gis_utils, _compat
+from scipy.interpolate import griddata
+from scipy.spatial import cKDTree
+from shapely.geometry import Polygon, box
+
+from . import _compat, gis_utils
 
 logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")

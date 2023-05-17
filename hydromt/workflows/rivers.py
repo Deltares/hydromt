@@ -1,11 +1,12 @@
+import logging
+from typing import Union
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-from scipy import ndimage
-from typing import Union
-import logging
 from pyflwdir import Flwdir, FlwdirRaster
+from scipy import ndimage
 
 from ..gis_utils import spread2d
 

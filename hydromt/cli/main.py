@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 """command line interface for hydromt models"""
 
-import click
-from os.path import join
 import logging
 import warnings
+from os.path import join
+
+import click
 import numpy as np
+
+from .. import __version__, log
+from ..models import MODELS
+from . import cli_utils
 
 ### Uncomment the following lines for building exe
 # import sys
@@ -15,10 +20,6 @@ import numpy as np
 # pyproj.datadir.set_data_dir(pyproj_datadir)
 ###
 
-from . import cli_utils
-from .. import log
-from ..models import MODELS
-from .. import __version__
 
 logger = logging.getLogger(__name__)
 

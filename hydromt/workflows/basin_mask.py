@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
-"""Scripts to derive (sub)basin geometries from pre-cooked basin index files, 
+"""Scripts to derive (sub)basin geometries from pre-cooked basin index files,
 basin maps or flow direction maps.
 """
 
-from os.path import isdir, isfile
-from pathlib import Path
-import numpy as np
-import geopandas as gpd
-from shapely.geometry import box
-import xarray as xr
 import logging
 import warnings
+from os.path import isdir, isfile
+from pathlib import Path
+
+import geopandas as gpd
+import numpy as np
+import xarray as xr
+from shapely.geometry import box
+
+from ..data_adapter import GeoDataFrameAdapter
+from ..flw import basin_map, flwdir_from_da, outlet_map, stream_map
 
 # local
 from ..io import open_raster
-from ..flw import flwdir_from_da, basin_map, stream_map, outlet_map
-from ..data_adapter import GeoDataFrameAdapter
 from ..models import MODELS
 
 logger = logging.getLogger(__name__)

@@ -79,7 +79,11 @@ hydromt = "hydromt.cli.main:main"
 
 [tool.black]
 line-length = 88
-target-version = ['py37']
+target-version = ['py39']
+
+[tool.isort]
+py_version=39
+profile = "black"
 
 [tool.flit.sdist]
 include = ["hydromt"]
@@ -90,9 +94,9 @@ testpaths = ["tests"]
 filterwarnings = [
     "ignore:distutils Version classes are deprecated:DeprecationWarning",
     "ignore:getargs:DeprecationWarning", # The 'u' format is deprecated. Use 'U' instead.
-    "ignore:The *staticgeoms:DeprecationWarning", 
-    "ignore:The *staticmaps:DeprecationWarning", 
-    "ignore:The set_staticmaps:DeprecationWarning", 
+    "ignore:The *staticgeoms:DeprecationWarning",
+    "ignore:The *staticmaps:DeprecationWarning",
+    "ignore:The set_staticmaps:DeprecationWarning",
     "ignore:Adding a predefined data catalog:DeprecationWarning",
     "ignore:Shapely 2.0 is installed:UserWarning"
 ]

@@ -2,25 +2,26 @@
 # -*- coding: utf-8 -*-
 
 """gis related convience functions. More in pyflwdir.gis_utils"""
-from os.path import dirname, join, isfile
-import os
 import glob
-import sys
-import subprocess
-import numpy as np
-import xarray as xr
-import rasterio
-from pyproj import CRS
-from rasterio.transform import Affine
-import geopandas as gpd
-from shapely.geometry.base import BaseGeometry
-from shapely.geometry import box
 import logging
+import os
+import subprocess
+import sys
+from os.path import dirname, isfile, join
+from typing import Optional, Tuple
+
+import geopandas as gpd
+import numpy as np
+import rasterio
+import xarray as xr
 from pyflwdir import core_conversion, core_d8, core_ldd
 from pyflwdir import gis_utils as gis
-from typing import Optional, Tuple
-from . import _compat
+from pyproj import CRS
+from rasterio.transform import Affine
+from shapely.geometry import box
+from shapely.geometry.base import BaseGeometry
 
+from . import _compat
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 
@@ -554,6 +555,7 @@ def write_map(
     if not _compat.HAS_PCRASTER:
         raise ImportError("The pcraster package is required to write map files")
     import tempfile
+
     import pcraster as pcr
 
     with tempfile.TemporaryDirectory() as tmpdir:

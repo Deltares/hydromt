@@ -3,7 +3,7 @@ bottleneck
 click
 dask
 entrypoints
-flit>=3.4  
+flit>=3.4
 fsspec
 gdal>=3.1
 geopandas>=0.10
@@ -12,7 +12,7 @@ numpy
 openpyxl
 pandas
 packaging
-pip  
+pip
 pyflwdir>=0.5.4
 pyproj
 rasterio
