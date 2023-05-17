@@ -283,12 +283,13 @@ def test_setup_grid(tmpdir, demda):
     with pytest.raises(ValueError):
         model.setup_grid({"lumped_model": "test_model"})
     # bbox
+    bbox = [12.05, 45.30, 12.85, 45.65]
     with pytest.raises(
         ValueError, match="res argument required for kind 'bbox', 'geom'"
     ):
-        model.setup_grid({"bbox": [12.05, 45.30, 12.85, 45.65]})
+        model.setup_grid({"bbox": bbox})
     model.setup_grid(
-        region={"bbox": [12.05, 45.30, 12.85, 45.65]},
+        region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
@@ -296,8 +297,8 @@ def test_setup_grid(tmpdir, demda):
     assert "mask" not in model.grid
     assert model.crs.to_epsg() == 4326
     assert model.grid.raster.dims == ("y", "x")
-    assert model.grid.raster.shape == (9, 17)
-    # TODO check if grid.raster.bounds should be equal to bbox in that particular case?
+    assert model.grid.raster.shape == (7, 16)
+    assert np.all(np.round(model.grid.raster.bounds, 2) == bbox)
     grid = model.grid
     model._grid = xr.Dataset()  # remove old grid
 
