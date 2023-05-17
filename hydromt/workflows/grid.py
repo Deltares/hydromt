@@ -108,6 +108,8 @@ def grid_from_raster(
     """
     if variables is not None:
         ds = ds[variables]
+        if isinstance(ds, xr.DataArray):
+            ds = ds.to_dataset()
     # Fill nodata
     if fill_method is not None:
         ds = ds.raster.interpolate_na(method=fill_method)
