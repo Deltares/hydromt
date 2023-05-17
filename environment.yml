@@ -1,3 +1,4 @@
+---
 # minimal environment to install the latest release of hydromt and run the examples
 # used for binder
 name: hydromt

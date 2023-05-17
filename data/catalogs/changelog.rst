@@ -2,7 +2,7 @@
 Change log predefined datasets
 ==============================
 
-deltares_data 
+deltares_data
 =============
 
 version: 2023.2
@@ -43,10 +43,10 @@ added
 
 changed
 ^^^^^^^
-- Apply convention specified in the README 
+- Apply convention specified in the README
 	- check reasonable alphabetical order in data sets and components
 	- implement right versioning convention _v where possible
-	- apply consistent meta information 
+	- apply consistent meta information
 
 fixed
 ^^^^^

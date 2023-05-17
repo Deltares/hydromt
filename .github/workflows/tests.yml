@@ -1,12 +1,13 @@
+---
 name: Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
-jobs:  
+jobs:
   Test-matrix:
     name: ${{ matrix.os }} - py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
@@ -16,9 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest" ] #, "macos-latest", "windows-latest"]
-        python-version: ["3.9", "3.10"] # fix tests to support older versions
-    
+        os: [ubuntu-latest]    #, "macos-latest", "windows-latest"]
+        python-version: ['3.9', '3.10'] # fix tests to support older versions
+
     steps:
       - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
@@ -30,15 +31,15 @@ jobs:
           environment-file: envs/hydromt-test.yml
           activate-environment: hydromt-test
 
+      - name: Check style # we wanna do cheap tests first
+        run: black --check . --config=pyproject.toml
+
       - name: Conda info
         run: |
-         conda info
-         conda list
+          conda info
+          conda list
 
       - name: Test
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - uses: codecov/codecov-action@v1
-
-      - name: Check style
-        run: black --check .

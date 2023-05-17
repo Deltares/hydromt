@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 """HydroMT GridModel class definition"""
 
-from typing import Dict, List, Tuple, Union, Optional
 import logging
-from os.path import join, isfile
-import xarray as xr
-import numpy as np
-import geopandas as gpd
-from shapely.geometry import box
-from pyproj import CRS
+from os.path import isfile, join
+from typing import Dict, List, Optional, Tuple, Union
 
-from .model_api import Model
+import geopandas as gpd
+import numpy as np
+import xarray as xr
+from pyproj import CRS
+from shapely.geometry import box
+
 from .. import workflows
+from .model_api import Model
 
 __all__ = ["GridModel"]
 logger = logging.getLogger(__name__)

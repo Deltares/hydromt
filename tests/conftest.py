@@ -1,14 +1,22 @@
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyflwdir
 import pytest
-import geopandas as gpd
 import xarray as xr
 from shapely.geometry import box
 
-from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
+from hydromt import (
+    MODELS,
+    GridModel,
+    LumpedModel,
+    Model,
+    NetworkModel,
+    gis_utils,
+    raster,
+    vector,
+)
 from hydromt.data_catalog import DataCatalog
-from hydromt import raster, vector, gis_utils
 
 
 @pytest.fixture

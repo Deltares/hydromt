@@ -1,3 +1,4 @@
+---
 # this environment is used to test on github actions
 name: hydromt-test
 
@@ -41,4 +42,4 @@ dependencies:
   - xmltodict
   - zarr
   - pip:
-    - pyet # optional for Penman Monteith PET
+      - pyet # optional for Penman Monteith PET

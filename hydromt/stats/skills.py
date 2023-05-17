@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import xarray as xr
+import calendar
+import warnings
+from datetime import datetime, timedelta
+
+import bottleneck
 import numpy as np
 import pandas as pd
-import calendar
-from datetime import timedelta, datetime
-import bottleneck
-import warnings
+import xarray as xr
 
 warnings.filterwarnings("ignore")
 

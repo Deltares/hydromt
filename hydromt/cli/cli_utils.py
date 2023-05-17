@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
-"""Utils for parsing cli options and arguments 
+"""Utils for parsing cli options and arguments
 """
 
-from os.path import isfile
 import json
 import logging
-import click
 from ast import literal_eval
-from typing import Union, Dict
+from os.path import isfile
 from pathlib import Path
+from typing import Dict, Union
 from warnings import warn
+
+import click
 
 from .. import config
 from ..error import DeprecatedError

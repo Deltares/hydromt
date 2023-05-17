@@ -1,3 +1,4 @@
+---
 vito_mapping:
   data_type: DataFrame
   driver: csv

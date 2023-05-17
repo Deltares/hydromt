@@ -1,11 +1,11 @@
 """Test hydromt.flw submodule"""
-import pytest
-import numpy as np
-import xarray as xr
-from hydromt import flw
 import geopandas as gpd
+import numpy as np
+import pytest
+import xarray as xr
 
 import hydromt
+from hydromt import flw
 
 
 def test_from_da(flwda):

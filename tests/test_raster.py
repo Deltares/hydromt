@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.raster submodule."""
 
-import pytest
-import numpy as np
-import geopandas as gpd
-import xarray as xr
-from shapely.geometry import box, Point, LineString
-import dask
-from osgeo import gdal
-from affine import Affine
 import os
 
-from hydromt import open_raster, gis_utils
-from hydromt import raster
+import dask
+import geopandas as gpd
+import numpy as np
+import pytest
+import xarray as xr
+from affine import Affine
+from osgeo import gdal
+from shapely.geometry import LineString, Point, box
+
+from hydromt import gis_utils, open_raster, raster
 
 # origin, rotation, res, shape, internal_bounds
 # NOTE a rotated grid with a negative dx is not supported

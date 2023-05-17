@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT"""
 
-from os.path import join, dirname, abspath, isfile
+from os.path import abspath, dirname, isfile, join
+
+import geopandas as gpd
+import numpy as np
 import pytest
 import xarray as xr
-import numpy as np
-import geopandas as gpd
+from entrypoints import Distribution, EntryPoint
 from shapely.geometry import polygon
-from hydromt.models.model_api import _check_data
-from hydromt.models import Model, GridModel, LumpedModel, MODELS, model_plugins
-from hydromt.data_catalog import DataCatalog
-import hydromt.models.model_plugins
+
 import hydromt._compat
-from entrypoints import EntryPoint, Distribution
+import hydromt.models.model_plugins
+from hydromt.data_catalog import DataCatalog
+from hydromt.models import MODELS, GridModel, LumpedModel, Model, model_plugins
+from hydromt.models.model_api import _check_data
 
 DATADIR = join(dirname(abspath(__file__)), "data")
 

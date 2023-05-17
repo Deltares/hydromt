@@ -1,15 +1,16 @@
 """Test for hydromt.gu submodule"""
 
-import pytest
-import numpy as np
 import os
-from rasterio.transform import from_origin
-from affine import Affine
+
+import numpy as np
+import pytest
 import xarray as xr
+from affine import Affine
+from rasterio.transform import from_origin
 
 from hydromt import gis_utils as gu
-from hydromt.raster import full_from_transform, RasterDataArray
 from hydromt.io import open_raster
+from hydromt.raster import RasterDataArray, full_from_transform
 
 
 def test_crs():

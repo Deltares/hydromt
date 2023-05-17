@@ -1,14 +1,15 @@
+---
 root: d:/hydromt_testdata
 era5:
   path: ERA5/daily/era5_{year}_daily.nc
   data_type: RasterDataset
   driver: netcdf
   kwargs:
-    chunks: {time: 100, longitude: 120, latitude: 125 }
+    chunks: {time: 100, longitude: 120, latitude: 125}
     concat_dim: time
-    decode_times: True
+    decode_times: true
     combine: by_coords
-    parallel: True
+    parallel: true
   crs: 4326
   rename:
     tp: precip
@@ -63,9 +64,9 @@ gtsmv3_eu_era5:
   kwargs:
     chunks: {stations: 100, time: 1500}
     concat_dim: time
-    decode_times: True
+    decode_times: true
     combine: by_coords
-    parallel: True
+    parallel: true
   crs: 4326
   rename:
     station_x_coordinate: lon

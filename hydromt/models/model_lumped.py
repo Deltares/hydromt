@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """HydroMT LumpedModel class definition"""
 
-import xarray as xr
-import numpy as np
-import geopandas as gpd
-import os
-from os.path import join, isfile, isdir, dirname
-from typing import Union, Optional, List, Dict
 import logging
+import os
+from os.path import dirname, isdir, isfile, join
+from typing import Dict, List, Optional, Union
+
+import geopandas as gpd
+import numpy as np
+import xarray as xr
 from shapely.geometry import box
 
 from .model_api import Model

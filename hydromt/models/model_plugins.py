@@ -1,9 +1,10 @@
-from entrypoints import EntryPoint, Distribution, get_group_all
 import logging
 from typing import Dict, Iterator, List
-from .. import __version__
+
+from entrypoints import Distribution, EntryPoint, get_group_all
+
+from .. import __version__, _compat
 from .model_api import Model
-from .. import _compat
 
 logger = logging.getLogger(__name__)
 

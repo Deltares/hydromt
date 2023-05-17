@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """This file describes an API for HydroMT, used by e.g. HydroMT-Dash to dynamically generate the inputs.
 """
-from typing import List, Dict, Union
-import typing
 import inspect
 import logging
+import typing
+from typing import Dict, List, Union
 
-from ..models import MODELS
-from ..data_catalog import DataCatalog
-from .. import workflows, log
 from hydromt.gis_utils import utm_crs
+
+from .. import log, workflows
+from ..data_catalog import DataCatalog
+from ..models import MODELS
 
 logger = logging.getLogger(__name__)
 

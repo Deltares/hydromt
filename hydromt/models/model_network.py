@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """HydroMT NetworkModel class definition"""
 
-import xarray as xr
 import logging
 from typing import List
+
+import xarray as xr
+
 from .model_api import Model
 
 __all__ = ["NetworkModel"]

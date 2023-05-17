@@ -3,10 +3,10 @@
 html[data-theme="light"] {
     /* NOTE: added after pydata v0.9 */
     --pst-color-primary: #080c80 !important;
-    
+
     /* hyperlinks */
     --pst-color-link: rgb(13, 56, 224);
-    
+
     /* panels */
     --pst-color-preformatted-border: #080c80 !important;
     --pst-color-panel-background: #f0f0f075;
@@ -17,7 +17,7 @@ html[data-theme="light"] {
     --pst-color-navbar-link-hover: #fff;
     --pst-color-navbar-link-active: #fff;
 
-    
+
     /* sphinx design */
     /* NOTE: does not work since v0.9 */
     --sd-color-card-border-hover: #080c80;

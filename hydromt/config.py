@@ -1,12 +1,13 @@
 """config I/O functions"""
 
 import abc
-from ast import literal_eval
 import codecs
+from ast import literal_eval
 from configparser import ConfigParser
-from os.path import dirname, join, abspath, exists, splitext
+from os.path import abspath, dirname, exists, join, splitext
 from pathlib import Path
-from typing import Union, Dict, List
+from typing import Dict, List, Union
+
 import yaml
 
 __all__ = [

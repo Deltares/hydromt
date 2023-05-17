@@ -3,13 +3,15 @@
 
 """hydrological methods powered by pyFlwDir"""
 
-import warnings
 import logging
-import numpy as np
-import xarray as xr
+import warnings
+from typing import Optional, Tuple, Union
+
 import geopandas as gpd
+import numpy as np
 import pyflwdir
-from typing import Tuple, Union, Optional
+import xarray as xr
+
 from . import gis_utils
 
 logger = logging.getLogger(__name__)

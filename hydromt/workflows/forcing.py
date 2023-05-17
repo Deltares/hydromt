@@ -1,10 +1,11 @@
+import logging
+import re
+from typing import Union
+
+import numpy as np
 import pandas as pd
 import xarray as xr
 import xarray.core.resample
-import numpy as np
-import re
-import logging
-from typing import Union
 
 from .._compat import HAS_PYET
 

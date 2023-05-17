@@ -1,6 +1,7 @@
+---
 name: Feature Request
 description: Suggest an idea/enhancement for HydroMT
-title: "ENH: "
+title: 'ENH: '
 labels: [enhancement, needs refinement]
 
 body:

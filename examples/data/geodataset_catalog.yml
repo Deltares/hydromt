@@ -1,3 +1,4 @@
+---
 waterlevels_txt:
   path: stations.csv
   data_type: GeoDataset
