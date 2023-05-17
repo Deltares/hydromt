@@ -474,21 +474,28 @@ class GridModel(GridMixin, Model):
                 geom = geom.to_crs(crs)
             # Generate grid based on res for region bbox
             # TODO add warning on res value if crs is projected or not?
-            w, s, e, n = geom.total_bounds
+            xmin, ymin, xmax, ymax = geom.total_bounds
+            res = abs(res)
             if align:
-                # get the number of decimals in res
-                decimals = len(str(res / 2).split(".")[1])
-                int_fact = 10**decimals
-                res = abs(res)
-                res_int = int(res * int_fact)
-                # align grid
-                xmin = int((round(w / res) * res + res / 2) * int_fact)
-                ymin = int((round(s / res) * res + res / 2) * int_fact)
-                xmax = int(((round(e / res) + 1) * res - res / 2) * int_fact)
-                ymax = int(((round(n / res) + 1) * res - res / 2) * int_fact)
-            # Avoid floating point round of errors in np.arange
-            xcoords = np.arange(xmin, xmax, res_int) / int_fact
-            ycoords = np.flip(np.arange(ymin, ymax, res_int)) / int_fact
+                xmin = round(xmin / res) * res
+                ymin = round(ymin / res) * res
+                xmax = round(xmax / res) * res
+                ymax = round(ymax / res) * res
+            xcoords = np.linspace(
+                xmin + res / 2,
+                xmax - res / 2,
+                num=round((xmax - xmin) / res),
+                endpoint=True,
+            )
+            ycoords = np.flip(
+                np.linspace(
+                    ymin + res / 2,
+                    ymax - res / 2,
+                    num=round((ymax - ymin) / res),
+                    endpoint=True,
+                )
+            )
+
         elif kind in ["basin", "subbasin", "interbasin"]:
             # retrieve global hydrography data (lazy!)
             ds_hyd = self.data_catalog.get_rasterdataset(hydrography_fn)
