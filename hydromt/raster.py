@@ -1232,13 +1232,14 @@ class XRasterBase(XGeoBase):
         transform = self.transform
         if geom_type.lower().startswith("polygon"):
             # build a flattened list of coordinates for each cell
-            dr = np.array([0, 1, 1, 0, 0])
-            dc = np.array([0, 0, 1, 1, 0])
+            dr = np.array([0, 0, 1, 1, 0])
+            dc = np.array([0, 1, 1, 0, 0])
             ii, jj = np.meshgrid(np.arange(0, nrow), np.arange(0, ncol))
             coords = np.empty((nrow * ncol * 5, 2), dtype=np.float64)
+            # order of cells: first rows, then cols
             coords[:, 0], coords[:, 1] = transform * (
-                (jj[:, :, None] + dr[None, None, :]).ravel(),
-                (ii[:, :, None] + dc[None, None, :]).ravel(),
+                (jj.T[:, :, None] + dr[None, None, :]).ravel(),
+                (ii.T[:, :, None] + dc[None, None, :]).ravel(),
             )
             # offsets of the first coordinate of each cell, index of cells
             offsets = (
