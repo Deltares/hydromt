@@ -1857,6 +1857,8 @@ class RasterDataArray(XRasterBase):
             data=interp_data,
             attrs=self._obj.attrs,
         )
+        interp_array.raster.set_nodata(self.nodata)
+        interp_array.raster.set_crs(self.crs)
         return interp_array
 
     def to_xyz_tiles(
