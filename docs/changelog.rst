@@ -14,6 +14,7 @@ Added
 
 Changed
 -------
+- Added extrapolate option to `raster.interpolate_na` method. PR #348
 
 Fixed
 -----
