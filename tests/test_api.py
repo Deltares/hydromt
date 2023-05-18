@@ -1,6 +1,7 @@
-import pytest
 import json
+
 import numpy as np
+import pytest
 
 from hydromt.cli.api import *
 

@@ -1,10 +1,11 @@
+import logging
+import re
+from typing import Union
+
+import numpy as np
 import pandas as pd
 import xarray as xr
 import xarray.core.resample
-import numpy as np
-import re
-import logging
-from typing import Union
 
 from .._compat import HAS_PYET
 
@@ -441,7 +442,7 @@ def press_correction(
     R_air : float, default 8.3144621
         specific gas constant for dry air [J mol-1 K-1]
     Mo : float, default 0.0289644
-        molecular weight of gas [g / mol]
+        molecular weight of gas [kg / mol]
     LapseRate : float, deafult -0.0065
         lapse rate of temperature [C m-1]
 

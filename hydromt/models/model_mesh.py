@@ -1,18 +1,19 @@
-from typing import Union, Optional, List, Dict, Tuple
 import logging
 import os
-from os.path import join, isdir, dirname, isfile
+from os.path import dirname, isdir, isfile, join
 from pathlib import Path
+from typing import List, Optional, Tuple, Union, Dict
+
+import geopandas as gpd
+import pandas as pd
 import numpy as np
 import xarray as xr
 import xugrid as xu
-import pandas as pd
-import geopandas as gpd
-from shapely.geometry import box, Polygon
+from shapely.geometry import Polygon, box
 
+from .. import workflows
 from ..raster import GEO_MAP_COORD
 from .model_api import Model
-from .. import workflows
 
 __all__ = ["MeshModel"]
 logger = logging.getLogger(__name__)

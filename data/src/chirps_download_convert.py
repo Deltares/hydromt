@@ -1,12 +1,13 @@
+import glob
+import gzip
 import os
 from os.path import isdir
-import pandas as pd
-import requests
-import rasterio
-import gzip
-import glob
-import xarray as xr
+
 import numpy as np
+import pandas as pd
+import rasterio
+import requests
+import xarray as xr
 from requests import HTTPError
 
 

@@ -1,12 +1,14 @@
 """Tests for the cli submodule."""
 
+import os
+
+import numpy as np
 import pytest
 from click.testing import CliRunner
-import numpy as np
-import os
+
 from hydromt import __version__
-from hydromt.cli.main import main as hydromt_cli
 from hydromt.cli import api as hydromt_api
+from hydromt.cli.main import main as hydromt_cli
 
 
 def test_cli(tmpdir):

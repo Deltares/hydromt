@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
+import logging
 from abc import ABCMeta, abstractmethod
+from itertools import product
+from string import Formatter
+from typing import Tuple
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-import geopandas as gpd
 import yaml
-from upath import UPath
 from fsspec.implementations import local
-from string import Formatter
-from typing import Tuple
-from itertools import product
 from pyproj import CRS
-import logging
+from upath import UPath
 
 from .. import _compat, gis_utils
 

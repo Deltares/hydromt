@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-from os.path import join
-import numpy as np
-import geopandas as gpd
-from shapely.geometry import box
 import logging
-from typing import Union, NewType
+from os.path import join
 from pathlib import Path
+from typing import NewType, Union
 
-from .data_adapter import DataAdapter
+import geopandas as gpd
+import numpy as np
+from shapely.geometry import box
+
 from .. import io
-
+from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 

@@ -1,15 +1,16 @@
-from affine import Affine
-from ast import literal_eval
-import geopandas as gpd
-from pathlib import Path
-from pyproj import CRS
-import numpy as np
-import os
-from os.path import isfile, dirname, isdir, join, basename
-import requests
-import shutil
-from urllib.parse import urlparse
 import logging
+import os
+import shutil
+from ast import literal_eval
+from os.path import basename, dirname, isdir, isfile, join
+from pathlib import Path
+from urllib.parse import urlparse
+
+import geopandas as gpd
+import numpy as np
+import requests
+from affine import Affine
+from pyproj import CRS
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def _uri_validator(uri: str) -> bool:
         return False
 
 
-def _copyfile(src, dst):
+def _copyfile(src, dst, chunk_size=1024):
     """Copy src file to dst. This method supports both online and local files."""
     if not isdir(dirname(dst)):
         os.makedirs(dirname(dst))
@@ -37,7 +38,9 @@ def _copyfile(src, dst):
                     f"Data download failed with status code {r.status_code}"
                 )
             with open(dst, "wb") as f:
-                shutil.copyfileobj(r.raw, f)
+                for chunk in r.iter_content(chunk_size=chunk_size):
+                    f.write(chunk)
+                # shutil.copyfileobj(r.raw, f)
     else:
         shutil.copyfile(src, dst)
 

@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT"""
 
-from os.path import join, dirname, abspath, isfile
+from os.path import abspath, dirname, isfile, join
+
+import geopandas as gpd
+import numpy as np
 import pytest
 import xarray as xr
-import numpy as np
-import geopandas as gpd
+from entrypoints import Distribution, EntryPoint
 from shapely.geometry import polygon
-from hydromt.models.model_api import _check_data
-from hydromt.models import Model, GridModel, LumpedModel, MODELS, model_plugins
-from hydromt.data_catalog import DataCatalog
-import hydromt.models.model_plugins
+
 import hydromt._compat
-from entrypoints import EntryPoint, Distribution
+import hydromt.models.model_plugins
+from hydromt.data_catalog import DataCatalog
+from hydromt.models import MODELS, GridModel, LumpedModel, Model, model_plugins
+from hydromt.models.model_api import _check_data
 
 DATADIR = join(dirname(abspath(__file__)), "data")
 
@@ -146,7 +148,7 @@ def test_model(model, tmpdir):
     model._results = {}  # reset results for comparison
     equal, errors = model._test_equal(model1)
     assert equal, errors
-    # region from staticmaps
+    # read region from staticmaps
     model._geoms.pop("region")
     assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
@@ -464,7 +466,7 @@ def test_meshmodel(mesh_model, tmpdir):
 
 
 @pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
-def test_meshmodel_setup(griduda, world, tmpdir):
+def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])

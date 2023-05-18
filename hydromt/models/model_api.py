@@ -1,26 +1,27 @@
 # -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT"""
 
-from abc import ABCMeta
-import os
 import glob
-from os.path import join, isdir, isfile, abspath, dirname, basename, isabs
-import xarray as xr
-import numpy as np
-import pandas as pd
-import geopandas as gpd
-from geopandas.testing import assert_geodataframe_equal
-from shapely.geometry import box
-import logging
-from pathlib import Path
 import inspect
-import warnings
-from pyproj import CRS
+import logging
+import os
 import typing
-from typing import Any, Dict, List, Tuple, Union, Optional
+import warnings
+from abc import ABCMeta
+from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ..data_catalog import DataCatalog
+import geopandas as gpd
+import pandas as pd
+import numpy as np
+import xarray as xr
+from geopandas.testing import assert_geodataframe_equal
+from pyproj import CRS
+from shapely.geometry import box
+
 from .. import config, log, workflows
+from ..data_catalog import DataCatalog
 from ..raster import GEO_MAP_COORD
 
 __all__ = ["Model"]
@@ -673,8 +674,21 @@ class Model(object, metaclass=ABCMeta):
             if isfile(config_fn):
                 cfdict = self._configread(config_fn)
                 self.logger.debug(f"{prefix} config read from {config_fn}")
-            elif not self._read and prefix != "Default":  # skip for missing default
+            elif (
+                self._root is not None
+                and not isabs(config_fn)
+                and isfile(join(self._root, config_fn))
+            ):
+                cfdict = self._configread(join(self.root, config_fn))
+                self.logger.debug(
+                    f"{prefix} config read from {join(self.root,config_fn)}"
+                )
+            elif isfile(abspath(config_fn)):
+                cfdict = self._configread(abspath(config_fn))
+                self.logger.debug(f"{prefix} config read from {abspath(config_fn)}")
+            else:  # skip for missing default
                 self.logger.error(f"{prefix} config file not found at {config_fn}")
+
         self._config = cfdict
 
     def write_config(

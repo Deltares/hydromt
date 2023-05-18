@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.workflows.basin_mask"""
 
-import pytest
-import os
-import numpy as np
-import geopandas as gpd
-import xarray as xr
-import hydromt
-from hydromt.models import MODELS
 import logging
+import os
 import warnings
 
+import geopandas as gpd
+import numpy as np
+import pytest
+import xarray as xr
+
+import hydromt
+from hydromt import raster
+from hydromt.models import MODELS
 from hydromt.workflows.basin_mask import (
+    _check_size,
+    _parse_region_value,
     get_basin_geometry,
     parse_region,
-    _parse_region_value,
-    _check_size,
 )
-from hydromt import raster
 
 logger = logging.getLogger("tets_basin")
 

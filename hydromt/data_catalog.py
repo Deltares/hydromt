@@ -3,31 +3,33 @@
 
 """DataCatalog module for HydroMT"""
 from __future__ import annotations
-import os
-from os.path import join, isdir, dirname, basename, isfile, abspath, exists
+
 import copy
-from pathlib import Path
-from typing import Dict, List, Tuple, Union, Optional
+import itertools
+import logging
+import os
+import shutil
 import warnings
+from os.path import abspath, basename, dirname, exists, isdir, isfile, join
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
+import requests
 import xarray as xr
 import yaml
-import logging
-import requests
-import shutil
 from packaging.version import Version
-import itertools
 
 from .data_adapter import (
     DataAdapter,
-    RasterDatasetAdapter,
-    GeoDatasetAdapter,
-    GeoDataFrameAdapter,
     DataFrameAdapter,
+    GeoDataFrameAdapter,
+    GeoDatasetAdapter,
+    RasterDatasetAdapter,
 )
-from .data_adapter.caching import _uri_validator, _copyfile, HYDROMT_DATADIR
+from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
 
 logger = logging.getLogger(__name__)
 
@@ -154,8 +156,21 @@ class DataCatalog(object):
     def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
         # get predefined_catalogs
         urlpath = self._url if urlpath is None else urlpath
-        # TODO cache predefined catalogs
-        self._catalogs = _yml_from_uri_or_path(urlpath)
+        cache_path = join(self._cache_dir, basename(urlpath))
+        try:
+            # download file locally; overwrite existing file
+            _copyfile(urlpath, cache_path)
+        except Exception:  # if offline
+            self.logger.warning(
+                "Downloading the predefined catalogs failed; check your internet connection"
+            )
+            pass
+        if isfile(cache_path):
+            self._catalogs = _yml_from_uri_or_path(cache_path)
+        if self._catalogs is None:
+            raise ConnectionError(
+                "Predefined catalogs not found; check your internet connection."
+            )
         return self._catalogs
 
     def from_artifacts(
