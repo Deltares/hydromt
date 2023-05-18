@@ -36,7 +36,8 @@ from rasterio.enums import Resampling, MergeAlg
 from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
-from shapely.geometry import Polygon, box
+from shapely.geometry import Polygon, box, LineString
+import shapely
 
 from . import _compat, gis_utils
 
@@ -1218,12 +1219,13 @@ class XRasterBase(XGeoBase):
             "Creating vector grid for calculating coverage fraction per grid cell"
         )
         gdf["geometry"] = gdf.geometry.buffer(0)  # fix potential geometry errors
+        gdf_grid_all = ds_like.raster.vector_grid()
         if mask_name is None:
-            gdf_grid = ds_like.raster.vector_grid()
+            gdf_grid = gdf_grid_all
         else:
             msktn = ds_like[mask_name]
             idx_valid = np.where(msktn.values.flatten() != msktn.raster.nodata)[0]
-            gdf_grid = ds_like.raster.vector_grid().loc[idx_valid]
+            gdf_grid = gdf_grid_all.loc[idx_valid]
 
         # intersect the gdf data with the grid
         gdf = gdf.to_crs(gdf_grid.crs)
@@ -1255,6 +1257,9 @@ class XRasterBase(XGeoBase):
         if method == "area":
             da_out = da_area
         else:  # fraction
+            # Mask grid cells that actually do intersect with the geometry
+            idx_area = np.where(da_area.values.flatten() != da_area.raster.nodata)[0]
+            gdf_grid = gdf_grid_all.loc[idx_area]
             # Convert to frac using gdf grid in same crs (area error when using ds_like.raster.area_grid)
             gdf_grid = gdf_grid.to_crs(crs_utm)
             gdf_grid["area"] = gdf_grid.area
@@ -1263,6 +1268,8 @@ class XRasterBase(XGeoBase):
             )
 
             da_out = da_area / da_gridarea
+            # As not all da_gridarea were computed, cover with zeros
+            da_out = da_out.fillna(0)
             da_out.name = "fraction"
 
         da_out.raster.set_crs(ds_like.raster.crs)
