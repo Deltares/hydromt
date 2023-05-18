@@ -11,12 +11,14 @@ Unreleased
 
 Added
 -----
-- New generic methods for ``GridModel``: ``setup_grid``, ``setup_grid_from_constant``, ``setup_grid_from_raster``, ``setup_grid_from_raster_reclass``, ``setup_grid_from_vector``. PR #333
-- New ``grid`` workflow methods to support the setup methods in ``GridModel``: ``grid_from_constant``, ``grid_from_raster``, ``grid_from_raster_reclass``, ``grid_from_vector``. PR #333 
+- New generic methods for ``GridModel``: ``setup_grid``, ``setup_grid_from_constant``, ``setup_grid_from_rasterdataset``, ``setup_grid_from_raster_reclass``, ``setup_grid_from_geodataframe``. PR #333
+- New ``grid`` workflow methods to support the setup methods in ``GridModel``: ``grid_from_constant``, ``grid_from_rasterdataset``, ``grid_from_raster_reclass``, ``grid_from_geodataframe``. PR #333 
 - New raster method ``rasterize_geometry``.
 
 Changed
 -------
+- Name of methods ``setup_maps_from_raster`` and ``setup_mesh_from_raster`` to ``setup_maps_from_rasterdataset`` and ``setup_mesh_from_rasterdataset``. PR #333
+- Add rename argument to ``setup_*_from_rasterdataset``, ``setup_*_from_raster_reclass`` to maps and mesh for consistency with grid. PR #333
 
 Fixed
 -----

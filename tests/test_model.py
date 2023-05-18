@@ -229,13 +229,13 @@ def test_maps_setup(tmpdir):
     bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
     mod.setup_region({"bbox": bbox})
     mod.setup_config(**{"header": {"setting": "value"}})
-    mod.setup_maps_from_raster(
+    mod.setup_maps_from_rasterdataset(
         raster_fn="merit_hydro",
         name="hydrography",
         variables=["elevtn", "flwdir"],
         split_dataset=False,
     )
-    mod.setup_maps_from_raster(raster_fn="vito", fill_method="nearest")
+    mod.setup_maps_from_rasterdataset(raster_fn="vito", fill_method="nearest")
     mod.setup_maps_from_raster_reclass(
         raster_fn="vito",
         reclass_table_fn="vito_mapping",
@@ -371,13 +371,13 @@ def test_gridmodel_setup(tmpdir):
         dtype=np.int8,
         nodata=-1,
     )
-    mod.setup_grid_from_raster(
+    mod.setup_grid_from_rasterdataset(
         raster_fn="merit_hydro",
         variables=["elevtn", "basins"],
         reproject_method=["average", "mode"],
         mask_name="mask",
     )
-    mod.setup_grid_from_raster(
+    mod.setup_grid_from_rasterdataset(
         raster_fn="vito",
         fill_method="nearest",
         reproject_method="mode",
@@ -390,14 +390,14 @@ def test_gridmodel_setup(tmpdir):
         reclass_variables=["roughness_manning"],
         reproject_method=["average"],
     )
-    mod.setup_grid_from_vector(
+    mod.setup_grid_from_geodataframe(
         vector_fn="hydro_lakes",
         variables=["waterbody_id", "Depth_avg"],
         nodata=[-1, -999.0],
         rasterize_method="value",
         rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
     )
-    mod.setup_grid_from_vector(
+    mod.setup_grid_from_geodataframe(
         vector_fn="hydro_lakes",
         rasterize_method="fraction",
         rename={"hydro_lakes": "water_frac"},
@@ -476,7 +476,7 @@ def test_meshmodel_setup(griduda, world, tmpdir):
     region = {"mesh": griduda.ugrid.to_dataset()}
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod1.setup_mesh(region)
-    mod1.setup_mesh_from_raster("vito")
+    mod1.setup_mesh_from_rasterdataset("vito")
     assert "vito" in mod1.mesh.data_vars
     mod1.setup_mesh_from_raster_reclass(
         raster_fn="vito",

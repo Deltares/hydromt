@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "grid_from_constant",
-    "grid_from_raster",
+    "grid_from_rasterdataset",
     "grid_from_raster_reclass",
-    "grid_from_vector",
+    "grid_from_geodataframe",
 ]
 
 
@@ -50,7 +50,7 @@ def grid_from_constant(
     """
     da = hydromt.raster.full(
         coords=grid_like.raster.coords,
-        nodata=nodata,
+        nodata=constant,
         dtype=dtype,
         name=name,
         attrs={},
@@ -59,7 +59,6 @@ def grid_from_constant(
     )
     # Set nodata value
     da.raster.set_nodata(nodata)
-    da = da.where(da != nodata, constant)
     # Masking
     if mask_name is not None:
         if mask_name in grid_like:
@@ -68,9 +67,9 @@ def grid_from_constant(
     return da
 
 
-def grid_from_raster(
+def grid_from_rasterdataset(
     grid_like: Union[xr.DataArray, xr.Dataset],
-    ds: xr.Dataset,
+    ds: Union[xr.DataArray, xr.Dataset],
     variables: Optional[List] = None,
     fill_method: Optional[str] = None,
     reproject_method: Optional[Union[List, str]] = "nearest",
@@ -78,7 +77,7 @@ def grid_from_raster(
     rename: Optional[Dict] = dict(),
 ) -> xr.Dataset:
     """
-    Prepares data from resampled to grid_like object.
+    Prepares data by resampling ds to grid_like.
 
     If raster is a dataset, all variables will be added unless ``variables`` list is specified.
 
@@ -86,7 +85,7 @@ def grid_from_raster(
     ----------
     grid_like: xr.DataArray, xr.Dataset
         Grid to copy metadata from.
-    ds: xr.Dataset
+    ds: xr.DataArray, xr.Dataset
         Dataset with raster data.
     variables: list, optional
         List of variables to add to grid from raster_fn. By default all.
@@ -108,8 +107,8 @@ def grid_from_raster(
     """
     if variables is not None:
         ds = ds[variables]
-        if isinstance(ds, xr.DataArray):
-            ds = ds.to_dataset()
+    if isinstance(ds, xr.DataArray):
+        ds = ds.to_dataset()
     # Fill nodata
     if fill_method is not None:
         ds = ds.raster.interpolate_na(method=fill_method)
@@ -206,7 +205,7 @@ def grid_from_raster_reclass(
     return ds_out.rename(rename)
 
 
-def grid_from_vector(
+def grid_from_geodataframe(
     grid_like: Union[xr.DataArray, xr.Dataset],
     gdf: gpd.GeoDataFrame,
     variables: Optional[Union[List, str]] = None,

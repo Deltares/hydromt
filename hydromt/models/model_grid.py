@@ -72,9 +72,9 @@ class GridMixin(object):
 
         return [name]
 
-    def setup_grid_from_raster(
+    def setup_grid_from_rasterdataset(
         self,
-        raster_fn: Union[str, Path, xr.Dataset],
+        raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
         variables: Optional[List] = None,
         fill_method: Optional[str] = None,
         reproject_method: Optional[Union[List, str]] = "nearest",
@@ -92,7 +92,7 @@ class GridMixin(object):
 
         Parameters
         ----------
-        raster_fn: str, Path, xr.Dataset
+        raster_fn: str, Path, xr.DataArray, xr.Dataset
             Data catalog key, path to raster file or raster xarray data object.
             If a path to a raster file is provided it will be added
             to the data_catalog with its name based on the file basename without extension.
@@ -124,7 +124,7 @@ class GridMixin(object):
             single_var_as_array=False,
         )
         # Data resampling
-        ds_out = workflows.grid.grid_from_raster(
+        ds_out = workflows.grid.grid_from_rasterdataset(
             grid_like=self.grid,
             ds=ds,
             variables=variables,
@@ -215,7 +215,7 @@ class GridMixin(object):
 
         return list(ds_vars.data_vars.keys())
 
-    def setup_grid_from_vector(
+    def setup_grid_from_geodataframe(
         self,
         vector_fn: Union[str, Path, gpd.GeoDataFrame],
         variables: Optional[Union[List, str]] = None,
@@ -273,7 +273,7 @@ class GridMixin(object):
         if vector_fn in rename.keys():
             # In case of choosing a new name with area or fraction method pass the name directly
             rename = rename[vector_fn]
-        ds = workflows.grid.grid_from_vector(
+        ds = workflows.grid.grid_from_geodataframe(
             grid_like=self.grid,
             gdf=gdf,
             variables=variables,
@@ -509,27 +509,27 @@ class GridModel(GridMixin, Model):
                 **region,
             )
             # get ds_hyd again but clipped to geom, one variable is enough
-            ds_hyd = self.data_catalog.get_rasterdataset(
+            da_hyd = self.data_catalog.get_rasterdataset(
                 hydrography_fn, geom=geom, variables=["flwdir"]
             )
             if not isinstance(res, (int, float)):
                 self.logger.info(
-                    f"res argument not defined, using resolution of hydrography_fn {ds_hyd.raster.res}"
+                    f"res argument not defined, using resolution of hydrography_fn {da_hyd.raster.res}"
                 )
-                res = ds_hyd.raster.res
-            # Reproject ds_hyd based on crs and grid and align, method is not important only coords will be used
+                res = da_hyd.raster.res
+            # Reproject da_hyd based on crs and grid and align, method is not important only coords will be used
             # TODO add warning on res value if crs is projected or not?
-            if res != ds_hyd.raster.res and crs != ds_hyd.raster.crs:
-                ds_hyd = ds_hyd.raster.reproject(
+            if res != da_hyd.raster.res and crs != da_hyd.raster.crs:
+                da_hyd = da_hyd.raster.reproject(
                     dst_crs=crs,
                     dst_res=res,
                     align=align,
                 )
             # Get xycoords, geom
-            xcoords = ds_hyd.raster.xcoords.values
-            ycoords = ds_hyd.raster.ycoords.values
-            if geom.crs != ds_hyd.raster.crs:
-                crs = ds_hyd.raster.crs
+            xcoords = da_hyd.raster.xcoords.values
+            ycoords = da_hyd.raster.ycoords.values
+            if geom.crs != da_hyd.raster.crs:
+                crs = da_hyd.raster.crs
                 geom = geom.to_crs(crs)
         elif kind == "grid":
             # Support more formats for grid input (netcdf, zarr, io.open_raster)
@@ -537,12 +537,7 @@ class GridModel(GridMixin, Model):
             if isinstance(fn, (xr.DataArray, xr.Dataset)):
                 da_like = fn
             else:
-                if fn.endswith(".nc"):
-                    da_like = xr.open_dataset(fn)
-                elif fn.endswith(".zarr"):
-                    da_like = xr.open_zarr(fn)
-                else:
-                    da_like = io.open_raster(fn)
+                da_like = self.data_catalog.get_rasterdataset(fn)
             # Get xycoords, geom
             xcoords = da_like.raster.xcoords.values
             ycoords = da_like.raster.ycoords.values
@@ -566,10 +561,11 @@ class GridModel(GridMixin, Model):
             lazy=False,
         )
         # Create geometry_mask with geom
-        grid = grid.raster.geometry_mask(geom, all_touched=True)
-        grid.name = "mask"
+        if add_mask:
+            grid = grid.raster.geometry_mask(geom, all_touched=True)
+            grid.name = "mask"
         # Remove mask variable mask from grid if not add_mask
-        if not add_mask:
+        else:
             grid = grid.to_dataset()
             grid = grid.drop_vars("mask")
 

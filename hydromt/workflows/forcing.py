@@ -506,12 +506,13 @@ def pet_debruin(
     pet : xarray.DataArray
         reference evapotranspiration
     """
-    # saturation and actual vapour pressure at given temperature [Pa]
+    # saturation and actual vapour pressure at given temperature [hPa °C-1]
     esat = 6.112 * np.exp((17.67 * temp) / (temp + 243.5))
-    # slope of vapour pressure curve
+    # slope of vapour pressure curve [hPa °C-1]
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
     lam = (2.502 * 10**6) - (2250.0 * temp)
+    # psychometric constant [hPa °C-1]
     gamma = (cp * press) / (0.622 * lam)
     # compute ref. evaporation (with global radiation, therefore calling it potential)
     # in J m-2 over whole period
@@ -546,12 +547,13 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
     pet : xarray.DataArray (lazy)
         reference evapotranspiration
     """
-    # saturation and actual vapour pressure at given temperature [Pa]
+    # saturation and actual vapour pressure at given temperature [hPa °C-1]
     esat = 6.112 * np.exp((17.67 * temp) / (temp + 243.5))
-    # slope of vapour pressure curve
+    # slope of vapour pressure curve [hPa °C-1]
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
     lam = (2.502 * 10**6) - (2250.0 * temp)
+    # psychometric constant [hPa °C-1]
     gamma = (cp * press) / (0.622 * lam)
 
     ep_joule = 0.65 * slope / (slope + gamma) * k_in

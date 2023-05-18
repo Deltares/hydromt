@@ -794,7 +794,7 @@ class Model(object, metaclass=ABCMeta):
             self._write_nc(nc_dict, fn, **kwargs)
 
     # map files setup methods
-    def setup_maps_from_raster(
+    def setup_maps_from_rasterdataset(
         self,
         raster_fn: Union[str, Path, xr.Dataset],
         variables: Optional[List] = None,
@@ -802,6 +802,7 @@ class Model(object, metaclass=ABCMeta):
         name: Optional[str] = None,
         reproject_method: Optional[str] = None,
         split_dataset: Optional[bool] = True,
+        rename: Optional[Dict] = dict(),
     ) -> List[str]:
         """
         HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to maps object.
@@ -822,11 +823,13 @@ class Model(object, metaclass=ABCMeta):
             If specified, fills nodata values using fill_nodata method.
             Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         name: str, optional
-            Name of new maps variable, only in case split_dataset=False.
+            Name of new dataset in self.maps dictionnary, only in case split_dataset=False.
         reproject_method: str, optional
             See rasterio.warp.reproject for existing methods, by default the data is not reprojected (None).
         split_dataset: bool, optional
             If data is a xarray.Dataset split it into several xarray.DataArrays (default).
+        rename: dict, optional
+            Dictionary to rename variable names in raster_fn before adding to maps {'name_in_raster_fn': 'name_in_maps'}. By default empty.
 
         Returns
         -------
@@ -848,8 +851,8 @@ class Model(object, metaclass=ABCMeta):
         # Reprojection
         if ds.rio.crs != self.crs and reproject_method is not None:
             ds = ds.raster.reproject(dst_crs=self.crs, method=reproject_method)
-        # Add to maps
-        self.set_maps(ds, name=name, split_dataset=split_dataset)
+        # Rename and add to maps
+        self.set_maps(ds.rename(rename), name=name, split_dataset=split_dataset)
 
         return list(ds.data_vars.keys())
 
@@ -863,6 +866,7 @@ class Model(object, metaclass=ABCMeta):
         reproject_method: Optional[str] = None,
         name: Optional[str] = None,
         split_dataset: Optional[bool] = True,
+        rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
         """
@@ -892,6 +896,8 @@ class Model(object, metaclass=ABCMeta):
             Name of new maps variable, only in case split_dataset=False.
         split_dataset: bool, optional
             If data is a xarray.Dataset split it into several xarray.DataArrays (default).
+        rename: dict, optional
+            Dictionary to rename variable names in reclass_variables before adding to grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
 
         Returns
         -------
@@ -922,7 +928,7 @@ class Model(object, metaclass=ABCMeta):
         if ds_vars.rio.crs != self.crs and reproject_method is not None:
             ds_vars = ds_vars.raster.reproject(dst_crs=self.crs)
         # Add to maps
-        self.set_maps(ds_vars, name=name, split_dataset=split_dataset)
+        self.set_maps(ds_vars.rename(rename), name=name, split_dataset=split_dataset)
 
         return list(ds_vars.data_vars.keys())
 

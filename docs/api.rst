@@ -208,7 +208,7 @@ Setup methods
 
    Model.setup_config
    Model.setup_region
-   Model.setup_maps_from_raster
+   Model.setup_maps_from_rasterdataset
    Model.setup_maps_from_raster_reclass
 
 
@@ -252,13 +252,13 @@ Setup methods
 
    GridModel.setup_config
    GridModel.setup_region
-   GridModel.setup_maps_from_raster
+   GridModel.setup_maps_from_rasterdataset
    GridModel.setup_maps_from_raster_reclass
    GridModel.setup_grid
    GridModel.setup_grid_from_constant
-   GridModel.setup_grid_from_raster
+   GridModel.setup_grid_from_rasterdataset
    GridModel.setup_grid_from_raster_reclass
-   GridModel.setup_grid_from_vector
+   GridModel.setup_grid_from_geodataframe
 
 
 .. _lumped_model_api:
@@ -300,7 +300,7 @@ Setup methods
 
    LumpedModel.setup_config
    LumpedModel.setup_region
-   LumpedModel.setup_maps_from_raster
+   LumpedModel.setup_maps_from_rasterdataset
    LumpedModel.setup_maps_from_raster_reclass
 
 
@@ -344,9 +344,10 @@ Setup methods
 
    MeshModel.setup_config
    MeshModel.setup_region
-   MeshModel.setup_maps_from_raster
+   MeshModel.setup_maps_from_rasterdataset
    MeshModel.setup_maps_from_raster_reclass
-
+   MeshModel.setup_mesh_from_rasterdataset
+   MeshModel.setup_mesh_from_raster_reclass
 
 
 =========
@@ -360,9 +361,9 @@ Grid
    :toctree: _generated
 
    workflows.grid.grid_from_constant
-   workflows.grid.grid_from_raster
+   workflows.grid.grid_from_rasterdataset
    workflows.grid.grid_from_raster_reclass
-   workflows.grid.grid_from_vector
+   workflows.grid.grid_from_geodataframe
 
 
 Basin mask

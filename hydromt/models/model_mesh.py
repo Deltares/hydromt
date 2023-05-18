@@ -30,7 +30,7 @@ class MeshMixin(object):
         self._mesh = None
 
     ## general setup methods
-    def setup_mesh_from_raster(
+    def setup_mesh_from_rasterdataset(
         self,
         raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
         variables: Optional[list] = None,
