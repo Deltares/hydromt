@@ -354,9 +354,22 @@ def test_interpolate_na():
 
 
 def test_vector_grid(rioda):
+    # polygon
     gdf = rioda.raster.vector_grid()
-    assert isinstance(gdf, gpd.GeoDataFrame)
     assert rioda.raster.size == gdf.index.size
+    assert np.all(gdf.geometry.type == "Polygon")
+    assert np.all(gdf.total_bounds == rioda.raster.bounds)
+    # line
+    gdf = rioda.raster.vector_grid(geom_type="line")
+    nrow, ncol = rioda.raster.shape
+    assert gdf.index.size == (nrow + 1 + ncol + 1)
+    assert np.all(gdf.geometry.type == "LineString")
+    assert np.all(gdf.total_bounds == rioda.raster.bounds)
+    # point
+    gdf = rioda.raster.vector_grid(geom_type="point")
+    assert np.all(gdf.geometry.type == "Point")
+    assert rioda.raster.size == gdf.index.size
+    assert np.all(gdf.intersects(rioda.raster.box.geometry[0]))
 
 
 def test_sample():

@@ -14,6 +14,7 @@ Added
 
 Changed
 -------
+- new geom_type argument in `RasterDataArray.vector_grid` to specify the geometry type {'polygon', 'line', 'points'} of the vector grid. PR #351
 - Added extrapolate option to `raster.interpolate_na` method. PR #348
 
 Fixed
