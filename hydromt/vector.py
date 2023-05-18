@@ -1,18 +1,20 @@
 from __future__ import annotations
-from typing import Union, Any
-import numpy as np
-import xarray as xr
-import geopandas as gpd
-from geopandas import GeoSeries, GeoDataFrame
-from shapely.geometry.base import BaseGeometry
-import shapely
-import pyproj
-import logging
 
-from hydromt import gis_utils, raster
+import logging
+from typing import Any, Union
+
+import geopandas as gpd
+import numpy as np
+import pyproj
+import shapely
+import xarray as xr
+from geopandas import GeoDataFrame, GeoSeries
 
 # TODO try getting this version without importing osgeo to avoid conflicts with geopandas/rasterio
 from osgeo import __version__ as GDAL_VERSION
+from shapely.geometry.base import BaseGeometry
+
+from hydromt import gis_utils, raster
 
 logger = logging.getLogger(__name__)
 
@@ -506,7 +508,7 @@ class GeoBase(raster.XGeoBase):
             using the predicate function against each item in the
             index whose extent intersects the envelope of the input geometry:
             predicate(input_geometry, tree_geometry).
-        
+
         Returns
         -------
         da: xarray.DataArray

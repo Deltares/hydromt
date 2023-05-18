@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """Tests for the io submodule."""
 
-import pytest
-import numpy as np
-import pandas as pd
-import xarray as xr
-import rasterio
-import rioxarray
-import hydromt
-import os
 import glob
+import os
 from os.path import join
 from pathlib import Path
-from hydromt import raster, _compat
+
+import numpy as np
+import pandas as pd
+import pytest
+import rasterio
+import rioxarray
+import xarray as xr
+
+import hydromt
+from hydromt import _compat, raster
 
 
 def test_open_vector(tmpdir, df, geodf, world):

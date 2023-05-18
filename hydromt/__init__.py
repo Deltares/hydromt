@@ -9,13 +9,13 @@ import os
 
 os.environ["USE_PYGEOS"] = "0"
 
+# required for accessor style documentation
+from xarray import DataArray, Dataset
+
 # submodules
-from . import cli, workflows, stats, flw, raster, vector
+from . import cli, flw, raster, stats, vector, workflows
+from .data_catalog import *
+from .io import *
 
 # high-level methods
 from .models import *
-from .io import *
-from .data_catalog import *
-
-# required for accessor style documentation
-from xarray import DataArray, Dataset
