@@ -327,28 +327,49 @@ def test_area_grid(rioda):
 
 
 def test_interpolate_na():
-    # mv > nan
-    da0 = raster.full_from_transform(*testdata[0], nodata=-1)
-    da0.values.flat[np.array([0, 3, -3, -1])] = np.array([1, 1, 2, 2])
-    da1 = da0.raster.mask_nodata().raster.interpolate_na()  # nearest
-    assert np.all(np.isnan(da1) == False)
+    # nodata is nan
+    da0 = raster.full_from_transform(*testdata[0], nodata=np.nan)
+    da0.values.flat[np.array([0, 3, -6])] = np.array([1, 1, 2])
+    # default nearest interpolation
+    da1 = da0.raster.interpolate_na()
+    assert np.all(~np.isnan(da1))
     assert np.all(np.isin(da1, [1, 2]))
-    assert np.all(np.isnan(da1.raster.interpolate_na()) == False)
-    assert np.all(
-        da0.raster.interpolate_na(method="rio_idw", max_search_distance=3)
-        != da0.raster.nodata
-    )
+    # extra keyword argument to rasterio.fill.fillnodata
+    da1 = da0.raster.interpolate_na(method="rio_idw", max_search_distance=5)
+    assert np.all(~np.isnan(da1))
+    # linear interpolation -> still nans
+    da1 = da0.raster.interpolate_na(method="linear", extrapolate=False)
+    assert np.isnan(da1).sum() == 14
+    # extrapolate
+    da1 = da0.raster.interpolate_na(method="linear", extrapolate=True)
+    assert np.all(~np.isnan(da1))
+    # with extra dimension
     da2 = da0.copy()  # adding extra dims to spatial_ref is done inplace
-    assert np.all(da2.expand_dims("t").raster.interpolate_na() != da0.raster.nodata)
-    da3 = da0.astype(np.int32)  # this removes the nodata value ...
+    da1 = da2.expand_dims("t").raster.interpolate_na()
+    assert np.all(~np.isnan(da1))
+    # test with other nodata value
+    da3 = da0.fillna(-9999).astype(np.int32)
     da3.raster.set_nodata(-9999)
     assert da3.raster.interpolate_na().dtype == np.int32
 
 
 def test_vector_grid(rioda):
+    # polygon
     gdf = rioda.raster.vector_grid()
-    assert isinstance(gdf, gpd.GeoDataFrame)
     assert rioda.raster.size == gdf.index.size
+    assert np.all(gdf.geometry.type == "Polygon")
+    assert np.all(gdf.total_bounds == rioda.raster.bounds)
+    # line
+    gdf = rioda.raster.vector_grid(geom_type="line")
+    nrow, ncol = rioda.raster.shape
+    assert gdf.index.size == (nrow + 1 + ncol + 1)
+    assert np.all(gdf.geometry.type == "LineString")
+    assert np.all(gdf.total_bounds == rioda.raster.bounds)
+    # point
+    gdf = rioda.raster.vector_grid(geom_type="point")
+    assert np.all(gdf.geometry.type == "Point")
+    assert rioda.raster.size == gdf.index.size
+    assert np.all(gdf.intersects(rioda.raster.box.geometry[0]))
 
 
 def test_sample():
