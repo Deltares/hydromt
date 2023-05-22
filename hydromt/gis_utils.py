@@ -586,7 +586,7 @@ def write_map(
             # NOTE this should not be necessary
             pcrmap = pcr.lddrepair(ldd)
         elif pcr_vs == "bool":
-            pcrmap = pcr.numpy2pcr(pcr.Boolean, data.astype(np.bool), np.bool(nodata))
+            pcrmap = pcr.numpy2pcr(pcr.Boolean, data.astype(bool), np.bool_(nodata))
         elif pcr_vs == "scalar":
             pcrmap = pcr.numpy2pcr(pcr.Scalar, data.astype(float), float(nodata))
         elif pcr_vs == "ordinal":
