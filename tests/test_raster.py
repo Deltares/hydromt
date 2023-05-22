@@ -206,6 +206,33 @@ def test_rasterize(rioda):
         )
 
 
+def test_rasterize_geometry(rioda):
+    xmin, ymin, xmax, ymax = rioda.raster.bounds
+    resx, resy = rioda.raster.res
+    box1 = box(xmin, ymin, xmin + resx, ymin - resy)
+    box2 = box(xmax - resx, ymax + resy, xmax, ymax)
+    x1 = rioda.raster.xcoords.values[2]
+    y1 = rioda.raster.ycoords.values[2]
+    box3 = box(x1, y1, x1 + resx, y1 - resy)
+    gdf = gpd.GeoDataFrame(geometry=[box1, box2, box3], crs=rioda.raster.crs)
+
+    da = rioda.raster.rasterize_geometry(gdf, method="fraction", name="frac", nodata=0)
+    assert da.name == "frac"
+    assert da.raster.nodata == 0
+    assert np.round(da.values.max(), 4) <= 1.0
+    # Count unique values in da
+    assert np.unique(np.round(da.values, 2)).size == 3
+    assert 0.25 in np.unique(np.round(da.values, 2))
+
+    da2 = rioda.raster.rasterize_geometry(gdf, method="area")
+    assert da2.name == "area"
+    assert da2.raster.nodata == -1.0
+    rioda_grid = rioda.raster.vector_grid()
+    crs_utm = gis_utils.parse_crs("utm", rioda_grid.total_bounds)
+    rioda_grid = rioda_grid.to_crs(crs_utm)
+    assert da2.values.max() == rioda_grid.area.max()
+
+
 def test_vectorize():
     da = raster.full_from_transform(*testdata[0], nodata=1, name="test")
     da.raster.set_crs(4326)

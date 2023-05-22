@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
+import pandas as pd
 import numpy as np
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
@@ -807,17 +808,18 @@ class Model(object, metaclass=ABCMeta):
             self._write_nc(nc_dict, fn, **kwargs)
 
     # map files setup methods
-    def setup_maps_from_raster(
+    def setup_maps_from_rasterdataset(
         self,
-        raster_fn: str,
+        raster_fn: Union[str, Path, xr.Dataset],
         variables: Optional[List] = None,
         fill_method: Optional[str] = None,
         name: Optional[str] = None,
         reproject_method: Optional[str] = None,
         split_dataset: Optional[bool] = True,
+        rename: Optional[Dict] = dict(),
     ) -> List[str]:
         """
-        This component adds data variable(s) from ``raster_fn`` to maps object.
+        HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to maps object.
 
         If raster is a dataset, all variables will be added unless ``variables`` list is specified.
 
@@ -827,19 +829,21 @@ class Model(object, metaclass=ABCMeta):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog.
+        raster_fn: str, Path, xr.Dataset
+            Data catalog key, path to raster file or raster xarray data object.
         variables: list, optional
             List of variables to add to maps from raster_fn. By default all.
         fill_method : str, optional
             If specified, fills nodata values using fill_nodata method.
             Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         name: str, optional
-            Name of new maps variable, only in case split_dataset=False.
+            Name of new dataset in self.maps dictionnary, only in case split_dataset=False.
         reproject_method: str, optional
             See rasterio.warp.reproject for existing methods, by default the data is not reprojected (None).
         split_dataset: bool, optional
             If data is a xarray.Dataset split it into several xarray.DataArrays (default).
+        rename: dict, optional
+            Dictionary to rename variable names in raster_fn before adding to maps {'name_in_raster_fn': 'name_in_maps'}. By default empty.
 
         Returns
         -------
@@ -861,25 +865,26 @@ class Model(object, metaclass=ABCMeta):
         # Reprojection
         if ds.rio.crs != self.crs and reproject_method is not None:
             ds = ds.raster.reproject(dst_crs=self.crs, method=reproject_method)
-        # Add to maps
-        self.set_maps(ds, name=name, split_dataset=split_dataset)
+        # Rename and add to maps
+        self.set_maps(ds.rename(rename), name=name, split_dataset=split_dataset)
 
         return list(ds.data_vars.keys())
 
     def setup_maps_from_raster_reclass(
         self,
-        raster_fn: str,
-        reclass_table_fn: str,
+        raster_fn: Union[str, Path, xr.DataArray],
+        reclass_table_fn: Union[str, Path, pd.DataFrame],
         reclass_variables: List,
         variable: Optional[str] = None,
         fill_method: Optional[str] = None,
         reproject_method: Optional[str] = None,
         name: Optional[str] = None,
         split_dataset: Optional[bool] = True,
+        rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
         """
-        This component adds data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 
@@ -887,11 +892,10 @@ class Model(object, metaclass=ABCMeta):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
-            :py:meth:`hydromt.data_catalog.get_rasterdataset` method.
-        reclass_table_fn: str
-            Source name of reclassification table of `raster_fn` in data_catalog.
+        raster_fn: str, Path, xr.DataArray
+            Data catalog key, path to raster file or raster xarray data object. Should be a DataArray. Else use `variable` argument for selection.
+        reclass_table_fn: str, Path, pd.DataFrame
+            Data catalog key, path to tabular data file or tabular pandas dataframe object for the reclassification table of `raster_fn`.
         reclass_variables: list
             List of reclass_variables from reclass_table_fn table to add to maps. Index column should match values in `raster_fn`.
         variable: str, optional
@@ -906,6 +910,8 @@ class Model(object, metaclass=ABCMeta):
             Name of new maps variable, only in case split_dataset=False.
         split_dataset: bool, optional
             If data is a xarray.Dataset split it into several xarray.DataArrays (default).
+        rename: dict, optional
+            Dictionary to rename variable names in reclass_variables before adding to grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
 
         Returns
         -------
@@ -917,7 +923,7 @@ class Model(object, metaclass=ABCMeta):
         )
         # Read raster data and remapping table
         da = self.data_catalog.get_rasterdataset(
-            raster_fn, geom=self.region, buffer=2, **kwargs
+            raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
         )
         if not isinstance(da, xr.DataArray):
             raise ValueError(
@@ -929,14 +935,14 @@ class Model(object, metaclass=ABCMeta):
         )
         # Fill nodata
         if fill_method is not None:
-            ds = ds.raster.interpolate_na(method=fill_method)
+            da = da.raster.interpolate_na(method=fill_method)
         # Mapping function
         ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
         # Reprojection
         if ds_vars.rio.crs != self.crs and reproject_method is not None:
             ds_vars = ds_vars.raster.reproject(dst_crs=self.crs)
         # Add to maps
-        self.set_maps(ds_vars, name=name, split_dataset=split_dataset)
+        self.set_maps(ds_vars.rename(rename), name=name, split_dataset=split_dataset)
 
         return list(ds_vars.data_vars.keys())
 
