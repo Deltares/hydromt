@@ -17,7 +17,7 @@ import sys
 import tempfile
 from itertools import product
 from os.path import basename, dirname, isdir, join
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import dask
 import geopandas as gpd
@@ -32,7 +32,7 @@ import yaml
 from affine import Affine
 from pyproj import CRS
 from rasterio import features
-from rasterio.enums import Resampling
+from rasterio.enums import Resampling, MergeAlg
 from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
@@ -1181,6 +1181,103 @@ class XRasterBase(XGeoBase):
         )
         da_out.raster.set_nodata(nodata)
         da_out.raster.set_attrs(**self.attrs)
+        return da_out
+
+    def rasterize_geometry(
+        self,
+        gdf: gpd.GeoDataFrame,
+        method: Optional[str] = "fraction",
+        mask_name: Optional[str] = None,
+        name: Optional[str] = None,
+        nodata: Optional[Union[int, float]] = -1,
+    ) -> xr.DataArray:
+        """
+        Return an object with the fraction of area of the grid cells covered by geometry.
+
+        Arguments
+        ---------
+        gdf : geopandas.GeoDataFrame
+            GeoDataFrame of shapes to burn.
+        method : str, optional
+            Method to burn in the geometry, either 'fraction' (default) or 'area'.
+        mask_name : str, optional
+            Name of the mask variable in self to use for calculating the fraction of area covered by the geometry.
+            By default None for no masking.
+        name : str, optional
+            Name of the output DataArray. If None, the method name is used.
+        nodata : int or float, optional
+            Used as fill value for all areas not covered by input geometries, by default -1.
+
+        Returns
+        -------
+        da_out: xarray.DataArray
+            DataArray with burned geometries
+        """
+        ds_like = self._obj.copy()
+        # Create vector grid (for calculating fraction and storage per grid cell)
+        logger.debug(
+            "Creating vector grid for calculating coverage fraction per grid cell"
+        )
+        gdf["geometry"] = gdf.geometry.buffer(0)  # fix potential geometry errors
+        gdf_grid_all = ds_like.raster.vector_grid()
+        if mask_name is None:
+            gdf_grid = gdf_grid_all
+        else:
+            msktn = ds_like[mask_name]
+            idx_valid = np.where(msktn.values.flatten() != msktn.raster.nodata)[0]
+            gdf_grid = gdf_grid_all.loc[idx_valid]
+
+        # intersect the gdf data with the grid
+        gdf = gdf.to_crs(gdf_grid.crs)
+        gdf_intersect = gdf.overlay(gdf_grid, how="intersection")
+
+        # find the best UTM CRS for area computation
+        if gdf_intersect.crs.is_geographic:
+            crs_utm = gis_utils.parse_crs(
+                "utm", gdf_intersect.to_crs(4326).total_bounds
+            )
+        else:
+            crs_utm = gdf_intersect.crs
+
+        # compute area using same crs for frac
+        gdf_intersect = gdf_intersect.to_crs(crs_utm)
+        gdf_intersect["area"] = gdf_intersect.area
+        # convert to point (easier for stats)
+        gdf_intersect["geometry"] = gdf_intersect.representative_point()
+
+        # Rasterize area column with sum
+        da_area = ds_like.raster.rasterize(
+            gdf_intersect,
+            col_name="area",
+            nodata=0,
+            all_touched=True,
+            merge_alg=MergeAlg.add,
+        )
+
+        if method == "area":
+            da_out = da_area
+        else:  # fraction
+            # Mask grid cells that actually do intersect with the geometry
+            idx_area = np.where(da_area.values.flatten() != da_area.raster.nodata)[0]
+            gdf_grid = gdf_grid_all.loc[idx_area]
+            # Convert to frac using gdf grid in same crs (area error when using ds_like.raster.area_grid)
+            gdf_grid = gdf_grid.to_crs(crs_utm)
+            gdf_grid["area"] = gdf_grid.area
+            da_gridarea = ds_like.raster.rasterize(
+                gdf_grid, col_name="area", nodata=0, all_touched=False
+            )
+
+            da_out = da_area / da_gridarea
+            # As not all da_gridarea were computed, cover with zeros
+            da_out = da_out.fillna(0)
+            da_out.name = "fraction"
+
+        da_out.raster.set_crs(ds_like.raster.crs)
+        da_out.raster.set_nodata(nodata)
+        # Rename da_area
+        if name is not None:
+            da_out.name = name
+
         return da_out
 
     def geometry_mask(self, gdf, all_touched=False, invert=False, **kwargs):

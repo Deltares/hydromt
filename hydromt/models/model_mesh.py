@@ -2,9 +2,10 @@ import logging
 import os
 from os.path import dirname, isdir, isfile, join
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Dict
 
 import geopandas as gpd
+import pandas as pd
 import numpy as np
 import xarray as xr
 import xugrid as xu
@@ -30,16 +31,17 @@ class MeshMixin(object):
         self._mesh = None
 
     ## general setup methods
-    def setup_mesh_from_raster(
+    def setup_mesh_from_rasterdataset(
         self,
-        raster_fn: str,
+        raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
         variables: Optional[list] = None,
         fill_method: Optional[str] = None,
         resampling_method: Optional[str] = "mean",
         all_touched: Optional[bool] = True,
-    ) -> None:
+        rename: Optional[Dict] = dict(),
+    ) -> List[str]:
         """
-        This component adds data variable(s) from ``raster_fn`` to mesh object.
+        HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to mesh object.
 
         Raster data is interpolated to the mesh grid using the ``resampling_method``.
         If raster is a dataset, all variables will be added unless ``variables`` list is specified.
@@ -50,8 +52,8 @@ class MeshMixin(object):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog.
+        raster_fn: str, Path, xr.DataArray, xr.Dataset
+            Data catalog key, path to raster file or raster xarray data object.
         variables: list, optional
             List of variables to add to mesh from raster_fn. By default all.
         fill_method : str, optional
@@ -64,6 +66,13 @@ class MeshMixin(object):
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
+        rename: dict, optional
+            Dictionary to rename variable names in raster_fn before adding to mesh {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
+
+        Returns
+        -------
+        list
+            List of variables added to mesh.
         """
         self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
         # Read raster data and select variables
@@ -83,25 +92,28 @@ class MeshMixin(object):
         )
         # Rename variables
         rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
-        ds_sample = ds_sample.rename(rm_dict)
+        ds_sample = ds_sample.rename(rm_dict).rename(rename)
         # Convert to UgridDataset
         uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
 
         self.set_mesh(uds_sample)
 
+        return list(ds_sample.data_vars.keys())
+
     def setup_mesh_from_raster_reclass(
         self,
-        raster_fn: str,
-        reclass_table_fn: str,
+        raster_fn: Union[str, Path, xr.DataArray],
+        reclass_table_fn: Union[str, Path, pd.DataFrame],
         reclass_variables: list,
         variable: Optional[str] = None,
         fill_nodata: Optional[str] = None,
         resampling_method: Optional[Union[str, list]] = "mean",
         all_touched: Optional[bool] = True,
+        rename: Optional[Dict] = dict(),
         **kwargs,
-    ) -> None:
+    ) -> List[str]:
         """
-        This component adds data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        HYDROMT CORE METHOD: Add data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         The reclassified raster data are subsequently interpolated to the mesh using ``resampling_method``.
 
@@ -111,11 +123,10 @@ class MeshMixin(object):
 
         Parameters
         ----------
-        raster_fn: str
-            Source name of raster data in data_catalog. Should be a DataArray. Else use **kwargs to select variables/time_tuple in
-            :py:meth:`hydromt.data_catalog.get_rasterdataset` method
-        reclass_table_fn: str
-            Source name of reclassification table of raster_fn in data_catalog.
+        raster_fn: str, Path, xr.DataArray
+            Data catalog key, path to raster file or raster xarray data object. Should be a DataArray. Else use `variable` argument for selection.
+        reclass_table_fn: str, Path, pd.DataFrame
+            Data catalog key, path to tabular data file or tabular pandas dataframe object for the reclassification table of `raster_fn`.
         reclass_variables: list
             List of reclass_variables from reclass_table_fn table to add to mesh. Index column should match values in raster_fn.
         variable: str, optional
@@ -132,6 +143,8 @@ class MeshMixin(object):
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
+        rename: dict, optional
+            Dictionary to rename variable names in reclass_variables before adding to mesh {'name_in_reclass_table': 'name_in_mesh'}. By default empty.
         """
         self.logger.info(
             f"Preparing mesh data by reclassifying the data in {raster_fn} based on {reclass_table_fn}."
@@ -150,7 +163,7 @@ class MeshMixin(object):
         )
 
         if fill_nodata is not None:
-            ds = ds.raster.interpolate_na(method=fill_nodata)
+            da = da.raster.interpolate_na(method=fill_nodata)
 
         # Mapping function
         ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
@@ -169,12 +182,14 @@ class MeshMixin(object):
             f"{var}_{mtd}": var
             for var, mtd in zip(reclass_variables, resampling_method)
         }
-        ds_sample = ds_sample.rename(rm_dict)
+        ds_sample = ds_sample.rename(rm_dict).rename(rename)
         ds_sample = ds_sample[reclass_variables]
         # Convert to UgridDataset
         uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
 
         self.set_mesh(uds_sample)
+
+        return list(ds_sample.data_vars.keys())
 
     @property
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
@@ -295,7 +310,9 @@ class MeshModel(MeshMixin, Model):
         res: Optional[float] = None,
         crs: int = None,
     ) -> xu.UgridDataset:
-        """Creates an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
+        """
+        HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
+
         An 2D unstructured mesh will be created as 2D rectangular grid from a geometry (geom_fn) or bbox. If an existing
         2D mesh is given, then no new mesh will be generated
 

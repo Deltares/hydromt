@@ -46,6 +46,8 @@ def test_cli(tmpdir):
         root,
         "-r",
         "{'bbox': [12.05,45.30,12.85,45.65]}",
+        "--opt",
+        "setup_grid.res=0.05",
         "-vv",
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
