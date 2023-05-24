@@ -26,7 +26,7 @@ dependencies:
   - matplotlib # to run examples
   - nbsphinx # docs notebook examples
   - netcdf4
-  - numpy
+  - numpy>= 1.20
   - openpyxl
   - pandas
   - packaging

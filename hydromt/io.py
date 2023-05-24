@@ -370,11 +370,14 @@ def open_timeseries_from_table(
     """
     kwargs0 = dict(index_col=0, parse_dates=True)
     kwargs0.update(**kwargs)
+    if "date_format" not in kwargs0.keys():
+        kwargs0["date_format"] = "%Y-%m-%d"
+
     df = pd.read_csv(fn, **kwargs0)
     # check if time index
     if np.dtype(df.index).type != np.datetime64:
         try:
-            df.columns = pd.to_datetime(df.columns)
+            df.columns = pd.to_datetime(df.columns, format=kwargs0["date_format"])
             df = df.T
         except ValueError:
             raise ValueError(f"No time index found in file: {fn}")

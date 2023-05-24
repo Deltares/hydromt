@@ -295,7 +295,7 @@ class RasterDatasetAdapter(DataAdapter):
         # rename and select vars
         if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
             rm = {ds_out.raster.vars[0]: variables[0]}
-            if rm.keys() != rm.values():
+            if set(rm.keys()) != set(rm.values()):
                 warnings.warn(
                     f"Automatic renaming of single var array will be deprecated, rename {rm} in the data catalog instead.",
                     DeprecationWarning,

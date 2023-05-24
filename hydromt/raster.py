@@ -27,17 +27,17 @@ import pyproj
 import rasterio.fill
 import rasterio.warp
 import rioxarray
+import shapely
 import xarray as xr
 import yaml
 from affine import Affine
 from pyproj import CRS
 from rasterio import features
-from rasterio.enums import Resampling, MergeAlg
+from rasterio.enums import MergeAlg, Resampling
 from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
-from shapely.geometry import Polygon, box, LineString
-import shapely
+from shapely.geometry import LineString, Polygon, box
 
 from . import _compat, gis_utils
 
@@ -1622,8 +1622,9 @@ class RasterDataArray(XRasterBase):
                 nodata = self._obj.rio.encoded_nodata
         # Only numerical nodata values are supported
         if np.issubdtype(type(nodata), np.number):
-            self._obj.rio.set_nodata(nodata, inplace=True)
-            self._obj.rio.write_nodata(nodata, inplace=True)
+            # cast to float since using int causes inconsistent casting
+            self._obj.rio.set_nodata(np.float32(nodata), inplace=True)
+            self._obj.rio.write_nodata(np.float32(nodata), inplace=True)
         else:
             logger.warning("No numerical nodata value found, skipping set_nodata")
             self._obj.attrs.pop("_FillValue", None)
