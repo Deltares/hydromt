@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Utils for parsing cli options and arguments
-"""
+"""Utils for parsing cli options and arguments."""
 
 import json
 import logging
@@ -23,8 +22,7 @@ __all__ = ["parse_json", "parse_config", "parse_opt"]
 
 
 def parse_opt(ctx, param, value):
-    """
-    click callback to validate `--opt KEY1=VAL1 --opt SECT.KEY2=VAL2` and collect
+    """Click callback to validate `--opt KEY1=VAL1 --opt SECT.KEY2=VAL2` and collect
     in a dictionary like the one below, which is what the CLI function receives.
     If no value or `None` is received then an empty dictionary is returned.
         {
@@ -81,7 +79,7 @@ def parse_json(ctx, param, value):
 
 
 def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
-    """Parse config from ini `path` and combine with command line options `opt_cli`"""
+    """Parse config from ini `path` and combine with command line options `opt_cli`."""
     opt = {}
     if path is not None and isfile(path):
         if str(path).endswith(".ini"):
@@ -98,7 +96,7 @@ def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
         for section in opt_cli:
             if not isinstance(opt_cli[section], dict):
                 raise ValueError(
-                    f"No section found in --opt values: "
+                    "No section found in --opt values: "
                     "use <section>.<option>=<value> notation."
                 )
             if section not in opt:

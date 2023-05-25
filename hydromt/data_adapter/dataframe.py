@@ -147,7 +147,6 @@ class DataFrameAdapter(DataAdapter):
 
         For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
-
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         if "storage_options" in self.kwargs:
             kwargs = self.kwargs["storage_options"]
@@ -214,7 +213,7 @@ class DataFrameAdapter(DataAdapter):
             logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
             df = df[df.index.slice_indexer(*time_tuple)]
             if df.size == 0:
-                raise IndexError(f"DataFrame: Time slice out of range.")
+                raise IndexError("DataFrame: Time slice out of range.")
 
         # set meta data
         df.attrs.update(self.meta)

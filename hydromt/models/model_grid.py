@@ -1,23 +1,18 @@
 # -*- coding: utf-8 -*-
-"""HydroMT GridModel class definition"""
+"""HydroMT GridModel class definition."""
 
 import logging
 from pathlib import Path
-import xarray as xr
-import numpy as np
-import pandas as pd
-from os.path import isfile, join
 from typing import Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import xarray as xr
 from pyproj import CRS
 from shapely.geometry import box
 
-from .model_api import Model
-from .. import raster, gis_utils
-from .. import workflows
+from .. import gis_utils, raster, workflows
 from .model_api import Model
 
 __all__ = ["GridModel"]
@@ -42,8 +37,7 @@ class GridMixin(object):
         nodata: Optional[Union[int, float]] = None,
         mask_name: Optional[str] = "mask",
     ) -> List[str]:
-        """
-        HYDROMT CORE METHOD: Adds a grid based on a constant value.
+        """HYDROMT CORE METHOD: Adds a grid based on a constant value.
 
         Parameters
         ----------
@@ -85,8 +79,7 @@ class GridMixin(object):
         mask_name: Optional[str] = "mask",
         rename: Optional[Dict] = dict(),
     ) -> List[str]:
-        """
-        HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
 
         If raster is a dataset, all variables will be added unless ``variables`` list is specified.
 
@@ -154,8 +147,7 @@ class GridMixin(object):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """
-        HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 
@@ -229,8 +221,7 @@ class GridMixin(object):
         rename: Optional[Dict] = dict(),
         all_touched: Optional[bool] = True,
     ) -> List[str]:
-        """
-        HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
         Several type of rasterization are possible:
             * "fraction": the fraction of the grid cell covered by the vector shape is returned.
             * "area": the area of the grid cell covered by the vector shape is returned.
@@ -295,7 +286,8 @@ class GridMixin(object):
     @property
     def grid(self):
         """Model static gridded data. Returns xarray.Dataset.
-        Previously called staticmaps."""
+        Previously called staticmaps.
+        """
         if len(self._grid) == 0 and self._read:
             self.read_grid()
         return self._grid
@@ -343,7 +335,7 @@ class GridMixin(object):
                 self._grid[dvar] = data[dvar]
 
     def read_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
-        """Read model grid data at <root>/<fn> and add to grid property
+        """Read model grid data at <root>/<fn> and add to grid property.
 
         key-word arguments are passed to :py:func:`xarray.open_dataset`
 
@@ -357,7 +349,7 @@ class GridMixin(object):
             self.set_grid(ds)
 
     def write_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
-        """Write model grid data to netcdf file at <root>/<fn>
+        """Write model grid data to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
@@ -375,7 +367,7 @@ class GridMixin(object):
 
 
 class GridModel(GridMixin, Model):
-    """Model class Grid Model for gridded models in HydroMT"""
+    """Model class Grid Model for gridded models in HydroMT."""
 
     _CLI_ARGS = {"region": "setup_grid"}
     _NAME = "grid_model"
@@ -408,8 +400,7 @@ class GridModel(GridMixin, Model):
         add_mask: bool = True,
         align: bool = True,
     ) -> xr.DataArray:
-        """
-        HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
+        """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
 
         An 2D regular grid will be created from a geometry (geom_fn) or bbox. If an existing
         grid is given, then no new grid will be generated.
@@ -451,7 +442,7 @@ class GridModel(GridMixin, Model):
         grid : xr.DataArray
             Generated grid mask.
         """
-        self.logger.info(f"Preparing 2D grid.")
+        self.logger.info("Preparing 2D grid.")
 
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:

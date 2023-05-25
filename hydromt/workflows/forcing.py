@@ -43,7 +43,7 @@ def precip(
         Additional key-word arguments (e.g. label, closed) for time resampling method
 
     Returns
-    --------
+    -------
     p_out: xarray.DataArray (lazy)
         processed precipitation forcing
     """
@@ -114,7 +114,7 @@ def temp(
         Additional key-word arguments (e.g. label, closed) for time resampling method
 
     Returns
-    --------
+    -------
     t_out: xarray.DataArray (lazy)
         processed temperature forcing
     """
@@ -185,7 +185,7 @@ def press(
         Additional key-word arguments (e.g. label, closed) for time resampling method
 
     Returns
-    --------
+    -------
     press_out: xarray.DataArray (lazy)
         processed pressure forcing
     """
@@ -247,7 +247,7 @@ def wind(
         Additional key-word arguments (e.g. label, closed) for time resampling method
 
     Returns
-    --------
+    -------
     wind_out: xarray.DataArray (lazy)
         processed wind forcing
     """
@@ -318,13 +318,13 @@ def pet(
         Additional key-word arguments (e.g. label, closed) for time resampling method
 
     Returns
-    --------
+    -------
     pet_out : xarray.DataArray (lazy)
         reference evapotranspiration
     """
     # # resample in time
     if temp.raster.dim0 != "time" or ds.raster.dim0 != "time":
-        raise ValueError(f'First dimension of input variables should be "time"')
+        raise ValueError('First dimension of input variables should be "time"')
     # make sure temp and ds align both temporally and spatially
     if not np.all(temp["time"].values == ds["time"].values):
         raise ValueError("All input variables have same time index.")
@@ -472,7 +472,6 @@ def temp_correction(dem, lapse_rate=-0.0065):
     temp_add : xarray.DataArray
         temperature addition
     """
-
     temp_add = (dem * lapse_rate).fillna(0)
 
     return temp_add
@@ -544,7 +543,7 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
         standard cp [J kg-1 K-1]
 
     Returns
-    --------
+    -------
     pet : xarray.DataArray (lazy)
         reference evapotranspiration
     """
@@ -574,8 +573,7 @@ def pm_fao56(
     dem: xarray.DataArray,
     var: str = "temp_dew",
 ) -> xarray.DataArray:
-    """
-    Estimate daily reference evapotranspiration (ETo) from a hypothetical
+    """Estimate daily reference evapotranspiration (ETo) from a hypothetical
     short grass reference surface using the FAO-56 Penman-Monteith equation.
 
     Actual vapor pressure is derived either from relative humidity or dewpoint temperature (depending on var_for_avp_name).
@@ -692,7 +690,7 @@ def resample_time(
         If True multiply output with relative change in frequency to conserve mass
 
     Returns
-    --------
+    -------
     pet : xarray.DataArray
         Resampled data.
     """
@@ -718,7 +716,7 @@ def delta_freq(da_or_freq, da_or_freq1):
     """Returns the relative difference between the dataset mean timestep and destination freq
     <1 : upsampling
     1 : same
-    >1 : downsampling
+    >1 : downsampling.
     """
     return to_timedelta(da_or_freq1) / to_timedelta(da_or_freq)
 

@@ -20,7 +20,7 @@ LOCAL_EPS = {
 
 
 def get_general_eps() -> Dict:
-    """Get local hydromt generic model class entrypoints
+    """Get local hydromt generic model class entrypoints.
 
     Returns
     -------
@@ -37,12 +37,12 @@ def get_general_eps() -> Dict:
 
 
 def _discover(path=None) -> List:
-    """Discover drivers via entrypoints"""
+    """Discover drivers via entrypoints."""
     return get_group_all("hydromt.models", path=path)
 
 
 def get_plugin_eps(path=None, logger=logger) -> Dict:
-    """Discover hydromt model plugins based on 'hydromt.models' entrypoints
+    """Discover hydromt model plugins based on 'hydromt.models' entrypoints.
 
     Parameters
     ----------
@@ -69,7 +69,7 @@ def get_plugin_eps(path=None, logger=logger) -> Dict:
 
 
 def load(ep, logger=logger) -> Model:
-    """Load entrypoint and return plugin model class
+    """Load entrypoint and return plugin model class.
 
     Parameters
     ----------
@@ -118,7 +118,7 @@ class ModelCatalog:
 
     @property
     def plugins(self) -> List:
-        """Returns list with names of model plugins"""
+        """Returns list with names of model plugins."""
         if len(self._plugins) == 0:
             eps = get_plugin_eps()
             self._plugins = list(eps.keys())
@@ -127,7 +127,7 @@ class ModelCatalog:
 
     @property
     def generic(self) -> List:
-        """Returns list with names of generic models"""
+        """Returns list with names of generic models."""
         if len(self._general) == 0:
             eps = get_general_eps()
             self._general = list(eps.keys())
@@ -135,7 +135,7 @@ class ModelCatalog:
         return self._general
 
     def load(self, name) -> Model:
-        """Returns model class"""
+        """Returns model class."""
         if name not in self._cls:
             self._cls[name] = load(self[name])
         return self._cls[name]

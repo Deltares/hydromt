@@ -1,9 +1,10 @@
-from typing import Optional, Union, List, Dict
+import logging
+from typing import Dict, List, Optional, Union
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import xarray as xr
-import logging
 
 import hydromt
 
@@ -25,8 +26,7 @@ def grid_from_constant(
     nodata: Optional[Union[int, float]] = None,
     mask_name: Optional[str] = "mask",
 ) -> xr.DataArray:
-    """
-    Prepares a grid based on a constant value.
+    """Prepares a grid based on a constant value.
 
     Parameters
     ----------
@@ -76,8 +76,7 @@ def grid_from_rasterdataset(
     mask_name: Optional[str] = "mask",
     rename: Optional[Dict] = dict(),
 ) -> xr.Dataset:
-    """
-    Prepares data by resampling ds to grid_like.
+    """Prepares data by resampling ds to grid_like.
 
     If raster is a dataset, all variables will be added unless ``variables`` list is specified.
 
@@ -144,8 +143,7 @@ def grid_from_raster_reclass(
     mask_name: Optional[str] = "mask",
     rename: Optional[Dict] = dict(),
 ) -> xr.Dataset:
-    """
-    Prepares data variable(s) resampled to grid_like object by reclassifying the data in ``da`` based on ``reclass_table``.
+    """Prepares data variable(s) resampled to grid_like object by reclassifying the data in ``da`` based on ``reclass_table``.
 
     Parameters
     ----------
@@ -215,8 +213,7 @@ def grid_from_geodataframe(
     rename: Optional[Union[Dict, str]] = dict(),
     all_touched: Optional[bool] = True,
 ) -> xr.Dataset:
-    """
-    Prepares data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.
+    """Prepares data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.
     Several type of rasterization are possible:
         * "fraction": the fraction of the grid cell covered by the gdf shape is returned.
         * "area": the area of the grid cell covered by the gdf shape is returned.

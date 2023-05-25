@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""gis related convience functions. More in pyflwdir.gis_utils"""
+"""gis related convience functions. More in pyflwdir.gis_utils."""
 import glob
 import logging
 import os
 import subprocess
-import sys
 from os.path import dirname, isfile, join
 from typing import Optional, Tuple
 
@@ -229,7 +228,7 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
 
 # REPROJ
 def utm_crs(bbox):
-    """Returns wkt string of nearest UTM projects
+    """Returns wkt string of nearest UTM projects.
 
     Parameters
     ----------
@@ -265,8 +264,7 @@ def parse_crs(crs, bbox=None):
 
 
 def axes_attrs(crs):
-    """
-    Provide CF-compliant variable names and metadata for axes
+    """Provide CF-compliant variable names and metadata for axes.
 
     Parameters
     ----------
@@ -290,7 +288,7 @@ def axes_attrs(crs):
 
 
 def meridian_offset(ds, x_name="x", bbox=None):
-    """re-arange data along x dim"""
+    """re-arange data along x dim."""
     if ds.raster.crs is None or ds.raster.crs.is_projected:
         raise ValueError("The method is only applicable to geographic CRS")
     lons = np.copy(ds[x_name].values)
@@ -379,7 +377,8 @@ def affine_to_meshgrid(transform, shape):
 ## CELLAREAS
 def reggrid_area(lats, lons):
     """Returns the cell area [m2] for a regular grid based on its cell centres
-    lat, lon coordinates."""
+    lat, lon coordinates.
+    """
     xres = np.abs(np.mean(np.diff(lons)))
     yres = np.abs(np.mean(np.diff(lats)))
     area = np.ones((lats.size, lons.size), dtype=lats.dtype)
@@ -388,7 +387,8 @@ def reggrid_area(lats, lons):
 
 def cellarea(lat, xres=1.0, yres=1.0):
     """Return the area [m2] of cell based on the cell center latitude and its resolution
-    in measured in degrees."""
+    in measured in degrees.
+    """
     l1 = np.radians(lat - np.abs(yres) / 2.0)
     l2 = np.radians(lat + np.abs(yres) / 2.0)
     dx = np.radians(np.abs(xres))
@@ -397,7 +397,8 @@ def cellarea(lat, xres=1.0, yres=1.0):
 
 def cellres(lat, xres=1.0, yres=1.0):
     """Return the cell (x, y) resolution [m] based on cell center latitude and its
-    resolution measured in degrees."""
+    resolution measured in degrees.
+    """
     m1 = 111132.92  # latitude calculation term 1
     m2 = -559.82  # latitude calculation term 2
     m3 = 1.175  # latitude calculation term 3
@@ -433,7 +434,7 @@ def spread2d(
     nodata: Optional[float] = None,
 ) -> xr.Dataset:
     """Returns values of `da_obs` spreaded to cells with `nodata` value within `da_mask`,
-    powered by :py:meth:`pyflwdir.gis_utils.spread2d`
+    powered by :py:meth:`pyflwdir.gis_utils.spread2d`.
 
     Parameters
     ----------
@@ -493,7 +494,7 @@ def spread2d(
 
 
 def write_clone(tmpdir, gdal_transform, wkt_projection, shape):
-    """write pcraster clone file to a tmpdir using gdal"""
+    """Write pcraster clone file to a tmpdir using gdal."""
     from osgeo import gdal
 
     gdal.AllRegister()
@@ -508,10 +509,9 @@ def write_clone(tmpdir, gdal_transform, wkt_projection, shape):
         TempDataset.SetProjection(wkt_projection)
     # TODO set csr
     # copy to pcraster format
-    outDataset = driver2.CreateCopy(fn, TempDataset, 0)
+    driver2.CreateCopy(fn, TempDataset, 0)
     # close and cleanup
     TempDataset = None
-    outDataset = None
     return fn
 
 
@@ -608,7 +608,7 @@ def create_vrt(
     """Creates a .vrt file from a list op raster datasets by either
     passing the list directly (file_list_path) or by inferring it by passing
     a path containing wildcards (files_path) of the location(s) of the
-    raster datasets
+    raster datasets.
 
     Parameters
     ----------
@@ -626,7 +626,6 @@ def create_vrt(
     ValueError
         A Path is needed, either file_list_path or files_path
     """
-
     if file_list_path is None and files_path is None:
         raise ValueError(
             "Either 'file_list_path' or 'files_path' is required -> None was given"

@@ -2,14 +2,14 @@ import logging
 import os
 from os.path import dirname, isdir, isfile, join
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, Dict
+from typing import Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
-import pandas as pd
 import numpy as np
+import pandas as pd
 import xarray as xr
 import xugrid as xu
-from shapely.geometry import Polygon, box
+from shapely.geometry import box
 
 from .. import workflows
 from ..raster import GEO_MAP_COORD
@@ -40,8 +40,7 @@ class MeshMixin(object):
         all_touched: Optional[bool] = True,
         rename: Optional[Dict] = dict(),
     ) -> List[str]:
-        """
-        HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to mesh object.
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to mesh object.
 
         Raster data is interpolated to the mesh grid using the ``resampling_method``.
         If raster is a dataset, all variables will be added unless ``variables`` list is specified.
@@ -112,8 +111,7 @@ class MeshMixin(object):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """
-        HYDROMT CORE METHOD: Add data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         The reclassified raster data are subsequently interpolated to the mesh using ``resampling_method``.
 
@@ -236,7 +234,7 @@ class MeshMixin(object):
                 self._mesh[dvar] = data[dvar]
 
     def read_mesh(self, fn: str = "mesh/mesh.nc", **kwargs) -> None:
-        """Read model mesh data at <root>/<fn> and add to mesh property
+        """Read model mesh data at <root>/<fn> and add to mesh property.
 
         key-word arguments are passed to :py:func:`xr.open_dataset`
 
@@ -254,7 +252,7 @@ class MeshMixin(object):
             self.set_mesh(uds)
 
     def write_mesh(self, fn: str = "mesh/mesh.nc", **kwargs) -> None:
-        """Write model grid data to netcdf file at <root>/<fn>
+        """Write model grid data to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.ugrid.to_netcdf`
 
@@ -281,7 +279,7 @@ class MeshMixin(object):
 
 
 class MeshModel(MeshMixin, Model):
-    """Model class Mesh Model for mesh models in HydroMT"""
+    """Model class Mesh Model for mesh models in HydroMT."""
 
     _CLI_ARGS = {"region": "setup_mesh", "res": "setup_mesh"}
     _NAME = "mesh_model"
@@ -310,8 +308,7 @@ class MeshModel(MeshMixin, Model):
         res: Optional[float] = None,
         crs: int = None,
     ) -> xu.UgridDataset:
-        """
-        HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
+        """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
 
         An 2D unstructured mesh will be created as 2D rectangular grid from a geometry (geom_fn) or bbox. If an existing
         2D mesh is given, then no new mesh will be generated
@@ -344,7 +341,7 @@ class MeshModel(MeshMixin, Model):
             Generated mesh2d.
 
         """
-        self.logger.info(f"Preparing 2D mesh.")
+        self.logger.info("Preparing 2D mesh.")
 
         if "mesh" not in region:
             if not isinstance(res, (int, float)):
@@ -394,7 +391,7 @@ class MeshModel(MeshMixin, Model):
         else:
             mesh2d_fn = region["mesh"]
             if isinstance(mesh2d_fn, (str, Path)) and isfile(mesh2d_fn):
-                self.logger.info(f"An existing 2D grid is used to prepare 2D mesh.")
+                self.logger.info("An existing 2D grid is used to prepare 2D mesh.")
 
                 ds = xr.open_dataset(mesh2d_fn, mask_and_scale=False)
             elif isinstance(mesh2d_fn, xr.Dataset):
@@ -500,7 +497,7 @@ class MeshModel(MeshMixin, Model):
 
     @property
     def mesh_gdf(self) -> gpd.GeoDataFrame:
-        """Returns geometry of mesh as a gpd.GeoDataFrame"""
+        """Returns geometry of mesh as a gpd.GeoDataFrame."""
         if self._mesh is not None:
             name = [n for n in self.mesh.data_vars][0]  # works better on a DataArray
             return self._mesh[name].ugrid.to_geodataframe()

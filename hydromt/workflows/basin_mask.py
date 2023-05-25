@@ -342,7 +342,7 @@ def get_basin_geometry(
             ds_clip = ds[dvars].raster.clip_geom(geom, buffer=buffer, mask=True)
         # get basin IDs
         if xy is not None:
-            logger.debug(f"Getting basin IDs at point locations.")
+            logger.debug("Getting basin IDs at point locations.")
             sel = {
                 ds.raster.x_dim: xr.IndexVariable("xy", np.atleast_1d(xy[0])),
                 ds.raster.y_dim: xr.IndexVariable("xy", np.atleast_1d(xy[1])),
@@ -359,12 +359,12 @@ def get_basin_geometry(
                     else:
                         stream = outmap
                 ds_clip[basins_name] = ds_clip[basins_name].where(stream, 0)
-            logger.debug(f"Getting IDs of intersecting basins.")
+            logger.debug("Getting IDs of intersecting basins.")
             basid = np.unique(ds_clip[basins_name].values)
         basid = np.atleast_1d(basid)
         basid = basid[basid > 0]
         if basid.size == 0:
-            raise ValueError(f"No basins found with given criteria.")
+            raise ValueError("No basins found with given criteria.")
         # clip ds to total basin
         if gdf_bas is not None:
             gdf_match = np.isin(gdf_bas["basid"], basid)
@@ -431,7 +431,7 @@ def get_basin_geometry(
                 outmap = outmap.where(stream_kwargs, False)
             idxs_out = np.where(outmap.values.ravel())[0]
             if not np.any(outmap):
-                raise ValueError(f"No outlets found with with given criteria.")
+                raise ValueError("No outlets found with with given criteria.")
             xy = outmap.raster.idx_to_xy(idxs_out)
         # get subbasin map
         bas_mask, xy_out = basin_map(ds, flwdir, xy, **kwargs)

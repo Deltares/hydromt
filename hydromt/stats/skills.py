@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import calendar
 import warnings
-from datetime import datetime, timedelta
 
 import bottleneck
 import numpy as np
-import pandas as pd
 import xarray as xr
 
 warnings.filterwarnings("ignore")
@@ -190,7 +187,7 @@ def spearman_rank_correlation(sim, obs, dim="time"):
 
 
 def kge_non_parametric(sim, obs, dim="time"):
-    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series with decomposed scores
+    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series with decomposed scores.
 
     .. ref:
 
@@ -227,7 +224,7 @@ def kge_non_parametric(sim, obs, dim="time"):
 
 
 def kge_non_parametric_flood(sim, obs, dim="time"):
-    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series optimized for flood peaks using Pearson (see Pool et al., 2018)
+    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series optimized for flood peaks using Pearson (see Pool et al., 2018).
 
     .. ref:
 
@@ -346,7 +343,7 @@ def rmse(sim, obs, dim="time"):
 
 
 def kge(sim, obs, dim="time"):
-    """Returns the Kling-Gupta Efficiency (KGE) of two time series
+    """Returns the Kling-Gupta Efficiency (KGE) of two time series.
 
     .. ref:
 
@@ -381,7 +378,7 @@ def kge(sim, obs, dim="time"):
 
 
 def kge_2012(sim, obs, dim="time"):
-    """Returns the Kling-Gupta Efficiency (KGE, 2012) of two time series
+    """Returns the Kling-Gupta Efficiency (KGE, 2012) of two time series.
 
     .. ref:
 
@@ -446,23 +443,23 @@ def _fdc_alpha(sim, obs, axis=-1):
 
 
 def _bias(sim, obs, axis=-1):
-    """bias"""
+    """Bias."""
     return np.nansum(sim - obs, axis=axis) / np.nansum(np.isfinite(obs), axis=axis)
 
 
 def _pbias(sim, obs, axis=-1):
-    """percentual bias"""
+    """Percentual bias."""
     return np.nansum(sim - obs, axis=axis) / np.nansum(obs, axis=axis)
 
 
 def _mse(sim, obs, axis=-1):
-    """mean squared error"""
+    """Mean squared error."""
     mse = np.nansum((obs - sim) ** 2, axis=axis)
     return mse
 
 
 def _nse(sim, obs, axis=-1):
-    """nash-sutcliffe efficiency"""
+    """nash-sutcliffe efficiency."""
     obs_mean = np.nanmean(obs, axis=axis)
     a = np.nansum((sim - obs) ** 2, axis=axis)
     b = np.nansum((obs - obs_mean[..., None]) ** 2, axis=axis)

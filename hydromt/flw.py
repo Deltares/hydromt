@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""hydrological methods powered by pyFlwDir"""
+"""hydrological methods powered by pyFlwDir."""
 
 import logging
 import warnings
@@ -129,7 +129,8 @@ def d8_from_dem(
     nodata = da_elv.raster.nodata
     crs = da_elv.raster.crs
     assert da_elv.raster.res[1] < 0
-    assert nodata is not None and ~np.isnan(nodata)
+    assert nodata is not None
+    assert ~np.isnan(nodata)
     # burn in river if
     if gdf_stream is not None and "uparea" in gdf_stream.columns:
         gdf_stream = gdf_stream.sort_values(by="uparea")
@@ -330,7 +331,7 @@ def reproject_hydrography_like(
     elvsyn_reproj.raster.set_crs(crs)
     elvsyn_reproj.raster.set_nodata(nodata)
     # get flow directions based on reprojected synthetic elevation
-    logger.info(f"Deriving flow direction from reprojected synthethic elevation.")
+    logger.info("Deriving flow direction from reprojected synthethic elevation.")
     da_flw1 = d8_from_dem(elvsyn_reproj, **kwargs)
     flwdir = flwdir_from_da(da_flw1, ftype="d8", mask=elv_mask)
     # find source river cells outside destination grid bbox
@@ -393,7 +394,7 @@ def gaugemap(
     flwdir: Optional[pyflwdir.FlwdirRaster] = None,
     logger=logger,
 ) -> xr.DataArray:
-    """This method is deprecated. See :py:meth:`~hydromt.flw.gauge_map`"""
+    """This method is deprecated. See :py:meth:`~hydromt.flw.gauge_map`."""
     warnings.warn(
         'The "gaugemap" method is deprecated, use  "hydromt.flw.gauge_map" instead.',
         DeprecationWarning,
@@ -510,7 +511,7 @@ def outlet_map(da_flw: xr.DataArray, ftype: str = "infer") -> xr.DataArray:
 
 
 def stream_map(ds, stream=None, **stream_kwargs):
-    """Return a stream mask DataArray
+    """Return a stream mask DataArray.
 
     Parameters
     ----------

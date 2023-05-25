@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
-"""HydroMT statistics"""
+"""HydroMT statistics."""
 
 from .skills import *

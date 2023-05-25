@@ -5,7 +5,6 @@ import logging
 from abc import ABCMeta, abstractmethod
 from itertools import product
 from string import Formatter
-from typing import Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -56,12 +55,11 @@ def remove_duplicates(ds):
 
 
 def harmonise_dims(ds):
-    """
-    Function to harmonise lon-lat-time dimensions
+    """Function to harmonise lon-lat-time dimensions
     Where needed:
         - lon: Convert longitude coordinates from 0-360 to -180-180
         - lat: Do N->S orientation instead of S->N
-        - time: Convert to datetimeindex
+        - time: Convert to datetimeindex.
 
     Parameters
     ----------
@@ -103,7 +101,7 @@ PREPROCESSORS = {
 
 
 class DataAdapter(object, metaclass=ABCMeta):
-    """General Interface to data source for HydroMT"""
+    """General Interface to data source for HydroMT."""
 
     _DEFAULT_DRIVER = None  # placeholder
     _DRIVERS = {}
@@ -162,7 +160,8 @@ class DataAdapter(object, metaclass=ABCMeta):
 
     def to_dict(self):
         """Returns a dictionary view of the data source. Can be used to initialize
-        the data adapter."""
+        the data adapter.
+        """
         source = dict(data_type=self.data_type)
         for k, v in vars(self).items():
             if k in ["name", "catalog_name"]:
@@ -184,11 +183,11 @@ class DataAdapter(object, metaclass=ABCMeta):
         bbox: list = None,
         logger=logger,
     ) -> int:
-        """Return nearest smaller zoom level based on zoom resolutions defined in data catalog"""
+        """Return nearest smaller zoom level based on zoom resolutions defined in data catalog."""
         # common pyproj crs axis units
         known_units = ["degree", "metre", "US survey foot"]
         if self.zoom_levels is None or len(self.zoom_levels) == 0:
-            logger.warning(f"No zoom levels available, default to zero")
+            logger.warning("No zoom levels available, default to zero")
             return 0
         zls = list(self.zoom_levels.keys())
         if zoom_level is None:  # return first zoomlevel (assume these are ordered)
@@ -250,7 +249,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         **kwargs,
     ):
         """Resolve {year}, {month} and {variable} keywords
-        in self.path based on 'time_tuple' and 'variables' arguments
+        in self.path based on 'time_tuple' and 'variables' arguments.
 
         Parameters
         ----------
@@ -334,7 +333,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         return list(set(fns))  # return unique paths
 
     def get_filesystem(self, **kwargs):
-        """Return an initialised filesystem object based on self.filesystem and **kwargs"""
+        """Return an initialised filesystem object based on self.filesystem and **kwargs."""
         if self.filesystem == "local":
             fs = local.LocalFileSystem(**kwargs)
         elif self.filesystem == "gcs":
@@ -361,4 +360,5 @@ class DataAdapter(object, metaclass=ABCMeta):
     @abstractmethod
     def get_data(self, bbox, geom, buffer):
         """Return a view (lazy if possible) of the data with standardized field names.
-        If bbox of mask are given, clip data to that extent"""
+        If bbox of mask are given, clip data to that extent.
+        """

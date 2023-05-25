@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import pyproj
 import xarray as xr
-from fsspec.implementations import local
 from shapely.geometry import box
 from shapely.geometry.base import GEOMETRY_TYPES
 
@@ -36,8 +35,8 @@ def open_raster(
     """Open a gdal-readable file with rasterio based on
     :py:meth:`rioxarray.open_rasterio`, but return squeezed DataArray.
 
-    Arguments
-    ----------
+    Arguments:
+    ---------
     filename : str, path, file-like, rasterio.DatasetReader, or rasterio.WarpedVRT
         Path to the file to open. Or already open rasterio dataset.
     mask_nodata : bool, optional
@@ -52,7 +51,7 @@ def open_raster(
         key-word arguments are passed to :py:meth:`xarray.open_dataset` with
         "rasterio" engine.
 
-    Returns
+    Returns:
     -------
     data : DataArray
         DataArray
@@ -105,8 +104,8 @@ def open_mfraster(
     If ``mosaic`` the DataArrays are concatenated along the the spatial dimensions
     using :py:meth:`~hydromt.raster.merge`.
 
-    Arguments
-    ----------
+    Arguments:
+    ---------
     paths: str, list of str/Path/file-like
         Paths to the rasterio/gdal files.
         Paths can be provided as list of paths or a path pattern string which is
@@ -136,7 +135,7 @@ def open_mfraster(
     **kwargs
         key-word arguments are passed to :py:meth:`hydromt.raster.open_raster`
 
-    Returns
+    Returns:
     -------
     data : DataSet
         The newly created DataSet.
@@ -190,7 +189,7 @@ def open_mfraster(
             if not mosaic:
                 # check if transform, shape and crs are close
                 if not da_lst[0].raster.identical_grid(da):
-                    raise xr.MergeError(f"Geotransform and/or shape do not match")
+                    raise xr.MergeError("Geotransform and/or shape do not match")
                 # copy coordinates from first raster
                 da[da.raster.x_dim] = da_lst[0][da.raster.x_dim]
                 da[da.raster.y_dim] = da_lst[0][da.raster.y_dim]
@@ -230,7 +229,7 @@ def open_raster_from_tindex(
     tile index file as generated with `gdaltindex`. A bbox or geom describing the
     output area of interest is required.
 
-    Arguments
+    Arguments:
     ---------
     fn: path, str
         Path to tile index file.
@@ -248,7 +247,7 @@ def open_raster_from_tindex(
         key-word arguments are passed to :py:meth:`hydromt.io.open_mfraster()`
 
 
-    Returns
+    Returns:
     -------
     data : Dataset
         A single-variable Dataset of merged raster tiles.
@@ -297,7 +296,7 @@ def open_geodataset(
 ):
     """Open point location GIS file and timeseries file combine a single xarray.Dataset.
 
-    Arguments
+    Arguments:
     ---------
     fn_locs: path, str
         Path to point location file, see :py:meth:`geopandas.read_file` for options.
@@ -321,7 +320,7 @@ def open_geodataset(
     **kwargs
         Key-word arguments passed to :py:func:`geopandas.read_file` to read the point geometry file.
 
-    Returns
+    Returns:
     -------
     ds: xarray.Dataset
         Dataset with geospatial coordinates.
@@ -353,7 +352,7 @@ def open_timeseries_from_table(
     Accepts files with time index on one dimension and numeric location index on the other dimension.
     In case of string location indices, non-numeric parts are filtered from the location index.
 
-    Arguments
+    Arguments:
     ---------
     fn: path, str
         Path to time series file
@@ -363,7 +362,7 @@ def open_timeseries_from_table(
         key-word arguments are passed to the reader method
 
 
-    Returns
+    Returns:
     -------
     da: xarray.DataArray
         DataArray

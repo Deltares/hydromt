@@ -1,10 +1,9 @@
-"""Test hydromt.flw submodule"""
+"""Test hydromt.flw submodule."""
 import geopandas as gpd
 import numpy as np
 import pytest
 import xarray as xr
 
-import hydromt
 from hydromt import flw
 
 
@@ -59,7 +58,8 @@ def test_reproject_flwdir(hydds, demda):
     hydds1 = flw.reproject_hydrography_like(
         hydds, demda_reproj, outlets="min"
     )  # force single outlet
-    assert "uparea" in hydds1 and "flwdir" in hydds1
+    assert "uparea" in hydds1
+    assert "flwdir" in hydds1
     assert hydds1.raster.shape == demda_reproj.raster.shape
     assert np.allclose(hydds["uparea"].max(), hydds1["uparea"].max())
     # downscaled subdomain
@@ -117,7 +117,8 @@ def test_gauge_map(hydds, flwdir):
     # test with idxs at outlet
     idx0 = np.argmax(hydds["uparea"].values.ravel())
     da_gauges, idxs, ids = flw.gauge_map(hydds, idxs=[idx0])
-    assert idxs[0] == idx0 and len(idxs) == 1
+    assert idxs[0] == idx0
+    assert len(idxs) == 1
     assert np.all(da_gauges.values.flat[idxs] == ids)
     # test with x,y at headwater cell and stream to snap to
     idx1 = np.argmax(flwdir.distnc.ravel())

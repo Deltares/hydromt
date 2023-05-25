@@ -1,4 +1,4 @@
-"""config I/O functions"""
+"""config I/O functions."""
 
 import abc
 import codecs

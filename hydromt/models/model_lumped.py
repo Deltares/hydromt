@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""HydroMT LumpedModel class definition"""
+"""HydroMT LumpedModel class definition."""
 
 import logging
 import os
 from os.path import dirname, isdir, isfile, join
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -135,7 +135,7 @@ class LumpedMixin:
 
 
 class LumpedModel(LumpedMixin, Model):
-    """Model class Lumped Model for lumped models in HydroMT"""
+    """Model class Lumped Model for lumped models in HydroMT."""
 
     _CLI_ARGS = {"region": "setup_region"}
     _NAME = "lumped_model"

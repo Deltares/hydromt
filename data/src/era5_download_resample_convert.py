@@ -198,7 +198,6 @@ def resample_year(
     dask_kwargs : dict, optional
         _description_, by default {}
     """
-
     # nc out settings
     chunksizes = tuple([s for s in chunks.values()])
     e0 = {
@@ -270,7 +269,7 @@ def resample_year(
 
 
 def move_replace(src: str, dst: str, timeout: int = 300) -> None:
-    """try replacing old file which might be locked"""
+    """Try replacing old file which might be locked."""
     if not isfile(src):
         return
     if not os.path.isdir(os.path.dirname(dst)):
@@ -419,7 +418,7 @@ def update_hourly_nc(
     move_to_ddir: bool = False,
     dask_kwargs: dict = {},
 ) -> None:
-    """Update the hourly by downloading the latest data from the CDS
+    """Update the hourly by downloading the latest data from the CDS.
 
     Parameters
     ----------
@@ -490,7 +489,7 @@ def update_daily_nc(
     move_to_ddir: bool = False,
     dask_kwargs: dict = {},
 ) -> None:
-    """Update the daily nc files based on hourly files
+    """Update the daily nc files based on hourly files.
 
     Parameters
     ----------
@@ -573,7 +572,6 @@ def update_zarr(
     dt_era5t : pd.Timedelta, optional
         time period of ERA5T data which is overwritten by new data, by default dt_era5t
     """
-
     print(f"writing to {fn_zarr}")
     for var in variables:
         # get start & end dates from files
@@ -671,7 +669,7 @@ if __name__ == "__main__":
     # NOTE these are kept in different ddir
     # variables_hour, ddir_hour = ["shww"], r"p:\wflow_global\hydromt\ocean\era5"
 
-    print(f"downloading ..")
+    print("downloading ..")
     update_hourly_nc(
         outdir,
         ddir=ddir_hour,

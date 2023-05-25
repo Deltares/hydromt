@@ -1,4 +1,4 @@
-"""Test hydromt.forcing submodule"""
+"""Test hydromt.forcing submodule."""
 
 import numpy as np
 import pytest

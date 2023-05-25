@@ -19,7 +19,7 @@ HYDROMT_DATADIR = join(Path.home(), ".hydromt_data")
 
 
 def _uri_validator(uri: str) -> bool:
-    """Check if uri is valid"""
+    """Check if uri is valid."""
     try:
         result = urlparse(uri)
         return all([result.scheme, result.netloc])
@@ -82,7 +82,7 @@ def cache_vrt_tiles(
         ds = xd.parse(f.read())["VRTDataset"]
 
     def intersects(source: dict, affine, bbox):
-        """Check whether source interesects with bbox"""
+        """Check whether source interesects with bbox."""
         names = ["@xOff", "@yOff", "@xSize", "@ySize"]
         x0, y0, dx, dy = [float(source["DstRect"][k]) for k in names]
         xs, ys = affine * (np.array([x0, x0 + dx]), np.array([y0, y0 + dy]))

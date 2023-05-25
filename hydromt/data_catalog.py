@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""DataCatalog module for HydroMT"""
+"""DataCatalog module for HydroMT."""
 from __future__ import annotations
 
 import copy
@@ -10,7 +10,7 @@ import logging
 import os
 import shutil
 import warnings
-from os.path import abspath, basename, dirname, exists, isdir, isfile, join
+from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -55,7 +55,7 @@ class DataCatalog(object):
         """Catalog of DataAdapter sources to easily read from different files
         and keep track of files which have been accessed.
 
-        Arguments
+        Arguments:
         ---------
         data_libs: (list of) str, Path, optional
             One or more paths to data catalog yaml files or names of predefined data catalogs.
@@ -176,7 +176,7 @@ class DataCatalog(object):
     def from_artifacts(
         self, name: str = "artifact_data", version: str = "latest"
     ) -> None:
-        """Deprecated method. Use :py:func:`hydromt.data_catalog.DataCatalog.from_predefined_catalogs` instead
+        """Deprecated method. Use :py:func:`hydromt.data_catalog.DataCatalog.from_predefined_catalogs` instead.
 
         Parameters
         ----------
@@ -186,7 +186,7 @@ class DataCatalog(object):
             Release version. By default it takes the latest known release.
         """
         warnings.warn(
-            f'"from_artifacts" is deprecated. Use "from_predefined_catalogs instead".',
+            '"from_artifacts" is deprecated. Use "from_predefined_catalogs instead".',
             DeprecationWarning,
         )
         self.from_predefined_catalogs(name, version)
@@ -217,7 +217,7 @@ class DataCatalog(object):
     def from_archive(
         self, urlpath: Union[Path, str], version: str = None, name: str = None
     ) -> None:
-        """Read a data archive including a data_catalog.yml file"""
+        """Read a data archive including a data_catalog.yml file."""
         name = basename(urlpath).split(".")[0] if name is None else name
         root = join(self._cache_dir, name)
         if version is not None:
@@ -467,7 +467,7 @@ class DataCatalog(object):
         return sources_out
 
     def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
-        """Return data catalog summary as DataFrame"""
+        """Return data catalog summary as DataFrame."""
         d = dict()
         for name, source in self._sources.items():
             if len(source_names) > 0 and name not in source_names:
@@ -603,7 +603,7 @@ class DataCatalog(object):
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as :py:class:`xarray.DataArray` rather than :py:class:`xarray.Dataset`.
 
-        Arguments
+        Arguments:
         ---------
         data_like: str, Path, xr.Dataset, xr.Datarray
             Data catalog key, path to raster file or raster xarray data object.
@@ -631,7 +631,7 @@ class DataCatalog(object):
             If True, return a DataArray if the dataset consists of a single variable.
             If False, always return a Dataset. By default True.
 
-        Returns
+        Returns:
         -------
         obj: xarray.Dataset or xarray.DataArray
             RasterDataset
@@ -685,7 +685,7 @@ class DataCatalog(object):
         with optional additional `buffer` and `align` arguments.
         To return only the dataframe columns of interest provide the `variables` argument.
 
-        Arguments
+        Arguments:
         ---------
         data_like: str, Path, gpd.GeoDataFrame
             Data catalog key, path to vector file or a vector geopandas object.
@@ -706,7 +706,7 @@ class DataCatalog(object):
         variables : str or list of str, optional.
             Names of GeoDataFrame columns to return. By default all columns are returned.
 
-        Returns
+        Returns:
         -------
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
@@ -761,7 +761,7 @@ class DataCatalog(object):
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as xarray.DataArray rather than Dataset.
 
-        Arguments
+        Arguments:
         ---------
         data_like: str, Path, xr.Dataset, xr.DataArray
             Data catalog key, path to geodataset file or geodataset xarray object.
@@ -785,7 +785,7 @@ class DataCatalog(object):
             If True, return a DataArray if the dataset consists of a single variable.
             If False, always return a Dataset. By default True.
 
-        Returns
+        Returns:
         -------
         obj: xarray.Dataset or xarray.DataArray
             GeoDataset

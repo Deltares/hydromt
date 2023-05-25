@@ -1,8 +1,6 @@
-import geopandas as gpd
 import numpy as np
 import rasterio
 from pyproj import CRS
-from shapely.geometry import box
 
 from .raster import full_from_transform
 
@@ -23,8 +21,8 @@ def merge(
 
     Based on :py:meth:`rasterio.merge.merge`.
 
-    Arguments
-    ----------
+    Arguments:
+    ---------
     data_arrays: list of xarray.DataArray
         Tiles to merge
     dst_crs: pyproj.CRS, int
@@ -49,12 +47,11 @@ def merge(
     **kwargs:
         Key-word arguments passed to :py:meth:`~hydromt.raster.RasterDataArray.reproject`
 
-    Returns
+    Returns:
     -------
     da_out: xarray.DataArray
         Merged tiles.
     """
-
     # define merge method
     if merge_method == "first":
 

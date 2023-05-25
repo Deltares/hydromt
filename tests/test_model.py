@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for the hydromt.models module of HydroMT"""
+"""Tests for the hydromt.models module of HydroMT."""
 
 from os.path import abspath, dirname, isfile, join
 
@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 import xarray as xr
 from entrypoints import Distribution, EntryPoint
-from shapely.geometry import polygon
 
 import hydromt._compat
 import hydromt.models.model_plugins
@@ -341,7 +340,7 @@ def test_setup_grid(tmpdir, demda):
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert not np.all(model.grid["mask"].values == True)
+    assert not np.all(model.grid["mask"].values is True)
     assert model.grid.raster.shape == (47, 61)
 
 

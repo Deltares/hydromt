@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""command line interface for hydromt models"""
+"""command line interface for hydromt models."""
 
 import logging
-import warnings
 from os.path import join
 
 import click
@@ -175,7 +174,7 @@ def build(
         "build", join(model_root, "hydromt.log"), log_level=log_level, append=False
     )
     logger.info(f"Building instance of {model} model at {model_root}.")
-    logger.info(f"User settings:")
+    logger.info("User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # Set region to None if empty string json
@@ -278,7 +277,7 @@ def update(
     # parse settings
     if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
         opt = {components[0]: opt}
-    logger.info(f"User settings:")
+    logger.info("User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # parse data catalog options from global section in config and cli options

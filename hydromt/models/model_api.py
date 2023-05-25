@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""General and basic API for models in HydroMT"""
+"""General and basic API for models in HydroMT."""
 
 import glob
 import inspect
@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
-import pandas as pd
 import numpy as np
+import pandas as pd
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class Model(object, metaclass=ABCMeta):
-    """General and basic API for models in HydroMT"""
+    """General and basic API for models in HydroMT."""
 
     # FIXME
     _DATADIR = ""  # path to the model data folder
@@ -64,7 +64,7 @@ class Model(object, metaclass=ABCMeta):
         logger=logger,
         **artifact_keys,
     ):
-        """Initialize a model
+        """Initialize a model.
 
         Parameters
         ----------
@@ -116,7 +116,7 @@ class Model(object, metaclass=ABCMeta):
 
     @property
     def api(self) -> Dict:
-        """Return all model components and their data types"""
+        """Return all model components and their data types."""
         _api = self._API.copy()
         # loop over parent and mixin classes and update API
         for base_cls in self.__class__.__bases__:
@@ -132,7 +132,7 @@ class Model(object, metaclass=ABCMeta):
         return opt
 
     def _run_log_method(self, method, *args, **kwargs):
-        """Log method parameters before running a method"""
+        """Log method parameters before running a method."""
         method = method.strip("0123456789")
         func = getattr(self, method)
         signature = inspect.signature(func)
@@ -294,8 +294,7 @@ class Model(object, metaclass=ABCMeta):
         hydrography_fn: str = "merit_hydro",
         basin_index_fn: str = "merit_hydro_index",
     ) -> dict:
-        """
-        This component sets the `region` of interest of the model.
+        """This component sets the `region` of interest of the model.
 
         Adds model layer:
 
@@ -525,7 +524,7 @@ class Model(object, metaclass=ABCMeta):
         used_only: bool = True,
         append: bool = True,
     ):
-        """Write the data catalog to data_lib_fn
+        """Write the data catalog to data_lib_fn.
 
         Parameters
         ----------
@@ -559,7 +558,7 @@ class Model(object, metaclass=ABCMeta):
     # model configuration
     @property
     def config(self) -> Dict[str, Union[Dict, str]]:
-        """Model configuration. Returns a (nested) dictionary"""
+        """Model configuration. Returns a (nested) dictionary."""
         # initialize default config if in write-mode
         if not self._config:
             self.read_config()
@@ -592,16 +591,16 @@ class Model(object, metaclass=ABCMeta):
             args = args[0].split(".") + args[1:]
         branch = self.config  # reads config at first call
         for key in args[:-1]:
-            if not key in branch or not isinstance(branch[key], dict):
+            if key not in branch or not isinstance(branch[key], dict):
                 branch[key] = {}
             branch = branch[key]
         branch[args[-1]] = value
 
     def setup_config(self, **cfdict):
-        """Update config with a dictionary"""
+        """Update config with a dictionary."""
         # TODO rename to update_config
         if len(cfdict) > 0:
-            self.logger.debug(f"Setting model config options.")
+            self.logger.debug("Setting model config options.")
         for key, value in cfdict.items():
             self.set_config(key, value)
 
@@ -620,6 +619,7 @@ class Model(object, metaclass=ABCMeta):
             NOTE: this assumes the config is located in model root!
 
         Returns
+        -------
         value : any type
             dictionary value
 
@@ -660,7 +660,8 @@ class Model(object, metaclass=ABCMeta):
 
     def read_config(self, config_fn: Optional[str] = None):
         """Parse config from file. If no config file found a default config file is
-        read in writing mode."""
+        read in writing mode.
+        """
         prefix = "User defined"
         if config_fn is None:  # prioritize user defined config path (new v0.4.1)
             if not self._read:  # write-only mode > read default config
@@ -694,7 +695,7 @@ class Model(object, metaclass=ABCMeta):
     def write_config(
         self, config_name: Optional[str] = None, config_root: Optional[str] = None
     ):
-        """Write config to <root/config_fn>"""
+        """Write config to <root/config_fn>."""
         self._assert_write_mode
         if config_name is not None:
             self._config_fn = config_name
@@ -710,7 +711,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def staticmaps(self):
         """Model static maps. Returns xarray.Dataset,
-        ..NOTE: will be deprecated in future versions and replaced by `grid`
+        ..NOTE: will be deprecated in future versions and replaced by `grid`.
         """
         warnings.warn(
             "The staticmaps property of the Model class will be deprecated in future versions, "
@@ -724,8 +725,7 @@ class Model(object, metaclass=ABCMeta):
     def set_staticmaps(
         self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
     ):
-        """
-        This method will be deprecated in future versions. See :py:meth:`~hydromt.models.GridModel.set_grid`
+        """This method will be deprecated in future versions. See :py:meth:`~hydromt.models.GridModel.set_grid`.
 
         Add data to staticmaps.
 
@@ -772,7 +772,7 @@ class Model(object, metaclass=ABCMeta):
                 self._staticmaps[dvar] = data[dvar]
 
     def read_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
-        """Read static model maps at <root>/<fn> and add to staticmaps property
+        """Read static model maps at <root>/<fn> and add to staticmaps property.
 
         key-word arguments are passed to :py:func:`xarray.open_dataset`
 
@@ -788,7 +788,7 @@ class Model(object, metaclass=ABCMeta):
             self.set_staticmaps(ds)
 
     def write_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
-        """Write static model maps to netcdf file at <root>/<fn>
+        """Write static model maps to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
@@ -818,8 +818,7 @@ class Model(object, metaclass=ABCMeta):
         split_dataset: Optional[bool] = True,
         rename: Optional[Dict] = dict(),
     ) -> List[str]:
-        """
-        HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to maps object.
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to maps object.
 
         If raster is a dataset, all variables will be added unless ``variables`` list is specified.
 
@@ -883,8 +882,7 @@ class Model(object, metaclass=ABCMeta):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """
-        HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 
@@ -949,7 +947,7 @@ class Model(object, metaclass=ABCMeta):
     # model map
     @property
     def maps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Model maps. Returns dict of xarray.DataArray or xarray.Dataset"""
+        """Model maps. Returns dict of xarray.DataArray or xarray.Dataset."""
         if len(self._maps) == 0 and self._read:
             self.read_maps()
         return self._maps
@@ -965,7 +963,7 @@ class Model(object, metaclass=ABCMeta):
         Dataset can either be added as is (default) or split into several
         DataArrays using the split_dataset argument.
 
-        Arguments
+        Arguments:
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
@@ -981,7 +979,7 @@ class Model(object, metaclass=ABCMeta):
             self._maps[name] = data_dict[name]
 
     def read_maps(self, fn: str = "maps/*.nc", **kwargs) -> None:
-        """Read model map at <root>/<fn> and add to maps component
+        """Read model map at <root>/<fn> and add to maps component.
 
         key-word arguments are passed to :py:func:`xarray.open_dataset`
 
@@ -996,7 +994,7 @@ class Model(object, metaclass=ABCMeta):
             self.set_maps(ds, name=name)
 
     def write_maps(self, fn="maps/{name}.nc", **kwargs) -> None:
-        """Write maps to netcdf file at <root>/<fn>
+        """Write maps to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
@@ -1016,7 +1014,8 @@ class Model(object, metaclass=ABCMeta):
     @property
     def geoms(self) -> Dict[str, Union[gpd.GeoDataFrame, gpd.GeoSeries]]:
         """Model geometries. Returns dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
-        ..NOTE: previously call staticgeoms."""
+        ..NOTE: previously call staticgeoms.
+        """
         if not self._geoms and self._read:
             self.read_geoms()
         return self._geoms
@@ -1024,7 +1023,7 @@ class Model(object, metaclass=ABCMeta):
     def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
         """Add data to the geoms attribute.
 
-        Arguments
+        Arguments:
         ---------
         geoms: geopandas.GeoDataFrame or geopandas.GeoSeries
             New geometry data to add
@@ -1041,7 +1040,7 @@ class Model(object, metaclass=ABCMeta):
         self._geoms[name] = geom
 
     def read_geoms(self, fn: str = "geoms/*.geojson", **kwargs) -> None:
-        """Read model geometries files at <root>/<fn> and add to geoms property
+        """Read model geometries files at <root>/<fn> and add to geoms property.
 
         key-word arguments are passed to :py:func:`geopandas.read_file`
 
@@ -1058,7 +1057,7 @@ class Model(object, metaclass=ABCMeta):
             self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
 
     def write_geoms(self, fn: str = "geoms/{name}.geojson", **kwargs) -> None:
-        """Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>
+        """Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`geopandas.GeoDataFrame.to_file`
 
@@ -1090,7 +1089,7 @@ class Model(object, metaclass=ABCMeta):
 
     @property
     def staticgeoms(self):
-        """This property will be deprecated in future versions, use :py:meth:`~hydromt.Model.geom`"""
+        """This property will be deprecated in future versions, use :py:meth:`~hydromt.Model.geom`."""
         warnings.warn(
             "The staticgeoms method will be deprecated in future versions, use geoms instead.",
             DeprecationWarning,
@@ -1101,7 +1100,7 @@ class Model(object, metaclass=ABCMeta):
         return self._staticgeoms
 
     def set_staticgeoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
-        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.set_geoms`"""
+        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.set_geoms`."""
         warnings.warn(
             "The set_staticgeoms method will be deprecated in future versions, use set_geoms instead.",
             DeprecationWarning,
@@ -1109,7 +1108,7 @@ class Model(object, metaclass=ABCMeta):
         return self.set_geoms(geom, name)
 
     def read_staticgeoms(self):
-        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.read_geoms`"""
+        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.read_geoms`."""
         warnings.warn(
             'The read_staticgeoms" method will be deprecated in future versions, use read_geoms instead.',
             DeprecationWarning,
@@ -1117,7 +1116,7 @@ class Model(object, metaclass=ABCMeta):
         return self.read_geoms(fn="staticgeoms/*.geojson")
 
     def write_staticgeoms(self):
-        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.write_geoms`"""
+        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.write_geoms`."""
         warnings.warn(
             'The "write_staticgeoms" method will be deprecated in future versions, use  "write_geoms" instead.',
             DeprecationWarning,
@@ -1127,7 +1126,7 @@ class Model(object, metaclass=ABCMeta):
     # model forcing files
     @property
     def forcing(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Model forcing. Returns dict of xarray.DataArray or xarray.Dataset"""
+        """Model forcing. Returns dict of xarray.DataArray or xarray.Dataset."""
         if not self._forcing and self._read:
             self.read_forcing()
         return self._forcing
@@ -1140,7 +1139,7 @@ class Model(object, metaclass=ABCMeta):
     ):
         """Add data to forcing attribute.
 
-        Arguments
+        Arguments:
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
@@ -1156,7 +1155,7 @@ class Model(object, metaclass=ABCMeta):
             self._forcing[name] = data_dict[name]
 
     def read_forcing(self, fn: str = "forcing/*.nc", **kwargs) -> None:
-        """Read forcing at <root>/<fn> and add to forcing property
+        """Read forcing at <root>/<fn> and add to forcing property.
 
         key-word arguments are passed to :py:func:`xarray.open_dataset`
 
@@ -1171,7 +1170,7 @@ class Model(object, metaclass=ABCMeta):
             self.set_forcing(ds, name=name)
 
     def write_forcing(self, fn="forcing/{name}.nc", **kwargs) -> None:
-        """Write forcing to netcdf file at <root>/<fn>
+        """Write forcing to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
@@ -1190,7 +1189,7 @@ class Model(object, metaclass=ABCMeta):
     # model state files
     @property
     def states(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Model states. Returns dict of xarray.DataArray or xarray.Dataset"""
+        """Model states. Returns dict of xarray.DataArray or xarray.Dataset."""
         if not self._states and self._read:
             self.read_states()
         return self._states
@@ -1203,7 +1202,7 @@ class Model(object, metaclass=ABCMeta):
     ):
         """Add data to states attribute.
 
-        Arguments
+        Arguments:
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
@@ -1219,7 +1218,7 @@ class Model(object, metaclass=ABCMeta):
             self._states[name] = data_dict[name]
 
     def read_states(self, fn: str = "states/*.nc", **kwargs) -> None:
-        """Read states at <root>/<fn> and add to states property
+        """Read states at <root>/<fn> and add to states property.
 
         key-word arguments are passed to :py:func:`xarray.open_dataset`
 
@@ -1234,7 +1233,7 @@ class Model(object, metaclass=ABCMeta):
             self.set_states(ds, name=name)
 
     def write_states(self, fn="states/{name}.nc", **kwargs) -> None:
-        """Write states to netcdf file at <root>/<fn>
+        """Write states to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
@@ -1253,7 +1252,7 @@ class Model(object, metaclass=ABCMeta):
     # model results files; NOTE we don't have a write_results method (that's up to the model kernel)
     @property
     def results(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Model results.  Returns dict of xarray.DataArray or xarray.Dataset"""
+        """Model results.  Returns dict of xarray.DataArray or xarray.Dataset."""
         if not self._results and self._read:
             self.read_results()
         return self._results
@@ -1269,7 +1268,7 @@ class Model(object, metaclass=ABCMeta):
         Dataset can either be added as is (default) or split into several
         DataArrays using the split_dataset argument.
 
-        Arguments
+        Arguments:
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
@@ -1285,7 +1284,7 @@ class Model(object, metaclass=ABCMeta):
             self._results[name] = data_dict[name]
 
     def read_results(self, fn: str = "results/*.nc", **kwargs) -> None:
-        """Read results at <root>/<fn> and add to results property
+        """Read results at <root>/<fn> and add to results property.
 
         key-word arguments are passed to :py:func:`xarray.open_dataset`
 
@@ -1355,49 +1354,56 @@ class Model(object, metaclass=ABCMeta):
     @property
     def dims(self) -> Tuple:
         """Returns spatial dimension names of staticmaps.
-        ..NOTE: will be deprecated in future versions"""
+        ..NOTE: will be deprecated in future versions.
+        """
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.dims
 
     @property
     def coords(self) -> Dict:
         """Returns the coordinates of model staticmaps.
-        ..NOTE: will be deprecated in future versions"""
+        ..NOTE: will be deprecated in future versions.
+        """
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.coords
 
     @property
     def res(self) -> Tuple:
         """Returns the resolution of the model staticmaps.
-        ..NOTE: will be deprecated in future versions"""
+        ..NOTE: will be deprecated in future versions.
+        """
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.res
 
     @property
     def transform(self):
         """Returns the geospatial transform of the model staticmaps.
-        ..NOTE: will be deprecated in future versions"""
+        ..NOTE: will be deprecated in future versions.
+        """
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.transform
 
     @property
     def width(self):
         """Returns the width of the model staticmaps.
-        ..NOTE: will be deprecated in future versions"""
+        ..NOTE: will be deprecated in future versions.
+        """
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.width
 
     @property
     def height(self):
         """Returns the height of the model staticmaps.
-        ..NOTE: will be deprecated in future versions"""
+        ..NOTE: will be deprecated in future versions.
+        """
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.height
 
     @property
     def shape(self) -> Tuple:
         """Returns the shape of the model staticmaps.
-        ..NOTE: will be deprecated in future versions"""
+        ..NOTE: will be deprecated in future versions.
+        """
         if len(self._staticmaps) > 0:
             return self.staticmaps.raster.shape
 
@@ -1457,7 +1463,7 @@ class Model(object, metaclass=ABCMeta):
         return non_compliant
 
     def _test_equal(self, other, skip_component=["root"]) -> Tuple[bool, Dict]:
-        """Test if two models including their data components are equal
+        """Test if two models including their data components are equal.
 
         Parameters
         ----------
@@ -1515,7 +1521,7 @@ def _check_data(
 
 
 def _assert_isinstance(obj: Any, dtype: Any, name: str = ""):
-    """Check if obj match typing or class (dtype)"""
+    """Check if obj match typing or class (dtype)."""
     args = typing.get_args(dtype)
     _cls = typing.get_origin(dtype)
     if len(args) == 0 and dtype != Any and dtype is not None:
@@ -1533,7 +1539,8 @@ def _assert_isinstance(obj: Any, dtype: Any, name: str = ""):
 
 def _check_equal(a, b, name="") -> Dict[str, str]:
     """Recursive test of model components.
-    Returns dict with component name and associated error message."""
+    Returns dict with component name and associated error message.
+    """
     errors = {}
     try:
         assert isinstance(b, type(a)), "property types do not match"

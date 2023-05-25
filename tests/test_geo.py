@@ -12,7 +12,7 @@ from hydromt.vector import GeoDataset
 # from hydromt import vector
 
 
-@pytest.fixture
+@pytest.fixture()
 def dummy_shp():
     geom = [
         Polygon(((0, 0), (1, 0), (1, 1), (0, 1), (0, 0))),

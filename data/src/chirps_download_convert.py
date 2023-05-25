@@ -42,7 +42,7 @@ def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
         url = f"{BASE_URL}/{year}/{basename}"
         try:
             download_file(url, outdir)
-        except HTTPError as r:
+        except HTTPError:
             fn_out = os.path.join(outdir, basename)
             if os.path.isfile(fn_out):
                 os.unlink(fn_out)

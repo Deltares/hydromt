@@ -10,7 +10,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-from fsspec.implementations import local
 from shapely.geometry import box
 
 from .. import gis_utils, io
@@ -136,7 +135,6 @@ class RasterDatasetAdapter(DataAdapter):
         driver: str
             Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
-
         try:
             obj = self.get_data(
                 bbox=bbox,
@@ -327,10 +325,10 @@ class RasterDatasetAdapter(DataAdapter):
                 logger.debug(f"RasterDataset: Slicing time dim {time_tuple}")
                 ds_out = ds_out.sel({"time": slice(*time_tuple)})
             if ds_out.time.size == 0:
-                raise IndexError(f"RasterDataset: Time slice out of range.")
+                raise IndexError("RasterDataset: Time slice out of range.")
 
         # set crs
-        if ds_out.raster.crs is None and self.crs != None:
+        if ds_out.raster.crs is None and self.crs is not None:
             ds_out.raster.set_crs(self.crs)
         elif ds_out.raster.crs is None:
             raise ValueError(

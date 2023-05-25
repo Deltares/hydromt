@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""HydroMT NetworkModel class definition"""
+"""HydroMT NetworkModel class definition."""
 
 import logging
 from typing import List

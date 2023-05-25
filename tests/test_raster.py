@@ -41,7 +41,7 @@ def get_transform(
 testdata = [(get_transform(*d[:3]), d[-2]) for d in tests[:4]]
 
 
-@pytest.mark.parametrize("origin, rotation, res, shape, bounds", tests)
+@pytest.mark.parametrize(("origin", "rotation", "res", "shape", "bounds"), tests)
 def test_raster_properties(origin, rotation, res, shape, bounds):
     transform = get_transform(origin, rotation, res)
     da = raster.full_from_transform(transform, shape, name="test", crs=4326)
@@ -53,7 +53,7 @@ def test_raster_properties(origin, rotation, res, shape, bounds):
     assert np.allclose(bounds, da.raster.internal_bounds)
 
 
-@pytest.mark.parametrize("transform, shape", testdata)
+@pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_attrs(transform, shape):
     # checks on raster spatial attributes
     da = raster.full_from_transform(transform, shape, name="test")
@@ -62,7 +62,7 @@ def test_attrs(transform, shape):
     assert raster.GEO_MAP_COORD in da.coords
     assert da.raster.dims == ("y", "x")
     assert "x_dim" in da.raster.attrs
-    assert da.raster.dim0 == None if len(shape) == 2 else "dim0"
+    assert da.raster.dim0 is None if len(shape) == 2 else "dim0"
     assert da.raster.width == da["x"].size
     assert da.raster.height == da["y"].size
     assert da.raster.size == da["x"].size * da["y"].size
@@ -105,7 +105,7 @@ def test_gdal(tmpdir):
     # Write to netcdf and reopen with gdal
     fn_nc = str(tmpdir.join("gdal_test.nc"))
     da.to_netcdf(fn_nc)
-    info = gdal.Info(fn_nc)
+    gdal.Info(fn_nc)
     ds = gdal.Open(fn_nc)
     assert da[raster.GEO_MAP_COORD].attrs["crs_wkt"] == ds.GetProjection()
 
@@ -174,7 +174,7 @@ def test_from_numpy_full_like():
         raster.full_like(da.to_dataset())
 
 
-@pytest.mark.parametrize("transform, shape", testdata)
+@pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_idx(transform, shape):
     da = raster.full_from_transform(transform, shape, name="test")
     size = np.multiply(*da.raster.shape)
@@ -247,7 +247,7 @@ def test_vectorize():
     assert np.all(da == da.raster.geometry_mask(gdf).astype(da.dtype))
 
 
-@pytest.mark.parametrize("transform, shape", testdata)
+@pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_clip(transform, shape):
     # create rasterdataarray with crs
     da = raster.full_from_transform(transform, shape, nodata=1, name="test", crs=4326)
@@ -433,7 +433,8 @@ def test_zonal_stats():
     gdf = gpd.GeoDataFrame(geometry=geoms, crs=da.raster.crs)
 
     ds0 = da.raster.zonal_stats(gdf, "count")
-    assert "test_count" in ds0.data_vars and "index" in ds0.dims
+    assert "test_count" in ds0.data_vars
+    assert "index" in ds0.dims
     assert np.all(ds0["index"] == np.array([0, 2, 3]))
     assert np.all(ds0["test_count"] == np.array([40, 1, 10]))
 
@@ -449,7 +450,7 @@ def test_zonal_stats():
         da.raster.zonal_stats(gdf.iloc[1:2], "mean")
 
 
-@pytest.mark.parametrize("transform, shape", testdata[-2:])
+@pytest.mark.parametrize(("transform", "shape"), testdata[-2:])
 def test_rotated(transform, shape, tmpdir):
     da = raster.full_from_transform(transform, shape, nodata=-1, name="test")
     da.raster.set_crs(4326)

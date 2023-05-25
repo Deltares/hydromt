@@ -266,7 +266,7 @@ class GeoDatasetAdapter(DataAdapter):
             ds_out = ds_out[variables]
 
         # set crs
-        if ds_out.vector.crs is None and self.crs != None:
+        if ds_out.vector.crs is None and self.crs is not None:
             ds_out.vector.set_crs(self.crs)
         if ds_out.vector.crs is None:
             raise ValueError(
@@ -302,7 +302,7 @@ class GeoDatasetAdapter(DataAdapter):
                 logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
                 ds_out = ds_out.sel(time=slice(*time_tuple))
             if ds_out.time.size == 0:
-                logger.warning(f"GeoDataset: Time slice out of range.")
+                logger.warning("GeoDataset: Time slice out of range.")
                 drop_vars = [v for v in ds_out.data_vars if "time" in ds_out[v].dims]
                 ds_out = ds_out.drop_vars(drop_vars)
 
