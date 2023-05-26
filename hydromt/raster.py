@@ -22,6 +22,7 @@ import pandas as pd
 import pyproj
 import rasterio.fill
 import rasterio.warp
+import rioxarray  # noqa: F401
 import shapely
 import xarray as xr
 import yaml
@@ -376,7 +377,7 @@ class XRasterBase(XGeoBase):
 
         check_x = np.all(np.isclose(np.diff(np.diff(self._obj[x_dim])), 0, atol=1e-4))
         check_y = np.all(np.isclose(np.diff(np.diff(self._obj[y_dim])), 0, atol=1e-4))
-        if check_x is False or check_y is False:
+        if check_x == False or check_y == False:
             raise ValueError("raster only applies to regular grids")
 
     def reset_spatial_dims_attrs(self):
@@ -566,7 +567,7 @@ class XRasterBase(XGeoBase):
             check = np.all([self._obj[name].dims == dims for name in self.vars])
         else:
             check = self._obj.dims == dims
-        if check is False:
+        if check == False:
             raise ValueError(
                 f"Invalid dimension order ({da.dims}). "
                 f"You can use `obj.transpose({dims}) to reorder your dimensions."
@@ -725,7 +726,7 @@ class XRasterBase(XGeoBase):
         if mask_outside:
             invalid = ~np.logical_and(mask, points_inside)
             r[invalid], c[invalid] = nodata, nodata
-        elif np.any(points_inside[mask] is False):
+        elif np.any(points_inside[mask] == False):
             raise ValueError("Coordinates outside domain.")
         return r, c
 
@@ -764,8 +765,8 @@ class XRasterBase(XGeoBase):
         if mask is None:
             mask = np.ones(r.shape, dtype=bool)  # all valid
         if mask_outside:
-            mask[points_inside is False] = False
-        elif np.any(points_inside[mask] is False):
+            mask[points_inside == False] = False
+        elif np.any(points_inside[mask] == False):
             raise ValueError("Linear indices outside domain.")
         y = np.full(r.shape, nodata, dtype=np.float64)
         x = np.full(r.shape, nodata, dtype=np.float64)

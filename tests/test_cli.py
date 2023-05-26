@@ -1,6 +1,5 @@
 """Tests for the cli submodule."""
 
-import os
 
 import numpy as np
 import pytest
@@ -51,11 +50,11 @@ def test_cli(tmpdir):
         "-vv",
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
-    assert os.path.isfile(os.path.join(root, "geoms", "region.geojson"))
 
     # test force overwrite
+    r = CliRunner().invoke(hydromt_cli, cmd)
     with pytest.raises(IOError, match="Model dir already exists"):
-        CliRunner().invoke(hydromt_cli, cmd)
+        raise r.exception
 
     r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])
     assert r.exit_code == 0

@@ -85,9 +85,9 @@ target-version = ['py39']
 line-length = 88
 
 # enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT)
-select = ["E","F","I","PT","D", "ERA"]
+select = ["E","F","I","PT","D"]
 ignore-init-module-imports = true
-ignore = ["D211", "D213", "E741", "D105"]
+ignore = ["D211", "D213", "E741", "D105", "E712"]
 exclude = ["docs"]
 
 [tool.ruff.per-file-ignores]

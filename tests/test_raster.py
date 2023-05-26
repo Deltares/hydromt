@@ -126,8 +126,8 @@ def test_attrs_errors(rioda):
         rioda.raster.set_spatial_dims()
     with pytest.raises(ValueError, match="Invalid dimension order."):
         rioda.transpose("x", "y").raster._check_dimensions()
-    with pytest.raises(ValueError, match="Invalid dimension order."):
-        da1 = rioda.expand_dims("t").transpose("y", "x", "t", transpose_coords=True)
+
+    da1 = rioda.expand_dims("t").transpose("y", "x", "t", transpose_coords=True)
     with pytest.raises(ValueError, match="Invalid dimension order."):
         da1.raster._check_dimensions()
     with pytest.raises(ValueError, match="Only 2D and 3D data"):

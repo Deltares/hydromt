@@ -446,7 +446,7 @@ class Model(object, metaclass=ABCMeta):
                             )
                         else:
                             msg = (
-                                "Model dir already exists and cannot be"
+                                "Model dir already exists and cannot be "
                                 + f"overwritten: {path}. Use 'mode=w+' to force "
                                 + "overwrite existing files."
                             )
