@@ -8,13 +8,13 @@ from .model_network import NetworkModel
 from .model_plugins import EntryPoint, ModelCatalog
 
 __all__ = [
-    Model,
-    GridMixin,
-    GridModel,
-    LumpedModel,
-    NetworkModel,
-    EntryPoint,
-    ModelCatalog,
+    "Model",
+    "GridMixin",
+    "GridModel",
+    "LumpedModel",
+    "NetworkModel",
+    "EntryPoint",
+    "ModelCatalog",
 ]
 
 # NOTE: pygeos is still required in XUGRID;

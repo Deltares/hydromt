@@ -15,14 +15,14 @@ from .skills import (
 )
 
 __all__ = [
-    bias,
-    kge,
-    kge_2012,
-    kge_non_parametric,
-    kge_non_parametric_flood,
-    pearson_correlation,
-    percentual_bias,
-    rmse,
-    rsquared,
-    spearman_rank_correlation,
+    "bias",
+    "kge",
+    "kge_2012",
+    "kge_non_parametric",
+    "kge_non_parametric_flood",
+    "pearson_correlation",
+    "percentual_bias",
+    "rmse",
+    "rsquared",
+    "spearman_rank_correlation",
 ]

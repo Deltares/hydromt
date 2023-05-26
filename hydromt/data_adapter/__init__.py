@@ -8,9 +8,9 @@ from .geodataset import GeoDatasetAdapter
 from .rasterdataset import RasterDatasetAdapter
 
 __all__ = [
-    DataAdapter,
-    GeoDataFrameAdapter,
-    DataFrameAdapter,
-    GeoDatasetAdapter,
-    RasterDatasetAdapter,
+    "DataAdapter",
+    "GeoDataFrameAdapter",
+    "DataFrameAdapter",
+    "GeoDatasetAdapter",
+    "RasterDatasetAdapter",
 ]
