@@ -1,9 +1,11 @@
-from typing import Optional, Union, List, Dict
+import logging
+from typing import Dict, List, Optional, Tuple, Union
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import xarray as xr
-import logging
+from shapely.geometry import Polygon
 
 import hydromt
 
@@ -14,6 +16,7 @@ __all__ = [
     "grid_from_rasterdataset",
     "grid_from_raster_reclass",
     "grid_from_geodataframe",
+    "rotated_grid",
 ]
 
 
@@ -306,3 +309,54 @@ def grid_from_geodataframe(
         )
 
     return ds_out
+
+
+def rotated_grid(
+    pol: Polygon, res: float, dec_origin=0, dec_rotation=3
+) -> Tuple[float, float, int, int, float]:
+    """Returns the origin (x0, y0), shape (mmax, nmax) and rotation
+    of the rotated grid fitted to the minimum rotated rectangle around the
+    area of interest (pol). The grid shape is defined by the resolution (res).
+
+    Parameters
+    ----------
+    pol : Polygon
+        Polygon of the area of interest
+    res : float
+        Resolution of the grid
+    """
+
+    def _azimuth(point1, point2):
+        """azimuth between 2 points (interval 0 - 180)"""
+        angle = np.arctan2(point2[1] - point1[1], point2[0] - point1[0])
+        return round(np.degrees(angle), dec_rotation)
+
+    def _dist(a, b):
+        """distance between points"""
+        return np.hypot(b[0] - a[0], b[1] - a[1])
+
+    mrr = pol.minimum_rotated_rectangle
+    coords = np.asarray(mrr.exterior.coords)[:-1, :]  # get coordinates of all corners
+    # get origin based on the corner with the smallest distance to origin
+    # after translation to account for possible negative coordinates
+    ib = np.argmin(
+        np.hypot(coords[:, 0] - coords[:, 0].min(), coords[:, 1] - coords[:, 1].min())
+    )
+    ir = (ib + 1) % 4
+    il = (ib + 3) % 4
+    x0, y0 = coords[ib, :]
+    x0, y0 = round(x0, dec_origin), round(y0, dec_origin)
+    az1 = _azimuth((x0, y0), coords[ir, :])
+    az2 = _azimuth((x0, y0), coords[il, :])
+    axis1 = _dist((x0, y0), coords[ir, :])
+    axis2 = _dist((x0, y0), coords[il, :])
+    if az2 < az1:
+        rot = az2
+        mmax = int(np.ceil(axis2 / res))
+        nmax = int(np.ceil(axis1 / res))
+    else:
+        rot = az1
+        mmax = int(np.ceil(axis1 / res))
+        nmax = int(np.ceil(axis2 / res))
+
+    return x0, y0, mmax, nmax, rot

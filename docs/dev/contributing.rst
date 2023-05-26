@@ -180,12 +180,12 @@ Code format
 ^^^^^^^^^^^
 - We use the `black code style <https://black.readthedocs.io/en/stable/the_black_code_style.html>`_ and `pre-commit <https://pre-commit.org>` to keep everything formatted. Please make sure all hooks pass before commiting. Pre-commit will do this for you if it's installed correctly.
 
-You can install pre-commit by running: 
+You can install pre-commit by running:
 .. code-block:: console
 
   $ pip install pre-commit
 
-Then simply install the necessary hooks with 
+Then simply install the necessary hooks with
 
 .. code-block:: console
 
@@ -195,7 +195,7 @@ Now pre-commit will check all configured hooks against all the staged files and 
 
 When pre-commit applies fixes for you you will have to add them to the staging area again. The git staging area will never be modified by pre-commit.
 
-If you want you can use pre-commit on it's own to run agains all files for exmaple. 
+If you want you can use pre-commit on it's own to run agains all files for exmaple.
 
 .. code-block:: console
 
