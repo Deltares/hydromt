@@ -18,7 +18,7 @@ setup_grid_from_constant:
 
 setup_grid_from_rasterdataset:
   raster_fn: merit_hydro_1k
-  variables: 
+  variables:
   - elevtn
   - basins
   reproject_method:
@@ -58,7 +58,7 @@ setup_grid_from_geodataframe2:
   rasterize_method: fraction
   rename:
     hydro_lakes: water_frac
-  
+
 write:
   components:
   - config

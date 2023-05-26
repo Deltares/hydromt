@@ -2,11 +2,11 @@ import logging
 import os
 from os.path import dirname, isdir, isfile, join
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, Dict
+from typing import Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
-import pandas as pd
 import numpy as np
+import pandas as pd
 import xarray as xr
 import xugrid as xu
 from shapely.geometry import Polygon, box
