@@ -128,6 +128,7 @@ def test_attrs_errors(rioda):
         rioda.transpose("x", "y").raster._check_dimensions()
     with pytest.raises(ValueError, match="Invalid dimension order."):
         da1 = rioda.expand_dims("t").transpose("y", "x", "t", transpose_coords=True)
+    with pytest.raises(ValueError, match="Invalid dimension order."):
         da1.raster._check_dimensions()
     with pytest.raises(ValueError, match="Only 2D and 3D data"):
         rioda.expand_dims(("t", "t1")).raster._check_dimensions()
@@ -498,11 +499,4 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
 
 
 # def test_to_osm(tmpdir, dummy):
-#     path = str(tmpdir)
 #     dummy.raster.to_osm(
-#         f"{path}\\dummy_osm",
-#         zl=4,
-#         bbox=(0, -45, 45, 0),
-#     )
-#     f = open(f"{path}\\dummy_osm\\3\\filelist.txt", "r")
-#     assert len(f.readlines()) == 4

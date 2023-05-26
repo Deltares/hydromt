@@ -1,3 +1,4 @@
+"""Implementations for model mesh workloads."""
 import logging
 import os
 from os.path import dirname, isdir, isfile, join
@@ -43,7 +44,8 @@ class MeshMixin(object):
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to mesh object.
 
         Raster data is interpolated to the mesh grid using the ``resampling_method``.
-        If raster is a dataset, all variables will be added unless ``variables`` list is specified.
+        If raster is a dataset, all variables will be added unless ``variables`` list
+        is specified.
 
         Adds model layers:
 
@@ -56,8 +58,8 @@ class MeshMixin(object):
         variables: list, optional
             List of variables to add to mesh from raster_fn. By default all.
         fill_method : str, optional
-            If specified, fills no data values using fill_nodata method. AVailable methods
-            are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+            If specified, fills no data values using fill_nodata method.
+            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         resampling_method: str, optional
             Method to sample from raster data to mesh. By default mean. Options include
             {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
@@ -66,7 +68,8 @@ class MeshMixin(object):
             If False, only pixels whose center is within the geometry or that are
             selected by Bresenham's line algorithm will be used. By default True.
         rename: dict, optional
-            Dictionary to rename variable names in raster_fn before adding to mesh {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
+            Dictionary to rename variable names in raster_fn before adding to mesh
+            {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
 
         Returns
         -------
@@ -111,41 +114,64 @@ class MeshMixin(object):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """Add data variable(s) to the mesh object by reclassifying data in `raster_fn`.
 
-        The reclassified raster data are subsequently interpolated to the mesh using ``resampling_method``.
+        Reclassification is based on `reclass_table_fn`. The reclassified raster data
+        are subsequently interpolated to the mesh using `resampling_method`.
 
         Adds model layers:
 
-        * **reclass_variables** mesh: reclassified raster data interpolated to the model mesh
+        * **reclass_variables** mesh: reclassified raster data interpolated to the
+            model mesh
 
         Parameters
         ----------
-        raster_fn: str, Path, xr.DataArray
-            Data catalog key, path to raster file or raster xarray data object. Should be a DataArray. Else use `variable` argument for selection.
-        reclass_table_fn: str, Path, pd.DataFrame
-            Data catalog key, path to tabular data file or tabular pandas dataframe object for the reclassification table of `raster_fn`.
-        reclass_variables: list
-            List of reclass_variables from reclass_table_fn table to add to mesh. Index column should match values in raster_fn.
-        variable: str, optional
-            Name of raster dataset variable to use. This is only required when reading datasets with multiple variables.
-            By default None.
-        fill_method : str, optional
-            If specified, fills nodata values in `raster_fn` using fill_nodata method before reclassifying.
-            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
-        resampling_method: str, list, optional
-            Method to sample from raster data to mesh. Can be a list per variable in ``reclass_variables`` or a
-            single method for all. By default mean for all reclass_variables.
-            Options include {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
+        raster_fn : str, Path, xr.DataArray
+            Data catalog key, path to the raster file, or raster xarray data object.
+            Should be a DataArray. If not, use the `variable` argument for selection.
+        reclass_table_fn : str, Path, pd.DataFrame
+            Data catalog key, path to the tabular data file, or tabular pandas dataframe
+            object for the reclassification table of `raster_fn`.
+        reclass_variables : list
+            List of reclass_variables from the reclass_table_fn table to add to the
+            mesh. The index column should match values in raster_fn.
+        variable : str, optional
+            Name of the raster dataset variable to use. This is only required when
+            reading datasets with multiple variables. By default, None.
+        fill_nodata : str, optional
+            If specified, fills nodata values in `raster_fn` using the `fill_nodata`
+            method before reclassifying. Available methods are
+            {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        resampling_method : str or list, optional
+            Method to sample from raster data to the mesh. Can be a list per variable
+            in `reclass_variables` or a single method for all. By default, 'mean' is
+            used for all `reclass_variables`. Options include {'count', 'min', 'max',
+            'sum', 'mean', 'std', 'median', 'q##'}.
         all_touched : bool, optional
-            If True, all pixels touched by geometries will used to define the sample.
+            If True, all pixels touched by geometries will be used to define the sample.
             If False, only pixels whose center is within the geometry or that are
-            selected by Bresenham's line algorithm will be used. By default True.
-        rename: dict, optional
-            Dictionary to rename variable names in reclass_variables before adding to mesh {'name_in_reclass_table': 'name_in_mesh'}. By default empty.
+            selected by Bresenham's line algorithm will be used. By default, True.
+        rename : dict, optional
+            Dictionary to rename variable names in `reclass_variables` before adding
+            them to the mesh. The dictionary should have the form
+            {'name_in_reclass_table': 'name_in_mesh'}. By default, an empty dictionary.
+        **kwargs : dict
+            Additional keyword arguments to be passed to the raster dataset
+            retrieval method.
+
+        Returns
+        -------
+        variable_names : List[str]
+            List of added variable names in the mesh.
+
+        Raises
+        ------
+        ValueError
+            If `raster_fn` is not a single variable raster.
         """
         self.logger.info(
-            f"Preparing mesh data by reclassifying the data in {raster_fn} based on {reclass_table_fn}."
+            f"Preparing mesh data by reclassifying the data in {raster_fn} "
+            f"based on {reclass_table_fn}."
         )
         # Read raster data and mapping table
         da = self.data_catalog.get_rasterdataset(
@@ -211,11 +237,13 @@ class MeshMixin(object):
         data: xugrid.UgridDataArray or xugrid.UgridDataset
             new layer to add to mesh
         name: str, optional
-            Name of new object layer, this is used to overwrite the name of a UgridDataArray.
+            Name of new object layer, this is used to overwrite the name of
+            a UgridDataArray.
         """
         if not isinstance(data, (xu.UgridDataArray, xu.UgridDataset)):
             raise ValueError(
-                "New mesh data in set_mesh should be of type xu.UgridDataArray or xu.UgridDataset"
+                "New mesh data in set_mesh should be of type xu.UgridDataArray"
+                " or xu.UgridDataset"
             )
         if isinstance(data, xu.UgridDataArray):
             if name is not None:
@@ -242,6 +270,8 @@ class MeshMixin(object):
         ----------
         fn : str, optional
             filename relative to model root, by default 'mesh/mesh.nc'
+        **kwargs : dict
+            Additional keyword arguments to be passed to the `_read_nc` method.
         """
         self._assert_read_mode
         for ds in self._read_nc(fn, **kwargs).values():
@@ -252,14 +282,17 @@ class MeshMixin(object):
             self.set_mesh(uds)
 
     def write_mesh(self, fn: str = "mesh/mesh.nc", **kwargs) -> None:
-        """Write model grid data to netcdf file at <root>/<fn>.
+        """Write model grid data to a netCDF file at <root>/<fn>.
 
-        key-word arguments are passed to :py:meth:`xarray.Dataset.ugrid.to_netcdf`
+        Keyword arguments are passed to :py:meth:`xarray.Dataset.ugrid.to_netcdf`.
 
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, by default 'grid/grid.nc'
+            Filename relative to the model root directory, by default 'grid/grid.nc'.
+        **kwargs : dict
+            Additional keyword arguments to be passed to the
+            `xarray.Dataset.ugrid.to_netcdf` method.
         """
         if self._mesh is None:
             self.logger.debug("No mesh data found, skip writing.")
@@ -270,7 +303,6 @@ class MeshMixin(object):
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
         self.logger.debug(f"Writing file {fn}")
-        # ds_new = xu.UgridDataset(grid=ds_out.ugrid.grid) # bug in xugrid?
         ds_out = self.mesh.ugrid.to_dataset()
         if self.mesh.ugrid.grid.crs is not None:
             # save crs to spatial_ref coordinate
@@ -279,6 +311,7 @@ class MeshMixin(object):
 
 
 class MeshModel(MeshMixin, Model):
+
     """Model class Mesh Model for mesh models in HydroMT."""
 
     _CLI_ARGS = {"region": "setup_mesh", "res": "setup_mesh"}
@@ -308,10 +341,11 @@ class MeshModel(MeshMixin, Model):
         res: Optional[float] = None,
         crs: int = None,
     ) -> xu.UgridDataset:
-        """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
+        """Create an 2D unstructured mesh or reads an existing 2D mesh.
 
-        An 2D unstructured mesh will be created as 2D rectangular grid from a geometry (geom_fn) or bbox. If an existing
-        2D mesh is given, then no new mesh will be generated
+        Grids are read according to UGRID conventions. An 2D unstructured mesh
+        will be created as 2D rectangular grid from a geometry (geom_fn) or bbox.
+        If an existing 2D mesh is given, then no new mesh will be generated
 
         Note Only existing meshed with only 2D grid can be read.
         #FIXME: read existing 1D2D network file and extract 2D part.
@@ -331,9 +365,11 @@ class MeshModel(MeshMixin, Model):
 
             * {'mesh': 'path/to/2dmesh_file'}
         res: float
-            Resolution used to generate 2D mesh [unit of the CRS], required if region is not based on 'mesh'.
+            Resolution used to generate 2D mesh [unit of the CRS], required if region
+            is not based on 'mesh'.
         crs : EPSG code, int, optional
-            Optional EPSG code of the model. If None using the one from region, and else 4326.
+            Optional EPSG code of the model. If None using the one from region,
+            and else 4326.
 
         Returns
         -------
@@ -356,7 +392,8 @@ class MeshModel(MeshMixin, Model):
                     raise ValueError('Model region "geom" has no CRS')
             else:
                 raise ValueError(
-                    f"Region for mesh must of kind [bbox, geom, mesh], kind {kind} not understood."
+                    f"Region for mesh must of kind [bbox, geom, mesh], kind {kind} "
+                    "not understood."
                 )
             if crs is not None:
                 geom = geom.to_crs(crs)
@@ -407,8 +444,9 @@ class MeshModel(MeshMixin, Model):
                 topodim = ds[topology].attrs["topology_dimension"]
                 if topodim != 2:  # chek if 2d mesh file else throw error
                     raise NotImplementedError(
-                        f"{mesh2d_fn} cannot be opened. Please check if the existing grid is "
-                        f"an 2D mesh and not 1D2D mesh. This option is not yet available for 1D2D meshes."
+                        f"{mesh2d_fn} cannot be opened. Please check if the existing"
+                        " grid is an 2D mesh and not 1D2D mesh. "
+                        " This option is not yet available for 1D2D meshes."
                     )
 
             # Continues with a 2D grid
@@ -421,7 +459,8 @@ class MeshModel(MeshMixin, Model):
             else:
                 # Assume model crs
                 self.logger.warning(
-                    f"Mesh data from {mesh2d_fn} doesn't have a CRS. Assuming crs option {crs}"
+                    f"Mesh data from {mesh2d_fn} doesn't have a CRS."
+                    f" Assuming crs option {crs}"
                 )
                 mesh2d.ugrid.grid.set_crs(crs)
             mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
@@ -433,8 +472,8 @@ class MeshModel(MeshMixin, Model):
 
         self.set_mesh(mesh2d)
 
-        # This setup method returns region so that it can be wrapped for models which require
-        # more information
+        # This setup method returns region so that it can be wrapped for models
+        # which require more information
         return mesh2d
 
     ## I/O
@@ -454,8 +493,9 @@ class MeshModel(MeshMixin, Model):
         Parameters
         ----------
         components : List, optional
-            List of model components to read, each should have an associated read_<component> method.
-            By default ['config', 'maps', 'mesh', 'geoms', 'forcing', 'states', 'results']
+            List of model components to read, each should have an associated
+            read_<component> method. By default ['config', 'maps', 'mesh',
+            'geoms', 'forcing', 'states', 'results']
         """
         super().read(components=components)
 
@@ -468,8 +508,9 @@ class MeshModel(MeshMixin, Model):
         Parameters
         ----------
         components : List, optional
-            List of model components to write, each should have an associated write_<component> method.
-            By default ['config', 'maps', 'mesh', 'geoms', 'forcing', 'states']
+            List of model components to write, each should have an
+            associated write_<component> method. By default ['config', 'maps',
+            'mesh', 'geoms', 'forcing', 'states']
         """
         super().write(components=components)
 

@@ -1,3 +1,4 @@
+"""Caching mechanisms used in HydroMT."""
 import logging
 import os
 import shutil
@@ -23,7 +24,7 @@ def _uri_validator(uri: str) -> bool:
     try:
         result = urlparse(uri)
         return all([result.scheme, result.netloc])
-    except:
+    except ValueError | AttributeError:
         return False
 
 
@@ -40,7 +41,6 @@ def _copyfile(src, dst, chunk_size=1024):
             with open(dst, "wb") as f:
                 for chunk in r.iter_content(chunk_size=chunk_size):
                     f.write(chunk)
-                # shutil.copyfileobj(r.raw, f)
     else:
         shutil.copyfile(src, dst)
 
@@ -63,6 +63,8 @@ def cache_vrt_tiles(
         geometry to intersect tiles with
     cache_dir: str, Path
         path of the root folder where
+    logger: Logger
+        Logger to write logs to
 
     Returns
     -------

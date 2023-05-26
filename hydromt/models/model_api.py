@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class Model(object, metaclass=ABCMeta):
+
     """General and basic API for models in HydroMT."""
 
     # FIXME
@@ -77,6 +78,10 @@ class Model(object, metaclass=ABCMeta):
             Note that this is not the HydroMT model setup configuration file!
         data_libs : List[str], optional
             List of data catalog yaml files, by default None
+        **artifact_keys:
+            Additional keyword arguments to be passed down.
+        logger:
+            The logger to be used.
         """
         from . import MODELS  # avoid circular import
 
@@ -92,9 +97,11 @@ class Model(object, metaclass=ABCMeta):
         )
 
         # placeholders
-        # metadata maps that can be at different resolutions #TODO> do we want read/write maps?
+        # metadata maps that can be at different resolutions
+        # TODO do we want read/write maps?
         self._config = dict()  # nested dictionary
         self._maps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
+
         # NOTE was staticgeoms in <=v0.5
         self._geoms = dict()  # dictionary of gdp.GeoDataFrame
         self._forcing = dict()  # dictionary of xr.DataArray and/or xr.Dataset
@@ -163,11 +170,12 @@ class Model(object, metaclass=ABCMeta):
     ):
         """Single method to build a model from scratch based on settings in `opt`.
 
-        Methods will be run one by one based on the order of appearance in `opt` (.ini configuration file).
-        All model methods are supported including setup_*, read_* and write_* methods.
+        Methods will be run one by one based on the order of appearance in `opt`
+        (.ini configuration file). All model methods are supported including
+        setup_*, read_* and write_* methods.
 
-        If a write_* option is listed in `opt` (ini file) the full writing of the model at the end
-        of the update process is skipped.
+        If a write_* option is listed in `opt` (ini file) the full writing of the
+        model at the end of the update process is skipped.
 
         Parameters
         ----------
@@ -175,12 +183,13 @@ class Model(object, metaclass=ABCMeta):
             Description of model region. See :py:meth:`~hydromt.workflows.parse_region`
             for all options.
         write: bool, optional
-            Write the complete model after executing all methods in opt, by default True.
+            Write complete model after executing all methods in opt, by default True.
         opt: dict, optional
             Model build configuration. The configuration can be parsed from a
             .ini file using :py:meth:`~hydromt.config.configread`.
-            This is a nested dictionary where the first-level keys are the names of model
-            specific (setup) methods and the second-level contain argument-value pairs of the method.
+            This is a nested dictionary where the first-level keys are the names
+            of model specific (setup) methods and the second-level contain
+            argument-value pairs of the method.
 
             .. code-block:: text
 
@@ -204,7 +213,7 @@ class Model(object, metaclass=ABCMeta):
 
         # then loop over other methods
         for method in opt:
-            # if any write_* functions are present in opt, skip the final self.write() call
+            # if any write_* functions are present in opt, skip the final self.write()
             if method.startswith("write_"):
                 write = False
             kwargs = {} if opt[method] is None else opt[method]
@@ -222,11 +231,12 @@ class Model(object, metaclass=ABCMeta):
     ):
         """Single method to update a model based the settings in `opt`.
 
-        Methods will be run one by one based on the order of appearance in `opt` (ini configuration file).
+        Methods will be run one by one based on the order of appearance in `opt`
+        (ini configuration file).
 
         All model methods are supported including setup_*, read_* and write_* methods.
-        If a write_* option is listed in `opt` (ini file) the full writing of the model at the end
-        of the update process is skipped.
+        If a write_* option is listed in `opt` (ini file) the full writing of the model
+        at the end of the update process is skipped.
 
         Parameters
         ----------
@@ -239,8 +249,9 @@ class Model(object, metaclass=ABCMeta):
         opt: dict, optional
             Model build configuration. The configuration can be parsed from a
             .ini file using :py:meth:`~hydromt.config.configread`.
-            This is a nested dictionary where the first-level keys are the names of model
-            specific (setup) methods and the second-level contain argument-value pairs of the method.
+            This is a nested dictionary where the first-level keys
+            are the names of model specific (setup) methods and
+            the second-level contain argument-value pairs of the method.
 
             .. code-block:: text
 
@@ -276,7 +287,7 @@ class Model(object, metaclass=ABCMeta):
 
         # loop over other methods from ini file
         for method in opt:
-            # if any write_* functions are present in opt, skip the final self.write() call
+            # if any write_* functions are present in opt, skip the final self.write()
             if method.startswith("write_"):
                 write = False
             kwargs = {} if opt[method] is None else opt[method]
@@ -294,7 +305,7 @@ class Model(object, metaclass=ABCMeta):
         hydrography_fn: str = "merit_hydro",
         basin_index_fn: str = "merit_hydro_index",
     ) -> dict:
-        """This component sets the `region` of interest of the model.
+        """Set the `region` of interest of the model.
 
         Adds model layer:
 
@@ -363,13 +374,13 @@ class Model(object, metaclass=ABCMeta):
 
         self.set_geoms(geom, name="region")
 
-        # This setup method returns region so that it can be wrapped for models which require
-        # more information, e.g. grid RasterDataArray or xy coordinates.
+        # This setup method returns region so that it can be wrapped for models which
+        # require more information, e.g. grid RasterDataArray or xy coordinates.
         return region
 
-    # TODO remove
-    # placeholder to make make sure build with the current _CLI_ARGS does not raise an error
-    def setup_basemaps(self, *args, **kwargs):
+    # TODO remove placeholder to make make sure
+    # build with the current _CLI_ARGS does not raise an error
+    def setup_basemaps(self, *args, **kwargs):  # noqa: D102
         warnings.warn(
             "The setup_basemaps method is not implemented.",
             UserWarning,
@@ -412,7 +423,6 @@ class Model(object, metaclass=ABCMeta):
             raise ValueError(
                 f'mode "{mode}" unknown, select from "r", "r+", "w" or "w+"'
             )
-        # old_root = getattr(self, "_root", None)
         self._root = root if root is None else abspath(root)
         self._read = mode.startswith("r")
         self._write = mode != "r"
@@ -436,15 +446,17 @@ class Model(object, metaclass=ABCMeta):
                             )
                         else:
                             msg = (
-                                f"Model dir already exists and cannot be overwritten: {path}."
-                                "Use 'mode=w+' to force overwrite existing files."
+                                "Model dir already exists and cannot be"
+                                + f"overwritten: {path}. Use 'mode=w+' to force "
+                                + "overwrite existing files."
                             )
                             self.logger.error(msg)
                             raise IOError(msg)
             # check directory
             elif not isdir(self._root):
                 raise IOError(f'model root not found at "{self._root}"')
-            # remove old logging file handler and add new filehandler in root if it does not exist
+            # remove old logging file handler and add new filehandler
+            # in root if it does not exist
             has_log_file = False
             log_level = 20  # default, but overwritten by the level of active loggers
             for i, h in enumerate(self.logger.handlers):
@@ -479,8 +491,9 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         components : List, optional
-            List of model components to read, each should have an associated read_<component> method.
-            By default ['config', 'maps', 'staticmaps', 'geoms', 'forcing', 'states', 'results']
+            List of model components to read, each should have an associated
+            read_<component> method. By default ['config', 'maps', 'staticmaps',
+            'geoms', 'forcing', 'states', 'results']
         """
         self.logger.info(f"Reading model data from {self.root}")
         for component in components:
@@ -506,8 +519,9 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         components : List, optional
-            List of model components to write, each should have an associated write_<component> method.
-            By default ['config', 'maps', 'staticmaps', 'geoms', 'forcing', 'states']
+            List of model components to write, each should have an
+            associated write_<component> method. By default ['config', 'maps',
+            'staticmaps', 'geoms', 'forcing', 'states']
         """
         self.logger.info(f"Writing model data to {self.root}")
         for component in components:
@@ -532,7 +546,8 @@ class Model(object, metaclass=ABCMeta):
             Global root for all relative paths in yaml file.
             If "auto" the data source paths are relative to the yaml output ``path``.
         data_lib_fn: str, Path, optional
-            Path of output yml file, absolute or relative to the model root, by default "hydromt_data.yml".
+            Path of output yml file, absolute or relative to the model root,
+            by default "hydromt_data.yml".
         used_only: bool, optional
             If True, export only data entries kept in used_data list. By default True
         append: bool, optional
@@ -615,7 +630,8 @@ class Model(object, metaclass=ABCMeta):
         fallback: any, optional
             fallback value if key(s) not found in config, by default None.
         abs_path: bool, optional
-            If True return the absolute path relative to the model root, by deafult False.
+            If True return the absolute path relative to the model root,
+            by deafult False.
             NOTE: this assumes the config is located in model root!
 
         Returns
@@ -659,8 +675,9 @@ class Model(object, metaclass=ABCMeta):
         return config.configwrite(fn, self.config)
 
     def read_config(self, config_fn: Optional[str] = None):
-        """Parse config from file. If no config file found a default config file is
-        read in writing mode.
+        """Parse config from file.
+
+        If no config file found a default config file is read in writing mode.
         """
         prefix = "User defined"
         if config_fn is None:  # prioritize user defined config path (new v0.4.1)
@@ -710,12 +727,14 @@ class Model(object, metaclass=ABCMeta):
     # model static maps
     @property
     def staticmaps(self):
-        """Model static maps. Returns xarray.Dataset,
+        """Model static maps.
+
+        Returns xarray.Dataset,
         ..NOTE: will be deprecated in future versions and replaced by `grid`.
         """
         warnings.warn(
-            "The staticmaps property of the Model class will be deprecated in future versions, "
-            "use the grid property of the GridModel class instead.",
+            "The staticmaps property of the Model class will be deprecated in future"
+            "versions. Use the grid property of the GridModel class instead.",
             DeprecationWarning,
         )
         if len(self._staticmaps) == 0 and self._read:
@@ -725,11 +744,11 @@ class Model(object, metaclass=ABCMeta):
     def set_staticmaps(
         self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
     ):
-        """This method will be deprecated in future versions. See :py:meth:`~hydromt.models.GridModel.set_grid`.
-
-        Add data to staticmaps.
+        """Add data to staticmaps.
 
         All layers of staticmaps must have identical spatial coordinates.
+        This method will be deprecated in future versions. See
+        :py:meth:`~hydromt.models.GridModel.set_grid`.
 
         Parameters
         ----------
@@ -740,7 +759,8 @@ class Model(object, metaclass=ABCMeta):
             or to select a variable from a Dataset.
         """
         warnings.warn(
-            "The set_staticmaps method will be deprecated in future versions, use set_grid instead.",
+            "The set_staticmaps method will be deprecated in future versions, "
+            + "use set_grid instead.",
             DeprecationWarning,
         )
         if name is None:
@@ -776,12 +796,16 @@ class Model(object, metaclass=ABCMeta):
 
         key-word arguments are passed to :py:func:`xarray.open_dataset`
 
-        .. NOTE: this method is deprecated. Use the grid property of the GridMixin instead.
+        .. NOTE: this method is deprecated.
+        Use the grid property of the GridMixin instead.
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, by default "staticmaps/staticmaps.nc"
+        **kwargs:
+            Additional keyword arguments that are passed to the
+            `_read_nc` function.
         """
         self._assert_read_mode
         for ds in self._read_nc(fn, **kwargs).values():
@@ -792,12 +816,16 @@ class Model(object, metaclass=ABCMeta):
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
-        .. NOTE: this method is deprecated. Use the grid property of the GridMixin instead.
+        .. NOTE: this method is deprecated.
+        Use the grid property of the GridMixin instead.
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, by default 'staticmaps/staticmaps.nc'
+        **kwargs:
+            Additional keyword arguments that are passed to the
+            `_write_nc` function.
         """
         if len(self._staticmaps) == 0:
             self.logger.debug("No staticmaps data found, skip writing.")
@@ -820,7 +848,8 @@ class Model(object, metaclass=ABCMeta):
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to maps object.
 
-        If raster is a dataset, all variables will be added unless ``variables`` list is specified.
+        If raster is a dataset, all variables will be added unless ``variables``
+        list is specified.
 
         Adds model layers:
 
@@ -836,13 +865,16 @@ class Model(object, metaclass=ABCMeta):
             If specified, fills nodata values using fill_nodata method.
             Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
         name: str, optional
-            Name of new dataset in self.maps dictionnary, only in case split_dataset=False.
+            Name of new dataset in self.maps dictionnary,
+            only in case split_dataset=False.
         reproject_method: str, optional
-            See rasterio.warp.reproject for existing methods, by default the data is not reprojected (None).
+            See rasterio.warp.reproject for existing methods, by default the data is
+            not reprojected (None).
         split_dataset: bool, optional
-            If data is a xarray.Dataset split it into several xarray.DataArrays (default).
+            If data is a xarray.Dataset split it into several xarray.DataArrays.
         rename: dict, optional
-            Dictionary to rename variable names in raster_fn before adding to maps {'name_in_raster_fn': 'name_in_maps'}. By default empty.
+            Dictionary to rename variable names in raster_fn before adding to maps
+            {'name_in_raster_fn': 'name_in_maps'}. By default empty.
 
         Returns
         -------
@@ -882,7 +914,10 @@ class Model(object, metaclass=ABCMeta):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """Add data variable(s) to maps object.
+
+        This is done by reclassifying the data in
+        ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 
@@ -891,25 +926,34 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         raster_fn: str, Path, xr.DataArray
-            Data catalog key, path to raster file or raster xarray data object. Should be a DataArray. Else use `variable` argument for selection.
+            Data catalog key, path to raster file or raster xarray data object.
+            Should be a DataArray. Else use `variable` argument for selection.
         reclass_table_fn: str, Path, pd.DataFrame
-            Data catalog key, path to tabular data file or tabular pandas dataframe object for the reclassification table of `raster_fn`.
+            Data catalog key, path to tabular data file or tabular pandas dataframe
+            object for the reclassification table of `raster_fn`.
         reclass_variables: list
-            List of reclass_variables from reclass_table_fn table to add to maps. Index column should match values in `raster_fn`.
+            List of reclass_variables from reclass_table_fn table to add to maps. Index
+            column should match values in `raster_fn`.
         variable: str, optional
-            Name of raster dataset variable to use. This is only required when reading datasets with multiple variables.
-            By default None.
+            Name of raster dataset variable to use. This is only required when reading
+            datasets with multiple variables. By default None.
         fill_method : str, optional
-            If specified, fills nodata values in `raster_fn` using fill_nodata method before reclassifying.
-            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+            If specified, fills nodata values in `raster_fn` using fill_nodata method
+            before reclassifying. Available methods are {'linear', 'nearest',
+            'cubic', 'rio_idw'}.
         reproject_method: str, optional
-            See rasterio.warp.reproject for existing methods, by default the data is not reprojected (None).
+            See rasterio.warp.reproject for existing methods, by default the data is
+            not reprojected (None).
         name: str, optional
             Name of new maps variable, only in case split_dataset=False.
         split_dataset: bool, optional
-            If data is a xarray.Dataset split it into several xarray.DataArrays (default).
+            If data is a xarray.Dataset split it into several xarray.DataArrays.
         rename: dict, optional
-            Dictionary to rename variable names in reclass_variables before adding to grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+            Dictionary to rename variable names in reclass_variables before adding to
+            grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+        **kwargs:
+            Additional keyword arguments that are passed to the
+            `data_catalog.get_rasterdataset` function.
 
         Returns
         -------
@@ -917,7 +961,8 @@ class Model(object, metaclass=ABCMeta):
             Names of added model map layers
         """
         self.logger.info(
-            f"Preparing map data by reclassifying the data in {raster_fn} based on {reclass_table_fn}"
+            f"Preparing map data by reclassifying the data in {raster_fn} based"
+            f" on {reclass_table_fn}"
         )
         # Read raster data and remapping table
         da = self.data_catalog.get_rasterdataset(
@@ -968,9 +1013,10 @@ class Model(object, metaclass=ABCMeta):
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
         name: str, optional
-            Variable name, only in case data is of type DataArray or if a Dataset is added as is (split_dataset=False).
+            Variable name, only in case data is of type DataArray or if a Dataset is
+            added as is (split_dataset=False).
         split_dataset: bool, optional
-            If data is a xarray.Dataset split it into several xarray.DataArrays (default).
+            If data is a xarray.Dataset split it into several xarray.DataArrays.
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
@@ -987,6 +1033,9 @@ class Model(object, metaclass=ABCMeta):
         ----------
         fn : str, optional
             filename relative to model root, may wildcards, by default "maps/*.nc"
+        **kwargs:
+            Additional keyword arguments that are passed to the
+            `_read_nc` function.
         """
         self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
@@ -1003,6 +1052,9 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'maps/{name}.nc'
+        **kwargs:
+            Additional keyword arguments that are passed to the
+            `_write_nc` function.
         """
         if len(self._maps) == 0:
             self.logger.debug("No maps data found, skip writing.")
@@ -1013,7 +1065,9 @@ class Model(object, metaclass=ABCMeta):
     # model geometry files
     @property
     def geoms(self) -> Dict[str, Union[gpd.GeoDataFrame, gpd.GeoSeries]]:
-        """Model geometries. Returns dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
+        """Model geometries.
+
+        Return dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
         ..NOTE: previously call staticgeoms.
         """
         if not self._geoms and self._read:
@@ -1025,7 +1079,7 @@ class Model(object, metaclass=ABCMeta):
 
         Arguments:
         ---------
-        geoms: geopandas.GeoDataFrame or geopandas.GeoSeries
+        geom: geopandas.GeoDataFrame or geopandas.GeoSeries
             New geometry data to add
         name: str
             Geometry name.
@@ -1033,7 +1087,8 @@ class Model(object, metaclass=ABCMeta):
         gtypes = [gpd.GeoDataFrame, gpd.GeoSeries]
         if not np.any([isinstance(geom, t) for t in gtypes]):
             raise ValueError(
-                "First parameter map(s) should be geopandas.GeoDataFrame or geopandas.GeoSeries"
+                "First parameter map(s) should be geopandas.GeoDataFrame"
+                " or geopandas.GeoSeries"
             )
         if name in self._geoms:
             self.logger.warning(f"Replacing geom: {name}")
@@ -1048,6 +1103,9 @@ class Model(object, metaclass=ABCMeta):
         ----------
         fn : str, optional
             filename relative to model root, may wildcards, by default "geoms/*.nc"
+        **kwargs:
+            Additional keyword arguments that are passed to the
+            `geopandas.read_file` function.
         """
         self._assert_read_mode
         fns = glob.glob(join(self.root, fn))
@@ -1066,6 +1124,9 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'geoms/{name}.geojson'
+        **kwargs:
+            Additional keyword arguments that are passed to the
+            `geopandas.to_file` function.
         """
         if len(self._geoms) == 0:
             self.logger.debug("No geoms data found, skip writing.")
@@ -1085,13 +1146,16 @@ class Model(object, metaclass=ABCMeta):
                 os.makedirs(dirname(_fn))
             gdf.to_file(_fn, **kwargs)
 
-    # OLD model geometry files; TODO remove
-
     @property
     def staticgeoms(self):
-        """This property will be deprecated in future versions, use :py:meth:`~hydromt.Model.geom`."""
+        """Access the geometryes.
+
+        This property will be deprecated in future versions,
+        use :py:meth:`~hydromt.Model.geom`.
+        """
         warnings.warn(
-            "The staticgeoms method will be deprecated in future versions, use geoms instead.",
+            "The staticgeoms method will be deprecated in future versions,"
+            " use geoms instead.",
             DeprecationWarning,
         )
         if not self._geoms and self._read:
@@ -1100,25 +1164,40 @@ class Model(object, metaclass=ABCMeta):
         return self._staticgeoms
 
     def set_staticgeoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
-        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.set_geoms`."""
+        """Set the geometries.
+
+        This method will be deprecated in future versions,
+        use :py:meth:`~hydromt.Model.set_geoms`.
+        """
         warnings.warn(
-            "The set_staticgeoms method will be deprecated in future versions, use set_geoms instead.",
+            "The set_staticgeoms method will be deprecated in future versions,"
+            " use set_geoms instead.",
             DeprecationWarning,
         )
         return self.set_geoms(geom, name)
 
     def read_staticgeoms(self):
-        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.read_geoms`."""
+        """Read gemoetries from disk.
+
+        This method will be deprecated in future versions
+        use :py:meth:`~hydromt.Model.read_geoms`.
+        """
         warnings.warn(
-            'The read_staticgeoms" method will be deprecated in future versions, use read_geoms instead.',
+            'The read_staticgeoms" method will be deprecated in future versions," \
+            " use read_geoms instead.',
             DeprecationWarning,
         )
         return self.read_geoms(fn="staticgeoms/*.geojson")
 
     def write_staticgeoms(self):
-        """This method will be deprecated in future versions, use :py:meth:`~hydromt.Model.write_geoms`."""
+        """Write the geometries to disk.
+
+        This method will be deprecated in future versions,
+        use :py:meth:`~hydromt.Model.write_geoms`.
+        """
         warnings.warn(
-            'The "write_staticgeoms" method will be deprecated in future versions, use  "write_geoms" instead.',
+            'The "write_staticgeoms" method will be deprecated in future versions,"\
+             " use  "write_geoms" instead.',
             DeprecationWarning,
         )
         return self.write_geoms(fn="staticgeoms/{name}.geojson")
@@ -1163,6 +1242,9 @@ class Model(object, metaclass=ABCMeta):
         ----------
         fn : str, optional
             filename relative to model root, may wildcards, by default "forcing/*.nc"
+        **kwargs:
+            Additional keyword arguments that are passed to the `_read_nc`
+            function.
         """
         self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
@@ -1179,6 +1261,9 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'forcing/{name}.nc'
+        **kwargs:
+            Additional keyword arguments that are passed to the `_write_nc`
+            function.
         """
         if len(self._forcing) == 0:
             self.logger.debug("No forcing data found, skip writing.")
@@ -1226,6 +1311,9 @@ class Model(object, metaclass=ABCMeta):
         ----------
         fn : str, optional
             filename relative to model root, may wildcards, by default "states/*.nc"
+        **kwargs:
+            Additional keyword arguments that are passed to the `_read_nc`
+            function.
         """
         self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
@@ -1242,6 +1330,9 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'states/{name}.nc'
+        **kwargs:
+            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
+            function.
         """
         if len(self._states) == 0:
             self.logger.debug("No states data found, skip writing.")
@@ -1249,7 +1340,8 @@ class Model(object, metaclass=ABCMeta):
             self._assert_write_mode
             self._write_nc(self._states, fn, **kwargs)
 
-    # model results files; NOTE we don't have a write_results method (that's up to the model kernel)
+    # model results files; NOTE we don't have a write_results method
+    # (that's up to the model kernel)
     @property
     def results(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model results.  Returns dict of xarray.DataArray or xarray.Dataset."""
@@ -1275,7 +1367,8 @@ class Model(object, metaclass=ABCMeta):
         name: str, optional
             Results name, required if data is xarray.Dataset and split_dataset=False.
         split_dataset: bool, optional
-            If True (False by default), split a Dataset to store each variable as a DataArray.
+            If True (False by default), split a Dataset to store each variable
+            as a DataArray.
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
@@ -1292,6 +1385,9 @@ class Model(object, metaclass=ABCMeta):
         ----------
         fn : str, optional
             filename relative to model root, may wildcards, by default "results/*.nc"
+        **kwargs:
+            Additional keyword arguments that are passed to the `_read_nc`
+            function.
         """
         self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
@@ -1344,8 +1440,10 @@ class Model(object, metaclass=ABCMeta):
             return self.region.crs
 
     def set_crs(self, crs) -> None:
+        """Set the coordinate reference system."""
         warnings.warn(
-            '"set_crs" is deprecated. Please set the crs of all model components instead.',
+            '"set_crs" is deprecated. Please set the crs of all model'
+            " components instead.",
             DeprecationWarning,
         )
         if len(self._staticmaps) > 0:
@@ -1354,6 +1452,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def dims(self) -> Tuple:
         """Returns spatial dimension names of staticmaps.
+
         ..NOTE: will be deprecated in future versions.
         """
         if len(self._staticmaps) > 0:
@@ -1362,6 +1461,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def coords(self) -> Dict:
         """Returns the coordinates of model staticmaps.
+
         ..NOTE: will be deprecated in future versions.
         """
         if len(self._staticmaps) > 0:
@@ -1370,6 +1470,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def res(self) -> Tuple:
         """Returns the resolution of the model staticmaps.
+
         ..NOTE: will be deprecated in future versions.
         """
         if len(self._staticmaps) > 0:
@@ -1378,6 +1479,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def transform(self):
         """Returns the geospatial transform of the model staticmaps.
+
         ..NOTE: will be deprecated in future versions.
         """
         if len(self._staticmaps) > 0:
@@ -1386,6 +1488,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def width(self):
         """Returns the width of the model staticmaps.
+
         ..NOTE: will be deprecated in future versions.
         """
         if len(self._staticmaps) > 0:
@@ -1394,6 +1497,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def height(self):
         """Returns the height of the model staticmaps.
+
         ..NOTE: will be deprecated in future versions.
         """
         if len(self._staticmaps) > 0:
@@ -1402,6 +1506,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def shape(self) -> Tuple:
         """Returns the shape of the model staticmaps.
+
         ..NOTE: will be deprecated in future versions.
         """
         if len(self._staticmaps) > 0:
@@ -1424,7 +1529,8 @@ class Model(object, metaclass=ABCMeta):
         # TODO: For now stays here but move to grid in GridModel and delete
         elif len(self.staticmaps) > 0:
             warnings.warn(
-                'Defining "region" based on staticmaps will be deprecated. Either use use region from GridModel or define your own method.',
+                'Defining "region" based on staticmaps will be deprecated. Either use'
+                " region from GridModel or define your own method.",
                 DeprecationWarning,
             )
             crs = self.staticmaps.raster.crs
@@ -1437,8 +1543,10 @@ class Model(object, metaclass=ABCMeta):
 
     # test methods
     def test_model_api(self):
+        """Test compliance with HydroMT Model API."""
         warnings.warn(
-            '"test_model_api" is now part of the internal API, use "_test_model_api" instead.',
+            '"test_model_api" is now part of the internal API, use "_test_model_api"'
+            " instead.",
             DeprecationWarning,
         )
         return self._test_model_api()
@@ -1449,7 +1557,8 @@ class Model(object, metaclass=ABCMeta):
         Returns
         -------
         non_compliant: list
-            List of model components that are non-compliant with the model API structure.
+            List of model components that are non-compliant with the model API
+            structure.
         """
         non_compliant = []
         for component, dtype in self.api.items():
@@ -1539,6 +1648,7 @@ def _assert_isinstance(obj: Any, dtype: Any, name: str = ""):
 
 def _check_equal(a, b, name="") -> Dict[str, str]:
     """Recursive test of model components.
+
     Returns dict with component name and associated error message.
     """
     errors = {}

@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-"""submodule for hydromt command line tool."""
+"""Submodule for hydromt command line tool."""

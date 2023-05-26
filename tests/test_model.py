@@ -199,11 +199,6 @@ def test_setup_region(model, demda, tmpdir):
     model.setup_region({"grid": grid_fn})
     assert np.all(demda.raster.bounds == model.region.total_bounds)
     # # TODO model once we have registered the Model class entrypoint
-    # model._geoms.pop('region') # remove old region
-    # root = str(tmpdir.join('root'))
-    # model.set_root(root, mode='w')
-    # model.write()
-    # model.setup_region({'model': root})
     # basin
     model._geoms.pop("region")  # remove old region
     model.setup_region({"basin": [12.2, 45.833333333333329]})
@@ -281,7 +276,7 @@ def test_setup_grid(tmpdir, demda):
         mode="w",
     )
     # wrong region kind
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Region for grid must be of kind"):
         model.setup_grid({"lumped_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]

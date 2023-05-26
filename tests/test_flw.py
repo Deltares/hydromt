@@ -89,11 +89,14 @@ def test_basin_map(hydds, flwdir):
     # errors
     with pytest.raises(ValueError, match="Flwdir and ds dimensions do not match"):
         flw.basin_map(hydds.isel(x=slice(1, -1)), flwdir)
+
     with pytest.raises(ValueError, match="No basin outlets found in domain."):
         idxs_outlet = flwdir.idxs_outlet
-        flwdir.idxs_outlet = []
+    flwdir.idxs_outlet = []
+
+    with pytest.raises(ValueError, match="No basin outlets found in domain."):
         flw.basin_map(hydds, flwdir, outlets=True)
-        flwdir.idxs_outlet = idxs_outlet
+    flwdir.idxs_outlet = idxs_outlet
 
 
 def test_clip_basins(hydds, flwdir):

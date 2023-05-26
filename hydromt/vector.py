@@ -1,3 +1,4 @@
+"""Implementaion of the vector workloads."""
 from __future__ import annotations
 
 import logging
@@ -10,7 +11,8 @@ import shapely
 import xarray as xr
 from geopandas import GeoDataFrame, GeoSeries
 
-# TODO try getting this version without importing osgeo to avoid conflicts with geopandas/rasterio
+# TODO try getting this version without importing osgeo to avoid
+# conflicts with geopandas/rasterio
 from osgeo import __version__ as GDAL_VERSION
 from shapely.geometry.base import BaseGeometry
 
@@ -20,7 +22,11 @@ logger = logging.getLogger(__name__)
 
 
 class GeoBase(raster.XGeoBase):
+
+    """Base accessor class for geo data."""
+
     def __init__(self, xarray_obj):
+        """Initialize a new object based on the provided xarray_obj."""
         super(GeoBase, self).__init__(xarray_obj)
         self._geometry = None
 
@@ -130,8 +136,12 @@ class GeoBase(raster.XGeoBase):
 
         Arguments:
         ---------
-        x_name, y_name, geom_name: str, optional
-            The name of the x, y and geometry coordinate.
+        x_name: str, optional
+            The name of the x coordinate.
+        y_name: str, optional
+            The name of the ycoordinate.
+        geom_name: str, optional
+            The name of the geometry coordinate.
         index_dim: str optional
             The name of the geometry index dimension
         geom_format: {'xy', 'wkt', 'geom'}
@@ -281,8 +291,10 @@ class GeoBase(raster.XGeoBase):
         geom_name: str = None,
         replace: bool = True,
     ):
-        """Update the geometry in the Dataset/Array with a new geometry (if provided)
-        or update the current geometry to a new geometry format.
+        """Update the geometry in the Dataset/Array with a new geometry.
+
+        if provided or use that, otherwise update the current
+        geometry to a new geometry format.
 
 
         Parameters
@@ -366,7 +378,7 @@ class GeoBase(raster.XGeoBase):
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
     def ogr_compliant(self, reducer=None) -> xr.Dataset:
-        """Creates a Dataset/Array which is understood by OGR.
+        """Create a Dataset/Array which is understood by OGR.
 
         Variables with more than one dimension are not understood and will
         removed if no reducer is provided.
@@ -436,7 +448,7 @@ class GeoBase(raster.XGeoBase):
         return obj
 
     def to_geom(self, geom_name: str = None) -> Union[xr.DataArray, xr.Dataset]:
-        """Converts Dataset/ DataArray with xy or wkt geometries to shapely Geometries.
+        """Convert Dataset/ DataArray with xy or wkt geometries to shapely Geometries.
 
         Parameters
         ----------
@@ -452,7 +464,7 @@ class GeoBase(raster.XGeoBase):
         return self.update_geometry(geom_format="geom", geom_name=geom_name)
 
     def to_xy(self, x_name="x", y_name="y") -> Union[xr.DataArray, xr.Dataset]:
-        """Converts Dataset/ DataArray with Point geometries to x,y structure.
+        """Convert Dataset/ DataArray with Point geometries to x,y structure.
 
         Parameters
         ----------
@@ -471,7 +483,7 @@ class GeoBase(raster.XGeoBase):
         ogr_compliant=False,
         reducer=None,
     ) -> Union[xr.DataArray, xr.Dataset]:
-        """Converts geometries in Dataset/DataArray to wkt strings.
+        """Convert geometries in Dataset/DataArray to wkt strings.
 
         Parameters
         ----------
@@ -526,6 +538,8 @@ class GeoBase(raster.XGeoBase):
             (xmin, ymin, xmax, ymax) bounding box
         buffer: float, optional
             buffer around bbox in crs units, None by default.
+        crs : int, optional
+            EPSG of the data. If not given, it will be inferred.
 
         Returns:
         -------
@@ -569,9 +583,11 @@ class GeoBase(raster.XGeoBase):
     ## Output methods
     ## Either writes to files or other data types
     def to_gdf(self, reducer=None):
-        """Return geopandas GeoDataFrame with Point geometry based on Dataset
-        coordinates. If a reducer is passed the Dataset variables are reduced along
-        the all non-index dimensions and to a GeoDataFrame column.
+        """Return geopandas GeoDataFrame with Point geometry.
+
+        Geometry is based on Dataset coordinates. If a reducer is
+        passed the Dataset variables are reduced along the all
+        non-index dimensions and to a GeoDataFrame column.
 
         Arguments:
         ---------
@@ -631,6 +647,8 @@ class GeoBase(raster.XGeoBase):
         reducer : callable, optional
             Method by which multidimensional data is reduced to 1 dimensional
             e.g. numpy.mean
+        kwargs:
+            Any additional arguments to be passed down to the driver.
         """
         if ogr_compliant:
             self.ogr_compliant(reducer=reducer).to_netcdf(
@@ -644,7 +662,11 @@ class GeoBase(raster.XGeoBase):
 
 @xr.register_dataarray_accessor("vector")
 class GeoDataArray(GeoBase):
+
+    """Accessor class for vector based geo data arrays."""
+
     def __init__(self, xarray_obj):
+        """Initialise the object."""
         super(GeoDataArray, self).__init__(xarray_obj)
 
     # Constructers
@@ -659,14 +681,17 @@ class GeoDataArray(GeoBase):
         index_dim: str = None,
         keep_cols: bool = True,
     ) -> xr.DataArray:
-        """Parse GeoDataFrame object with point geometries to DataArray with
-        geospatial attributes and merge with array_like data.
+        """Parse GeoDataFrame object with point geometries to DataArray.
+
+        DataArray will have geospatial attributes and be merged with array_like data.
 
         Arguments:
         ---------
         gdf: geopandas GeoDataFrame
             Spatial coordinates. The index should match the array_like index_dim and the
             geometry column may only contain Point geometries.
+        name:
+            The name of the data set for metadata purposes.
         data: array_like
             Values for this array. Must be an ``numpy.ndarray``, ndarray like,
             or castable to an ``ndarray``. If a self-described xarray or pandas
@@ -737,7 +762,8 @@ class GeoDataArray(GeoBase):
         path : str
             path to file
         parse_geom : bool, optional
-            Create geometry objects in place of existing x, y or wkt geometry coordinates.
+            Create geometry objects in place of existing x, y or wkt geometry
+            coordinates.
         x_name, y_name, geom_name: str, optional
             The name of the x, y and geometry coordinate.
         crs : int, optional
@@ -761,7 +787,11 @@ class GeoDataArray(GeoBase):
 
 @xr.register_dataset_accessor("vector")
 class GeoDataset(GeoBase):
+
+    """Implementation for a vectorased geo dataset."""
+
     def __init__(self, xarray_obj):
+        """Initialise the object."""
         super(GeoDataset, self).__init__(xarray_obj)
 
     # Properties
@@ -784,8 +814,9 @@ class GeoDataset(GeoBase):
         index_dim: str = None,
         keep_cols: bool = True,
     ) -> xr.Dataset:
-        """Creates Dataset with geospatial coordinates. The Dataset values are
-        reindexed to the gdf index.
+        """Create Dataset with geospatial coordinates.
+
+        The Dataset values are reindexed to the gdf index.
 
         Arguments:
         ---------
@@ -796,7 +827,8 @@ class GeoDataset(GeoBase):
         data_vars: dict-like, DataArray or Dataset
             A mapping from variable names to `xarray.DataArray` objects.
             See `xarray.Dataset` for all options.
-            Aditionally it accepts `xarray.DataArray` with name property and `xarray.Dataset`.
+            Aditionally it accepts `xarray.DataArray` with name property and
+            `xarray.Dataset`.
         coords: sequence or dict of array_like, optional
             Coordinates (tick labels) to use for indexing along each dimension.
         index_dim: str, optional
@@ -866,7 +898,8 @@ class GeoDataset(GeoBase):
         path : str
             Path to the netCDF4 file
         parse_geom : bool, optional
-            Create geometry objects in place of existing x, y or wkt geometry coordinates.
+            Create geometry objects in place of existing x, y or
+            wkt geometry coordinates.
         x_name, y_name, geom_name: str, optional
             The name of the x, y and geometry coordinate.
         crs : int, optional

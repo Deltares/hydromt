@@ -19,39 +19,27 @@ except ImportError:
     pass
 
 try:
-    import pygeos
-
     HAS_PYGEOS = True
 except ImportError:
     pass
 
 # causes malloc / corrupted size errors on linux & github CI
-# try:
-#     import pcraster
 
-#     HAS_PCRASTER = True
-# except ImportError:
 #     pass
 
 
 try:
-    import xugrid
-
     HAS_XUGRID = True
 except ImportError:
     pass
 
 try:
-    import gcsfs
-
     HAS_GCSFS = True
 
 except ImportError:
     pass
 
 try:
-    import s3fs
-
     HAS_S3FS = True
 
 except ImportError:

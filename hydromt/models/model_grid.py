@@ -21,7 +21,8 @@ logger = logging.getLogger(__name__)
 
 class GridMixin(object):
     # placeholders
-    # xr.Dataset representation of all static parameter maps at the same resolution and bounds - renamed from staticmaps
+    # xr.Dataset representation of all static parameter maps at the same resolution and
+    # bounds - renamed from staticmaps
     _API = {"grid": xr.Dataset}
 
     def __init__(self, *args, **kwargs) -> None:
@@ -50,7 +51,8 @@ class GridMixin(object):
         nodata: int, float, optional
             Nodata value. By default infered from dtype.
         mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+            Use None to disable masking.
 
         Returns
         -------
@@ -81,7 +83,8 @@ class GridMixin(object):
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
 
-        If raster is a dataset, all variables will be added unless ``variables`` list is specified.
+        If raster is a dataset, all variables will be added unless ``variables`` list
+        is specified.
 
         Adds model layers:
 
@@ -92,7 +95,8 @@ class GridMixin(object):
         raster_fn: str, Path, xr.DataArray, xr.Dataset
             Data catalog key, path to raster file or raster xarray data object.
             If a path to a raster file is provided it will be added
-            to the data_catalog with its name based on the file basename without extension.
+            to the data_catalog with its name based on the file basename without
+            extension.
         variables: list, optional
             List of variables to add to grid from raster_fn. By default all.
         fill_method : str, optional
@@ -102,9 +106,11 @@ class GridMixin(object):
             See rasterio.warp.reproject for existing methods, by default 'nearest'.
             Can provide a list corresponding to ``variables``.
         mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+            Use None to disable masking.
         rename: dict, optional
-            Dictionary to rename variable names in raster_fn before adding to grid {'name_in_raster_fn': 'name_in_grid'}. By default empty.
+            Dictionary to rename variable names in raster_fn before adding to grid
+            {'name_in_raster_fn': 'name_in_grid'}. By default empty.
 
         Returns
         -------
@@ -147,7 +153,9 @@ class GridMixin(object):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """Add data variables to grid object by reclassifying the data in ``raster_fn``.
+
+        Reclassifications are based on ``reclass_table_fn``.
 
         Adds model layers:
 
@@ -156,24 +164,34 @@ class GridMixin(object):
         Parameters
         ----------
         raster_fn: str, Path, xr.DataArray
-            Data catalog key, path to raster file or raster xarray data object. Should be a DataArray. Else use `variable` argument for selection.
+            Data catalog key, path to raster file or raster xarray data object.
+            Should be a DataArray. Else use `variable` argument for selection.
         reclass_table_fn: str, Path, pd.DataFrame
-            Data catalog key, path to tabular data file or tabular pandas dataframe object for the reclassification table of `raster_fn`.
+            Data catalog key, path to tabular data file or tabular pandas dataframe
+            object for the reclassification table of `raster_fn`.
         reclass_variables: list
-            List of reclass_variables from reclass_table_fn table to add to maps. Index column should match values in `raster_fn`.
+            List of reclass_variables from reclass_table_fn table to add to maps.
+            Index column should match values in `raster_fn`.
         variable: str, optional
-            Name of raster_fn dataset variable to use. This is only required when reading datasets with multiple variables.
+            Name of raster_fn dataset variable to use. This is only required when
+            reading datasets with multiple variables.
             By default None.
         fill_method : str, optional
-            If specified, fills nodata values in `raster_fn` using fill_nodata method before reclassifying.
-            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+            If specified, fills nodata values in `raster_fn` using fill_nodata method
+            before reclassifying. Available methods are
+            {'linear', 'nearest', 'cubic', 'rio_idw'}.
         reproject_method: str, optional
             See rasterio.warp.reproject for existing methods, by default "nearest".
             Can provide a list corresponding to ``reclass_variables``.
         mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+            Use None to disable masking.
         rename: dict, optional
-            Dictionary to rename variable names in reclass_variables before adding to grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+            Dictionary to rename variable names in reclass_variables before adding to
+            grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+
+        **kwargs : dict
+            Additional keyword arguments to be passed to `get_rasterdataset`
 
         Returns
         -------
@@ -181,7 +199,8 @@ class GridMixin(object):
             Names of added model grid layers
         """
         self.logger.info(
-            f"Preparing grid data by reclassifying the data in {raster_fn} based on {reclass_table_fn}"
+            f"Preparing grid data by reclassifying the data in {raster_fn} based "
+            f"on {reclass_table_fn}"
         )
         # Read raster data and remapping table
         da = self.data_catalog.get_rasterdataset(
@@ -221,34 +240,42 @@ class GridMixin(object):
         rename: Optional[Dict] = dict(),
         all_touched: Optional[bool] = True,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
+        """Add data variables to grid object by rasterizing the data from ``vector_fn``.
+
         Several type of rasterization are possible:
-            * "fraction": the fraction of the grid cell covered by the vector shape is returned.
+            * "fraction": the fraction of the grid cell covered by the vector
+                shape is returned.
             * "area": the area of the grid cell covered by the vector shape is returned.
-            * "value": the value from the variables columns of vector_fn are used. If this is used, variables must be specified.
+            * "value": the value from the variables columns of vector_fn are used.
+                If this is used, variables must be specified.
 
         Parameters
         ----------
         vector_fn : str, Path, gpd.GeoDataFrame
             Data catalog key, path to vector file or a vector geopandas object.
         variables : List, str, optional
-            List of variables to add to grid from vector_fn. Required if rasterize_method is "value", by default None.
+            List of variables to add to grid from vector_fn. Required if
+            rasterize_method is "value", by default None.
         nodata : List, int, float, optional
-            No data value to use for rasterization, by default -1. If a list is provided, it should have the same length has variables.
+            No data value to use for rasterization, by default -1. If a list is
+            provided, it should have the same length has variables.
         rasterize_method : str, optional
             Method to rasterize the vector data. Either {"value", "fraction", "area"}.
-            If "value", the value from the variables columns in vector_fn are used directly in the raster.
-            If "fraction", the fraction of the grid cell covered by the vector file is returned.
-            If "area", the area of the grid cell covered by the vector file is returned.
+            If "value", the value from the variables columns in vector_fn are used
+            directly in the raster. If "fraction", the fraction of the grid
+            cell covered by the vector file is returned. If "area", the area of the
+            grid cell covered by the vector file is returned.
         mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+            Use None to disable masking.
         rename: dict, optional
-            Dictionary to rename variable names in variables before adding to grid {'name_in_variables': 'name_in_grid'}.
-            To rename with method fraction or area use {'vector_fn': 'name_in_grid'}. By default empty.
+            Dictionary to rename variable names in variables before adding to grid
+            {'name_in_variables': 'name_in_grid'}. To rename with method fraction or
+            area use {'vector_fn': 'name_in_grid'}. By default empty.
         all_touched : bool, optional
-            If True (default), all pixels touched by geometries will be burned in. If false, only
-            pixels whose center is within the polygon or that are selected by
-            Bresenham's line algorithm will be burned in.
+            If True (default), all pixels touched by geometries will be burned in.
+            If false, only pixels whose center is within the polygon or that are
+            selected by Bresenham's line algorithm will be burned in.
 
         Returns
         -------
@@ -261,12 +288,14 @@ class GridMixin(object):
         )
         if gdf.empty:
             self.logger.warning(
-                f"No shapes of {vector_fn} found within region, skipping setup_grid_from_vector."
+                f"No shapes of {vector_fn} found within region,"
+                " skipping setup_grid_from_vector."
             )
             return
         # Data resampling
         if vector_fn in rename.keys():
-            # In case of choosing a new name with area or fraction method pass the name directly
+            # In case of choosing a new name with area or fraction method pass
+            # the name directly
             rename = rename[vector_fn]
         ds = workflows.grid.grid_from_geodataframe(
             grid_like=self.grid,
@@ -285,9 +314,7 @@ class GridMixin(object):
 
     @property
     def grid(self):
-        """Model static gridded data. Returns xarray.Dataset.
-        Previously called staticmaps.
-        """
+        """Model static gridded data."""
         if len(self._grid) == 0 and self._read:
             self.read_grid()
         return self._grid
@@ -309,7 +336,8 @@ class GridMixin(object):
             Name of new map layer, this is used to overwrite the name of a DataArray
             and ignored if data is a Dataset
         """
-        # NOTE: variables in a dataset are not longer renamed as used to be the case in set_staticmaps
+        # NOTE: variables in a dataset are not longer renamed as used to be the case in
+        # set_staticmaps
         name_required = isinstance(data, np.ndarray) or (
             isinstance(data, xr.DataArray) and data.name is None
         )
@@ -343,6 +371,8 @@ class GridMixin(object):
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
+        **kwargs : dict
+            Additional keyword arguments to be passed to the `_read_nc` method.
         """
         self._assert_read_mode
         for ds in self._read_nc(fn, **kwargs).values():
@@ -357,6 +387,8 @@ class GridMixin(object):
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
+        **kwargs : dict
+            Additional keyword arguments to be passed to the `_write_nc` method.
         """
         if len(self._grid) == 0:
             self.logger.debug("No grid data found, skip writing.")
@@ -367,6 +399,7 @@ class GridMixin(object):
 
 
 class GridModel(GridMixin, Model):
+
     """Model class Grid Model for gridded models in HydroMT."""
 
     _CLI_ARGS = {"region": "setup_grid"}
@@ -402,8 +435,8 @@ class GridModel(GridMixin, Model):
     ) -> xr.DataArray:
         """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
 
-        An 2D regular grid will be created from a geometry (geom_fn) or bbox. If an existing
-        grid is given, then no new grid will be generated.
+        An 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
+        existing grid is given, then no new grid will be generated.
 
         Adds/Updates model layers (if add_mask):
         * **mask** grid mask: add grid mask to grid object
@@ -419,15 +452,21 @@ class GridModel(GridMixin, Model):
 
             Region must be of kind [grid, bbox, geom, basin, subbasin, interbasin].
         res: float
-            Resolution used to generate 2D grid [unit of the CRS], required if region is not based on 'grid'.
+            Resolution used to generate 2D grid [unit of the CRS], required if region
+            is not based on 'grid'.
         crs : EPSG code, int, str optional
-            EPSG code of the model or "utm" to let hydromt find the closest projected crs. If None using the one from region.
+            EPSG code of the model or "utm" to let hydromt find the closest projected
+            crs. If None using the one from region.
         hydrography_fn : str
-            Name of data source for hydrography data. Required if region is of kind 'basin', 'subbasin' or 'interbasin'.
+            Name of data source for hydrography data. Required if region is of kind
+                'basin', 'subbasin' or 'interbasin'.
 
-            * Required variables: ['flwdir'] and any other 'snapping' variable required to define the region.
+            * Required variables: ['flwdir'] and any other 'snapping' variable required
+                to define the region.
 
-            * Optional variables: ['basins'] if the `region` is based on a (sub)(inter)basins without a 'bounds' argument.
+            * Optional variables: ['basins'] if the `region` is based on a
+                (sub)(inter)basins without a 'bounds' argument.
+
         basin_index_fn : str
             Name of data source with basin (bounding box) geometries associated with
             the 'basins' layer of `hydrography_fn`. Only required if the `region` is
@@ -450,7 +489,8 @@ class GridModel(GridMixin, Model):
             kind, region = workflows.parse_region(region, logger=self.logger)
         elif kind != "grid":
             raise ValueError(
-                f"Region for grid must be of kind [grid, bbox, geom, basin, subbasin, interbasin], kind {kind} not understood."
+                f"Region for grid must be of kind [grid, bbox, geom, basin, subbasin,"
+                f" interbasin], kind {kind} not understood."
             )
 
         # Derive xcoords, ycoords and geom for the different kind options
@@ -509,10 +549,12 @@ class GridModel(GridMixin, Model):
             )
             if not isinstance(res, (int, float)):
                 self.logger.info(
-                    f"res argument not defined, using resolution of hydrography_fn {da_hyd.raster.res}"
+                    "res argument not defined, using resolution of "
+                    f"hydrography_fn {da_hyd.raster.res}"
                 )
                 res = da_hyd.raster.res
-            # Reproject da_hyd based on crs and grid and align, method is not important only coords will be used
+            # Reproject da_hyd based on crs and grid and align, method is not important
+            # only coords will be used
             # TODO add warning on res value if crs is projected or not?
             if res != da_hyd.raster.res and crs != da_hyd.raster.crs:
                 da_hyd = da_hyd.raster.reproject(
@@ -539,7 +581,8 @@ class GridModel(GridMixin, Model):
             geom = da_like.raster.box
             if crs is not None or res is not None:
                 self.logger.warning(
-                    f"For region kind 'grid', the gris crs/res are used and not user-defined crs {crs} or res {res}"
+                    "For region kind 'grid', the gris crs/res are used and not"
+                    f" user-defined crs {crs} or res {res}"
                 )
             crs = da_like.raster.crs
 
@@ -587,8 +630,9 @@ class GridModel(GridMixin, Model):
         Parameters
         ----------
         components : List, optional
-            List of model components to read, each should have an associated read_<component> method.
-            By default ['config', 'maps', 'grid', 'geoms', 'forcing', 'states', 'results']
+            List of model components to read, each should have an associated
+            read_<component> method. By default ['config', 'maps', 'grid',
+            'geoms', 'forcing', 'states', 'results']
         """
         super().read(components=components)
 
@@ -601,7 +645,8 @@ class GridModel(GridMixin, Model):
         Parameters
         ----------
         components : List, optional
-            List of model components to write, each should have an associated write_<component> method.
+            List of model components to write, each should have an
+            associated write_<component> method.
             By default ['config', 'maps', 'grid', 'geoms', 'forcing', 'states']
         """
         super().write(components=components)

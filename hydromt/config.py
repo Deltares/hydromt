@@ -32,11 +32,15 @@ def configread(
     defaults : dict, optional
         Nested dictionary with default options, by default dict()
     abs_path : bool, optional
-        If True, parse string values to an absolute path if the a file or folder with that
-        name (string value) relative to the config file exist, by default False
+        If True, parse string values to an absolute path if the a file or folder
+        with that name (string value) relative to the config file exist,
+        by default False
     skip_abspath_sections: list, optional
         These sections are not evaluated for absolute paths if abs_path=True,
         by default ['update_config']
+    **kwargs
+        Additional keyword arguments that are passed to the read_ini`
+        function.
 
     Returns
     -------
@@ -70,13 +74,18 @@ def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
         Path to configuration file
     cfdict : dict
         Configuration dictionary. If the configuration contains headers,
-        the first level keys are the section headers, the second level option-value pairs.
+        the first level keys are the section headers, the second level
+        option-value pairs.
     encoding : str, optional
         File encoding, by default "utf-8"
     cf : ConfigParser, optional
         Alternative configuration parser, by default None
     noheader : bool, optional
-        Set true for a single-level configuration dictionary with no headers, by default False
+        Set true for a single-level configuration dictionary with no headers,
+        by default False
+    **kwargs
+        Additional keyword arguments that are passed to the `write_ini_config`
+        function.
     """
     root = Path(dirname(config_fn))
     _cfdict = parse_relpath(cfdict.copy(), root)
@@ -154,7 +163,8 @@ def write_ini_config(
     cf : ConfigParser, optional
         Alternative configuration parser, by default None
     noheader : bool, optional
-        Set true for a single-level configuration dictionary with no headers, by default False
+        Set true for a single-level configuration dictionary with no headers,
+        by default False
     """
     if cf is None:
         cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
@@ -194,9 +204,7 @@ def parse_relpath(cfdict: dict, root: Path) -> dict:
 def parse_abspath(
     cfdict: dict, root: Path, skip_abspath_sections: List = ["setup_config"]
 ) -> dict:
-    """Parse string value to absolute path if the a file or folder with that
-    name (string value) relative to the config file exist.
-    """
+    """Parse string value to absolute path from config file."""
 
     def _abspath(value, root):
         if exists(join(root, value)):

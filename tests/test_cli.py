@@ -55,8 +55,8 @@ def test_cli(tmpdir):
 
     # test force overwrite
     with pytest.raises(IOError, match="Model dir already exists"):
-        r = CliRunner().invoke(hydromt_cli, cmd)
-        raise r.exception
+        CliRunner().invoke(hydromt_cli, cmd)
+
     r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])
     assert r.exit_code == 0
 

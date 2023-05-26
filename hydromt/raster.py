@@ -4,9 +4,7 @@
 # source file: https://github.com/corteva/rioxarray
 # license file: https://github.com/corteva/rioxarray/blob/master/LICENSE
 
-"""This module is an extension for xarray to provide rasterio capabilities
-to xarray datasets/dataarrays.
-"""
+"""Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
 from __future__ import annotations
 
 import logging
@@ -151,18 +149,31 @@ def full_from_transform(
     lazy=False,
 ):
     """Return a full DataArray based on a geospatial transform and shape.
+
     See :py:meth:`~hydromt.raster.full` for all options.
 
-    Arguments:
-    ---------
+    Parameters
+    ----------
     transform : affine transform
-        Two dimensional affine transform for 2D linear mapping
-    shape: tuple of int
+        Two dimensional affine transform for 2D linear mapping.
+    shape : tuple of int
         Length along (dim0, x, y) dimensions, of which the first is optional.
+    nodata : optional
+        The nodata value to assign to the DataArray. Defaults to np.nan.
+    dtype : optional
+        The data type to use for the DataArray. Defaults to np.float32.
+    name : optional
+        The name of the DataArray. Defaults to None.
+    attrs : optional
+        Additional attributes to assign to the DataArray. Empty by default.
+    crs : optional
+        The coordinate reference system (CRS) of the DataArray. Defaults to None.
+    lazy : bool, optional
+        Whether to create a lazy DataArray. Defaults to False.
 
-    Returns:
+    Returns
     -------
-    da: DataArray
+    da : DataArray
         Filled DataArray
     """
     if len(shape) not in [2, 3]:
@@ -187,12 +198,15 @@ def full_from_transform(
 
 
 class XGeoBase(object):
-    """This is the base class for the GIS extensions for xarray."""
+
+    """Base class for the GIS extensions for xarray."""
 
     def __init__(self, xarray_obj: xr.DataArray | xr.Dataset) -> None:
+        """Initialize new object based on the xarray object provided."""
         self._obj = xarray_obj
         # create new coordinate with attributes in which to save x_dim, y_dim and crs.
-        # other spatial properties are always calculated on the fly to ensure consistency with data
+        # other spatial properties are always calculated on the fly to ensure
+        # consistency with data
         if GEO_MAP_COORD not in self._obj.coords:
             # zero is used by rioxarray
             self._obj.coords[GEO_MAP_COORD] = xr.Variable((), 0)
@@ -224,7 +238,8 @@ class XGeoBase(object):
         Arguments:
         ---------
         input_crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
+            Coordinate Reference System. Accepts EPSG codes (int or str)
+            and proj (str or dict)
         """
         crs_names = ["crs_wkt", "crs", "epsg"]
         names = list(self._obj.coords.keys())
@@ -250,7 +265,7 @@ class XGeoBase(object):
                     try:
                         input_crs = pyproj.CRS.from_user_input(crs)
                         break
-                    except:
+                    except RuntimeError:
                         pass
         if input_crs is not None:
             grid_map_attrs = input_crs.to_cf()
@@ -261,9 +276,11 @@ class XGeoBase(object):
 
 
 class XRasterBase(XGeoBase):
-    """This is the base class for a Raster GIS extensions for xarray."""
+
+    """Base class for a Raster GIS extensions for xarray."""
 
     def __init__(self, xarray_obj):
+        """Initialize new object based on the xarray object provided."""
         super(XRasterBase, self).__init__(xarray_obj)
 
     @property
@@ -363,8 +380,9 @@ class XRasterBase(XGeoBase):
             raise ValueError("raster only applies to regular grids")
 
     def reset_spatial_dims_attrs(self):
-        """Reset spatial dimension names and attributes to make CF-compliant
-        Requires CRS attribute.
+        """Reset spatial dimension names and attributes.
+
+        Needed to make CF-compliant and requires CRS attribute.
         """
         if self.crs is None:
             raise ValueError("CRS is missing. Use set_crs function to resolve.")
@@ -388,8 +406,6 @@ class XRasterBase(XGeoBase):
     def dims(self) -> tuple[str, str]:
         """Return tuple of geospatial dimensions names."""
         # if self.dim0 is not None:
-        #     return self.dim0, self.y_dim, self.x_dim
-        # else:
         return self.y_dim, self.x_dim
 
     @property
@@ -400,7 +416,6 @@ class XRasterBase(XGeoBase):
     @property
     def shape(self) -> tuple[int, int]:
         """Return shape of geospatial dimension (height, width)."""
-        # return tuple([self._obj.coords[d].size for d in list(self.dims)])
         return self.height, self.width
 
     @property
@@ -469,6 +484,7 @@ class XRasterBase(XGeoBase):
     @property
     def res(self) -> tuple[float, float]:
         """Return resolution (x, y) tuple.
+
         NOTE: rotated rasters with a negative dx are not supported.
         """
         xs, ys = self.xcoords.data, self.ycoords.data
@@ -500,7 +516,8 @@ class XRasterBase(XGeoBase):
 
     @property
     def rotation(self) -> float:
-        """Return rotation of grid (degree)
+        """Return rotation of grid (degrees).
+
         NOTE: rotated rasters with a negative dx are not supported.
         """
         xs, ys = self.xcoords.data, self.ycoords.data
@@ -534,7 +551,7 @@ class XRasterBase(XGeoBase):
         return x0, y0
 
     def _check_dimensions(self) -> None:
-        """Validates the dimensions number of dimensions and dimension order."""
+        """Validate the number and order of dimensions."""
         dims = (self.y_dim, self.x_dim)
         da = self._obj[self.vars[0]] if isinstance(self._obj, xr.Dataset) else self._obj
         extra_dims = [dim for dim in da.dims if dim not in dims]
@@ -568,8 +585,9 @@ class XRasterBase(XGeoBase):
         )
 
     def aligned_grid(self, other) -> bool:
-        """Return True if other grid aligns with object grid (crs, resolution, origin),
-        but with a smaller extent.
+        """Check if other grid aligns with object grid (crs, resolution, origin).
+
+        Other can have a smaller extent.
         """
         w, s, e, n = self.bounds
         w1, s1, e1, n1 = other.raster.bounds
@@ -590,7 +608,7 @@ class XRasterBase(XGeoBase):
     def gdal_compliant(
         self, rename_dims=True, force_sn=False
     ) -> xr.DataArray | xr.Dataset:
-        """Updates attributes to get GDAL compliant NetCDF files.
+        """Update attributes to get GDAL compliant NetCDF files.
 
         Arguments:
         ---------
@@ -662,7 +680,7 @@ class XRasterBase(XGeoBase):
         return bounds
 
     def flipud(self) -> xr.DataArray | xr.Dataset:
-        """Returns raster flipped along y dimension."""
+        """Return raster flipped along y dimension."""
         y_dim = self.y_dim
         # NOTE don't use ycoords to work for rotated grids
         yrev = self._obj[y_dim].values[::-1]
@@ -679,8 +697,10 @@ class XRasterBase(XGeoBase):
 
         Arguments:
         ---------
-        xs, ys: ndarray of float
-            x, y coordinates
+        xs: ndarray of float
+            x coordinates
+        ys: ndarray of float
+            y coordinates
         mask : ndarray of bool, optional
             data mask of valid values, by default None
         mask_outside : boolean, optional
@@ -721,8 +741,10 @@ class XRasterBase(XGeoBase):
 
         Arguments:
         ---------
-        r, c : ndarray of int
-            index of row, column
+        r : ndarray of int
+            index of row
+        c : ndarray of int
+            index of column
         mask : ndarray of bool, optional
             data mask of valid values, by default None
         mask_outside : boolean, optional
@@ -779,8 +801,10 @@ class XRasterBase(XGeoBase):
 
         Arguments:
         ---------
-        xs, ys: ndarray of float
-            x, y coordinates
+        xs: ndarray of float
+            x coordinates
+        ys: ndarray of float
+            y coordinates
         mask : ndarray of bool, optional
             data mask of valid values, by default None
         mask_outside : boolean, optional
@@ -867,9 +891,9 @@ class XRasterBase(XGeoBase):
         stats: list of str, callable
             Statistics to compute from raster values, options include
             {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
-            Multiple percentiles can be calculated using comma-seperated values, e.g.: 'q10,50,90'
-            Statistics ignore the nodata value and are applied along the x and y dimension.
-            By default ['mean']
+            Multiple percentiles can be calculated using comma-seperated values,
+            e.g.: 'q10,50,90'. Statistics ignore the nodata value and are applied
+            along the x and y dimension. By default ['mean']
         all_touched : bool, optional
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
@@ -952,9 +976,11 @@ class XRasterBase(XGeoBase):
         Arguments:
         ---------
         reclass_table : pd.DataFrame
-            Tables with parameter names and values in columns and values in obj as index.
+            Tables with parameter names and values in columns
+            and values in obj as index.
         method : str, optional
-            Reclassification method. For now only 'exact' for one-on-one cell value mapping.
+            Reclassification method. For now only 'exact' for
+            one-on-one cell value mapping.
 
         Returns:
         -------
@@ -1079,7 +1105,7 @@ class XRasterBase(XGeoBase):
         return self._obj.isel({self.x_dim: col_slice, self.y_dim: row_slice})
 
     def clip_geom(self, geom, align=None, buffer=0, mask=False):
-        """Clip object to the bounding box of the geometry and add geometry 'mask' coordinate.
+        """Clip object to bounding box of the geometry and add 'mask' coordinate.
 
         Arguments:
         ---------
@@ -1127,9 +1153,10 @@ class XRasterBase(XGeoBase):
         gdf : geopandas.GeoDataFrame
             GeoDataFrame of shapes and values to burn.
         col_name : str, optional
-            GeoDataFrame column name to use for burning, by default 'index'
+            GeoDataFrame column name to use for burning, by default 'index'.
         nodata : int or float, optional
-            Used as fill value for all areas not covered by input geometries, by default 0.
+            Used as fill value for all areas not covered by input geometries.
+            0 by default.
         all_touched : bool, optional
             If True, all pixels touched by geometries will be burned in. If false, only
             pixels whose center is within the polygon or that are selected by
@@ -1139,6 +1166,8 @@ class XRasterBase(XGeoBase):
         sindex : bool, optional
             Create a spatial index to select overlapping geometries before rasterizing,
             by default False.
+        **kwargs : optional
+            Additional keyword arguments to pass to `features.rasterize`.
 
         Returns:
         -------
@@ -1192,7 +1221,7 @@ class XRasterBase(XGeoBase):
         name: Optional[str] = None,
         nodata: Optional[Union[int, float]] = -1,
     ) -> xr.DataArray:
-        """Return an object with the fraction of area of the grid cells covered by geometry.
+        """Return an object with the fraction of the grid cells covered by geometry.
 
         Arguments:
         ---------
@@ -1201,12 +1230,13 @@ class XRasterBase(XGeoBase):
         method : str, optional
             Method to burn in the geometry, either 'fraction' (default) or 'area'.
         mask_name : str, optional
-            Name of the mask variable in self to use for calculating the fraction of area covered by the geometry.
-            By default None for no masking.
+            Name of the mask variable in self to use for calculating the fraction of
+            area covered by the geometry. By default None for no masking.
         name : str, optional
             Name of the output DataArray. If None, the method name is used.
         nodata : int or float, optional
-            Used as fill value for all areas not covered by input geometries, by default -1.
+            Used as fill value for all areas not covered by input geometries.
+            By default -1.
 
         Returns:
         -------
@@ -1260,7 +1290,8 @@ class XRasterBase(XGeoBase):
             # Mask grid cells that actually do intersect with the geometry
             idx_area = np.where(da_area.values.flatten() != da_area.raster.nodata)[0]
             gdf_grid = gdf_grid_all.loc[idx_area]
-            # Convert to frac using gdf grid in same crs (area error when using ds_like.raster.area_grid)
+            # Convert to frac using gdf grid in same crs
+            # (area error when using ds_like.raster.area_grid)
             gdf_grid = gdf_grid.to_crs(crs_utm)
             gdf_grid["area"] = gdf_grid.area
             da_gridarea = ds_like.raster.rasterize(
@@ -1292,7 +1323,11 @@ class XRasterBase(XGeoBase):
             pixels whose center is within the polygon or that are selected by
             Bresenham's line algorithm will be burned in. By default False.
         invert : bool, optional
-            If True, the mask will be False where shapes overlap pixels, by default False
+            If True, the mask will be False where shapes overlap pixels,
+            by default False
+        **kwargs : optional
+            Additional keyword arguments to pass to `features.rasterize`.
+
 
         Returns:
         -------
@@ -1365,7 +1400,7 @@ class XRasterBase(XGeoBase):
         return gpd.GeoDataFrame(geometry=geoms, crs=self.crs)
 
     def area_grid(self, dtype=np.float32):
-        """Returns the grid cell area [m2].
+        """Return the grid cell area [m2].
 
         Returns
         -------
@@ -1390,8 +1425,10 @@ class XRasterBase(XGeoBase):
         return da_area.rename("area")
 
     def density_grid(self):
-        """Returns the density in [unit/m2] of raster(s). The cell areas are calculated
-        using :py:meth:`~hydromt.raster.XRasterBase.area_grid`.
+        """Return the density in [unit/m2] of raster(s).
+
+        The cell areas are calculated using
+        :py:meth:`~hydromt.raster.XRasterBase.area_grid`.
 
         Returns
         -------
@@ -1464,35 +1501,48 @@ class XRasterBase(XGeoBase):
         dst_height=None,
         align=False,
     ):
-        """Prepare nearest index mapping for the reprojection of a gridded timeseries
-        file, powered by pyproj and k-d tree lookup.
+        """Prepare nearest index mapping for reprojection of a gridded timeseries file.
 
-        Index mappings typically are used in reprojection workflows of time series,
-        or combinations of time series
+        Powered by pyproj and k-d tree lookup. Index mappings typically are used
+        in reprojection workflows of time series, or combinations of time series.
 
-        ... Note: Is used by :py:meth:`~hydromt.raster.RasterDataArray.reproject` if method equals 'nearest_index'
+        ... Note: Is used by :py:meth:`~hydromt.raster.RasterDataArray.reproject` if
+        method equals 'nearest_index'
 
         Arguments:
         ---------
         dst_crs: int, dict, or str, optional
-            Target CRS. Accepts EPSG codes (int or str); proj (str or dict) or wkt (str)
-            "utm" is accepted and will return the centroid utm zone CRS
+            Target CRS. Accepts EPSG codes (int or str);
+            proj (str or dict) or wkt (str).
+            "utm" is accepted and will return the centroid utm zone CRS.
         dst_res: tuple (x resolution, y resolution) or float, optional
-            Target resolution, in units of target CRS.
+            Target resolution, in units of the target CRS.
         dst_transform: affine.Affine(), optional
             Target affine transformation. Will be calculated if None.
-        dst_width, dst_height: int, optional
-            Output file size in pixels and lines. Cannot be used together with
-            resolution (dst_res).
-        align: boolean, optional
-            If True, align target transform to resolution
+        dst_width: int, optional
+            Output file width in pixels. Can't be used together with resolution dst_res.
+        dst_height: int, optional
+            Output file height in lines. Can't be used together with resolution dst_res.
+        align: bool, optional
+            If True, align the target transform to the resolution.
 
         Returns:
         -------
         index: xarray.DataArray of intp
-            DataArray with flat indices of source DataArray
+            DataArray with flat indices of the source DataArray.
+
+        Raises:
+        ------
+        ValueError
+            If the destination grid and CRS are not valid.
+
+        Notes:
+        -----
+        - The method is powered by pyproj and k-d tree lookup.
+        - The index mappings are typically used in reprojection workflows of time series
+        or combinations of time series.
         """
-        # parse and check destination grid and crs
+        # parse and check destination grid and CRS
         dst_crs = self._dst_crs(dst_crs)
         dst_transform, dst_width, dst_height = self._dst_transform(
             dst_crs, dst_res, dst_transform, dst_width, dst_height, align
@@ -1515,13 +1565,13 @@ class XRasterBase(XGeoBase):
         src_yy, src_xx = src_yy.ravel(), src_xx.ravel()
         src_coords = np.vstack([src_xx, src_yy]).transpose()
         # Build a KD-tree with the source grid cell center coordinate pairs.
-        # For each destination grid cell coordinate pairs, search for the nearest
+        # For each destination grid cell coordinate pair, search for the nearest
         # source grid cell in the KD-tree.
         # TODO: benchmark against RTree or S2Index https://github.com/benbovy/pys2index
         tree = cKDTree(src_coords)
         _, indices = tree.query(dst_coords_reproj)
         # filter destination cells with center outside source bbox
-        # TODO filter for rotated case
+        # TODO filter for the rotated case
         w, s, e, n = self.bounds
         valid = np.logical_and(
             np.logical_and(dst_xx_reproj > w, dst_xx_reproj < e),
@@ -1546,15 +1596,19 @@ class XRasterBase(XGeoBase):
 
 @xr.register_dataarray_accessor("raster")
 class RasterDataArray(XRasterBase):
-    """This is the GIS extension for xarray.DataArray."""
+
+    """GIS extension for xarray.DataArray."""
 
     def __init__(self, xarray_obj):
+        """Initiallize the object based on the provided xarray object."""
         super(RasterDataArray, self).__init__(xarray_obj)
 
     @staticmethod
     def from_numpy(data, transform, nodata=None, attrs={}, crs=None):
         """Transform a 2D/3D numpy array into a DataArray with geospatial attributes.
-        The data dimensions should have the y and x on the second last and last dimensions.
+
+        The data dimensions should have the y and x on the second last
+        and last dimensions.
 
         Arguments:
         ---------
@@ -1567,8 +1621,8 @@ class RasterDataArray(XRasterBase):
         attrs : dict, optional
             additional attributes
         crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
-            or wkt (str)
+            Coordinate Reference System. Accepts EPSG codes (int or str);
+            proj (str or dict) or wkt (str)
 
         Returns:
         -------
@@ -1614,6 +1668,8 @@ class RasterDataArray(XRasterBase):
             Nodata value for the DataArray.
             If the nodata property and argument are both None, the _FillValue
             attribute will be removed.
+        logger:
+            The logger to use.
         """
         if nodata is None:
             nodata = self._obj.rio.nodata
@@ -1629,6 +1685,7 @@ class RasterDataArray(XRasterBase):
 
     def mask_nodata(self, fill_value=np.nan):
         """Mask nodata values with fill_value (default np.nan).
+
         Note that masking with np.nan will change integer dtypes to float.
         """
         _da = self._obj
@@ -1640,6 +1697,7 @@ class RasterDataArray(XRasterBase):
 
     def mask(self, mask, logger=logger):
         """Mask cells where mask equals False with the data nodata value.
+
         A warning is raised if no the data has no nodata value.
         """
         if self.nodata is not None:
@@ -1738,8 +1796,9 @@ class RasterDataArray(XRasterBase):
         method="nearest",
         align=False,
     ):
-        """Reproject a DataArray with geospatial coordinates, powered
-        by :py:meth:`rasterio.warp.reproject`.
+        """Reproject a DataArray with geospatial coordinates.
+
+        Powered by :py:meth:`rasterio.warp.reproject`.
 
         Arguments:
         ---------
@@ -1750,9 +1809,10 @@ class RasterDataArray(XRasterBase):
             Target resolution, in units of target CRS.
         dst_transform: affine.Affine(), optional
             Target affine transformation. Will be calculated if None.
-        dst_width, dst_height: int, optional
-            Output file size in pixels and lines. Cannot be used together with
-            resolution (dst_res).
+        dst_width: int, optional
+            Output file width in pixels. Can't be used together with resolution dst_res.
+        dst_height: int, optional
+            Output file height in lines. Can't be used together with resolution dst_res.
         dst_nodata: int or float, optional
             The nodata value used to initialize the destination; it will
             remain in all areas not covered by the reprojected source. If None, the
@@ -1838,8 +1898,8 @@ class RasterDataArray(XRasterBase):
         other : xarray.DataArray or Dataset
             DataArray of the target resolution and projection.
         method : str, optional
-            See :py:meth:`~hydromt.raster.RasterDataArray.reproject` for existing methods,
-            by default 'nearest'.
+            See :py:meth:`~hydromt.raster.RasterDataArray.reproject` for existing
+            methods, by default 'nearest'.
 
         Returns:
         -------
@@ -1878,8 +1938,9 @@ class RasterDataArray(XRasterBase):
         return da
 
     def reindex2d(self, index, dst_nodata=None):
-        """Return reprojected DataArray object based on simple reindexing using
-        linear indices in ``index``, which can be calculated with
+        """Return reprojected DataArray object based on simple reindexing.
+
+        Use linear indices in ``index``, which can be calculated with
         :py:meth:`~hydromt.raster.RasterDataArray.nearest_index`.
 
         This is typically used to downscale time series data.
@@ -1888,6 +1949,10 @@ class RasterDataArray(XRasterBase):
         ---------
         index: xarray.DataArray of intp
             DataArray with flat indices of source DataArray
+        dst_nodata: int or float, optional
+            The nodata value used to initialize the destination; it will
+            remain in all areas not covered by the reprojected source. If None, the
+            source nodata value will be used.
 
         Returns:
         -------
@@ -1934,7 +1999,7 @@ class RasterDataArray(XRasterBase):
     def _interpolate_na(
         self, src_data: np.ndarray, method: str = "nearest", extrapolate=False, **kwargs
     ) -> np.ndarray:
-        """Returns interpolated array."""
+        """Return interpolated array."""
         data_isnan = True if self.nodata is None else np.isnan(self.nodata)
         mask = ~np.isnan(src_data) if data_isnan else src_data != self.nodata
         if not mask.any() or mask.all():
@@ -1979,13 +2044,15 @@ class RasterDataArray(XRasterBase):
         ---------
         method: {'linear', 'nearest', 'cubic', 'rio_idw'}, optional
             {'linear', 'nearest', 'cubic'} use :py:meth:`scipy.interpolate.griddata`;
-            'rio_idw' applies inverse distance weighting based on :py:meth:`rasterio.fill.fillnodata`.
-            Default is 'nearest'.
+            'rio_idw' applies inverse distance weighting based on
+            :py:meth:`rasterio.fill.fillnodata`. Default is 'nearest'.
         extrapolate: bool, optional
-            If True, extrapolate data at remaining nodata cells after interpolation based on nearest neighbor.
-        **kwargs
-            Additional key-word arguments are passed to :py:meth:`rasterio.fill.fillnodata`,
-            only used in combination with `method='rio_idw'`
+            If True, extrapolate data at remaining nodata cells after interpolation
+            based on nearest neighbor.
+        **kwargs:
+            Additional key-word arguments are passed to
+            :py:meth:`rasterio.fill.fillnodata`, only used in
+            combination with `method='rio_idw'`
 
         Returns:
         -------
@@ -2042,6 +2109,7 @@ class RasterDataArray(XRasterBase):
             """Yield (left, upper, width, height)."""
             nr, nc = shape
             lu = product(range(0, nc, px), range(0, nr, px))
+
             ## create the window
             for l, u in lu:
                 h = min(px, nr - u)
@@ -2126,114 +2194,6 @@ class RasterDataArray(XRasterBase):
         with open(join(root, f"{mName}.yml"), "w") as f:
             yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
 
-    # def to_osm(
-    #     self,
-    #     root: str,
-    #     zl: int,
-    #     bbox: tuple = (),
-    # ):
-    #     """Generate tiles from raster according to the osm scheme
-
-    #     Parameters
-    #     ----------
-    #     root : str
-    #         Path to folder where the database will be created
-    #     zl : int
-    #         Maximum zoom level of the database
-    #         Everyting is generated incrementally up until this level
-    #         E.g. zl = 8, levels generated: 0 to 7
-    #     bbox : tuple, optional
-    #         Bounding Box in the objects crs
-
-    #     """
-
-    #     assert self._obj.ndim == 2, "Only 2d datasets are accepted..."
-    #     obj = self._obj.transpose(self.y_dim, self.x_dim)
-
-    #     mName = os.path.normpath(os.path.basename(root))
-
-    #     def create_folder(path):
-    #         if not os.path.exists(path):
-    #             os.makedirs(path)
-
-    #     def transform_res(dres, transformer):
-    #         return transformer.transform(0, dres)[0]
-
-    #     create_folder(root)
-
-    #     dres = abs(self._obj.raster.res[0])
-    #     if bbox:
-    #         minx, miny, maxx, maxy = bbox
-    #     else:
-    #         minx, miny, maxx, maxy = self._obj.raster.transform_bounds(
-    #             dst_crs=self._obj.raster.crs
-    #         )
-
-    #     transformer = pyproj.Transformer.from_crs(self._obj.raster.crs.to_epsg(), 3857)
-    #     minx, miny = map(
-    #         max, zip(transformer.transform(miny, minx), [-20037508.34] * 2)
-    #     )
-    #     maxx, maxy = map(min, zip(transformer.transform(maxy, maxx), [20037508.34] * 2))
-
-    #     dres = transform_res(dres, transformer)
-    #     nzl = int(np.ceil((np.log10((20037508.34 * 2) / (dres * 256)) / np.log10(2))))
-
-    #     if zl > nzl:
-    #         zl = nzl
-
-    #     def tile_window(zl, minx, miny, maxx, maxy):
-    #         # Basic stuff
-    #         dx = (20037508.34 * 2) / (2**zl)
-    #         # Origin displacement
-    #         odx = np.floor(abs(-20037508.34 - minx) / dx)
-    #         ody = np.floor(abs(20037508.34 - maxy) / dx)
-
-    #         # Set the new origin
-    #         minx = -20037508.34 + odx * dx
-    #         maxy = 20037508.34 - ody * dx
-
-    #         # Create window generator
-    #         lu = product(np.arange(minx, maxx, dx), np.arange(maxy, miny, -dx))
-    #         for l, u in lu:
-    #             col = int(odx + (l - minx) / dx)
-    #             row = int(ody + (maxy - u) / dx)
-    #             yield Affine(dx / 256, 0, l, 0, -dx / 256, u), col, row
-
-    #     for zlvl in range(zl):
-    #         sd = f"{root}\\{zlvl}"
-    #         create_folder(sd)
-    #         file = open(f"{sd}\\filelist.txt", "w")
-
-    #         for transform, col, row in tile_window(zlvl, minx, miny, maxx, maxy):
-    #             ssd = f"{sd}\\{col}"
-    #             create_folder(ssd)
-
-    #             temp = obj.load()
-    #             temp = temp.raster.reproject(
-    #                 dst_transform=transform,
-    #                 dst_crs=3857,
-    #                 dst_width=256,
-    #                 dst_height=256,
-    #             )
-
-    #             temp.raster.to_raster(f"{ssd}\\{row}.tif", driver="GTiff")
-
-    #             file.write(f"{ssd}\\{row}.tif\n")
-
-    #             del temp
-
-    #         file.close()
-
-    #         gis_utils.create_vrt(sd, mName)
-    #     # Write a quick yaml for the database
-    #     with open(f"{root}\\..\\{mName}.yml", "w") as w:
-    #         w.write(f"{mName}:\n")
-    #         crs = 3857
-    #         w.write(f"  crs: {crs}\n")
-    #         w.write("  data_type: RasterDataset\n")
-    #         w.write("  driver: raster\n")
-    #         w.write(f"  path: {mName}/{{zoom_level}}/{mName}.vrt\n")
-
     def to_raster(
         self,
         raster_path,
@@ -2263,10 +2223,13 @@ class RasterDataArray(XRasterBase):
             Default is False.
         mask: bool, optional
             If True, set nodata values where 'mask' coordinate equals False.
-        **profile_kwargs
+        **profile_kwargs:
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
             are ignored.
+        logger : logger object, optional
+            The logger object used for logging messages. If not provided, the default
+            logger will be used.
 
         """
         for k in ["height", "width", "count", "transform"]:
@@ -2349,7 +2312,8 @@ class RasterDataArray(XRasterBase):
         Arguments:
         ---------
         connectivity : int, optional
-            Use 4 or 8 pixel connectivity for grouping pixels into features, by default 8
+            Use 4 or 8 pixel connectivity for grouping pixels into features,
+            by default 8
 
         Returns:
         -------
@@ -2381,7 +2345,8 @@ class RasterDataArray(XRasterBase):
 
 @xr.register_dataset_accessor("raster")
 class RasterDataset(XRasterBase):
-    """This is the GIS extension for :class:`xarray.Dataset`."""
+
+    """GIS extension for :class:`xarray.Dataset`."""
 
     @property
     def vars(self):
@@ -2390,6 +2355,7 @@ class RasterDataset(XRasterBase):
 
     def mask_nodata(self):
         """Mask nodata values with np.nan.
+
         Note this will change integer dtypes to float.
         """
         ds_out = self._obj
@@ -2399,6 +2365,7 @@ class RasterDataset(XRasterBase):
 
     def mask(self, mask):
         """Mask cells where mask equals False with the data nodata value.
+
         A warning is raised if no the data has no nodata value.
         """
         ds_out = self._obj
@@ -2409,6 +2376,7 @@ class RasterDataset(XRasterBase):
     @staticmethod
     def from_numpy(data_vars, transform, attrs=None, crs=None):
         """Transform multiple numpy arrays to a Dataset object.
+
         The arrays should have identical shape.
 
         Arguments:
@@ -2425,7 +2393,8 @@ class RasterDataset(XRasterBase):
         attrs : dict, optional
             additional global attributes
         crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
+            Coordinate Reference System. Accepts EPSG codes (int or str);
+            proj (str or dict)
 
         Returns:
         -------
@@ -2471,12 +2440,16 @@ class RasterDataset(XRasterBase):
             Target resolution, in units of target CRS.
         dst_transform: affine.Affine(), optional
             Target affine transformation. Will be calculated if None.
-        dst_width, dst_height: int, optional
+        dst_height: int, optional
+            Output file size in pixels and lines. Cannot be used together with
+            resolution (dst_res).
+        dst_width: int, optional
             Output file size in pixels and lines. Cannot be used together with
             resolution (dst_res).
         method: str, optional
-            See :py:meth:`rasterio.warp.reproject` for existing methods, by default nearest.
-            Additionally "nearest_index" can be used for KDTree based downsampling.
+            See :py:meth:`rasterio.warp.reproject` for existing methods,
+            by default nearest. Additionally "nearest_index" can be used
+            for KDTree based downsampling.
         align: boolean, optional
             If True, align target transform to resolution
 
@@ -2515,10 +2488,12 @@ class RasterDataset(XRasterBase):
         ---------
         method: {'linear', 'nearest', 'cubic', 'rio_idw'}, optional
             {'linear', 'nearest', 'cubic'} use :py:meth:`scipy.interpolate.griddata`;
-            'rio_idw' applies inverse distance weighting based on :py:meth:`rasterio.fill.fillnodata`.
-        **kwargs
-            Additional key-word arguments are passed to :py:meth:`rasterio.fill.fillnodata`,
-            only used in combination with `method='rio_idw'`
+            'rio_idw' applies inverse distance weighting based on
+            :py:meth:`rasterio.fill.fillnodata`.
+        **kwargs:
+            Additional key-word arguments are passed to
+            :py:meth:`rasterio.fill.fillnodata`, only used in combination
+            with `method='rio_idw'`
 
         Returns:
         -------
@@ -2531,8 +2506,7 @@ class RasterDataset(XRasterBase):
         return ds_out
 
     def reproject_like(self, other, method="nearest"):
-        """Reproject a Dataset object to match the resolution, projection,
-        and region of ``other``.
+        """Reproject to match the resolution, projection, and region of ``other``.
 
         Arguments:
         ---------
@@ -2579,8 +2553,9 @@ class RasterDataset(XRasterBase):
         return ds
 
     def reindex2d(self, index):
-        """Return reprojected Dataset object based on simple reindexing using
-        linear indices in ``index``, which can be calculated with
+        """Return reprojected Dataset based on simple reindexing.
+
+        Uses linear indices in ``index``, which can be calculated with
         :py:meth:`~hydromt.raster.RasterDataArray.nearest_index`.
 
         Arguments:
@@ -2613,6 +2588,7 @@ class RasterDataset(XRasterBase):
         **profile_kwargs,
     ):
         """Write the Dataset object to one gdal-writable raster files per variable.
+
         The files are written to the ``root`` directory using the following filename
         ``<prefix><variable_name><postfix>.<ext>``.
 
@@ -2630,6 +2606,8 @@ class RasterDataset(XRasterBase):
         windowed : bool, optional
             If True, it will write using the windows of the output raster.
             Default is False.
+        mask: bool
+            Whether to apply the mask to the tasterisation.
         prefix : str, optional
             Prefix to filenames in mapstack
         postfix : str, optional
@@ -2637,10 +2615,13 @@ class RasterDataset(XRasterBase):
         pcr_vs_map : dict, optional
             Only for PCRaster driver: <variable name> : <PCRaster type> key-value pairs
             e.g.: {'dem': 'scalar'}, see https://www.gdal.org/frmt_various.html#PCRaster
-        **profile_kwargs
+        **profile_kwargs:
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
             are ignored.
+        logger : logger object, optional
+            The logger object used for logging messages. If not provided, the default
+            logger will be used.
 
         """
         if driver not in gis_utils.GDAL_EXT_CODE_MAP:

@@ -9,8 +9,6 @@ from shapely.geometry import MultiPolygon, Polygon
 
 from hydromt.vector import GeoDataset
 
-# from hydromt import vector
-
 
 @pytest.fixture()
 def dummy_shp():

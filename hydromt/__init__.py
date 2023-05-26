@@ -14,8 +14,62 @@ from xarray import DataArray, Dataset
 
 # submodules
 from . import cli, flw, raster, stats, vector, workflows
-from .data_catalog import *
-from .io import *
+from .data_catalog import (
+    DataAdapter,
+    DataCatalog,
+    DataFrameAdapter,
+    GeoDataFrameAdapter,
+    GeoDatasetAdapter,
+)
+from .io import (
+    open_geodataset,
+    open_mfraster,
+    open_raster,
+    open_raster_from_tindex,
+    open_timeseries_from_table,
+    open_vector,
+    open_vector_from_table,
+)
 
 # high-level methods
-from .models import *
+from .models import (
+    MODELS,
+    GridModel,
+    model_api,
+    model_grid,
+    model_lumped,
+    model_mesh,
+    model_network,
+    model_plugins,
+)
+
+__all__ = [
+    model_api,
+    model_grid,
+    GridModel,
+    model_lumped,
+    model_mesh,
+    model_network,
+    model_plugins,
+    DataArray,
+    Dataset,
+    cli,
+    flw,
+    raster,
+    vector,
+    workflows,
+    stats,
+    open_geodataset,
+    open_mfraster,
+    open_raster,
+    open_raster_from_tindex,
+    open_timeseries_from_table,
+    open_vector,
+    open_vector_from_table,
+    DataAdapter,
+    DataCatalog,
+    DataFrameAdapter,
+    GeoDataFrameAdapter,
+    GeoDatasetAdapter,
+    MODELS,
+]

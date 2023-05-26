@@ -209,7 +209,6 @@ def grid_model(demda, flwda):
 @pytest.fixture()
 def lumped_model(ts, geodf):
     mod = LumpedModel()
-    # mod.setup_region({"bbox": geodf.total_bounds})
     mod.setup_config(**{"header": {"setting": "value"}})
     da = xr.DataArray(
         ts,

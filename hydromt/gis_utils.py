@@ -109,8 +109,10 @@ def nearest_merge(
     inplace: bool = False,
     logger=logger,
 ) -> gpd.GeoDataFrame:
-    """Merge attributes of gdf2 with the nearest feature of gdf1, optionally bounded by
-    a maximumum distance `max_dist`. Unless `overwrite = True`, gdf2 values are only
+    """Merge attributes of gdf2 with the nearest feature of gdf1.
+
+    Output is optionally bounded by a maximumum distance `max_dist`.
+    Unless `overwrite = True`, gdf2 values are only
     merged where gdf1 has missing values.
 
     Parameters
@@ -124,6 +126,10 @@ def nearest_merge(
     overwrite : bool, optional
         If False (default) gdf2 values are only merged where gdf1 has missing values,
         i.e. NaN values for existing columns or missing columns.
+    inplace : bool,
+        If True, apply the merge to gdf1, otherwise return a new object.
+    logger:
+        The logger to use.
 
     Returns
     -------
@@ -156,10 +162,11 @@ def nearest_merge(
 def nearest(
     gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Return the index of and distance [m] to the nearest geometry
-    in `gdf2` for each geometry of `gdf1`. For Line geometries in `gdf1` the nearest
-    geometry is based line center point and for polygons on its representative point.
-    Mixed geometry types are not yet supported.
+    """Return the index of and distance [m] to the nearest geometry.
+
+    For Line geometries in `gdf1` the nearest geometry is based line center point
+    and for polygons on its representative point. Mixed geometry types are not
+    yet supported.
 
     Note: Since geopandas v0.10.0 it contains a sjoin_nearest method which is very
     similar and should.
@@ -228,7 +235,7 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
 
 # REPROJ
 def utm_crs(bbox):
-    """Returns wkt string of nearest UTM projects.
+    """Return wkt string of nearest UTM projects.
 
     Parameters
     ----------
@@ -310,7 +317,7 @@ def meridian_offset(ds, x_name="x", bbox=None):
 
 
 def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
-    """Returns a raster axis with pixel center coordinates based on the transform.
+    """Return a raster axis with pixel center coordinates based on the transform.
 
     Parameters
     ----------
@@ -349,7 +356,7 @@ def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
 
 
 def affine_to_meshgrid(transform, shape):
-    """Returns a mesgrid of pixel center coordinates based on the transform.
+    """Return a mesgrid of pixel center coordinates based on the transform.
 
     Parameters
     ----------
@@ -376,9 +383,7 @@ def affine_to_meshgrid(transform, shape):
 
 ## CELLAREAS
 def reggrid_area(lats, lons):
-    """Returns the cell area [m2] for a regular grid based on its cell centres
-    lat, lon coordinates.
-    """
+    """Return the cell area [m2] for a regular grid based on the centres lat, lon."""
     xres = np.abs(np.mean(np.diff(lons)))
     yres = np.abs(np.mean(np.diff(lats)))
     area = np.ones((lats.size, lons.size), dtype=lats.dtype)
@@ -386,8 +391,9 @@ def reggrid_area(lats, lons):
 
 
 def cellarea(lat, xres=1.0, yres=1.0):
-    """Return the area [m2] of cell based on the cell center latitude and its resolution
-    in measured in degrees.
+    """Return the area [m2] of cell based its center latitude resolution.
+
+    Resolution is in measured degrees.
     """
     l1 = np.radians(lat - np.abs(yres) / 2.0)
     l2 = np.radians(lat + np.abs(yres) / 2.0)
@@ -396,8 +402,9 @@ def cellarea(lat, xres=1.0, yres=1.0):
 
 
 def cellres(lat, xres=1.0, yres=1.0):
-    """Return the cell (x, y) resolution [m] based on cell center latitude and its
-    resolution measured in degrees.
+    """Return the cell (x, y) resolution [m].
+
+    Based on cell center latitude and its resolution measured in degrees.
     """
     m1 = 111132.92  # latitude calculation term 1
     m2 = -559.82  # latitude calculation term 2
@@ -433,7 +440,8 @@ def spread2d(
     da_friction: Optional[xr.DataArray] = None,
     nodata: Optional[float] = None,
 ) -> xr.Dataset:
-    """Returns values of `da_obs` spreaded to cells with `nodata` value within `da_mask`,
+    """Return values of `da_obs` spreaded to cells with `nodata` value within `da_mask`.
+
     powered by :py:meth:`pyflwdir.gis_utils.spread2d`.
 
     Parameters
@@ -453,8 +461,8 @@ def spread2d(
     Returns
     -------
     ds_out: xarray.Dataset
-        Dataset with spreaded source values, linear index of the source cell "source_idx"
-        and friction distance to the source cell "source_dst".
+        Dataset with spreaded source values, linear index of the source cell
+        "source_idx" and friction distance to the source cell "source_dst".
     """
     nodata = da_obs.raster.nodata if nodata is None else nodata
     if nodata is None or np.isnan(nodata):
@@ -544,6 +552,11 @@ def write_map(
         Path to PCRaster clone map, by default None
     pcr_vs : str, optional
         pcraster type, by default "scalar"
+    **kwargs:
+        not used in this function, mainly here for compatability reasons.
+    crs:
+        The coordinate reference system of the data.
+
 
     Raises
     ------
@@ -605,8 +618,9 @@ def create_vrt(
     file_list_path: str = None,
     files_path: str = None,
 ):
-    """Creates a .vrt file from a list op raster datasets by either
-    passing the list directly (file_list_path) or by inferring it by passing
+    r"""Create a .vrt file from a list op raster datasets.
+
+    Either passing the list directly (file_list_path) or by inferring it by passing
     a path containing wildcards (files_path) of the location(s) of the
     raster datasets.
 

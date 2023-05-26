@@ -1,3 +1,4 @@
+"""Implementations relating to merging of datasets and arrays."""
 import numpy as np
 import rasterio
 from pyproj import CRS
@@ -15,8 +16,10 @@ def merge(
     merge_method="first",
     **kwargs,
 ):
-    """Merge multiple tiles to a single DataArray, if mismatching grid CRS or resolution,
-    tiles are reprojected to match the output DataArray grid. If no destination
+    """Merge multiple tiles to a single DataArray.
+
+    If mismatching grid CRS or resolution, tiles are reprojected
+    to match the output DataArray grid. If no destination
     grid is defined it is based on the first DataArray in the list.
 
     Based on :py:meth:`rasterio.merge.merge`.
@@ -45,7 +48,8 @@ def merge(
         * max: pixel-wise max of existing and new
         * new: assert no pixel overlap
     **kwargs:
-        Key-word arguments passed to :py:meth:`~hydromt.raster.RasterDataArray.reproject`
+        Key-word arguments passed to
+        :py:meth:`~hydromt.raster.RasterDataArray.reproject`
 
     Returns:
     -------

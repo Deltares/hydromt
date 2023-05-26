@@ -6,7 +6,7 @@ import logging
 from ast import literal_eval
 from os.path import isfile
 from pathlib import Path
-from typing import Dict, Union
+from typing import Any, Dict, Union
 from warnings import warn
 
 import click
@@ -22,7 +22,9 @@ __all__ = ["parse_json", "parse_config", "parse_opt"]
 
 
 def parse_opt(ctx, param, value):
-    """Click callback to validate `--opt KEY1=VAL1 --opt SECT.KEY2=VAL2` and collect
+    """Parse extra cli options.
+
+    Parse options like `--opt KEY1=VAL1 --opt SECT.KEY2=VAL2` and collect
     in a dictionary like the one below, which is what the CLI function receives.
     If no value or `None` is received then an empty dictionary is returned.
         {
@@ -58,10 +60,16 @@ def parse_opt(ctx, param, value):
     return out
 
 
-def parse_json(ctx, param, value):
+def parse_json(ctx, param, value: str) -> Dict[str, Any]:
+    """Parse json from object or file.
+
+    If the object passed is a path pointing to a file, load it's contents and parse it.
+    Otherwise attempt to parse the object as JSON itself.
+    """
     if isfile(value):
         with open(value, "r") as f:
             kwargs = json.load(f)
+
     # Catch old keyword for resulution "-r"
     elif type(literal_eval(value)) in (float, int):
         raise DeprecatedError("'-r' is used for region, resolution is deprecated")

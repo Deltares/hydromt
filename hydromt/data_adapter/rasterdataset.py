@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
+"""Implementation for the RasterDatasetAdapter."""
 import logging
 import os
 import warnings
 from os.path import join
-from pathlib import Path
 from typing import NewType, Union
 
 import geopandas as gpd
@@ -21,10 +20,13 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
 
-RasterDatasetSource = NewType("RasterDatasetSource", Union[str, Path])
+RasterDatasetSource = NewType("RasterDatasetSource", Union[str, os.PathLike])
 
 
 class RasterDatasetAdapter(DataAdapter):
+
+    """Implementation for the RasterDatasetAdapter."""
+
     _DEFAULT_DRIVER = "raster"
     _DRIVERS = {
         "nc": "netcdf",
@@ -45,29 +47,33 @@ class RasterDatasetAdapter(DataAdapter):
         meta={},
         **kwargs,
     ):
-        """Initiates data adapter for geospatial raster data.
+        """Initiate data adapter for geospatial raster data.
 
         This object contains all properties required to read supported raster files into
-        a single unified RasterDataset, i.e. :py:class:`xarray.Dataset` with geospatial attributes.
-        In addition it keeps meta data to be able to reproduce which data is used.
+        a single unified RasterDataset, i.e. :py:class:`xarray.Dataset` with geospatial
+        attributes. In addition it keeps meta data to be able to reproduce
+        which data is used.
 
         Parameters
         ----------
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
-            contain {variable}, {year}, {month} placeholders as well as path search pattern
-            using a '*' wildcard.
+            contain {variable}, {year}, {month} placeholders as well as path search
+            pattern using a '*' wildcard.
         driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
-            Driver to read files with, for 'raster' :py:func:`~hydromt.io.open_mfraster`,
-            for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
+            Driver to read files with,
+            for 'raster' :py:func:`~hydromt.io.open_mfraster`,
+            for 'netcdf' :py:func:`xarray.open_mfdataset`,
+            and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
         filesystem: {'local', 'gcs', 's3'}, optional
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
         crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
-            or wkt (str). Only used if the data has no native CRS.
+            Coordinate Reference System. Accepts EPSG codes (int or str);
+            proj (str or dict) or wkt (str).
+            Only used if the data has no native CRS.
         nodata: float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Nodata values can be differentiated between variables using a dictionary.
@@ -75,11 +81,15 @@ class RasterDatasetAdapter(DataAdapter):
             Mapping of native data source variable to output source variable name as
             required by hydroMT.
         unit_mult, unit_add: dict, optional
-            Scaling multiplication and addition to change to map from the native data unit
-            to the output data unit as required by hydroMT.
+            Scaling multiplication and addition to change to map from the native
+            data unit to the output data unit as required by hydroMT.
+        units:
+            Additional units for variables.
         meta: dict, optional
             Metadata information of dataset, preferably containing the following keys:
-            {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+            {'source_version', 'source_url', 'source_license',
+            'paper_ref', 'paper_doi', 'category'}
+        logger:
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -123,17 +133,25 @@ class RasterDatasetAdapter(DataAdapter):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         driver : str, optional
-            Driver to write file, e.g.: 'netcdf', 'zarr' or any gdal data type, by default None
+            Driver to write file, e.g.: 'netcdf', 'zarr' or any gdal data type,
+            by default None
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
+        logger : logger object, optional
+            The logger object used for logging messages. If not provided, the default
+            logger will be used.
+        **kwargs
+            Additional keyword arguments that are passed to the `to_netcdf`
+            function.
 
         Returns
         -------
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+            Name of driver to read data with, see
+            :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
         try:
             obj = self.get_data(
@@ -198,10 +216,10 @@ class RasterDatasetAdapter(DataAdapter):
         cache_root=None,
         logger=logger,
     ):
-        """Returns a clipped, sliced and unified RasterDataset based on the properties
-        of this RasterDatasetAdapter.
+        """Return a clipped, sliced and unified RasterDataset.
 
-        For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+        For a detailed description see:
+        :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
         # If variable is string, convert to list
         if variables:
@@ -210,8 +228,8 @@ class RasterDatasetAdapter(DataAdapter):
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         if "storage_options" in self.kwargs:
             so_kwargs = self.kwargs["storage_options"]
-            # For s3, anonymous connection still requires --no-sign-request profile to read the data
-            # setting environment variable works
+            # For s3, anonymous connection still requires --no-sign-request profile to
+            # read the data setting environment variable works
             if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
@@ -231,7 +249,8 @@ class RasterDatasetAdapter(DataAdapter):
         )
 
         kwargs = self.kwargs.copy()
-        # zarr can use storage options directly, the rest should be converted to file-like objects
+        # zarr can use storage options directly, the rest should be converted to
+        # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":
             storage_options = kwargs.pop("storage_options")
             fs = self.get_filesystem(**storage_options)
@@ -270,7 +289,8 @@ class RasterDatasetAdapter(DataAdapter):
                 )
             else:
                 raise NotImplementedError(
-                    "Remote (cloud) RasterDataset not supported with driver raster_tindex."
+                    "Remote (cloud) RasterDataset not supported "
+                    "with driver raster_tindex."
                 )
         elif self.driver == "raster":  # rasterio files
             if cache_root is not None and all([str(fn).endswith(".vrt") for fn in fns]):
@@ -295,7 +315,8 @@ class RasterDatasetAdapter(DataAdapter):
             rm = {ds_out.raster.vars[0]: variables[0]}
             if rm.keys() != rm.values():
                 warnings.warn(
-                    f"Automatic renaming of single var array will be deprecated, rename {rm} in the data catalog instead.",
+                    "Automatic renaming of single var array will be deprecated, rename"
+                    f" {rm} in the data catalog instead.",
                     DeprecationWarning,
                 )
         else:
