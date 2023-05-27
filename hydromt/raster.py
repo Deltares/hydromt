@@ -526,7 +526,10 @@ class XRasterBase(XGeoBase):
         if xs.ndim == 2:
             ddx1 = xs[0, -1] - xs[0, 0]
             ddy1 = ys[0, -1] - ys[0, 0]
-            rot = math.degrees(math.atan(ddy1 / ddx1))
+            if not np.isclose(ddx1,0): 
+                 rot = math.degrees(math.atan(ddy1 / ddx1))
+            else:
+                rot = -90
             if ddx1 < 0:
                 rot = 180 + rot
             elif ddy1 < 0:
