@@ -142,13 +142,15 @@ If we open up the file we can see some changes have been made:
 .. code-block:: python
 
   <<<<<<< HEAD
+
   print("Orange is the best colour")
-  ||||||| 6948ad29
+
+  ||||||| <hash>
   =======
   print("blue is the best colour")
   >>>>>>> feature-c
 
-(the number after the ||||| in your case will almost certainly be different, this does not matter.) Here we see the contents of both the commits. The top one are the changes the branch made that initiated the merge, and the bottom one is the other branch. The branch name is also listed after the >>>>>. If we try to commit now, it will not let us:
+Here we see the contents of both the commits. The top one are the changes the branch made that initiated the merge, and the bottom one is the other branch. The branch name is also listed after the >>>>>. If we try to commit now, it will not let us:
 
 .. code-block:: console
 
@@ -273,7 +275,13 @@ You can install pre-commit by running:
 
   $ pip install pre-commit
 
+<<<<<<< HEAD
 It is best to install pre-commit in your existing enviromnment. After that simply install the necessary hooks with
+||||||| 6948ad29
+Then simply install the necessary hooks with
+=======
+Then simply install the necessary hooks with
+>>>>>>> main
 
 .. code-block:: console
 
@@ -283,6 +291,12 @@ After doing this pre-commit will check all your staged files when commiting.
 
 For example say that you've added the following new feature:
 
+<<<<<<< HEAD
+||||||| 6948ad29
+If you want you can use pre-commit on it's own to run agains all files for exmaple.
+=======
+If you want you can use pre-commit on it's own to run agains all files for exmaple.
+>>>>>>> main
 
 .. code-block:: console
 

@@ -320,6 +320,19 @@ def test_setup_grid(tmpdir, demda):
     assert model.grid.raster.res == (10000, -10000)
     model._grid = xr.Dataset()  # remove old grid
 
+    # bbox rotated
+    model.setup_grid(
+        region={"bbox": [12.65, 45.50, 12.85, 45.60]},
+        res=0.05,
+        crs=4326,
+        rotated=True,
+        add_mask=True,
+    )
+    assert "xc" in model.grid.coords
+    assert model.grid.raster.y_dim == "y"
+    assert np.isclose(model.grid.raster.res[0], 0.05)
+    model._grid = xr.Dataset()  # remove old grid
+
     # grid
     grid_fn = str(tmpdir.join("grid.tif"))
     demda.raster.to_raster(grid_fn)
@@ -404,6 +417,7 @@ def test_gridmodel_setup(tmpdir):
     for v in ["mask", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
         assert v in mod.grid
     assert mod.grid["lake_depth"].raster.nodata == -999.0
+    assert mod.grid["roughness_manning"].raster.nodata == -999.0
     assert np.unique(mod.grid["c2"]).size == 2
     assert np.isin([-1, 2], np.unique(mod.grid["c2"])).all()
 

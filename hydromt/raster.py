@@ -971,7 +971,9 @@ class XRasterBase(XGeoBase):
 
         return ds_out
 
-    def reclassify(self, reclass_table: pd.DataFrame, method: str = "exact"):
+    def reclassify(
+        self, reclass_table: pd.DataFrame, method: str = "exact", logger=logger
+    ):
         """Reclass columns in df from raster map (DataArray).
 
         Arguments:
@@ -982,6 +984,9 @@ class XRasterBase(XGeoBase):
         method : str, optional
             Reclassification method. For now only 'exact' for
             one-on-one cell value mapping.
+        logger:
+            The logger to be used. If no logger is provided the
+            default one will beused.
 
         Returns:
         -------
@@ -1005,6 +1010,17 @@ class XRasterBase(XGeoBase):
             for c in reclass_table.columns
         }
         reclass_table = reclass_table.astype(dtypes)
+        # Get the nodata line
+        nodata_ref = da.raster.nodata
+        if nodata_ref is not None:
+            nodata_line = reclass_table[reclass_table.index == nodata_ref]
+            if nodata_line.empty:
+                # None will be used
+                nodata_ref = None
+                logger.warning(
+                    f"The nodata value {nodata_ref} is not in the reclass table."
+                    "None will be used for the params."
+                )
         # apply for each parameter
         for param in params:
             values = reclass_table[param].values
@@ -1016,7 +1032,10 @@ class XRasterBase(XGeoBase):
                 output_dtypes=[values.dtype],
                 kwargs={"ddict": d},
             )
-            da_param.attrs.update(_FillValue=np.nan)
+            nodata = (
+                nodata_line.at[nodata_ref, param] if nodata_ref is not None else None
+            )
+            da_param.attrs.update(_FillValue=nodata)
             ds_out[param] = da_param
         return ds_out
 
@@ -2549,8 +2568,9 @@ class RasterDataset(XRasterBase):
                 x_dim=other.raster.x_dim, y_dim=other.raster.y_dim
             )
         # make sure coordinates are identical!
-        ds[other.raster.x_dim] = other.raster.xcoords
-        ds[other.raster.y_dim] = other.raster.ycoords
+        xcoords, ycoords = other.raster.xcoords, other.raster.ycoords
+        ds[xcoords.name] = xcoords
+        ds[ycoords.name] = ycoords
         return ds
 
     def reindex2d(self, index):

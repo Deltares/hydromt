@@ -9,6 +9,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
+from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
@@ -378,7 +379,14 @@ class GridMixin(object):
         for ds in self._read_nc(fn, **kwargs).values():
             self.set_grid(ds)
 
-    def write_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
+    def write_grid(
+        self,
+        fn: str = "grid/grid.nc",
+        gdal_compliant: bool = False,
+        rename_dims: bool = False,
+        force_sn: bool = False,
+        **kwargs,
+    ) -> None:
         """Write model grid data to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
@@ -389,13 +397,29 @@ class GridMixin(object):
             filename relative to model root, by default 'grid/grid.nc'
         **kwargs : dict
             Additional keyword arguments to be passed to the `_write_nc` method.
+        gdal_compliant : bool, optional
+            If True, write grid data in a way that is compatible with GDAL,
+            by default False
+        rename_dims: bool, optional
+            If True and gdal_compliant, rename x_dim and y_dim to standard names
+            depending on the CRS (x/y for projected and lat/lon for geographic).
+        force_sn: bool, optional
+            If True and gdal_compliant, forces the dataset to have
+            South -> North orientation.
         """
         if len(self._grid) == 0:
             self.logger.debug("No grid data found, skip writing.")
         else:
             self._assert_write_mode
             # _write_nc requires dict - use dummy 'grid' key
-            self._write_nc({"grid": self._grid}, fn, **kwargs)
+            self._write_nc(
+                {"grid": self._grid},
+                fn,
+                gdal_compliant=gdal_compliant,
+                rename_dims=rename_dims,
+                force_sn=force_sn,
+                **kwargs,
+            )
 
 
 class GridModel(GridMixin, Model):
@@ -428,10 +452,13 @@ class GridModel(GridMixin, Model):
         region: dict,
         res: Optional[float] = None,
         crs: int = None,
+        rotated: bool = False,
         hydrography_fn: Optional[str] = None,
         basin_index_fn: Optional[str] = None,
         add_mask: bool = True,
         align: bool = True,
+        dec_origin: int = 0,
+        dec_rotation: int = 3,
     ) -> xr.DataArray:
         """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
 
@@ -456,7 +483,9 @@ class GridModel(GridMixin, Model):
             is not based on 'grid'.
         crs : EPSG code, int, str optional
             EPSG code of the model or "utm" to let hydromt find the closest projected
-            crs. If None using the one from region.
+        rotated : bool, optional
+            if True, a minimum rotated rectangular grid is fitted around the region,
+            by default False. Only  applies if region is of kind 'bbox', 'geom'
         hydrography_fn : str
             Name of data source for hydrography data. Required if region is of kind
                 'basin', 'subbasin' or 'interbasin'.
@@ -475,6 +504,10 @@ class GridModel(GridMixin, Model):
             Add mask variable to grid object, by default True.
         align : bool, optional
             If True (default), align target transform to resolution.
+        dec_origin : int, optional
+            number of decimals to round the origin coordinates, by default 0
+        dec_rotation : int, optional
+            number of decimals to round the rotation angle, by default 3
 
         Returns
         -------
@@ -509,27 +542,38 @@ class GridModel(GridMixin, Model):
                 geom = geom.to_crs(crs)
             # Generate grid based on res for region bbox
             # TODO add warning on res value if crs is projected or not?
-            xmin, ymin, xmax, ymax = geom.total_bounds
-            res = abs(res)
-            if align:
-                xmin = round(xmin / res) * res
-                ymin = round(ymin / res) * res
-                xmax = round(xmax / res) * res
-                ymax = round(ymax / res) * res
-            xcoords = np.linspace(
-                xmin + res / 2,
-                xmax - res / 2,
-                num=round((xmax - xmin) / res),
-                endpoint=True,
-            )
-            ycoords = np.flip(
-                np.linspace(
-                    ymin + res / 2,
-                    ymax - res / 2,
-                    num=round((ymax - ymin) / res),
+            if not rotated:
+                xmin, ymin, xmax, ymax = geom.total_bounds
+                res = abs(res)
+                if align:
+                    xmin = round(xmin / res) * res
+                    ymin = round(ymin / res) * res
+                    xmax = round(xmax / res) * res
+                    ymax = round(ymax / res) * res
+                xcoords = np.linspace(
+                    xmin + res / 2,
+                    xmax - res / 2,
+                    num=round((xmax - xmin) / res),
                     endpoint=True,
                 )
-            )
+                ycoords = np.flip(
+                    np.linspace(
+                        ymin + res / 2,
+                        ymax - res / 2,
+                        num=round((ymax - ymin) / res),
+                        endpoint=True,
+                    )
+                )
+            else:  # rotated
+                geomu = geom.unary_union
+                x0, y0, mmax, nmax, rot = workflows.grid.rotated_grid(
+                    geomu, res, dec_origin=dec_origin, dec_rotation=dec_rotation
+                )
+                transform = (
+                    Affine.translation(x0, y0)
+                    * Affine.rotation(rot)
+                    * Affine.scale(res, res)
+                )
 
         elif kind in ["basin", "subbasin", "interbasin"]:
             # retrieve global hydrography data (lazy!)
@@ -587,17 +631,29 @@ class GridModel(GridMixin, Model):
             crs = da_like.raster.crs
 
         # Instantiate grid object
-        coords = {"y": ycoords, "x": xcoords}
         # Generate grid using hydromt full method
-        grid = raster.full(
-            coords=coords,
-            nodata=1,
-            dtype=np.uint8,
-            name="mask",
-            attrs={},
-            crs=geom.crs,
-            lazy=False,
-        )
+        if not rotated:
+            coords = {"y": ycoords, "x": xcoords}
+            grid = raster.full(
+                coords=coords,
+                nodata=1,
+                dtype=np.uint8,
+                name="mask",
+                attrs={},
+                crs=geom.crs,
+                lazy=False,
+            )
+        else:
+            grid = raster.full_from_transform(
+                transform,
+                shape=(mmax, nmax),
+                nodata=1,
+                dtype=np.uint8,
+                name="mask",
+                attrs={},
+                crs=geom.crs,
+                lazy=False,
+            )
         # Create geometry_mask with geom
         if add_mask:
             grid = grid.raster.geometry_mask(geom, all_touched=True)

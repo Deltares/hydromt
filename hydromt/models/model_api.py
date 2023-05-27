@@ -1395,7 +1395,13 @@ class Model(object, metaclass=ABCMeta):
             self.set_results(ds, name=name)
 
     def _write_nc(
-        self, nc_dict: Dict[str, Union[xr.DataArray, xr.Dataset]], fn, **kwargs
+        self,
+        nc_dict: Dict[str, Union[xr.DataArray, xr.Dataset]],
+        fn: str,
+        gdal_compliant: bool = False,
+        rename_dims: bool = False,
+        force_sn: bool = False,
+        **kwargs,
     ) -> None:
         for name, ds in nc_dict.items():
             if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
@@ -1407,6 +1413,10 @@ class Model(object, metaclass=ABCMeta):
             _fn = join(self.root, fn.format(name=name))
             if not isdir(dirname(_fn)):
                 os.makedirs(dirname(_fn))
+            if gdal_compliant:
+                ds = ds.raster.gdal_compliant(
+                    rename_dims=rename_dims, force_sn=force_sn
+                )
             ds.to_netcdf(_fn, **kwargs)
 
     # general reader & writer
