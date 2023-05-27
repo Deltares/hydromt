@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""Implementations related to logging."""
 
 import logging
 import logging.handlers
@@ -7,8 +6,9 @@ import os
 import sys
 from functools import wraps
 
-FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 from . import __version__
+
+FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 
 
 def setuplog(
@@ -18,7 +18,7 @@ def setuplog(
     fmt: str = FMT,
     append: bool = True,
 ) -> logging.Logger:
-    f"""Set-up the logging on sys.stdout and file if path is given.
+    """Set up the logging on sys.stdout and file if path is given.
 
     Parameters
     ----------
@@ -29,9 +29,10 @@ def setuplog(
     log_level : int, optional
         Log level [0-50], by default 20 (info)
     fmt : str, optional
-        log message formatter, by default {FMT}
+        log message formatter
     append : bool, optional
-        Wether to append (True) or overwrite (False) to a logfile at path, by default True
+        Wether to append (True) or overwrite (False) to a logfile at path,
+        by default True
 
     Returns
     -------
@@ -72,12 +73,26 @@ def add_filehandler(logger, path, log_level=20, fmt=FMT):
 
 
 def logged(logger):
+    """Define a decorator that logs the execution of a function.
+
+    This decorator logs the input arguments, output, and any raised exceptions of
+    the decorated function using the provided logger.
+
+    Parameters
+    ----------
+    logger : Logger
+        The logger object used to log the function execution.
+
+    Returns
+    -------
+    wrap : callable
+        The decorator function that wraps the decorated function.
+    """
+
     def wrap(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
-            # logger = logging.getLogger(log)
             f = function.__name__
-            # logger.debug(f"Calling '{f}'")
             logger.debug(f"{f} - args={args} kwargs={kwargs}")
             try:
                 response = function(*args, **kwargs)

@@ -1,4 +1,4 @@
-"""Test for hydromt.gu submodule"""
+"""Test for hydromt.gu submodule."""
 
 import os
 
@@ -51,7 +51,8 @@ def test_transform_rotation():
     shape = (10, 5)
     coords = gu.affine_to_coords(transform, shape)
     xs, ys = coords["xc"][1], coords["yc"][1]
-    assert xs.ndim == 2 and ys.ndim == 2
+    assert xs.ndim == 2
+    assert ys.ndim == 2
     da = full_from_transform(transform, shape, crs=4326)
     assert da.raster.x_dim == "x"
     assert da.raster.xcoords.ndim == 2

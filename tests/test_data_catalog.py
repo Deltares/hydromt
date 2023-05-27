@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from hydromt.data_adapter import DataAdapter, DataFrameAdapter, RasterDatasetAdapter
+from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
 from hydromt.data_catalog import DataCatalog, _parse_data_dict
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -101,7 +101,6 @@ def test_data_catalog(tmpdir):
     # add source from dict
     data_dict = {keys[0]: source.to_dict()}
     data_catalog.from_dict(data_dict)
-    # printers
     assert isinstance(data_catalog.__repr__(), str)
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
@@ -114,7 +113,7 @@ def test_data_catalog(tmpdir):
     assert len(data_catalog._sources) == 0
     data_catalog.from_artifacts("deltares_data")
     assert len(data_catalog._sources) > 0
-    with pytest.raises(IOError):
+    with pytest.raises(IOError, match="URL b'404: Not Found'"):
         data_catalog = DataCatalog(deltares_data="unknown_version")
 
 

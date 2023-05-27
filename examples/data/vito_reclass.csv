@@ -1,4 +1,5 @@
 vito,description,manning
+0,Unknown,-999.
 20,Shrubs,0.5
 30,Herbaceous vegetation,0.15
 40,Cultivated and managed vegetation/agriculture (cropland),0.2
@@ -21,4 +22,4 @@ vito,description,manning
 125,Open forest mixed,0.5
 126,Open forest unknown,0.5
 200,Open sea,0.01
-0,No data,-999
+255,No data,-999.

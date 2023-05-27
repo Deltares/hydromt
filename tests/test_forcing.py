@@ -1,4 +1,4 @@
-"""Test hydromt.forcing submodule"""
+"""Test hydromt.forcing submodule."""
 
 import numpy as np
 import pytest
@@ -27,7 +27,8 @@ def test_precip():
 
     # Testing with clim argument
     p_clim = cat.get_rasterdataset("worldclim")
-    # give it a nodata value in the datacatalog >> issue to create for the data artifacts
+    # give it a nodata value in the datacatalog >> issue to
+    # create for the data artifacts
     p_clim.raster.set_nodata(-999.0)
 
     pout_clim = precip(p_precip, grid, clim=p_clim)
