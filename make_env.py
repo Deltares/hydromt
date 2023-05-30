@@ -1,6 +1,6 @@
 import argparse
 
-from tomllib import load
+from tomli import load
 
 parser = argparse.ArgumentParser()
 

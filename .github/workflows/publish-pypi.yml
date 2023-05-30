@@ -59,6 +59,10 @@ jobs:
         run: |
           ls -ltrh
           ls -ltrh dist
+      - name: install tomli
+        run: pip install tomli
+      - name: generate env
+        run: python make_env.py min
 
       - name: Setup environment
         uses: conda-incubator/setup-miniconda@v2
@@ -67,8 +71,8 @@ jobs:
           mamba-version: '*'
           channels: conda-forge,defaults
           channel-priority: true
-          environment-file: envs/hydromt-min.yml
-          activate-environment: hydromt-min
+          environment-file: environment.yml
+          activate-environment: hydromt
 
       - name: Conda info
         run: |
@@ -99,18 +103,18 @@ jobs:
           verbose: true
           skip_existing: true
 
-  upload-to-pypi:
-    needs: test-built-dist
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: releases
-          path: dist
-      - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.5.1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
-          verbose: true
+  # upload-to-pypi:
+  #   needs: test-built-dist
+  #   if: github.event_name == 'release'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: releases
+  #         path: dist
+  #     - name: Publish package to PyPI
+  #       uses: pypa/gh-action-pypi-publish@v1.5.1
+  #       with:
+  #         user: __token__
+  #         password: ${{ secrets.PYPI_TOKEN }}
+  #         verbose: true

@@ -1,5 +1,5 @@
 ---
-name: Build Docs
+name: Build docs
 
 # We don't want pushes (or PRs) to gh-pages to kick anything off
 on:
@@ -21,6 +21,10 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
+      - name: install tomli
+        run: pip install tomli
+      - name: Generate env spec
+        run: python make_env.py doc
 
       - name: Setup environment
         uses: conda-incubator/setup-miniconda@v2
@@ -29,7 +33,7 @@ jobs:
           miniforge-variant: Mambaforge
           channels: conda-forge, defaults
           channel-priority: strict
-          environment-file: envs/hydromt-dev.yml
+          environment-file: environment.yml
           activate-environment: hydromt-dev
 
       - name: Install hydromt
@@ -45,13 +49,13 @@ jobs:
         # run: echo "DOC_VERSION=preview" >> $GITHUB_ENV
         run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
-      - name: Upload to GitHub Pages
-        if: ${{ github.event_name != 'pull_request'}}
-        uses: peaceiris/actions-gh-pages@v3.8.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_build/html
-          exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
-          destination_dir: ./${{ env.DOC_VERSION }}
-          keep_files: false
-          full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
+      # - name: Upload to GitHub Pages
+      #   if: ${{ github.event_name != 'pull_request'}}
+      #   uses: peaceiris/actions-gh-pages@v3.8.0
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./docs/_build/html
+      #     exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
+      #     destination_dir: ./${{ env.DOC_VERSION }}
+      #     keep_files: false
+      #     full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
