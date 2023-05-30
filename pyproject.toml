@@ -109,5 +109,6 @@ filterwarnings = [
     "ignore:The set_staticmaps:DeprecationWarning",
     "ignore:Adding a predefined data catalog:DeprecationWarning",
     "ignore:Shapely 2.0 is installed:UserWarning",
-    "ignore::rasterio.errors.NotGeoreferencedWarning" # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
+    "ignore::rasterio.errors.NotGeoreferencedWarning", # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
+    "ignore:.*isinstance:numba.core.errors.NumbaExperimentalFeatureWarning" # soon to be solved upstream. see https://github.com/numba/numba/pull/8911
 ]
