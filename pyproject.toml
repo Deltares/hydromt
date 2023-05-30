@@ -108,5 +108,6 @@ filterwarnings = [
     "ignore:The *staticmaps:DeprecationWarning",
     "ignore:The set_staticmaps:DeprecationWarning",
     "ignore:Adding a predefined data catalog:DeprecationWarning",
-    "ignore:Shapely 2.0 is installed:UserWarning"
+    "ignore:Shapely 2.0 is installed:UserWarning",
+    "ignore::rasterio.errors.NotGeoreferencedWarning" # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
 ]
