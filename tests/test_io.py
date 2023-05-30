@@ -151,9 +151,9 @@ def test_raster_io(tmpdir, rioda):
     da2 = hydromt.open_raster(fn_tif)
     assert not np.any(np.isnan(da2.values))
     fn_tif = str(tmpdir.join("test_2.tif"))
-    da1.fillna(da1.attrs['_FillValue']).expand_dims("t").round(0).astype(np.int32).raster.to_raster(
-        fn_tif, dtype=np.int32
-    )
+    da1.fillna(da1.attrs["_FillValue"]).expand_dims("t").round(0).astype(
+        np.int32
+    ).raster.to_raster(fn_tif, dtype=np.int32)
     da3 = hydromt.open_raster(fn_tif)
     assert da3.dtype == np.int32
     # to_mapstack / open_mfraster

@@ -526,8 +526,8 @@ class XRasterBase(XGeoBase):
         if xs.ndim == 2:
             ddx1 = xs[0, -1] - xs[0, 0]
             ddy1 = ys[0, -1] - ys[0, 0]
-            if not np.isclose(ddx1,0): 
-                 rot = math.degrees(math.atan(ddy1 / ddx1))
+            if not np.isclose(ddx1, 0):
+                rot = math.degrees(math.atan(ddy1 / ddx1))
             else:
                 rot = -90
             if ddx1 < 0:
@@ -1243,6 +1243,7 @@ class XRasterBase(XGeoBase):
         mask_name: Optional[str] = None,
         name: Optional[str] = None,
         nodata: Optional[Union[int, float]] = -1,
+        keep_geom_type=False,
     ) -> xr.DataArray:
         """Return an object with the fraction of the grid cells covered by geometry.
 
@@ -1260,6 +1261,10 @@ class XRasterBase(XGeoBase):
         nodata : int or float, optional
             Used as fill value for all areas not covered by input geometries.
             By default -1.
+        keep_geom_type : bool
+            Only maintain geometries of the same time if true, otherwise
+            keep geometries, regardless of their remaining type.
+            False by default
 
         Returns:
         -------
@@ -1282,7 +1287,9 @@ class XRasterBase(XGeoBase):
 
         # intersect the gdf data with the grid
         gdf = gdf.to_crs(gdf_grid.crs)
-        gdf_intersect = gdf.overlay(gdf_grid, how="intersection")
+        gdf_intersect = gdf.overlay(
+            gdf_grid, how="intersection", keep_geom_type=keep_geom_type
+        )
 
         # find the best UTM CRS for area computation
         if gdf_intersect.crs.is_geographic:
