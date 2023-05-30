@@ -23,15 +23,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Generate env spec
-        run: pip install tomli && python make_env.py doc
+        run: pip install tomli && python make_env.py test
       - uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: ${{ matrix.python-version }}
           miniforge-variant: Mambaforge
           channels: conda-forge, defaults
           channel-priority: strict
-          environment-file: envs/hydromt-test.yml
-          activate-environment: hydromt-test
+          environment-file: environment.yml
+          activate-environment: hydromt
 
       - name: Test
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
