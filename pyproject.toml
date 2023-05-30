@@ -67,6 +67,8 @@ doc = [
     "sphinx",
     "sphinx_design",
     "sphinx_autosummary_accessors",
+    "ipython",
+    "ipywidget"
 ]
 
 

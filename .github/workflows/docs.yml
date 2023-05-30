@@ -34,7 +34,7 @@ jobs:
           channels: conda-forge, defaults
           channel-priority: strict
           environment-file: environment.yml
-          activate-environment: hydromt-dev
+          activate-environment: hydromt
 
       - name: Install hydromt
         run: pip install .
