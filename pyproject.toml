@@ -94,6 +94,7 @@ exclude = ["docs"]
 "tests/**" = ["D103", "D100", "D104"]
 "hydromt/__init__.py" = ["E402"]
 "hydromt/_compat.py" = ["F401"]
+"tests/conftest.py" = ["E402" ]
 
 [tool.flit.sdist]
 include = ["hydromt"]
