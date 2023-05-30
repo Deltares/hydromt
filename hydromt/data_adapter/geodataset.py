@@ -155,6 +155,17 @@ class GeoDatasetAdapter(DataAdapter):
         if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
             return None, None
 
+        # much better for mem/storage/processing if dtypes are set correctly
+        for name, coord in obj.coords.items():
+            if coord.values.dtype != object:
+                continue
+
+            # not sure if coordinates values of different dtypes
+            # are possible, but let's just hope users aren't
+            # that mean for now.
+            if isinstance(coord.values[0], str):
+                obj[name] = obj[name].astype(str)
+
         if driver is None or driver == "netcdf":
             # always write netcdf
             driver = "netcdf"
