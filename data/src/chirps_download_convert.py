@@ -1,3 +1,5 @@
+"""Implementation of data downloading functionality."""
+
 import glob
 import gzip
 import os
@@ -12,6 +14,17 @@ from requests import HTTPError
 
 
 def download_file(url, outdir=os.path.dirname(__file__)):
+    """Download a file from the given URL and save it to the specified output directory.
+
+    Args:
+    ----
+    url (str): The URL of the file to download.
+    outdir (str): The output directory to save the downloaded file.
+
+    Returns:
+    -------
+        None
+    """
     basename = url.split("/")[-1]
     local_filename = os.path.join(outdir, basename)
     if os.path.isfile(local_filename):
@@ -29,6 +42,21 @@ def download_file(url, outdir=os.path.dirname(__file__)):
 
 
 def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
+    """Download daily CHIRPS data for Africa within the specified date range.
+
+    Arguments:
+    ---------
+    outroot :
+        The root directory to save the downloaded files.
+    start :
+        The start date in the format "YYYY-MM-DD" (default: "2020-01-01").
+    end :
+        The end date in the format "YYYY-MM-DD" (default: "2021-03-31").
+
+    Returns:
+    -------
+        None
+    """
     BASE_URL = "https://data.chc.ucsb.edu/products/CHIRPS-2.0/africa_daily/tifs/p05"
     for date in pd.date_range(start=start, end=end, freq="d"):
         if date > pd.to_datetime("today").date():
@@ -42,7 +70,7 @@ def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
         url = f"{BASE_URL}/{year}/{basename}"
         try:
             download_file(url, outdir)
-        except HTTPError as r:
+        except HTTPError:
             fn_out = os.path.join(outdir, basename)
             if os.path.isfile(fn_out):
                 os.unlink(fn_out)
@@ -57,6 +85,16 @@ def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
 
 
 def tifs_to_nc(folder, year):
+    """Convert downloaded CHIRPS TIFF files for a specific year to NetCDF format.
+
+    Arguments:
+    ---------
+    folder: str
+        The root folder where the downloaded TIFF files are located.
+    year: int
+        The year to convert to NetCDF.
+
+    """
     path = os.path.join(folder, str(year), f"chirps-v2.0.{year}*.tif*")
     nodata = -9999.0
     files = sorted(glob.glob(path))
@@ -87,7 +125,6 @@ def tifs_to_nc(folder, year):
         if f.endswith("gz"):
             infile.close()
 
-    # t=t.shift(1,freq='D')
     ds_img = xr.Dataset(
         {"precipitation": (["time", "lat", "lon"], ds)},
         coords={"lon": x, "lat": y, "time": t},

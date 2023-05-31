@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for the hydromt.models module of HydroMT"""
+"""Tests for the hydromt.models module of HydroMT."""
 
 from os.path import abspath, dirname, isfile, join
 
@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 import xarray as xr
 from entrypoints import Distribution, EntryPoint
-from shapely.geometry import polygon
 
 import hydromt._compat
 import hydromt.models.model_plugins
@@ -200,11 +199,6 @@ def test_setup_region(model, demda, tmpdir):
     model.setup_region({"grid": grid_fn})
     assert np.all(demda.raster.bounds == model.region.total_bounds)
     # # TODO model once we have registered the Model class entrypoint
-    # model._geoms.pop('region') # remove old region
-    # root = str(tmpdir.join('root'))
-    # model.set_root(root, mode='w')
-    # model.write()
-    # model.setup_region({'model': root})
     # basin
     model._geoms.pop("region")  # remove old region
     model.setup_region({"basin": [12.2, 45.833333333333329]})
@@ -282,7 +276,7 @@ def test_setup_grid(tmpdir, demda):
         mode="w",
     )
     # wrong region kind
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Region for grid must be of kind"):
         model.setup_grid({"lumped_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]
@@ -354,7 +348,7 @@ def test_setup_grid(tmpdir, demda):
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert not np.all(model.grid["mask"].values == True)
+    assert not np.all(model.grid["mask"].values is True)
     assert model.grid.raster.shape == (47, 61)
 
 

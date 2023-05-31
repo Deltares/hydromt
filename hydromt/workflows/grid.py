@@ -1,3 +1,4 @@
+"""Implementation for grid based workflows."""
 import logging
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -28,8 +29,7 @@ def grid_from_constant(
     nodata: Optional[Union[int, float]] = None,
     mask_name: Optional[str] = "mask",
 ) -> xr.DataArray:
-    """
-    Prepares a grid based on a constant value.
+    """Prepare a grid based on a constant value.
 
     Parameters
     ----------
@@ -44,7 +44,8 @@ def grid_from_constant(
     nodata: int, float, optional
         Nodata value. By default infered from dtype.
     mask_name: str, optional
-        Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+        Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+        Use None to disable masking.
 
     Returns
     -------
@@ -79,10 +80,10 @@ def grid_from_rasterdataset(
     mask_name: Optional[str] = "mask",
     rename: Optional[Dict] = dict(),
 ) -> xr.Dataset:
-    """
-    Prepares data by resampling ds to grid_like.
+    """Prepare data by resampling ds to grid_like.
 
-    If raster is a dataset, all variables will be added unless ``variables`` list is specified.
+    If raster is a dataset, all variables will be added unless
+    ``variables`` list is specified.
 
     Parameters
     ----------
@@ -99,9 +100,11 @@ def grid_from_rasterdataset(
         See rasterio.warp.reproject for existing methods, by default 'nearest'.
         Can provide a list corresponding to ``variables``.
     mask_name: str, optional
-        Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+        Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+        Use None to disable masking.
     rename: dict, optional
-        Dictionary to rename variable names in raster_fn before adding to grid {'name_in_raster_fn': 'name_in_grid'}. By default empty.
+        Dictionary to rename variable names in raster_fn before adding to grid
+        {'name_in_raster_fn': 'name_in_grid'}. By default empty.
 
     Returns
     -------
@@ -147,8 +150,7 @@ def grid_from_raster_reclass(
     mask_name: Optional[str] = "mask",
     rename: Optional[Dict] = dict(),
 ) -> xr.Dataset:
-    """
-    Prepares data variable(s) resampled to grid_like object by reclassifying the data in ``da`` based on ``reclass_table``.
+    """Prepare data variable(s) resampled to grid_like object by reclassifying the data in ``da`` based on ``reclass_table``.
 
     Parameters
     ----------
@@ -159,23 +161,27 @@ def grid_from_raster_reclass(
     reclass_table: pd.DataFrame
         Tabular pandas dataframe object for the reclassification table of `da`.
     reclass_variables: list
-        List of reclass_variables from reclass_table_fn table to add to maps. Index column should match values in `raster_fn`.
+        List of reclass_variables from reclass_table_fn table to add to maps.
+        Index column should match values in `raster_fn`.
     fill_method : str, optional
-        If specified, fills nodata values in `raster_fn` using fill_nodata method before reclassifying.
-        Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        If specified, fills nodata values in `raster_fn` using fill_nodata method
+        before reclassifying. Available methods are
+        {'linear', 'nearest', 'cubic', 'rio_idw'}.
     reproject_method: str, optional
         See rasterio.warp.reproject for existing methods, by default "nearest".
         Can provide a list corresponding to ``reclass_variables``.
     mask_name: str, optional
-        Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+        Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+        Use None to disable masking.
     rename: dict, optional
-        Dictionary to rename variable names in reclass_variables before adding to grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+        Dictionary to rename variable names in reclass_variables before adding to grid
+        {'name_in_reclass_table': 'name_in_grid'}. By default empty.
 
     Returns
     -------
     ds_out: xr.Dataset
         Dataset with reclassified data from reclass_table to da resampled to grid_like.
-    """
+    """  # noqa: E501
     if not isinstance(da, xr.DataArray):
         raise ValueError("da should be a single variable.")
     if reclass_variables is not None:
@@ -218,12 +224,13 @@ def grid_from_geodataframe(
     rename: Optional[Union[Dict, str]] = dict(),
     all_touched: Optional[bool] = True,
 ) -> xr.Dataset:
-    """
-    Prepares data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.
+    """Prepare data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.
+
     Several type of rasterization are possible:
-        * "fraction": the fraction of the grid cell covered by the gdf shape is returned.
-        * "area": the area of the grid cell covered by the gdf shape is returned.
-        * "value": the value from the variables columns of gdf are used. If this is used, variables must be specified.
+        * "fraction": returns the fraction of the grid cell covered by the gdf shape.
+        * "area": Returns the area of the grid cell covered by the gdf shape.
+        * "value": the value from the variables columns of gdf are used.
+            If this is used, variables must be specified.
 
     Parameters
     ----------
@@ -232,29 +239,34 @@ def grid_from_geodataframe(
     gdf : gpd.GeoDataFrame
         geopandas object to rasterize.
     variables : List, str, optional
-        List of variables to add to grid from vector_fn. Required if rasterize_method is "value", by default None.
+        List of variables to add to grid from vector_fn. Required if
+        rasterize_method is "value", by default None.
     nodata : List, int, float, optional
-        No data value to use for rasterization, by default -1. If a list is provided, it should have the same length has variables.
+        No data value to use for rasterization, by default -1. If a list is provided,
+        it should have the same length has variables.
     rasterize_method : str, optional
         Method to rasterize the vector data. Either {"value", "fraction", "area"}.
-        If "value", the value from the variables columns in vector_fn are used directly in the raster.
-        If "fraction", the fraction of the grid cell covered by the vector file is returned.
-        If "area", the area of the grid cell covered by the vector file is returned.
+        If "value", the value from the variables columns in vector_fn are used
+        directly in the raster. If "fraction", the fraction of the grid cell covered
+        by the vector file is returned. If "area", the area of the grid cell covered
+        by the vector file is returned.
     mask_name: str, optional
-        Name of mask in self.grid to use for masking raster_fn. By default 'mask'. Use None to disable masking.
+        Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+        Use None to disable masking.
     rename: dict or str, optional
-        Dictionary to rename variable names in variables before adding to grid {'name_in_variables': 'name_in_grid'}.
-        To rename with method fraction or area give directly 'name_in_grid' string. By default empty.
+        Dictionary to rename variable names in variables before adding to grid
+        {'name_in_variables': 'name_in_grid'}. To rename with method fraction
+        or area give directly 'name_in_grid' string. By default empty.
     all_touched : bool, optional
-        If True (default), all pixels touched by geometries will be burned in. If false, only
-        pixels whose center is within the polygon or that are selected by
-        Bresenham's line algorithm will be burned in.
+        If True (default), all pixels touched by geometries will be burned in.
+        If false, only pixels whose center is within the polygon or
+        that are selected by Bresenham's line algorithm will be burned in.
 
     Returns
     -------
     ds_out: xr.Dataset
         Dataset with data from vector_fn resampled to grid_like.
-    """
+    """  # noqa: E501
     # Check which method is used
     if rasterize_method == "value":
         ds_lst = []
@@ -266,7 +278,8 @@ def grid_from_geodataframe(
                 nodata = np.repeat(nodata, len(vars))
             else:
                 raise ValueError(
-                    f"Length of nodata ({len(nodata)}) should be equal to 1 or length of variables ({len(vars)})."
+                    f"Length of nodata ({len(nodata)}) should be equal to 1 "
+                    + f"or length of variables ({len(vars)})."
                 )
         # Loop of variables and nodata
         for var, nd in zip(vars, nodata):
@@ -305,7 +318,8 @@ def grid_from_geodataframe(
 
     else:
         raise ValueError(
-            f"rasterize_method {rasterize_method} not recognized. Use one of {'value', 'fraction', 'area'}."
+            f"rasterize_method {rasterize_method} not recognized."
+            + "Use one of {'value', 'fraction', 'area'}."
         )
 
     return ds_out
@@ -314,8 +328,9 @@ def grid_from_geodataframe(
 def rotated_grid(
     pol: Polygon, res: float, dec_origin=0, dec_rotation=3
 ) -> Tuple[float, float, int, int, float]:
-    """Returns the origin (x0, y0), shape (mmax, nmax) and rotation
-    of the rotated grid fitted to the minimum rotated rectangle around the
+    """Return the origin (x0, y0), shape (mmax, nmax) and rotation of the rotated grid.
+
+    The grid is fitted to the minimum rotated rectangle around the
     area of interest (pol). The grid shape is defined by the resolution (res).
 
     Parameters
@@ -324,15 +339,19 @@ def rotated_grid(
         Polygon of the area of interest
     res : float
         Resolution of the grid
+    dec_origin:
+        Number of signifiant numbers to round the origin points to.
+    dec_rotation:
+        Number of signifiant numbers to round the rotation to.
     """
 
     def _azimuth(point1, point2):
-        """azimuth between 2 points (interval 0 - 180)"""
+        """Azimuth between 2 points (interval 0 - 180)."""
         angle = np.arctan2(point2[1] - point1[1], point2[0] - point1[0])
         return round(np.degrees(angle), dec_rotation)
 
     def _dist(a, b):
-        """distance between points"""
+        """Distance between points."""
         return np.hypot(b[0] - a[0], b[1] - a[1])
 
     mrr = pol.minimum_rotated_rectangle

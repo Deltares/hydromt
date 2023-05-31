@@ -44,6 +44,7 @@ dependencies:
   - responses # tests
   - requests
   - rioxarray
+  - pre-commit
   - scipy
   - testpath  # tests
   - toml

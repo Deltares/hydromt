@@ -1,8 +1,7 @@
-import geopandas as gpd
+"""Implementations relating to merging of datasets and arrays."""
 import numpy as np
 import rasterio
 from pyproj import CRS
-from shapely.geometry import box
 
 from .raster import full_from_transform
 
@@ -17,14 +16,16 @@ def merge(
     merge_method="first",
     **kwargs,
 ):
-    """Merge multiple tiles to a single DataArray, if mismatching grid CRS or resolution,
-    tiles are reprojected to match the output DataArray grid. If no destination
+    """Merge multiple tiles to a single DataArray.
+
+    If mismatching grid CRS or resolution, tiles are reprojected
+    to match the output DataArray grid. If no destination
     grid is defined it is based on the first DataArray in the list.
 
     Based on :py:meth:`rasterio.merge.merge`.
 
-    Arguments
-    ----------
+    Arguments:
+    ---------
     data_arrays: list of xarray.DataArray
         Tiles to merge
     dst_crs: pyproj.CRS, int
@@ -47,14 +48,14 @@ def merge(
         * max: pixel-wise max of existing and new
         * new: assert no pixel overlap
     **kwargs:
-        Key-word arguments passed to :py:meth:`~hydromt.raster.RasterDataArray.reproject`
+        Key-word arguments passed to
+        :py:meth:`~hydromt.raster.RasterDataArray.reproject`
 
-    Returns
+    Returns:
     -------
     da_out: xarray.DataArray
         Merged tiles.
     """
-
     # define merge method
     if merge_method == "first":
 
