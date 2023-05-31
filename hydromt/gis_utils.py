@@ -383,7 +383,7 @@ def affine_to_meshgrid(transform, shape):
 
 ## CELLAREAS
 def reggrid_area(lats, lons):
-    """Return the cell area [m2] for a regular grid based on its cell centres lat, lon."""
+    """Return the cell area [m2] for a regular grid based on its cell centres lat, lon."""  # noqa: E501
     xres = np.abs(np.mean(np.diff(lons)))
     yres = np.abs(np.mean(np.diff(lats)))
     area = np.ones((lats.size, lons.size), dtype=lats.dtype)
@@ -394,7 +394,7 @@ def cellarea(lat, xres=1.0, yres=1.0):
     """Return the area [m2] of cell based on its center latitude and resolution in degrees.
 
     Resolution is in measured degrees.
-    """
+    """  # noqa: E501
     l1 = np.radians(lat - np.abs(yres) / 2.0)
     l2 = np.radians(lat + np.abs(yres) / 2.0)
     dx = np.radians(np.abs(xres))
