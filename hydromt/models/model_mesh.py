@@ -116,7 +116,7 @@ class MeshMixin(object):
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
-        Reclassification is based on `reclass_table_fn`. The reclassified raster data
+        The reclassified raster data
         are subsequently interpolated to the mesh using `resampling_method`.
 
         Adds model layers:
