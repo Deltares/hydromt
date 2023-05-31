@@ -26,6 +26,7 @@ dependencies = [
     "pandas",
     "pyflwdir>=0.5.4",
     "pyproj",
+    "ruff",
     "rasterio",
     "requests",
     "rioxarray",
