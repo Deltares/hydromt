@@ -2,6 +2,7 @@
 import logging
 import os
 import warnings
+from os import PathLike
 from os.path import join
 from typing import NewType, Union
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
 
-RasterDatasetSource = NewType("RasterDatasetSource", Union[str, os.PathLike])
+RasterDatasetSource = NewType("RasterDatasetSource", Union[str, PathLike])
 
 
 class RasterDatasetAdapter(DataAdapter):

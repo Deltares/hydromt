@@ -110,10 +110,12 @@ in the mean time your colleague does the same:
   $ git add hydromt/feature-B.py
   $ git commit -m "implement feature B!"
 
-If you want to syncronize with your colleague you can do this by using the `git merge` command:
+If you want to syncronize with your colleague, it is important that you both make sure that you have the up to date version by using the `git pull` command.
+After that you can bring your branch up to date this by using the `git merge` command:
 
 .. code-block:: console
 
+  $ git pull
   $ git merge feature-A
   Merge made by the 'ort' strategy.
    tmp-a.py | 0
@@ -275,13 +277,7 @@ You can install pre-commit by running:
 
   $ pip install pre-commit
 
-<<<<<<< HEAD
 It is best to install pre-commit in your existing enviromnment. After that simply install the necessary hooks with
-||||||| 6948ad29
-Then simply install the necessary hooks with
-=======
-Then simply install the necessary hooks with
->>>>>>> main
 
 .. code-block:: console
 
@@ -291,12 +287,6 @@ After doing this pre-commit will check all your staged files when commiting.
 
 For example say that you've added the following new feature:
 
-<<<<<<< HEAD
-||||||| 6948ad29
-If you want you can use pre-commit on it's own to run agains all files for exmaple.
-=======
-If you want you can use pre-commit on it's own to run agains all files for exmaple.
->>>>>>> main
 
 .. code-block:: console
 
