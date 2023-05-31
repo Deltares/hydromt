@@ -315,7 +315,7 @@ class GridMixin(object):
 
     @property
     def grid(self):
-        """Model static gridded data."""
+        """Model static gridded data as xarray.Dataset."""
         if len(self._grid) == 0 and self._read:
             self.read_grid()
         return self._grid
