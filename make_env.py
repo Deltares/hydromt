@@ -1,3 +1,5 @@
+"""A simple script to generate enviroment.yml files from pyproject.toml."""
+
 import argparse
 
 from tomli import load
