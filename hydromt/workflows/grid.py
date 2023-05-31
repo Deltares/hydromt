@@ -226,7 +226,7 @@ def grid_from_geodataframe(
 ) -> xr.Dataset:
     """Prepare data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.
 
-    Rasterizes the data from ``gdf``. Several type of rasterization are possible:
+    Several type of rasterization are possible:
         * "fraction": returns the fraction of the grid cell covered by the gdf shape.
         * "area": Returns the area of the grid cell covered by the gdf shape.
         * "value": the value from the variables columns of gdf are used.
