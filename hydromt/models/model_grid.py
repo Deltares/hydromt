@@ -156,8 +156,6 @@ class GridMixin(object):
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
-        Reclassifications are based on ``reclass_table_fn``.
-
         Adds model layers:
 
         * **reclass_variables** grid: reclassified raster data

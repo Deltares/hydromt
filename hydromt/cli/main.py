@@ -268,18 +268,12 @@ def update(
     --------------
 
     Update (overwrite!) landuse-landcover based maps in a Wflow model:
-    hydromt update wflow /path/to/model_root \
-        -c setup_lulcmaps \
-        --opt lulc_fn=vito \
-        -d /path/to/data_catalog.yml -v
+    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
 
     Update Wflow model components outlined in an .ini configuration file and
     write the model to a directory:
-    hydromt update wflow /path/to/model_root \
-        -o /path/to/model_out \
-        -i /path/to/wflow_config.ini \
-        -d /path/to/data_catalog.yml -v
-    """
+    hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.ini  -d /path/to/data_catalog.yml -v
+    """  # noqa: E501
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -352,19 +346,17 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
 
     Example usage to clip a wflow model for a subbasin derived from point coordinates
     snapped to cells with upstream area >= 50 km2
-    hydromt clip wflow /path/to/model_root /path/to/model_destination \
-        "{'subbasin': [-7.24, 62.09], 'wflow_uparea': 50}"
+    hydromt clip wflow /path/to/model_root /path/to/model_destination "{'subbasin': [-7.24, 62.09], 'wflow_uparea': 50}"
 
     Example usage basin based on ID from model_root basins map
     hydromt clip wflow /path/to/model_root /path/to/model_destination "{'basin': 1}"
 
     Example usage basins whose outlets are inside a geometry
-    hydromt clip wflow /path/to/model_root /path/to/model_destination \
-        "{'outlet': 'geometry.geojson'}"
+    hydromt clip wflow /path/to/model_root /path/to/model_destination "{'outlet': 'geometry.geojson'}"
 
     All available option in the clip_staticmaps function help.
 
-    """
+    """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
     logger = log.setuplog(
         "clip", join(model_destination, "hydromt-clip.log"), log_level=log_level
