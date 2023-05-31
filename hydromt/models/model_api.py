@@ -914,7 +914,7 @@ class Model(object, metaclass=ABCMeta):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """Add data variable(s) to maps object.
+        """HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         This is done by reclassifying the data in
         ``raster_fn`` based on ``reclass_table_fn``.
@@ -959,7 +959,7 @@ class Model(object, metaclass=ABCMeta):
         -------
         list
             Names of added model map layers
-        """
+        """  # noqa: E501
         self.logger.info(
             f"Preparing map data by reclassifying the data in {raster_fn} based"
             f" on {reclass_table_fn}"

@@ -154,7 +154,7 @@ class GridMixin(object):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """Add data variables to grid object by reclassifying the data in ``raster_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Reclassifications are based on ``reclass_table_fn``.
 
@@ -198,7 +198,7 @@ class GridMixin(object):
         -------
         list
             Names of added model grid layers
-        """
+        """  # noqa: E501
         self.logger.info(
             f"Preparing grid data by reclassifying the data in {raster_fn} based "
             f"on {reclass_table_fn}"
@@ -241,7 +241,7 @@ class GridMixin(object):
         rename: Optional[Dict] = dict(),
         all_touched: Optional[bool] = True,
     ) -> List[str]:
-        """Add data variables to grid object by rasterizing the data from ``vector_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
 
         Several type of rasterization are possible:
             * "fraction": the fraction of the grid cell covered by the vector
@@ -282,7 +282,7 @@ class GridMixin(object):
         -------
         list
             Names of added model grid layers
-        """
+        """  # noqa: E501
         self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
         gdf = self.data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs

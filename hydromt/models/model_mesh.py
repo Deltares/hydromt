@@ -114,7 +114,7 @@ class MeshMixin(object):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """Add data variable(s) to the mesh object by reclassifying data in `raster_fn`.
+        """HYDROMT CORE METHOD: Add data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Reclassification is based on `reclass_table_fn`. The reclassified raster data
         are subsequently interpolated to the mesh using `resampling_method`.
@@ -168,7 +168,7 @@ class MeshMixin(object):
         ------
         ValueError
             If `raster_fn` is not a single variable raster.
-        """
+        """  # noqa: E501
         self.logger.info(
             f"Preparing mesh data by reclassifying the data in {raster_fn} "
             f"based on {reclass_table_fn}."
@@ -341,7 +341,7 @@ class MeshModel(MeshMixin, Model):
         res: Optional[float] = None,
         crs: int = None,
     ) -> xu.UgridDataset:
-        """Create an 2D unstructured mesh or reads an existing 2D mesh.
+        """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
 
         Grids are read according to UGRID conventions. An 2D unstructured mesh
         will be created as 2D rectangular grid from a geometry (geom_fn) or bbox.
@@ -376,7 +376,7 @@ class MeshModel(MeshMixin, Model):
         mesh2d : xu.UgridDataset
             Generated mesh2d.
 
-        """
+        """  # noqa: E501
         self.logger.info("Preparing 2D mesh.")
 
         if "mesh" not in region:
