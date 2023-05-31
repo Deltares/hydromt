@@ -81,11 +81,6 @@ hydromt = "hydromt.cli.main:main"
 line-length = 88
 target-version = ['py39']
 
-
-[tool.isort]
-py_version=39
-profile = "black"
-
 [tool.ruff]
 line-length = 88
 
