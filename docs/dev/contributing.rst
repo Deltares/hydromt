@@ -29,7 +29,7 @@ Checklist pull requests
 If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure do the following steps:
 1. If it does not yet exist, create an issue following the :ref:`issue conventions <Issue conventions>`
 2. Create a new branch where you develop your new code, see also :ref:`Git conventions <Git conventions>`
-3. Make sure all pre-commit hooks pass, see  :ref:`code format <Code format>`. For *ipynb files make sure that you have cleared all results.
+3. Make sure all pre-commit hooks pass, see  :ref:`code format <Code format>`. For ipynb files make sure that you have cleared all results.
 4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the
   `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`__
 5. Push your commits to the github repository and open a draft pull request. Potentially, ask other contributors for feedback.
