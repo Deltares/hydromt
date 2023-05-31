@@ -174,7 +174,8 @@ It's telling us we first need to tell it what we want to do with the current con
 
 Success!
 This is a simple introduction into a potentially very complicated subject. You can read more about the different possibilities here:
-* `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
+
+*  `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
 * `Merge Strategies <https://www.atlassian.com/git/tutorials/using-branches/merge-strategy>`_
 
 
