@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""hydrological methods powered by pyFlwDir"""
+"""Hydrological flow direction methods powered by pyFlwDir."""
 
 import logging
 import warnings
@@ -38,8 +35,10 @@ def flwdir_from_da(
     mask: Union[xr.DataArray, bool, None] = None,
     logger=logger,
 ):
-    """Parse dataarray to flow direction raster object. If a mask coordinate is present
-    this will be passed on the the pyflwdir.from_array method.
+    """Parse dataarray to flow direction raster object.
+
+    If a mask coordinate is present this will be passed
+    on the the pyflwdir.from_array method.
 
     Parameters
     ----------
@@ -52,6 +51,9 @@ def flwdir_from_da(
     mask : xr.DataArray, bool, optional
         Mask for gridded flow direction data, by default None.
         If True, use the mask coordinate of `da`.
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
 
     Returns
     -------
@@ -95,9 +97,10 @@ def d8_from_dem(
 ) -> xr.DataArray:
     """Derive D8 flow directions grid from an elevation grid.
 
-    Outlets occur at the edge of valid data or at user defined cells (if `idxs_pit` is provided).
-    A local depressions is filled based on its lowest pour point level if the pour point
-    depth is smaller than the maximum pour point depth `max_depth`, otherwise the lowest
+    Outlets occur at the edge of valid data or at user defined cells
+    (if `idxs_pit` is provided). A local depressions is filled based on its
+    lowest pour point level if the pour point depth is smaller than the
+    maximum pour point depth `max_depth`, otherwise the lowest
     elevation in the depression becomes a pit.
 
     Parameters
@@ -116,6 +119,9 @@ def d8_from_dem(
         or only the minimum elevation edge cell ('min')
     idxs_pit: 1D array of int
         Linear indices of outlet cells.
+    **kwargs:
+        Additional keyword arguments that are passed to the `fill_depressions`
+        function.
 
     Returns
     -------
@@ -129,7 +135,8 @@ def d8_from_dem(
     nodata = da_elv.raster.nodata
     crs = da_elv.raster.crs
     assert da_elv.raster.res[1] < 0
-    assert nodata is not None and ~np.isnan(nodata)
+    assert nodata is not None
+    assert ~np.isnan(nodata)
     # burn in river if
     if gdf_stream is not None and "uparea" in gdf_stream.columns:
         gdf_stream = gdf_stream.sort_values(by="uparea")
@@ -189,6 +196,12 @@ def upscale_flwdir(
         Name of upscaled flow direction raster DataArray, by default "flwdir"
     method : {'com2', 'com', 'eam', 'dmm'}
         Upscaling method for flow direction data, by default 'com2'.
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
+    **kwargs:
+        Additional keyword arguments that are passed to the `flwdir.upscale`
+        function.
 
     Returns
     -------
@@ -262,8 +275,9 @@ def reproject_hydrography_like(
     """Reproject flow direction and upstream area data to the `da_elv` crs and grid.
 
     Flow directions are derived from a reprojected grid of synthetic elevation,
-    based on the log10 upstream area [m2]. For regions without upstream area, the original
-    elevation is used assuming these elevation values are <= 0 (i.e. offshore bathymetry).
+    based on the log10 upstream area [m2]. For regions without upstream area,
+    the original elevation is used assuming these elevation values are <= 0
+    (i.e. offshore bathymetry).
 
     The upstream area on the reprojected grid is based on the new flow directions and
     rivers entering the domain, defined by the minimum upstream area `river_upa` [km2]
@@ -284,12 +298,16 @@ def reproject_hydrography_like(
     river_upa: float, optional
         Minimum upstream area threshold [km2] for inflowing rivers, by default 5 km2
     river_len: float, optional
-        Mimimum distance from river outlet for inflowing river location, by default 1000 m.
+        Mimimum distance from river outlet for inflowing river location,
+        by default 1000 m.
     uparea_name, flwdir_name : str, optional
         Name of upstream area (default "uparea") and flow direction ("flwdir") variables
         in `ds_hydro`.
     kwargs: key-word arguments
         key-word arguments are passed to `d8_from_dem`
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
 
     Returns
     -------
@@ -321,7 +339,8 @@ def reproject_hydrography_like(
     # reproject with 'min' to preserve rivers
     elv_mask = da_elv != da_elv.raster.nodata
     elvsyn_reproj = elvsyn.raster.reproject_like(da_elv, method="min")
-    # in regions without uparea use elevation, assuming the elevation < 0 (i.e. offshore bathymetry)
+    # in regions without uparea use elevation, assuming the elevation < 0
+    # (i.e. offshore bathymetry)
     elvsyn_reproj = elvsyn_reproj.where(
         np.logical_or(elvsyn_reproj != nodata, ~elv_mask),
         da_elv - da_elv.where(elvsyn_reproj == nodata).max() - 0.1,  # make sure < 0
@@ -330,13 +349,14 @@ def reproject_hydrography_like(
     elvsyn_reproj.raster.set_crs(crs)
     elvsyn_reproj.raster.set_nodata(nodata)
     # get flow directions based on reprojected synthetic elevation
-    logger.info(f"Deriving flow direction from reprojected synthethic elevation.")
+    logger.info("Deriving flow direction from reprojected synthethic elevation.")
     da_flw1 = d8_from_dem(elvsyn_reproj, **kwargs)
     flwdir = flwdir_from_da(da_flw1, ftype="d8", mask=elv_mask)
     # find source river cells outside destination grid bbox
     outside_dst = da_upa.raster.geometry_mask(da_elv.raster.box, invert=True)
     area = flwdir.area / 1e6  # area [km2]
-    # If any river cell outside the destination grid, vectorize and reproject river segments(!) uparea
+    # If any river cell outside the destination grid, vectorize and reproject river
+    # segments(!) uparea
     # to set as boundary condition to the upstream area map.
     nriv = 0
     if np.any(np.logical_and(rivmask, outside_dst)):
@@ -351,7 +371,8 @@ def reproject_hydrography_like(
         inflow_idxs = np.where(np.logical_and(rivmsk, _edge).ravel())[0]
         if inflow_idxs.size > 0:
             # map nearest segment to each river edge cell;
-            # keep cell which longest distance to outlet per river segment to avoid duplicating uparea
+            # keep cell which longest distance to outlet per river segment to
+            # avoid duplicating uparea
             gdf0 = gpd.GeoDataFrame(
                 index=inflow_idxs,
                 geometry=gpd.points_from_xy(*flwdir.xy(inflow_idxs)),
@@ -393,7 +414,10 @@ def gaugemap(
     flwdir: Optional[pyflwdir.FlwdirRaster] = None,
     logger=logger,
 ) -> xr.DataArray:
-    """This method is deprecated. See :py:meth:`~hydromt.flw.gauge_map`"""
+    """Return map with unique gauge IDs.
+
+    This method is deprecated. See :py:meth:`~hydromt.flw.gauge_map`.
+    """
     warnings.warn(
         'The "gaugemap" method is deprecated, use  "hydromt.flw.gauge_map" instead.',
         DeprecationWarning,
@@ -447,6 +471,9 @@ def gauge_map(
     max_dist: float, optional
         Maximum distance between original and snapped point location.
         A warning is logged if exceeded. By default 10 km.
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
 
     Returns
     -------
@@ -486,7 +513,7 @@ def gauge_map(
 
 
 def outlet_map(da_flw: xr.DataArray, ftype: str = "infer") -> xr.DataArray:
-    """Returns a mask of basin outlets/pits from a flow direction raster.
+    """Return a mask of basin outlets/pits from a flow direction raster.
 
     Parameters
     ----------
@@ -510,7 +537,7 @@ def outlet_map(da_flw: xr.DataArray, ftype: str = "infer") -> xr.DataArray:
 
 
 def stream_map(ds, stream=None, **stream_kwargs):
-    """Return a stream mask DataArray
+    """Return a stream mask DataArray.
 
     Parameters
     ----------
@@ -557,7 +584,8 @@ def basin_map(
     Parameters
     ----------
     ds : xarray.Dataset
-        Dataset used for output grid definition and containing `stream_kwargs` variables.
+        Dataset used for output grid definition and containing `stream_kwargs`
+        variables.
     flwdir : pyflwdir.FlwdirRaster
         Flow direction raster object
     idxs : 1D array or int, optional
@@ -623,7 +651,9 @@ def basin_shape(
     mask: bool = True,
     **kwargs,
 ) -> gpd.GeoDataFrame:
-    """This method is be deprecated. Use :py:meth:`~hydromt.flw.basin_map` in combination
+    """Generate basins from a given dataset and flow direction raster.
+
+    This method is be deprecated. Use :py:meth:`~hydromt.flw.basin_map` in combination
     with :py:meth:`~hydromt.raster.RasterDataArray.vectorize` instead.
     """
     warnings.warn(
@@ -701,7 +731,7 @@ def dem_adjust(
     river_d8: bool = False,
     logger=logger,
 ) -> xr.DataArray:
-    """Returns hydrologically conditioned elevation.
+    """Return hydrologically conditioned elevation.
 
     The elevation is conditioned to D4 (`connectivity=4`) or D8 (`connectivity=8`)
     flow directions based on the algorithm described in Yamazaki et al. [1]_
@@ -718,12 +748,16 @@ def dem_adjust(
         D8 flow directions [-]
         binary river mask [-], optional
     flwdir : pyflwdir.FlwdirRaster, optional
-        D8 flow direction raster object. If None it is derived on the fly from `da_flwdir`.
+        D8 flow direction raster object. If None it is derived on the fly
+        from `da_flwdir`.
     connectivity: {4, 8}
         D4 or D8 flow connectivity.
     river_d8 : bool
         If True and `connectivity==4`, additionally condition river cells to D8.
         Requires `da_rivmsk`.
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
 
     Returns
     -------
@@ -732,7 +766,9 @@ def dem_adjust(
 
     References
     ----------
-    .. [1] Yamazaki et al. (2012). Adjustment of a spaceborne DEM for use in floodplain hydrodynamic modeling. Journal of Hydrology, 436-437, 81–91. https://doi.org/10.1016/j.jhydrol.2012.02.045
+    .. [1] Yamazaki et al. (2012). Adjustment of a spaceborne DEM for use in floodplain
+        hydrodynamic modeling. Journal of Hydrology, 436-437, 81-91.
+        https://doi.org/10.1016/j.jhydrol.2012.02.045
 
 
     See Also
@@ -770,7 +806,6 @@ def dem_adjust(
         if river_d8:
             flwdir_river = flwdir_from_da(da_flwdir, mask=rivmsk)
             elevtn = flwdir_river.dem_adjust(elevtn)
-        # assert np.all((elv2 - flwdir_d4.downstream(elv2))>=0)
 
     # save to dataarray
     da_out = xr.DataArray(

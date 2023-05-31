@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for the hydromt.models module of HydroMT"""
+"""Tests for the hydromt.models module of HydroMT."""
 
 from os.path import abspath, dirname, isfile, join
 
@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 import xarray as xr
 from entrypoints import Distribution, EntryPoint
-from shapely.geometry import polygon
 
 import hydromt._compat
 import hydromt.models.model_plugins
@@ -200,11 +199,6 @@ def test_setup_region(model, demda, tmpdir):
     model.setup_region({"grid": grid_fn})
     assert np.all(demda.raster.bounds == model.region.total_bounds)
     # # TODO model once we have registered the Model class entrypoint
-    # model._geoms.pop('region') # remove old region
-    # root = str(tmpdir.join('root'))
-    # model.set_root(root, mode='w')
-    # model.write()
-    # model.setup_region({'model': root})
     # basin
     model._geoms.pop("region")  # remove old region
     model.setup_region({"basin": [12.2, 45.833333333333329]})
@@ -282,7 +276,7 @@ def test_setup_grid(tmpdir, demda):
         mode="w",
     )
     # wrong region kind
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Region for grid must be of kind"):
         model.setup_grid({"lumped_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]
@@ -326,6 +320,19 @@ def test_setup_grid(tmpdir, demda):
     assert model.grid.raster.res == (10000, -10000)
     model._grid = xr.Dataset()  # remove old grid
 
+    # bbox rotated
+    model.setup_grid(
+        region={"bbox": [12.65, 45.50, 12.85, 45.60]},
+        res=0.05,
+        crs=4326,
+        rotated=True,
+        add_mask=True,
+    )
+    assert "xc" in model.grid.coords
+    assert model.grid.raster.y_dim == "y"
+    assert np.isclose(model.grid.raster.res[0], 0.05)
+    model._grid = xr.Dataset()  # remove old grid
+
     # grid
     grid_fn = str(tmpdir.join("grid.tif"))
     demda.raster.to_raster(grid_fn)
@@ -341,7 +348,7 @@ def test_setup_grid(tmpdir, demda):
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert not np.all(model.grid["mask"].values == True)
+    assert not np.all(model.grid["mask"].values is True)
     assert model.grid.raster.shape == (47, 61)
 
 
@@ -410,6 +417,7 @@ def test_gridmodel_setup(tmpdir):
     for v in ["mask", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
         assert v in mod.grid
     assert mod.grid["lake_depth"].raster.nodata == -999.0
+    assert mod.grid["roughness_manning"].raster.nodata == -999.0
     assert np.unique(mod.grid["c2"]).size == 2
     assert np.isin([-1, 2], np.unique(mod.grid["c2"])).all()
 

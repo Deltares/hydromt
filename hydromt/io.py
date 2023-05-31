@@ -1,3 +1,4 @@
+"""Implementations for all of the necessary IO for HydroMT."""
 import glob
 import io
 import logging
@@ -10,7 +11,6 @@ import numpy as np
 import pandas as pd
 import pyproj
 import xarray as xr
-from fsspec.implementations import local
 from shapely.geometry import box
 from shapely.geometry.base import GEOMETRY_TYPES
 
@@ -33,11 +33,12 @@ __all__ = [
 def open_raster(
     filename, mask_nodata=False, chunks={}, nodata=None, logger=logger, **kwargs
 ):
-    """Open a gdal-readable file with rasterio based on
+    """Open a gdal-readable file with rasterio based on.
+
     :py:meth:`rioxarray.open_rasterio`, but return squeezed DataArray.
 
-    Arguments
-    ----------
+    Arguments:
+    ---------
     filename : str, path, file-like, rasterio.DatasetReader, or rasterio.WarpedVRT
         Path to the file to open. Or already open rasterio dataset.
     mask_nodata : bool, optional
@@ -48,11 +49,14 @@ def open_raster(
         Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or
         ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
         DataArray into a dask array.
-    **kwargs
+    **kwargs:
         key-word arguments are passed to :py:meth:`xarray.open_dataset` with
         "rasterio" engine.
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
 
-    Returns
+    Returns:
     -------
     data : DataArray
         DataArray
@@ -92,7 +96,6 @@ def open_mfraster(
     concat_dim="dim0",
     mosaic=False,
     mosaic_kwargs={},
-    logger=logger,
     **kwargs,
 ):
     """Open multiple gdal-readable files as single Dataset with geospatial attributes.
@@ -105,8 +108,8 @@ def open_mfraster(
     If ``mosaic`` the DataArrays are concatenated along the the spatial dimensions
     using :py:meth:`~hydromt.raster.merge`.
 
-    Arguments
-    ----------
+    Arguments:
+    ---------
     paths: str, list of str/Path/file-like
         Paths to the rasterio/gdal files.
         Paths can be provided as list of paths or a path pattern string which is
@@ -133,10 +136,10 @@ def open_mfraster(
     mosaic_kwargs: dict, optional
         Mosaic key_word arguments to unify raster crs and/or resolution. See
         :py:meth:`hydromt.merge.merge` for options.
-    **kwargs
+    **kwargs:
         key-word arguments are passed to :py:meth:`hydromt.raster.open_raster`
 
-    Returns
+    Returns:
     -------
     data : DataSet
         The newly created DataSet.
@@ -190,7 +193,7 @@ def open_mfraster(
             if not mosaic:
                 # check if transform, shape and crs are close
                 if not da_lst[0].raster.identical_grid(da):
-                    raise xr.MergeError(f"Geotransform and/or shape do not match")
+                    raise xr.MergeError("Geotransform and/or shape do not match")
                 # copy coordinates from first raster
                 da[da.raster.x_dim] = da_lst[0][da.raster.x_dim]
                 da[da.raster.y_dim] = da_lst[0][da.raster.y_dim]
@@ -213,7 +216,7 @@ def open_mfraster(
     else:
         ds = xr.merge(
             da_lst
-        )  # , combine_attrs="drop") seems that with rioxarray drops all datarrays atrributes not just ds
+        )  # seems that with rioxarray drops all datarrays atrributes not just ds
         ds.attrs = {}
 
     # update spatial attributes
@@ -226,13 +229,15 @@ def open_mfraster(
 def open_raster_from_tindex(
     fn_tindex, bbox=None, geom=None, tileindex="location", mosaic_kwargs={}, **kwargs
 ):
-    """Reads and merges raster tiles (potentially in different CRS) based on a
+    """Read and merge raster tiles.
+
+    Raster tiles can potentially be in different CRS. Based on a
     tile index file as generated with `gdaltindex`. A bbox or geom describing the
     output area of interest is required.
 
-    Arguments
+    Arguments:
     ---------
-    fn: path, str
+    fn_tindex: path, str
         Path to tile index file.
     bbox : tuple of floats, optional
         (xmin, ymin, xmax, ymax) bounding box in EPGS:4326, by default None.
@@ -244,11 +249,11 @@ def open_raster_from_tindex(
     mosaic_kwargs: dict, optional
         Mosaic key_word arguments to unify raster crs and/or resolution. See
         :py:meth:`~hydromt.merge.merge()` for options.
-    **kwargs
+    **kwargs:
         key-word arguments are passed to :py:meth:`hydromt.io.open_mfraster()`
 
 
-    Returns
+    Returns:
     -------
     data : Dataset
         A single-variable Dataset of merged raster tiles.
@@ -297,7 +302,7 @@ def open_geodataset(
 ):
     """Open point location GIS file and timeseries file combine a single xarray.Dataset.
 
-    Arguments
+    Arguments:
     ---------
     fn_locs: path, str
         Path to point location file, see :py:meth:`geopandas.read_file` for options.
@@ -314,14 +319,21 @@ def open_geodataset(
     bbox : array of float, default None
         Filter features by given bounding box described by [xmin, ymin, xmax, ymax]
         Cannot be used with geom.
+    index_dim:
+        The dimention to index on.
+    chunks:
+        The dimentions of the chunks to store the underlying data in.
     geom : GeoDataFrame or GeoSeries | shapely Geometry, default None
         Filter for features that intersect with the geom.
         CRS mis-matches are resolved if given a GeoSeries or GeoDataFrame.
         Cannot be used with bbox.
-    **kwargs
-        Key-word arguments passed to :py:func:`geopandas.read_file` to read the point geometry file.
+    **kwargs:
+        Key-word argume
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
 
-    Returns
+    Returns:
     -------
     ds: xarray.Dataset
         Dataset with geospatial coordinates.
@@ -350,20 +362,27 @@ def open_timeseries_from_table(
     fn, name=None, index_dim="index", logger=logger, **kwargs
 ):
     """Open timeseries csv file and parse to xarray.DataArray.
-    Accepts files with time index on one dimension and numeric location index on the other dimension.
-    In case of string location indices, non-numeric parts are filtered from the location index.
 
-    Arguments
+    Accepts files with time index on one dimension and numeric location index on the
+    other dimension. In case of string location indices, non-numeric parts are
+    filtered from the location index.
+
+    Arguments:
     ---------
     fn: path, str
         Path to time series file
     name: str
         variable name, derived from basename of fn if None.
+    index_dim:
+        the dimention to index on.
     **kwargs:
         key-word arguments are passed to the reader method
+    logger:
+        The logger to be used. If none probided, the default will be used.
 
 
-    Returns
+
+    Returns:
     -------
     da: xarray.DataArray
         DataArray
@@ -403,10 +422,10 @@ def open_vector(
     logger=logger,
     **kwargs,
 ):
-    """Open fiona-compatible geometry, csv, excel or xy file and
-    parse to :py:meth:`geopandas.GeoDataFrame`.
+    """Open fiona-compatible geometry, csv, excel or xy file and parse it.
 
-    CSV or XLS file are converted to point geometries based on default columns names
+    Construct a :py:meth:`geopandas.GeoDataFrame` CSV or XLS file are
+    converted to point geometries based on default columns names
     for the x- and y-coordinates, or if given, the x_dim and y_dim arguments.
 
     Parameters
@@ -414,9 +433,9 @@ def open_vector(
     fn : str
         path to geometry file
     driver: {'csv', 'xls', 'xy', 'vector'}, optional
-        driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector files,
-        :py:meth:`hydromt.io.open_vector_from_table` for csv, xls(x) and xy files.
-        By default None, and infered from file extention.
+        driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
+        files, :py:meth:`hydromt.io.open_vector_from_table`
+        for csv, xls(x) and xy files. By default None, and infered from file extention.
     crs: str, `pyproj.CRS`, or dict
         Source coordinate reference system, ignored for files with a native crs.
     dst_crs: str, `pyproj.CRS`, or dict
@@ -428,8 +447,8 @@ def open_vector(
         Filter for features that intersect with the mask.
         CRS mis-matches are resolved if given a GeoSeries or GeoDataFrame.
         Cannot be used with bbox.
-    predicate : {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'}, optional
-        If predicate is provided, the GeoDataFrame is filtered by testing
+    predicate : {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
+        optional. If predicate is provided, the GeoDataFrame is filtered by testing
         the predicate function against each item. Requires bbox or mask.
         By default 'intersects'
     x_dim, y_dim : str
@@ -440,6 +459,9 @@ def open_vector(
         file opening mode (fiona files only), by default 'r'
     **kwargs:
         Keyword args to be passed to the driver method when opening the file
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
 
     Returns
     -------
@@ -494,14 +516,20 @@ def open_vector_from_table(
     driver: {'csv', 'xls', 'xlsx', 'xy'}
         If 'csv' use :py:meth:`pandas.read_csv` to read the data;
         If 'xls' or 'xlsx' use :py:meth:`pandas.read_excel` with `engine=openpyxl`
-        If 'xy' use :py:meth:`pandas.read_csv` with `index_col=False`, `header=None`, `delim_whitespace=True`.
+        If 'xy' use :py:meth:`pandas.read_csv` with `index_col=False`,
+            `header=None`, `delim_whitespace=True`.
     x_dim, y_dim: str
         Name of x, y column. By default the x-column header should be one of
-        ['x', 'longitude', 'lon', 'long'], and y-column header one of ['y', 'latitude', 'lat'].
-        For xy files, which don't have a header, the first column is interpreted as x
-        and the second as y column.
+        ['x', 'longitude', 'lon', 'long'], and y-column header one of
+        ['y', 'latitude', 'lat']. For xy files, which don't have a header,
+        the first column is interpreted as x and the second as y column.
     crs: int, dict, or str, optional
-        Coordinate reference system, accepts EPSG codes (int or str), proj (str or dict) or wkt (str)
+        Coordinate reference system, accepts EPSG codes (int or str), proj (str or dict)
+        or wkt (str)
+    fn:
+        The filename to read the table from.
+    **kwargs
+        Additional keyword arguments that are passed to the underlying drivers.
 
     Returns
     -------

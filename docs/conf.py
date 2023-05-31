@@ -18,7 +18,6 @@
 #
 import os
 import shutil
-import sys
 from distutils.dir_util import copy_tree
 
 import numpy as np
@@ -26,7 +25,6 @@ import sphinx_autosummary_accessors
 from click.testing import CliRunner
 
 import hydromt
-from hydromt import DataCatalog
 from hydromt.cli.main import main as hydromt_cli
 
 # here = os.path.dirname(__file__)

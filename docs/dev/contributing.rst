@@ -29,7 +29,7 @@ Checklist pull requests
 If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure do the following steps:
 1. If it does not yet exist, create an issue following the :ref:`issue conventions <Issue conventions>`
 2. Create a new branch where you develop your new code, see also :ref:`Git conventions <Git conventions>`
-3. Run black before committing your changes, see  :ref:`code format <Code format>`. This does only apply for *.py files. For *ipynb files make sure that you have cleared all results.
+3. Make sure all pre-commit hooks pass, see  :ref:`code format <Code format>`. For ipynb files make sure that you have cleared all results.
 4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the
   `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`__
 5. Push your commits to the github repository and open a draft pull request. Potentially, ask other contributors for feedback.
@@ -87,6 +87,99 @@ When your changes are ready for review, you can merge them into the main codebas
 pull request. We recommend creating a pull request as early as possible to give other
 developers a heads up and to provide an opportunity for valuable early feedback. You
 can create a pull request online or by pushing your branch to a feature-branch.
+
+Dealing with merge conflicts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Because git facilitates many people working on the same piece of code, it can happen that someone else makes changes to the repository before you do.
+When this happens it's important to synchronize the code base before merging to make sure the outcome will look as we expect. For example, imagine you've made a new feature by branching off main:
+
+.. code-block:: console
+
+  $ git checkout main && git checkout -b feature-A
+  $ touch hydromt/feature-A.py
+  $ git add hydromt/feature-A.py
+  $ git commit -m "implement feature A!"
+
+in the mean time your colleague does the same:
+
+.. code-block:: console
+
+  $ git checkout main && git checkout -b feature-B
+  $ touch hydromt/feature-B.py
+  $ git add hydromt/feature-B.py
+  $ git commit -m "implement feature B!"
+
+If you want to syncronize with your colleague, it is important that you both make sure that you have the up to date version by using the `git pull` command.
+After that you can bring your branch up to date this by using the `git merge` command:
+
+.. code-block:: console
+
+  $ git pull
+  $ git merge feature-A
+  Merge made by the 'ort' strategy.
+   tmp-a.py | 0
+   1 file changed, 0 insertions(+), 0 deletions(-)
+   create mode 100644 tmp-a.py
+
+This means that git detected that you didt not make changes to the same file and therefore no problem occured. However if we imagine that you both make changes to the same file, things will be different:
+
+.. code-block:: console
+
+  $ git checkout main && git checkout -b feature-c
+  $ echo 'print("blue is the best colour")' > feature-c.py
+  $ git add feature-c.py
+  $ git commit -m "implement feature c!"
+  $ git checkout main && git checkout -b feature-c-colleague
+  $ echo 'print("Orange is the best colour")' > feature-c.py
+  $ git add feature-c.py
+  $ git commit -m "implement feature c!"
+  $ git merge feature-c
+  Auto-merging feature-c.py
+  CONFLICT (add/add): Merge conflict in feature-c.py
+  Automatic merge failed; fix conflicts and then commit the result.
+
+If we open up the file we can see some changes have been made:
+
+.. code-block:: python
+
+  <<<<<<< HEAD
+
+  print("Orange is the best colour")
+
+  ||||||| <hash>
+  =======
+  print("blue is the best colour")
+  >>>>>>> feature-c
+
+Here we see the contents of both the commits. The top one are the changes the branch made that initiated the merge, and the bottom one is the other branch. The branch name is also listed after the >>>>>. If we try to commit now, it will not let us:
+
+.. code-block:: console
+
+  $ git commit
+  U       feature-c.py
+  error: Committing is not possible because you have unmerged files.
+  hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+  hint: as appropriate to mark resolution and make a commit.
+  fatal: Exiting because of an unresolved conflict.
+
+It's telling us we first need to tell it what we want to do with the current conflict. To do this, simply edit the file how you'd like it to be, and add it to the staging, then continue with the merge like so:
+
+.. code-block:: console
+
+  $ echo 'print("Pruple is the best color") # a comporomise' > feature-c.py
+  $ git add feature-c.py
+  $ git commit
+  [feature-c-colleague 7dd3f576] Merge branch 'feature-c' into feature-c-colleague
+
+Success!
+This is a simple introduction into a potentially very complicated subject. You can read more about the different possibilities here:
+
+*  `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
+* `Merge Strategies <https://www.atlassian.com/git/tutorials/using-branches/merge-strategy>`_
+
+
+
 
 HydroMT design conventions
 --------------------------
@@ -180,27 +273,106 @@ Code format
 ^^^^^^^^^^^
 - We use the `black code style <https://black.readthedocs.io/en/stable/the_black_code_style.html>`_ and `pre-commit <https://pre-commit.org>` to keep everything formatted. Please make sure all hooks pass before commiting. Pre-commit will do this for you if it's installed correctly.
 
-You can install pre-commit by running: 
+You can install pre-commit by running:
 .. code-block:: console
 
   $ pip install pre-commit
 
-Then simply install the necessary hooks with 
+It is best to install pre-commit in your existing enviromnment. After that simply install the necessary hooks with
 
 .. code-block:: console
 
   $ pre-commit install
 
-Now pre-commit will check all configured hooks against all the staged files and in many cases apply fixes for you before you commit.
+After doing this pre-commit will check all your staged files when commiting.
 
-When pre-commit applies fixes for you you will have to add them to the staging area again. The git staging area will never be modified by pre-commit.
+For example say that you've added the following new feature:
 
-If you want you can use pre-commit on it's own to run agains all files for exmaple. 
 
 .. code-block:: console
 
-    $ pre-commit run --all
+  $ echo 'import os\nprint("This is a new exciting feature")' > hydromt/new_feature.py
 
+(you do not have to do this, it is just for demonstration, but you can copy and execute this code to try for yourself.)
+
+Then you can add the new feature to the git staging area and try to commit as usual. However pre-commit will tell you that you should add some docstrings for example. You should see an output similar to the one below:
+
+.. code-block:: console
+
+  $ git add hydromt/new_feature.py
+  $ git commit -m "The feature you've all been waiting for."
+    Trim Trailing Whitespace.................................................Passed
+    Fix End of Files.........................................................Failed
+    - hook id: end-of-file-fixer
+    - exit code: 1
+    - files were modified by this hook
+
+    Fixing hydromt/new_feature.py
+
+    Check Yaml...........................................(no files to check)Skipped
+    Check for added large files..............................................Passed
+    Check python ast.........................................................Passed
+    Check JSON...........................................(no files to check)Skipped
+    Debug Statements (Python)................................................Passed
+    Mixed line ending........................................................Passed
+    Format YAML files....................................(no files to check)Skipped
+    ruff.....................................................................Failed
+    - hook id: ruff
+    - exit code: 1
+    - files were modified by this hook
+
+    hydromt/new_feature.py:1:1: D100 Missing docstring in public module
+    Found 2 errors (1 fixed, 1 remaining).
+
+    black....................................................................Passed
+
+This means that pre-commit has found issues in the code you submitted. In the case of the import it was able to fix it automatically. However `ruff` has also detected that you have not added a docstring for the new feature. You can find this out by running:
+
+.. code-block:: console
+
+  $ ruff .
+
+which will show you the same output:
+
+.. code-block:: console
+
+  hydromt/new_feature.py:1:1: D100 Missing docstring in public module
+  Found 1 error.
+
+After you've fixed this problem by for example adding the docstring """Implement the cool new feature""" at the top of the new file, you just have to add the new version to the staging area again and re-attempt the commit which should now succeed:
+
+.. code-block:: console
+
+  $ git add hydromt/new_feature.py
+  $ git commit -m "The feature you've all been waiting for."
+  Trim Trailing Whitespace.................................................Passed
+  Fix End of Files.........................................................Passed
+  Check Yaml...........................................(no files to check)Skipped
+  Check for added large files..............................................Passed
+  Check python ast.........................................................Passed
+  Check JSON...........................................(no files to check)Skipped
+  Debug Statements (Python)................................................Passed
+  Mixed line ending........................................................Passed
+  Format YAML files....................................(no files to check)Skipped
+  ruff.....................................................................Passed
+  black....................................................................Passed
+  [linting a5e9b683] The feature you've all been waiting for.
+   1 file changed, 4 insertions(+)
+   create mode 100644 hydromt/new_feature.py
+
+Now you can push your commit as normal.
+
+From time to time you might see comments like these:
+
+.. code-block:: python
+
+  import rioxarray # noqa: F401
+
+The `noqa` is instructing the linters to ignore the specified rule for the line in question. Whenever possible, we try to avoid using these but it's not always possible. The full list of rules can be found here: `Ruff Rules Section <https://beta.ruff.rs/docs/rules/>`_ Some common ones are:
+
+* E501: Line too long.
+* F401: Unused import.
+* D102: Public methods should have docstrings.
 
 
 Test and CI

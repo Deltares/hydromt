@@ -18,12 +18,12 @@ setup_grid_from_constant:
 
 setup_grid_from_rasterdataset:
   raster_fn: merit_hydro_1k
-  variables: 
-  - elevtn
-  - basins
+  variables:
+    - elevtn
+    - basins
   reproject_method:
-  - average
-  - mode
+    - average
+    - mode
 
 setup_grid_from_rasterdataset2:
   raster_fn: vito
@@ -36,18 +36,18 @@ setup_grid_from_raster_reclass:
   raster_fn: vito
   reclass_table_fn: vito_reclass
   reclass_variables:
-  - manning
+    - manning
   reproject_method:
-  - average
+    - average
 
 setup_grid_from_geodataframe:
   vector_fn: hydro_lakes
   variables:
-  - waterbody_id
-  - Depth_avg
+    - waterbody_id
+    - Depth_avg
   nodata:
-  - -1
-  - -999.0
+    - -1
+    - -999.0
   rasterize_method: value
   rename:
     waterbody_id: lake_id
@@ -58,9 +58,9 @@ setup_grid_from_geodataframe2:
   rasterize_method: fraction
   rename:
     hydro_lakes: water_frac
-  
+
 write:
   components:
-  - config
-  - geoms
-  - grid
+    - config
+    - geoms
+    - grid

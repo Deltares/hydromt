@@ -1,4 +1,4 @@
-"""HydroMT: Automated and reproducible model building and analysis"""
+"""HydroMT: Automated and reproducible model building and analysis."""
 
 # version number without 'v' at start
 __version__ = "0.7.2.dev0"

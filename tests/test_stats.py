@@ -2,8 +2,6 @@
 """Tests for the vector submodule."""
 
 import numpy as np
-import pytest
-import xarray as xr
 
 from hydromt.stats import skills
 

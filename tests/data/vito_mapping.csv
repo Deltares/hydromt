@@ -21,4 +21,5 @@ vito,description,landuse,roughness_manning
 125,Open forest mixed,125,0.5
 126,Open forest unknown,126,0.5
 200,Open sea,200,0.01
-0,No data,0,-999.0
+0,Unknown,0,-999.0
+255,No data,255,-999.0
