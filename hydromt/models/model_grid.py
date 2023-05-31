@@ -462,7 +462,7 @@ class GridModel(GridMixin, Model):
     ) -> xr.DataArray:
         """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
 
-        An 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
+        A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
         existing grid is given, then no new grid will be generated.
 
         Adds/Updates model layers (if add_mask):
