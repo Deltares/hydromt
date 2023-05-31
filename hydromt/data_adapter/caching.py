@@ -1,3 +1,4 @@
+"""Caching mechanisms used in HydroMT."""
 import logging
 import os
 import shutil
@@ -19,11 +20,11 @@ HYDROMT_DATADIR = join(Path.home(), ".hydromt_data")
 
 
 def _uri_validator(uri: str) -> bool:
-    """Check if uri is valid"""
+    """Check if uri is valid."""
     try:
         result = urlparse(uri)
         return all([result.scheme, result.netloc])
-    except:
+    except ValueError | AttributeError:
         return False
 
 
@@ -40,7 +41,6 @@ def _copyfile(src, dst, chunk_size=1024):
             with open(dst, "wb") as f:
                 for chunk in r.iter_content(chunk_size=chunk_size):
                     f.write(chunk)
-                # shutil.copyfileobj(r.raw, f)
     else:
         shutil.copyfile(src, dst)
 
@@ -63,6 +63,8 @@ def cache_vrt_tiles(
         geometry to intersect tiles with
     cache_dir: str, Path
         path of the root folder where
+    logger: Logger
+        Logger to write logs to
 
     Returns
     -------
@@ -82,7 +84,7 @@ def cache_vrt_tiles(
         ds = xd.parse(f.read())["VRTDataset"]
 
     def intersects(source: dict, affine, bbox):
-        """Check whether source interesects with bbox"""
+        """Check whether source interesects with bbox."""
         names = ["@xOff", "@yOff", "@xSize", "@ySize"]
         x0, y0, dx, dy = [float(source["DstRect"][k]) for k in names]
         xs, ys = affine * (np.array([x0, x0 + dx]), np.array([y0, y0 + dy]))

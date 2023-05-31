@@ -3,7 +3,7 @@
 
 import glob
 import tempfile
-from os.path import abspath, dirname, exists, isfile, join
+from os.path import abspath, dirname, join
 
 import geopandas as gpd
 import numpy as np
@@ -133,9 +133,11 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     da1 = data_catalog.get_geodataset(
         fn_nc, variables=["test1"], bbox=geoda.vector.bounds
     ).sortby("index")
-    assert np.allclose(da1, geoda) and da1.name == "test1"
+    assert np.allclose(da1, geoda)
+    assert da1.name == "test1"
     ds1 = data_catalog.get_geodataset("test", single_var_as_array=False)
-    assert isinstance(ds1, xr.Dataset) and "test" in ds1
+    assert isinstance(ds1, xr.Dataset)
+    assert "test" in ds1
     da2 = data_catalog.get_geodataset(fn_gdf, fn_data=fn_csv).sortby("index")
     assert np.allclose(da2, geoda)
     # test with xy locs
@@ -155,13 +157,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
             data_root=td, data_name="test1", driver="netcdf", variables="test1"
         )
         GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
-    #     try:
     #         GeoDatasetAdapter(fn_nc).to_file(
-    #             data_root=td, data_name="test", driver="unknown_driver"
-    #         )
-    #     except ValueError as e:
-    #         error = e.args[0]
-    # match = "GeoDataset: Driver unknown_driver unknown."
     # assert match in error
 
 

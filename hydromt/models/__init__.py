@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""HydroMT models API"""
+"""HydroMT models API."""
 from .. import _compat
 from .model_api import *
 from .model_grid import *

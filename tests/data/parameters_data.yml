@@ -4,9 +4,6 @@ vito_mapping:
   driver: csv
   kwargs:
     index_col: 0
-  nodata:
-    landuse: 0
-    roughness_manning: -999.0
   meta:
     category: landuse
     source_info: landuse parameters based on vito classification (https://land.copernicus.eu/global/products/lc)
