@@ -27,6 +27,7 @@ dependencies = [
     "rasterio",
     "requests",
     "rioxarray",
+    "ruff",
     "shapely>=2.0.0",
     "scipy",
     "universal_pathlib",
@@ -96,6 +97,7 @@ exclude = ["docs"]
 "hydromt/workflows/__init__.py" = ["F403"]
 "hydromt/models/__init__.py" = ["F403", "F401", "F405"]
 "hydromt/_compat.py" = ["F401"]
+"tests/conftest.py" = ["E402"]
 
 [tool.flit.sdist]
 include = ["hydromt"]
