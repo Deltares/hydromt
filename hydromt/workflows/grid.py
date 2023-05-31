@@ -150,9 +150,7 @@ def grid_from_raster_reclass(
     mask_name: Optional[str] = "mask",
     rename: Optional[Dict] = dict(),
 ) -> xr.Dataset:
-    """Prepare data variable(s) resampled to grid_like object.
-
-    Variables are a reclassification of the data in ``da`` based on ``reclass_table``.
+    """Prepare data variable(s) resampled to grid_like object by reclassifying the data in ``da`` based on ``reclass_table``.
 
     Parameters
     ----------
@@ -183,7 +181,7 @@ def grid_from_raster_reclass(
     -------
     ds_out: xr.Dataset
         Dataset with reclassified data from reclass_table to da resampled to grid_like.
-    """
+    """  # noqa: E501
     if not isinstance(da, xr.DataArray):
         raise ValueError("da should be a single variable.")
     if reclass_variables is not None:
@@ -226,9 +224,9 @@ def grid_from_geodataframe(
     rename: Optional[Union[Dict, str]] = dict(),
     all_touched: Optional[bool] = True,
 ) -> xr.Dataset:
-    """Prepare data variable(s) resampled to grid_like object.
+    """Prepare data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.
 
-    Rasterizes the data from ``gdf``. Several type of rasterization are possible:
+    Several type of rasterization are possible:
         * "fraction": returns the fraction of the grid cell covered by the gdf shape.
         * "area": Returns the area of the grid cell covered by the gdf shape.
         * "value": the value from the variables columns of gdf are used.
@@ -268,7 +266,7 @@ def grid_from_geodataframe(
     -------
     ds_out: xr.Dataset
         Dataset with data from vector_fn resampled to grid_like.
-    """
+    """  # noqa: E501
     # Check which method is used
     if rasterize_method == "value":
         ds_lst = []

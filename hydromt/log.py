@@ -31,7 +31,7 @@ def setuplog(
     fmt : str, optional
         log message formatter
     append : bool, optional
-        Wether to append (True) or overwrite (False) to a logfile at path,
+        Whether to append (True) or overwrite (False) to a logfile at path,
         by default True
 
     Returns

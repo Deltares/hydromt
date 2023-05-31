@@ -11,6 +11,16 @@ from .. import __version__, log
 from ..models import MODELS
 from . import cli_utils
 
+BUILDING_EXE = False
+if BUILDING_EXE:
+    import sys
+
+    exepath = sys.prefix
+    import pyproj
+
+    pyproj_datadir = join(exepath, "proj-data")
+    pyproj.datadir.set_data_dir(pyproj_datadir)
+
 logger = logging.getLogger(__name__)
 
 
@@ -158,20 +168,13 @@ def build(
     Example usage:
     --------------
 
-    To build a wflow model for a subbasin using and point coordinates snapped to cells
-    with stream order >= 4
-    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini \
-        -r "{'subbasin': [-7.24, 62.09], 'strord': 4}" \
-        -d deltares_data \
-        -d /path/to/data_catalog.yml -v
+    To build a wflow model for a subbasin using a point coordinates snapped to cells
+    with upstream area >= 50 km2
+    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini  -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -d deltares_data -d /path/to/data_catalog.yml -v
 
     To build a sfincs model based on a bbox
-    hydromt build sfincs /path/to/model_root \
-        -i /path/to/sfincs_config.ini \
-        -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" \
-        -d /path/to/data_catalog.yml -v
-
-    """
+    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -d /path/to/data_catalog.yml -v
+    """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
     logger = log.setuplog(
         "build", join(model_root, "hydromt.log"), log_level=log_level, append=False
@@ -264,18 +267,12 @@ def update(
     --------------
 
     Update (overwrite!) landuse-landcover based maps in a Wflow model:
-    hydromt update wflow /path/to/model_root \
-        -c setup_lulcmaps \
-        --opt lulc_fn=vito \
-        -d /path/to/data_catalog.yml -v
+    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
 
     Update Wflow model components outlined in an .ini configuration file and
     write the model to a directory:
-    hydromt update wflow /path/to/model_root \
-        -o /path/to/model_out \
-        -i /path/to/wflow_config.ini \
-        -d /path/to/data_catalog.yml -v
-    """
+    hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.ini  -d /path/to/data_catalog.yml -v
+    """  # noqa: E501
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -347,9 +344,8 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     For options to build wflow models see:
 
     Example usage to clip a wflow model for a subbasin derived from point coordinates
-    snapped to cells with stream order >= 4
-    hydromt clip wflow /path/to/model_root /path/to/model_destination \
-        "{'subbasin': [-7.24, 62.09], 'wflow_streamorder': 4}"
+    snapped to cells with upstream area >= 50 km2
+    hydromt clip wflow /path/to/model_root /path/to/model_destination "{'subbasin': [-7.24, 62.09], 'wflow_uparea': 50}"
 
     Example usage basin based on ID from model_root basins map
     hydromt clip wflow /path/to/model_root /path/to/model_destination "{'basin': 1}"
@@ -360,7 +356,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
 
     All available option in the clip_staticmaps function help.
 
-    """
+    """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
     logger = log.setuplog(
         "clip", join(model_destination, "hydromt-clip.log"), log_level=log_level

@@ -17,7 +17,7 @@ __all__ = [
 
 class DataFrameAdapter(DataAdapter):
 
-    """Adapter implementation for Pandas Dataframes."""
+    """DataAdapter implementation for Pandas Dataframes."""
 
     _DEFAULT_DRIVER = "csv"
     _DRIVERS = {"xlsx": "excel", "xls": "excel"}

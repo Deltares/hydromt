@@ -269,7 +269,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         Parameters
         ----------
         time_tuple : tuple of str, optional
-            Start and end data in string format understood by
+            Start and end date in string format understood by
             :py:func:`pandas.to_timedelta`, by default None
         variables : list of str, optional
             List of variable names, by default None
@@ -348,7 +348,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {path}{postfix}")
 
-        # With some fs like gcfs or s3fs, the first part of the past is not returned
+        # With some fs like gcfs or s3fs, the first part of the path is not returned
         # properly with glob
         if not str(UPath(fns[0])).startswith(str(UPath(path))[0:2]):
             # Assumes it's the first part of the path that is not

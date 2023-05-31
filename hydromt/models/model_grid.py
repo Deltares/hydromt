@@ -154,9 +154,7 @@ class GridMixin(object):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """Add data variables to grid object by reclassifying the data in ``raster_fn``.
-
-        Reclassifications are based on ``reclass_table_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 
@@ -198,7 +196,7 @@ class GridMixin(object):
         -------
         list
             Names of added model grid layers
-        """
+        """  # noqa: E501
         self.logger.info(
             f"Preparing grid data by reclassifying the data in {raster_fn} based "
             f"on {reclass_table_fn}"
@@ -241,7 +239,7 @@ class GridMixin(object):
         rename: Optional[Dict] = dict(),
         all_touched: Optional[bool] = True,
     ) -> List[str]:
-        """Add data variables to grid object by rasterizing the data from ``vector_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
 
         Several type of rasterization are possible:
             * "fraction": the fraction of the grid cell covered by the vector
@@ -282,7 +280,7 @@ class GridMixin(object):
         -------
         list
             Names of added model grid layers
-        """
+        """  # noqa: E501
         self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
         gdf = self.data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs
@@ -315,7 +313,7 @@ class GridMixin(object):
 
     @property
     def grid(self):
-        """Model static gridded data."""
+        """Model static gridded data as xarray.Dataset."""
         if len(self._grid) == 0 and self._read:
             self.read_grid()
         return self._grid
@@ -462,7 +460,7 @@ class GridModel(GridMixin, Model):
     ) -> xr.DataArray:
         """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
 
-        An 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
+        A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
         existing grid is given, then no new grid will be generated.
 
         Adds/Updates model layers (if add_mask):

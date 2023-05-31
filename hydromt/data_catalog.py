@@ -150,7 +150,7 @@ class DataCatalog(object):
         return self._sources.__setitem__(key, value)
 
     def __iter__(self):
-        """Itterate over soruces."""
+        """Iterate over sources."""
         return self._sources.__iter__()
 
     def __len__(self):
@@ -213,7 +213,7 @@ class DataCatalog(object):
         self.from_predefined_catalogs(name, version)
 
     def from_predefined_catalogs(self, name: str, version: str = "latest") -> None:
-        """Generate a cataloge from one of the predefined ones."""
+        """Generate a catalogue from one of the predefined ones."""
         if "=" in name:
             name, version = name.split("=")[0], name.split("=")[-1]
         if name not in self.predefined_catalogs:

@@ -29,7 +29,7 @@ Checklist pull requests
 If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure do the following steps:
 1. If it does not yet exist, create an issue following the :ref:`issue conventions <Issue conventions>`
 2. Create a new branch where you develop your new code, see also :ref:`Git conventions <Git conventions>`
-3. Make sure all pre-commit hooks pass, see  :ref:`code format <Code format>`. For *ipynb files make sure that you have cleared all results.
+3. Make sure all pre-commit hooks pass, see  :ref:`code format <Code format>`. For ipynb files make sure that you have cleared all results.
 4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the
   `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`__
 5. Push your commits to the github repository and open a draft pull request. Potentially, ask other contributors for feedback.
@@ -172,10 +172,9 @@ It's telling us we first need to tell it what we want to do with the current con
 
 Success!
 This is a simple introduction into a potentially very complicated subject. You can read more about the different possibilities here:
+
 * `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
 * `Merge Strategies <https://www.atlassian.com/git/tutorials/using-branches/merge-strategy>`_
-
-
 
 
 HydroMT design conventions
@@ -275,13 +274,7 @@ You can install pre-commit by running:
 
   $ pip install pre-commit
 
-<<<<<<< HEAD
 It is best to install pre-commit in your existing enviromnment. After that simply install the necessary hooks with
-||||||| 6948ad29
-Then simply install the necessary hooks with
-=======
-Then simply install the necessary hooks with
->>>>>>> main
 
 .. code-block:: console
 
@@ -291,12 +284,7 @@ After doing this pre-commit will check all your staged files when commiting.
 
 For example say that you've added the following new feature:
 
-<<<<<<< HEAD
-||||||| 6948ad29
 If you want you can use pre-commit on it's own to run agains all files for exmaple.
-=======
-If you want you can use pre-commit on it's own to run agains all files for exmaple.
->>>>>>> main
 
 .. code-block:: console
 
@@ -370,6 +358,86 @@ After you've fixed this problem by for example adding the docstring """Implement
    create mode 100644 hydromt/new_feature.py
 
 Now you can push your commit as normal.
+(you do not have to do this, it is just for demonstration, but you can copy and execute this code to try for yourself.)
+
+Then you can add the new feature to the git staging area and try to commit as usual. However pre-commit will tell you that you should add some docstrings for example. You should see an output similar to the one below:
+
+.. code-block:: console
+
+  $ git add hydromt/new_feature.py
+  $ git commit -m "The feature you've all been waiting for."
+    Trim Trailing Whitespace.................................................Passed
+    Fix End of Files.........................................................Failed
+    - hook id: end-of-file-fixer
+    - exit code: 1
+    - files were modified by this hook
+
+    Fixing hydromt/new_feature.py
+
+    Check Yaml...........................................(no files to check)Skipped
+    Check for added large files..............................................Passed
+    Check python ast.........................................................Passed
+    Check JSON...........................................(no files to check)Skipped
+    Debug Statements (Python)................................................Passed
+    Mixed line ending........................................................Passed
+    Format YAML files....................................(no files to check)Skipped
+    ruff.....................................................................Failed
+    - hook id: ruff
+    - exit code: 1
+    - files were modified by this hook
+
+    hydromt/new_feature.py:1:1: D100 Missing docstring in public module
+    Found 2 errors (1 fixed, 1 remaining).
+
+    black....................................................................Passed
+
+This means that pre-commit has found issues in the code you submitted. In the case of the import it was able to fix it automatically. However `ruff` has also detected that you have not added a docstring for the new feature. You can find this out by running:
+
+.. code-block:: console
+
+  $ ruff .
+
+which will show you the same output:
+
+.. code-block:: console
+
+  hydromt/new_feature.py:1:1: D100 Missing docstring in public module
+  Found 1 error.
+
+After you've fixed this problem by for example adding the docstring """Implement the cool new feature""" at the top of the new file, you just have to add the new version to the staging area again and re-attempt the commit which should now succeed:
+
+.. code-block:: console
+
+  $ git add hydromt/new_feature.py
+  $ git commit -m "The feature you've all been waiting for."
+  Trim Trailing Whitespace.................................................Passed
+  Fix End of Files.........................................................Passed
+  Check Yaml...........................................(no files to check)Skipped
+  Check for added large files..............................................Passed
+  Check python ast.........................................................Passed
+  Check JSON...........................................(no files to check)Skipped
+  Debug Statements (Python)................................................Passed
+  Mixed line ending........................................................Passed
+  Format YAML files....................................(no files to check)Skipped
+  ruff.....................................................................Passed
+  black....................................................................Passed
+  [linting a5e9b683] The feature you've all been waiting for.
+   1 file changed, 4 insertions(+)
+   create mode 100644 hydromt/new_feature.py
+
+Now you can push your commit as normal.
+
+From time to time you might see comments like these:
+
+.. code-block:: python
+
+  import rioxarray # noqa: F401
+
+The `noqa` is instructing the linters to ignore the specified rule for the line in question. Whenever possible, we try to avoid using these but it's not always possible. The full list of rules can be found here: `Ruff Rules Section <https://beta.ruff.rs/docs/rules/>`_ Some common ones are:
+
+* E501: Line too long.
+* F401: Unused import.
+* D102: Public methods should have docstrings.
 
 
 Test and CI
