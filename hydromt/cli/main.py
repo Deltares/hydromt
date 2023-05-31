@@ -173,7 +173,8 @@ def build(
     hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini  -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -d deltares_data -d /path/to/data_catalog.yml -v
 
     To build a sfincs model based on a bbox
-    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -d /path/to/data_catalog.yml -v
+    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini  -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
+
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
     logger = log.setuplog(
@@ -351,8 +352,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     hydromt clip wflow /path/to/model_root /path/to/model_destination "{'basin': 1}"
 
     Example usage basins whose outlets are inside a geometry
-    hydromt clip wflow /path/to/model_root /path/to/model_destination \
-        "{'outlet': 'geometry.geojson'}"
+    hydromt clip wflow /path/to/model_root /path/to/model_destination "{'outlet': 'geometry.geojson'}"
 
     All available option in the clip_staticmaps function help.
 

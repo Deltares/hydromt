@@ -91,8 +91,8 @@ can create a pull request online or by pushing your branch to a feature-branch.
 Dealing with merge conflicts
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Because git facilitates many people working on the same peice of code, it can happen that someone else makes changes to the repository before you do.
-When this happens it's important to syncronize the code base before merging to make sure the outcome will look as we expect. For example, imagine you've made a new feature by branching off main:
+Because git facilitates many people working on the same piece of code, it can happen that someone else makes changes to the repository before you do.
+When this happens it's important to synchronize the code base before merging to make sure the outcome will look as we expect. For example, imagine you've made a new feature by branching off main:
 
 .. code-block:: console
 
@@ -110,10 +110,12 @@ in the mean time your colleague does the same:
   $ git add hydromt/feature-B.py
   $ git commit -m "implement feature B!"
 
-If you want to syncronize with your colleague you can do this by using the `git merge` command:
+If you want to syncronize with your colleague, it is important that you both make sure that you have the up to date version by using the `git pull` command.
+After that you can bring your branch up to date this by using the `git merge` command:
 
 .. code-block:: console
 
+  $ git pull
   $ git merge feature-A
   Merge made by the 'ort' strategy.
    tmp-a.py | 0
@@ -173,8 +175,10 @@ It's telling us we first need to tell it what we want to do with the current con
 Success!
 This is a simple introduction into a potentially very complicated subject. You can read more about the different possibilities here:
 
-* `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
+*  `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
 * `Merge Strategies <https://www.atlassian.com/git/tutorials/using-branches/merge-strategy>`_
+
+
 
 
 HydroMT design conventions
@@ -284,80 +288,11 @@ After doing this pre-commit will check all your staged files when commiting.
 
 For example say that you've added the following new feature:
 
-If you want you can use pre-commit on it's own to run agains all files for exmaple.
 
 .. code-block:: console
 
   $ echo 'import os\nprint("This is a new exciting feature")' > hydromt/new_feature.py
 
-(you do not have to do this, it is just for demonstration, but you can copy and execute this code to try for yourself.)
-
-Then you can add the new feature to the git staging area and try to commit as usual. However pre-commit will tell you that you should add some docstrings for example. You should see an output similar to the one below:
-
-.. code-block:: console
-
-  $ git add hydromt/new_feature.py
-  $ git commit -m "The feature you've all been waiting for."
-    Trim Trailing Whitespace.................................................Passed
-    Fix End of Files.........................................................Failed
-    - hook id: end-of-file-fixer
-    - exit code: 1
-    - files were modified by this hook
-
-    Fixing hydromt/new_feature.py
-
-    Check Yaml...........................................(no files to check)Skipped
-    Check for added large files..............................................Passed
-    Check python ast.........................................................Passed
-    Check JSON...........................................(no files to check)Skipped
-    Debug Statements (Python)................................................Passed
-    Mixed line ending........................................................Passed
-    Format YAML files....................................(no files to check)Skipped
-    ruff.....................................................................Failed
-    - hook id: ruff
-    - exit code: 1
-    - files were modified by this hook
-
-    hydromt/new_feature.py:1:1: D100 Missing docstring in public module
-    Found 2 errors (1 fixed, 1 remaining).
-
-    black....................................................................Passed
-
-This means that pre-commit has found issues in the code you submitted. In the case of the import it was able to fix it automatically. However `ruff` has also detected that you have not added a docstring for the new feature. You can find this out by running:
-
-.. code-block:: console
-
-  $ ruff .
-
-which will show you the same output:
-
-.. code-block:: console
-
-  hydromt/new_feature.py:1:1: D100 Missing docstring in public module
-  Found 1 error.
-
-After you've fixed this problem by for example adding the docstring """Implement the cool new feature""" at the top of the new file, you just have to add the new version to the staging area again and re-attempt the commit which should now succeed:
-
-.. code-block:: console
-
-  $ git add hydromt/new_feature.py
-  $ git commit -m "The feature you've all been waiting for."
-  Trim Trailing Whitespace.................................................Passed
-  Fix End of Files.........................................................Passed
-  Check Yaml...........................................(no files to check)Skipped
-  Check for added large files..............................................Passed
-  Check python ast.........................................................Passed
-  Check JSON...........................................(no files to check)Skipped
-  Debug Statements (Python)................................................Passed
-  Mixed line ending........................................................Passed
-  Format YAML files....................................(no files to check)Skipped
-  ruff.....................................................................Passed
-  black....................................................................Passed
-  [linting a5e9b683] The feature you've all been waiting for.
-   1 file changed, 4 insertions(+)
-   create mode 100644 hydromt/new_feature.py
-
-Now you can push your commit as normal.
 (you do not have to do this, it is just for demonstration, but you can copy and execute this code to try for yourself.)
 
 Then you can add the new feature to the git staging area and try to commit as usual. However pre-commit will tell you that you should add some docstrings for example. You should see an output similar to the one below:
