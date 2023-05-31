@@ -102,7 +102,7 @@ def load(ep, logger=logger) -> Model:
 
 class ModelCatalog:
 
-    """The model cataloge provides access to plugins and their models."""
+    """The model catalogue provides access to plugins and their Model classes."""
 
     def __init__(self):
         """Initiate the catalog object."""
@@ -153,7 +153,7 @@ class ModelCatalog:
         return self._cls[name]
 
     def __str__(self):
-        """Generate string representation containing the regitered entrypoints."""
+        """Generate string representation containing the registered entrypoints."""
         plugins = "".join(
             [
                 f" - {name} ({self.eps[name].distro.name}"

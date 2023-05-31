@@ -91,8 +91,8 @@ can create a pull request online or by pushing your branch to a feature-branch.
 Dealing with merge conflicts
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Because git facilitates many people working on the same peice of code, it can happen that someone else makes changes to the repository before you do.
-When this happens it's important to syncronize the code base before merging to make sure the outcome will look as we expect. For example, imagine you've made a new feature by branching off main:
+Because git facilitates many people working on the same piece of code, it can happen that someone else makes changes to the repository before you do.
+When this happens it's important to synchronize the code base before merging to make sure the outcome will look as we expect. For example, imagine you've made a new feature by branching off main:
 
 .. code-block:: console
 

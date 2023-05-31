@@ -1,4 +1,4 @@
-"""hydrological methods powered by pyFlwDir."""
+"""Hydrological flow direction methods powered by pyFlwDir."""
 
 import logging
 import warnings

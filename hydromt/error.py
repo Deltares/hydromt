@@ -1,4 +1,4 @@
-"""Implementation of deprication errros."""
+"""Implementation of deprecation errors."""
 
 
 class DeprecatedError(Exception):

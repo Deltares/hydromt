@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""gis related convience functions. More in pyflwdir.gis_utils."""
+"""GIS related convenience functions."""
 import glob
 import logging
 import os
@@ -295,7 +295,7 @@ def axes_attrs(crs):
 
 
 def meridian_offset(ds, x_name="x", bbox=None):
-    """re-arange data along x dim."""
+    """re-arrange data along x dim."""
     if ds.raster.crs is None or ds.raster.crs.is_projected:
         raise ValueError("The method is only applicable to geographic CRS")
     lons = np.copy(ds[x_name].values)
@@ -356,7 +356,7 @@ def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
 
 
 def affine_to_meshgrid(transform, shape):
-    """Return a mesgrid of pixel center coordinates based on the transform.
+    """Return a meshgrid of pixel center coordinates based on the transform.
 
     Parameters
     ----------
@@ -383,7 +383,7 @@ def affine_to_meshgrid(transform, shape):
 
 ## CELLAREAS
 def reggrid_area(lats, lons):
-    """Return the cell area [m2] for a regular grid based on the centres lat, lon."""
+    """Return the cell area [m2] for a regular grid based on its cell centres lat, lon."""
     xres = np.abs(np.mean(np.diff(lons)))
     yres = np.abs(np.mean(np.diff(lats)))
     area = np.ones((lats.size, lons.size), dtype=lats.dtype)
@@ -391,7 +391,7 @@ def reggrid_area(lats, lons):
 
 
 def cellarea(lat, xres=1.0, yres=1.0):
-    """Return the area [m2] of cell based its center latitude resolution.
+    """Return the area [m2] of cell based on its center latitude and resolution in degrees.
 
     Resolution is in measured degrees.
     """

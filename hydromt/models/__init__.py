@@ -20,9 +20,9 @@ __all__ = [
 # NOTE: pygeos is still required in XUGRID;
 # remove requirement after https://github.com/Deltares/xugrid/issues/33
 if _compat.HAS_XUGRID and _compat.HAS_PYGEOS:
-    from .model_mesh import MeshModel
+    from .model_mesh import MeshModel, MeshMixin
 
-    __all__.append(MeshModel)
+    __all__.append(MeshModel, MeshMixin)
 
 # expose global MODELS object which discovers and loads
 # any local generalized or plugin model class on-the-fly

@@ -1,4 +1,4 @@
-"""Implementation for the geoset DataAdapter."""
+"""Implementation for the geodataset DataAdapter."""
 import logging
 import os
 from os.path import join
@@ -24,7 +24,7 @@ GeoDatasetSource = NewType("GeoDatasetSource", Union[str, Path])
 
 class GeoDatasetAdapter(DataAdapter):
 
-    """DatasetAdapter for Geo datasets."""
+    """DatasetAdapter for GeoDatasets."""
 
     _DEFAULT_DRIVER = "vector"
     _DRIVERS = {

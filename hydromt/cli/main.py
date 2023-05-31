@@ -158,10 +158,10 @@ def build(
     Example usage:
     --------------
 
-    To build a wflow model for a subbasin using and point coordinates snapped to cells
-    with stream order >= 4
+    To build a wflow model for a subbasin using a point coordinates snapped to cells
+    with upstream area >= 50 km2
     hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini \
-        -r "{'subbasin': [-7.24, 62.09], 'strord': 4}" \
+        -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" \
         -d deltares_data \
         -d /path/to/data_catalog.yml -v
 
@@ -347,9 +347,9 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     For options to build wflow models see:
 
     Example usage to clip a wflow model for a subbasin derived from point coordinates
-    snapped to cells with stream order >= 4
+    snapped to cells with upstream area >= 50 km2
     hydromt clip wflow /path/to/model_root /path/to/model_destination \
-        "{'subbasin': [-7.24, 62.09], 'wflow_streamorder': 4}"
+        "{'subbasin': [-7.24, 62.09], 'wflow_uparea': 50}"
 
     Example usage basin based on ID from model_root basins map
     hydromt clip wflow /path/to/model_root /path/to/model_destination "{'basin': 1}"
