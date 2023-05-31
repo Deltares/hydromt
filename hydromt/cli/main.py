@@ -11,6 +11,16 @@ from .. import __version__, log
 from ..models import MODELS
 from . import cli_utils
 
+BUILDING_EXE = False
+if BUILDING_EXE:
+    import sys
+
+    exepath = sys.prefix
+    import pyproj
+
+    pyproj_datadir = join(exepath, "proj-data")
+    pyproj.datadir.set_data_dir(pyproj_datadir)
+
 logger = logging.getLogger(__name__)
 
 

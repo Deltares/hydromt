@@ -361,6 +361,18 @@ After you've fixed this problem by for example adding the docstring """Implement
 
 Now you can push your commit as normal.
 
+From time to time you might see comments like these:
+
+.. code-block:: python
+
+  import rioxarray # noqa: F401
+
+The `noqa` is instructing the linters to igore the specified rule for the line in question. Whenever possible, we try to avoid using these but it's not allways possible. The full list of rules can be found here: `Ruff Rules Seciont <https://beta.ruff.rs/docs/rules/>`__ Some common ones are:
+
+* E501: Line too long.
+* F401: Unused import.
+* D102: Public methods should have docstrings.
+
 
 Test and CI
 -----------
