@@ -18,6 +18,7 @@ dependencies = [
     "geopandas>=0.10",
     "gdal>=3.1",
     "fiona==1.8.22",
+    "pip",
     "numpy",
     "netcdf4",
     "openpyxl",
@@ -69,7 +70,8 @@ doc = [
     "sphinx_design",
     "sphinx_autosummary_accessors",
     "ipython",
-    "ipywidget"
+    "ipywidgets",
+    "cartopy"
 ]
 
 
