@@ -367,7 +367,7 @@ From time to time you might see comments like these:
 
   import rioxarray # noqa: F401
 
-The `noqa` is instructing the linters to igore the specified rule for the line in question. Whenever possible, we try to avoid using these but it's not allways possible. The full list of rules can be found here: `Ruff Rules Seciont <https://beta.ruff.rs/docs/rules/>`__ Some common ones are:
+The `noqa` is instructing the linters to ignore the specified rule for the line in question. Whenever possible, we try to avoid using these but it's not always possible. The full list of rules can be found here: `Ruff Rules Section <https://beta.ruff.rs/docs/rules/>`_ Some common ones are:
 
 * E501: Line too long.
 * F401: Unused import.
