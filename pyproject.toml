@@ -56,6 +56,8 @@ all = [
     "xugrid",
     "pygeos",
     "pyet",
+    "s3fs", 
+    "gcsfs"
 ]
 test = [
     "black",
