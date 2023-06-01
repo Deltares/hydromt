@@ -26,7 +26,7 @@ in the configuration `.yaml file <https://en.wikipedia.org/wiki/YAML>`_
 
 
 Model configuration (.yaml) file
--------------------------------
+--------------------------------
 
 The .yaml file has a simple syntax with sections and key-value pairs. In HydroMT sections corresponds with model methods
 and the key-value pair with the arguments of each method. For available methods and their arguments of a specific model,

@@ -1186,7 +1186,7 @@ class XRasterBase(XGeoBase):
         sindex : bool, optional
             Create a spatial index to select overlapping geometries before rasterizing,
             by default False.
-        **kwargs : optional
+        kwargs : optional
             Additional keyword arguments to pass to `features.rasterize`.
 
         Returns:
@@ -1345,7 +1345,7 @@ class XRasterBase(XGeoBase):
         invert : bool, optional
             If True, the mask will be False where shapes overlap pixels,
             by default False
-        **kwargs : optional
+        kwargs : optional
             Additional keyword arguments to pass to `features.rasterize`.
 
 
