@@ -840,7 +840,10 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            self.update(**{name: DataFrameAdapter(path=path, **kwargs)})
+            driver = kwargs.pop("driver", None) # retrieve driver from kwargs before kwargs are passed as driver_kwargs
+            rename = kwargs.pop("rename", None)
+            
+            self.update(**{name: DataFrameAdapter(path=path, driver_kwargs=kwargs, driver=driver, rename=rename)})
         elif data_like in self.sources:
             name = data_like
         else:
@@ -881,6 +884,7 @@ def _parse_data_dict(
     data = dict()
     for name, source in data_dict.items():
         source = source.copy()  # important as we modify with pop
+    
         if "alias" in source:
             alias = source.pop("alias")
             if alias not in data_dict:
@@ -910,6 +914,7 @@ def _parse_data_dict(
         # lower kwargs for backwards compatability
         # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
         driver_kwargs = source.pop("kwargs", {})
+        driver_kwargs.update(source.pop("driver_kwargs", {}))
         for driver_kwarg in driver_kwargs:
             if "fn" in driver_kwarg:
                 driver_kwargs.update(
@@ -929,7 +934,7 @@ def _parse_data_dict(
                     path_n = path_n.replace("{" + k + "}", v)
                     name_n = name_n.replace("{" + k + "}", v)
 
-                    data[name_n] = adapter(
+                data[name_n] = adapter(
                         path=path_n,
                         name=name_n,
                         catalog_name=catalog_name,

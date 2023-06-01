@@ -97,6 +97,7 @@ class RasterDatasetAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            **kwargs
         )
 
     def to_file(
