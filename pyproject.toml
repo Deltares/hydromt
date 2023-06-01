@@ -27,6 +27,7 @@ dependencies = [
     "pyflwdir>=0.5.4",
     "pyproj",
     "ruff",
+    "pre-commit",
     "rasterio",
     "requests",
     "rioxarray",
@@ -56,7 +57,7 @@ all = [
     "xugrid",
     "pygeos",
     "pyet",
-    "s3fs", 
+    "s3fs",
     "gcsfs"
 ]
 test = [
