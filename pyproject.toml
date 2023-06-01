@@ -97,6 +97,9 @@ exclude = ["docs"]
 "hydromt/models/__init__.py" = ["F403", "F401", "F405"]
 "hydromt/_compat.py" = ["F401"]
 
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
 [tool.flit.sdist]
 include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]

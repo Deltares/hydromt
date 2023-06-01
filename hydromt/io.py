@@ -37,7 +37,7 @@ def open_raster(
 
     :py:meth:`rioxarray.open_rasterio`, but return squeezed DataArray.
 
-    Arguments:
+    Arguments
     ---------
     filename : str, path, file-like, rasterio.DatasetReader, or rasterio.WarpedVRT
         Path to the file to open. Or already open rasterio dataset.
@@ -56,7 +56,7 @@ def open_raster(
         The logger object used for logging messages. If not provided, the default
         logger will be used.
 
-    Returns:
+    Returns
     -------
     data : DataArray
         DataArray
@@ -108,7 +108,7 @@ def open_mfraster(
     If ``mosaic`` the DataArrays are concatenated along the the spatial dimensions
     using :py:meth:`~hydromt.raster.merge`.
 
-    Arguments:
+    Arguments
     ---------
     paths: str, list of str/Path/file-like
         Paths to the rasterio/gdal files.
@@ -139,7 +139,7 @@ def open_mfraster(
     **kwargs:
         key-word arguments are passed to :py:meth:`hydromt.raster.open_raster`
 
-    Returns:
+    Returns
     -------
     data : DataSet
         The newly created DataSet.
@@ -235,7 +235,7 @@ def open_raster_from_tindex(
     tile index file as generated with `gdaltindex`. A bbox or geom describing the
     output area of interest is required.
 
-    Arguments:
+    Arguments
     ---------
     fn_tindex: path, str
         Path to tile index file.
@@ -253,7 +253,7 @@ def open_raster_from_tindex(
         key-word arguments are passed to :py:meth:`hydromt.io.open_mfraster()`
 
 
-    Returns:
+    Returns
     -------
     data : Dataset
         A single-variable Dataset of merged raster tiles.
@@ -302,7 +302,7 @@ def open_geodataset(
 ):
     """Open point location GIS file and timeseries file combine a single xarray.Dataset.
 
-    Arguments:
+    Arguments
     ---------
     fn_locs: path, str
         Path to point location file, see :py:meth:`geopandas.read_file` for options.
@@ -333,7 +333,7 @@ def open_geodataset(
         The logger object used for logging messages. If not provided, the default
         logger will be used.
 
-    Returns:
+    Returns
     -------
     ds: xarray.Dataset
         Dataset with geospatial coordinates.
@@ -367,7 +367,7 @@ def open_timeseries_from_table(
     other dimension. In case of string location indices, non-numeric parts are
     filtered from the location index.
 
-    Arguments:
+    Arguments
     ---------
     fn: path, str
         Path to time series file
@@ -382,7 +382,7 @@ def open_timeseries_from_table(
 
 
 
-    Returns:
+    Returns
     -------
     da: xarray.DataArray
         DataArray
@@ -516,8 +516,8 @@ def open_vector_from_table(
     driver: {'csv', 'xls', 'xlsx', 'xy'}
         If 'csv' use :py:meth:`pandas.read_csv` to read the data;
         If 'xls' or 'xlsx' use :py:meth:`pandas.read_excel` with `engine=openpyxl`
-        If 'xy' use :py:meth:`pandas.read_csv` with `index_col=False`,
-            `header=None`, `delim_whitespace=True`.
+        If 'xy' use :py:meth:`pandas.read_csv` with `index_col=False`, `header=None`,
+        `delim_whitespace=True`.
     x_dim, y_dim: str
         Name of x, y column. By default the x-column header should be one of
         ['x', 'longitude', 'lon', 'long'], and y-column header one of

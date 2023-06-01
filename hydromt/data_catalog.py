@@ -60,7 +60,7 @@ class DataCatalog(object):
         Helps to easily read from different files and keep track of
         files which have been accessed.
 
-        Arguments:
+        Arguments
         ---------
         data_libs: (list of) str, Path, optional
             One or more paths to data catalog yaml files or names of predefined data
@@ -633,7 +633,7 @@ class DataCatalog(object):
         will be returned as :py:class:`xarray.DataArray` rather than
         :py:class:`xarray.Dataset`.
 
-        Arguments:
+        Arguments
         ---------
         data_like: str, Path, xr.Dataset, xr.Datarray
             Data catalog key, path to raster file or raster xarray data object.
@@ -665,7 +665,7 @@ class DataCatalog(object):
             Additional keyword arguments that are passed to the `RasterDatasetAdapter`
             function.
 
-        Returns:
+        Returns
         -------
         obj: xarray.Dataset or xarray.DataArray
             RasterDataset
@@ -721,33 +721,34 @@ class DataCatalog(object):
         To return only the dataframe columns of interest provide the
         `variables` argument.
 
-        Arguments:
+        Arguments
         ---------
         data_like: str, Path, gpd.GeoDataFrame
             Data catalog key, path to vector file or a vector geopandas object.
             If a path to a vector file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
-        bbox : array-like of floats
+        bbox: array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest
             (in WGS84 coordinates).
-        geom : geopandas.GeoDataFrame/Series,
+        geom: geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
-        buffer : float, optional
-            Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
-        predicate : {'intersects', 'within', 'contains', 'overlaps',
-            'crosses', 'touches'}, optional If predicate is provided,
-            the GeoDataFrame is filtered by testing the predicate function
-            against each item. Requires bbox or mask. By default 'intersects'
-        align : float, optional
+        buffer: float, optional
+            Buffer around the `bbox` or `geom` area of interest in meters.
+            By default 0.
+        predicate: 'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'
+            Optional If predicate is provided, the GeoDataFrame is filtered by testing
+            the predicate function against each item. Requires bbox or mask.
+            By default 'intersects'
+        align: float, optional
             Resolution to align the bounding box, by default None
-        variables : str or list of str, optional.
+        variables: str or list of str, optional.
             Names of GeoDataFrame columns to return. By default all columns are
             returned.
         **kwargs:
             Additional keyword arguments that are passed to the `RasterDatasetAdapter`
             function.
 
-        Returns:
+        Returns
         -------
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
@@ -804,7 +805,7 @@ class DataCatalog(object):
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as xarray.DataArray rather than Dataset.
 
-        Arguments:
+        Arguments
         ---------
         data_like: str, Path, xr.Dataset, xr.DataArray
             Data catalog key, path to geodataset file or geodataset xarray object.
@@ -832,7 +833,7 @@ class DataCatalog(object):
             Additional keyword arguments that are passed to the `GeoDatasetAdapter`
             function.
 
-        Returns:
+        Returns
         -------
         obj: xarray.Dataset or xarray.DataArray
             GeoDataset
