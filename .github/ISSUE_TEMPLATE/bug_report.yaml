@@ -1,8 +1,7 @@
 ---
 name: Bug Report
 description: Report incorrect behavior in the HydroMT library
-title: 'BUG: '
-labels: [bug, needs refinement]
+labels: [Bug, Needs refinement]
 
 body:
   - type: checkboxes
@@ -16,30 +15,30 @@ body:
         - label: >
             I have checked that this bug exists on the latest version of HydroMT.
           required: true
-        - label: >
-            I have checked that this bug exists on the main branch of HydroMT.
   - type: textarea
     id: example
     attributes:
       label: Reproducible Example
       description: >
-        Please provide a minimal, copy-pastable example to reproduce the behavior:
+        Please provide a minimal, copy-pastable example or a link to a public repository that reproduces the behavior. If providing a copy pastable example,
+        you may assume your in a clean up to date version of hydromt with a python enviroment active. In the case of a repository, ensure the repository
+        has a README.md which includes intructions to reproduce the behaviour.
     validations:
       required: true
   - type: textarea
     id: problem
     attributes:
-      label: Issue Description
+      label: Current behaviour
       description: >
-        Please provide a description of the issue shown in the reproducible example:
+        Please provide a description of the incorrect behaviour shown in the reproducible example:
     validations:
       required: true
   - type: textarea
-    id: version
+    id: problem
     attributes:
-      label: Installed Versions
+      label: Desired behaviour
       description: >
-        Please provide the version of HydroMT:
+        Please provide a description of what you think the behaviour should be:
     validations:
       required: true
   - type: textarea

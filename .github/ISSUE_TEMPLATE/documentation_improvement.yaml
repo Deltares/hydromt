@@ -1,8 +1,7 @@
 ---
 name: Documentation Improvement
 description: Report wrong or missing documentation
-title: 'DOC: '
-labels: [documentation, needs refinement]
+labels: [Documentation, Needs refinement]
 
 body:
   - type: checkboxes
@@ -13,14 +12,23 @@ body:
             I have checked that the issue still exists on the latest versions of the docs
             on `main` [here](https://github.com/Deltares/hydromt)
           required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of issue
+      description: What kind of documentation issue is this?
+      options:
+        - Docs are wrong
+        - Docs are unclear
+        - Docs are missing
+    validations:
+      required: true
   - type: textarea
     id: location
     attributes:
       label: Location of the documentation
       description: >
-        Please provide the URL of the documentation:
-    validations:
-      required: true
+        If the docs are wrong or unclear please provide the URL of the documentation in question:
   - type: textarea
     id: problem
     attributes:
@@ -35,5 +43,3 @@ body:
       label: Suggested fix for documentation
       description: >
         Please explain your suggested fix and why it's better than the existing documentation:
-    validations:
-      required: true
