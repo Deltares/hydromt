@@ -17,6 +17,8 @@ dependencies = [
     "fsspec",
     "geopandas>=0.10",
     "gdal>=3.1",
+    "fiona==1.8.22",
+    "pip",
     "numpy",
     "netcdf4",
     "openpyxl",
@@ -24,6 +26,8 @@ dependencies = [
     "pandas",
     "pyflwdir>=0.5.4",
     "pyproj",
+    "ruff",
+    "pre-commit",
     "rasterio",
     "requests",
     "rioxarray",
@@ -53,6 +57,8 @@ all = [
     "xugrid",
     "pygeos",
     "pyet",
+    "s3fs",
+    "gcsfs"
 ]
 test = [
     "black",
@@ -67,6 +73,9 @@ doc = [
     "sphinx",
     "sphinx_design",
     "sphinx_autosummary_accessors",
+    "ipython",
+    "ipywidgets",
+    "cartopy"
 ]
 
 
