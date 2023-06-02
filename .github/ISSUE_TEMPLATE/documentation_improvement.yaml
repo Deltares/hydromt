@@ -27,13 +27,13 @@ body:
     id: location
     attributes:
       description: >
-        If the docs are wrong or unclear please provide the URL of the documentation in question:
+        If the docs are wrong or unclear please provide the URL of the documentation in question
       label: Location of the documentation
   - type: textarea
     id: problem
     attributes:
       description: >
-        Please provide a description of the documentation problem:
+        Please provide a description of the documentation problem
       label: Documentation problem
     validations:
       required: true
@@ -41,5 +41,5 @@ body:
     id: suggested-fix
     attributes:
       description: >
-        Please explain your suggested fix and why it's better than the existing documentation:
+        Please explain your suggested fix and why it's better than the existing documentation
       label: Suggested fix for documentation

@@ -17,7 +17,7 @@ body:
     id: description
     attributes:
       description: >
-        Please provide a clear and concise description of the feature you're requesting:
+        Please provide a clear and concise description of the feature you're requesting
       label: Enhancement Description
     validations:
       required: true
@@ -25,11 +25,11 @@ body:
     id: use-case
     attributes:
       description: >
-        Please describe a situation in which this feature would be useful to you, with code or cli examples if possible.
+        Please describe a situation in which this feature would be useful to you, with code or cli examples if possible
       label: Use case
   - type: textarea
     id: context
     attributes:
       description: >
-        Please add any other context about the enhancement here:
+        Please add any other context about the enhancement here
       label: Additional Context

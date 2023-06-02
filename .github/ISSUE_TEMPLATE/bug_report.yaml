@@ -27,7 +27,7 @@ body:
     id: current-behaviour
     attributes:
       description: >
-        Please provide a description of the incorrect behaviour shown in the reproducible example:
+        Please provide a description of the incorrect behaviour shown in the reproducible example
       label: Current behaviour
     validations:
       required: true
@@ -35,7 +35,7 @@ body:
     id: expected-behaviour
     attributes:
       description: >
-        Please provide a description of what you think the behaviour should be:
+        Please provide a description of what you think the behaviour should be
       label: Desired behaviour
     validations:
       required: true
@@ -43,7 +43,7 @@ body:
     id: additional
     attributes:
       description: >
-        Please add any other context about the bug here:
+        Please add any other context about the bug here
       label: Additional context
     validations:
       required: false
