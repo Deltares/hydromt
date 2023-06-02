@@ -16,34 +16,34 @@ body:
   - type: textarea
     id: example
     attributes:
-      label: Reproducible Example
       description: >
         Please provide a minimal, copy-pastable example or a link to a public repository that reproduces the behavior. If providing a copy pastable example,
         you may assume your in a clean up to date version of hydromt with a python enviroment active. In the case of a repository, ensure the repository
         has a README.md which includes intructions to reproduce the behaviour.
+      label: Reproducible Example
     validations:
       required: true
   - type: textarea
     id: current-behaviour
     attributes:
-      label: Current behaviour
       description: >
         Please provide a description of the incorrect behaviour shown in the reproducible example:
+      label: Current behaviour
     validations:
       required: true
   - type: textarea
     id: expected-behaviour
     attributes:
-      label: Desired behaviour
       description: >
         Please provide a description of what you think the behaviour should be:
+      label: Desired behaviour
     validations:
       required: true
   - type: textarea
     id: additional
     attributes:
-      label: Additional context
       description: >
         Please add any other context about the bug here:
+      label: Additional context
     validations:
       required: false

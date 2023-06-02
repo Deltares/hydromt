@@ -1,8 +1,8 @@
-## Issue adressed
+## Issue addressed
 Fixes #<issue number>
 
 ## Explanation
-Explain how you adressed the bug/feature request, what choices you made and why.
+Explain how you addressed the bug/feature request, what choices you made and why.
 
 ## Checklist
 - [ ] Updated tests or added new tests
