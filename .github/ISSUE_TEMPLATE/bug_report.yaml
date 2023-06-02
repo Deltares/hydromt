@@ -9,11 +9,9 @@ body:
     attributes:
       label: HydroMT version checks
       options:
-        - label: >
-            I have checked that this issue has not already been reported.
+        - label: I have checked that this issue has not already been reported.
           required: true
-        - label: >
-            I have checked that this bug exists on the latest version of HydroMT.
+        - label: I have checked that this bug exists on the latest version of HydroMT.
           required: true
   - type: textarea
     id: example
@@ -26,7 +24,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: problem
+    id: current-behaviour
     attributes:
       label: Current behaviour
       description: >
@@ -34,7 +32,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: problem
+    id: expected-behaviour
     attributes:
       label: Desired behaviour
       description: >
@@ -42,7 +40,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: Additional
+    id: additional
     attributes:
       label: Additional context
       description: >
