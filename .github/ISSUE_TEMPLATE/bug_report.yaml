@@ -1,8 +1,7 @@
 ---
 name: Bug Report
 description: Report incorrect behavior in the HydroMT library
-title: 'BUG: '
-labels: [bug, needs refinement]
+labels: [Bug, Needs refinement]
 
 body:
   - type: checkboxes
@@ -10,43 +9,41 @@ body:
     attributes:
       label: HydroMT version checks
       options:
-        - label: >
-            I have checked that this issue has not already been reported.
+        - label: I have checked that this issue has not already been reported.
           required: true
-        - label: >
-            I have checked that this bug exists on the latest version of HydroMT.
+        - label: I have checked that this bug exists on the latest version of HydroMT.
           required: true
-        - label: >
-            I have checked that this bug exists on the main branch of HydroMT.
   - type: textarea
     id: example
     attributes:
+      description: >
+        Please provide a minimal, copy-pastable example or a link to a public repository that reproduces the behavior. If providing a copy pastable example,
+        you may assume your in a clean up to date version of hydromt with a python enviroment active. In the case of a repository, ensure the repository
+        has a README.md which includes intructions to reproduce the behaviour.
       label: Reproducible Example
-      description: >
-        Please provide a minimal, copy-pastable example to reproduce the behavior:
     validations:
       required: true
   - type: textarea
-    id: problem
+    id: current-behaviour
     attributes:
-      label: Issue Description
       description: >
-        Please provide a description of the issue shown in the reproducible example:
+        Please provide a description of the incorrect behaviour shown in the reproducible example
+      label: Current behaviour
     validations:
       required: true
   - type: textarea
-    id: version
+    id: expected-behaviour
     attributes:
-      label: Installed Versions
       description: >
-        Please provide the version of HydroMT:
+        Please provide a description of what you think the behaviour should be
+      label: Desired behaviour
     validations:
       required: true
   - type: textarea
-    id: Additional
+    id: additional
     attributes:
+      description: >
+        Please add any other context about the bug here
       label: Additional context
-      description: >
-        Please add any other context about the bug here:
     validations:
       required: false
