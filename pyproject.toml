@@ -19,7 +19,7 @@ dependencies = [
     "gdal>=3.1",
     "fiona==1.8.22",
     "pip",
-    "numpy",
+    "numpy>=1.20",
     "netcdf4",
     "openpyxl",
     "packaging",
