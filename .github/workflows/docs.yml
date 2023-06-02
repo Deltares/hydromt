@@ -49,7 +49,7 @@ jobs:
         run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
-        if: ${{ github.event_name != 'pull_request'}}
+        if: ${{ github.event_name != 'pull_request' && !github.event.act }}
         uses: peaceiris/actions-gh-pages@v3.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

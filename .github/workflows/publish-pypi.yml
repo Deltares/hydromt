@@ -105,7 +105,7 @@ jobs:
 
   upload-to-pypi:
     needs: test-built-dist
-    if: github.event_name == 'release'
+    if: ${{ github.event_name == 'release' && !github.event.act  }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3
