@@ -1,5 +1,5 @@
 ---
-name: Build Docs
+name: Build docs
 
 # We don't want pushes (or PRs) to gh-pages to kick anything off
 on:
@@ -21,6 +21,10 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
+      - name: install tomli
+        run: pip install tomli
+      - name: Generate env spec
+        run: python make_env.py doc
 
       - name: Setup environment
         uses: conda-incubator/setup-miniconda@v2
@@ -29,8 +33,8 @@ jobs:
           miniforge-variant: Mambaforge
           channels: conda-forge, defaults
           channel-priority: strict
-          environment-file: envs/hydromt-dev.yml
-          activate-environment: hydromt-dev
+          environment-file: environment.yml
+          activate-environment: hydromt
 
       - name: Install hydromt
         run: pip install .
@@ -42,7 +46,6 @@ jobs:
           popd
 
       - name: Set doc version
-        # run: echo "DOC_VERSION=preview" >> $GITHUB_ENV
         run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
