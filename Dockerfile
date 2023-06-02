@@ -24,6 +24,7 @@ RUN python make_env.py full
 
 RUN conda env create -f environment.yml \
  && conda run -n hydromt pip install .
+USER hydromt
 
 ENTRYPOINT ["conda","run","-n", "hydromt"]
 CMD ["hydromt", "--models"]
