@@ -1,4 +1,6 @@
-FROM continuumio/miniconda3:23.3.1-0 as base
+FROM mambaorg/micromamba:1.4-bullseye-slim as env
+
+USER root
 
 RUN apt-get update \
  && apt-get install -y --fix-missing --no-install-recommends libgdal-dev gcc lzma-dev python3-dev python3-pip \
@@ -11,20 +13,20 @@ ENV HOME /home/hydromt
 ENV NUMBA_CACHE_DIR=${HOME}/.cahce/numba
 ENV USE_PYGEOS=0
 RUN chown -R hydromt ${HOME}
-
-COPY hydromt ${HOME}/hydromt
-COPY tests ${HOME}/tests
-COPY data ${HOME}/data
-COPY README.rst ${HOME}
+WORKDIR ${HOME}
 COPY pyproject.toml ${HOME}/pyproject.toml
 COPY make_env.py ${HOME}/make_env.py
-WORKDIR ${HOME}
-RUN python make_env.py full
+RUN python3 make_env.py full
+RUN micromamba env create -f environment.yml -y
 
-
-RUN conda env create -f environment.yml \
- && conda run -n hydromt pip install .
+FROM env as base
+COPY data ${HOME}/data
+COPY README.rst ${HOME}
+COPY tests ${HOME}/tests
+COPY hydromt ${HOME}/hydromt
 USER hydromt
 
-ENTRYPOINT ["conda","run","-n", "hydromt"]
+RUN micromamba run -n hydromt pip install .
+
+ENTRYPOINT ["micromamba","run","-n", "hydromt"]
 CMD ["hydromt", "--models"]
