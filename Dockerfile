@@ -12,6 +12,7 @@ RUN groupadd -r hydromt \
 ENV HOME /home/hydromt
 ENV NUMBA_CACHE_DIR=${HOME}/.cahce/numba
 ENV USE_PYGEOS=0
+ENV PYTHONDONTWRITEBYTECODE=1
 RUN chown -R hydromt ${HOME}
 WORKDIR ${HOME}
 COPY pyproject.toml ${HOME}/pyproject.toml
