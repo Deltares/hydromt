@@ -75,6 +75,7 @@ doc = [
     "sphinx_autosummary_accessors",
     "ipython",
     "ipywidgets",
+    "jupyterlab",
     "cartopy"
 ]
 

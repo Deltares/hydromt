@@ -84,6 +84,20 @@ To install HydroMT in a new environment called `hydromt` from the conda-forge ch
     $ conda create -n hydromt -c conda-forge hydromt
 
 Then, activate the environment (as stated by conda create) to start making use of HydroMT.
+To test whether the instalation was sccessful you can run :code:`hydromt --model` and the output should
+look approximately like the one below:
+
+
+.. code-block:: console
+
+    $ hyromt --model
+
+    model plugins:
+    generic models (hydromt 0.7.2.dev0):
+     - grid_model
+     - lumped_model
+     - mesh_model
+     - network_model
 
 Optionally, specific versions of python or other dependencies can be set and additional packages can be added,
 for example Python version 3.9 and GDAL 3.4.1 and the HydroMT-Wflow plugin:
