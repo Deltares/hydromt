@@ -73,19 +73,28 @@ def write_nested_dropdown(name, data_cat, note="", categories=[]):
                 write_panel(f, category, level=2, item="tab-item")
             for source in sources:
                 items = data_cat[source].summary().items()
-                summary = "\n".join([f":{k}: {v}" for k, v in items if k != "category"])
+                summary = "\n".join(
+                    [f":{k}: {clean_str(v)}" for k, v in items if k != "category"]
+                )
                 write_panel(f, source, summary, level=3)
 
         write_panel(f, "all", level=2, item="tab-item")
         for source in df.index.values:
             items = data_cat[source].summary()
-            items = {
-                k: v.replace("*", "\\*")
-                for (k, v) in items.items()
-                if isinstance(v, str)
-            }.items()
+            items = {k: clean_str(v) for (k, v) in items.items()}.items()
             summary = "\n".join([f":{k}: {v}" for k, v in items])
             write_panel(f, source, summary, level=3)
+
+
+def clean_str(s):
+    if not isinstance(s, str):
+        return s
+    clean = s.replace("*", "\\*")
+    idx = clean.find("p:/")
+    if idx > -1:
+        clean = clean[idx:]
+
+    return clean
 
 
 # NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
