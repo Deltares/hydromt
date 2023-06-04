@@ -12,6 +12,8 @@ import shutil
 import warnings
 from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
+from platform import system
+from re import match as regex_match
 from typing import Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -969,7 +971,11 @@ def _parse_data_dict(
         path = source.pop("path")
         # if remote path, keep as is else call abs_path method to solve local files
         if not _uri_validator(path):
-            path = abs_path(root, path)
+            # abspath doesn't work like you think for windows paths in a linux system
+            # if we're on linux and get a windows path, don't even bother since it
+            # clearly not on our system, so just use it as is.
+            if system() == "Windows" or not _is_windows_path(path):
+                path = abs_path(root, path)
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)
@@ -1002,6 +1008,10 @@ def _parse_data_dict(
             )
 
     return data
+
+
+def _is_windows_path(p):
+    return regex_match(r"\w:/", p)
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
