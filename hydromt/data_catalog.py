@@ -971,11 +971,12 @@ def _parse_data_dict(
         path = source.pop("path")
         # if remote path, keep as is else call abs_path method to solve local files
         if not _uri_validator(path):
-            # abspath doesn't work like you think for windows paths in a linux system
-            # if we're on linux and get a windows path, don't even bother since it
-            # clearly not on our system, so just use it as is.
-            if system() == "Windows" or not _is_windows_path(path):
+            try:
                 path = abs_path(root, path)
+            except RuntimeError:
+                # can't expand a windows path on non-windows system
+                # This is the best we can do
+                path = join(root, path)
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
             meta.update(category=category)
@@ -1038,6 +1039,8 @@ def _process_dict(d: Dict, logger=logger) -> Dict:
 
 
 def abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
+    if system() != "Windows" and _is_windows_path(root):
+        raise RuntimeError("Cannot expand windows path on non windows system")
     path = Path(str(rel_path))
     if not path.is_absolute():
         if root is not None:
