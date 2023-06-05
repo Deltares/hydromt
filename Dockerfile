@@ -1,32 +1,54 @@
+## Set up the base environment to install hydromt into
 FROM mambaorg/micromamba:1.4-bullseye-slim as env
-
 USER root
-
 RUN apt-get update \
- && apt-get install -y --fix-missing --no-install-recommends libgdal-dev gcc lzma-dev python3-dev python3-pip \
+ && apt-get install python3-dev python3-pip -y --fix-missing --no-install-recommends \
+ && apt-get autoremove \
+ && apt-get clean \
  && python3 -m pip install tomli
 
-RUN groupadd -r hydromt \
- && useradd -m -r -g hydromt hydromt
-
-ENV HOME /home/hydromt
-ENV NUMBA_CACHE_DIR=${HOME}/.cahce/numba
-ENV USE_PYGEOS=0
-ENV PYTHONDONTWRITEBYTECODE=1
+ENV HOME=/home/hydromt
 WORKDIR ${HOME}
-COPY pyproject.toml ${HOME}/pyproject.toml
-COPY make_env.py ${HOME}/make_env.py
-RUN python3 make_env.py full
-RUN chown -R hydromt ${HOME}
-USER hydromt
-RUN micromamba env create -f environment.yml -y
 
-FROM env as base
-COPY data ${HOME}/data
-COPY README.rst ${HOME}
-COPY tests ${HOME}/tests
-COPY hydromt ${HOME}/hydromt
-RUN micromamba run -n hydromt pip install .
+COPY pyproject.toml make_env.py ${HOME}
+RUN python3 make_env.py full \
+ && micromamba env create -f environment.yml -y \
+ && micromamba clean -ayf \
+ && find /opt/conda/ -follow -type f -name '*.a' -delete \
+ && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete
+
+## Actually install hydromt
+FROM  mambaorg/micromamba:1.4-jammy as dev
+USER root
+ENV HOME=/home/hydromt
+WORKDIR ${HOME}
+COPY --from=env /opt /opt
+COPY pyproject.toml README.rst ${HOME}
+COPY tests/ ${HOME}/tests
+COPY hydromt/ ${HOME}/hydromt
+COPY data/ ${HOME}/data
+RUN micromamba run -n hydromt pip install . \
+ && micromamba clean -ayf \
+ && find /opt/conda/ -follow -type f -name '*.a' -delete \
+ && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete
+
+
+## final image
+FROM  mambaorg/micromamba:1.4-jammy as prod
+COPY --from=dev /opt /opt
+COPY --from=dev /home/hydromt /home/hydromt
+USER root
+ENV HOME=/home/hydromt \
+    NUMBA_CACHE_DIR=${HOME}/.cahce/numba\
+    USE_PYGEOS=0 \
+    PYTHONDONTWRITEBYTECODE=1
+WORKDIR ${HOME}
+RUN groupadd -r hydromt \
+ && useradd -m -r -g hydromt hydromt\
+ && chown -R hydromt ${HOME}
+USER hydromt
 
 ENTRYPOINT ["micromamba","run","-n", "hydromt"]
 CMD ["hydromt", "--models"]
