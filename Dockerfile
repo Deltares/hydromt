@@ -2,7 +2,7 @@
 FROM mambaorg/micromamba:1.4-bullseye-slim as env
 USER root
 RUN apt-get update \
- && apt-get install python3-dev python3-pip -y --fix-missing --no-install-recommends \
+ && apt-get install -y --fix-missing --no-install-recommends  python3-dev python3-pip \
  && apt-get autoremove \
  && apt-get clean \
  && python3 -m pip install tomli
