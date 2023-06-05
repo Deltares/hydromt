@@ -13,11 +13,12 @@ ENV HOME /home/hydromt
 ENV NUMBA_CACHE_DIR=${HOME}/.cahce/numba
 ENV USE_PYGEOS=0
 ENV PYTHONDONTWRITEBYTECODE=1
-RUN chown -R hydromt ${HOME}
 WORKDIR ${HOME}
 COPY pyproject.toml ${HOME}/pyproject.toml
 COPY make_env.py ${HOME}/make_env.py
 RUN python3 make_env.py full
+RUN chown -R hydromt ${HOME}
+USER hydromt
 RUN micromamba env create -f environment.yml -y
 
 FROM env as base
@@ -25,8 +26,6 @@ COPY data ${HOME}/data
 COPY README.rst ${HOME}
 COPY tests ${HOME}/tests
 COPY hydromt ${HOME}/hydromt
-USER hydromt
-
 RUN micromamba run -n hydromt pip install .
 
 ENTRYPOINT ["micromamba","run","-n", "hydromt"]
