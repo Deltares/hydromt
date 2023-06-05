@@ -1,5 +1,5 @@
 ## Set up the base environment to install hydromt into
-FROM mambaorg/micromamba:1.4-bullseye-slim as env
+FROM mambaorg/micromamba:1.4-bullseye-slim AS env
 USER root
 RUN apt-get update \
  && apt-get install -y --fix-missing --no-install-recommends  python3-dev python3-pip \
@@ -19,7 +19,7 @@ RUN python3 make_env.py full \
  && find /opt/conda/ -follow -type f -name '*.js.map' -delete
 
 ## Actually install hydromt
-FROM  mambaorg/micromamba:1.4-jammy as dev
+FROM  mambaorg/micromamba:1.4-jammy AS dev
 USER root
 ENV HOME=/home/hydromt
 WORKDIR ${HOME}
@@ -36,7 +36,7 @@ RUN micromamba run -n hydromt pip install . \
 
 
 ## final image
-FROM  mambaorg/micromamba:1.4-jammy as prod
+FROM  mambaorg/micromamba:1.4-jammy AS prod
 COPY --from=dev /opt /opt
 COPY --from=dev /home/hydromt /home/hydromt
 USER root
