@@ -6,7 +6,7 @@ Contributors
 * Hélène Boisgontier `@hboisgon <https://github.com/hboisgon>`_
 * Huite Bootsma `@Huite <https://github.com/huite>`_
 * Laurène Bouaziz `@laurenebouaziz <https://github.com/laurenebouaziz>`_
-* Anaïs Couasnon `<@couasnonanais <https://github.com/couasnonanais>`_
+* Anaïs Couasnon `@couasnonanais <https://github.com/couasnonanais>`_
 * Dirk Eilander `@DirkEilander <https://github.com/DirkEilander>`_
 * Mark Hegnauer `@markhegnauer <https://github.com/markhegnauer>`_
 * Tim Leijnse `@Leynse <https://github.com/leynse>`_
@@ -14,3 +14,4 @@ Contributors
 * Indra Marth `@IMarth <https://github.com/IMarth>`_
 * Willem van Verseveld `@verseve <https://github.com/verseve>`_
 * Albrecht Weerts `@aweerts <https://github.com/aweerts>`_
+* Sam Vente `@savente93 <https://github.com/savente93>`_
