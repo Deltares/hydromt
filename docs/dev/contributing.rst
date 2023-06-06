@@ -34,7 +34,7 @@ If you found a bug or an issue you would like to tackle or contribute to a new d
 2. Create a new branch where you develop your new code, see also :ref:`git-conventions`
 3. Make sure all pre-commit hooks pass, see  :ref:`code-format`. For ipynb files make sure that you have cleared all results.
 4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`_
-5. Push your commits to the github repository and open a draft pull request. Potentially, ask other contributors for feedback.
+5. Push your commits to the github repository and open a draft pull request. The body of the pull request will be pre-filled with a template. Please fill out this template with the relevant information, and complete the checklist included.
 6. Once you're satisfied with the changes mark the pull request as "as ready for review" and ask another contributor to review the code. The review should cover the implementation as well as steps 2-4.
 7. Merge the pull request once the review has been approved.
 
