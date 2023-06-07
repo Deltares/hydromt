@@ -13,9 +13,11 @@ html:
 docs: html
 
 env: environment.yml
-	python make_env.py full $(PY_VERSION)
 	$(PY_ENV_MANAGER) create -f environment.yml -y
 	$(PY_ENV_MANAGER) -n hydromt run pip install .
+
+environment.yml:
+	python make_env.py full $(PY_VERSION)
 
 docker:
 	docker build -t hydromt --target=prod -f Dockerfile .
