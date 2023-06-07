@@ -22,21 +22,8 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install flit wheel twine
-
-      - name: Build tarball and wheels
-        run: |
-          git clean -xdf
-          git restore -SW .
-          flit build
-
-      - name: Check built artifacts
-        run: |
-          python -m twine check dist/*
-          pwd
+      - name: Build artifacts
+        run: make pypi
 
       - uses: actions/upload-artifact@v3
         with:
