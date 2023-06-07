@@ -516,8 +516,8 @@ era5_hourly:
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
-    source_url: https://doi.org/10.24381/cds.bd0915c6
-    source_version: ERA5 hourly data on pressure levels
+    source_url: https://doi.org/10.24381/cds.adbb2d47
+    source_version: ERA5 hourly data on single levels from 1940 to present
   path: meteo/era5/{variable}/era5_{variable}_{year}*_hourly.nc
   rename:
     d2m: temp_dew
@@ -582,7 +582,7 @@ era5_orography:
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
-    source_url: https://doi.org/10.24381/cds.bd0915c6
+    source_url: https://apps.ecmwf.int/codes/grib/param-db?id=129
   path: meteo/era5/meta/era5_orography_2018.nc
   rename:
     z: elevtn
@@ -1327,6 +1327,7 @@ merit_hydro_ihu_index:
     paper_doi: 10.5194/hess-25-5287-2021
     paper_ref: Eilander et al. (2021)
     source_license: CC-BY-NC 4.0
+    source_url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
   path: topography/merit_hydro_ihu/30sec/basins.gpkg
 
 merit_hydro_index:
