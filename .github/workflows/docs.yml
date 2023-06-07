@@ -5,8 +5,20 @@ name: Build docs
 on:
   push:
     branches: [main]
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
+      - docs/*
+      - examples/*
   pull_request:
     branches: [main]
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
+      - docs/*
+      - examples/*
 
 jobs:
   # Build docs on Linux
@@ -58,3 +70,7 @@ jobs:
           destination_dir: ./${{ env.DOC_VERSION }}
           keep_files: false
           full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
