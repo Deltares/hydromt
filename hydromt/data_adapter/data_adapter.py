@@ -182,7 +182,9 @@ class DataAdapter(object, metaclass=ABCMeta):
         for k, v in vars(self).items():
             if k in ["name", "catalog_name"]:
                 continue  # do not add these identifiers
-            if k == "driver_kwargs": # Prevent driver_kwargs name from ending up in the data catalog
+            if (
+                k == "driver_kwargs"
+            ):  # Prevent driver_kwargs name from ending up in the data catalog
                 k = "kwargs"
             if v is not None and (not isinstance(v, dict) or len(v) > 0):
                 source.update({k: v})

@@ -221,7 +221,7 @@ def test_dataframe(df, df_time, tmpdir):
     data_catalog = DataCatalog()
     df1 = data_catalog.get_dataframe(fn_df, index_col=0)
     assert isinstance(df1, pd.DataFrame)
-    pd.testing.assert_frame_equal(df,df1)
+    pd.testing.assert_frame_equal(df, df1)
 
     # Test FWF support
     fn_fwf = str(tmpdir.join("test.txt"))

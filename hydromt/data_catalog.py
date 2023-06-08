@@ -9,6 +9,7 @@ import inspect
 import warnings
 import logging
 from os.path import abspath, basename, exists, isdir, isfile, join
+import os
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -328,8 +329,10 @@ class DataCatalog(object):
         meta = yml.pop("meta", meta)
         if hydromt_version := meta.get("hydromt_version"):
             if hydromt_version != __version__:
-                warnings.warn(f"HydroMT version ({hydromt_version}) specified in data catalog does not match installed HydroMT version ({__version__})", UserWarning)
-            
+                warnings.warn(
+                    f"HydroMT version ({hydromt_version}) specified in data catalog does not match installed HydroMT version ({__version__})",
+                    UserWarning,
+                )
 
         catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
 
@@ -683,8 +686,16 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(kwargs, RasterDatasetAdapter)
-            self.update(**{name: RasterDatasetAdapter(path=path,driver_kwargs=driver_kwargs, **kwargs)})
+            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(
+                kwargs, RasterDatasetAdapter
+            )
+            self.update(
+                **{
+                    name: RasterDatasetAdapter(
+                        path=path, driver_kwargs=driver_kwargs, **kwargs
+                    )
+                }
+            )
         elif data_like in self.sources:
             name = data_like
         else:
@@ -766,8 +777,16 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(kwargs, GeoDataFrameAdapter)
-            self.update(**{name: GeoDataFrameAdapter(path=path, driver_kwargs=driver_kwargs,**kwargs)})
+            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(
+                kwargs, GeoDataFrameAdapter
+            )
+            self.update(
+                **{
+                    name: GeoDataFrameAdapter(
+                        path=path, driver_kwargs=driver_kwargs, **kwargs
+                    )
+                }
+            )
         elif data_like in self.sources:
             name = data_like
         else:
@@ -852,8 +871,16 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(kwargs, GeoDatasetAdapter)
-            self.update(**{name: GeoDatasetAdapter(path=path, driver_kwargs=driver_kwargs, **kwargs)})
+            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(
+                kwargs, GeoDatasetAdapter
+            )
+            self.update(
+                **{
+                    name: GeoDatasetAdapter(
+                        path=path, driver_kwargs=driver_kwargs, **kwargs
+                    )
+                }
+            )
 
         elif data_like in self.sources:
             name = data_like
@@ -915,10 +942,17 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(kwargs, DataFrameAdapter)
-                                
-            
-            self.update(**{name: DataFrameAdapter(path=path, driver_kwargs=driver_kwargs, **kwargs)})
+            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(
+                kwargs, DataFrameAdapter
+            )
+
+            self.update(
+                **{
+                    name: DataFrameAdapter(
+                        path=path, driver_kwargs=driver_kwargs, **kwargs
+                    )
+                }
+            )
         elif data_like in self.sources:
             name = data_like
         else:
@@ -960,7 +994,7 @@ def _parse_data_dict(
     data = dict()
     for name, source in data_dict.items():
         source = source.copy()  # important as we modify with pop
-    
+
         if "alias" in source:
             alias = source.pop("alias")
             if alias not in data_dict:
@@ -1011,14 +1045,14 @@ def _parse_data_dict(
                     name_n = name_n.replace("{" + k + "}", v)
 
                 data[name_n] = adapter(
-                        path=path_n,
-                        name=name_n,
-                        catalog_name=catalog_name,
-                        meta=meta,
-                        attrs=attrs,
-                        driver_kwargs=driver_kwargs,
-                        **source,  # key word arguments specific to certain adaptors
-                    )
+                    path=path_n,
+                    name=name_n,
+                    catalog_name=catalog_name,
+                    meta=meta,
+                    attrs=attrs,
+                    driver_kwargs=driver_kwargs,
+                    **source,  # key word arguments specific to certain adaptors
+                )
 
         else:
             data[name] = adapter(
@@ -1065,11 +1099,14 @@ def abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
         path = Path(abspath(rel_path))
     return str(path)
 
-def _seperate_driver_kwargs_from_kwargs(kwargs: dict, data_adapter: DataAdapter) -> Tuple[dict]:
+
+def _seperate_driver_kwargs_from_kwargs(
+    kwargs: dict, data_adapter: DataAdapter
+) -> Tuple[dict]:
     driver_kwargs = kwargs
     driver_kwargs_copy = driver_kwargs.copy()
     kwargs = {}
-    for k,v in driver_kwargs_copy.items():
+    for k, v in driver_kwargs_copy.items():
         if k in inspect.signature(data_adapter.__init__).parameters.keys():
-            kwargs.update({k:driver_kwargs.pop(k)})
+            kwargs.update({k: driver_kwargs.pop(k)})
     return kwargs, driver_kwargs
