@@ -60,7 +60,7 @@ class DataCatalog(object):
         Helps to easily read from different files and keep track of
         files which have been accessed.
 
-        Arguments:
+        Arguments
         ---------
         data_libs: (list of) str, Path, optional
             One or more paths to data catalog yaml files or names of predefined data
@@ -633,7 +633,7 @@ class DataCatalog(object):
         will be returned as :py:class:`xarray.DataArray` rather than
         :py:class:`xarray.Dataset`.
 
-        Arguments:
+        Arguments
         ---------
         data_like: str, Path, xr.Dataset, xr.Datarray
             Data catalog key, path to raster file or raster xarray data object.
@@ -721,7 +721,7 @@ class DataCatalog(object):
         To return only the dataframe columns of interest provide the
         `variables` argument.
 
-        Arguments:
+        Arguments
         ---------
         data_like: str, Path, gpd.GeoDataFrame
             Data catalog key, path to vector file or a vector geopandas object.
@@ -804,7 +804,7 @@ class DataCatalog(object):
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as xarray.DataArray rather than Dataset.
 
-        Arguments:
+        Arguments
         ---------
         data_like: str, Path, xr.Dataset, xr.DataArray
             Data catalog key, path to geodataset file or geodataset xarray object.

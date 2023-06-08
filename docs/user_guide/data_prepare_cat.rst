@@ -33,8 +33,8 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
       version: version
     my_dataset:
       crs: EPSG/WKT
-      data_type: RasterDataset/GeoDataset/GeoDataFrame
-      driver: raster/raster_tindex/netcdf/zarr/vector/vector_table
+      data_type: RasterDataset/GeoDataset/GeoDataFrame/DataFrame
+      driver: csv/raster/raster_tindex/netcdf/zarr/vector/vector_table/xlsx/xls
       filesystem: local/gcs/s3
       kwargs:
         key: value
@@ -71,7 +71,7 @@ The yaml file has an *optional* global **meta** data section:
 
 The following are **required data source arguments**:
 
-- **data_type**: type of input data. Either *RasterDataset*, *GeoDataset* or *GeoDataFrame*.
+- **data_type**: type of input data. Either *RasterDataset*, *GeoDataset*, *GeoDataFrame* or *DataFrame*.
 - **driver**: data_type specific driver to read a dataset, see overview below.
 - **path**: path to the data file.
   Relative paths are combined with the global ``root`` option of the yaml file (if available) or the directory of the yaml file itself.
