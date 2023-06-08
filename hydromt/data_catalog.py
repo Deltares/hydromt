@@ -8,6 +8,7 @@ from os.path import join, isdir, dirname, basename, isfile, abspath, exists
 import copy
 from pathlib import Path
 from typing import Dict, List, Tuple, Union, Optional
+import inspect
 import warnings
 import numpy as np
 import pandas as pd
@@ -291,7 +292,13 @@ class DataCatalog(object):
             meta.update(category=yml.pop("category"))
         # read meta data
         meta = yml.pop("meta", meta)
+        if hydromt_version := meta.get("hydromt_version"):
+            if hydromt_version != __version__:
+                warnings.warn(f"HydroMT version ({hydromt_version}) specified in data catalog does not match installed HydroMT version ({__version__})", UserWarning)
+            
+
         catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
+
         # TODO keep meta data!! Note only possible if yml files are not merged
         if root is None:
             root = meta.get("root", os.path.dirname(urlpath))
@@ -630,7 +637,8 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            self.update(**{name: RasterDatasetAdapter(path=path, **kwargs)})
+            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(kwargs, RasterDatasetAdapter)
+            self.update(**{name: RasterDatasetAdapter(path=path,driver_kwargs=driver_kwargs, **kwargs)})
         elif data_like in self.sources:
             name = data_like
         else:
@@ -705,7 +713,8 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            self.update(**{name: GeoDataFrameAdapter(path=path, **kwargs)})
+            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(kwargs, GeoDataFrameAdapter)
+            self.update(**{name: GeoDataFrameAdapter(path=path, driver_kwargs=driver_kwargs,**kwargs)})
         elif data_like in self.sources:
             name = data_like
         else:
@@ -784,7 +793,9 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            self.update(**{name: GeoDatasetAdapter(path=path, **kwargs)})
+            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(kwargs, GeoDatasetAdapter)
+            self.update(**{name: GeoDatasetAdapter(path=path, driver_kwargs=driver_kwargs, **kwargs)})
+
         elif data_like in self.sources:
             name = data_like
         else:
@@ -841,10 +852,10 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            driver = kwargs.pop("driver", None) # retrieve driver from kwargs before kwargs are passed as driver_kwargs
-            rename = kwargs.pop("rename", None)
+            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(kwargs, DataFrameAdapter)
+                                
             
-            self.update(**{name: DataFrameAdapter(path=path, driver_kwargs=kwargs, driver=driver, rename=rename)})
+            self.update(**{name: DataFrameAdapter(path=path, driver_kwargs=driver_kwargs, **kwargs)})
         elif data_like in self.sources:
             name = data_like
         else:
@@ -880,12 +891,6 @@ def _parse_data_dict(
     # NOTE: shouldn't the kwarg overwrite the dict/yml ?
     if root is None:
         root = data_dict.pop("root", None)
-
-    if hydromt_version := data_dict.get("meta",{}).get("hydromt_version", None):
-        if hydromt_version != __version__:
-            warnings.warn(f"HydroMT version ({hydromt_version}) specified in data catalog does not match installed HydroMT version ({__version__})")
-        
-
 
     # parse data
     data = dict()
@@ -998,3 +1003,12 @@ def abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
             rel_path = join(root, rel_path)
         path = Path(abspath(rel_path))
     return str(path)
+
+def _seperate_driver_kwargs_from_kwargs(kwargs: dict, data_adapter: DataAdapter) -> Tuple[dict]:
+    driver_kwargs = kwargs
+    driver_kwargs_copy = driver_kwargs.copy()
+    kwargs = {}
+    for k,v in driver_kwargs_copy.items():
+        if k in inspect.signature(data_adapter.__init__).parameters.keys():
+            kwargs.update({k:driver_kwargs.pop(k)})
+    return kwargs, driver_kwargs

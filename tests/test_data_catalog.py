@@ -11,6 +11,7 @@ from hydromt.data_catalog import (
     DataCatalog,
     _parse_data_dict,
 )
+from hydromt import __version__
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 
@@ -70,7 +71,8 @@ def test_parser():
         _parse_data_dict({"test": {"path": "", "data_type": "error"}})
     with pytest.raises(ValueError, match="alias test not found in data_dict"):
         _parse_data_dict({"test1": {"alias": "test"}})
-
+    
+    
 
 def test_data_catalog_io(tmpdir):
     data_catalog = DataCatalog()
@@ -85,6 +87,8 @@ def test_data_catalog_io(tmpdir):
     DataCatalog(fallback_lib=None).to_yml(fn_yml)
     # test print
     print(data_catalog["merit_hydro"])
+    
+
 
 
 @pytest.mark.filterwarnings('ignore:"from_artifacts" is deprecated:DeprecationWarning')
@@ -117,6 +121,13 @@ def test_data_catalog(tmpdir):
     assert len(data_catalog._sources) > 0
     with pytest.raises(IOError):
         data_catalog = DataCatalog(deltares_data="unknown_version")
+    
+    # test hydromt version in meta data
+    fn_yml = join(tmpdir, "test.yml")
+    data_catalog = DataCatalog()
+    data_catalog.to_yml(fn_yml, meta={ "hydromt_version": "0.7.0"})
+    with pytest.warns(UserWarning):
+        data_catalog = DataCatalog(data_libs=fn_yml)
 
 
 def test_from_archive(tmpdir):
