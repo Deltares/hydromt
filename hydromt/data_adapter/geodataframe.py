@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
-from os.path import join
-import numpy as np
-import geopandas as gpd
-from shapely.geometry import box
+"""The Geodataframe adapter implementation."""
 import logging
-from typing import Union, NewType
+from os.path import join
 from pathlib import Path
+from typing import NewType, Union
 
-from .data_adapter import DataAdapter
+import geopandas as gpd
+import numpy as np
+from shapely.geometry import box
+
 from .. import io
-
+from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,9 @@ GeoDataframeSource = NewType("GeoDataframeSource", Union[str, Path])
 
 
 class GeoDataFrameAdapter(DataAdapter):
+
+    """The Geodataframe adapter implementation."""
+
     _DEFAULT_DRIVER = "vector"
     _DRIVERS = {
         "xy": "xy",
@@ -42,7 +45,7 @@ class GeoDataFrameAdapter(DataAdapter):
         driver_kwargs={},
         **kwargs,
     ):
-        """Initiates data adapter for geospatial vector data.
+        """Initiate data adapter for geospatial vector data.
 
         This object contains all properties required to read supported files into
         a single unified :py:func:`geopandas.GeoDataFrame`.
@@ -61,8 +64,8 @@ class GeoDataFrameAdapter(DataAdapter):
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
         crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
-            or wkt (str). Only used if the data has no native CRS.
+            Coordinate Reference System. Accepts EPSG codes (int or str);
+            proj (str or dict) or wkt (str). Only used if the data has no native CRS.
         nodata: (dictionary) float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Multiple nodata values can be provided in a list and differentiated between
@@ -72,11 +75,14 @@ class GeoDataFrameAdapter(DataAdapter):
             Mapping of native data source variable to output source variable name as
             required by hydroMT.
         unit_mult, unit_add: dict, optional
-            Scaling multiplication and addition to change to map from the native data unit
-            to the output data unit as required by hydroMT.
+            Scaling multiplication and addition to change to map from the native data
+            unit to the output data unit as required by hydroMT.
+        units:
+            Not used in this implementation, here for compatability reasons.
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+            {'source_version', 'source_url', 'source_license',
+            'paper_ref', 'paper_doi', 'category'}
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -115,17 +121,24 @@ class GeoDataFrameAdapter(DataAdapter):
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
         driver : str, optional
-            Driver to write file, e.g.: 'GPKG', 'ESRI Shapefile' or any fiona data type, by default None
+            Driver to write file, e.g.: 'GPKG', 'ESRI Shapefile' or any fiona data type,
+            by default None
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
+        logger : logger object, optional
+            The logger object used for logging messages. If not provided, the default
+            logger will be used.
+        **kwargs
+            Additional keyword arguments that are passed to the geopandas driver.
 
         Returns
         -------
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
+            Name of driver to read data with, see
+            :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
         kwargs.pop("time_tuple", None)
         gdf = self.get_data(bbox=bbox, variables=variables, logger=logger)
@@ -166,10 +179,10 @@ class GeoDataFrameAdapter(DataAdapter):
         variables=None,
         **kwargs,  # this is not used, for testing only
     ):
-        """Returns a clipped and unified GeoDataFrame (vector) based on the properties
-        of this GeoDataFrameAdapter.
+        """Return a clipped and unified GeoDataFrame (vector).
 
-        For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
+        For a detailed description see:
+        :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
         # If variable is string, convert to list
         if variables:

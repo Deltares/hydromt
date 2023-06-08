@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HydroMT models API"""
+"""HydroMT models API."""
+from .. import _compat
 from .model_api import *
 from .model_grid import *
 from .model_lumped import *
 from .model_network import *
 from .model_plugins import *
-from .. import _compat
 
 # NOTE: pygeos is still required in XUGRID;
 # remove requirement after https://github.com/Deltares/xugrid/issues/33

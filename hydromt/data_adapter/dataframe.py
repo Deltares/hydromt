@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
+"""Implementation for the Pandas Dataframe adapter."""
+import logging
 import os
 from os.path import join
+
 import numpy as np
 import pandas as pd
-from .data_adapter import DataAdapter
 
-import logging
+from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,9 @@ __all__ = [
 
 
 class DataFrameAdapter(DataAdapter):
+
+    """DataAdapter implementation for Pandas Dataframes."""
+
     _DEFAULT_DRIVER = "csv"
     _DRIVERS = {"xlsx": "excel", "xls": "excel"}
 
@@ -32,7 +36,7 @@ class DataFrameAdapter(DataAdapter):
         driver_kwargs={},
         **kwargs,
     ):
-        """Initiates data adapter for 2D tabular data.
+        """Initiate data adapter for 2D tabular data.
 
         This object contains all properties required to read supported files into
         a :py:func:`pandas.DataFrame`.
@@ -60,11 +64,12 @@ class DataFrameAdapter(DataAdapter):
             Mapping of native column names to output column names as
             required by hydroMT.
         unit_mult, unit_add: dict, optional
-            Scaling multiplication and addition to change to map from the native data unit
-            to the output data unit as required by hydroMT.
+            Scaling multiplication and addition to change to map from the native
+            data unit to the output data unit as required by hydroMT.
         meta: dict, optional
             Metadata information of dataframe, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+            {'source_version', 'source_url', 'source_license', 'paper_ref',
+            'paper_doi', 'category'}
         **kwargs
             Additional key-word arguments passed to the driver.
         """
@@ -92,29 +97,38 @@ class DataFrameAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Save dataframe slice to file.
+        """Save a dataframe slice to a file.
 
         Parameters
         ----------
-        data_root : str, Path
-            Path to output folder
+        data_root : str or Path
+            Path to the output folder.
         data_name : str
-            Name of output file without extension.
+            Name of the output file without extension.
         driver : str, optional
-            Driver to write file, e.g.: 'csv', 'excel', by default None
+            Driver to write the file, e.g., 'csv', 'excel'. If None,
+            the default behavior is used.
         variables : list of str, optional
-            Names of DataFrame columns to return. By default all columns
-            are returned.
-        time_tuple : tuple of str, datetime, optional
-            Start and end date of period of interest. By default the entire time period
-            of the DataFrame is returned.
+            Names of DataFrame columns to include in the output. By default,
+            all columns are included.
+        time_tuple : tuple of str or datetime, optional
+            Start and end date of the period of interest. By default, the entire time
+            period of the DataFrame is included.
+        logger : Logger, optional
+            Logger object to log warnings or messages. By default, the module
+            logger is used.
+        **kwargs : dict
+            Additional keyword arguments to be passed to the file writing method.
 
         Returns
         -------
-        fn_out: str
-            Absolute path to output file
-        driver: str
-            Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
+        fn_out : str
+            Absolute path to the output file.
+        driver : str
+            Name of the driver used to read the data.
+            See :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`.
+
+
         """
         kwargs.pop("bbox", None)
         try:
@@ -126,16 +140,15 @@ class DataFrameAdapter(DataAdapter):
             return None, None
 
         if driver is None or driver == "csv":
-            # always write netcdf
+            # always write as CSV
             driver = "csv"
             fn_out = join(data_root, f"{data_name}.csv")
-
             obj.to_csv(fn_out, **kwargs)
         elif driver == "excel":
             fn_out = join(data_root, f"{data_name}.xlsx")
             obj.to_excel(fn_out, **kwargs)
         else:
-            raise ValueError(f"DataFrame: Driver {driver} unknown.")
+            raise ValueError(f"DataFrame: Driver {driver} is unknown.")
 
         return fn_out, driver
 
@@ -146,16 +159,17 @@ class DataFrameAdapter(DataAdapter):
         logger=logger,
         **kwargs,
     ):
-        """Returns a DataFrame, optionally sliced by time and variables, based on the properties of this DataFrameAdapter.
+        """Return a DataFrame.
 
-        For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
+        Returned data is optionally sliced by time and variables,
+        based on the properties of this DataFrameAdapter. For a detailed
+        description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
-
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         if "storage_options" in self.kwargs:
             kwargs = self.kwargs["storage_options"]
-            # For s3, anonymous connection still requires --no-sign-request profile to read the data
-            # setting environment variable works
+            # For s3, anonymous connection still requires --no-sign-request profile
+            # to read the data setting environment variable works
             if "anon" in kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
@@ -217,7 +231,7 @@ class DataFrameAdapter(DataAdapter):
             logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
             df = df[df.index.slice_indexer(*time_tuple)]
             if df.size == 0:
-                raise IndexError(f"DataFrame: Time slice out of range.")
+                raise IndexError("DataFrame: Time slice out of range.")
 
         # set meta data
         df.attrs.update(self.meta)

@@ -9,25 +9,25 @@ HydroMT: Automated and reproducible model building and analysis
 
 What is HydroMT?
 ----------------
-**HydroMT** (Hydro Model Tools) is an open-source Python package that facilitates the process of 
-building and analyzing spatial geoscientific models with a focus on water system models. 
-It does so by automating the workflow to go from raw data to a complete model instance which 
-is ready to run and to analyse model results once the simulation has finished. 
-HydroMT builds on the latest packages in the scientific and geospatial python eco-system including 
+**HydroMT** (Hydro Model Tools) is an open-source Python package that facilitates the process of
+building and analyzing spatial geoscientific models with a focus on water system models.
+It does so by automating the workflow to go from raw data to a complete model instance which
+is ready to run and to analyse model results once the simulation has finished.
+HydroMT builds on the latest packages in the scientific and geospatial python eco-system including
 xarray_, rasterio_, rioxarray_, geopandas_, scipy_ and pyflwdir_.
 
 
 Why HydroMT?
 ------------
-Setting up spatial geoscientific models typically requires many (manual) steps 
-to process input data and might therefore be time consuming and hard to reproduce. 
-Especially improving models based on global geospatial datasets, which are 
-rapidly becoming available at increasingly high resolutions, might be challenging. 
-Furthermore, analyzing model schematization and results from different models, 
+Setting up spatial geoscientific models typically requires many (manual) steps
+to process input data and might therefore be time consuming and hard to reproduce.
+Especially improving models based on global geospatial datasets, which are
+rapidly becoming available at increasingly high resolutions, might be challenging.
+Furthermore, analyzing model schematization and results from different models,
 which often use model-specific peculiar data formats, can be time consuming.
-This package aims to make the model building process **fast**, **modular** and **reproducible** 
+This package aims to make the model building process **fast**, **modular** and **reproducible**
 by configuring the model building process from a single *ini* configuration file
-and **model- and data-agnostic** through a common model and data interface. 
+and **model- and data-agnostic** through a common model and data interface.
 
 
 How to use HydroMT?
@@ -35,14 +35,14 @@ How to use HydroMT?
 HydroMT can be used as a **command line** application (CLI) which provides commands to *build*,
 *update* and *clip* models with a single line, or **from Python** to exploit its rich interface.
 You can learn more about how to use HydroMT in its `online documentation. <https://deltares.github.io/hydromt/latest/>`_
-For a smooth installing experience, we recommend installing HydroMT and its dependencies 
+For a smooth installing experience, we recommend installing HydroMT and its dependencies
 from conda-forge in a clean environment, see `installation guide. <https://deltares.github.io/hydromt/latest/getting_started/installation>`_
 
 
 HydroMT model plugins
 ---------------------
-HydroMT is commonly used in combination with a **model plugin** which 
-provides a HydroMT implementation for specific model software. Using the plugins allows to prepare a ready-to-run set of input files from raw geoscientific datasets and analyse model results in a fast and reproducible way. 
+HydroMT is commonly used in combination with a **model plugin** which
+provides a HydroMT implementation for specific model software. Using the plugins allows to prepare a ready-to-run set of input files from raw geoscientific datasets and analyse model results in a fast and reproducible way.
 Known model plugins include:
 
 * hydromt_wflow_: A framework for distributed rainfall-runoff (wflow_sbm) and sediment transport (wflow_sediment) modelling.
@@ -66,9 +66,9 @@ How to contribute?
 If you find any issues in the code or documentation feel free to leave an issue on the `github issue tracker. <https://github.com/Deltares/hydromt/issues>`_
 You can find information about how to contribute to the HydroMT project at our `contributing page. <https://deltares.github.io/hydromt/latest/dev/contributing>`_
 
-HydroMT seeks active contribution from the (hydro) geoscientific community. 
-So far, it has been developed and tested with a range of `Deltares <https://www.deltares.nl/en/>`_ models, but 
-we believe it is applicable to a much wider set of geoscientific models and are 
+HydroMT seeks active contribution from the (hydro) geoscientific community.
+So far, it has been developed and tested with a range of `Deltares <https://www.deltares.nl/en/>`_ models, but
+we believe it is applicable to a much wider set of geoscientific models and are
 happy to discuss how it can be implemented for your model.
 
 

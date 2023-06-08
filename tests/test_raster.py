@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.raster submodule."""
 
-import pytest
-import numpy as np
-import geopandas as gpd
-import xarray as xr
-from shapely.geometry import box, Point, LineString
-import dask
-from osgeo import gdal
-from affine import Affine
 import os
 
-from hydromt import open_raster, gis_utils
-from hydromt import raster
+import dask
+import geopandas as gpd
+import numpy as np
+import pytest
+import xarray as xr
+from affine import Affine
+from osgeo import gdal
+from shapely.geometry import LineString, Point, box
+
+from hydromt import gis_utils, open_raster, raster
 
 # origin, rotation, res, shape, internal_bounds
 # NOTE a rotated grid with a negative dx is not supported
@@ -41,7 +41,7 @@ def get_transform(
 testdata = [(get_transform(*d[:3]), d[-2]) for d in tests[:4]]
 
 
-@pytest.mark.parametrize("origin, rotation, res, shape, bounds", tests)
+@pytest.mark.parametrize(("origin", "rotation", "res", "shape", "bounds"), tests)
 def test_raster_properties(origin, rotation, res, shape, bounds):
     transform = get_transform(origin, rotation, res)
     da = raster.full_from_transform(transform, shape, name="test", crs=4326)
@@ -53,7 +53,7 @@ def test_raster_properties(origin, rotation, res, shape, bounds):
     assert np.allclose(bounds, da.raster.internal_bounds)
 
 
-@pytest.mark.parametrize("transform, shape", testdata)
+@pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_attrs(transform, shape):
     # checks on raster spatial attributes
     da = raster.full_from_transform(transform, shape, name="test")
@@ -62,7 +62,7 @@ def test_attrs(transform, shape):
     assert raster.GEO_MAP_COORD in da.coords
     assert da.raster.dims == ("y", "x")
     assert "x_dim" in da.raster.attrs
-    assert da.raster.dim0 == None if len(shape) == 2 else "dim0"
+    assert da.raster.dim0 is None if len(shape) == 2 else "dim0"
     assert da.raster.width == da["x"].size
     assert da.raster.height == da["y"].size
     assert da.raster.size == da["x"].size * da["y"].size
@@ -105,13 +105,16 @@ def test_gdal(tmpdir):
     # Write to netcdf and reopen with gdal
     fn_nc = str(tmpdir.join("gdal_test.nc"))
     da.to_netcdf(fn_nc)
-    info = gdal.Info(fn_nc)
+    gdal.Info(fn_nc)
     ds = gdal.Open(fn_nc)
     assert da[raster.GEO_MAP_COORD].attrs["crs_wkt"] == ds.GetProjection()
 
 
 def test_attrs_errors(rioda):
-    rioda = rioda.rename({"x": "xxxx"})
+    rioda = rioda.rename({"x": "X"})
+    rioda.raster.set_spatial_dims()
+    assert rioda.raster.x_dim == "X"
+    rioda = rioda.rename({"X": "xxxx"})
     with pytest.raises(ValueError, match="dimension not found"):
         rioda.raster.set_spatial_dims()
     rioda = rioda.rename({"xxxx": "x", "y": "yyyy"})
@@ -123,8 +126,9 @@ def test_attrs_errors(rioda):
         rioda.raster.set_spatial_dims()
     with pytest.raises(ValueError, match="Invalid dimension order."):
         rioda.transpose("x", "y").raster._check_dimensions()
+
+    da1 = rioda.expand_dims("t").transpose("y", "x", "t", transpose_coords=True)
     with pytest.raises(ValueError, match="Invalid dimension order."):
-        da1 = rioda.expand_dims("t").transpose("y", "x", "t", transpose_coords=True)
         da1.raster._check_dimensions()
     with pytest.raises(ValueError, match="Only 2D and 3D data"):
         rioda.expand_dims(("t", "t1")).raster._check_dimensions()
@@ -171,7 +175,7 @@ def test_from_numpy_full_like():
         raster.full_like(da.to_dataset())
 
 
-@pytest.mark.parametrize("transform, shape", testdata)
+@pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_idx(transform, shape):
     da = raster.full_from_transform(transform, shape, name="test")
     size = np.multiply(*da.raster.shape)
@@ -203,6 +207,33 @@ def test_rasterize(rioda):
         )
 
 
+def test_rasterize_geometry(rioda):
+    xmin, ymin, xmax, ymax = rioda.raster.bounds
+    resx, resy = rioda.raster.res
+    box1 = box(xmin, ymin, xmin + resx, ymin - resy)
+    box2 = box(xmax - resx, ymax + resy, xmax, ymax)
+    x1 = rioda.raster.xcoords.values[2]
+    y1 = rioda.raster.ycoords.values[2]
+    box3 = box(x1, y1, x1 + resx, y1 - resy)
+    gdf = gpd.GeoDataFrame(geometry=[box1, box2, box3], crs=rioda.raster.crs)
+
+    da = rioda.raster.rasterize_geometry(gdf, method="fraction", name="frac", nodata=0)
+    assert da.name == "frac"
+    assert da.raster.nodata == 0
+    assert np.round(da.values.max(), 4) <= 1.0
+    # Count unique values in da
+    assert np.unique(np.round(da.values, 2)).size == 3
+    assert 0.25 in np.unique(np.round(da.values, 2))
+
+    da2 = rioda.raster.rasterize_geometry(gdf, method="area")
+    assert da2.name == "area"
+    assert da2.raster.nodata == -1.0
+    rioda_grid = rioda.raster.vector_grid()
+    crs_utm = gis_utils.parse_crs("utm", rioda_grid.total_bounds)
+    rioda_grid = rioda_grid.to_crs(crs_utm)
+    assert da2.values.max() == rioda_grid.area.max()
+
+
 def test_vectorize():
     da = raster.full_from_transform(*testdata[0], nodata=1, name="test")
     da.raster.set_crs(4326)
@@ -217,7 +248,7 @@ def test_vectorize():
     assert np.all(da == da.raster.geometry_mask(gdf).astype(da.dtype))
 
 
-@pytest.mark.parametrize("transform, shape", testdata)
+@pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_clip(transform, shape):
     # create rasterdataarray with crs
     da = raster.full_from_transform(transform, shape, nodata=1, name="test", crs=4326)
@@ -324,28 +355,49 @@ def test_area_grid(rioda):
 
 
 def test_interpolate_na():
-    # mv > nan
-    da0 = raster.full_from_transform(*testdata[0], nodata=-1)
-    da0.values.flat[np.array([0, 3, -3, -1])] = np.array([1, 1, 2, 2])
-    da1 = da0.raster.mask_nodata().raster.interpolate_na()  # nearest
-    assert np.all(np.isnan(da1) == False)
+    # nodata is nan
+    da0 = raster.full_from_transform(*testdata[0], nodata=np.nan)
+    da0.values.flat[np.array([0, 3, -6])] = np.array([1, 1, 2])
+    # default nearest interpolation
+    da1 = da0.raster.interpolate_na()
+    assert np.all(~np.isnan(da1))
     assert np.all(np.isin(da1, [1, 2]))
-    assert np.all(np.isnan(da1.raster.interpolate_na()) == False)
-    assert np.all(
-        da0.raster.interpolate_na(method="rio_idw", max_search_distance=3)
-        != da0.raster.nodata
-    )
+    # extra keyword argument to rasterio.fill.fillnodata
+    da1 = da0.raster.interpolate_na(method="rio_idw", max_search_distance=5)
+    assert np.all(~np.isnan(da1))
+    # linear interpolation -> still nans
+    da1 = da0.raster.interpolate_na(method="linear", extrapolate=False)
+    assert np.isnan(da1).sum() == 14
+    # extrapolate
+    da1 = da0.raster.interpolate_na(method="linear", extrapolate=True)
+    assert np.all(~np.isnan(da1))
+    # with extra dimension
     da2 = da0.copy()  # adding extra dims to spatial_ref is done inplace
-    assert np.all(da2.expand_dims("t").raster.interpolate_na() != da0.raster.nodata)
-    da3 = da0.astype(np.int32)  # this removes the nodata value ...
+    da1 = da2.expand_dims("t").raster.interpolate_na()
+    assert np.all(~np.isnan(da1))
+    # test with other nodata value
+    da3 = da0.fillna(-9999).astype(np.int32)
     da3.raster.set_nodata(-9999)
     assert da3.raster.interpolate_na().dtype == np.int32
 
 
 def test_vector_grid(rioda):
+    # polygon
     gdf = rioda.raster.vector_grid()
-    assert isinstance(gdf, gpd.GeoDataFrame)
     assert rioda.raster.size == gdf.index.size
+    assert np.all(gdf.geometry.type == "Polygon")
+    assert np.all(gdf.total_bounds == rioda.raster.bounds)
+    # line
+    gdf = rioda.raster.vector_grid(geom_type="line")
+    nrow, ncol = rioda.raster.shape
+    assert gdf.index.size == (nrow + 1 + ncol + 1)
+    assert np.all(gdf.geometry.type == "LineString")
+    assert np.all(gdf.total_bounds == rioda.raster.bounds)
+    # point
+    gdf = rioda.raster.vector_grid(geom_type="point")
+    assert np.all(gdf.geometry.type == "Point")
+    assert rioda.raster.size == gdf.index.size
+    assert np.all(gdf.intersects(rioda.raster.box.geometry[0]))
 
 
 def test_sample():
@@ -382,7 +434,8 @@ def test_zonal_stats():
     gdf = gpd.GeoDataFrame(geometry=geoms, crs=da.raster.crs)
 
     ds0 = da.raster.zonal_stats(gdf, "count")
-    assert "test_count" in ds0.data_vars and "index" in ds0.dims
+    assert "test_count" in ds0.data_vars
+    assert "index" in ds0.dims
     assert np.all(ds0["index"] == np.array([0, 2, 3]))
     assert np.all(ds0["test_count"] == np.array([40, 1, 10]))
 
@@ -398,7 +451,7 @@ def test_zonal_stats():
         da.raster.zonal_stats(gdf.iloc[1:2], "mean")
 
 
-@pytest.mark.parametrize("transform, shape", testdata[-2:])
+@pytest.mark.parametrize(("transform", "shape"), testdata[-2:])
 def test_rotated(transform, shape, tmpdir):
     da = raster.full_from_transform(transform, shape, nodata=-1, name="test")
     da.raster.set_crs(4326)
@@ -446,11 +499,4 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
 
 
 # def test_to_osm(tmpdir, dummy):
-#     path = str(tmpdir)
 #     dummy.raster.to_osm(
-#         f"{path}\\dummy_osm",
-#         zl=4,
-#         bbox=(0, -45, 45, 0),
-#     )
-#     f = open(f"{path}\\dummy_osm\\3\\filelist.txt", "r")
-#     assert len(f.readlines()) == 4

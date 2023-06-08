@@ -1,9 +1,11 @@
-from entrypoints import EntryPoint, Distribution, get_group_all
+"""Implementation of the mechanism to access the plugin entrypoints."""
 import logging
 from typing import Dict, Iterator, List
-from .. import __version__
+
+from entrypoints import Distribution, EntryPoint, get_group_all
+
+from .. import __version__, _compat
 from .model_api import Model
-from .. import _compat
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +21,7 @@ LOCAL_EPS = {
 
 
 def get_general_eps() -> Dict:
-    """Get local hydromt generic model class entrypoints
+    """Get local hydromt generic model class entrypoints.
 
     Returns
     -------
@@ -36,17 +38,20 @@ def get_general_eps() -> Dict:
 
 
 def _discover(path=None) -> List:
-    """Discover drivers via entrypoints"""
+    """Discover drivers via entrypoints."""
     return get_group_all("hydromt.models", path=path)
 
 
 def get_plugin_eps(path=None, logger=logger) -> Dict:
-    """Discover hydromt model plugins based on 'hydromt.models' entrypoints
+    """Discover hydromt model plugins based on 'hydromt.models' entrypoints.
 
     Parameters
     ----------
     path : str or None
         Default is ``sys.path``.
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
 
     Returns
     -------
@@ -61,19 +66,23 @@ def get_plugin_eps(path=None, logger=logger) -> Dict:
             logger.warning(f"Duplicated model plugin '{name}'; skipping {plugin}")
             continue
         logger.debug(
-            f"Discovered model plugin '{name} = {ep.module_name}.{ep.object_name}' ({ep.distro.version})"
+            f"Discovered model plugin '{name} = {ep.module_name}.{ep.object_name}' "
+            f"({ep.distro.version})"
         )
         eps[ep.name] = ep
     return eps
 
 
 def load(ep, logger=logger) -> Model:
-    """Load entrypoint and return plugin model class
+    """Load entrypoint and return plugin model class.
 
     Parameters
     ----------
     ep : entrypoint
         discovered entrypoint
+    logger : logger object, optional
+        The logger object used for logging messages. If not provided, the default
+        logger will be used.
 
     Returns
     -------
@@ -92,7 +101,11 @@ def load(ep, logger=logger) -> Model:
 
 
 class ModelCatalog:
+
+    """The model catalogue provides access to plugins and their Model classes."""
+
     def __init__(self):
+        """Initiate the catalog object."""
         self._eps = {}  # entrypoints
         self._cls = {}  # classes
         self._plugins = []  # names of plugins
@@ -100,7 +113,7 @@ class ModelCatalog:
 
     @property
     def eps(self) -> Dict:
-        """Returns dictionary with available model entrypoints."""
+        """Return dictionary with available model entrypoints."""
         if len(self._eps) == 0:
             self.plugins  # discover plugins
             self.generic  # get generic local model classes
@@ -108,7 +121,7 @@ class ModelCatalog:
 
     @property
     def cls(self) -> Dict:
-        """Returns dictionary with available model classes."""
+        """Return dictionary with available model classes."""
         if len(self._cls) != len(self.eps):
             for name in self.eps:
                 if name not in self._cls:
@@ -117,7 +130,7 @@ class ModelCatalog:
 
     @property
     def plugins(self) -> List:
-        """Returns list with names of model plugins"""
+        """Return list with names of model plugins."""
         if len(self._plugins) == 0:
             eps = get_plugin_eps()
             self._plugins = list(eps.keys())
@@ -126,7 +139,7 @@ class ModelCatalog:
 
     @property
     def generic(self) -> List:
-        """Returns list with names of generic models"""
+        """Return list with names of generic models."""
         if len(self._general) == 0:
             eps = get_general_eps()
             self._general = list(eps.keys())
@@ -134,25 +147,32 @@ class ModelCatalog:
         return self._general
 
     def load(self, name) -> Model:
-        """Returns model class"""
+        """Return model class."""
         if name not in self._cls:
             self._cls[name] = load(self[name])
         return self._cls[name]
 
     def __str__(self):
+        """Generate string representation containing the registered entrypoints."""
         plugins = "".join(
             [
-                f" - {name} ({self.eps[name].distro.name} {self.eps[name].distro.version})\n"
+                f" - {name} ({self.eps[name].distro.name}"
+                f" {self.eps[name].distro.version})\n"
                 for name in self.plugins
             ]
         )
         generic = "".join([f" - {name}\n" for name in self.generic])
-        return f"model plugins:\n{plugins}generic models (hydromt {__version__}):\n{generic}"
+        return (
+            f"model plugins:\n{plugins}generic models (hydromt {__version__})"
+            f":\n{generic}"
+        )
 
     def __getitem__(self, name) -> Model:
+        """Return the entrypoint with the provided name."""
         if name not in self.eps:
             raise ValueError(f"Unknown model {name}; select from {self.eps.keys()}")
         return self._eps[name]
 
     def __iter__(self) -> Iterator:
+        """Return an iterator over registered entrypoints."""
         return iter(self.eps)

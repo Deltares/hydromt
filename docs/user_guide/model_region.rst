@@ -4,14 +4,14 @@ Defining a model region
 -----------------------
 
 To setup a model for a specific region, you can use several geospatial or hydrographic region definitions which are explained in this chapter.
-The syntax is interpreted using the :py:meth:`~hydromt.workflows.basin_mask.parse_region` method. 
+The syntax is interpreted using the :py:meth:`~hydromt.workflows.basin_mask.parse_region` method.
 For hydrographic regions see also the `delineate basins <../_examples/delineate_basin.ipynb>`_ example and :py:meth:`~hydromt.workflows.basin_mask.get_basin_geometry` method.
 
 .. NOTE::
 
     All x and y coordinates in the *point* and *bbox* are in the EPSG:4326 (WGS84) coordinate reference system.
 
-Geospatial region   
+Geospatial region
 ^^^^^^^^^^^^^^^^^
 
     Bounding box (bbox): ``{'bbox': [xmin, ymin, xmax, ymax]}``
@@ -60,7 +60,7 @@ To delineate the basin(s) touching a region or point location, users can supply 
 
     - ``{'basin': [xmin, ymin, xmax, ymax], 'outlets': true}``
 
-    
+
 **Subbasin**: is defined by the area that drains into an outlet, stream or region.
 Users can supply the following:
 

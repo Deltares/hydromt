@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Utils for parsing cli options and arguments 
-"""
+"""Utils for parsing cli options and arguments."""
 
-from os.path import isfile
 import json
 import logging
-import click
 from ast import literal_eval
-from typing import Union, Dict
+from os.path import isfile
 from pathlib import Path
+from typing import Any, Dict, Union
 from warnings import warn
+
+import click
 
 from .. import config
 from ..error import DeprecatedError
@@ -22,8 +22,9 @@ __all__ = ["parse_json", "parse_config", "parse_opt"]
 
 
 def parse_opt(ctx, param, value):
-    """
-    click callback to validate `--opt KEY1=VAL1 --opt SECT.KEY2=VAL2` and collect
+    """Parse extra cli options.
+
+    Parse options like `--opt KEY1=VAL1 --opt SECT.KEY2=VAL2` and collect
     in a dictionary like the one below, which is what the CLI function receives.
     If no value or `None` is received then an empty dictionary is returned.
         {
@@ -59,10 +60,16 @@ def parse_opt(ctx, param, value):
     return out
 
 
-def parse_json(ctx, param, value):
+def parse_json(ctx, param, value: str) -> Dict[str, Any]:
+    """Parse json from object or file.
+
+    If the object passed is a path pointing to a file, load it's contents and parse it.
+    Otherwise attempt to parse the object as JSON itself.
+    """
     if isfile(value):
         with open(value, "r") as f:
             kwargs = json.load(f)
+
     # Catch old keyword for resulution "-r"
     elif type(literal_eval(value)) in (float, int):
         raise DeprecatedError("'-r' is used for region, resolution is deprecated")
@@ -80,7 +87,7 @@ def parse_json(ctx, param, value):
 
 
 def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
-    """Parse config from ini `path` and combine with command line options `opt_cli`"""
+    """Parse config from ini `path` and combine with command line options `opt_cli`."""
     opt = {}
     if path is not None and isfile(path):
         if str(path).endswith(".ini"):
@@ -97,7 +104,7 @@ def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
         for section in opt_cli:
             if not isinstance(opt_cli[section], dict):
                 raise ValueError(
-                    f"No section found in --opt values: "
+                    "No section found in --opt values: "
                     "use <section>.<option>=<value> notation."
                 )
             if section not in opt:
