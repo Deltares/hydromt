@@ -28,6 +28,7 @@ from .data_adapter import (
     DataFrameAdapter,
 )
 from .data_adapter.caching import _uri_validator, _copyfile, HYDROMT_DATADIR
+from . import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -879,6 +880,12 @@ def _parse_data_dict(
     # NOTE: shouldn't the kwarg overwrite the dict/yml ?
     if root is None:
         root = data_dict.pop("root", None)
+
+    if hydromt_version := data_dict.get("meta",{}).get("hydromt_version", None):
+        if hydromt_version != __version__:
+            warnings.warn(f"HydroMT version ({hydromt_version}) specified in data catalog does not match installed HydroMT version ({__version__})")
+        
+
 
     # parse data
     data = dict()
