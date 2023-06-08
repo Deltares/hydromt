@@ -1243,7 +1243,7 @@ class XRasterBase(XGeoBase):
         mask_name: Optional[str] = None,
         name: Optional[str] = None,
         nodata: Optional[Union[int, float]] = -1,
-        keep_geom_type=False,
+        keep_geom_type: Optional[bool] = False,
     ) -> xr.DataArray:
         """Return an object with the fraction of the grid cells covered by geometry.
 
@@ -1262,7 +1262,7 @@ class XRasterBase(XGeoBase):
             Used as fill value for all areas not covered by input geometries.
             By default -1.
         keep_geom_type : bool
-            Only maintain geometries of the same time if true, otherwise
+            Only maintain geometries of the same type if true, otherwise
             keep geometries, regardless of their remaining type.
             False by default
 
