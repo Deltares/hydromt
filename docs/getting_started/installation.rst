@@ -84,13 +84,13 @@ To install HydroMT in a new environment called `hydromt` from the conda-forge ch
     $ conda create -n hydromt -c conda-forge hydromt
 
 Then, activate the environment (as stated by conda create) to start making use of HydroMT.
-To test whether the instalation was sccessful you can run :code:`hydromt --model` and the output should
+To test whether the installation was successful you can run :code:`hydromt --models` and the output should
 look approximately like the one below:
 
 
 .. code-block:: console
 
-    $ hyromt --model
+    $ hydromt --models
 
     model plugins:
     generic models (hydromt 0.7.2.dev0):

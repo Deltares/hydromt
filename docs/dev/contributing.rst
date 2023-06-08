@@ -29,11 +29,12 @@ are especially helpful!
 Checklist pull requests
 -----------------------
 
-If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure do the following steps:
-1. If it does not yet exist, create an issue following the :ref:`issue-conventions`
-2. Create a new branch where you develop your new code, see also :ref:`git-conventions`
+If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure to do the following steps:
+
+1. If it does not yet exist, create an issue following the :ref:`issue-conventions`.
+2. Create a new branch where you develop your new code, see also :ref:`git-conventions`.
 3. Make sure all pre-commit hooks pass, see  :ref:`code-format`. For ipynb files make sure that you have cleared all results.
-4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`_
+4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`_.
 5. Push your commits to the github repository and open a draft pull request. The body of the pull request will be pre-filled with a template. Please fill out this template with the relevant information, and complete the checklist included.
 6. Once you're satisfied with the changes mark the pull request as "as ready for review" and ask another contributor to review the code. The review should cover the implementation as well as steps 2-4.
 7. Merge the pull request once the review has been approved.
@@ -278,7 +279,7 @@ Docstrings
 
 Code format
 ^^^^^^^^^^^
-- We use the `black code style <https://black.readthedocs.io/en/stable/the_black_code_style.html>`_ and `pre-commit <https://pre-commit.org>`_ to keep everything formatted. Please make sure all hooks pass before commiting. Pre-commit will do this for you if it's installed correctly.
+- We use the `black code style <https://black.readthedocs.io/en/stable/the_black_code_style.html>`_ and `pre-commit <https://pre-commit.com>`_ to keep everything formatted. Please make sure all hooks pass before commiting. Pre-commit will do this for you if it's installed correctly.
 
 You can install pre-commit by running:
 
