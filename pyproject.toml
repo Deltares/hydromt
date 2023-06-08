@@ -26,12 +26,9 @@ dependencies = [
     "pandas",
     "pyflwdir>=0.5.4",
     "pyproj",
-    "ruff",
-    "pre-commit",
     "rasterio",
     "requests",
     "rioxarray",
-    "ruff",
     "shapely>=2.0.0",
     "scipy",
     "universal_pathlib",
@@ -53,7 +50,7 @@ classifiers = [
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
-all = [
+extra = [
     "pcraster",
     "xugrid",
     "pygeos",
@@ -61,12 +58,17 @@ all = [
     "s3fs",
     "gcsfs"
 ]
-test = [
+dev = [
     "black",
+    "ruff",
+    "pre-commit"
+]
+test = [
 	"pytest>=2.7.3",
 	"pytest-cov",
     "pytest-mock",
 	"responses",
+    "testpath"
 ]
 doc = [
 	"nbsphinx",

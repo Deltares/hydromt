@@ -24,17 +24,18 @@ deps = toml["project"]["dependencies"]
 extra_deps = []
 
 if args.profile == "full":
-    extra_deps.extend(toml["project"]["optional-dependencies"]["all"])
+    extra_deps.extend(toml["project"]["optional-dependencies"]["extra"])
     extra_deps.extend(toml["project"]["optional-dependencies"]["test"])
     extra_deps.extend(toml["project"]["optional-dependencies"]["doc"])
+    extra_deps.extend(toml["project"]["optional-dependencies"]["dev"])
 elif args.profile == "test":
-    extra_deps.extend(toml["project"]["optional-dependencies"]["all"])
+    extra_deps.extend(toml["project"]["optional-dependencies"]["extra"])
     extra_deps.extend(toml["project"]["optional-dependencies"]["test"])
 elif args.profile == "doc":
-    extra_deps.extend(toml["project"]["optional-dependencies"]["all"])
+    extra_deps.extend(toml["project"]["optional-dependencies"]["extra"])
     extra_deps.extend(toml["project"]["optional-dependencies"]["doc"])
 elif args.profile == "min":
-    extra_deps.extend(toml["project"]["optional-dependencies"]["all"])
+    extra_deps.extend(toml["project"]["optional-dependencies"]["extra"])
     pass
 else:
     raise RuntimeWarning(f"Uknown profile: {args.profile}")
