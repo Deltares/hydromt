@@ -1559,7 +1559,7 @@ class XRasterBase(XGeoBase):
         Notes
         -----
         - The method is powered by pyproj and k-d tree lookup.
-        - | The index mappings are typically used in reprojection workflows of 
+        - | The index mappings are typically used in reprojection workflows of
           | time series or combinations of time series.
         """
         # parse and check destination grid and CRS
