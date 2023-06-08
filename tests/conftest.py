@@ -83,7 +83,7 @@ def geodf(df):
 
 @pytest.fixture()
 def world():
-    world = gpd.read_file("tests/data/naturalearth_lowres")
+    world = gpd.read_file("tests/data/naturalearth_lowres.geojson")
     return world
 
 
