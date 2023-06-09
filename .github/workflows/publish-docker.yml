@@ -44,7 +44,7 @@ jobs:
           load: true
           target: jupyter
           push: ${{ !github.event.act }}
-          tags: savente/hydromt-jupyter
+          tags: deltares/hydromt-jupyter:latest
       - name: Build and push CLI
         uses: docker/build-push-action@v4
         with:
@@ -54,13 +54,13 @@ jobs:
           push: ${{ !github.event.act }}
           tags: deltares/hydromt-cli
       - name: Build and push
-        uses: savente/build-push-action@v4
+        uses: deltares/build-push-action@v4:latest
         with:
           context: .
           load: true
           target: dev
           push: ${{ !github.event.act }}
-          tags: savente/hydromt-dev
+          tags: deltares/hydromt-dev:latest
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
@@ -68,4 +68,4 @@ jobs:
           load: true
           target: env
           push: ${{ !github.event.act }}
-          tags: savente/hydromt-env
+          tags: deltares/hydromt-env:latest
