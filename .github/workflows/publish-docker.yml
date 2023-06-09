@@ -1,5 +1,5 @@
 ---
-name: Build and Upload HydroMT to DockerHub
+name: Build and publish HydroMT to DockerHub
 
 on:
   release:
@@ -10,7 +10,7 @@ on:
       - v*
 
 jobs:
-  build-docker-image:
+  publish-docker-image:
     if: ${{ github.event_name == 'release' || github.event.act }}
     runs-on: ubuntu-latest
     steps:
@@ -20,34 +20,52 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build and test
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          tags: hydromt
-
-      - name: Run Tests
-        run: docker run --rm -it hydromt pytest
-
-  publish-docker-image:
-    runs-on: ubuntu-latest
-    needs: build-docker-image
-    if: ${{ !github.event.act }}
-    steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
+      - name: Build and test
+        uses: docker/build-push-action@v4
         with:
-          images: deltares/hydromt
+          context: .
+          load: true
+          tags: hydromt-dev
+
+      - name: Run Tests
+        run: docker run --rm -it hydromt-dev pytest
+
+      # sadly this seems to be the only way to publish multiple images in the same workflow
+      # the building should get cached though.
+      - name: Build and push jupyter
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          target: jupyter
+          push: ${{ !github.event.act }}
+          tags: savente/hydromt-jupyter
+      - name: Build and push CLI
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          target: cli
+          push: ${{ !github.event.act }}
+          tags: deltares/hydromt-cli
+      - name: Build and push
+        uses: savente/build-push-action@v4
+        with:
+          context: .
+          load: true
+          target: dev
+          push: ${{ !github.event.act }}
+          tags: savente/hydromt-dev
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
-          tags: ${{ build-docker-image.steps.meta.outputs.tags }}
-          labels: ${{ build-docker-image.steps.meta.outputs.labels }}
+          load: true
+          target: env
+          push: ${{ !github.event.act }}
+          tags: savente/hydromt-env
