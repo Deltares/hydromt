@@ -1008,7 +1008,7 @@ class Model(object, metaclass=ABCMeta):
         Dataset can either be added as is (default) or split into several
         DataArrays using the split_dataset argument.
 
-        Arguments:
+        Arguments
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
@@ -1077,7 +1077,7 @@ class Model(object, metaclass=ABCMeta):
     def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
         """Add data to the geoms attribute.
 
-        Arguments:
+        Arguments
         ---------
         geom: geopandas.GeoDataFrame or geopandas.GeoSeries
             New geometry data to add
@@ -1218,7 +1218,7 @@ class Model(object, metaclass=ABCMeta):
     ):
         """Add data to forcing attribute.
 
-        Arguments:
+        Arguments
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
@@ -1287,7 +1287,7 @@ class Model(object, metaclass=ABCMeta):
     ):
         """Add data to states attribute.
 
-        Arguments:
+        Arguments
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add
@@ -1360,7 +1360,7 @@ class Model(object, metaclass=ABCMeta):
         Dataset can either be added as is (default) or split into several
         DataArrays using the split_dataset argument.
 
-        Arguments:
+        Arguments
         ---------
         data: xarray.Dataset or xarray.DataArray
             New forcing data to add

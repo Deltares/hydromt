@@ -24,7 +24,7 @@ def merge(
 
     Based on :py:meth:`rasterio.merge.merge`.
 
-    Arguments:
+    Arguments
     ---------
     data_arrays: list of xarray.DataArray
         Tiles to merge
@@ -51,7 +51,7 @@ def merge(
         Key-word arguments passed to
         :py:meth:`~hydromt.raster.RasterDataArray.reproject`
 
-    Returns:
+    Returns
     -------
     da_out: xarray.DataArray
         Merged tiles.

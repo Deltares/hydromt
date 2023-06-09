@@ -9,6 +9,13 @@ import os
 
 os.environ["USE_PYGEOS"] = "0"
 
+# pkg_resource deprication warnings originate from dependencies
+# so silence them for now
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+
 # required for accessor style documentation
 from xarray import DataArray, Dataset
 
