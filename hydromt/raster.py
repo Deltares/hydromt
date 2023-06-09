@@ -1707,9 +1707,17 @@ class RasterDataArray(XRasterBase):
                 nodata = self._obj.rio.encoded_nodata
         # Only numerical nodata values are supported
         if np.issubdtype(type(nodata), np.number):
+            # python naitive types don't play very nice
+            if isinstance(nodata, float):
+                nodata_cast = np.float32(nodata)
+            elif isinstance(nodata, int):
+                nodata_cast = np.int32(nodata)
+            else:
+                nodata_cast = nodata
+
             # cast to float since using int causes inconsistent casting
-            self._obj.rio.set_nodata(np.float32(nodata), inplace=True)
-            self._obj.rio.write_nodata(np.float32(nodata), inplace=True)
+            self._obj.rio.set_nodata(nodata_cast, inplace=True)
+            self._obj.rio.write_nodata(nodata_cast, inplace=True)
         else:
             logger.warning("No numerical nodata value found, skipping set_nodata")
             self._obj.attrs.pop("_FillValue", None)
