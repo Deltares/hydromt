@@ -34,7 +34,7 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
     my_dataset:
       crs: EPSG/WKT
       data_type: RasterDataset/GeoDataset/GeoDataFrame/DataFrame
-      driver: csv/raster/raster_tindex/netcdf/zarr/vector/vector_table/xlsx/xls
+      driver: raster/raster_tindex/netcdf/zarr/vector/vector_table/csv/xlsx/xls
       filesystem: local/gcs/s3
       kwargs:
         key: value
