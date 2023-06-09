@@ -82,7 +82,7 @@ def download_era5_year(
 ) -> None:
     """Download a ERA5 variable for a single year from Copernicus Climate Data Store.
 
-    Arguments:
+    Arguments
     ---------
     fn_out: (str)
         The output path to save the downloaded file.
