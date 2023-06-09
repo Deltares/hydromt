@@ -79,7 +79,9 @@ doc = [
     "ipython",
     "ipywidgets",
     "jupyterlab",
-    "cartopy"
+    "cartopy",
+    "notebook",
+    "jupyterhub"
 ]
 
 

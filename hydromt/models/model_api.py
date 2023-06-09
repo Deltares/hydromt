@@ -704,7 +704,7 @@ class Model(object, metaclass=ABCMeta):
             elif isfile(abspath(config_fn)):
                 cfdict = self._configread(abspath(config_fn))
                 self.logger.debug(f"{prefix} config read from {abspath(config_fn)}")
-            elif prefix != "Default":  # skip for missing default
+            else:  # skip for missing default
                 self.logger.error(f"{prefix} config file not found at {config_fn}")
 
         self._config = cfdict
