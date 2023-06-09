@@ -19,15 +19,13 @@ dependencies = [
     "gdal>=3.1",
     "fiona==1.8.22",
     "pip",
-    "numpy",
+    "numpy>=1.20",
     "netcdf4",
     "openpyxl",
     "packaging",
     "pandas",
     "pyflwdir>=0.5.4",
     "pyproj",
-    "ruff",
-    "pre-commit",
     "rasterio",
     "requests",
     "rioxarray",
@@ -52,7 +50,7 @@ classifiers = [
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
-all = [
+extra = [
     "pcraster",
     "xugrid",
     "pygeos",
@@ -60,12 +58,17 @@ all = [
     "s3fs",
     "gcsfs"
 ]
-test = [
+dev = [
     "black",
+    "ruff",
+    "pre-commit"
+]
+test = [
 	"pytest>=2.7.3",
 	"pytest-cov",
     "pytest-mock",
 	"responses",
+    "testpath"
 ]
 doc = [
 	"nbsphinx",
@@ -106,6 +109,7 @@ exclude = ["docs"]
 "hydromt/workflows/__init__.py" = ["F403"]
 "hydromt/models/__init__.py" = ["F403", "F401", "F405"]
 "hydromt/_compat.py" = ["F401"]
+"tests/conftest.py" = ["E402"]
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
@@ -123,5 +127,7 @@ filterwarnings = [
     "ignore:The *staticmaps:DeprecationWarning",
     "ignore:The set_staticmaps:DeprecationWarning",
     "ignore:Adding a predefined data catalog:DeprecationWarning",
-    "ignore:Shapely 2.0 is installed:UserWarning"
+    "ignore:Shapely 2.0 is installed:UserWarning",
+    "ignore::rasterio.errors.NotGeoreferencedWarning", # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
+    "ignore:.*isinstance:numba.core.errors.NumbaExperimentalFeatureWarning" # soon to be solved upstream. see https://github.com/numba/numba/pull/8911
 ]

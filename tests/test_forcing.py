@@ -33,7 +33,7 @@ def test_precip():
 
     pout_clim = precip(p_precip, grid, clim=p_clim)
     # the values have changed. Could check if the value itself is correct
-    assert pout_clim.values != p_clim.values
+    assert not pout_clim.equals(p_clim)
 
     # Testing with freq argument
     pout_freq = precip(p_precip, grid, freq="H")
