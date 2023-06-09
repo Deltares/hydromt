@@ -80,8 +80,12 @@ class GeoDatasetAdapter(DataAdapter):
             data unit to the output data unit as required by hydroMT.
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license',
-            'paper_ref', 'paper_doi', 'category'}
+            - 'source_version'
+            - 'source_url'
+            - 'source_license'
+            - 'paper_ref'
+            - 'paper_doi'
+            - 'category'
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
