@@ -27,8 +27,7 @@ from click.testing import CliRunner
 import hydromt
 from hydromt.cli.main import main as hydromt_cli
 
-# here = os.path.dirname(__file__)
-# sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
+os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
 
 def cli2rst(output, fn):
@@ -55,7 +54,8 @@ def write_panel(f, name, content="", level=0, item="dropdown"):
     if content:
         pad = "".ljust((level + 1) * 3)
         for line in content.split("\n"):
-            f.write(f"{pad}{line}\n")
+            line_clean = line.replace("*", "\\*")
+            f.write(f"{pad}{line_clean}\n")
         f.write("\n")
 
 
@@ -73,14 +73,28 @@ def write_nested_dropdown(name, data_cat, note="", categories=[]):
                 write_panel(f, category, level=2, item="tab-item")
             for source in sources:
                 items = data_cat[source].summary().items()
-                summary = "\n".join([f":{k}: {v}" for k, v in items if k != "category"])
+                summary = "\n".join(
+                    [f":{k}: {clean_str(v)}" for k, v in items if k != "category"]
+                )
                 write_panel(f, source, summary, level=3)
 
         write_panel(f, "all", level=2, item="tab-item")
         for source in df.index.values:
-            items = data_cat[source].summary().items()
+            items = data_cat[source].summary()
+            items = {k: clean_str(v) for (k, v) in items.items()}.items()
             summary = "\n".join([f":{k}: {v}" for k, v in items])
             write_panel(f, source, summary, level=3)
+
+
+def clean_str(s):
+    if not isinstance(s, str):
+        return s
+    clean = s.replace("*", "\\*")
+    idx = clean.find("p:/")
+    if idx > -1:
+        clean = clean[idx:]
+
+    return clean
 
 
 # NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
@@ -197,7 +211,10 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-
+# Napoleon settings
+napoleon_numpy_docstring = True
+napoleon_google_docstring = False
+napoleon_preprocess_types = True
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

@@ -134,7 +134,7 @@ class GeoBase(raster.XGeoBase):
     ) -> None:
         """Set the spatial and index dimensions of the object.
 
-        Arguments:
+        Arguments
         ---------
         x_name: str, optional
             The name of the x coordinate.
@@ -510,7 +510,7 @@ class GeoBase(raster.XGeoBase):
     def clip_geom(self, geom, predicate="intersects"):
         """Select all geometries that intersect with the input geometry.
 
-        Arguments:
+        Arguments
         ---------
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
@@ -521,7 +521,7 @@ class GeoBase(raster.XGeoBase):
             index whose extent intersects the envelope of the input geometry:
             predicate(input_geometry, tree_geometry).
 
-        Returns:
+        Returns
         -------
         da: xarray.DataArray
             Clipped DataArray
@@ -532,7 +532,7 @@ class GeoBase(raster.XGeoBase):
     def clip_bbox(self, bbox, crs=None, buffer=None):
         """Select point locations to bounding box.
 
-        Arguments:
+        Arguments
         ---------
         bbox: tuple of floats
             (xmin, ymin, xmax, ymax) bounding box
@@ -541,7 +541,7 @@ class GeoBase(raster.XGeoBase):
         crs : int, optional
             EPSG of the data. If not given, it will be inferred.
 
-        Returns:
+        Returns
         -------
         da: xarray.DataArray
             Clipped DataArray
@@ -562,12 +562,12 @@ class GeoBase(raster.XGeoBase):
 
         The ``crs`` attribute on the current GeoDataArray must be set.
 
-        Arguments:
+        Arguments
         ---------
         dst_crs: int, dict, or str, optional
             Accepts EPSG codes (int or str); proj (str or dict) or wkt (str)
 
-        Returns:
+        Returns
         -------
         xr.DataArray
             DataArray with transformed geospatial coordinates
@@ -589,13 +589,13 @@ class GeoBase(raster.XGeoBase):
         passed the Dataset variables are reduced along the all
         non-index dimensions and to a GeoDataFrame column.
 
-        Arguments:
+        Arguments
         ---------
         reducer : callable, optional
             method by which multidimensional data is reduced to 1 dimensional
             e.g. numpy.mean
 
-        Returns:
+        Returns
         -------
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
@@ -685,7 +685,7 @@ class GeoDataArray(GeoBase):
 
         DataArray will have geospatial attributes and be merged with array_like data.
 
-        Arguments:
+        Arguments
         ---------
         gdf: geopandas GeoDataFrame
             Spatial coordinates. The index should match the array_like index_dim and the
@@ -710,7 +710,7 @@ class GeoDataArray(GeoBase):
         keep_cols: bool, optional
             If True, keep gdf columns as extra coordinates in dataset
 
-        Returns:
+        Returns
         -------
         da: xarray.DataArray
             DataArray with geospatial coordinates
@@ -818,7 +818,7 @@ class GeoDataset(GeoBase):
 
         The Dataset values are reindexed to the gdf index.
 
-        Arguments:
+        Arguments
         ---------
         gdf: geopandas GeoDataFrame
             Spatial coordinates. The index should match the df index and the geometry
@@ -836,7 +836,7 @@ class GeoDataset(GeoBase):
         keep_cols: bool, optional
             If True, keep gdf columns as extra coordinates in dataset
 
-        Returns:
+        Returns
         -------
         da: xarray.Dataset
             Dataset with geospatial coordinates

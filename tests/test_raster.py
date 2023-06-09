@@ -217,7 +217,9 @@ def test_rasterize_geometry(rioda):
     box3 = box(x1, y1, x1 + resx, y1 - resy)
     gdf = gpd.GeoDataFrame(geometry=[box1, box2, box3], crs=rioda.raster.crs)
 
-    da = rioda.raster.rasterize_geometry(gdf, method="fraction", name="frac", nodata=0)
+    da = rioda.raster.rasterize_geometry(
+        gdf, method="fraction", name="frac", nodata=0, keep_geom_type=False
+    )
     assert da.name == "frac"
     assert da.raster.nodata == 0
     assert np.round(da.values.max(), 4) <= 1.0
