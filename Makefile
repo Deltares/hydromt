@@ -21,7 +21,7 @@ environment.yml: pyproject.toml make_env.py
 
 docker:
 	docker build -t hydromt --target=prod -f Dockerfile .
-	docker tag hydromt-prod $(DOCKER_USER_NAME)/hydromt:latest
+	docker tag hydromt $(DOCKER_USER_NAME)/hydromt:latest
 	docker push $(DOCKER_USER_NAME)/hydromt:latest
 
 pypi:
