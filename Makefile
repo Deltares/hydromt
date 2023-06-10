@@ -16,8 +16,8 @@ env: environment.yml
 	$(PY_ENV_MANAGER) create -f environment.yml -y
 	$(PY_ENV_MANAGER) -n hydromt run pip install .
 
-environment.yml:
-	python make_env.py full $(PY_VERSION)
+environment.yml: pyproject.toml make_env.py
+	python make_env.py full
 
 docker:
 	docker build -t hydromt --target=prod -f Dockerfile .
