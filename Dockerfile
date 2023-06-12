@@ -35,5 +35,6 @@ ENV NUMBA_CACHE_DIR=/home/mambauser/.cahce/numba \
     PYTHONDONTWRITEBYTECODE=1 \
     PYDEVD_DISABLE_FILE_VALIDATION=1
 USER mambauser
+WORKDIR /home/mambauser
 ENTRYPOINT ["micromamba","run","-n", "hydromt"]
 CMD ["hydromt", "--models"]
