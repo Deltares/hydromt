@@ -5,6 +5,8 @@ FROM savente/hydromt:current as binder
 # Binder hard requires all of these steps when they build the imae
 # therefore these steps aren't taken sooner
 USER root
+ENV NB_USER=hydromt \
+    NB_UID=1000
 RUN mv /home/mambauser /home/${NB_USER} \
  && groupadd -r ${NB_USER}\
  && usermod -l ${NB_USER} -d ${HOME} -u ${NB_UID} mambauser \
