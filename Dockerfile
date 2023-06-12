@@ -55,7 +55,3 @@ RUN groupadd -r ${NB_USER}\
 USER ${NB_USER}
 ENTRYPOINT ["micromamba","run","-n", "hydromt"]
 CMD ["hydromt", "--models"]
-
-FROM cli AS jupyter
-USER ${NB_USER}
-CMD ["micromamba","run","-n", "hydromt", "jupyter", "lab", "--ip=0.0.0.0"]
