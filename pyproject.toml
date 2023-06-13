@@ -53,11 +53,6 @@ io = [
     "universal_pathlib", # wraps fsspecs
     "fsspec==2023.5.0",  # enable cloud file systems likg GCS and S3
 ]
-deprecated = [
-    "pcraster",  # Old Wflow model was build on this
-    "pygeos",    # Supersceded by shapely 2
-    "rioxarray", # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
-]
 extra = [
     "xugrid", # xarray wrapper for mesh processing
     "pyet",   # calc evapotraspiration, quite well used, used in all wflow models but domain specific
@@ -76,11 +71,6 @@ test = [
     "pytest-cov",    # test coverage
     "pytest-mock",   # mocking
 ]
-jupyter = [
-    "jupyterlab", # run examples in jupyter notebook
-    "cartopy",    # plotting examples
-    "matplotlib", # plotting
-]
 doc = [
     "nbsphinx",                     # build notebooks in docs
     "pydata-sphinx-theme",          # theme
@@ -89,9 +79,19 @@ doc = [
     "sphinx_autosummary_accessors", # doc layout
     "hydromt[jupyter]",             # examples are included in the docs
 ]
+jupyter = [
+    "jupyterlab", # run examples in jupyter notebook
+    "cartopy",    # plotting examples
+    "matplotlib", # plotting
+]
+deprecated = [
+    "pcraster",  # Old Wflow model was build on this
+    "pygeos",    # Supersceded by shapely 2
+    "rioxarray", # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
+]
 
-full = ["hydromt[io,mesh,et,dev]"]
-all = ["hydromt[io,deprecated,mesh,et,dev]"]
+full = ["hydromt[io,extra,dev,test,doc]"]
+all = ["hydromt[io,extra,dev,test,doc,deprecated]"]
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
