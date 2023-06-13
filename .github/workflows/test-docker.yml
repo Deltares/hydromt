@@ -1,5 +1,5 @@
 ---
-name: Build and test docker images & binder integration
+name: Test Docker images and Binder integration
 
 on:
   push:
@@ -16,6 +16,9 @@ on:
 jobs:
   build-docker-image:
     runs-on: ubuntu-latest
+    concurrency:
+      group: test-docker-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -33,16 +36,13 @@ jobs:
           load: true
           target: cli
           tags: hydromt
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Run Tests
-        run: docker run --rm -it hydromt pytest
+        run: docker run --rm hydromt pytest
 
-      - name: install repo2docker
+      - name: Test Binder integration with repo2docker
         run: |
           pip install jupyter-repo2docker
-          repo2docker .
-
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+          repo2docker . echo 'success!'
