@@ -1,6 +1,9 @@
 ARG NB_USER=hydromt
 ARG NB_UID=1000
 
+# currently we haven't published an official hydromt image yet, so for now
+# I import from an export I've put on my own account. this should be moved
+# to the official image as soon as it's published.
 FROM savente/hydromt:current as binder
 # Binder hard requires all of these steps when they build the imae
 # therefore these steps aren't taken sooner
