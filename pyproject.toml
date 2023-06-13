@@ -63,15 +63,13 @@ extra = [
     "pyet",   # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
-    "black",         # linting
-    "ruff",          # linting
-    "pre-commit",    # linting
-    "hydromt[test]",
-    "hydromt[doc]",
-    "pip>=23.1.2",   # needed for recursive dependencies
-    "flint",         # needed to publish to pypi
-    "wheel",         # needed to publish to pypi
-    "twine",         # needed to publish to pypi
+    "black",       # linting
+    "ruff",        # linting
+    "pre-commit",  # linting
+    "pip>=23.1.2", # needed for recursive dependencies
+    "flint",       # needed to publish to pypi
+    "wheel",       # needed to publish to pypi
+    "twine",       # needed to publish to pypi
 ]
 test = [
     "pytest>=2.7.3", # testing framework
@@ -91,7 +89,8 @@ doc = [
     "hydromt[jupyter]",             # examples are included in the docs
 ]
 
-full = ["hydromt[io,deprecated,mesh,et,dev]"]
+full = ["hydromt[io,mesh,et,dev]"]
+all = ["hydromt[io,deprecated,mesh,et,dev]"]
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
