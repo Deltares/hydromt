@@ -13,16 +13,19 @@ html:
 docs: html
 
 env: environment.yml
-	$(PY_ENV_MANAGER) create -f environment.yml -y
+	$(PY_ENV_MANAGER) create -f environment.yml -y 
 	$(PY_ENV_MANAGER) -n hydromt run pip install .
 
 environment.yml: pyproject.toml make_env.py
 	python3 make_env.py full
 
 docker:
-	docker build -t hydromt --target=prod -f Dockerfile .
+	docker build -t hydromt --target=cli .
 	docker tag hydromt $(DOCKER_USER_NAME)/hydromt:latest
 	docker push $(DOCKER_USER_NAME)/hydromt:latest
+
+binder: .binder Dockerfile 
+	repo2docker .
 
 pypi:
 	python -m pip install --upgrade pip
