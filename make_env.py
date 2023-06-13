@@ -46,7 +46,7 @@ parser.add_argument("--channel", "-c", default="conda-forge")
 args = parser.parse_args()
 
 # will sadly have to maintian this manually :(
-deps_not_in_conda = ["sphinx_autosummary_accessors", "sphinx_design", "pyet"]
+deps_not_in_conda = ["sphinx_autosummary_accessors", "sphinx_design", "pyet", "flint"]
 with open("pyproject.toml", "rb") as f:
     toml = load(f)
 

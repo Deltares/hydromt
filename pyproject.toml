@@ -21,6 +21,7 @@ dependencies = [
     "numpy>=1.20",     # pin necessary to ensure compatability with C headers
     "netcdf4",         # netcfd IO
     "packaging",       # compare versions of hydromt
+    "rioxarray", # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
     "pandas",          # Dataframes
     "pyflwdir>=0.5.4", # Hight models and derivatives
     "pyproj",          # projections for Coordinate reference systems
@@ -87,7 +88,6 @@ jupyter = [
 deprecated = [
     "pcraster",  # Old Wflow model was build on this
     "pygeos",    # Supersceded by shapely 2
-    "rioxarray", # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
 ]
 
 full = ["hydromt[io,extra,dev,test,doc]"]
@@ -138,6 +138,6 @@ filterwarnings = [
     "ignore:The set_staticmaps:DeprecationWarning",
     "ignore:Adding a predefined data catalog:DeprecationWarning",
     "ignore:Shapely 2.0 is installed:UserWarning",
-    "ignore::rasterio.errors.NotGeoreferencedWarning",                       # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
+    "ignore:rasterio.errors.NotGeoreferencedWarning",                       # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
     "ignore:.*isinstance:numba.core.errors.NumbaExperimentalFeatureWarning", # soon to be solved upstream. see https://github.com/numba/numba/pull/8911
 ]

@@ -3,7 +3,7 @@ from packaging.version import Version
 __all__ = []
 
 HAS_XUGRID = False
-HAS_PCRASTER = True  # don't check PCRASTER compat for now, see below
+HAS_PCRASTER = False
 HAS_SHAPELY20 = False
 HAS_PYET = False
 HAS_PYGEOS = False
@@ -25,13 +25,12 @@ try:
 except ImportError:
     pass
 
-# causes malloc / corrupted size errors on linux & github CI
-# try:
-#     import pcraster
+try:
+    import pcraster
 
-#     HAS_PCRASTER = True
-# except ImportError:
-#     pass
+    HAS_PCRASTER = True
+except ImportError:
+    pass
 
 
 try:
