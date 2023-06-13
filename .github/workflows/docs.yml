@@ -1,5 +1,5 @@
 ---
-name: Build docs
+name: Build Documentation
 
 # We don't want pushes (or PRs) to gh-pages to kick anything off
 on:
@@ -30,6 +30,9 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
@@ -68,7 +71,3 @@ jobs:
           destination_dir: ./${{ env.DOC_VERSION }}
           keep_files: false
           full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
-
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true

@@ -27,6 +27,9 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.9', '3.10', '3.11']
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@v3
@@ -45,7 +48,3 @@ jobs:
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - uses: codecov/codecov-action@v3
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
