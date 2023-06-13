@@ -15,7 +15,9 @@ docs: html
 doc: html
 
 env:
-	python3 make_env.py $(OPT_DEPS)
+	@# the subst is to make sure the is always exactly one "" around OPT_DEPS so people can
+	@# specify it both as OPT_DEPS=extra,io and OPT_DEPS="extra,io"
+	python3 make_env.py "$(subst ",,$(OPT_DEPS))"
 	# $(PY_ENV_MANAGER) create -f environment.yml -y
 	# $(PY_ENV_MANAGER) -n hydromt run pip install .
 

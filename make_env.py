@@ -13,9 +13,11 @@ def _parse_profile(profile_str: str, opt_deps) -> List[str]:
         return []
 
     parsed = []
-    queue = list(map(lambda x: "hydromt[" + x + "]", profile_str.split(",")))
+    queue = ["hydromt[" + x.strip() + "]" for x in profile_str.split(",")]
     while len(queue) > 0:
         dep = queue.pop(0)
+        if dep == "":
+            continue
         m = pat.match(dep)
         if m:
             # if we match the patern, all list elts have to be dependenciy groups
@@ -27,11 +29,11 @@ def _parse_profile(profile_str: str, opt_deps) -> List[str]:
             continue
 
         if dep in opt_deps:
-            queue.extend(opt_deps[dep])
+            queue.extend([x.strip() for x in opt_deps[dep]])
         else:
             parsed.append(dep)
 
-    return sorted(list(set(parsed)))
+    return parsed
 
 
 pat = re.compile(r"\s*hydromt\[(.*)\]\s*")
@@ -64,7 +66,8 @@ for dep in deps_to_install:
     else:
         conda_deps.append(dep)
 
-conda_deps_to_install_string = "\n- ".join(sorted(conda_deps))
+# the list(set()) is to remove duplicates
+conda_deps_to_install_string = "\n- ".join(sorted(list(set(conda_deps))))
 env_spec = f"""
 name: hydromt
 
@@ -75,7 +78,7 @@ dependencies:
 - {conda_deps_to_install_string}
 """
 if len(pip_deps) > 0:
-    pip_deps_to_install_string = "\n  - ".join(sorted(pip_deps))
+    pip_deps_to_install_string = "\n  - ".join(sorted(list(set(pip_deps))))
     env_spec += f"""- pip:
   - {pip_deps_to_install_string}
 """
