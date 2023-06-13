@@ -10,33 +10,33 @@ authors = [
     {name = "Sam Vente", email="sam.vente@deltares.nl"}
 ]
 dependencies = [
-    "affine",
-    "bottleneck",
-    "click",
-    "dask",
-    "entrypoints",
-    "fsspec==2023.5.0",
-    "geopandas>=0.10",
-    "gdal>=3.1",
-    "fiona==1.8.22",
-    "pip",
+    "affine", # Spatial rasterers coordinate system (afine) meta data also for BBOX coalision
+    "bottleneck", # Speedup spearmen rank computation
+    "click", # CLI configuration
+    "dask", # distributed/lazy computing
+    "entrypoints", # Provide access for Plugins
+    "fsspec==2023.5.0", # enable cloud file systems likg GCS and S3
+    "geopandas>=0.10", # pandas but geo, wraps fiona and shapely (look into ...)
+    "gdal>=3.1", # enable the world (geospacial datate) raster and victor
+    "fiona==1.8.22", #IO for vector and shape files
     "numpy>=1.20",
-    "netcdf4",
-    "openpyxl",
-    "packaging",
-    "pandas",
-    "pyflwdir>=0.5.4",
-    "pyproj",
-    "rasterio",
-    "requests",
-    "rioxarray",
-    "shapely>=2.0.0",
-    "scipy",
-    "universal_pathlib",
-    "xarray",
-    "xmltodict",
-    "zarr",
+    "netcdf4", # netcfd IO
+    "openpyxl", # excel IO  <- make optional
+    "packaging", # to compare versions
+    "pandas", # Dataframes
+    "pyflwdir>=0.5.4", # Hight models and derivatives
+    "pyproj", # projections for CRS
+    "rasterio", # raster wrapper around gdal
+    "requests", # donwload stuff
+    "rioxarray", # wraps rasterio and xarray (maybe get rid of in future?) also does raster IO  writing metadata
+    "shapely>=2.0.0", # geometry transforms
+    "scipy", # it's scipy
+    "universal_pathlib", # wraps fsspecs
+    "xarray", # ndim data
+    "xmltodict", # xml parser also used to read VRT
+    "zarr", # zarr
 ]
+# same author: rasterio fiona affine
 requires-python = ">=3.8" # fix tests to support older versions
 readme = "README.rst"
 classifiers = [
@@ -52,35 +52,36 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 extra = [
-    "pcraster",
-    "xugrid",
-    "pygeos",
-    "pyet",
-    "s3fs",
-    "gcsfs"
+    "pcraster", # could be removed. Old Wflow model was build on this
+    "xugrid", # xarray wrapper for mesh processing
+    "pygeos", # could maybe be removed? supersceded by shapely 2
+    "pyet", # calc evapotraspiration, quite well used, used in all wflow models but domain specific
+    "s3fs", # S3 file system
+    "gcsfs" # google cloud file system
 ]
 dev = [
-    "black",
+    "black", # linting
     "ruff",
     "pre-commit"
 ]
 test = [
-	"pytest>=2.7.3",
-	"pytest-cov",
-    "pytest-mock",
-	"responses",
-    "testpath"
+	"pytest>=2.7.3", # testing
+	"pytest-cov", #coverage
+    "pytest-mock", # mocking
+	"responses", # ????
+    "testpath" # ???
 ]
 doc = [
-	"nbsphinx",
-    "pydata-sphinx-theme",
-    "sphinx",
-    "sphinx_design",
-    "sphinx_autosummary_accessors",
-    "ipython",
-    "ipywidgets",
+	"nbsphinx", #build notebooks in docs
+    "pydata-sphinx-theme", # theme
+    "sphinx", #build docks
+    "sphinx_design", # layout
+    "sphinx_autosummary_accessors", #layout
+    # binder stuff
+    "ipython", # remove?
+    "ipywidgets", # remove?
     "jupyterlab",
-    "cartopy",
+    "cartopy", # plotting examples
     "notebook",
     "jupyterhub"
 ]
