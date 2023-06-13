@@ -11,6 +11,7 @@ on:
 
 jobs:
   publish-docker-image:
+    timeout-minutes: 20
     if: ${{ github.event_name == 'release' || github.event.act }}
     runs-on: ubuntu-latest
     steps:

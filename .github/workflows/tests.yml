@@ -19,6 +19,7 @@ jobs:
   Test-matrix:
     name: ${{ matrix.os }} - py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     defaults:
       run:
         shell: bash -l {0}

@@ -11,6 +11,7 @@ on:
 
 jobs:
   build-artifacts:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -31,6 +32,7 @@ jobs:
           path: dist
 
   test-built-dist:
+    timeout-minutes: 10
     needs: build-artifacts
     runs-on: ubuntu-latest
     defaults:
@@ -73,6 +75,7 @@ jobs:
           echo "hydromt --models"
 
   upload-to-test-pypi:
+    timeout-minutes: 10
     needs: test-built-dist
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -91,6 +94,7 @@ jobs:
           skip_existing: true
 
   upload-to-pypi:
+    timeout-minutes: 10
     needs: test-built-dist
     if: ${{ github.event_name == 'release' && !github.event.act  }}
     runs-on: ubuntu-latest
