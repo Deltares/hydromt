@@ -13,8 +13,9 @@ html:
 docs: html
 
 env: environment.yml
-	$(PY_ENV_MANAGER) create -f environment.yml -y 
-	$(PY_ENV_MANAGER) -n hydromt run pip install .
+	$(PY_ENV_MANAGER) create -f environment.yml -y
+	$(PY_ENV_MANAGER) run -n hydromt pip install .
+	$(PY_ENV_MANAGER) run -n hydromt pre-commit install
 
 environment.yml: pyproject.toml make_env.py
 	python3 make_env.py full
@@ -24,7 +25,7 @@ docker:
 	docker tag hydromt $(DOCKER_USER_NAME)/hydromt:latest
 	docker push $(DOCKER_USER_NAME)/hydromt:latest
 
-binder: .binder Dockerfile 
+binder: .binder Dockerfile
 	repo2docker .
 
 pypi:
