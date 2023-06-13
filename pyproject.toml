@@ -10,34 +10,29 @@ authors = [
     {name = "Sam Vente", email="sam.vente@deltares.nl"}
 ]
 dependencies = [
-    "affine", # Spatial rasterers coordinate system (afine) meta data also for BBOX coalision
-    "bottleneck", # Speedup spearmen rank computation
+    "affine", # Spatial rasterers affine transformations (bbox pixel coalision)
+    "bottleneck", # Spearmen rank computation
     "click", # CLI configuration
-    "dask", # distributed/lazy computing
+    "dask", # lazy computing
     "entrypoints", # Provide access for Plugins
-    "fsspec==2023.5.0", # enable cloud file systems likg GCS and S3
-    "geopandas>=0.10", # pandas but geo, wraps fiona and shapely (look into ...)
-    "gdal>=3.1", # enable the world (geospacial datate) raster and victor
-    "fiona==1.8.22", #IO for vector and shape files
-    "numpy>=1.20",
+    "geopandas>=0.10", # pandas but geo, wraps fiona and shapely
+    "gdal>=3.1", # enable geospacial data manipulation, both  raster and victor
+    "fiona==1.8.22", # IO for vector and shape files
+    "numpy>=1.20", # pin necessary to ensure compatability with C headers
     "netcdf4", # netcfd IO
-    "openpyxl", # excel IO  <- make optional
-    "packaging", # to compare versions
+    "packaging", # compare versions of hydromt
     "pandas", # Dataframes
     "pyflwdir>=0.5.4", # Hight models and derivatives
-    "pyproj", # projections for CRS
+    "pyproj", # projections for Coordinate reference systems
     "rasterio", # raster wrapper around gdal
-    "requests", # donwload stuff
-    "rioxarray", # wraps rasterio and xarray (maybe get rid of in future?) also does raster IO  writing metadata
     "shapely>=2.0.0", # geometry transforms
-    "scipy", # it's scipy
-    "universal_pathlib", # wraps fsspecs
+    "scipy", # scientific utilities
     "xarray", # ndim data
     "xmltodict", # xml parser also used to read VRT
     "zarr", # zarr
 ]
-# same author: rasterio fiona affine
-requires-python = ">=3.8" # fix tests to support older versions
+
+requires-python = ">=3.9" # fix tests to support older versions
 readme = "README.rst"
 classifiers = [
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -51,41 +46,55 @@ classifiers = [
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
-extra = [
-    "pcraster", # could be removed. Old Wflow model was build on this
-    "xugrid", # xarray wrapper for mesh processing
-    "pygeos", # could maybe be removed? supersceded by shapely 2
-    "pyet", # calc evapotraspiration, quite well used, used in all wflow models but domain specific
+io = [
     "s3fs", # S3 file system
-    "gcsfs" # google cloud file system
+    "gcsfs", # google cloud file system
+    "openpyxl", # excel IO  <- make optional
+    "requests", # donwload stuff
+    "universal_pathlib", # wraps fsspecs
+    "fsspec==2023.5.0", # enable cloud file systems likg GCS and S3
+]
+deprecated = [
+    "pcraster", # Old Wflow model was build on this
+    "pygeos", # Supersceded by shapely 2
+    "rioxarray", # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
+]
+extra = [
+"xugrid", # xarray wrapper for mesh processing
+"pyet", # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
     "black", # linting
-    "ruff",
-    "pre-commit"
+    "ruff", # linting
+    "pre-commit", # linting
+    "hydromt[test]",
+    "hydromt[doc]",
+    "pip>=23.1.2", # needed for recursive dependencies
+    "flint", # needed to publish to pypi
+    "wheel", # needed to publish to pypi
+    "twine", # needed to publish to pypi
 ]
 test = [
-	"pytest>=2.7.3", # testing
-	"pytest-cov", #coverage
+	"pytest>=2.7.3", # testing framework
+	"pytest-cov", # test coverage
     "pytest-mock", # mocking
-	"responses", # ????
-    "testpath" # ???
+]
+jupyter = [
+    "jupyterlab", # run examples in jupyter notebook
+    "cartopy", # plotting examples
 ]
 doc = [
 	"nbsphinx", #build notebooks in docs
     "pydata-sphinx-theme", # theme
     "sphinx", #build docks
-    "sphinx_design", # layout
-    "sphinx_autosummary_accessors", #layout
-    # binder stuff
-    "ipython", # remove?
-    "ipywidgets", # remove?
-    "jupyterlab",
-    "cartopy", # plotting examples
-    "notebook",
-    "jupyterhub"
+    "sphinx_design", # doc layout
+    "sphinx_autosummary_accessors", # doc layout
+    "hydromt[jupyter]" # examples are included in the docs
 ]
 
+full = [
+    "hydromt[io,deprecated,mesh,et,dev]"
+]
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"

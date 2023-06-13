@@ -1,5 +1,6 @@
 PY_ENV_MANAGER		?= micromamba
 DOCKER_USER_NAME 	?= deltares
+OPT_DEPS			?= full
 SPHINXBUILD   	 	 = sphinx-build
 SPHINXPROJ    	 	 = hydromt
 SOURCEDIR     	 	 = docs
@@ -11,22 +12,19 @@ html:
 	PYDEVD_DISABLE_FILE_VALIDATION=1 $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)"
 
 docs: html
+doc: html
 
-env: environment.yml
-	$(PY_ENV_MANAGER) create -f environment.yml -y
-	$(PY_ENV_MANAGER) -n hydromt run pip install .
+env:
+	python3 make_env.py $(OPT_DEPS)
+	# $(PY_ENV_MANAGER) create -f environment.yml -y
+	# $(PY_ENV_MANAGER) -n hydromt run pip install .
 
-environment.yml: pyproject.toml make_env.py
-	python make_env.py full
 
 docker:
-	docker build -t hydromt --target=prod -f Dockerfile .
+	docker build -t hydromt --target=cli .
 	docker tag hydromt $(DOCKER_USER_NAME)/hydromt:latest
-	docker push $(DOCKER_USER_NAME)/hydromt:latest
 
 pypi:
-	python -m pip install --upgrade pip
-	python -m pip install flit wheel twine
 	git clean -xdf
 	git restore -SW .
 	flit build
