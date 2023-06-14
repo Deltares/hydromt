@@ -9,7 +9,7 @@ from tomli import load
 
 # our quick and dirty implementation of recursive depedencies
 def _parse_profile(profile_str: str, opt_deps) -> List[str]:
-    if profile_str is None or profile_str in [[], "", [""], "min", ["min"]]:
+    if profile_str is None or profile_str == "":
         return []
 
     parsed = []
@@ -39,7 +39,7 @@ def _parse_profile(profile_str: str, opt_deps) -> List[str]:
 pat = re.compile(r"\s*hydromt\[(.*)\]\s*")
 parser = argparse.ArgumentParser()
 
-parser.add_argument("profile", default="full", nargs="?")
+parser.add_argument("profile", default="", nargs="?")
 parser.add_argument("--output", "-o", default="environment.yml")
 parser.add_argument("--channel", "-c", default="conda-forge")
 

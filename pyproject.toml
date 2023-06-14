@@ -66,6 +66,7 @@ dev = [
     "flint",       # needed to publish to pypi
     "wheel",       # needed to publish to pypi
     "twine",       # needed to publish to pypi
+    "conda-tree",  # vetting dependencies
 ]
 test = [
     "pytest>=2.7.3", # testing framework
@@ -83,7 +84,7 @@ doc = [
 jupyter = [
     "jupyterlab", # run examples in jupyter notebook
     "cartopy",    # plotting examples
-    "matplotlib", # plotting
+    "matplotlib-base", # plotting
 ]
 deprecated = [
     "pcraster", # Old Wflow model was build on this

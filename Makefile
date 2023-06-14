@@ -1,6 +1,6 @@
 PY_ENV_MANAGER		?= micromamba
 DOCKER_USER_NAME 	?= deltares
-OPT_DEPS			?= full
+OPT_DEPS			?= ""
 SPHINXBUILD   	 	 = sphinx-build
 SPHINXPROJ    	 	 = hydromt
 SOURCEDIR     	 	 = docs
@@ -11,6 +11,7 @@ BUILDDIR      	 	 = docs/_build
 html:
 	PYDEVD_DISABLE_FILE_VALIDATION=1 $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)"
 
+# some aliases
 docs: html
 doc: html
 
@@ -19,20 +20,47 @@ env:
 	@# specify it both as OPT_DEPS=extra,io and OPT_DEPS="extra,io"
 	python3 make_env.py "$(subst ",,$(OPT_DEPS))"
 	$(PY_ENV_MANAGER) create -f environment.yml -y
-	$(PY_ENV_MANAGER) -n hydromt run pip install '.[$(subst ",,$(OPT_DEPS))]'
+	$(PY_ENV_MANAGER) -n hydromt run pip install .
 
 
 docker:
-	docker build -t hydromt-cloud --target=cli --build-args OPT_DEPS="io,extra" .
-	docker tag hydromt-cloud $(DOCKER_USER_NAME)/hydromt-cloud:latest
 
-	docker build -t hydromt-jupyter --target=jupyter --build-args OPT_DEPS="jupyter".
-	docker tag hydromt-jupyter $(DOCKER_USER_NAME)/hydromt-jupyter:latest
+min-environment.yml:
+	python3 make_env.py -o min-environment.yml
 
-	docker build -t hydromt --target=full --build-args OPT_DEPS="full".
-	docker tag hydromt $(DOCKER_USER_NAME)/hydromt:latest
+jupyter-environment.yml:
+	python3 make_env.py "jupyter,extra" -o jupyter-environment.yml
 
+test-environment.yml:
+	python3 make_env.py "test" -o test-environment.yml
 
+dev-environment.yml:
+	python3 make_env.py "dev" -o dev-environment.yml
+
+full-environment.yml:
+	python3 make_env.py "full" -o full-environment.yml
+
+all-environment.yml:
+	python3 make_env.py "all" -o all-environment.yml
+
+docker-min: min-environment.yml
+	docker build -t $(DOCKER_USER_NAME)/hydromt-min:latest .
+	docker tag $(DOCKER_USER_NAME)/hydromt-min:latest $(DOCKER_USER_NAME)/hydromt-min:$$(git rev-parse --short HEAD) 
+	
+docker-jupyter: jupyter-environment.yml
+	docker build -t $(DOCKER_USER_NAME)/hydromt-jupyter:latest .
+	docker tag $(DOCKER_USER_NAME)/hydromt-jupyter:latest $(DOCKER_USER_NAME)/hydromt-jupyter:$$(git rev-parse --short HEAD)
+
+docker-full: full-environment.yml
+	docker build -t $(DOCKER_USER_NAME)/hydromt-full:latest .
+	docker tag $(DOCKER_USER_NAME)/hydromt-full:latest $(DOCKER_USER_NAME)/hydromt-full:$$(git rev-parse --short HEAD)
+
+docker-test: test-environment.yml
+	docker build -t $(DOCKER_USER_NAME)/hydromt-test:latest .
+	docker tag $(DOCKER_USER_NAME)/hydromt-test:latest $(DOCKER_USER_NAME)/hydromt-test:$$(git rev-parse --short HEAD)
+
+	
+docker: docker-min docker-jupyter docker-full docker-test
 
 pypi:
 	git clean -xdf
@@ -41,6 +69,6 @@ pypi:
 	python -m twine check dist/*
 
 clean:
-	rm -f environment.yml
+	rm -f *environment.yml
 	rm -rf $(BUILDDIR)/*
 	rm -rf dist
