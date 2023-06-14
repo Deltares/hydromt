@@ -66,7 +66,6 @@ dev = [
     "flint",       # needed to publish to pypi
     "wheel",       # needed to publish to pypi
     "twine",       # needed to publish to pypi
-    "conda-tree",  # vetting dependencies
 ]
 test = [
     "pytest>=2.7.3", # testing framework
@@ -92,7 +91,7 @@ deprecated = [
 ]
 
 full = ["hydromt[io,extra,dev,test,doc]"]
-all = ["hydromt[io,extra,dev,test,doc,deprecated]"]
+slim = ["hydromt[io,extra,jupyter]"]
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"

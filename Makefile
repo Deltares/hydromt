@@ -1,5 +1,6 @@
 PY_ENV_MANAGER		?= micromamba
-DOCKER_USER_NAME 	?= deltares
+# DOCKER_USER_NAME 	?= deltares
+DOCKER_USER_NAME 	?= savente
 OPT_DEPS			?= ""
 SPHINXBUILD   	 	 = sphinx-build
 SPHINXPROJ    	 	 = hydromt
@@ -22,45 +23,29 @@ env:
 	$(PY_ENV_MANAGER) create -f environment.yml -y
 	$(PY_ENV_MANAGER) -n hydromt run pip install .
 
-
-docker:
-
-min-environment.yml:
+min-environment.yml: 
 	python3 make_env.py -o min-environment.yml
 
-jupyter-environment.yml:
-	python3 make_env.py "jupyter,extra" -o jupyter-environment.yml
+slim-environment.yml: 
+	python3 make_env.py "slim" -o slim-environment.yml
 
-test-environment.yml:
-	python3 make_env.py "test" -o test-environment.yml
-
-dev-environment.yml:
-	python3 make_env.py "dev" -o dev-environment.yml
-
-full-environment.yml:
+full-environment.yml: 
 	python3 make_env.py "full" -o full-environment.yml
 
-all-environment.yml:
-	python3 make_env.py "all" -o all-environment.yml
-
-docker-min: min-environment.yml
-	docker build -t $(DOCKER_USER_NAME)/hydromt-min:latest .
-	docker tag $(DOCKER_USER_NAME)/hydromt-min:latest $(DOCKER_USER_NAME)/hydromt-min:$$(git rev-parse --short HEAD) 
+docker-min: min-environment.yml 
+	docker build -t $(DOCKER_USER_NAME)/hydromt:min --target=min . 
+	docker tag $(DOCKER_USER_NAME)/hydromt:min $(DOCKER_USER_NAME)/hydromt:min-git-$$(git rev-parse --short HEAD) 
 	
-docker-jupyter: jupyter-environment.yml
-	docker build -t $(DOCKER_USER_NAME)/hydromt-jupyter:latest .
-	docker tag $(DOCKER_USER_NAME)/hydromt-jupyter:latest $(DOCKER_USER_NAME)/hydromt-jupyter:$$(git rev-parse --short HEAD)
+docker-slim: slim-environment.yml
+	docker build -t $(DOCKER_USER_NAME)/hydromt:slim --target=slim .
+	docker build -t $(DOCKER_USER_NAME)/hydromt:latest --target=slim .
+	docker tag $(DOCKER_USER_NAME)/hydromt:slim $(DOCKER_USER_NAME)/hydromt:slim-git-$$(git rev-parse --short HEAD)
 
 docker-full: full-environment.yml
-	docker build -t $(DOCKER_USER_NAME)/hydromt-full:latest .
-	docker tag $(DOCKER_USER_NAME)/hydromt-full:latest $(DOCKER_USER_NAME)/hydromt-full:$$(git rev-parse --short HEAD)
-
-docker-test: test-environment.yml
-	docker build -t $(DOCKER_USER_NAME)/hydromt-test:latest .
-	docker tag $(DOCKER_USER_NAME)/hydromt-test:latest $(DOCKER_USER_NAME)/hydromt-test:$$(git rev-parse --short HEAD)
-
+	docker build -t $(DOCKER_USER_NAME)/hydromt:full --target=full .
+	docker tag $(DOCKER_USER_NAME)/hydromt:full $(DOCKER_USER_NAME)/hydromt:full-git-$$(git rev-parse --short HEAD)
 	
-docker: docker-min docker-jupyter docker-full docker-test
+docker: docker-min docker-slim docker-full
 
 pypi:
 	git clean -xdf
@@ -72,3 +57,7 @@ clean:
 	rm -f *environment.yml
 	rm -rf $(BUILDDIR)/*
 	rm -rf dist
+	
+docker-clean:
+	docker images =reference="*:hydromt*" -q | xargs --no-run-if-empty docker rmi -f
+	docker system prune -f 
