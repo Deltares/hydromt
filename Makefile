@@ -15,7 +15,6 @@ docs: html
 doc: html
 
 env:
-	pip install tomli
 	@# the subst is to make sure the is always exactly one "" around OPT_DEPS so people can
 	@# specify it both as OPT_DEPS=extra,io and OPT_DEPS="extra,io"
 	python3 make_env.py "$(subst ",,$(OPT_DEPS))"
@@ -24,8 +23,16 @@ env:
 
 
 docker:
-	docker build -t hydromt --target=cli .
+	docker build -t hydromt-cloud --target=cli --build-args OPT_DEPS="io,extra" .
+	docker tag hydromt-cloud $(DOCKER_USER_NAME)/hydromt-cloud:latest
+
+	docker build -t hydromt-jupyter --target=jupyter --build-args OPT_DEPS="jupyter".
+	docker tag hydromt-jupyter $(DOCKER_USER_NAME)/hydromt-jupyter:latest
+
+	docker build -t hydromt --target=full --build-args OPT_DEPS="full".
 	docker tag hydromt $(DOCKER_USER_NAME)/hydromt:latest
+
+
 
 pypi:
 	git clean -xdf

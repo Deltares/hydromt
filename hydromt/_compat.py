@@ -9,6 +9,7 @@ HAS_PYET = False
 HAS_PYGEOS = False
 HAS_GCSFS = False
 HAS_S3FS = False
+HAS_OPENPYXL = False
 
 try:
     from shapely import __version__ as SH_VERSION
@@ -17,6 +18,13 @@ try:
         HAS_SHAPELY20 = True
 except ImportError:
     pass
+
+try:
+    import openpyxl
+
+    HAS_OPENPYXL = True
+except ImportError:
+    False
 
 try:
     import pygeos

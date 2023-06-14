@@ -35,7 +35,7 @@ To generate a usable mamba/conda environment you'll need to have `tomli` install
 You wil also need a suable instalation of `make`. If you're using linux this should already be installed by defautl. If you are using windows we
 recommend you install it using `chocolatey <https://chocolatey.org/install>`_ like so:
 
-.. code-block:: conosle
+.. code-block:: console
 
     $ choco install make
 

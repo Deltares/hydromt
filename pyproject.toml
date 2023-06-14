@@ -29,8 +29,8 @@ dependencies = [
     "shapely>=2.0.0",    # geometry transforms
     "scipy",             # scientific utilities
     "xarray",            # ndim data
+    "universal_pathlib", # provides path compatability between different filesystems
     "xmltodict",         # xml parser also used to read VRT
-    "universal_pathlib", # wraps fsspecs
     "zarr",              # zarr
 ]
 
@@ -78,7 +78,7 @@ doc = [
     "sphinx",                       # build docks
     "sphinx_design",                # doc layout
     "sphinx_autosummary_accessors", # doc layout
-    "hydromt[jupyter]",             # examples are included in the docs
+    "hydromt[jupyter,extra]",       # examples are included in the docs
 ]
 jupyter = [
     "jupyterlab", # run examples in jupyter notebook
