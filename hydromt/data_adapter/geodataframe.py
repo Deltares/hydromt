@@ -43,18 +43,22 @@ class GeoDataFrameAdapter(DataAdapter):
         meta={},
         attrs={},
         driver_kwargs={},
-        **kwargs,
+        name="",  # optional for now
+        catalog_name="",  # optional for now
     ):
-        """Initiate data adapter for geospatial vector data.
+        """Initiate data adapter for geospatial timeseries data.
 
         This object contains all properties required to read supported files into
-        a single unified :py:func:`geopandas.GeoDataFrame`.
-        In addition it keeps meta data to be able to reproduce which data is used.
+        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial
+        point geometries. In addition it keeps meta data to be able to reproduce which
+        data is used.
 
         Parameters
         ----------
         path: str, Path
-            Path to data source.
+            Path to data source. If the dataset consists of multiple files, the path may
+            contain {variable} placeholders as well as path
+            search pattern using a '*' wildcard.
         driver: {'vector', 'vector_table'}, optional
             Driver to read files with, for 'vector' :py:func:`~geopandas.read_file`,
             for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
@@ -66,31 +70,31 @@ class GeoDataFrameAdapter(DataAdapter):
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
             proj (str or dict) or wkt (str). Only used if the data has no native CRS.
-        nodata: (dictionary) float, int, optional
+        nodata: float, int, optional
             Missing value number. Only used if the data has no native missing value.
-            Multiple nodata values can be provided in a list and differentiated between
-            dataframe columns using a dictionary with variable (column) keys. The nodata
-            values are only applied to columns with numeric data.
+            Nodata values can be differentiated between variables using a dictionary.
         rename: dict, optional
             Mapping of native data source variable to output source variable name as
             required by hydroMT.
         unit_mult, unit_add: dict, optional
-            Scaling multiplication and addition to change to map from the native data
-            unit to the output data unit as required by hydroMT.
-        units:
-            Not used in this implementation, here for compatability reasons.
+            Scaling multiplication and addition to change to map from the native
+            data unit to the output data unit as required by hydroMT.
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license',
             'paper_ref', 'paper_doi', 'category'}
-        **kwargs
+        placeholders: dict, optional
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
         """
         super().__init__(
             path=path,
             driver=driver,
             filesystem=filesystem,
-            crs=crs,
             nodata=nodata,
             rename=rename,
             unit_mult=unit_mult,
@@ -98,7 +102,10 @@ class GeoDataFrameAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            name=name,
+            catalog_name=catalog_name,
         )
+        self.crs = crs
 
     def to_file(
         self,
@@ -177,7 +184,7 @@ class GeoDataFrameAdapter(DataAdapter):
         buffer=0,
         logger=logger,
         variables=None,
-        **kwargs,  # this is not used, for testing only
+        # **kwargs,  # this is not used, for testing only
     ):
         """Return a clipped and unified GeoDataFrame (vector).
 
@@ -188,8 +195,7 @@ class GeoDataFrameAdapter(DataAdapter):
         if variables:
             variables = np.atleast_1d(variables).tolist()
 
-        kwargs = self.kwargs.copy()
-        if "storage_options" in kwargs:
+        if "storage_options" in self.driver_kwargs:
             # not sure if storage options can be passed to fiona.open()
             # for now throw NotImplemented Error
             raise NotImplementedError(
@@ -197,6 +203,7 @@ class GeoDataFrameAdapter(DataAdapter):
             )
         _ = self.resolve_paths()  # throw nice error if data not found
 
+        kwargs = self.driver_kwargs.copy()
         # parse geom, bbox and buffer arguments
         clip_str = ""
         if geom is None and bbox is not None:

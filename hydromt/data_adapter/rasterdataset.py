@@ -47,21 +47,23 @@ class RasterDatasetAdapter(DataAdapter):
         meta={},
         attrs={},
         driver_kwargs={},
-        **kwargs,
+        name="",  # optional for now
+        catalog_name="",  # optional for now
+        zoom_levels={},
     ):
-        """Initiate data adapter for geospatial raster data.
+        """Initiate data adapter for geospatial timeseries data.
 
-        This object contains all properties required to read supported raster files into
-        a single unified RasterDataset, i.e. :py:class:`xarray.Dataset` with geospatial
-        attributes. In addition it keeps meta data to be able to reproduce
-        which data is used.
+        This object contains all properties required to read supported files into
+        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial
+        point geometries. In addition it keeps meta data to be able to reproduce which
+        data is used.
 
         Parameters
         ----------
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
-            contain {variable}, {year}, {month} placeholders as well as path search
-            pattern using a '*' wildcard.
+            contain {variable}, {year}, {month} placeholders as well as path
+            search pattern using a '*' wildcard.
         driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
             Driver to read files with,
             for 'raster' :py:func:`~hydromt.io.open_mfraster`,
@@ -74,8 +76,9 @@ class RasterDatasetAdapter(DataAdapter):
             By default, local.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
-            proj (str or dict) or wkt (str).
-            Only used if the data has no native CRS.
+            proj (str or dict) or wkt (str). Only used if the data has no native CRS.
+        zoomlevel: dict, optional
+            TODO
         nodata: float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Nodata values can be differentiated between variables using a dictionary.
@@ -85,21 +88,22 @@ class RasterDatasetAdapter(DataAdapter):
         unit_mult, unit_add: dict, optional
             Scaling multiplication and addition to change to map from the native
             data unit to the output data unit as required by hydroMT.
-        units:
-            Additional units for variables.
         meta: dict, optional
-            Metadata information of dataset, preferably containing the following keys:
+            Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license',
             'paper_ref', 'paper_doi', 'category'}
-        logger:
-        **kwargs
+        placeholders: dict, optional
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
         """
         super().__init__(
             path=path,
             driver=driver,
             filesystem=filesystem,
-            crs=crs,
             nodata=nodata,
             rename=rename,
             unit_mult=unit_mult,
@@ -107,8 +111,11 @@ class RasterDatasetAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
-            **kwargs,
+            name=name,
+            catalog_name=catalog_name,
         )
+        self.crs = crs
+        self.zoom_levels = zoom_levels
 
     def to_file(
         self,
@@ -228,16 +235,15 @@ class RasterDatasetAdapter(DataAdapter):
             variables = np.atleast_1d(variables).tolist()
 
         # Extract storage_options from kwargs to instantiate fsspec object correctly
-        if "storage_options" in self.kwargs:
-            so_kwargs = self.kwargs["storage_options"]
+        so_kwargs = dict()
+        if "storage_options" in self.driver_kwargs:
+            so_kwargs = self.driver_kwargs["storage_options"]
             # For s3, anonymous connection still requires --no-sign-request profile to
             # read the data setting environment variable works
             if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        else:
-            so_kwargs = dict()
 
         # resolve path based on time, zoom level and/or variables
         fns = self.resolve_paths(
@@ -250,7 +256,7 @@ class RasterDatasetAdapter(DataAdapter):
             **so_kwargs,
         )
 
-        kwargs = self.kwargs.copy()
+        kwargs = self.driver_kwargs.copy()
         # zarr can use storage options directly, the rest should be converted to
         # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":

@@ -44,7 +44,8 @@ class GeoDatasetAdapter(DataAdapter):
         meta={},
         attrs={},
         driver_kwargs={},
-        **kwargs,
+        name="",  # optional for now
+        catalog_name="",  # optional for now
     ):
         """Initiate data adapter for geospatial timeseries data.
 
@@ -87,14 +88,15 @@ class GeoDatasetAdapter(DataAdapter):
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
-        **kwargs
+        driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
         """
         super().__init__(
             path=path,
             driver=driver,
             filesystem=filesystem,
-            crs=crs,
             nodata=nodata,
             rename=rename,
             unit_mult=unit_mult,
@@ -102,7 +104,10 @@ class GeoDatasetAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            name=name,
+            catalog_name=catalog_name,
         )
+        self.crs = crs
 
     def to_file(
         self,
@@ -203,24 +208,25 @@ class GeoDatasetAdapter(DataAdapter):
             variables = np.atleast_1d(variables).tolist()
 
         # Extract storage_options from kwargs to instantiate fsspec object correctly
-        if "storage_options" in self.kwargs and self.driver == "zarr":
-            kwargs = self.kwargs["storage_options"]
+        so_kwargs = dict()
+        if "storage_options" in self.driver_kwargs and self.driver == "zarr":
+            so_kwargs = self.driver_kwargs["storage_options"]
             # For s3, anonymous connection still requires --no-sign-request profile to
             # read the data
             # setting environment variable works
-            if "anon" in kwargs:
+            if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        elif "storage_options" in self.kwargs:
+        elif "storage_options" in self.driver_kwargs:
             raise NotImplementedError(
                 "Remote (cloud) GeoDataset only supported with driver zarr."
             )
-        else:
-            kwargs = dict()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables, **kwargs)
+        fns = self.resolve_paths(
+            time_tuple=time_tuple, variables=variables, **so_kwargs
+        )
 
-        kwargs = self.kwargs.copy()
+        kwargs = self.driver_kwargs.copy()
 
         # parse geom, bbox and buffer arguments
         clip_str = ""

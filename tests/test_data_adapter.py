@@ -152,11 +152,13 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     ds1 = data_catalog.get_geodataset("test", single_var_as_array=False)
     assert isinstance(ds1, xr.Dataset)
     assert "test" in ds1
-    da2 = data_catalog.get_geodataset(fn_gdf, fn_data=fn_csv).sortby("index")
+    da2 = data_catalog.get_geodataset(
+        fn_gdf, driver_kwargs=dict(fn_data=fn_csv)
+    ).sortby("index")
     assert np.allclose(da2, geoda)
     # test with xy locs
     da3 = data_catalog.get_geodataset(
-        fn_csv_locs, fn_data=fn_csv, crs=geodf.crs
+        fn_csv_locs, driver_kwargs=dict(fn_data=fn_csv), crs=geodf.crs
     ).sortby("index")
     assert np.allclose(da3, geoda)
     assert da3.vector.crs.to_epsg() == 4326
@@ -219,20 +221,22 @@ def test_dataframe(df, df_time, tmpdir):
     fn_df = str(tmpdir.join("test.csv"))
     df.to_csv(fn_df)
     data_catalog = DataCatalog()
-    df1 = data_catalog.get_dataframe(fn_df, index_col=0)
+    df1 = data_catalog.get_dataframe(fn_df, driver_kwargs=dict(index_col=0))
     assert isinstance(df1, pd.DataFrame)
     pd.testing.assert_frame_equal(df, df1)
 
     # Test FWF support
     fn_fwf = str(tmpdir.join("test.txt"))
     df.to_string(fn_fwf, index=False)
-    fwf = data_catalog.get_dataframe(fn_fwf, driver="fwf", colspecs="infer")
+    fwf = data_catalog.get_dataframe(
+        fn_fwf, driver="fwf", driver_kwargs=dict(colspecs="infer")
+    )
     assert isinstance(fwf, pd.DataFrame)
     assert np.all(fwf == df)
 
     fn_xlsx = str(tmpdir.join("test.xlsx"))
     df.to_excel(fn_xlsx)
-    df2 = data_catalog.get_dataframe(fn_xlsx, index_col=0)
+    df2 = data_catalog.get_dataframe(fn_xlsx, driver_kwargs=dict(index_col=0))
     assert isinstance(df2, pd.DataFrame)
     assert np.all(df2 == df)
 
@@ -263,7 +267,9 @@ def test_dataframe_time(df_time, tmpdir):
     fn_df_ts = str(tmpdir.join("test_ts.csv"))
     df_time.to_csv(fn_df_ts)
     data_catalog = DataCatalog()
-    dfts1 = data_catalog.get_dataframe(fn_df_ts, index_col=0, parse_dates=True)
+    dfts1 = data_catalog.get_dataframe(
+        fn_df_ts, driver_kwargs=dict(index_col=0, parse_dates=True)
+    )
     assert isinstance(dfts1, pd.DataFrame)
     assert np.all(dfts1 == df_time)
 
@@ -274,7 +280,7 @@ def test_dataframe_time(df_time, tmpdir):
         "pet": "ET",
     }
     dfts2 = data_catalog.get_dataframe(
-        fn_df_ts, index_col=0, parse_dates=True, rename=rename
+        fn_df_ts, driver_kwargs=dict(index_col=0, parse_dates=True), rename=rename
     )
     assert np.all(list(dfts2.columns) == list(rename.values()))
 
@@ -290,7 +296,10 @@ def test_dataframe_time(df_time, tmpdir):
         "pet": 2,
     }
     dfts3 = data_catalog.get_dataframe(
-        fn_df_ts, index_col=0, parse_dates=True, unit_mult=unit_mult, unit_add=unit_add
+        fn_df_ts,
+        driver_kwargs=dict(index_col=0, parse_dates=True),
+        unit_mult=unit_mult,
+        unit_add=unit_add,
     )
     # Do checks
     for var in df_time.columns:
@@ -298,14 +307,18 @@ def test_dataframe_time(df_time, tmpdir):
 
     # Test timeslice
     dfts4 = data_catalog.get_dataframe(
-        fn_df_ts, index_col=0, parse_dates=True, time_tuple=("2007-01-02", "2007-01-04")
+        fn_df_ts,
+        time_tuple=("2007-01-02", "2007-01-04"),
+        driver_kwargs=dict(index_col=0, parse_dates=True),
     )
     assert len(dfts4) == 3
 
     # Test variable slice
     vars_slice = ["precip", "temp"]
     dfts5 = data_catalog.get_dataframe(
-        fn_df_ts, index_col=0, parse_dates=True, variables=vars_slice
+        fn_df_ts,
+        variables=vars_slice,
+        driver_kwargs=dict(index_col=0, parse_dates=True),
     )
     assert np.all(dfts5.columns == vars_slice)
 

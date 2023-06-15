@@ -329,12 +329,14 @@ class DataCatalog(object):
             meta.update(category=yml.pop("category"))
         # read meta data
         meta = yml.pop("meta", meta)
-        if hydromt_version := meta.get("hydromt_version"):
-            if hydromt_version != __version__:
-                warnings.warn(
-                    f"HydroMT version ({hydromt_version}) specified in data catalog does not match installed HydroMT version ({__version__})",
-                    UserWarning,
-                )
+        self_version = Version(__version__)
+        hydromt_version = meta.get("hydromt_version", __version__)
+        yml_version = Version(hydromt_version)
+
+        if yml_version > self_version:
+            self.logger.warning(
+                f"Specified HydroMT version ({hydromt_version}) more recent than installed version ({__version__}).",
+            )
 
         catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
 
@@ -603,7 +605,7 @@ class DataCatalog(object):
                 source.path = fn_out
                 source.driver = driver
                 source.filesystem = "local"
-                source.kwargs = {}
+                source.driver_kwargs = {}
                 source.rename = {}
                 if key in sources_out:
                     self.logger.warning(
@@ -688,28 +690,20 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(
-                kwargs, RasterDatasetAdapter
-            )
-            self.update(
-                **{
-                    name: RasterDatasetAdapter(
-                        path=path, driver_kwargs=driver_kwargs, **kwargs
-                    )
-                }
-            )
+            source = RasterDatasetAdapter(path=path, **kwargs)
+            self.update(**{name: source})
         elif data_like in self.sources:
             name = data_like
+            source = self.sources[name]
         else:
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.sources[name]
         self.logger.info(
             f"DataCatalog: Getting {name} RasterDataset {source.driver} data from"
             f" {source.path}"
         )
-        obj = self.sources[name].get_data(
+        obj = source.get_data(
             bbox=bbox,
             geom=geom,
             buffer=buffer,
@@ -779,23 +773,15 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(
-                kwargs, GeoDataFrameAdapter
-            )
-            self.update(
-                **{
-                    name: GeoDataFrameAdapter(
-                        path=path, driver_kwargs=driver_kwargs, **kwargs
-                    )
-                }
-            )
+            source = GeoDataFrameAdapter(path=path, **kwargs)
+            self.update(**{name: source})
         elif data_like in self.sources:
             name = data_like
+            source = self.sources[name]
         else:
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.sources[name]
         self.logger.info(
             f"DataCatalog: Getting {name} GeoDataFrame {source.driver} data"
             f" from {source.path}"
@@ -873,24 +859,15 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(
-                kwargs, GeoDatasetAdapter
-            )
-            self.update(
-                **{
-                    name: GeoDatasetAdapter(
-                        path=path, driver_kwargs=driver_kwargs, **kwargs
-                    )
-                }
-            )
-
+            source = GeoDatasetAdapter(path=path, **kwargs)
+            self.update(**{name: source})
         elif data_like in self.sources:
             name = data_like
+            source = self.sources[name]
         else:
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.sources[name]
         self.logger.info(
             f"DataCatalog: Getting {name} GeoDataset {source.driver} data"
             f" from {source.path}"
@@ -944,24 +921,15 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
-            kwargs, driver_kwargs = _seperate_driver_kwargs_from_kwargs(
-                kwargs, DataFrameAdapter
-            )
-
-            self.update(
-                **{
-                    name: DataFrameAdapter(
-                        path=path, driver_kwargs=driver_kwargs, **kwargs
-                    )
-                }
-            )
+            source = DataFrameAdapter(path=path, **kwargs)
+            self.update(**{name: source})
         elif data_like in self.sources:
             name = data_like
+            source = self.sources[name]
         else:
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.sources[name]
         self.logger.info(
             f"DataCatalog: Getting {name} DataFrame {source.driver} data"
             f" from {source.path}"
@@ -1025,14 +993,13 @@ def _parse_data_dict(
         attrs = source.pop("attrs", {})
         # lower kwargs for backwards compatability
         # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
-        driver_kwargs = source.pop("kwargs", {})
-        driver_kwargs.update(source.pop("driver_kwargs", {}))
+        driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
         for driver_kwarg in driver_kwargs:
+            # required for geodataset where driver_kwargs can be a path
             if "fn" in driver_kwarg:
                 driver_kwargs.update(
                     {driver_kwarg: abs_path(root, driver_kwargs[driver_kwarg])}
                 )
-        # source.update(**source.pop("kwargs", {}))
         for opt in source:
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})

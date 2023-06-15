@@ -121,8 +121,6 @@ def test_data_catalog(tmpdir):
     fn_yml = join(tmpdir, "test.yml")
     data_catalog = DataCatalog()
     data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
-    with pytest.warns(UserWarning):
-        data_catalog = DataCatalog(data_libs=fn_yml)
 
 
 def test_from_archive(tmpdir):

@@ -27,6 +27,7 @@ class DataFrameAdapter(DataAdapter):
         path,
         driver=None,
         filesystem="local",
+        crs=None,
         nodata=None,
         rename={},
         unit_mult={},
@@ -34,44 +35,53 @@ class DataFrameAdapter(DataAdapter):
         meta={},
         attrs={},
         driver_kwargs={},
-        **kwargs,
+        name="",  # optional for now
+        catalog_name="",  # optional for now
     ):
-        """Initiate data adapter for 2D tabular data.
+        """Initiate data adapter for geospatial timeseries data.
 
         This object contains all properties required to read supported files into
-        a :py:func:`pandas.DataFrame`.
-        In addition it keeps meta data to be able to reproduce which data is used.
+        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial
+        point geometries. In addition it keeps meta data to be able to reproduce which
+        data is used.
 
         Parameters
         ----------
         path: str, Path
-            Path to data source.
-        driver: {'csv', 'xlsx', 'xls', 'fwf'}, optional
-            Driver to read files with, for 'csv' :py:func:`~pandas.read_csv`,
-            for {'xlsx', 'xls'} :py:func:`~pandas.read_excel`, and for 'fwf'
-            :py:func:`~pandas.read_fwf`.
+            Path to data source. If the dataset consists of multiple files, the path may
+            contain {variable}, {year}, {month} placeholders as well as path
+            search pattern using a '*' wildcard.
+        driver: {'vector', 'vector_table'}, optional
+            Driver to read files with, for 'vector' :py:func:`~geopandas.read_file`,
+            for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
             By default the driver is inferred from the file extension and falls back to
-            'csv' if unknown.
+            'vector' if unknown.
         filesystem: {'local', 'gcs', 's3'}, optional
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
-        nodata: (dictionary) float, int, optional
+        crs: int, dict, or str, optional
+            Coordinate Reference System. Accepts EPSG codes (int or str);
+            proj (str or dict) or wkt (str). Only used if the data has no native CRS.
+        nodata: float, int, optional
             Missing value number. Only used if the data has no native missing value.
-            Multiple nodata values can be provided in a list and differentiated between
-            dataframe columns using a dictionary with variable (column) keys. The nodata
-            values are only applied to columns with numeric data.
+            Nodata values can be differentiated between variables using a dictionary.
         rename: dict, optional
-            Mapping of native column names to output column names as
+            Mapping of native data source variable to output source variable name as
             required by hydroMT.
         unit_mult, unit_add: dict, optional
             Scaling multiplication and addition to change to map from the native
             data unit to the output data unit as required by hydroMT.
         meta: dict, optional
-            Metadata information of dataframe, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license', 'paper_ref',
-            'paper_doi', 'category'}
-        **kwargs
+            Metadata information of dataset, prefably containing the following keys:
+            {'source_version', 'source_url', 'source_license',
+            'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
         """
         super().__init__(
             path=path,
@@ -84,7 +94,8 @@ class DataFrameAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
-            kwargs=kwargs,
+            name=name,
+            catalog_name=catalog_name,
         )
 
     def to_file(
@@ -157,7 +168,6 @@ class DataFrameAdapter(DataAdapter):
         variables=None,
         time_tuple=None,
         logger=logger,
-        **kwargs,
     ):
         """Return a DataFrame.
 
@@ -166,27 +176,28 @@ class DataFrameAdapter(DataAdapter):
         description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
         # Extract storage_options from kwargs to instantiate fsspec object correctly
-        if "storage_options" in self.kwargs:
-            kwargs = self.kwargs["storage_options"]
+        so_kwargs = {}
+        if "storage_options" in self.driver_kwargs:
+            so_kwargs = self.driver_kwargs["storage_options"]
             # For s3, anonymous connection still requires --no-sign-request profile
             # to read the data setting environment variable works
-            if "anon" in kwargs:
+            if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        _ = self.resolve_paths(**kwargs)  # throw nice error if data not found
+        _ = self.resolve_paths(**so_kwargs)  # throw nice error if data not found
 
-        kwargs = self.kwargs.copy()
+        kwargs = self.driver_kwargs.copy()
 
         # read and clip
         logger.info(f"DataFrame: Read {self.driver} data.")
 
         if self.driver in ["csv"]:
-            df = pd.read_csv(self.path, **self.driver_kwargs)
+            df = pd.read_csv(self.path, **kwargs)
         elif self.driver in ["xls", "xlsx", "excel"]:
-            df = pd.read_excel(self.path, engine="openpyxl", **self.driver_kwargs)
+            df = pd.read_excel(self.path, engine="openpyxl", **kwargs)
         elif self.driver in ["fwf"]:
-            df = pd.read_fwf(self.path, **self.driver_kwargs)
+            df = pd.read_fwf(self.path, **kwargs)
         else:
             raise IOError(f"DataFrame: driver {self.driver} unknown.")
 
