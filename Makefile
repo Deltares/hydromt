@@ -8,7 +8,6 @@ BUILDDIR      	 	 = docs/_build
 
 .PHONY: clean html
 
-SHELL=/bin/zsh
 
 html:
 	PYDEVD_DISABLE_FILE_VALIDATION=1 $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)"
