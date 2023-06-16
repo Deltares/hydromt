@@ -90,7 +90,7 @@ deprecated = [
     "pygeos",   # Supersceded by shapely 2
 ]
 
-full = ["hydromt[io,extra,dev,test,doc]"]
+full = ["hydromt[io,extra,dev,test,doc, jupyter, deprecated]"]
 slim = ["hydromt[io,extra,jupyter]"]
 
 [project.urls]

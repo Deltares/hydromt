@@ -1,6 +1,5 @@
 PY_ENV_MANAGER		?= micromamba
-# DOCKER_USER_NAME 	?= deltares
-DOCKER_USER_NAME 	?= savente
+DOCKER_USER_NAME 	?= deltares
 OPT_DEPS			?= ""
 SPHINXBUILD   	 	 = sphinx-build
 SPHINXPROJ    	 	 = hydromt
@@ -8,6 +7,8 @@ SOURCEDIR     	 	 = docs
 BUILDDIR      	 	 = docs/_build
 
 .PHONY: clean html
+
+SHELL=/bin/zsh
 
 html:
 	PYDEVD_DISABLE_FILE_VALIDATION=1 $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)"
@@ -22,6 +23,11 @@ env:
 	python3 make_env.py "$(subst ",,$(OPT_DEPS))"
 	$(PY_ENV_MANAGER) create -f environment.yml -y
 	$(PY_ENV_MANAGER) -n hydromt run pip install .
+
+dev: full-environment.yml
+	$(PY_ENV_MANAGER) create -f full-environment.yml -y
+	$(PY_ENV_MANAGER) -n hydromt run pip install .
+	$(PY_ENV_MANAGER) -n hydromt run pre-commit install
 
 min-environment.yml:
 	python3 make_env.py -o min-environment.yml

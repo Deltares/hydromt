@@ -1,6 +1,7 @@
 FROM  mambaorg/micromamba:1.4-alpine AS min
 ENV HOME=/home/mambauser
 WORKDIR ${HOME}
+USER mambauser
 COPY min-environment.yml pyproject.toml README.rst ${HOME}/
 RUN micromamba create -f min-environment.yml -y --no-pyc \
  && micromamba clean -ayf \
@@ -22,6 +23,7 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
 FROM  mambaorg/micromamba:1.4-alpine AS full
 ENV HOME=/home/mambauser
 WORKDIR ${HOME}
+USER mambauser
 COPY full-environment.yml pyproject.toml README.rst ${HOME}/
 RUN micromamba create -f full-environment.yml -y --no-pyc \
  && micromamba clean -ayf \
@@ -43,6 +45,7 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
 FROM  mambaorg/micromamba:1.4-alpine AS slim
 ENV HOME=/home/mambauser
 WORKDIR ${HOME}
+USER mambauser
 COPY slim-environment.yml pyproject.toml README.rst ${HOME}/
 RUN micromamba create -f slim-environment.yml -y --no-pyc \
  && rm -rf ${HOME}/.cache \
