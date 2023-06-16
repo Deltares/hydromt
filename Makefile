@@ -23,25 +23,25 @@ env:
 	$(PY_ENV_MANAGER) create -f environment.yml -y
 	$(PY_ENV_MANAGER) -n hydromt run pip install .
 
-min-environment.yml: 
+min-environment.yml:
 	python3 make_env.py -o min-environment.yml
 
-slim-environment.yml: 
+slim-environment.yml:
 	python3 make_env.py "slim" -o slim-environment.yml
 
-full-environment.yml: 
+full-environment.yml:
 	python3 make_env.py "full" -o full-environment.yml
 
-docker-min: min-environment.yml 
-	docker build -t $(DOCKER_USER_NAME)/hydromt:min --target=min . 
-	
+docker-min: min-environment.yml
+	docker build -t $(DOCKER_USER_NAME)/hydromt:min --target=min .
+
 docker-slim: slim-environment.yml
 	docker build -t $(DOCKER_USER_NAME)/hydromt:slim --target=slim .
 	docker build -t $(DOCKER_USER_NAME)/hydromt:latest --target=slim .
-	
+
 docker-full: full-environment.yml
 	docker build -t $(DOCKER_USER_NAME)/hydromt:full --target=full .
-	
+
 docker: docker-min docker-slim docker-full
 
 pypi:
@@ -54,7 +54,7 @@ clean:
 	rm -f *environment.yml
 	rm -rf $(BUILDDIR)/*
 	rm -rf dist
-	
+
 docker-clean:
 	docker images =reference="*hydromt*" -q | xargs --no-run-if-empty docker rmi -f
-	docker system prune -f 
+	docker system prune -f

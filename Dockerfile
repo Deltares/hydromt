@@ -1,5 +1,5 @@
 FROM  mambaorg/micromamba:1.4-alpine AS min
-ENV HOME=/home/mambauser 
+ENV HOME=/home/mambauser
 WORKDIR ${HOME}
 COPY min-environment.yml pyproject.toml README.rst ${HOME}/
 RUN micromamba create -f min-environment.yml -y --no-pyc \
@@ -17,10 +17,10 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
  && micromamba clean -ayf \
  && find /opt/conda/ -follow -type f -name '*.a' -delete \
  && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
- && find /opt/conda/ -follow -type f -name '*.js.map' -delete 
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete
 
 FROM  mambaorg/micromamba:1.4-alpine AS full
-ENV HOME=/home/mambauser 
+ENV HOME=/home/mambauser
 WORKDIR ${HOME}
 COPY full-environment.yml pyproject.toml README.rst ${HOME}/
 RUN micromamba create -f full-environment.yml -y --no-pyc \
@@ -38,10 +38,10 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
  && micromamba clean -ayf \
  && find /opt/conda/ -follow -type f -name '*.a' -delete \
  && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
- && find /opt/conda/ -follow -type f -name '*.js.map' -delete 
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete
 
 FROM  mambaorg/micromamba:1.4-alpine AS slim
-ENV HOME=/home/mambauser 
+ENV HOME=/home/mambauser
 WORKDIR ${HOME}
 COPY slim-environment.yml pyproject.toml README.rst ${HOME}/
 RUN micromamba create -f slim-environment.yml -y --no-pyc \
@@ -58,4 +58,4 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
  && micromamba clean -ayf \
  && find /opt/conda/ -follow -type f -name '*.a' -delete \
  && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
- && find /opt/conda/ -follow -type f -name '*.js.map' -delete 
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete
