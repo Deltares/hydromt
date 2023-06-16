@@ -66,7 +66,34 @@ If you want you can also do these steps manually. The first step is to create th
     $ python make_env.py "full"
 
 When the script is finished, a file called `environment.yml` will be created which you can pass to conda
-as demonstrated in the sections below.
+as demonstrated in the sections below. This will include all optional dependencies of HydroMT. If you want a more
+finetined instalation you can also specify exactly which dependency grousp you'd like like this:
+
+.. code-block:: console
+
+    $ make env OPT_DEPS="extra,io,doc"
+
+
+We have 7 optional dependency groups you can specify:
+
+1. `io`: Reading and writing various formats like excel but also cloud file systems
+2. `extra`: Couldn't think of a better name for this one, but it has some extra for ET and mesh calculations
+3. `dev`: everything you need to develop and publish HydroMT
+4. `test` What you need to run the test suite. Test suite should be setup that only tests that use the dependencies that are installed are run, so this should always pass no matter what other dependencies you may or may not have installed.
+5. `doc` generate the docs
+6. `jupyter` Run Jupyter notebooks and run the examples. Going to use this for binder support mostly.
+7. `deprecated` dependencies that we hope to remove soon, but aren't quite ready to yet.
+
+
+We also have 3 "flavors". These are more or less just collections of one or more groups designed for common use cases:
+1. `min` no optional dependencies. mostly as a base to build your DIY stack on.
+2. `slim` Just the operational bits, what most people will probably want if you using HydroMT and what the cloud will most likely use
+3. `full` absolutely everything, useful for developing.
+
+We also have docker images for each of the flavours that should be published soon (but are not yet as the writing of this section)
+
+
+After the environment file has been created you can create an environment out of it by running:
 
 .. code-block:: console
 
