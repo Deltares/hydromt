@@ -34,16 +34,13 @@ full-environment.yml:
 
 docker-min: min-environment.yml 
 	docker build -t $(DOCKER_USER_NAME)/hydromt:min --target=min . 
-	docker tag $(DOCKER_USER_NAME)/hydromt:min $(DOCKER_USER_NAME)/hydromt:min-git-$$(git rev-parse --short HEAD) 
 	
 docker-slim: slim-environment.yml
 	docker build -t $(DOCKER_USER_NAME)/hydromt:slim --target=slim .
 	docker build -t $(DOCKER_USER_NAME)/hydromt:latest --target=slim .
-	docker tag $(DOCKER_USER_NAME)/hydromt:slim $(DOCKER_USER_NAME)/hydromt:slim-git-$$(git rev-parse --short HEAD)
-
+	
 docker-full: full-environment.yml
 	docker build -t $(DOCKER_USER_NAME)/hydromt:full --target=full .
-	docker tag $(DOCKER_USER_NAME)/hydromt:full $(DOCKER_USER_NAME)/hydromt:full-git-$$(git rev-parse --short HEAD)
 	
 docker: docker-min docker-slim docker-full
 
@@ -59,5 +56,5 @@ clean:
 	rm -rf dist
 	
 docker-clean:
-	docker images =reference="*:hydromt*" -q | xargs --no-run-if-empty docker rmi -f
+	docker images =reference="*hydromt*" -q | xargs --no-run-if-empty docker rmi -f
 	docker system prune -f 
