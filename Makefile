@@ -8,13 +8,10 @@ BUILDDIR      	 	 = docs/_build
 
 .PHONY: clean html
 
-
-html:
-	PYDEVD_DISABLE_FILE_VALIDATION=1 $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)"
-
-# some aliases
-docs: html
-doc: html
+dev: full-environment.yml
+	$(PY_ENV_MANAGER) create -f full-environment.yml -y
+	$(PY_ENV_MANAGER) -n hydromt run pip install .
+	$(PY_ENV_MANAGER) -n hydromt run pre-commit install
 
 env:
 	@# the subst is to make sure the is always exactly one "" around OPT_DEPS so people can
@@ -22,11 +19,6 @@ env:
 	python3 make_env.py "$(subst ",,$(OPT_DEPS))"
 	$(PY_ENV_MANAGER) create -f environment.yml -y
 	$(PY_ENV_MANAGER) -n hydromt run pip install .
-
-dev: full-environment.yml
-	$(PY_ENV_MANAGER) create -f full-environment.yml -y
-	$(PY_ENV_MANAGER) -n hydromt run pip install .
-	$(PY_ENV_MANAGER) -n hydromt run pre-commit install
 
 min-environment.yml:
 	python3 make_env.py -o min-environment.yml
@@ -63,3 +55,11 @@ clean:
 docker-clean:
 	docker images =reference="*hydromt*" -q | xargs --no-run-if-empty docker rmi -f
 	docker system prune -f
+
+
+html:
+	PYDEVD_DISABLE_FILE_VALIDATION=1 $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)"
+
+# some aliases
+docs: html
+doc: html
