@@ -25,8 +25,7 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
 FROM  mambaorg/micromamba:1.4-alpine AS full
 ENV HOME=/home/mambauser
 WORKDIR ${HOME}
-USER mambauser
-COPY full-environment.yml pyproject.toml README.rst ${HOME}/
+COPY full-environment.yml pyproject.toml Makefile README.rst ${HOME}/
 RUN micromamba create -f full-environment.yml -y --no-pyc \
  && micromamba clean -ayf \
  && rm -rf ${HOME}/.cache \
@@ -35,9 +34,13 @@ RUN micromamba create -f full-environment.yml -y --no-pyc \
  && find /opt/conda/ -follow -type f -name '*.js.map' -delete  \
  && rm full-environment.yml
 COPY data/ ${HOME}/data
+COPY docs/ ${HOME}/docs
 COPY examples/ ${HOME}/examples
 COPY tests/ ${HOME}/tests
 COPY hydromt/ ${HOME}/hydromt
+USER root
+RUN chown -R mambauser /home/mambauser/docs && apk add --no-cache make
+USER mambauser
 RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disable-pip-version-check --no-deps\
  && micromamba clean -ayf \
  && find /opt/conda/ -follow -type f -name '*.a' -delete \

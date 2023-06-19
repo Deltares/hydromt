@@ -35,32 +35,18 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
-      - name: install tomli
-        run: pip install tomli
-      - name: Generate env spec
-        run: python make_env.py doc
-
-      - name: Setup environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: '3.10'
-          miniforge-variant: Mambaforge
-          channels: conda-forge, defaults
-          channel-priority: strict
-          environment-file: environment.yml
-          activate-environment: hydromt
-
-      - name: Install hydromt
-        run: pip install .
-
-      - name: Build docs
+      - uses: actions/checkout@v3
+      - name: build image
         run: |
-          make html
+          make full-environment.yml
+          docker build -t hydromt-docs --target=full .
+      - name: generate docs
+        run: docker run --cidfile ${{ matrix.os }}_container_id hydromt-docs make html
+      - name: Copy docs from image to host
+        run: docker cp $(cat ${{ matrix.os }}_container_id):/home/mambauser/docs/_build/html .
 
-      - name: Set doc version
-        run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
+      # - name: Set doc version
+      #   run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
