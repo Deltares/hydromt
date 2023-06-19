@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -7,7 +6,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>hydromt.Model &#8212; HydroMT  documentation</title>
   
@@ -19,30 +18,38 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_generated/hydromt.Model';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.3';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="hydromt.Model.read" href="hydromt.Model.read.html" />
@@ -57,6 +64,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -97,7 +113,8 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
   
@@ -107,11 +124,12 @@
   
   
   
+  
     
     
     
-    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">HydroMT Core</p>
@@ -119,7 +137,6 @@
 </a></div>
     
   </div>
-  
   
   <div class="col-lg-9 navbar-header-items">
     
@@ -178,13 +195,15 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -214,24 +233,50 @@ document.write(`
         </li>
 </ul></div>
       
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
     </div>
     
   </div>
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -329,6 +374,30 @@ document.write(`
         </li>
 </ul></div>
         
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
       </div>
     
   </div>
@@ -339,6 +408,8 @@ document.write(`
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.html">hydromt.data_catalog.DataCatalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source.html">hydromt.data_catalog.DataCatalog.get_source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.iter_sources.html">hydromt.data_catalog.DataCatalog.iter_sources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.sources.html">hydromt.data_catalog.DataCatalog.sources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.keys.html">hydromt.data_catalog.DataCatalog.keys</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.predefined_catalogs.html">hydromt.data_catalog.DataCatalog.predefined_catalogs</a></li>
@@ -346,19 +417,23 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.to_dataframe.html">hydromt.data_catalog.DataCatalog.to_dataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.to_yml.html">hydromt.data_catalog.DataCatalog.to_yml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.export_data.html">hydromt.data_catalog.DataCatalog.export_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source_bbox.html">hydromt.data_catalog.DataCatalog.get_source_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source_time_range.html">hydromt.data_catalog.DataCatalog.get_source_time_range</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.set_predefined_catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.add_source.html">hydromt.data_catalog.DataCatalog.add_source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.update.html">hydromt.data_catalog.DataCatalog.update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_archive.html">hydromt.data_catalog.DataCatalog.from_archive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_yml.html">hydromt.data_catalog.DataCatalog.from_yml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_dict.html">hydromt.data_catalog.DataCatalog.from_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.update.html">hydromt.data_catalog.DataCatalog.update</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.set_predefined_catalogs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_rasterdataset.html">hydromt.data_catalog.DataCatalog.get_rasterdataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataset.html">hydromt.data_catalog.DataCatalog.get_geodataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataframe.html">hydromt.data_catalog.DataCatalog.get_dataframe</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.html">hydromt.data_adapter.RasterDatasetAdapter</a></li>
@@ -366,6 +441,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.get_data.html">hydromt.data_adapter.RasterDatasetAdapter.get_data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.to_dict.html">hydromt.data_adapter.RasterDatasetAdapter.to_dict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.to_file.html">hydromt.data_adapter.RasterDatasetAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.get_bbox.html">hydromt.data_adapter.RasterDatasetAdapter.get_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.get_time_range.html">hydromt.data_adapter.RasterDatasetAdapter.get_time_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.detect_bbox.html">hydromt.data_adapter.RasterDatasetAdapter.detect_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.detect_time_range.html">hydromt.data_adapter.RasterDatasetAdapter.detect_time_range</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.html">hydromt.data_adapter.GeoDatasetAdapter</a></li>
@@ -373,6 +452,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.get_data.html">hydromt.data_adapter.GeoDatasetAdapter.get_data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.to_dict.html">hydromt.data_adapter.GeoDatasetAdapter.to_dict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.to_file.html">hydromt.data_adapter.GeoDatasetAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.get_bbox.html">hydromt.data_adapter.GeoDatasetAdapter.get_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.get_time_range.html">hydromt.data_adapter.GeoDatasetAdapter.get_time_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.detect_bbox.html">hydromt.data_adapter.GeoDatasetAdapter.detect_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.detect_time_range.html">hydromt.data_adapter.GeoDatasetAdapter.detect_time_range</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.html">hydromt.data_adapter.GeoDataFrameAdapter</a></li>
@@ -380,6 +463,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.get_data.html">hydromt.data_adapter.GeoDataFrameAdapter.get_data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.to_dict.html">hydromt.data_adapter.GeoDataFrameAdapter.to_dict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.to_file.html">hydromt.data_adapter.GeoDataFrameAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.get_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.get_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.html">hydromt.data_adapter.DataFrameAdapter</a></li>
@@ -405,6 +490,7 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.Model.crs.html">hydromt.Model.crs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.Model.region.html">hydromt.Model.region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.Model.root.html">hydromt.Model.root</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.Model.api.html">hydromt.Model.api</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -434,6 +520,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.Model.write_states.html">hydromt.Model.write_states</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.Model.set_results.html">hydromt.Model.set_results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.Model.read_results.html">hydromt.Model.read_results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.Model.read_nc.html">hydromt.Model.read_nc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.Model.write_nc.html">hydromt.Model.write_nc</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.Model.setup_config.html">hydromt.Model.setup_config</a></li>
@@ -466,50 +554,62 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.GridModel.setup_grid_from_geodataframe.html">hydromt.GridModel.setup_grid_from_geodataframe</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.html">hydromt.LumpedModel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.html">hydromt.VectorModel</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.response_units.html">hydromt.LumpedModel.response_units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.crs.html">hydromt.LumpedModel.crs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.region.html">hydromt.LumpedModel.region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.vector.html">hydromt.VectorModel.vector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.crs.html">hydromt.VectorModel.crs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.region.html">hydromt.VectorModel.region</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.set_response_units.html">hydromt.LumpedModel.set_response_units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.read_response_units.html">hydromt.LumpedModel.read_response_units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.write_response_units.html">hydromt.LumpedModel.write_response_units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.set_vector.html">hydromt.VectorModel.set_vector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.read_vector.html">hydromt.VectorModel.read_vector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.write_vector.html">hydromt.VectorModel.write_vector</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.setup_config.html">hydromt.LumpedModel.setup_config</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.setup_region.html">hydromt.LumpedModel.setup_region</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.setup_maps_from_rasterdataset.html">hydromt.LumpedModel.setup_maps_from_rasterdataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.LumpedModel.setup_maps_from_raster_reclass.html">hydromt.LumpedModel.setup_maps_from_raster_reclass</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.setup_config.html">hydromt.VectorModel.setup_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.setup_region.html">hydromt.VectorModel.setup_region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.setup_maps_from_rasterdataset.html">hydromt.VectorModel.setup_maps_from_rasterdataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.VectorModel.setup_maps_from_raster_reclass.html">hydromt.VectorModel.setup_maps_from_raster_reclass</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.html">hydromt.MeshModel</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.mesh.html">hydromt.MeshModel.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.mesh_names.html">hydromt.MeshModel.mesh_names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.mesh_grids.html">hydromt.MeshModel.mesh_grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.mesh_datasets.html">hydromt.MeshModel.mesh_datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.mesh_gdf.html">hydromt.MeshModel.mesh_gdf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.crs.html">hydromt.MeshModel.crs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.region.html">hydromt.MeshModel.region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.bounds.html">hydromt.MeshModel.bounds</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.set_mesh.html">hydromt.MeshModel.set_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.get_mesh.html">hydromt.MeshModel.get_mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.read_mesh.html">hydromt.MeshModel.read_mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.write_mesh.html">hydromt.MeshModel.write_mesh</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.setup_config.html">hydromt.MeshModel.setup_config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.setup_region.html">hydromt.MeshModel.setup_region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.setup_mesh2d.html">hydromt.MeshModel.setup_mesh2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.setup_mesh2d_from_rasterdataset.html">hydromt.MeshModel.setup_mesh2d_from_rasterdataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.setup_mesh2d_from_raster_reclass.html">hydromt.MeshModel.setup_mesh2d_from_raster_reclass</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.setup_maps_from_rasterdataset.html">hydromt.MeshModel.setup_maps_from_rasterdataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.setup_maps_from_raster_reclass.html">hydromt.MeshModel.setup_maps_from_raster_reclass</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.setup_mesh_from_rasterdataset.html">hydromt.MeshModel.setup_mesh_from_rasterdataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.MeshModel.setup_mesh_from_raster_reclass.html">hydromt.MeshModel.setup_mesh_from_raster_reclass</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.workflows.grid.grid_from_constant.html">hydromt.workflows.grid.grid_from_constant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.workflows.grid.grid_from_rasterdataset.html">hydromt.workflows.grid.grid_from_rasterdataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.workflows.grid.grid_from_raster_reclass.html">hydromt.workflows.grid.grid_from_raster_reclass</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.workflows.grid.grid_from_geodataframe.html">hydromt.workflows.grid.grid_from_geodataframe</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.workflows.mesh.create_mesh2d.html">hydromt.workflows.mesh.create_mesh2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.workflows.mesh.mesh2d_from_rasterdataset.html">hydromt.workflows.mesh.mesh2d_from_rasterdataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.workflows.mesh.mesh2d_from_raster_reclass.html">hydromt.workflows.mesh.mesh2d_from_raster_reclass</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.workflows.basin_mask.get_basin_geometry.html">hydromt.workflows.basin_mask.get_basin_geometry</a></li>
@@ -550,6 +650,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.DataArray.raster.to_xyz_tiles.html">hydromt.DataArray.raster.to_xyz_tiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.DataArray.raster.to_slippy_tiles.html">hydromt.DataArray.raster.to_slippy_tiles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.DataArray.raster.to_raster.html">hydromt.DataArray.raster.to_raster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.Dataset.raster.to_mapstack.html">hydromt.Dataset.raster.to_mapstack</a></li>
 </ul>
@@ -608,6 +709,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.DataArray.raster.interpolate_na.html">hydromt.DataArray.raster.interpolate_na</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.DataArray.raster.clip.html">hydromt.DataArray.raster.clip</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.DataArray.raster.clip_bbox.html">hydromt.DataArray.raster.clip_bbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.DataArray.raster.clip_mask.html">hydromt.DataArray.raster.clip_mask</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.DataArray.raster.clip_geom.html">hydromt.DataArray.raster.clip_geom</a></li>
@@ -732,10 +834,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.gis_utils.nearest_merge.html">hydromt.gis_utils.nearest_merge</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="hydromt.gis_utils.write_map.html">hydromt.gis_utils.write_map</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.gis_utils.write_clone.html">hydromt.gis_utils.write_clone</a></li>
-</ul>
-<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.bias.html">hydromt.stats.skills.bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.percentual_bias.html">hydromt.stats.skills.percentual_bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.nashsutcliffe.html">hydromt.stats.skills.nashsutcliffe</a></li>
@@ -749,6 +847,15 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.rsquared.html">hydromt.stats.skills.rsquared</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.mse.html">hydromt.stats.skills.mse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.rmse.html">hydromt.stats.skills.rmse</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.stats.extremes.get_peaks.html">hydromt.stats.extremes.get_peaks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.stats.extremes.fit_extremes.html">hydromt.stats.extremes.fit_extremes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.stats.extremes.get_return_value.html">hydromt.stats.extremes.get_return_value</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.stats.extremes.eva.html">hydromt.stats.extremes.eva</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.stats.design_events.get_peak_hydrographs.html">hydromt.stats.design_events.get_peak_hydrographs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.config.configread.html">hydromt.config.configread</a></li>
@@ -785,8 +892,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
@@ -814,20 +921,20 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="hydromt-model">
-<h1>hydromt.Model<a class="headerlink" href="#hydromt-model" title="Permalink to this heading">#</a></h1>
+<h1>hydromt.Model<a class="headerlink" href="#hydromt-model" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="hydromt.Model">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hydromt.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_fn:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_libs:</span> <span class="pre">~typing.List</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">hydromt.models.model_api</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**artifact_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hydromt/models/model_api.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.Model" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hydromt.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_fn:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_libs:</span> <span class="pre">~typing.List</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">hydromt.models.model_api</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**artifact_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hydromt/models/model_api.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.Model" title="Link to this definition">#</a></dt>
 <dd><p>General and basic API for models in HydroMT.</p>
 <p>Initialize a model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Model root, by default None</p></li>
+<li><p><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Model root, by default None</p></li>
 <li><p><strong>mode</strong> (<code class="docutils literal notranslate"><span class="pre">{'r','r+','w'}</span></code>, <em>optional</em>) – read/append/write mode, by default “w”</p></li>
-<li><p><strong>config_fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Model simulation configuration file, by default None.
+<li><p><strong>config_fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Model simulation configuration file, by default None.
 Note that this is not the HydroMT model setup configuration file!</p></li>
-<li><p><strong>data_libs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List[str]</span></code>, <em>optional</em>) – List of data catalog yaml files, by default None</p></li>
+<li><p><strong>data_libs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List[str]</span></code>, <em>optional</em>) – List of data catalog configuration files, by default None</p></li>
 <li><p><strong>**artifact_keys</strong> – Additional keyword arguments to be passed down.</p></li>
 <li><p><strong>logger</strong> – The logger to be used.</p></li>
 </ul>
@@ -835,16 +942,16 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="hydromt.Model.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_fn:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_libs:</span> <span class="pre">~typing.List</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">hydromt.models.model_api</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**artifact_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hydromt/models/model_api.html#Model.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.Model.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_fn:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_libs:</span> <span class="pre">~typing.List</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">hydromt.models.model_api</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**artifact_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hydromt/models/model_api.html#Model.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.Model.__init__" title="Link to this definition">#</a></dt>
 <dd><p>Initialize a model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Model root, by default None</p></li>
+<li><p><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Model root, by default None</p></li>
 <li><p><strong>mode</strong> (<code class="docutils literal notranslate"><span class="pre">{'r','r+','w'}</span></code>, <em>optional</em>) – read/append/write mode, by default “w”</p></li>
-<li><p><strong>config_fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Model simulation configuration file, by default None.
+<li><p><strong>config_fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Model simulation configuration file, by default None.
 Note that this is not the HydroMT model setup configuration file!</p></li>
-<li><p><strong>data_libs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List[str]</span></code>, <em>optional</em>) – List of data catalog yaml files, by default None</p></li>
+<li><p><strong>data_libs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List[str]</span></code>, <em>optional</em>) – List of data catalog configuration files, by default None</p></li>
 <li><p><strong>**artifact_keys</strong> – Additional keyword arguments to be passed down.</p></li>
 <li><p><strong>logger</strong> – The logger to be used.</p></li>
 </ul>
@@ -864,20 +971,26 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.get_config.html#hydromt.Model.get_config" title="hydromt.Model.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config</span></code></a>(*args[, fallback, abs_path])</p></td>
 <td><p>Get a config value at key(s).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.read.html#hydromt.Model.read" title="hydromt.Model.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>([components])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tables_merged</span></code>()</p></td>
+<td><p>Return all tables of a model merged into one dataframe.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.read.html#hydromt.Model.read" title="hydromt.Model.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>([components])</p></td>
 <td><p>Read the complete model schematization and configuration from model files.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.read_config.html#hydromt.Model.read_config" title="hydromt.Model.read_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code></a>([config_fn])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.read_config.html#hydromt.Model.read_config" title="hydromt.Model.read_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code></a>([config_fn])</p></td>
 <td><p>Parse config from file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.read_forcing.html#hydromt.Model.read_forcing" title="hydromt.Model.read_forcing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_forcing</span></code></a>([fn])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.read_forcing.html#hydromt.Model.read_forcing" title="hydromt.Model.read_forcing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_forcing</span></code></a>([fn])</p></td>
 <td><p>Read forcing at &lt;root&gt;/&lt;fn&gt; and add to forcing property.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.read_geoms.html#hydromt.Model.read_geoms" title="hydromt.Model.read_geoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_geoms</span></code></a>([fn])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.read_geoms.html#hydromt.Model.read_geoms" title="hydromt.Model.read_geoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_geoms</span></code></a>([fn])</p></td>
 <td><p>Read model geometries files at &lt;root&gt;/&lt;fn&gt; and add to geoms property.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.read_maps.html#hydromt.Model.read_maps" title="hydromt.Model.read_maps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_maps</span></code></a>([fn])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.read_maps.html#hydromt.Model.read_maps" title="hydromt.Model.read_maps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_maps</span></code></a>([fn])</p></td>
 <td><p>Read model map at &lt;root&gt;/&lt;fn&gt; and add to maps component.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.read_nc.html#hydromt.Model.read_nc" title="hydromt.Model.read_nc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_nc</span></code></a>(fn[, mask_and_scale, ...])</p></td>
+<td><p>Read netcdf files at &lt;root&gt;/&lt;fn&gt; and return as dict of xarray.Dataset.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.read_results.html#hydromt.Model.read_results" title="hydromt.Model.read_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_results</span></code></a>([fn])</p></td>
 <td><p>Read results at &lt;root&gt;/&lt;fn&gt; and add to results property.</p></td>
@@ -891,35 +1004,41 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_staticmaps</span></code>([fn])</p></td>
 <td><p>Read static model maps at &lt;root&gt;/&lt;fn&gt; and add to staticmaps property.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.set_config.html#hydromt.Model.set_config" title="hydromt.Model.set_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_config</span></code></a>(*args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_tables</span></code>([fn])</p></td>
+<td><p>Read table files at &lt;root&gt;/tables and parse to dict of dataframes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.set_config.html#hydromt.Model.set_config" title="hydromt.Model.set_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_config</span></code></a>(*args)</p></td>
 <td><p>Update the config dictionary at key(s) with values.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_crs</span></code>(crs)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_crs</span></code>(crs)</p></td>
 <td><p>Set the coordinate reference system.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.set_forcing.html#hydromt.Model.set_forcing" title="hydromt.Model.set_forcing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_forcing</span></code></a>(data[, name, split_dataset])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.set_forcing.html#hydromt.Model.set_forcing" title="hydromt.Model.set_forcing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_forcing</span></code></a>(data[, name, split_dataset])</p></td>
 <td><p>Add data to forcing attribute.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.set_geoms.html#hydromt.Model.set_geoms" title="hydromt.Model.set_geoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_geoms</span></code></a>(geom, name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.set_geoms.html#hydromt.Model.set_geoms" title="hydromt.Model.set_geoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_geoms</span></code></a>(geom, name)</p></td>
 <td><p>Add data to the geoms attribute.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.set_maps.html#hydromt.Model.set_maps" title="hydromt.Model.set_maps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_maps</span></code></a>(data[, name, split_dataset])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.set_maps.html#hydromt.Model.set_maps" title="hydromt.Model.set_maps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_maps</span></code></a>(data[, name, split_dataset])</p></td>
 <td><p>Add raster data to the maps component.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.set_results.html#hydromt.Model.set_results" title="hydromt.Model.set_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_results</span></code></a>(data[, name, split_dataset])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.set_results.html#hydromt.Model.set_results" title="hydromt.Model.set_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_results</span></code></a>(data[, name, split_dataset])</p></td>
 <td><p>Add data to results attribute.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.set_root.html#hydromt.Model.set_root" title="hydromt.Model.set_root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_root</span></code></a>(root[, mode])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.set_root.html#hydromt.Model.set_root" title="hydromt.Model.set_root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_root</span></code></a>(root[, mode])</p></td>
 <td><p>Initialize the model root.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.set_states.html#hydromt.Model.set_states" title="hydromt.Model.set_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_states</span></code></a>(data[, name, split_dataset])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.set_states.html#hydromt.Model.set_states" title="hydromt.Model.set_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_states</span></code></a>(data[, name, split_dataset])</p></td>
 <td><p>Add data to states attribute.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_staticgeoms</span></code>(geom, name)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_staticgeoms</span></code>(geom, name)</p></td>
 <td><p>Set the geometries.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_staticmaps</span></code>(data[, name])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_staticmaps</span></code>(data[, name])</p></td>
 <td><p>Add data to staticmaps.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_tables</span></code>(tables[, name])</p></td>
+<td><p>Add (a) table(s) &lt;pandas.DataFrame&gt; to model.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_basemaps</span></code>(*args, **kwargs)</p></td>
 <td><p></p></td>
@@ -939,7 +1058,7 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_model_api</span></code>()</p></td>
 <td><p>Test compliance with HydroMT Model API.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.update.html#hydromt.Model.update" title="hydromt.Model.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>([model_out, write, opt])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.update.html#hydromt.Model.update" title="hydromt.Model.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>([model_out, write, opt, ...])</p></td>
 <td><p>Single method to update a model based the settings in <cite>opt</cite>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.write.html#hydromt.Model.write" title="hydromt.Model.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>([components])</p></td>
@@ -960,14 +1079,20 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.write_maps.html#hydromt.Model.write_maps" title="hydromt.Model.write_maps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_maps</span></code></a>([fn])</p></td>
 <td><p>Write maps to netcdf file at &lt;root&gt;/&lt;fn&gt;.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.write_states.html#hydromt.Model.write_states" title="hydromt.Model.write_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_states</span></code></a>([fn])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.write_nc.html#hydromt.Model.write_nc" title="hydromt.Model.write_nc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_nc</span></code></a>(nc_dict, fn[, gdal_compliant, ...])</p></td>
+<td><p>Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.write_states.html#hydromt.Model.write_states" title="hydromt.Model.write_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_states</span></code></a>([fn])</p></td>
 <td><p>Write states to netcdf file at &lt;root&gt;/&lt;fn&gt;.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_staticgeoms</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_staticgeoms</span></code>()</p></td>
 <td><p>Write the geometries to disk.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_staticmaps</span></code>([fn])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_staticmaps</span></code>([fn])</p></td>
 <td><p>Write static model maps to netcdf file at &lt;root&gt;/&lt;fn&gt;.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_tables</span></code>([fn])</p></td>
+<td><p>Write tables at &lt;root&gt;/tables.</p></td>
 </tr>
 </tbody>
 </table>
@@ -975,7 +1100,7 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.api.html#hydromt.Model.api" title="hydromt.Model.api"><code class="xref py py-obj docutils literal notranslate"><span class="pre">api</span></code></a></p></td>
-<td><p>Return all model components and their data types.</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bounds</span></code></p></td>
 <td><p>Returns the bounding box of the model region.</p></td>
@@ -1013,7 +1138,7 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.Model.results.html#hydromt.Model.results" title="hydromt.Model.results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">results</span></code></a></p></td>
 <td><p>Model results.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.Model.root.html#hydromt.Model.root" title="hydromt.Model.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code></a></p></td>
 <td><p>Path to model folder.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
@@ -1028,10 +1153,13 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">staticmaps</span></code></p></td>
 <td><p>Model static maps.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tables</span></code></p></td>
+<td><p>Model tables.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></p></td>
 <td><p>Returns the geospatial transform of the model staticmaps.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">width</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">width</span></code></p></td>
 <td><p>Returns the width of the model staticmaps.</p></td>
 </tr>
 </tbody>
@@ -1045,11 +1173,10 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
               
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="hydromt.ModelCatalog.html"
@@ -1069,10 +1196,7 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -1130,8 +1254,8 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1149,7 +1273,7 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -1157,10 +1281,11 @@ Note that this is not the HydroMT model setup configuration file!</p></li>
     </div>
   
   
+  
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
 </p></div>
       
     </div>

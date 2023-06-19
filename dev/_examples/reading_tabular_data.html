@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -7,7 +6,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Example: Reading 2D tabular data (DataFrame) &#8212; HydroMT  documentation</title>
   
@@ -19,33 +18,41 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/reading_tabular_data';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.3';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Example: Reading tiled raster data with different zoom levels" href="working_with_tiled_raster_data.html" />
@@ -60,6 +67,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -100,7 +116,8 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
   
@@ -110,11 +127,12 @@
   
   
   
+  
     
     
     
-    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">HydroMT Core</p>
@@ -122,7 +140,6 @@
 </a></div>
     
   </div>
-  
   
   <div class="col-lg-9 navbar-header-items">
     
@@ -181,13 +198,15 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -217,24 +236,50 @@ document.write(`
         </li>
 </ul></div>
       
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
     </div>
     
   </div>
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -332,6 +377,30 @@ document.write(`
         </li>
 </ul></div>
         
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
       </div>
     
   </div>
@@ -363,6 +432,7 @@ document.write(`
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Example: Reading 2D tabular data (DataFrame)</a></li>
 
 <li class="toctree-l1"><a class="reference internal" href="working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
+
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with models in HydroMT</span></p>
 <ul class="nav bd-sidenav">
@@ -374,6 +444,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/model_region.html">Defining a model region</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_models_basics.html">Example: Working with models from CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_meshmodel.html">Example: Working with mesh models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="delineate_basin.html">Example: Define hydrological model regions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Methods and workflows</span></p>
@@ -383,6 +454,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="working_with_raster.html">Example: Working with raster data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_geodatasets.html">Example: Working with geodatasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
+
 </ul>
 </div>
 </nav></div>
@@ -412,8 +485,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
@@ -423,7 +496,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../user_guide/intro.html" class="nav-link">User guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Example: Reading 2D tabular data (DataFrame)</li>
+    <li class="breadcrumb-item active" aria-current="page">Example:...</li>
   </ul>
 </nav>
 </div>
@@ -447,7 +520,7 @@ document.write(`
     <a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/reading_tabular_data.ipynb" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
 </div></div>
 <section id="Example:-Reading-2D-tabular-data-(DataFrame)">
-<h1>Example: Reading 2D tabular data (DataFrame)<a class="headerlink" href="#Example:-Reading-2D-tabular-data-(DataFrame)" title="Permalink to this heading">#</a></h1>
+<h1>Example: Reading 2D tabular data (DataFrame)<a class="headerlink" href="#Example:-Reading-2D-tabular-data-(DataFrame)" title="Link to this heading">#</a></h1>
 <p>This example illustrates the how to read 2D tabular data using the HydroMT <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.html"><span class="doc">DataCatalog</span></a> with the <code class="docutils literal notranslate"><span class="pre">csv</span></code> driver.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -466,7 +539,7 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:50,703 - tabular data example - log - INFO - HydroMT version: 0.7.2.dev0
+2023-10-31 08:53:08,381 - tabular data example - log - INFO - HydroMT version: 0.9.1.dev
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -482,15 +555,15 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:50,711 - tabular data example - data_catalog - INFO - Parsing data catalog from data/tabular_data_catalog.yml
+2023-10-31 08:53:08,389 - tabular data example - data_catalog - INFO - Parsing data catalog from data/tabular_data_catalog.yml
 </pre></div></div>
 </div>
 </section>
 <section id="CSV-driver">
-<h1>CSV driver<a class="headerlink" href="#CSV-driver" title="Permalink to this heading">#</a></h1>
+<h1>CSV driver<a class="headerlink" href="#CSV-driver" title="Link to this heading">#</a></h1>
 <section id="time-series-data">
-<h2>time series data<a class="headerlink" href="#time-series-data" title="Permalink to this heading">#</a></h2>
-<p>To read 2D tabular data from a comma-separated file (csv) and parse it into a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html">pandas.DataFrame</a> we use the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html">pandas.read_csv()</a>. Any <em>kwargs</em> in the data catalog are passed to this method, e.g., parsing dates in the “time” colum and setting this as the index.</p>
+<h2>time series data<a class="headerlink" href="#time-series-data" title="Link to this heading">#</a></h2>
+<p>To read 2D tabular data from a comma-separated file (csv) and parse it into a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html">pandas.DataFrame</a> we use the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html">pandas.read_csv()</a>. Any <em>driver_kwargs</em> in the data catalog are passed to this method, e.g., parsing dates in the “time” colum and setting this as the index.</p>
 <p>This works similarly for excel tables, but based on the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel">pandas.read_excel()</a> method.</p>
 <p>For demonstration we use a dummy example timeseries data in csv.</p>
 <div class="nbinput docutils container">
@@ -510,8 +583,7 @@ document.write(`
 <div class="highlight"><pre>
 data_type: DataFrame
 driver: csv
-filesystem: local
-kwargs:
+driver_kwargs:
   index_col: time
   parse_dates: true
 path: /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
@@ -532,8 +604,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:50,730 - tabular data example - data_catalog - INFO - DataCatalog: Getting example_csv_data DataFrame csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
-2023-06-19 06:29:50,731 - tabular data example - dataframe - INFO - DataFrame: Read csv data.
+2023-10-31 08:53:08,405 - tabular data example - dataframe - INFO - Reading example_csv_data csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -625,7 +696,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
 </div>
 </section>
 <section id="reclassification-table">
-<h2>reclassification table<a class="headerlink" href="#reclassification-table" title="Permalink to this heading">#</a></h2>
+<h2>reclassification table<a class="headerlink" href="#reclassification-table" title="Link to this heading">#</a></h2>
 <p>Another typical usecase for tabular data are reclassification tables to reclassify e.g. land use data to manning roughness. An example of this data is shown in the cells below. Note tha the values are not validated and likely too high!</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -642,9 +713,9 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:51,276 - tabular data example - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
-2023-06-19 06:29:51,423 - tabular data example - data_catalog - INFO - Reading data catalog artifact_data v0.0.8 from archive
-2023-06-19 06:29:51,424 - tabular data example - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-10-31 08:53:08,912 - tabular data example - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2023-10-31 08:53:08,976 - tabular data example - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
+2023-10-31 08:53:08,977 - tabular data example - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -655,8 +726,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
 <div class="highlight"><pre>
 data_type: DataFrame
 driver: csv
-filesystem: local
-kwargs:
+driver_kwargs:
   index_col: 0
 meta:
   notes: reclass table for manning values
@@ -677,8 +747,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:51,503 - tabular data example - data_catalog - INFO - DataCatalog: Getting vito_reclass DataFrame csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
-2023-06-19 06:29:51,504 - tabular data example - dataframe - INFO - DataFrame: Read csv data.
+2023-10-31 08:53:09,039 - tabular data example - dataframe - INFO - Reading vito_reclass csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -705,10 +774,12 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
     <tr style="text-align: right;">
       <th></th>
       <th>description</th>
+      <th>landuse</th>
       <th>manning</th>
     </tr>
     <tr>
       <th>vito</th>
+      <th></th>
       <th></th>
       <th></th>
     </tr>
@@ -717,26 +788,31 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
     <tr>
       <th>0</th>
       <td>Unknown</td>
+      <td>0</td>
       <td>-999.000</td>
     </tr>
     <tr>
       <th>20</th>
       <td>Shrubs</td>
+      <td>20</td>
       <td>0.500</td>
     </tr>
     <tr>
       <th>30</th>
       <td>Herbaceous vegetation</td>
+      <td>30</td>
       <td>0.150</td>
     </tr>
     <tr>
       <th>40</th>
       <td>Cultivated and managed vegetation/agriculture ...</td>
+      <td>40</td>
       <td>0.200</td>
     </tr>
     <tr>
       <th>50</th>
       <td>Urban / built up</td>
+      <td>50</td>
       <td>0.011</td>
     </tr>
   </tbody>
@@ -758,7 +834,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:51,519 - tabular data example - data_catalog - INFO - DataCatalog: Getting vito RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
+2023-10-31 08:53:09,051 - tabular data example - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -767,7 +843,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f7d9c861960&gt;
+&lt;matplotlib.image.AxesImage at 0x7fd4602b3510&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -785,11 +861,10 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
               
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="reading_point_data.html"
@@ -809,10 +884,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -873,8 +945,8 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -892,7 +964,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -900,10 +972,11 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
     </div>
   
   
+  
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
 </p></div>
       
     </div>

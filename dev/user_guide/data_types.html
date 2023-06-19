@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -7,7 +6,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Supported data types &#8212; HydroMT  documentation</title>
   
@@ -19,30 +18,38 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/data_types';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.3';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Pre-defined data catalogs" href="data_existing_cat.html" />
@@ -57,6 +64,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -97,7 +113,8 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
   
@@ -107,11 +124,12 @@
   
   
   
+  
     
     
     
-    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">HydroMT Core</p>
@@ -119,7 +137,6 @@
 </a></div>
     
   </div>
-  
   
   <div class="col-lg-9 navbar-header-items">
     
@@ -178,13 +195,15 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -214,24 +233,50 @@ document.write(`
         </li>
 </ul></div>
       
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
     </div>
     
   </div>
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -329,6 +374,30 @@ document.write(`
         </li>
 </ul></div>
         
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
       </div>
     
   </div>
@@ -360,6 +429,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../_examples/reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
 
 <li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
+
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with models in HydroMT</span></p>
 <ul class="nav bd-sidenav">
@@ -371,6 +441,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="model_region.html">Defining a model region</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_models_basics.html">Example: Working with models from CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_meshmodel.html">Example: Working with mesh models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../_examples/delineate_basin.html">Example: Define hydrological model regions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Methods and workflows</span></p>
@@ -380,6 +451,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_raster.html">Example: Working with raster data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_geodatasets.html">Example: Working with geodatasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
+
 </ul>
 </div>
 </nav></div>
@@ -409,8 +482,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
@@ -438,7 +511,7 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="supported-data-types">
-<span id="data-types"></span><h1>Supported data types<a class="headerlink" href="#supported-data-types" title="Permalink to this heading">#</a></h1>
+<span id="data-types"></span><h1>Supported data types<a class="headerlink" href="#supported-data-types" title="Link to this heading">#</a></h1>
 <p>HydroMT currently supports the following data types:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#rasterdataset"><span class="std std-ref">RasterDataset</span></a>: static and dynamic raster (or gridded) data</p></li>
@@ -446,9 +519,9 @@ document.write(`
 <li><p><a class="reference internal" href="#geodataset"><span class="std std-ref">GeoDataset</span></a>: dynamic point location data</p></li>
 <li><p><a class="reference internal" href="#dataframe"><span class="std std-ref">DataFrame</span></a>: 2D tabular data</p></li>
 </ul>
-<p>Internally the RasterDataset and GeoDataset are represented by <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects,
-the GeoDataFrame by <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v0.13.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a>, and the DataFrame by
-<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>. We use drivers, typically from third-party packages and sometimes
+<p>Internally the RasterDataset and GeoDataset are represented by <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects,
+the GeoDataFrame by <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v0.14.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a>, and the DataFrame by
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>. We use drivers, typically from third-party packages and sometimes
 wrapped in HydroMT functions, to parse many different file formats to this standardized internal
 data representation.</p>
 <div class="admonition note">
@@ -456,7 +529,7 @@ data representation.</p>
 <p>Please contact us through the issue list if you would like to add other drivers.</p>
 </div>
 <section id="recognized-dimension-names">
-<span id="dimensions"></span><h2>Recognized dimension names<a class="headerlink" href="#recognized-dimension-names" title="Permalink to this heading">#</a></h2>
+<span id="dimensions"></span><h2>Recognized dimension names<a class="headerlink" href="#recognized-dimension-names" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><strong>time</strong>: time or date stamp [“time”].</p></li>
 <li><p><strong>x</strong>: x coordinate [“x”, “longitude”, “lon”, “long”].</p></li>
@@ -464,7 +537,7 @@ data representation.</p>
 </ul>
 </section>
 <section id="raster-data-rasterdataset">
-<span id="rasterdataset"></span><h2>Raster data (RasterDataset)<a class="headerlink" href="#raster-data-rasterdataset" title="Permalink to this heading">#</a></h2>
+<span id="rasterdataset"></span><h2>Raster data (RasterDataset)<a class="headerlink" href="#raster-data-rasterdataset" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="#geotiff"><span class="std std-ref">Single variable GeoTiff raster</span></a></p></li>
 <li><p><a class="reference internal" href="#vrt"><span class="std std-ref">Multi variable Virtual Raster Tileset (VRT)</span></a></p></li>
@@ -499,7 +572,7 @@ and <a class="reference external" href="https://rasterio.readthedocs.io/en/lates
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">netcdf</span></code> or <code class="docutils literal notranslate"><span class="pre">zarr</span></code></p></td>
 <td><p>NetCDF and Zarr</p></td>
-<td><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a></p></td>
+<td><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a></p></td>
 <td><p>required y and x <a class="reference internal" href="#dimensions">dimensions</a></p></td>
 </tr>
 </tbody>
@@ -515,7 +588,7 @@ and allows lazy reading of the data.</p>
 <span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base/landcover/globcover/GLOBCOVER_200901_200912_300x300m.tif</span>
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RasterDataset</span>
 <span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raster</span>
-<span class="w">  </span><span class="nt">kwargs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">driver_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">chunks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">x</span><span class="p">:</span><span class="w"> </span><span class="nv">3600</span><span class="p p-Indicator">,</span><span class="nt"> y</span><span class="p">:</span><span class="w"> </span><span class="nv">3600</span><span class="p p-Indicator">}</span>
 <span class="w">  </span><span class="nt">meta</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">landuse</span>
@@ -526,7 +599,7 @@ and allows lazy reading of the data.</p>
 </pre></div>
 </div>
 <section id="multi-variable-virtual-raster-tileset-vrt">
-<span id="vrt"></span><h3>Multi-variable Virtual Raster Tileset (VRT)<a class="headerlink" href="#multi-variable-virtual-raster-tileset-vrt" title="Permalink to this heading">#</a></h3>
+<span id="vrt"></span><h3>Multi-variable Virtual Raster Tileset (VRT)<a class="headerlink" href="#multi-variable-virtual-raster-tileset-vrt" title="Link to this heading">#</a></h3>
 <p>Multiple raster layers from different files are parsed using the <strong>raster</strong> driver.
 Each raster becomes a variable in the resulting RasterDataset based on its filename.
 The path to multiple files can be set using a sting glob or several keys,
@@ -542,7 +615,7 @@ VRT files are useful for large raster datasets which are often tiled and can be 
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RasterDataset</span>
 <span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raster</span>
 <span class="w">  </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4326</span>
-<span class="w">  </span><span class="nt">kwargs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">driver_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">chunks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">x</span><span class="p">:</span><span class="w"> </span><span class="nv">6000</span><span class="p p-Indicator">,</span><span class="nt"> y</span><span class="p">:</span><span class="w"> </span><span class="nv">6000</span><span class="p p-Indicator">}</span>
 <span class="w">  </span><span class="nt">rename</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flwdir</span>
@@ -561,7 +634,7 @@ VRT files are useful for large raster datasets which are often tiled and can be 
 </div>
 </section>
 <section id="tiled-raster-dataset">
-<span id="tile"></span><h3>Tiled raster dataset<a class="headerlink" href="#tiled-raster-dataset" title="Permalink to this heading">#</a></h3>
+<span id="tile"></span><h3>Tiled raster dataset<a class="headerlink" href="#tiled-raster-dataset" title="Link to this heading">#</a></h3>
 <p>Tiled index datasets are parsed using the <strong>raster_tindex</strong> driver.
 This data format is used to combine raster tiles with different CRS projections.
 A polygon vector file (e.g. GeoPackage) is used to make a tile index with the spatial
@@ -571,14 +644,14 @@ Use <a class="reference external" href="https://gdal.org/programs/gdaltindex.htm
 <p>Here a GeoPackage with the tile index referring to individual GeoTiff raster tiles is used.
 The <code class="docutils literal notranslate"><span class="pre">mosaic_kwargs</span></code> are passed to <a class="reference internal" href="../_generated/hydromt.io.open_raster_from_tindex.html#hydromt.io.open_raster_from_tindex" title="hydromt.io.open_raster_from_tindex"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_raster_from_tindex()</span></code></a> to
 set the resampling <code class="docutils literal notranslate"><span class="pre">method</span></code>. The name of the column in the tile index attribute table <code class="docutils literal notranslate"><span class="pre">tileindex</span></code>
-which contains the raster tile file names is set in the <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> (to be directly passed as an argument to
+which contains the raster tile file names is set in the <code class="docutils literal notranslate"><span class="pre">driver_kwargs</span></code> (to be directly passed as an argument to
 <a class="reference internal" href="../_generated/hydromt.io.open_raster_from_tindex.html#hydromt.io.open_raster_from_tindex" title="hydromt.io.open_raster_from_tindex"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_raster_from_tindex()</span></code></a>).</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">grwl_mask</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">static_data/base/grwl/tindex.gpkg</span>
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RasterDataset</span>
 <span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raster_tindex</span>
 <span class="w">  </span><span class="nt">nodata</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">  </span><span class="nt">kwargs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">driver_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">chunks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">x</span><span class="p">:</span><span class="w"> </span><span class="nv">3000</span><span class="p p-Indicator">,</span><span class="nt"> y</span><span class="p">:</span><span class="w"> </span><span class="nv">3000</span><span class="p p-Indicator">}</span>
 <span class="w">    </span><span class="nt">mosaic_kwargs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="nv">nearest</span><span class="p p-Indicator">}</span>
 <span class="w">    </span><span class="nt">tileindex</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">location</span>
@@ -598,7 +671,7 @@ their values. For fast access to large raster datasets, other formats might be m
 </div>
 </section>
 <section id="netcdf-raster-dataset">
-<span id="nc-raster"></span><h3>Netcdf raster dataset<a class="headerlink" href="#netcdf-raster-dataset" title="Permalink to this heading">#</a></h3>
+<span id="nc-raster"></span><h3>Netcdf raster dataset<a class="headerlink" href="#netcdf-raster-dataset" title="Link to this heading">#</a></h3>
 <p>Netcdf and Zarr raster data are typically used for dynamic raster data and
 parsed using the <strong>netcdf</strong> and <strong>zarr</strong> drivers.
 A typical raster netcdf or zarr raster dataset has the following structure with
@@ -615,8 +688,8 @@ See list of recognized <a class="reference internal" href="#dimensions">dimensio
 </pre></div>
 </div>
 <p>To read a raster dataset from a multiple file netcdf archive the following data entry
-is used, where the <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
-(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
+is used, where the <code class="docutils literal notranslate"><span class="pre">driver_kwargs</span></code> are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
+(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
 In case the CRS cannot be inferred from the netcdf data it should be defined with the <code class="docutils literal notranslate"><span class="pre">crs</span></code> option here.
 The path to multiple files can be set using a sting glob or several keys,
 see description of the <code class="docutils literal notranslate"><span class="pre">path</span></code> argument in the <a class="reference internal" href="data_prepare_cat.html#data-yaml"><span class="std std-ref">yaml file description</span></a>.
@@ -627,7 +700,7 @@ unify the data to match the HydroMT naming and unit <a class="reference internal
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RasterDataset</span>
 <span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">netcdf</span>
 <span class="w">  </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4326</span>
-<span class="w">  </span><span class="nt">kwargs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">driver_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">chunks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">latitude</span><span class="p">:</span><span class="w"> </span><span class="nv">125</span><span class="p p-Indicator">,</span><span class="nt"> longitude</span><span class="p">:</span><span class="w"> </span><span class="nv">120</span><span class="p p-Indicator">,</span><span class="nt"> time</span><span class="p">:</span><span class="w"> </span><span class="nv">50</span><span class="p p-Indicator">}</span>
 <span class="w">    </span><span class="nt">combine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">by_coords</span>
 <span class="w">    </span><span class="nt">decode_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -648,9 +721,9 @@ unify the data to match the HydroMT naming and unit <a class="reference internal
 </pre></div>
 </div>
 <section id="preprocess-functions-when-combining-multiple-files">
-<h4>Preprocess functions when combining multiple files<a class="headerlink" href="#preprocess-functions-when-combining-multiple-files" title="Permalink to this heading">#</a></h4>
-<p>In <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, xarray allows for a <em>preprocess</em> function to be run before merging several
-netcdf files together. In hydroMT, some preprocess functions are available and can be passed through the <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>
+<h4>Preprocess functions when combining multiple files<a class="headerlink" href="#preprocess-functions-when-combining-multiple-files" title="Link to this heading">#</a></h4>
+<p>In <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, xarray allows for a <em>preprocess</em> function to be run before merging several
+netcdf files together. In hydroMT, some preprocess functions are available and can be passed through the <code class="docutils literal notranslate"><span class="pre">driver_kwargs</span></code>
 options in the same way as any xr.open_mfdataset options. These preprocess functions are:</p>
 <ul class="simple">
 <li><p><strong>round_latlon</strong>: round x and y dimensions to 5 decimals to avoid merging problems in xarray due to small differences
@@ -662,7 +735,7 @@ in x, y values in the different netcdf files of the same data source.</p></li>
 </section>
 </section>
 <section id="vector-data-geodataframe">
-<span id="geodataframe"></span><h2>Vector data (GeoDataFrame)<a class="headerlink" href="#vector-data-geodataframe" title="Permalink to this heading">#</a></h2>
+<span id="geodataframe"></span><h2>Vector data (GeoDataFrame)<a class="headerlink" href="#vector-data-geodataframe" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="#gpkg-vector"><span class="std std-ref">GeoPackage spatial vector data</span></a></p></li>
 <li><p><a class="reference internal" href="#textdelimited-vector"><span class="std std-ref">Point vector from text delimited data</span></a></p></li>
@@ -685,17 +758,17 @@ in x, y values in the different netcdf files of the same data source.</p></li>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">vector</span></code></p></td>
 <td><p>ESRI Shapefile, GeoPackage, GeoJSON, etc.</p></td>
 <td><p><a class="reference internal" href="../_generated/hydromt.io.open_vector.html#hydromt.io.open_vector" title="hydromt.io.open_vector"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_vector()</span></code></a></p></td>
-<td><p>Point, Line and Polygon geometries. Uses <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.read_file.html#geopandas.read_file" title="(in GeoPandas v0.13.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">geopandas.read_file()</span></code></a></p></td>
+<td><p>Point, Line and Polygon geometries. Uses <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.read_file.html#geopandas.read_file" title="(in GeoPandas v0.14.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">geopandas.read_file()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">vector_table</span></code></p></td>
-<td><p>CSV, XY, and EXCEL.</p></td>
+<td><p>CSV, XY, PARQUET and EXCEL.</p></td>
 <td><p><a class="reference internal" href="../_generated/hydromt.io.open_vector.html#hydromt.io.open_vector" title="hydromt.io.open_vector"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_vector()</span></code></a></p></td>
 <td><p>Point geometries only. Uses <a class="reference internal" href="../_generated/hydromt.io.open_vector_from_table.html#hydromt.io.open_vector_from_table" title="hydromt.io.open_vector_from_table"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_vector_from_table()</span></code></a></p></td>
 </tr>
 </tbody>
 </table>
 <section id="geopackage-spatial-vector-data">
-<span id="gpkg-vector"></span><h3>GeoPackage spatial vector data<a class="headerlink" href="#geopackage-spatial-vector-data" title="Permalink to this heading">#</a></h3>
+<span id="gpkg-vector"></span><h3>GeoPackage spatial vector data<a class="headerlink" href="#geopackage-spatial-vector-data" title="Link to this heading">#</a></h3>
 <p>Spatial vector data is parsed to a <strong>GeoDataFrame</strong> using the <strong>vector</strong> driver.
 For large spatial vector datasets we recommend the GeoPackage format as it includes a
 spatial index for fast filtering of the data based on spatial location. An example is
@@ -705,7 +778,7 @@ columns of the attribute table in case of a GeoDataFrame.</p>
 <span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base/emissions/GDP-countries/World_countries_GDPpcPPP.gpkg</span>
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GeoDataFrame</span>
 <span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vector</span>
-<span class="w">  </span><span class="nt">kwargs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">driver_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">layer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GDP</span>
 <span class="w">  </span><span class="nt">rename</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">GDP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gdp</span>
@@ -718,7 +791,7 @@ columns of the attribute table in case of a GeoDataFrame.</p>
 </div>
 </section>
 <section id="point-vector-from-text-delimited-data">
-<span id="textdelimited-vector"></span><h3>Point vector from text delimited data<a class="headerlink" href="#point-vector-from-text-delimited-data" title="Permalink to this heading">#</a></h3>
+<span id="textdelimited-vector"></span><h3>Point vector from text delimited data<a class="headerlink" href="#point-vector-from-text-delimited-data" title="Link to this heading">#</a></h3>
 <p>Tabulated point vector data files can be parsed to a <strong>GeoDataFrame</strong> with the <strong>vector_table</strong>
 driver. This driver reads CSV (or similar delimited text files), EXCEL and XY
 (white-space delimited text file without headers) files. See this list of <a class="reference internal" href="#dimensions"><span class="std std-ref">dimension names</span></a>
@@ -742,7 +815,7 @@ of the GeoDataFrame attribute table.</p>
 </div>
 <p>As the CRS of the coordinates cannot be inferred from the data it must be set in the
 data entry in the yaml file as shown in the example below. The internal data format
-is based on the file extension unless the <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> <code class="docutils literal notranslate"><span class="pre">driver</span></code> option is set.
+is based on the file extension unless the <code class="docutils literal notranslate"><span class="pre">driver_kwargs</span></code> <code class="docutils literal notranslate"><span class="pre">driver</span></code> option is set.
 See <a class="reference internal" href="../_generated/hydromt.io.open_vector.html#hydromt.io.open_vector" title="hydromt.io.open_vector"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_vector()</span></code></a> and <a class="reference internal" href="../_generated/hydromt.io.open_vector_from_table.html#hydromt.io.open_vector_from_table" title="hydromt.io.open_vector_from_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_vector_from_table()</span></code></a> for more
 options.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stations</span><span class="p">:</span>
@@ -750,14 +823,19 @@ options.</p>
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GeoDataFrame</span>
 <span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vector_table</span>
 <span class="w">  </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4326</span>
-<span class="w">  </span><span class="nt">kwargs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">driver_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csv</span>
 </pre></div>
 </div>
+<p id="binary-vector">HydroMT also supports reading and writing vector data in binary format. Currently only parquet is
+supported, but others could be added if desired. The structure of the files should be the same as
+the text format files described above but writing according to the parquet file spec. Since this is
+a binary format, not examples are provided, but for example pandas can write the same data structure
+to parquet as it can csv.</p>
 </section>
 </section>
 <section id="geospatial-point-time-series-geodataset">
-<span id="geodataset"></span><h2>Geospatial point time-series (GeoDataset)<a class="headerlink" href="#geospatial-point-time-series-geodataset" title="Permalink to this heading">#</a></h2>
+<span id="geodataset"></span><h2>Geospatial point time-series (GeoDataset)<a class="headerlink" href="#geospatial-point-time-series-geodataset" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="#nc-point"><span class="std std-ref">Netcdf point time-series dataset</span></a></p></li>
 <li><p><a class="reference internal" href="#csv-point"><span class="std std-ref">CSV point time-series data</span></a></p></li>
@@ -784,13 +862,13 @@ options.</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">netcdf</span></code> or <code class="docutils literal notranslate"><span class="pre">zarr</span></code></p></td>
 <td><p>NetCDF and Zarr</p></td>
-<td><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a></p></td>
+<td><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a></p></td>
 <td><p>required time and index <a class="reference internal" href="#dimensions">dimensions</a> and x- and y coordinates.</p></td>
 </tr>
 </tbody>
 </table>
 <section id="netcdf-point-time-series-dataset">
-<span id="nc-point"></span><h3>Netcdf point time-series dataset<a class="headerlink" href="#netcdf-point-time-series-dataset" title="Permalink to this heading">#</a></h3>
+<span id="nc-point"></span><h3>Netcdf point time-series dataset<a class="headerlink" href="#netcdf-point-time-series-dataset" title="Link to this heading">#</a></h3>
 <p>Netcdf and Zarr point time-series data are parsed to <strong>GeoDataset</strong> using the <strong>netcdf</strong> and <strong>zarr</strong> drivers.
 A typical netcdf or zarr point time-series dataset has the following structure with
 two (“time” and “index”) dimensions, where the index dimension has x and y coordinates.
@@ -807,8 +885,8 @@ on a list of recognized <a class="reference internal" href="#dimensions">dimensi
 </pre></div>
 </div>
 <p>To read a point time-series dataset from a multiple file netcdf archive the following data entry
-is used, where the <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
-(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2023.5.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
+is used, where the <code class="docutils literal notranslate"><span class="pre">driver_kwargs</span></code> are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
+(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
 In case the CRS cannot be inferred from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys,
 see description of the <code class="docutils literal notranslate"><span class="pre">path</span></code> argument in the <a class="reference internal" href="data_prepare_cat.html#data-yaml"><span class="std std-ref">yaml file description</span></a>.
@@ -819,7 +897,7 @@ unify the data to match the HydroMT naming and unit <a class="reference internal
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GeoDataset</span>
 <span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">netcdf</span>
 <span class="w">  </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4326</span>
-<span class="w">  </span><span class="nt">kwargs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">driver_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">chunks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">stations</span><span class="p">:</span><span class="w"> </span><span class="nv">100</span><span class="p p-Indicator">,</span><span class="nt"> time</span><span class="p">:</span><span class="w"> </span><span class="nv">1500</span><span class="p p-Indicator">}</span>
 <span class="w">    </span><span class="nt">combine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">by_coords</span>
 <span class="w">    </span><span class="nt">decode_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -838,12 +916,13 @@ unify the data to match the HydroMT naming and unit <a class="reference internal
 </div>
 </section>
 <section id="csv-point-time-series-data">
-<span id="csv-point"></span><h3>CSV point time-series data<a class="headerlink" href="#csv-point-time-series-data" title="Permalink to this heading">#</a></h3>
+<span id="csv-point"></span><h3>CSV point time-series data<a class="headerlink" href="#csv-point-time-series-data" title="Link to this heading">#</a></h3>
 <p>Point time-series data where the geospatial point geometries and time-series are saved in
 separate (text) files are parsed to <strong>GeoDataset</strong> using the <strong>vector</strong> driver.
 The GeoDataset must at least contain a location index with point geometries which is referred to by the <code class="docutils literal notranslate"><span class="pre">path</span></code> argument
 The path may refer to both GIS vector data such as GeoJSON with only Point geometries
 or tabulated point vector data such as csv files, see earlier examples for GeoDataFrame datasets.
+Finally, certain binary formats such as parquet are also supported.
 In addition a tabulated time-series text file can be passed to be used as a variable of the GeoDataset.
 This data is added by a second file which is referred to using the <code class="docutils literal notranslate"><span class="pre">fn_data</span></code> key-word argument.
 The index of the time-series (in the columns header) and point locations must match.
@@ -853,13 +932,13 @@ For more options see the <a class="reference internal" href="../_generated/hydro
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GeoDataset</span>
 <span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vector</span>
 <span class="w">  </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4326</span>
-<span class="w">  </span><span class="nt">kwargs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">driver_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">fn_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/stations_data.csv</span>
 </pre></div>
 </div>
 <p><em>Tabulated time series text file</em></p>
 <p>This data is read using the <a class="reference internal" href="../_generated/hydromt.io.open_timeseries_from_table.html#hydromt.io.open_timeseries_from_table" title="hydromt.io.open_timeseries_from_table"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_timeseries_from_table()</span></code></a> method. To
-read the time stamps the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html#pandas.to_datetime" title="(in pandas v2.0.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.to_datetime()</span></code></a> method is used.</p>
+read the time stamps the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html#pandas.to_datetime" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.to_datetime()</span></code></a> method is used.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">time, &lt;ID1&gt;, &lt;ID2&gt;</span>
 <span class="go">&lt;time1&gt;, &lt;value&gt;, &lt;value&gt;</span>
 <span class="go">&lt;time2&gt;, &lt;value&gt;, &lt;value&gt;</span>
@@ -869,7 +948,7 @@ read the time stamps the <a class="reference external" href="https://pandas.pyda
 </section>
 </section>
 <section id="d-tabular-data-dataframe">
-<span id="dataframe"></span><h2>2D tabular data (DataFrame)<a class="headerlink" href="#d-tabular-data-dataframe" title="Permalink to this heading">#</a></h2>
+<span id="dataframe"></span><h2>2D tabular data (DataFrame)<a class="headerlink" href="#d-tabular-data-dataframe" title="Link to this heading">#</a></h2>
 <table class="table" id="dataframe-formats">
 <colgroup>
 <col style="width: 17.0%" />
@@ -887,18 +966,23 @@ read the time stamps the <a class="reference external" href="https://pandas.pyda
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">csv</span></code></p></td>
 <td><p>Comma-separated files (or using another delimiter)</p></td>
-<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.0.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_csv()</span></code></a></p></td>
-<td><p>See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.0.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_csv()</span></code></a> for all</p></td>
+<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_csv()</span></code></a></p></td>
+<td><p>See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_csv()</span></code></a> for all</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">excel</span></code></p></td>
 <td><p>Excel files</p></td>
-<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.0.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_excel()</span></code></a></p></td>
-<td><p>If required, provide a sheet name through kwargs</p></td>
+<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_excel()</span></code></a></p></td>
+<td><p>If required, provide a sheet name through driver_kwargs</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fwf</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parquet</span></code></p></td>
+<td><p>Binary encoded columnar data format</p></td>
+<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_parquet()</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fwf</span></code></p></td>
 <td><p>Fixed width delimited text files</p></td>
-<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.0.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_fwf()</span></code></a></p></td>
-<td><p>The formatting of these files can either be inferred or defined by the user, both through the kwargs.</p></td>
+<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_fwf()</span></code></a></p></td>
+<td><p>The formatting of these files can either be inferred or defined by the user, both through the driver_kwargs.</p></td>
 </tr>
 </tbody>
 </table>
@@ -907,27 +991,27 @@ read the time stamps the <a class="reference external" href="https://pandas.pyda
 <p>Only 2-dimensional data tables are supported, please contact us through the issue list if you would like to have support for n-dimensional tables.</p>
 </div>
 <section id="supported-files">
-<h3>Supported files<a class="headerlink" href="#supported-files" title="Permalink to this heading">#</a></h3>
+<h3>Supported files<a class="headerlink" href="#supported-files" title="Link to this heading">#</a></h3>
 <p>The DataFrameAdapter is quite flexible in supporting different types of tabular data formats. All drivers allow for flexible reading of
-files: for example both mapping tables and time series data are supported. Please note that for timeseries, the kwargs need to be used to
+files: for example both mapping tables and time series data are supported. Please note that for timeseries, the driver_kwargs need to be used to
 set the correct column for indexing, and formatting and parsing of datetime-strings. See the relevant pandas function for which arguments
 can be used. Also note that the <strong>csv</strong> driver is not restricted to comma-separated files, as the delimiter can be given to the reader
-throught the kwargs.</p>
+through the driver_kwargs.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">observations</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data/lulc/globcover_mapping.csv</span>
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DataFrame</span>
 <span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csv</span>
 <span class="w">  </span><span class="nt">meta</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">parameter_mapping</span>
-<span class="w">  </span><span class="nt">kwargs</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">header</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">  </span><span class="nt">driver_kwargs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">header</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w">  </span><span class="c1"># null translates to None in Python -&gt; no header</span>
 <span class="w">    </span><span class="nt">index_col</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">    </span><span class="nt">parse_dates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The yml-parser does not correctly parses <cite>None</cite> arguments. When this is required, the <cite>null</cite> argment should be used instead.
+<p>The yml-parser does not correctly parses <cite>None</cite> arguments. When this is required, the <cite>null</cite> argument should be used instead.
 This is parsed to the Python code as a <cite>None</cite>.</p>
 </div>
 </section>
@@ -939,11 +1023,10 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
               
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="data_prepare_cat.html"
@@ -963,10 +1046,7 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -1044,8 +1124,8 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1063,7 +1143,7 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -1071,10 +1151,11 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
     </div>
   
   
+  
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
 </p></div>
       
     </div>

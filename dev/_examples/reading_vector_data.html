@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -7,7 +6,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Example: Reading vector data &#8212; HydroMT  documentation</title>
   
@@ -19,33 +18,41 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/reading_vector_data';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.3';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Example: Reading geospatial point time-series" href="reading_point_data.html" />
@@ -60,6 +67,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -100,7 +116,8 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
   
@@ -110,11 +127,12 @@
   
   
   
+  
     
     
     
-    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">HydroMT Core</p>
@@ -122,7 +140,6 @@
 </a></div>
     
   </div>
-  
   
   <div class="col-lg-9 navbar-header-items">
     
@@ -181,13 +198,15 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -217,24 +236,50 @@ document.write(`
         </li>
 </ul></div>
       
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
     </div>
     
   </div>
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -332,6 +377,30 @@ document.write(`
         </li>
 </ul></div>
         
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
       </div>
     
   </div>
@@ -363,6 +432,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
 
 <li class="toctree-l1"><a class="reference internal" href="working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
+
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with models in HydroMT</span></p>
 <ul class="nav bd-sidenav">
@@ -374,6 +444,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/model_region.html">Defining a model region</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_models_basics.html">Example: Working with models from CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_meshmodel.html">Example: Working with mesh models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="delineate_basin.html">Example: Define hydrological model regions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Methods and workflows</span></p>
@@ -383,6 +454,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="working_with_raster.html">Example: Working with raster data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_geodatasets.html">Example: Working with geodatasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
+
 </ul>
 </div>
 </nav></div>
@@ -412,8 +485,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
@@ -423,7 +496,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../user_guide/intro.html" class="nav-link">User guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Example: Reading vector data</li>
+    <li class="breadcrumb-item active" aria-current="page">Example:...</li>
   </ul>
 </nav>
 </div>
@@ -447,7 +520,7 @@ document.write(`
     <a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/reading_vector_data.ipynb" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
 </div></div>
 <section id="Example:-Reading-vector-data">
-<h1>Example: Reading vector data<a class="headerlink" href="#Example:-Reading-vector-data" title="Permalink to this heading">#</a></h1>
+<h1>Example: Reading vector data<a class="headerlink" href="#Example:-Reading-vector-data" title="Link to this heading">#</a></h1>
 <p>This example illustrates the how to read raster data using the HydroMT <a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.html">DataCatalog</a> with the <code class="docutils literal notranslate"><span class="pre">vector</span></code> or <code class="docutils literal notranslate"><span class="pre">vector_table</span></code> drivers.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -468,7 +541,7 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:55,772 - read vector data - log - INFO - HydroMT version: 0.7.2.dev0
+2023-10-31 08:53:14,360 - read vector data - log - INFO - HydroMT version: 0.9.1.dev
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -485,33 +558,24 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:55,828 - read vector data - data_catalog - INFO - Reading data catalog artifact_data v0.0.8 from archive
-2023-06-19 06:29:55,829 - read vector data - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-10-31 08:53:14,414 - read vector data - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
+2023-10-31 08:53:14,415 - read vector data - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
 </pre></div></div>
 </div>
 </section>
 <section id="Vector-driver">
-<h1>Vector driver<a class="headerlink" href="#Vector-driver" title="Permalink to this heading">#</a></h1>
+<h1>Vector driver<a class="headerlink" href="#Vector-driver" title="Link to this heading">#</a></h1>
 <p>To read vector data and parse it into a <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html">geopandas.GeoDataFrame</a> object we use the <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.read_file.html">geopandas.read_file</a> method, see the <a class="reference external" href="https://geopandas.org/en/stable/docs/user_guide/io.html#reading-spatial-data">geopandas documentation</a> for details. Geopandas supports many file formats, see below. For large datasets we recommend using data
 formats which contain a spatial index, such as ‘GeoPackage (GPKG)’ or ‘FlatGeoBuf’ to speed up reading spatial subsets of the data.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># supported file formats</span>
-<span class="kn">import</span> <span class="nn">fiona</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">fiona</span><span class="o">.</span><span class="n">supported_drivers</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># uncomment to see list of supported file formats</span>
+<span class="c1"># import fiona</span>
+<span class="c1"># print(list(fiona.supported_drivers.keys()))</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-[&#39;DXF&#39;, &#39;CSV&#39;, &#39;OpenFileGDB&#39;, &#39;ESRIJSON&#39;, &#39;ESRI Shapefile&#39;, &#39;FlatGeobuf&#39;, &#39;GeoJSON&#39;, &#39;GeoJSONSeq&#39;, &#39;GPKG&#39;, &#39;GML&#39;, &#39;OGR_GMT&#39;, &#39;GPX&#39;, &#39;Idrisi&#39;, &#39;MapInfo File&#39;, &#39;DGN&#39;, &#39;PCIDSK&#39;, &#39;OGR_PDS&#39;, &#39;S57&#39;, &#39;SQLite&#39;, &#39;TopoJSON&#39;]
-</pre></div></div>
 </div>
 <p>Here we use a spatial subset of the <a class="reference external" href="https://gadm.org/download_world.html">Database of Global Administrative Areas (GADM)</a> level 3 units.</p>
 <div class="nbinput docutils container">
@@ -532,7 +596,6 @@ formats which contain a spatial index, such as ‘GeoPackage (GPKG)’ or ‘Fla
 crs: 4326
 data_type: GeoDataFrame
 driver: vector
-filesystem: local
 meta:
   category: geography
   notes: last downloaded 2020-10-19; license required for commercial use
@@ -559,8 +622,7 @@ path: /home/runner/.hydromt_data/artifact_data/v0.0.8/gadm_level3.gpkg
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:55,945 - read vector data - data_catalog - INFO - DataCatalog: Getting gadm_level3 GeoDataFrame vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/gadm_level3.gpkg
-2023-06-19 06:29:55,946 - read vector data - geodataframe - INFO - GeoDataFrame: Read vector data.
+2023-10-31 08:53:14,495 - read vector data - geodataframe - INFO - Reading gadm_level3 vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/gadm_level3.gpkg
 number of rows: 509
 </pre></div></div>
 </div>
@@ -729,8 +791,8 @@ number of rows: 509
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:56,083 - read vector data - data_catalog - INFO - DataCatalog: Getting gadm_level3 GeoDataFrame vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/gadm_level3.gpkg
-2023-06-19 06:29:56,087 - read vector data - geodataframe - INFO - GeoDataFrame: Read vector data and clip to bbox (epsg:4326) [11.557, 46.096, 11.851, 46.477].
+2023-10-31 08:53:14,756 - read vector data - geodataframe - INFO - Reading gadm_level3 vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/gadm_level3.gpkg
+2023-10-31 08:53:14,792 - read vector data - geodataframe - DEBUG - Clip intersects [11.557, 46.096, 11.851, 46.477] (EPSG:4326)
 number of rows: 28
 </pre></div></div>
 </div>
@@ -799,7 +861,7 @@ number of rows: 28
 </div>
 </section>
 <section id="Vector_table-driver">
-<h1>Vector_table driver<a class="headerlink" href="#Vector_table-driver" title="Permalink to this heading">#</a></h1>
+<h1>Vector_table driver<a class="headerlink" href="#Vector_table-driver" title="Link to this heading">#</a></h1>
 <p>To read <em>point</em> vector data from a table (csv, xls or xlsx) we use the <a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.io.open_vector_from_table.html">open_vector_from_table</a> method.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -895,7 +957,7 @@ number of rows: 28
         <span class="s2">&quot;data_type&quot;</span><span class="p">:</span> <span class="s2">&quot;GeoDataFrame&quot;</span><span class="p">,</span>
         <span class="s2">&quot;driver&quot;</span><span class="p">:</span> <span class="s2">&quot;vector_table&quot;</span><span class="p">,</span>
         <span class="s2">&quot;crs&quot;</span><span class="p">:</span> <span class="mi">4326</span><span class="p">,</span>
-        <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x_dim&quot;</span><span class="p">:</span> <span class="s2">&quot;x_centroid&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;driver_kwargs&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x_dim&quot;</span><span class="p">:</span> <span class="s2">&quot;x_centroid&quot;</span><span class="p">},</span>
     <span class="p">}</span>
 <span class="p">}</span>
 <span class="n">data_catalog</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data_source</span><span class="p">)</span>
@@ -912,8 +974,7 @@ number of rows: 28
 crs: 4326
 data_type: GeoDataFrame
 driver: vector_table
-filesystem: local
-kwargs:
+driver_kwargs:
   x_dim: x_centroid
 path: /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/xy.csv
 </pre></div></div>
@@ -934,8 +995,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/xy.csv
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:29:56,310 - read vector data - data_catalog - INFO - DataCatalog: Getting GADM_level3_centroids GeoDataFrame vector_table data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/xy.csv
-2023-06-19 06:29:56,311 - read vector data - geodataframe - INFO - GeoDataFrame: Read vector_table data.
+2023-10-31 08:53:15,031 - read vector data - geodataframe - INFO - Reading GADM_level3_centroids vector_table data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/xy.csv
 CRS: EPSG:4326
 </pre></div></div>
 </div>
@@ -998,7 +1058,7 @@ CRS: EPSG:4326
 </div>
 </section>
 <section id="Visualize-vector-data">
-<h1>Visualize vector data<a class="headerlink" href="#Visualize-vector-data" title="Permalink to this heading">#</a></h1>
+<h1>Visualize vector data<a class="headerlink" href="#Visualize-vector-data" title="Link to this heading">#</a></h1>
 <p>The data can be visualized with the <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.plot.html">.plot()</a> geopandas method. In an interactive environment you can also try the <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.explore.html">.explore()</a> method</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -1037,11 +1097,10 @@ CRS: EPSG:4326
               
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="reading_raster_data.html"
@@ -1061,10 +1120,7 @@ CRS: EPSG:4326
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -1123,8 +1179,8 @@ CRS: EPSG:4326
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1142,7 +1198,7 @@ CRS: EPSG:4326
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -1150,10 +1206,11 @@ CRS: EPSG:4326
     </div>
   
   
+  
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
 </p></div>
       
     </div>

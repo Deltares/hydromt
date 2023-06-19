@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -7,7 +6,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>API reference &#8212; HydroMT  documentation</title>
   
@@ -19,34 +18,42 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="_static/theme-deltares.css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
-    <script src="_static/design-tabs.js"></script>
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.3';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="hydromt.data_catalog.DataCatalog" href="_generated/hydromt.data_catalog.DataCatalog.html" />
-    <link rel="prev" title="Example: Working with flow direction data" href="_examples/working_with_flow_directions.html" />
+    <link rel="prev" title="Example: Doing Extreme Value Analysis (EVA) for time series" href="_examples/doing_extreme_value_analysis.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -57,6 +64,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -97,7 +113,8 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
   
@@ -107,11 +124,12 @@
   
   
   
+  
     
     
     
-    <img src="_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">HydroMT Core</p>
@@ -119,7 +137,6 @@
 </a></div>
     
   </div>
-  
   
   <div class="col-lg-9 navbar-header-items">
     
@@ -178,13 +195,15 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -214,24 +233,50 @@ document.write(`
         </li>
 </ul></div>
       
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
     </div>
     
   </div>
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -329,6 +374,30 @@ document.write(`
         </li>
 </ul></div>
         
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
       </div>
     
   </div>
@@ -339,6 +408,8 @@ document.write(`
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.html">hydromt.data_catalog.DataCatalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_source.html">hydromt.data_catalog.DataCatalog.get_source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.iter_sources.html">hydromt.data_catalog.DataCatalog.iter_sources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.sources.html">hydromt.data_catalog.DataCatalog.sources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.keys.html">hydromt.data_catalog.DataCatalog.keys</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.predefined_catalogs.html">hydromt.data_catalog.DataCatalog.predefined_catalogs</a></li>
@@ -346,19 +417,23 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.to_dataframe.html">hydromt.data_catalog.DataCatalog.to_dataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.to_yml.html">hydromt.data_catalog.DataCatalog.to_yml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.export_data.html">hydromt.data_catalog.DataCatalog.export_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_source_bbox.html">hydromt.data_catalog.DataCatalog.get_source_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_source_time_range.html">hydromt.data_catalog.DataCatalog.get_source_time_range</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.set_predefined_catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.add_source.html">hydromt.data_catalog.DataCatalog.add_source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.update.html">hydromt.data_catalog.DataCatalog.update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_archive.html">hydromt.data_catalog.DataCatalog.from_archive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_yml.html">hydromt.data_catalog.DataCatalog.from_yml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_dict.html">hydromt.data_catalog.DataCatalog.from_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.update.html">hydromt.data_catalog.DataCatalog.update</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.set_predefined_catalogs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html">hydromt.data_catalog.DataCatalog.get_rasterdataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_geodataset.html">hydromt.data_catalog.DataCatalog.get_geodataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_dataframe.html">hydromt.data_catalog.DataCatalog.get_dataframe</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.html">hydromt.data_adapter.RasterDatasetAdapter</a></li>
@@ -366,6 +441,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.get_data.html">hydromt.data_adapter.RasterDatasetAdapter.get_data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.to_dict.html">hydromt.data_adapter.RasterDatasetAdapter.to_dict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.to_file.html">hydromt.data_adapter.RasterDatasetAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.get_bbox.html">hydromt.data_adapter.RasterDatasetAdapter.get_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.get_time_range.html">hydromt.data_adapter.RasterDatasetAdapter.get_time_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.detect_bbox.html">hydromt.data_adapter.RasterDatasetAdapter.detect_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.detect_time_range.html">hydromt.data_adapter.RasterDatasetAdapter.detect_time_range</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.html">hydromt.data_adapter.GeoDatasetAdapter</a></li>
@@ -373,6 +452,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.get_data.html">hydromt.data_adapter.GeoDatasetAdapter.get_data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.to_dict.html">hydromt.data_adapter.GeoDatasetAdapter.to_dict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.to_file.html">hydromt.data_adapter.GeoDatasetAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.get_bbox.html">hydromt.data_adapter.GeoDatasetAdapter.get_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.get_time_range.html">hydromt.data_adapter.GeoDatasetAdapter.get_time_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.detect_bbox.html">hydromt.data_adapter.GeoDatasetAdapter.detect_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.detect_time_range.html">hydromt.data_adapter.GeoDatasetAdapter.detect_time_range</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.html">hydromt.data_adapter.GeoDataFrameAdapter</a></li>
@@ -380,6 +463,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.get_data.html">hydromt.data_adapter.GeoDataFrameAdapter.get_data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.to_dict.html">hydromt.data_adapter.GeoDataFrameAdapter.to_dict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.to_file.html">hydromt.data_adapter.GeoDataFrameAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.get_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.get_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.DataFrameAdapter.html">hydromt.data_adapter.DataFrameAdapter</a></li>
@@ -405,6 +490,7 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.crs.html">hydromt.Model.crs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.region.html">hydromt.Model.region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.root.html">hydromt.Model.root</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.api.html">hydromt.Model.api</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -434,6 +520,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.write_states.html">hydromt.Model.write_states</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.set_results.html">hydromt.Model.set_results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.read_results.html">hydromt.Model.read_results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.read_nc.html">hydromt.Model.read_nc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.write_nc.html">hydromt.Model.write_nc</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Model.setup_config.html">hydromt.Model.setup_config</a></li>
@@ -466,50 +554,62 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.GridModel.setup_grid_from_geodataframe.html">hydromt.GridModel.setup_grid_from_geodataframe</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.html">hydromt.LumpedModel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.html">hydromt.VectorModel</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.response_units.html">hydromt.LumpedModel.response_units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.crs.html">hydromt.LumpedModel.crs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.region.html">hydromt.LumpedModel.region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.vector.html">hydromt.VectorModel.vector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.crs.html">hydromt.VectorModel.crs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.region.html">hydromt.VectorModel.region</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.set_response_units.html">hydromt.LumpedModel.set_response_units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.read_response_units.html">hydromt.LumpedModel.read_response_units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.write_response_units.html">hydromt.LumpedModel.write_response_units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.set_vector.html">hydromt.VectorModel.set_vector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.read_vector.html">hydromt.VectorModel.read_vector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.write_vector.html">hydromt.VectorModel.write_vector</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.setup_config.html">hydromt.LumpedModel.setup_config</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.setup_region.html">hydromt.LumpedModel.setup_region</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.setup_maps_from_rasterdataset.html">hydromt.LumpedModel.setup_maps_from_rasterdataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.LumpedModel.setup_maps_from_raster_reclass.html">hydromt.LumpedModel.setup_maps_from_raster_reclass</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.setup_config.html">hydromt.VectorModel.setup_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.setup_region.html">hydromt.VectorModel.setup_region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.setup_maps_from_rasterdataset.html">hydromt.VectorModel.setup_maps_from_rasterdataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.VectorModel.setup_maps_from_raster_reclass.html">hydromt.VectorModel.setup_maps_from_raster_reclass</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.html">hydromt.MeshModel</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.mesh.html">hydromt.MeshModel.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.mesh_names.html">hydromt.MeshModel.mesh_names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.mesh_grids.html">hydromt.MeshModel.mesh_grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.mesh_datasets.html">hydromt.MeshModel.mesh_datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.mesh_gdf.html">hydromt.MeshModel.mesh_gdf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.crs.html">hydromt.MeshModel.crs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.region.html">hydromt.MeshModel.region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.bounds.html">hydromt.MeshModel.bounds</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.set_mesh.html">hydromt.MeshModel.set_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.get_mesh.html">hydromt.MeshModel.get_mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.read_mesh.html">hydromt.MeshModel.read_mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.write_mesh.html">hydromt.MeshModel.write_mesh</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.setup_config.html">hydromt.MeshModel.setup_config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.setup_region.html">hydromt.MeshModel.setup_region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh2d.html">hydromt.MeshModel.setup_mesh2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh2d_from_rasterdataset.html">hydromt.MeshModel.setup_mesh2d_from_rasterdataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh2d_from_raster_reclass.html">hydromt.MeshModel.setup_mesh2d_from_raster_reclass</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.setup_maps_from_rasterdataset.html">hydromt.MeshModel.setup_maps_from_rasterdataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.setup_maps_from_raster_reclass.html">hydromt.MeshModel.setup_maps_from_raster_reclass</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh_from_rasterdataset.html">hydromt.MeshModel.setup_mesh_from_rasterdataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh_from_raster_reclass.html">hydromt.MeshModel.setup_mesh_from_raster_reclass</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.workflows.grid.grid_from_constant.html">hydromt.workflows.grid.grid_from_constant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.workflows.grid.grid_from_rasterdataset.html">hydromt.workflows.grid.grid_from_rasterdataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.workflows.grid.grid_from_raster_reclass.html">hydromt.workflows.grid.grid_from_raster_reclass</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.workflows.grid.grid_from_geodataframe.html">hydromt.workflows.grid.grid_from_geodataframe</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.workflows.mesh.create_mesh2d.html">hydromt.workflows.mesh.create_mesh2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.workflows.mesh.mesh2d_from_rasterdataset.html">hydromt.workflows.mesh.mesh2d_from_rasterdataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.workflows.mesh.mesh2d_from_raster_reclass.html">hydromt.workflows.mesh.mesh2d_from_raster_reclass</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.workflows.basin_mask.get_basin_geometry.html">hydromt.workflows.basin_mask.get_basin_geometry</a></li>
@@ -550,6 +650,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.DataArray.raster.to_xyz_tiles.html">hydromt.DataArray.raster.to_xyz_tiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.DataArray.raster.to_slippy_tiles.html">hydromt.DataArray.raster.to_slippy_tiles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.DataArray.raster.to_raster.html">hydromt.DataArray.raster.to_raster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.Dataset.raster.to_mapstack.html">hydromt.Dataset.raster.to_mapstack</a></li>
 </ul>
@@ -608,6 +709,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.DataArray.raster.interpolate_na.html">hydromt.DataArray.raster.interpolate_na</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip.html">hydromt.DataArray.raster.clip</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip_bbox.html">hydromt.DataArray.raster.clip_bbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip_mask.html">hydromt.DataArray.raster.clip_mask</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip_geom.html">hydromt.DataArray.raster.clip_geom</a></li>
@@ -732,10 +834,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.gis_utils.nearest_merge.html">hydromt.gis_utils.nearest_merge</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.gis_utils.write_map.html">hydromt.gis_utils.write_map</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.gis_utils.write_clone.html">hydromt.gis_utils.write_clone</a></li>
-</ul>
-<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.bias.html">hydromt.stats.skills.bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.percentual_bias.html">hydromt.stats.skills.percentual_bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.nashsutcliffe.html">hydromt.stats.skills.nashsutcliffe</a></li>
@@ -749,6 +847,15 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.rsquared.html">hydromt.stats.skills.rsquared</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.mse.html">hydromt.stats.skills.mse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.rmse.html">hydromt.stats.skills.rmse</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.extremes.get_peaks.html">hydromt.stats.extremes.get_peaks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.extremes.fit_extremes.html">hydromt.stats.extremes.fit_extremes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.extremes.get_return_value.html">hydromt.stats.extremes.get_return_value</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.extremes.eva.html">hydromt.stats.extremes.eva</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.design_events.get_peak_hydrographs.html">hydromt.stats.design_events.get_peak_hydrographs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.config.configread.html">hydromt.config.configread</a></li>
@@ -785,8 +892,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="index.html" class="nav-link" aria-label="Home">
@@ -811,17 +918,23 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="api-reference">
-<span id="id1"></span><h1>API reference<a class="headerlink" href="#api-reference" title="Permalink to this heading">#</a></h1>
+<span id="id1"></span><h1>API reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h1>
 <section id="data">
-<h2>Data<a class="headerlink" href="#data" title="Permalink to this heading">#</a></h2>
+<h2>Data<a class="headerlink" href="#data" title="Link to this heading">#</a></h2>
 <section id="data-catalog">
-<span id="api-data-catalog"></span><h3>Data catalog<a class="headerlink" href="#data-catalog" title="Permalink to this heading">#</a></h3>
+<span id="api-data-catalog"></span><h3>Data catalog<a class="headerlink" href="#data-catalog" title="Link to this heading">#</a></h3>
 <section id="general">
-<h4>General<a class="headerlink" href="#general" title="Permalink to this heading">#</a></h4>
+<h4>General<a class="headerlink" href="#general" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.html#hydromt.data_catalog.DataCatalog" title="hydromt.data_catalog.DataCatalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog</span></code></a>(data_libs, fallback_lib)</p></td>
 <td><p>Base class for the data catalog object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_source.html#hydromt.data_catalog.DataCatalog.get_source" title="hydromt.data_catalog.DataCatalog.get_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.get_source</span></code></a>(source)</p></td>
+<td><p>Return a data source.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.iter_sources.html#hydromt.data_catalog.DataCatalog.iter_sources" title="hydromt.data_catalog.DataCatalog.iter_sources"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.iter_sources</span></code></a>([...])</p></td>
+<td><p>Return a flat list of all available data sources.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.sources.html#hydromt.data_catalog.DataCatalog.sources" title="hydromt.data_catalog.DataCatalog.sources"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.sources</span></code></a></p></td>
 <td><p>Returns dictionary of DataAdapter sources.</p></td>
@@ -844,36 +957,45 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.export_data.html#hydromt.data_catalog.DataCatalog.export_data" title="hydromt.data_catalog.DataCatalog.export_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.export_data</span></code></a>(data_root)</p></td>
 <td><p>Export a data slice of each dataset and a data_catalog.yml file to disk.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_source_bbox.html#hydromt.data_catalog.DataCatalog.get_source_bbox" title="hydromt.data_catalog.DataCatalog.get_source_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.get_source_bbox</span></code></a>(source)</p></td>
+<td><p>Retrieve the bounding box and crs of the source.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_source_time_range.html#hydromt.data_catalog.DataCatalog.get_source_time_range" title="hydromt.data_catalog.DataCatalog.get_source_time_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.get_source_time_range</span></code></a>(source)</p></td>
+<td><p>Detect the temporal range of the dataset.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
 <section id="add-data-sources">
-<h4>Add data sources<a class="headerlink" href="#add-data-sources" title="Permalink to this heading">#</a></h4>
+<h4>Add data sources<a class="headerlink" href="#add-data-sources" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.set_predefined_catalogs" title="hydromt.data_catalog.DataCatalog.set_predefined_catalogs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.set_predefined_catalogs</span></code></a>([...])</p></td>
-<td><p>Initialise the predefined catalogs.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.from_predefined_catalogs" title="hydromt.data_catalog.DataCatalog.from_predefined_catalogs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_predefined_catalogs</span></code></a>(name)</p></td>
-<td><p>Generate a catalogue from one of the predefined ones.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_archive.html#hydromt.data_catalog.DataCatalog.from_archive" title="hydromt.data_catalog.DataCatalog.from_archive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_archive</span></code></a>(urlpath)</p></td>
-<td><p>Read a data archive including a data_catalog.yml file.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_yml.html#hydromt.data_catalog.DataCatalog.from_yml" title="hydromt.data_catalog.DataCatalog.from_yml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_yml</span></code></a>(urlpath[, ...])</p></td>
-<td><p>Add data sources based on yaml file.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_dict.html#hydromt.data_catalog.DataCatalog.from_dict" title="hydromt.data_catalog.DataCatalog.from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_dict</span></code></a>(data_dict)</p></td>
-<td><p>Add data sources based on dictionary.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.add_source.html#hydromt.data_catalog.DataCatalog.add_source" title="hydromt.data_catalog.DataCatalog.add_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.add_source</span></code></a>(source, ...)</p></td>
+<td><p>Add a new data source to the data catalog.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.update.html#hydromt.data_catalog.DataCatalog.update" title="hydromt.data_catalog.DataCatalog.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.update</span></code></a>(**kwargs)</p></td>
-<td><p>Add data sources to library.</p></td>
+<td><p>Add data sources to library or update them.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.from_predefined_catalogs" title="hydromt.data_catalog.DataCatalog.from_predefined_catalogs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_predefined_catalogs</span></code></a>(name)</p></td>
+<td><p>Add data sources from a predefined data catalog.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_archive.html#hydromt.data_catalog.DataCatalog.from_archive" title="hydromt.data_catalog.DataCatalog.from_archive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_archive</span></code></a>(urlpath)</p></td>
+<td><p>Read and cache a data archive including a data_catalog.yml file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_yml.html#hydromt.data_catalog.DataCatalog.from_yml" title="hydromt.data_catalog.DataCatalog.from_yml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_yml</span></code></a>(urlpath[, ...])</p></td>
+<td><p>Add data sources based on yaml file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_dict.html#hydromt.data_catalog.DataCatalog.from_dict" title="hydromt.data_catalog.DataCatalog.from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_dict</span></code></a>(data_dict)</p></td>
+<td><p>Add data sources based on dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.set_predefined_catalogs" title="hydromt.data_catalog.DataCatalog.set_predefined_catalogs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.set_predefined_catalogs</span></code></a>([...])</p></td>
+<td><p>Initialise the predefined catalogs.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="get-data">
-<span id="api-data-catalog-get"></span><h4>Get data<a class="headerlink" href="#get-data" title="Permalink to this heading">#</a></h4>
+<span id="api-data-catalog-get"></span><h4>Get data<a class="headerlink" href="#get-data" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html#hydromt.data_catalog.DataCatalog.get_rasterdataset" title="hydromt.data_catalog.DataCatalog.get_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.get_rasterdataset</span></code></a>(...)</p></td>
@@ -885,12 +1007,15 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_geodataframe.html#hydromt.data_catalog.DataCatalog.get_geodataframe" title="hydromt.data_catalog.DataCatalog.get_geodataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.get_geodataframe</span></code></a>(...)</p></td>
 <td><p>Return a clipped and unified GeoDataFrame (vector).</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_dataframe.html#hydromt.data_catalog.DataCatalog.get_dataframe" title="hydromt.data_catalog.DataCatalog.get_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.get_dataframe</span></code></a>(data_like)</p></td>
+<td><p>Return a unified and sliced DataFrame.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
 </section>
 <section id="rasterdataset">
-<h3>RasterDataset<a class="headerlink" href="#rasterdataset" title="Permalink to this heading">#</a></h3>
+<h3>RasterDataset<a class="headerlink" href="#rasterdataset" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.html#hydromt.data_adapter.RasterDatasetAdapter" title="hydromt.data_adapter.RasterDatasetAdapter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.RasterDatasetAdapter</span></code></a>(path[, ...])</p></td>
@@ -908,11 +1033,23 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.to_file.html#hydromt.data_adapter.RasterDatasetAdapter.to_file" title="hydromt.data_adapter.RasterDatasetAdapter.to_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.RasterDatasetAdapter.to_file</span></code></a>(...)</p></td>
 <td><p>Save a data slice to file.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.get_bbox.html#hydromt.data_adapter.RasterDatasetAdapter.get_bbox" title="hydromt.data_adapter.RasterDatasetAdapter.get_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.RasterDatasetAdapter.get_bbox</span></code></a>([...])</p></td>
+<td><p>Return the bounding box and espg code of the dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.get_time_range.html#hydromt.data_adapter.RasterDatasetAdapter.get_time_range" title="hydromt.data_adapter.RasterDatasetAdapter.get_time_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.RasterDatasetAdapter.get_time_range</span></code></a>([...])</p></td>
+<td><p>Detect the time range of the dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.detect_bbox.html#hydromt.data_adapter.RasterDatasetAdapter.detect_bbox" title="hydromt.data_adapter.RasterDatasetAdapter.detect_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.RasterDatasetAdapter.detect_bbox</span></code></a>([ds])</p></td>
+<td><p>Detect the bounding box and crs of the dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.RasterDatasetAdapter.detect_time_range.html#hydromt.data_adapter.RasterDatasetAdapter.detect_time_range" title="hydromt.data_adapter.RasterDatasetAdapter.detect_time_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.RasterDatasetAdapter.detect_time_range</span></code></a>([ds])</p></td>
+<td><p>Detect the temporal range of the dataset.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
 <section id="geodataset">
-<h3>GeoDataset<a class="headerlink" href="#geodataset" title="Permalink to this heading">#</a></h3>
+<h3>GeoDataset<a class="headerlink" href="#geodataset" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.html#hydromt.data_adapter.GeoDatasetAdapter" title="hydromt.data_adapter.GeoDatasetAdapter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDatasetAdapter</span></code></a>(path[, ...])</p></td>
@@ -930,11 +1067,23 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.to_file.html#hydromt.data_adapter.GeoDatasetAdapter.to_file" title="hydromt.data_adapter.GeoDatasetAdapter.to_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDatasetAdapter.to_file</span></code></a>(...)</p></td>
 <td><p>Save a data slice to file.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.get_bbox.html#hydromt.data_adapter.GeoDatasetAdapter.get_bbox" title="hydromt.data_adapter.GeoDatasetAdapter.get_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDatasetAdapter.get_bbox</span></code></a>([detect])</p></td>
+<td><p>Return the bounding box and espg code of the dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.get_time_range.html#hydromt.data_adapter.GeoDatasetAdapter.get_time_range" title="hydromt.data_adapter.GeoDatasetAdapter.get_time_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDatasetAdapter.get_time_range</span></code></a>([...])</p></td>
+<td><p>Detect the time range of the dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.detect_bbox.html#hydromt.data_adapter.GeoDatasetAdapter.detect_bbox" title="hydromt.data_adapter.GeoDatasetAdapter.detect_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDatasetAdapter.detect_bbox</span></code></a>([ds])</p></td>
+<td><p>Detect the bounding box and crs of the dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDatasetAdapter.detect_time_range.html#hydromt.data_adapter.GeoDatasetAdapter.detect_time_range" title="hydromt.data_adapter.GeoDatasetAdapter.detect_time_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDatasetAdapter.detect_time_range</span></code></a>([ds])</p></td>
+<td><p>Detect the temporal range of the dataset.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
 <section id="geodataframe">
-<h3>GeoDataFrame<a class="headerlink" href="#geodataframe" title="Permalink to this heading">#</a></h3>
+<h3>GeoDataFrame<a class="headerlink" href="#geodataframe" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.html#hydromt.data_adapter.GeoDataFrameAdapter" title="hydromt.data_adapter.GeoDataFrameAdapter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDataFrameAdapter</span></code></a>(path[, ...])</p></td>
@@ -952,11 +1101,17 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.to_file.html#hydromt.data_adapter.GeoDataFrameAdapter.to_file" title="hydromt.data_adapter.GeoDataFrameAdapter.to_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDataFrameAdapter.to_file</span></code></a>(...)</p></td>
 <td><p>Save a data slice to file.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.get_bbox.html#hydromt.data_adapter.GeoDataFrameAdapter.get_bbox" title="hydromt.data_adapter.GeoDataFrameAdapter.get_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDataFrameAdapter.get_bbox</span></code></a>([...])</p></td>
+<td><p>Return the bounding box and espg code of the dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html#hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox" title="hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.GeoDataFrameAdapter.detect_bbox</span></code></a>([gdf])</p></td>
+<td><p>Detect the bounding box and crs of the dataset.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
 <section id="dataframe">
-<h3>DataFrame<a class="headerlink" href="#dataframe" title="Permalink to this heading">#</a></h3>
+<h3>DataFrame<a class="headerlink" href="#dataframe" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_adapter.DataFrameAdapter.html#hydromt.data_adapter.DataFrameAdapter" title="hydromt.data_adapter.DataFrameAdapter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_adapter.DataFrameAdapter</span></code></a>(path[, ...])</p></td>
@@ -979,9 +1134,9 @@ document.write(`
 </section>
 </section>
 <section id="models">
-<h2>Models<a class="headerlink" href="#models" title="Permalink to this heading">#</a></h2>
+<h2>Models<a class="headerlink" href="#models" title="Link to this heading">#</a></h2>
 <section id="discovery">
-<h3>Discovery<a class="headerlink" href="#discovery" title="Permalink to this heading">#</a></h3>
+<h3>Discovery<a class="headerlink" href="#discovery" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.ModelCatalog.html#hydromt.ModelCatalog" title="hydromt.ModelCatalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelCatalog</span></code></a>()</p></td>
@@ -991,7 +1146,7 @@ document.write(`
 </table>
 </section>
 <section id="model">
-<span id="model-api"></span><h3>Model<a class="headerlink" href="#model" title="Permalink to this heading">#</a></h3>
+<span id="model-api"></span><h3>Model<a class="headerlink" href="#model" title="Link to this heading">#</a></h3>
 <p>Note that the base Model attributes and methods are available to all models.</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
@@ -1001,7 +1156,7 @@ document.write(`
 </tbody>
 </table>
 <section id="high-level-methods">
-<h4>High level methods<a class="headerlink" href="#high-level-methods" title="Permalink to this heading">#</a></h4>
+<h4>High level methods<a class="headerlink" href="#high-level-methods" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.read.html#hydromt.Model.read" title="hydromt.Model.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.read</span></code></a>([components])</p></td>
@@ -1013,7 +1168,7 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.build.html#hydromt.Model.build" title="hydromt.Model.build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.build</span></code></a>([region, write, opt])</p></td>
 <td><p>Single method to build a model from scratch based on settings in <cite>opt</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Model.update.html#hydromt.Model.update" title="hydromt.Model.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.update</span></code></a>([model_out, write, opt])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Model.update.html#hydromt.Model.update" title="hydromt.Model.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.update</span></code></a>([model_out, write, opt, ...])</p></td>
 <td><p>Single method to update a model based the settings in <cite>opt</cite>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.set_root.html#hydromt.Model.set_root" title="hydromt.Model.set_root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.set_root</span></code></a>(root[, mode])</p></td>
@@ -1026,7 +1181,7 @@ document.write(`
 </table>
 </section>
 <section id="model-attributes">
-<h4>Model attributes<a class="headerlink" href="#model-attributes" title="Permalink to this heading">#</a></h4>
+<h4>Model attributes<a class="headerlink" href="#model-attributes" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.crs.html#hydromt.Model.crs" title="hydromt.Model.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.crs</span></code></a></p></td>
@@ -1035,14 +1190,17 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Model.region.html#hydromt.Model.region" title="hydromt.Model.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.region</span></code></a></p></td>
 <td><p>Returns the geometry of the model area of interest.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.api.html#hydromt.Model.api" title="hydromt.Model.api"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.api</span></code></a></p></td>
-<td><p>Return all model components and their data types.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.root.html#hydromt.Model.root" title="hydromt.Model.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.root</span></code></a></p></td>
+<td><p>Path to model folder.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Model.api.html#hydromt.Model.api" title="hydromt.Model.api"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.api</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="model-components-and-attributes">
-<h4>Model components and attributes<a class="headerlink" href="#model-components-and-attributes" title="Permalink to this heading">#</a></h4>
+<h4>Model components and attributes<a class="headerlink" href="#model-components-and-attributes" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.config.html#hydromt.Model.config" title="hydromt.Model.config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.config</span></code></a></p></td>
@@ -1067,7 +1225,7 @@ document.write(`
 </table>
 </section>
 <section id="general-methods">
-<h4>General methods<a class="headerlink" href="#general-methods" title="Permalink to this heading">#</a></h4>
+<h4>General methods<a class="headerlink" href="#general-methods" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.get_config.html#hydromt.Model.get_config" title="hydromt.Model.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.get_config</span></code></a>(*args[, fallback, abs_path])</p></td>
@@ -1124,11 +1282,17 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Model.read_results.html#hydromt.Model.read_results" title="hydromt.Model.read_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.read_results</span></code></a>([fn])</p></td>
 <td><p>Read results at &lt;root&gt;/&lt;fn&gt; and add to results property.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.read_nc.html#hydromt.Model.read_nc" title="hydromt.Model.read_nc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.read_nc</span></code></a>(fn[, mask_and_scale, ...])</p></td>
+<td><p>Read netcdf files at &lt;root&gt;/&lt;fn&gt; and return as dict of xarray.Dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Model.write_nc.html#hydromt.Model.write_nc" title="hydromt.Model.write_nc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.write_nc</span></code></a>(nc_dict, fn[, ...])</p></td>
+<td><p>Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
 <section id="setup-methods">
-<span id="id2"></span><h4>Setup methods<a class="headerlink" href="#setup-methods" title="Permalink to this heading">#</a></h4>
+<span id="id2"></span><h4>Setup methods<a class="headerlink" href="#setup-methods" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Model.setup_config.html#hydromt.Model.setup_config" title="hydromt.Model.setup_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.setup_config</span></code></a>(**cfdict)</p></td>
@@ -1148,7 +1312,7 @@ document.write(`
 </section>
 </section>
 <section id="gridmodel">
-<span id="grid-model-api"></span><h3>GridModel<a class="headerlink" href="#gridmodel" title="Permalink to this heading">#</a></h3>
+<span id="grid-model-api"></span><h3>GridModel<a class="headerlink" href="#gridmodel" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.GridModel.html#hydromt.GridModel" title="hydromt.GridModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GridModel</span></code></a>(root, mode, config_fn, data_libs)</p></td>
@@ -1157,7 +1321,7 @@ document.write(`
 </tbody>
 </table>
 <section id="components-and-attributes">
-<h4>Components and attributes<a class="headerlink" href="#components-and-attributes" title="Permalink to this heading">#</a></h4>
+<h4>Components and attributes<a class="headerlink" href="#components-and-attributes" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.GridModel.grid.html#hydromt.GridModel.grid" title="hydromt.GridModel.grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GridModel.grid</span></code></a></p></td>
@@ -1173,7 +1337,7 @@ document.write(`
 </table>
 </section>
 <section id="id3">
-<h4>General methods<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h4>
+<h4>General methods<a class="headerlink" href="#id3" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.GridModel.set_grid.html#hydromt.GridModel.set_grid" title="hydromt.GridModel.set_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GridModel.set_grid</span></code></a>(data[, name])</p></td>
@@ -1189,7 +1353,7 @@ document.write(`
 </table>
 </section>
 <section id="id4">
-<h4>Setup methods<a class="headerlink" href="#id4" title="Permalink to this heading">#</a></h4>
+<h4>Setup methods<a class="headerlink" href="#id4" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.GridModel.setup_config.html#hydromt.GridModel.setup_config" title="hydromt.GridModel.setup_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GridModel.setup_config</span></code></a>(**cfdict)</p></td>
@@ -1223,61 +1387,61 @@ document.write(`
 </table>
 </section>
 </section>
-<section id="lumpedmodel">
-<span id="lumped-model-api"></span><h3>LumpedModel<a class="headerlink" href="#lumpedmodel" title="Permalink to this heading">#</a></h3>
+<section id="vectormodel">
+<span id="vector-model-api"></span><h3>VectorModel<a class="headerlink" href="#vectormodel" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.html#hydromt.LumpedModel" title="hydromt.LumpedModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel</span></code></a>(root, mode, config_fn, data_libs)</p></td>
-<td><p>Model class Lumped Model for lumped models in HydroMT.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.html#hydromt.VectorModel" title="hydromt.VectorModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel</span></code></a>(root, mode, config_fn, data_libs)</p></td>
+<td><p>Model class Vector Model for vector (polygons) models in HydroMT.</p></td>
 </tr>
 </tbody>
 </table>
 <section id="id5">
-<h4>Components and attributes<a class="headerlink" href="#id5" title="Permalink to this heading">#</a></h4>
+<h4>Components and attributes<a class="headerlink" href="#id5" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.response_units.html#hydromt.LumpedModel.response_units" title="hydromt.LumpedModel.response_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.response_units</span></code></a></p></td>
-<td><p>Model response unit (lumped) data.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.vector.html#hydromt.VectorModel.vector" title="hydromt.VectorModel.vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.vector</span></code></a></p></td>
+<td><p>Model vector (polygon) data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.crs.html#hydromt.LumpedModel.crs" title="hydromt.LumpedModel.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.crs</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.crs.html#hydromt.VectorModel.crs" title="hydromt.VectorModel.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.crs</span></code></a></p></td>
 <td><p>Returns coordinate reference system embedded in region.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.region.html#hydromt.LumpedModel.region" title="hydromt.LumpedModel.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.region</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.region.html#hydromt.VectorModel.region" title="hydromt.VectorModel.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.region</span></code></a></p></td>
 <td><p>Returns the geometry of the model area of interest.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="id6">
-<h4>General methods<a class="headerlink" href="#id6" title="Permalink to this heading">#</a></h4>
+<h4>General methods<a class="headerlink" href="#id6" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.set_response_units.html#hydromt.LumpedModel.set_response_units" title="hydromt.LumpedModel.set_response_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.set_response_units</span></code></a>(data[, name])</p></td>
-<td><p>Add data to response_units.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.set_vector.html#hydromt.VectorModel.set_vector" title="hydromt.VectorModel.set_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.set_vector</span></code></a>([data, name, ...])</p></td>
+<td><p>Add data to vector.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.read_response_units.html#hydromt.LumpedModel.read_response_units" title="hydromt.LumpedModel.read_response_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.read_response_units</span></code></a>([fn, fn_geom])</p></td>
-<td><p>Read model response units from combined netcdf and geojson file.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.read_vector.html#hydromt.VectorModel.read_vector" title="hydromt.VectorModel.read_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.read_vector</span></code></a>([fn, fn_geom])</p></td>
+<td><p>Read model vector from combined netcdf and geojson file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.write_response_units.html#hydromt.LumpedModel.write_response_units" title="hydromt.LumpedModel.write_response_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.write_response_units</span></code></a>([fn, fn_geom])</p></td>
-<td><p>Write model response units to combined netcdf and geojson files.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.write_vector.html#hydromt.VectorModel.write_vector" title="hydromt.VectorModel.write_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.write_vector</span></code></a>([fn, fn_geom, ...])</p></td>
+<td><p>Write model vector to combined netcdf and geojson files.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="id7">
-<h4>Setup methods<a class="headerlink" href="#id7" title="Permalink to this heading">#</a></h4>
+<h4>Setup methods<a class="headerlink" href="#id7" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.setup_config.html#hydromt.LumpedModel.setup_config" title="hydromt.LumpedModel.setup_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.setup_config</span></code></a>(**cfdict)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.setup_config.html#hydromt.VectorModel.setup_config" title="hydromt.VectorModel.setup_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.setup_config</span></code></a>(**cfdict)</p></td>
 <td><p>Update config with a dictionary.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.setup_region.html#hydromt.LumpedModel.setup_region" title="hydromt.LumpedModel.setup_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.setup_region</span></code></a>(region[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.setup_region.html#hydromt.VectorModel.setup_region" title="hydromt.VectorModel.setup_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.setup_region</span></code></a>(region[, ...])</p></td>
 <td><p>Set the <cite>region</cite> of interest of the model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.setup_maps_from_rasterdataset.html#hydromt.LumpedModel.setup_maps_from_rasterdataset" title="hydromt.LumpedModel.setup_maps_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.setup_maps_from_rasterdataset</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.setup_maps_from_rasterdataset.html#hydromt.VectorModel.setup_maps_from_rasterdataset" title="hydromt.VectorModel.setup_maps_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.setup_maps_from_rasterdataset</span></code></a>(...)</p></td>
 <td><p>HYDROMT CORE METHOD: Add data variable(s) from <code class="docutils literal notranslate"><span class="pre">raster_fn</span></code> to maps object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.LumpedModel.setup_maps_from_raster_reclass.html#hydromt.LumpedModel.setup_maps_from_raster_reclass" title="hydromt.LumpedModel.setup_maps_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LumpedModel.setup_maps_from_raster_reclass</span></code></a>(...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.VectorModel.setup_maps_from_raster_reclass.html#hydromt.VectorModel.setup_maps_from_raster_reclass" title="hydromt.VectorModel.setup_maps_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VectorModel.setup_maps_from_raster_reclass</span></code></a>(...)</p></td>
 <td><p>HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">raster_fn</span></code> based on <code class="docutils literal notranslate"><span class="pre">reclass_table_fn</span></code>.</p></td>
 </tr>
 </tbody>
@@ -1285,7 +1449,7 @@ document.write(`
 </section>
 </section>
 <section id="meshmodel">
-<span id="mesh-model-api"></span><h3>MeshModel<a class="headerlink" href="#meshmodel" title="Permalink to this heading">#</a></h3>
+<span id="mesh-model-api"></span><h3>MeshModel<a class="headerlink" href="#meshmodel" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.html#hydromt.MeshModel" title="hydromt.MeshModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel</span></code></a>(root, mode, config_fn, data_libs)</p></td>
@@ -1294,39 +1458,57 @@ document.write(`
 </tbody>
 </table>
 <section id="id8">
-<h4>Components and attributes<a class="headerlink" href="#id8" title="Permalink to this heading">#</a></h4>
+<h4>Components and attributes<a class="headerlink" href="#id8" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.mesh.html#hydromt.MeshModel.mesh" title="hydromt.MeshModel.mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.mesh</span></code></a></p></td>
 <td><p>Model static mesh data.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.mesh_names.html#hydromt.MeshModel.mesh_names" title="hydromt.MeshModel.mesh_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.mesh_names</span></code></a></p></td>
+<td><p>List of grid names in mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.mesh_grids.html#hydromt.MeshModel.mesh_grids" title="hydromt.MeshModel.mesh_grids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.mesh_grids</span></code></a></p></td>
+<td><p>Dictionnary of grid names and Ugrid topologies in mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.mesh_datasets.html#hydromt.MeshModel.mesh_datasets" title="hydromt.MeshModel.mesh_datasets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.mesh_datasets</span></code></a></p></td>
+<td><p>Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.mesh_gdf.html#hydromt.MeshModel.mesh_gdf" title="hydromt.MeshModel.mesh_gdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.mesh_gdf</span></code></a></p></td>
+<td><p>Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.crs.html#hydromt.MeshModel.crs" title="hydromt.MeshModel.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.crs</span></code></a></p></td>
-<td><p>Returns coordinate reference system embedded in region.</p></td>
+<td><p>Returns model mesh crs.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.region.html#hydromt.MeshModel.region" title="hydromt.MeshModel.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.region</span></code></a></p></td>
-<td><p>Returns geometry of region of the model area of interest.</p></td>
+<td><p>Returns geometry of region of the model area of interest based on mesh total bounds.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.bounds.html#hydromt.MeshModel.bounds" title="hydromt.MeshModel.bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.bounds</span></code></a></p></td>
+<td><p>Returns model mesh bounds.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="id9">
-<h4>General methods<a class="headerlink" href="#id9" title="Permalink to this heading">#</a></h4>
+<h4>General methods<a class="headerlink" href="#id9" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.set_mesh.html#hydromt.MeshModel.set_mesh" title="hydromt.MeshModel.set_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.set_mesh</span></code></a>(data[, name])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.set_mesh.html#hydromt.MeshModel.set_mesh" title="hydromt.MeshModel.set_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.set_mesh</span></code></a>(data[, name, grid_name, ...])</p></td>
 <td><p>Add data to mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.read_mesh.html#hydromt.MeshModel.read_mesh" title="hydromt.MeshModel.read_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.read_mesh</span></code></a>([fn])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.get_mesh.html#hydromt.MeshModel.get_mesh" title="hydromt.MeshModel.get_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.get_mesh</span></code></a>(grid_name[, include_data])</p></td>
+<td><p>Return a specific grid topology from mesh based on grid_name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.read_mesh.html#hydromt.MeshModel.read_mesh" title="hydromt.MeshModel.read_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.read_mesh</span></code></a>([fn, crs])</p></td>
 <td><p>Read model mesh data at &lt;root&gt;/&lt;fn&gt; and add to mesh property.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.write_mesh.html#hydromt.MeshModel.write_mesh" title="hydromt.MeshModel.write_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.write_mesh</span></code></a>([fn])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.write_mesh.html#hydromt.MeshModel.write_mesh" title="hydromt.MeshModel.write_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.write_mesh</span></code></a>([fn, ...])</p></td>
 <td><p>Write model grid data to a netCDF file at &lt;root&gt;/&lt;fn&gt;.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="id10">
-<h4>Setup methods<a class="headerlink" href="#id10" title="Permalink to this heading">#</a></h4>
+<h4>Setup methods<a class="headerlink" href="#id10" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_config.html#hydromt.MeshModel.setup_config" title="hydromt.MeshModel.setup_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_config</span></code></a>(**cfdict)</p></td>
@@ -1335,17 +1517,20 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_region.html#hydromt.MeshModel.setup_region" title="hydromt.MeshModel.setup_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_region</span></code></a>(region[, ...])</p></td>
 <td><p>Set the <cite>region</cite> of interest of the model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_maps_from_rasterdataset.html#hydromt.MeshModel.setup_maps_from_rasterdataset" title="hydromt.MeshModel.setup_maps_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_maps_from_rasterdataset</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh2d.html#hydromt.MeshModel.setup_mesh2d" title="hydromt.MeshModel.setup_mesh2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_mesh2d</span></code></a>(region[, res, crs, ...])</p></td>
+<td><p>HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh2d_from_rasterdataset.html#hydromt.MeshModel.setup_mesh2d_from_rasterdataset" title="hydromt.MeshModel.setup_mesh2d_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_mesh2d_from_rasterdataset</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Add data variable(s) from <code class="docutils literal notranslate"><span class="pre">raster_fn</span></code> to 2D <code class="docutils literal notranslate"><span class="pre">grid_name</span></code> in mesh object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh2d_from_raster_reclass.html#hydromt.MeshModel.setup_mesh2d_from_raster_reclass" title="hydromt.MeshModel.setup_mesh2d_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_mesh2d_from_raster_reclass</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Add data variable(s) to 2D <code class="docutils literal notranslate"><span class="pre">grid_name</span></code> in mesh object by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">raster_fn</span></code> based on <code class="docutils literal notranslate"><span class="pre">reclass_table_fn</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_maps_from_rasterdataset.html#hydromt.MeshModel.setup_maps_from_rasterdataset" title="hydromt.MeshModel.setup_maps_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_maps_from_rasterdataset</span></code></a>(...)</p></td>
 <td><p>HYDROMT CORE METHOD: Add data variable(s) from <code class="docutils literal notranslate"><span class="pre">raster_fn</span></code> to maps object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_maps_from_raster_reclass.html#hydromt.MeshModel.setup_maps_from_raster_reclass" title="hydromt.MeshModel.setup_maps_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_maps_from_raster_reclass</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_maps_from_raster_reclass.html#hydromt.MeshModel.setup_maps_from_raster_reclass" title="hydromt.MeshModel.setup_maps_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_maps_from_raster_reclass</span></code></a>(...)</p></td>
 <td><p>HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">raster_fn</span></code> based on <code class="docutils literal notranslate"><span class="pre">reclass_table_fn</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh_from_rasterdataset.html#hydromt.MeshModel.setup_mesh_from_rasterdataset" title="hydromt.MeshModel.setup_mesh_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_mesh_from_rasterdataset</span></code></a>(...)</p></td>
-<td><p>HYDROMT CORE METHOD: Add data variable(s) from <code class="docutils literal notranslate"><span class="pre">raster_fn</span></code> to mesh object.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.MeshModel.setup_mesh_from_raster_reclass.html#hydromt.MeshModel.setup_mesh_from_raster_reclass" title="hydromt.MeshModel.setup_mesh_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeshModel.setup_mesh_from_raster_reclass</span></code></a>(...)</p></td>
-<td><p>HYDROMT CORE METHOD: Add data variable(s) to mesh object by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">raster_fn</span></code> based on <code class="docutils literal notranslate"><span class="pre">reclass_table_fn</span></code>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1353,9 +1538,9 @@ document.write(`
 </section>
 </section>
 <section id="workflows">
-<h2>Workflows<a class="headerlink" href="#workflows" title="Permalink to this heading">#</a></h2>
+<span id="workflows-api"></span><h2>Workflows<a class="headerlink" href="#workflows" title="Link to this heading">#</a></h2>
 <section id="grid">
-<h3>Grid<a class="headerlink" href="#grid" title="Permalink to this heading">#</a></h3>
+<h3>Grid<a class="headerlink" href="#grid" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.workflows.grid.grid_from_constant.html#hydromt.workflows.grid.grid_from_constant" title="hydromt.workflows.grid.grid_from_constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflows.grid.grid_from_constant</span></code></a>(grid_like, ...)</p></td>
@@ -1373,8 +1558,24 @@ document.write(`
 </tbody>
 </table>
 </section>
+<section id="mesh">
+<h3>Mesh<a class="headerlink" href="#mesh" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.workflows.mesh.create_mesh2d.html#hydromt.workflows.mesh.create_mesh2d" title="hydromt.workflows.mesh.create_mesh2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflows.mesh.create_mesh2d</span></code></a>(region[, res, ...])</p></td>
+<td><p>Create an 2D unstructured mesh or reads an existing 2D mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.workflows.mesh.mesh2d_from_rasterdataset.html#hydromt.workflows.mesh.mesh2d_from_rasterdataset" title="hydromt.workflows.mesh.mesh2d_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflows.mesh.mesh2d_from_rasterdataset</span></code></a>(ds, ...)</p></td>
+<td><p>Resamples data in ds to mesh2d.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.workflows.mesh.mesh2d_from_raster_reclass.html#hydromt.workflows.mesh.mesh2d_from_raster_reclass" title="hydromt.workflows.mesh.mesh2d_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflows.mesh.mesh2d_from_raster_reclass</span></code></a>(da, ...)</p></td>
+<td><p>Resample data to <code class="docutils literal notranslate"><span class="pre">mesh2d</span></code> grid by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">da</span></code> based on <code class="docutils literal notranslate"><span class="pre">df_vars</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="basin-mask">
-<h3>Basin mask<a class="headerlink" href="#basin-mask" title="Permalink to this heading">#</a></h3>
+<h3>Basin mask<a class="headerlink" href="#basin-mask" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.workflows.basin_mask.get_basin_geometry.html#hydromt.workflows.basin_mask.get_basin_geometry" title="hydromt.workflows.basin_mask.get_basin_geometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflows.basin_mask.get_basin_geometry</span></code></a>(ds)</p></td>
@@ -1387,7 +1588,7 @@ document.write(`
 </table>
 </section>
 <section id="river-bathymetry">
-<h3>River bathymetry<a class="headerlink" href="#river-bathymetry" title="Permalink to this heading">#</a></h3>
+<h3>River bathymetry<a class="headerlink" href="#river-bathymetry" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.workflows.rivers.river_width.html#hydromt.workflows.rivers.river_width" title="hydromt.workflows.rivers.river_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflows.rivers.river_width</span></code></a>(gdf_stream, ...)</p></td>
@@ -1400,9 +1601,9 @@ document.write(`
 </table>
 </section>
 <section id="forcing">
-<h3>Forcing<a class="headerlink" href="#forcing" title="Permalink to this heading">#</a></h3>
+<h3>Forcing<a class="headerlink" href="#forcing" title="Link to this heading">#</a></h3>
 <section id="data-handling">
-<h4>Data handling<a class="headerlink" href="#data-handling" title="Permalink to this heading">#</a></h4>
+<h4>Data handling<a class="headerlink" href="#data-handling" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.workflows.forcing.precip.html#hydromt.workflows.forcing.precip" title="hydromt.workflows.forcing.precip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflows.forcing.precip</span></code></a>(precip, da_like[, ...])</p></td>
@@ -1424,7 +1625,7 @@ document.write(`
 </table>
 </section>
 <section id="correction-methods">
-<h4>Correction methods<a class="headerlink" href="#correction-methods" title="Permalink to this heading">#</a></h4>
+<h4>Correction methods<a class="headerlink" href="#correction-methods" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.workflows.forcing.press_correction.html#hydromt.workflows.forcing.press_correction" title="hydromt.workflows.forcing.press_correction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflows.forcing.press_correction</span></code></a>(dem_model)</p></td>
@@ -1437,7 +1638,7 @@ document.write(`
 </table>
 </section>
 <section id="time-resampling-methods">
-<h4>Time resampling methods<a class="headerlink" href="#time-resampling-methods" title="Permalink to this heading">#</a></h4>
+<h4>Time resampling methods<a class="headerlink" href="#time-resampling-methods" title="Link to this heading">#</a></h4>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.workflows.forcing.resample_time.html#hydromt.workflows.forcing.resample_time" title="hydromt.workflows.forcing.resample_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflows.forcing.resample_time</span></code></a>(da, freq[, ...])</p></td>
@@ -1450,7 +1651,7 @@ document.write(`
 </table>
 </section>
 <section id="computation-methods">
-<h4>Computation methods<a class="headerlink" href="#computation-methods" title="Permalink to this heading">#</a></h4>
+<h4>Computation methods<a class="headerlink" href="#computation-methods" title="Link to this heading">#</a></h4>
 <p><strong>PET</strong></p>
 <table class="autosummary longtable table autosummary">
 <tbody>
@@ -1469,9 +1670,9 @@ document.write(`
 </section>
 </section>
 <section id="reading-writing-methods">
-<h2>Reading/writing methods<a class="headerlink" href="#reading-writing-methods" title="Permalink to this heading">#</a></h2>
+<h2>Reading/writing methods<a class="headerlink" href="#reading-writing-methods" title="Link to this heading">#</a></h2>
 <section id="reading-methods">
-<span id="open-methods"></span><h3>Reading methods<a class="headerlink" href="#reading-methods" title="Permalink to this heading">#</a></h3>
+<span id="open-methods"></span><h3>Reading methods<a class="headerlink" href="#reading-methods" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.io.open_raster.html#hydromt.io.open_raster" title="hydromt.io.open_raster"><code class="xref py py-obj docutils literal notranslate"><span class="pre">io.open_raster</span></code></a>(filename[, mask_nodata, ...])</p></td>
@@ -1484,31 +1685,34 @@ document.write(`
 <td><p>Read and merge raster tiles.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.io.open_vector.html#hydromt.io.open_vector" title="hydromt.io.open_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">io.open_vector</span></code></a>(fn[, driver, crs, dst_crs, ...])</p></td>
-<td><p>Open fiona-compatible geometry, csv, excel or xy file and parse it.</p></td>
+<td><p>Open fiona-compatible geometry, csv, parquet, excel or xy file and parse it.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.io.open_vector_from_table.html#hydromt.io.open_vector_from_table" title="hydromt.io.open_vector_from_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">io.open_vector_from_table</span></code></a>(fn[, driver, ...])</p></td>
-<td><p>Read point geometry files from csv, xy or excel table files.</p></td>
+<td><p>Read point geometry files from csv, parquet, xy or excel table files.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.io.open_geodataset.html#hydromt.io.open_geodataset" title="hydromt.io.open_geodataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">io.open_geodataset</span></code></a>(fn_locs[, fn_data, ...])</p></td>
-<td><p>Open point location GIS file and timeseries file combine a single xarray.Dataset.</p></td>
+<td><p>Open and combine geometry location GIS file and timeseries file in a xr.Dataset.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.io.open_timeseries_from_table.html#hydromt.io.open_timeseries_from_table" title="hydromt.io.open_timeseries_from_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">io.open_timeseries_from_table</span></code></a>(fn[, name, ...])</p></td>
-<td><p>Open timeseries csv file and parse to xarray.DataArray.</p></td>
+<td><p>Open timeseries csv or parquet file and parse to xarray.DataArray.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="raster-writing-methods">
-<h3>Raster writing methods<a class="headerlink" href="#raster-writing-methods" title="Permalink to this heading">#</a></h3>
+<h3>Raster writing methods<a class="headerlink" href="#raster-writing-methods" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.to_xyz_tiles.html#hydromt.DataArray.raster.to_xyz_tiles" title="hydromt.DataArray.raster.to_xyz_tiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.to_xyz_tiles</span></code></a>(root, ...[, ...])</p></td>
 <td><p>Export rasterdataset to tiles in a xyz structure.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.to_raster.html#hydromt.DataArray.raster.to_raster" title="hydromt.DataArray.raster.to_raster"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.to_raster</span></code></a>(raster_path[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.to_slippy_tiles.html#hydromt.DataArray.raster.to_slippy_tiles" title="hydromt.DataArray.raster.to_slippy_tiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.to_slippy_tiles</span></code></a>(root[, ...])</p></td>
+<td><p>Produce tiles in /zoom/x/y.&lt;ext&gt; structure (EPSG:3857).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.to_raster.html#hydromt.DataArray.raster.to_raster" title="hydromt.DataArray.raster.to_raster"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.to_raster</span></code></a>(raster_path[, ...])</p></td>
 <td><p>Write DataArray object to a gdal-writable raster file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Dataset.raster.to_mapstack.html#hydromt.Dataset.raster.to_mapstack" title="hydromt.Dataset.raster.to_mapstack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset.raster.to_mapstack</span></code></a>(root[, driver, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Dataset.raster.to_mapstack.html#hydromt.Dataset.raster.to_mapstack" title="hydromt.Dataset.raster.to_mapstack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset.raster.to_mapstack</span></code></a>(root[, driver, ...])</p></td>
 <td><p>Write the Dataset object to one gdal-writable raster files per variable.</p></td>
 </tr>
 </tbody>
@@ -1516,9 +1720,9 @@ document.write(`
 </section>
 </section>
 <section id="raster-methods">
-<h2>Raster methods<a class="headerlink" href="#raster-methods" title="Permalink to this heading">#</a></h2>
+<span id="raster-api"></span><h2>Raster methods<a class="headerlink" href="#raster-methods" title="Link to this heading">#</a></h2>
 <section id="id11">
-<h3>High level methods<a class="headerlink" href="#id11" title="Permalink to this heading">#</a></h3>
+<h3>High level methods<a class="headerlink" href="#id11" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.merge.merge.html#hydromt.merge.merge" title="hydromt.merge.merge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge.merge</span></code></a>(data_arrays[, dst_crs, ...])</p></td>
@@ -1547,14 +1751,14 @@ document.write(`
 </table>
 </section>
 <section id="attributes">
-<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">#</a></h3>
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.attrs.html#hydromt.DataArray.raster.attrs" title="hydromt.DataArray.raster.attrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.attrs</span></code></a></p></td>
 <td><p>Return dictionary of spatial attributes.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.crs.html#hydromt.DataArray.raster.crs" title="hydromt.DataArray.raster.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.crs</span></code></a></p></td>
-<td><p>Return Coordinate Reference System as <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS()</span></code> object.</p></td>
+<td><p>Return horizontal Coordinate Reference System.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.bounds.html#hydromt.DataArray.raster.bounds" title="hydromt.DataArray.raster.bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.bounds</span></code></a></p></td>
 <td><p>Return the bounds (xmin, ymin, xmax, ymax) of the object.</p></td>
@@ -1617,16 +1821,16 @@ document.write(`
 </table>
 </section>
 <section id="id12">
-<h3>General methods<a class="headerlink" href="#id12" title="Permalink to this heading">#</a></h3>
+<h3>General methods<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.set_crs.html#hydromt.DataArray.raster.set_crs" title="hydromt.DataArray.raster.set_crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.set_crs</span></code></a>([input_crs])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.set_crs.html#hydromt.DataArray.raster.set_crs" title="hydromt.DataArray.raster.set_crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.set_crs</span></code></a>([input_crs, write_crs])</p></td>
 <td><p>Set the Coordinate Reference System.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.set_spatial_dims.html#hydromt.DataArray.raster.set_spatial_dims" title="hydromt.DataArray.raster.set_spatial_dims"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.set_spatial_dims</span></code></a>([x_dim, y_dim])</p></td>
 <td><p>Set the geospatial dimensions of the object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.reset_spatial_dims_attrs.html#hydromt.DataArray.raster.reset_spatial_dims_attrs" title="hydromt.DataArray.raster.reset_spatial_dims_attrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.reset_spatial_dims_attrs</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.reset_spatial_dims_attrs.html#hydromt.DataArray.raster.reset_spatial_dims_attrs" title="hydromt.DataArray.raster.reset_spatial_dims_attrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.reset_spatial_dims_attrs</span></code></a>([...])</p></td>
 <td><p>Reset spatial dimension names and attributes.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.identical_grid.html#hydromt.DataArray.raster.identical_grid" title="hydromt.DataArray.raster.identical_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.identical_grid</span></code></a>(other)</p></td>
@@ -1666,7 +1870,7 @@ document.write(`
 </table>
 </section>
 <section id="nodata-handling-and-interpolation">
-<h3>Nodata handling and interpolation<a class="headerlink" href="#nodata-handling-and-interpolation" title="Permalink to this heading">#</a></h3>
+<h3>Nodata handling and interpolation<a class="headerlink" href="#nodata-handling-and-interpolation" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.set_nodata.html#hydromt.DataArray.raster.set_nodata" title="hydromt.DataArray.raster.set_nodata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.set_nodata</span></code></a>([nodata, logger])</p></td>
@@ -1682,23 +1886,26 @@ document.write(`
 </table>
 </section>
 <section id="clip">
-<h3>Clip<a class="headerlink" href="#clip" title="Permalink to this heading">#</a></h3>
+<h3>Clip<a class="headerlink" href="#clip" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip_bbox.html#hydromt.DataArray.raster.clip_bbox" title="hydromt.DataArray.raster.clip_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.clip_bbox</span></code></a>(bbox[, align, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip.html#hydromt.DataArray.raster.clip" title="hydromt.DataArray.raster.clip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.clip</span></code></a>(xslice, yslice)</p></td>
+<td><p>Clip object based on slices.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip_bbox.html#hydromt.DataArray.raster.clip_bbox" title="hydromt.DataArray.raster.clip_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.clip_bbox</span></code></a>(bbox[, align, ...])</p></td>
 <td><p>Clip object based on a bounding box.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip_mask.html#hydromt.DataArray.raster.clip_mask" title="hydromt.DataArray.raster.clip_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.clip_mask</span></code></a>(mask)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip_mask.html#hydromt.DataArray.raster.clip_mask" title="hydromt.DataArray.raster.clip_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.clip_mask</span></code></a>(da_mask[, mask])</p></td>
 <td><p>Clip object to region with mask values greater than zero.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip_geom.html#hydromt.DataArray.raster.clip_geom" title="hydromt.DataArray.raster.clip_geom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.clip_geom</span></code></a>(geom[, align, ...])</p></td>
-<td><p>Clip object to bounding box of the geometry and add 'mask' coordinate.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.clip_geom.html#hydromt.DataArray.raster.clip_geom" title="hydromt.DataArray.raster.clip_geom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.clip_geom</span></code></a>(geom[, align, ...])</p></td>
+<td><p>Clip object to bounding box of the geometry.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="reproject">
-<h3>Reproject<a class="headerlink" href="#reproject" title="Permalink to this heading">#</a></h3>
+<h3>Reproject<a class="headerlink" href="#reproject" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.reproject.html#hydromt.DataArray.raster.reproject" title="hydromt.DataArray.raster.reproject"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.reproject</span></code></a>([dst_crs, ...])</p></td>
@@ -1720,7 +1927,7 @@ document.write(`
 </table>
 </section>
 <section id="transform">
-<h3>Transform<a class="headerlink" href="#transform" title="Permalink to this heading">#</a></h3>
+<h3>Transform<a class="headerlink" href="#transform" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.rasterize.html#hydromt.DataArray.raster.rasterize" title="hydromt.DataArray.raster.rasterize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.rasterize</span></code></a>(gdf[, col_name, ...])</p></td>
@@ -1742,7 +1949,7 @@ document.write(`
 </table>
 </section>
 <section id="sampling-and-zonal-stats">
-<h3>Sampling and zonal stats<a class="headerlink" href="#sampling-and-zonal-stats" title="Permalink to this heading">#</a></h3>
+<h3>Sampling and zonal stats<a class="headerlink" href="#sampling-and-zonal-stats" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.raster.sample.html#hydromt.DataArray.raster.sample" title="hydromt.DataArray.raster.sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.raster.sample</span></code></a>(gdf[, wdw])</p></td>
@@ -1755,7 +1962,7 @@ document.write(`
 </table>
 </section>
 <section id="low-level-methods">
-<h3>Low level methods<a class="headerlink" href="#low-level-methods" title="Permalink to this heading">#</a></h3>
+<h3>Low level methods<a class="headerlink" href="#low-level-methods" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.gis_utils.axes_attrs.html#hydromt.gis_utils.axes_attrs" title="hydromt.gis_utils.axes_attrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gis_utils.axes_attrs</span></code></a>(crs)</p></td>
@@ -1769,9 +1976,9 @@ document.write(`
 </section>
 </section>
 <section id="geodataset-methods">
-<h2>GeoDataset methods<a class="headerlink" href="#geodataset-methods" title="Permalink to this heading">#</a></h2>
+<span id="geodataset-api"></span><h2>GeoDataset methods<a class="headerlink" href="#geodataset-methods" title="Link to this heading">#</a></h2>
 <section id="id13">
-<h3>High level methods<a class="headerlink" href="#id13" title="Permalink to this heading">#</a></h3>
+<h3>High level methods<a class="headerlink" href="#id13" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.from_gdf.html#hydromt.DataArray.vector.from_gdf" title="hydromt.DataArray.vector.from_gdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.from_gdf</span></code></a>(gdf, data[, ...])</p></td>
@@ -1781,7 +1988,7 @@ document.write(`
 <td><p>Return geopandas GeoDataFrame with Point geometry.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.from_netcdf.html#hydromt.DataArray.vector.from_netcdf" title="hydromt.DataArray.vector.from_netcdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.from_netcdf</span></code></a>(path[, ...])</p></td>
-<td><p>Read netcdf file as GeoDataArray.</p></td>
+<td><p>Read netcdf file or convert xr.DataArray as GeoDataArray.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.to_netcdf.html#hydromt.DataArray.vector.to_netcdf" title="hydromt.DataArray.vector.to_netcdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.to_netcdf</span></code></a>(path[, ...])</p></td>
 <td><p>Export geodataset vectordata to an ogr compliant netCDF4 file.</p></td>
@@ -1793,7 +2000,7 @@ document.write(`
 <td><p>Return geopandas GeoDataFrame with Point geometry.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Dataset.vector.from_netcdf.html#hydromt.Dataset.vector.from_netcdf" title="hydromt.Dataset.vector.from_netcdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset.vector.from_netcdf</span></code></a>(path[, ...])</p></td>
-<td><p>Create GeoDataset from ogr compliant netCDF4 file.</p></td>
+<td><p>Create GeoDataset from ogr compliant netCDF4 file or xr.Dataset.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Dataset.vector.to_netcdf.html#hydromt.Dataset.vector.to_netcdf" title="hydromt.Dataset.vector.to_netcdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset.vector.to_netcdf</span></code></a>(path[, ...])</p></td>
 <td><p>Export geodataset vectordata to an ogr compliant netCDF4 file.</p></td>
@@ -1802,14 +2009,14 @@ document.write(`
 </table>
 </section>
 <section id="id14">
-<h3>Attributes<a class="headerlink" href="#id14" title="Permalink to this heading">#</a></h3>
+<h3>Attributes<a class="headerlink" href="#id14" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.attrs.html#hydromt.DataArray.vector.attrs" title="hydromt.DataArray.vector.attrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.attrs</span></code></a></p></td>
 <td><p>Return dictionary of spatial attributes.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.crs.html#hydromt.DataArray.vector.crs" title="hydromt.DataArray.vector.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.crs</span></code></a></p></td>
-<td><p>Return Coordinate Reference System as <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS()</span></code> object.</p></td>
+<td><p>Return horizontal Coordinate Reference System.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.index_dim.html#hydromt.DataArray.vector.index_dim" title="hydromt.DataArray.vector.index_dim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.index_dim</span></code></a></p></td>
 <td><p>Index dimension name.</p></td>
@@ -1851,7 +2058,7 @@ document.write(`
 <td><p>Return dictionary of spatial attributes.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Dataset.vector.crs.html#hydromt.Dataset.vector.crs" title="hydromt.Dataset.vector.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset.vector.crs</span></code></a></p></td>
-<td><p>Return Coordinate Reference System as <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.CRS()</span></code> object.</p></td>
+<td><p>Return horizontal Coordinate Reference System.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Dataset.vector.index_dim.html#hydromt.Dataset.vector.index_dim" title="hydromt.Dataset.vector.index_dim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset.vector.index_dim</span></code></a></p></td>
 <td><p>Index dimension name.</p></td>
@@ -1893,7 +2100,7 @@ document.write(`
 </table>
 </section>
 <section id="conversion">
-<h3>Conversion<a class="headerlink" href="#conversion" title="Permalink to this heading">#</a></h3>
+<h3>Conversion<a class="headerlink" href="#conversion" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.ogr_compliant.html#hydromt.DataArray.vector.ogr_compliant" title="hydromt.DataArray.vector.ogr_compliant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.ogr_compliant</span></code></a>([reducer])</p></td>
@@ -1930,16 +2137,16 @@ document.write(`
 </table>
 </section>
 <section id="id15">
-<h3>General methods<a class="headerlink" href="#id15" title="Permalink to this heading">#</a></h3>
+<h3>General methods<a class="headerlink" href="#id15" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.set_crs.html#hydromt.DataArray.vector.set_crs" title="hydromt.DataArray.vector.set_crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.set_crs</span></code></a>([input_crs])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.set_crs.html#hydromt.DataArray.vector.set_crs" title="hydromt.DataArray.vector.set_crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.set_crs</span></code></a>([input_crs, write_crs])</p></td>
 <td><p>Set the Coordinate Reference System.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.set_spatial_dims.html#hydromt.DataArray.vector.set_spatial_dims" title="hydromt.DataArray.vector.set_spatial_dims"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.set_spatial_dims</span></code></a>([...])</p></td>
 <td><p>Set the spatial and index dimensions of the object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Dataset.vector.set_crs.html#hydromt.Dataset.vector.set_crs" title="hydromt.Dataset.vector.set_crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset.vector.set_crs</span></code></a>([input_crs])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.Dataset.vector.set_crs.html#hydromt.Dataset.vector.set_crs" title="hydromt.Dataset.vector.set_crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset.vector.set_crs</span></code></a>([input_crs, write_crs])</p></td>
 <td><p>Set the Coordinate Reference System.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.Dataset.vector.set_spatial_dims.html#hydromt.Dataset.vector.set_spatial_dims" title="hydromt.Dataset.vector.set_spatial_dims"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset.vector.set_spatial_dims</span></code></a>([geom_name, ...])</p></td>
@@ -1949,7 +2156,7 @@ document.write(`
 </table>
 </section>
 <section id="id16">
-<h3>Clip<a class="headerlink" href="#id16" title="Permalink to this heading">#</a></h3>
+<h3>Clip<a class="headerlink" href="#id16" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.clip_bbox.html#hydromt.DataArray.vector.clip_bbox" title="hydromt.DataArray.vector.clip_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.clip_bbox</span></code></a>(bbox[, crs, buffer])</p></td>
@@ -1968,7 +2175,7 @@ document.write(`
 </table>
 </section>
 <section id="id17">
-<h3>Reproject<a class="headerlink" href="#id17" title="Permalink to this heading">#</a></h3>
+<h3>Reproject<a class="headerlink" href="#id17" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.DataArray.vector.to_crs.html#hydromt.DataArray.vector.to_crs" title="hydromt.DataArray.vector.to_crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataArray.vector.to_crs</span></code></a>(dst_crs)</p></td>
@@ -1982,7 +2189,7 @@ document.write(`
 </section>
 </section>
 <section id="flow-direction-methods">
-<h2>Flow direction methods<a class="headerlink" href="#flow-direction-methods" title="Permalink to this heading">#</a></h2>
+<h2>Flow direction methods<a class="headerlink" href="#flow-direction-methods" title="Link to this heading">#</a></h2>
 <p>These methods are based on the pyflwdir library. For more flow direction based methods
 visit the <a class="reference external" href="https://deltares.github.io/pyflwdir/latest/">pyflwdir docs.</a></p>
 <table class="autosummary longtable table autosummary">
@@ -2021,12 +2228,12 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 </table>
 </section>
 <section id="general-gis-methods">
-<h2>General GIS methods<a class="headerlink" href="#general-gis-methods" title="Permalink to this heading">#</a></h2>
+<h2>General GIS methods<a class="headerlink" href="#general-gis-methods" title="Link to this heading">#</a></h2>
 <section id="raster">
-<h3>Raster<a class="headerlink" href="#raster" title="Permalink to this heading">#</a></h3>
+<h3>Raster<a class="headerlink" href="#raster" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.gis_utils.create_vrt.html#hydromt.gis_utils.create_vrt" title="hydromt.gis_utils.create_vrt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gis_utils.create_vrt</span></code></a>(vrt_path[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.gis_utils.create_vrt.html#hydromt.gis_utils.create_vrt" title="hydromt.gis_utils.create_vrt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gis_utils.create_vrt</span></code></a>(vrt_path[, files, ...])</p></td>
 <td><p>Create a .vrt file from a list op raster datasets.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.gis_utils.spread2d.html#hydromt.gis_utils.spread2d" title="hydromt.gis_utils.spread2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gis_utils.spread2d</span></code></a>(da_obs[, da_mask, ...])</p></td>
@@ -2045,7 +2252,7 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 </table>
 </section>
 <section id="crs-and-transform">
-<h3>CRS and transform<a class="headerlink" href="#crs-and-transform" title="Permalink to this heading">#</a></h3>
+<h3>CRS and transform<a class="headerlink" href="#crs-and-transform" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.gis_utils.parse_crs.html#hydromt.gis_utils.parse_crs" title="hydromt.gis_utils.parse_crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gis_utils.parse_crs</span></code></a>(crs[, bbox])</p></td>
@@ -2061,7 +2268,7 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 </table>
 </section>
 <section id="vector">
-<h3>Vector<a class="headerlink" href="#vector" title="Permalink to this heading">#</a></h3>
+<h3>Vector<a class="headerlink" href="#vector" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.gis_utils.filter_gdf.html#hydromt.gis_utils.filter_gdf" title="hydromt.gis_utils.filter_gdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gis_utils.filter_gdf</span></code></a>(gdf[, geom, bbox, crs, ...])</p></td>
@@ -2076,24 +2283,11 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 </tbody>
 </table>
 </section>
-<section id="pcraster-i-o">
-<h3>PCRaster I/O<a class="headerlink" href="#pcraster-i-o" title="Permalink to this heading">#</a></h3>
-<table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.gis_utils.write_map.html#hydromt.gis_utils.write_map" title="hydromt.gis_utils.write_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gis_utils.write_map</span></code></a>(data, raster_path, ...)</p></td>
-<td><p>Write pcraster map files using pcr.report functionality.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.gis_utils.write_clone.html#hydromt.gis_utils.write_clone" title="hydromt.gis_utils.write_clone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gis_utils.write_clone</span></code></a>(tmpdir, ...)</p></td>
-<td><p>Write pcraster clone file to a tmpdir using gdal.</p></td>
-</tr>
-</tbody>
-</table>
 </section>
-</section>
-<section id="statistics">
-<span id="id18"></span><h2>Statistics<a class="headerlink" href="#statistics" title="Permalink to this heading">#</a></h2>
+<section id="statistics-and-extreme-value-analysis">
+<span id="statistics"></span><h2>Statistics and Extreme Value Analysis<a class="headerlink" href="#statistics-and-extreme-value-analysis" title="Link to this heading">#</a></h2>
 <section id="statistics-and-performance-metrics">
-<h3>Statistics and performance metrics<a class="headerlink" href="#statistics-and-performance-metrics" title="Permalink to this heading">#</a></h3>
+<h3>Statistics and performance metrics<a class="headerlink" href="#statistics-and-performance-metrics" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.bias.html#hydromt.stats.skills.bias" title="hydromt.stats.skills.bias"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.bias</span></code></a>(sim, obs[, dim])</p></td>
@@ -2138,11 +2332,40 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 </tbody>
 </table>
 </section>
+<section id="extreme-value-analysis">
+<h3>Extreme Value Analysis<a class="headerlink" href="#extreme-value-analysis" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.extremes.get_peaks.html#hydromt.stats.extremes.get_peaks" title="hydromt.stats.extremes.get_peaks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.extremes.get_peaks</span></code></a>(da[, ev_type, ...])</p></td>
+<td><p>Return peaks from time series.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.extremes.fit_extremes.html#hydromt.stats.extremes.fit_extremes" title="hydromt.stats.extremes.fit_extremes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.extremes.fit_extremes</span></code></a>(da_peaks[, ...])</p></td>
+<td><p>Return distribution fit from extremes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.extremes.get_return_value.html#hydromt.stats.extremes.get_return_value" title="hydromt.stats.extremes.get_return_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.extremes.get_return_value</span></code></a>(da_params[, ...])</p></td>
+<td><p>Return return value based on EVA.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.extremes.eva.html#hydromt.stats.extremes.eva" title="hydromt.stats.extremes.eva"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.extremes.eva</span></code></a>(da[, ev_type, min_dist, ...])</p></td>
+<td><p>Return Extreme Value Analysis.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="design-events">
+<h2>Design Events<a class="headerlink" href="#design-events" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.design_events.get_peak_hydrographs.html#hydromt.stats.design_events.get_peak_hydrographs" title="hydromt.stats.design_events.get_peak_hydrographs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.design_events.get_peak_hydrographs</span></code></a>(da, ...)</p></td>
+<td><p>Return peak hydrographs.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="utilities">
-<h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this heading">#</a></h2>
+<h2>Utilities<a class="headerlink" href="#utilities" title="Link to this heading">#</a></h2>
 <section id="configuration-files">
-<h3>Configuration files<a class="headerlink" href="#configuration-files" title="Permalink to this heading">#</a></h3>
+<h3>Configuration files<a class="headerlink" href="#configuration-files" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.config.configread.html#hydromt.config.configread" title="hydromt.config.configread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config.configread</span></code></a>(config_fn[, defaults, ...])</p></td>
@@ -2155,7 +2378,7 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 </table>
 </section>
 <section id="logging">
-<h3>Logging<a class="headerlink" href="#logging" title="Permalink to this heading">#</a></h3>
+<h3>Logging<a class="headerlink" href="#logging" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.log.setuplog.html#hydromt.log.setuplog" title="hydromt.log.setuplog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log.setuplog</span></code></a>([name, path, log_level, fmt, ...])</p></td>
@@ -2172,19 +2395,18 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
               
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="_examples/working_with_flow_directions.html"
+       href="_examples/doing_extreme_value_analysis.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Example: Working with flow direction data</p>
+        <p class="prev-next-title">Example: Doing Extreme Value Analysis (EVA) for time series</p>
       </div>
     </a>
     <a class="right-next"
@@ -2196,10 +2418,7 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -2243,7 +2462,7 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Setup methods</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lumpedmodel">LumpedModel</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vectormodel">VectorModel</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Components and attributes</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">General methods</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Setup methods</a></li>
@@ -2259,6 +2478,7 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#workflows">Workflows</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#grid">Grid</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mesh">Mesh</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basin-mask">Basin mask</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#river-bathymetry">River bathymetry</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#forcing">Forcing</a><ul class="nav section-nav flex-column">
@@ -2303,13 +2523,14 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#raster">Raster</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crs-and-transform">CRS and transform</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vector">Vector</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pcraster-i-o">PCRaster I/O</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#statistics">Statistics</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#statistics-and-extreme-value-analysis">Statistics and Extreme Value Analysis</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#statistics-and-performance-metrics">Statistics and performance metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#extreme-value-analysis">Extreme Value Analysis</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-events">Design Events</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#utilities">Utilities</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration-files">Configuration files</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#logging">Logging</a></li>
@@ -2354,8 +2575,8 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2373,7 +2594,7 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -2381,10 +2602,11 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
     </div>
   
   
+  
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
 </p></div>
       
     </div>

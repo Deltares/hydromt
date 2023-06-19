@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -7,7 +6,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Developer’s environment &#8212; HydroMT  documentation</title>
   
@@ -19,30 +18,38 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'dev/dev_install';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.3';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Contributors" href="team.html" />
@@ -57,6 +64,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -97,7 +113,8 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
   
@@ -107,11 +124,12 @@
   
   
   
+  
     
     
     
-    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">HydroMT Core</p>
@@ -119,7 +137,6 @@
 </a></div>
     
   </div>
-  
   
   <div class="col-lg-9 navbar-header-items">
     
@@ -178,13 +195,15 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -214,24 +233,50 @@ document.write(`
         </li>
 </ul></div>
       
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
     </div>
     
   </div>
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -329,6 +374,30 @@ document.write(`
         </li>
 </ul></div>
         
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
       </div>
     
   </div>
@@ -343,7 +412,12 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer’s guide</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Developer’s environment</a></li>
+
+
+
 <li class="toctree-l1"><a class="reference internal" href="team.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin-quickstart.html">Starting your own HydroMT Plugin</a></li>
+
 </ul>
 </div>
 </nav></div>
@@ -373,8 +447,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
@@ -384,7 +458,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="intro.html" class="nav-link">Dev guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Developer’s environment</li>
+    <li class="breadcrumb-item active" aria-current="page">Developer’s...</li>
   </ul>
 </nav>
 </div>
@@ -402,30 +476,31 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="developer-s-environment">
-<span id="dev-env"></span><h1>Developer’s environment<a class="headerlink" href="#developer-s-environment" title="Permalink to this heading">#</a></h1>
+<span id="dev-env"></span><h1>Developer’s environment<a class="headerlink" href="#developer-s-environment" title="Link to this heading">#</a></h1>
 <p>Developing HydroMT requires Python &gt;= 3.9. We prefer developing with the most recent
 version of Python. We strongly encourage you to develop in a separate conda environment.
 To make sure all dependencies are up to dat we only provide a pyproject.toml that lists the dependencies.
-However, there is a script that can generate the conda enviroment specification for you.</p>
+However, there is a script that can generate the conda environment specification for you.</p>
 <section id="developer-installation-guide">
-<span id="dev-install"></span><h2>Developer installation guide<a class="headerlink" href="#developer-installation-guide" title="Permalink to this heading">#</a></h2>
-<p>First, clone the HydroMT <code class="docutils literal notranslate"><span class="pre">git</span></code> repo using <a class="reference external" href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account">ssh</a> from
-<a class="reference external" href="https://github.com/Deltares/hydromt.git">github</a>.</p>
+<span id="dev-install"></span><h2>Developer installation guide<a class="headerlink" href="#developer-installation-guide" title="Link to this heading">#</a></h2>
+<p>Here we describe two ways to install HydroMT for development.
+The first is using the <cite>makefile</cite> which boils down to running a single command.
+The second is a step-by-step guide that shows you exactly what the makefile does
+and how to do it manually.</p>
+<p>But first, you need to clone the HydroMT <code class="docutils literal notranslate"><span class="pre">git</span></code> repo using
+<a class="reference external" href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account">ssh</a>
+from <a class="reference external" href="https://github.com/Deltares/hydromt.git">github</a>.
+Then, navigate into the the code folder (where the pyproject.toml is located)</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:Deltares/hydromt.git
 <span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>hydromt
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In the commands below you can exchange <cite>conda</cite> for <cite>mamba</cite>, see <a class="reference internal" href="../getting_started/installation.html#installation-guide"><span class="std std-ref">installation guide</span></a> for the difference between both.</p>
-</div>
-<p>Then, navigate into the the code folder (where the envs folder and pyproject.toml are located):
-To generate a usable mamba/conda environment you’ll need to have <cite>tomli</cite> installed. You can simply install this with pip:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>tomli
-</pre></div>
-</div>
-<p>You wil also need a suable instalation of <cite>make</cite>. If you’re using linux this should already be installed by defautl. If you are using windows we
-recommend you install it using <a class="reference external" href="https://chocolatey.org/install">chocolatey</a> like so:</p>
+</section>
+</section>
+<section id="makefile-based-installation">
+<h1>Makefile based installation<a class="headerlink" href="#makefile-based-installation" title="Link to this heading">#</a></h1>
+<p>You wil need a usable installation of <cite>make</cite>. If you’re using linux this should already be installed by default.
+If you are using windows we recommend you install it using <a class="reference external" href="https://chocolatey.org/install">chocolatey</a> like so:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>choco<span class="w"> </span>install<span class="w"> </span>make
 </pre></div>
 </div>
@@ -433,31 +508,68 @@ recommend you install it using <a class="reference external" href="https://choco
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>dev
 </pre></div>
 </div>
-<p>This will create an enviromnment file, create an environment using a packagemangager and install hydromt into it. By default
-the makefile will attempt to use <cite>micromamba</cite>. If you want it to use a diferent one like, conda, you only have to set the
-environment variable like this if you’re on linux:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">PY_ENV_MANAGER</span><span class="o">=</span>conda
+<p>This will create an environment file, create an environment called <cite>hydromt-dev</cite> using a package manager
+and install hydromt into it. By default the makefile will attempt to use <cite>mamba</cite>. If you want it to use a
+different one like, conda, you only have to set the environment variable like this:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>dev<span class="w"> </span><span class="nv">PY_ENV_MANAGER</span><span class="o">=</span>conda
 </pre></div>
 </div>
-<p>or like this if you’re on windows:</p>
-<p>If you want you can also do these steps manually. The first step is to create the <cite>environment.yml</cite>:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>make_env.py<span class="w"> </span><span class="s2">&quot;full&quot;</span>
+<p>If you would like this to be the case you can also add make this the default behavior with the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PY_ENV_MANAGER=conda&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.<span class="k">$(</span>basename<span class="w"> </span><span class="nv">$0</span><span class="k">)</span>rc
 </pre></div>
 </div>
-<p>When the script is finished, a file called <cite>environment.yml</cite> will be created which you can pass to conda
-as demonstrated in the sections below. This will include all optional dependencies of HydroMT. If you want a more
-finetined instalation you can also specify exactly which dependency grousp you’d like like this:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>env<span class="w"> </span><span class="nv">OPT_DEPS</span><span class="o">=</span><span class="s2">&quot;extra,io,doc&quot;</span>
+</section>
+<section id="step-by-step-installation">
+<h1>Step-by-step installation<a class="headerlink" href="#step-by-step-installation" title="Link to this heading">#</a></h1>
+<p>If you want you can also do the steps of <cite>make dev</cite> manually.</p>
+<p>To generate a usable mamba/conda environment you’ll need to have <cite>tomli</cite> installed.
+You can simply install this with pip (only required for python &lt; 3.11):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>tomli
 </pre></div>
 </div>
-<p>We have 7 optional dependency groups you can specify:</p>
+<p>The first step is to create the <cite>environment.yml</cite>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>make_env.py<span class="w"> </span>full<span class="w"> </span>-n<span class="w"> </span>hydromt-dev
+</pre></div>
+</div>
+<p>When the script is finished, a file called <cite>environment.yml</cite> will be created which you can pass to mamba
+as demonstrated in the sections below. This will include all optional dependencies of HydroMT.</p>
+<p>After the environment file has been created you can create an environment out of it by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+<span class="gp">$ </span>mamba<span class="w"> </span>activate<span class="w"> </span>hydromt-dev
+</pre></div>
+</div>
+<p>Finally, create a developer installation of HydroMT:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the commands above you can exchange <cite>mamba</cite> for <cite>conda</cite>,
+see <a class="reference internal" href="../getting_started/installation.html#installation-guide"><span class="std std-ref">installation guide</span></a> for the difference between both.</p>
+</div>
+</section>
+<section id="fine-tuned-installation">
+<h1>Fine tuned installation<a class="headerlink" href="#fine-tuned-installation" title="Link to this heading">#</a></h1>
+<p>If you want a more fine tuned installation you can also specify exactly
+which dependency groups you’d like. For instance, this will create an environment
+with the extra, io and doc dependencies.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>env<span class="w"> </span><span class="nv">OPT_DEPS</span><span class="o">=</span><span class="s2">&quot;extra,io,doc&quot;</span><span class="w"> </span><span class="nv">ENV_NAME</span><span class="o">=</span><span class="s2">&quot;hydromt-extra-io-doc&quot;</span>
+</pre></div>
+</div>
+<p>Or manually:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>tomli<span class="w"> </span><span class="c1"># only required for python &lt; 3.11</span>
+<span class="gp">$ </span>python<span class="w"> </span>make_env.py<span class="w"> </span><span class="s2">&quot;extra,io,doc&quot;</span><span class="w"> </span>-n<span class="w"> </span>hydromt-extra-io-doc
+<span class="gp">$ </span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+</pre></div>
+</div>
+<p>We have 7 optional dependency groups you can specify (see <cite>pyproject.toml</cite> for list of dependencies in each group):</p>
 <ol class="arabic simple">
 <li><p><cite>io</cite>: Reading and writing various formats like excel but also cloud file systems</p></li>
 <li><p><cite>extra</cite>: Couldn’t think of a better name for this one, but it has some extra for ET and mesh calculations</p></li>
 <li><p><cite>dev</cite>: everything you need to develop and publish HydroMT</p></li>
 <li><p><cite>test</cite> What you need to run the test suite. Test suite should be setup that only tests that use the dependencies that are installed are run, so this should always pass no matter what other dependencies you may or may not have installed.</p></li>
 <li><p><cite>doc</cite> generate the docs</p></li>
-<li><p><cite>jupyter</cite> Run Jupyter notebooks and run the examples. Going to use this for binder support mostly.</p></li>
+<li><p><cite>examples</cite> Run Jupyter notebook examples. Used this for binder support mostly.</p></li>
 <li><p><cite>deprecated</cite> dependencies that we hope to remove soon, but aren’t quite ready to yet.</p></li>
 </ol>
 <p>We also have 3 “flavors”. These are more or less just collections of one or more groups designed for common use cases:
@@ -465,16 +577,6 @@ finetined instalation you can also specify exactly which dependency grousp you�
 2. <cite>slim</cite> Just the operational bits, what most people will probably want if you using HydroMT and what the cloud will most likely use
 3. <cite>full</cite> absolutely everything, useful for developing.</p>
 <p>We also have docker images for each of the flavours that should be published soon (but are not yet as the writing of this section)</p>
-<p>After the environment file has been created you can create an environment out of it by running:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>micromamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
-<span class="gp">$ </span>micromamba<span class="w"> </span>activate<span class="w"> </span>hydromt
-</pre></div>
-</div>
-<p>Finally, create a developer installation of HydroMT:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</pre></div>
-</div>
-</section>
 </section>
 
 
@@ -482,11 +584,10 @@ finetined instalation you can also specify exactly which dependency grousp you�
               
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="contributing.html"
@@ -506,10 +607,7 @@ finetined instalation you can also specify exactly which dependency grousp you�
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -524,8 +622,15 @@ finetined instalation you can also specify exactly which dependency grousp you�
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Developer’s environment</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#developer-installation-guide">Developer installation guide</a></li>
 </ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#makefile-based-installation">Makefile based installation</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-by-step-installation">Step-by-step installation</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#fine-tuned-installation">Fine tuned installation</a></li>
+</ul>
+
   </nav></div>
 
   <div class="sidebar-secondary-item">
@@ -564,8 +669,8 @@ finetined instalation you can also specify exactly which dependency grousp you�
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -583,7 +688,7 @@ finetined instalation you can also specify exactly which dependency grousp you�
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -591,10 +696,11 @@ finetined instalation you can also specify exactly which dependency grousp you�
     </div>
   
   
+  
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
 </p></div>
       
     </div>

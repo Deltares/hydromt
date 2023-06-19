@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -7,7 +6,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Example: Reading tiled raster data with different zoom levels &#8212; HydroMT  documentation</title>
   
@@ -19,33 +18,41 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/working_with_tiled_raster_data';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.3';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Overview models" href="../user_guide/model_overview.html" />
@@ -60,6 +67,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -100,7 +116,8 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
   
@@ -110,11 +127,12 @@
   
   
   
+  
     
     
     
-    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">HydroMT Core</p>
@@ -122,7 +140,6 @@
 </a></div>
     
   </div>
-  
   
   <div class="col-lg-9 navbar-header-items">
     
@@ -181,13 +198,15 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -217,24 +236,50 @@ document.write(`
         </li>
 </ul></div>
       
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
     </div>
     
   </div>
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -332,6 +377,30 @@ document.write(`
         </li>
 </ul></div>
         
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
       </div>
     
   </div>
@@ -363,6 +432,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
 
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Example: Reading tiled raster data with different zoom levels</a></li>
+
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with models in HydroMT</span></p>
 <ul class="nav bd-sidenav">
@@ -374,6 +444,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/model_region.html">Defining a model region</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_models_basics.html">Example: Working with models from CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_meshmodel.html">Example: Working with mesh models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="delineate_basin.html">Example: Define hydrological model regions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Methods and workflows</span></p>
@@ -383,6 +454,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="working_with_raster.html">Example: Working with raster data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_geodatasets.html">Example: Working with geodatasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
+
 </ul>
 </div>
 </nav></div>
@@ -412,8 +485,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
@@ -423,7 +496,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../user_guide/intro.html" class="nav-link">User guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Example: Reading tiled raster data with different zoom levels</li>
+    <li class="breadcrumb-item active" aria-current="page">Example:...</li>
   </ul>
 </nav>
 </div>
@@ -447,7 +520,7 @@ document.write(`
     <a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/working_with_tiled_raster_data.ipynb" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
 </div></div>
 <section id="Example:-Reading-tiled-raster-data-with-different-zoom-levels">
-<h1>Example: Reading tiled raster data with different zoom levels<a class="headerlink" href="#Example:-Reading-tiled-raster-data-with-different-zoom-levels" title="Permalink to this heading">#</a></h1>
+<h1>Example: Reading tiled raster data with different zoom levels<a class="headerlink" href="#Example:-Reading-tiled-raster-data-with-different-zoom-levels" title="Link to this heading">#</a></h1>
 <p>This example will show how one can export raster dataset to individual tiles at differnt zoom levels and read the data via the <a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html">DataCatalog.get_rasterdataset</a> method.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -458,7 +531,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">hydromt.log</span> <span class="kn">import</span> <span class="n">setuplog</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">setuplog</span><span class="p">(</span><span class="s1">&#39;tiling&#39;</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">setuplog</span><span class="p">(</span><span class="s2">&quot;tiling&quot;</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
 <span class="c1"># get some elevation data from the data catalog</span>
 <span class="n">data_lib</span> <span class="o">=</span> <span class="s2">&quot;artifact_data&quot;</span>
@@ -474,10 +547,10 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:31:55,775 - tiling - log - INFO - HydroMT version: 0.7.2.dev0
-2023-06-19 06:31:55,823 - tiling - data_catalog - INFO - Reading data catalog artifact_data v0.0.8 from archive
-2023-06-19 06:31:55,825 - tiling - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
-2023-06-19 06:31:55,894 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+2023-10-31 08:56:58,791 - tiling - log - INFO - HydroMT version: 0.9.1.dev
+2023-10-31 08:56:58,911 - tiling - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
+2023-10-31 08:56:58,912 - tiling - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-10-31 08:56:58,968 - tiling - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -490,8 +563,8 @@ document.write(`
 </pre></div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">da0</span></code> is gridded data as an xarray.DataArray object. With HydroMT an xarray.DataArray has some extra functionality via <code class="docutils literal notranslate"><span class="pre">.raster</span></code> This extra functionality does include the ability to write a raster to a tile database (tiling).</p>
-<section id="tiling-raster-with-XYZ-stucture">
-<h2>tiling raster with XYZ stucture<a class="headerlink" href="#tiling-raster-with-XYZ-stucture" title="Permalink to this heading">#</a></h2>
+<section id="Tiling-raster-with-XYZ-stucture">
+<h2>Tiling raster with XYZ stucture<a class="headerlink" href="#Tiling-raster-with-XYZ-stucture" title="Link to this heading">#</a></h2>
 <p>First let’s have a look at the XYZ structure. an xarray.DataArray is simple written to a tile database in XYZ structure via .raster.to_xyz_tiles</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -500,7 +573,7 @@ document.write(`
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write the database in XYZ stucture</span>
 <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">_xyz&quot;</span>
 <span class="n">root</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;tmpdir&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-<span class="n">zoom_levels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>  <span class="c1"># note that you can skip a zoom level</span>
+<span class="n">zoom_levels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
 <span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">to_xyz_tiles</span><span class="p">(</span>
     <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
     <span class="n">tile_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
@@ -511,33 +584,12 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-0...10...20...30...40...50...60...70...80...90...100 - done.
-0...10...20...30...40...50...60...70...80...90...100 - done.
-0...10...20..
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Tiles at zoomlevel 3 smaller than tile_size 256
-Tiles at zoomlevel 5 smaller than tile_size 256
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-.30...40...50...60...70...80...90...100 - done.
-0...10...20...30...40...50...60...70...80...90...100 - done.
-0...10...20...30...40...50...60...70...80...90...100 - done.
+Tiles at zoomlevel 4 smaller than tile_size 256
 </pre></div></div>
 </div>
 <p>The tiles in the ‘merit_hydro_xyz’ folder now contains the zoom_levels as defined above.</p>
@@ -545,18 +597,160 @@ Tiles at zoomlevel 5 smaller than tile_size 256
 <p>A mosaic is created per zoomlevel of these tiles in a .vrt file.</p>
 <p>At last, a .yml file is produced which can be read by the <a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.html">DataCatalog</a> of HydroMT.</p>
 </section>
-<section id="reading-tiled-raster-data-with-zoom-levels">
-<h2>reading tiled raster data with zoom levels<a class="headerlink" href="#reading-tiled-raster-data-with-zoom-levels" title="Permalink to this heading">#</a></h2>
+<section id="Tiling-raster-with-OSM-stucture">
+<h2>Tiling raster with OSM stucture<a class="headerlink" href="#Tiling-raster-with-OSM-stucture" title="Link to this heading">#</a></h2>
+<p>Now let’s have a look at tiling according to the OSM structure an xarray.DataArray is simple written to a tile database in OSM structure via <code class="docutils literal notranslate"><span class="pre">.raster.to_slippy_tiles</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write the database in XYZ stucture</span>
+<span class="n">name_osm</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">_osm&quot;</span>
+<span class="n">root_osm</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;tmpdir&quot;</span><span class="p">,</span> <span class="n">name_osm</span><span class="p">)</span>
+<span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">to_slippy_tiles</span><span class="p">(</span>
+    <span class="n">root</span><span class="o">=</span><span class="n">root_osm</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span> <span class="n">reproj_method</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">,</span> <span class="n">write_vrt</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># try also &#39;netcdf4&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The tiles in the ‘merit_hydro_OSM’ folder now contains all the zoom_levels from the minimal starting level (9) until the highest level (0).</p>
+<p>Every tile, regardless of the zoomlevel, has a resolution of 256 by 256 pixels.</p>
+<p>Zoomlevel 0 is at the scale of the entire world (one tile) and is the most downscaled. Zoomlevel 9 contains the highest resolution (most tiles) in regards to this tile database.</p>
+<p>A mosaic is created per zoomlevel of these tiles in a .vrt file, if <code class="docutils literal notranslate"><span class="pre">write_vrt=True</span></code> (only applicable to nc and Gtiff files). At last, if <code class="docutils literal notranslate"><span class="pre">write_vrt=True</span></code>, a yaml file is produced which can be read by the <a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.html">DataCatalog</a> of HydroMT.</p>
+</section>
+</section>
+<section id="Tiling-raster-for-a-webviewer">
+<h1>Tiling raster for a webviewer<a class="headerlink" href="#Tiling-raster-for-a-webviewer" title="Link to this heading">#</a></h1>
+<p>Finally, let’s take a look at tiling of a raster dataset with its use being to view the data in a webviewer. This is easily done with the .raster.to_webviewer_tiles method.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write the data in OSM structure, but to images!</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+
+<span class="n">name_png</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">_png&quot;</span>
+<span class="n">root_png</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;tmpdir&quot;</span><span class="p">,</span> <span class="n">name_png</span><span class="p">)</span>
+<span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">to_slippy_tiles</span><span class="p">(</span>
+    <span class="n">root</span><span class="o">=</span><span class="n">root_png</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now that the images are created, let’s take a look at an individual tile.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># View the data</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># Create a figure to show the image</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_position</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+
+<span class="c1"># Show the image</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">root_png</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">,</span> <span class="s2">&quot;273&quot;</span><span class="p">,</span> <span class="s2">&quot;182.png&quot;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.image.AxesImage at 0x7f6a20a90590&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_working_with_tiled_raster_data_13_1.png" src="../_images/_examples_working_with_tiled_raster_data_13_1.png" />
+</div>
+</div>
+<p>The image itself tends to look like an oil painting, but this is correct.</p>
+<p>The colors for this image are determined so that they are correctly visually represented according to Terrarium Terrain RGB.</p>
+<p>If one were to see what this would look like in e.g. QGIS, a local sever is needed. With python this is easily done with the command <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">http.server</span> <span class="pre">8000</span></code> from the command line while within the folder where the tiles are located. In this case that would be ‘root_png’. In QGIS, make a new XYZ Tiles connection. For this new connection the URL becomes ‘<a class="reference external" href="http://localhost:8000">http://localhost:8000</a>/{z}/{x}/{y}.png’ and the interpolation is set to Terrarium Terrain RGB.</p>
+<p>However, if the images are meant to be viewed as is, then a custom colormap can be defined to make them look nice!</p>
+<p>Let’s make another dataset of png’s!</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+
+<span class="n">name_png_cmap</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">_png_cmap&quot;</span>
+<span class="n">root_png_cmap</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;tmpdir&quot;</span><span class="p">,</span> <span class="n">name_png_cmap</span><span class="p">)</span>
+<span class="c1"># let us define a nice color for a terrain image</span>
+<span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">to_slippy_tiles</span><span class="p">(</span>
+    <span class="n">root</span><span class="o">=</span><span class="n">root_png_cmap</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;terrain&quot;</span><span class="p">,</span>
+    <span class="n">norm</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">2000</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now lets take a look at the improved standard visuals!</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># View the data</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># Create a figure to show the image</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_position</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+
+<span class="c1"># Show the image</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">root_png_cmap</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">,</span> <span class="s2">&quot;273&quot;</span><span class="p">,</span> <span class="s2">&quot;182.png&quot;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.image.AxesImage at 0x7f6a20a60590&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_working_with_tiled_raster_data_17_1.png" src="../_images/_examples_working_with_tiled_raster_data_17_1.png" />
+</div>
+</div>
+<section id="Reading-tiled-raster-data-with-zoom-levels">
+<h2>Reading tiled raster data with zoom levels<a class="headerlink" href="#Reading-tiled-raster-data-with-zoom-levels" title="Link to this heading">#</a></h2>
 <p>With DataCatalog.<a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html">get_rasterdataset</a> a raster (.vrt) can be retrieved. In case of a tile database it can be done for a certain zoomlevel. E.g.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Imports</span>
 <span class="kn">from</span> <span class="nn">hydromt</span> <span class="kn">import</span> <span class="n">DataCatalog</span>
 
 <span class="c1"># Load the yml into a DataCatalog</span>
-<span class="n">data_catalog</span> <span class="o">=</span> <span class="n">DataCatalog</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.yml&quot;</span><span class="p">),</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+<span class="n">data_catalog</span> <span class="o">=</span> <span class="n">DataCatalog</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.yml&quot;</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">root_osm</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name_osm</span><span class="si">}</span><span class="s2">.yml&quot;</span><span class="p">)],</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
+<span class="p">)</span>
 
 <span class="c1"># View the structure of the DataCatalog</span>
 <span class="n">data_catalog</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
@@ -568,11 +762,12 @@ Tiles at zoomlevel 5 smaller than tile_size 256
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:31:57,879 - tiling - data_catalog - INFO - Parsing data catalog from tmpdir/merit_hydro_xyz/merit_hydro_xyz.yml
+2023-10-31 08:57:20,661 - tiling - data_catalog - INFO - Parsing data catalog from tmpdir/merit_hydro_xyz/merit_hydro_xyz.yml
+2023-10-31 08:57:20,663 - tiling - data_catalog - INFO - Parsing data catalog from tmpdir/merit_hydro_osm/merit_hydro_osm.yml
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -580,18 +775,45 @@ Tiles at zoomlevel 5 smaller than tile_size 256
 crs: 4326
 data_type: RasterDataset
 driver: raster
-filesystem: local
+nodata: -9999.0
 path: /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
 zoom_levels:
   0: 0.0008333333333325754
   1: 0.0016666666666651508
   2: 0.0033333333333303017
   3: 0.006666666666660603
-  5: 0.026666666666642413
+  4: 0.013333333333321207
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># For the osm dataset</span>
+<span class="n">data_catalog</span><span class="p">[</span><span class="n">name_osm</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+crs: 3857
+data_type: RasterDataset
+driver: raster
+path: /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_osm/lvl{zoom_level}.vrt
+zoom_levels:
+  7: 1222.9924525628203
+  8: 611.4962262814097
+  9: 305.74811314070485
+  10: 152.87405657035288
+  11: 76.43702828517598
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># without zoom_level the highest res data is fetched</span>
@@ -605,27 +827,54 @@ zoom_levels:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:31:57,891 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+2023-10-31 08:57:20,677 - tiling - rasterdataset - INFO - Reading merit_hydro_xyz raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(1920, 1680)
+(2048, 1792)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># And for OSM</span>
+<span class="n">da1</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="n">name_osm</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">geom</span><span class="o">=</span><span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">box</span><span class="p">)</span>
+<span class="n">da1</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-10-31 08:57:20,707 - tiling - rasterdataset - INFO - Reading merit_hydro_osm raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_osm/lvl{zoom_level}.vrt
+2023-10-31 08:57:20,720 - tiling - io - WARNING - nodata value missing for /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_osm/lvl11.vrt
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(3575, 2050)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Request a raster from the Datacatolog based on zoom resolution &amp; unit</span>
-<span class="n">da</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">600</span><span class="p">,</span> <span class="s1">&#39;degree&#39;</span><span class="p">))</span>
-
-<span class="n">da</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="p">(</span><span class="mf">1e3</span><span class="p">,</span> <span class="s1">&#39;meter&#39;</span><span class="p">))</span>
-<br/></pre></div>
+<span class="n">da</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="n">name_osm</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">600</span><span class="p">,</span> <span class="s2">&quot;degree&quot;</span><span class="p">))</span>
+<span class="n">da</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="n">name_osm</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="p">(</span><span class="mf">1e4</span><span class="p">,</span> <span class="s2">&quot;meter&quot;</span><span class="p">))</span>
+</pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -633,18 +882,18 @@ zoom_levels:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:31:57,920 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
-2023-06-19 06:31:57,923 - tiling - data_adapter - INFO - Getting data for zoom_level 1 based on res (0.0016666666666666668, &#39;degree&#39;)
-2023-06-19 06:31:57,942 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
-2023-06-19 06:31:57,943 - tiling - data_adapter - INFO - Getting data for zoom_level 2 based on res (1000.0, &#39;meter&#39;)
+2023-10-31 08:57:20,742 - tiling - rasterdataset - INFO - Reading merit_hydro_osm raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_osm/lvl{zoom_level}.vrt
+2023-10-31 08:57:20,749 - tiling - io - WARNING - nodata value missing for /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_osm/lvl10.vrt
+2023-10-31 08:57:20,759 - tiling - rasterdataset - INFO - Reading merit_hydro_osm raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_osm/lvl{zoom_level}.vrt
+2023-10-31 08:57:20,766 - tiling - io - WARNING - nodata value missing for /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_osm/lvl7.vrt
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># We can also directly request a specific zoom level</span>
-<span class="n">da</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="n">zoom_levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">da</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="n">zoom_levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">geom</span><span class="o">=</span><span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">box</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -654,12 +903,12 @@ zoom_levels:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:31:57,965 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
-(60, 53)
+2023-10-31 08:57:20,783 - tiling - rasterdataset - INFO - Reading merit_hydro_xyz raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+(128, 112)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># View the data</span>
@@ -674,27 +923,27 @@ zoom_levels:
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
+Text(0.5, 1.0, &#39;zoomlevel 4&#39;)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_working_with_tiled_raster_data_12_1.png" src="../_images/_examples_working_with_tiled_raster_data_12_1.png" />
+<img alt="../_images/_examples_working_with_tiled_raster_data_25_1.png" src="../_images/_examples_working_with_tiled_raster_data_25_1.png" />
 </div>
 </div>
 </section>
 <section id="Caching-tiled-raster-datasets">
-<h2>Caching tiled raster datasets<a class="headerlink" href="#Caching-tiled-raster-datasets" title="Permalink to this heading">#</a></h2>
+<h2>Caching tiled raster datasets<a class="headerlink" href="#Caching-tiled-raster-datasets" title="Link to this heading">#</a></h2>
 <p>Tiles of tiled rasterdatasets which are described by a .vrt file can be cached locally (starting from v0.7.0). The requested data tiles will by default be stored to ~/.hydromt_data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set caching to True</span>
@@ -711,12 +960,12 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:31:58,960 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
-2023-06-19 06:31:58,967 - tiling - caching - INFO - Downloading 56 tiles to /home/runner/.hydromt_data/merit_hydro_xyz/merit_hydro_xyz
+2023-10-31 08:57:21,317 - tiling - rasterdataset - INFO - Reading merit_hydro_xyz raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+2023-10-31 08:57:21,324 - tiling - caching - INFO - Downloading 56 tiles to /home/runner/.hydromt_data/merit_hydro_xyz/merit_hydro_xyz
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># if we run the same request again we will use the cached files (and download none)</span>
@@ -729,8 +978,8 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-19 06:31:59,001 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
-2023-06-19 06:31:59,006 - tiling - caching - INFO - Downloading 0 tiles to /home/runner/.hydromt_data/merit_hydro_xyz/merit_hydro_xyz
+2023-10-31 08:57:21,359 - tiling - rasterdataset - INFO - Reading merit_hydro_xyz raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+2023-10-31 08:57:21,364 - tiling - caching - INFO - Downloading 0 tiles to /home/runner/.hydromt_data/merit_hydro_xyz/merit_hydro_xyz
 </pre></div></div>
 </div>
 </section>
@@ -741,11 +990,10 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
               
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="reading_tabular_data.html"
@@ -765,10 +1013,7 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -783,10 +1028,18 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tiling-raster-with-XYZ-stucture">tiling raster with XYZ stucture</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-tiled-raster-data-with-zoom-levels">reading tiled raster data with zoom levels</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Example: Reading tiled raster data with different zoom levels</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Tiling-raster-with-XYZ-stucture">Tiling raster with XYZ stucture</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Tiling-raster-with-OSM-stucture">Tiling raster with OSM stucture</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#Tiling-raster-for-a-webviewer">Tiling raster for a webviewer</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reading-tiled-raster-data-with-zoom-levels">Reading tiled raster data with zoom levels</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Caching-tiled-raster-datasets">Caching tiled raster datasets</a></li>
 </ul>
+</li>
+</ul>
+
   </nav></div>
 
   <div class="sidebar-secondary-item">
@@ -825,8 +1078,8 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -844,7 +1097,7 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -852,10 +1105,11 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
     </div>
   
   
+  
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
 </p></div>
       
     </div>
