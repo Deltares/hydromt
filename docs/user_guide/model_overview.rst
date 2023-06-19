@@ -17,7 +17,7 @@ several options to define a region based on a geospatial or hydrographic region.
 
 The exact process of building or updating a model can be configured in a single configuration :ref:`.yaml file <model_config>`.
 This file describes the full pipeline of model methods and their arguments. The methods vary for the
-different model classes and :ref:`plugins`, as documented in this documentation or for each plugin documentation websites.
+different model classes and :ref:`plugins`, as documented in this documentation or for each plugin documentation website.
 
 .. _model_interface:
 
