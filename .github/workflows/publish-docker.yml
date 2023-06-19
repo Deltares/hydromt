@@ -34,18 +34,33 @@ jobs:
         with:
           context: .
           load: true
-          target: cli
-          tags: hydromt
+          target: full
 
       - name: Run Tests
         run: docker run --rm hydromt pytest
 
       #build should be cached from previous steps
-      - name: Build and push docker image
+      - name: Build and push full image
         uses: docker/build-push-action@v4
         with:
           context: .
           load: true
-          target: cli
+          target: full
+          push: ${{ !github.event.act }}
+          tags: deltares/hydromt
+      - name: Build and push min image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          target: min
+          push: ${{ !github.event.act }}
+          tags: deltares/hydromt:min
+      - name: Build and push slim image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          target: slim
           push: ${{ !github.event.act }}
           tags: deltares/hydromt
