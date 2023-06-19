@@ -9,7 +9,7 @@ Prerequisites
 
 Python and conda/mamba
 -----------------------
-You'll need **Python 3.8 or greater** and a package manager such as conda or mamba.
+You'll need **Python 3.9 or greater** and a package manager such as conda or mamba.
 These package managers help you to install (Python) packages and `manage
 environments`_ such that different installations do not conflict.
 

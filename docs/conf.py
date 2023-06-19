@@ -102,7 +102,7 @@ def clean_str(s):
 
 project = "HydroMT"
 copyright = "Deltares"
-author = "Dirk Eilander"
+author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 
 # The short version which is displayed
 version = hydromt.__version__
