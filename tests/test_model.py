@@ -480,18 +480,19 @@ def test_meshmodel_setup(griduda, world):
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})
     region = {"geom": world[world.name == "Italy"]}
-    mod.setup_mesh(region, res=10000, crs=3857)
+    mod.setup_mesh2d(region, res=10000, crs=3857, grid_name="mesh2d")
     mod.region
 
     region = {"mesh": griduda.ugrid.to_dataset()}
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
-    mod1.setup_mesh(region)
-    mod1.setup_mesh_from_rasterdataset("vito")
+    mod1.setup_mesh2d(region, grid_name="mesh2d")
+    mod1.setup_mesh2d_from_rasterdataset("vito", grid_name="mesh2d")
     assert "vito" in mod1.mesh.data_vars
-    mod1.setup_mesh_from_raster_reclass(
+    mod1.setup_mesh2d_from_raster_reclass(
         raster_fn="vito",
         reclass_table_fn="vito_mapping",
         reclass_variables=["roughness_manning"],
         resampling_method="mean",
+        grid_name="mesh2d",
     )
     assert "roughness_manning" in mod1.mesh.data_vars
