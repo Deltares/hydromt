@@ -21,7 +21,7 @@ def _parse_profile(profile_str: str, opt_deps) -> List[str]:
         m = pat.match(dep)
         if m:
             # if we match the patern, all list elts have to be dependenciy groups
-            dep_groups = m.groups(0)[0].split(",")
+            dep_groups = [d.strip() for d in m.groups(0)[0].split(",")]
             unknown_dep_groups = set(dep_groups) - set(opt_deps.keys())
             if len(unknown_dep_groups) > 0:
                 raise RuntimeError(f"unknown dependency group(s): {unknown_dep_groups}")

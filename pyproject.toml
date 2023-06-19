@@ -84,6 +84,7 @@ jupyter = [
     "jupyterlab", # run examples in jupyter notebook
     "cartopy",    # plotting examples
     "matplotlib-base", # plotting
+    "notebook", # jupyter integration
 ]
 deprecated = [
     "pcraster", # Old Wflow model was build on this
