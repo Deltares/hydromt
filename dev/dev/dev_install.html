@@ -403,7 +403,7 @@ document.write(`
                   
   <section id="developer-s-environment">
 <span id="dev-env"></span><h1>Developer’s environment<a class="headerlink" href="#developer-s-environment" title="Permalink to this heading">#</a></h1>
-<p>Developing HydroMT requires Python &gt;= 3.8. We prefer developing with the most recent
+<p>Developing HydroMT requires Python &gt;= 3.9. We prefer developing with the most recent
 version of Python. We strongly encourage you to develop in a separate conda environment.
 To make sure all dependencies are up to dat we only provide a pyproject.toml that lists the dependencies.
 However, there is a script that can generate the conda enviroment specification for you.</p>
@@ -420,15 +420,54 @@ However, there is a script that can generate the conda enviroment specification 
 <p>In the commands below you can exchange <cite>conda</cite> for <cite>mamba</cite>, see <a class="reference internal" href="../getting_started/installation.html#installation-guide"><span class="std std-ref">installation guide</span></a> for the difference between both.</p>
 </div>
 <p>Then, navigate into the the code folder (where the envs folder and pyproject.toml are located):
-To generate an <cite>enviromnment.yml</cite> file necessary to develop HydroMT simply run:</p>
+To generate a usable mamba/conda environment you’ll need to have <cite>tomli</cite> installed. You can simply install this with pip:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>tomli
-<span class="gp">$ </span>python<span class="w"> </span>make_env.py<span class="w"> </span>full
+</pre></div>
+</div>
+<p>You wil also need a suable instalation of <cite>make</cite>. If you’re using linux this should already be installed by defautl. If you are using windows we
+recommend you install it using <a class="reference external" href="https://chocolatey.org/install">chocolatey</a> like so:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>choco<span class="w"> </span>install<span class="w"> </span>make
+</pre></div>
+</div>
+<p>Afterwards to create an environment you can simply call:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>dev
+</pre></div>
+</div>
+<p>This will create an enviromnment file, create an environment using a packagemangager and install hydromt into it. By default
+the makefile will attempt to use <cite>micromamba</cite>. If you want it to use a diferent one like, conda, you only have to set the
+environment variable like this if you’re on linux:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">PY_ENV_MANAGER</span><span class="o">=</span>conda
+</pre></div>
+</div>
+<p>or like this if you’re on windows:</p>
+<p>If you want you can also do these steps manually. The first step is to create the <cite>environment.yml</cite>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>make_env.py<span class="w"> </span><span class="s2">&quot;full&quot;</span>
 </pre></div>
 </div>
 <p>When the script is finished, a file called <cite>environment.yml</cite> will be created which you can pass to conda
-as demonstrated in the sections below.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
-<span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>hydromt
+as demonstrated in the sections below. This will include all optional dependencies of HydroMT. If you want a more
+finetined instalation you can also specify exactly which dependency grousp you’d like like this:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>env<span class="w"> </span><span class="nv">OPT_DEPS</span><span class="o">=</span><span class="s2">&quot;extra,io,doc&quot;</span>
+</pre></div>
+</div>
+<p>We have 7 optional dependency groups you can specify:</p>
+<ol class="arabic simple">
+<li><p><cite>io</cite>: Reading and writing various formats like excel but also cloud file systems</p></li>
+<li><p><cite>extra</cite>: Couldn’t think of a better name for this one, but it has some extra for ET and mesh calculations</p></li>
+<li><p><cite>dev</cite>: everything you need to develop and publish HydroMT</p></li>
+<li><p><cite>test</cite> What you need to run the test suite. Test suite should be setup that only tests that use the dependencies that are installed are run, so this should always pass no matter what other dependencies you may or may not have installed.</p></li>
+<li><p><cite>doc</cite> generate the docs</p></li>
+<li><p><cite>jupyter</cite> Run Jupyter notebooks and run the examples. Going to use this for binder support mostly.</p></li>
+<li><p><cite>deprecated</cite> dependencies that we hope to remove soon, but aren’t quite ready to yet.</p></li>
+</ol>
+<p>We also have 3 “flavors”. These are more or less just collections of one or more groups designed for common use cases:
+1. <cite>min</cite> no optional dependencies. mostly as a base to build your DIY stack on.
+2. <cite>slim</cite> Just the operational bits, what most people will probably want if you using HydroMT and what the cloud will most likely use
+3. <cite>full</cite> absolutely everything, useful for developing.</p>
+<p>We also have docker images for each of the flavours that should be published soon (but are not yet as the writing of this section)</p>
+<p>After the environment file has been created you can create an environment out of it by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>micromamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+<span class="gp">$ </span>micromamba<span class="w"> </span>activate<span class="w"> </span>hydromt
 </pre></div>
 </div>
 <p>Finally, create a developer installation of HydroMT:</p>

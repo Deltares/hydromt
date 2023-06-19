@@ -448,7 +448,7 @@ document.write(`
 </div></div>
 <section id="Example:-Reading-tiled-raster-data-with-different-zoom-levels">
 <h1>Example: Reading tiled raster data with different zoom levels<a class="headerlink" href="#Example:-Reading-tiled-raster-data-with-different-zoom-levels" title="Permalink to this heading">#</a></h1>
-<p>This example will show how one can export raster dataset to individual tiles at differnt zoom levels and read the data via the via the <a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html">DataCatalog.get_rasterdataset</a> method.</p>
+<p>This example will show how one can export raster dataset to individual tiles at differnt zoom levels and read the data via the <a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html">DataCatalog.get_rasterdataset</a> method.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -474,10 +474,10 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-09 07:55:22,887 - tiling - log - INFO - HydroMT version: 0.7.2.dev0
-2023-06-09 07:55:22,942 - tiling - data_catalog - INFO - Reading data catalog artifact_data v0.0.8 from archive
-2023-06-09 07:55:22,943 - tiling - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
-2023-06-09 07:55:23,014 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+2023-06-19 06:31:55,775 - tiling - log - INFO - HydroMT version: 0.7.2.dev0
+2023-06-19 06:31:55,823 - tiling - data_catalog - INFO - Reading data catalog artifact_data v0.0.8 from archive
+2023-06-19 06:31:55,825 - tiling - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-06-19 06:31:55,894 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -489,10 +489,10 @@ document.write(`
 (1920, 1680)
 </pre></div></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">da0</span></code> is gridded data as a xarray.DataArray object. With HydroMT a xarray.DataArray has some extra functionality via <code class="docutils literal notranslate"><span class="pre">.raster</span></code> This extra functionality does include the ability to write a raster to a tile database (tiling).</p>
+<p><code class="docutils literal notranslate"><span class="pre">da0</span></code> is gridded data as an xarray.DataArray object. With HydroMT an xarray.DataArray has some extra functionality via <code class="docutils literal notranslate"><span class="pre">.raster</span></code> This extra functionality does include the ability to write a raster to a tile database (tiling).</p>
 <section id="tiling-raster-with-XYZ-stucture">
 <h2>tiling raster with XYZ stucture<a class="headerlink" href="#tiling-raster-with-XYZ-stucture" title="Permalink to this heading">#</a></h2>
-<p>First let’s have a look at the XYZ structure. A xarray.DataArray is simple written to a tile database in XYZ structure via .raster.to_xyz_tiles</p>
+<p>First let’s have a look at the XYZ structure. an xarray.DataArray is simple written to a tile database in XYZ structure via .raster.to_xyz_tiles</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -547,7 +547,7 @@ Tiles at zoomlevel 5 smaller than tile_size 256
 </section>
 <section id="reading-tiled-raster-data-with-zoom-levels">
 <h2>reading tiled raster data with zoom levels<a class="headerlink" href="#reading-tiled-raster-data-with-zoom-levels" title="Permalink to this heading">#</a></h2>
-<p>With DataCatalog.<a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html">get_rasterdataset</a> a raster (.vrt) can be retreived. In case of a tile database it can be done for a certain zoomlevel. E.g.</p>
+<p>With DataCatalog.<a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html">get_rasterdataset</a> a raster (.vrt) can be retrieved. In case of a tile database it can be done for a certain zoomlevel. E.g.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -568,7 +568,7 @@ Tiles at zoomlevel 5 smaller than tile_size 256
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-09 07:55:24,994 - tiling - data_catalog - INFO - Parsing data catalog from tmpdir/merit_hydro_xyz/merit_hydro_xyz.yml
+2023-06-19 06:31:57,879 - tiling - data_catalog - INFO - Parsing data catalog from tmpdir/merit_hydro_xyz/merit_hydro_xyz.yml
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -605,7 +605,7 @@ zoom_levels:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-09 07:55:25,003 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+2023-06-19 06:31:57,891 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -633,10 +633,10 @@ zoom_levels:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-09 07:55:25,029 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
-2023-06-09 07:55:25,032 - tiling - data_adapter - INFO - Getting data for zoom_level 1 based on res (0.0016666666666666668, &#39;degree&#39;)
-2023-06-09 07:55:25,048 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
-2023-06-09 07:55:25,049 - tiling - data_adapter - INFO - Getting data for zoom_level 2 based on res (1000.0, &#39;meter&#39;)
+2023-06-19 06:31:57,920 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+2023-06-19 06:31:57,923 - tiling - data_adapter - INFO - Getting data for zoom_level 1 based on res (0.0016666666666666668, &#39;degree&#39;)
+2023-06-19 06:31:57,942 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+2023-06-19 06:31:57,943 - tiling - data_adapter - INFO - Getting data for zoom_level 2 based on res (1000.0, &#39;meter&#39;)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -654,7 +654,7 @@ zoom_levels:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-09 07:55:25,071 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+2023-06-19 06:31:57,965 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
 (60, 53)
 </pre></div></div>
 </div>
@@ -711,8 +711,8 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-09 07:55:25,946 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
-2023-06-09 07:55:25,953 - tiling - caching - INFO - Downloading 56 tiles to /home/runner/.hydromt_data/merit_hydro_xyz/merit_hydro_xyz
+2023-06-19 06:31:58,960 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+2023-06-19 06:31:58,967 - tiling - caching - INFO - Downloading 56 tiles to /home/runner/.hydromt_data/merit_hydro_xyz/merit_hydro_xyz
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -729,8 +729,8 @@ Text(0.5, 1.0, &#39;zoomlevel 5&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-06-09 07:55:25,986 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
-2023-06-09 07:55:25,991 - tiling - caching - INFO - Downloading 0 tiles to /home/runner/.hydromt_data/merit_hydro_xyz/merit_hydro_xyz
+2023-06-19 06:31:59,001 - tiling - data_catalog - INFO - DataCatalog: Getting merit_hydro_xyz RasterDataset raster data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/merit_hydro_xyz/merit_hydro_xyz_zl{zoom_level}.vrt
+2023-06-19 06:31:59,006 - tiling - caching - INFO - Downloading 0 tiles to /home/runner/.hydromt_data/merit_hydro_xyz/merit_hydro_xyz
 </pre></div></div>
 </div>
 </section>
