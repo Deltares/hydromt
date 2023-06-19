@@ -21,12 +21,15 @@ env:
 	$(PY_ENV_MANAGER) -n hydromt run pip install .
 
 min-environment.yml:
+	pip install tomli
 	python3 make_env.py -o min-environment.yml
 
 slim-environment.yml:
+	pip install tomli
 	python3 make_env.py "slim" -o slim-environment.yml
 
 full-environment.yml:
+	pip install tomli
 	python3 make_env.py "full" -o full-environment.yml
 
 docker-min: min-environment.yml

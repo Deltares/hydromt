@@ -2,9 +2,13 @@
 
 import argparse
 import re
+from sys import version_info
 from typing import List
 
-from tomli import load
+if version_info.minor >= 11:
+    from tomllib import load
+else:
+    from tomli import load
 
 
 # our quick and dirty implementation of recursive depedencies
