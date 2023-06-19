@@ -78,7 +78,7 @@ Users can supply the following:
 
     - ``{'subbasin': [x, y], 'bounds': [xmin, ymin, xmax, ymax]}``
 
-    The subbasins can further be refined based one (or more) variable-threshold pair(s)
+    The subbasins can further be refined based on one (or more) variable-threshold pair(s)
     to define streams, as described above for basins. If used in combination with point outlet locations,
     these are snapped to the nearest stream which meets the threshold criteria.
 

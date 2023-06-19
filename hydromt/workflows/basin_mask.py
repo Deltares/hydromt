@@ -429,6 +429,9 @@ def get_basin_geometry(
                 dims=ds.raster.dims,
                 data=np.full(ds.raster.shape, True, dtype=bool),
             )  # all True
+        # Convert xy to tuple
+        if xy is not None:
+            xy = (np.atleast_1d(xy[0]), np.atleast_1d(xy[1]))
         # get stream mask. Always over entire domain
         # to include cells downstream of aoi!
         kwargs = dict()
