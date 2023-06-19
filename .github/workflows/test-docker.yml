@@ -34,7 +34,7 @@ jobs:
         with:
           context: .
           load: true
-          target: cli
+          target: slim
           tags: hydromt
           cache-from: type=gha
           cache-to: type=gha,mode=max
