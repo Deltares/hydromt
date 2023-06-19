@@ -81,17 +81,17 @@ doc = [
     "hydromt[jupyter,extra]",       # examples are included in the docs
 ]
 jupyter = [
-    "jupyterlab", # run examples in jupyter notebook
-    "cartopy",    # plotting examples
+    "jupyterlab",      # run examples in jupyter notebook
+    "cartopy",         # plotting examples
     "matplotlib-base", # plotting
-    "notebook", # jupyter integration
+    "notebook",        # jupyter integration
 ]
 deprecated = [
     "pcraster", # Old Wflow model was build on this
     "pygeos",   # Supersceded by shapely 2
 ]
 
-full = ["hydromt[io,extra,dev,test,doc, jupyter, deprecated]"]
+full = ["hydromt[io,extra,dev,test,doc, jupyter]"]
 slim = ["hydromt[io,extra,jupyter]"]
 
 [project.urls]
