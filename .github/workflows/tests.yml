@@ -30,20 +30,14 @@ jobs:
         python-version: ['3.9', '3.10', '3.11']
     steps:
       - uses: actions/checkout@v3
-      - name: Generate env spec
-        run: pip install tomli && python make_env.py test
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          miniforge-variant: Mambaforge
-          channels: conda-forge, defaults
-          channel-priority: strict
-          environment-file: environment.yml
-          activate-environment: hydromt
-
-      - name: Test
-        run: python -m pytest --verbose --cov=hydromt --cov-report xml
-
+      - name: build test image
+        run: |
+          make full-environment.yml
+          docker build -t hydromt-test --target=full .
+      - name: run test suite
+        run: docker run --cidfile ${{ matrix.os }}_container_id hydromt-test pytest --verbose --cov=hydromt --cov-report xml
+      - name: Copy coverage file from image to host
+        run: docker cp $(cat ${{ matrix.os }}_container_id):/home/mambauser/coverage.xml .
       - uses: codecov/codecov-action@v3
 
 concurrency:
