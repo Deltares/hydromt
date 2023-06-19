@@ -94,7 +94,6 @@ def test_aws_copdem(tmpdir):
     assert da.max().values == 100
 
 
-@pytest.mark.slow()
 def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     name = "test_zoom"
     yml_dict = {

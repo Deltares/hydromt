@@ -38,7 +38,7 @@ jobs:
           target: full
 
       - name: Run Tests
-        run: docker run --rm -it hydromt pytest
+        run: docker run --rm hydromt pytest
 
       #build should be cached from previous steps
       - name: Build and push full image
