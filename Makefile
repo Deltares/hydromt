@@ -59,7 +59,6 @@ docker-clean:
 	docker images =reference="*hydromt*" -q | xargs --no-run-if-empty docker rmi -f
 	docker system prune -f
 
-
 html:
 	PYDEVD_DISABLE_FILE_VALIDATION=1 $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)"
 
