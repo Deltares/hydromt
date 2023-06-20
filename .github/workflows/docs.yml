@@ -11,6 +11,9 @@ on:
       - data/*
       - docs/*
       - examples/*
+      - Makefile
+      - Dockerfile
+      - pyproject.toml
   pull_request:
     branches: [main]
     paths:
@@ -19,6 +22,9 @@ on:
       - data/*
       - docs/*
       - examples/*
+      - Makefile
+      - Dockerfile
+      - pyproject.toml
 
 jobs:
   # Build docs on Linux
@@ -39,7 +45,7 @@ jobs:
       - name: build image
         run: |
           make full-environment.yml
-          docker build -t hydromt-docs --target=full .
+          docker build -t --cache-to=gha,max --cache-from=gha hydromt-docs --target=full .
       - name: generate docs
         run: docker run --cidfile ${{ matrix.os }}_container_id hydromt-docs make html
       - name: Copy docs from image to host

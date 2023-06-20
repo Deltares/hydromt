@@ -8,12 +8,18 @@ on:
       - tests/*
       - hydromt/*
       - data/*
+      - Makefile
+      - Dockerfile
+      - pyproject.toml
   pull_request:
     branches: [main]
     paths:
       - tests/*
       - hydromt/*
       - data/*
+      - Makefile
+      - Dockerfile
+      - pyproject.toml
 
 jobs:
   Test-matrix:
@@ -33,9 +39,10 @@ jobs:
       - name: build test image
         run: |
           make full-environment.yml
-          docker build -t hydromt-test --target=full .
+          docker build --cache-to=gha,max --cache-from=gha -t hydromt-test --target=full .
       - name: run test suite
-        run: docker run --cidfile ${{ matrix.os }}_container_id hydromt-test pytest --verbose --cov=hydromt --cov-report xml
+        run: docker run --cidfile ${{ matrix.os }}_container_id --cache-to=gha,max --cache-from=gha hydromt-test pytest --verbose --cov=hydromt --cov-report\
+          xml
       - name: Copy coverage file from image to host
         run: docker cp $(cat ${{ matrix.os }}_container_id):/home/mambauser/coverage.xml .
       - uses: codecov/codecov-action@v3
