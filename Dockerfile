@@ -41,6 +41,7 @@ COPY hydromt/ ${HOME}/hydromt
 USER root
 RUN chown -R mambauser /home/mambauser/docs && apk add --no-cache make
 USER mambauser
+WORKDIR ${HOME}
 RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disable-pip-version-check --no-deps\
  && micromamba clean -ayf \
  && find /opt/conda/ -follow -type f -name '*.a' -delete \

@@ -42,10 +42,17 @@ jobs:
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v3
-      - name: build image
+      - name: make env var
         run: |
           make full-environment.yml
-          docker build -t --cache-to=gha,max --cache-from=gha hydromt-docs --target=full .
+      - name: Build image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          target: full
+          tags: hydromt-docs
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: generate docs
         run: docker run --cidfile ${{ matrix.os }}_container_id hydromt-docs make html
       - name: Copy docs from image to host

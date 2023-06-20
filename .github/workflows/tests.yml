@@ -36,13 +36,22 @@ jobs:
         python-version: ['3.9', '3.10', '3.11']
     steps:
       - uses: actions/checkout@v3
-      - name: build test image
+      - name: make env var
         run: |
           make full-environment.yml
-          docker build --cache-to=gha,max --cache-from=gha -t hydromt-test --target=full .
+      - name: Build image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          target: full
+          tags: hydromt-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: run test suite
-        run: docker run --cidfile ${{ matrix.os }}_container_id --cache-to=gha,max --cache-from=gha hydromt-test pytest --verbose --cov=hydromt --cov-report\
-          xml
+        run: |
+          docker run \
+          --cidfile ${{ matrix.os }}_container_id \
+          hydromt-test pytest --verbose --cov=hydromt --cov-report xml
       - name: Copy coverage file from image to host
         run: docker cp $(cat ${{ matrix.os }}_container_id):/home/mambauser/coverage.xml .
       - uses: codecov/codecov-action@v3
