@@ -47,9 +47,7 @@ jobs:
           context: .
           target: full
           tags: hydromt-test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          outputs: type=docker
+          cache-from: savente/hydromt:full
       - name: run test suite
         run: |
           docker run \
