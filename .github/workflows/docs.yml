@@ -55,6 +55,7 @@ jobs:
           tags: hydromt-docs
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          outputs: type=docker
       - name: generate docs
         run: docker run --cidfile ${{ matrix.os }}_container_id hydromt-docs make html
       - name: Copy docs from image to host

@@ -49,6 +49,7 @@ jobs:
           tags: hydromt-test
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          outputs: type=docker
       - name: run test suite
         run: |
           docker run \
