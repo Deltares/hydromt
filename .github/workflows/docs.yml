@@ -45,7 +45,8 @@ jobs:
       - name: Copy docs from image to host
         run: docker cp $(cat ${{ matrix.os }}_container_id):/home/mambauser/docs/_build/html .
       - name: Set doc version
-        run: echo "DOC_VERSION=$(docker run hydromt-docs python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')"
+        run: |
+          echo "DOC_VERSION=$(docker run hydromt-docs python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" \
           >> $GITHUB_ENV
       - name: Upload to GitHub Pages
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
