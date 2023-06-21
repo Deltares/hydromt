@@ -1,10 +1,11 @@
 ---
 name: Refresh CI cache
 on:
-  workflow_dispatch:
-  pull_request:
-    types:
-      - closed
+  push:
+  # workflow_dispatch:
+  # pull_request:
+  #   types:
+  #     - closed
 
 jobs:
   refresh-cache:
