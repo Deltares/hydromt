@@ -40,10 +40,19 @@ jobs:
         run: make full-environment.yml
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: build test image
-        run: |
-          docker pull savente/hydromt-deps-only:latest
-          docker build -t hydromt-test --target=full --cache-from docker.io/savente/hydromt-deps-only:latest .
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          target: full
+          tags: savente/hydromt-test
+          cache-from: type=gha,savente/hydromt-deps-only
+          cache-to: type=gha,mode=max
+      # - name: build test image
+      #   run: |
+      #     docker pull savente/hydromt-deps-only:latest
+      #     docker build -t hydromt-test --target=full --cache-from docker.io/savente/hydromt-deps-only:latest .
       - name: run test suite
         run: |
           docker run \

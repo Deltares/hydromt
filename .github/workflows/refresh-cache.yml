@@ -22,7 +22,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: savente
-          password: dckr_pat_2qn2zUadS4Paoshkq35odcHmYJQ
+          password: dckr_pat_2qn2zUadS4Paoshkq35odcHmYJQ # don't worry, by the time you read this this token is already revoked
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
