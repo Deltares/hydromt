@@ -40,6 +40,11 @@ jobs:
         run: make full-environment.yml
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: docker hub lgoin
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.TEST_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.TEST_DOCKERHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
@@ -47,7 +52,7 @@ jobs:
           push: true
           target: full
           tags: savente/hydromt-test
-          cache-from: type=gha,savente/hydromt-deps-only
+          cache-from: type=gha
           cache-to: type=gha,mode=max
       # - name: build test image
       #   run: |
