@@ -23,7 +23,7 @@ on:
 
 jobs:
   Test-matrix:
-    name: ${{ matrix.os }} - py${{ matrix.python-version }}
+    name: py${{matrix.python-version}}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     defaults:
@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: ['3.9'] #, '3.10', '3.11']
     steps:
       - uses: actions/checkout@v3
       - name: make env var
@@ -41,21 +41,31 @@ jobs:
           make full-environment.yml
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build image
-        uses: docker/build-push-action@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v3
         with:
-          context: .
-          target: full
-          tags: hydromt-test
-          cache-from: savente/hydromt:full
+          name: hydromt
+          path: /tmp
+      - name: build test image
+        run: |
+          docker images
+          docker build -t hydromt-test --target=full --cache-from hydromt-full .
+      # - name: Build image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: .
+      #     target: full
+      #     cache-from: hydromt-full
+      #     tags: hydromt-test
+          # outputs: type=docker
       - name: run test suite
         run: |
           docker run \
           --cidfile ${{ matrix.os }}_container_id \
           hydromt-test pytest --verbose --cov=hydromt --cov-report xml
-      - name: Copy coverage file from image to host
-        run: docker cp $(cat ${{ matrix.os }}_container_id):/home/mambauser/coverage.xml .
-      - uses: codecov/codecov-action@v3
+      # - name: Copy coverage file from image to host
+      #   run: docker cp $(cat ${{ matrix.os }}_container_id):/home/mambauser/coverage.xml .
+      # - uses: codecov/codecov-action@v3
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
