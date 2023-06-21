@@ -1,0 +1,32 @@
+---
+name: Refresh CI cache
+on:
+  push:
+  # workflow_dispatch:
+  # pull_request:
+  #   types:
+  #     - closed
+
+jobs:
+  refresh-cache:
+    runs-on: ubuntu-latest
+    # if: github.event.pull_request.merged == true || github.event == 'workflow_dispatch'
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: generate env file
+        run: make full-environment.yml
+      - name: Build and export
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          tags: hydromt-full
+          target: full
+          outputs: type=docker,dest=/tmp/hydromt.tar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: myimage
+          path: /tmp/hydromt.tar
