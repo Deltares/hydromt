@@ -44,10 +44,11 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: hydromt
-          path: /tmp
+          name: myimage
+          path: /tmp/hydromt.tar
       - name: build test image
         run: |
+          docker load -i /tmp/hydromt.tar
           docker images
           docker build -t hydromt-test --target=full --cache-from hydromt-full .
       # - name: Build image
