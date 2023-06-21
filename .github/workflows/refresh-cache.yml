@@ -1,7 +1,6 @@
 ---
 name: Refresh CI cache
 on:
-  push:
   workflow_dispatch:
   pull_request:
     types:
@@ -10,7 +9,7 @@ on:
 jobs:
   refresh-cache:
     runs-on: ubuntu-latest
-    # if: github.event.pull_request.merged == true || github.event == 'workflow_dispatch'
+    if: github.event.pull_request.merged == true || github.event == 'workflow_dispatch'
     steps:
       - name: Check out code
         uses: actions/checkout@v3
