@@ -22,10 +22,10 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
  ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
  CMD ["hydromt","--models"]
 
-FROM  mambaorg/micromamba:1.4-alpine AS full
+FROM  mambaorg/micromamba:1.4-alpine AS deps-only
 ENV HOME=/home/mambauser
 WORKDIR ${HOME}
-COPY full-environment.yml pyproject.toml Makefile README.rst ${HOME}/
+COPY full-environment.yml ${HOME}/
 RUN micromamba create -f full-environment.yml -y --no-pyc \
  && micromamba clean -ayf \
  && rm -rf ${HOME}/.cache \
@@ -33,13 +33,21 @@ RUN micromamba create -f full-environment.yml -y --no-pyc \
  && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
  && find /opt/conda/ -follow -type f -name '*.js.map' -delete  \
  && rm full-environment.yml
+ USER root
+ RUN apk add --no-cache make
+USER mambauser
+
+FROM savente/hydromt-deps-only:latest as full
+ENV HOME=/home/mambauser
+WORKDIR ${HOME}
+COPY full-environment.yml pyproject.toml Makefile README.rst ${HOME}/
 COPY data/ ${HOME}/data
 COPY docs/ ${HOME}/docs
 COPY examples/ ${HOME}/examples
 COPY tests/ ${HOME}/tests
 COPY hydromt/ ${HOME}/hydromt
 USER root
-RUN chown -R mambauser /home/mambauser/docs && apk add --no-cache make
+RUN chown -R mambauser /home/mambauser/docs
 USER mambauser
 WORKDIR ${HOME}
 RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disable-pip-version-check --no-deps\

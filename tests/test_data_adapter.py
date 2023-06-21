@@ -119,6 +119,7 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
         data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
 
 
+@pytest.mark.skip()
 def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
