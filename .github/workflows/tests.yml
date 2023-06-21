@@ -43,7 +43,7 @@ jobs:
       - name: build test image
         run: |
           docker pull savente/hydromt-deps-only:latest
-          docker build -t hydromt-test --target=full --cache-from savente/hydromt-deps-only .
+          docker build -t hydromt-test --target=full --cache-from docker.io/savente/hydromt-deps-only:latest .
       - name: run test suite
         run: |
           docker run \
