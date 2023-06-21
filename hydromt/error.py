@@ -1,5 +1,7 @@
 """Implementation of deprecation errors."""
 
+# all your cache miss are belong to us!
+
 
 class DeprecatedError(Exception):
 
