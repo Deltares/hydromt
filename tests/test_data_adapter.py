@@ -4,6 +4,7 @@
 import glob
 import tempfile
 from os.path import abspath, dirname, join
+import os
 
 import geopandas as gpd
 import numpy as np
@@ -119,6 +120,44 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
         data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
 
 
+def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
+    era5 = artifact_data.get_rasterdataset("era5")
+    fp1 = join(tmpdir, "era5.zarr")
+    era5.to_zarr(fp1)
+    data_dict = {
+        "era5_zarr": {
+            "crs": 4326,
+            "data_type": "RasterDataset",
+            "driver": "zarr",
+            "driver_kwargs": {
+                "preprocess": "round_latlon",
+            },
+            "path": fp1,
+        }
+    }
+    datacatalog = DataCatalog()
+    datacatalog.from_dict(data_dict)
+    era5_zarr = datacatalog.get_rasterdataset("era5_zarr")
+    fp2 = join(tmpdir, "era5.nc")
+    era5.to_netcdf(fp2)
+
+    data_dict2 = {
+        "era5_nc": {
+            "crs": 4326,
+            "data_type": "RasterDataset",
+            "driver": "netcdf",
+            "driver_kwargs": {
+                "preprocess": "round_latlon",
+            },
+            "path": fp2,
+        }
+    }
+    datacatalog.from_dict(data_dict2)
+    era5_nc = datacatalog.get_rasterdataset("era5_nc")
+    assert era5_zarr.equals(era5_nc)
+    datacatalog["era5_zarr"].to_file(tmpdir, "era5_zarr", driver="zarr")
+
+
 def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
     era5_dict = {"era5": artifact_data.sources["era5"].to_dict()}
     attrs = {
@@ -177,7 +216,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     # assert match in error
 
 
-def test_geodataset_unit_attrs(artifact_data: DataCatalog):
+def test_geodataset_unit_attrs(artifact_data: DataCatalog, tmpdir: str):
     gtsm_dict = {"gtsmv3_eu_era5": artifact_data.sources["gtsmv3_eu_era5"].to_dict()}
     attrs = {
         "waterlevel": {
@@ -187,9 +226,29 @@ def test_geodataset_unit_attrs(artifact_data: DataCatalog):
     }
     gtsm_dict["gtsmv3_eu_era5"].update(dict(attrs=attrs))
     artifact_data.from_dict(gtsm_dict)
-    gtsm_geodataset = artifact_data.get_geodataset("gtsmv3_eu_era5")
-    assert gtsm_geodataset.attrs["long_name"] == attrs["waterlevel"]["long_name"]
-    assert gtsm_geodataset.attrs["unit"] == attrs["waterlevel"]["unit"]
+    gtsm_geodataarray = artifact_data.get_geodataset("gtsmv3_eu_era5")
+    assert gtsm_geodataarray.attrs["long_name"] == attrs["waterlevel"]["long_name"]
+    assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
+
+
+def test_geodataset_unit_conversion(artifact_data: DataCatalog):
+    gtsm_geodataarray = artifact_data.get_geodataset("gtsmv3_eu_era5")
+    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.sources["gtsmv3_eu_era5"].to_dict()}
+    gtsm_dict["gtsmv3_eu_era5"].update(dict(unit_mult=dict(waterlevel=1000)))
+    datacatalog = DataCatalog()
+    datacatalog.from_dict(gtsm_dict)
+    gtsm_geodataarray1000 = datacatalog.get_geodataset("gtsmv3_eu_era5")
+    assert gtsm_geodataarray1000.equals(gtsm_geodataarray * 1000)
+
+
+def test_set_nodata_geodataset(artifact_data: DataCatalog):
+    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.sources["gtsmv3_eu_era5"].to_dict()}
+    gtsm_dict["gtsmv3_eu_era5"].update(dict(nodata=-99))
+    datacatalog = DataCatalog()
+    datacatalog.from_dict(gtsm_dict)
+    gtsm_geodataarray = datacatalog.get_geodataset("gtsmv3_eu_era5")
+    # assert gtsm_geodataarray.vector.nodata == -99 TODO assertion cannot be made
+    # since set_noda for GeoDataArray.vector does not exist
 
 
 def test_geodataframe(geodf, tmpdir):
@@ -236,6 +295,11 @@ def test_dataframe(df, df_time, tmpdir):
 
     fn_xlsx = str(tmpdir.join("test.xlsx"))
     df.to_excel(fn_xlsx)
+    data_dict = {
+        "test_excel": {"path": fn_xlsx, "data_type": "DataFrame", "driver": "excel"}
+    }
+    data_catalog.from_dict(data_dict)
+    data_catalog["test_excel"].to_file(tmpdir, "text_excel", driver="excel")
     df2 = data_catalog.get_dataframe(fn_xlsx, driver_kwargs=dict(index_col=0))
     assert isinstance(df2, pd.DataFrame)
     assert np.all(df2 == df)
@@ -321,6 +385,26 @@ def test_dataframe_time(df_time, tmpdir):
         driver_kwargs=dict(index_col=0, parse_dates=True),
     )
     assert np.all(dfts5.columns == vars_slice)
+
+
+def test_dataframe_parse_nodata(artifact_data: DataCatalog, tmpdir):
+    hydro_reservoirs = artifact_data.get_geodataframe(
+        "hydro_reservoirs"
+    )  # This dataset has nodata set to -99
+    dataframe = pd.DataFrame(hydro_reservoirs.drop(columns="geometry"))
+    dataframe["Dam_height"] = -99
+    fp = join(tmpdir, "hydro_reservoirs.csv")
+    dataframe.to_csv(fp, index=False)
+    data_dict = {
+        "hydro_reservoirs": artifact_data.sources["hydro_reservoirs"].to_dict()
+    }
+    data_dict["hydro_reservoirs"].update(
+        dict(path=fp, driver="csv", data_type="DataFrame")
+    )
+    datacatalog = DataCatalog()
+    datacatalog.from_dict(data_dict)
+    hydro_reservoirs_df = datacatalog.get_dataframe("hydro_reservoirs")
+    assert sum(hydro_reservoirs_df["Dam_height"].isna()) == 5
 
 
 def test_cache_vrt(tmpdir, rioda_large):
