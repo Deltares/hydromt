@@ -4,7 +4,6 @@
 import glob
 import tempfile
 from os.path import abspath, dirname, join
-import os
 
 import geopandas as gpd
 import numpy as np
@@ -246,7 +245,7 @@ def test_set_nodata_geodataset(artifact_data: DataCatalog):
     gtsm_dict["gtsmv3_eu_era5"].update(dict(nodata=-99))
     datacatalog = DataCatalog()
     datacatalog.from_dict(gtsm_dict)
-    gtsm_geodataarray = datacatalog.get_geodataset("gtsmv3_eu_era5")
+    datacatalog.get_geodataset("gtsmv3_eu_era5")
     # assert gtsm_geodataarray.vector.nodata == -99 TODO assertion cannot be made
     # since set_noda for GeoDataArray.vector does not exist
 

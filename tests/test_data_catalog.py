@@ -10,7 +10,6 @@ import xarray as xr
 
 from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
 from hydromt.data_catalog import DataCatalog, _parse_data_dict
-from hydromt import __version__
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 

@@ -6,14 +6,14 @@ from __future__ import annotations
 
 import copy
 import inspect
-import warnings
+import itertools
 import logging
-from os.path import abspath, basename, exists, isdir, isfile, join
 import os
+import shutil
+import warnings
+from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
-import shutil
-import itertools
 
 import geopandas as gpd
 import numpy as np
@@ -23,6 +23,7 @@ import xarray as xr
 import yaml
 from packaging.version import Version
 
+from . import __version__
 from .data_adapter import (
     DataAdapter,
     DataFrameAdapter,
@@ -30,8 +31,7 @@ from .data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from .data_adapter.caching import _uri_validator, _copyfile, HYDROMT_DATADIR
-from . import __version__
+from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
 
 logger = logging.getLogger(__name__)
 
@@ -335,7 +335,8 @@ class DataCatalog(object):
 
         if yml_version > self_version:
             self.logger.warning(
-                f"Specified HydroMT version ({hydromt_version}) more recent than installed version ({__version__}).",
+                f"Specified HydroMT version ({hydromt_version}) \
+                  more recent than installed version ({__version__}).",
             )
 
         catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
@@ -992,7 +993,8 @@ def _parse_data_dict(
         # Get unit attrs if given from source
         attrs = source.pop("attrs", {})
         # lower kwargs for backwards compatability
-        # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
+        # FIXME this could be problamatic if driver kwargs conflict DataAdapter
+        #  arguments
         driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
         for driver_kwarg in driver_kwargs:
             # required for geodataset where driver_kwargs can be a path
