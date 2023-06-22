@@ -82,7 +82,7 @@ and allows lazy reading of the data.
       path: base/landcover/globcover/GLOBCOVER_200901_200912_300x300m.tif
       data_type: RasterDataset
       driver: raster
-      kwargs:
+      driver_kwargs:
         chunks: {x: 3600, y: 3600}
       meta:
         category: landuse
@@ -116,7 +116,7 @@ VRT files are useful for large raster datasets which are often tiled and can be 
       data_type: RasterDataset
       driver: raster
       crs: 4326
-      kwargs:
+      driver_kwargs:
         chunks: {x: 6000, y: 6000}
       rename:
         dir: flwdir
@@ -147,7 +147,7 @@ Use `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_ to build an except
 Here a GeoPackage with the tile index referring to individual GeoTiff raster tiles is used.
 The ``mosaic_kwargs`` are passed to :py:meth:`~hydromt.io.open_raster_from_tindex` to
 set the resampling ``method``. The name of the column in the tile index attribute table ``tileindex``
-which contains the raster tile file names is set in the ``kwargs`` (to be directly passed as an argument to
+which contains the raster tile file names is set in the ``driver_kwargs`` (to be directly passed as an argument to
 :py:meth:`~hydromt.io.open_raster_from_tindex`).
 
 .. code-block:: yaml
@@ -157,7 +157,7 @@ which contains the raster tile file names is set in the ``kwargs`` (to be direct
       data_type: RasterDataset
       driver: raster_tindex
       nodata: 0
-      kwargs:
+      driver_kwargs:
         chunks: {x: 3000, y: 3000}
         mosaic_kwargs: {method: nearest}
         tileindex: location
@@ -198,7 +198,7 @@ See list of recognized dimensions_ names.
 
 
 To read a raster dataset from a multiple file netcdf archive the following data entry
-is used, where the ``kwargs`` are passed to :py:func:`xarray.open_mfdataset`
+is used, where the ``driver_kwargs`` are passed to :py:func:`xarray.open_mfdataset`
 (or :py:func:`xarray.open_zarr` for zarr data).
 In case the CRS cannot be inferred from the netcdf data it should be defined with the ``crs`` option here.
 The path to multiple files can be set using a sting glob or several keys,
@@ -213,7 +213,7 @@ unify the data to match the HydroMT naming and unit :ref:`terminology <terminolo
       data_type: RasterDataset
       driver: netcdf
       crs: 4326
-      kwargs:
+      driver_kwargs:
         chunks: {latitude: 125, longitude: 120, time: 50}
         combine: by_coords
         decode_times: true
@@ -237,7 +237,7 @@ Preprocess functions when combining multiple files
 """"""""""""""""""""""""""""""""""""""""""""""""""
 
 In :py:func:`xarray.open_mfdataset`, xarray allows for a *preprocess* function to be run before merging several
-netcdf files together. In hydroMT, some preprocess functions are available and can be passed through the ``kwargs``
+netcdf files together. In hydroMT, some preprocess functions are available and can be passed through the ``driver_kwargs``
 options in the same way as any xr.open_mfdataset options. These preprocess functions are:
 
 - **round_latlon**: round x and y dimensions to 5 decimals to avoid merging problems in xarray due to small differences
@@ -293,7 +293,7 @@ columns of the attribute table in case of a GeoDataFrame.
         path: base/emissions/GDP-countries/World_countries_GDPpcPPP.gpkg
         data_type: GeoDataFrame
         driver: vector
-        kwargs:
+        driver_kwargs:
           layer: GDP
         rename:
           GDP: gdp
@@ -336,7 +336,7 @@ of the GeoDataFrame attribute table.
 
 As the CRS of the coordinates cannot be inferred from the data it must be set in the
 data entry in the yaml file as shown in the example below. The internal data format
-is based on the file extension unless the ``kwargs`` ``driver`` option is set.
+is based on the file extension unless the ``driver_kwargs`` ``driver`` option is set.
 See :py:meth:`~hydromt.io.open_vector` and :py:func:`~hydromt.io.open_vector_from_table` for more
 options.
 
@@ -347,7 +347,7 @@ options.
       data_type: GeoDataFrame
       driver: vector_table
       crs: 4326
-      kwargs:
+      driver_kwargs:
         driver: csv
 
 .. _GeoDataset:
@@ -401,7 +401,7 @@ on a list of recognized dimensions_ names.
         waterlevel   (time, stations)
 
 To read a point time-series dataset from a multiple file netcdf archive the following data entry
-is used, where the ``kwargs`` are passed to :py:func:`xarray.open_mfdataset`
+is used, where the ``driver_kwargs`` are passed to :py:func:`xarray.open_mfdataset`
 (or :py:func:`xarray.open_zarr` for zarr data).
 In case the CRS cannot be inferred from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys,
@@ -416,7 +416,7 @@ unify the data to match the HydroMT naming and unit :ref:`terminology <terminolo
       data_type: GeoDataset
       driver: netcdf
       crs: 4326
-      kwargs:
+      driver_kwargs:
         chunks: {stations: 100, time: 1500}
         combine: by_coords
         decode_times: true
@@ -454,7 +454,7 @@ For more options see the :py:meth:`~hydromt.io.open_geodataset` method.
       data_type: GeoDataset
       driver: vector
       crs: 4326
-      kwargs:
+      driver_kwargs:
         fn_data: /path/to/stations_data.csv
 
 *Tabulated time series text file*
@@ -491,11 +491,11 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
    * - ``excel``
      - Excel files
      - :py:func:`pandas.read_excel`
-     - If required, provide a sheet name through kwargs
+     - If required, provide a sheet name through driver_kwargs
    * - ``fwf``
      - Fixed width delimited text files
      - :py:func:`pandas.read_fwf`
-     - The formatting of these files can either be inferred or defined by the user, both through the kwargs.
+     - The formatting of these files can either be inferred or defined by the user, both through the driver_kwargs.
 
 
 .. note::
@@ -507,10 +507,10 @@ Supported files
 ^^^^^^^^^^^^^^^
 
 The DataFrameAdapter is quite flexible in supporting different types of tabular data formats. All drivers allow for flexible reading of
-files: for example both mapping tables and time series data are supported. Please note that for timeseries, the kwargs need to be used to
+files: for example both mapping tables and time series data are supported. Please note that for timeseries, the driver_kwargs need to be used to
 set the correct column for indexing, and formatting and parsing of datetime-strings. See the relevant pandas function for which arguments
 can be used. Also note that the **csv** driver is not restricted to comma-separated files, as the delimiter can be given to the reader
-throught the kwargs.
+throught the driver_kwargs.
 
 .. code-block:: yaml
 
@@ -520,7 +520,7 @@ throught the kwargs.
       driver: csv
       meta:
         category: parameter_mapping
-      kwargs:
+      driver_kwargs:
         header: null
         index_col: 0
         parse_dates: false

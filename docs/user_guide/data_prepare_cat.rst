@@ -24,7 +24,7 @@ Each data source, is added to a data catalog yaml file with a user-defined name.
 A blue print for a dataset called **my_dataset** is shown below.
 The ``path``, ``data_type`` and ``driver`` options are required and the ``meta`` option with the shown keys is highly recommended.
 The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per variable (or attribute table column in case of a GeoDataFrame).
-``kwargs`` contain any options passed to different drivers.
+``driver_kwargs`` contain any options passed to different drivers.
 
 .. code-block:: yaml
 
@@ -36,7 +36,7 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
       data_type: RasterDataset/GeoDataset/GeoDataFrame
       driver: raster/raster_tindex/netcdf/zarr/vector/vector_table
       filesystem: local/gcs/s3
-      kwargs:
+      driver_kwargs:
         key: value
       meta:
         source_url: zenodo.org/my_dataset
@@ -87,9 +87,9 @@ A full list of **optional data source arguments** is given below
 
 - **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data.
 - **filesystem** (required if different than local): specify if the data is stored locally or remotely (e.g cloud). Supported filesystems are *local* for local data,
-  *gcs* for data stored on Google Cloud Storage, and *aws* for data stored on Amazon Web Services. Profile or authentication information can be passed to ``kwargs`` via
+  *gcs* for data stored on Google Cloud Storage, and *aws* for data stored on Amazon Web Services. Profile or authentication information can be passed to ``driver_kwargs`` via
   *storage_options*.
-- **kwargs**: pairs of key value arguments to pass to the driver specific open data method (eg xr.open_mfdataset for netdcf raster, see the full list below).
+- **driver_kwargs**: pairs of key value arguments to pass to the driver specific open data method (eg xr.open_mfdataset for netdcf raster, see the full list below).
   Only used if not crs can be inferred from the input data.
 - **meta** (recommended): additional information on the dataset organized in a sub-list.
   Good meta data includes a *source_url*, *source_license*, *source_version*, *paper_ref*, *paper_doi*, *category*, etc. These are added to the data attributes.
