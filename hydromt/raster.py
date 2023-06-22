@@ -1155,7 +1155,7 @@ class XRasterBase(XGeoBase):
             bbox = rasterio.warp.transform_bounds(geom.crs, self.crs, *bbox)
         obj_clip = self.clip_bbox(bbox, align=align, buffer=buffer)
         if mask:
-            obj_clip.coords["mask"] = obj_clip.raster.geometry_mask(geom) 
+            obj_clip.coords["mask"] = obj_clip.raster.geometry_mask(geom)
             obj_clip = obj_clip.raster.mask(obj_clip.coords["mask"])
         return obj_clip
 
