@@ -12,11 +12,11 @@ repos:
       - id: debug-statements
       - id: mixed-line-ending
 
-  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.2.1
-    hooks:
-      - id: yamlfmt
-        args: [--mapping, '2', --sequence, '4', --offset, '2']
+  # - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+  #   rev: 0.2.1
+  #   hooks:
+  #     - id: yamlfmt
+  #       args: [--mapping, '2', --sequence, '4', --offset, '2']
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.0.270

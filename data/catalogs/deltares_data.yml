@@ -2,7 +2,7 @@
 meta:
   root: p:/wflow_global/hydromt
   version: 2023.3
-  
+
 
 basin_atlas_level12_v10:
   crs: 4326
@@ -1836,6 +1836,7 @@ worldclim_v2.0:
     paper_ref: Fick and Hijmans (2017)
     source_url: https://www.worldclim.org/data/worldclim21.html
     source_version: 2
+    nodata: -999.0
   path: meteo/worldclim_v2.0/wc2.0_30s_prec.nc
   rename:
     prec: precip
