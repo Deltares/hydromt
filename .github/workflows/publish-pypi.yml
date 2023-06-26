@@ -11,6 +11,7 @@ on:
 
 jobs:
   build-artifacts:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,21 +23,8 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install flit wheel twine
-
-      - name: Build tarball and wheels
-        run: |
-          git clean -xdf
-          git restore -SW .
-          flit build
-
-      - name: Check built artifacts
-        run: |
-          python -m twine check dist/*
-          pwd
+      - name: Build artifacts
+        run: make pypi
 
       - uses: actions/upload-artifact@v3
         with:
@@ -44,6 +32,7 @@ jobs:
           path: dist
 
   test-built-dist:
+    timeout-minutes: 10
     needs: build-artifacts
     runs-on: ubuntu-latest
     defaults:
@@ -86,6 +75,7 @@ jobs:
           echo "hydromt --models"
 
   upload-to-test-pypi:
+    timeout-minutes: 10
     needs: test-built-dist
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -104,8 +94,9 @@ jobs:
           skip_existing: true
 
   upload-to-pypi:
+    timeout-minutes: 10
     needs: test-built-dist
-    if: github.event_name == 'release'
+    if: ${{ github.event_name == 'release' && !github.event.act  }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3

@@ -292,16 +292,12 @@ def test_dataframe(df, df_time, tmpdir):
     assert isinstance(fwf, pd.DataFrame)
     assert np.all(fwf == df)
 
-    fn_xlsx = str(tmpdir.join("test.xlsx"))
-    df.to_excel(fn_xlsx)
-    data_dict = {
-        "test_excel": {"path": fn_xlsx, "data_type": "DataFrame", "driver": "excel"}
-    }
-    data_catalog.from_dict(data_dict)
-    data_catalog["test_excel"].to_file(tmpdir, "text_excel", driver="excel")
-    df2 = data_catalog.get_dataframe(fn_xlsx, driver_kwargs=dict(index_col=0))
-    assert isinstance(df2, pd.DataFrame)
-    assert np.all(df2 == df)
+    if compat.HAS_OPENPYXL:
+        fn_xlsx = str(tmpdir.join("test.xlsx"))
+        df.to_excel(fn_xlsx)
+        df2 = data_catalog.get_dataframe(fn_xlsx, index_col=0)
+        assert isinstance(df2, pd.DataFrame)
+        assert np.all(df2 == df)
 
 
 def test_dataframe_unit_attrs(artifact_data: DataCatalog, df: pd.DataFrame):

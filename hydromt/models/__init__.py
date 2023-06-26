@@ -7,9 +7,7 @@ from .model_lumped import *
 from .model_network import *
 from .model_plugins import *
 
-# NOTE: pygeos is still required in XUGRID;
-# remove requirement after https://github.com/Deltares/xugrid/issues/33
-if _compat.HAS_XUGRID and _compat.HAS_PYGEOS:
+if _compat.HAS_XUGRID:
     from .model_mesh import MeshModel
 
 # expose global MODELS object which discovers and loads

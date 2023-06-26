@@ -52,7 +52,7 @@ HydroMT is organized in the following way:
 - **Methods and workflow**
 
   Most of the heavy work in HydroMT is done by :ref:`Methods and workflows <methods_workflows>`,
-  indicated by the gear wheels in \autoref{fig:schematic}. Methods provide the low-level functionality
+  indicated by the gear wheels in the image :ref:`arch` below. Methods provide the low-level functionality
   such as GIS rasterization, reprojection, or zonal statistics. Workflows combine several methods to
   transform data to a model layer or postprocess model results. Examples of workflows include the
   delineation of hydrological basins (watersheds), conversion of landuse-landcover data to model
@@ -71,6 +71,8 @@ A user can interact with HydroMT through the following interfaces:
   While most common functionalities can be called through the CLI, the Python interface offers more flexibility for advanced users.
   It allows you to e.g. interact directly with a model component :ref:`Model API <model_interface>` and apply the many
   methods and workflows available. Please find all available functions :ref:`API reference <api_reference>`
+
+.. _arch:
 
 .. figure:: ../_static/Architecture_model_data_input.png
 
@@ -126,7 +128,6 @@ Region                          Argument of the *build* and *clip* CLI methods t
    data_conventions.rst
    ../_examples/prep_data_catalog.ipynb
    ../_examples/export_data.ipynb
-   ../_examples/tiling_raster_data.ipynb
    ../_examples/reading_raster_data.ipynb
    ../_examples/reading_vector_data.ipynb
    ../_examples/reading_point_data.ipynb

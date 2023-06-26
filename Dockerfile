@@ -1,15 +1,70 @@
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.6.4
+FROM  mambaorg/micromamba:1.4-alpine AS min
+ENV HOME=/home/mambauser
+WORKDIR ${HOME}
+USER mambauser
+COPY min-environment.yml pyproject.toml README.rst ${HOME}/
+RUN micromamba create -f min-environment.yml -y --no-pyc \
+ && micromamba clean -ayf \
+ && rm -rf ${HOME}/.cache \
+ && find /opt/conda/ -follow -type f -name '*.a' -delete \
+ && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete  \
+ && rm min-environment.yml
+COPY data/ ${HOME}/data
+COPY examples/ ${HOME}/examples
+COPY tests/ ${HOME}/tests
+COPY hydromt/ ${HOME}/hydromt
+RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disable-pip-version-check --no-deps\
+ && micromamba clean -ayf \
+ && find /opt/conda/ -follow -type f -name '*.a' -delete \
+ && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete
+ ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
+ CMD ["hydromt","--models"]
 
-RUN apt-get update && apt-get install  -y --fix-missing --no-install-recommends libgdal-dev gcc lzma-dev python3-dev python3-pip
-WORKDIR /hydromt
-COPY hydromt /hydromt/hydromt
-COPY envs/docker-requirements.txt /hydromt/requirements.txt
-COPY README.rst /hydromt/
-COPY pyproject.toml /hydromt/pyproject.toml
+FROM  mambaorg/micromamba:1.4-alpine AS full
+ENV HOME=/home/mambauser
+WORKDIR ${HOME}
+USER mambauser
+COPY full-environment.yml pyproject.toml README.rst ${HOME}/
+RUN micromamba create -f full-environment.yml -y --no-pyc \
+ && micromamba clean -ayf \
+ && rm -rf ${HOME}/.cache \
+ && find /opt/conda/ -follow -type f -name '*.a' -delete \
+ && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete  \
+ && rm full-environment.yml
+COPY data/ ${HOME}/data
+COPY examples/ ${HOME}/examples
+COPY tests/ ${HOME}/tests
+COPY hydromt/ ${HOME}/hydromt
+RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disable-pip-version-check --no-deps\
+ && micromamba clean -ayf \
+ && find /opt/conda/ -follow -type f -name '*.a' -delete \
+ && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete
+ ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
+ CMD ["hydromt","--models"]
 
-RUN pip install -r requirements.txt
-RUN pip install .
-
-RUN groupadd -r hydromt && useradd -r -g hydromt hydromt
-USER hydromt
-ENTRYPOINT ["hydromt"]
+FROM  mambaorg/micromamba:1.4-alpine AS slim
+ENV HOME=/home/mambauser
+WORKDIR ${HOME}
+USER mambauser
+COPY slim-environment.yml pyproject.toml README.rst ${HOME}/
+RUN micromamba create -f slim-environment.yml -y --no-pyc \
+ && rm -rf ${HOME}/.cache \
+ && micromamba clean -ayf \
+ && find /opt/conda/ -follow -type f -name '*.a' -delete \
+ && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete  \
+ && rm slim-environment.yml
+COPY data/ ${HOME}/data
+COPY examples/ ${HOME}/examples
+COPY hydromt/ ${HOME}/hydromt
+RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disable-pip-version-check --no-deps\
+ && micromamba clean -ayf \
+ && find /opt/conda/ -follow -type f -name '*.a' -delete \
+ && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
+ && find /opt/conda/ -follow -type f -name '*.js.map' -delete
+ ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
+ CMD ["hydromt","--models"]

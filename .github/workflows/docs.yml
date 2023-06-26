@@ -1,16 +1,29 @@
 ---
-name: Build docs
+name: Build Documentation
 
 # We don't want pushes (or PRs) to gh-pages to kick anything off
 on:
   push:
     branches: [main]
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
+      - docs/*
+      - examples/*
   pull_request:
     branches: [main]
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
+      - docs/*
+      - examples/*
 
 jobs:
   # Build docs on Linux
   Docs:
+    timeout-minutes: 10
     name: linux docs
     runs-on: ubuntu-latest
     env:
@@ -18,6 +31,9 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
@@ -41,15 +57,13 @@ jobs:
 
       - name: Build docs
         run: |
-          pushd docs
           make html
-          popd
 
       - name: Set doc version
         run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
-        if: ${{ github.event_name != 'pull_request'}}
+        if: ${{ github.event_name != 'pull_request' && !github.event.act }}
         uses: peaceiris/actions-gh-pages@v3.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

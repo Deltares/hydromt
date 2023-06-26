@@ -28,6 +28,7 @@ Changed
 Fixed
 -----
 - Order of renaming variables in get_rasterdataset for x,y dimensions. PR #324
+- fix bug in ``get_basin_geometry`` for region kind 'subbasin' if no stream or outlet option is specified.
 
 Deprecated
 ----------

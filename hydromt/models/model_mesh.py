@@ -417,7 +417,7 @@ class MeshModel(MeshMixin, Model):
                 # TODO: grid.intersects(geom) does not seem to work ?
                 grid = grid.loc[
                     gpd.sjoin(
-                        grid, geom, how="left", op="intersects"
+                        grid, geom, how="left", predicate="intersects"
                     ).index_right.notna()
                 ].reset_index()
             # Create mesh from grid

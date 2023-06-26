@@ -83,8 +83,12 @@ class GeoDatasetAdapter(DataAdapter):
             data unit to the output data unit as required by hydroMT.
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license',
-            'paper_ref', 'paper_doi', 'category'}
+            - 'source_version'
+            - 'source_url'
+            - 'source_license'
+            - 'paper_ref'
+            - 'paper_doi'
+            - 'category'
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
@@ -162,6 +166,17 @@ class GeoDatasetAdapter(DataAdapter):
         )
         if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
             return None, None
+
+        # much better for mem/storage/processing if dtypes are set correctly
+        for name, coord in obj.coords.items():
+            if coord.values.dtype != object:
+                continue
+
+            # not sure if coordinates values of different dtypes
+            # are possible, but let's just hope users aren't
+            # that mean for now.
+            if isinstance(coord.values[0], str):
+                obj[name] = obj[name].astype(str)
 
         if driver is None or driver == "netcdf":
             # always write netcdf

@@ -1,3 +1,6 @@
+import os
+
+os.environ["USE_PYGEOS"] = "0"
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -80,7 +83,7 @@ def geodf(df):
 
 @pytest.fixture()
 def world():
-    world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+    world = gpd.read_file("tests/data/naturalearth_lowres.geojson")
     return world
 
 
@@ -241,7 +244,7 @@ def mesh_model(griduda):
     return mod
 
 
-@pytest.fixture
+@pytest.fixture()
 def artifact_data():
     datacatalog = DataCatalog()
     datacatalog.from_predefined_catalogs("artifact_data")

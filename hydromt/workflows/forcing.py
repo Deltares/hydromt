@@ -519,7 +519,7 @@ def pet_debruin(
         pressure at surface [hPa]
     k_in : xarray.DataArray
         global (=short wave incoming) radiation [W m-2]
-    k_ext : xarray.DataArray}
+    k_ext : xarray.DataArray
         TOA incident solar radiation [W m-2]
     timestep : int, default 86400
         seconds per timestep

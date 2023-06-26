@@ -4,22 +4,30 @@ name: Tests
 on:
   push:
     branches: [main]
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
   pull_request:
     branches: [main]
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
 
 jobs:
   Test-matrix:
     name: ${{ matrix.os }} - py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     defaults:
       run:
         shell: bash -l {0}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]    #, "macos-latest", "windows-latest"]
-        python-version: ['3.9', '3.10', '3.11'] # fix tests to support older versions
-
+        os: [ubuntu-latest]
+        python-version: ['3.9', '3.10', '3.11']
     steps:
       - uses: actions/checkout@v3
       - name: Generate env spec
@@ -37,3 +45,7 @@ jobs:
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - uses: codecov/codecov-action@v3
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

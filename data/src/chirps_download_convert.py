@@ -21,7 +21,7 @@ def download_file(url, outdir=os.path.dirname(__file__)):
     url (str): The URL of the file to download.
     outdir (str): The output directory to save the downloaded file.
 
-    Returns:
+    Returns
     -------
         None
     """
@@ -44,7 +44,7 @@ def download_file(url, outdir=os.path.dirname(__file__)):
 def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
     """Download daily CHIRPS data for Africa within the specified date range.
 
-    Arguments:
+    Arguments
     ---------
     outroot :
         The root directory to save the downloaded files.
@@ -53,7 +53,7 @@ def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
     end :
         The end date in the format "YYYY-MM-DD" (default: "2021-03-31").
 
-    Returns:
+    Returns
     -------
         None
     """
@@ -87,7 +87,7 @@ def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
 def tifs_to_nc(folder, year):
     """Convert downloaded CHIRPS TIFF files for a specific year to NetCDF format.
 
-    Arguments:
+    Arguments
     ---------
     folder: str
         The root folder where the downloaded TIFF files are located.
