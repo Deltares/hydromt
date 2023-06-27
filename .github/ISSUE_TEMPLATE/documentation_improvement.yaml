@@ -9,8 +9,7 @@ body:
       label: HydroMT version checks
       options:
         - label: >
-            I have checked that the issue still exists on the latest versions of the docs
-            on `main` [here](https://github.com/Deltares/hydromt)
+            I have checked that the issue still exists on the latest versions of the docs on `main` [here](https://github.com/Deltares/hydromt)
           required: true
   - type: dropdown
     id: kind
