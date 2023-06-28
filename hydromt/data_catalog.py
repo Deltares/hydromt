@@ -988,7 +988,7 @@ def _parse_data_dict(
         # Only for local files
         path = source.pop("path")
         # if remote path, keep as is else call abs_path method to solve local files
-        if not _uri_validator(path):
+        if not _uri_validator(str(path)):
             path = abs_path(root, path)
         meta = source.pop("meta", {})
         if "category" not in meta and category is not None:
@@ -1025,7 +1025,7 @@ def _parse_data_dict(
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
-    if _uri_validator(uri_or_path):
+    if _uri_validator(str(uri_or_path)):
         with requests.get(uri_or_path, stream=True) as r:
             if r.status_code != 200:
                 raise IOError(f"URL {r.content}: {uri_or_path}")

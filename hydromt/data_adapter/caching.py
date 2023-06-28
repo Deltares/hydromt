@@ -5,6 +5,7 @@ import shutil
 from ast import literal_eval
 from os.path import basename, dirname, isdir, isfile, join
 from pathlib import Path
+from typing import Union
 from urllib.parse import urlparse
 
 import geopandas as gpd
@@ -19,10 +20,10 @@ logger = logging.getLogger(__name__)
 HYDROMT_DATADIR = join(Path.home(), ".hydromt_data")
 
 
-def _uri_validator(uri: str) -> bool:
+def _uri_validator(uri: Union[str, Path]) -> bool:
     """Check if uri is valid."""
     try:
-        result = urlparse(uri)
+        result = urlparse(str(uri))
         return all([result.scheme, result.netloc])
     except ValueError | AttributeError:
         return False
