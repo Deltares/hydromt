@@ -127,6 +127,10 @@ class DataCatalog(object):
 
     @property
     def keys(self) -> List:
+        warnings.warn(
+            'Using iterating over the DataCatalog directly is deprecated. Please use cat.get_sources()',
+            DeprecationWarning,
+        )
         """Returns list of data source names."""
         return list(self._sources.keys())
 
@@ -139,10 +143,18 @@ class DataCatalog(object):
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
+        warnings.warn(
+            'Using iterating over the DataCatalog directly is deprecated. Please use cat.get_source("name")',
+            DeprecationWarning,
+        )
         return self._sources[key]
 
     def __setitem__(self, key: str, value: DataAdapter) -> None:
         """Set or update adaptors."""
+        warnings.warn(
+            'Using DataCatalog as a dictionary directly is deprecated. Please use cat.add_source(adapter)',
+            DeprecationWarning,
+        )
         if not isinstance(value, DataAdapter):
             raise ValueError(f"Value must be DataAdapter, not {type(key).__name__}.")
         if key in self._sources:
@@ -151,10 +163,18 @@ class DataCatalog(object):
 
     def __iter__(self):
         """Iterate over sources."""
+        warnings.warn(
+            'Using iterating over the DataCatalog directly is deprecated. Please use cat.get_sources()',
+            DeprecationWarning,
+        )
         return self._sources.__iter__()
 
     def __len__(self):
         """Return number of sources."""
+        warnings.warn(
+            'Using len on DataCatalog directly is deprecated. Please use len(cat.get_sources())',
+            DeprecationWarning,
+        )
         return self._sources.__len__()
 
     def __repr__(self):
@@ -165,7 +185,7 @@ class DataCatalog(object):
         return self.to_dataframe()._repr_html_()
 
     def update(self, **kwargs) -> None:
-        """Add data sources to library."""
+        """Add data sources to library or update them."""
         for k, v in kwargs.items():
             self[k] = v
 
