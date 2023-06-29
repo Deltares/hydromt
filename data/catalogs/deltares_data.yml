@@ -141,7 +141,7 @@ copdem30_v2021.1:
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
     source_version: '2021_1'
-  nodata: -9999  # copdem has no actual nodata, this is to suppress a missing nodata warning
+  nodata: -9999 # copdem has no actual nodata, this is to suppress a missing nodata warning
   path: topography/copdem/copdem.vrt
   rename:
     copdem: elevtn
@@ -160,7 +160,7 @@ copdem30_mask_v2021.1:
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
     source_version: '2021_1'
-  nodata: -1  # copdem has no actual nodata, this is to suppress a missing nodata warning
+  nodata: -1 # copdem has no actual nodata, this is to suppress a missing nodata warning
   path: topography/copdem/copdem_mask.vrt
   rename:
     copdem_mask: mask
