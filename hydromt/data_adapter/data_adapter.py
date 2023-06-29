@@ -191,8 +191,6 @@ class DataAdapter(object, metaclass=ABCMeta):
         # meta data
         self.meta = {k: v for k, v in meta.items() if v is not None}
         # variable attributes
-        # for var in self.var:
-        #     self[var].attrs.update(**attrs[var])
         self.attrs = {k: v for k, v in attrs.items() if v is not None}
 
     @property

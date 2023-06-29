@@ -29,7 +29,6 @@ class GeoBase(raster.XGeoBase):
         """Initialize a new object based on the provided xarray_obj."""
         super(GeoBase, self).__init__(xarray_obj)
         self._geometry = None
-        self.nodata = np.nan  # placeholder nodata variable TODO
 
     @property
     def _all_names(self):

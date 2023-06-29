@@ -246,8 +246,6 @@ def test_set_nodata_geodataset(artifact_data: DataCatalog):
     datacatalog = DataCatalog()
     datacatalog.from_dict(gtsm_dict)
     datacatalog.get_geodataset("gtsmv3_eu_era5")
-    # assert gtsm_geodataarray.vector.nodata == -99 TODO assertion cannot be made
-    # since set_noda for GeoDataArray.vector does not exist
 
 
 def test_geodataframe(geodf, tmpdir):
