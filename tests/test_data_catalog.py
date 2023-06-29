@@ -2,6 +2,7 @@
 
 import os
 from os.path import abspath, dirname, join
+from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
@@ -26,6 +27,10 @@ def test_parser():
     }
     dd_out = _parse_data_dict(dd, root=root)
     assert isinstance(dd_out["test"], RasterDatasetAdapter)
+    assert dd_out["test"].path == abspath(dd["test"]["path"])
+    # test with Path object
+    dd["test"].update(path=Path(dd["test"]["path"]))
+    dd_out = _parse_data_dict(dd, root=root)
     assert dd_out["test"].path == abspath(dd["test"]["path"])
     # rel path
     dd = {
@@ -62,6 +67,7 @@ def test_parser():
     assert len(dd_out) == 6
     assert dd_out["test_a_1"].path == abspath(join(root, "data_1.tif"))
     assert "placeholders" not in dd_out["test_a_1"].to_dict()
+
     # errors
     with pytest.raises(ValueError, match="Missing required path argument"):
         _parse_data_dict({"test": {}})
