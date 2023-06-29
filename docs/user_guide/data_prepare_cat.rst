@@ -90,7 +90,7 @@ A full list of **optional data source arguments** is given below
   *gcs* for data stored on Google Cloud Storage, and *aws* for data stored on Amazon Web Services. Profile or authentication information can be passed to ``driver_kwargs`` via
   *storage_options*.
 - **driver_kwargs**: pairs of key value arguments to pass to the driver specific open data method (eg xr.open_mfdataset for netdcf raster, see the full list below).
-  Only used if not crs can be inferred from the input data.
+  Only used if not crs can be inferred from the input data. Added with HydroMT v0.7.2
 - **meta** (recommended): additional information on the dataset organized in a sub-list.
   Good meta data includes a *source_url*, *source_license*, *source_version*, *paper_ref*, *paper_doi*, *category*, etc. These are added to the data attributes.
   Usual categories within HydroMT are *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data*
@@ -108,12 +108,11 @@ A full list of **optional data source arguments** is given below
   see `Reading tiled raster data with different zoom levels <../_examples/working_with_tiled_raster_data.ipynb>`_.
 - **rename**: pairs of variable names in the input data (*old_variable_name*) and the corresponding
   :ref:`HydroMT variable naming conventions <data_convention>` and :ref:`recognized dimension names <dimensions>` (*new_variable_name*).
-- **units** (optional and for *RasterDataset* only). specify the units of the input data: supported are [m3], [m], [mm], and [m3/s].
-  This option is used *only* for the forcing of the Delwaq models in order to do specific unit conversions that cannot be handled from simple
-  addition or multiplication (e.g. conversion from mm water equivalent to m3/s of water which requires a multiplication by each grid cell area and not a fixed number).
 - **unit_add**: add or substract a value to the input data for unit conversion (e.g. -273.15 for conversion of temperature from Kelvin to Celsius).
 - **unit_mult**: multiply the input data by a value for unit conversion (e.g. 1000 for conversion from m to mm of precipitation).
-
+- **attrs** (optional): This argument allows for setting attributes like the unit or long name to variables. Consider units is optional and for *RasterDataset* only. Specify the units of the input data: supported are [m3], [m], [mm], and [m3/s].
+  This option is used *only* for the forcing of the Delwaq models in order to do specific unit conversions that cannot be handled from simple
+  addition or multiplication (e.g. conversion from mm water equivalent to m3/s of water which requires a multiplication by each grid cell area and not a fixed number). Added with HydroMT v0.7.2
 .. note::
 
   The **alias** argument will be deprecated and should no longer be used, see `github issue for more information <https://github.com/Deltares/hydromt/issues/148>`_

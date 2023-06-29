@@ -92,6 +92,9 @@ class GeoDatasetAdapter(DataAdapter):
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         name, catalog_name: str, optional

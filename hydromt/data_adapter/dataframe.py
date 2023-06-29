@@ -38,12 +38,11 @@ class DataFrameAdapter(DataAdapter):
         name="",  # optional for now
         catalog_name="",  # optional for now
     ):
-        """Initiate data adapter for geospatial timeseries data.
+        """Initiate data adapter for 2D tabular data.
 
         This object contains all properties required to read supported files into
-        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial
-        point geometries. In addition it keeps meta data to be able to reproduce which
-        data is used.
+        a :py:func:`pandas.DataFrame`.
+        In addition it keeps meta data to be able to reproduce which data is used.
 
         Parameters
         ----------
@@ -78,6 +77,9 @@ class DataFrameAdapter(DataAdapter):
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         name, catalog_name: str, optional

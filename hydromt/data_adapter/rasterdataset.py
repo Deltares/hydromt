@@ -51,12 +51,12 @@ class RasterDatasetAdapter(DataAdapter):
         catalog_name="",  # optional for now
         zoom_levels={},
     ):
-        """Initiate data adapter for geospatial timeseries data.
+        """Initiate data adapter for geospatial raster data.
 
-        This object contains all properties required to read supported files into
-        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial
-        point geometries. In addition it keeps meta data to be able to reproduce which
-        data is used.
+        This object contains all properties required to read supported raster files into
+        a single unified RasterDataset, i.e. :py:class:`xarray.Dataset` with geospatial
+        attributes. In addition it keeps meta data to be able to reproduce
+        which data is used.
 
         Parameters
         ----------
@@ -77,8 +77,6 @@ class RasterDatasetAdapter(DataAdapter):
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
             proj (str or dict) or wkt (str). Only used if the data has no native CRS.
-        zoomlevel: dict, optional
-            TODO
         nodata: float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Nodata values can be differentiated between variables using a dictionary.
@@ -95,10 +93,16 @@ class RasterDatasetAdapter(DataAdapter):
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
+        zoomlevels: dict, optional
+            TODO
+
         """
         super().__init__(
             path=path,

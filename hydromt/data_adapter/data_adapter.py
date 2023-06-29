@@ -115,8 +115,6 @@ class DataAdapter(object, metaclass=ABCMeta):
         self,
         path,
         driver=None,
-        name="",  # optional for now
-        catalog_name="",  # optional for now
         filesystem="local",
         nodata=None,
         rename={},
@@ -125,13 +123,10 @@ class DataAdapter(object, metaclass=ABCMeta):
         meta={},
         attrs={},
         driver_kwargs={},
+        name="",  # optional for now
+        catalog_name="",  # optional for now
     ):
-        """Initiate data adapter for geospatial timeseries data.
-
-        This object contains all properties required to read supported files into
-        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial
-        point geometries. In addition it keeps meta data to be able to reproduce which
-        data is used.
+        """General Interface to data source for HydroMT.
 
         Parameters
         ----------
@@ -164,10 +159,14 @@ class DataAdapter(object, metaclass=ABCMeta):
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
+
         """
         self.name = name
         self.catalog_name = catalog_name
@@ -216,10 +215,6 @@ class DataAdapter(object, metaclass=ABCMeta):
         for k, v in vars(self).items():
             if k in ["name", "catalog_name"]:
                 continue  # do not add these identifiers
-            if (
-                k == "driver_kwargs"
-            ):  # Prevent driver_kwargs name from ending up in the data catalog
-                k = "kwargs"
             if v is not None and (not isinstance(v, dict) or len(v) > 0):
                 source.update({k: v})
         return source
