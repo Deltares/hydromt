@@ -1,33 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""DataCatalog module for HydroMT"""
+"""DataCatalog module for HydroMT."""
 from __future__ import annotations
-import os
-from os.path import join, isdir, dirname, basename, isfile, abspath, exists
+
 import copy
-from pathlib import Path
-from typing import Dict, List, Tuple, Union, Optional
+import itertools
+import logging
+import os
+import shutil
 import warnings
+from os.path import abspath, basename, exists, isdir, isfile, join
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
+import requests
 import xarray as xr
 import yaml
-import logging
-import requests
-import shutil
 from packaging.version import Version
-import itertools
 
 from .data_adapter import (
     DataAdapter,
-    RasterDatasetAdapter,
-    GeoDatasetAdapter,
-    GeoDataFrameAdapter,
     DataFrameAdapter,
+    GeoDataFrameAdapter,
+    GeoDatasetAdapter,
+    RasterDatasetAdapter,
 )
-from .data_adapter.caching import _uri_validator, _copyfile, HYDROMT_DATADIR
+from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,9 @@ __all__ = [
 
 
 class DataCatalog(object):
+
+    """Base class for the data catalog object."""
+
     # root URL with data_catalog file
     _url = r"https://raw.githubusercontent.com/Deltares/hydromt/main/data/predefined_catalogs.yml"
     _cache_dir = HYDROMT_DATADIR
@@ -50,17 +55,21 @@ class DataCatalog(object):
         cache_dir: str = None,
         **artifact_keys,
     ) -> None:
-        """Catalog of DataAdapter sources to easily read from different files
-        and keep track of files which have been accessed.
+        """Catalog of DataAdapter sources.
+
+        Helps to easily read from different files and keep track of
+        files which have been accessed.
 
         Arguments
         ---------
         data_libs: (list of) str, Path, optional
-            One or more paths to data catalog yaml files or names of predefined data catalogs.
-            By default the data catalog is initiated without data entries.
-            See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yaml format.
+            One or more paths to data catalog yaml files or names of predefined data
+            catalogs. By default the data catalog is initiated without data entries.
+            See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for
+            accepted yaml format.
         fallback_lib:
-            Name of pre-defined data catalog to read if no data_libs are provided, by default 'artifact_data'.
+            Name of pre-defined data catalog to read if no data_libs are provided,
+            by default 'artifact_data'.
             If None, no default data catalog is used.
         cache: bool, optional
             Set to true to cache data locally before reading.
@@ -69,6 +78,9 @@ class DataCatalog(object):
             Folder root path to cach data to, by default ~/.hydromt_data
         artifact_keys:
             Deprecated from version v0.5
+        logger : logger object, optional
+            The logger object used for logging messages. If not provided, the default
+            logger will be used.
         """
         if data_libs is None:  # legacy code. to be removed
             data_libs = []
@@ -120,14 +132,17 @@ class DataCatalog(object):
 
     @property
     def predefined_catalogs(self) -> Dict:
+        """Return all predefined catalogs."""
         if not self._catalogs:
             self.set_predefined_catalogs()
         return self._catalogs
 
     def __getitem__(self, key: str) -> DataAdapter:
+        """Get the source."""
         return self._sources[key]
 
     def __setitem__(self, key: str, value: DataAdapter) -> None:
+        """Set or update adaptors."""
         if not isinstance(value, DataAdapter):
             raise ValueError(f"Value must be DataAdapter, not {type(key).__name__}.")
         if key in self._sources:
@@ -135,12 +150,15 @@ class DataCatalog(object):
         return self._sources.__setitem__(key, value)
 
     def __iter__(self):
+        """Iterate over sources."""
         return self._sources.__iter__()
 
     def __len__(self):
+        """Return number of sources."""
         return self._sources.__len__()
 
     def __repr__(self):
+        """Prettyprint the sources."""
         return self.to_dataframe().__repr__()
 
     def _repr_html_(self):
@@ -152,6 +170,7 @@ class DataCatalog(object):
             self[k] = v
 
     def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
+        """Initialise the predefined catalogs."""
         # get predefined_catalogs
         urlpath = self._url if urlpath is None else urlpath
         cache_path = join(self._cache_dir, basename(urlpath))
@@ -160,7 +179,8 @@ class DataCatalog(object):
             _copyfile(urlpath, cache_path)
         except Exception:  # if offline
             self.logger.warning(
-                "Downloading the predefined catalogs failed; check your internet connection"
+                "Downloading the predefined catalogs failed;"
+                "check your internet connection"
             )
             pass
         if isfile(cache_path):
@@ -174,7 +194,10 @@ class DataCatalog(object):
     def from_artifacts(
         self, name: str = "artifact_data", version: str = "latest"
     ) -> None:
-        """Deprecated method. Use :py:func:`hydromt.data_catalog.DataCatalog.from_predefined_catalogs` instead
+        """Parse artifacts.
+
+        Deprecated method. Use
+        :py:func:`hydromt.data_catalog.DataCatalog.from_predefined_catalogs` instead.
 
         Parameters
         ----------
@@ -184,12 +207,13 @@ class DataCatalog(object):
             Release version. By default it takes the latest known release.
         """
         warnings.warn(
-            f'"from_artifacts" is deprecated. Use "from_predefined_catalogs instead".',
+            '"from_artifacts" is deprecated. Use "from_predefined_catalogs instead".',
             DeprecationWarning,
         )
         self.from_predefined_catalogs(name, version)
 
     def from_predefined_catalogs(self, name: str, version: str = "latest") -> None:
+        """Generate a catalogue from one of the predefined ones."""
         if "=" in name:
             name, version = name.split("=")[0], name.split("=")[-1]
         if name not in self.predefined_catalogs:
@@ -215,7 +239,7 @@ class DataCatalog(object):
     def from_archive(
         self, urlpath: Union[Path, str], version: str = None, name: str = None
     ) -> None:
-        """Read a data archive including a data_catalog.yml file"""
+        """Read a data archive including a data_catalog.yml file."""
         name = basename(urlpath).split(".")[0] if name is None else name
         root = join(self._cache_dir, name)
         if version is not None:
@@ -340,8 +364,8 @@ class DataCatalog(object):
 
         Examples
         --------
-        A data dictionary with two entries is provided below, where all the text between <>
-        should be filled by the user. See the specific data adapters
+        A data dictionary with two entries is provided below, where all the text between
+        <> should be filled by the user. See the specific data adapters
         for more information about the required and optional arguments.
 
         .. code-block:: text
@@ -394,14 +418,16 @@ class DataCatalog(object):
             yaml output path.
         root: str, Path, optional
             Global root for all relative paths in yaml file.
-            If "auto" (default) the data source paths are relative to the yaml output ``path``.
+            If "auto" (default) the data source paths are relative to the yaml
+            output ``path``.
         source_names: list, optional
-            List of source names to export, by default None in which case all sources are exported.
-            This argument is ignored if `used_only=True`.
+            List of source names to export, by default None in which case all sources
+            are exported. This argument is ignored if `used_only=True`.
         used_only: bool, optional
             If True, export only data entries kept in used_data list, by default False.
         meta: dict, optional
-            key-value pairs to add to the data catalog meta section, such as 'version', by default empty.
+            key-value pairs to add to the data catalog meta section, such as 'version',
+            by default empty.
         """
         source_names = self._used_data if used_only else source_names
         yml_dir = os.path.dirname(abspath(path))
@@ -427,11 +453,13 @@ class DataCatalog(object):
         Parameters
         ----------
         source_names : list, optional
-            List of source names to export, by default None in which case all sources are exported.
+            List of source names to export, by default None in which case all sources
+            are exported.
         root : str, Path, optional
             Global root for all relative paths in yml file.
         meta: dict, optional
-            key-value pairs to add to the data catalog meta section, such as 'version', by default empty.
+            key-value pairs to add to the data catalog meta section, such as 'version',
+            by default empty.
 
         Returns
         -------
@@ -465,7 +493,7 @@ class DataCatalog(object):
         return sources_out
 
     def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
-        """Return data catalog summary as DataFrame"""
+        """Return data catalog summary as DataFrame."""
         d = dict()
         for name, source in self._sources.items():
             if len(source_names) > 0 and name not in source_names:
@@ -495,14 +523,16 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         source_names: list, optional
-            List of source names to export, by default None in which case all sources are exported.
-            Specific variables can be selected by appending them to the source name in square brackets.
-            For example, to export all variables of 'source_name1' and only 'var1' and 'var2' of 'source_name'
+            List of source names to export, by default None in which case all sources
+            are exported. Specific variables can be selected by appending them to the
+            source name in square brackets. For example, to export all variables of
+            'source_name1' and only 'var1' and 'var2' of 'source_name'
             use source_names=['source_name1', 'source_name2[var1,var2]']
         unit_conversion: boolean, optional
             If False skip unit conversion when parsing data from file, by default True.
         meta: dict, optional
-            key-value pairs to add to the data catalog meta section, such as 'version', by default empty.
+            key-value pairs to add to the data catalog meta section, such as 'version',
+            by default empty.
         append: bool, optional
             If True, append to existing data catalog, by default False.
         """
@@ -591,15 +621,17 @@ class DataCatalog(object):
         single_var_as_array: bool = True,
         **kwargs,
     ) -> xr.Dataset:
-        """Returns a clipped, sliced and unified RasterDataset.
+        """Return a clipped, sliced and unified RasterDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` and `align` arguments.
-        To slice the data to the time period of interest, provide the `time_tuple` argument.
-        To return only the dataset variables of interest provide the `variables` argument.
+        To slice the data to the time period of interest, provide the `time_tuple`
+        argument. To return only the dataset variables of interest provide the
+        `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
-        will be returned as :py:class:`xarray.DataArray` rather than :py:class:`xarray.Dataset`.
+        will be returned as :py:class:`xarray.DataArray` rather than
+        :py:class:`xarray.Dataset`.
 
         Arguments
         ---------
@@ -608,13 +640,14 @@ class DataCatalog(object):
             If a path to a raster file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
+            (xmin, ymin, xmax, ymax) bounding box of area of interest
+            (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         zoom_level : int, tuple, optional
             Zoom level of the xyz tile dataset (0 is base level)
-            Using a tuple the zoom level can be specified as (<zoom_resolution>, <unit>),
-            e.g., (1000, 'meter')
+            Using a tuple the zoom level can be specified as
+            (<zoom_resolution>, <unit>), e.g., (1000, 'meter')
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         align : float, optional
@@ -628,6 +661,9 @@ class DataCatalog(object):
         single_var_as_array: bool, optional
             If True, return a DataArray if the dataset consists of a single variable.
             If False, always return a Dataset. By default True.
+        **kwargs:
+            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
+            function.
 
         Returns
         -------
@@ -651,7 +687,8 @@ class DataCatalog(object):
         self._used_data.append(name)
         source = self.sources[name]
         self.logger.info(
-            f"DataCatalog: Getting {name} RasterDataset {source.driver} data from {source.path}"
+            f"DataCatalog: Getting {name} RasterDataset {source.driver} data from"
+            f" {source.path}"
         )
         obj = self.sources[name].get_data(
             bbox=bbox,
@@ -677,11 +714,12 @@ class DataCatalog(object):
         predicate: str = "intersects",
         **kwargs,
     ):
-        """Returns a clipped and unified GeoDataFrame (vector).
+        """Return a clipped and unified GeoDataFrame (vector).
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` and `align` arguments.
-        To return only the dataframe columns of interest provide the `variables` argument.
+        To return only the dataframe columns of interest provide the
+        `variables` argument.
 
         Arguments
         ---------
@@ -690,19 +728,24 @@ class DataCatalog(object):
             If a path to a vector file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
+            (xmin, ymin, xmax, ymax) bounding box of area of interest
+            (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
-        predicate : {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'}, optional
-            If predicate is provided, the GeoDataFrame is filtered by testing
-            the predicate function against each item. Requires bbox or mask.
-            By default 'intersects'
+        predicate : {'intersects', 'within', 'contains', 'overlaps',
+            'crosses', 'touches'}, optional If predicate is provided,
+            the GeoDataFrame is filtered by testing the predicate function
+            against each item. Requires bbox or mask. By default 'intersects'
         align : float, optional
             Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
-            Names of GeoDataFrame columns to return. By default all columns are returned.
+            Names of GeoDataFrame columns to return. By default all columns are
+            returned.
+        **kwargs:
+            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
+            function.
 
         Returns
         -------
@@ -726,7 +769,8 @@ class DataCatalog(object):
         self._used_data.append(name)
         source = self.sources[name]
         self.logger.info(
-            f"DataCatalog: Getting {name} GeoDataFrame {source.driver} data from {source.path}"
+            f"DataCatalog: Getting {name} GeoDataFrame {source.driver} data"
+            f" from {source.path}"
         )
         gdf = source.get_data(
             bbox=bbox,
@@ -749,12 +793,13 @@ class DataCatalog(object):
         single_var_as_array: bool = True,
         **kwargs,
     ) -> xr.Dataset:
-        """Returns a clipped, sliced and unified GeoDataset.
+        """Return a clipped, sliced and unified GeoDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` and `align` arguments.
-        To slice the data to the time period of interest, provide the `time_tuple` argument.
-        To return only the dataset variables of interest provide the `variables` argument.
+        To slice the data to the time period of interest, provide the
+        `time_tuple` argument. To return only the dataset variables
+        of interest provide the `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as xarray.DataArray rather than Dataset.
@@ -766,7 +811,8 @@ class DataCatalog(object):
             If a path to a file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest (in WGS84 coordinates).
+            (xmin, ymin, xmax, ymax) bounding box of area of interest
+            (in WGS84 coordinates).
         geom : geopandas.GeoDataFrame/Series,
             A geometry defining the area of interest.
         buffer : float, optional
@@ -782,6 +828,9 @@ class DataCatalog(object):
         single_var_as_array: bool, optional
             If True, return a DataArray if the dataset consists of a single variable.
             If False, always return a Dataset. By default True.
+        **kwargs:
+            Additional keyword arguments that are passed to the `GeoDatasetAdapter`
+            function.
 
         Returns
         -------
@@ -805,7 +854,8 @@ class DataCatalog(object):
         self._used_data.append(name)
         source = self.sources[name]
         self.logger.info(
-            f"DataCatalog: Getting {name} GeoDataset {source.driver} data from {source.path}"
+            f"DataCatalog: Getting {name} GeoDataset {source.driver} data"
+            f" from {source.path}"
         )
         obj = source.get_data(
             bbox=bbox,
@@ -825,13 +875,13 @@ class DataCatalog(object):
         time_tuple: tuple = None,
         **kwargs,
     ):
-        """Returns a unified and sliced DataFrame.
+        """Return a unified and sliced DataFrame.
 
         Parameters
         ----------
         data_like : str, Path, pd.DataFrame
-            Data catalog key, path to tabular data file or tabular pandas dataframe object.
-            If a path to a tabular data file is provided it will be added
+            Data catalog key, path to tabular data file or tabular pandas dataframe
+            object. If a path to a tabular data file is provided it will be added
             to the data_catalog with its based on the file basename without extension.
         variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
@@ -839,6 +889,9 @@ class DataCatalog(object):
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
+        **kwargs:
+            Additional keyword arguments that are passed to the `DataframeAdapter`
+            function.
 
         Returns
         -------
@@ -862,7 +915,8 @@ class DataCatalog(object):
         self._used_data.append(name)
         source = self.sources[name]
         self.logger.info(
-            f"DataCatalog: Getting {name} DataFrame {source.driver} data from {source.path}"
+            f"DataCatalog: Getting {name} DataFrame {source.driver} data"
+            f" from {source.path}"
         )
         obj = source.get_data(
             variables=variables,
@@ -919,7 +973,8 @@ def _parse_data_dict(
         if "category" not in meta and category is not None:
             meta.update(category=category)
         # lower kwargs for backwards compatability
-        # FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments
+        # FIXME this could be problamatic if driver kwargs conflict DataAdapter
+        # arguments
         source.update(**source.pop("kwargs", {}))
         for opt in source:
             if "fn" in opt:  # get absolute paths for file names
@@ -968,9 +1023,6 @@ def _process_dict(d: Dict, logger=logger) -> Dict:
             d[k] = _process_dict(v)
         elif _check_key and isinstance(v, Path):
             d[k] = str(v)  # path to string
-        # elif not _check_key or not isinstance(v, (list, str, int, float, bool)):
-        #     d.pop(k)  # remove this entry
-        #     logger.debug(f'Removing non-serializable entry "{k}"')
     return d
 
 

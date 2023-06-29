@@ -1,3 +1,4 @@
+---
 meta:
   version: 2023.2
 esa_worldcover_2020_v100:
@@ -7,7 +8,7 @@ esa_worldcover_2020_v100:
   filesystem: s3
   kwargs:
     storage_options:
-      anon: True
+      anon: true
   meta:
     category: landuse
     source_license: CC BY 4.0

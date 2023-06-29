@@ -1,3 +1,4 @@
+---
 name: Build and Upload HydroMT to PyPI
 
 on:
@@ -6,8 +7,7 @@ on:
       - published
   push:
     tags:
-      - 'v*'
-
+      - v*
 
 jobs:
   build-artifacts:
@@ -16,27 +16,14 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
- 
+
       - uses: actions/setup-python@v4
         name: Install Python
         with:
           python-version: 3.8
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install flit wheel twine
-
-      - name: Build tarball and wheels
-        run: |
-          git clean -xdf
-          git restore -SW .
-          flit build
-
-      - name: Check built artifacts
-        run: |
-          python -m twine check dist/*
-          pwd
+      - name: Build artifacts
+        run: make pypi
 
       - uses: actions/upload-artifact@v3
         with:
@@ -50,7 +37,7 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
         with:
           name: releases
@@ -59,16 +46,20 @@ jobs:
         run: |
           ls -ltrh
           ls -ltrh dist
+      - name: install tomli
+        run: pip install tomli
+      - name: generate env
+        run: python make_env.py min
 
       - name: Setup environment
         uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: "3.9"
-          mamba-version: "*"
+          python-version: '3.9'
+          mamba-version: '*'
           channels: conda-forge,defaults
           channel-priority: true
-          environment-file: envs/hydromt-min.yml
-          activate-environment: hydromt-min
+          environment-file: environment.yml
+          activate-environment: hydromt
 
       - name: Conda info
         run: |
@@ -101,7 +92,7 @@ jobs:
 
   upload-to-pypi:
     needs: test-built-dist
-    if: github.event_name == 'release'
+    if: ${{ github.event_name == 'release' && !github.event.act  }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3

@@ -17,7 +17,7 @@ We recommend using the Mambaforge_ Python distribution. This installs Python
 and the `mamba package manager`_. Miniforge_ and Miniconda_ will install
 Python and the `conda package manager`_. Differences to note, in a nutshell:
 
-* **mamba** is much faster than **conda**, but has identical commands. 
+* **mamba** is much faster than **conda**, but has identical commands.
 * Mambaforge and miniforge are community driven installers, installing by
   default from the **conda-forge channel**.
 * Miniconda is a company driven (Anaconda) installer, installing by default
@@ -33,7 +33,7 @@ Dependencies
 
 The HydroMT Python package makes extensive use of the modern scientific Python
 ecosystem. The most important dependencies are listed here (for a complete list,
-see the pyproject.toml file in the repository root). These dependencies are automatically installed when 
+see the pyproject.toml file in the repository root). These dependencies are automatically installed when
 installing HydroMT with a package manager, such as conda or mamba.
 
 Data structures:
@@ -45,7 +45,7 @@ Data structures:
 Delayed/out-of-core computation, parallelization:
 
 * `dask <https://dask.org/>`__
-  
+
 Spatial and statistical operations:
 
 * `scipy <https://docs.scipy.org/doc/scipy/reference/>`__
@@ -67,8 +67,8 @@ Installation
 
 HydroMT is available from pypi and conda-forge, but we recommend installing from conda-forge in a new conda environment.
 
-.. Note:: 
-    
+.. Note::
+
     In the commands below you can exchange `conda` for `mamba`, see above for the difference between both.
 
 Install HydroMT in a new environment
@@ -84,6 +84,20 @@ To install HydroMT in a new environment called `hydromt` from the conda-forge ch
     $ conda create -n hydromt -c conda-forge hydromt
 
 Then, activate the environment (as stated by conda create) to start making use of HydroMT.
+To test whether the installation was successful you can run :code:`hydromt --models` and the output should
+look approximately like the one below:
+
+
+.. code-block:: console
+
+    $ hydromt --models
+
+    model plugins:
+    generic models (hydromt 0.7.2.dev0):
+     - grid_model
+     - lumped_model
+     - mesh_model
+     - network_model
 
 Optionally, specific versions of python or other dependencies can be set and additional packages can be added,
 for example Python version 3.9 and GDAL 3.4.1 and the HydroMT-Wflow plugin:
@@ -96,7 +110,7 @@ for example Python version 3.9 and GDAL 3.4.1 and the HydroMT-Wflow plugin:
 Install HydroMT in an existing environment
 ------------------------------------------
 
-To install HydroMT **using mamba or conda** execute the command below after activating the correct environment. 
+To install HydroMT **using mamba or conda** execute the command below after activating the correct environment.
 Note that if some dependencies are not installed from conda-forge the installation may fail.
 
 .. code-block:: console
@@ -109,7 +123,7 @@ You can also install HydroMT **using pip** from pypi (not recommended):
 
     $ pip install hydromt
 
-To install the **latest (unreleased) version from github**, execute the command below. 
+To install the **latest (unreleased) version from github**, execute the command below.
 Note that you might have to uninstall HydroMT first to successfully install from github.
 
 .. code-block:: console
@@ -121,7 +135,7 @@ Note that you might have to uninstall HydroMT first to successfully install from
 Install HydroMT plugins
 ------------------------
 To use HydroMT to set up specific models, we  separate plugins that are available as separate python packages.
-Most plugins are available on conda-forge and can be installed in the same environment. For instance, 
+Most plugins are available on conda-forge and can be installed in the same environment. For instance,
 to install HydroMT-Wflow in the environment where you have already installed HydroMT do:
 
 .. code-block:: console

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HydroMT NetworkModel class definition"""
+"""HydroMT NetworkModel class definition."""
 
-import xarray as xr
 import logging
 from typing import List
+
+import xarray as xr
+
 from .model_api import Model
 
 __all__ = ["NetworkModel"]
@@ -11,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class NetworkModel(Model):
+
+    """Implementation for the network models."""
+
     _CLI_ARGS = {"region": "setup_region"}
     _NAME = "network_model"
 
@@ -51,8 +56,9 @@ class NetworkModel(Model):
         Parameters
         ----------
         components : List, optional
-            List of model components to read, each should have an associated read_<component> method.
-            By default ['config', 'maps', 'network', 'geoms', 'forcing', 'states', 'results']
+            List of model components to read, each should have an associated
+            read_<component> method. By default ['config', 'maps',
+            'network', 'geoms', 'forcing', 'states', 'results']
         """
         super().read(components=components)
 
@@ -71,21 +77,22 @@ class NetworkModel(Model):
         Parameters
         ----------
         components : List, optional
-            List of model components to write, each should have an associated write_<component> method.
-            By default ['config', 'maps', 'network', 'geoms', 'forcing', 'states']
+            List of model components to write, each should have an
+            associated write_<component> method. By default ['config', 'maps',
+            'network', 'geoms', 'forcing', 'states']
         """
         super().write(components=components)
 
     # TODO: make NetworkMixin class with following properties/methods
     @property
-    def network(self):
+    def network(self):  # noqa: D102
         raise NotImplementedError()
 
-    def set_network(self):
+    def set_network(self):  # noqa: D102
         raise NotImplementedError()
 
-    def read_network(self):
+    def read_network(self):  # noqa: D102
         raise NotImplementedError()
 
-    def write_network(self):
+    def write_network(self):  # noqa: D102
         raise NotImplementedError()

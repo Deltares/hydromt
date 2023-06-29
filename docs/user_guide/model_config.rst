@@ -5,7 +5,7 @@ Preparing a model configuration
 ===============================
 
 A user can define a complete pipeline of methods and their options to :ref:`build a model <model_build>` or :ref:`updating an existing model <model_update>`
-in the configuration `.yaml file <https://en.wikipedia.org/wiki/YAML>`_ 
+in the configuration `.yaml file <https://en.wikipedia.org/wiki/YAML>`_
 
 **Steps in brief:**
 
@@ -21,18 +21,18 @@ in the configuration `.yaml file <https://en.wikipedia.org/wiki/YAML>`_
 .. NOTE::
 
     The HydroMT model configuration (.yaml) file should not be confused with the simulation configuration file of the model kernel.
-    While the first defines how HydroMT should build or update a model, the latter defines the simulation for the model kernel. 
+    While the first defines how HydroMT should build or update a model, the latter defines the simulation for the model kernel.
     The format of the latter differs with each plugin, but can be accessed in HydroMT trough the :py:meth:`hydromt.Model.config` component.
 
 
 Model configuration (.yaml) file
-------------------------------- 
+--------------------------------
 
 The .yaml file has a simple syntax with sections and key-value pairs. In HydroMT sections corresponds with model methods
-and the key-value pair with the arguments of each method. For available methods and their arguments of a specific model, 
+and the key-value pair with the arguments of each method. For available methods and their arguments of a specific model,
 please visit the :ref:`plugin documentation pages <plugins>` or the :ref:`API reference <api_reference>`.
-When passed to the build or update CLI methods, HydroMT executes all methods in order as provided in the .yaml file. 
-As such the .yaml file, in combination with a data catalog yaml file 
+When passed to the build or update CLI methods, HydroMT executes all methods in order as provided in the .yaml file.
+As such the .yaml file, in combination with a data catalog yaml file
 define a **reproducible** model.
 
 HydroMT configuration file specifications and conventions:
@@ -48,7 +48,7 @@ An example .yaml file is shown below. Note that this .yaml file does not apply t
 
     setup_basemaps:
       topography_fn: merit   # source name of topography data
-      crs: 4326              # CRS EPSG code 
+      crs: 4326              # CRS EPSG code
       res: 100               # resolution [m]
 
     setup_manning_roughness:

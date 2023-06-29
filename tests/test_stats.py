@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the vector submodule."""
 
-import pytest
 import numpy as np
-import xarray as xr
 
 from hydromt.stats import skills
 

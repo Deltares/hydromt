@@ -1,0 +1,5 @@
+-P ubuntu-latest=catthehacker/ubuntu:full-latest
+-P ubuntu-latest=catthehacker/ubuntu:full-20.04
+-P ubuntu-18.04=catthehacker/ubuntu:full-18.04
+
+-e .act_event.json

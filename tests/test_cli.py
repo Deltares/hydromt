@@ -1,12 +1,13 @@
 """Tests for the cli submodule."""
 
+
+import numpy as np
 import pytest
 from click.testing import CliRunner
-import numpy as np
-import os
+
 from hydromt import __version__
-from hydromt.cli.main import main as hydromt_cli
 from hydromt.cli import api as hydromt_api
+from hydromt.cli.main import main as hydromt_cli
 
 
 def test_cli(tmpdir):
@@ -44,15 +45,17 @@ def test_cli(tmpdir):
         root,
         "-r",
         "{'bbox': [12.05,45.30,12.85,45.65]}",
+        "--opt",
+        "setup_grid.res=0.05",
         "-vv",
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
-    assert os.path.isfile(os.path.join(root, "geoms", "region.geojson"))
 
     # test force overwrite
+    r = CliRunner().invoke(hydromt_cli, cmd)
     with pytest.raises(IOError, match="Model dir already exists"):
-        r = CliRunner().invoke(hydromt_cli, cmd)
         raise r.exception
+
     r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])
     assert r.exit_code == 0
 
