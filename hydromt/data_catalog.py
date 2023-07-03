@@ -141,6 +141,14 @@ class DataCatalog(object):
         if not self._catalogs:
             self.set_predefined_catalogs()
         return self._catalogs
+    
+    def get_source(self, key: str, catalog_name=None) -> DataAdapter:
+        """Get the source."""
+        warnings.warn(
+            'Using iterating over the DataCatalog directly is deprecated. Please use cat.get_source("name")',
+            DeprecationWarning,
+        )
+        return self._sources[key]
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""

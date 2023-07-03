@@ -8,11 +8,13 @@ import geopandas as gpd
 import pandas as pd
 import pytest
 import xarray as xr
+from yaml import load, safe_load, FullLoader, dump
 
 from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
 from hydromt.data_catalog import DataCatalog, _parse_data_dict
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
+DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 def test_parser():
@@ -94,73 +96,46 @@ def test_data_catalog_io(tmpdir):
 def test_versioned_catalogs(tmpdir):
     # we want to keep a legacy version embeded in the test code since we're presumably
     # going to change the actual catalog.
-    legacy_esa_catalog = '''
-esa_worldcover:
-  crs: 4326
-  data_type: RasterDataset
-  driver: raster
-  kwargs:
-    chunks:
-      x: 36000
-      y: 36000
-  meta:
-    category: landuse
-    source_license: CC BY 4.0
-    source_url: https://doi.org/10.5281/zenodo.5571936
-    source_version: v100
-  path: landuse/esa_worldcover/esa-worldcover.vrt
-'''
 
-    aws_esa_catalog = '''
-esa_worldcover:
-  crs: 4326
-  data_type: RasterDataset
-  driver: raster
-  filesystem: s3
-  kwargs:
-    storage_options:
-      anon: true
-  meta:
-    category: landuse
-    source_license: CC BY 4.0
-    source_url: https://doi.org/10.5281/zenodo.5571936
-    source_version: v100
-  path: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
-  rename:
-    ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
-'''
+    legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
+    aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
+    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
+    legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
+    with open(legacy_yml_fn, 'r') as f:
+        legacy_esa_yml = load(f, Loader=FullLoader)
+    with pytest.deprecated_call():
+        _ = legacy_data_catalog['esa_worldcover']
+    # with pytest.raises(KeyError):
+    #     legacy_data_catalog.get_source('esa_worldcover', catalog_name="aws_data")
+    print(legacy_data_catalog.get_source('esa_worldcover'))
+    print(dump(legacy_esa_yml))
+    assert legacy_data_catalog.get_source('esa_worldcover') == dump(legacy_esa_yml)
 
-    aws_base_esa_catalog = '''
-esa_worldcover:
-  crs: 4326
-  data_type: RasterDataset
-  driver: raster
-  meta:
-    category: landuse
-    source_license: CC BY 4.0
-    source_url: https://doi.org/10.5281/zenodo.5571936
-    source_version: v100
-  versions:
-    - catalog_name: aws_data
-      path: path: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
-      rename:
-        ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
-      filesystem: s3
-      kwargs:
-        storage_options:
-          anon: true
-    - catalog_name: deltares_data
-      path: landuse/esa_worldcover/esa-worldcover.vrt
-      kwargs:
-        chunks:
-          x: 36000
-          y: 36000
-'''
-    legacy_data_catalog = DataCatalog(data_libs=[legacy_esa_catalog])
+    aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
+    with open(aws_yml_fn, 'r') as f:
+        aws_esa_yml = safe_load(f,Loader=FullLoader)
+    assert aws_data_catalog.get_source('esa_worldcover') == aws_esa_yml
+    assert aws_data_catalog.get_source('esa_worldcover', catalog_name="aws_data") == aws_esa_yml
+
+    merged_catalog = DataCatalog(data_libs=[legacy_esa_yml,aws_esa_yml])
+    with open(merged_yml_fn, 'r') as f:
+        merged_esa_yml = safe_load(f,Loader=FullLoader)
+    assert merged_catalog.get_source('esa_worldcover') == aws_esa_yml
+    assert merged_catalog.get_source('esa_worldcover', catalog_name="aws_data") == aws_esa_yml
+    assert merged_catalog.get_source('esa_worldcover', catalog_name="deltares_data") == legacy_esa_yml
+
+    dst_merged_yml_fn = join(tmpdir, "dst_merged_esa_worldcover.yml")
+    merged_esa_yml.to_yml(dst_merged_yml_fn)
+
+    with open(dst_merged_yml_fn, 'r') as f:
+        reloaded_merged_esa_yml = load(f)
+    
+    assert reloaded_merged_esa_yml == merged_esa_yml
+    
 
 @pytest.mark.filterwarnings('ignore:"from_artifacts" is deprecated:DeprecationWarning')
 def test_data_catalog(tmpdir):
-    data_catalog = DataCatalog(data_libs=None)  # NOTE: legacy code!
+    data_catalog = DataCatalog(data_libs=None)
     # initialized with empty dict
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
