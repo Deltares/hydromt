@@ -20,7 +20,7 @@ __all__ = ["GridModel"]
 logger = logging.getLogger(__name__)
 
 
-class GridMixin(object):
+class GridMixin(Model):
     # placeholders
     # xr.Dataset representation of all static parameter maps at the same resolution and
     # bounds - renamed from staticmaps

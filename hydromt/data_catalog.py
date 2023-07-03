@@ -127,11 +127,12 @@ class DataCatalog(object):
 
     @property
     def keys(self) -> List:
+        """Returns list of data source names."""
         warnings.warn(
-            'Using iterating over the DataCatalog directly is deprecated. Please use cat.get_sources()',
+            'Using iterating over the DataCatalog directly is deprecated.'\
+            'Please use cat.get_sources()',
             DeprecationWarning,
         )
-        """Returns list of data source names."""
         return list(self._sources.keys())
 
     @property

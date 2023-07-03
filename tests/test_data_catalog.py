@@ -85,6 +85,72 @@ def test_data_catalog_io(tmpdir):
     # test print
     print(data_catalog["merit_hydro"])
 
+def test_versioned_catalogs(tmpdir):
+    # we want to keep a legacy version embeded in the test code since we're presumably
+    # going to change the actual catalog.
+    legacy_esa_catalog = '''
+esa_worldcover:
+  crs: 4326
+  data_type: RasterDataset
+  driver: raster
+  kwargs:
+    chunks:
+      x: 36000
+      y: 36000
+  meta:
+    category: landuse
+    source_license: CC BY 4.0
+    source_url: https://doi.org/10.5281/zenodo.5571936
+    source_version: v100
+  path: landuse/esa_worldcover/esa-worldcover.vrt
+'''
+
+    aws_esa_catalog = '''
+esa_worldcover:
+  crs: 4326
+  data_type: RasterDataset
+  driver: raster
+  filesystem: s3
+  kwargs:
+    storage_options:
+      anon: true
+  meta:
+    category: landuse
+    source_license: CC BY 4.0
+    source_url: https://doi.org/10.5281/zenodo.5571936
+    source_version: v100
+  path: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
+  rename:
+    ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
+'''
+
+    aws_base_esa_catalog = '''
+esa_worldcover:
+  crs: 4326
+  data_type: RasterDataset
+  driver: raster
+  meta:
+    category: landuse
+    source_license: CC BY 4.0
+    source_url: https://doi.org/10.5281/zenodo.5571936
+    source_version: v100
+  versions:
+    - catalog_name: aws_data
+      path: path: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
+      rename:
+        ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
+      filesystem: s3
+      kwargs:
+        storage_options:
+          anon: true
+    - catalog_name: deltares_data
+      path: landuse/esa_worldcover/esa-worldcover.vrt
+      kwargs:
+        chunks:
+          x: 36000
+          y: 36000
+'''
+    legacy_data_catalog = DataCatalog(data_libs=[legacy_esa_catalog])
 
 @pytest.mark.filterwarnings('ignore:"from_artifacts" is deprecated:DeprecationWarning')
 def test_data_catalog(tmpdir):
