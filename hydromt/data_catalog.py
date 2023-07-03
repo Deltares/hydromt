@@ -129,8 +129,8 @@ class DataCatalog(object):
     def keys(self) -> List:
         """Returns list of data source names."""
         warnings.warn(
-            'Using iterating over the DataCatalog directly is deprecated.'\
-            'Please use cat.get_sources()',
+            "Using iterating over the DataCatalog directly is deprecated."
+            "Please use cat.get_sources()",
             DeprecationWarning,
         )
         return list(self._sources.keys())
@@ -141,13 +141,9 @@ class DataCatalog(object):
         if not self._catalogs:
             self.set_predefined_catalogs()
         return self._catalogs
-    
+
     def get_source(self, key: str, catalog_name=None) -> DataAdapter:
         """Get the source."""
-        warnings.warn(
-            'Using iterating over the DataCatalog directly is deprecated. Please use cat.get_source("name")',
-            DeprecationWarning,
-        )
         return self._sources[key]
 
     def __getitem__(self, key: str) -> DataAdapter:
@@ -161,7 +157,7 @@ class DataCatalog(object):
     def __setitem__(self, key: str, value: DataAdapter) -> None:
         """Set or update adaptors."""
         warnings.warn(
-            'Using DataCatalog as a dictionary directly is deprecated. Please use cat.add_source(adapter)',
+            "Using DataCatalog as a dictionary directly is deprecated. Please use cat.add_source(adapter)",
             DeprecationWarning,
         )
         if not isinstance(value, DataAdapter):
@@ -173,7 +169,7 @@ class DataCatalog(object):
     def __iter__(self):
         """Iterate over sources."""
         warnings.warn(
-            'Using iterating over the DataCatalog directly is deprecated. Please use cat.get_sources()',
+            "Using iterating over the DataCatalog directly is deprecated. Please use cat.get_sources()",
             DeprecationWarning,
         )
         return self._sources.__iter__()
@@ -181,7 +177,7 @@ class DataCatalog(object):
     def __len__(self):
         """Return number of sources."""
         warnings.warn(
-            'Using len on DataCatalog directly is deprecated. Please use len(cat.get_sources())',
+            "Using len on DataCatalog directly is deprecated. Please use len(cat.get_sources())",
             DeprecationWarning,
         )
         return self._sources.__len__()
