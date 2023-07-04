@@ -114,6 +114,8 @@ def test_versioned_catalogs(tmpdir):
         merged_catalog.get_source("esa_worldcover").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
+    print(merged_catalog.get_source("esa_worldcover"))
+    breakpoint()
     assert merged_catalog.get_source(
         "esa_worldcover", catalog_name="legacy_esa_worldcover"
     ).path.endswith("landuse/esa_worldcover/esa-worldcover.vrt")

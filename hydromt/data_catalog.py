@@ -145,6 +145,11 @@ class DataCatalog(object):
     def get_source(self, key: str, catalog_name=None) -> DataAdapter:
         """Get the source."""
         return self._sources[key]
+    
+    def add_source(self,key: str, adapter: DataAdapter) -> None:
+        if key in self._sources:
+            self.logger.warning(f"Overwriting data source {key}.")
+        return self._sources.__setitem__(key, value)
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
@@ -152,7 +157,7 @@ class DataCatalog(object):
             'Using iterating over the DataCatalog directly is deprecated. Please use cat.get_source("name")',
             DeprecationWarning,
         )
-        return self._sources[key]
+        return self.get_source(key)
 
     def __setitem__(self, key: str, value: DataAdapter) -> None:
         """Set or update adaptors."""
@@ -160,16 +165,13 @@ class DataCatalog(object):
             "Using DataCatalog as a dictionary directly is deprecated. Please use cat.add_source(adapter)",
             DeprecationWarning,
         )
-        if not isinstance(value, DataAdapter):
-            raise ValueError(f"Value must be DataAdapter, not {type(key).__name__}.")
-        if key in self._sources:
-            self.logger.warning(f"Overwriting data source {key}.")
-        return self._sources.__setitem__(key, value)
+        self.add_source(key,value)
+
 
     def __iter__(self):
         """Iterate over sources."""
         warnings.warn(
-            "Using iterating over the DataCatalog directly is deprecated. Please use cat.get_sources()",
+            "Using iterating over the DataCatalog directly is deprecated. Please use cat.iter_sources()",
             DeprecationWarning,
         )
         return self._sources.__iter__()
@@ -192,7 +194,12 @@ class DataCatalog(object):
     def update(self, **kwargs) -> None:
         """Add data sources to library or update them."""
         for k, v in kwargs.items():
-            self[k] = v
+            self.add_source(k,v)
+
+    def update_sources(self, **kwargs) -> None:
+        """Add data sources to library or update them."""
+        for k, v in kwargs.items():
+            self.add_source(k,v)
 
     def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
         """Initialise the predefined catalogs."""
