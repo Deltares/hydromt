@@ -298,7 +298,7 @@ def test_dataframe(df, df_time, tmpdir):
     if compat.HAS_OPENPYXL:
         fn_xlsx = str(tmpdir.join("test.xlsx"))
         df.to_excel(fn_xlsx)
-        df2 = data_catalog.get_dataframe(fn_xlsx, index_col=0)
+        df2 = data_catalog.get_dataframe(fn_xlsx, driver_kwargs=dict(index_col=0))
         assert isinstance(df2, pd.DataFrame)
         assert np.all(df2 == df)
 
