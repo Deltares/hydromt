@@ -668,6 +668,8 @@ class GeoDataArray(GeoBase):
     def __init__(self, xarray_obj):
         """Initialise the object."""
         super(GeoDataArray, self).__init__(xarray_obj)
+        self.nodata = np.nan  # Temporary nodata value until set_nodata is implemented
+        # for geodataarray
 
     # Constructers
     # i.e. from other datatypes or files
