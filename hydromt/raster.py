@@ -1783,7 +1783,7 @@ class RasterDataArray(XRasterBase):
         )
         # apply rasterio warp reproject
         rasterio.warp.reproject(
-            source=self._obj.load().data,
+            source=self._obj.values,
             destination=da_reproject.data,
             src_transform=self.transform,
             src_crs=self.crs,
@@ -1950,13 +1950,18 @@ class RasterDataArray(XRasterBase):
         if self.aligned_grid(other):
             da = self.clip_bbox(other.raster.bounds)
         elif not self.identical_grid(other):
-            da = self.reproject(
-                dst_crs=other.raster.crs,
-                dst_transform=other.raster.transform,
-                dst_width=other.raster.width,
-                dst_height=other.raster.height,
-                method=method,
-            )
+            da_clip = self.clip_bbox(other.raster.transform_bounds(self.crs), buffer=2)
+            if np.any(np.array(da_clip.shape) < 2):
+                # out of bounds -> return empty array
+                da = full_like(other, fill_value=self.nodata)
+            else:
+                da = da_clip.raster.reproject(
+                    dst_crs=other.raster.crs,
+                    dst_transform=other.raster.transform,
+                    dst_width=other.raster.width,
+                    dst_height=other.raster.height,
+                    method=method,
+                )
         if (
             da.raster.x_dim != other.raster.x_dim
             or da.raster.y_dim != other.raster.y_dim
