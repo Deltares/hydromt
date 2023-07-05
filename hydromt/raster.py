@@ -227,11 +227,31 @@ class XGeoBase(object):
 
     @property
     def crs(self) -> CRS:
-        """Return Coordinate Reference System as :py:meth:`pyproj.CRS` object."""
+        """Return horizontal Coordinate Reference System."""
+        return self.get_crs(compound=False)
+
+    def get_crs(self, compound=False) -> CRS:
+        """Return Coordinate Reference System.
+
+        Arguments
+        ---------
+        compound: bool, optional
+            If False (default) return the horizontal CRS only.
+
+        Returns
+        -------
+        crs: pyproj.CRS
+        """
         if "crs_wkt" not in self.attrs:
             self.set_crs()
         if "crs_wkt" in self.attrs:
-            return pyproj.CRS.from_user_input(self.attrs["crs_wkt"])
+            crs = pyproj.CRS.from_user_input(self.attrs["crs_wkt"])
+            if crs.is_compound and not compound:
+                # return first vertical crs
+                sub_crs_list = crs.sub_crs_list
+                i = [not crs.is_vertical for crs in sub_crs_list].index(True)
+                crs = sub_crs_list[i]
+            return crs
 
     def set_crs(self, input_crs=None):
         """Set the Coordinate Reference System.
@@ -1951,7 +1971,7 @@ class RasterDataArray(XRasterBase):
             da = self.clip_bbox(other.raster.bounds)
         elif not self.identical_grid(other):
             da_clip = self.clip_bbox(other.raster.transform_bounds(self.crs), buffer=2)
-            if np.any(np.array(da_clip.shape) < 2):
+            if np.any(np.array(da_clip.raster.shape) < 2):
                 # out of bounds -> return empty array
                 da = full_like(other, fill_value=self.nodata)
             else:
