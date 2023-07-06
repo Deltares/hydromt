@@ -375,12 +375,9 @@ class RasterDatasetAdapter(DataAdapter):
         # clip with bbox
         if bbox is not None:
             bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-            logger.debug(f"RasterDataset: Clip with bbox - [{bbox_str}] (epgs:{epsg}))")
-            try:
-                ds_out = ds_out.raster.clip_bbox(bbox, buffer=buffer, align=align)
-                if np.any(np.array(ds_out.raster.shape) < 2):
-                    raise IndexError()
-            except IndexError:
+            logger.debug(f"RasterDataset: Clip with bbox - [{bbox_str}] (epsg:{epsg}))")
+            ds_out = ds_out.raster.clip_bbox(bbox, buffer=buffer, align=align)
+            if np.any(np.array(ds_out.raster.shape) < 2):
                 raise IndexError(
                     f"RasterDataset: No data within spatial domain for {self.path}."
                 )
