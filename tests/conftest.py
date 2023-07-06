@@ -1,16 +1,28 @@
+import os
+
+os.environ["USE_PYGEOS"] = "0"
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyflwdir
 import pytest
-import geopandas as gpd
 import xarray as xr
+from shapely.geometry import box
 
-from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
+from hydromt import (
+    MODELS,
+    GridModel,
+    LumpedModel,
+    Model,
+    NetworkModel,
+    gis_utils,
+    raster,
+    vector,
+)
 from hydromt.data_catalog import DataCatalog
-from hydromt import raster, vector, gis_utils
 
 
-@pytest.fixture
+@pytest.fixture()
 def rioda():
     return raster.full_from_transform(
         transform=[0.5, 0.0, 3.0, 0.0, -0.5, -9.0],
@@ -21,7 +33,7 @@ def rioda():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def rioda_large():
     da = raster.full_from_transform(
         transform=[0.004166666666666666, 0.0, 0.0, 0.0, -0.004166666666666667, 0.0],
@@ -33,7 +45,7 @@ def rioda_large():
     return da
 
 
-@pytest.fixture
+@pytest.fixture()
 def df():
     df = pd.DataFrame(
         {
@@ -46,7 +58,7 @@ def df():
     return df
 
 
-@pytest.fixture
+@pytest.fixture()
 def df_time():
     df_time = pd.DataFrame(
         {
@@ -59,7 +71,7 @@ def df_time():
     return df_time
 
 
-@pytest.fixture
+@pytest.fixture()
 def geodf(df):
     gdf = gpd.GeoDataFrame(
         data=df.copy().drop(columns=["longitude", "latitude"]),
@@ -69,13 +81,13 @@ def geodf(df):
     return gdf
 
 
-@pytest.fixture
+@pytest.fixture()
 def world():
-    world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+    world = gpd.read_file("tests/data/naturalearth_lowres.geojson")
     return world
 
 
-@pytest.fixture
+@pytest.fixture()
 def ts(geodf):
     dates = pd.date_range("01-01-2000", "12-31-2000", name="time")
     ts = pd.DataFrame(
@@ -86,13 +98,13 @@ def ts(geodf):
     return ts
 
 
-@pytest.fixture
+@pytest.fixture()
 def geoda(geodf, ts):
     da = vector.GeoDataArray.from_gdf(geodf, ts, name="test", dims=("index", "time"))
     return da
 
 
-@pytest.fixture
+@pytest.fixture()
 def demda():
     np.random.seed(11)
     da = xr.DataArray(
@@ -105,7 +117,7 @@ def demda():
     return da
 
 
-@pytest.fixture
+@pytest.fixture()
 def flwdir(demda):
     # NOTE: single basin!
     return pyflwdir.from_dem(
@@ -117,7 +129,7 @@ def flwdir(demda):
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def flwda(flwdir):
     da = xr.DataArray(
         name="flwdir",
@@ -130,7 +142,7 @@ def flwda(flwdir):
     return da
 
 
-@pytest.fixture
+@pytest.fixture()
 def hydds(flwda, flwdir):
     ds = flwda.copy().to_dataset()
     ds["uparea"] = xr.DataArray(
@@ -179,17 +191,7 @@ def ts_extremes():
     return da
 
 
-@pytest.fixture
-def demuda():
-    import xugrid as xu
-
-    uds = xu.data.adh_san_diego()
-    uda = uds["elevation"]
-    uda.ugrid.grid.set_crs(epsg=2230)
-    return uda
-
-
-@pytest.fixture
+@pytest.fixture()
 def griduda():
     import xugrid as xu
 
@@ -202,11 +204,12 @@ def griduda():
     uda = xu.UgridDataset.from_geodataframe(gdf_da)
     uda = uda["value"]
     uda = uda.rename("elevtn")
+    uda.ugrid.grid.set_crs(epsg=gdf_da.crs.to_epsg())
 
     return uda
 
 
-@pytest.fixture
+@pytest.fixture()
 def model(demda, world, obsda):
     mod = Model()
     mod.setup_region({"geom": demda.raster.box})
@@ -220,7 +223,7 @@ def model(demda, world, obsda):
     return mod
 
 
-@pytest.fixture
+@pytest.fixture()
 def grid_model(demda, flwda):
     mod = GridModel()
     mod.setup_region({"geom": demda.raster.box})
@@ -230,10 +233,9 @@ def grid_model(demda, flwda):
     return mod
 
 
-@pytest.fixture
+@pytest.fixture()
 def lumped_model(ts, geodf):
     mod = LumpedModel()
-    # mod.setup_region({"bbox": geodf.total_bounds})
     mod.setup_config(**{"header": {"setting": "value"}})
     da = xr.DataArray(
         ts,
@@ -247,20 +249,20 @@ def lumped_model(ts, geodf):
     return mod
 
 
-@pytest.fixture
+@pytest.fixture()
 def network_model():
     mod = NetworkModel()
     # TODO set data and attributes of mod
     return mod
 
 
-@pytest.fixture
-def mesh_model(demuda):
+@pytest.fixture()
+def mesh_model(griduda):
     mod = MODELS.load("mesh_model")()
-    # region = gpd.GeoDataFrame(
-    #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.grid.crs
-    # )
-    # mod.setup_region({"geom": region})
+    region = gpd.GeoDataFrame(
+        geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
+    )
+    mod.setup_region({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_mesh(demuda, "elevtn")
+    mod.set_mesh(griduda, "elevtn")
     return mod

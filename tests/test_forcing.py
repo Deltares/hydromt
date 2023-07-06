@@ -1,12 +1,13 @@
-"""Test hydromt.forcing submodule"""
+"""Test hydromt.forcing submodule."""
 
+import numpy as np
 import pytest
+import xarray as xr
+
+import hydromt._compat as compat
 from hydromt.data_catalog import DataCatalog
 from hydromt.raster import full_from_transform
-from hydromt.workflows.forcing import precip, pet
-import numpy as np
-import xarray as xr
-import hydromt._compat as compat
+from hydromt.workflows.forcing import pet, precip
 
 
 def test_precip():
@@ -26,12 +27,13 @@ def test_precip():
 
     # Testing with clim argument
     p_clim = cat.get_rasterdataset("worldclim")
-    # give it a nodata value in the datacatalog >> issue to create for the data artifacts
+    # give it a nodata value in the datacatalog >> issue to
+    # create for the data artifacts
     p_clim.raster.set_nodata(-999.0)
 
     pout_clim = precip(p_precip, grid, clim=p_clim)
     # the values have changed. Could check if the value itself is correct
-    assert pout_clim.values != p_clim.values
+    assert not pout_clim.equals(p_clim)
 
     # Testing with freq argument
     pout_freq = precip(p_precip, grid, freq="H")

@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-"""Tests for the hydromt.models module of HydroMT"""
+"""Tests for the hydromt.models module of HydroMT."""
 
-from os.path import join, dirname, abspath, isfile
+from os.path import abspath, dirname, isfile, join
+
+import geopandas as gpd
+import numpy as np
 import pytest
 import xarray as xr
-import numpy as np
-import geopandas as gpd
-from shapely.geometry import polygon
-from hydromt.models.model_api import _check_data
-from hydromt.models import Model, GridModel, LumpedModel, MODELS, model_plugins
-from hydromt.data_catalog import DataCatalog
-import hydromt.models.model_plugins
+from entrypoints import Distribution, EntryPoint
+
 import hydromt._compat
-from entrypoints import EntryPoint, Distribution
+import hydromt.models.model_plugins
+from hydromt.data_catalog import DataCatalog
+from hydromt.models import MODELS, GridModel, LumpedModel, Model, model_plugins
+from hydromt.models.model_api import _check_data
 
 DATADIR = join(dirname(abspath(__file__)), "data")
 
@@ -146,7 +147,7 @@ def test_model(model, tmpdir):
     model._results = {}  # reset results for comparison
     equal, errors = model._test_equal(model1)
     assert equal, errors
-    # region from staticmaps
+    # read region from staticmaps
     model._geoms.pop("region")
     assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
@@ -198,11 +199,6 @@ def test_setup_region(model, demda, tmpdir):
     model.setup_region({"grid": grid_fn})
     assert np.all(demda.raster.bounds == model.region.total_bounds)
     # # TODO model once we have registered the Model class entrypoint
-    # model._geoms.pop('region') # remove old region
-    # root = str(tmpdir.join('root'))
-    # model.set_root(root, mode='w')
-    # model.write()
-    # model.setup_region({'model': root})
     # basin
     model._geoms.pop("region")  # remove old region
     model.setup_region({"basin": [12.2, 45.833333333333329]})
@@ -229,13 +225,13 @@ def test_maps_setup(tmpdir):
     bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
     mod.setup_region({"bbox": bbox})
     mod.setup_config(**{"header": {"setting": "value"}})
-    mod.setup_maps_from_raster(
+    mod.setup_maps_from_rasterdataset(
         raster_fn="merit_hydro",
         name="hydrography",
         variables=["elevtn", "flwdir"],
         split_dataset=False,
     )
-    mod.setup_maps_from_raster(raster_fn="vito", fill_method="nearest")
+    mod.setup_maps_from_rasterdataset(raster_fn="vito", fill_method="nearest")
     mod.setup_maps_from_raster_reclass(
         raster_fn="vito",
         reclass_table_fn="vito_mapping",
@@ -270,6 +266,167 @@ def test_gridmodel(grid_model, tmpdir):
     # check if equal
     equal, errors = grid_model._test_equal(model1)
     assert equal, errors
+
+
+def test_setup_grid(tmpdir, demda):
+    # Initialize model
+    model = GridModel(
+        root=join(tmpdir, "grid_model"),
+        data_libs=["artifact_data"],
+        mode="w",
+    )
+    # wrong region kind
+    with pytest.raises(ValueError, match="Region for grid must be of kind"):
+        model.setup_grid({"lumped_model": "test_model"})
+    # bbox
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    with pytest.raises(
+        ValueError, match="res argument required for kind 'bbox', 'geom'"
+    ):
+        model.setup_grid({"bbox": bbox})
+    model.setup_grid(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    assert "mask" not in model.grid
+    assert model.crs.to_epsg() == 4326
+    assert model.grid.raster.dims == ("y", "x")
+    assert model.grid.raster.shape == (7, 16)
+    assert np.all(np.round(model.grid.raster.bounds, 2) == bbox)
+    grid = model.grid
+    model._grid = xr.Dataset()  # remove old grid
+
+    # geom
+    region = model._geoms.pop("region")
+    model.setup_grid(
+        region={"geom": region},
+        res=0.05,
+        add_mask=False,
+    )
+    gpd.testing.assert_geodataframe_equal(region, model.region)
+    xr.testing.assert_allclose(grid, model.grid)
+    model._grid = xr.Dataset()  # remove old grid
+
+    model.setup_grid(
+        region={"geom": region},
+        res=10000,
+        crs="utm",
+        add_mask=True,
+    )
+    assert "mask" in model.grid
+    assert model.crs.to_epsg() == 32633
+    assert model.grid.raster.res == (10000, -10000)
+    model._grid = xr.Dataset()  # remove old grid
+
+    # bbox rotated
+    model.setup_grid(
+        region={"bbox": [12.65, 45.50, 12.85, 45.60]},
+        res=0.05,
+        crs=4326,
+        rotated=True,
+        add_mask=True,
+    )
+    assert "xc" in model.grid.coords
+    assert model.grid.raster.y_dim == "y"
+    assert np.isclose(model.grid.raster.res[0], 0.05)
+    model._grid = xr.Dataset()  # remove old grid
+
+    # grid
+    grid_fn = str(tmpdir.join("grid.tif"))
+    demda.raster.to_raster(grid_fn)
+    model.setup_grid({"grid": grid_fn})
+    assert np.all(demda.raster.bounds == model.region.total_bounds)
+    model._grid = xr.Dataset()  # remove old grid
+
+    # basin
+    model.setup_grid(
+        region={"subbasin": [12.319, 46.320], "uparea": 50},
+        res=1000,
+        crs="utm",
+        hydrography_fn="merit_hydro",
+        basin_index_fn="merit_hydro_index",
+    )
+    assert not np.all(model.grid["mask"].values is True)
+    assert model.grid.raster.shape == (47, 61)
+
+
+def test_gridmodel_setup(tmpdir):
+    # Initialize model
+    dc_param_fn = join(DATADIR, "parameters_data.yml")
+    mod = GridModel(
+        root=join(tmpdir, "grid_model"),
+        data_libs=["artifact_data", dc_param_fn],
+        mode="w",
+    )
+    # Add region
+    mod.setup_grid(
+        {"subbasin": [12.319, 46.320], "uparea": 50},
+        res=0.008333,
+        hydrography_fn="merit_hydro",
+        basin_index_fn="merit_hydro_index",
+        add_mask=True,
+    )
+    # Add data with setup_* methods
+    mod.setup_grid_from_constant(
+        constant=0.01,
+        name="c1",
+        nodata=-99.0,
+    )
+    mod.setup_grid_from_constant(
+        constant=2,
+        name="c2",
+        dtype=np.int8,
+        nodata=-1,
+    )
+    mod.setup_grid_from_rasterdataset(
+        raster_fn="merit_hydro",
+        variables=["elevtn", "basins"],
+        reproject_method=["average", "mode"],
+        mask_name="mask",
+    )
+    mod.setup_grid_from_rasterdataset(
+        raster_fn="vito",
+        fill_method="nearest",
+        reproject_method="mode",
+        rename={"vito": "landuse"},
+    )
+    mod.setup_grid_from_raster_reclass(
+        raster_fn="vito",
+        fill_method="nearest",
+        reclass_table_fn="vito_mapping",
+        reclass_variables=["roughness_manning"],
+        reproject_method=["average"],
+    )
+    mod.setup_grid_from_geodataframe(
+        vector_fn="hydro_lakes",
+        variables=["waterbody_id", "Depth_avg"],
+        nodata=[-1, -999.0],
+        rasterize_method="value",
+        rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
+    )
+    mod.setup_grid_from_geodataframe(
+        vector_fn="hydro_lakes",
+        rasterize_method="fraction",
+        rename={"hydro_lakes": "water_frac"},
+    )
+
+    # Checks
+    assert len(mod.grid) == 10
+    for v in ["mask", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
+        assert v in mod.grid
+    assert mod.grid["lake_depth"].raster.nodata == -999.0
+    assert mod.grid["roughness_manning"].raster.nodata == -999.0
+    assert np.unique(mod.grid["c2"]).size == 2
+    assert np.isin([-1, 2], np.unique(mod.grid["c2"])).all()
+
+    non_compliant = mod._test_model_api()
+    assert len(non_compliant) == 0, non_compliant
+
+    # write model
+    mod.set_root(str(tmpdir), mode="w")
+    mod.write(components=["geoms", "grid"])
 
 
 def test_lumpedmodel(lumped_model, tmpdir):
@@ -317,7 +474,7 @@ def test_meshmodel(mesh_model, tmpdir):
 
 
 @pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
-def test_meshmodel_setup(griduda, world, tmpdir):
+def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
@@ -329,7 +486,7 @@ def test_meshmodel_setup(griduda, world, tmpdir):
     region = {"mesh": griduda.ugrid.to_dataset()}
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod1.setup_mesh(region)
-    mod1.setup_mesh_from_raster("vito")
+    mod1.setup_mesh_from_rasterdataset("vito")
     assert "vito" in mod1.mesh.data_vars
     mod1.setup_mesh_from_raster_reclass(
         raster_fn="vito",

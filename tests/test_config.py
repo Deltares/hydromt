@@ -1,10 +1,8 @@
 from pathlib import Path
 
 import pytest
-import yaml
 
 from hydromt import config
-from hydromt.cli.cli_utils import parse_opt
 
 
 @pytest.mark.parametrize("ext", ["ini", "yaml"])

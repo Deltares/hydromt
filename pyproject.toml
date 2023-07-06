@@ -5,39 +5,38 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "hydromt"
 authors = [
-    {name = "Dirk Eilander", email = "dirk.eilander@deltares.nl"},
-    {name = "Hélène Boisgontier", email = "helene.boisgontier@deltares.nl"},
+    { name = "Dirk Eilander", email = "dirk.eilander@deltares.nl" },
+    { name = "Hélène Boisgontier", email = "helene.boisgontier@deltares.nl" },
+    { name = "Sam Vente", email = "sam.vente@deltares.nl" },
 ]
 dependencies = [
-    "affine",
-    "bottleneck",
-    "click",
-    "dask",
-    "entrypoints",
-    "fsspec",
-    "geopandas>=0.10",
-    "gdal>=3.1",
-    "numpy",
-    "netcdf4",
-    "openpyxl",
-    "packaging",
-    "pandas",
-    "pyflwdir>=0.5.4",
-    "pyproj",
-    "rasterio",
-    "requests",
-    "rioxarray",
-    "shapely>=2.0.0",
-    "scipy",
-    "universal_pathlib",
-    "xarray",
-    "xmltodict",
-    "zarr",
+    "affine",            # Spatial rasterers affine transformations (bbox pixel coalision)
+    "bottleneck",        # Spearmen rank computation
+    "click",             # CLI configuration
+    "dask",              # lazy computing
+    "entrypoints",       # Provide access for Plugins
+    "geopandas>=0.10",   # pandas but geo, wraps fiona and shapely
+    "gdal>=3.1",         # enable geospacial data manipulation, both  raster and victor
+    "fiona==1.8.22",     # IO for vector and shape files
+    "numpy>=1.20",       # pin necessary to ensure compatability with C headers
+    "netcdf4",           # netcfd IO
+    "packaging",         # compare versions of hydromt
+    "rioxarray",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
+    "pandas",            # Dataframes
+    "pyflwdir>=0.5.4",   # Hight models and derivatives
+    "pyproj",            # projections for Coordinate reference systems
+    "rasterio",          # raster wrapper around gdal
+    "shapely>=2.0.0",    # geometry transforms
+    "scipy",             # scientific utilities
+    "xarray",            # ndim data
+    "universal_pathlib", # provides path compatability between different filesystems
+    "xmltodict",         # xml parser also used to read VRT
+    "zarr",              # zarr
 ]
-requires-python = ">=3.8" # fix tests to support older versions
+
+requires-python = ">=3.9"
 readme = "README.rst"
 classifiers = [
-    # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
@@ -48,27 +47,52 @@ classifiers = [
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
-all = [
-    "pcraster",
-    "xugrid",
-    "pygeos",
-    "pyet",
+io = [
+    "s3fs",             # S3 file system
+    "gcsfs",            # google cloud file system
+    "openpyxl",         # excel IO
+    "requests",         # donwload stuff
+    "fsspec==2023.5.0", # enable cloud file systems likg GCS and S3
+]
+extra = [
+    "xugrid", # xarray wrapper for mesh processing
+    "pyet",   # calc evapotraspiration, quite well used, used in all wflow models but domain specific
+]
+dev = [
+    "black",       # linting
+    "ruff",        # linting
+    "pre-commit",  # linting
+    "pip>=23.1.2", # needed for recursive dependencies
+    "flint",       # needed to publish to pypi
+    "wheel",       # needed to publish to pypi
+    "twine",       # needed to publish to pypi
 ]
 test = [
-    "black",
-	"pytest>=2.7.3",
-	"pytest-cov",
-    "pytest-mock",
-	"responses",
+    "pytest>=2.7.3", # testing framework
+    "pytest-cov",    # test coverage
+    "pytest-mock",   # mocking
 ]
 doc = [
-	"nbsphinx",
-    "pydata-sphinx-theme",
-    "sphinx",
-    "sphinx_design",
-    "sphinx_autosummary_accessors",
+    "nbsphinx",                     # build notebooks in docs
+    "pydata-sphinx-theme",          # theme
+    "sphinx",                       # build docks
+    "sphinx_design",                # doc layout
+    "sphinx_autosummary_accessors", # doc layout
+    "hydromt[jupyter,extra]",       # examples are included in the docs
+]
+jupyter = [
+    "jupyterlab",      # run examples in jupyter notebook
+    "cartopy",         # plotting examples
+    "matplotlib-base", # plotting
+    "notebook",        # jupyter integration
+]
+deprecated = [
+    "pcraster", # Old Wflow model was build on this
+    "pygeos",   # Supersceded by shapely 2
 ]
 
+full = ["hydromt[io,extra,dev,test,doc, jupyter]"]
+slim = ["hydromt[io,extra,jupyter]"]
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
@@ -79,7 +103,27 @@ hydromt = "hydromt.cli.main:main"
 
 [tool.black]
 line-length = 88
-target-version = ['py37']
+target-version = ['py39']
+
+[tool.ruff]
+line-length = 88
+
+# enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT)
+select = ["E", "F", "I", "PT", "D"]
+ignore-init-module-imports = true
+ignore = ["D211", "D213", "E741", "D105", "E712"]
+exclude = ["docs"]
+
+[tool.ruff.per-file-ignores]
+"tests/**" = ["D103", "D100", "D104"]
+"hydromt/__init__.py" = ["E402", "F401", "F403"]
+"hydromt/workflows/__init__.py" = ["F403"]
+"hydromt/models/__init__.py" = ["F403", "F401", "F405"]
+"hydromt/_compat.py" = ["F401"]
+"tests/conftest.py" = ["E402"]
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
 
 [tool.flit.sdist]
 include = ["hydromt"]
@@ -89,10 +133,12 @@ exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 testpaths = ["tests"]
 filterwarnings = [
     "ignore:distutils Version classes are deprecated:DeprecationWarning",
-    "ignore:getargs:DeprecationWarning", # The 'u' format is deprecated. Use 'U' instead.
-    "ignore:The *staticgeoms:DeprecationWarning", 
-    "ignore:The *staticmaps:DeprecationWarning", 
-    "ignore:The set_staticmaps:DeprecationWarning", 
+    "ignore:getargs:DeprecationWarning",                                     # The 'u' format is deprecated. Use 'U' instead.
+    "ignore:The *staticgeoms:DeprecationWarning",
+    "ignore:The *staticmaps:DeprecationWarning",
+    "ignore:The set_staticmaps:DeprecationWarning",
     "ignore:Adding a predefined data catalog:DeprecationWarning",
-    "ignore:Shapely 2.0 is installed:UserWarning"
+    "ignore:Shapely 2.0 is installed:UserWarning",
+    "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
+    "ignore:.*isinstance:numba.core.errors.NumbaExperimentalFeatureWarning", # soon to be solved upstream. see https://github.com/numba/numba/pull/8911
 ]

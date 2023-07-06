@@ -1,3 +1,4 @@
+---
 meta:
   version: 2023.2
 cmip6_{model}_historical_{member}_{timestep}:
@@ -6,7 +7,7 @@ cmip6_{model}_historical_{member}_{timestep}:
   driver: zarr
   filesystem: gcs
   kwargs:
-    drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
+    drop_variables: [time_bnds, lat_bnds, lon_bnds, bnds]
     decode_times: true
     preprocess: harmonise_dims
     consolidated: true
@@ -18,19 +19,17 @@ cmip6_{model}_historical_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: ['IPSL/IPSL-CM6A-LR','SNU/SAM0-UNICON','NCAR/CESM2','NCAR/CESM2-WACCM','INM/INM-CM4-8','INM/INM-CM5-0',
-    'NOAA-GFDL/GFDL-ESM4','NCC/NorESM2-LM','NIMS-KMA/KACE-1-0-G','CAS/FGOALS-f3-L','CSIRO-ARCCSS/ACCESS-CM2',
-    'NCC/NorESM2-MM','CSIRO/ACCESS-ESM1-5','NCAR/CESM2-WACCM-FV2','NCAR/CESM2-FV2','CMCC/CMCC-CM2-SR5',
-    'AS-RCEC/TaiESM1','NCC/NorCPM1','IPSL/IPSL-CM5A2-INCA','CMCC/CMCC-CM2-HR4','CMCC/CMCC-ESM2','IPSL/IPSL-CM6A-LR-INCA',
-    'E3SM-Project/E3SM-1-0']
-#    model: ['NOAA-GFDL/GFDL-CM4','BCC/BCC-CSM2-MR', 'BCC/BCC-ESM1', 'CCCma/CanESM5', 'MRI/MRI-ESM2-0', 
-#    'HAMMOZ-Consortium/MPI-ESM-1-2-HAM', 'MPI-M/MPI-ESM1-2-LR', 'MPI-M/MPI-ESM1-2-HR', 'NUIST/NESM3',
-#    'CAS/FGOALS-g3', 'MIROC/MIROC6', 'KIOST/KIOST-ESM', 'CCCR-IITM/IITM-ESM', 'AWI/AWI-ESM-1-1-LR',
-#    'EC-Earth-Consortium/EC-Earth3-Veg-LR', 'EC-Earth-Consortium/EC-Earth3-Veg', 
-#    'EC-Earth-Consortium/EC-Earth3', 'EC-Earth-Consortium/EC-Earth3-AerChem',
-#    'EC-Earth-Consortium/EC-Earth3-CC', 'MPI-M/ICON-ESM-LR'] # other models but were regridded to irregular grid for lat
-    member: ['r1i1p1f1']
-    timestep: ['day', 'Amon']
+    model: [IPSL/IPSL-CM6A-LR, SNU/SAM0-UNICON, NCAR/CESM2, NCAR/CESM2-WACCM, INM/INM-CM4-8, INM/INM-CM5-0, NOAA-GFDL/GFDL-ESM4, NCC/NorESM2-LM, NIMS-KMA/KACE-1-0-G,
+      CAS/FGOALS-f3-L, CSIRO-ARCCSS/ACCESS-CM2, NCC/NorESM2-MM, CSIRO/ACCESS-ESM1-5, NCAR/CESM2-WACCM-FV2, NCAR/CESM2-FV2, CMCC/CMCC-CM2-SR5, AS-RCEC/TaiESM1,
+      NCC/NorCPM1, IPSL/IPSL-CM5A2-INCA, CMCC/CMCC-CM2-HR4, CMCC/CMCC-ESM2, IPSL/IPSL-CM6A-LR-INCA, E3SM-Project/E3SM-1-0]
+    #    model: ['NOAA-GFDL/GFDL-CM4','BCC/BCC-CSM2-MR', 'BCC/BCC-ESM1', 'CCCma/CanESM5', 'MRI/MRI-ESM2-0',
+    #    'HAMMOZ-Consortium/MPI-ESM-1-2-HAM', 'MPI-M/MPI-ESM1-2-LR', 'MPI-M/MPI-ESM1-2-HR', 'NUIST/NESM3',
+    #    'CAS/FGOALS-g3', 'MIROC/MIROC6', 'KIOST/KIOST-ESM', 'CCCR-IITM/IITM-ESM', 'AWI/AWI-ESM-1-1-LR',
+    #    'EC-Earth-Consortium/EC-Earth3-Veg-LR', 'EC-Earth-Consortium/EC-Earth3-Veg',
+    #    'EC-Earth-Consortium/EC-Earth3', 'EC-Earth-Consortium/EC-Earth3-AerChem',
+    #    'EC-Earth-Consortium/EC-Earth3-CC', 'MPI-M/ICON-ESM-LR'] # other models but were regridded to irregular grid for lat
+    member: [r1i1p1f1]
+    timestep: [day, Amon]
   path: gs://cmip6/CMIP6/CMIP/{model}/historical/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
@@ -42,14 +41,14 @@ cmip6_{model}_historical_{member}_{timestep}:
   unit_mult:
     precip: 86400
     press_msl: 0.01
-    
+
 cmip6_{model}_ssp119_{member}_{timestep}:
   crs: 4326
   data_type: RasterDataset
   driver: zarr
   filesystem: gcs
   kwargs:
-    drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
+    drop_variables: [time_bnds, lat_bnds, lon_bnds, bnds]
     decode_times: true
     preprocess: harmonise_dims
     consolidated: true
@@ -61,11 +60,11 @@ cmip6_{model}_ssp119_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: ['NOAA-GFDL/GFDL-ESM4', 'IPSL/IPSL-CM6A-LR']
-#    model: ['CCCma/CanESM5', 'MRI/MRI-ESM2-0','EC-Earth-Consortium/EC-Earth3-Veg',
-#    'EC-Earth-Consortium/EC-Earth3-Veg-LR'] # other models but were regridded to irregular grid for lat
-    member: ['r1i1p1f1']
-    timestep: ['day','Amon']
+    model: [NOAA-GFDL/GFDL-ESM4, IPSL/IPSL-CM6A-LR]
+    #    model: ['CCCma/CanESM5', 'MRI/MRI-ESM2-0','EC-Earth-Consortium/EC-Earth3-Veg',
+    #    'EC-Earth-Consortium/EC-Earth3-Veg-LR'] # other models but were regridded to irregular grid for lat
+    member: [r1i1p1f1]
+    timestep: [day, Amon]
   path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp119/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
@@ -84,7 +83,7 @@ cmip6_{model}_ssp126_{member}_{timestep}:
   driver: zarr
   filesystem: gcs
   kwargs:
-    drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
+    drop_variables: [time_bnds, lat_bnds, lon_bnds, bnds]
     decode_times: true
     preprocess: harmonise_dims
     consolidated: true
@@ -96,14 +95,14 @@ cmip6_{model}_ssp126_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: ['NOAA-GFDL/GFDL-ESM4','INM/INM-CM4-8','INM/INM-CM5-0','IPSL/IPSL-CM6A-LR','NIMS-KMA/KACE-1-0-G',
-    'NCC/NorESM2-MM','CMCC/CMCC-CM2-SR5','IPSL/IPSL-CM5A2-INCA','CMCC/CMCC-ESM2']
-#    model: ['BCC/BCC-CSM2-MR','CCCma/CanESM5','AWI/AWI-CM-1-1-MR','DKRZ/MPI-ESM1-2-HR','MPI-M/MPI-ESM1-2-LR',
-#    'NUIST/NESM3', 'MIROC/MIROC6','MRI/MRI-ESM2-0','KIOST/KIOST-ESM','EC-Earth-Consortium/EC-Earth3-Veg',
-#    'EC-Earth-Consortium/EC-Earth3','CCCR-IITM/IITM-ESM','EC-Earth-Consortium/EC-Earth3-Veg-LR',
-#    'NCAR/CESM2-WACCM','CSIRO-ARCCSS/ACCESS-CM2'] # other models but were regridded to irregular grid for lat or time outofbounds
-    member: ['r1i1p1f1']
-    timestep: ['day','Amon']
+    model: [NOAA-GFDL/GFDL-ESM4, INM/INM-CM4-8, INM/INM-CM5-0, IPSL/IPSL-CM6A-LR, NIMS-KMA/KACE-1-0-G, NCC/NorESM2-MM, CMCC/CMCC-CM2-SR5, IPSL/IPSL-CM5A2-INCA,
+      CMCC/CMCC-ESM2]
+    #    model: ['BCC/BCC-CSM2-MR','CCCma/CanESM5','AWI/AWI-CM-1-1-MR','DKRZ/MPI-ESM1-2-HR','MPI-M/MPI-ESM1-2-LR',
+    #    'NUIST/NESM3', 'MIROC/MIROC6','MRI/MRI-ESM2-0','KIOST/KIOST-ESM','EC-Earth-Consortium/EC-Earth3-Veg',
+    #    'EC-Earth-Consortium/EC-Earth3','CCCR-IITM/IITM-ESM','EC-Earth-Consortium/EC-Earth3-Veg-LR',
+    #    'NCAR/CESM2-WACCM','CSIRO-ARCCSS/ACCESS-CM2'] # other models but were regridded to irregular grid for lat or time outofbounds
+    member: [r1i1p1f1]
+    timestep: [day, Amon]
   path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp126/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
@@ -122,7 +121,7 @@ cmip6_{model}_ssp245_{member}_{timestep}:
   driver: zarr
   filesystem: gcs
   kwargs:
-    drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
+    drop_variables: [time_bnds, lat_bnds, lon_bnds, bnds]
     decode_times: true
     preprocess: harmonise_dims
     consolidated: true
@@ -134,15 +133,14 @@ cmip6_{model}_ssp245_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: ['NOAA-GFDL/GFDL-ESM4','IPSL/IPSL-CM6A-LR','INM/INM-CM4-8','INM/INM-CM5-0','NCAR/CESM2-WACCM',
-    'NCC/NorESM2-LM','CSIRO-ARCCSS/ACCESS-CM2','NCC/NorESM2-MM','NIMS-KMA/KACE-1-0-G','CMCC/CMCC-CM2-SR5',
-    'CMCC/CMCC-ESM2','AS-RCEC/TaiESM1']
-#    model: ['NOAA-GFDL/GFDL-CM4','BCC/BCC-CSM2-MR','CCCma/CanESM5','EC-Earth-Consortium/EC-Earth3-Veg',
-#    'EC-Earth-Consortium/EC-Earth3','EC-Earth-Consortium/EC-Earth3-Veg-LR','EC-Earth-Consortium/EC-Earth3-CC',
-#    'AWI/AWI-CM-1-1-MR','MRI/MRI-ESM2-0','MPI-M/MPI-ESM1-2-LR','DKRZ/MPI-ESM1-2-HR','NUIST/NESM3',
-#    'CAS/FGOALS-g3','MIROC/MIROC6','KIOST/KIOST-ESM','CCCR-IITM/IITM-ESM'] # other models but were regridded to irregular grid for lat
-    member: ['r1i1p1f1']
-    timestep: ['day','Amon']
+    model: [NOAA-GFDL/GFDL-ESM4, IPSL/IPSL-CM6A-LR, INM/INM-CM4-8, INM/INM-CM5-0, NCAR/CESM2-WACCM, NCC/NorESM2-LM, CSIRO-ARCCSS/ACCESS-CM2, NCC/NorESM2-MM,
+      NIMS-KMA/KACE-1-0-G, CMCC/CMCC-CM2-SR5, CMCC/CMCC-ESM2, AS-RCEC/TaiESM1]
+    #    model: ['NOAA-GFDL/GFDL-CM4','BCC/BCC-CSM2-MR','CCCma/CanESM5','EC-Earth-Consortium/EC-Earth3-Veg',
+    #    'EC-Earth-Consortium/EC-Earth3','EC-Earth-Consortium/EC-Earth3-Veg-LR','EC-Earth-Consortium/EC-Earth3-CC',
+    #    'AWI/AWI-CM-1-1-MR','MRI/MRI-ESM2-0','MPI-M/MPI-ESM1-2-LR','DKRZ/MPI-ESM1-2-HR','NUIST/NESM3',
+    #    'CAS/FGOALS-g3','MIROC/MIROC6','KIOST/KIOST-ESM','CCCR-IITM/IITM-ESM'] # other models but were regridded to irregular grid for lat
+    member: [r1i1p1f1]
+    timestep: [day, Amon]
   path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp245/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
@@ -161,7 +159,7 @@ cmip6_{model}_ssp370_{member}_{timestep}:
   driver: zarr
   filesystem: gcs
   kwargs:
-    drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
+    drop_variables: [time_bnds, lat_bnds, lon_bnds, bnds]
     decode_times: true
     preprocess: harmonise_dims
     consolidated: true
@@ -173,15 +171,14 @@ cmip6_{model}_ssp370_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: ['NOAA-GFDL/GFDL-ESM4','IPSL/IPSL-CM6A-LR','INM/INM-CM4-8','INM/INM-CM5-0','NCAR/CESM2-WACCM',
-    'CSIRO-ARCCSS/ACCESS-CM2','NCC/NorESM2-MM','NCC/NorESM2-LM','NIMS-KMA/KACE-1-0-G','CMCC/CMCC-CM2-SR5',
-    'IPSL/IPSL-CM5A2-INCA','CMCC/CMCC-ESM2']
-#    model: ['BCC/BCC-CSM2-MR','CCCma/CanESM5','AWI/AWI-CM-1-1-MR','BCC/BCC-ESM1','DKRZ/MPI-ESM1-2-HR',
-#    EC-Earth-Consortium/EC-Earth3-Veg','EC-Earth-Consortium/EC-Earth3','EC-Earth-Consortium/EC-Earth3-AerChem',
-#    'EC-Earth-Consortium/EC-Earth3-Veg-LR','MRI/MRI-ESM2-0','MPI-M/MPI-ESM1-2-LR','HAMMOZ-Consortium/MPI-ESM-1-2-HAM',
-#    'CAS/FGOALS-g3','MIROC/MIROC6','CCCR-IITM/IITM-ESM'] # other models but were regridded to irregular grid for lat
-    member: ['r1i1p1f1']
-    timestep: ['day','Amon']
+    model: [NOAA-GFDL/GFDL-ESM4, IPSL/IPSL-CM6A-LR, INM/INM-CM4-8, INM/INM-CM5-0, NCAR/CESM2-WACCM, CSIRO-ARCCSS/ACCESS-CM2, NCC/NorESM2-MM, NCC/NorESM2-LM,
+      NIMS-KMA/KACE-1-0-G, CMCC/CMCC-CM2-SR5, IPSL/IPSL-CM5A2-INCA, CMCC/CMCC-ESM2]
+    #    model: ['BCC/BCC-CSM2-MR','CCCma/CanESM5','AWI/AWI-CM-1-1-MR','BCC/BCC-ESM1','DKRZ/MPI-ESM1-2-HR',
+    #    EC-Earth-Consortium/EC-Earth3-Veg','EC-Earth-Consortium/EC-Earth3','EC-Earth-Consortium/EC-Earth3-AerChem',
+    #    'EC-Earth-Consortium/EC-Earth3-Veg-LR','MRI/MRI-ESM2-0','MPI-M/MPI-ESM1-2-LR','HAMMOZ-Consortium/MPI-ESM-1-2-HAM',
+    #    'CAS/FGOALS-g3','MIROC/MIROC6','CCCR-IITM/IITM-ESM'] # other models but were regridded to irregular grid for lat
+    member: [r1i1p1f1]
+    timestep: [day, Amon]
   path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp370/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
@@ -200,7 +197,7 @@ cmip6_{model}_ssp434_{member}_{timestep}:
   driver: zarr
   filesystem: gcs
   kwargs:
-    drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
+    drop_variables: [time_bnds, lat_bnds, lon_bnds, bnds]
     decode_times: true
     preprocess: harmonise_dims
     consolidated: true
@@ -212,10 +209,10 @@ cmip6_{model}_ssp434_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: ['IPSL/IPSL-CM6A-LR']
-#    model: ['CCCma/CanESM5'] # other models but were regridded to irregular grid for lat
-    member: ['r1i1p1f1']
-    timestep: ['day','Amon']
+    model: [IPSL/IPSL-CM6A-LR]
+    #    model: ['CCCma/CanESM5'] # other models but were regridded to irregular grid for lat
+    member: [r1i1p1f1]
+    timestep: [day, Amon]
   path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp434/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
@@ -234,7 +231,7 @@ cmip6_{model}_ssp460_{member}_{timestep}:
   driver: zarr
   filesystem: gcs
   kwargs:
-    drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
+    drop_variables: [time_bnds, lat_bnds, lon_bnds, bnds]
     decode_times: true
     preprocess: harmonise_dims
     consolidated: true
@@ -246,10 +243,10 @@ cmip6_{model}_ssp460_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: ['IPSL/IPSL-CM6A-LR']
-#    model: ['CCCma/CanESM5'] # other models but were regridded to irregular grid for lat
-    member: ['r1i1p1f1']
-    timestep: ['day','Amon']
+    model: [IPSL/IPSL-CM6A-LR]
+    #    model: ['CCCma/CanESM5'] # other models but were regridded to irregular grid for lat
+    member: [r1i1p1f1]
+    timestep: [day, Amon]
   path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp460/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip
@@ -268,7 +265,7 @@ cmip6_{model}_ssp585_{member}_{timestep}:
   driver: zarr
   filesystem: gcs
   kwargs:
-    drop_variables: ['time_bnds', 'lat_bnds', 'lon_bnds', 'bnds']
+    drop_variables: [time_bnds, lat_bnds, lon_bnds, bnds]
     decode_times: true
     preprocess: harmonise_dims
     consolidated: true
@@ -280,15 +277,15 @@ cmip6_{model}_ssp585_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: ['NOAA-GFDL/GFDL-ESM4','INM/INM-CM4-8','INM/INM-CM5-0','NIMS-KMA/KACE-1-0-G','NCC/NorESM2-MM','NCC/NorESM2-LM',
-    'CMCC/CMCC-CM2-SR5','AS-RCEC/TaiESM1','CMCC/CMCC-ESM2']
-#    model: ['NOAA-GFDL/GFDL-CM4','BCC/BCC-CSM2-MR','CCCma/CanESM5','AWI/AWI-CM-1-1-MR','MPI-M/MPI-ESM1-2-LR',
-#    'DKRZ/MPI-ESM1-2-HR','MIROC/MIROC6','MRI/MRI-ESM2-0','EC-Earth-Consortium/EC-Earth3-Veg',
-#    'EC-Earth-Consortium/EC-Earth3','EC-Earth-Consortium/EC-Earth3-Veg-LR','EC-Earth-Consortium/EC-Earth3-CC',
-#    'NUIST/NESM3','CAS/FGOALS-g3','IPSL/IPSL-CM6A-LR','KIOST/KIOST-ESM', 'NCAR/CESM2-WACCM','CCCR-IITM/IITM-ESM',
-#    'CSIRO-ARCCSS/ACCESS-CM2','CSIRO/ACCESS-ESM1-5'] # other models but were regridded to irregular grid for lat or time outofbounds
-    member: ['r1i1p1f1']
-    timestep: ['day','Amon']
+    model: [NOAA-GFDL/GFDL-ESM4, INM/INM-CM4-8, INM/INM-CM5-0, NIMS-KMA/KACE-1-0-G, NCC/NorESM2-MM, NCC/NorESM2-LM, CMCC/CMCC-CM2-SR5, AS-RCEC/TaiESM1,
+      CMCC/CMCC-ESM2]
+    #    model: ['NOAA-GFDL/GFDL-CM4','BCC/BCC-CSM2-MR','CCCma/CanESM5','AWI/AWI-CM-1-1-MR','MPI-M/MPI-ESM1-2-LR',
+    #    'DKRZ/MPI-ESM1-2-HR','MIROC/MIROC6','MRI/MRI-ESM2-0','EC-Earth-Consortium/EC-Earth3-Veg',
+    #    'EC-Earth-Consortium/EC-Earth3','EC-Earth-Consortium/EC-Earth3-Veg-LR','EC-Earth-Consortium/EC-Earth3-CC',
+    #    'NUIST/NESM3','CAS/FGOALS-g3','IPSL/IPSL-CM6A-LR','KIOST/KIOST-ESM', 'NCAR/CESM2-WACCM','CCCR-IITM/IITM-ESM',
+    #    'CSIRO-ARCCSS/ACCESS-CM2','CSIRO/ACCESS-ESM1-5'] # other models but were regridded to irregular grid for lat or time outofbounds
+    member: [r1i1p1f1]
+    timestep: [day, Amon]
   path: gs://cmip6/CMIP6/ScenarioMIP/{model}/ssp585/{member}/{timestep}/{variable}/*/*
   rename:
     pr: precip

@@ -1,10 +1,12 @@
+"""Implementaion of forcing workflows."""
+import logging
+import re
+from typing import Union
+
+import numpy as np
 import pandas as pd
 import xarray as xr
 import xarray.core.resample
-import numpy as np
-import re
-import logging
-from typing import Union
 
 from .._compat import HAS_PYET
 
@@ -23,7 +25,9 @@ def precip(
     resample_kwargs={},
     logger=logger,
 ):
-    """Lazy reprojection of precipitation to model grid and resampling of time dimension to frequency.
+    """Return the lazy reprojection of precipitation to model.
+
+      Applies the projection to the grid and resampling of time dimension to frequency.
 
     Parameters
     ----------
@@ -40,9 +44,13 @@ def precip(
         Method for spatital reprojection of precip, by default 'nearest_index'
     resample_kwargs:
         Additional key-word arguments (e.g. label, closed) for time resampling method
+    kwargs:
+        Additional arguments to pass through to underlying methods.
+    logger:
+        The logger to use
 
     Returns
-    --------
+    -------
     p_out: xarray.DataArray (lazy)
         processed precipitation forcing
     """
@@ -88,8 +96,10 @@ def temp(
     resample_kwargs={},
     logger=logger,
 ):
-    """Lazy reprojection of temperature to model grid using lapse_rate for downscaling,
-    and resampling of time dimension to frequency.
+    """Return lazy reprojection of temperature to model grid.
+
+    Use lapse_rate for downscaling, and resampling of time
+    dimension to frequency.
 
     Parameters
     ----------
@@ -111,9 +121,11 @@ def temp(
         lapse rate of temperature [C m-1] (default: -0.0065)
     resample_kwargs:
         Additional key-word arguments (e.g. label, closed) for time resampling method
+    logger:
+        The logger to use.
 
     Returns
-    --------
+    -------
     t_out: xarray.DataArray (lazy)
         processed temperature forcing
     """
@@ -163,7 +175,9 @@ def press(
     resample_kwargs={},
     logger=logger,
 ):
-    """Lazy reprojection of pressure to model grid and resampling of time dimension to frequency.
+    """Return lazy reprojection of pressure to model grid.
+
+    Resample time dimension to frequency.
 
     Parameters
     ----------
@@ -182,9 +196,11 @@ def press(
         lapse rate of temperature [C m-1] (default: -0.0065)
     resample_kwargs:
         Additional key-word arguments (e.g. label, closed) for time resampling method
+    logger:
+        The logger to use.
 
     Returns
-    --------
+    -------
     press_out: xarray.DataArray (lazy)
         processed pressure forcing
     """
@@ -220,9 +236,10 @@ def wind(
     resample_kwargs: dict = {},
     logger=logger,
 ):
-    """Lazy reprojection of wind speed to model grid and resampling of time dimension to frequency.
+    """Return lazy reprojection of wind speed to model grid.
 
-    Either provide wind speed directly or both wind_u and wind_v components.
+    Resample time dimension to frequency. Either provides wind speed directly
+    or both wind_u and wind_v components.
 
     Parameters
     ----------
@@ -237,16 +254,19 @@ def wind(
     altitude: float, optional
         ALtitude of wind speed data. By default 10m.
     altitude_correction: str, optional
-       If True wind speed is re-calculated to wind speed at 2 meters using original `altitude`.
+       If True wind speed is re-calculated to wind speed at 2 meters using
+       original `altitude`.
     freq: str, Timedelta
         output frequency of timedimension
     reproj_method: str, optional
         Method for spatital reprojection of precip, by default 'nearest_index'
     resample_kwargs:
         Additional key-word arguments (e.g. label, closed) for time resampling method
+    logger:
+        The logger to use.
 
     Returns
-    --------
+    -------
     wind_out: xarray.DataArray (lazy)
         processed wind forcing
     """
@@ -281,22 +301,26 @@ def pet(
     wind_correction: bool = True,
     wind_altitude: float = 10,
     reproj_method: str = "nearest_index",
-    # lapse_rate: float=-0.0065,
     freq: str = None,
     resample_kwargs: dict = {},
     logger=logger,
 ) -> xarray.DataArray:
-    """Determines reference evapotranspiration (lazy reprojection on model grid and resampling of time dimension to frequency).
+    """Determine reference evapotranspiration.
+
+    (lazy reprojection on model grid and resampling of time dimension to frequency).
 
     Parameters
     ----------
     ds : xarray.Dataset
-        Dataset with climate variables: pressure [hPa], global radiation [W m-2], TOA incident solar radiation [W m-2], wind [m s-1]
+        Dataset with climate variables: pressure [hPa], global radiation [W m-2],
+        TOA incident solar radiation [W m-2], wind [m s-1]
 
         * Required variables: {"temp", "press" or "press_msl", "kin"}
         * additional variables for debruin: {"kout"}
-        * additional variables for penman-monteith_rh_simple: {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "rh"}
-        * additional variables for penman-monteith_tdew: {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "temp_dew"}
+        * additional variables for penman-monteith_rh_simple:
+            {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "rh"}
+        * additional variables for penman-monteith_tdew:
+            {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "temp_dew"}
     temp : xarray.DataArray
         DataArray with temperature on model grid resolution [°C]
     dem_model : xarray.DataArray
@@ -305,25 +329,30 @@ def pet(
     method : {'debruin', 'makkink', "penman-monteith_rh_simple", "penman-monteith_tdew"}
         Potential evapotranspiration method.
         if penman-monteith is used, requires the installation of the pyet package.
+    reproj_method: str, optional
+        Method for spatital reprojection of precip, by default 'nearest_index'
     press_correction : bool, default False
         If True pressure is corrected, based on elevation data of `dem_model`
     wind_altitude: float, optional
         ALtitude of wind speed data. By default 10m.
     wind_correction: str, optional
-       If True wind speed is re-calculated to wind speed at 2 meters using original `wind_altitude`.
-    freq : str, Timedelta, default None
+        If True wind speed is re-calculated to wind speed at 2 meters using
+        original `wind_altitude`.
+    freq: str, Timedelta, default None
         output frequency of timedimension
     resample_kwargs:
         Additional key-word arguments (e.g. label, closed) for time resampling method
+    logger:
+        The logger to use.
 
     Returns
-    --------
+    -------
     pet_out : xarray.DataArray (lazy)
         reference evapotranspiration
     """
     # # resample in time
     if temp.raster.dim0 != "time" or ds.raster.dim0 != "time":
-        raise ValueError(f'First dimension of input variables should be "time"')
+        raise ValueError('First dimension of input variables should be "time"')
     # make sure temp and ds align both temporally and spatially
     if not np.all(temp["time"].values == ds["time"].values):
         raise ValueError("All input variables have same time index.")
@@ -352,7 +381,8 @@ def pet(
             ds["press"] = ds["press"] * 10
         else:
             raise ModuleNotFoundError(
-                "If 'press' is supplied and 'press_correction' is not used, the pyet package must be installed."
+                "If 'press' is supplied and 'press_correction' is not used,"
+                + " the pyet package must be installed."
             )
 
     timestep = to_timedelta(ds).total_seconds()
@@ -441,8 +471,8 @@ def press_correction(
     R_air : float, default 8.3144621
         specific gas constant for dry air [J mol-1 K-1]
     Mo : float, default 0.0289644
-        molecular weight of gas [g / mol]
-    LapseRate : float, deafult -0.0065
+        molecular weight of gas [kg / mol]
+    lapse_rate : float, deafult -0.0065
         lapse rate of temperature [C m-1]
 
     Returns
@@ -471,7 +501,6 @@ def temp_correction(dem, lapse_rate=-0.0065):
     temp_add : xarray.DataArray
         temperature addition
     """
-
     temp_add = (dem * lapse_rate).fillna(0)
 
     return temp_add
@@ -480,7 +509,7 @@ def temp_correction(dem, lapse_rate=-0.0065):
 def pet_debruin(
     temp, press, k_in, k_ext, timestep=86400, cp=1005.0, beta=20.0, Cs=110.0
 ):
-    """Determines De Bruin (2016) reference evapotranspiration.
+    """Determine De Bruin (2016) reference evapotranspiration.
 
     Parameters
     ----------
@@ -490,7 +519,7 @@ def pet_debruin(
         pressure at surface [hPa]
     k_in : xarray.DataArray
         global (=short wave incoming) radiation [W m-2]
-    k_ext : xarray.DataArray}
+    k_ext : xarray.DataArray
         TOA incident solar radiation [W m-2]
     timestep : int, default 86400
         seconds per timestep
@@ -506,12 +535,13 @@ def pet_debruin(
     pet : xarray.DataArray
         reference evapotranspiration
     """
-    # saturation and actual vapour pressure at given temperature [Pa]
+    # saturation and actual vapour pressure at given temperature [hPa °C-1]
     esat = 6.112 * np.exp((17.67 * temp) / (temp + 243.5))
-    # slope of vapour pressure curve
+    # slope of vapour pressure curve [hPa °C-1]
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
     lam = (2.502 * 10**6) - (2250.0 * temp)
+    # psychometric constant [hPa °C-1]
     gamma = (cp * press) / (0.622 * lam)
     # compute ref. evaporation (with global radiation, therefore calling it potential)
     # in J m-2 over whole period
@@ -542,16 +572,17 @@ def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
         standard cp [J kg-1 K-1]
 
     Returns
-    --------
+    -------
     pet : xarray.DataArray (lazy)
         reference evapotranspiration
     """
-    # saturation and actual vapour pressure at given temperature [Pa]
+    # saturation and actual vapour pressure at given temperature [hPa °C-1]
     esat = 6.112 * np.exp((17.67 * temp) / (temp + 243.5))
-    # slope of vapour pressure curve
+    # slope of vapour pressure curve [hPa °C-1]
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
     # compute latent heat of vapourization [J kg-1]
     lam = (2.502 * 10**6) - (2250.0 * temp)
+    # psychometric constant [hPa °C-1]
     gamma = (cp * press) / (0.622 * lam)
 
     ep_joule = 0.65 * slope / (slope + gamma) * k_in
@@ -571,13 +602,13 @@ def pm_fao56(
     dem: xarray.DataArray,
     var: str = "temp_dew",
 ) -> xarray.DataArray:
-    """
-    Estimate daily reference evapotranspiration (ETo) from a hypothetical
-    short grass reference surface using the FAO-56 Penman-Monteith equation.
+    """Estimate daily reference evapotranspiration (ETo).
 
-    Actual vapor pressure is derived either from relative humidity or dewpoint temperature (depending on var_for_avp_name).
-
-    Based on equation 6 in Allen et al (1998) and using the functions provided by the pyet package ()
+    Based on a hypothetical short grass reference surface using the
+    FAO-56 Penman-Monteith equation. Actual vapor pressure is derived either
+    from relative humidity or dewpoint temperature (depending on var_for_avp_name).
+    Based on equation 6 in Allen et al (1998) and using the functions provided
+    by the pyet package ()
 
     Parameters
     ----------
@@ -594,11 +625,13 @@ def pm_fao56(
     wind : xarray.DataArray
         DataArray with wind speed at 2m above the surface [m s-1]
     temp_dew : xarray.DataArray
-        DataArray with either temp_dew (dewpoint temperature at 2m above surface [°C]) or rh (relative humidity [%]) to estimate actual vapor pressure
+        DataArray with either temp_dew (dewpoint temperature at 2m above surface [°C])
+        or rh (relative humidity [%]) to estimate actual vapor pressure
     dem : xarray.DataArray
         DataArray with elevation at model resolution [m]
     var : str, optional
-        String with variable name used to estimate actual vapor pressure (chose from ["temp_dew", "rh"])
+        String with variable name used to estimate actual vapor pressure
+        (chose from ["temp_dew", "rh"])
 
     Returns
     -------
@@ -670,6 +703,7 @@ def resample_time(
     logger=logger,
 ):
     """Resample data to destination frequency.
+
     Skip if input data already at output frequency.
 
     Parameters
@@ -687,9 +721,11 @@ def resample_time(
         to input frequency.
     conserve_mass: bool, optional
         If True multiply output with relative change in frequency to conserve mass
+    logger:
+        The logger to use.
 
     Returns
-    --------
+    -------
     pet : xarray.DataArray
         Resampled data.
     """
@@ -712,15 +748,17 @@ def resample_time(
 
 
 def delta_freq(da_or_freq, da_or_freq1):
-    """Returns the relative difference between the dataset mean timestep and destination freq
+    """Return relative difference between dataset mean timestep and destination freq.
+
     <1 : upsampling
     1 : same
-    >1 : downsampling
+    >1 : downsampling.
     """
     return to_timedelta(da_or_freq1) / to_timedelta(da_or_freq)
 
 
 def to_timedelta(da_or_freq):
+    """Convert time dimention or frequency to timedelta."""
     if isinstance(da_or_freq, (xr.DataArray, xr.Dataset)):
         freq = da_to_timedelta(da_or_freq)
     else:
@@ -729,10 +767,12 @@ def to_timedelta(da_or_freq):
 
 
 def da_to_timedelta(da):
+    """Convert time dimenstion in dataset to timedelta."""
     return pd.to_timedelta(np.diff(da.time).mean())
 
 
 def freq_to_timedelta(freq):
+    """Convert frequency to timedelta."""
     # Add '1' to freq that doesn't have any digit
     if isinstance(freq, str) and not bool(re.search(r"\d", freq)):
         freq = "1{}".format(freq)

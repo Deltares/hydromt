@@ -1,32 +1,33 @@
+---
 # list of predefined data catalogs
 #
 # <name>:
 #    urlpath: <path or url to yml file or data archive containing a data_catalog.yml file>
 #    versions:
 #       <calendar_version>: <git hash / tag>
-#    notes: <notes used in > 
-# if new versions of the data_catalogs are created, the current file predefined_catalogs.yml should be edited in main (not in the branch). 
+#    notes: <notes used in >
+# if new versions of the data_catalogs are created, the current file predefined_catalogs.yml should be edited in main (not in the branch).
 deltares_data:
-   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/deltares_data.yml
-   versions:
-     v2023.2: main
-     v2022.7: e082da339f22cb1fc3571eec5a901a21d1c8a7bd 
-     v2022.5: d88cc47bd4ecc83de38c00aa554a7d48ad23ec23
-   notes: This data is only accessible when connected to the Deltares network.
+  urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/deltares_data.yml
+  versions:
+    v2023.2: main
+    v2022.7: e082da339f22cb1fc3571eec5a901a21d1c8a7bd
+    v2022.5: d88cc47bd4ecc83de38c00aa554a7d48ad23ec23
+  notes: This data is only accessible when connected to the Deltares network.
 gcs_cmip6_data:
-   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/gcs_cmip6_data.yml
-   versions:
-     v2023.2: main 
-   notes: This data uses CMIP6 data stored in Google Cloud Service.
+  urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/gcs_cmip6_data.yml
+  versions:
+    v2023.2: main
+  notes: This data uses CMIP6 data stored in Google Cloud Service.
 aws_data:
-   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/aws_data.yml
-   versions:
-     v2023.2: main 
-   notes: This data are stored in public Amazon Web Services.
+  urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/aws_data.yml
+  versions:
+    v2023.2: main
+  notes: This data are stored in public Amazon Web Services.
 artifact_data:
-   urlpath: https://github.com/DirkEilander/hydromt-artifacts/releases/download/{version}/data.tar.gz
-   versions:
-      v0.0.8: v0.0.8
-      v0.0.7: v0.0.7
-      v0.0.6: v0.0.6
-   notes: This data archive contains a sample dataset for the Piave basin (North Italy) to be used for tests and docs/demo purposes.
+  urlpath: https://github.com/DirkEilander/hydromt-artifacts/releases/download/{version}/data.tar.gz
+  versions:
+    v0.0.8: v0.0.8
+    v0.0.7: v0.0.7
+    v0.0.6: v0.0.6
+  notes: This data archive contains a sample dataset for the Piave basin (North Italy) to be used for tests and docs/demo purposes.

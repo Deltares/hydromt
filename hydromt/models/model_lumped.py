@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-"""HydroMT LumpedModel class definition"""
+"""HydroMT LumpedModel class definition."""
 
-import xarray as xr
-import numpy as np
-import geopandas as gpd
-import os
-from os.path import join, isfile, isdir, dirname
-from typing import Union, Optional, List, Dict
 import logging
+import os
+from os.path import dirname, isdir, isfile, join
+from typing import List, Optional, Union
+
+import geopandas as gpd
+import numpy as np
+import xarray as xr
 from shapely.geometry import box
 
 from .model_api import Model
@@ -78,17 +79,23 @@ class LumpedMixin:
         fn_geom: str = "response_units/response_units.geojson",
         **kwargs,
     ) -> None:
-        """Read model response units from combined netcdf file at <root>/<fn> and geojson file at <root>/<fn_geom>.
-        The netcdf file contains the attribute data and the geojson file the geometry vector data.
+        """Read model response units from combined netcdf and geojson file.
 
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
+        Files are read at <root>/<fn> and geojson file at <root>/<fn_geom>.
+        The netcdf file contains the attribute data and the geojson file the geometry
+        vector data. key-word arguments are passed to :py:func:`xarray.open_dataset`
 
         Parameters
         ----------
         fn : str, optional
-            netcdf filename relative to model root, by default 'response_units/response_units.nc'
+            netcdf filename relative to model root,
+            by default 'response_units/response_units.nc'
         fn_geom : str, optional
-            geojson filename relative to model root, by default 'response_units/response_units.geojson'
+            geojson filename relative to model root,
+            by default 'response_units/response_units.geojson'
+        **kwargs:
+            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
+            function.
         """
         self._assert_read_mode
         ds = xr.merge(self._read_nc(fn, **kwargs).values())
@@ -106,17 +113,24 @@ class LumpedMixin:
         fn_geom: str = "response_units/response_units.geojson",
         **kwargs,
     ):
-        """Write model response units to combined netcdf file at <root>/<fn> and geojson file at <root>/<fn_geom>.
-        The netcdf file contains the attribute data and the geojson file the geometry vector data.
+        """Write model response units to combined netcdf and geojson files.
 
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+        Files are written at <root>/<fn> and at <root>/<fn_geom> respectively.
+        The netcdf file contains the attribute data and the geojson file the geometry
+        vector data. Key-word arguments are passed to
+        :py:meth:`xarray.Dataset.to_netcdf`
 
         Parameters
         ----------
         fn : str, optional
-            netcdf filename relative to model root, by default 'response_units/response_units.nc'
+            netcdf filename relative to model root,
+            by default 'response_units/response_units.nc'
         fn_geom : str, optional
-            geojson filename relative to model root, by default 'response_units/response_units.geojson'
+            geojson filename relative to model root,
+            by default 'response_units/response_units.geojson'
+        **kwargs:
+            Additional keyword arguments that are passed to the `_write_nc`
+            function.
         """
         if len(self._response_units) == 0:
             self.logger.debug("No response_units data found, skip writing.")
@@ -134,7 +148,8 @@ class LumpedMixin:
 
 
 class LumpedModel(LumpedMixin, Model):
-    """Model class Lumped Model for lumped models in HydroMT"""
+
+    """Model class Lumped Model for lumped models in HydroMT."""
 
     _CLI_ARGS = {"region": "setup_region"}
     _NAME = "lumped_model"
@@ -172,8 +187,10 @@ class LumpedModel(LumpedMixin, Model):
         Parameters
         ----------
         components : List, optional
-            List of model components to read, each should have an associated read_<component> method.
-            By default ['config', 'maps', 'response_units', 'geoms', 'forcing', 'states', 'results']
+            List of model components to read, each should have an
+            associated read_<component> method.
+            By default ['config', 'maps', 'response_units', 'geoms',
+            'forcing', 'states', 'results']
         """
         super().read(components=components)
 
@@ -192,8 +209,9 @@ class LumpedModel(LumpedMixin, Model):
         Parameters
         ----------
         components : List, optional
-            List of model components to write, each should have an associated write_<component> method.
-            By default ['config', 'maps', 'response_units', 'geoms', 'forcing', 'states']
+            List of model components to write, each should have an
+            associated write_<component> method. By default ['config',
+            'maps', 'response_units', 'geoms', 'forcing', 'states']
         """
         super().write(components=components)
 

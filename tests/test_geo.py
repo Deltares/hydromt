@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 """Tests for the vector submodule."""
 
-import pytest
 import numpy as np
+import pytest
 from geopandas import GeoDataFrame
 from pyproj import CRS
-from shapely.geometry import Polygon, MultiPolygon
+from shapely.geometry import MultiPolygon, Polygon
 
 from hydromt.vector import GeoDataset
 
-# from hydromt import vector
 
-
-@pytest.fixture
+@pytest.fixture()
 def dummy_shp():
     geom = [
         Polygon(((0, 0), (1, 0), (1, 1), (0, 1), (0, 0))),

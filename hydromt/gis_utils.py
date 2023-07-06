@@ -1,26 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""gis related convience functions. More in pyflwdir.gis_utils"""
-from os.path import dirname, join, isfile
-import os
+"""GIS related convenience functions."""
 import glob
-import sys
-import subprocess
-import numpy as np
-import xarray as xr
-import rasterio
-from pyproj import CRS
-from rasterio.transform import Affine
-import geopandas as gpd
-from shapely.geometry.base import BaseGeometry
-from shapely.geometry import box
 import logging
+import os
+import subprocess
+from os.path import dirname, isfile, join
+from typing import Optional, Tuple
+
+import geopandas as gpd
+import numpy as np
+import rasterio
+import xarray as xr
 from pyflwdir import core_conversion, core_d8, core_ldd
 from pyflwdir import gis_utils as gis
-from typing import Optional, Tuple
-from . import _compat
+from pyproj import CRS
+from rasterio.transform import Affine
+from shapely.geometry import box
+from shapely.geometry.base import BaseGeometry
 
+from . import _compat
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 
@@ -109,8 +109,10 @@ def nearest_merge(
     inplace: bool = False,
     logger=logger,
 ) -> gpd.GeoDataFrame:
-    """Merge attributes of gdf2 with the nearest feature of gdf1, optionally bounded by
-    a maximumum distance `max_dist`. Unless `overwrite = True`, gdf2 values are only
+    """Merge attributes of gdf2 with the nearest feature of gdf1.
+
+    Output is optionally bounded by a maximumum distance `max_dist`.
+    Unless `overwrite = True`, gdf2 values are only
     merged where gdf1 has missing values.
 
     Parameters
@@ -124,6 +126,10 @@ def nearest_merge(
     overwrite : bool, optional
         If False (default) gdf2 values are only merged where gdf1 has missing values,
         i.e. NaN values for existing columns or missing columns.
+    inplace : bool,
+        If True, apply the merge to gdf1, otherwise return a new object.
+    logger:
+        The logger to use.
 
     Returns
     -------
@@ -156,10 +162,11 @@ def nearest_merge(
 def nearest(
     gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Return the index of and distance [m] to the nearest geometry
-    in `gdf2` for each geometry of `gdf1`. For Line geometries in `gdf1` the nearest
-    geometry is based line center point and for polygons on its representative point.
-    Mixed geometry types are not yet supported.
+    """Return the index of and distance [m] to the nearest geometry.
+
+    For Line geometries in `gdf1` the nearest geometry is based line center point
+    and for polygons on its representative point. Mixed geometry types are not
+    yet supported.
 
     Note: Since geopandas v0.10.0 it contains a sjoin_nearest method which is very
     similar and should.
@@ -228,7 +235,7 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
 
 # REPROJ
 def utm_crs(bbox):
-    """Returns wkt string of nearest UTM projects
+    """Return wkt string of nearest UTM projects.
 
     Parameters
     ----------
@@ -264,8 +271,7 @@ def parse_crs(crs, bbox=None):
 
 
 def axes_attrs(crs):
-    """
-    Provide CF-compliant variable names and metadata for axes
+    """Provide CF-compliant variable names and metadata for axes.
 
     Parameters
     ----------
@@ -289,7 +295,7 @@ def axes_attrs(crs):
 
 
 def meridian_offset(ds, x_name="x", bbox=None):
-    """re-arange data along x dim"""
+    """re-arrange data along x dim."""
     if ds.raster.crs is None or ds.raster.crs.is_projected:
         raise ValueError("The method is only applicable to geographic CRS")
     lons = np.copy(ds[x_name].values)
@@ -311,7 +317,7 @@ def meridian_offset(ds, x_name="x", bbox=None):
 
 
 def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
-    """Returns a raster axis with pixel center coordinates based on the transform.
+    """Return a raster axis with pixel center coordinates based on the transform.
 
     Parameters
     ----------
@@ -350,7 +356,7 @@ def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
 
 
 def affine_to_meshgrid(transform, shape):
-    """Returns a mesgrid of pixel center coordinates based on the transform.
+    """Return a meshgrid of pixel center coordinates based on the transform.
 
     Parameters
     ----------
@@ -377,8 +383,7 @@ def affine_to_meshgrid(transform, shape):
 
 ## CELLAREAS
 def reggrid_area(lats, lons):
-    """Returns the cell area [m2] for a regular grid based on its cell centres
-    lat, lon coordinates."""
+    """Return the cell area [m2] for a regular grid based on its cell centres lat, lon."""  # noqa: E501
     xres = np.abs(np.mean(np.diff(lons)))
     yres = np.abs(np.mean(np.diff(lats)))
     area = np.ones((lats.size, lons.size), dtype=lats.dtype)
@@ -386,8 +391,10 @@ def reggrid_area(lats, lons):
 
 
 def cellarea(lat, xres=1.0, yres=1.0):
-    """Return the area [m2] of cell based on the cell center latitude and its resolution
-    in measured in degrees."""
+    """Return the area [m2] of cell based on its center latitude and resolution in degrees.
+
+    Resolution is in measured degrees.
+    """  # noqa: E501
     l1 = np.radians(lat - np.abs(yres) / 2.0)
     l2 = np.radians(lat + np.abs(yres) / 2.0)
     dx = np.radians(np.abs(xres))
@@ -395,8 +402,10 @@ def cellarea(lat, xres=1.0, yres=1.0):
 
 
 def cellres(lat, xres=1.0, yres=1.0):
-    """Return the cell (x, y) resolution [m] based on cell center latitude and its
-    resolution measured in degrees."""
+    """Return the cell (x, y) resolution [m].
+
+    Based on cell center latitude and its resolution measured in degrees.
+    """
     m1 = 111132.92  # latitude calculation term 1
     m2 = -559.82  # latitude calculation term 2
     m3 = 1.175  # latitude calculation term 3
@@ -431,8 +440,9 @@ def spread2d(
     da_friction: Optional[xr.DataArray] = None,
     nodata: Optional[float] = None,
 ) -> xr.Dataset:
-    """Returns values of `da_obs` spreaded to cells with `nodata` value within `da_mask`,
-    powered by :py:meth:`pyflwdir.gis_utils.spread2d`
+    """Return values of `da_obs` spreaded to cells with `nodata` value within `da_mask`.
+
+    powered by :py:meth:`pyflwdir.gis_utils.spread2d`.
 
     Parameters
     ----------
@@ -451,8 +461,8 @@ def spread2d(
     Returns
     -------
     ds_out: xarray.Dataset
-        Dataset with spreaded source values, linear index of the source cell "source_idx"
-        and friction distance to the source cell "source_dst".
+        Dataset with spreaded source values, linear index of the source cell
+        "source_idx" and friction distance to the source cell "source_dst".
     """
     nodata = da_obs.raster.nodata if nodata is None else nodata
     if nodata is None or np.isnan(nodata):
@@ -492,7 +502,7 @@ def spread2d(
 
 
 def write_clone(tmpdir, gdal_transform, wkt_projection, shape):
-    """write pcraster clone file to a tmpdir using gdal"""
+    """Write pcraster clone file to a tmpdir using gdal."""
     from osgeo import gdal
 
     gdal.AllRegister()
@@ -507,10 +517,9 @@ def write_clone(tmpdir, gdal_transform, wkt_projection, shape):
         TempDataset.SetProjection(wkt_projection)
     # TODO set csr
     # copy to pcraster format
-    outDataset = driver2.CreateCopy(fn, TempDataset, 0)
+    driver2.CreateCopy(fn, TempDataset, 0)
     # close and cleanup
     TempDataset = None
-    outDataset = None
     return fn
 
 
@@ -543,6 +552,11 @@ def write_map(
         Path to PCRaster clone map, by default None
     pcr_vs : str, optional
         pcraster type, by default "scalar"
+    **kwargs:
+        not used in this function, mainly here for compatability reasons.
+    crs:
+        The coordinate reference system of the data.
+
 
     Raises
     ------
@@ -554,6 +568,7 @@ def write_map(
     if not _compat.HAS_PCRASTER:
         raise ImportError("The pcraster package is required to write map files")
     import tempfile
+
     import pcraster as pcr
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -584,7 +599,7 @@ def write_map(
             # NOTE this should not be necessary
             pcrmap = pcr.lddrepair(ldd)
         elif pcr_vs == "bool":
-            pcrmap = pcr.numpy2pcr(pcr.Boolean, data.astype(np.bool), np.bool(nodata))
+            pcrmap = pcr.numpy2pcr(pcr.Boolean, data.astype(bool), np.bool_(nodata))
         elif pcr_vs == "scalar":
             pcrmap = pcr.numpy2pcr(pcr.Scalar, data.astype(float), float(nodata))
         elif pcr_vs == "ordinal":
@@ -603,10 +618,11 @@ def create_vrt(
     file_list_path: str = None,
     files_path: str = None,
 ):
-    """Creates a .vrt file from a list op raster datasets by either
-    passing the list directly (file_list_path) or by inferring it by passing
+    r"""Create a .vrt file from a list op raster datasets.
+
+    Either passing the list directly (file_list_path) or by inferring it by passing
     a path containing wildcards (files_path) of the location(s) of the
-    raster datasets
+    raster datasets.
 
     Parameters
     ----------
@@ -624,7 +640,6 @@ def create_vrt(
     ValueError
         A Path is needed, either file_list_path or files_path
     """
-
     if file_list_path is None and files_path is None:
         raise ValueError(
             "Either 'file_list_path' or 'files_path' is required -> None was given"

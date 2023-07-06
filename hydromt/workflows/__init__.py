@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-"""HydroMT workflows"""
+"""HydroMT workflows."""
 
 from .basin_mask import *
 from .forcing import *
+from .grid import *
 from .rivers import *

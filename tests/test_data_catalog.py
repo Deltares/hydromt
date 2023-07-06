@@ -1,16 +1,16 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
-import pytest
-from os.path import join, abspath, dirname
-import pandas as pd
+from os.path import abspath, dirname, join
+from pathlib import Path
+
 import geopandas as gpd
+import pandas as pd
+import pytest
 import xarray as xr
-from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter, DataFrameAdapter
-from hydromt.data_catalog import (
-    DataCatalog,
-    _parse_data_dict,
-)
+
+from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
+from hydromt.data_catalog import DataCatalog, _parse_data_dict
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 
@@ -27,6 +27,10 @@ def test_parser():
     }
     dd_out = _parse_data_dict(dd, root=root)
     assert isinstance(dd_out["test"], RasterDatasetAdapter)
+    assert dd_out["test"].path == abspath(dd["test"]["path"])
+    # test with Path object
+    dd["test"].update(path=Path(dd["test"]["path"]))
+    dd_out = _parse_data_dict(dd, root=root)
     assert dd_out["test"].path == abspath(dd["test"]["path"])
     # rel path
     dd = {
@@ -63,6 +67,7 @@ def test_parser():
     assert len(dd_out) == 6
     assert dd_out["test_a_1"].path == abspath(join(root, "data_1.tif"))
     assert "placeholders" not in dd_out["test_a_1"].to_dict()
+
     # errors
     with pytest.raises(ValueError, match="Missing required path argument"):
         _parse_data_dict({"test": {}})
@@ -102,7 +107,6 @@ def test_data_catalog(tmpdir):
     # add source from dict
     data_dict = {keys[0]: source.to_dict()}
     data_catalog.from_dict(data_dict)
-    # printers
     assert isinstance(data_catalog.__repr__(), str)
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
@@ -115,7 +119,7 @@ def test_data_catalog(tmpdir):
     assert len(data_catalog._sources) == 0
     data_catalog.from_artifacts("deltares_data")
     assert len(data_catalog._sources) > 0
-    with pytest.raises(IOError):
+    with pytest.raises(IOError, match="URL b'404: Not Found'"):
         data_catalog = DataCatalog(deltares_data="unknown_version")
 
 
