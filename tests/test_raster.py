@@ -89,8 +89,8 @@ def test_crs():
     # compound crs
     da[raster.GEO_MAP_COORD].attrs = dict()
     da.raster.set_crs(9518)  # WGS 84 + EGM2008 height
-    da.raster.get_crs().to_epsg() == 9518  # return compound crs
-    da.raster.crs.to_epsg() == 4326  # return horizontal crs
+    assert da.raster.get_crs().to_epsg() == 9518  # return compound crs
+    assert da.raster.crs.to_epsg() == 4326  # return horizontal crs
 
 
 def test_gdal(tmpdir):
