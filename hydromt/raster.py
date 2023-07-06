@@ -2604,7 +2604,7 @@ class RasterDataset(XRasterBase):
                 for var in self._obj.data_vars:
                     ds[var] = full_like(other, nodata=np.nan)
             else:
-                ds = ds_clip.reproject(
+                ds = ds_clip.raster.reproject(
                     dst_crs=other.raster.crs,
                     dst_transform=other.raster.transform,
                     dst_width=other.raster.width,
