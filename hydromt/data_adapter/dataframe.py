@@ -2,6 +2,7 @@
 import logging
 import os
 from os.path import join
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -24,19 +25,18 @@ class DataFrameAdapter(DataAdapter):
 
     def __init__(
         self,
-        path,
-        driver=None,
-        filesystem="local",
-        crs=None,
-        nodata=None,
-        rename={},
-        unit_mult={},
-        unit_add={},
-        meta={},
-        attrs={},
-        driver_kwargs={},
-        name="",  # optional for now
-        catalog_name="",  # optional for now
+        path: str,
+        driver: str = None,
+        filesystem: str = "local",
+        nodata: Union[dict, float, int] = None,
+        rename: dict = {},
+        unit_mult: dict = {},
+        unit_add: dict = {},
+        meta: dict = {},
+        attrs: dict = {},
+        driver_kwargs: dict = {},
+        name: str = "",  # optional for now
+        catalog_name: str = "",  # optional for now
     ):
         """Initiate data adapter for 2D tabular data.
 
@@ -50,18 +50,16 @@ class DataFrameAdapter(DataAdapter):
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable}, {year}, {month} placeholders as well as path
             search pattern using a '*' wildcard.
-        driver: {'vector', 'vector_table'}, optional
-            Driver to read files with, for 'vector' :py:func:`~geopandas.read_file`,
-            for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
+        driver: {'csv', 'xlsx', 'xls', 'fwf'}, optional
+            Driver to read files with, for 'csv' :py:func:`~pandas.read_csv`,
+            for {'xlsx', 'xls'} :py:func:`~pandas.read_excel`, and for 'fwf'
+            :py:func:`~pandas.read_fwf`.
             By default the driver is inferred from the file extension and falls back to
-            'vector' if unknown.
+            'csv' if unknown.
         filesystem: {'local', 'gcs', 's3'}, optional
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
-        crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str);
-            proj (str or dict) or wkt (str). Only used if the data has no native CRS.
-        nodata: float, int, optional
+        nodata: dict, float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Nodata values can be differentiated between variables using a dictionary.
         rename: dict, optional

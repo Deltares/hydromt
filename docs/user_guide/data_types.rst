@@ -521,7 +521,7 @@ throught the driver_kwargs.
       meta:
         category: parameter_mapping
       driver_kwargs:
-        header: null
+        header: null  # null translates to None in Python -> no header
         index_col: 0
         parse_dates: false
 

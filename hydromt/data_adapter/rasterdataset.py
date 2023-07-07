@@ -36,20 +36,20 @@ class RasterDatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path,
-        driver=None,
-        filesystem="local",
-        crs=None,
-        nodata=None,
-        rename={},
-        unit_mult={},
-        unit_add={},
-        meta={},
-        attrs={},
-        driver_kwargs={},
-        name="",  # optional for now
-        catalog_name="",  # optional for now
-        zoom_levels={},
+        path: str,
+        driver: str = None,
+        filesystem: str = "local",
+        crs: Union[int, str, dict] = None,
+        nodata: Union[dict, float, int] = None,
+        rename: dict = {},
+        unit_mult: dict = {},
+        unit_add: dict = {},
+        meta: dict = {},
+        attrs: dict = {},
+        driver_kwargs: dict = {},
+        zoom_levels: dict = {},
+        name: str = "",  # optional for now
+        catalog_name: str = "",  # optional for now
     ):
         """Initiate data adapter for geospatial raster data.
 
@@ -101,7 +101,8 @@ class RasterDatasetAdapter(DataAdapter):
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
         zoomlevels: dict, optional
-            TODO
+            Dictionary with zoom levels and associated resolution in the unit of the 
+            data CRS.
 
         """
         super().__init__(
