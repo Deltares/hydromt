@@ -18,6 +18,7 @@ from hydromt.stats import extremes
 def test_peaks(ts_extremes):
     # testing block maxima for 6 months time windows
     ts_bm = extremes.get_peaks(ts_extremes, ev_type='BM', period='182.625D').load() # default: ev_type='BM', period='year'
+    #TODO: split in smaller arguments
     assert all(ts_bm.notnull().sum(dim="time") == np.repeat(int(np.round((ts_extremes.time[-1] - ts_extremes.time[0])/pd.Timedelta('182.625D'))), len(ts_bm["stations"])))
     assert all(ts_bm.max(dim="time") == ts_extremes.max(dim='time').load())
 
@@ -37,6 +38,7 @@ def test_fit_extremes(ts_extremes):
     for i in range(len(da_params['stations'])):
         mean = bm_peaks.isel(stations=i).mean().values
         std = bm_peaks.isel(stations=i).std().values
+        #TODO - test against exact value?
         np.testing.assert_approx_equal(da_params.isel(stations=i).sel(dparams='loc'), mean - 0.57 * (std*np.sqrt(6)/np.pi), significant=2)
         np.testing.assert_approx_equal(da_params.isel(stations=i).sel(dparams='scale'), std*np.sqrt(6)/np.pi, significant=1)
     del da_params
@@ -47,6 +49,7 @@ def test_fit_extremes(ts_extremes):
     #Checking the values of the parameters about
     for i in range(len(da_params['stations'])):
         #Tests for genextreme too sensitive for scale and shape and are failing right now...
+        #TODO - test also against values
         np.testing.assert_approx_equal(da_params.isel(stations=i).sel(dparams='loc'), genextreme.fit(bm_peaks.isel(stations=i).to_series().dropna().values, floc=float(da_params.isel(stations=i).sel(dparams='loc').values))[1], significant=2)
     del da_params
 
@@ -114,6 +117,7 @@ def test_eva(ts_extremes):
 
 #Add deprecation error for eva?
 #Test not working right now
-# def test_eva_idf(ts_extremes):
-#     ds_idf = extremes.eva_idf(ts_extremes, distribution='gumb')
+def test_eva_idf(ts_extremes):
+    ds_idf = extremes.eva_idf(ts_extremes.isel(stations=0), distribution='gumb') #This one works
+    ds_idf = extremes.eva_idf(ts_extremes, distribution='gumb') #This one doesn't work due to the extra 'stations' dimension when the function fit_extremes is called
 
