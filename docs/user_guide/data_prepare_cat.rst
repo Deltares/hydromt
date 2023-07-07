@@ -85,7 +85,7 @@ The following are **required data source arguments**:
 
 A full list of **optional data source arguments** is given below
 
-- **driver_kwargs**: pairs of key value arguments to pass to the driver specific open data method 
+- **driver_kwargs**: pairs of key value arguments to pass to the driver specific open data method
   (eg xr.open_mfdataset for netdcf raster, see the full list below).
   *NOTE*: New with HydroMT v0.7.2 (was called *kwargs* before)
 - **filesystem** (required if different than local): specify if the data is stored locally or remotely (e.g cloud). Supported filesystems are *local* for local data,
@@ -101,10 +101,10 @@ A full list of **optional data source arguments** is given below
   :ref:`HydroMT variable naming conventions <data_convention>` and :ref:`recognized dimension names <dimensions>` (*new_variable_name*).
 - **unit_add**: add or substract a value to the input data for unit conversion (e.g. -273.15 for conversion of temperature from Kelvin to Celsius).
 - **unit_mult**: multiply the input data by a value for unit conversion (e.g. 1000 for conversion from m to mm of precipitation).
-- **attrs** (optional): This argument allows for setting attributes like the unit or long name to variables. 
+- **attrs** (optional): This argument allows for setting attributes like the unit or long name to variables.
   *NOTE*: New in HydroMT v0.7.2
 - **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data.
-  Only used if not crs can be inferred from the input data. 
+  Only used if not crs can be inferred from the input data.
 - **zoom_level** (optional): this argument can be used for a *RasterDatasets* that contain multiple zoom levels of different resolution.
   It should contain a list of numeric zoom levels that correspond to the `zoom_level` key in file path, e.g.,  ``"path/to/my/files/{zoom_level}/data.tif"``
   and corresponding resolution, expressed in the unit of the data crs.

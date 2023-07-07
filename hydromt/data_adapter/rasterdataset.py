@@ -101,7 +101,7 @@ class RasterDatasetAdapter(DataAdapter):
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
         zoomlevels: dict, optional
-            Dictionary with zoom levels and associated resolution in the unit of the 
+            Dictionary with zoom levels and associated resolution in the unit of the
             data CRS.
 
         """
