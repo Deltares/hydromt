@@ -51,6 +51,7 @@ def test_raster_properties(origin, rotation, res, shape, bounds):
     assert np.allclose(transform, da.raster.transform)
     assert np.allclose(da.raster.box.total_bounds, da.raster.bounds)
     assert np.allclose(bounds, da.raster.internal_bounds)
+    assert da.raster.box.crs == da.raster.crs
 
 
 @pytest.mark.parametrize(("transform", "shape"), testdata)
@@ -89,8 +90,7 @@ def test_crs():
     # compound crs
     da[raster.GEO_MAP_COORD].attrs = dict()
     da.raster.set_crs(9518)  # WGS 84 + EGM2008 height
-    assert da.raster.get_crs().to_epsg() == 9518  # return compound crs
-    assert da.raster.crs.to_epsg() == 4326  # return horizontal crs
+    assert da.raster.crs.to_epsg() == 9518  # return horizontal crs
 
 
 def test_gdal(tmpdir):
@@ -253,6 +253,10 @@ def test_vectorize():
     assert np.all(gdf["value"].values == 1)
     assert da.raster.crs.to_epsg() == gdf.crs.to_epsg()
     assert np.all(da == da.raster.geometry_mask(gdf).astype(da.dtype))
+    # test with compound crs
+    da.raster.set_crs(9518)  # WGS 84 + EGM2008 height
+    gdf = da.raster.vectorize()
+    assert gdf.crs.to_epsg() == 9518
 
 
 @pytest.mark.parametrize(("transform", "shape"), testdata)

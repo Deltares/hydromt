@@ -230,29 +230,10 @@ class XGeoBase(object):
         """Return horizontal Coordinate Reference System."""
         # return horizontal crs by default to avoid errors downstream
         # with reproject / rasterize etc.
-        return self.get_crs(horizontal_only=True)
-
-    def get_crs(self, horizontal_only=False) -> CRS:
-        """Return Coordinate Reference System.
-
-        Arguments
-        ---------
-        horizontal_only: bool, optional
-            If True return the horizontal CRS only, by default False.
-
-        Returns
-        -------
-        crs: pyproj.CRS
-        """
         if "crs_wkt" not in self.attrs:
             self.set_crs()
         if "crs_wkt" in self.attrs:
             crs = pyproj.CRS.from_user_input(self.attrs["crs_wkt"])
-            if crs.is_compound and horizontal_only:
-                # return first vertical crs
-                sub_crs_list = crs.sub_crs_list
-                i = [not crs.is_vertical for crs in sub_crs_list].index(True)
-                crs = sub_crs_list[i]
             return crs
 
     def set_crs(self, input_crs=None):
@@ -495,14 +476,11 @@ class XRasterBase(XGeoBase):
     @property
     def box(self) -> gpd.GeoDataFrame:
         """Return :py:meth:`~geopandas.GeoDataFrame` of bounding box."""
-        crs = self.crs
-        if crs is not None and crs.to_epsg() is not None:
-            crs = crs.to_epsg()  # not all CRS have an EPSG code
         transform = self.transform
         rs = np.array([0, self.height, self.height, 0, 0])
         cs = np.array([0, 0, self.width, self.width, 0])
         xs, ys = transform * (cs, rs)
-        return gpd.GeoDataFrame(geometry=[Polygon([*zip(xs, ys)])], crs=crs)
+        return gpd.GeoDataFrame(geometry=[Polygon([*zip(xs, ys)])], crs=self.crs)
 
     @property
     def res(self) -> tuple[float, float]:
@@ -2403,10 +2381,7 @@ class RasterDataArray(XRasterBase):
         ]
         if len(feats) == 0:  # return empty GeoDataFrame
             return gpd.GeoDataFrame()
-        crs = self.crs
-        if crs is None and crs.to_epsg() is not None:
-            crs = crs.to_epsg()  # not all CRS have an EPSG code
-        gdf = gpd.GeoDataFrame.from_features(feats, crs=crs)
+        gdf = gpd.GeoDataFrame.from_features(feats, crs=self.crs)
         gdf.index = gdf.index.astype(self._obj.dtype)
         return gdf
 
