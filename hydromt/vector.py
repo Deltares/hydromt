@@ -668,8 +668,28 @@ class GeoDataArray(GeoBase):
     def __init__(self, xarray_obj):
         """Initialise the object."""
         super(GeoDataArray, self).__init__(xarray_obj)
-        self.nodata = np.nan  # Temporary nodata value until set_nodata is implemented
-        # for geodataarray
+
+    @property
+    def nodata(self):
+        """Nodata value of the DataArray."""
+        return self._obj.attrs.get("_FillValue", None)
+
+    def set_nodata(self, nodata=None):
+        """Set the nodata value of the DataArray.
+
+        Parameters
+        ----------
+        nodata : float, int, opional
+            nodata value
+        """
+        # Only numerical nodata values are supported
+        if np.issubdtype(type(nodata), np.number):
+            if not np.issubdtype(type(nodata), self._obj.dtype):
+                nodata = self._obj.dtype.type(nodata)
+            self._obj.attrs["_FillValue"] = nodata
+        else:
+            logger.warning("No numerical nodata value found, skipping set_nodata")
+            self._obj.attrs.pop("_FillValue", None)
 
     # Constructers
     # i.e. from other datatypes or files

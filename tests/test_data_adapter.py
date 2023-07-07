@@ -216,11 +216,9 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
             data_root=td, data_name="test1", driver="netcdf", variables="test1"
         )
         GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
-    #         GeoDatasetAdapter(fn_nc).to_file(
-    # assert match in error
 
 
-def test_geodataset_unit_attrs(artifact_data: DataCatalog, tmpdir: str):
+def test_geodataset_unit_attrs(artifact_data: DataCatalog):
     gtsm_dict = {"gtsmv3_eu_era5": artifact_data.sources["gtsmv3_eu_era5"].to_dict()}
     attrs = {
         "waterlevel": {
@@ -245,12 +243,13 @@ def test_geodataset_unit_conversion(artifact_data: DataCatalog):
     assert gtsm_geodataarray1000.equals(gtsm_geodataarray * 1000)
 
 
-def test_set_nodata_geodataset(artifact_data: DataCatalog):
+def test_geodataset_set_nodata(artifact_data: DataCatalog):
     gtsm_dict = {"gtsmv3_eu_era5": artifact_data.sources["gtsmv3_eu_era5"].to_dict()}
     gtsm_dict["gtsmv3_eu_era5"].update(dict(nodata=-99))
     datacatalog = DataCatalog()
     datacatalog.from_dict(gtsm_dict)
-    datacatalog.get_geodataset("gtsmv3_eu_era5")
+    ds = datacatalog.get_geodataset("gtsmv3_eu_era5")
+    assert ds.vector.nodata == -99
 
 
 def test_geodataframe(geodf, tmpdir):
@@ -277,7 +276,7 @@ def test_geodataframe_unit_attrs(artifact_data: DataCatalog):
     assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
 
 
-def test_dataframe(df, df_time, tmpdir):
+def test_dataframe(df, tmpdir):
     # Test reading csv
     fn_df = str(tmpdir.join("test.csv"))
     df.to_csv(fn_df)
@@ -303,25 +302,28 @@ def test_dataframe(df, df_time, tmpdir):
         assert np.all(df2 == df)
 
 
-def test_dataframe_unit_attrs(artifact_data: DataCatalog, df: pd.DataFrame):
-    data_catalog_dir = dirname(artifact_data.sources["chelsa"].path)
-    df_path = join(data_catalog_dir, "cities.csv")
+def test_dataframe_unit_attrs(df: pd.DataFrame, tmpdir):
+    df_path = join(tmpdir, "cities.csv")
+    df["test_na"] = -9999
     df.to_csv(df_path)
     cities = {
         "cities": {
             "path": df_path,
             "data_type": "DataFrame",
             "driver": "csv",
+            "nodata": -9999,
             "attrs": {
                 "city": {"long_name": "names of cities"},
                 "country": {"long_name": "names of countries"},
             },
         }
     }
-    artifact_data.from_dict(cities)
-    cities_df = artifact_data.get_dataframe("cities")
+    datacatalog = DataCatalog()
+    datacatalog.from_dict(cities)
+    cities_df = datacatalog.get_dataframe("cities")
     assert cities_df["city"].attrs["long_name"] == "names of cities"
     assert cities_df["country"].attrs["long_name"] == "names of countries"
+    assert np.all(cities_df["test_na"].isna())
 
 
 def test_dataframe_time(df_time, tmpdir):
@@ -383,26 +385,6 @@ def test_dataframe_time(df_time, tmpdir):
         driver_kwargs=dict(index_col=0, parse_dates=True),
     )
     assert np.all(dfts5.columns == vars_slice)
-
-
-def test_dataframe_parse_nodata(artifact_data: DataCatalog, tmpdir):
-    hydro_reservoirs = artifact_data.get_geodataframe(
-        "hydro_reservoirs"
-    )  # This dataset has nodata set to -99
-    dataframe = pd.DataFrame(hydro_reservoirs.drop(columns="geometry"))
-    dataframe["Dam_height"] = -99
-    fp = join(tmpdir, "hydro_reservoirs.csv")
-    dataframe.to_csv(fp, index=False)
-    data_dict = {
-        "hydro_reservoirs": artifact_data.sources["hydro_reservoirs"].to_dict()
-    }
-    data_dict["hydro_reservoirs"].update(
-        dict(path=fp, driver="csv", data_type="DataFrame")
-    )
-    datacatalog = DataCatalog()
-    datacatalog.from_dict(data_dict)
-    hydro_reservoirs_df = datacatalog.get_dataframe("hydro_reservoirs")
-    assert sum(hydro_reservoirs_df["Dam_height"].isna()) == 5
 
 
 def test_cache_vrt(tmpdir, rioda_large):

@@ -101,6 +101,7 @@ def ts(geodf):
 @pytest.fixture()
 def geoda(geodf, ts):
     da = vector.GeoDataArray.from_gdf(geodf, ts, name="test", dims=("index", "time"))
+    da.vector.set_nodata(np.nan)
     return da
 
 
