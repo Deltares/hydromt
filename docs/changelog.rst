@@ -29,7 +29,6 @@ Fixed
 - Order of renaming variables in ``DataCatalog.get_rasterdataset`` for x,y dimensions. PR #324
 - fix bug in ``get_basin_geometry`` for region kind 'subbasin' if no stream or outlet option is specified.
 - fix use of Path objects in ``DataCatalog.from_dict``. PR #429
-- ``raster.crs`` returns the horizontal CRS in case of a compound CRS. PR #434
 - ``raster.reproject_like`` first clips the data to the target extent before reprojecting. PR #434
 
 Deprecated
