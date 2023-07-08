@@ -19,7 +19,7 @@ Added
 
 Changed
 -------
-- Kwargs in Data Catalog should now be called driver kwargs if kwargs are meant for functions relating to reading data. Other kwargs should be explicitly stated in the data catalog.
+- Arguments to drivers in data catalog files and the `DataCatalog.get_` methods should now explicitly be called driver_kwargs instead of kwargs. PR #334
 - New geom_type argument in `RasterDataArray.vector_grid` to specify the geometry type {'polygon', 'line', 'points'} of the vector grid. PR #351
 - Added extrapolate option to `raster.interpolate_na` method. PR #348
 - Name of methods ``setup_maps_from_raster`` and ``setup_mesh_from_raster`` to ``setup_maps_from_rasterdataset`` and ``setup_mesh_from_rasterdataset``. PR #333

@@ -1,6 +1,7 @@
 """Implementation for the Pandas Dataframe adapter."""
 import logging
 import os
+import warnings
 from os.path import join
 from typing import Union
 
@@ -37,6 +38,7 @@ class DataFrameAdapter(DataAdapter):
         driver_kwargs: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        **kwargs,
     ):
         """Initiate data adapter for 2D tabular data.
 
@@ -83,6 +85,14 @@ class DataFrameAdapter(DataAdapter):
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
         """
+        if kwargs:
+            warnings.warn(
+                "Passing additional keyword arguments to be used by the "
+                "DataFrameAdapter driver is deprecated and will be removed "
+                "in a future version. Please use 'driver_kwargs' instead.",
+                DeprecationWarning,
+            )
+            driver_kwargs.update(kwargs)
         super().__init__(
             path=path,
             driver=driver,

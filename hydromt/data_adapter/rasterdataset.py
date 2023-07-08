@@ -50,6 +50,7 @@ class RasterDatasetAdapter(DataAdapter):
         zoom_levels: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        **kwargs,
     ):
         """Initiate data adapter for geospatial raster data.
 
@@ -105,6 +106,14 @@ class RasterDatasetAdapter(DataAdapter):
             data CRS.
 
         """
+        if kwargs:
+            warnings.warn(
+                "Passing additional keyword arguments to be used by the "
+                "RasterDatasetAdapter driver is deprecated and will be removed "
+                "in a future version. Please use 'driver_kwargs' instead.",
+                DeprecationWarning,
+            )
+            driver_kwargs.update(kwargs)
         super().__init__(
             path=path,
             driver=driver,

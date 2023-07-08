@@ -1,6 +1,7 @@
 """Implementation for the geodataset DataAdapter."""
 import logging
 import os
+import warnings
 from os.path import join
 from pathlib import Path
 from typing import NewType, Union
@@ -46,6 +47,7 @@ class GeoDatasetAdapter(DataAdapter):
         driver_kwargs: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        **kwargs,
     ):
         """Initiate data adapter for geospatial timeseries data.
 
@@ -100,6 +102,14 @@ class GeoDatasetAdapter(DataAdapter):
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
         """
+        if kwargs:
+            warnings.warn(
+                "Passing additional keyword arguments to be used by the "
+                "GeoDatasetAdapter driver is deprecated and will be removed "
+                "in a future version. Please use 'driver_kwargs' instead.",
+                DeprecationWarning,
+            )
+            driver_kwargs.update(kwargs)
         super().__init__(
             path=path,
             driver=driver,

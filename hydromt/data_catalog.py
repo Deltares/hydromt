@@ -676,7 +676,7 @@ class DataCatalog(object):
             If False, always return a Dataset. By default True.
         **kwargs:
             Additional keyword arguments that are passed to the `RasterDatasetAdapter`
-            function.
+            function. Only used if `data_like` is a path to a raster file.
 
         Returns
         -------
@@ -758,8 +758,8 @@ class DataCatalog(object):
             Names of GeoDataFrame columns to return. By default all columns are
             returned.
         **kwargs:
-            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
-            function.
+            Additional keyword arguments that are passed to the `GeoDataFrameAdapter`
+            function. Only used if `data_like` is a path to a vector file.
 
         Returns
         -------
@@ -845,7 +845,7 @@ class DataCatalog(object):
             If False, always return a Dataset. By default True.
         **kwargs:
             Additional keyword arguments that are passed to the `GeoDatasetAdapter`
-            function.
+            function. Only used if `data_like` is a path to a geodataset file.
 
         Returns
         -------
@@ -907,7 +907,7 @@ class DataCatalog(object):
             of the dataset is returned.
         **kwargs:
             Additional keyword arguments that are passed to the `DataframeAdapter`
-            function.
+            function. Only used if `data_like` is a path to a tabular data file.
 
         Returns
         -------
