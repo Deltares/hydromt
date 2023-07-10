@@ -1,7 +1,9 @@
-import numpy as np
-import xarray as xr
+"""Functions for design events."""
 import math as math
 from typing import Optional
+
+import numpy as np
+import xarray as xr
 from numba import njit
 
 __all__ = [
@@ -17,9 +19,11 @@ def get_peak_hydrographs(
     n_peaks: Optional[int] = None,
     normalize: bool = True,
 ) -> xr.DataArray:
-    """Returns a hydrograph of `wdw_size` length around each peak
-    in `da_peaks` with a max value or 1 at the peak. The mean hydrograph can be derived
-    by applying stastics along the 'peak' output dimension.
+    """Return peak hydrographs.
+
+    Return a hydrograph of `wdw_size` length around each peak
+    in `da_peaks` with a max value or 1 at the peak. The mean hydrograph can be
+    derived by applying statistics along the 'peak' output dimension.
 
     Parameters
     ----------
@@ -70,17 +74,21 @@ def get_peak_hydrographs(
 
 
 def get_hyetograph(da_idf: xr.DataArray, dt: float, length: int) -> xr.DataArray:
-    """Returns design storm hyetograph based on intensity-frequency-duration (IDF) table.
+    """Return hyetograph.
+
+    Return design storm hyetograph based on intensity-frequency-duration (IDF)
+    table.
 
     The input `da_idf` can be obtained as the output of the :py:meth:`eva_idf`.
-    Note: here we use the precipitation intensitity and not the depth as input!
+    Note: here we use the precipitation intensity and not the depth as input!
+    The design hyetograph is based on the alternating block method.
 
     Parameters
     ----------
     da_idf : xr.DataArray
-        IDF data, should contain a 'duration' dimension
+        IDF data, must contain a 'duration' dimension
     dt : float
-        Time-step for output hyetograph, same unit as IDF duration.
+        Time-step for output hyetograph, same time step unit as IDF duration.
     length : int
         Number of time-step intervals in design storms.
 
@@ -88,14 +96,24 @@ def get_hyetograph(da_idf: xr.DataArray, dt: float, length: int) -> xr.DataArray
     -------
     xr.DataArray
         Design storm hyetograph
-    """
+        #TODO: add some description of the variables and dimensions...(check below)
+        The design storms time dimension is relative to the peak (time=0) of time step
+        dt and total length record of length.
 
+        If using :py:meth:`eva_idf` to obtain the IDF curves, the output is stored in
+        variable `return_values`.
+    """
     durations = da_idf["duration"]
     assert np.all(np.diff(durations) > 0)
     assert dt >= durations[0]
 
     t = np.arange(0, durations[-1] + dt, dt)
     alt_order = np.append(np.arange(1, length, 2)[::-1], np.arange(0, length, 2))
+
+    # drop 'time' dimension if present in xarray.Dataset
+    # TODO: check if this is correct!!
+    if "time" in list(da_idf.dims.keys()):
+        da_idf = da_idf.drop_dims("time")
     # get cummulative precip depth
     pdepth = (da_idf * durations).reset_coords(drop=True).rename({"duration": "time"})
     # interpolate to dt temporal resolution
@@ -117,8 +135,10 @@ def hydrograph_1d(
     n_peaks: Optional[int] = None,
     normalize: bool = True,
 ) -> np.ndarray:
-    """Returns 2D array of shape (`n_peaks`, `wdw_size`) with normalized hydrographs
-    from time series `ts`
+    """Return hydrograph 1D.
+
+    Return 2D array of shape (`n_peaks`, `wdw_size`) with normalized hydrographs
+    from time series `ts`.
 
     Parameters
     ----------

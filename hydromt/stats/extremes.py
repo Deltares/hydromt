@@ -1,23 +1,24 @@
-import numpy as np
-import pandas as pd
-import xarray as xr
+"""Functions for extreme value analysis."""
 import math as math
-from scipy import stats
 from typing import Optional
-from numba import njit
+
 import dask
-#import warnings
+import numpy as np
+import xarray as xr
+from numba import njit
+from scipy import stats
 
 __all__ = [
     "eva_idf",
     "eva_block_maxima",
     "eva_peaks_over_threshold",
+    "eva",
     "get_peaks",
     "get_return_value",
     "fit_extremes",
 ]
 
-_RPS = np.array([2, 5, 10, 25, 50, 100, 250, 500]) # years
+_RPS = np.array([2, 5, 10, 25, 50, 100, 250, 500])  # years
 _DISTS = {
     "POT": ["exp", "gpd"],
     "BM": ["gumb", "gev"],
@@ -33,7 +34,10 @@ def eva_idf(
     rps: np.ndarray = _RPS,
     **kwargs,
 ) -> xr.Dataset:
-    """Returns a intensity-frequency-duration (IDF) table based on block maxima of `da`.
+    """Return IDF based on EVA.
+
+    Return a intensity-frequency-duration (IDF) table based on block
+    maxima of `da`.
 
     Parameters
     ----------
@@ -66,8 +70,9 @@ def eva_idf(
     # return
     if "min_dist" not in kwargs:
         kwargs.update(min_dist=dt_max)
-    return eva_block_maxima(da1, distribution=distribution, rps=rps, **kwargs)
-    #return eva(da1, ev_type="BM", distribution=distribution, rps=rps, **kwargs)
+    # return eva_block_maxima(da1, distribution=distribution, rps=rps, **kwargs)
+    return eva(da1, ev_type="BM", distribution=distribution, rps=rps, **kwargs)
+
 
 def eva(
     da: xr.DataArray,
@@ -80,8 +85,9 @@ def eva(
     rps: np.ndarray = _RPS,
     criterium: str = "AIC",
 ) -> xr.Dataset:
+    """Return Extreme Value Analysis.
 
-    """Extreme value analysis based on block maxima (BM) or Peaks Over Threshold (POT).
+    Extreme value analysis based on block maxima (BM) or Peaks Over Threshold (POT).
     The method selects the peaks, fits a distribution and calculates return values for
     provided return periods.
 
@@ -102,7 +108,7 @@ def eva(
         invalid blocks are set to NaN.
     distribution : str, optional
         Short name of distribution. If None (default) the optimal block maxima
-        distribution ("gumb" or "gev" for BM and "exp" or "gpd" for POT) is selected 
+        distribution ("gumb" or "gev" for BM and "exp" or "gpd" for POT) is selected
         based on `criterium`.
     rps : np.ndarray, optional
         Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]
@@ -112,15 +118,16 @@ def eva(
     Returns
     -------
     xr.Dataset
-        Dataset with peaks timeseries, distribution name and parameters and return values.
+        Dataset with peaks timeseries, distribution name and parameters
+        and return values.
     """
     da_peaks = get_peaks(
         da,
-        ev_type = ev_type,
-        min_dist = min_dist,
-        qthresh = qthresh,
-        period = period,
-        min_sample_size = min_sample_size,
+        ev_type=ev_type,
+        min_dist=min_dist,
+        qthresh=qthresh,
+        period=period,
+        min_sample_size=min_sample_size,
     )
     # fit distribution using lmom
     da_params = fit_extremes(
@@ -131,6 +138,8 @@ def eva(
     # combine data
     return xr.merge([da_peaks, da_params, da_rps])
 
+
+# In theory could be removed because redundant with eva
 def eva_block_maxima(
     da: xr.DataArray,
     period: str = "365.25D",
@@ -140,7 +149,9 @@ def eva_block_maxima(
     rps: np.ndarray = _RPS,
     criterium: str = "AIC",
 ) -> xr.Dataset:
-    """Extreme valua analysis based on block maxima. The method selects the peaks,
+    """Return EVA based on block maxima.
+
+    Extreme valua analysis based on block maxima. The method selects the peaks,
     fits a distribution and calculates return values for provided return periods.
 
     Parameters
@@ -165,7 +176,8 @@ def eva_block_maxima(
     Returns
     -------
     xr.Dataset
-        Dataset with peaks timeseries, distribution name and parameters and return values.
+        Dataset with peaks timeseries, distribution name and parameters
+        and return values.
     """
     da_bm = get_peaks(
         da,
@@ -184,6 +196,7 @@ def eva_block_maxima(
     return xr.merge([da_bm, da_params, da_rps])
 
 
+# In theory could be removed because redundant with eva
 def eva_peaks_over_threshold(
     da: xr.DataArray,
     qthresh: float = 0.9,
@@ -194,8 +207,11 @@ def eva_peaks_over_threshold(
     rps: np.ndarray = _RPS,
     criterium: str = "AIC",
 ) -> xr.Dataset:
-    """Extreme valua analysis based on peaks over threshold. The method selects the peaks,
-    fits a distribution and calculates return values for provided return periods.
+    """Return EVA based on peaks over threshold.
+
+    Extreme valua analysis based on peaks over threshold. The method selects the
+    peaks, fits a distribution and calculates return values for provided return
+    periods.
 
     Parameters
     ----------
@@ -220,7 +236,8 @@ def eva_peaks_over_threshold(
     Returns
     -------
     xr.Dataset
-        Dataset with peaks timeseries, distribution name and parameters and return values.
+        Dataset with peaks timeseries, distribution name and parameters
+        and return values.
     """
     da_bm = get_peaks(
         da,
@@ -247,17 +264,20 @@ def get_peaks(
     period: str = "year",
     min_sample_size: int = 0,
 ) -> xr.DataArray:
-    """Returns the timeseries with all but the peak values set to NaN.
+    """Return peaks from time series.
 
-    For block maxima (BM) peaks, peaks are determined by finding the maximum within 
-    each period and then ensuring a minimum distance (min_dist) and minimum sample size 
-    (min_sample_size) per period. 
+    Return the timeseries with all but the peak values set to NaN.
 
-    For Peaks Over Threshold (POT), peaks are determined solely based on the minimum 
-    distance between peaks. 
+    For block maxima (BM) peaks, peaks are determined by finding the maximum within
+    each period and then ensuring a minimum distance (min_dist) and minimum sample size
+    (min_sample_size) per period.
 
-    The average interarrival time (extreme_rates) is calculated by dividing the number of 
-    peaks by the total duration of the timeseries and converting it to a yearly rate.  
+    For Peaks Over Threshold (POT), peaks are determined solely based on the minimum
+    distance between peaks.
+
+    The average interarrival time (extreme_rates) is calculated by dividing the number
+    of peaks by the total duration of the timeseries and converting it to a yearly
+    rate.
 
     Parameters
     ----------
@@ -278,41 +298,43 @@ def get_peaks(
     Returns
     -------
     xr.DataArray
-        Timeseries data with only peak values, all other values are set to NaN. 
-        Average interarrival time calculated based on the average number of peaks per year
-        and stored as "extreme_rates"
+        Timeseries data with only peak values, all other values are set to NaN.
+        Average interarrival time calculated based on the average number of peaks
+        per year and stored as "extreme_rates"
     """
-
     assert 0 < qthresh < 1.0, 'Quantile "qthresh" should be between (0,1)'
-    if not ev_type.upper() in _DISTS.keys():
+    if ev_type.upper() not in _DISTS.keys():
         raise ValueError(
             f"Unknown ev_type {ev_type.upper()}, select from {_DISTS.keys()}."
         )
     bins = None
-    duration = (da["time"][-1]-da["time"][0]).dt.days/365.2425
+    duration = (da["time"][-1] - da["time"][0]).dt.days / 365.2425
     if period in ["year", "quarter", "month"]:
         bins = getattr(da["time"].dt, period).values
-        nperiods = np.unique(bins).size  # FIXME
+        np.unique(bins).size  # FIXME
     else:
         tstart = da.resample(time=period, label="left").first()["time"]
         bins = tstart.reindex_like(da, method="ffill").values.astype(float)
-        nperiods = np.unique(bins).size
+        np.unique(bins).size
     if ev_type.upper() != "BM":
-        #TODO - Need to fix periods for POT!
+        # TODO - Need to fix periods for POT!
         bins = None
         min_sample_size = 0
-        #Add nperiods
-    func = lambda x: local_max_1d(
-        x, min_dist=min_dist, bins=bins, min_sample_size=min_sample_size
-    )
+        # Add nperiods
+
+    def func(x):
+        return local_max_1d(
+            x, min_dist=min_dist, bins=bins, min_sample_size=min_sample_size
+        )
+
     duck = dask.array if isinstance(da.data, dask.array.Array) else np
     lmax = duck.apply_along_axis(func, da.get_axis_num("time"), da)
     # apply POT threshold
     peaks = da.where(lmax)
     if ev_type.upper() == "POT":
         peaks = da.where(peaks > da.quantile(qthresh, dim="time"))
-    # TODO get extreme rate - this rate is peak rate per period!! not correct for later I think
-    #da_rate = np.isfinite(peaks).sum("time") / nperiods
+    # TODO get extreme rate - this rate is peak rate per period!! not correct
+    # da_rate = np.isfinite(peaks).sum("time") / nperiods
     da_rate = np.isfinite(peaks).sum("time") / duration
     peaks = peaks.assign_coords({"extremes_rate": da_rate})
     peaks.name = "peaks"
@@ -320,15 +342,19 @@ def get_peaks(
 
 
 def get_return_value(da_params: xr.DataArray, rps: np.ndarray = _RPS) -> xr.DataArray:
-    """Returns return values based on a fitted extreme value distribution using the
+    """Return return value based on EVA.
+
+    Return return values based on a fitted extreme value distribution using the
     :py:meth:`fit_extremes` method based on the scipy inverse survival function (isf).
 
     Parameters
     ----------
     da_params : xr.DataArray
-        Short name and parameters of extreme value distribution, see also :py:meth:`fit_extremes`.
+        Short name and parameters of extreme value distribution,
+        see also :py:meth:`fit_extremes`.
     rps : np.ndarray, optional
-        Array of return periods in years, by default [1.5, 2, 5, 10, 20, 50, 100, 200, 500]
+        Array of return periods in years, by default
+        [1.5, 2, 5, 10, 20, 50, 100, 200, 500]
 
     Returns
     -------
@@ -346,13 +372,6 @@ def get_return_value(da_params: xr.DataArray, rps: np.ndarray = _RPS) -> xr.Data
     distributions = da_params["distribution"].load()
     assert "extremes_rate" in da_params.reset_coords()  # coord or variable
     extremes_rate = da_params["extremes_rate"].load()
-
-    #TODO remove this text!
-    # if "extremes_rate" in da_params:
-    #     extremes_rate = da_params["extremes_rate"].load()
-    # else:
-    #     extremes_rate = 1.0
-    # print("extremes_rate is ", extremes_rate)
 
     if da_params.ndim == 1:  # fix case of single dim
         da_params = da_params.expand_dims("index")
@@ -379,23 +398,26 @@ def fit_extremes(
     ev_type: str = "BM",
     criterium: str = "AIC",
 ) -> xr.DataArray:
-    """Returns the fitted parameters of the extreme value `distribution` based on
-    the lmoments method. If no distribution name is provided `distribution=None`, the optimal
-    distribution is selected based on `criterium` from a list of distributions
-    associated with `ev_type`.
+    """Return distribution fit from extremes.
+
+    Return the fitted parameters of the extreme value `distribution` based on
+    the lmoments method. If no distribution name is provided `distribution=None`,
+    the optimal distribution is selected based on `criterium` from a list
+    of distributions associated with `ev_type`.
 
     Block maximum distributions: gumbel ("gumb") and general extreme value ("gev").
-    Peak over threshold distributions: exponential ("exp") and general pareto distribution ("gdp").
+    Peak over threshold distributions: exponential ("exp") and general pareto
+    distribution ("gdp").
 
     Parameters
     ----------
     da_peaks : xr.DataArray
-        Timeseries data with only peak values, any other values are set to NaN. The DataArray should 
-        contain as coordinate `extreme_rates` indicating the yearly rate of extreme events. If not provided,
-        this value is set to 1.0
+        Timeseries data with only peak values, any other values are set to NaN.
+        The DataArray should contain as coordinate `extreme_rates` indicating
+        the yearly rate of extreme events. If not provided, this value is set to 1.0
     distribution: {'gev', 'gpd', 'gumb', 'exp'}, optional
-        Short distribution name. If None (default) the optimal distribution is calculated
-        based on `criterium`
+        Short distribution name. If None (default) the optimal distribution
+        is calculated based on `criterium`
     ev_type : {"POT", "BM"}
         Peaks over threshold (POT) or block maxima (BM) peaks, by default "BM"
     criterium: {'AIC', 'AICc', 'BIC'}
@@ -413,12 +435,15 @@ def fit_extremes(
         raise ValueError(
             f"Unknown ev_type {ev_type.upper()}, select from {_DISTS.keys()}."
         )
-    
+
     if "extremes_rate" not in da_peaks.reset_coords():  # coord or variable
-        print("Setting extremes_rates to 1.0") #This would be better with a logger I guess?
-        dim = list([d for d in da_peaks.dims if d != "time"]) 
-        #TODO - check how to add this
-        #da_peaks.assign_coords({"extremes_rate": xr.Variable(dims=dim, np.ones(len(dim)))})
+        print(
+            "Setting extremes_rates to 1.0"
+        )  # This would be better with a logger I guess?
+        list([d for d in da_peaks.dims if d != "time"])
+        # TODO - check how to add this
+        # da_peaks.assign_coords({"extremes_rate":
+        #       xr.Variable(dims=dim, np.ones(len(dim)))})
 
     def _fitopt_1d(x, distributions=distributions, criterium=criterium):
         params, d = lmoment_fitopt(x, distributions=distributions, criterium=criterium)
@@ -447,7 +472,9 @@ def fit_extremes(
     # add coordinates
     dims = list([d for d in da_params.dims if d != "dparams"])
     coords = dict(
-        dparams=xr.IndexVariable("dparams", ["shape", "loc", "scale"]),
+        dparams=xr.IndexVariable(
+            "dparams", ["shape", "loc", "scale"]
+        ),  # I think this should have the dimension of duration as well
         distribution=xr.IndexVariable(dims=dims, data=distributions),
     )
     # keep extremes_rate meta data
@@ -457,8 +484,6 @@ def fit_extremes(
 
 
 ## PEAKS
-
-
 @njit
 def local_max_1d(
     arr: np.ndarray,
@@ -466,7 +491,7 @@ def local_max_1d(
     min_dist: int = 0,
     min_sample_size: int = 0,
 ) -> np.ndarray:
-    """returns boolean index of local maxima in `arr` which are `min_dist` apart
+    """Return boolean index of local maxima in `arr` which are `min_dist` apart.
 
     Parameters
     ----------
@@ -524,7 +549,7 @@ def local_max_1d(
 
 
 def get_dist(distribution):
-    """Returns scipy.stats distribution"""
+    """Return scipy.stats distribution."""
     _DISTS = {
         "gev": "genextreme",
         "gpd": "genpareto",
@@ -539,7 +564,10 @@ def get_dist(distribution):
 
 
 def get_frozen_dist(params, distribution):
-    """Returns scipy.stats frozen distribution, i.e.: with set parameters"""
+    """Return frozen distribution.
+
+    Returns scipy.stats frozen distribution, i.e.: with set parameters.
+    """
     return get_dist(distribution)(*params[:-2], loc=params[-2], scale=params[-1])
 
 
@@ -551,7 +579,7 @@ def get_frozen_dist(params, distribution):
 
 
 def _aic(x, params, distribution):
-    """Return Akaike Information Criterion for a frozen distribution"""
+    """Return Akaike Information Criterion for a frozen distribution."""
     k = len(params)
     nll = get_frozen_dist(params, distribution).logpdf(x).sum()
     aic = 2 * k - 2 * nll
@@ -559,8 +587,11 @@ def _aic(x, params, distribution):
 
 
 def _aicc(x, params, distribution):
-    """Return Akaike Information Criterion with correction for small sample size
-    for a frozen distribution"""
+    """Return AICC.
+
+    Return Akaike Information Criterion with correction for small sample size
+    for a frozen distribution.
+    """
     k = len(params)
     aic = _aic(x, params, distribution)
     aicc = aic + ((2 * k) ** 2 + 2 * k) / (len(x) - k - 1)
@@ -568,7 +599,7 @@ def _aicc(x, params, distribution):
 
 
 def _bic(x, params, distribution):
-    """Return Bayesian Information Criterion for a frozen distribution"""
+    """Return Bayesian Information Criterion for a frozen distribution."""
     k = len(params)
     nll = get_frozen_dist(params, distribution).logpdf(x).sum()
     bic = k * np.log(len(x)) - 2 * nll
@@ -648,7 +679,7 @@ def plot_return_values(
 
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(10, 6))
-    ax.plot(xobs, rvs_obs, color=color, marker="o", label=f"plot position", lw=0)
+    ax.plot(xobs, rvs_obs, color=color, marker="o", label="plot position", lw=0)
 
     if distribution != "emperical":
         ax.plot(
@@ -700,14 +731,16 @@ def plot_return_values(
 
 
 def lmoment_fitopt(x, distributions=["gumb", "gev"], criterium="AIC"):
-    """lmomentfit routine derive parameters of a distribution function
+    """Return parameters based on lmoments fit.
+
+    Lmomentfit routine derive parameters of a distribution function
     based on lmoments. The distribution selection is based on the
     AIC criterium.
 
     Based on the theory of Hosking and Wallis (1997) Appendix A.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     X: 1D array of float
         data series
     distributions: iterable of {'gev', 'gpd', 'gumb', 'exp'}
@@ -741,13 +774,15 @@ def lmoment_fitopt(x, distributions=["gumb", "gev"], criterium="AIC"):
 
 
 def lmoment_fit(x, distribution):
-    """lmomentfit routine derive parameters of a distribution function
+    """Return parameters based on lmoments.
+
+    Lmomentfit routine derive parameters of a distribution function
     based on lmoments.
 
     Based on the theory of Hosking and Wallis (1997) Appendix A.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     X: 1D array of float
         data series
     distribution: {'gev', 'gpd', 'gumb', 'exp'}
@@ -773,7 +808,9 @@ def lmoment_fit(x, distribution):
 
 
 def _lmomentfit(lmom, distribution):
-    """lmomentfit routine to derive parameters of a distribution function
+    """Return parameters based on lmoments.
+
+    Lmomentfit routine to derive parameters of a distribution function
     based on given lmoments.
 
     Based on the theory of Hosking and Wallis (1997) Appendix A.
@@ -823,7 +860,7 @@ def _lmomentfit(lmom, distribution):
 
 
 def legendre_shift_poly(n):
-    """Shifted Legendre polynomial
+    """Shifted Legendre polynomial.
 
     Based on recurrence relation
         (n + 1)Pn+1 (x) - (1 + 2 n)(2 x - 1)Pn (x) + n Pn-1 (x) = 0
@@ -832,7 +869,6 @@ def legendre_shift_poly(n):
     Return the result as a vector whose mth element is the coefficient of x^(n+1-m).
     polyval(legendre_shift_poly(n),x) evaluates P_n(x).
     """
-
     if n == 0:
         pk = 1
     elif n == 1:
@@ -872,19 +908,18 @@ def get_lmom(x, nmom=4):
 
     lmom by Kobus N. Bekker, 14-09-2004
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     x: 1D array of float
         data series
     nmom: int
         number of L-Moments to be computed, by default 4.
 
-    Returns:
-    --------
+    Returns
+    -------
     lmom: 1D array of float
         vector of (nmom) L-moments
     """
-
     n = len(x)
     xs = np.msort(x)
     bb = np.zeros(nmom - 1)
