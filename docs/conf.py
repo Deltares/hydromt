@@ -102,7 +102,7 @@ def clean_str(s):
 
 project = "HydroMT"
 copyright = "Deltares"
-author = "Dirk Eilander"
+author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 
 # The short version which is displayed
 version = hydromt.__version__
@@ -222,6 +222,7 @@ napoleon_preprocess_types = True
 #
 html_theme = "pydata_sphinx_theme"
 html_logo = "_static/hydromt-icon.svg"
+html_favicon = "_static/hydromt-icon.svg"
 autodoc_member_order = "bysource"  # overwrite default alphabetical sort
 autoclass_content = "both"
 

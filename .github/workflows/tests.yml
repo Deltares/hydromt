@@ -19,6 +19,7 @@ jobs:
   Test-matrix:
     name: ${{ matrix.os }} - py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     defaults:
       run:
         shell: bash -l {0}
@@ -27,7 +28,6 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.9', '3.10', '3.11']
-
     steps:
       - uses: actions/checkout@v3
       - name: Generate env spec

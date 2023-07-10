@@ -120,6 +120,11 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
 
 
 def test_geodataset(geoda, geodf, ts, tmpdir):
+    # this test can sometimes hang because of threading issues therefore
+    # the synchronous scheduler here is necessary
+    from dask import config as dask_config
+
+    dask_config.set(scheduler="synchronous")
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
@@ -192,11 +197,12 @@ def test_dataframe(df, df_time, tmpdir):
     assert isinstance(fwf, pd.DataFrame)
     assert np.all(fwf == df)
 
-    fn_xlsx = str(tmpdir.join("test.xlsx"))
-    df.to_excel(fn_xlsx)
-    df2 = data_catalog.get_dataframe(fn_xlsx, index_col=0)
-    assert isinstance(df2, pd.DataFrame)
-    assert np.all(df2 == df)
+    if compat.HAS_OPENPYXL:
+        fn_xlsx = str(tmpdir.join("test.xlsx"))
+        df.to_excel(fn_xlsx)
+        df2 = data_catalog.get_dataframe(fn_xlsx, index_col=0)
+        assert isinstance(df2, pd.DataFrame)
+        assert np.all(df2 == df)
 
 
 def test_dataframe_time(df_time, tmpdir):
