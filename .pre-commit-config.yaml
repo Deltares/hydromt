@@ -11,10 +11,10 @@ repos:
       - id: check-json
       - id: debug-statements
       - id: mixed-line-ending
-  - repo: https://github.com/google/yamlfmt
-    rev: v0.8.0
-    hooks:
-      - id: yamlfmt
+  # - repo: https://github.com/google/yamlfmt
+  #   rev: v0.8.0
+  #   hooks:
+  #     - id: yamlfmt
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.0.270
     hooks:
