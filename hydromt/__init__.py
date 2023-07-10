@@ -15,6 +15,8 @@ import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+import dask
+dask.config.set(scheduler='single-threaded')
 
 # required for accessor style documentation
 from xarray import DataArray, Dataset

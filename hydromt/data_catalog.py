@@ -194,11 +194,14 @@ class DataCatalog(object):
         )
         self.add_source(key, value)
 
-    def iter_sources(self) -> Tuple[str, DataAdapter]:
+    def iter_sources(self) -> List[Tuple[str, DataAdapter]]:
+        ans = []
         for source_name, available_providers in self._sources.items():
             # print(available_providers)
             for provider, adapter in available_providers.items():
-                yield (source_name, adapter)
+               ans.append((source_name, adapter))
+
+        return ans
 
     def __iter__(self):
         """Iterate over sources."""
@@ -625,9 +628,17 @@ class DataCatalog(object):
                 # deduce variables from name
                 if "[" in name:
                     variables = name.split("[")[-1].split("]")[0].split(",")
+                    breakpoint()
                     name = name.split("[")[0]
                     source_vars[name] = variables
-                sources[name] = copy.deepcopy(self.sources[name])
+
+                if name not in sources: 
+                    sources[name] = {}
+
+                source = self.get_source(name)
+                sources[name]['last'] = copy.deepcopy(source)
+                sources[name][source.catalog_name] = copy.deepcopy(source)
+                
         else:
             sources = copy.deepcopy(self.sources)
 
@@ -635,54 +646,64 @@ class DataCatalog(object):
         fn = join(data_root, "data_catalog.yml")
         if isfile(fn) and append:
             self.logger.info(f"Appending existing data catalog {fn}")
+            breakpoint()
             sources_out = DataCatalog(fn).sources
         else:
             sources_out = {}
 
         # export data and update sources
-        for key, source in sources.items():
-            try:
-                # read slice of source and write to file
-                self.logger.debug(f"Exporting {key}.")
-                if not unit_conversion:
-                    unit_mult = source.unit_mult
-                    unit_add = source.unit_add
-                    source.unit_mult = {}
-                    source.unit_add = {}
-                fn_out, driver = source.to_file(
-                    data_root=data_root,
-                    data_name=key,
-                    variables=source_vars.get(key, None),
-                    bbox=bbox,
-                    time_tuple=time_tuple,
-                    logger=self.logger,
-                )
-                if fn_out is None:
-                    self.logger.warning(f"{key} file contains no data within domain")
+        for key, available_providers in sources.items():
+            for provider, adapter in available_providers.items():
+                if provider == "last":
                     continue
-                # update path & driver and remove kwargs and rename in output sources
-                if unit_conversion:
-                    source.unit_mult = {}
-                    source.unit_add = {}
-                else:
-                    source.unit_mult = unit_mult
-                    source.unit_add = unit_add
-                source.path = fn_out
-                source.driver = driver
-                source.filesystem = "local"
-                source.driver_kwargs = {}
-                source.rename = {}
-                if key in sources_out:
-                    self.logger.warning(
-                        f"{key} already exists in data catalog and is overwritten."
+                try:
+                    # read slice of source and write to file
+                    self.logger.debug(f"Exporting {key}.")
+                    if not unit_conversion:
+                        unit_mult = source.unit_mult
+                        unit_add = source.unit_add
+                        source.unit_mult = {}
+                        source.unit_add = {}
+                    breakpoint()
+                    fn_out, driver = source.to_file(
+                        data_root=data_root,
+                        data_name=key,
+                        variables=source_vars.get(key, None),
+                        bbox=bbox,
+                        time_tuple=time_tuple,
+                        logger=self.logger,
                     )
-                sources_out[key] = source
-            except FileNotFoundError:
-                self.logger.warning(f"{key} file not found at {source.path}")
+                    if fn_out is None:
+                        self.logger.warning(f"{key} file contains no data within domain")
+                        continue
+                    # update path & driver and remove kwargs and rename in output sources
+                    if unit_conversion:
+                        source.unit_mult = {}
+                        source.unit_add = {}
+                    else:
+                        source.unit_mult = unit_mult
+                        source.unit_add = unit_add
+                    source.path = fn_out
+                    source.driver = driver
+                    source.filesystem = "local"
+                    source.driver_kwargs = {}
+                    source.rename = {}
+                    if key in sources_out:
+                        self.logger.warning(
+                            f"{key} already exists in data catalog and is overwritten."
+                        )
+                    if not isinstance(source, DataAdapter):
+                        breakpoint()
+                    sources_out[key] = source
+                except FileNotFoundError:
+                    self.logger.warning(f"{key} file not found at {source.path}")
 
         # write data catalog to yml
         data_catalog_out = DataCatalog()
-        data_catalog_out._sources = sources_out
+        for key, adapter in sources_out.items():
+            # if not isinstance(adapter, DataAdapter):
+            #     breakpoint()
+            data_catalog_out.add_source(key,adapter)
         data_catalog_out.to_yml(fn, root="auto", meta=meta)
 
     def get_rasterdataset(

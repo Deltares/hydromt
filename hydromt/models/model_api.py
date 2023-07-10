@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+## will be deprecated -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT."""
 
 import glob
@@ -346,10 +346,12 @@ class Model(object, metaclass=ABCMeta):
         kind, region = workflows.parse_region(region, logger=self.logger)
         # NOTE: kind=outlet is deprecated!
         if kind in ["basin", "subbasin", "interbasin", "outlet"]:
+            if kind == "outlet":
+                warning.warn("Using outlet as kind in setup_region is deprecated", DeprecationWarning)
             # retrieve global hydrography data (lazy!)
             ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=self.data_catalog[basin_index_fn])
+                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = workflows.get_basin_geometry(
                 ds=ds_org,

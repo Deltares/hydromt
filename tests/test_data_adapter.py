@@ -162,7 +162,7 @@ def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
     datacatalog.from_dict(data_dict2)
     era5_nc = datacatalog.get_rasterdataset("era5_nc")
     assert era5_zarr.equals(era5_nc)
-    datacatalog["era5_zarr"].to_file(tmpdir, "era5_zarr", driver="zarr")
+    datacatalog.get_source("era5_zarr").to_file(tmpdir, "era5_zarr", driver="zarr")
 
 
 def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):

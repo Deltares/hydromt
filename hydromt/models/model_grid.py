@@ -577,7 +577,7 @@ class GridModel(GridMixin, Model):
             # retrieve global hydrography data (lazy!)
             ds_hyd = self.data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=self.data_catalog[basin_index_fn])
+                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = workflows.get_basin_geometry(
                 ds=ds_hyd,

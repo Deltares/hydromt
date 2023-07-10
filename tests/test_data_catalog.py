@@ -104,6 +104,9 @@ def test_versioned_catalogs(tmpdir):
     assert legacy_data_catalog.get_source("esa_worldcover").path.endswith(
         "landuse/esa_worldcover/esa-worldcover.vrt"
     )
+    with pytest.deprecated_call():
+        _ = legacy_data_catalog['esa_worldcover']
+
     aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
     assert (
         aws_data_catalog.get_source("esa_worldcover").path
@@ -121,7 +124,6 @@ def test_versioned_catalogs(tmpdir):
     ).path.endswith("landuse/esa_worldcover/esa-worldcover.vrt")
 
 
-@pytest.mark.filterwarnings('ignore:"from_artifacts" is deprecated:DeprecationWarning')
 def test_data_catalog(tmpdir):
     data_catalog = DataCatalog(data_libs=None)
     # initialized with empty dict
@@ -144,9 +146,11 @@ def test_data_catalog(tmpdir):
     # check that no sources are loaded if fallback_lib is None
     assert not DataCatalog(fallback_lib=None).sources
     # test artifact keys (NOTE: legacy code!)
-    data_catalog = DataCatalog(deltares_data=False)
+    with pytest.deprecated_call():
+        data_catalog = DataCatalog(deltares_data=False)
     assert len(data_catalog._sources) == 0
-    data_catalog.from_artifacts("deltares_data")
+    with pytest.deprecated_call():
+        data_catalog.from_artifacts("deltares_data")
     assert len(data_catalog._sources) > 0
     with pytest.raises(IOError, match="URL b'404: Not Found'"):
         with pytest.deprecated_call():
@@ -168,8 +172,8 @@ def test_from_archive(tmpdir):
         data_catalog.predefined_catalogs["artifact_data"]["versions"].values()
     )[0]
     data_catalog.from_archive(urlpath.format(version=version_hash))
-    assert len(data_catalog._sources) > 0
-    source0 = data_catalog._sources[[k for k in data_catalog.sources.keys()][0]]
+    assert len(data_catalog.iter_sources()) > 0
+    source0 = data_catalog.get_source(next(iter([source_name for source_name,_ in data_catalog.iter_sources()])))
     assert ".hydromt_data" in str(source0.path)
     # failed to download
     with pytest.raises(ConnectionError, match="Data download failed"):
@@ -290,7 +294,7 @@ def test_get_data(df):
     data_catalog = DataCatalog("artifact_data")  # read artifacts
 
     # raster dataset using three different ways
-    da = data_catalog.get_rasterdataset(data_catalog["koppen_geiger"].path)
+    da = data_catalog.get_rasterdataset(data_catalog.get_source("koppen_geiger").path)
     assert isinstance(da, xr.DataArray)
     da = data_catalog.get_rasterdataset("koppen_geiger")
     assert isinstance(da, xr.DataArray)
@@ -300,7 +304,7 @@ def test_get_data(df):
         data_catalog.get_rasterdataset([])
 
     # vector dataset using three different ways
-    gdf = data_catalog.get_geodataframe(data_catalog["osm_coastlines"].path)
+    gdf = data_catalog.get_geodataframe(data_catalog.get_source("osm_coastlines").path)
     assert isinstance(gdf, gpd.GeoDataFrame)
     gdf = data_catalog.get_geodataframe("osm_coastlines")
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -310,7 +314,7 @@ def test_get_data(df):
         data_catalog.get_geodataframe([])
 
     # geodataset using three different ways
-    da = data_catalog.get_geodataset(data_catalog["gtsmv3_eu_era5"].path)
+    da = data_catalog.get_geodataset(data_catalog.get_source("gtsmv3_eu_era5").path)
     assert isinstance(da, xr.DataArray)
     da = data_catalog.get_geodataset("gtsmv3_eu_era5")
     assert isinstance(da, xr.DataArray)
