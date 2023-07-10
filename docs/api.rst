@@ -815,11 +815,11 @@ Extreme Value Analysis
 .. autosummary::
    :toctree: _generated
 
-   stats.get_peaks
-   stats.fit_extremes
-   stats.get_return_value
-   stats.eva
-   stats.eva_idf
+   stats.extremes.get_peaks
+   stats.extremes.fit_extremes
+   stats.extremes.get_return_value
+   stats.extremes.eva
+   stats.extremes.eva_idf
 
 =============
 Design Events
@@ -827,8 +827,8 @@ Design Events
 .. autosummary::
    :toctree: _generated
 
-   design_events.get_peak_hydrographs
-   design_events.get_hyetograph
+   stats.design_events.get_peak_hydrographs
+   stats.design_events.get_hyetograph
 
 
 =========

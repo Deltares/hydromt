@@ -646,22 +646,61 @@ def lmoment_ci(x, distribution, nsample=1000, alpha=0.9, rps=_RPS, extremes_rate
 
 
 def plot_return_values(
-    x,
-    params,
-    distribution,
-    x_scale="gumbel",
+    x: xr.DataArray,
+    params: xr.DataArray,
+    distribution: str,
+    x_scale: Optional[str] = "gumbel",
     ax=None,
-    color="k",
-    a=0,
-    alpha=0.9,
-    nsample=1000,
-    rps=_RPS,
-    extremes_rate=1.0,
+    color: Optional[str] = "k",
+    a: Optional[float] = 0,
+    alpha: Optional[float] = 0.9,
+    nsample: Optional[int] = 1000,
+    rps: Optional[np.ndarray] = _RPS,
+    extremes_rate: float = 1.0,
 ):
+    # TODO: add description to this function Dirk - done very simply now
+    # Maybe extremes_rate should be checked from the params?
+    """Return figure of EVA fit and empirical data.
+
+    Parameters
+    ----------
+    x : xr.DataArray
+        Timeseries data with only peak values, all other values are set to NaN
+    params : xr.DataArray
+        Short name and parameters of extreme value distribution,
+        see also :py:meth:`fit_extremes`.
+    distribution : str
+        Name of distribution used for fit. Can be set to `empirical` if no fit is
+        performed
+    x_scale : str, optional
+        transformation of the x-axis for the figure
+    ax :
+
+    color : str, optional
+        Color of the line. By default colord is black 'k'.
+    a : float, optional
+        Float for the Gringorten position. By default a = 0
+    alpha : float, optional
+        alpha value for the confidence interval of the EV fit. By default, alpha = 0.9
+    nsample : int, optional
+        number of samples used to calculate the confidence interval. By default,
+        nsample = 1000
+    rps : np.ndarray, optional
+        Specific return periods to highlight as points in the plot. By default
+        [2, 5, 10, 25, 50, 100, 250, 500] years
+    extremes_rate : float.
+        Average interarrival time calculated based on the average number of peaks
+        per year. For annual maxima, extremes_rate = 1
+
+    Returns
+    -------
+    ax.figure
+        Figure of EVA fit and empirical data
+    """
     import matplotlib.pyplot as plt
 
     rvs_obs = np.sort(x[np.isfinite(x)])
-    if distribution != "emperical":
+    if distribution != "empirical":
         params = params[-2:] if distribution == "gumb" else params
         rvs_sim = _get_return_values(
             params, distribution, rps=rps, extremes_rate=extremes_rate
@@ -681,7 +720,7 @@ def plot_return_values(
         _, ax = plt.subplots(1, 1, figsize=(10, 6))
     ax.plot(xobs, rvs_obs, color=color, marker="o", label="plot position", lw=0)
 
-    if distribution != "emperical":
+    if distribution != "empirical":
         ax.plot(
             xsim, rvs_sim, color=color, ls="--", label=f"{distribution.upper()} fit"
         )
