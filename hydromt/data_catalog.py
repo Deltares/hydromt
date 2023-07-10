@@ -138,6 +138,7 @@ class DataCatalog(object):
         return list(self._sources.keys())
 
     def get_source_names(self) -> List[str]:
+        """Return a list of all available data source names."""
         return list(self._sources.keys())
 
     @property
@@ -150,15 +151,19 @@ class DataCatalog(object):
     def get_source(self, key: str, provider=None) -> DataAdapter:
         """Get the source."""
         if key not in self._sources:
+            available_sources = sorted(list(self._sources.keys()))
             raise KeyError(
-                f"Requested unknown data source: {key} available sources are: {sorted(list(self._sources.keys()))}"
+                f"Requested unknown data source: {key} "
+                f"available sources are: {available_sources}"
             )
 
         available_providers = self._sources[key]
         if provider is not None:
             if provider not in available_providers:
+                providers = sorted(list(available_providers.keys()))
                 raise KeyError(
-                    f"Requested unknown proveder {provider} for data_source {key} available providers are {sorted(list(available_providers.keys()))}"
+                    f"Requested unknown proveder {provider} for data_source {key}"
+                    f" available providers are {providers}"
                 )
             else:
                 return available_providers[provider]
@@ -166,6 +171,7 @@ class DataCatalog(object):
             return available_providers["last"]
 
     def add_source(self, key: str, adapter: DataAdapter) -> None:
+        """Add a new data source to the data catalog."""
         if not isinstance(adapter, DataAdapter):
             raise ValueError("Value must be DataAdapter")
 
@@ -181,7 +187,8 @@ class DataCatalog(object):
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
         warnings.warn(
-            'Using iterating over the DataCatalog directly is deprecated. Please use cat.get_source("name")',
+            'Using iterating over the DataCatalog directly is deprecated."\
+            " Please use cat.get_source("name")',
             DeprecationWarning,
         )
         return self.get_source(key)
@@ -189,24 +196,29 @@ class DataCatalog(object):
     def __setitem__(self, key: str, value: DataAdapter) -> None:
         """Set or update adaptors."""
         warnings.warn(
-            "Using DataCatalog as a dictionary directly is deprecated. Please use cat.add_source(adapter)",
+            "Using DataCatalog as a dictionary directly is deprecated."
+            " Please use cat.add_source(adapter)",
             DeprecationWarning,
         )
         self.add_source(key, value)
 
     def iter_sources(self) -> List[Tuple[str, DataAdapter]]:
+        """Return a flat list of all available data sources with no duplicates."""
         ans = []
         for source_name, available_providers in self._sources.items():
             # print(available_providers)
             for provider, adapter in available_providers.items():
-               ans.append((source_name, adapter))
+                if provider == "last":
+                    continue
+                ans.append((source_name, adapter))
 
         return ans
 
     def __iter__(self):
         """Iterate over sources."""
         warnings.warn(
-            "Using iterating over the DataCatalog directly is deprecated. Please use cat.iter_sources()",
+            "Using iterating over the DataCatalog directly is deprecated."
+            " Please use cat.iter_sources()",
             DeprecationWarning,
         )
         return self._sources.__iter__()
@@ -214,7 +226,8 @@ class DataCatalog(object):
     def __len__(self):
         """Return number of sources."""
         warnings.warn(
-            "Using len on DataCatalog directly is deprecated. Please use len(cat.get_source())",
+            "Using len on DataCatalog directly is deprecated."
+            " Please use len(cat.get_source())",
             DeprecationWarning,
         )
         return self._sources.__len__()
@@ -628,17 +641,16 @@ class DataCatalog(object):
                 # deduce variables from name
                 if "[" in name:
                     variables = name.split("[")[-1].split("]")[0].split(",")
-                    breakpoint()
                     name = name.split("[")[0]
                     source_vars[name] = variables
 
-                if name not in sources: 
+                if name not in sources:
                     sources[name] = {}
 
                 source = self.get_source(name)
-                sources[name]['last'] = copy.deepcopy(source)
+                sources[name]["last"] = copy.deepcopy(source)
                 sources[name][source.catalog_name] = copy.deepcopy(source)
-                
+
         else:
             sources = copy.deepcopy(self.sources)
 
@@ -646,14 +658,14 @@ class DataCatalog(object):
         fn = join(data_root, "data_catalog.yml")
         if isfile(fn) and append:
             self.logger.info(f"Appending existing data catalog {fn}")
-            breakpoint()
+            # breakpoint()
             sources_out = DataCatalog(fn).sources
         else:
             sources_out = {}
 
         # export data and update sources
         for key, available_providers in sources.items():
-            for provider, adapter in available_providers.items():
+            for provider, source in available_providers.items():
                 if provider == "last":
                     continue
                 try:
@@ -664,7 +676,7 @@ class DataCatalog(object):
                         unit_add = source.unit_add
                         source.unit_mult = {}
                         source.unit_add = {}
-                    breakpoint()
+                    # breakpoint()
                     fn_out, driver = source.to_file(
                         data_root=data_root,
                         data_name=key,
@@ -674,9 +686,12 @@ class DataCatalog(object):
                         logger=self.logger,
                     )
                     if fn_out is None:
-                        self.logger.warning(f"{key} file contains no data within domain")
+                        self.logger.warning(
+                            f"{key} file contains no data within domain"
+                        )
                         continue
-                    # update path & driver and remove kwargs and rename in output sources
+                    # update path & driver and remove kwargs
+                    # and rename in output sources
                     if unit_conversion:
                         source.unit_mult = {}
                         source.unit_add = {}
@@ -689,21 +704,26 @@ class DataCatalog(object):
                     source.driver_kwargs = {}
                     source.rename = {}
                     if key in sources_out:
+                        # breakpoint()
                         self.logger.warning(
                             f"{key} already exists in data catalog and is overwritten."
                         )
-                    if not isinstance(source, DataAdapter):
-                        breakpoint()
-                    sources_out[key] = source
+                    if key not in sources_out:
+                        sources_out[key] = {}
+
+                    sources_out[key][source.catalog_name] = source
+                    sources_out[key]["last"] = source
                 except FileNotFoundError:
                     self.logger.warning(f"{key} file not found at {source.path}")
 
         # write data catalog to yml
         data_catalog_out = DataCatalog()
-        for key, adapter in sources_out.items():
-            # if not isinstance(adapter, DataAdapter):
-            #     breakpoint()
-            data_catalog_out.add_source(key,adapter)
+        for key, available_profviders in sources_out.items():
+            for provider, adapter in available_providers.items():
+                if provider == "last":
+                    continue
+                data_catalog_out.add_source(key, adapter)
+
         data_catalog_out.to_yml(fn, root="auto", meta=meta)
 
     def get_rasterdataset(

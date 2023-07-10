@@ -347,7 +347,10 @@ class Model(object, metaclass=ABCMeta):
         # NOTE: kind=outlet is deprecated!
         if kind in ["basin", "subbasin", "interbasin", "outlet"]:
             if kind == "outlet":
-                warning.warn("Using outlet as kind in setup_region is deprecated", DeprecationWarning)
+                warnings.warn(
+                    "Using outlet as kind in setup_region is deprecated",
+                    DeprecationWarning,
+                )
             # retrieve global hydrography data (lazy!)
             ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:

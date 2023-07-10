@@ -105,7 +105,7 @@ def test_versioned_catalogs(tmpdir):
         "landuse/esa_worldcover/esa-worldcover.vrt"
     )
     with pytest.deprecated_call():
-        _ = legacy_data_catalog['esa_worldcover']
+        _ = legacy_data_catalog["esa_worldcover"]
 
     aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
     assert (
@@ -152,9 +152,10 @@ def test_data_catalog(tmpdir):
     with pytest.deprecated_call():
         data_catalog.from_artifacts("deltares_data")
     assert len(data_catalog._sources) > 0
-    with pytest.raises(IOError, match="URL b'404: Not Found'"):
-        with pytest.deprecated_call():
-            data_catalog = DataCatalog(deltares_data="unknown_version")
+    with pytest.raises(
+        IOError, match="URL b'404: Not Found'"
+    ), pytest.deprecated_call():
+        data_catalog = DataCatalog(deltares_data="unknown_version")
 
     # test hydromt version in meta data
     fn_yml = join(tmpdir, "test.yml")
@@ -173,7 +174,9 @@ def test_from_archive(tmpdir):
     )[0]
     data_catalog.from_archive(urlpath.format(version=version_hash))
     assert len(data_catalog.iter_sources()) > 0
-    source0 = data_catalog.get_source(next(iter([source_name for source_name,_ in data_catalog.iter_sources()])))
+    source0 = data_catalog.get_source(
+        next(iter([source_name for source_name, _ in data_catalog.iter_sources()]))
+    )
     assert ".hydromt_data" in str(source0.path)
     # failed to download
     with pytest.raises(ConnectionError, match="Data download failed"):
@@ -235,7 +238,7 @@ def test_export_global_datasets(tmpdir):
     assert yml_list[2].strip().startswith("root:")
     # check if data is parsed correctly
     data_catalog1 = DataCatalog(data_lib_fn)
-    for key, source in data_catalog1.sources.items():
+    for key, source in data_catalog1.iter_sources():
         source_type = type(source).__name__
         dtypes = DTYPES[source_type]
         obj = source.get_data()
@@ -278,13 +281,14 @@ def test_export_dataframe(tmpdir, df, df_time):
         time_tuple=("2010-02-01", "2010-02-14"),
         bbox=[11.70, 45.35, 12.95, 46.70],
     )
+    # breakpoint()
     data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
-    assert len(data_catalog1) == 1
+    assert len(data_catalog1.iter_sources()) == 1
 
     data_catalog.export_data(str(tmpdir))
     data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
-    assert len(data_catalog1) == 2
-    for key, source in data_catalog1.sources.items():
+    assert len(data_catalog1.iter_sources()) == 2
+    for key, source in data_catalog1.iter_sources():
         dtypes = pd.DataFrame
         obj = source.get_data()
         assert isinstance(obj, dtypes), key

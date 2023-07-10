@@ -192,7 +192,7 @@ def model(demda, world, obsda):
     mod.setup_region({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
     with pytest.deprecated_call():
-        mod.set_staticmaps(demda, "elevtn")  
+        mod.set_staticmaps(demda, "elevtn")
     mod.set_geoms(world, "world")
     mod.set_maps(demda, "elevtn")
     mod.set_forcing(obsda, "waterlevel")
