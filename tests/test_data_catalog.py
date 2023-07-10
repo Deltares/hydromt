@@ -90,7 +90,7 @@ def test_data_catalog_io(tmpdir):
     fn_yml = join(tmpdir, "test1.yml")
     DataCatalog(fallback_lib=None).to_yml(fn_yml)
     # test print
-    print(data_catalog["merit_hydro"])
+    print(data_catalog.get_source("merit_hydro"))
 
 
 def test_versioned_catalogs(tmpdir):
@@ -115,9 +115,9 @@ def test_versioned_catalogs(tmpdir):
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
     print(merged_catalog.get_source("esa_worldcover"))
-    breakpoint()
+    # breakpoint()
     assert merged_catalog.get_source(
-        "esa_worldcover", catalog_name="legacy_esa_worldcover"
+        "esa_worldcover", provider="legacy_esa_worldcover"
     ).path.endswith("landuse/esa_worldcover/esa-worldcover.vrt")
 
 
@@ -129,10 +129,10 @@ def test_data_catalog(tmpdir):
     # global data sources from artifacts are automatically added
     assert len(data_catalog.sources) > 0
     # test keys, getitem,
-    keys = data_catalog.keys
-    source = data_catalog[keys[0]]
+    keys = [key for key, _ in data_catalog.iter_sources()]
+    source = data_catalog.get_source(keys[0])
     assert isinstance(source, DataAdapter)
-    assert keys[0] in data_catalog
+    assert keys[0] in data_catalog.get_source_names()
     # add source from dict
     data_dict = {keys[0]: source.to_dict()}
     data_catalog.from_dict(data_dict)
@@ -140,7 +140,7 @@ def test_data_catalog(tmpdir):
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataAdapter"):
-        data_catalog["test"] = "string"
+        data_catalog.add_source("test", "string")
     # check that no sources are loaded if fallback_lib is None
     assert not DataCatalog(fallback_lib=None).sources
     # test artifact keys (NOTE: legacy code!)
@@ -149,7 +149,8 @@ def test_data_catalog(tmpdir):
     data_catalog.from_artifacts("deltares_data")
     assert len(data_catalog._sources) > 0
     with pytest.raises(IOError, match="URL b'404: Not Found'"):
-        data_catalog = DataCatalog(deltares_data="unknown_version")
+        with pytest.deprecated_call():
+            data_catalog = DataCatalog(deltares_data="unknown_version")
 
     # test hydromt version in meta data
     fn_yml = join(tmpdir, "test.yml")

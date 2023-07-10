@@ -128,13 +128,16 @@ class DataCatalog(object):
         return self._sources
 
     @property
-    def keys(self) -> List:
+    def keys(self) -> List[str]:
         """Returns list of data source names."""
         warnings.warn(
             "Using iterating over the DataCatalog directly is deprecated."
-            "Please use cat.get_sources()",
+            "Please use cat.get_source()",
             DeprecationWarning,
         )
+        return list(self._sources.keys())
+
+    def get_source_names(self) -> List[str]:
         return list(self._sources.keys())
 
     @property
@@ -144,14 +147,36 @@ class DataCatalog(object):
             self.set_predefined_catalogs()
         return self._catalogs
 
-    def get_source(self, key: str, catalog_name=None) -> DataAdapter:
+    def get_source(self, key: str, provider=None) -> DataAdapter:
         """Get the source."""
+        if key not in self._sources:
+            raise KeyError(
+                f"Requested unknown data source: {key} available sources are: {sorted(list(self._sources.keys()))}"
+            )
+
+        available_providers = self._sources[key]
+        if provider is not None:
+            if provider not in available_providers:
+                raise KeyError(
+                    f"Requested unknown proveder {provider} for data_source {key} available providers are {sorted(list(available_providers.keys()))}"
+                )
+            else:
+                return available_providers[provider]
+        else:
+            return available_providers["last"]
+
+    def add_source(self, key: str, adapter: DataAdapter) -> None:
+        if not isinstance(adapter, DataAdapter):
+            raise ValueError("Value must be DataAdapter")
+
+        if key not in self._sources:
+            self._sources[key] = dict()
+
+        # TODO catalgos here need to be diffed to construct common base
+
+        self._sources[key]["last"] = adapter
+        self._sources[key][adapter.catalog_name] = adapter
         return self._sources[key]
-    
-    def add_source(self,key: str, adapter: DataAdapter) -> None:
-        if key in self._sources:
-            self.logger.warning(f"Overwriting data source {key}.")
-        return self._sources.__setitem__(key, value)
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
@@ -167,8 +192,13 @@ class DataCatalog(object):
             "Using DataCatalog as a dictionary directly is deprecated. Please use cat.add_source(adapter)",
             DeprecationWarning,
         )
-        self.add_source(key,value)
+        self.add_source(key, value)
 
+    def iter_sources(self) -> Tuple[str, DataAdapter]:
+        for source_name, available_providers in self._sources.items():
+            # print(available_providers)
+            for provider, adapter in available_providers.items():
+                yield (source_name, adapter)
 
     def __iter__(self):
         """Iterate over sources."""
@@ -181,7 +211,7 @@ class DataCatalog(object):
     def __len__(self):
         """Return number of sources."""
         warnings.warn(
-            "Using len on DataCatalog directly is deprecated. Please use len(cat.get_sources())",
+            "Using len on DataCatalog directly is deprecated. Please use len(cat.get_source())",
             DeprecationWarning,
         )
         return self._sources.__len__()
@@ -196,12 +226,12 @@ class DataCatalog(object):
     def update(self, **kwargs) -> None:
         """Add data sources to library or update them."""
         for k, v in kwargs.items():
-            self.add_source(k,v)
+            self.add_source(k, v)
 
     def update_sources(self, **kwargs) -> None:
         """Add data sources to library or update them."""
         for k, v in kwargs.items():
-            self.add_source(k,v)
+            self.add_source(k, v)
 
     def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
         """Initialise the predefined catalogs."""
@@ -516,7 +546,9 @@ class DataCatalog(object):
             root = abspath(root)
             meta.update(**{"root": root})
             root_drive = os.path.splitdrive(root)[0]
-        for name, source in sorted(self._sources.items()):  # alphabetical order
+        for name, source in sorted(
+            self.iter_sources(), key=lambda x: x[0]
+        ):  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
             source_dict = source.to_dict()
@@ -540,7 +572,7 @@ class DataCatalog(object):
     def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
         """Return data catalog summary as DataFrame."""
         d = dict()
-        for name, source in self._sources.items():
+        for name, source in self.iter_sources():
             if len(source_names) > 0 and name not in source_names:
                 continue
             d[name] = source.summary()
@@ -732,6 +764,7 @@ class DataCatalog(object):
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
+        source = self.get_source(name)
         self.logger.info(
             f"DataCatalog: Getting {name} RasterDataset {source.driver} data from"
             f" {source.path}"
@@ -815,6 +848,7 @@ class DataCatalog(object):
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
+        source = self.get_source(name)
         self.logger.info(
             f"DataCatalog: Getting {name} GeoDataFrame {source.driver} data"
             f" from {source.path}"
@@ -901,6 +935,7 @@ class DataCatalog(object):
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
+        source = self.get_source(name)
         self.logger.info(
             f"DataCatalog: Getting {name} GeoDataset {source.driver} data"
             f" from {source.path}"
@@ -963,6 +998,7 @@ class DataCatalog(object):
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
+        source = self.get_source(name)
         self.logger.info(
             f"DataCatalog: Getting {name} DataFrame {source.driver} data"
             f" from {source.path}"
