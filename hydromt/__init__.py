@@ -29,3 +29,4 @@ from .io import *
 
 # high-level methods
 from .models import *
+from .utils import *

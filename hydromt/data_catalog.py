@@ -32,6 +32,7 @@ from .data_adapter import (
     RasterDatasetAdapter,
 )
 from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
+from .utils import partition_dictionaries
 
 logger = logging.getLogger(__name__)
 
@@ -178,11 +179,17 @@ class DataCatalog(object):
         if key not in self._sources:
             self._sources[key] = dict()
 
-        # TODO catalgos here need to be diffed to construct common base
-
-        self._sources[key]["last"] = adapter
-        self._sources[key][adapter.catalog_name] = adapter
-        return self._sources[key]
+        existing = self._sources[key]
+        base, diff_existing, diff_new = partition_dictionaries(
+            existing, adapter.to_dict()
+        )
+        if base == {}:
+            self._sources[key]["last"] = adapter
+            self._sources[key][adapter.catalog_name] = adapter
+        else:
+            base_adapter = DataAdapter.from_dict(base)
+            self._sources[key]["base"] = base_adapter
+            self._source[key]["versions"] = [diff_existing, diff_new]
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
@@ -658,7 +665,6 @@ class DataCatalog(object):
         fn = join(data_root, "data_catalog.yml")
         if isfile(fn) and append:
             self.logger.info(f"Appending existing data catalog {fn}")
-            # breakpoint()
             sources_out = DataCatalog(fn).sources
         else:
             sources_out = {}
@@ -676,7 +682,6 @@ class DataCatalog(object):
                         unit_add = source.unit_add
                         source.unit_mult = {}
                         source.unit_add = {}
-                    # breakpoint()
                     fn_out, driver = source.to_file(
                         data_root=data_root,
                         data_name=key,
@@ -704,7 +709,6 @@ class DataCatalog(object):
                     source.driver_kwargs = {}
                     source.rename = {}
                     if key in sources_out:
-                        # breakpoint()
                         self.logger.warning(
                             f"{key} already exists in data catalog and is overwritten."
                         )

@@ -8,6 +8,7 @@ import geopandas as gpd
 import pandas as pd
 import pytest
 import xarray as xr
+import yaml
 
 from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
 from hydromt.data_catalog import DataCatalog, _parse_data_dict
@@ -117,11 +118,25 @@ def test_versioned_catalogs(tmpdir):
         merged_catalog.get_source("esa_worldcover").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
-    print(merged_catalog.get_source("esa_worldcover"))
-    # breakpoint()
     assert merged_catalog.get_source(
         "esa_worldcover", provider="legacy_esa_worldcover"
     ).path.endswith("landuse/esa_worldcover/esa-worldcover.vrt")
+    assert (
+        merged_catalog.get_source("esa_worldcover", provider="aws_esa_worldcover").path
+        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
+    )
+    aws_data_catalog.from_yml(legacy_yml_fn)
+    # assert merged_catalog.to_dict() == aws_data_catalog.to_dict()
+    with open(join(DATADIR, "merged_esa_worldcover.yml"), "r") as f:
+        expected_merged_catalog_dict = yaml.load(f, Loader=yaml.Loader)
+
+    import json
+
+    print(
+        "expected: ", json.dumps(expected_merged_catalog_dict, sort_keys=True, indent=2)
+    )
+    print("computed: ", json.dumps(merged_catalog.to_dict(), sort_keys=True, indent=2))
+    assert expected_merged_catalog_dict == merged_catalog.to_dict()
 
 
 def test_data_catalog(tmpdir):
@@ -281,7 +296,6 @@ def test_export_dataframe(tmpdir, df, df_time):
         time_tuple=("2010-02-01", "2010-02-14"),
         bbox=[11.70, 45.35, 12.95, 46.70],
     )
-    # breakpoint()
     data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
     assert len(data_catalog1.iter_sources()) == 1
 
