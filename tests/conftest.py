@@ -101,6 +101,7 @@ def ts(geodf):
 @pytest.fixture()
 def geoda(geodf, ts):
     da = vector.GeoDataArray.from_gdf(geodf, ts, name="test", dims=("index", "time"))
+    da.vector.set_nodata(np.nan)
     return da
 
 
@@ -266,3 +267,10 @@ def mesh_model(griduda):
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(griduda, "elevtn")
     return mod
+
+
+@pytest.fixture()
+def artifact_data():
+    datacatalog = DataCatalog()
+    datacatalog.from_predefined_catalogs("artifact_data")
+    return datacatalog

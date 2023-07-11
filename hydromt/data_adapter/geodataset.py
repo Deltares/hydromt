@@ -1,6 +1,7 @@
 """Implementation for the geodataset DataAdapter."""
 import logging
 import os
+import warnings
 from os.path import join
 from pathlib import Path
 from typing import NewType, Union
@@ -33,15 +34,19 @@ class GeoDatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path,
-        driver=None,
-        filesystem="local",
-        crs=None,
-        nodata=None,
-        rename={},
-        unit_mult={},
-        unit_add={},
-        meta={},
+        path: str,
+        driver: str = None,
+        filesystem: str = "local",
+        crs: Union[int, str, dict] = None,
+        nodata: Union[dict, float, int] = None,
+        rename: dict = {},
+        unit_mult: dict = {},
+        unit_add: dict = {},
+        meta: dict = {},
+        attrs: dict = {},
+        driver_kwargs: dict = {},
+        name: str = "",  # optional for now
+        catalog_name: str = "",  # optional for now
         **kwargs,
     ):
         """Initiate data adapter for geospatial timeseries data.
@@ -89,21 +94,37 @@ class GeoDatasetAdapter(DataAdapter):
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
-        **kwargs
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
+        driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
         """
+        if kwargs:
+            warnings.warn(
+                "Passing additional keyword arguments to be used by the "
+                "GeoDatasetAdapter driver is deprecated and will be removed "
+                "in a future version. Please use 'driver_kwargs' instead.",
+                DeprecationWarning,
+            )
+            driver_kwargs.update(kwargs)
         super().__init__(
             path=path,
             driver=driver,
             filesystem=filesystem,
-            crs=crs,
             nodata=nodata,
             rename=rename,
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
-            **kwargs,
+            attrs=attrs,
+            driver_kwargs=driver_kwargs,
+            name=name,
+            catalog_name=catalog_name,
         )
+        self.crs = crs
 
     def to_file(
         self,
@@ -215,24 +236,25 @@ class GeoDatasetAdapter(DataAdapter):
             variables = np.atleast_1d(variables).tolist()
 
         # Extract storage_options from kwargs to instantiate fsspec object correctly
-        if "storage_options" in self.kwargs and self.driver == "zarr":
-            kwargs = self.kwargs["storage_options"]
+        so_kwargs = dict()
+        if "storage_options" in self.driver_kwargs and self.driver == "zarr":
+            so_kwargs = self.driver_kwargs["storage_options"]
             # For s3, anonymous connection still requires --no-sign-request profile to
             # read the data
             # setting environment variable works
-            if "anon" in kwargs:
+            if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        elif "storage_options" in self.kwargs:
+        elif "storage_options" in self.driver_kwargs:
             raise NotImplementedError(
                 "Remote (cloud) GeoDataset only supported with driver zarr."
             )
-        else:
-            kwargs = dict()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables, **kwargs)
+        fns = self.resolve_paths(
+            time_tuple=time_tuple, variables=variables, **so_kwargs
+        )
 
-        kwargs = self.kwargs.copy()
+        kwargs = self.driver_kwargs.copy()
 
         # parse geom, bbox and buffer arguments
         clip_str = ""
@@ -367,6 +389,14 @@ class GeoDatasetAdapter(DataAdapter):
         # return data array if single var
         if single_var_as_array and len(ds_out.vector.vars) == 1:
             ds_out = ds_out[ds_out.vector.vars[0]]
+
+        # Set variable attribute data
+        if self.attrs:
+            if isinstance(ds_out, xr.DataArray):
+                ds_out.attrs.update(self.attrs[ds_out.name])
+            else:
+                for k in self.attrs:
+                    ds_out[k].attrs.update(self.attrs[k])
 
         # set meta data
         ds_out.attrs.update(self.meta)
