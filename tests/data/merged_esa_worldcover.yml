@@ -10,7 +10,8 @@ esa_worldcover:
   versions:
     - legacy_esa_worldcover:
         path: landuse/esa_worldcover/esa-worldcover.vrt
-        kwargs:
+        filesystem: local
+        driver_kwargs:
           chunks:
             x: 36000
             y: 36000
@@ -19,6 +20,6 @@ esa_worldcover:
         rename:
           ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
         filesystem: s3
-        kwargs:
+        driver_kwargs:
           storage_options:
             anon: true

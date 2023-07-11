@@ -2,7 +2,7 @@ esa_worldcover:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 36000
       y: 36000

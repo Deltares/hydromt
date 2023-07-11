@@ -151,8 +151,16 @@ def test_versioned_catalogs(tmpdir):
         expected_merged_catalog_dict = yaml.load(f, Loader=yaml.Loader)
 
     catalog_dict = aws_and_legacy_data_catalog.to_dict()
-    print("expected: ", _dict_pprint(expected_merged_catalog_dict))
-    print("computed: ", _dict_pprint(catalog_dict))
+
+    # strip absolute path to make the test portable
+    catalog_dict["esa_worldcover"]["versions"][0]["legacy_esa_worldcover"][
+        "path"
+    ] = catalog_dict["esa_worldcover"]["versions"][0]["legacy_esa_worldcover"][
+        "path"
+    ].removeprefix(
+        DATADIR + "/"
+    )
+
     assert catalog_dict == expected_merged_catalog_dict
 
 

@@ -3,7 +3,7 @@ esa_worldcover:
   data_type: RasterDataset
   driver: raster
   filesystem: s3
-  kwargs:
+  driver_kwargs:
     storage_options:
       anon: true
   meta:
