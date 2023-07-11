@@ -470,15 +470,12 @@ def fit_extremes(
     da_params = da_params.isel(dparams=slice(0, -1))
     da_params.name = "parameters"
     # add coordinates
-    dims = list([d for d in da_params.dims if d != "dparams"])
+    dist_dims = list([d for d in da_params.dims if d != "dparams"])
     coords = dict(
-        dparams=xr.IndexVariable(
-            "dparams", ["shape", "loc", "scale"]
-        ),  # I think this should have the dimension of duration as well
-        distribution=xr.IndexVariable(dims=dims, data=distributions),
+        dparams=xr.IndexVariable("dparams", ["shape", "loc", "scale"]),
+        distribution=xr.DataArray(dims=dist_dims, data=distributions),
+        extremes_rate=da_peaks["extremes_rate"],
     )
-    # keep extremes_rate meta data
-    coords.update(extremes_rate=da_peaks["extremes_rate"])
     da_params = da_params.assign_coords(coords)
     return da_params.squeeze()
 

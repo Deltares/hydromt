@@ -155,39 +155,38 @@ def hydds(flwda, flwdir):
     return ds
 
 
-@pytest.fixture
-def ts(): 
+@pytest.fixture()
+def obsda():
     rng = np.random.default_rng(12345)
     da = xr.DataArray(
-        data=rng.random(size=365*40) * 100,
+        data=rng.random(size=365) * 100,
         dims=("time"),
-        coords={"time": pd.date_range(start="2020-01-01", periods=365*40, freq="1D")},
+        coords={"time": pd.date_range(start="2020-01-01", periods=365, freq="1D")},
         attrs=dict(_FillValue=-9999),
     )
     da.raster.set_crs(4326)
     return da
 
-@pytest.fixture
+
+@pytest.fixture()
 def ts_extremes():
     rng = np.random.default_rng(12345)
-    normal = pd.DataFrame(rng.random(size=(365*100,2)) * 100, index = pd.date_range(start="2020-01-01", periods=365*100, freq="1D"))
-    ext = rng.gumbel(loc=100, scale=25, size=(200,2)) #Create extremes
-    #replace extremes in normal values
+    normal = pd.DataFrame(
+        rng.random(size=(365 * 100, 2)) * 100,
+        index=pd.date_range(start="2020-01-01", periods=365 * 100, freq="1D"),
+    )
+    ext = rng.gumbel(loc=100, scale=25, size=(200, 2))  # Create extremes
     for i in range(2):
-        normal.loc[normal.nlargest(200, i).index, i] = ext[:,i].reshape(-1)
-    #normal.nlargest(200, 0).index
+        normal.loc[normal.nlargest(200, i).index, i] = ext[:, i].reshape(-1)
     da = xr.DataArray(
-        #data=rng.gumbel(loc=100, scale=25, size=(100,2)),
-        data = normal.values,
-        dims=("time","stations"),
-        coords={"time": pd.date_range(start="1950-01-01", periods=365*100, freq="D"), 
-                "stations": [1,2]},
-        # coords={"time": pd.date_range(start="1950-01-01", periods=100, freq="AS"), 
-        #         "stations": [1,2]},
+        data=normal.values,
+        dims=("time", "stations"),
+        coords={
+            "time": pd.date_range(start="1950-01-01", periods=365 * 100, freq="D"),
+            "stations": [1, 2],
+        },
         attrs=dict(_FillValue=-9999),
     )
-    #Needed to run the function ...
-    # da = da.assign_coords({"extremes_rate": xr.Variable("stations", np.ones(len(da['stations'])))})
     da.raster.set_crs(4326)
     return da
 
