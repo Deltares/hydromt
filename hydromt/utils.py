@@ -34,3 +34,9 @@ def partition_dictionaries(left, right):
                 right_less_left[key] = value_right
 
     return common, left_less_right, right_less_left
+
+
+def _dict_pprint(d):
+    import json
+
+    return json.dumps(d, indent=2)

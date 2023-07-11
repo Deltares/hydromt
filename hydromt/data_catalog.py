@@ -23,6 +23,8 @@ import xarray as xr
 import yaml
 from packaging.version import Version
 
+from hydromt.utils import partition_dictionaries
+
 from . import __version__
 from .data_adapter import (
     DataAdapter,
@@ -166,6 +168,8 @@ class DataCatalog(object):
                     f" available providers are {providers}"
                 )
             else:
+                adapter = available_providers[provider]
+                adapter.version_name = provider
                 return available_providers[provider]
         else:
             return available_providers["last"]
@@ -482,7 +486,7 @@ class DataCatalog(object):
             }
 
         """
-        data_dicts = _normalise_data_dict(data_dict, catalog_name=catalog_name)
+        data_dicts = _denormalise_data_dict(data_dict, catalog_name=catalog_name)
         for d in data_dicts:
             parsed_dict = _parse_data_dict(
                 d, catalog_name=catalog_name, root=root, category=category
@@ -560,12 +564,12 @@ class DataCatalog(object):
             root = abspath(root)
             meta.update(**{"root": root})
             root_drive = os.path.splitdrive(root)[0]
-        for name, source in sorted(
-            self.iter_sources(), key=lambda x: x[0]
-        ):  # alphabetical order
+        sorted_sources = sorted(self.iter_sources(), key=lambda x: x[0])
+        for name, source in sorted_sources:  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
             source_dict = source.to_dict()
+
             if root is not None:
                 path = source_dict["path"]  # is abspath
                 source_drive = os.path.splitdrive(path)[0]
@@ -578,7 +582,22 @@ class DataCatalog(object):
                     ).replace("\\", "/")
             # remove non serializable entries to prevent errors
             source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
-            sources_out.update({name: source_dict})
+            if name in sources_out:
+                existing = sources_out.pop(name)
+                base, diff_existing, diff_new = partition_dictionaries(
+                    source_dict, existing
+                )
+                # TODO how to deal with driver_kwargs vs kwargs when writing?
+                _ = base.pop("driver_kwargs", None)
+                existing_version_name = diff_existing.pop("version_name")
+                new_version_name = diff_new.pop("version_name")
+                base["versions"] = [
+                    {new_version_name: diff_new},
+                    {existing_version_name: diff_existing},
+                ]
+                sources_out[name] = base
+            else:
+                sources_out.update({name: source_dict})
         if meta:
             sources_out = {"meta": meta, **sources_out}
         return sources_out
@@ -1181,7 +1200,7 @@ def _process_dict(d: Dict, logger=logger) -> Dict:
     return d
 
 
-def _normalise_data_dict(data_dict, catalog_name) -> List[Dict[str, Any]]:
+def _denormalise_data_dict(data_dict, catalog_name) -> List[Dict[str, Any]]:
     # first do a pass to expand possible versions
     dicts = []
     for name, source in data_dict.items():
@@ -1197,6 +1216,13 @@ def _normalise_data_dict(data_dict, catalog_name) -> List[Dict[str, Any]]:
                 dicts.append({name: source_copy})
         else:
             dicts.append({name: source})
+
+    return dicts
+
+
+def _normalise_data_dict(data_dict) -> List[Dict[str, Any]]:
+    # first do a pass to expand possible versions
+    dicts = []
 
     return dicts
 

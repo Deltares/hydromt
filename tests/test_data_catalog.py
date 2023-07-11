@@ -12,6 +12,7 @@ import yaml
 
 from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
 from hydromt.data_catalog import DataCatalog, _parse_data_dict
+from hydromt.utils import _dict_pprint
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -149,7 +150,10 @@ def test_versioned_catalogs(tmpdir):
     with open(join(DATADIR, "merged_esa_worldcover.yml"), "r") as f:
         expected_merged_catalog_dict = yaml.load(f, Loader=yaml.Loader)
 
-    assert aws_and_legacy_data_catalog.to_dict() == expected_merged_catalog_dict
+    catalog_dict = aws_and_legacy_data_catalog.to_dict()
+    print("expected: ", _dict_pprint(expected_merged_catalog_dict))
+    print("computed: ", _dict_pprint(catalog_dict))
+    assert catalog_dict == expected_merged_catalog_dict
 
 
 def test_data_catalog(tmpdir):
