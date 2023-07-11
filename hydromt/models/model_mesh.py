@@ -3,7 +3,7 @@ import logging
 import os
 from os.path import dirname, isdir, isfile, join
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -522,7 +522,7 @@ class MeshModel(MeshMixin, Model):
         Parameters
         ----------
         region : dict
-            Dictionary describing region of interest, e.g.:
+            Dictionary describing region of interest, e.g.: TODO support bounds in region for type mesh
 
             * {'bbox': [xmin, ymin, xmax, ymax]}
 
@@ -632,6 +632,18 @@ class MeshModel(MeshMixin, Model):
                 mesh2d.ugrid.grid.set_crs(crs)
             mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
 
+            # TODO if bounds clip
+            # Check if intersects with region
+            # xmin, ymin, xmax, ymax = self.bounds
+            # subset = mesh2d.ugrid.sel(y=slice(ymin, ymax), x=slice(xmin, xmax))
+            # err = "RasterDataset: No data within model region."
+            # subset = subset.ugrid.assign_node_coords()
+            # if subset.ugrid.grid.node_x.size == 0
+            # or subset.ugrid.grid.node_y.size == 0:
+            #     raise IndexError(err)
+            # reinitialise mesh2d grid (set_mesh is used in super)
+            # self._mesh = subset
+
         # Reproject to user crs option if needed
         if mesh2d.ugrid.grid.crs != crs and crs is not None:
             self.logger.info(f"Reprojecting mesh to crs {crs}")
@@ -685,7 +697,7 @@ class MeshModel(MeshMixin, Model):
 
     # MeshModel properties
     @property
-    def bounds(self) -> Tuple:
+    def bounds(self) -> Dict:
         """Returns model mesh bounds."""
         if self._mesh is not None:
             return self._mesh.ugrid.bounds
