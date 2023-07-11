@@ -13,7 +13,7 @@ import shutil
 import warnings
 from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -32,7 +32,6 @@ from .data_adapter import (
     RasterDatasetAdapter,
 )
 from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
-from .utils import partition_dictionaries
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +153,7 @@ class DataCatalog(object):
         if key not in self._sources:
             available_sources = sorted(list(self._sources.keys()))
             raise KeyError(
-                f"Requested unknown data source: {key} "
+                f"Requested unknown data source: '{key}' "
                 f"available sources are: {available_sources}"
             )
 
@@ -163,7 +162,7 @@ class DataCatalog(object):
             if provider not in available_providers:
                 providers = sorted(list(available_providers.keys()))
                 raise KeyError(
-                    f"Requested unknown proveder {provider} for data_source {key}"
+                    f"Requested unknown proveder '{provider}' for data_source '{key}'"
                     f" available providers are {providers}"
                 )
             else:
@@ -177,19 +176,13 @@ class DataCatalog(object):
             raise ValueError("Value must be DataAdapter")
 
         if key not in self._sources:
-            self._sources[key] = dict()
+            self._sources[key] = {}
 
-        existing = self._sources[key]
-        base, diff_existing, diff_new = partition_dictionaries(
-            existing, adapter.to_dict()
-        )
-        if base == {}:
-            self._sources[key]["last"] = adapter
-            self._sources[key][adapter.catalog_name] = adapter
+        self._sources[key]["last"] = adapter
+        if hasattr(adapter, "version_name") and adapter.version_name is not None:
+            self._sources[key][adapter.version_name] = adapter
         else:
-            base_adapter = DataAdapter.from_dict(base)
-            self._sources[key]["base"] = base_adapter
-            self._source[key]["versions"] = [diff_existing, diff_new]
+            self._sources[key][adapter.catalog_name] = adapter
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
@@ -253,8 +246,7 @@ class DataCatalog(object):
 
     def update_sources(self, **kwargs) -> None:
         """Add data sources to library or update them."""
-        for k, v in kwargs.items():
-            self.add_source(k, v)
+        self.update(**kwargs)
 
     def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
         """Initialise the predefined catalogs."""
@@ -490,15 +482,14 @@ class DataCatalog(object):
             }
 
         """
-        data_dict = _parse_data_dict(
-            data_dict,
-            catalog_name=catalog_name,
-            root=root,
-            category=category,
-        )
-        self.update(**data_dict)
-        if mark_used:
-            self._used_data.extend(list(data_dict.keys()))
+        data_dicts = _normalise_data_dict(data_dict, catalog_name=catalog_name)
+        for d in data_dicts:
+            parsed_dict = _parse_data_dict(
+                d, catalog_name=catalog_name, root=root, category=category
+            )
+            self.update(**parsed_dict)
+            if mark_used:
+                self._used_data.extend(list(parsed_dict.keys()))
 
     def to_yml(
         self,
@@ -1118,6 +1109,19 @@ def _parse_data_dict(
         for opt in source:
             if "fn" in opt:  # get absolute paths for file names
                 source.update({opt: abs_path(root, source[opt])})
+        dict_catalog_name = source.pop("catalog_name", None)
+        if dict_catalog_name is not None and dict_catalog_name != catalog_name:
+            raise RuntimeError(
+                "catalog name passed as argument and differs from one in dictionary"
+            )
+
+        dict_name = source.pop("name", None)
+        if dict_name is not None and dict_name != name:
+            raise RuntimeError(
+                "Source name passed as argument and differs from one in dictionary"
+            )
+
+        version_name = source.pop("version_name", None)
         if "placeholders" in source:
             # pop avoid placeholders being passed to adapter
             options = source.pop("placeholders")
@@ -1132,6 +1136,7 @@ def _parse_data_dict(
                     path=path_n,
                     name=name_n,
                     catalog_name=catalog_name,
+                    version_name=version_name,
                     meta=meta,
                     attrs=attrs,
                     driver_kwargs=driver_kwargs,
@@ -1143,6 +1148,7 @@ def _parse_data_dict(
                 path=path,
                 name=name,
                 catalog_name=catalog_name,
+                version_name=version_name,
                 meta=meta,
                 attrs=attrs,
                 driver_kwargs=driver_kwargs,
@@ -1173,6 +1179,26 @@ def _process_dict(d: Dict, logger=logger) -> Dict:
         elif _check_key and isinstance(v, Path):
             d[k] = str(v)  # path to string
     return d
+
+
+def _normalise_data_dict(data_dict, catalog_name) -> List[Dict[str, Any]]:
+    # first do a pass to expand possible versions
+    dicts = []
+    for name, source in data_dict.items():
+        if "versions" in source:
+            versions = source.pop("versions")
+            for version in versions:
+                version_name, diff = version.popitem()
+                source_copy = copy.deepcopy(source)
+                diff["version_name"] = version_name
+                diff["name"] = name
+                diff["catalog_name"] = catalog_name
+                source_copy.update(**diff)
+                dicts.append({name: source_copy})
+        else:
+            dicts.append({name: source})
+
+    return dicts
 
 
 def abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:

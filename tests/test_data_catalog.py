@@ -95,48 +95,61 @@ def test_data_catalog_io(tmpdir):
 
 
 def test_versioned_catalogs(tmpdir):
-    # we want to keep a legacy version embeded in the test code since we're presumably
-    # going to change the actual catalog.
-
+    # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
-    aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
-    # merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
     assert legacy_data_catalog.get_source("esa_worldcover").path.endswith(
         "landuse/esa_worldcover/esa-worldcover.vrt"
     )
+    # make sure we raise deprecation warning here
     with pytest.deprecated_call():
         _ = legacy_data_catalog["esa_worldcover"]
 
+    aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
     aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
     assert (
         aws_data_catalog.get_source("esa_worldcover").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
-    merged_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
+
+    # make sure we can read merged catalogs
+    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
+    read_merged_catalog = DataCatalog(data_libs=[merged_yml_fn])
     assert (
-        merged_catalog.get_source("esa_worldcover").path
+        read_merged_catalog.get_source("esa_worldcover").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
-    assert merged_catalog.get_source(
+    assert (
+        read_merged_catalog.get_source(
+            "esa_worldcover", provider="aws_esa_worldcover"
+        ).path
+        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
+    )
+    assert read_merged_catalog.get_source(
         "esa_worldcover", provider="legacy_esa_worldcover"
     ).path.endswith("landuse/esa_worldcover/esa-worldcover.vrt")
+
+    # Make sure we can queiry for the version we want
+    aws_and_legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
     assert (
-        merged_catalog.get_source("esa_worldcover", provider="aws_esa_worldcover").path
+        aws_and_legacy_data_catalog.get_source("esa_worldcover").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
-    aws_data_catalog.from_yml(legacy_yml_fn)
-    # assert merged_catalog.to_dict() == aws_data_catalog.to_dict()
+
+    assert (
+        aws_and_legacy_data_catalog.get_source(
+            "esa_worldcover", provider="aws_esa_worldcover"
+        ).path
+        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
+    )
+    assert aws_and_legacy_data_catalog.get_source(
+        "esa_worldcover", provider="legacy_esa_worldcover"
+    ).path.endswith("landuse/esa_worldcover/esa-worldcover.vrt")
+
     with open(join(DATADIR, "merged_esa_worldcover.yml"), "r") as f:
         expected_merged_catalog_dict = yaml.load(f, Loader=yaml.Loader)
 
-    import json
-
-    print(
-        "expected: ", json.dumps(expected_merged_catalog_dict, sort_keys=True, indent=2)
-    )
-    print("computed: ", json.dumps(merged_catalog.to_dict(), sort_keys=True, indent=2))
-    assert expected_merged_catalog_dict == merged_catalog.to_dict()
+    assert aws_and_legacy_data_catalog.to_dict() == expected_merged_catalog_dict
 
 
 def test_data_catalog(tmpdir):

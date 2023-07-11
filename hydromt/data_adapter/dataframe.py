@@ -38,6 +38,7 @@ class DataFrameAdapter(DataAdapter):
         driver_kwargs: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        version_name=None,
         **kwargs,
     ):
         """Initiate data adapter for 2D tabular data.
@@ -106,6 +107,7 @@ class DataFrameAdapter(DataAdapter):
             driver_kwargs=driver_kwargs,
             name=name,
             catalog_name=catalog_name,
+            version_name=version_name,
         )
 
     def to_file(

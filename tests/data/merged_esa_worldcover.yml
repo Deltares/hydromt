@@ -8,7 +8,13 @@ esa_worldcover:
     source_url: https://doi.org/10.5281/zenodo.5571936
     source_version: v100
   versions:
-    - aws_data:
+    - legacy_esa_worldcover:
+        path: landuse/esa_worldcover/esa-worldcover.vrt
+        kwargs:
+          chunks:
+            x: 36000
+            y: 36000
+    - aws_esa_worldcover:
         path: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
         rename:
           ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
@@ -16,9 +22,3 @@ esa_worldcover:
         kwargs:
           storage_options:
             anon: true
-    - deltares_data:
-        path: landuse/esa_worldcover/esa-worldcover.vrt
-        kwargs:
-          chunks:
-            x: 36000
-            y: 36000
