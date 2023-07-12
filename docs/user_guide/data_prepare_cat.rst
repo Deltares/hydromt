@@ -114,6 +114,8 @@ A full list of **optional data source arguments** is given below
 - **placeholder** (optional): this argument can be used to generate multiple sources with a single entry in the data catalog file. If different files follow a logical
   nomenclature, multiple data sources can be defined by iterating through all possible combinations of the placeholders. The placeholder names should be given in the
   source name and the path and its values listed under the placeholder argument.
+- **versions** (optional): If you want to use the same data source but load it from different places (e.g. local & aws) you can add this key
+  Keys here are essentially overrides that will get applied to the containing catalog when they get parsed and expanded.
 
 .. note::
 

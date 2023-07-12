@@ -11,6 +11,7 @@ Unreleased
 
 Added
 -----
+- Support for loading the same data source but from different places (e.g. local & aws)
 - Support for unit attributes for all data types in the DataCatalog. PR #334
 - Data catalog can now handle specification of HydroMT version
 - New generic methods for ``GridModel``: ``setup_grid``, ``setup_grid_from_constant``, ``setup_grid_from_rasterdataset``, ``setup_grid_from_raster_reclass``, ``setup_grid_from_geodataframe``. PR #333

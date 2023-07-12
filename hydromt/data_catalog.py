@@ -1211,6 +1211,11 @@ def _denormalise_data_dict(data_dict, catalog_name="") -> List[Dict[str, Any]]:
                 dicts.append({name: source_copy})
         elif "alias" in source:
             alias = source.pop("alias")
+            warnings.warn(
+                "The use of alias is deprecated, please add a version on the aliased"
+                "catalog instead.",
+                DeprecationWarning,
+            )
             if alias not in data_dict:
                 raise ValueError(f"alias {alias} not found in data_dict.")
             # use alias source but overwrite any attributes with original source
@@ -1220,13 +1225,6 @@ def _denormalise_data_dict(data_dict, catalog_name="") -> List[Dict[str, Any]]:
             dicts.append({name: source})
         else:
             dicts.append({name: source})
-
-    return dicts
-
-
-def _normalise_data_dict(data_dict) -> List[Dict[str, Any]]:
-    # first do a pass to expand possible versions
-    dicts = []
 
     return dicts
 

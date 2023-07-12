@@ -55,7 +55,9 @@ def test_parser():
         },
         "test1": {"alias": "test"},
     }
-    dd = _denormalise_data_dict(dd, catalog_name="tmp")
+    with pytest.deprecated_call():
+        dd = _denormalise_data_dict(dd, catalog_name="tmp")
+
     dd_out1 = _parse_data_dict(dd[0], root=root)
     dd_out2 = _parse_data_dict(dd[1], root=root)
     assert dd_out1["test"].path == dd_out2["test1"].path
@@ -77,7 +79,9 @@ def test_parser():
         _parse_data_dict({"test": {}})
     with pytest.raises(ValueError, match="Data type error unknown"):
         _parse_data_dict({"test": {"path": "", "data_type": "error"}})
-    with pytest.raises(ValueError, match="alias test not found in data_dict"):
+    with pytest.raises(
+        ValueError, match="alias test not found in data_dict"
+    ), pytest.deprecated_call():
         _denormalise_data_dict({"test1": {"alias": "test"}})
 
 

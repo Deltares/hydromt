@@ -183,7 +183,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     # the synchronous scheduler here is necessary
     from dask import config as dask_config
 
-    dask_config.set(scheduler="synchronous")
+    dask_config.set(scheduler="single-threaded")
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
