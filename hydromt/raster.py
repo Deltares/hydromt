@@ -2347,7 +2347,6 @@ class RasterDataArray(XRasterBase):
         prev = 0
         zls = {}
         for zl in zoom_levels:
-            diff = abs(zl - prev)
             dx = (20037508.34 * 2) / (2**zl)
             px = dx / px_size
 
