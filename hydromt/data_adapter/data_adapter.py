@@ -114,20 +114,60 @@ class DataAdapter(object, metaclass=ABCMeta):
     def __init__(
         self,
         path,
-        driver,
-        name="",  # optional for now
-        catalog_name="",  # optional for now
+        driver=None,
         filesystem="local",
-        crs=None,
         nodata=None,
         rename={},
         unit_mult={},
         unit_add={},
         meta={},
-        zoom_levels={},
-        **kwargs,
+        attrs={},
+        driver_kwargs={},
+        name="",  # optional for now
+        catalog_name="",  # optional for now
     ):
-        """Initialise the DataAdapter."""
+        """General Interface to data source for HydroMT.
+
+        Parameters
+        ----------
+        path: str, Path
+            Path to data source. If the dataset consists of multiple files, the path may
+            contain {variable}, {year}, {month} placeholders as well as path
+            search pattern using a '*' wildcard.
+        driver: {'vector', 'netcdf', 'zarr'}, optional
+            Driver to read files with,
+            for 'vector' :py:func:`~hydromt.io.open_geodataset`,
+            for 'netcdf' :py:func:`xarray.open_mfdataset`.
+            By default the driver is inferred from the file extension and falls back to
+            'vector' if unknown.
+        filesystem: {'local', 'gcs', 's3'}, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            By default, local.
+        nodata: float, int, optional
+            Missing value number. Only used if the data has no native missing value.
+            Nodata values can be differentiated between variables using a dictionary.
+        rename: dict, optional
+            Mapping of native data source variable to output source variable name as
+            required by hydroMT.
+        unit_mult, unit_add: dict, optional
+            Scaling multiplication and addition to change to map from the native
+            data unit to the output data unit as required by hydroMT.
+        meta: dict, optional
+            Metadata information of dataset, prefably containing the following keys:
+            {'source_version', 'source_url', 'source_license',
+            'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
+        driver_kwargs, dict, optional
+            Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
+
+        """
         self.name = name
         self.catalog_name = catalog_name
         # general arguments
@@ -140,16 +180,17 @@ class DataAdapter(object, metaclass=ABCMeta):
             )
         self.driver = driver
         self.filesystem = filesystem
-        self.kwargs = kwargs
+        self.driver_kwargs = driver_kwargs
+
         # data adapter arguments
-        self.crs = crs
         self.nodata = nodata
         self.rename = rename
         self.unit_mult = unit_mult
         self.unit_add = unit_add
-        self.zoom_levels = zoom_levels
         # meta data
         self.meta = {k: v for k, v in meta.items() if v is not None}
+        # variable attributes
+        self.attrs = {k: v for k, v in attrs.items() if v is not None}
 
     @property
     def data_type(self):

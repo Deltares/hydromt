@@ -36,16 +36,20 @@ class RasterDatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path,
-        driver=None,
-        filesystem="local",
-        crs=None,
-        nodata=None,
-        rename={},
-        unit_mult={},
-        unit_add={},
-        units={},
-        meta={},
+        path: str,
+        driver: str = None,
+        filesystem: str = "local",
+        crs: Union[int, str, dict] = None,
+        nodata: Union[dict, float, int] = None,
+        rename: dict = {},
+        unit_mult: dict = {},
+        unit_add: dict = {},
+        meta: dict = {},
+        attrs: dict = {},
+        driver_kwargs: dict = {},
+        zoom_levels: dict = {},
+        name: str = "",  # optional for now
+        catalog_name: str = "",  # optional for now
         **kwargs,
     ):
         """Initiate data adapter for geospatial raster data.
@@ -59,8 +63,8 @@ class RasterDatasetAdapter(DataAdapter):
         ----------
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
-            contain {variable}, {year}, {month} placeholders as well as path search
-            pattern using a '*' wildcard.
+            contain {variable}, {year}, {month} placeholders as well as path
+            search pattern using a '*' wildcard.
         driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
             Driver to read files with,
             for 'raster' :py:func:`~hydromt.io.open_mfraster`,
@@ -73,8 +77,7 @@ class RasterDatasetAdapter(DataAdapter):
             By default, local.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
-            proj (str or dict) or wkt (str).
-            Only used if the data has no native CRS.
+            proj (str or dict) or wkt (str). Only used if the data has no native CRS.
         nodata: float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Nodata values can be differentiated between variables using a dictionary.
@@ -84,30 +87,49 @@ class RasterDatasetAdapter(DataAdapter):
         unit_mult, unit_add: dict, optional
             Scaling multiplication and addition to change to map from the native
             data unit to the output data unit as required by hydroMT.
-        units:
-            Additional units for variables.
         meta: dict, optional
-            Metadata information of dataset, preferably containing the following keys:
+            Metadata information of dataset, prefably containing the following keys:
             {'source_version', 'source_url', 'source_license',
             'paper_ref', 'paper_doi', 'category'}
-        logger:
-        **kwargs
+        placeholders: dict, optional
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
+        driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
+        zoomlevels: dict, optional
+            Dictionary with zoom levels and associated resolution in the unit of the
+            data CRS.
+
         """
+        if kwargs:
+            warnings.warn(
+                "Passing additional keyword arguments to be used by the "
+                "RasterDatasetAdapter driver is deprecated and will be removed "
+                "in a future version. Please use 'driver_kwargs' instead.",
+                DeprecationWarning,
+            )
+            driver_kwargs.update(kwargs)
         super().__init__(
             path=path,
             driver=driver,
             filesystem=filesystem,
-            crs=crs,
             nodata=nodata,
             rename=rename,
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
-            **kwargs,
+            attrs=attrs,
+            driver_kwargs=driver_kwargs,
+            name=name,
+            catalog_name=catalog_name,
         )
-        # TODO: see if the units argument can be solved with unit_mult/unit_add
-        self.units = units
+        self.crs = crs
+        self.zoom_levels = zoom_levels
 
     def to_file(
         self,
@@ -227,16 +249,15 @@ class RasterDatasetAdapter(DataAdapter):
             variables = np.atleast_1d(variables).tolist()
 
         # Extract storage_options from kwargs to instantiate fsspec object correctly
-        if "storage_options" in self.kwargs:
-            so_kwargs = self.kwargs["storage_options"]
+        so_kwargs = dict()
+        if "storage_options" in self.driver_kwargs:
+            so_kwargs = self.driver_kwargs["storage_options"]
             # For s3, anonymous connection still requires --no-sign-request profile to
             # read the data setting environment variable works
             if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        else:
-            so_kwargs = dict()
 
         # resolve path based on time, zoom level and/or variables
         fns = self.resolve_paths(
@@ -249,7 +270,7 @@ class RasterDatasetAdapter(DataAdapter):
             **so_kwargs,
         )
 
-        kwargs = self.kwargs.copy()
+        kwargs = self.driver_kwargs.copy()
         # zarr can use storage options directly, the rest should be converted to
         # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":
@@ -414,9 +435,8 @@ class RasterDatasetAdapter(DataAdapter):
             ds_out[name].raster.set_nodata(nodata)  # reset nodata in case of change
 
         # unit attributes
-        # TODO: can we solve this with unit conversion or otherwise generalize meta
-        for k in self.units:
-            ds_out[k].attrs.update(units=self.units[k])
+        for k in self.attrs:
+            ds_out[k].attrs.update(self.attrs[k])
 
         # return data array if single var
         if single_var_as_array and len(ds_out.raster.vars) == 1:

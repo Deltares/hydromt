@@ -11,7 +11,7 @@ from hydromt.vector import GeoDataset
 
 
 @pytest.fixture()
-def dummy_shp():
+def gdf():
     geom = [
         Polygon(((0, 0), (1, 0), (1, 1), (0, 1), (0, 0))),
         MultiPolygon(
@@ -29,9 +29,20 @@ def dummy_shp():
     return gdf
 
 
-def test_ogr(tmpdir, dummy_shp):
+def test_nodata(geoda):
+    assert np.isnan(geoda.vector.nodata)
+    # set with integer -> should be converted to geoda dtype
+    geoda.vector.set_nodata(np.int32(-9999))
+    assert geoda.vector.nodata == -9999
+    assert type(geoda.vector.nodata) == geoda.dtype
+    # remove nodata
+    geoda.vector.set_nodata(None)
+    assert geoda.vector.nodata is None
+
+
+def test_ogr(tmpdir, gdf):
     # Create a geodataset and an ogr compliant version of it
-    ds = GeoDataset.from_gdf(dummy_shp)
+    ds = GeoDataset.from_gdf(gdf)
     oc = ds.vector.ogr_compliant()
 
     # Assert some ogr compliant stuff
