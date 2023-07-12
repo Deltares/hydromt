@@ -63,8 +63,7 @@ dev = [
     "ruff",        # linting
     "pre-commit",  # linting
     "pip>=23.1.2", # needed for recursive dependencies
-    "flint",       # needed to publish to pypi
-    "wheel",       # needed to publish to pypi
+    "flit",       # needed to publish to pypi
     "twine",       # needed to publish to pypi
 ]
 test = [
