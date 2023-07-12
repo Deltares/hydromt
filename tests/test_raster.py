@@ -500,5 +500,14 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
         assert len(f.readlines()) == 1
 
 
-# def test_to_osm(tmpdir, dummy):
-#     dummy.raster.to_osm(
+def test_to_osm_tiles(tmpdir, rioda_large):
+    path = str(tmpdir)
+    rioda_large.raster.to_osm_tiles(
+        os.path.join(path, "dummy_osm"),
+        zoom_levels=[5],
+        min_lvl=8,
+    )
+    with open(os.path.join(path, "dummy_osm", "5", "filelist.txt"), "r") as f:
+        assert len(f.readlines()) == 1
+    with open(os.path.join(path, "dummy_osm", "8", "filelist.txt"), "r") as f:
+        assert len(f.readlines()) == 12
