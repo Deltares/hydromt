@@ -584,6 +584,9 @@ class DataCatalog(object):
             source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
             if name in sources_out:
                 existing = sources_out.pop(name)
+                if existing == source_dict:
+                    sources_out.update({name: source_dict})
+                    continue
                 base, diff_existing, diff_new = partition_dictionaries(
                     source_dict, existing
                 )
@@ -1089,14 +1092,6 @@ def _parse_data_dict(
     for name, source in data_dict.items():
         source = source.copy()  # important as we modify with pop
 
-        if "alias" in source:
-            alias = source.pop("alias")
-            if alias not in data_dict:
-                raise ValueError(f"alias {alias} not found in data_dict.")
-            # use alias source but overwrite any attributes with original source
-            source_org = source.copy()
-            source = data_dict[alias].copy()
-            source.update(source_org)
         if "path" not in source:
             raise ValueError(f"{name}: Missing required path argument.")
         data_type = source.pop("data_type", None)
@@ -1200,7 +1195,7 @@ def _process_dict(d: Dict, logger=logger) -> Dict:
     return d
 
 
-def _denormalise_data_dict(data_dict, catalog_name) -> List[Dict[str, Any]]:
+def _denormalise_data_dict(data_dict, catalog_name="") -> List[Dict[str, Any]]:
     # first do a pass to expand possible versions
     dicts = []
     for name, source in data_dict.items():
@@ -1214,6 +1209,15 @@ def _denormalise_data_dict(data_dict, catalog_name) -> List[Dict[str, Any]]:
                 diff["catalog_name"] = catalog_name
                 source_copy.update(**diff)
                 dicts.append({name: source_copy})
+        elif "alias" in source:
+            alias = source.pop("alias")
+            if alias not in data_dict:
+                raise ValueError(f"alias {alias} not found in data_dict.")
+            # use alias source but overwrite any attributes with original source
+            source_org = source.copy()
+            source = data_dict[alias].copy()
+            source.update(source_org)
+            dicts.append({name: source})
         else:
             dicts.append({name: source})
 

@@ -11,8 +11,7 @@ import xarray as xr
 import yaml
 
 from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
-from hydromt.data_catalog import DataCatalog, _parse_data_dict
-from hydromt.utils import _dict_pprint
+from hydromt.data_catalog import DataCatalog, _denormalise_data_dict, _parse_data_dict
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -56,8 +55,10 @@ def test_parser():
         },
         "test1": {"alias": "test"},
     }
-    dd_out = _parse_data_dict(dd, root=root)
-    assert dd_out["test"].path == dd_out["test1"].path
+    dd = _denormalise_data_dict(dd, catalog_name="tmp")
+    dd_out1 = _parse_data_dict(dd[0], root=root)
+    dd_out2 = _parse_data_dict(dd[1], root=root)
+    assert dd_out1["test"].path == dd_out2["test1"].path
     # placeholder
     dd = {
         "test_{p1}_{p2}": {
@@ -77,7 +78,7 @@ def test_parser():
     with pytest.raises(ValueError, match="Data type error unknown"):
         _parse_data_dict({"test": {"path": "", "data_type": "error"}})
     with pytest.raises(ValueError, match="alias test not found in data_dict"):
-        _parse_data_dict({"test1": {"alias": "test"}})
+        _denormalise_data_dict({"test1": {"alias": "test"}})
 
 
 def test_data_catalog_io(tmpdir):
