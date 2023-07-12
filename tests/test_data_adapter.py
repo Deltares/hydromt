@@ -61,8 +61,7 @@ def test_rasterdataset(rioda, tmpdir):
         data_catalog.get_rasterdataset("no_file.tif")
 
 
-# @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
-@pytest.mark.skip()
+@pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
 def test_gcs_cmip6(tmpdir):
     # TODO switch to pre-defined catalogs when pushed to main
     catalog_fn = join(CATALOGDIR, "gcs_cmip6_data.yml")
