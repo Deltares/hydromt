@@ -2267,7 +2267,6 @@ class RasterDataArray(XRasterBase):
         **kwargs
             Key-word arguments to write raster files
         """
-
         resampling = getattr(Resampling, method, None)
         if resampling is None:
             raise ValueError(f"Resampling method unknown: {method}.")
