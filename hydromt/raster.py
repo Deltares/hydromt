@@ -7,9 +7,9 @@
 """Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
 from __future__ import annotations
 
+import gc
 import logging
 import math
-import gc
 import os
 import tempfile
 from itertools import product
@@ -2344,7 +2344,6 @@ class RasterDataArray(XRasterBase):
 
         vrt_fn = None
         nodata = self.nodata
-        prev = 0
         zls = {}
         for zl in zoom_levels:
             dx = (20037508.34 * 2) / (2**zl)
@@ -2461,7 +2460,6 @@ class RasterDataArray(XRasterBase):
             # Create a vrt using GDAL
             vrt_fn = join(root, f"{mName}_zl{zl}.vrt")
             gis_utils.create_vrt(vrt_fn, file_list_path=txt_path)
-            prev = zl
             zls.update({zl: round(float(px), 2)})
             del obj
 
