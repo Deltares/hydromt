@@ -740,6 +740,10 @@ class GeoDataArray(GeoBase):
         if index_dim is None:
             index_dim = gdf.index.name if gdf.index.name is not None else "index"
         geom_name = gdf.geometry.name
+        # Some index dimension checking
+        # TODO Check this!!! Might be unwanted
+        if index_dim in gdf.columns:
+            gdf.set_index(index_dim, inplace=True)
         # create DataArray from array_like data
         da = xr.DataArray(data=data, coords=coords, dims=dims, name=name)
         # check dims -> assume index dim is first dim if not provided
@@ -760,6 +764,7 @@ class GeoDataArray(GeoBase):
             hdrs = gdf.columns
         else:
             hdrs = [geom_name]
+        da = da.reindex({index_dim: gdf.index})
         da = da.assign_coords({hdr: (index_dim, gdf[hdr]) for hdr in hdrs})
         da = da.transpose(index_dim, ...).reindex({index_dim: gdf.index})
         # set geospatial attributes
