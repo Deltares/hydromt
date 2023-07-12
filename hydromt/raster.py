@@ -2364,13 +2364,13 @@ class RasterDataArray(XRasterBase):
                 3857, obj.raster.crs.to_epsg(), always_xy=True
             )
 
-            sd = f"{root}\\{zl}"
+            sd = join(root, f"{zl}")
             create_folder(sd)
             txt_path = join(sd, "filelist.txt")
             file = open(txt_path, "w")
 
             for transform, bounds, col, row in tile_window(zl, minx, miny, maxx, maxy):
-                ssd = f"{sd}\\{col}"
+                ssd = join(sd, f"{col}")
                 create_folder(ssd)
 
                 ul = t_r.transform(bounds[0], bounds[3])
