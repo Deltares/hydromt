@@ -471,7 +471,7 @@ def test_rotated(transform, shape, tmpdir):
     gdf2 = da2.raster.vectorize().sort_values("value")
     gdf2.index = gdf2.index.astype(int)
     gpd.testing.assert_geodataframe_equal(
-        gdf, gdf2, check_less_precise=True, check_dtype=False
+        gdf, gdf2, check_less_precise=True, check_dtype=False, check_index_type=False
     )
     # test sample
     idxs = np.array([2, 7])

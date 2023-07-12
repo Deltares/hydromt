@@ -11,6 +11,8 @@ Unreleased
 
 Added
 -----
+- Support for unit attributes for all data types in the DataCatalog. PR #334
+- Data catalog can now handle specification of HydroMT version
 - New generic methods for ``GridModel``: ``setup_grid``, ``setup_grid_from_constant``, ``setup_grid_from_rasterdataset``, ``setup_grid_from_raster_reclass``, ``setup_grid_from_geodataframe``. PR #333
 - New ``grid`` workflow methods to support the setup methods in ``GridModel``: ``grid_from_constant``, ``grid_from_rasterdataset``, ``grid_from_raster_reclass``, ``grid_from_geodataframe``. PR #333
 - New raster method ``rasterize_geometry``.
@@ -18,7 +20,8 @@ Added
 
 Changed
 -------
-- new geom_type argument in `RasterDataArray.vector_grid` to specify the geometry type {'polygon', 'line', 'points'} of the vector grid. PR #351
+- Arguments to drivers in data catalog files and the `DataCatalog.get_` methods should now explicitly be called driver_kwargs instead of kwargs. PR #334
+- New geom_type argument in `RasterDataArray.vector_grid` to specify the geometry type {'polygon', 'line', 'points'} of the vector grid. PR #351
 - Added extrapolate option to `raster.interpolate_na` method. PR #348
 - Name of methods ``setup_maps_from_raster`` and ``setup_mesh_from_raster`` to ``setup_maps_from_rasterdataset`` and ``setup_mesh_from_rasterdataset``. PR #333
 - Add rename argument to ``setup_*_from_rasterdataset``, ``setup_*_from_raster_reclass`` to maps and mesh for consistency with grid. PR #333

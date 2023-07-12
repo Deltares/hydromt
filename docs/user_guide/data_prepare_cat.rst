@@ -24,7 +24,7 @@ Each data source, is added to a data catalog yaml file with a user-defined name.
 A blue print for a dataset called **my_dataset** is shown below.
 The ``path``, ``data_type`` and ``driver`` options are required and the ``meta`` option with the shown keys is highly recommended.
 The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per variable (or attribute table column in case of a GeoDataFrame).
-``kwargs`` contain any options passed to different drivers.
+``driver_kwargs`` contain any options passed to different drivers.
 
 .. code-block:: yaml
 
@@ -35,9 +35,9 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
       crs: EPSG/WKT
       data_type: RasterDataset/GeoDataset/GeoDataFrame/DataFrame
       driver: raster/raster_tindex/netcdf/zarr/vector/vector_table/csv/xlsx/xls
-      filesystem: local/gcs/s3
-      kwargs:
+      driver_kwargs:
         key: value
+      filesystem: local/gcs/s3
       meta:
         source_url: zenodo.org/my_dataset
         source_license: CC-BY-3.0
@@ -50,21 +50,21 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
       path: /absolut_path/to/my_dataset.extension OR relative_path/to_my_dataset.extension
       placeholders:
         [placeholder_key: [placeholder_values]]
-      zoom_levels:
-        [zoom_level: zoom_resolution]
       rename:
         old_variable_name: new_variable_name
       unit_add:
         new_variable_name: value
       unit_mult:
         new_variable_name: value
+      zoom_levels:
+        [zoom_level: zoom_resolution]
 
 The yaml file has an *optional* global **meta** data section:
 
 - **root** (optional): root folder for all the data sources in the yaml file.
   If not provided the folder of where the yaml file is located will be used as root.
   This is used in combination with each data source **path** argument to avoid repetition.
-- **version** (recommended): data catalog version; we recommend `calendar versioning <https://calver.org/>`
+- **version** (recommended): data catalog version; we recommend `calendar versioning <https://calver.org/>`_
 - **category** (optional): used if all data source in catalog belong to the same category. Usual categories within HydroMT are
   *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data*
   but the user is free to define its own categories.
@@ -85,34 +85,35 @@ The following are **required data source arguments**:
 
 A full list of **optional data source arguments** is given below
 
-- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data.
+- **driver_kwargs**: pairs of key value arguments to pass to the driver specific open data method
+  (eg xr.open_mfdataset for netdcf raster, see the full list below).
+  *NOTE*: New with HydroMT v0.7.2 (was called *kwargs* before)
 - **filesystem** (required if different than local): specify if the data is stored locally or remotely (e.g cloud). Supported filesystems are *local* for local data,
-  *gcs* for data stored on Google Cloud Storage, and *aws* for data stored on Amazon Web Services. Profile or authentication information can be passed to ``kwargs`` via
+  *gcs* for data stored on Google Cloud Storage, and *aws* for data stored on Amazon Web Services. Profile or authentication information can be passed to ``driver_kwargs`` via
   *storage_options*.
-- **kwargs**: pairs of key value arguments to pass to the driver specific open data method (eg xr.open_mfdataset for netdcf raster, see the full list below).
-  Only used if not crs can be inferred from the input data.
 - **meta** (recommended): additional information on the dataset organized in a sub-list.
   Good meta data includes a *source_url*, *source_license*, *source_version*, *paper_ref*, *paper_doi*, *category*, etc. These are added to the data attributes.
   Usual categories within HydroMT are *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data*
   but the user is free to define its own categories.
 - **nodata** (required if missing in the data): nodata value of the input data. For Raster- and GeoDatasets this is only used if not inferred from the original input data.
   For GeoDataFrame provided nodata values are converted to nan values.
-- **placeholder** (optional): this argument can be used to generate multiple sources with a single entry in the data catalog file. If different files follow a logical
-  nomenclature, multiple data sources can be defined by iterating through all possible combinations of the placeholders. The placeholder names should be given in the
-  source name and the path and its values listed under the placeholder argument.
-  **zoom_level** (optional): this argument can be used for a *RasterDatasets* that contain multiple zoom levels of different resolution.
+- **rename**: pairs of variable names in the input data (*old_variable_name*) and the corresponding
+  :ref:`HydroMT variable naming conventions <data_convention>` and :ref:`recognized dimension names <dimensions>` (*new_variable_name*).
+- **unit_add**: add or substract a value to the input data for unit conversion (e.g. -273.15 for conversion of temperature from Kelvin to Celsius).
+- **unit_mult**: multiply the input data by a value for unit conversion (e.g. 1000 for conversion from m to mm of precipitation).
+- **attrs** (optional): This argument allows for setting attributes like the unit or long name to variables.
+  *NOTE*: New in HydroMT v0.7.2
+- **crs** (required if missing in the data): EPSG code or WKT string of the reference coordinate system of the data.
+  Only used if not crs can be inferred from the input data.
+- **zoom_level** (optional): this argument can be used for a *RasterDatasets* that contain multiple zoom levels of different resolution.
   It should contain a list of numeric zoom levels that correspond to the `zoom_level` key in file path, e.g.,  ``"path/to/my/files/{zoom_level}/data.tif"``
   and corresponding resolution, expressed in the unit of the data crs.
   The *crs* argument is therefore required when using zoom_levels to correctly interpret the unit of the resolution.
   The required zoom level can be requested from HydroMT as argument to the `DataCatalog.get_rasterdataset` method,
   see `Reading tiled raster data with different zoom levels <../_examples/working_with_tiled_raster_data.ipynb>`_.
-- **rename**: pairs of variable names in the input data (*old_variable_name*) and the corresponding
-  :ref:`HydroMT variable naming conventions <data_convention>` and :ref:`recognized dimension names <dimensions>` (*new_variable_name*).
-- **units** (optional and for *RasterDataset* only). specify the units of the input data: supported are [m3], [m], [mm], and [m3/s].
-  This option is used *only* for the forcing of the Delwaq models in order to do specific unit conversions that cannot be handled from simple
-  addition or multiplication (e.g. conversion from mm water equivalent to m3/s of water which requires a multiplication by each grid cell area and not a fixed number).
-- **unit_add**: add or substract a value to the input data for unit conversion (e.g. -273.15 for conversion of temperature from Kelvin to Celsius).
-- **unit_mult**: multiply the input data by a value for unit conversion (e.g. 1000 for conversion from m to mm of precipitation).
+- **placeholder** (optional): this argument can be used to generate multiple sources with a single entry in the data catalog file. If different files follow a logical
+  nomenclature, multiple data sources can be defined by iterating through all possible combinations of the placeholders. The placeholder names should be given in the
+  source name and the path and its values listed under the placeholder argument.
 
 .. note::
 
