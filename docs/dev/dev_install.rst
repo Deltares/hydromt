@@ -46,7 +46,7 @@ Afterwards to create an environment you can simply call:
     $ make dev
 
 This will create an enviromnment file, create an environment using a packagemangager and install hydromt into it. By default
-the makefile will attempt to use `micromamba`. If you want it to use a diferent one like, conda, you only have to set the
+the makefile will attempt to use `mamba`. If you want it to use a diferent one like, conda, you only have to set the
 environment variable like this if you're on linux:
 
 .. code-block:: console
@@ -97,8 +97,8 @@ After the environment file has been created you can create an environment out of
 
 .. code-block:: console
 
-    $ micromamba env create -f environment.yml
-    $ micromamba activate hydromt
+    $ mamba env create -f environment.yml
+    $ mamba activate hydromt
 
 Finally, create a developer installation of HydroMT:
 
