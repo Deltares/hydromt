@@ -24,6 +24,7 @@ Changed
 - Added extrapolate option to `raster.interpolate_na` method. PR #348
 - Name of methods ``setup_maps_from_raster`` and ``setup_mesh_from_raster`` to ``setup_maps_from_rasterdataset`` and ``setup_mesh_from_rasterdataset``. PR #333
 - Add rename argument to ``setup_*_from_rasterdataset``, ``setup_*_from_raster_reclass`` to maps and mesh for consistency with grid. PR #333
+- GeoDataFrame and accompanying array-like data can have different indices `RasterDataArray.from_gdf` (restored functionality). PR #441
 
 Fixed
 -----
