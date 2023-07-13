@@ -1,4 +1,4 @@
-PY_ENV_MANAGER		?= micromamba
+PY_ENV_MANAGER		?= mamba
 DOCKER_USER_NAME 	?= deltares
 OPT_DEPS			?= ""
 SPHINXBUILD   	 	 = sphinx-build
@@ -9,16 +9,9 @@ BUILDDIR      	 	 = docs/_build
 .PHONY: clean html
 
 dev: full-environment.yml
-	$(PY_ENV_MANAGER) create -f full-environment.yml -y
-	$(PY_ENV_MANAGER) -n hydromt run pip install .
-	$(PY_ENV_MANAGER) -n hydromt run pre-commit install
-
-env:
-	@# the subst is to make sure the is always exactly one "" around OPT_DEPS so people can
-	@# specify it both as OPT_DEPS=extra,io and OPT_DEPS="extra,io"
-	python3 make_env.py "$(subst ",,$(OPT_DEPS))"
-	$(PY_ENV_MANAGER) create -f environment.yml -y
-	$(PY_ENV_MANAGER) -n hydromt run pip install .
+	$(PY_ENV_MANAGER) env create -f full-environment.yml
+	$(PY_ENV_MANAGER) run -n hydromt-full pip install -e .
+	$(PY_ENV_MANAGER) run -n hydromt-full pre-commit install
 
 min-environment.yml:
 	pip install tomli

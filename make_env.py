@@ -43,7 +43,7 @@ def _parse_profile(profile_str: str, opt_deps) -> List[str]:
 pat = re.compile(r"\s*hydromt\[(.*)\]\s*")
 parser = argparse.ArgumentParser()
 
-parser.add_argument("profile", default="", nargs="?")
+parser.add_argument("flavour", default="", nargs="?")
 parser.add_argument("--output", "-o", default="environment.yml")
 parser.add_argument("--channel", "-c", default="conda-forge")
 
@@ -58,7 +58,7 @@ with open("pyproject.toml", "rb") as f:
 deps = toml["project"]["dependencies"]
 opt_deps = toml["project"]["optional-dependencies"]
 
-extra_deps = _parse_profile(args.profile, opt_deps)
+extra_deps = _parse_profile(args.flavour, opt_deps)
 
 deps_to_install = deps.copy()
 deps_to_install.extend(extra_deps)
@@ -73,7 +73,7 @@ for dep in deps_to_install:
 # the list(set()) is to remove duplicates
 conda_deps_to_install_string = "\n- ".join(sorted(list(set(conda_deps))))
 env_spec = f"""
-name: hydromt
+name: hydromt-{args.flavour}
 
 channels:
     - {args.channel}
