@@ -2353,8 +2353,6 @@ class RasterDataArray(XRasterBase):
                 obj = xr.open_dataarray(vrt_fn, engine="rasterio").squeeze(
                     "band", drop=True
                 )
-            x_dim, y_dim = obj.raster.x_dim, obj.raster.y_dim
-            obj = obj.chunk({x_dim: 1024, y_dim: 1024})
 
             obj_bounds = obj.raster.bounds
             obj_res = obj.raster.res[0]
