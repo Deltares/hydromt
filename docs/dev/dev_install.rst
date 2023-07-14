@@ -98,7 +98,7 @@ After the environment file has been created you can create an environment out of
 .. code-block:: console
 
     $ mamba env create -f environment.yml
-    $ mamba activate hydromt
+    $ mamba activate hydromt-full
 
 Finally, create a developer installation of HydroMT:
 
