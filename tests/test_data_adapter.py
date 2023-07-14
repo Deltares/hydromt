@@ -51,14 +51,18 @@ def test_resolve_path(tmpdir):
 
 def test_rasterdataset(rioda, tmpdir):
     fn_tif = str(tmpdir.join("test.tif"))
-    rioda.raster.to_raster(fn_tif)
+    rioda_utm = rioda.raster.reproject(dst_crs="utm")
+    rioda_utm.raster.to_raster(fn_tif)
     data_catalog = DataCatalog()
     da1 = data_catalog.get_rasterdataset(fn_tif, bbox=rioda.raster.bounds)
-    assert np.all(da1 == rioda)
-    da1 = data_catalog.get_rasterdataset("test", geom=rioda.raster.box)
-    assert np.all(da1 == rioda)
+    assert np.all(da1 == rioda_utm)
+    geom = rioda.raster.box
+    da1 = data_catalog.get_rasterdataset("test", geom=geom)
+    assert np.all(da1 == rioda_utm)
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_rasterdataset("no_file.tif")
+    with pytest.raises(IndexError, match="RasterDataset: No data within"):
+        data_catalog.get_rasterdataset("test", bbox=[40, 50, 41, 51])
 
 
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
