@@ -596,7 +596,7 @@ class DataCatalog(object):
             data_dict.pop("root", None)  # remove root if it equals the toml_dir
         if data_dict:
             with open(path, "wb") as f:
-                dump_toml(data_dict, f, encoding="utf-8")
+                dump_toml(data_dict, f)
         else:
             self.logger.info("The data catalog is empty, no toml file is written.")
 
@@ -1189,10 +1189,10 @@ def _toml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
         with requests.get(uri_or_path, stream=True) as r:
             if r.status_code != 200:
                 raise IOError(f"URL {r.content}: {uri_or_path}")
-            toml = load_toml(r.text, encoding="utf-8")
+            toml = load_toml(r.text)
     else:
         with open(uri_or_path, "rb") as stream:
-            toml = load_toml(stream, encoding="utf-8")
+            toml = load_toml(stream)
     return toml
 
 
