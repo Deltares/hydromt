@@ -28,6 +28,8 @@ dependencies = [
     "rasterio",          # raster wrapper around gdal
     "shapely>=2.0.0",    # geometry transforms
     "scipy",             # scientific utilities
+    "tomli",             # parsing toml files
+    "tomli-w",           # writing toml files
     "xarray",            # ndim data
     "universal_pathlib", # provides path compatability between different filesystems
     "xmltodict",         # xml parser also used to read VRT

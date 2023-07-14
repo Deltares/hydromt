@@ -77,7 +77,7 @@ def test_parser():
         _parse_data_dict({"test1": {"alias": "test"}})
 
 
-def test_data_catalog_io(tmpdir):
+def test_data_catalog_yml_io(tmpdir):
     data_catalog = DataCatalog()
     data_catalog.sources  # load artifact data as fallback
     # read / write
@@ -88,6 +88,21 @@ def test_data_catalog_io(tmpdir):
     # test that no file is written for empty DataCatalog
     fn_yml = join(tmpdir, "test1.yml")
     DataCatalog(fallback_lib=None).to_yml(fn_yml)
+    # test print
+    print(data_catalog["merit_hydro"])
+
+
+def test_data_catalog_toml_io(tmpdir):
+    data_catalog = DataCatalog()
+    data_catalog.sources  # load artifact data as fallback
+    # read / write
+    fn_toml = join(tmpdir, "test.toml")
+    data_catalog.to_toml(fn_toml)
+    data_catalog1 = DataCatalog(data_libs=fn_toml)
+    assert data_catalog.to_dict() == data_catalog1.to_dict()
+    # test that no file is written for empty DataCatalog
+    fn_toml = join(tmpdir, "test1.toml")
+    DataCatalog(fallback_lib=None).to_yml(fn_toml)
     # test print
     print(data_catalog["merit_hydro"])
 
