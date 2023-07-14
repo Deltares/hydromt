@@ -48,7 +48,7 @@ Git conventions
 First of all, if git is new to you, here are some great resources for learning Git:
 
 - the GitHub `help pages <https://docs.github.com/en/github/getting-started-with-github/getting-started-with-git>`__.
-- the NumPy’s `documentation <http://docs.scipy.org/doc/numpy/dev/index.html>`__.
+- the NumPy's `documentation <http://docs.scipy.org/doc/numpy/dev/index.html>`__.
 
 The code is hosted on GitHub. To contribute you will need to sign up for a free
 GitHub account. We follow the `GitHub workflow
@@ -181,7 +181,7 @@ It's telling us we first need to tell it what we want to do with the current con
 Success!
 This is a simple introduction into a potentially very complicated subject. You can read more about the different possibilities here:
 
-*  `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
+* `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
 * `Merge Strategies <https://www.atlassian.com/git/tutorials/using-branches/merge-strategy>`_
 
 
@@ -197,10 +197,10 @@ General
 Data
 ^^^^
 - Currently, :ref:`these data types <data_types>` are supported, but this list can be extended based on demand.
-- Input data is defined in the :ref:`data catalog <data_yaml>` and parsed by HydroMT to the associated
-  Python data type through the DataAdapter class. The goal of this class is to unify the internal representation
-  of the data (its data type, variables names and units) through minimal preprocessing. When accessing data
-  from the data catalog with any ``DataCatalog.get_<data_type>`` method, it is passed through the adapter to
+- Input data is defined in the data catalog which can be in either :ref:`yaml <data_file_yaml>` or :ref:`toml <data_file_toml>` format and
+  parsed by HydroMT to the associated Python data type through the DataAdapter class. The goal of this class is to unify
+  the internal representation of the data (its data type, variables names and units) through minimal preprocessing. When
+  accessing data from the data catalog with any ``DataCatalog.get_<data_type>`` method, it is passed through the adapter to
   ensure a consistent representation of data within HydroMT. The `get_*` methods take additional arguments to
   define a spatial or temporal subset of the dataset.
 

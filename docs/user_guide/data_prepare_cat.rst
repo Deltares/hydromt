@@ -7,14 +7,14 @@ Preparing a Data Catalog
 
 1) Have your (local) dataset ready in one of the supported :ref:`raster <raster_formats>`,
    :ref:`vector <vector_formats>` or :ref:`geospatial time-series <geo_formats>`
-2) Create your own :ref:`yaml file <data_yaml>` or :ref:`toml file <data_toml>` with a reference to your prepared dataset following
+2) Create your own :ref:`catalog file <data_file>` with a reference to your prepared dataset following
    the HydroMT :ref:`data conventions <data_convention>`, see examples below.
 
 A detailed description of the configuration file is given below.
 For more information see :py:meth:`~hydromt.data_catalog.DataCatalog.from_yml`
 and examples per :ref:`data type <data_types>`
 
-.. _data_yaml:
+.. _data_file:
 
 Data catalog file
 ----------------------
@@ -25,6 +25,8 @@ A blue print for a dataset called **my_dataset** is shown below.
 The ``path``, ``data_type`` and ``driver`` options are required and the ``meta`` option with the shown keys is highly recommended.
 The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per variable (or attribute table column in case of a GeoDataFrame).
 ``driver_kwargs`` contain any options passed to different drivers.
+
+.. _data_file_yaml:
 
 .. code-block:: yaml
 
@@ -58,6 +60,9 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
         new_variable_name: value
       zoom_levels:
         [zoom_level: zoom_resolution]
+
+
+.. _data_file_toml:
 
 .. code-block:: toml
 

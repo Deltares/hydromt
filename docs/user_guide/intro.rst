@@ -23,7 +23,7 @@ HydroMT is organized in the following way:
 
   HydroMT is data-agnostic through the Data Adapter, which reads a wide range of data formats and unifies
   the input data (e.g., on-the-fly renaming and unit conversion). Datasets are listed and passed to HydroMT
-  in a user defined data catalog :ref:`yaml file <data_yaml>`.. HydroMT also provides several
+  in a user defined data catalog :ref:`file <data_file>`.. HydroMT also provides several
   :ref:`pre-defined data catalogs <existing_catalog>` with mostly global datasets that can be used as is,
   although not all datasets in these catalogs are openly accessible.
   Currently, four different types of input data are supported and represented by a specific Python data
