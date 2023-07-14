@@ -2282,11 +2282,6 @@ class RasterDataArray(XRasterBase):
             if not os.path.exists(path):
                 os.makedirs(path)
 
-        def transform_res(dres, transformer):
-            return transformer.transform(0, dres)[0]
-
-        transformer = pyproj.Transformer.from_crs(self._obj.raster.crs.to_epsg(), 3857)
-
         if bbox:
             minx, miny, maxx, maxy = bbox
         else:
@@ -2301,12 +2296,14 @@ class RasterDataArray(XRasterBase):
             zip((maxx, maxy), [20037508.34] * 2),
         )
 
-        dres = abs(self._obj.raster.res[0])
-        dres = transform_res(dres, transformer)
+        _obj_tr = rasterio.warp.calculate_default_transform(
+            obj.raster.crs,
+            "EPSG:3857",
+            *obj.shape,
+            *obj.raster.bounds,
+        )[0]
+        dres = _obj_tr[0]
         nzl = int(np.ceil((np.log10((20037508.34 * 2) / (dres * 256)) / np.log10(2))))
-
-        if max(zoom_levels) > nzl:
-            raise OSError("")
 
         def tile_window(zl, minx, miny, maxx, maxy):
             # Origin displacement
@@ -2347,6 +2344,11 @@ class RasterDataArray(XRasterBase):
         for zl in zoom_levels:
             dx = (20037508.34 * 2) / (2**zl)
             px = dx / px_size
+
+            if max(zoom_levels) > nzl:
+                logger.warning(
+                    f"Pixels at zoomlevel {zl} are smaller than the original data"
+                )
 
             # read data from previous zoomlevel
             if vrt_fn is not None:
