@@ -6,11 +6,11 @@ from os import PathLike
 from os.path import join
 from typing import NewType, Union
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pyproj
+import rasterio
 import xarray as xr
-from shapely.geometry import box
 
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
@@ -381,30 +381,29 @@ class RasterDatasetAdapter(DataAdapter):
             )
 
         # clip
-        epsg = ds_out.raster.crs.to_epsg()
+        # make sure bbox is in data crs
+        crs = ds_out.raster.crs
+        epsg = crs.to_epsg()  # this could return None
         if geom is not None:
-            bbox = geom.to_crs(4326).total_bounds
-        if epsg != 4326 and bbox is not None and geom is None:
-            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-        elif epsg == 4326:
-            w, e = np.asarray(ds_out.raster.bounds)[[0, 2]]
+            bbox = geom.to_crs(crs).total_bounds
+        elif epsg != 4326 and bbox is not None:
+            crs4326 = pyproj.CRS.from_epsg(4326)
+            bbox = rasterio.warp.transform_bounds(crs4326, crs, *bbox)
+        # work with 4326 data that is defined at 0-360 degrees longtitude
+        if epsg == 4326:
+            e = ds_out.raster.bounds[2]
             if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
                 x_dim = ds_out.raster.x_dim
                 ds_out = gis_utils.meridian_offset(ds_out, x_dim, bbox).sortby(x_dim)
+        # clip with bbox
         if bbox is not None:
-            err = f"RasterDataset: No data within spatial domain for {self.path}."
-            try:
-                bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-                if geom is not None:
-                    logger.debug(f"RasterDataset: Clip with geom - [{bbox_str}]")
-                    ds_out = ds_out.raster.clip_geom(geom, buffer=buffer, align=align)
-                elif bbox is not None:
-                    logger.debug(f"RasterDataset: Clip with bbox - [{bbox_str}]")
-                    ds_out = ds_out.raster.clip_bbox(bbox, buffer=buffer, align=align)
-            except IndexError:
-                raise IndexError(err)
-            if ds_out.raster.xcoords.size == 0 or ds_out.raster.ycoords.size == 0:
-                raise IndexError(err)
+            bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
+            logger.debug(f"RasterDataset: Clip with bbox - [{bbox_str}] (epsg:{epsg}))")
+            ds_out = ds_out.raster.clip_bbox(bbox, buffer=buffer, align=align)
+            if np.any(np.array(ds_out.raster.shape) < 2):
+                raise IndexError(
+                    f"RasterDataset: No data within spatial domain for {self.path}."
+                )
 
         # set nodata value
         if self.nodata is not None:
