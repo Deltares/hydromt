@@ -335,7 +335,7 @@ of the GeoDataFrame attribute table.
     ...
 
 As the CRS of the coordinates cannot be inferred from the data it must be set in the
-data entry in the yaml file as shown in the example below. The internal data format
+data entry in the configuration file as shown in the example below. The internal data format
 is based on the file extension unless the ``driver_kwargs`` ``driver`` option is set.
 See :py:meth:`~hydromt.io.open_vector` and :py:func:`~hydromt.io.open_vector_from_table` for more
 options.

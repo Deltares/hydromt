@@ -324,7 +324,6 @@ Then you can add the new feature to the git staging area and try to commit as us
     Check JSON...........................................(no files to check)Skipped
     Debug Statements (Python)................................................Passed
     Mixed line ending........................................................Passed
-    Format YAML files....................................(no files to check)Skipped
     ruff.....................................................................Failed
     - hook id: ruff
     - exit code: 1
@@ -362,7 +361,6 @@ After you've fixed this problem by for example adding the docstring """Implement
   Check JSON...........................................(no files to check)Skipped
   Debug Statements (Python)................................................Passed
   Mixed line ending........................................................Passed
-  Format YAML files....................................(no files to check)Skipped
   ruff.....................................................................Passed
   black....................................................................Passed
   [linting a5e9b683] The feature you've all been waiting for.

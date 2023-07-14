@@ -6,15 +6,15 @@ Overview data
 The best way to provide data to HydroMT is by using a **data catalog**. The goal of this
 data catalog is to provide simple and standardized access to (large) datasets.
 It supports many drivers to read different data formats and contains several pre-processing steps to unify the datasets.
-A data catalog can be initialized from one or more **yaml file(s)**, which contain all required information to read and pre-process a dataset,
-as well as meta data for reproducibility.
+A data catalog can be initialized from one or more **configuration file(s)**, which contain all required information to read and pre-process a dataset,
+as well as meta data for reproducibility. Supported data formats are ``yaml`` and ``toml``
 
 You can :ref:`explore and make use of pre-defined data catalogs <existing_catalog>` (primarily global data),
 :ref:`prepare your own data catalog <own_catalog>` (e.g. to include local data) or use a combination of both.
 
 .. TIP::
 
-    If no yaml file is provided to the CLI build or update methods or to :py:class:`~hydromt.data_catalog.DataCatalog`,
+    If no configuration file is provided to the CLI build or update methods or to :py:class:`~hydromt.data_catalog.DataCatalog`,
     HydroMT will use the data stored in the :ref:`artifact_data <existing_catalog>`
     which contains an extract of global data for a small region around the Piave river in Northern Italy.
 
@@ -31,8 +31,8 @@ From CLI
 --------
 
 When using the HydroMT command line interface (CLI), one can provide a data catalog by specifying the
-path to the yaml file with the ``-d (--data)`` option.
-Multiple yaml files can be added by reusing the ``-d`` option. If the yaml files have data sources with
+path to the configuration file with the ``-d (--data)`` option.
+Multiple configuration files can be added by reusing the ``-d`` option. If the configuration files have data sources with
 the same name, the source from the last catalog in the list is used.
 
 For example when using the :ref:`build <cli_build>` CLI method:
@@ -69,7 +69,7 @@ From Python
 
 To read a dataset in Python using the HydroMT requires two steps:
 
-1) Initialize a :py:class:`~hydromt.data_catalog.DataCatalog` with references to user- or pre-defined data catalog yaml files
+1) Initialize a :py:class:`~hydromt.data_catalog.DataCatalog` with references to user- or pre-defined data catalog configuration files
 2) Use :ref:`one of the DataCatalog.get_* methods <api_data_catalog_get>` to access (a temporal or spatial region of) the data.
 
 For example to retrieve a raster dataset use :py:func:`~hydromt.DataCatalog.get_rasterdataset`:

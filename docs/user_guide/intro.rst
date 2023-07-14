@@ -95,7 +95,7 @@ Configuration (HydroMT)         (.yaml) file describing the complete pipeline wi
 Data catalog                    A set of data sources available for HydroMT. It is build up from *yaml* files containing
                                 one or more data sources with information about how to read and optionally preprocess
                                 the data and contains meta-data about the data source.
-Data source                     Input data to be processed by HydroMT. Data sources are listed in yaml files.
+Data source                     Input data to be processed by HydroMT. Data sources are listed in configuration files.
 Model                           A set of files describing the schematization, forcing, states, simulation configuration
                                 and results for any supported model kernel and model classes. The final set of files is
                                 dependent on the model type (grid, lumped or mesh model for examples) or the model plugin.

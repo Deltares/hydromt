@@ -77,7 +77,7 @@ class Model(object, metaclass=ABCMeta):
             Model simulation configuration file, by default None.
             Note that this is not the HydroMT model setup configuration file!
         data_libs : List[str], optional
-            List of data catalog yaml files, by default None
+            List of data catalog configuration files, by default None
         **artifact_keys:
             Additional keyword arguments to be passed down.
         logger:
@@ -543,7 +543,7 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         root: str, Path, optional
-            Global root for all relative paths in yaml file.
+            Global root for all relative paths in configuration file.
             If "auto" the data source paths are relative to the yaml output ``path``.
         data_lib_fn: str, Path, optional
             Path of output yml file, absolute or relative to the model root,
@@ -555,7 +555,7 @@ class Model(object, metaclass=ABCMeta):
         """
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
-        # read hydromt_data yaml file and add to data catalog
+        # read hydromt_data configuration file and add to data catalog
         if self._read and isfile(path) and append:
             cat.from_yml(path)
         # update data catalog with new used sources
