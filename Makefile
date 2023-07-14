@@ -13,17 +13,24 @@ dev: full-environment.yml
 	$(PY_ENV_MANAGER) run -n hydromt-full pip install -e .
 	$(PY_ENV_MANAGER) run -n hydromt-full pre-commit install
 
+env:
+	@# the subst is to make sure the is always exactly one "" around OPT_DEPS so people can
+	@# specify it both as OPT_DEPS=extra,io and OPT_DEPS="extra,io"
+	python make_env.py "$(subst ",,$(OPT_DEPS))"
+	$(PY_ENV_MANAGER) create -f environment.yml -y
+	$(PY_ENV_MANAGER) -n hydromt run pip install .
+
 min-environment.yml:
 	pip install tomli
-	python3 make_env.py -o min-environment.yml
+	python make_env.py -o min-environment.yml
 
 slim-environment.yml:
 	pip install tomli
-	python3 make_env.py "slim" -o slim-environment.yml
+	python make_env.py "slim" -o slim-environment.yml
 
 full-environment.yml:
 	pip install tomli
-	python3 make_env.py "full" -o full-environment.yml
+	python make_env.py "full" -o full-environment.yml
 
 docker-min: min-environment.yml
 	docker build -t $(DOCKER_USER_NAME)/hydromt:min --target=min .
