@@ -702,6 +702,7 @@ class GeoDataArray(GeoBase):
         name: str = None,
         index_dim: str = None,
         keep_cols: bool = True,
+        how: str = "gdf",
     ) -> xr.DataArray:
         """Parse GeoDataFrame object with point geometries to DataArray.
 
@@ -731,19 +732,25 @@ class GeoDataArray(GeoBase):
             Name of index dimension of data
         keep_cols: bool, optional
             If True, keep gdf columns as extra coordinates in dataset
+        how: str, optional
+            Which indices to use for the new DataArray
+            E.g. how = 'gdf' will result in the usage of the GeoDataFrame indices
+            The options are: 'gdf', 'inner'
 
         Returns
         -------
         da: xarray.DataArray
             DataArray with geospatial coordinates
         """
+        if how not in ["gdf", "inner", "data"]:
+            raise ValueError(f"{how} is not a valid value for 'how'")
         if index_dim is None:
             index_dim = gdf.index.name if gdf.index.name is not None else "index"
         geom_name = gdf.geometry.name
         # Some index dimension checking
         # TODO Check this!!! Might be unwanted
         if index_dim in gdf.columns:
-            gdf.set_index(index_dim, inplace=True)
+            gdf = gdf.set_index(index_dim)
         # create DataArray from array_like data
         da = xr.DataArray(data=data, coords=coords, dims=dims, name=name)
         # check dims -> assume index dim is first dim if not provided
@@ -764,9 +771,22 @@ class GeoDataArray(GeoBase):
             hdrs = gdf.columns
         else:
             hdrs = [geom_name]
-        da = da.reindex({index_dim: gdf.index})
-        da = da.assign_coords({hdr: (index_dim, gdf[hdr]) for hdr in hdrs})
-        da = da.transpose(index_dim, ...).reindex({index_dim: gdf.index})
+        # Which indices to use
+        if how == "gdf":
+            _index = gdf.index
+            da = da.reindex({index_dim: gdf.index})
+            da = da.assign_coords({hdr: (index_dim, gdf[hdr]) for hdr in hdrs})
+        elif how == "inner":
+            _comb = [*data.index, *gdf.index]
+            _index = [n for n in set(_comb) if _comb.count(n) > 1]
+            da = da.reindex({index_dim: _index})
+            da = da.assign_coords(
+                {hdr: (index_dim, gdf.loc[_index][hdr]) for hdr in hdrs}
+            )
+        elif how == "data":
+            raise NotImplementedError("")
+
+        da = da.transpose(index_dim, ...).reindex({index_dim: _index})
         # set geospatial attributes
         da.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
         da.vector.set_crs(gdf.crs)
