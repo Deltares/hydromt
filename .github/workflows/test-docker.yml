@@ -7,11 +7,13 @@ on:
     paths:
       - .binder/*
       - Dockerfile
+      - pyproject.toml
   pull_request:
     branches: [main]
     paths:
       - .binder/*
       - Dockerfile
+      - pyproject.toml
 
 jobs:
   test-docker-image:

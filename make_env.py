@@ -12,12 +12,13 @@ else:
 
 
 # our quick and dirty implementation of recursive depedencies
-def _parse_profile(profile_str: str, opt_deps) -> List[str]:
+def _parse_profile(profile_str: str, opt_deps: dict, project_name: str) -> List[str]:
     if profile_str is None or profile_str == "":
         return []
 
+    pat = re.compile(r"\s*" + project_name + r"\[(.*)\]\s*")
     parsed = []
-    queue = ["hydromt[" + x.strip() + "]" for x in profile_str.split(",")]
+    queue = [f"{project_name}[{x.strip()}]" for x in profile_str.split(",")]
     while len(queue) > 0:
         dep = queue.pop(0)
         if dep == "":
@@ -40,28 +41,41 @@ def _parse_profile(profile_str: str, opt_deps) -> List[str]:
     return parsed
 
 
-pat = re.compile(r"\s*hydromt\[(.*)\]\s*")
 parser = argparse.ArgumentParser()
 
-parser.add_argument("flavour", default="", nargs="?")
+parser.add_argument("profile", default="dev,test", nargs="?")
 parser.add_argument("--output", "-o", default="environment.yml")
-parser.add_argument("--channel", "-c", default="conda-forge")
-
+parser.add_argument("--channels", "-c", default=None)
+parser.add_argument("--name", "-n", default=None)
+parser.add_argument("--py", "-p", default=None)
 args = parser.parse_args()
 
-# will sadly have to maintian this manually :(
-deps_not_in_conda = ["sphinx_autosummary_accessors", "sphinx_design", "pyet", "flint"]
+#
 with open("pyproject.toml", "rb") as f:
     toml = load(f)
-
-
 deps = toml["project"]["dependencies"]
 opt_deps = toml["project"]["optional-dependencies"]
+project_name = toml["project"]["name"]
+# specific pyproject2conda settings
+kwargs = toml["tool"].get("pyproject2conda", {})
+deps_not_in_conda = kwargs.get("deps_not_in_conda", [])
+channels = kwargs.get("channels", ["defaults"])
+if args.channels is not None:
+    channels.extend(args.channels.split(","))
 
-extra_deps = _parse_profile(args.flavour, opt_deps)
+# parse environment name
+name = args.name
+if name is None:
+    name = project_name
+print(f"Environment name: {name}")
 
+# parse dependencies groups and flavours
+# "min" equals no optional dependencies
 deps_to_install = deps.copy()
-deps_to_install.extend(extra_deps)
+if args.profile not in ["", "min"]:
+    extra_deps = _parse_profile(args.profile, opt_deps, project_name)
+    deps_to_install.extend(extra_deps)
+
 conda_deps = []
 pip_deps = []
 for dep in deps_to_install:
@@ -69,14 +83,22 @@ for dep in deps_to_install:
         pip_deps.append(dep)
     else:
         conda_deps.append(dep)
+if args.py is not None:
+    conda_deps.append(f"python=={args.py}")
+
+# add pip as a conda dependency if we have pip deps
+if len(pip_deps) > 0:
+    conda_deps.append("pip")
 
 # the list(set()) is to remove duplicates
 conda_deps_to_install_string = "\n- ".join(sorted(list(set(conda_deps))))
-env_spec = f"""
-name: hydromt-{args.flavour}
+channels_string = "\n- ".join(set(channels))
+
+# create environment.yml
+env_spec = f"""name: {name}
 
 channels:
-    - {args.channel}
+- {channels_string}
 
 dependencies:
 - {conda_deps_to_install_string}
