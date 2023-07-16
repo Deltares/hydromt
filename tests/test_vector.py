@@ -106,14 +106,14 @@ def test_from_gdf(geoda, geodf):
     xr.testing.assert_equal(ds1[geoda.name], da1)
     # inner join
     da1 = GeoDataArray.from_gdf(
-        geodf.loc[[2, 3, 4]], geoda0.sel(index=[0, 1, 2]), how="inner"
+        geodf.loc[[2, 3, 4]], geoda0.sel(index=[0, 1, 2]), merge_index="inner"
     )
     assert np.all(np.isin(da1.index, [2]))
     ds1 = GeoDataset.from_gdf(
-        geodf.loc[[2, 3, 4]], geoda0.sel(index=[0, 1, 2]), how="inner"
+        geodf.loc[[2, 3, 4]], geoda0.sel(index=[0, 1, 2]), merge_index="inner"
     )  # idem for dataset
     xr.testing.assert_equal(ds1[geoda.name], da1)
-    # test without data
+    # test without GeoDataset from gdf only
     ds1 = GeoDataset.from_gdf(geodf)
     assert isinstance(ds1, xr.Dataset)
     assert np.all(geodf.geometry == ds1.vector.geometry)
@@ -124,15 +124,23 @@ def test_from_gdf(geoda, geodf):
         GeoDataset.from_gdf(geodf, data_vars=1)
     with pytest.raises(ValueError, match="Index dimension city not found in data_vars"):
         GeoDataset.from_gdf(geodf, geoda0, index_dim="city")
-    with pytest.raises(ValueError, match="wrong is not a valid value for 'how'"):
-        GeoDataset.from_gdf(geodf, geoda0, how="wrong")
+    with pytest.raises(ValueError, match="x is not a valid value for 'merge_index'"):
+        GeoDataset.from_gdf(geodf, geoda0, merge_index="x")
+    with pytest.raises(ValueError, match="No common indices found between gdf"):
+        ds1 = GeoDataset.from_gdf(
+            geodf.loc[[3]], geoda0.sel(index=[0]), merge_index="inner"
+        )
     # errors GeoDataArray
     with pytest.raises(ValueError, match="gdf data type not understood"):
         GeoDataArray.from_gdf(geoda, geoda)
     with pytest.raises(ValueError, match="Index dimension city not found in data_vars"):
         GeoDataset.from_gdf(geodf, geoda0, index_dim="city")
-    with pytest.raises(ValueError, match="wrong is not a valid value for 'how'"):
-        GeoDataArray.from_gdf(geodf, geoda0, how="wrong")
+    with pytest.raises(ValueError, match="x is not a valid value for 'merge_index'"):
+        GeoDataArray.from_gdf(geodf, geoda0, merge_index="x")
+    with pytest.raises(ValueError, match="No common indices found between gdf"):
+        ds1 = GeoDataArray.from_gdf(
+            geodf.loc[[3]], geoda0.sel(index=[0]), merge_index="inner"
+        )
 
 
 def test_geo_clip(geoda, world):

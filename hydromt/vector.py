@@ -702,7 +702,7 @@ class GeoDataArray(GeoBase):
         name: str = None,
         index_dim: str = None,
         keep_cols: bool = True,
-        how: str = "gdf",
+        merge_index: str = "gdf",
     ) -> xr.DataArray:
         """Parse GeoDataFrame object with point geometries to DataArray.
 
@@ -732,7 +732,7 @@ class GeoDataArray(GeoBase):
             Name of index dimension of data
         keep_cols: bool, optional
             If True, keep gdf columns as extra coordinates in dataset
-        how: {'gdf', 'inner'}, default 'gdf'
+        merge_index: {'gdf', 'inner'}, default 'gdf'
             Type of merge to be performed between gdf and data.
 
             * gdf: use only keys from gdf index. Missing values will be filled with NaNs
@@ -770,12 +770,17 @@ class GeoDataArray(GeoBase):
                     "DataArray and GeoDataFrame index datatypes do not match."
                 )
         # Which indices to use
-        if how == "gdf":
-            _index = gdf.index.values
-        elif how == "inner":
-            _index = gdf.index.intersection(da[index_dim]).values
+        gdf_index = gdf.index.values
+        ds_index = da[index_dim].values
+        intersect_index = np.intersect1d(gdf_index, ds_index)
+        if merge_index == "gdf":
+            _index = gdf_index
+        elif merge_index == "inner":
+            _index = intersect_index
         else:
-            raise ValueError(f"{how} is not a valid value for 'how'")
+            raise ValueError(f"{merge_index} is not a valid value for 'merge_index'")
+        if len(intersect_index) == 0:
+            raise ValueError("No common indices found between gdf and data.")
         da = da.reindex({index_dim: _index}).transpose(index_dim, ...)
         # set gdf geometry and optional other columns
         hdrs = gdf.columns if keep_cols else [geom_name]
@@ -853,7 +858,7 @@ class GeoDataset(GeoBase):
         coords: dict = None,
         index_dim: str = None,
         keep_cols: bool = True,
-        how: str = "gdf",
+        merge_index: str = "gdf",
     ) -> xr.Dataset:
         """Create Dataset with geospatial coordinates.
 
@@ -874,7 +879,7 @@ class GeoDataset(GeoBase):
             Name of index dimension in data_vars
         keep_cols: bool, optional
             If True, keep gdf columns as extra coordinates in dataset
-        how: {'gdf', 'inner'}, default 'gdf'
+        merge_index: {'gdf', 'inner'}, default 'gdf'
             Type of merge to be performed between gdf and data.
 
             * gdf: use only keys from gdf index. Missing values will be filled with NaNs
@@ -922,12 +927,17 @@ class GeoDataset(GeoBase):
         else:  # create empty dataset
             ds = xr.Dataset(coords={index_dim: gdf.index.values})
         # Which indices to use
-        if how == "gdf":
-            _index = gdf.index.values
-        elif how == "inner":
-            _index = gdf.index.intersection(ds[index_dim]).values
+        gdf_index = gdf.index.values
+        ds_index = ds[index_dim].values
+        intersect_index = np.intersect1d(gdf_index, ds_index)
+        if merge_index == "gdf":
+            _index = gdf_index
+        elif merge_index == "inner":
+            _index = intersect_index
         else:
-            raise ValueError(f"{how} is not a valid value for 'how'")
+            raise ValueError(f"{merge_index} is not a valid value for 'merge_index'")
+        if len(intersect_index) == 0:
+            raise ValueError("No common indices found between gdf and data_vars.")
         ds = ds.reindex({index_dim: _index}).transpose(index_dim, ...)
         # set gdf geometry and optional other columns
         hdrs = gdf.columns if keep_cols else [geom_name]
