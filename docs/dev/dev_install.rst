@@ -45,13 +45,19 @@ Afterwards to create an environment you can simply call:
 
     $ make dev
 
-This will create an enviromnment file, create an environment called `hydromt-dev` using a packagemangager
+This will create an enviromnment file, create an environment called `hydromt-dev` using a package mangager
 and install hydromt into it. By default the makefile will attempt to use `mamba`. If you want it to use a
 diferent one like, conda, you only have to set the environment variable like this:
 
 .. code-block:: console
 
     $ make dev PY_ENV_MANAGER=conda
+
+If you would like this to be the case you can also add make this the default behaviour with the following command:
+
+.. code-block:: console
+
+    $ echo 'export PY_ENV_MANAGER=conda' >> ~/.$(basename $0)rc
 
 Step-by-step installation
 --------------------------
@@ -92,11 +98,11 @@ Finally, create a developer installation of HydroMT:
     In the commands above you can exchange `mamba` for `conda`,
     see :ref:`installation guide <installation_guide>` for the difference between both.
 
-Finetined installation
+Fine tuned installation
 ----------------------
 
-If you want a more finetined installation you can also specify exactly
-which dependency groups you'd. For instance, this will create an environment
+If you want a more fine tuned installation you can also specify exactly
+which dependency groups you'd like. For instance, this will create an environment
 with the extra, io and doc dependencies.
 
 .. code-block:: console

@@ -9,31 +9,27 @@ BUILDDIR      	 	 = docs/_build
 
 .PHONY: clean html
 
-dev:
-	pip install tomli
+dev: pyproject.toml
 	python make_env.py full -n hydromt-dev
 	$(PY_ENV_MANAGER) env create -f environment.yml
 	$(PY_ENV_MANAGER) run -n hydromt-dev pip install -e .
 	$(PY_ENV_MANAGER) run -n hydromt-dev pre-commit install
 
-env:
+env: pyproject.toml
 	@# the subst is to make sure the is always exactly one "" around OPT_DEPS so people can
 	@# specify it both as OPT_DEPS=extra,io and OPT_DEPS="extra,io"
-	pip install tomli
+	@# Note that if you use this receipt you will not get in editable install
 	python make_env.py "$(subst ",,$(OPT_DEPS))" -n $(ENV_NAME)
 	$(PY_ENV_MANAGER) env create -f environment.yml
 	$(PY_ENV_MANAGER) run -n $(ENV_NAME) pip install .
 
 min-environment.yml:
-	pip install tomli
 	python make_env.py -o min-environment.yml
 
 slim-environment.yml:
-	pip install tomli
 	python make_env.py "slim" -o slim-environment.yml
 
 full-environment.yml:
-	pip install tomli
 	python make_env.py "full" -o full-environment.yml
 
 docker-min: min-environment.yml
