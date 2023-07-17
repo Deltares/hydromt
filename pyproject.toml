@@ -77,9 +77,9 @@ doc = [
     "sphinx",                       # build docks
     "sphinx_design",                # doc layout
     "sphinx_autosummary_accessors", # doc layout
-    "hydromt[jupyter,extra]",       # examples are included in the docs
+    "hydromt[examples,extra]",      # examples are included in the docs
 ]
-jupyter = [
+examples = [
     "jupyterlab",      # run examples in jupyter notebook
     "cartopy",         # plotting examples
     "matplotlib-base", # plotting
@@ -90,8 +90,8 @@ deprecated = [
     "pygeos",   # Supersceded by shapely 2
 ]
 
-full = ["hydromt[io,extra,dev,test,doc, jupyter]"]
-slim = ["hydromt[io,extra,jupyter]"]
+full = ["hydromt[io,extra,dev,test,doc,examples]"]
+slim = ["hydromt[io,extra,examples]"]
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
@@ -99,6 +99,14 @@ Source = "https://github.com/Deltares/hydromt"
 
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
+
+[tool.pyproject2conda]
+channels = ["conda-forge", "defaults"]
+deps_not_in_conda  = [
+    "sphinx_autosummary_accessors",
+    "sphinx_design",
+    "pyet",
+]
 
 [tool.black]
 line-length = 88
