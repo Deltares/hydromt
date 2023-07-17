@@ -702,6 +702,7 @@ class GeoDataArray(GeoBase):
         name: str = None,
         index_dim: str = None,
         keep_cols: bool = True,
+        merge_index: str = "gdf",
     ) -> xr.DataArray:
         """Parse GeoDataFrame object with point geometries to DataArray.
 
@@ -712,8 +713,6 @@ class GeoDataArray(GeoBase):
         gdf: geopandas GeoDataFrame
             Spatial coordinates. The index should match the array_like index_dim and the
             geometry column may only contain Point geometries.
-        name:
-            The name of the data set for metadata purposes.
         data: array_like
             Values for this array. Must be an ``numpy.ndarray``, ndarray like,
             or castable to an ``ndarray``. If a self-described xarray or pandas
@@ -727,23 +726,38 @@ class GeoDataArray(GeoBase):
             for 1D data) or a sequence of hashables with length equal to the
             number of dimensions. If this argument is omitted, dimension names
             default to ``['dim_0', ... 'dim_n']``.
+        name: str, optional
+            The name of the data set for metadata purposes.
         index_dim: str, optional
             Name of index dimension of data
         keep_cols: bool, optional
             If True, keep gdf columns as extra coordinates in dataset
+        merge_index: {'gdf', 'inner'}, default 'gdf'
+            Type of merge to be performed between gdf and data.
+
+            * gdf: use only keys from gdf index. Missing values will be filled with NaNs
+            * inner: use intersection of gdf and data index.
 
         Returns
         -------
         da: xarray.DataArray
             DataArray with geospatial coordinates
         """
+        # parse gdf to dataset
+        if isinstance(gdf, GeoSeries):
+            if gdf.name is None:
+                gdf.name = "geometry"
+            gdf = gdf.to_frame()
+        if not isinstance(gdf, GeoDataFrame):
+            raise ValueError(f"gdf data type not understood {type(gdf)}")
+        # check index_dim
         if index_dim is None:
             index_dim = gdf.index.name if gdf.index.name is not None else "index"
         geom_name = gdf.geometry.name
         # create DataArray from array_like data
         da = xr.DataArray(data=data, coords=coords, dims=dims, name=name)
         # check dims -> assume index dim is first dim if not provided
-        if dims is None and index_dim not in da.dims:
+        if dims is None and index_dim not in da.dims and len(da.dims) > 0:
             da = da.rename({list(da.dims)[0]: index_dim})
         # check if all data array contain index_dim
         if index_dim not in da.dims:
@@ -755,13 +769,22 @@ class GeoDataArray(GeoBase):
                 raise TypeError(
                     "DataArray and GeoDataFrame index datatypes do not match."
                 )
-        # set gdf geometry and optional other columns
-        if keep_cols:
-            hdrs = gdf.columns
+        # Which indices to use
+        gdf_index = gdf.index.values
+        ds_index = da[index_dim].values
+        intersect_index = np.intersect1d(gdf_index, ds_index)
+        if merge_index == "gdf":
+            _index = gdf_index
+        elif merge_index == "inner":
+            _index = intersect_index
         else:
-            hdrs = [geom_name]
-        da = da.assign_coords({hdr: (index_dim, gdf[hdr]) for hdr in hdrs})
-        da = da.transpose(index_dim, ...).reindex({index_dim: gdf.index})
+            raise ValueError(f"{merge_index} is not a valid value for 'merge_index'")
+        if len(intersect_index) == 0:
+            raise ValueError("No common indices found between gdf and data.")
+        da = da.reindex({index_dim: _index}).transpose(index_dim, ...)
+        # set gdf geometry and optional other columns
+        hdrs = gdf.columns if keep_cols else [geom_name]
+        da = da.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs})
         # set geospatial attributes
         da.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
         da.vector.set_crs(gdf.crs)
@@ -831,14 +854,13 @@ class GeoDataset(GeoBase):
     @staticmethod
     def from_gdf(
         gdf: gpd.GeoDataFrame,
-        data_vars: dict = {},
+        data_vars: dict = None,
         coords: dict = None,
         index_dim: str = None,
         keep_cols: bool = True,
+        merge_index: str = "gdf",
     ) -> xr.Dataset:
         """Create Dataset with geospatial coordinates.
-
-        The Dataset values are reindexed to the gdf index.
 
         Arguments
         ---------
@@ -857,6 +879,11 @@ class GeoDataset(GeoBase):
             Name of index dimension in data_vars
         keep_cols: bool, optional
             If True, keep gdf columns as extra coordinates in dataset
+        merge_index: {'gdf', 'inner'}, default 'gdf'
+            Type of merge to be performed between gdf and data.
+
+            * gdf: use only keys from gdf index. Missing values will be filled with NaNs
+            * inner: use intersection of gdf and data index.
 
         Returns
         -------
@@ -870,35 +897,52 @@ class GeoDataset(GeoBase):
             gdf = gdf.to_frame()
         if not isinstance(gdf, GeoDataFrame):
             raise ValueError(f"gdf data type not understood {type(gdf)}")
+        # check index_dim
         if index_dim is None:
             index_dim = gdf.index.name if gdf.index.name is not None else "index"
         geom_name = gdf.geometry.name
-        if not keep_cols:
-            gdf = gdf[[geom_name]]
-        ds = gdf.to_xarray().set_coords(gdf.columns)
         # parse data_vars to dataset
-        if data_vars is not None and len(data_vars) > 0:
+        if data_vars is not None:
             if isinstance(data_vars, xr.DataArray):
-                data_vars = data_vars.to_dataset()
+                ds = data_vars.to_dataset()
             elif isinstance(data_vars, xr.Dataset):
-                pass
+                ds = data_vars
             else:
-                data_vars = xr.Dataset(data_vars, coords=coords)
-            # check if any data array contain index_dim
-            if index_dim not in data_vars.dims:
-                raise ValueError(f"Index dimension {index_dim} not found in dataset.")
-            if np.dtype(data_vars[index_dim]).type != np.dtype(gdf.index).type:
                 try:
-                    data_vars[index_dim] = data_vars[index_dim].astype(
-                        np.dtype(gdf.index).type
+                    ds = xr.Dataset(data_vars, coords=coords)
+                except TypeError:
+                    raise TypeError(
+                        "data_vars should be a dict-like, DataArray or Dataset"
                     )
+            # check if any data array contain index_dim
+            if index_dim not in ds.dims:
+                raise ValueError(f"Index dimension {index_dim} not found in data_vars.")
+            if np.dtype(ds[index_dim]).type != np.dtype(gdf.index).type:
+                try:
+                    ds[index_dim] = ds[index_dim].astype(np.dtype(gdf.index).type)
                 except TypeError:
                     raise TypeError(
                         "Dataset and GeoDataFrame index datatypes do not match."
                     )
-        # combine both, transpose and reindex
-        ds = ds.assign(data_vars)
-        ds = ds.transpose(index_dim, ...).reindex({index_dim: gdf.index})
+        else:  # create empty dataset
+            ds = xr.Dataset(coords={index_dim: gdf.index.values})
+        # Which indices to use
+        gdf_index = gdf.index.values
+        ds_index = ds[index_dim].values
+        intersect_index = np.intersect1d(gdf_index, ds_index)
+        if merge_index == "gdf":
+            _index = gdf_index
+        elif merge_index == "inner":
+            _index = intersect_index
+        else:
+            raise ValueError(f"{merge_index} is not a valid value for 'merge_index'")
+        if len(intersect_index) == 0:
+            raise ValueError("No common indices found between gdf and data_vars.")
+        ds = ds.reindex({index_dim: _index}).transpose(index_dim, ...)
+        # set gdf geometry and optional other columns
+        hdrs = gdf.columns if keep_cols else [geom_name]
+        ds = ds.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs})
+        # set geospatial attributes
         ds.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
         ds.vector.set_crs(gdf.crs)
         return ds
