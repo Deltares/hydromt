@@ -9,7 +9,6 @@ from numba import njit
 from scipy import stats
 
 __all__ = [
-    "eva_idf",
     "eva_block_maxima",
     "eva_peaks_over_threshold",
     "eva",
@@ -25,53 +24,6 @@ _DISTS = {
 }
 
 ## high level methods
-
-
-def eva_idf(
-    da: xr.DataArray,
-    durations: np.ndarray = np.array([1, 2, 3, 6, 12, 24, 36, 48], dtype=int),
-    distribution: str = "gumb",
-    rps: np.ndarray = _RPS,
-    **kwargs,
-) -> xr.Dataset:
-    """Return IDF based on EVA.
-
-    Return a intensity-frequency-duration (IDF) table based on block
-    maxima of `da`.
-
-    Parameters
-    ----------
-    da : xr.DataArray
-        Timeseries data, must have a regular spaced 'time' dimension.
-    durations : np.ndarray
-        List of durations, provided as multiply of the data time step,
-        by default [1, 2, 3, 6, 12, 24, 36, 48]
-    distribution : str, optional
-        Short name of distribution, by default 'gumb'
-    rps : np.ndarray, optional
-        Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]
-    **kwargs :
-        key-word arguments passed to the :py:meth:`eva` method.
-
-    Returns
-    -------
-    xr.Dataset
-        IDF table
-    """
-    assert np.all(
-        np.diff(durations) > 0
-    ), "durations should be monotonically increasing"
-    dt_max = int(durations[-1])
-    da_roll = da.rolling(time=dt_max).construct("duration")
-    # get mean intensity for each duration and concat into single dataarray
-    da1 = [da_roll.isel(duration=slice(0, d)).mean("duration") for d in durations]
-    da1 = xr.concat(da1, dim="duration")
-    da1["duration"] = xr.IndexVariable("duration", durations)
-    # return
-    if "min_dist" not in kwargs:
-        kwargs.update(min_dist=dt_max)
-    # return eva_block_maxima(da1, distribution=distribution, rps=rps, **kwargs)
-    return eva(da1, ev_type="BM", distribution=distribution, rps=rps, **kwargs)
 
 
 def eva(

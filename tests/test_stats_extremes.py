@@ -1,7 +1,4 @@
 """Tests for the stats/extremes submodule."""
-
-# %%
-
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -9,27 +6,21 @@ import xarray as xr
 from hydromt.stats import extremes
 
 
-# %%
 def test_peaks(ts_extremes):
     # testing block maxima for 6 months time windows
     ts_bm = extremes.get_peaks(
         ts_extremes, ev_type="BM", period="182.625D"
-    ).load()  # default: ev_type='BM', period='year'
+    )  # default: ev_type='BM', period='year'
 
     # Testing expected number of peaks
-    nb_peaks = int(
-        np.round(
-            (ts_extremes.time[-1] - ts_extremes.time[0]) / pd.Timedelta("182.625D")
-        )
-    )
-    assert all(
-        ts_bm.notnull().sum(dim="time") == np.repeat(nb_peaks, len(ts_bm["stations"]))
-    )
+    dt_tot = ts_extremes.time[-1] - ts_extremes.time[0]
+    nb_peaks = int(np.round(dt_tot / pd.Timedelta("182.625D")))
+    assert all(ts_bm.notnull().sum(dim="time") == nb_peaks)
     # Testing expected maximum value
-    assert all(ts_bm.max(dim="time") == ts_extremes.max(dim="time").load())
+    assert all(ts_bm.max(dim="time") == ts_extremes.max(dim="time"))
 
     # testing for POT
-    ts_pot = extremes.get_peaks(ts_extremes, ev_type="POT", qthresh=0.996).load()
+    ts_pot = extremes.get_peaks(ts_extremes, ev_type="POT", qthresh=0.996)
     # Testing expected number of peaks
     assert all(ts_pot.notnull().sum(dim="time") == [145, 146])
     # Testing expected maximum value
@@ -40,18 +31,12 @@ def test_fit_extremes(ts_extremes):
     from scipy.stats import genextreme, genpareto
 
     # Fitting BM-Gumbel to Gumbel generated data
-    bm_peaks = extremes.get_peaks(ts_extremes, ev_type="BM", period="182.625D").load()
-    da_params = extremes.fit_extremes(
-        bm_peaks, ev_type="BM", distribution="gumb"
-    ).load()
+    bm_peaks = extremes.get_peaks(ts_extremes, ev_type="BM", period="182.625D")
+    da_params = extremes.fit_extremes(bm_peaks, ev_type="BM", distribution="gumb")
     # Testing if parameters is 'gumb' as expected
-    assert all(
-        da_params["distribution"] == np.repeat("gumb", len(da_params["stations"]))
-    )
+    assert all(da_params["distribution"] == "gumb")
     # Testing if shape parameter is 0 as expected
-    assert all(
-        da_params.sel(dparams="shape") == np.repeat(0, len(da_params["stations"]))
-    )
+    assert all(da_params.sel(dparams="shape") == 0)
     # testing if we get the value from the function
     np.testing.assert_array_almost_equal(
         da_params.sel(dparams="loc").values, [106, 104], decimal=0
@@ -78,11 +63,9 @@ def test_fit_extremes(ts_extremes):
     del da_params
 
     # Fitting BM-GEV to Gumbel generated data
-    da_params = extremes.fit_extremes(bm_peaks, ev_type="BM", distribution="gev").load()
+    da_params = extremes.fit_extremes(bm_peaks, ev_type="BM", distribution="gev")
     # Testing if parameters is 'gev' as expected
-    assert all(
-        da_params["distribution"] == np.repeat("gev", len(da_params["stations"]))
-    )
+    assert all(da_params["distribution"] == "gev")
     # testing if we get the value from the function
     np.testing.assert_array_almost_equal(
         da_params.sel(dparams="loc").values, [103.9, 101.7], decimal=1
@@ -106,14 +89,10 @@ def test_fit_extremes(ts_extremes):
     del da_params
 
     # Fitting POT-GPD to Gumbel generated data
-    pot_peaks = extremes.get_peaks(ts_extremes, ev_type="POT", qthresh=0.996).load()
-    da_params = extremes.fit_extremes(
-        pot_peaks, ev_type="POT", distribution="gpd"
-    ).load()
+    pot_peaks = extremes.get_peaks(ts_extremes, ev_type="POT", qthresh=0.996)
+    da_params = extremes.fit_extremes(pot_peaks, ev_type="POT", distribution="gpd")
     # Testing if parameters is 'gpd' as expected
-    assert all(
-        da_params["distribution"] == np.repeat("gpd", len(da_params["stations"]))
-    )
+    assert all(da_params["distribution"] == "gpd")
     # testing if we get the value from the function
     np.testing.assert_array_almost_equal(
         da_params.sel(dparams="loc").values, [96.2, 95.65], decimal=1
@@ -144,18 +123,15 @@ def test_fit_extremes(ts_extremes):
         )
 
 
-# %%
 def test_return_values(ts_extremes):
     from scipy.stats import genpareto, gumbel_r
 
     rps = np.array([1.5, 5, 10, 25, 50, 100, 250, 500])
 
     # Block Maxima - GUMBEL
-    bm_peaks = extremes.get_peaks(ts_extremes, ev_type="BM", period="182.625D").load()
-    da_params = extremes.fit_extremes(
-        bm_peaks, ev_type="BM", distribution="gumb"
-    ).load()
-    da_rps = extremes.get_return_value(da_params, rps=rps).load()
+    bm_peaks = extremes.get_peaks(ts_extremes, ev_type="BM", period="182.625D")
+    da_params = extremes.fit_extremes(bm_peaks, ev_type="BM", distribution="gumb")
+    da_rps = extremes.get_return_value(da_params, rps=rps)
     # Shape of da_rps should match
     assert da_rps.shape == (len(da_params["stations"]), len(rps))
     # Testing if values are the same as from the function
@@ -176,11 +152,9 @@ def test_return_values(ts_extremes):
     del da_rps, da_params
 
     # Peaks Over Threshold - GPD
-    pot_peaks = extremes.get_peaks(ts_extremes, ev_type="POT", qthresh=0.996).load()
-    da_params = extremes.fit_extremes(
-        pot_peaks, ev_type="POT", distribution="gpd"
-    ).load()
-    da_rps = extremes.get_return_value(da_params, rps=rps).load()
+    pot_peaks = extremes.get_peaks(ts_extremes, ev_type="POT", qthresh=0.996)
+    da_params = extremes.fit_extremes(pot_peaks, ev_type="POT", distribution="gpd")
+    da_rps = extremes.get_return_value(da_params, rps=rps)
     # Shape of da_rps should match
     assert da_rps.shape == (len(da_params["stations"]), len(rps))
     # Testing if values are the same as from the function
@@ -206,12 +180,10 @@ def test_eva(ts_extremes):
     # Test for 6M BM
     bm_eva = extremes.eva(
         ts_extremes, ev_type="BM", period="182.625D", distribution="gumb"
-    ).load()
-    bm_peaks = extremes.get_peaks(ts_extremes, ev_type="BM", period="182.625D").load()
-    da_params = extremes.fit_extremes(
-        bm_peaks, ev_type="BM", distribution="gumb"
-    ).load()
-    da_rps = extremes.get_return_value(da_params).load()
+    )
+    bm_peaks = extremes.get_peaks(ts_extremes, ev_type="BM", period="182.625D")
+    da_params = extremes.fit_extremes(bm_peaks, ev_type="BM", distribution="gumb")
+    da_rps = extremes.get_return_value(da_params)
     bm_test = xr.merge([bm_peaks, da_params, da_rps])
 
     xr.testing.assert_equal(bm_eva, bm_test)
@@ -220,23 +192,10 @@ def test_eva(ts_extremes):
     # Test fot POT
     pot_eva = extremes.eva(
         ts_extremes, ev_type="POT", qthresh=0.996, distribution="gpd"
-    ).load()
+    )
     # Peaks Over Threshold - GPD
-    pot_peaks = extremes.get_peaks(ts_extremes, ev_type="POT", qthresh=0.996).load()
-    da_params = extremes.fit_extremes(
-        pot_peaks, ev_type="POT", distribution="gpd"
-    ).load()
-    da_rps = extremes.get_return_value(da_params).load()
+    pot_peaks = extremes.get_peaks(ts_extremes, ev_type="POT", qthresh=0.996)
+    da_params = extremes.fit_extremes(pot_peaks, ev_type="POT", distribution="gpd")
+    da_rps = extremes.get_return_value(da_params)
     pot_test = xr.merge([pot_peaks, da_params, da_rps])
     xr.testing.assert_equal(pot_test, pot_eva)
-
-
-# TODO - Test not working right now because problem in the da_params dimensions
-# (see comments below)
-def test_eva_idf(ts_extremes):
-    # This works
-    extremes.eva_idf(ts_extremes.isel(stations=0), distribution="gumb")
-    # This does not work - I think because of a problem in the dimensions in da_params
-    # that does not account for durations AND stations when the function fit_extremes
-    # is called
-    extremes.eva_idf(ts_extremes, distribution="gumb")

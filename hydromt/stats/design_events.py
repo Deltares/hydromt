@@ -8,7 +8,6 @@ from numba import njit
 
 __all__ = [
     "get_peak_hydrographs",
-    "get_hyetograph",
 ]
 
 
@@ -71,60 +70,6 @@ def get_peak_hydrographs(
     t0 = int(np.floor(wdw_size / 2))
     da_shape["time"] = xr.IndexVariable("time", np.arange(-t0, t0 + wdw_size % 2))
     return da_shape.squeeze()
-
-
-def get_hyetograph(da_idf: xr.DataArray, dt: float, length: int) -> xr.DataArray:
-    """Return hyetograph.
-
-    Return design storm hyetograph based on intensity-frequency-duration (IDF)
-    table.
-
-    The input `da_idf` can be obtained as the output of the :py:meth:`eva_idf`.
-    Note: here we use the precipitation intensity and not the depth as input!
-    The design hyetograph is based on the alternating block method.
-
-    Parameters
-    ----------
-    da_idf : xr.DataArray
-        IDF data, must contain a 'duration' dimension
-    dt : float
-        Time-step for output hyetograph, same time step unit as IDF duration.
-    length : int
-        Number of time-step intervals in design storms.
-
-    Returns
-    -------
-    xr.DataArray
-        Design storm hyetograph
-        #TODO: add some description of the variables and dimensions...(check below)
-        The design storms time dimension is relative to the peak (time=0) of time step
-        dt and total length record of length.
-
-        If using :py:meth:`eva_idf` to obtain the IDF curves, the output is stored in
-        variable `return_values`.
-    """
-    durations = da_idf["duration"]
-    assert np.all(np.diff(durations) > 0)
-    assert dt >= durations[0]
-
-    t = np.arange(0, durations[-1] + dt, dt)
-    alt_order = np.append(np.arange(1, length, 2)[::-1], np.arange(0, length, 2))
-
-    # drop 'time' dimension if present in xarray.Dataset
-    # TODO: check if this is correct!!
-    if "time" in list(da_idf.dims.keys()):
-        da_idf = da_idf.drop_dims("time")
-    # get cummulative precip depth
-    pdepth = (da_idf * durations).reset_coords(drop=True).rename({"duration": "time"})
-    # interpolate to dt temporal resolution
-    pstep = pdepth.interp(time=t).fillna(0).diff("time") / dt
-    # reorder using alternating blocks method
-    pevent = pstep.isel(time=slice(0, length)).isel(time=alt_order)
-    # set time coordinate
-    t0 = int(np.ceil((length + 1) / 2))
-    pevent["time"] = xr.IndexVariable("time", (t[1 : length + 1] - t0))
-    pevent.attrs.update(**da_idf.attrs)
-    return pevent
 
 
 @njit
