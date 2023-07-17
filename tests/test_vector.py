@@ -3,11 +3,12 @@
 
 import numpy as np
 import pytest
+import xarray as xr
 from geopandas import GeoDataFrame
 from pyproj import CRS
 from shapely.geometry import MultiPolygon, Polygon
 
-from hydromt.vector import GeoDataset
+from hydromt.vector import GeoDataArray, GeoDataset
 
 
 @pytest.fixture()
@@ -57,14 +58,11 @@ def test_ogr(tmpdir, gdf):
     assert np.all(ds.vector.geometry == ds1.vector.geometry)
 
 
-def test_geo(geoda, geodf):
+def test_vector(geoda, geodf):
     # vector props
     assert geoda.vector.crs.to_epsg() == geodf.crs.to_epsg()
     assert np.dtype(geoda[geoda.vector.time_dim]).type == np.datetime64
     assert np.all(geoda.vector.geometry == geodf.geometry)
-    # build from array
-    da1 = GeoDataset.from_gdf(geodf, geoda)[geoda.name]
-    assert np.all(da1 == geoda)
     # to geopandas
     gdf1 = geoda.vector.to_gdf(reducer=np.mean)
     gdf2 = geoda.to_dataset().vector.to_gdf(reducer=np.mean)
@@ -76,9 +74,73 @@ def test_geo(geoda, geodf):
     da1 = geoda.vector.to_crs(3857)
     gdf1 = geodf.to_crs(3857)
     assert np.all(da1.vector.geometry == gdf1.geometry)
-    # errors
+
+
+def test_from_gdf(geoda, geodf):
+    geoda0 = geoda.reset_coords(drop=True)  # drop geometries
+    dims = list(geoda0.dims)
+    coords = geoda0.coords
+    # build from GeoDataFrame
+    da1 = GeoDataArray.from_gdf(geodf, geoda0)
+    assert np.all(geodf.geometry == da1.vector.geometry)
+    assert all([c in da1.coords for c in geodf.columns])
+    ds1 = GeoDataset.from_gdf(geodf, geoda0)  # idem for dataset
+    xr.testing.assert_equal(ds1[geoda.name], da1)
+    # build from GeoSeries
+    da1 = GeoDataArray.from_gdf(geodf["geometry"], geoda0)
+    assert np.all(geodf.geometry == da1.vector.geometry)
+    ds1 = GeoDataset.from_gdf(geodf["geometry"], geoda0)  # idem for dataset
+    xr.testing.assert_equal(ds1[geoda.name], da1)
+    # test with numpy array
+    ds1 = GeoDataset.from_gdf(geodf, {"test": (dims, geoda0.values)}, coords=coords)
+    assert isinstance(ds1, xr.Dataset)
+    assert np.all(geodf.geometry == ds1.vector.geometry)
+    da1 = GeoDataArray.from_gdf(geodf, geoda0.values, coords=coords)  # idem for array
+    xr.testing.assert_equal(ds1["test"], da1)
+    # test with different merging strategies
+    da1 = GeoDataArray.from_gdf(geodf, geoda0.sel(index=[0, 1, 2]))
+    assert np.all(np.isnan(da1.sel(index=[3, 4])))
+    assert np.all(geodf.geometry == da1.vector.geometry)
+    assert np.all(da1.index == geodf.index)
+    ds1 = GeoDataset.from_gdf(geodf, geoda0.sel(index=[0, 1, 2]))  # idem for dataset
+    xr.testing.assert_equal(ds1[geoda.name], da1)
+    # inner join
+    da1 = GeoDataArray.from_gdf(
+        geodf.loc[[2, 3, 4]], geoda0.sel(index=[0, 1, 2]), merge_index="inner"
+    )
+    assert np.all(np.isin(da1.index, [2]))
+    ds1 = GeoDataset.from_gdf(
+        geodf.loc[[2, 3, 4]], geoda0.sel(index=[0, 1, 2]), merge_index="inner"
+    )  # idem for dataset
+    xr.testing.assert_equal(ds1[geoda.name], da1)
+    # test without GeoDataset from gdf only
+    ds1 = GeoDataset.from_gdf(geodf)
+    assert isinstance(ds1, xr.Dataset)
+    assert np.all(geodf.geometry == ds1.vector.geometry)
+    # errors GeoDataset
     with pytest.raises(ValueError, match="gdf data type not understood"):
         GeoDataset.from_gdf(geoda)
+    with pytest.raises(TypeError, match="data_vars should be a dict-like"):
+        GeoDataset.from_gdf(geodf, data_vars=1)
+    with pytest.raises(ValueError, match="Index dimension city not found in data_vars"):
+        GeoDataset.from_gdf(geodf, geoda0, index_dim="city")
+    with pytest.raises(ValueError, match="x is not a valid value for 'merge_index'"):
+        GeoDataset.from_gdf(geodf, geoda0, merge_index="x")
+    with pytest.raises(ValueError, match="No common indices found between gdf"):
+        ds1 = GeoDataset.from_gdf(
+            geodf.loc[[3]], geoda0.sel(index=[0]), merge_index="inner"
+        )
+    # errors GeoDataArray
+    with pytest.raises(ValueError, match="gdf data type not understood"):
+        GeoDataArray.from_gdf(geoda, geoda)
+    with pytest.raises(ValueError, match="Index dimension city not found in data_vars"):
+        GeoDataset.from_gdf(geodf, geoda0, index_dim="city")
+    with pytest.raises(ValueError, match="x is not a valid value for 'merge_index'"):
+        GeoDataArray.from_gdf(geodf, geoda0, merge_index="x")
+    with pytest.raises(ValueError, match="No common indices found between gdf"):
+        ds1 = GeoDataArray.from_gdf(
+            geodf.loc[[3]], geoda0.sel(index=[0]), merge_index="inner"
+        )
 
 
 def test_geo_clip(geoda, world):
