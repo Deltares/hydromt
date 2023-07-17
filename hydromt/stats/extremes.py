@@ -319,10 +319,8 @@ def get_return_value(da_params: xr.DataArray, rps: np.ndarray = _RPS) -> xr.Data
             p = p[1:]
         return _get_return_values(p, d, rps=rps, extremes_rate=r)
 
-    assert "dparams" in da_params.dims
-    assert "distribution" in da_params.reset_coords()  # coord or variable
+    assert "dparams" in da_params.dims, "da_params should have a 'dparams' dimension"
     distributions = da_params["distribution"].load()
-    assert "extremes_rate" in da_params.reset_coords()  # coord or variable
     extremes_rate = da_params["extremes_rate"].load()
 
     if da_params.ndim == 1:  # fix case of single dim
@@ -387,15 +385,6 @@ def fit_extremes(
         raise ValueError(
             f"Unknown ev_type {ev_type.upper()}, select from {_DISTS.keys()}."
         )
-
-    if "extremes_rate" not in da_peaks.reset_coords():  # coord or variable
-        print(
-            "Setting extremes_rates to 1.0"
-        )  # This would be better with a logger I guess?
-        list([d for d in da_peaks.dims if d != "time"])
-        # TODO - check how to add this
-        # da_peaks.assign_coords({"extremes_rate":
-        #       xr.Variable(dims=dim, np.ones(len(dim)))})
 
     def _fitopt_1d(x, distributions=distributions, criterium=criterium):
         params, d = lmoment_fitopt(x, distributions=distributions, criterium=criterium)
