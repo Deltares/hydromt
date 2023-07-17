@@ -343,7 +343,9 @@ class Model(object, metaclass=ABCMeta):
         --------
         hydromt.workflows.basin_mask.parse_region
         """
-        kind, region = workflows.parse_region(region, logger=self.logger)
+        kind, region = workflows.parse_region(
+            region, data_catalog=self.data_catalog, logger=self.logger
+        )
         # NOTE: kind=outlet is deprecated!
         if kind in ["basin", "subbasin", "interbasin", "outlet"]:
             # retrieve global hydrography data (lazy!)

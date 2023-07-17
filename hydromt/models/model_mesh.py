@@ -382,7 +382,9 @@ class MeshModel(MeshMixin, Model):
         if "mesh" not in region:
             if not isinstance(res, (int, float)):
                 raise ValueError("res argument required")
-            kind, region = workflows.parse_region(region, logger=self.logger)
+            kind, region = workflows.parse_region(
+                region, data_catalog=self.data_catalog, logger=self.logger
+            )
             if kind == "bbox":
                 bbox = region["bbox"]
                 geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
