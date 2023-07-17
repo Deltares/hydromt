@@ -184,12 +184,10 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
-    fn_parquet = str(tmpdir.join("test.parquet"))
     fn_csv_locs = str(tmpdir.join("test_locs.xy"))
     geoda.vector.to_netcdf(fn_nc)
     geodf.to_file(fn_gdf, driver="GeoJSON")
     ts.to_csv(fn_csv)
-    ts.to_parquet(fn_parquet)
     hydromt.io.write_xy(fn_csv_locs, geodf)
     data_catalog = DataCatalog()
     # added fn_ts to test if it does not go into xr.open_dataset
@@ -213,13 +211,13 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     assert da3.vector.crs.to_epsg() == 4326
     with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
         data_catalog.get_geodataset("no_file.geojson")
-    # Test nc file writing to file
     with tempfile.TemporaryDirectory() as td:
+        # Test nc file writing to file
         GeoDatasetAdapter(fn_nc).to_file(
             data_root=td, data_name="test", driver="netcdf"
         )
         GeoDatasetAdapter(fn_nc).to_file(
-            data_root=td, data_name="test1", driver="netcdf", variables="test1"
+            data_root=tmpdir, data_name="test1", driver="netcdf", variables="test1"
         )
         GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
 
@@ -295,7 +293,7 @@ def test_dataframe(df, tmpdir):
     fn_df_parquet = str(tmpdir.join("test.parquet"))
     df.to_parquet(fn_df_parquet)
     data_catalog = DataCatalog()
-    df2 = data_catalog.get_dataframe(fn_df_parquet)
+    df2 = data_catalog.get_dataframe(fn_df_parquet, driver="parquet")
     assert isinstance(df2, pd.DataFrame)
     pd.testing.assert_frame_equal(df, df2)
 
