@@ -11,7 +11,7 @@ import logging
 import os
 import shutil
 import warnings
-from os.path import abspath, basename, exists, isdir, isfile, join
+from os.path import abspath, basename, exists, isdir, isfile, join, splitext
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -691,6 +691,9 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
+            _, ext = splitext(path)
+            if ext in [".parquet", ".pq"]:
+                kwargs["driver"] = "parquet"
             source = RasterDatasetAdapter(path=path, **kwargs)
             self.update(**{name: source})
         elif data_like in self.sources:
@@ -774,6 +777,9 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
+            _, ext = splitext(path)
+            if ext in [".parquet", ".pq"]:
+                kwargs["driver"] = "parquet"
             source = GeoDataFrameAdapter(path=path, **kwargs)
             self.update(**{name: source})
         elif data_like in self.sources:
@@ -860,6 +866,9 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
+            _, ext = splitext(path)
+            if ext in [".parquet", ".pq"]:
+                kwargs["driver"] = "parquet"
             source = GeoDatasetAdapter(path=path, **kwargs)
             self.update(**{name: source})
         elif data_like in self.sources:
@@ -922,6 +931,9 @@ class DataCatalog(object):
         if data_like not in self.sources and exists(abspath(data_like)):
             path = str(abspath(data_like))
             name = basename(data_like).split(".")[0]
+            _, ext = splitext(path)
+            if ext in [".parquet", ".pq"]:
+                kwargs["driver"] = "parquet"
             source = DataFrameAdapter(path=path, **kwargs)
             self.update(**{name: source})
         elif data_like in self.sources:

@@ -2,7 +2,7 @@
 import glob
 import io
 import logging
-from os.path import abspath, basename, dirname, isfile, join
+from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 
 import dask
@@ -309,11 +309,11 @@ def open_geodataset(
     fn_data: path, str
         Path to data file of which the index dimension which should match the geospatial
         coordinates index.
-        This can either be a csv with datetime in the first column and the location
-        index in the header row, or a netcdf with a time and index dimensions.
+        This can either be a csv, or parquet with datetime in the first column and the
+        location index in the header row, or a netcdf with a time and index dimensions.
     var_name: str, optional
-        Name of the variable in case of a csv fn_data file. By default, None and
-        infered from basename.
+        Name of the variable in case of a csv, or parquet fn_data file. By default,
+        None and infered from basename.
     crs: str, `pyproj.CRS`, or dict
         Source coordinate reference system, ignored for files with a native crs.
     bbox : array of float, default None
@@ -361,7 +361,7 @@ def open_geodataset(
 def open_timeseries_from_table(
     fn, name=None, index_dim="index", logger=logger, **kwargs
 ):
-    """Open timeseries csv file and parse to xarray.DataArray.
+    """Open timeseries csv or parquet file and parse to xarray.DataArray.
 
     Accepts files with time index on one dimension and numeric location index on the
     other dimension. In case of string location indices, non-numeric parts are
@@ -387,9 +387,16 @@ def open_timeseries_from_table(
     da: xarray.DataArray
         DataArray
     """
-    kwargs0 = dict(index_col=0, parse_dates=True)
-    kwargs0.update(**kwargs)
-    df = pd.read_csv(fn, **kwargs0)
+    _, ext = splitext(fn)
+    if ext == ".csv":
+        kwargs0 = dict(index_col=0, parse_dates=True)
+        kwargs0.update(**kwargs)
+        df = pd.read_csv(fn, **kwargs0)
+    elif ext in [".parquet", ".pq"]:
+        df = pd.read_parquet(fn, **kwargs)
+    else:
+        raise ValueError(f"Unknown table file format: {ext}")
+
     # check if time index
     if np.dtype(df.index).type != np.datetime64:
         try:
@@ -422,9 +429,9 @@ def open_vector(
     logger=logger,
     **kwargs,
 ):
-    """Open fiona-compatible geometry, csv, excel or xy file and parse it.
+    """Open fiona-compatible geometry, csv, parquet, excel or xy file and parse it.
 
-    Construct a :py:meth:`geopandas.GeoDataFrame` CSV or XLS file are
+    Construct a :py:meth:`geopandas.GeoDataFrame` CSV, parquet, or XLS file are
     converted to point geometries based on default columns names
     for the x- and y-coordinates, or if given, the x_dim and y_dim arguments.
 
@@ -432,10 +439,11 @@ def open_vector(
     ----------
     fn : str
         path to geometry file
-    driver: {'csv', 'xls', 'xy', 'vector'}, optional
+    driver: {'csv', 'xls', 'xy', 'vector', 'parquet'}, optional
         driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
         files, :py:meth:`hydromt.io.open_vector_from_table`
-        for csv, xls(x) and xy files. By default None, and infered from file extention.
+        for csv, parquet, xls(x) and xy files. By default None, and infered from
+        file extention.
     crs: str, `pyproj.CRS`, or dict
         Source coordinate reference system, ignored for files with a native crs.
     dst_crs: str, `pyproj.CRS`, or dict
@@ -452,7 +460,7 @@ def open_vector(
         the predicate function against each item. Requires bbox or mask.
         By default 'intersects'
     x_dim, y_dim : str
-        Name of x, y-coordinate columns, only applicable for csv or xls tables
+        Name of x, y-coordinate columns, only applicable for parquet, csv or xls tables
     assert_gtype : {Point, LineString, Polygon}, optional
         If given, assert geometry type
     mode: {'r', 'a', 'w'}
@@ -470,7 +478,7 @@ def open_vector(
     """
     filtered = False
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
-    if driver in ["csv", "xls", "xlsx", "xy"]:
+    if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     else:
         gdf = gpd.read_file(fn, bbox=bbox, mask=geom, mode=mode, **kwargs)
@@ -509,12 +517,13 @@ def open_vector_from_table(
     crs=None,
     **kwargs,
 ):
-    """Read point geometry files from csv, xy or excel table files.
+    """Read point geometry files from csv, parquet, xy or excel table files.
 
     Parameters
     ----------
-    driver: {'csv', 'xls', 'xlsx', 'xy'}
+    driver: {'csv', 'parquet', 'xls', 'xlsx', 'xy'}
         If 'csv' use :py:meth:`pandas.read_csv` to read the data;
+        If 'parquet' use :py:meth:`pandas.read_parquet` to read the data;
         If 'xls' or 'xlsx' use :py:meth:`pandas.read_excel` with `engine=openpyxl`
         If 'xy' use :py:meth:`pandas.read_csv` with `index_col=False`, `header=None`,
         `delim_whitespace=True`.
@@ -537,13 +546,15 @@ def open_vector_from_table(
         Parsed and filtered point geometries
     """
     driver = driver.lower() if driver is not None else str(fn).split(".")[-1].lower()
-    if "index_col" not in kwargs:
+    if "index_col" not in kwargs and driver != "parquet":
         kwargs.update(index_col=0)
-    if driver in ["csv"]:
+    if driver == "csv":
         df = pd.read_csv(fn, **kwargs)
+    elif driver == "parquet":
+        df = pd.read_parquet(fn, **kwargs)
     elif driver in ["xls", "xlsx"]:
         df = pd.read_excel(fn, engine="openpyxl", **kwargs)
-    elif driver in ["xy"]:
+    elif driver == "xy":
         x_dim = x_dim if x_dim is not None else "x"
         y_dim = y_dim if y_dim is not None else "y"
         kwargs.update(index_col=False, header=None, delim_whitespace=True)

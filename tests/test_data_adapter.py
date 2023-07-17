@@ -180,14 +180,16 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     # the synchronous scheduler here is necessary
     from dask import config as dask_config
 
-    dask_config.set(scheduler="synchronous")
+    dask_config.set(scheduler="single-threaded")
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
+    fn_parquet = str(tmpdir.join("test.parquet"))
     fn_csv_locs = str(tmpdir.join("test_locs.xy"))
     geoda.vector.to_netcdf(fn_nc)
     geodf.to_file(fn_gdf, driver="GeoJSON")
     ts.to_csv(fn_csv)
+    ts.to_parquet(fn_parquet)
     hydromt.io.write_xy(fn_csv_locs, geodf)
     data_catalog = DataCatalog()
     # added fn_ts to test if it does not go into xr.open_dataset
@@ -289,6 +291,14 @@ def test_dataframe(df, tmpdir):
     assert isinstance(df1, pd.DataFrame)
     pd.testing.assert_frame_equal(df, df1)
 
+    # test reading parquet
+    fn_df_parquet = str(tmpdir.join("test.parquet"))
+    df.to_parquet(fn_df_parquet)
+    data_catalog = DataCatalog()
+    df2 = data_catalog.get_dataframe(fn_df_parquet)
+    assert isinstance(df2, pd.DataFrame)
+    pd.testing.assert_frame_equal(df, df2)
+
     # Test FWF support
     fn_fwf = str(tmpdir.join("test.txt"))
     df.to_string(fn_fwf, index=False)
@@ -301,9 +311,9 @@ def test_dataframe(df, tmpdir):
     if compat.HAS_OPENPYXL:
         fn_xlsx = str(tmpdir.join("test.xlsx"))
         df.to_excel(fn_xlsx)
-        df2 = data_catalog.get_dataframe(fn_xlsx, driver_kwargs=dict(index_col=0))
-        assert isinstance(df2, pd.DataFrame)
-        assert np.all(df2 == df)
+        df3 = data_catalog.get_dataframe(fn_xlsx, driver_kwargs=dict(index_col=0))
+        assert isinstance(df3, pd.DataFrame)
+        assert np.all(df3 == df)
 
 
 def test_dataframe_unit_attrs(df: pd.DataFrame, tmpdir):
