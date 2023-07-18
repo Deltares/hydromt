@@ -11,6 +11,7 @@ on:
       - data/*
       - docs/*
       - examples/*
+      - pyproject.toml
   pull_request:
     branches: [main]
     paths:
@@ -19,6 +20,7 @@ on:
       - data/*
       - docs/*
       - examples/*
+      - pyproject.toml
 
 jobs:
   # Build docs on Linux
