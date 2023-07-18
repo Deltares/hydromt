@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 """Tests for the io submodule."""
 
-import pytest
-import numpy as np
-import pandas as pd
-import xarray as xr
-import rasterio
-import rioxarray
-import hydromt
-import os
 import glob
+import os
 from os.path import join
 from pathlib import Path
-from hydromt import raster, _compat
+
+import numpy as np
+import pandas as pd
+import pytest
+import rasterio
+import xarray as xr
+
+import hydromt
+from hydromt import _compat, raster
 
 
 def test_open_vector(tmpdir, df, geodf, world):
@@ -21,7 +22,8 @@ def test_open_vector(tmpdir, df, geodf, world):
     fn_xls = str(tmpdir.join("test.xlsx"))
     fn_geojson = str(tmpdir.join("test.geojson"))
     df.to_csv(fn_csv)
-    df.to_excel(fn_xls)
+    if _compat.HAS_OPENPYXL:
+        df.to_excel(fn_xls)
     geodf.to_file(fn_geojson, driver="GeoJSON")
     hydromt.write_xy(fn_xy, geodf)
     # read csv
@@ -31,9 +33,11 @@ def test_open_vector(tmpdir, df, geodf, world):
     # no data in domain
     gdf1 = hydromt.open_vector(fn_csv, crs=4326, bbox=[200, 300, 200, 300])
     assert gdf1.index.size == 0
-    # read xls
-    gdf1 = hydromt.open_vector(fn_xls, assert_gtype="Point", crs=4326)
-    assert np.all(gdf1 == geodf)
+    if _compat.HAS_OPENPYXL:
+        # read xls
+        gdf1 = hydromt.open_vector(fn_xls, assert_gtype="Point", crs=4326)
+        assert np.all(gdf1 == geodf)
+
     # read xy
     gdf1 = hydromt.open_vector(fn_xy, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
@@ -97,29 +101,28 @@ def test_open_geodataset(tmpdir, geodf):
 
 
 def test_timeseries_io(tmpdir, ts):
-    name = "waterlevel"
-    fn_ts = str(tmpdir.join(f"test1.csv"))
+    fn_ts = str(tmpdir.join("test1.csv"))
     # dattime in columns
     ts.to_csv(fn_ts)
     da = hydromt.open_timeseries_from_table(fn_ts)
     assert isinstance(da, xr.DataArray)
     assert da.time.dtype.type.__name__ == "datetime64"
     # transposed df > datetime in row index
-    fn_ts2 = str(tmpdir.join(f"test2.csv"))
+    fn_ts2 = str(tmpdir.join("test2.csv"))
     ts = ts.T
     ts.to_csv(fn_ts2)
     da2 = hydromt.open_timeseries_from_table(fn_ts2)
     assert da.time.dtype.type.__name__ == "datetime64"
     assert np.all(da == da2)
     # no time index
-    fn_ts3 = str(tmpdir.join(f"test3.csv"))
+    fn_ts3 = str(tmpdir.join("test3.csv"))
     pd.DataFrame(ts.values).to_csv(fn_ts3)
     with pytest.raises(ValueError, match="No time index found"):
         hydromt.open_timeseries_from_table(fn_ts3)
     # parse str index to numeric index
     cols = [f"a_{i}" for i in ts.columns]
     ts.columns = cols
-    fn_ts4 = str(tmpdir.join(f"test4.csv"))
+    fn_ts4 = str(tmpdir.join("test4.csv"))
     ts.to_csv(fn_ts4)
     da4 = hydromt.open_timeseries_from_table(fn_ts4)
     assert np.all(da == da4)
@@ -127,7 +130,7 @@ def test_timeseries_io(tmpdir, ts):
     # no numeric index
     cols[0] = "a"
     ts.columns = cols
-    fn_ts5 = str(tmpdir.join(f"test5.csv"))
+    fn_ts5 = str(tmpdir.join("test5.csv"))
     ts.to_csv(fn_ts5)
     with pytest.raises(ValueError, match="No numeric index"):
         hydromt.open_timeseries_from_table(fn_ts5)
@@ -151,9 +154,9 @@ def test_raster_io(tmpdir, rioda):
     da2 = hydromt.open_raster(fn_tif)
     assert not np.any(np.isnan(da2.values))
     fn_tif = str(tmpdir.join("test_2.tif"))
-    da1.expand_dims("t").round(0).astype(np.int32).raster.to_raster(
-        fn_tif, dtype=np.int32
-    )
+    da1.fillna(da1.attrs["_FillValue"]).expand_dims("t").round(0).astype(
+        np.int32
+    ).raster.to_raster(fn_tif, dtype=np.int32)
     da3 = hydromt.open_raster(fn_tif)
     assert da3.dtype == np.int32
     # to_mapstack / open_mfraster
@@ -170,7 +173,7 @@ def test_raster_io(tmpdir, rioda):
     # concat
     fn_tif = str(tmpdir.join("test_3.tif"))
     da.raster.to_raster(fn_tif, crs=3857)
-    ds_in = hydromt.open_mfraster(join(root, f"test_*.tif"), concat=True)
+    ds_in = hydromt.open_mfraster(join(root, "test_*.tif"), concat=True)
     assert ds_in[ds_in.raster.vars[0]].ndim == 3
     # with reading with pathlib
     paths = [Path(p) for p in glob.glob(join(root, f"{prefix}*.tif"))]

@@ -1,0 +1,44 @@
+---
+name: Documentation Improvement
+description: Report wrong or missing documentation
+labels: [Documentation, Needs refinement]
+
+body:
+  - type: checkboxes
+    attributes:
+      label: HydroMT version checks
+      options:
+        - label: >
+            I have checked that the issue still exists on the latest versions of the docs on `main` [here](https://github.com/Deltares/hydromt)
+          required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      description: What kind of documentation issue is this?
+      label: Kind of issue
+      options:
+        - Docs are wrong
+        - Docs are unclear
+        - Docs are missing
+    validations:
+      required: true
+  - type: textarea
+    id: location
+    attributes:
+      description: >
+        If the docs are wrong or unclear please provide the URL of the documentation in question
+      label: Location of the documentation
+  - type: textarea
+    id: problem
+    attributes:
+      description: >
+        Please provide a description of the documentation problem
+      label: Documentation problem
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      description: >
+        Please explain your suggested fix and why it's better than the existing documentation
+      label: Suggested fix for documentation

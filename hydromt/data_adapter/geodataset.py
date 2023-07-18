@@ -1,19 +1,20 @@
-# -*- coding: utf-8 -*-
+"""Implementation for the geodataset DataAdapter."""
+import logging
 import os
+import warnings
 from os.path import join
+from pathlib import Path
+from typing import NewType, Union
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-import geopandas as gpd
 from shapely.geometry import box
-import logging
-from typing import Union, NewType
-from pathlib import Path
 
 from .. import gis_utils, io
-from .data_adapter import DataAdapter
 from ..raster import GEO_MAP_COORD
-
+from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,9 @@ GeoDatasetSource = NewType("GeoDatasetSource", Union[str, Path])
 
 
 class GeoDatasetAdapter(DataAdapter):
+
+    """DatasetAdapter for GeoDatasets."""
+
     _DEFAULT_DRIVER = "vector"
     _DRIVERS = {
         "nc": "netcdf",
@@ -30,31 +34,37 @@ class GeoDatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path,
-        driver=None,
-        filesystem="local",
-        crs=None,
-        nodata=None,
-        rename={},
-        unit_mult={},
-        unit_add={},
-        meta={},
+        path: str,
+        driver: str = None,
+        filesystem: str = "local",
+        crs: Union[int, str, dict] = None,
+        nodata: Union[dict, float, int] = None,
+        rename: dict = {},
+        unit_mult: dict = {},
+        unit_add: dict = {},
+        meta: dict = {},
+        attrs: dict = {},
+        driver_kwargs: dict = {},
+        name: str = "",  # optional for now
+        catalog_name: str = "",  # optional for now
         **kwargs,
     ):
-        """Initiates data adapter for geospatial timeseries data.
+        """Initiate data adapter for geospatial timeseries data.
 
         This object contains all properties required to read supported files into
-        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial point
-        geometries. In addition it keeps meta data to be able to reproduce which data is used.
+        a single unified GeoDataset, i.e. :py:class:`xarray.Dataset` with geospatial
+        point geometries. In addition it keeps meta data to be able to reproduce which
+        data is used.
 
         Parameters
         ----------
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
-            contain {variable}, {year}, {month} placeholders as well as path search pattern
-            using a '*' wildcard.
+            contain {variable}, {year}, {month} placeholders as well as path
+            search pattern using a '*' wildcard.
         driver: {'vector', 'netcdf', 'zarr'}, optional
-            Driver to read files with, for 'vector' :py:func:`~hydromt.io.open_geodataset`,
+            Driver to read files with,
+            for 'vector' :py:func:`~hydromt.io.open_geodataset`,
             for 'netcdf' :py:func:`xarray.open_mfdataset`.
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
@@ -62,8 +72,8 @@ class GeoDatasetAdapter(DataAdapter):
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
         crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
-            or wkt (str). Only used if the data has no native CRS.
+            Coordinate Reference System. Accepts EPSG codes (int or str);
+            proj (str or dict) or wkt (str). Only used if the data has no native CRS.
         nodata: float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Nodata values can be differentiated between variables using a dictionary.
@@ -71,28 +81,50 @@ class GeoDatasetAdapter(DataAdapter):
             Mapping of native data source variable to output source variable name as
             required by hydroMT.
         unit_mult, unit_add: dict, optional
-            Scaling multiplication and addition to change to map from the native data unit
-            to the output data unit as required by hydroMT.
+            Scaling multiplication and addition to change to map from the native
+            data unit to the output data unit as required by hydroMT.
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
+            - 'source_version'
+            - 'source_url'
+            - 'source_license'
+            - 'paper_ref'
+            - 'paper_doi'
+            - 'category'
         placeholders: dict, optional
-            Placeholders to expand yaml entry to multiple entries (name and path) based on placeholder values
-        **kwargs
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
+        driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
         """
+        if kwargs:
+            warnings.warn(
+                "Passing additional keyword arguments to be used by the "
+                "GeoDatasetAdapter driver is deprecated and will be removed "
+                "in a future version. Please use 'driver_kwargs' instead.",
+                DeprecationWarning,
+            )
+            driver_kwargs.update(kwargs)
         super().__init__(
             path=path,
             driver=driver,
             filesystem=filesystem,
-            crs=crs,
             nodata=nodata,
             rename=rename,
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
-            **kwargs,
+            attrs=attrs,
+            driver_kwargs=driver_kwargs,
+            name=name,
+            catalog_name=catalog_name,
         )
+        self.crs = crs
 
     def to_file(
         self,
@@ -123,29 +155,61 @@ class GeoDatasetAdapter(DataAdapter):
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
+        logger : logger object, optional
+            The logger object used for logging messages. If not provided, the default
+            logger will be used.
+        **kwargs
+            Additional keyword arguments that are passed to the `to_zarr`
+            function.
 
         Returns
         -------
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
+            Name of driver to read data with, see
+            :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
         obj = self.get_data(
-            bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
+            bbox=bbox,
+            time_tuple=time_tuple,
+            variables=variables,
+            logger=logger,
+            single_var_as_array=variables is None,
         )
         if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
             return None, None
 
+        # much better for mem/storage/processing if dtypes are set correctly
+        for name, coord in obj.coords.items():
+            if coord.values.dtype != object:
+                continue
+
+            # not sure if coordinates values of different dtypes
+            # are possible, but let's just hope users aren't
+            # that mean for now.
+            if isinstance(coord.values[0], str):
+                obj[name] = obj[name].astype(str)
+
         if driver is None or driver == "netcdf":
             # always write netcdf
             driver = "netcdf"
-            fn_out = join(data_root, f"{data_name}.nc")
             dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.vector.vars
-            encoding = {k: {"zlib": True} for k in dvars}
-            obj.to_netcdf(fn_out, encoding=encoding)
+            if variables is None:
+                encoding = {k: {"zlib": True} for k in dvars}
+                fn_out = join(data_root, f"{data_name}.nc")
+                obj.to_netcdf(fn_out, encoding=encoding)
+            else:  # save per variable
+                if not os.path.isdir(join(data_root, data_name)):
+                    os.makedirs(join(data_root, data_name))
+                for var in dvars:
+                    fn_out = join(data_root, data_name, f"{var}.nc")
+                    obj[var].to_netcdf(fn_out, encoding={var: {"zlib": True}})
+                fn_out = join(data_root, data_name, "{variable}.nc")
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
+            if isinstance(obj, xr.DataArray):
+                obj = obj.to_dataset()
             obj.to_zarr(fn_out, **kwargs)
         else:
             raise ValueError(f"GeoDataset: Driver {driver} unknown.")
@@ -162,33 +226,35 @@ class GeoDatasetAdapter(DataAdapter):
         single_var_as_array=True,
         logger=logger,
     ):
-        """Returns a clipped, sliced and unified GeoDataset based on the properties
-        of this GeoDatasetAdapter.
+        """Return a clipped, sliced and unified GeoDataset.
 
-        For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
+        For a detailed description see:
+        :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
         # If variable is string, convert to list
         if variables:
             variables = np.atleast_1d(variables).tolist()
 
         # Extract storage_options from kwargs to instantiate fsspec object correctly
-        if "storage_options" in self.kwargs and self.driver == "zarr":
-            kwargs = self.kwargs["storage_options"]
-            # For s3, anonymous connection still requires --no-sign-request profile to read the data
+        so_kwargs = dict()
+        if "storage_options" in self.driver_kwargs and self.driver == "zarr":
+            so_kwargs = self.driver_kwargs["storage_options"]
+            # For s3, anonymous connection still requires --no-sign-request profile to
+            # read the data
             # setting environment variable works
-            if "anon" in kwargs:
+            if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        elif "storage_options" in self.kwargs:
+        elif "storage_options" in self.driver_kwargs:
             raise NotImplementedError(
                 "Remote (cloud) GeoDataset only supported with driver zarr."
             )
-        else:
-            kwargs = dict()
-        fns = self.resolve_paths(time_tuple=time_tuple, variables=variables, **kwargs)
+        fns = self.resolve_paths(
+            time_tuple=time_tuple, variables=variables, **so_kwargs
+        )
 
-        kwargs = self.kwargs.copy()
+        kwargs = self.driver_kwargs.copy()
 
         # parse geom, bbox and buffer arguments
         clip_str = ""
@@ -252,7 +318,7 @@ class GeoDatasetAdapter(DataAdapter):
             ds_out = ds_out[variables]
 
         # set crs
-        if ds_out.vector.crs is None and self.crs != None:
+        if ds_out.vector.crs is None and self.crs is not None:
             ds_out.vector.set_crs(self.crs)
         if ds_out.vector.crs is None:
             raise ValueError(
@@ -288,7 +354,7 @@ class GeoDatasetAdapter(DataAdapter):
                 logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
                 ds_out = ds_out.sel(time=slice(*time_tuple))
             if ds_out.time.size == 0:
-                logger.warning(f"GeoDataset: Time slice out of range.")
+                logger.warning("GeoDataset: Time slice out of range.")
                 drop_vars = [v for v in ds_out.data_vars if "time" in ds_out[v].dims]
                 ds_out = ds_out.drop_vars(drop_vars)
 
@@ -323,6 +389,14 @@ class GeoDatasetAdapter(DataAdapter):
         # return data array if single var
         if single_var_as_array and len(ds_out.vector.vars) == 1:
             ds_out = ds_out[ds_out.vector.vars[0]]
+
+        # Set variable attribute data
+        if self.attrs:
+            if isinstance(ds_out, xr.DataArray):
+                ds_out.attrs.update(self.attrs[ds_out.name])
+            else:
+                for k in self.attrs:
+                    ds_out[k].attrs.update(self.attrs[k])
 
         # set meta data
         ds_out.attrs.update(self.meta)

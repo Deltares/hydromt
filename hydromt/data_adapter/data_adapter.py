@@ -1,18 +1,19 @@
-# -*- coding: utf-8 -*-
+"""DataAdapter class."""
 from __future__ import annotations
+
+import logging
 from abc import ABCMeta, abstractmethod
+from itertools import product
+from string import Formatter
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-import geopandas as gpd
 import yaml
-from upath import UPath
 from fsspec.implementations import local
-from string import Formatter
-from typing import Tuple
-from itertools import product
 from pyproj import CRS
-import logging
+from upath import UPath
 
 from .. import _compat, gis_utils
 
@@ -54,12 +55,12 @@ def remove_duplicates(ds):
 
 
 def harmonise_dims(ds):
-    """
-    Function to harmonise lon-lat-time dimensions
+    """Harmonise lon-lat-time dimensions.
+
     Where needed:
         - lon: Convert longitude coordinates from 0-360 to -180-180
         - lat: Do N->S orientation instead of S->N
-        - time: Convert to datetimeindex
+        - time: Convert to datetimeindex.
 
     Parameters
     ----------
@@ -83,8 +84,11 @@ def harmonise_dims(ds):
         ds = ds.reindex({y_dim: ds[y_dim][::-1]})
     # Final check for lat-lon
     assert (
-        np.diff(ds[y_dim].values)[0] < 0 and np.diff(ds[x_dim].values)[0] > 0
-    ), "orientation not N->S & W->E after get_data preprocess set_lon_lat_axis"
+        np.diff(ds[y_dim].values)[0] < 0
+    ), "orientation not N->S after get_data preprocess set_lon_lat_axis"
+    assert (
+        np.diff(ds[x_dim].values)[0] > 0
+    ), "orientation not W->E after get_data preprocess set_lon_lat_axis"
     # Time
     if ds.indexes["time"].dtype == "O":
         ds = to_datetimeindex(ds)
@@ -101,7 +105,8 @@ PREPROCESSORS = {
 
 
 class DataAdapter(object, metaclass=ABCMeta):
-    """General Interface to data source for HydroMT"""
+
+    """General Interface to data source for HydroMT."""
 
     _DEFAULT_DRIVER = None  # placeholder
     _DRIVERS = {}
@@ -109,19 +114,60 @@ class DataAdapter(object, metaclass=ABCMeta):
     def __init__(
         self,
         path,
-        driver,
-        name="",  # optional for now
-        catalog_name="",  # optional for now
+        driver=None,
         filesystem="local",
-        crs=None,
         nodata=None,
         rename={},
         unit_mult={},
         unit_add={},
         meta={},
-        zoom_levels={},
-        **kwargs,
+        attrs={},
+        driver_kwargs={},
+        name="",  # optional for now
+        catalog_name="",  # optional for now
     ):
+        """General Interface to data source for HydroMT.
+
+        Parameters
+        ----------
+        path: str, Path
+            Path to data source. If the dataset consists of multiple files, the path may
+            contain {variable}, {year}, {month} placeholders as well as path
+            search pattern using a '*' wildcard.
+        driver: {'vector', 'netcdf', 'zarr'}, optional
+            Driver to read files with,
+            for 'vector' :py:func:`~hydromt.io.open_geodataset`,
+            for 'netcdf' :py:func:`xarray.open_mfdataset`.
+            By default the driver is inferred from the file extension and falls back to
+            'vector' if unknown.
+        filesystem: {'local', 'gcs', 's3'}, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            By default, local.
+        nodata: float, int, optional
+            Missing value number. Only used if the data has no native missing value.
+            Nodata values can be differentiated between variables using a dictionary.
+        rename: dict, optional
+            Mapping of native data source variable to output source variable name as
+            required by hydroMT.
+        unit_mult, unit_add: dict, optional
+            Scaling multiplication and addition to change to map from the native
+            data unit to the output data unit as required by hydroMT.
+        meta: dict, optional
+            Metadata information of dataset, prefably containing the following keys:
+            {'source_version', 'source_url', 'source_license',
+            'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
+        driver_kwargs, dict, optional
+            Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
+
+        """
         self.name = name
         self.catalog_name = catalog_name
         # general arguments
@@ -134,23 +180,25 @@ class DataAdapter(object, metaclass=ABCMeta):
             )
         self.driver = driver
         self.filesystem = filesystem
-        self.kwargs = kwargs
+        self.driver_kwargs = driver_kwargs
+
         # data adapter arguments
-        self.crs = crs
         self.nodata = nodata
         self.rename = rename
         self.unit_mult = unit_mult
         self.unit_add = unit_add
-        self.zoom_levels = zoom_levels
         # meta data
         self.meta = {k: v for k, v in meta.items() if v is not None}
+        # variable attributes
+        self.attrs = {k: v for k, v in attrs.items() if v is not None}
 
     @property
     def data_type(self):
+        """Return the datatype of the addapter."""
         return type(self).__name__.replace("Adapter", "")
 
     def summary(self):
-        """Returns a dictionary summary of the data adapter."""
+        """Return a dictionary summary of the data adapter."""
         return dict(
             path=self.path,
             data_type=self.data_type,
@@ -159,8 +207,10 @@ class DataAdapter(object, metaclass=ABCMeta):
         )
 
     def to_dict(self):
-        """Returns a dictionary view of the data source. Can be used to initialize
-        the data adapter."""
+        """Return a dictionary view of the data source.
+
+        Can be used to initialize the data adapter.
+        """
         source = dict(data_type=self.data_type)
         for k, v in vars(self).items():
             if k in ["name", "catalog_name"]:
@@ -170,9 +220,11 @@ class DataAdapter(object, metaclass=ABCMeta):
         return source
 
     def __str__(self):
+        """Return string representation of self in yaml."""
         return yaml.dump(self.to_dict())
 
     def __repr__(self):
+        """Pretty print string representation of self."""
         return self.__str__()
 
     def _parse_zoom_level(
@@ -182,11 +234,14 @@ class DataAdapter(object, metaclass=ABCMeta):
         bbox: list = None,
         logger=logger,
     ) -> int:
-        """Return nearest smaller zoom level based on zoom resolutions defined in data catalog"""
+        """Return nearest smaller zoom level.
+
+        Based on zoom resolutions defined in data catalog.
+        """
         # common pyproj crs axis units
         known_units = ["degree", "metre", "US survey foot"]
         if self.zoom_levels is None or len(self.zoom_levels) == 0:
-            logger.warning(f"No zoom levels available, default to zero")
+            logger.warning("No zoom levels available, default to zero")
             return 0
         zls = list(self.zoom_levels.keys())
         if zoom_level is None:  # return first zoomlevel (assume these are ordered)
@@ -203,7 +258,8 @@ class DataAdapter(object, metaclass=ABCMeta):
             unit = {"meter": "metre", "foot": "US survey foot"}.get(unit, unit)
             if unit not in known_units:
                 raise TypeError(
-                    f"zoom_level unit {unit} not understood; should be one of {known_units}"
+                    f"zoom_level unit {unit} not understood;"
+                    f" should be one of {known_units}"
                 )
         elif not isinstance(zoom_level, int):
             raise TypeError(
@@ -247,19 +303,29 @@ class DataAdapter(object, metaclass=ABCMeta):
         logger=logger,
         **kwargs,
     ):
-        """Resolve {year}, {month} and {variable} keywords
-        in self.path based on 'time_tuple' and 'variables' arguments
+        """Resolve {year}, {month} and {variable} keywords in self.path.
+
+          Keywords are based on 'time_tuple' and 'variables'.
 
         Parameters
         ----------
         time_tuple : tuple of str, optional
-            Start and end data in string format understood by :py:func:`pandas.to_timedelta`, by default None
+            Start and end date in string format understood by
+            :py:func:`pandas.to_timedelta`, by default None
         variables : list of str, optional
             List of variable names, by default None
         zoom_level : int | tuple, optional
-            zoom level of dataset, can be provided as tuple of (<zoom resolution>, <unit>)
+            zoom level of dataset, can be provided as tuple of
+            (<zoom resolution>, <unit>)
         **kwargs
-            key-word arguments are passed to fsspec FileSystem objects. Arguments depend on protocal (local, gcs, s3...).
+            key-word arguments are passed to fsspec FileSystem objects. Arguments
+            depend on protocal (local, gcs, s3...).
+        geom:
+            A geoSeries describing the geometries.
+        bbox:
+            A list of bounding boxes.
+        logger:
+            The logger to use. If none is provided, the devault logger will be used.
 
         Returns
         -------
@@ -323,16 +389,18 @@ class DataAdapter(object, metaclass=ABCMeta):
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {path}{postfix}")
 
-        # With some fs like gcfs or s3fs, the first part of the past is not returned properly with glob
+        # With some fs like gcfs or s3fs, the first part of the path is not returned
+        # properly with glob
         if not str(UPath(fns[0])).startswith(str(UPath(path))[0:2]):
-            # Assumes it's the first part of the path that is not correctly parsed with gcsfs, s3fs etc.
+            # Assumes it's the first part of the path that is not
+            # correctly parsed with gcsfs, s3fs etc.
             last_parent = UPath(path).parents[-1]
             # add the rest of the path
             fns = [last_parent.joinpath(*UPath(fn).parts[1:]) for fn in fns]
         return list(set(fns))  # return unique paths
 
     def get_filesystem(self, **kwargs):
-        """Return an initialised filesystem object based on self.filesystem and **kwargs"""
+        """Return an initialised filesystem object."""
         if self.filesystem == "local":
             fs = local.LocalFileSystem(**kwargs)
         elif self.filesystem == "gcs":
@@ -340,18 +408,21 @@ class DataAdapter(object, metaclass=ABCMeta):
                 fs = gcsfs.GCSFileSystem(**kwargs)
             else:
                 raise ModuleNotFoundError(
-                    "The gcsfs library is required to read data from gcs (Google Cloud Storage). Please install."
+                    "The gcsfs library is required to read data from gcs"
+                    + "(Google Cloud Storage). Please install."
                 )
         elif self.filesystem == "s3":
             if _compat.HAS_S3FS:
                 fs = s3fs.S3FileSystem(**kwargs)
             else:
                 raise ModuleNotFoundError(
-                    "The s3fs library is required to read data from s3 (Amazon Web Storage). Please install."
+                    "The s3fs library is required to read data from s3"
+                    + " (Amazon Web Storage). Please install."
                 )
         else:
             raise ValueError(
-                f"Unknown or unsupported filesystem {self.filesystem}. Use one of {FILESYSTEMS}"
+                f"Unknown or unsupported filesystem {self.filesystem}."
+                + f" Use one of {FILESYSTEMS}"
             )
 
         return fs
@@ -359,4 +430,6 @@ class DataAdapter(object, metaclass=ABCMeta):
     @abstractmethod
     def get_data(self, bbox, geom, buffer):
         """Return a view (lazy if possible) of the data with standardized field names.
-        If bbox of mask are given, clip data to that extent"""
+
+        If bbox of mask are given, clip data to that extent.
+        """

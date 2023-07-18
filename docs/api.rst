@@ -131,7 +131,7 @@ Note that the base Model attributes and methods are available to all models.
 
    Model
 
-High level methods 
+High level methods
 ------------------
 
 .. autosummary::
@@ -208,7 +208,7 @@ Setup methods
 
    Model.setup_config
    Model.setup_region
-   Model.setup_maps_from_raster
+   Model.setup_maps_from_rasterdataset
    Model.setup_maps_from_raster_reclass
 
 
@@ -252,8 +252,13 @@ Setup methods
 
    GridModel.setup_config
    GridModel.setup_region
-   GridModel.setup_maps_from_raster
+   GridModel.setup_maps_from_rasterdataset
    GridModel.setup_maps_from_raster_reclass
+   GridModel.setup_grid
+   GridModel.setup_grid_from_constant
+   GridModel.setup_grid_from_rasterdataset
+   GridModel.setup_grid_from_raster_reclass
+   GridModel.setup_grid_from_geodataframe
 
 
 .. _lumped_model_api:
@@ -295,7 +300,7 @@ Setup methods
 
    LumpedModel.setup_config
    LumpedModel.setup_region
-   LumpedModel.setup_maps_from_raster
+   LumpedModel.setup_maps_from_rasterdataset
    LumpedModel.setup_maps_from_raster_reclass
 
 
@@ -339,14 +344,26 @@ Setup methods
 
    MeshModel.setup_config
    MeshModel.setup_region
-   MeshModel.setup_maps_from_raster
+   MeshModel.setup_maps_from_rasterdataset
    MeshModel.setup_maps_from_raster_reclass
-
+   MeshModel.setup_mesh_from_rasterdataset
+   MeshModel.setup_mesh_from_raster_reclass
 
 
 =========
 Workflows
 =========
+
+Grid
+====
+
+.. autosummary::
+   :toctree: _generated
+
+   workflows.grid.grid_from_constant
+   workflows.grid.grid_from_rasterdataset
+   workflows.grid.grid_from_raster_reclass
+   workflows.grid.grid_from_geodataframe
 
 
 Basin mask
@@ -464,7 +481,7 @@ High level methods
 .. autosummary::
    :toctree: _generated
    :template: autosummary/accessor_method.rst
-   
+
    DataArray.raster.from_numpy
    Dataset.raster.from_numpy
 
@@ -565,6 +582,7 @@ Transform
    :toctree: _generated
 
    DataArray.raster.rasterize
+   DataArray.raster.rasterize_geometry
    DataArray.raster.geometry_mask
    DataArray.raster.vectorize
    DataArray.raster.vector_grid
@@ -650,7 +668,7 @@ Conversion
 
 .. autosummary::
    :template: autosummary/accessor_method.rst
-   :toctree: _generated  
+   :toctree: _generated
 
    DataArray.vector.ogr_compliant
    DataArray.vector.update_geometry
@@ -734,13 +752,13 @@ Raster
    gis_utils.reggrid_area
    gis_utils.cellarea
    gis_utils.cellres
-   
+
 CRS and transform
 =================
 
 .. autosummary::
    :toctree: _generated
-   
+
    gis_utils.parse_crs
    gis_utils.utm_crs
    gis_utils.affine_to_coords
@@ -755,14 +773,14 @@ Vector
    gis_utils.nearest
    gis_utils.nearest_merge
 
-   
+
 PCRaster I/O
 ============
 
 .. autosummary::
    :toctree: _generated
 
-   gis_utils.write_map 
+   gis_utils.write_map
    gis_utils.write_clone
 
 
@@ -777,7 +795,7 @@ Statistics and performance metrics
 
 .. autosummary::
    :toctree: _generated
-   
+
    stats.skills.bias
    stats.skills.percentual_bias
    stats.skills.nashsutcliffe
@@ -801,7 +819,7 @@ Configuration files
 
 .. autosummary::
    :toctree: _generated
-   
+
    config.configread
    config.configwrite
 
@@ -810,5 +828,5 @@ Logging
 
 .. autosummary::
    :toctree: _generated
-   
+
    log.setuplog

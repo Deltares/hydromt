@@ -1,15 +1,16 @@
-"""Test for hydromt.gu submodule"""
+"""Test for hydromt.gu submodule."""
 
-import pytest
-import numpy as np
 import os
-from rasterio.transform import from_origin
-from affine import Affine
+
+import numpy as np
+import pytest
 import xarray as xr
+from affine import Affine
+from rasterio.transform import from_origin
 
 from hydromt import gis_utils as gu
-from hydromt.raster import full_from_transform, RasterDataArray
 from hydromt.io import open_raster
+from hydromt.raster import RasterDataArray, full_from_transform
 
 
 def test_crs():
@@ -50,7 +51,8 @@ def test_transform_rotation():
     shape = (10, 5)
     coords = gu.affine_to_coords(transform, shape)
     xs, ys = coords["xc"][1], coords["yc"][1]
-    assert xs.ndim == 2 and ys.ndim == 2
+    assert xs.ndim == 2
+    assert ys.ndim == 2
     da = full_from_transform(transform, shape, crs=4326)
     assert da.raster.x_dim == "x"
     assert da.raster.xcoords.ndim == 2

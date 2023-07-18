@@ -1,7 +1,12 @@
+"""Implementation of deprecation errors."""
+
+
 class DeprecatedError(Exception):
-    """Simple custom class to raise an error for something that is now deprecated"""
+
+    """Simple custom class to raise an error for something that is now deprecated."""
 
     def __init__(self, msg: str):
+        """Initialise the object."""
         self.base = "DeprecationError"
         self.message = msg
 

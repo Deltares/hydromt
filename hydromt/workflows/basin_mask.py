@@ -1,21 +1,24 @@
 # -*- coding: utf-8 -*-
-"""Scripts to derive (sub)basin geometries from pre-cooked basin index files, 
-basin maps or flow direction maps.
+"""Scripts to derive (sub)basin geometries.
+
+Based on pre-cooked basin index files, basin maps or flow direction maps.
 """
 
-from os.path import isdir, isfile
-from pathlib import Path
-import numpy as np
-import geopandas as gpd
-from shapely.geometry import box
-import xarray as xr
 import logging
 import warnings
+from os.path import isdir, isfile
+from pathlib import Path
+
+import geopandas as gpd
+import numpy as np
+import xarray as xr
+from shapely.geometry import box
+
+from ..data_adapter import GeoDataFrameAdapter
+from ..flw import basin_map, flwdir_from_da, outlet_map, stream_map
 
 # local
 from ..io import open_raster
-from ..flw import flwdir_from_da, basin_map, stream_map, outlet_map
-from ..data_adapter import GeoDataFrameAdapter
 from ..models import MODELS
 
 logger = logging.getLogger(__name__)
@@ -24,7 +27,7 @@ __all__ = ["get_basin_geometry", "parse_region"]
 
 
 def parse_region(region, logger=logger):
-    """Checks and returns parsed region arguments.
+    """Check and return parsed region arguments.
 
     Parameters
     ----------
@@ -45,11 +48,13 @@ def parse_region(region, logger=logger):
 
         * {'grid': /path/to/raster}
 
-        Entire basin can be defined based on an ID, one or multiple point location (x, y),
-        or a region of interest (bounding box or geometry) for which the basin IDs are
-        looked up. The basins withint the area of interest can be further filtered to
-        only include basins with their outlet within the area of interest ('outlets': true)
-        of stream threshold arguments (e.g.: 'uparea': 1000). Common use-cases include:
+        Entire basin can be defined based on an ID, one or multiple point location
+        (x, y), or a region of interest (bounding box or geometry) for which the
+        basin IDs are looked up. The basins withint the area of interest can be further
+        filtered to only include basins with their outlet within the area of interest
+        ('outlets': true) of stream threshold arguments (e.g.: 'uparea': 1000).
+
+        Common use-cases include:
 
         * {'basin': ID}
 
@@ -70,7 +75,8 @@ def parse_region(region, logger=logger):
         Subbasins are defined by its outlet locations and include all area upstream
         from these points. The outlet locations can be passed as xy coordinate pairs,
         but also derived from the most downstream cell(s) within a area of interest
-        defined by a bounding box or geometry, optionally refined by stream threshold arguments.
+        defined by a bounding box or geometry, optionally refined by stream threshold
+        arguments.
 
         The method can be speed up by providing an additional ``bounds`` argument which
         should contain all upstream cell. If cells upstream of the subbasin are not
@@ -78,7 +84,10 @@ def parse_region(region, logger=logger):
 
         * {'subbasin': [x, y], '<variable>': threshold}
 
-        * {'subbasin': [[x1, x2, ..], [y1, y2, ..]], '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]}
+        * {
+            'subbasin': [[x1, x2, ..], [y1, y2, ..]],
+            '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
+            }
 
         * {'subbasin': /path/to/point_geometry, '<variable>': threshold}
 
@@ -86,14 +95,16 @@ def parse_region(region, logger=logger):
 
         * {'subbasin': /path/to/polygon_geometry, '<variable>': threshold}
 
-        Interbasins are similar to subbasins but are bounded by a bounding box or geometry
-        and do not include all upstream area. Common use-cases include:
+        Interbasins are similar to subbasins but are bounded by a bounding box or
+        geometry and do not include all upstream area. Common use-cases include:
 
         * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
 
         * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
 
         * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
+    logger:
+        The logger to use.
 
     Returns
     -------
@@ -162,11 +173,11 @@ def _parse_region_value(value):
         kwarg = dict(xy=value)
     elif isinstance(value, int):  # single int
         kwarg = dict(basid=value)
-    elif isinstance(value, str) and isfile(value):
+    elif isinstance(value, (str, Path)) and isfile(value):
         kwarg = dict(geom=gpd.read_file(value))
     elif isinstance(value, gpd.GeoDataFrame):  # geometry
         kwarg = dict(geom=value)
-    elif isinstance(value, str) and isdir(value):
+    elif isinstance(value, (str, Path)) and isdir(value):
         kwarg = dict(root=value)
     if "geom" in kwarg and np.all(kwarg["geom"].geometry.type == "Point"):
         xy = (
@@ -205,7 +216,7 @@ def get_basin_geometry(
     buffer=10,
     **stream_kwargs,
 ):
-    """Returns a geometry of the (sub)(inter)basin(s).
+    """Return a geometry of the (sub)(inter)basin(s).
 
     This method derives a geometry of sub-, inter- or full basin based on an input
     dataset with flow-direction and optional basins ID raster data in combination
@@ -244,6 +255,10 @@ def get_basin_geometry(
         name of flow direction type, by default None; use input ftype.
     stream_kwargs : key-word arguments
         name of variable in ds and threshold value
+    buffer:
+        The buffer to apply.
+    logger:
+        The logger to use.
 
     Returns
     -------
@@ -322,7 +337,8 @@ def get_basin_geometry(
             if gdf_bas is not None:
                 gdf_bas = None
                 logger.warning(
-                    "Basin geometries ignored as no corresponding basin map is provided."
+                    "Basin geometries ignored as no corresponding"
+                    + " basin map is provided."
                 )
             _check_size(ds, logger)
             logger.info(f'basin map "{basins_name}" missing, calculating on the fly.')
@@ -340,7 +356,7 @@ def get_basin_geometry(
             ds_clip = ds[dvars].raster.clip_geom(geom, buffer=buffer, mask=True)
         # get basin IDs
         if xy is not None:
-            logger.debug(f"Getting basin IDs at point locations.")
+            logger.debug("Getting basin IDs at point locations.")
             sel = {
                 ds.raster.x_dim: xr.IndexVariable("xy", np.atleast_1d(xy[0])),
                 ds.raster.y_dim: xr.IndexVariable("xy", np.atleast_1d(xy[1])),
@@ -357,12 +373,12 @@ def get_basin_geometry(
                     else:
                         stream = outmap
                 ds_clip[basins_name] = ds_clip[basins_name].where(stream, 0)
-            logger.debug(f"Getting IDs of intersecting basins.")
+            logger.debug("Getting IDs of intersecting basins.")
             basid = np.unique(ds_clip[basins_name].values)
         basid = np.atleast_1d(basid)
         basid = basid[basid > 0]
         if basid.size == 0:
-            raise ValueError(f"No basins found with given criteria.")
+            raise ValueError("No basins found with given criteria.")
         # clip ds to total basin
         if gdf_bas is not None:
             gdf_match = np.isin(gdf_bas["basid"], basid)
@@ -370,7 +386,8 @@ def get_basin_geometry(
             if gdf_bas.index.size > 0:
                 if geom is not None:
                     xminbas, yminbas, xmaxbas, ymaxbas = gdf_bas.total_bounds
-                    # Check that total_bounds is at least bigger than original geom bounds
+                    # Check that total_bounds is at least bigger
+                    # than original geom bounds
                     xmingeom, ymingeom, xmaxgeom, ymaxgeom = geom.total_bounds
                     total_bounds = [
                         min(xminbas, xmingeom),
@@ -406,14 +423,17 @@ def get_basin_geometry(
         # get area of interest (aoi) mask
         if geom is not None:
             aoi = ds.raster.geometry_mask(geom)
-            # stream = stream.where(aoi, False)
         else:
             aoi = xr.DataArray(
                 coords=ds.raster.coords,
                 dims=ds.raster.dims,
                 data=np.full(ds.raster.shape, True, dtype=bool),
             )  # all True
-        # get stream mask (always over entire domain to include cells downstream of aoi!)
+        # Convert xy to tuple
+        if xy is not None:
+            xy = (np.atleast_1d(xy[0]), np.atleast_1d(xy[1]))
+        # get stream mask. Always over entire domain
+        # to include cells downstream of aoi!
         kwargs = dict()
         if stream_kwargs:
             stream = stream_map(ds, **stream_kwargs)
@@ -429,7 +449,7 @@ def get_basin_geometry(
                 outmap = outmap.where(stream_kwargs, False)
             idxs_out = np.where(outmap.values.ravel())[0]
             if not np.any(outmap):
-                raise ValueError(f"No outlets found with with given criteria.")
+                raise ValueError("No outlets found with with given criteria.")
             xy = outmap.raster.idx_to_xy(idxs_out)
         # get subbasin map
         bas_mask, xy_out = basin_map(ds, flwdir, xy, **kwargs)

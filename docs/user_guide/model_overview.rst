@@ -6,18 +6,18 @@ Overview models
 High level functionality
 ------------------------
 
-HydroMT has the following high-level functionality for setting up models from raw data or adjusting models: 
+HydroMT has the following high-level functionality for setting up models from raw data or adjusting models:
 
 * :ref:`building a model <model_build>`: building a model from scratch.
 * :ref:`updating a model <model_update>`: adding or changing model components of an existing model.
 * :ref:`clipping a model <model_clip>`: changing the spatial domain of an existing model (e.g. select subbasins from a larger model).
 
-The building and clipping methods required the user to provide a :ref:`region <region>` of interest. HydroMT provides 
+The building and clipping methods required the user to provide a :ref:`region <region>` of interest. HydroMT provides
 several options to define a region based on a geospatial or hydrographic region.
 
-The exact process of building or updating a model can be configured in a single configuration :ref:`.ini file <model_config>`.
-This file describes the full pipeline of model methods and their arguments. The methods vary for the 
-different model classes and :ref:`plugins`, as documented in this documentation or for each plugin documentation websites.
+The exact process of building or updating a model can be configured in a single configuration :ref:`.yaml file <model_config>`.
+This file describes the full pipeline of model methods and their arguments. The methods vary for the
+different model classes and :ref:`plugins`, as documented in this documentation or for each plugin documentation website.
 
 .. _model_interface:
 
@@ -26,20 +26,20 @@ Model API
 
 .. currentmodule:: hydromt
 
-HydroMT defines any model through the model-agnostic Model API based on several *general* components and *computational* unit components. 
+HydroMT defines any model through the model-agnostic Model API based on several *general* components and *computational* unit components.
 Each component represents a specific model data type and is parsed to a specific Python data object.
-The general components are **maps** (raster data), **geoms** (vector data), **forcing**, **results**, **states**, and **config** (the model simulation configuration). These are available to all model classes and plugins. 
+The general components are **maps** (raster data), **geoms** (vector data), **forcing**, **results**, **states**, and **config** (the model simulation configuration). These are available to all model classes and plugins.
 
 The computational components are different for different types of models: i.e. **grid** for distributed or grid models, **response_units** for lumped or semi-distributed models, **mesh** for mesh or unstructured grid models, and **network** for network models (to be developed).
 
-By default, the model components are returned and read from standard formats, as documented in the :ref:`API reference <api_reference>`. 
+By default, the model components are returned and read from standard formats, as documented in the :ref:`API reference <api_reference>`.
 While a generalized model class can readily be used, it can also be tailored to specific model software through so-called :ref:`plugins`. These plugins have the same model components (i.e. Model API), but with model-specific file readers and writers and workflows.
 
 .. NOTE::
 
   As of version 0.6.0, the grid model (distributed grid model), lumped model (semi-distributed and lumped models), mesh model (unstructured grid models) have been implemented. Other model classes such as network models will follow in future versions.
 
-The table below lists the base model components common to all model classes. 
+The table below lists the base model components common to all model classes.
 All base model attributes and methods can be found the :ref:`API reference <model_api>`
 
 .. list-table::
@@ -99,13 +99,13 @@ For each generalized model class, the respective computational unit components e
    * - grid
      - :ref:`GridModel <grid_model_api>`
      - Static gridded data with on unified grid
-     - | :py:attr:`~GridModel.grid` 
+     - | :py:attr:`~GridModel.grid`
        | :py:func:`~GridModel.set_grid`
        | :py:func:`~GridModel.read_grid`
        | :py:func:`~GridModel.write_grid`
    * - response_units
      - :ref:`LumpedModel <lumped_model_api>`
-     - Static lumped data over the response_units  
+     - Static lumped data over the response_units
      - | :py:attr:`~LumpedModel.response_units`
        | :py:func:`~LumpedModel.set_response_units`
        | :py:func:`~LumpedModel.read_response_units`
@@ -113,15 +113,15 @@ For each generalized model class, the respective computational unit components e
    * - mesh
      - :ref:`MeshModel <mesh_model_api>`
      - Static mesh (unstructured grid) data
-     - | :py:attr:`~MeshModel.mesh` 
+     - | :py:attr:`~MeshModel.mesh`
        | :py:func:`~MeshModel.set_mesh`
        | :py:func:`~MeshModel.read_mesh`
        | :py:func:`~MeshModel.write_mesh`
-       
+
 
 
 .. NOTE::
 
-    Prior to v0.6.0, the *staticmaps* and *staticgeoms* components were available. 
-    *staticmaps* is replaced with *grid* in GridModel, 
+    Prior to v0.6.0, the *staticmaps* and *staticgeoms* components were available.
+    *staticmaps* is replaced with *grid* in GridModel,
     whereas *staticgeoms* is renamed to *geoms* for consistency but still available in the Model class.

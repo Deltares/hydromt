@@ -1,16 +1,16 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
-import pytest
-from os.path import join, abspath, dirname
-import pandas as pd
+from os.path import abspath, dirname, join
+from pathlib import Path
+
 import geopandas as gpd
+import pandas as pd
+import pytest
 import xarray as xr
-from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter, DataFrameAdapter
-from hydromt.data_catalog import (
-    DataCatalog,
-    _parse_data_dict,
-)
+
+from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
+from hydromt.data_catalog import DataCatalog, _parse_data_dict
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 
@@ -28,6 +28,10 @@ def test_parser():
     dd_out = _parse_data_dict(dd, root=root)
     assert isinstance(dd_out["test"], RasterDatasetAdapter)
     assert dd_out["test"].path == abspath(dd["test"]["path"])
+    # test with Path object
+    dd["test"].update(path=Path(dd["test"]["path"]))
+    dd_out = _parse_data_dict(dd, root=root)
+    assert dd_out["test"].path == abspath(dd["test"]["path"])
     # rel path
     dd = {
         "test": {
@@ -40,7 +44,7 @@ def test_parser():
     dd_out = _parse_data_dict(dd)
     assert dd_out["test"].path == abspath(join(root, dd["test"]["path"]))
     # check if path in kwargs is also absolute
-    assert dd_out["test"].kwargs["fn"] == abspath(join(root, "test"))
+    assert dd_out["test"].driver_kwargs["fn"] == abspath(join(root, "test"))
     # alias
     dd = {
         "test": {
@@ -63,6 +67,7 @@ def test_parser():
     assert len(dd_out) == 6
     assert dd_out["test_a_1"].path == abspath(join(root, "data_1.tif"))
     assert "placeholders" not in dd_out["test_a_1"].to_dict()
+
     # errors
     with pytest.raises(ValueError, match="Missing required path argument"):
         _parse_data_dict({"test": {}})
@@ -102,7 +107,6 @@ def test_data_catalog(tmpdir):
     # add source from dict
     data_dict = {keys[0]: source.to_dict()}
     data_catalog.from_dict(data_dict)
-    # printers
     assert isinstance(data_catalog.__repr__(), str)
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
@@ -115,8 +119,13 @@ def test_data_catalog(tmpdir):
     assert len(data_catalog._sources) == 0
     data_catalog.from_artifacts("deltares_data")
     assert len(data_catalog._sources) > 0
-    with pytest.raises(IOError):
+    with pytest.raises(IOError, match="URL b'404: Not Found'"):
         data_catalog = DataCatalog(deltares_data="unknown_version")
+
+    # test hydromt version in meta data
+    fn_yml = join(tmpdir, "test.yml")
+    data_catalog = DataCatalog()
+    data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
 
 
 def test_from_archive(tmpdir):
@@ -158,9 +167,9 @@ def test_export_global_datasets(tmpdir):
     }
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
     time_tuple = ("2010-02-10", "2010-02-15")
-    data_catalog = DataCatalog()  # read artifacts by default
+    data_catalog = DataCatalog("artifact_data")  # read artifacts
     source_names = [
-        "era5",
+        "era5[precip,temp]",
         "grwl_mask",
         "modis_lai",
         "osm_coastlines",
@@ -175,12 +184,20 @@ def test_export_global_datasets(tmpdir):
         source_names=source_names,
         meta={"version": 1},
     )
+    # test append and overwrite source
+    data_catalog.export_data(
+        tmpdir,
+        bbox=bbox,
+        source_names=["corine"],
+        append=True,
+        meta={"version": 2},
+    )
     data_lib_fn = join(tmpdir, "data_catalog.yml")
     # check if meta is written
     with open(data_lib_fn, "r") as f:
         yml_list = f.readlines()
     assert yml_list[0].strip() == "meta:"
-    assert yml_list[1].strip() == "version: 1"
+    assert yml_list[1].strip() == "version: 2"
     assert yml_list[2].strip().startswith("root:")
     # check if data is parsed correctly
     data_catalog1 = DataCatalog(data_lib_fn)
@@ -237,3 +254,69 @@ def test_export_dataframe(tmpdir, df, df_time):
         dtypes = pd.DataFrame
         obj = source.get_data()
         assert isinstance(obj, dtypes), key
+
+
+def test_get_data(df):
+    data_catalog = DataCatalog("artifact_data")  # read artifacts
+
+    # raster dataset using three different ways
+    da = data_catalog.get_rasterdataset(data_catalog["koppen_geiger"].path)
+    assert isinstance(da, xr.DataArray)
+    da = data_catalog.get_rasterdataset("koppen_geiger")
+    assert isinstance(da, xr.DataArray)
+    da = data_catalog.get_rasterdataset(da)
+    assert isinstance(da, xr.DataArray)
+    with pytest.raises(ValueError, match='Unknown raster data type "list"'):
+        data_catalog.get_rasterdataset([])
+
+    # vector dataset using three different ways
+    gdf = data_catalog.get_geodataframe(data_catalog["osm_coastlines"].path)
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    gdf = data_catalog.get_geodataframe("osm_coastlines")
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    gdf = data_catalog.get_geodataframe(gdf)
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    with pytest.raises(ValueError, match='Unknown vector data type "list"'):
+        data_catalog.get_geodataframe([])
+
+    # geodataset using three different ways
+    da = data_catalog.get_geodataset(data_catalog["gtsmv3_eu_era5"].path)
+    assert isinstance(da, xr.DataArray)
+    da = data_catalog.get_geodataset("gtsmv3_eu_era5")
+    assert isinstance(da, xr.DataArray)
+    da = data_catalog.get_geodataset(da)
+    assert isinstance(da, xr.DataArray)
+    with pytest.raises(ValueError, match='Unknown geo data type "list"'):
+        data_catalog.get_geodataset([])
+
+    # dataframe using single way
+    df = data_catalog.get_dataframe(df)
+    assert isinstance(df, pd.DataFrame)
+    with pytest.raises(ValueError, match='Unknown tabular data type "list"'):
+        data_catalog.get_dataframe([])
+
+
+def test_deprecation_warnings(artifact_data):
+    with pytest.deprecated_call():
+        # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
+        DataCatalog(artifact_data="v0.0.6")
+    with pytest.deprecated_call():
+        cat = DataCatalog()
+        # should be cat.from_predefined_catalogs('artifact_data', 'v0.0.6')
+        cat.from_artifacts("artifact_data", version="v0.0.6")
+    with pytest.deprecated_call():
+        fn = artifact_data["chelsa"].path
+        # should be driver_kwargs=dict(chunks={'x': 100, 'y': 100})
+        artifact_data.get_rasterdataset(fn, chunks={"x": 100, "y": 100})
+    with pytest.deprecated_call():
+        fn = artifact_data["gadm_level1"].path
+        # should be driver_kwargs=dict(assert_gtype='Polygon')
+        artifact_data.get_geodataframe(fn, assert_gtype="MultiPolygon")
+    with pytest.deprecated_call():
+        fn = artifact_data["grdc"].path
+        # should be driver_kwargs=dict(index_col=0)
+        artifact_data.get_dataframe(fn, index_col=0)
+    with pytest.deprecated_call():
+        fn = artifact_data["gtsmv3_eu_era5"].path
+        # should be driver_kwargs=dict(chunks={'time': 100})
+        artifact_data.get_geodataset(fn, chunks={"time": 100})

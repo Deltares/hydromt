@@ -1,31 +1,33 @@
-# -*- coding: utf-8 -*-
+"""Implementation for the RasterDatasetAdapter."""
+import logging
 import os
+import warnings
+from os import PathLike
 from os.path import join
-from fsspec.implementations import local
+from typing import NewType, Union
+
 import numpy as np
 import pandas as pd
+import pyproj
+import rasterio
 import xarray as xr
-import geopandas as gpd
-from shapely.geometry import box
-import warnings
-import logging
-from typing import Union, NewType
-from pathlib import Path
 
 from .. import gis_utils, io
-from .data_adapter import DataAdapter, PREPROCESSORS
-from .caching import cache_vrt_tiles
 from ..raster import GEO_MAP_COORD
-
+from .caching import cache_vrt_tiles
+from .data_adapter import PREPROCESSORS, DataAdapter
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
 
-RasterDatasetSource = NewType("RasterDatasetSource", Union[str, Path])
+RasterDatasetSource = NewType("RasterDatasetSource", Union[str, PathLike])
 
 
 class RasterDatasetAdapter(DataAdapter):
+
+    """Implementation for the RasterDatasetAdapter."""
+
     _DEFAULT_DRIVER = "raster"
     _DRIVERS = {
         "nc": "netcdf",
@@ -34,41 +36,48 @@ class RasterDatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path,
-        driver=None,
-        filesystem="local",
-        crs=None,
-        nodata=None,
-        rename={},
-        unit_mult={},
-        unit_add={},
-        units={},
-        meta={},
+        path: str,
+        driver: str = None,
+        filesystem: str = "local",
+        crs: Union[int, str, dict] = None,
+        nodata: Union[dict, float, int] = None,
+        rename: dict = {},
+        unit_mult: dict = {},
+        unit_add: dict = {},
+        meta: dict = {},
+        attrs: dict = {},
+        driver_kwargs: dict = {},
+        zoom_levels: dict = {},
+        name: str = "",  # optional for now
+        catalog_name: str = "",  # optional for now
         **kwargs,
     ):
-        """Initiates data adapter for geospatial raster data.
+        """Initiate data adapter for geospatial raster data.
 
         This object contains all properties required to read supported raster files into
-        a single unified RasterDataset, i.e. :py:class:`xarray.Dataset` with geospatial attributes.
-        In addition it keeps meta data to be able to reproduce which data is used.
+        a single unified RasterDataset, i.e. :py:class:`xarray.Dataset` with geospatial
+        attributes. In addition it keeps meta data to be able to reproduce
+        which data is used.
 
         Parameters
         ----------
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
-            contain {variable}, {year}, {month} placeholders as well as path search pattern
-            using a '*' wildcard.
+            contain {variable}, {year}, {month} placeholders as well as path
+            search pattern using a '*' wildcard.
         driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
-            Driver to read files with, for 'raster' :py:func:`~hydromt.io.open_mfraster`,
-            for 'netcdf' :py:func:`xarray.open_mfdataset`, and for 'zarr' :py:func:`xarray.open_zarr`
+            Driver to read files with,
+            for 'raster' :py:func:`~hydromt.io.open_mfraster`,
+            for 'netcdf' :py:func:`xarray.open_mfdataset`,
+            and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
         filesystem: {'local', 'gcs', 's3'}, optional
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
         crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
-            or wkt (str). Only used if the data has no native CRS.
+            Coordinate Reference System. Accepts EPSG codes (int or str);
+            proj (str or dict) or wkt (str). Only used if the data has no native CRS.
         nodata: float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Nodata values can be differentiated between variables using a dictionary.
@@ -76,28 +85,51 @@ class RasterDatasetAdapter(DataAdapter):
             Mapping of native data source variable to output source variable name as
             required by hydroMT.
         unit_mult, unit_add: dict, optional
-            Scaling multiplication and addition to change to map from the native data unit
-            to the output data unit as required by hydroMT.
+            Scaling multiplication and addition to change to map from the native
+            data unit to the output data unit as required by hydroMT.
         meta: dict, optional
-            Metadata information of dataset, preferably containing the following keys:
-            {'source_version', 'source_url', 'source_license', 'paper_ref', 'paper_doi', 'category'}
-        **kwargs
+            Metadata information of dataset, prefably containing the following keys:
+            {'source_version', 'source_url', 'source_license',
+            'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
+        driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
+        zoomlevels: dict, optional
+            Dictionary with zoom levels and associated resolution in the unit of the
+            data CRS.
+
         """
+        if kwargs:
+            warnings.warn(
+                "Passing additional keyword arguments to be used by the "
+                "RasterDatasetAdapter driver is deprecated and will be removed "
+                "in a future version. Please use 'driver_kwargs' instead.",
+                DeprecationWarning,
+            )
+            driver_kwargs.update(kwargs)
         super().__init__(
             path=path,
             driver=driver,
             filesystem=filesystem,
-            crs=crs,
             nodata=nodata,
             rename=rename,
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
-            **kwargs,
+            attrs=attrs,
+            driver_kwargs=driver_kwargs,
+            name=name,
+            catalog_name=catalog_name,
         )
-        # TODO: see if the units argument can be solved with unit_mult/unit_add
-        self.units = units
+        self.crs = crs
+        self.zoom_levels = zoom_levels
 
     def to_file(
         self,
@@ -124,39 +156,55 @@ class RasterDatasetAdapter(DataAdapter):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         driver : str, optional
-            Driver to write file, e.g.: 'netcdf', 'zarr' or any gdal data type, by default None
+            Driver to write file, e.g.: 'netcdf', 'zarr' or any gdal data type,
+            by default None
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
+        logger : logger object, optional
+            The logger object used for logging messages. If not provided, the default
+            logger will be used.
+        **kwargs
+            Additional keyword arguments that are passed to the `to_netcdf`
+            function.
 
         Returns
         -------
         fn_out: str
             Absolute path to output file
         driver: str
-            Name of driver to read data with, see :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+            Name of driver to read data with, see
+            :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
-
         try:
             obj = self.get_data(
-                bbox=bbox, time_tuple=time_tuple, variables=variables, logger=logger
+                bbox=bbox,
+                time_tuple=time_tuple,
+                variables=variables,
+                logger=logger,
+                single_var_as_array=variables is None,
             )
         except IndexError as err:  # out of bounds
             logger.warning(str(err))
             return None, None
 
         if driver is None:
-            driver = self.driver
-            if driver in ["raster_tindex", "raster"]:
-                # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
-                driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
+            # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
+            driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
         # write using various writers
         if driver in ["netcdf"]:  # TODO complete list
-            fn_out = join(data_root, f"{data_name}.nc")
-            if "encoding" not in kwargs:
-                dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
-                kwargs.update(encoding={k: {"zlib": True} for k in dvars})
-            obj.to_netcdf(fn_out, **kwargs)
+            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
+            if variables is None:
+                encoding = {k: {"zlib": True} for k in dvars}
+                fn_out = join(data_root, f"{data_name}.nc")
+                obj.to_netcdf(fn_out, encoding=encoding, **kwargs)
+            else:  # save per variable
+                if not os.path.isdir(join(data_root, data_name)):
+                    os.makedirs(join(data_root, data_name))
+                for var in dvars:
+                    fn_out = join(data_root, data_name, f"{var}.nc")
+                    obj[var].to_netcdf(fn_out, encoding={var: {"zlib": True}}, **kwargs)
+                fn_out = join(data_root, data_name, "{variable}.nc")
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
             obj.to_zarr(fn_out, **kwargs)
@@ -191,26 +239,25 @@ class RasterDatasetAdapter(DataAdapter):
         cache_root=None,
         logger=logger,
     ):
-        """Returns a clipped, sliced and unified RasterDataset based on the properties
-        of this RasterDatasetAdapter.
+        """Return a clipped, sliced and unified RasterDataset.
 
-        For a detailed description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+        For a detailed description see:
+        :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
         # If variable is string, convert to list
         if variables:
             variables = np.atleast_1d(variables).tolist()
 
         # Extract storage_options from kwargs to instantiate fsspec object correctly
-        if "storage_options" in self.kwargs:
-            so_kwargs = self.kwargs["storage_options"]
-            # For s3, anonymous connection still requires --no-sign-request profile to read the data
-            # setting environment variable works
+        so_kwargs = dict()
+        if "storage_options" in self.driver_kwargs:
+            so_kwargs = self.driver_kwargs["storage_options"]
+            # For s3, anonymous connection still requires --no-sign-request profile to
+            # read the data setting environment variable works
             if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        else:
-            so_kwargs = dict()
 
         # resolve path based on time, zoom level and/or variables
         fns = self.resolve_paths(
@@ -223,8 +270,9 @@ class RasterDatasetAdapter(DataAdapter):
             **so_kwargs,
         )
 
-        kwargs = self.kwargs.copy()
-        # zarr can use storage options directly, the rest should be converted to file-like objects
+        kwargs = self.driver_kwargs.copy()
+        # zarr can use storage options directly, the rest should be converted to
+        # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":
             storage_options = kwargs.pop("storage_options")
             fs = self.get_filesystem(**storage_options)
@@ -263,7 +311,8 @@ class RasterDatasetAdapter(DataAdapter):
                 )
             else:
                 raise NotImplementedError(
-                    "Remote (cloud) RasterDataset not supported with driver raster_tindex."
+                    "Remote (cloud) RasterDataset not supported "
+                    "with driver raster_tindex."
                 )
         elif self.driver == "raster":  # rasterio files
             if cache_root is not None and all([str(fn).endswith(".vrt") for fn in fns]):
@@ -283,17 +332,13 @@ class RasterDatasetAdapter(DataAdapter):
         if GEO_MAP_COORD in ds_out.data_vars:
             ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
-        # transpose dims to get y and x dim last
-        x_dim = ds_out.raster.x_dim
-        y_dim = ds_out.raster.y_dim
-        ds_out = ds_out.transpose(..., y_dim, x_dim)
-
         # rename and select vars
         if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
             rm = {ds_out.raster.vars[0]: variables[0]}
-            if rm.keys() != rm.values():
+            if set(rm.keys()) != set(rm.values()):
                 warnings.warn(
-                    f"Automatic renaming of single var array will be deprecated, rename {rm} in the data catalog instead.",
+                    "Automatic renaming of single var array will be deprecated, rename"
+                    f" {rm} in the data catalog instead.",
                     DeprecationWarning,
                 )
         else:
@@ -303,6 +348,11 @@ class RasterDatasetAdapter(DataAdapter):
             if np.any([var not in ds_out.data_vars for var in variables]):
                 raise ValueError(f"RasterDataset: Not all variables found: {variables}")
             ds_out = ds_out[variables]
+
+        # transpose dims to get y and x dim last
+        x_dim = ds_out.raster.x_dim
+        y_dim = ds_out.raster.y_dim
+        ds_out = ds_out.transpose(..., y_dim, x_dim)
 
         # clip tslice
         if (
@@ -318,10 +368,10 @@ class RasterDatasetAdapter(DataAdapter):
                 logger.debug(f"RasterDataset: Slicing time dim {time_tuple}")
                 ds_out = ds_out.sel({"time": slice(*time_tuple)})
             if ds_out.time.size == 0:
-                raise IndexError(f"RasterDataset: Time slice out of range.")
+                raise IndexError("RasterDataset: Time slice out of range.")
 
         # set crs
-        if ds_out.raster.crs is None and self.crs != None:
+        if ds_out.raster.crs is None and self.crs is not None:
             ds_out.raster.set_crs(self.crs)
         elif ds_out.raster.crs is None:
             raise ValueError(
@@ -329,30 +379,29 @@ class RasterDatasetAdapter(DataAdapter):
             )
 
         # clip
-        epsg = ds_out.raster.crs.to_epsg()
+        # make sure bbox is in data crs
+        crs = ds_out.raster.crs
+        epsg = crs.to_epsg()  # this could return None
         if geom is not None:
-            bbox = geom.to_crs(4326).total_bounds
-        if epsg != 4326 and bbox is not None and geom is None:
-            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-        elif epsg == 4326:
-            w, e = np.asarray(ds_out.raster.bounds)[[0, 2]]
+            bbox = geom.to_crs(crs).total_bounds
+        elif epsg != 4326 and bbox is not None:
+            crs4326 = pyproj.CRS.from_epsg(4326)
+            bbox = rasterio.warp.transform_bounds(crs4326, crs, *bbox)
+        # work with 4326 data that is defined at 0-360 degrees longtitude
+        if epsg == 4326:
+            e = ds_out.raster.bounds[2]
             if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
                 x_dim = ds_out.raster.x_dim
                 ds_out = gis_utils.meridian_offset(ds_out, x_dim, bbox).sortby(x_dim)
+        # clip with bbox
         if bbox is not None:
-            err = f"RasterDataset: No data within spatial domain for {self.path}."
-            try:
-                bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-                if geom is not None:
-                    logger.debug(f"RasterDataset: Clip with geom - [{bbox_str}]")
-                    ds_out = ds_out.raster.clip_geom(geom, buffer=buffer, align=align)
-                elif bbox is not None:
-                    logger.debug(f"RasterDataset: Clip with bbox - [{bbox_str}]")
-                    ds_out = ds_out.raster.clip_bbox(bbox, buffer=buffer, align=align)
-            except IndexError:
-                raise IndexError(err)
-            if ds_out.raster.xcoords.size == 0 or ds_out.raster.ycoords.size == 0:
-                raise IndexError(err)
+            bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
+            logger.debug(f"RasterDataset: Clip with bbox - [{bbox_str}] (epsg:{epsg}))")
+            ds_out = ds_out.raster.clip_bbox(bbox, buffer=buffer, align=align)
+            if np.any(np.array(ds_out.raster.shape) < 2):
+                raise IndexError(
+                    f"RasterDataset: No data within spatial domain for {self.path}."
+                )
 
         # set nodata value
         if self.nodata is not None:
@@ -386,9 +435,8 @@ class RasterDatasetAdapter(DataAdapter):
             ds_out[name].raster.set_nodata(nodata)  # reset nodata in case of change
 
         # unit attributes
-        # TODO: can we solve this with unit conversion or otherwise generalize meta
-        for k in self.units:
-            ds_out[k].attrs.update(units=self.units[k])
+        for k in self.attrs:
+            ds_out[k].attrs.update(self.attrs[k])
 
         # return data array if single var
         if single_var_as_array and len(ds_out.raster.vars) == 1:

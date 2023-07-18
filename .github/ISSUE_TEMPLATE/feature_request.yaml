@@ -1,0 +1,35 @@
+---
+name: Feature Request
+description: Suggest an idea/enhancement for HydroMT
+labels: [Enhancement, Needs refinement]
+
+body:
+  - type: dropdown
+    id: checks
+    attributes:
+      description: What kind of feature request is this?
+      label: Kind of request
+      options:
+        - Adding new functionality
+        - Changing existing functionality
+        - Removing existing functionality
+  - type: textarea
+    id: description
+    attributes:
+      description: >
+        Please provide a clear and concise description of the feature you're requesting
+      label: Enhancement Description
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      description: >
+        Please describe a situation in which this feature would be useful to you, with code or cli examples if possible
+      label: Use case
+  - type: textarea
+    id: context
+    attributes:
+      description: >
+        Please add any other context about the enhancement here
+      label: Additional Context

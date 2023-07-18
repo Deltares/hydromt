@@ -8,7 +8,7 @@ Statistical methods
 Skill statistics
 ----------------
 
-HydroMT provides different functions to apply :ref:`model skill statistics <Statistics>` to compare model results with observations. 
+HydroMT provides different functions to apply :ref:`model skill statistics <Statistics>` to compare model results with observations.
 The following statistics are available:
 
 - Absolute and percentual bias
@@ -31,7 +31,7 @@ applied directly across all observation locations in your model.
     # read model results
     # NOTE: the name of the results depends on the wflow run configuration (toml file)
     mod = WflowModel(root=r'/path/to/wflow_model/root', mode='r')
-    sim = mod.results['Q_gauges_grdc']  
+    sim = mod.results['Q_gauges_grdc']
     # read observations
     obs = xr.open_dataset(r'/path/to/grdc_obs.nc')
     # calculate skill statistic
