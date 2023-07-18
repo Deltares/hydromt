@@ -25,16 +25,6 @@ jobs:
       - name: generate env
         run: |
           pip install tomli flit twine
-      #     python make_env.py full -o environment.yml -p 3.9 -n hydromt
-
-      # - uses: conda-incubator/setup-miniconda@v2
-      #   with:
-      #     miniforge-variant: Mambaforge
-      #     channels: conda-forge
-      #     channel-priority: strict
-      #     environment-file: environment.yml
-      #     activate-environment: hydromt
-
 
       - name: Build artifacts
         run: make pypi
