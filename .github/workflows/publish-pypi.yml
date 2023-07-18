@@ -11,7 +11,6 @@ on:
 
 jobs:
   build-artifacts:
-    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +20,11 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: 3.8
+          python-version: 3.9
+
+      - name: generate env
+        run: |
+          pip install tomli flit twine
 
       - name: Build artifacts
         run: make pypi
@@ -32,7 +35,6 @@ jobs:
           path: dist
 
   test-built-dist:
-    timeout-minutes: 10
     needs: build-artifacts
     runs-on: ubuntu-latest
     defaults:
@@ -58,7 +60,7 @@ jobs:
         with:
           python-version: '3.9'
           mamba-version: '*'
-          channels: conda-forge,defaults
+          channels: conda-forge
           channel-priority: true
           environment-file: environment.yml
           activate-environment: hydromt
@@ -94,7 +96,6 @@ jobs:
           skip_existing: true
 
   upload-to-pypi:
-    timeout-minutes: 10
     needs: test-built-dist
     if: ${{ github.event_name == 'release' && !github.event.act  }}
     runs-on: ubuntu-latest
