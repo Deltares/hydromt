@@ -101,7 +101,7 @@ Source = "https://github.com/Deltares/hydromt"
 hydromt = "hydromt.cli.main:main"
 
 [tool.pyproject2conda]
-channels = ["conda-forge", "defaults"]
+channels = ["conda-forge"]
 deps_not_in_conda  = [
     "sphinx_autosummary_accessors",
     "sphinx_design",
