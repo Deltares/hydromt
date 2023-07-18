@@ -56,10 +56,10 @@ with open("pyproject.toml", "rb") as f:
 deps = toml["project"]["dependencies"]
 opt_deps = toml["project"]["optional-dependencies"]
 project_name = toml["project"]["name"]
-# specific pyproject2conda settings
-kwargs = toml["tool"].get("pyproject2conda", {})
-deps_not_in_conda = kwargs.get("deps_not_in_conda", [])
-channels = kwargs.get("channels", ["defaults"])
+# specific conda_install settings
+install_config = toml["tool"].get("conda_install", {})
+deps_not_in_conda = install_config.get("deps_not_in_conda", [])
+channels = install_config.get("channels", ["conda-forge"])
 if args.channels is not None:
     channels.extend(args.channels.split(","))
 
