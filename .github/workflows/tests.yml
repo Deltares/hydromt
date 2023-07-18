@@ -8,12 +8,14 @@ on:
       - tests/*
       - hydromt/*
       - data/*
+      - pyproject.toml
   pull_request:
     branches: [main]
     paths:
       - tests/*
       - hydromt/*
       - data/*
+      - pyproject.toml
 
 jobs:
   Test-matrix:

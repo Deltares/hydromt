@@ -11,12 +11,35 @@ Unreleased
 
 Added
 -----
+- New support for configuring HydroMT using ``toml`` format. Interfact is the same as with ``yaml``, and can be accessed with the ``to_toml`` and ``from_toml`` functions.
+
+Changed
+-------
+-
+
+Fixed
+-----
+-
+
+Deprecated
+----------
+-
+
+
+v0.8.0 (2023-07-18)
+===================
+This release contains several new features, including extreme value analysis, new generic methods for the ``GridModel`` class, setting variable attributes like units through the data catalog, and the ability to detect compatability issues between Datacatalog and HydroMT versions. It also includes a minor breaking change since now geometry masks are only set if the `mask` in `raster.clip_geom` is set to `True` to improve memory usage.
+
+
+Added
+-----
 - Support for unit attributes for all data types in the DataCatalog. PR #334
 - Data catalog can now handle specification of HydroMT version
 - New generic methods for ``GridModel``: ``setup_grid``, ``setup_grid_from_constant``, ``setup_grid_from_rasterdataset``, ``setup_grid_from_raster_reclass``, ``setup_grid_from_geodataframe``. PR #333
 - New ``grid`` workflow methods to support the setup methods in ``GridModel``: ``grid_from_constant``, ``grid_from_rasterdataset``, ``grid_from_raster_reclass``, ``grid_from_geodataframe``. PR #333
 - New raster method ``rasterize_geometry``.
-- New support for configuring HydroMT using ``toml`` format. Interfact is the same as with ``yaml``, and can be accessed with the ``to_toml`` and ``from_toml`` functions.
+- New extreme valua analysis and design event (creation hydrographs) methods in stats submodule.
+  Note that these methods are experimental and may be moved elsewhere / change in signature. PR #85
 
 Changed
 -------
@@ -28,6 +51,7 @@ Changed
 - Introduced different merge options in `GeoDataset.from_gdf` and `GeoDataFrame.from_gdf`. PR #441
 - ``DataCatalog.get_rasterdataset`` always uses bbox to clip raster data. PR #434
 - ``raster.clip_geom`` only set a geometry mask if the mask argument is true to avoid memory issues. PR #434
+- ``raster.clip_mask`` interface and behavior changed to be consistent with ``raster.clip_geom``. PR #318
 
 Fixed
 -----
@@ -35,9 +59,6 @@ Fixed
 - fix bug in ``get_basin_geometry`` for region kind 'subbasin' if no stream or outlet option is specified.
 - fix use of Path objects in ``DataCatalog.from_dict``. PR #429
 - ``raster.reproject_like`` first clips the data to the target extent before reprojecting. PR #434
-
-Deprecated
-----------
 
 
 v0.7.1 (14 April 2023)
