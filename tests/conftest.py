@@ -169,6 +169,29 @@ def obsda():
 
 
 @pytest.fixture()
+def ts_extremes():
+    rng = np.random.default_rng(12345)
+    normal = pd.DataFrame(
+        rng.random(size=(365 * 100, 2)) * 100,
+        index=pd.date_range(start="2020-01-01", periods=365 * 100, freq="1D"),
+    )
+    ext = rng.gumbel(loc=100, scale=25, size=(200, 2))  # Create extremes
+    for i in range(2):
+        normal.loc[normal.nlargest(200, i).index, i] = ext[:, i].reshape(-1)
+    da = xr.DataArray(
+        data=normal.values,
+        dims=("time", "stations"),
+        coords={
+            "time": pd.date_range(start="1950-01-01", periods=365 * 100, freq="D"),
+            "stations": [1, 2],
+        },
+        attrs=dict(_FillValue=-9999),
+    )
+    da.raster.set_crs(4326)
+    return da
+
+
+@pytest.fixture()
 def griduda():
     import xugrid as xu
 
