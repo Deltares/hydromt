@@ -1102,30 +1102,37 @@ class XRasterBase(XGeoBase):
                 x1 += xres * buffer
             return self._obj.sel({self.x_dim: slice(x0, x1), self.y_dim: slice(y0, y1)})
 
-    # TODO make consistent with clip_geom
-    def clip_mask(self, mask):
+    def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
         """Clip object to region with mask values greater than zero.
 
         Arguments
         ---------
-        mask : xarray.DataArray
+        da_mask : xarray.DataArray
             Mask array.
+        mask: bool, optional
+            Mask values outside geometry with the raster nodata value
+            and add a "mask" coordinate with the boolean mask.
 
         Returns
         -------
         xarray.DataSet or DataArray
             Data clipped to mask.
         """
-        if not isinstance(mask, xr.DataArray):
+        if not isinstance(da_mask, xr.DataArray):
             raise ValueError("Mask should be xarray.DataArray type.")
-        if not mask.raster.shape == self.shape:
-            raise ValueError("Mask shape invalid.")
-        mask_bin = (mask.values != 0).astype(np.uint8)
-        if not np.any(mask_bin):
-            raise ValueError("Invalid mask.")
-        row_slice, col_slice = ndimage.find_objects(mask_bin)[0]
-        self._obj.coords["mask"] = xr.Variable(self.dims, mask_bin)
-        return self._obj.isel({self.x_dim: col_slice, self.y_dim: row_slice})
+        if not self.identical_grid(da_mask):
+            raise ValueError("Mask grid invalid.")
+        da_mask = da_mask != 0  # convert to boolean
+        if not np.any(da_mask):
+            raise ValueError("No valid values found in mask.")
+        # clip
+        row_slice, col_slice = ndimage.find_objects(da_mask.values.astype(np.uint8))[0]
+        obj_clip = self._obj.isel({self.x_dim: col_slice, self.y_dim: row_slice})
+        if mask:  # mask values and add mask coordinate
+            mask_bin = da_mask.isel({self.x_dim: col_slice, self.y_dim: row_slice})
+            obj_clip.coords["mask"] = xr.Variable(self.dims, mask_bin.values)
+            obj_clip = obj_clip.raster.mask(obj_clip.coords["mask"])
+        return obj_clip
 
     def clip_geom(self, geom, align=None, buffer=0, mask=False):
         """Clip object to bounding box of the geometry.
