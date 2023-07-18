@@ -278,8 +278,12 @@ def test_clip(transform, shape):
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
     assert "mask" not in da_clip1.coords  # this changed in v0.7.2
     # test mask
-    da_clip1 = da.raster.clip_mask(da.raster.geometry_mask(gdf))
+    da_mask = da.raster.geometry_mask(gdf)
+    da_clip1 = da.raster.clip_mask(da_mask=da_mask)
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
+    assert "mask" not in da_clip1.coords  # this changed in v0.7.2
+    da_clip1 = da.raster.clip_mask(da_mask=da_mask, mask=True)
+    assert "mask" in da_clip1.coords
 
     # test geom - different crs & mask=True (changed in v0.7.2)
     da_clip1 = da.raster.clip_geom(gdf.to_crs(3857), mask=True)
@@ -300,9 +304,9 @@ def test_clip(transform, shape):
 def test_clip_errors(rioda):
     with pytest.raises(ValueError, match="Mask should be xarray.DataArray type."):
         rioda.raster.clip_mask(rioda.values)
-    with pytest.raises(ValueError, match="Mask shape invalid."):
+    with pytest.raises(ValueError, match="Mask grid invalid"):
         rioda.raster.clip_mask(rioda.isel({"x": slice(1, -1)}))
-    with pytest.raises(ValueError, match="Invalid mask."):
+    with pytest.raises(ValueError, match="No valid values found in mask"):
         rioda.raster.clip_mask(xr.zeros_like(rioda))
     with pytest.raises(ValueError, match="should be geopandas"):
         rioda.raster.clip_geom(rioda.raster.bounds)

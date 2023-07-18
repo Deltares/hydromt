@@ -27,6 +27,7 @@ Changed
 - Introduced different merge options in `GeoDataset.from_gdf` and `GeoDataFrame.from_gdf`. PR #441
 - ``DataCatalog.get_rasterdataset`` always uses bbox to clip raster data. PR #434
 - ``raster.clip_geom`` only set a geometry mask if the mask argument is true to avoid memory issues. PR #434
+- ``raster.clip_mask`` interface and behavior changed to be consistent with ``raster.clip_geom``. PR #318
 
 Fixed
 -----
