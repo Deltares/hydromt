@@ -819,7 +819,6 @@ Extreme Value Analysis
    stats.extremes.fit_extremes
    stats.extremes.get_return_value
    stats.extremes.eva
-   stats.extremes.eva_idf
 
 =============
 Design Events
@@ -828,7 +827,6 @@ Design Events
    :toctree: _generated
 
    stats.design_events.get_peak_hydrographs
-   stats.design_events.get_hyetograph
 
 
 =========
