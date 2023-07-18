@@ -57,7 +57,7 @@ deps = toml["project"]["dependencies"]
 opt_deps = toml["project"]["optional-dependencies"]
 project_name = toml["project"]["name"]
 # specific conda_install settings
-install_config = toml["tool"].get("conda_install", {})
+install_config = toml["tool"].get("make_env", {})
 deps_not_in_conda = install_config.get("deps_not_in_conda", [])
 channels = install_config.get("channels", ["conda-forge"])
 if args.channels is not None:
