@@ -11,8 +11,6 @@ on:
 
 jobs:
   publish-docker-image:
-    timeout-minutes: 20
-    if: ${{ github.event_name == 'release' || github.event.act }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,6 +40,7 @@ jobs:
 
       #build should be cached from previous steps
       - name: Build and push full image
+        if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -50,6 +49,7 @@ jobs:
           push: ${{ !github.event.act }}
           tags: deltares/hydromt
       - name: Build and push min image
+        if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -58,6 +58,7 @@ jobs:
           push: ${{ !github.event.act }}
           tags: deltares/hydromt:min
       - name: Build and push slim image
+        if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
         with:
           context: .
