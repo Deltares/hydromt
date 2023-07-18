@@ -25,6 +25,7 @@ jobs:
 
       - name: generate env
         run: |
+          pip install tomli
           make dev
 
       - uses: conda-incubator/setup-miniconda@v2
