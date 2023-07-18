@@ -26,12 +26,16 @@ Changed
 - Added extrapolate option to `raster.interpolate_na` method. PR #348
 - Name of methods ``setup_maps_from_raster`` and ``setup_mesh_from_raster`` to ``setup_maps_from_rasterdataset`` and ``setup_mesh_from_rasterdataset``. PR #333
 - Add rename argument to ``setup_*_from_rasterdataset``, ``setup_*_from_raster_reclass`` to maps and mesh for consistency with grid. PR #333
+- Introduced different merge options in `GeoDataset.from_gdf` and `GeoDataFrame.from_gdf`. PR #441
+- ``DataCatalog.get_rasterdataset`` always uses bbox to clip raster data. PR #434
+- ``raster.clip_geom`` only set a geometry mask if the mask argument is true to avoid memory issues. PR #434
 
 Fixed
 -----
-- Order of renaming variables in get_rasterdataset for x,y dimensions. PR #324
+- Order of renaming variables in ``DataCatalog.get_rasterdataset`` for x,y dimensions. PR #324
 - fix bug in ``get_basin_geometry`` for region kind 'subbasin' if no stream or outlet option is specified.
-- fix use of Path objects in parsing data catalog files. PR #429
+- fix use of Path objects in ``DataCatalog.from_dict``. PR #429
+- ``raster.reproject_like`` first clips the data to the target extent before reprojecting. PR #434
 
 Deprecated
 ----------
