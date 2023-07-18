@@ -11,7 +11,6 @@ on:
 
 jobs:
   build-artifacts:
-    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -25,17 +24,16 @@ jobs:
 
       - name: generate env
         run: |
-          pip install tomli
-          make dev
+          pip install tomli flit twine
+      #     python make_env.py full -o environment.yml -p 3.9 -n hydromt
 
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: 3.9
-          miniforge-variant: Mambaforge
-          channels: conda-forge, defaults
-          channel-priority: strict
-          environment-file: environment.yml
-          activate-environment: hydromt-dev
+      # - uses: conda-incubator/setup-miniconda@v2
+      #   with:
+      #     miniforge-variant: Mambaforge
+      #     channels: conda-forge
+      #     channel-priority: strict
+      #     environment-file: environment.yml
+      #     activate-environment: hydromt
 
 
       - name: Build artifacts
@@ -47,7 +45,6 @@ jobs:
           path: dist
 
   test-built-dist:
-    timeout-minutes: 10
     needs: build-artifacts
     runs-on: ubuntu-latest
     defaults:
@@ -73,7 +70,7 @@ jobs:
         with:
           python-version: '3.9'
           mamba-version: '*'
-          channels: conda-forge,defaults
+          channels: conda-forge
           channel-priority: true
           environment-file: environment.yml
           activate-environment: hydromt
@@ -109,7 +106,6 @@ jobs:
           skip_existing: true
 
   upload-to-pypi:
-    timeout-minutes: 10
     needs: test-built-dist
     if: ${{ github.event_name == 'release' && !github.event.act  }}
     runs-on: ubuntu-latest
