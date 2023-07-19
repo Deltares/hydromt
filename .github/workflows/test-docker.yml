@@ -18,6 +18,7 @@ on:
 jobs:
   test-docker-image:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     concurrency:
       group: test-docker-${{ github.ref }}
       cancel-in-progress: true
