@@ -474,6 +474,77 @@ def test_meshmodel(mesh_model, tmpdir):
 
 
 @pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
+def test_setup_mesh(tmpdir, griduda):
+    MeshModel = MODELS.load("mesh_model")
+    # Initialize model
+    model = MeshModel(
+        root=join(tmpdir, "mesh_model"),
+        data_libs=["artifact_data"],
+        mode="w",
+    )
+    # wrong region kind
+    with pytest.raises(ValueError, match="Region for mesh must be of kind "):
+        model.setup_mesh2d(
+            region={"basin": [12.5, 45.5]},
+            res=0.05,
+        )
+    # bbox
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    with pytest.raises(
+        ValueError, match="res argument required for kind 'bbox', 'geom'"
+    ):
+        model.setup_mesh2d({"bbox": bbox})
+    model.setup_mesh2d(
+        region={"bbox": bbox},
+        res=0.05,
+        crs=4326,
+        grid_name="mesh2d",
+    )
+    assert "mesh2d" in model.mesh_names
+    assert model.crs.to_epsg() == 4326
+    assert np.all(np.round(model.region.total_bounds, 3) == bbox)
+    assert model.mesh.ugrid.grid.n_node == 136
+    model._mesh = None  # remove old mesh
+
+    # geom
+    region = model._geoms.pop("region")
+    model.setup_mesh2d(
+        region={"geom": region},
+        res=10000,
+        crs="utm",
+        grid_name="mesh2d",
+    )
+    assert model.crs.to_epsg() == 32633
+    assert model.mesh.ugrid.grid.n_node == 35
+    model._mesh = None  # remove old mesh
+
+    # mesh
+    # create mesh file
+    mesh_fn = str(tmpdir.join("mesh2d.nc"))
+    gridda = griduda.ugrid.to_dataset()
+    gridda = gridda.rio.write_crs(griduda.ugrid.grid.crs)
+    gridda.to_netcdf(mesh_fn)
+
+    model.setup_mesh2d(
+        region={"mesh": mesh_fn},
+        grid_name="mesh2d",
+    )
+    assert np.all(griduda.ugrid.total_bounds == model.region.total_bounds)
+    assert model.mesh.ugrid.grid.n_node == 169
+    model._mesh = None  # remove old mesh
+
+    # mesh with bounds
+    bounds = [12.095, 46.495, 12.10, 46.50]
+    model.setup_mesh2d(
+        {"mesh": mesh_fn, "bounds": bounds},
+        grid_name="mesh1",
+    )
+    assert "mesh1" in model.mesh_names
+    assert model.mesh.ugrid.grid.n_node == 49
+    assert np.all(np.round(model.region.total_bounds, 3) == bounds)
+
+
+@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
