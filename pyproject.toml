@@ -18,6 +18,7 @@ dependencies = [
     "geopandas>=0.10",   # pandas but geo, wraps fiona and shapely
     "gdal>=3.1",         # enable geospacial data manipulation, both  raster and victor
     "fiona==1.8.22",     # IO for vector and shape files
+    "numba",             # speed up computations (used in e.g. stats)
     "numpy>=1.20",       # pin necessary to ensure compatability with C headers
     "netcdf4",           # netcfd IO
     "packaging",         # compare versions of hydromt
@@ -63,8 +64,7 @@ dev = [
     "ruff",        # linting
     "pre-commit",  # linting
     "pip>=23.1.2", # needed for recursive dependencies
-    "flint",       # needed to publish to pypi
-    "wheel",       # needed to publish to pypi
+    "flit",       # needed to publish to pypi
     "twine",       # needed to publish to pypi
 ]
 test = [
@@ -78,20 +78,21 @@ doc = [
     "sphinx",                       # build docks
     "sphinx_design",                # doc layout
     "sphinx_autosummary_accessors", # doc layout
-    "hydromt[jupyter,extra]",       # examples are included in the docs
+    "hydromt[examples,extra]",      # examples are included in the docs
 ]
-jupyter = [
-    "jupyterlab", # run examples in jupyter notebook
-    "cartopy",    # plotting examples
+examples = [
+    "jupyterlab",      # run examples in jupyter notebook
+    "cartopy",         # plotting examples
     "matplotlib-base", # plotting
+    "notebook",        # jupyter integration
 ]
 deprecated = [
     "pcraster", # Old Wflow model was build on this
     "pygeos",   # Supersceded by shapely 2
 ]
 
-full = ["hydromt[io,extra,dev,test,doc, jupyter, deprecated]"]
-slim = ["hydromt[io,extra,jupyter]"]
+full = ["hydromt[io,extra,dev,test,doc,examples]"]
+slim = ["hydromt[io,extra,examples]"]
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
@@ -99,6 +100,14 @@ Source = "https://github.com/Deltares/hydromt"
 
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
+
+[tool.make_env]
+channels = ["conda-forge"]
+deps_not_in_conda  = [
+    "sphinx_autosummary_accessors",
+    "sphinx_design",
+    "pyet",
+]
 
 [tool.black]
 line-length = 88
@@ -117,6 +126,7 @@ exclude = ["docs"]
 "tests/**" = ["D103", "D100", "D104"]
 "hydromt/__init__.py" = ["E402", "F401", "F403"]
 "hydromt/workflows/__init__.py" = ["F403"]
+"hydromt/stats/__init__.py" = ["F403"]
 "hydromt/models/__init__.py" = ["F403", "F401", "F405"]
 "hydromt/_compat.py" = ["F401"]
 "tests/conftest.py" = ["E402"]

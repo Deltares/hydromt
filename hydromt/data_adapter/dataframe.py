@@ -1,7 +1,9 @@
 """Implementation for the Pandas Dataframe adapter."""
 import logging
 import os
+import warnings
 from os.path import join
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -24,14 +26,18 @@ class DataFrameAdapter(DataAdapter):
 
     def __init__(
         self,
-        path,
-        driver=None,
-        filesystem="local",
-        nodata=None,
-        rename={},
-        unit_mult={},
-        unit_add={},
-        meta={},
+        path: str,
+        driver: str = None,
+        filesystem: str = "local",
+        nodata: Union[dict, float, int] = None,
+        rename: dict = {},
+        unit_mult: dict = {},
+        unit_add: dict = {},
+        meta: dict = {},
+        attrs: dict = {},
+        driver_kwargs: dict = {},
+        name: str = "",  # optional for now
+        catalog_name: str = "",  # optional for now
         **kwargs,
     ):
         """Initiate data adapter for 2D tabular data.
@@ -43,7 +49,9 @@ class DataFrameAdapter(DataAdapter):
         Parameters
         ----------
         path: str, Path
-            Path to data source.
+            Path to data source. If the dataset consists of multiple files, the path may
+            contain {variable}, {year}, {month} placeholders as well as path
+            search pattern using a '*' wildcard.
         driver: {'csv', 'xlsx', 'xls', 'fwf'}, optional
             Driver to read files with, for 'csv' :py:func:`~pandas.read_csv`,
             for {'xlsx', 'xls'} :py:func:`~pandas.read_excel`, and for 'fwf'
@@ -53,24 +61,38 @@ class DataFrameAdapter(DataAdapter):
         filesystem: {'local', 'gcs', 's3'}, optional
             Filesystem where the data is stored (local, cloud, http etc.).
             By default, local.
-        nodata: (dictionary) float, int, optional
+        nodata: dict, float, int, optional
             Missing value number. Only used if the data has no native missing value.
-            Multiple nodata values can be provided in a list and differentiated between
-            dataframe columns using a dictionary with variable (column) keys. The nodata
-            values are only applied to columns with numeric data.
+            Nodata values can be differentiated between variables using a dictionary.
         rename: dict, optional
-            Mapping of native column names to output column names as
+            Mapping of native data source variable to output source variable name as
             required by hydroMT.
         unit_mult, unit_add: dict, optional
             Scaling multiplication and addition to change to map from the native
             data unit to the output data unit as required by hydroMT.
         meta: dict, optional
-            Metadata information of dataframe, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license', 'paper_ref',
-            'paper_doi', 'category'}
-        **kwargs
+            Metadata information of dataset, prefably containing the following keys:
+            {'source_version', 'source_url', 'source_license',
+            'paper_ref', 'paper_doi', 'category'}
+        placeholders: dict, optional
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
+        driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional for now.
         """
+        if kwargs:
+            warnings.warn(
+                "Passing additional keyword arguments to be used by the "
+                "DataFrameAdapter driver is deprecated and will be removed "
+                "in a future version. Please use 'driver_kwargs' instead.",
+                DeprecationWarning,
+            )
+            driver_kwargs.update(kwargs)
         super().__init__(
             path=path,
             driver=driver,
@@ -80,7 +102,10 @@ class DataFrameAdapter(DataAdapter):
             unit_mult=unit_mult,
             unit_add=unit_add,
             meta=meta,
-            **kwargs,
+            attrs=attrs,
+            driver_kwargs=driver_kwargs,
+            name=name,
+            catalog_name=catalog_name,
         )
 
     def to_file(
@@ -153,7 +178,6 @@ class DataFrameAdapter(DataAdapter):
         variables=None,
         time_tuple=None,
         logger=logger,
-        **kwargs,
     ):
         """Return a DataFrame.
 
@@ -162,17 +186,18 @@ class DataFrameAdapter(DataAdapter):
         description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
         # Extract storage_options from kwargs to instantiate fsspec object correctly
-        if "storage_options" in self.kwargs:
-            kwargs = self.kwargs["storage_options"]
+        so_kwargs = {}
+        if "storage_options" in self.driver_kwargs:
+            so_kwargs = self.driver_kwargs["storage_options"]
             # For s3, anonymous connection still requires --no-sign-request profile
             # to read the data setting environment variable works
-            if "anon" in kwargs:
+            if "anon" in so_kwargs:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        _ = self.resolve_paths(**kwargs)  # throw nice error if data not found
+        _ = self.resolve_paths(**so_kwargs)  # throw nice error if data not found
 
-        kwargs = self.kwargs.copy()
+        kwargs = self.driver_kwargs.copy()
 
         # read and clip
         logger.info(f"DataFrame: Read {self.driver} data.")
@@ -231,5 +256,10 @@ class DataFrameAdapter(DataAdapter):
 
         # set meta data
         df.attrs.update(self.meta)
+
+        # set column attributes
+        for col in self.attrs:
+            if col in df.columns:
+                df[col].attrs.update(**self.attrs[col])
 
         return df

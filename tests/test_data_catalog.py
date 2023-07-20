@@ -2,6 +2,7 @@
 
 import os
 from os.path import abspath, dirname, join
+from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
@@ -27,6 +28,10 @@ def test_parser():
     dd_out = _parse_data_dict(dd, root=root)
     assert isinstance(dd_out["test"], RasterDatasetAdapter)
     assert dd_out["test"].path == abspath(dd["test"]["path"])
+    # test with Path object
+    dd["test"].update(path=Path(dd["test"]["path"]))
+    dd_out = _parse_data_dict(dd, root=root)
+    assert dd_out["test"].path == abspath(dd["test"]["path"])
     # rel path
     dd = {
         "test": {
@@ -39,7 +44,7 @@ def test_parser():
     dd_out = _parse_data_dict(dd)
     assert dd_out["test"].path == abspath(join(root, dd["test"]["path"]))
     # check if path in kwargs is also absolute
-    assert dd_out["test"].kwargs["fn"] == abspath(join(root, "test"))
+    assert dd_out["test"].driver_kwargs["fn"] == abspath(join(root, "test"))
     # alias
     dd = {
         "test": {
@@ -62,6 +67,7 @@ def test_parser():
     assert len(dd_out) == 6
     assert dd_out["test_a_1"].path == abspath(join(root, "data_1.tif"))
     assert "placeholders" not in dd_out["test_a_1"].to_dict()
+
     # errors
     with pytest.raises(ValueError, match="Missing required path argument"):
         _parse_data_dict({"test": {}})
@@ -115,6 +121,11 @@ def test_data_catalog(tmpdir):
     assert len(data_catalog._sources) > 0
     with pytest.raises(IOError, match="URL b'404: Not Found'"):
         data_catalog = DataCatalog(deltares_data="unknown_version")
+
+    # test hydromt version in meta data
+    fn_yml = join(tmpdir, "test.yml")
+    data_catalog = DataCatalog()
+    data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
 
 
 def test_from_archive(tmpdir):
@@ -283,3 +294,29 @@ def test_get_data(df):
     assert isinstance(df, pd.DataFrame)
     with pytest.raises(ValueError, match='Unknown tabular data type "list"'):
         data_catalog.get_dataframe([])
+
+
+def test_deprecation_warnings(artifact_data):
+    with pytest.deprecated_call():
+        # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
+        DataCatalog(artifact_data="v0.0.6")
+    with pytest.deprecated_call():
+        cat = DataCatalog()
+        # should be cat.from_predefined_catalogs('artifact_data', 'v0.0.6')
+        cat.from_artifacts("artifact_data", version="v0.0.6")
+    with pytest.deprecated_call():
+        fn = artifact_data["chelsa"].path
+        # should be driver_kwargs=dict(chunks={'x': 100, 'y': 100})
+        artifact_data.get_rasterdataset(fn, chunks={"x": 100, "y": 100})
+    with pytest.deprecated_call():
+        fn = artifact_data["gadm_level1"].path
+        # should be driver_kwargs=dict(assert_gtype='Polygon')
+        artifact_data.get_geodataframe(fn, assert_gtype="MultiPolygon")
+    with pytest.deprecated_call():
+        fn = artifact_data["grdc"].path
+        # should be driver_kwargs=dict(index_col=0)
+        artifact_data.get_dataframe(fn, index_col=0)
+    with pytest.deprecated_call():
+        fn = artifact_data["gtsmv3_eu_era5"].path
+        # should be driver_kwargs=dict(chunks={'time': 100})
+        artifact_data.get_geodataset(fn, chunks={"time": 100})

@@ -1,17 +1,16 @@
 ---
 name: Build and publish HydroMT to DockerHub
 
-on:
-  release:
-    types:
-      - published
-  push:
-    tags:
-      - v*
+# on:
+#   release:
+#     types:
+#       - published
+#   push:
+#     tags:
+#       - v*
 
 jobs:
   publish-docker-image:
-    if: ${{ github.event_name == 'release' || github.event.act }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,8 +25,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.TEST_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.TEST_DOCKERHUB_TOKEN }}
 
       - name: Build and test
         uses: docker/build-push-action@v4
@@ -37,10 +36,11 @@ jobs:
           target: full
 
       - name: Run Tests
-        run: docker run --rm -it hydromt pytest
+        run: docker run --rm hydromt pytest
 
       #build should be cached from previous steps
       - name: Build and push full image
+        if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -49,6 +49,7 @@ jobs:
           push: ${{ !github.event.act }}
           tags: deltares/hydromt
       - name: Build and push min image
+        if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -57,6 +58,7 @@ jobs:
           push: ${{ !github.event.act }}
           tags: deltares/hydromt:min
       - name: Build and push slim image
+        if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
         with:
           context: .

@@ -1,5 +1,5 @@
 ---
-name: Build docs
+name: Build Documentation
 
 # We don't want pushes (or PRs) to gh-pages to kick anything off
 on:
@@ -11,6 +11,7 @@ on:
       - data/*
       - docs/*
       - examples/*
+      - pyproject.toml
   pull_request:
     branches: [main]
     paths:
@@ -19,10 +20,12 @@ on:
       - data/*
       - docs/*
       - examples/*
+      - pyproject.toml
 
 jobs:
   # Build docs on Linux
   Docs:
+    timeout-minutes: 10
     name: linux docs
     runs-on: ubuntu-latest
     env:
@@ -30,6 +33,9 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
@@ -68,7 +74,3 @@ jobs:
           destination_dir: ./${{ env.DOC_VERSION }}
           keep_files: false
           full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
-
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true

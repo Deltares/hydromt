@@ -20,7 +20,11 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: 3.8
+          python-version: 3.9
+
+      - name: generate env
+        run: |
+          pip install tomli flit twine
 
       - name: Build artifacts
         run: make pypi
@@ -56,7 +60,7 @@ jobs:
         with:
           python-version: '3.9'
           mamba-version: '*'
-          channels: conda-forge,defaults
+          channels: conda-forge
           channel-priority: true
           environment-file: environment.yml
           activate-environment: hydromt
@@ -73,6 +77,7 @@ jobs:
           echo "hydromt --models"
 
   upload-to-test-pypi:
+    timeout-minutes: 10
     needs: test-built-dist
     if: github.event_name == 'push'
     runs-on: ubuntu-latest

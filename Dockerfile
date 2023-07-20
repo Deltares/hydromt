@@ -19,6 +19,8 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
  && find /opt/conda/ -follow -type f -name '*.a' -delete \
  && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
  && find /opt/conda/ -follow -type f -name '*.js.map' -delete
+ ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
+ CMD ["hydromt","--models"]
 
 FROM  mambaorg/micromamba:1.4-alpine AS full
 ENV HOME=/home/mambauser
@@ -41,6 +43,8 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
  && find /opt/conda/ -follow -type f -name '*.a' -delete \
  && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
  && find /opt/conda/ -follow -type f -name '*.js.map' -delete
+ ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
+ CMD ["hydromt","--models"]
 
 FROM  mambaorg/micromamba:1.4-alpine AS slim
 ENV HOME=/home/mambauser
@@ -62,3 +66,5 @@ RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disabl
  && find /opt/conda/ -follow -type f -name '*.a' -delete \
  && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
  && find /opt/conda/ -follow -type f -name '*.js.map' -delete
+ ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
+ CMD ["hydromt","--models"]

@@ -51,6 +51,7 @@ def test_raster_properties(origin, rotation, res, shape, bounds):
     assert np.allclose(transform, da.raster.transform)
     assert np.allclose(da.raster.box.total_bounds, da.raster.bounds)
     assert np.allclose(bounds, da.raster.internal_bounds)
+    assert da.raster.box.crs == da.raster.crs
 
 
 @pytest.mark.parametrize(("transform", "shape"), testdata)
@@ -86,6 +87,10 @@ def test_crs():
     da[raster.GEO_MAP_COORD].attrs = dict()
     da.raster.set_crs("epsg:4326")
     assert da.raster.crs.to_epsg() == 4326
+    # compound crs
+    da[raster.GEO_MAP_COORD].attrs = dict()
+    da.raster.set_crs(9518)  # WGS 84 + EGM2008 height
+    assert da.raster.crs.to_epsg() == 9518  # return horizontal crs
 
 
 def test_gdal(tmpdir):
@@ -248,6 +253,10 @@ def test_vectorize():
     assert np.all(gdf["value"].values == 1)
     assert da.raster.crs.to_epsg() == gdf.crs.to_epsg()
     assert np.all(da == da.raster.geometry_mask(gdf).astype(da.dtype))
+    # test with compound crs
+    da.raster.set_crs(9518)  # WGS 84 + EGM2008 height
+    gdf = da.raster.vectorize()
+    assert gdf.crs.to_epsg() == 9518
 
 
 @pytest.mark.parametrize(("transform", "shape"), testdata)
@@ -267,12 +276,19 @@ def test_clip(transform, shape):
     # test geom
     da_clip1 = da.raster.clip_geom(gdf)
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
+    assert "mask" not in da_clip1.coords  # this changed in v0.7.2
     # test mask
-    da_clip1 = da.raster.clip_mask(da.raster.geometry_mask(gdf))
+    da_mask = da.raster.geometry_mask(gdf)
+    da_clip1 = da.raster.clip_mask(da_mask=da_mask)
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
-    # test geom - different crs
-    da_clip1 = da.raster.clip_geom(gdf.to_crs(3857))
+    assert "mask" not in da_clip1.coords  # this changed in v0.7.2
+    da_clip1 = da.raster.clip_mask(da_mask=da_mask, mask=True)
+    assert "mask" in da_clip1.coords
+
+    # test geom - different crs & mask=True (changed in v0.7.2)
+    da_clip1 = da.raster.clip_geom(gdf.to_crs(3857), mask=True)
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
+    assert "mask" in da_clip1.coords
 
     # these test are for non-rotated only
     if da.raster.rotation != 0:
@@ -288,22 +304,33 @@ def test_clip(transform, shape):
 def test_clip_errors(rioda):
     with pytest.raises(ValueError, match="Mask should be xarray.DataArray type."):
         rioda.raster.clip_mask(rioda.values)
-    with pytest.raises(ValueError, match="Mask shape invalid."):
+    with pytest.raises(ValueError, match="Mask grid invalid"):
         rioda.raster.clip_mask(rioda.isel({"x": slice(1, -1)}))
-    with pytest.raises(ValueError, match="Invalid mask."):
+    with pytest.raises(ValueError, match="No valid values found in mask"):
         rioda.raster.clip_mask(xr.zeros_like(rioda))
     with pytest.raises(ValueError, match="should be geopandas"):
         rioda.raster.clip_geom(rioda.raster.bounds)
 
 
 def test_reproject():
+    # create data
     kwargs = dict(name="test", crs=4326)
     transform, shape = testdata[1][0], (9, 5, 5)
     da0 = raster.full_from_transform(transform, shape, **kwargs)
     da0.data = np.random.random(da0.shape)
     ds0 = da0.to_dataset()
     ds1 = raster.full_from_transform(*testdata[1], **kwargs).to_dataset()
+    da2 = raster.full_from_transform(*testdata[3], **kwargs).to_dataset()
     assert np.all(ds1.raster.bounds == ds1.raster.transform_bounds(ds1.raster.crs))
+    # test out of bounds -> return empty grid
+    ds2_empty = ds0.raster.reproject_like(da2)
+    assert ds2_empty.raster.identical_grid(da2)
+    assert np.all(np.isnan(ds2_empty))
+    assert ds2_empty.data_vars.keys() == ds0.data_vars.keys()
+    da2_empty = da0.raster.reproject_like(da2)
+    assert np.all(np.isnan(da2_empty))
+    assert da2_empty.raster.identical_grid(da2)
+    assert da2_empty.name == da0.name
     # flipud
     assert ds1.raster.flipud().raster.res[1] == -ds1.raster.res[1]
     # reproject nearest index
@@ -471,7 +498,7 @@ def test_rotated(transform, shape, tmpdir):
     gdf2 = da2.raster.vectorize().sort_values("value")
     gdf2.index = gdf2.index.astype(int)
     gpd.testing.assert_geodataframe_equal(
-        gdf, gdf2, check_less_precise=True, check_dtype=False
+        gdf, gdf2, check_less_precise=True, check_dtype=False, check_index_type=False
     )
     # test sample
     idxs = np.array([2, 7])
