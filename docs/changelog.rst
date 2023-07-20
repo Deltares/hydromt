@@ -15,7 +15,7 @@ Added
 
 Changed
 -------
--
+- Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. PR #412
 
 Fixed
 -----
