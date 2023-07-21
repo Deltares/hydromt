@@ -11,7 +11,8 @@ Unreleased
 
 Added
 -----
--
+- Added documentation for how to start your own plugin (#446)
+
 
 Changed
 -------
