@@ -125,7 +125,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         driver_kwargs={},
         name="",  # optional for now
         catalog_name="",  # optional for now
-        version_name=None,
+        provider="UNSPECIFIED",
+        data_version="UNSPECIFIED",
     ):
         """General Interface to data source for HydroMT.
 
@@ -171,7 +172,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         """
         self.name = name
         self.catalog_name = catalog_name
-        self.version_name = version_name
+        self.provider = provider
+        self.data_version = data_version
         # general arguments
         self.path = path
         # driver and driver keyword-arguments

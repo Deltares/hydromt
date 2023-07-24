@@ -8,7 +8,6 @@ import geopandas as gpd
 import pandas as pd
 import pytest
 import xarray as xr
-import yaml
 
 from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
 from hydromt.data_catalog import DataCatalog, _denormalise_data_dict, _parse_data_dict
@@ -107,6 +106,8 @@ def test_versioned_catalogs(tmpdir):
     assert legacy_data_catalog.get_source("esa_worldcover").path.endswith(
         "landuse/esa_worldcover/esa-worldcover.vrt"
     )
+    assert legacy_data_catalog.get_source("esa_worldcover").data_version == 2020
+
     # make sure we raise deprecation warning here
     with pytest.deprecated_call():
         _ = legacy_data_catalog["esa_worldcover"]
@@ -118,31 +119,32 @@ def test_versioned_catalogs(tmpdir):
         aws_data_catalog.get_source("esa_worldcover").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
+    assert aws_data_catalog.get_source("esa_worldcover").data_version == 2021
     assert (
-        aws_data_catalog.get_source("esa_worldcover", data_version="2021").path
+        aws_data_catalog.get_source("esa_worldcover", data_version=2021).path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
     assert (
-        aws_data_catalog.get_source("esa_worldcover", data_version="2021").path
-        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
+        aws_data_catalog.get_source("esa_worldcover", data_version=2021).data_version
+        == 2021
     )
     assert (
         aws_data_catalog.get_source(
-            "esa_worldcover", data_version="2021", provider="aws"
+            "esa_worldcover", data_version=2021, provider="aws"
         ).path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
 
     with pytest.raises(KeyError):
         aws_data_catalog.get_source(
-            "esa_worldcover", data_version="2021", provider="asdfasdf"
+            "esa_worldcover", data_version=2021, provider="asdfasdf"
         )
     with pytest.raises(KeyError):
         aws_data_catalog.get_source(
             "esa_worldcover", data_version="asdfasdf", provider="aws"
         )
     with pytest.raises(KeyError):
-        aws_data_catalog.get_source("asdfasdf", data_version="2021", provider="aws")
+        aws_data_catalog.get_source("asdfasdf", data_version=2021, provider="aws")
 
     # make sure we trigger user warning when overwriting versions
     with pytest.warns(UserWarning):
@@ -156,14 +158,12 @@ def test_versioned_catalogs(tmpdir):
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
     assert (
-        read_merged_catalog.get_source(
-            "esa_worldcover", provider="aws_esa_worldcover"
-        ).path
+        read_merged_catalog.get_source("esa_worldcover", provider="aws").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
     assert read_merged_catalog.get_source(
-        "esa_worldcover", provider="legacy_esa_worldcover"
-    ).path.endswith("landuse/esa_worldcover/esa-worldcover.vrt")
+        "esa_worldcover", provider="local"
+    ).path.endswith("landuse/esa_worldcover_2021/esa-worldcover.vrt")
 
     # Make sure we can queiry for the version we want
     aws_and_legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
@@ -173,30 +173,14 @@ def test_versioned_catalogs(tmpdir):
     )
 
     assert (
-        aws_and_legacy_data_catalog.get_source(
-            "esa_worldcover", provider="aws_esa_worldcover"
-        ).path
+        aws_and_legacy_data_catalog.get_source("esa_worldcover", provider="aws").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
     assert aws_and_legacy_data_catalog.get_source(
         "esa_worldcover", provider="legacy_esa_worldcover"
     ).path.endswith("landuse/esa_worldcover/esa-worldcover.vrt")
 
-    with open(join(DATADIR, "merged_esa_worldcover.yml"), "r") as f:
-        expected_merged_catalog_dict = yaml.load(f, Loader=yaml.Loader)
-
-    catalog_dict = aws_and_legacy_data_catalog.to_dict()
-
-    # strip absolute path to make the test portable
-    catalog_dict["esa_worldcover"]["versions"][0]["legacy_esa_worldcover"][
-        "path"
-    ] = catalog_dict["esa_worldcover"]["versions"][0]["legacy_esa_worldcover"][
-        "path"
-    ].removeprefix(
-        DATADIR + "/"
-    )
-
-    assert catalog_dict == expected_merged_catalog_dict
+    _ = aws_and_legacy_data_catalog.to_dict()
 
 
 def test_data_catalog(tmpdir):

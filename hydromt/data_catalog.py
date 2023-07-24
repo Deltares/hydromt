@@ -180,16 +180,12 @@ class DataCatalog(object):
         else:
             available_data_versions = available_providers[requested_provider]
             if requested_data_version not in available_data_versions:
-                data_versions = sorted(list(available_data_versions.keys()))
+                data_versions = sorted(list(map(str, available_data_versions.keys())))
                 raise KeyError(
                     f"Requested unknown data_version '{requested_data_version}' for"
                     f" data_source '{key}' and provider '{requested_provider}'"
                     f" available data_versions are {data_versions}"
                 )
-            else:
-                adapter = available_data_versions[requested_data_version]
-                adapter.provider = requested_provider
-                adapter.data_version = requested_data_version
 
         return self._sources[key][requested_provider][requested_data_version]
 
@@ -201,10 +197,10 @@ class DataCatalog(object):
         if hasattr(adapter, "data_version") and adapter.data_version is not None:
             data_version = adapter.data_version
         else:
-            data_version = "UNKNOWN"
+            data_version = "UNSPECIFIED"
 
         if hasattr(adapter, "provider") and adapter.provider is not None:
-            provider = adapter.provier
+            provider = adapter.provider
         else:
             provider = adapter.catalog_name
 
@@ -224,9 +220,15 @@ class DataCatalog(object):
                 UserWarning,
             )
 
+        if "last_added" not in self._sources[key]:
+            self._sources[key]["last_added"] = {}
+
         self._sources[key][provider][data_version] = adapter
         self._sources[key][provider]["last_added"] = adapter
-        self._sources[key]["last_added"] = {"last_added": adapter}
+
+        self._sources[key]["last_added"]["last_added"] = adapter
+        self._sources[key]["last_added"][data_version] = adapter
+        pass
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
@@ -633,12 +635,7 @@ class DataCatalog(object):
                 )
                 _ = base.pop("driver_kwargs", None)
 
-                existing_version_name = diff_existing.pop("version_name")
-                new_version_name = diff_new.pop("version_name")
-                base["versions"] = [
-                    {new_version_name: diff_new},
-                    {existing_version_name: diff_existing},
-                ]
+                base["variants"] = ([diff_new, diff_existing],)
                 sources_out[name] = base
             else:
                 sources_out.update({name: source_dict})
@@ -705,12 +702,21 @@ class DataCatalog(object):
                     name = name.split("[")[0]
                     source_vars[name] = variables
 
+                source = self.get_source(name)
+                provider = source.provider
+                data_version = source.data_version
+
                 if name not in sources:
                     sources[name] = {}
+                if provider not in sources[name]:
+                    sources[name][provider] = {}
 
-                source = self.get_source(name)
-                sources[name]["last"] = copy.deepcopy(source)
-                sources[name][source.catalog_name] = copy.deepcopy(source)
+                if "last_added" not in sources[name]:
+                    sources[name]["last_added"] = {}
+
+                sources[name][provider]["last_added"] = copy.deepcopy(source)
+                sources[name]["last_added"]["last_added"] = copy.deepcopy(source)
+                sources[name][provider][data_version] = copy.deepcopy(source)
 
         else:
             sources = copy.deepcopy(self.sources)
@@ -1184,7 +1190,7 @@ def _parse_data_dict(
         # Get unit attrs if given from source
         attrs = source.pop("attrs", {})
         # lower kwargs for backwards compatability
-        # FIXME this could be problamatic if driver kwargs conflict DataAdapter
+
         #  arguments
         driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
         for driver_kwarg in driver_kwargs:
@@ -1208,7 +1214,15 @@ def _parse_data_dict(
                 "Source name passed as argument and differs from one in dictionary"
             )
 
-        version_name = source.pop("version_name", None)
+        dict_catalog_name = source.pop("catalog_name", None)
+        if dict_catalog_name is not None and dict_catalog_name != catalog_name:
+            raise RuntimeError(
+                "catalog name passed as argument and differs from one in dictionary"
+            )
+
+        provider = source.pop("provider", None)
+        data_version = source.pop("data_version", None)
+
         if "placeholders" in source:
             # pop avoid placeholders being passed to adapter
             options = source.pop("placeholders")
@@ -1223,7 +1237,8 @@ def _parse_data_dict(
                     path=path_n,
                     name=name_n,
                     catalog_name=catalog_name,
-                    version_name=version_name,
+                    provider=provider,
+                    data_version=data_version,
                     meta=meta,
                     attrs=attrs,
                     driver_kwargs=driver_kwargs,
@@ -1235,7 +1250,8 @@ def _parse_data_dict(
                 path=path,
                 name=name,
                 catalog_name=catalog_name,
-                version_name=version_name,
+                provider=provider,
+                data_version=data_version,
                 meta=meta,
                 attrs=attrs,
                 driver_kwargs=driver_kwargs,
@@ -1278,11 +1294,6 @@ def _denormalise_data_dict(data_dict, catalog_name="") -> List[Dict[str, Any]]:
                 source_copy = copy.deepcopy(source)
                 diff["name"] = name
                 diff["catalog_name"] = catalog_name
-                if "provider" not in diff:
-                    diff["provider"] = catalog_name
-                if "data_version" not in diff:
-                    diff["data_version"] = "latest"
-
                 source_copy.update(**diff)
                 dicts.append({name: source_copy})
         elif "alias" in source:
