@@ -162,14 +162,9 @@ class DataCatalog(object):
         available_providers = self._sources[key]
 
         if provider is None:
-            requested_provider = "last_added"
+            requested_provider = list(available_providers.keys())[-1]
         else:
             requested_provider = provider
-
-        if data_version is None:
-            requested_data_version = "last_added"
-        else:
-            requested_data_version = data_version
 
         if requested_provider not in available_providers:
             providers = sorted(list(available_providers.keys()))
@@ -177,15 +172,21 @@ class DataCatalog(object):
                 f"Requested unknown proveder '{requested_provider}' for data_source"
                 f" '{key}' available providers are {providers}"
             )
+
+        available_data_versions = available_providers[requested_provider]
+
+        if data_version is None:
+            requested_data_version = list(available_data_versions.keys())[-1]
         else:
-            available_data_versions = available_providers[requested_provider]
-            if requested_data_version not in available_data_versions:
-                data_versions = sorted(list(map(str, available_data_versions.keys())))
-                raise KeyError(
-                    f"Requested unknown data_version '{requested_data_version}' for"
-                    f" data_source '{key}' and provider '{requested_provider}'"
-                    f" available data_versions are {data_versions}"
-                )
+            requested_data_version = data_version
+
+        if requested_data_version not in available_data_versions:
+            data_versions = sorted(list(map(str, available_data_versions.keys())))
+            raise KeyError(
+                f"Requested unknown data_version '{requested_data_version}' for"
+                f" data_source '{key}' and provider '{requested_provider}'"
+                f" available data_versions are {data_versions}"
+            )
 
         return self._sources[key][requested_provider][requested_data_version]
 
@@ -220,15 +221,7 @@ class DataCatalog(object):
                 UserWarning,
             )
 
-        if "last_added" not in self._sources[key]:
-            self._sources[key]["last_added"] = {}
-
         self._sources[key][provider][data_version] = adapter
-        self._sources[key][provider]["last_added"] = adapter
-
-        self._sources[key]["last_added"]["last_added"] = adapter
-        self._sources[key]["last_added"][data_version] = adapter
-        pass
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
@@ -252,12 +245,8 @@ class DataCatalog(object):
         """Return a flat list of all available data sources with no duplicates."""
         ans = []
         for source_name, available_providers in self._sources.items():
-            for provider, available_data_versions in available_providers.items():
-                if provider == "last_added":
-                    continue
-                for data_version, adapter in available_data_versions.items():
-                    if data_version == "last_added":
-                        continue
+            for _, available_data_versions in available_providers.items():
+                for _, adapter in available_data_versions.items():
                     ans.append((source_name, adapter))
 
         return ans
@@ -711,11 +700,6 @@ class DataCatalog(object):
                 if provider not in sources[name]:
                     sources[name][provider] = {}
 
-                if "last_added" not in sources[name]:
-                    sources[name]["last_added"] = {}
-
-                sources[name][provider]["last_added"] = copy.deepcopy(source)
-                sources[name]["last_added"]["last_added"] = copy.deepcopy(source)
                 sources[name][provider][data_version] = copy.deepcopy(source)
 
         else:
@@ -732,11 +716,7 @@ class DataCatalog(object):
         # export data and update sources
         for key, available_variants in sources.items():
             for provider, available_data_versions in available_variants.items():
-                if provider == "last_added":
-                    continue
                 for data_version, source in available_data_versions.items():
-                    if data_version == "last_added":
-                        continue
                     try:
                         # read slice of source and write to file
                         self.logger.debug(f"Exporting {key}.")
@@ -781,8 +761,6 @@ class DataCatalog(object):
                             sources_out[key][provider] = {}
 
                         sources_out[key][provider][data_version] = source
-                        sources_out[key][provider]["last_added"] = source
-                        sources_out[key]["last_added"] = {"last_added": source}
                     except FileNotFoundError:
                         self.logger.warning(f"{key} file not found at {source.path}")
 
@@ -790,12 +768,7 @@ class DataCatalog(object):
         data_catalog_out = DataCatalog()
         for key, available_variants in sources_out.items():
             for provider, available_data_versions in available_variants.items():
-                if provider == "last_added":
-                    continue
                 for data_version, adapter in available_data_versions.items():
-                    if data_version == "last_added":
-                        continue
-
                     data_catalog_out.add_source(key, adapter)
 
         data_catalog_out.to_yml(fn, root="auto", meta=meta)
