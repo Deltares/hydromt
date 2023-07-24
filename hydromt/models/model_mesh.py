@@ -306,6 +306,8 @@ class MeshMixin(object):
             # Check on crs
             if not data.ugrid.grid.crs == self.crs:
                 raise ValueError("Data and self.mesh should have the same CRS.")
+            # Save crs as it will be lost when converting to xarray
+            crs = self.crs
             # Check on new grid topology
             if grid_name in self.mesh_names:
                 # check if the two grids are the same
@@ -346,6 +348,9 @@ class MeshMixin(object):
                 self._mesh = xu.UgridDataset(
                     xr.merge([self.mesh.ugrid.to_dataset(), data.ugrid.to_dataset()])
                 )
+            # Restore crs
+            for grid in self._mesh.ugrid.grids:
+                grid.set_crs(crs)
 
         # update related geoms if necessary: region
         if overwrite_grid or new_grid:
@@ -379,7 +384,9 @@ class MeshMixin(object):
         if grid_name not in self.mesh_names:
             raise ValueError(f"Grid {grid_name} not found in mesh.")
         if include_data:
-            uds = xu.UgridDataset(grids=self.mesh_grids[grid_name])
+            grid = self.mesh_grids[grid_name]
+            uds = xu.UgridDataset(grid.to_dataset())
+            uds.ugrid.grid.set_crs(self.crs)
             # Look for data_vars that are defined on grid_name
             for var in self.mesh.data_vars:
                 if hasattr(self.mesh[var], "ugrid"):
@@ -458,7 +465,7 @@ class MeshMixin(object):
     def mesh_datasets(self) -> Dict:
         """Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh."""  # noqa: E501
         datasets = dict()
-        if self.mesh is not None:
+        if self._mesh is not None:
             for grid in self.mesh.ugrid.grids:
                 datasets[grid.name] = self.get_mesh(
                     grid_name=grid.name, include_data=True
@@ -480,8 +487,17 @@ class MeshMixin(object):
         mesh_gdf = dict()
         if self._mesh is not None:
             for k, v in self.mesh_datasets.items():
-                # works better on a DataArray
-                # name = [n for n in self.mesh.data_vars][0]
+                # works better on a Dataarray / Dataset
+                # (need to add dummy variable if empty)
+                if len(v.data_vars) == 0:
+                    grid = v.ugrid.grid
+                    if grid.topology_dimension == 1:
+                        dim = grid.edge_dimension
+                    elif grid.topology_dimension == 2:
+                        dim = grid.face_dimension
+                    v[f"{grid.name}_node_id"] = xr.DataArray(
+                        v[dim].values.astype(str), dims=dim
+                    )
                 mesh_gdf[k] = v.ugrid.to_geodataframe()
 
         return mesh_gdf

@@ -122,6 +122,7 @@ def create_mesh2d(
         # Create mesh from grid
         grid.index.name = "mesh2d_nFaces"
         mesh2d = xu.UgridDataset.from_geodataframe(grid)
+        mesh2d = mesh2d.ugrid.assign_face_coords()
         mesh2d.ugrid.grid.set_crs(grid.crs)
 
     else:
