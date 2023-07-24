@@ -200,6 +200,9 @@ class DataFrameAdapter(DataAdapter):
         _ = self.resolve_paths(**so_kwargs)  # throw nice error if data not found
 
         kwargs = self.driver_kwargs.copy()
+        # these are just for internal bookeeping. drivers don't need them
+        _ = kwargs.pop("provider", None)
+        _ = kwargs.pop("data_version", None)
 
         # read and clip
         logger.info(f"DataFrame: Read {self.driver} data.")

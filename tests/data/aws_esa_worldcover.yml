@@ -3,6 +3,8 @@ esa_worldcover:
   data_type: RasterDataset
   driver: raster
   filesystem: s3
+  data_version: 2021
+  provider: aws
   driver_kwargs:
     storage_options:
       anon: true

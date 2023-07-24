@@ -150,7 +150,7 @@ class DataCatalog(object):
             self.set_predefined_catalogs()
         return self._catalogs
 
-    def get_source(self, key: str, provider=None) -> DataAdapter:
+    def get_source(self, key: str, provider=None, data_version=None) -> DataAdapter:
         """Get the source."""
         if key not in self._sources:
             available_sources = sorted(list(self._sources.keys()))
@@ -160,33 +160,73 @@ class DataCatalog(object):
             )
 
         available_providers = self._sources[key]
-        if provider is not None:
-            if provider not in available_providers:
-                providers = sorted(list(available_providers.keys()))
+
+        if provider is None:
+            requested_provider = "last_added"
+        else:
+            requested_provider = provider
+
+        if data_version is None:
+            requested_data_version = "last_added"
+        else:
+            requested_data_version = data_version
+
+        if requested_provider not in available_providers:
+            providers = sorted(list(available_providers.keys()))
+            raise KeyError(
+                f"Requested unknown proveder '{requested_provider}' for data_source"
+                f" '{key}' available providers are {providers}"
+            )
+        else:
+            available_data_versions = available_providers[requested_provider]
+            if requested_data_version not in available_data_versions:
+                data_versions = sorted(list(available_data_versions.keys()))
                 raise KeyError(
-                    f"Requested unknown proveder '{provider}' for data_source '{key}'"
-                    f" available providers are {providers}"
+                    f"Requested unknown data_version '{requested_data_version}' for"
+                    f" data_source '{key}' and provider '{requested_provider}'"
+                    f" available data_versions are {data_versions}"
                 )
             else:
-                adapter = available_providers[provider]
-                adapter.version_name = provider
-                return available_providers[provider]
-        else:
-            return available_providers["last"]
+                adapter = available_data_versions[requested_data_version]
+                adapter.provider = requested_provider
+                adapter.data_version = requested_data_version
+
+        return self._sources[key][requested_provider][requested_data_version]
 
     def add_source(self, key: str, adapter: DataAdapter) -> None:
         """Add a new data source to the data catalog."""
         if not isinstance(adapter, DataAdapter):
             raise ValueError("Value must be DataAdapter")
 
+        if hasattr(adapter, "data_version") and adapter.data_version is not None:
+            data_version = adapter.data_version
+        else:
+            data_version = "UNKNOWN"
+
+        if hasattr(adapter, "provider") and adapter.provider is not None:
+            provider = adapter.provier
+        else:
+            provider = adapter.catalog_name
+
         if key not in self._sources:
             self._sources[key] = {}
 
-        self._sources[key]["last"] = adapter
-        if hasattr(adapter, "version_name") and adapter.version_name is not None:
-            self._sources[key][adapter.version_name] = adapter
-        else:
-            self._sources[key][adapter.catalog_name] = adapter
+        if provider not in self._sources[key]:
+            self._sources[key][provider] = {}
+
+        if (
+            provider in self._sources[key]
+            and data_version in self._sources[key][provider]
+        ):
+            warnings.warn(
+                f"overwriting entry with provider: {provider} and version:"
+                f" {data_version} in {key} entry",
+                UserWarning,
+            )
+
+        self._sources[key][provider][data_version] = adapter
+        self._sources[key][provider]["last_added"] = adapter
+        self._sources[key]["last_added"] = {"last_added": adapter}
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
@@ -210,11 +250,13 @@ class DataCatalog(object):
         """Return a flat list of all available data sources with no duplicates."""
         ans = []
         for source_name, available_providers in self._sources.items():
-            # print(available_providers)
-            for provider, adapter in available_providers.items():
-                if provider == "last":
+            for provider, available_data_versions in available_providers.items():
+                if provider == "last_added":
                     continue
-                ans.append((source_name, adapter))
+                for data_version, adapter in available_data_versions.items():
+                    if data_version == "last_added":
+                        continue
+                    ans.append((source_name, adapter))
 
         return ans
 
@@ -225,16 +267,16 @@ class DataCatalog(object):
             " Please use cat.iter_sources()",
             DeprecationWarning,
         )
-        return self._sources.__iter__()
+        return self.iter_sources()
 
     def __len__(self):
         """Return number of sources."""
         warnings.warn(
             "Using len on DataCatalog directly is deprecated."
-            " Please use len(cat.get_source())",
+            " Please use len(cat.iter_sources())",
             DeprecationWarning,
         )
-        return self._sources.__len__()
+        return len(self.iter_sources())
 
     def __repr__(self):
         """Prettyprint the sources."""
@@ -422,7 +464,6 @@ class DataCatalog(object):
 
         catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
 
-        # TODO keep meta data!! Note only possible if yml files are not merged
         if root is None:
             root = meta.get("root", os.path.dirname(urlpath))
         self.from_dict(
@@ -590,8 +631,8 @@ class DataCatalog(object):
                 base, diff_existing, diff_new = partition_dictionaries(
                     source_dict, existing
                 )
-                # TODO how to deal with driver_kwargs vs kwargs when writing?
                 _ = base.pop("driver_kwargs", None)
+
                 existing_version_name = diff_existing.pop("version_name")
                 new_version_name = diff_new.pop("version_name")
                 base["versions"] = [
@@ -683,63 +724,73 @@ class DataCatalog(object):
             sources_out = {}
 
         # export data and update sources
-        for key, available_providers in sources.items():
-            for provider, source in available_providers.items():
-                if provider == "last":
+        for key, available_variants in sources.items():
+            for provider, available_data_versions in available_variants.items():
+                if provider == "last_added":
                     continue
-                try:
-                    # read slice of source and write to file
-                    self.logger.debug(f"Exporting {key}.")
-                    if not unit_conversion:
-                        unit_mult = source.unit_mult
-                        unit_add = source.unit_add
-                        source.unit_mult = {}
-                        source.unit_add = {}
-                    fn_out, driver = source.to_file(
-                        data_root=data_root,
-                        data_name=key,
-                        variables=source_vars.get(key, None),
-                        bbox=bbox,
-                        time_tuple=time_tuple,
-                        logger=self.logger,
-                    )
-                    if fn_out is None:
-                        self.logger.warning(
-                            f"{key} file contains no data within domain"
-                        )
+                for data_version, source in available_data_versions.items():
+                    if data_version == "last_added":
                         continue
-                    # update path & driver and remove kwargs
-                    # and rename in output sources
-                    if unit_conversion:
-                        source.unit_mult = {}
-                        source.unit_add = {}
-                    else:
-                        source.unit_mult = unit_mult
-                        source.unit_add = unit_add
-                    source.path = fn_out
-                    source.driver = driver
-                    source.filesystem = "local"
-                    source.driver_kwargs = {}
-                    source.rename = {}
-                    if key in sources_out:
-                        self.logger.warning(
-                            f"{key} already exists in data catalog and is overwritten."
+                    try:
+                        # read slice of source and write to file
+                        self.logger.debug(f"Exporting {key}.")
+                        if not unit_conversion:
+                            unit_mult = source.unit_mult
+                            unit_add = source.unit_add
+                            source.unit_mult = {}
+                            source.unit_add = {}
+                        fn_out, driver = source.to_file(
+                            data_root=data_root,
+                            data_name=key,
+                            variables=source_vars.get(key, None),
+                            bbox=bbox,
+                            time_tuple=time_tuple,
+                            logger=self.logger,
                         )
-                    if key not in sources_out:
-                        sources_out[key] = {}
+                        if fn_out is None:
+                            self.logger.warning(
+                                f"{key} file contains no data within domain"
+                            )
+                            continue
+                        # update path & driver and remove kwargs
+                        # and rename in output sources
+                        if unit_conversion:
+                            source.unit_mult = {}
+                            source.unit_add = {}
+                        else:
+                            source.unit_mult = unit_mult
+                            source.unit_add = unit_add
+                        source.path = fn_out
+                        source.driver = driver
+                        source.filesystem = "local"
+                        source.driver_kwargs = {}
+                        source.rename = {}
+                        if key in sources_out:
+                            self.logger.warning(
+                                f"{key} already exists in data catalog, overwriting..."
+                            )
+                        if key not in sources_out:
+                            sources_out[key] = {}
+                        if provider not in sources_out[key]:
+                            sources_out[key][provider] = {}
 
-                    sources_out[key][source.catalog_name] = source
-                    sources_out[key]["last"] = source
-                except FileNotFoundError:
-                    self.logger.warning(f"{key} file not found at {source.path}")
+                        sources_out[key][provider][data_version] = source
+                        sources_out[key][provider]["last_added"] = source
+                        sources_out[key]["last_added"] = {"last_added": source}
+                    except FileNotFoundError:
+                        self.logger.warning(f"{key} file not found at {source.path}")
 
         # write data catalog to yml
         data_catalog_out = DataCatalog()
-        for key, available_profviders in sources_out.items():
-            for provider, adapter in available_providers.items():
-                if provider == "last":
+        for key, available_variants in sources_out.items():
+            for provider, available_data_versions in available_variants.items():
+                if provider == "last_added":
                     continue
-                data_catalog_out.add_source(key, adapter)
+                for data_version, adapter in available_data_versions.items():
+                    if data_version == "last_added":
+                        continue
+
+                    data_catalog_out.add_source(key, adapter)
 
         data_catalog_out.to_yml(fn, root="auto", meta=meta)
 
@@ -754,6 +805,8 @@ class DataCatalog(object):
         variables: Union[List, str] = None,
         time_tuple: Tuple = None,
         single_var_as_array: bool = True,
+        provider: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified RasterDataset.
@@ -822,7 +875,11 @@ class DataCatalog(object):
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.get_source(name)
+        source = self.get_source(
+            name,
+            provider=provider,
+            data_version=data_version,
+        )
         self.logger.info(
             f"DataCatalog: Getting {name} RasterDataset {source.driver} data from"
             f" {source.path}"
@@ -849,6 +906,8 @@ class DataCatalog(object):
         buffer: Union[float, int] = 0,
         variables: Union[List, str] = None,
         predicate: str = "intersects",
+        provider=None,
+        data_version=None,
         **kwargs,
     ):
         """Return a clipped and unified GeoDataFrame (vector).
@@ -906,7 +965,11 @@ class DataCatalog(object):
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.get_source(name)
+        source = self.get_source(
+            name,
+            provider=provider,
+            data_version=data_version,
+        )
         self.logger.info(
             f"DataCatalog: Getting {name} GeoDataFrame {source.driver} data"
             f" from {source.path}"
@@ -930,6 +993,8 @@ class DataCatalog(object):
         variables: List = None,
         time_tuple: Tuple = None,
         single_var_as_array: bool = True,
+        provider=None,
+        data_version=None,
         **kwargs,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified GeoDataset.
@@ -993,7 +1058,11 @@ class DataCatalog(object):
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.get_source(name)
+        source = self.get_source(
+            name,
+            provider=provider,
+            data_version=data_version,
+        )
         self.logger.info(
             f"DataCatalog: Getting {name} GeoDataset {source.driver} data"
             f" from {source.path}"
@@ -1005,7 +1074,6 @@ class DataCatalog(object):
             variables=variables,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
-            logger=self.logger,
         )
         return obj
 
@@ -1014,6 +1082,8 @@ class DataCatalog(object):
         data_like: Union[str, Path, pd.DataFrame],
         variables: list = None,
         time_tuple: tuple = None,
+        provider=None,
+        data_version=None,
         **kwargs,
     ):
         """Return a unified and sliced DataFrame.
@@ -1056,7 +1126,11 @@ class DataCatalog(object):
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.get_source(name)
+        source = self.get_source(
+            name,
+            provider=provider,
+            data_version=data_version,
+        )
         self.logger.info(
             f"DataCatalog: Getting {name} DataFrame {source.driver} data"
             f" from {source.path}"
@@ -1083,7 +1157,6 @@ def _parse_data_dict(
         "GeoDataset": GeoDatasetAdapter,
         "DataFrame": DataFrameAdapter,
     }
-    # NOTE: shouldn't the kwarg overwrite the dict/yml ?
     if root is None:
         root = data_dict.pop("root", None)
 
@@ -1199,14 +1272,17 @@ def _denormalise_data_dict(data_dict, catalog_name="") -> List[Dict[str, Any]]:
     # first do a pass to expand possible versions
     dicts = []
     for name, source in data_dict.items():
-        if "versions" in source:
-            versions = source.pop("versions")
-            for version in versions:
-                version_name, diff = version.popitem()
+        if "variants" in source:
+            variants = source.pop("variants")
+            for diff in variants:
                 source_copy = copy.deepcopy(source)
-                diff["version_name"] = version_name
                 diff["name"] = name
                 diff["catalog_name"] = catalog_name
+                if "provider" not in diff:
+                    diff["provider"] = catalog_name
+                if "data_version" not in diff:
+                    diff["data_version"] = "latest"
+
                 source_copy.update(**diff)
                 dicts.append({name: source_copy})
         elif "alias" in source:

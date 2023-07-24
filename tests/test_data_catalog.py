@@ -113,10 +113,40 @@ def test_versioned_catalogs(tmpdir):
 
     aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
     aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
+    # test get_source with all keyword combinations
     assert (
         aws_data_catalog.get_source("esa_worldcover").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
+    assert (
+        aws_data_catalog.get_source("esa_worldcover", data_version="2021").path
+        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
+    )
+    assert (
+        aws_data_catalog.get_source("esa_worldcover", data_version="2021").path
+        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
+    )
+    assert (
+        aws_data_catalog.get_source(
+            "esa_worldcover", data_version="2021", provider="aws"
+        ).path
+        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
+    )
+
+    with pytest.raises(KeyError):
+        aws_data_catalog.get_source(
+            "esa_worldcover", data_version="2021", provider="asdfasdf"
+        )
+    with pytest.raises(KeyError):
+        aws_data_catalog.get_source(
+            "esa_worldcover", data_version="asdfasdf", provider="aws"
+        )
+    with pytest.raises(KeyError):
+        aws_data_catalog.get_source("asdfasdf", data_version="2021", provider="aws")
+
+    # make sure we trigger user warning when overwriting versions
+    with pytest.warns(UserWarning):
+        aws_data_catalog.from_yml(aws_yml_fn)
 
     # make sure we can read merged catalogs
     merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")

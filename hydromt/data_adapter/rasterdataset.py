@@ -273,6 +273,9 @@ class RasterDatasetAdapter(DataAdapter):
         )
 
         kwargs = self.driver_kwargs.copy()
+        # these are just for internal bookeeping. drivers don't need them
+        _ = kwargs.pop("provider", None)
+        _ = kwargs.pop("data_version", None)
         # zarr can use storage options directly, the rest should be converted to
         # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":

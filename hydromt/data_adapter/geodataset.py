@@ -257,7 +257,12 @@ class GeoDatasetAdapter(DataAdapter):
         )
 
         kwargs = self.driver_kwargs.copy()
-
+        # these are just for internal bookeeping. drivers don't need them
+        _ = kwargs.pop(
+            "provider",
+            None,
+        )
+        _ = kwargs.pop("data_version", None)
         # parse geom, bbox and buffer arguments
         clip_str = ""
         if geom is None and bbox is not None:
