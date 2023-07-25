@@ -1,0 +1,45 @@
+[
+
+  {
+    "name":"v0.5.0",
+    "version":"0.5.0",
+    "url":"https://deltares.github.io/hydromt/v0.5.0/"
+
+  },
+  {
+    "name":"v0.6.0",
+    "version":"0.6.0",
+    "url":"https://deltares.github.io/hydromt/v0.6.0/"
+
+  },
+  {
+    "name":"v0.7.0",
+    "version":"0.7.0",
+    "url":"https://deltares.github.io/hydromt/v0.7.0/"
+
+  },
+  {
+    "name":"v0.7.1",
+    "version":"0.7.1",
+    "url":"https://deltares.github.io/hydromt/v0.7.1/"
+
+  },
+  {
+    "name":"latest",
+    "version":"latest",
+    "url":"https://deltares.github.io/hydromt/latest/"
+
+  },
+  {
+    "name":"dev",
+    "version":"dev",
+    "url":"https://deltares.github.io/hydromt/dev/"
+
+  },
+  {
+    "name":"v0.8.0",
+    "version":"0.8.0",
+    "url":"https://deltares.github.io/hydromt/v0.8.0/"
+
+  }
+]
