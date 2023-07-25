@@ -37,13 +37,18 @@ def _run_clean(s: str) -> str:
     )
 
 
-last_release = _run_clean("git tag --list")[-1]
+base_version = "0.8.1"
 
-last_release_sha = _run_clean(f"git rev-list -n 1 {last_release}")
+try:
+    last_release = _run_clean("git tag --list")[-1]
 
-num_commits_since_release = (
-    len(_run_clean(f"git rev-list {last_release_sha}..main")) + 1
-)
+    last_release_sha = _run_clean(f"git rev-list -n 1 {last_release}")
 
-# version number without 'v' at start
-__version__ = f"0.8.1.dev{num_commits_since_release}"
+    num_commits_since_release = (
+        len(_run_clean(f"git rev-list {last_release_sha}..main")) + 1
+    )
+
+    # version number without 'v' at start
+    __version__ = f"{base_version}.dev{num_commits_since_release}"
+except Exception:
+    __version__ = base_version
