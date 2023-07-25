@@ -11,7 +11,7 @@ Unreleased
 
 Added
 -----
-- Versions of HydroMT between releases are now set dynamically based on the number of commits since the last release. (#455)
+- Versions of HydroMT between releases are now updated automatically when the PR is approved. (#455)
 
 Changed
 -------
