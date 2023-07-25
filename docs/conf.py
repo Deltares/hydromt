@@ -234,6 +234,8 @@ autoclass_content = "both"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+bare_version = hydromt.__version__
+doc_version = bare_version[: bare_version.find("dev") - 1]
 html_static_path = ["_static"]
 html_css_files = ["theme-deltares.css"]
 html_theme_options = {
@@ -257,14 +259,18 @@ html_theme_options = {
     "logo": {
         "text": "HydroMT Core",
     },
-    "navbar_end": ["navbar-icon-links"],  # remove dark mode switch
+    "navbar_end": ["navbar-icon-links", "version-switcher"],  # remove dark mode switch
+    "switcher": {
+        "json_url": "https://deltares.github.io/hydromt/latest/switcher.json",
+        "version_match": doc_version,
+    },
 }
 
 html_context = {
     "github_url": "https://github.com",  # or your GitHub Enterprise interprise
     "github_user": "Deltares",
     "github_repo": "hydromt",
-    "github_version": "main",  # FIXME
+    "github_version": "main",
     "doc_path": "docs",
     "default_mode": "light",
 }
