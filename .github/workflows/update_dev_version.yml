@@ -1,0 +1,28 @@
+
+on:
+  pull_request_review:
+    types:
+      - submitted
+  workflow_dispatch:
+
+
+jobs:
+  update_version:
+  if: github.event.review.state == 'approved'
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout source
+      uses: actions/checkout@v3
+    - name: configure git
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+    - name: update version
+      run: |
+        last_release=$(git tag --list | tail -n 1)
+        num_commits_since_release=$(($(git rev-list $last_release..main | wc -l) + 1 ))
+        sed -i "s/__version__\s*=\s*\"(\d+\.\d+\.\d+).dev(\d+)\"/__version__ = \"$1.dev$num_commits_since_release\"/" hydromt/__init__.py
+        git add hydromt/__init__.py
+        git commit -m "update version"
+        git push origin ${{ github.ref_name}} -f
+        gh pr comment ${{ github.ref_name }} -b "I've updated the version for you. Feel free to merge now!"
