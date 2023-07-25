@@ -1,12 +1,10 @@
 """Implementation for mesh based workflows."""
 import logging
-from os.path import isfile
-from pathlib import Path
 from typing import Dict, Optional, Union
 
 import geopandas as gpd
-import xarray as xr
 import xugrid as xu
+from pyproj import CRS
 from shapely.geometry import box
 from xugrid.ugrid import conventions
 
@@ -38,7 +36,6 @@ def create_mesh2d(
     can be extracted using the `bounds` argument of region.
 
     Note Only existing meshed with only 2D grid can be read.
-    #FIXME: read existing 1D2D network file and extract 2D part.
 
     Adds/Updates model layers:
 
@@ -48,7 +45,9 @@ def create_mesh2d(
     ----------
     region : dict
         Dictionary describing region of interest, bounds can be provided
-        for type 'mesh'. CRS for 'bbox' and 'bounds' should be 4326; e.g.:
+        for type 'mesh'. In case of 'mesh', if the file includes several
+        grids, the specific 2D grid can be selected using the 'grid_name' argument.
+        CRS for 'bbox' and 'bounds' should be 4326; e.g.:
 
         * {'bbox': [xmin, ymin, xmax, ymax]}
 
@@ -56,7 +55,7 @@ def create_mesh2d(
 
         * {'mesh': 'path/to/2dmesh_file'}
 
-        * {'mesh': 'path/to/2dmesh_file', 'bounds': [xmin, ymin, xmax, ymax]}
+        * {'mesh': 'path/to/2dmesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
     res: float
         Resolution used to generate 2D mesh [unit of the CRS], required if region
         is not based on 'mesh'.
@@ -70,11 +69,11 @@ def create_mesh2d(
     -------
     mesh2d : xu.UgridDataset
         Generated mesh2d.
-    """
-    if "mesh" not in region:
+    """  # noqa: E501
+    kind, region = parse_region(region, logger=logger)
+    if kind != "mesh":
         if not isinstance(res, (int, float)):
             raise ValueError("res argument required for kind 'bbox', 'geom'")
-        kind, region = parse_region(region, logger=logger)
         if kind == "bbox":
             bbox = region["bbox"]
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
@@ -113,7 +112,6 @@ def create_mesh2d(
         grid = gpd.GeoDataFrame(geometry=faces, crs=geom.crs)
         # If needed clip to geom
         if kind != "bbox":
-            # TODO: grid.intersects(geom) does not seem to work ?
             grid = grid.loc[
                 gpd.sjoin(
                     grid, geom, how="left", predicate="intersects"
@@ -126,65 +124,73 @@ def create_mesh2d(
         mesh2d.ugrid.grid.set_crs(grid.crs)
 
     else:
-        mesh2d_fn = region["mesh"]
-        if isinstance(mesh2d_fn, (str, Path)) and isfile(mesh2d_fn):
-            logger.info("An existing 2D grid is used to prepare 2D mesh.")
+        # Read existing mesh
+        uds = region["mesh"]
 
-            ds = xr.open_dataset(mesh2d_fn, mask_and_scale=False)
-        elif isinstance(mesh2d_fn, xr.Dataset):
-            ds = mesh2d_fn
-        else:
-            raise ValueError(f"Region 'mesh' file {mesh2d_fn} not found, please check")
-        topologies = [
-            k for k in ds.data_vars if ds[k].attrs.get("cf_role") == "mesh_topology"
-        ]
-        for topology in topologies:
-            topodim = ds[topology].attrs["topology_dimension"]
-            if topodim != 2:  # chek if 2d mesh file else throw error
-                raise NotImplementedError(
-                    f"{mesh2d_fn} cannot be opened. Please check if the existing"
-                    " grid is an 2D mesh and not 1D2D mesh. "
-                    " This option is not yet available for 1D2D meshes."
+        # Select grid and/or check single grid
+        grids = dict()
+        for grid in uds.grids:
+            grids[grid.name] = grid
+        # Select specific topology if given
+        if "grid_name" in region:
+            if region["grid_name"] not in grids:
+                raise ValueError(
+                    f"Mesh file does not contain grid {region['grid_name']}."
                 )
-
-        # Continues with a 2D grid
-        mesh2d = xu.UgridDataset(ds)
-        # Check crs and reproject to model crs
-        if crs is not None:
-            crs = gis_utils.parse_crs(crs, bbox=mesh2d.ugrid.grid.bounds)
+            grid = grids[region["grid_name"]]
+        elif len(grids) == 1:
+            grid = list(grids.values())[0]
         else:
-            crs = 4326
-        if ds.raster.crs is not None:  # parse crs
-            mesh2d.ugrid.grid.set_crs(ds.raster.crs)
+            raise ValueError(
+                "Mesh file contains several grids. "
+                "Use grid_name argument of region to select a single one."
+            )
+        # Chek if 2d mesh file else throw error
+        if grid.topology_dimension != 2:
+            raise ValueError("Grid in mesh file for create_mesh2d is not 2D.")
+        # Continues with a 2D grid
+        mesh2d = xu.UgridDataset(grid.to_dataset())
+
+        # Check crs and reproject to model crs
+        grid_crs = grid.crs
+        if crs is not None:
+            bbox = None
+            if grid_crs is not None:
+                if grid_crs.to_epsg() == 4326:
+                    bbox = mesh2d.ugrid.grid.bounds
+            crs = gis_utils.parse_crs(crs, bbox=bbox)
+        else:
+            crs = CRS.from_user_input(4326)
+        if grid_crs is not None:  # parse crs
+            mesh2d.ugrid.grid.set_crs(grid_crs)
         else:
             # Assume model crs
             logger.warning(
-                f"Mesh data from {mesh2d_fn} doesn't have a CRS."
+                "Mesh data from mesh file doesn't have a CRS."
                 f" Assuming crs option {crs}"
             )
             mesh2d.ugrid.grid.set_crs(crs)
         mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
 
+        # If bounds are provided in region, extract mesh for bounds
+        if "bounds" in region:
+            bounds = gpd.GeoDataFrame(geometry=[box(*region["bounds"])], crs=4326)
+            xmin, ymin, xmax, ymax = bounds.to_crs(mesh2d.ugrid.grid.crs).total_bounds
+            subset = mesh2d.ugrid.sel(y=slice(ymin, ymax), x=slice(xmin, xmax))
+            # Check if still cells after clipping
+            err = (
+                "MeshDataset: No data within model region."
+                "Check that bounds were given in the correct crs 4326"
+            )
+            subset = subset.ugrid.assign_node_coords()
+            if subset.ugrid.grid.node_x.size == 0 or subset.ugrid.grid.node_y.size == 0:
+                raise IndexError(err)
+            mesh2d = subset
+
     # Reproject to user crs option if needed
-    if mesh2d.ugrid.grid.crs != crs and crs is not None:
+    if mesh2d.ugrid.grid.crs != crs:
         logger.info(f"Reprojecting mesh to crs {crs}")
         mesh2d.ugrid.grid.to_crs(crs)
-
-    # If bounds are provided in region for mesh, extract mesh for bounds
-    if "bounds" in region and "mesh" in region:
-        bounds = gpd.GeoDataFrame(geometry=[box(*region["bounds"])], crs=4326)
-        xmin, ymin, xmax, ymax = bounds.to_crs(crs).total_bounds
-        subset = mesh2d.ugrid.sel(y=slice(ymin, ymax), x=slice(xmin, xmax))
-        # Check if still cells after clipping
-        err = (
-            "RasterDataset: No data within model region."
-            "Check that bounds were given in the correct crs 4326"
-        )
-        subset = subset.ugrid.assign_node_coords()
-        if subset.ugrid.grid.node_x.size == 0 or subset.ugrid.grid.node_y.size == 0:
-            raise IndexError(err)
-        # reinitialise mesh2d grid (set_mesh is used in super)
-        mesh2d = subset
 
     return mesh2d
 

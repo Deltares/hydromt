@@ -236,7 +236,13 @@ class MeshMixin(object):
 
     @property
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
-        """Model static mesh data. Returns a xarray.Dataset."""
+        """
+        Model static mesh data. It returns a xugrid.UgridDataset.
+
+        Mesh can contain several grids (1D, 2D, 3D) defined according
+        to UGRID conventions. To extract a specific grid, use get_mesh
+        method.
+        """
         # XU grid data type Xarray dataset with xu sampling.
         if self._mesh is None and self._read:
             self.read_mesh()
@@ -543,7 +549,6 @@ class MeshModel(MeshMixin, Model):
         can be extracted using the `bounds` argument of region.
 
         Note Only existing meshed with only 2D grid can be read.
-        #FIXME: read existing 1D2D network file and extract 2D part.
 
         Adds/Updates model layers:
 
@@ -553,6 +558,8 @@ class MeshModel(MeshMixin, Model):
         ----------
         region : dict
             Dictionary describing region of interest, bounds can be provided for type 'mesh'.
+            In case of 'mesh', if the file includes several grids, the specific 2D grid can
+            be selected using the 'grid_name' argument.
             CRS for 'bbox' and 'bounds' should be 4326; e.g.:
 
             * {'bbox': [xmin, ymin, xmax, ymax]}
@@ -561,7 +568,7 @@ class MeshModel(MeshMixin, Model):
 
             * {'mesh': 'path/to/2dmesh_file'}
 
-            * {'mesh': 'path/to/2dmesh_file', 'bounds': [xmin, ymin, xmax, ymax]}
+            * {'mesh': 'path/to/mesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
         res: float
             Resolution used to generate 2D mesh [unit of the CRS], required if region
             is not based on 'mesh'.
