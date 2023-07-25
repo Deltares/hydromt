@@ -175,6 +175,8 @@ class RasterDatasetAdapter(DataAdapter):
         driver: str
             Name of driver to read data with, see
             :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+        kwargs: dict
+            the additional kwyeord arguments that were passed to `to_netcdf`
         """
         try:
             obj = self.get_data(
@@ -186,7 +188,7 @@ class RasterDatasetAdapter(DataAdapter):
             )
         except IndexError as err:  # out of bounds
             logger.warning(str(err))
-            return None, None
+            return None, None, None
 
         if driver is None:
             # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
@@ -224,7 +226,7 @@ class RasterDatasetAdapter(DataAdapter):
                 )
             driver = "raster"
 
-        return fn_out, driver
+        return fn_out, driver, kwargs
 
     def get_data(
         self,

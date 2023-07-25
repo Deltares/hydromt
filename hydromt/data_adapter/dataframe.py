@@ -148,6 +148,8 @@ class DataFrameAdapter(DataAdapter):
         driver : str
             Name of the driver used to read the data.
             See :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`.
+        kwargs: dict
+            The additional keyword arguments that were passed in.
 
 
         """
@@ -158,7 +160,7 @@ class DataFrameAdapter(DataAdapter):
             )
         except IndexError as err:  # out of bounds for time
             logger.warning(str(err))
-            return None, None
+            return None, None, None
 
         if driver is None or driver == "csv":
             # always write as CSV
@@ -171,7 +173,7 @@ class DataFrameAdapter(DataAdapter):
         else:
             raise ValueError(f"DataFrame: Driver {driver} is unknown.")
 
-        return fn_out, driver
+        return fn_out, driver, kwargs
 
     def get_data(
         self,

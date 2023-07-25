@@ -162,7 +162,7 @@ class GeoDataFrameAdapter(DataAdapter):
         kwargs.pop("time_tuple", None)
         gdf = self.get_data(bbox=bbox, variables=variables, logger=logger)
         if gdf.index.size == 0:
-            return None, None
+            return None, None, None
 
         if driver is None:
             _lst = ["csv", "xls", "xlsx", "xy", "vector_table"]
@@ -186,7 +186,7 @@ class GeoDataFrameAdapter(DataAdapter):
             gdf.to_file(fn_out, driver=driver, **kwargs)
             driver = "vector"
 
-        return fn_out, driver
+        return fn_out, driver, kwargs
 
     def get_data(
         self,

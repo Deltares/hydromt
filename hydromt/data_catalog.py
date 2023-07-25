@@ -585,7 +585,7 @@ class DataCatalog(object):
                     unit_add = source.unit_add
                     source.unit_mult = {}
                     source.unit_add = {}
-                fn_out, driver = source.to_file(
+                fn_out, driver, source_kwargs = source.to_file(
                     data_root=data_root,
                     data_name=key,
                     variables=source_vars.get(key, None),
