@@ -11,7 +11,7 @@ Unreleased
 
 Added
 -----
--
+- Versions of HydroMT between releases are now updated automatically when the PR is approved. (#455)
 
 Changed
 -------

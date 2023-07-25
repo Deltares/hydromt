@@ -37,7 +37,9 @@ If you found a bug or an issue you would like to tackle or contribute to a new d
 4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`_.
 5. Push your commits to the github repository and open a draft pull request. The body of the pull request will be pre-filled with a template. Please fill out this template with the relevant information, and complete the checklist included.
 6. Once you're satisfied with the changes mark the pull request as "as ready for review" and ask another contributor to review the code. The review should cover the implementation as well as steps 2-4.
-7. Merge the pull request once the review has been approved.
+7. Once your request has been approved, a bot will add a commit to your branch to automatically update the version number. Please wait for this to complete before you merge. Once it is done, a comment saying "You're free to merge now" will be added to your PR.
+8. Note that if you want to make changes after this commit has been added, you should pull the branch first to avoid merge conflicts.
+9. You are now free to merge your pull request. Do merge with a `squash` commit!! This is important to make sure the version counting stays accurate.
 
 
 .. _git-conventions:
@@ -181,7 +183,7 @@ It's telling us we first need to tell it what we want to do with the current con
 Success!
 This is a simple introduction into a potentially very complicated subject. You can read more about the different possibilities here:
 
-*  `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
+* `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
 * `Merge Strategies <https://www.atlassian.com/git/tutorials/using-branches/merge-strategy>`_
 
 

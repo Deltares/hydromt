@@ -1,6 +1,5 @@
 """HydroMT: Automated and reproducible model building and analysis."""
 
-# version number without 'v' at start
 __version__ = "0.8.1.dev0"
 
 # Set environment variables (this will be temporary)
