@@ -7,7 +7,7 @@ on:
 
 
 jobs:
-  update_version:
+  update-version:
     if: github.event_name == 'workflow_dispatch' || github.event.review.state == 'approved'
     defaults:
       run:
