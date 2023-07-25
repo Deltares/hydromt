@@ -1,0 +1,20 @@
+---
+name: Auto approve PR
+on:
+  pull_request:
+    types: [opened, reopened]
+jobs:
+  move-assigned-card:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup git
+        run: |
+          git config --global user.name "GH Actions bot"
+          git config --global user.email "<>"
+      - name: Auto approve PR
+        run: |
+          gh pr review --approve -b "You seem like a trust worthy individual. I'll just approve this for you, I'm sure it's fine. Right?" $PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
