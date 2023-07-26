@@ -1,6 +1,7 @@
-PY_ENV_MANAGER		?= micromamba
+PY_ENV_MANAGER		?= mamba
 DOCKER_USER_NAME 	?= deltares
 OPT_DEPS			?= ""
+ENV_NAME			?= hydromt
 SPHINXBUILD   	 	 = sphinx-build
 SPHINXPROJ    	 	 = hydromt
 SOURCEDIR     	 	 = docs
@@ -8,29 +9,28 @@ BUILDDIR      	 	 = docs/_build
 
 .PHONY: clean html
 
-dev: full-environment.yml
-	$(PY_ENV_MANAGER) create -f full-environment.yml -y
-	$(PY_ENV_MANAGER) -n hydromt run pip install .
-	$(PY_ENV_MANAGER) -n hydromt run pre-commit install
+dev: pyproject.toml
+	python make_env.py full -n hydromt-dev
+	$(PY_ENV_MANAGER) env create -f environment.yml
+	$(PY_ENV_MANAGER) run -n hydromt-dev pip install -e .
+	$(PY_ENV_MANAGER) run -n hydromt-dev pre-commit install
 
-env:
+env: pyproject.toml
 	@# the subst is to make sure the is always exactly one "" around OPT_DEPS so people can
 	@# specify it both as OPT_DEPS=extra,io and OPT_DEPS="extra,io"
-	python3 make_env.py "$(subst ",,$(OPT_DEPS))"
-	$(PY_ENV_MANAGER) create -f environment.yml -y
-	$(PY_ENV_MANAGER) -n hydromt run pip install .
+	@# Note that if you use this receipt you will not get in editable install
+	python make_env.py "$(subst ",,$(OPT_DEPS))" -n $(ENV_NAME)
+	$(PY_ENV_MANAGER) env create -f environment.yml
+	$(PY_ENV_MANAGER) run -n $(ENV_NAME) pip install .
 
 min-environment.yml:
-	pip install tomli
-	python3 make_env.py -o min-environment.yml
+	python make_env.py -o min-environment.yml
 
 slim-environment.yml:
-	pip install tomli
-	python3 make_env.py "slim" -o slim-environment.yml
+	python make_env.py "slim" -o slim-environment.yml
 
 full-environment.yml:
-	pip install tomli
-	python3 make_env.py "full" -o full-environment.yml
+	python make_env.py "full" -o full-environment.yml
 
 docker-min: min-environment.yml
 	docker build -t $(DOCKER_USER_NAME)/hydromt:min --target=min .
@@ -52,8 +52,10 @@ pypi:
 
 clean:
 	rm -f *environment.yml
-	rm -rf $(BUILDDIR)/*
+	rm -rf $(BUILDDIR)
 	rm -rf dist
+	rm -rf docs/_generated
+	rm -rf docs/_examples
 
 docker-clean:
 	docker images =reference="*hydromt*" -q | xargs --no-run-if-empty docker rmi -f

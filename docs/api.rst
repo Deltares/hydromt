@@ -787,9 +787,9 @@ PCRaster I/O
 
 .. _statistics:
 
-==========
-Statistics
-==========
+=====================================
+Statistics and Extreme Value Analysis
+=====================================
 
 Statistics and performance metrics
 ==================================
@@ -810,6 +810,25 @@ Statistics and performance metrics
    stats.skills.rsquared
    stats.skills.mse
    stats.skills.rmse
+
+Extreme Value Analysis
+=======================
+.. autosummary::
+   :toctree: _generated
+
+   stats.extremes.get_peaks
+   stats.extremes.fit_extremes
+   stats.extremes.get_return_value
+   stats.extremes.eva
+
+=============
+Design Events
+=============
+.. autosummary::
+   :toctree: _generated
+
+   stats.design_events.get_peak_hydrographs
+
 
 =========
 Utilities

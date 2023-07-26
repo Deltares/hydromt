@@ -228,11 +228,14 @@ class XGeoBase(object):
 
     @property
     def crs(self) -> CRS:
-        """Return Coordinate Reference System as :py:meth:`pyproj.CRS` object."""
+        """Return horizontal Coordinate Reference System."""
+        # return horizontal crs by default to avoid errors downstream
+        # with reproject / rasterize etc.
         if "crs_wkt" not in self.attrs:
             self.set_crs()
         if "crs_wkt" in self.attrs:
-            return pyproj.CRS.from_user_input(self.attrs["crs_wkt"])
+            crs = pyproj.CRS.from_user_input(self.attrs["crs_wkt"])
+            return crs
 
     def set_crs(self, input_crs=None):
         """Set the Coordinate Reference System.
@@ -474,14 +477,11 @@ class XRasterBase(XGeoBase):
     @property
     def box(self) -> gpd.GeoDataFrame:
         """Return :py:meth:`~geopandas.GeoDataFrame` of bounding box."""
-        crs = self.crs
-        if crs is not None and crs.to_epsg() is not None:
-            crs = crs.to_epsg()  # not all CRS have an EPSG code
         transform = self.transform
         rs = np.array([0, self.height, self.height, 0, 0])
         cs = np.array([0, 0, self.width, self.width, 0])
         xs, ys = transform * (cs, rs)
-        return gpd.GeoDataFrame(geometry=[Polygon([*zip(xs, ys)])], crs=crs)
+        return gpd.GeoDataFrame(geometry=[Polygon([*zip(xs, ys)])], crs=self.crs)
 
     @property
     def res(self) -> tuple[float, float]:
@@ -1103,33 +1103,40 @@ class XRasterBase(XGeoBase):
                 x1 += xres * buffer
             return self._obj.sel({self.x_dim: slice(x0, x1), self.y_dim: slice(y0, y1)})
 
-    # TODO make consistent with clip_geom
-    def clip_mask(self, mask):
+    def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
         """Clip object to region with mask values greater than zero.
 
         Arguments
         ---------
-        mask : xarray.DataArray
+        da_mask : xarray.DataArray
             Mask array.
+        mask: bool, optional
+            Mask values outside geometry with the raster nodata value
+            and add a "mask" coordinate with the boolean mask.
 
         Returns
         -------
         xarray.DataSet or DataArray
             Data clipped to mask.
         """
-        if not isinstance(mask, xr.DataArray):
+        if not isinstance(da_mask, xr.DataArray):
             raise ValueError("Mask should be xarray.DataArray type.")
-        if not mask.raster.shape == self.shape:
-            raise ValueError("Mask shape invalid.")
-        mask_bin = (mask.values != 0).astype(np.uint8)
-        if not np.any(mask_bin):
-            raise ValueError("Invalid mask.")
-        row_slice, col_slice = ndimage.find_objects(mask_bin)[0]
-        self._obj.coords["mask"] = xr.Variable(self.dims, mask_bin)
-        return self._obj.isel({self.x_dim: col_slice, self.y_dim: row_slice})
+        if not self.identical_grid(da_mask):
+            raise ValueError("Mask grid invalid.")
+        da_mask = da_mask != 0  # convert to boolean
+        if not np.any(da_mask):
+            raise ValueError("No valid values found in mask.")
+        # clip
+        row_slice, col_slice = ndimage.find_objects(da_mask.values.astype(np.uint8))[0]
+        obj_clip = self._obj.isel({self.x_dim: col_slice, self.y_dim: row_slice})
+        if mask:  # mask values and add mask coordinate
+            mask_bin = da_mask.isel({self.x_dim: col_slice, self.y_dim: row_slice})
+            obj_clip.coords["mask"] = xr.Variable(self.dims, mask_bin.values)
+            obj_clip = obj_clip.raster.mask(obj_clip.coords["mask"])
+        return obj_clip
 
     def clip_geom(self, geom, align=None, buffer=0, mask=False):
-        """Clip object to bounding box of the geometry and add 'mask' coordinate.
+        """Clip object to bounding box of the geometry.
 
         Arguments
         ---------
@@ -1141,7 +1148,8 @@ class XRasterBase(XGeoBase):
             Buffer around the bounding box expressed in resolution multiplicity,
             by default 0
         mask: bool, optional
-            Mask values outside geometry with the raster nodata value
+            Mask values outside geometry with the raster nodata value,
+            and add a "mask" coordinate with the rasterize geometry mask.
 
         Returns
         -------
@@ -1155,8 +1163,8 @@ class XRasterBase(XGeoBase):
         if geom.crs is not None and self.crs is not None and geom.crs != self.crs:
             bbox = rasterio.warp.transform_bounds(geom.crs, self.crs, *bbox)
         obj_clip = self.clip_bbox(bbox, align=align, buffer=buffer)
-        obj_clip.coords["mask"] = obj_clip.raster.geometry_mask(geom)  # TODO remove!
-        if mask:
+        if mask:  # set nodata values outside geometry
+            obj_clip = obj_clip.assign_coords(mask=obj_clip.raster.geometry_mask(geom))
             obj_clip = obj_clip.raster.mask(obj_clip.coords["mask"])
         return obj_clip
 
@@ -1489,7 +1497,6 @@ class XRasterBase(XGeoBase):
         dst_height=None,
         align=False,
     ):
-        xres, yres = self.res
         # NOTE dst_tranform may get overwritten here?!
         if dst_transform is None or dst_width is None or dst_height is None:
             (
@@ -1784,7 +1791,7 @@ class RasterDataArray(XRasterBase):
         )
         # apply rasterio warp reproject
         rasterio.warp.reproject(
-            source=self._obj.load().data,
+            source=self._obj.values,
             destination=da_reproject.data,
             src_transform=self.transform,
             src_crs=self.crs,
@@ -1921,7 +1928,7 @@ class RasterDataArray(XRasterBase):
                 else (self._obj.shape[0], dst_height, dst_width),
                 dims=self.dims if self.dim0 is None else (self.dim0, *self.dims),
             )
-            # chunk time and set reset chunks on other dims
+            # no chunks on spatial dims
             chunksize = max(self._obj.chunks[0])
             chunks = {d: chunksize if d == self.dim0 else -1 for d in self._obj.dims}
             _da = self._obj.chunk(chunks)
@@ -1951,13 +1958,21 @@ class RasterDataArray(XRasterBase):
         if self.aligned_grid(other):
             da = self.clip_bbox(other.raster.bounds)
         elif not self.identical_grid(other):
-            da = self.reproject(
-                dst_crs=other.raster.crs,
-                dst_transform=other.raster.transform,
-                dst_width=other.raster.width,
-                dst_height=other.raster.height,
-                method=method,
-            )
+            da_clip = self.clip_bbox(other.raster.transform_bounds(self.crs), buffer=2)
+            if np.any(np.array(da_clip.raster.shape) < 2):
+                # out of bounds -> return empty array
+                if isinstance(other, xr.Dataset):
+                    other = other[list(other.data_vars.keys())[0]]
+                da = full_like(other, nodata=self.nodata)
+                da.name = self._obj.name
+            else:
+                da = da_clip.raster.reproject(
+                    dst_crs=other.raster.crs,
+                    dst_transform=other.raster.transform,
+                    dst_width=other.raster.width,
+                    dst_height=other.raster.height,
+                    method=method,
+                )
         if (
             da.raster.x_dim != other.raster.x_dim
             or da.raster.y_dim != other.raster.y_dim
@@ -1973,8 +1988,7 @@ class RasterDataArray(XRasterBase):
             )
         # make sure coordinates are identical!
         xcoords, ycoords = other.raster.xcoords, other.raster.ycoords
-        da[xcoords.name] = xcoords
-        da[ycoords.name] = ycoords
+        da = da.assign_coords({xcoords.name: xcoords, ycoords.name: ycoords})
         return da
 
     def reindex2d(self, index, dst_nodata=None):
@@ -2026,7 +2040,7 @@ class RasterDataArray(XRasterBase):
                 else (self._obj.shape[0], *index.raster.shape),
                 dims=self.dims if self.dim0 is None else (self.dim0, *self.dims),
             )
-            # chunk along first dim
+            # no chunks on spatial dims
             chunksize = max(self._obj.chunks[0])
             chunks = {d: chunksize if d == self.dim0 else -1 for d in self._obj.dims}
             _da = self._obj.chunk(chunks)
@@ -2614,10 +2628,7 @@ class RasterDataArray(XRasterBase):
         ]
         if len(feats) == 0:  # return empty GeoDataFrame
             return gpd.GeoDataFrame()
-        crs = self.crs
-        if crs is None and crs.to_epsg() is not None:
-            crs = crs.to_epsg()  # not all CRS have an EPSG code
-        gdf = gpd.GeoDataFrame.from_features(feats, crs=crs)
+        gdf = gpd.GeoDataFrame.from_features(feats, crs=self.crs)
         gdf.index = gdf.index.astype(self._obj.dtype)
         return gdf
 
@@ -2806,13 +2817,22 @@ class RasterDataset(XRasterBase):
         if self.aligned_grid(other):
             ds = self.clip_bbox(other.raster.bounds)
         elif not self.identical_grid(other):
-            ds = self.reproject(
-                dst_crs=other.raster.crs,
-                dst_transform=other.raster.transform,
-                dst_width=other.raster.width,
-                dst_height=other.raster.height,
-                method=method,
-            )
+            ds_clip = self.clip_bbox(other.raster.transform_bounds(self.crs), buffer=2)
+            if np.any(np.array(ds_clip.raster.shape) < 2):
+                # out of bounds -> return empty dataset
+                if isinstance(other, xr.Dataset):
+                    other = other[list(other.data_vars.keys())[0]]
+                ds = xr.Dataset(attrs=self._obj.attrs)
+                for var in self._obj.data_vars:
+                    ds[var] = full_like(other, nodata=np.nan)
+            else:
+                ds = ds_clip.raster.reproject(
+                    dst_crs=other.raster.crs,
+                    dst_transform=other.raster.transform,
+                    dst_width=other.raster.width,
+                    dst_height=other.raster.height,
+                    method=method,
+                )
         if (
             ds.raster.x_dim != other.raster.x_dim
             or ds.raster.y_dim != other.raster.y_dim
@@ -2828,8 +2848,7 @@ class RasterDataset(XRasterBase):
             )
         # make sure coordinates are identical!
         xcoords, ycoords = other.raster.xcoords, other.raster.ycoords
-        ds[xcoords.name] = xcoords
-        ds[ycoords.name] = ycoords
+        ds = ds.assign_coords({xcoords.name: xcoords, ycoords.name: ycoords})
         return ds
 
     def reindex2d(self, index):
