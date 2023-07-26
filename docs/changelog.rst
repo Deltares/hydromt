@@ -11,7 +11,7 @@ Unreleased
 
 Added
 -----
--
+- New raster method ``to_osm_tiles``: tiling of a raster dataset according to the osm structure.
 
 Changed
 -------
