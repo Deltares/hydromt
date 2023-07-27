@@ -167,6 +167,7 @@ class DataFrameAdapter(DataAdapter):
             driver = "csv"
             fn_out = join(data_root, f"{data_name}.csv")
             obj.to_csv(fn_out, **kwargs)
+            kwargs["index_col"] = obj.index.name
         elif driver == "excel":
             fn_out = join(data_root, f"{data_name}.xlsx")
             obj.to_excel(fn_out, **kwargs)
