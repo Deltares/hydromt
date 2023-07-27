@@ -261,7 +261,7 @@ html_theme_options = {
     },
     "navbar_end": ["navbar-icon-links", "version-switcher"],  # remove dark mode switch
     "switcher": {
-        "json_url": "https://raw.githubusercontent.com/Deltares/hydromt/doc-version-switcher/docs/_static/switcher.json",
+        "json_url": "https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json",
         "version_match": doc_version,
     },
 }
