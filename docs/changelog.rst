@@ -11,7 +11,7 @@ Unreleased
 
 Added
 -----
--
+- docs now include a dropdown for selecting older versions of the docs. (#457)
 
 Changed
 -------
