@@ -11,8 +11,8 @@ Unreleased
 
 Added
 -----
+- docs now include a dropdown for selecting older versions of the docs. (#457)
 - Added documentation for how to start your own plugin (#446)
-
 
 Changed
 -------
