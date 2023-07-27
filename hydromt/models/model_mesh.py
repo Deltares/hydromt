@@ -253,7 +253,7 @@ class MeshMixin(object):
                     f"Cannot set mesh from {str(type(data).__name__)} without a name."
                 )
             data = data.to_dataset()
-        if self._mesh is None:  # NOTE: mesh is initialized with None
+        if self.mesh is None:  # NOTE: mesh is initialized with None
             self._mesh = data
         else:
             for dvar in data.data_vars:
@@ -279,7 +279,11 @@ class MeshMixin(object):
             if ds.rio.crs is not None:  # parse crs
                 uds.ugrid.grid.set_crs(ds.raster.crs)
                 uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
-            self.set_mesh(uds)
+            if self._mesh is None:
+                self._mesh = uds
+            else:
+                for dvar in uds.data_vars:
+                    self._mesh[dvar] = uds[dvar]
 
     def write_mesh(self, fn: str = "mesh/mesh.nc", **kwargs) -> None:
         """Write model grid data to a netCDF file at <root>/<fn>.

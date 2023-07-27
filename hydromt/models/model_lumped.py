@@ -68,7 +68,7 @@ class LumpedMixin:
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
         for dvar in data.data_vars:
-            if dvar in self._response_units:
+            if dvar in self.response_units:
                 self.logger.warning(f"Replacing response_units variable: {dvar}")
             # TODO: check on index coordinate before merging
             self._response_units[dvar] = data[dvar]
@@ -105,7 +105,8 @@ class LumpedMixin:
             ds = ds.assign_coords(geometry=(["index"], gdf["geometry"]))
             if gdf.crs is not None:  # parse crs
                 ds = ds.rio.write_crs(gdf.crs)
-        self.set_response_units(ds)
+        for dvar in ds.data_vars:
+            self._response_units[dvar] = ds[dvar]
 
     def write_response_units(
         self,

@@ -297,6 +297,9 @@ class Model(object, metaclass=ABCMeta):
         if write:
             self.write()
 
+        # clean up filehandlers and delete old files / rename tmp ones
+        # @savente93
+
     ## general setup methods
 
     def setup_region(
@@ -1020,7 +1023,7 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self._maps:
+            if name in self.maps:
                 self.logger.warning(f"Replacing result: {name}")
             self._maps[name] = data_dict[name]
 
@@ -1040,7 +1043,8 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
         for name, ds in ncs.items():
-            self.set_maps(ds, name=name)
+            data_dict = _check_data(ds, name=name, split_dataset=True)
+            self._maps[name] = data_dict[name]
 
     def write_maps(self, fn="maps/{name}.nc", **kwargs) -> None:
         """Write maps to netcdf file at <root>/<fn>.
@@ -1229,7 +1233,7 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self._forcing:
+            if name in self.forcing:
                 self.logger.warning(f"Replacing forcing: {name}")
             self._forcing[name] = data_dict[name]
 
@@ -1249,7 +1253,8 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
         for name, ds in ncs.items():
-            self.set_forcing(ds, name=name)
+            data_dict = _check_data(ds, name=name, split_dataset=True)
+            self._forcing[name] = data_dict[name]
 
     def write_forcing(self, fn="forcing/{name}.nc", **kwargs) -> None:
         """Write forcing to netcdf file at <root>/<fn>.
@@ -1298,7 +1303,7 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self._states:
+            if name in self.states:
                 self.logger.warning(f"Replacing state: {name}")
             self._states[name] = data_dict[name]
 
@@ -1318,7 +1323,8 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
         for name, ds in ncs.items():
-            self.set_states(ds, name=name)
+            data_dict = _check_data(ds, name=name, split_dataset=True)
+            self._states[name] = data_dict[name]
 
     def write_states(self, fn="states/{name}.nc", **kwargs) -> None:
         """Write states to netcdf file at <root>/<fn>.
@@ -1372,7 +1378,7 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self._results:
+            if name in self.results:
                 self.logger.warning(f"Replacing result: {name}")
             self._results[name] = data_dict[name]
 
@@ -1392,7 +1398,8 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode
         ncs = self._read_nc(fn, **kwargs)
         for name, ds in ncs.items():
-            self.set_results(ds, name=name)
+            data_dict = _check_data(ds, name=name, split_dataset=True)
+            self._results[name] = data_dict[name]
 
     def _write_nc(
         self,
@@ -1417,7 +1424,29 @@ class Model(object, metaclass=ABCMeta):
                 ds = ds.raster.gdal_compliant(
                     rename_dims=rename_dims, force_sn=force_sn
                 )
-            ds.to_netcdf(_fn, **kwargs)
+            if not isfile(_fn):
+                ds.to_netcdf(_fn, **kwargs)
+            else:
+                # Check if file content is identical, then skip writting
+                ds_old = xr.open_dataset(_fn, mask_and_scale=False)
+                if not ds_old.equals(ds):
+                    # Close file handle
+                    ds_old.close()
+                    # Try append mode
+                    # try:
+                    #     ds.to_netcdf(_fn, mode="a", **kwargs)
+                    # ruff fails on bare except but not sure if this
+                    # would always be the same error
+                    # except:
+                    #     # Write a temporary copy
+                    #     _fn_tmp = _fn + ".tmp"
+                    #     ds.to_netcdf(_fn_tmp, **kwargs)
+                    #     # TODO delete old file and rename when filehandles
+                    #     # can be closed
+                    #     # @savente93
+                else:
+                    # identical so skip writting and release filehandle
+                    ds_old.close()
 
     # general reader & writer
     def _read_nc(
@@ -1435,6 +1464,7 @@ class Model(object, metaclass=ABCMeta):
         for fn in fns:
             name = basename(fn).split(".")[0]
             self.logger.debug(f"Reading model file {name}.")
+            # @savente93: this is where the reading of model object files happens
             # Load data to allow overwritting in r+ mode
             if load:
                 ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs).load()
