@@ -43,7 +43,7 @@ __all__ = [
 
 # just for typehints
 SourceSpecDict = TypedDict(
-    "SourceSpecDict", {"source": str, "provider": str, "version": str | int}
+    "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
 )
 
 
