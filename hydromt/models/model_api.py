@@ -1,4 +1,4 @@
-## will be deprecated -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT."""
 
 import glob

@@ -182,6 +182,7 @@ def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
+# @pytest.mark.skip()
 def test_geodataset(geoda, geodf, ts, tmpdir):
     # this test can sometimes hang because of threading issues therefore
     # the synchronous scheduler here is necessary

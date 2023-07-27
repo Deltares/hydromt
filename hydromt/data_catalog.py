@@ -13,7 +13,7 @@ import shutil
 import warnings
 from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
 import geopandas as gpd
 import numpy as np
@@ -40,6 +40,11 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "DataCatalog",
 ]
+
+# just for typehints
+SourceSpecDict = TypedDict(
+    "SourceSpecDict", {"source": str, "provider": str, "version": str | int}
+)
 
 
 class DataCatalog(object):
@@ -634,12 +639,13 @@ class DataCatalog(object):
 
     def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
         """Return data catalog summary as DataFrame."""
-        d = dict()
-        for name, source in self.iter_sources():
-            if len(source_names) > 0 and name not in source_names:
-                continue
-            d[name] = source.summary()
-        return pd.DataFrame.from_dict(d, orient="index")
+        seq = [
+            (name, source)
+            for name, source in self.iter_sources()
+            if len(source_names) == 0 or name in source_names
+        ]
+        print(seq)
+        return pd.DataFrame.from_records(seq)
 
     def export_data(
         self,
@@ -775,17 +781,15 @@ class DataCatalog(object):
 
     def get_rasterdataset(
         self,
-        data_like: Union[str, Path, xr.Dataset, xr.DataArray],
-        bbox: List = None,
-        geom: gpd.GeoDataFrame = None,
-        zoom_level: int | tuple = None,
+        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        bbox: Optional[List] = None,
+        geom: Optional[gpd.GeoDataFrame] = None,
+        zoom_level: Optional[int | tuple] = None,
         buffer: Union[float, int] = 0,
-        align: bool = None,
-        variables: Union[List, str] = None,
-        time_tuple: Tuple = None,
-        single_var_as_array: bool = True,
-        provider: Optional[str] = None,
-        data_version: Optional[str] = None,
+        align: Optional[bool] = None,
+        variables: Optional[Union[List, str]] = None,
+        time_tuple: Optional[Tuple] = None,
+        single_var_as_array: Optional[bool] = True,
         **kwargs,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified RasterDataset.
@@ -847,18 +851,22 @@ class DataCatalog(object):
             name = basename(data_like).split(".")[0]
             source = RasterDatasetAdapter(path=path, **kwargs)
             self.update(**{name: source})
-        elif data_like in self.sources:
+        elif isinstance(data_like, dict):
+            if not SourceSpecDict.__required_keys__.issuperset(set(data_like.keys())):
+                unknown_keys = set(data_like.keys()) - SourceSpecDict.__required_keys__
+                raise ValueError(
+                    f"Unknown keys in requested data source: {unknown_keys}"
+                )
+            else:
+                source = self.get_source(**data_like)
+                name = source.name
+        elif isinstance(data_like, str) and data_like in self.sources:
             name = data_like
-            source = self.sources[name]
+            source = self.get_source(name)
         else:
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.get_source(
-            name,
-            provider=provider,
-            data_version=data_version,
-        )
         self.logger.info(
             f"DataCatalog: Getting {name} RasterDataset {source.driver} data from"
             f" {source.path}"
@@ -879,14 +887,12 @@ class DataCatalog(object):
 
     def get_geodataframe(
         self,
-        data_like: Union[str, Path, gpd.GeoDataFrame],
-        bbox: List = None,
-        geom: gpd.GeoDataFrame = None,
+        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        bbox: Optional[List] = None,
+        geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
-        variables: Union[List, str] = None,
+        variables: Optional[Union[List, str]] = None,
         predicate: str = "intersects",
-        provider=None,
-        data_version=None,
         **kwargs,
     ):
         """Return a clipped and unified GeoDataFrame (vector).
@@ -937,18 +943,22 @@ class DataCatalog(object):
             name = basename(data_like).split(".")[0]
             source = GeoDataFrameAdapter(path=path, **kwargs)
             self.update(**{name: source})
-        elif data_like in self.sources:
+        elif isinstance(data_like, dict):
+            if not SourceSpecDict.__required_keys__.issuperset(set(data_like.keys())):
+                unknown_keys = set(data_like.keys()) - SourceSpecDict.__required_keys__
+                raise ValueError(
+                    f"Unknown keys in requested data source: {unknown_keys}"
+                )
+            else:
+                source = self.get_source(**data_like)
+                name = source.name
+        elif isinstance(data_like, str) and data_like in self.sources:
             name = data_like
-            source = self.sources[name]
+            source = self.get_source(name)
         else:
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.get_source(
-            name,
-            provider=provider,
-            data_version=data_version,
-        )
         self.logger.info(
             f"DataCatalog: Getting {name} GeoDataFrame {source.driver} data"
             f" from {source.path}"
@@ -965,15 +975,13 @@ class DataCatalog(object):
 
     def get_geodataset(
         self,
-        data_like: Union[Path, str, xr.DataArray, xr.Dataset],
-        bbox: List = None,
-        geom: gpd.GeoDataFrame = None,
+        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        bbox: Optional[List] = None,
+        geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
-        variables: List = None,
-        time_tuple: Tuple = None,
+        variables: Optional[List] = None,
+        time_tuple: Optional[Tuple] = None,
         single_var_as_array: bool = True,
-        provider=None,
-        data_version=None,
         **kwargs,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified GeoDataset.
@@ -1030,18 +1038,22 @@ class DataCatalog(object):
             name = basename(data_like).split(".")[0]
             source = GeoDatasetAdapter(path=path, **kwargs)
             self.update(**{name: source})
-        elif data_like in self.sources:
+        elif isinstance(data_like, dict):
+            if not SourceSpecDict.__required_keys__.issuperset(set(data_like.keys())):
+                unknown_keys = set(data_like.keys()) - SourceSpecDict.__required_keys__
+                raise ValueError(
+                    f"Unknown keys in requested data source: {unknown_keys}"
+                )
+            else:
+                source = self.get_source(**data_like)
+                name = source.name
+        elif isinstance(data_like, str) and data_like in self.sources:
             name = data_like
-            source = self.sources[name]
+            source = self.get_source(name)
         else:
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.get_source(
-            name,
-            provider=provider,
-            data_version=data_version,
-        )
         self.logger.info(
             f"DataCatalog: Getting {name} GeoDataset {source.driver} data"
             f" from {source.path}"
@@ -1058,11 +1070,9 @@ class DataCatalog(object):
 
     def get_dataframe(
         self,
-        data_like: Union[str, Path, pd.DataFrame],
-        variables: list = None,
-        time_tuple: tuple = None,
-        provider=None,
-        data_version=None,
+        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        variables: Optional[list] = None,
+        time_tuple: Optional[Tuple] = None,
         **kwargs,
     ):
         """Return a unified and sliced DataFrame.
@@ -1098,18 +1108,22 @@ class DataCatalog(object):
             name = basename(data_like).split(".")[0]
             source = DataFrameAdapter(path=path, **kwargs)
             self.update(**{name: source})
+        elif isinstance(data_like, dict):
+            if not SourceSpecDict.__required_keys__.issuperset(set(data_like.keys())):
+                unknown_keys = set(data_like.keys()) - SourceSpecDict.__required_keys__
+                raise ValueError(
+                    f"Unknown keys in requested data source: {unknown_keys}"
+                )
+            else:
+                source = self.get_source(**data_like)
+                name = source.name
         elif data_like in self.sources:
             name = data_like
-            source = self.sources[name]
+            source = self.get_source(name)
         else:
             raise FileNotFoundError(f"No such file or catalog key: {data_like}")
 
         self._used_data.append(name)
-        source = self.get_source(
-            name,
-            provider=provider,
-            data_version=data_version,
-        )
         self.logger.info(
             f"DataCatalog: Getting {name} DataFrame {source.driver} data"
             f" from {source.path}"
@@ -1231,7 +1245,7 @@ def _parse_data_dict(
                 **source,
             )
 
-    return data
+        return data
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
@@ -1285,6 +1299,17 @@ def _denormalise_data_dict(data_dict, catalog_name="") -> List[Dict[str, Any]]:
             dicts.append({name: source})
         else:
             dicts.append({name: source})
+
+    for d in dicts:
+        if "placeholders" in d:
+            # pop avoid placeholders being passed to adapter
+            options = d.pop("placeholders")
+            for combination in itertools.product(*options.values()):
+                path_n = d["path"]
+                name_n = d["name"]
+                for k, v in zip(options.keys(), combination):
+                    path_n = path_n.replace("{" + k + "}", v)
+                    name_n = name_n.replace("{" + k + "}", v)
 
     return dicts
 

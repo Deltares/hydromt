@@ -5,6 +5,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from itertools import product
 from string import Formatter
+from typing import Optional
 
 import geopandas as gpd
 import numpy as np
@@ -125,8 +126,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         driver_kwargs={},
         name="",  # optional for now
         catalog_name="",  # optional for now
-        provider="UNSPECIFIED",
-        data_version="UNSPECIFIED",
+        provider: Optional[str] = None,
+        data_version: Optional[str] = None,
     ):
         """General Interface to data source for HydroMT.
 

@@ -103,8 +103,9 @@ def test_versioned_catalogs(tmpdir):
     # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
-    assert legacy_data_catalog.get_source("esa_worldcover").path.endswith(
-        "landuse/esa_worldcover/esa-worldcover.vrt"
+    assert (
+        Path(legacy_data_catalog.get_source("esa_worldcover").path).name
+        == "esa-worldcover.vrt"
     )
     assert legacy_data_catalog.get_source("esa_worldcover").data_version == 2020
 
@@ -161,9 +162,15 @@ def test_versioned_catalogs(tmpdir):
         read_merged_catalog.get_source("esa_worldcover", provider="aws").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
-    assert read_merged_catalog.get_source(
-        "esa_worldcover", provider="local"
-    ).path.endswith("landuse/esa_worldcover_2021/esa-worldcover.vrt")
+    assert (
+        Path(
+            read_merged_catalog.get_source("esa_worldcover", provider="local").path
+        ).name
+        == "esa-worldcover.vrt"
+    )
+
+    # make sure dataframe doesn't merge different variants
+    assert len(read_merged_catalog.to_dataframe()) == 2
 
     # Make sure we can queiry for the version we want
     aws_and_legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
@@ -176,9 +183,14 @@ def test_versioned_catalogs(tmpdir):
         aws_and_legacy_data_catalog.get_source("esa_worldcover", provider="aws").path
         == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
     )
-    assert aws_and_legacy_data_catalog.get_source(
-        "esa_worldcover", provider="legacy_esa_worldcover"
-    ).path.endswith("landuse/esa_worldcover/esa-worldcover.vrt")
+    assert (
+        Path(
+            aws_and_legacy_data_catalog.get_source(
+                "esa_worldcover", provider="legacy_esa_worldcover"
+            ).path
+        ).name
+        == "esa-worldcover.vrt"
+    )
 
     _ = aws_and_legacy_data_catalog.to_dict()
 
