@@ -639,13 +639,19 @@ class DataCatalog(object):
 
     def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
         """Return data catalog summary as DataFrame."""
-        return pd.DataFrame.from_records(
-            [
-                (name, source)
-                for name, source in self.iter_sources()
-                if len(source_names) == 0 or name in source_names
-            ]
-        )
+        d = []
+        for name, source in self.iter_sources():
+            if len(source_names) > 0 and name not in source_names:
+                continue
+            d.append(
+                {
+                    "name": name,
+                    "provider": source.provider,
+                    "data_version": source.data_version,
+                    **source.summary(),
+                }
+            )
+        return pd.DataFrame.from_records(d).set_index("name")
 
     def export_data(
         self,
