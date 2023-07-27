@@ -1090,7 +1090,7 @@ class Model(object, metaclass=ABCMeta):
                 "First parameter map(s) should be geopandas.GeoDataFrame"
                 " or geopandas.GeoSeries"
             )
-        if name in self._geoms:
+        if name in self.geoms:
             self.logger.warning(f"Replacing geom: {name}")
         self._geoms[name] = geom
 
@@ -1112,7 +1112,7 @@ class Model(object, metaclass=ABCMeta):
         for fn in fns:
             name = basename(fn).split(".")[0]
             self.logger.debug(f"Reading model file {name}.")
-            self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
+            self._geoms[name] = gpd.read_file(fn, **kwargs)
 
     def write_geoms(self, fn: str = "geoms/{name}.geojson", **kwargs) -> None:
         """Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
@@ -1421,7 +1421,12 @@ class Model(object, metaclass=ABCMeta):
 
     # general reader & writer
     def _read_nc(
-        self, fn: str, mask_and_scale=False, single_var_as_array=True, **kwargs
+        self,
+        fn: str,
+        mask_and_scale=False,
+        single_var_as_array=True,
+        load=False,
+        **kwargs,
     ) -> Dict[str, xr.Dataset]:
         ncs = dict()
         fns = glob.glob(join(self.root, fn))
@@ -1430,7 +1435,12 @@ class Model(object, metaclass=ABCMeta):
         for fn in fns:
             name = basename(fn).split(".")[0]
             self.logger.debug(f"Reading model file {name}.")
-            ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs)
+            # Load data to allow overwritting in r+ mode
+            if load:
+                ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs).load()
+                ds.close()
+            else:
+                ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs)
             # set geo coord if present as coordinate of dataset
             if GEO_MAP_COORD in ds.data_vars:
                 ds = ds.set_coords(GEO_MAP_COORD)

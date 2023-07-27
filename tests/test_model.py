@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 import xarray as xr
 from entrypoints import Distribution, EntryPoint
+from shapely.geometry import box
 
 import hydromt._compat
 import hydromt.models.model_plugins
@@ -153,13 +154,15 @@ def test_model(model, tmpdir):
 
 
 @pytest.mark.filterwarnings("ignore:The setup_basemaps")
-def test_model_build_update(tmpdir):
+def test_model_build_update(tmpdir, demda, obsda):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    # build model
     model = Model(root=str(tmpdir), mode="w")
     # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
     model._CLI_ARGS.update({"region": "setup_region"})
     model._NAME = "testmodel"
     model.build(
-        region={"bbox": [12.05, 45.30, 12.85, 45.65]},
+        region={"bbox": bbox},
         opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
     )
     assert "region" in model._geoms
@@ -183,6 +186,48 @@ def test_model_build_update(tmpdir):
     model_out = str(tmpdir.join("update"))
     model.update(model_out=model_out, opt={})  # write only
     assert isfile(join(model_out, "model.ini"))
+
+    # Now test update for a model with some data
+    geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+    # Quick check that model can't be overwritten without w+
+    with pytest.raises(
+        IOError, match="Model dir already exists and cannot be overwritten: "
+    ):
+        model = Model(root=str(tmpdir), mode="w")
+    # Build model with some data
+    model = Model(root=str(tmpdir), mode="w+")
+    # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
+    model._CLI_ARGS.update({"region": "setup_region"})
+    model._NAME = "testmodel"
+    model.build(
+        region={"bbox": bbox},
+        opt={
+            "setup_config": {"input": {"dem": "elevtn", "prec": "precip"}},
+            "set_geoms": {"geom": geom, "name": "geom1"},
+            "set_maps": {"data": demda, "name": "elevtn"},
+            "set_forcing": {"data": obsda, "name": "precip"},
+        },
+    )
+    # Now update the model
+    model = Model(root=str(tmpdir), mode="r+")
+    model.update(
+        opt={
+            "setup_config": {"input.dem2": "elevtn2", "input.temp": "temp"},
+            "set_geoms": {"geom": geom, "name": "geom2"},
+            "set_maps": {"data": demda, "name": "elevtn2"},
+            "set_forcing": {"data": obsda, "name": "temp"},
+        }
+    )
+    model.read()
+    # Check that variables from build AND update are present after read
+    assert "dem" in model.config["input"]
+    assert "dem2" in model.config["input"]
+    assert "geom1" in model.geoms
+    assert "geom2" in model.geoms
+    assert "elevtn" in model.maps
+    assert "elevtn2" in model.maps
+    assert "precip" in model.forcing
+    assert "temp" in model.forcing
 
 
 def test_setup_region(model, demda, tmpdir):
@@ -249,7 +294,7 @@ def test_maps_setup(tmpdir):
     mod.write(components=["config", "geoms", "maps"])
 
 
-def test_gridmodel(grid_model, tmpdir):
+def test_gridmodel(grid_model, tmpdir, demda):
     assert "grid" in grid_model.api
     non_compliant = grid_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
@@ -266,6 +311,21 @@ def test_gridmodel(grid_model, tmpdir):
     # check if equal
     equal, errors = grid_model._test_equal(model1)
     assert equal, errors
+
+    # try update
+    grid_model.set_root(str(join(tmpdir, "update")), mode="w")
+    grid_model.write()
+
+    model1 = GridModel(str(join(tmpdir, "update")), mode="r+")
+    model1.update(
+        opt={
+            "set_grid": {"data": demda, "name": "testdata"},
+            "write_grid": {},
+        }
+    )
+    model1.read()
+    assert "testdata" in model1.grid
+    assert "elevtn" in model1.grid
 
 
 def test_setup_grid(tmpdir, demda):

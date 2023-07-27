@@ -352,7 +352,8 @@ class GridMixin(object):
             data = data.to_dataset()
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
-        if len(self._grid) == 0:  # new data
+        # force read in r+ mode
+        if len(self.grid) == 0:  # new data
             self._grid = data
         else:
             for dvar in data.data_vars:
@@ -374,8 +375,12 @@ class GridMixin(object):
             Additional keyword arguments to be passed to the `_read_nc` method.
         """
         self._assert_read_mode
-        for ds in self._read_nc(fn, **kwargs).values():
-            self.set_grid(ds)
+        # Load grid data in r+ mode to allow overwritting netcdf files
+        if self._read and self._write:
+            kwargs["load"] = True
+        for ds in self._read_nc(fn, single_var_as_array=False, **kwargs).values():
+            for dvar in ds.data_vars:
+                self._grid[dvar] = ds[dvar]
 
     def write_grid(
         self,
