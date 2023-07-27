@@ -639,13 +639,13 @@ class DataCatalog(object):
 
     def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
         """Return data catalog summary as DataFrame."""
-        seq = [
-            (name, source)
-            for name, source in self.iter_sources()
-            if len(source_names) == 0 or name in source_names
-        ]
-        print(seq)
-        return pd.DataFrame.from_records(seq)
+        return pd.DataFrame.from_records(
+            [
+                (name, source)
+                for name, source in self.iter_sources()
+                if len(source_names) == 0 or name in source_names
+            ]
+        )
 
     def export_data(
         self,
