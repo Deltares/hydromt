@@ -22,12 +22,17 @@ jobs:
           git config user.email "<>"
       - name: Calculate new dev version
         run: |
-          echo "NEW_VERSION=$(($(git show main:hydromt/__init__.py | awk '/__version__/{print $0}' | awk -F'dev' '{print $2}' | tr -d '\"') + 1 ))">> $GITHUB_ENV
+          DEV_VERSION=$(cat hydromt/__init__.py | awk '/__version__/{print $0}' | awk -F'dev' '{print $2}' | tr -d '\"')
+          if [[ -z $DEV_VERSION ]]; then
+            echo "NEW_VERSION=.dev1"
+          else
+            echo "NEW_VERSION=.dev$(( $DEV_VERSION + 1))"
+          fi
       - name: update version
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sed -i "s/__version__\s*=\s*\"\([0-9]\+\.[0-9]\+\.[0-9]\+\).dev[0-9]\+\"/__version__ = \"\1.dev$LAST_VERSION\"/" hydromt/__init__.py
+          sed -i "s/__version__\s*=\s*\"\([0-9]\+\.[0-9]\+\.[0-9]\+\).dev[0-9]\+\"/__version__ = \"\1$NEW_VERSION\"/" hydromt/__init__.py
           git add hydromt/__init__.py
           git commit -m "update version"
           git push origin ${{ github.pull_request.base.ref}}
