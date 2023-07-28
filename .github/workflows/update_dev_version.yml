@@ -3,12 +3,12 @@ name: Update Version
 on:
   pull_request_review:
     types: [submitted]
-  workflow_dispatch:
+
 
 
 jobs:
   update-version:
-    if: github.event_name == 'workflow_dispatch' || github.event.review.state == 'approved'
+    if: github.event.review.state == 'approved'
     defaults:
       run:
         shell: bash -l {0}
@@ -30,5 +30,5 @@ jobs:
           sed -i "s/__version__\s*=\s*\"\([0-9]\+\.[0-9]\+\.[0-9]\+\).dev[0-9]\+\"/__version__ = \"\1.dev$LAST_VERSION\"/" hydromt/__init__.py
           git add hydromt/__init__.py
           git commit -m "update version"
-          git push origin ${{ github.ref_name}}
-          gh pr comment ${{ github.ref_name }} -b "I've updated the version for you. Feel free to merge now!"
+          git push origin ${{ github.pull_request.base.ref}}
+          gh pr comment ${{ github.pull_request.number }} -b "I've updated the version for you. Feel free to merge now!"
