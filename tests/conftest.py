@@ -114,7 +114,8 @@ def demda():
         coords={"y": -np.arange(0, 1500, 100), "x": np.arange(0, 1000, 100)},
         attrs=dict(_FillValue=-9999),
     )
-    da.raster.set_crs(3785)
+    # NOTE epsg 3785 is deprecated https://epsg.io/3785
+    da.raster.set_crs(3857)
     return da
 
 
@@ -139,7 +140,8 @@ def flwda(flwdir):
         coords=gis_utils.affine_to_coords(flwdir.transform, flwdir.shape),
         attrs=dict(_FillValue=247),
     )
-    da.raster.set_crs(3785)
+    # NOTE epsg 3785 is deprecated https://epsg.io/3785
+    da.raster.set_crs(3875)
     return da
 
 
