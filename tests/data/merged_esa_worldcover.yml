@@ -13,11 +13,11 @@ esa_worldcover:
     source_url: https://doi.org/10.5281/zenodo.5571936
   variants:
     - provider: local
-      version: 2020
-      path: landuse/esa_worldcover/esa-worldcover.vrt
-    - provider: local
       version: 2021
       path: landuse/esa_worldcover_2021/esa-worldcover.vrt
+    - provider: local
+      version: 2020
+      path: landuse/esa_worldcover/esa-worldcover.vrt
     - provider: aws
       version: 2020
       path: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt

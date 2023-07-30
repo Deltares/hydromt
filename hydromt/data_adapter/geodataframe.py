@@ -47,7 +47,7 @@ class GeoDataFrameAdapter(DataAdapter):
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
-        data_version=None,
+        version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial vector data.
@@ -119,7 +119,7 @@ class GeoDataFrameAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            data_version=data_version,
+            version=version,
         )
         self.crs = crs
 
@@ -220,9 +220,6 @@ class GeoDataFrameAdapter(DataAdapter):
         _ = self.resolve_paths()  # throw nice error if data not found
 
         kwargs = self.driver_kwargs.copy()
-        # these are just for internal bookeeping. drivers don't need them
-        _ = kwargs.pop("provider", None)
-        _ = kwargs.pop("data_version", None)
         # parse geom, bbox and buffer arguments
         clip_str = ""
         if geom is None and bbox is not None:

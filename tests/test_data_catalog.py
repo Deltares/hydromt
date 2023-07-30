@@ -10,7 +10,11 @@ import pytest
 import xarray as xr
 
 from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
-from hydromt.data_catalog import DataCatalog, _denormalise_data_dict, _parse_data_dict
+from hydromt.data_catalog import (
+    DataCatalog,
+    _denormalise_data_dict,
+    _parse_data_source_dict,
+)
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -20,32 +24,27 @@ def test_parser():
     # valid abs root on windows and linux!
     root = "c:/root" if os.name == "nt" else "/c/root"
     # simple; abs path
-    dd = {
-        "test": {
-            "data_type": "RasterDataset",
-            "path": f"{root}/to/data.tif",
-        }
+    source = {
+        "data_type": "RasterDataset",
+        "path": f"{root}/to/data.tif",
     }
-    dd_out = _parse_data_dict(dd, root=root)
-    assert isinstance(dd_out["test"], RasterDatasetAdapter)
-    assert dd_out["test"].path == abspath(dd["test"]["path"])
+    adapter = _parse_data_source_dict("test", source, root=root)
+    assert isinstance(adapter, RasterDatasetAdapter)
+    assert adapter.path == abspath(source["path"])
     # test with Path object
-    dd["test"].update(path=Path(dd["test"]["path"]))
-    dd_out = _parse_data_dict(dd, root=root)
-    assert dd_out["test"].path == abspath(dd["test"]["path"])
+    source.update(path=Path(source["path"]))
+    adapter = _parse_data_source_dict("test", source, root=root)
+    assert adapter.path == abspath(source["path"])
     # rel path
-    dd = {
-        "test": {
-            "data_type": "RasterDataset",
-            "path": "path/to/data.tif",
-            "kwargs": {"fn": "test"},
-        },
-        "root": root,
+    source = {
+        "data_type": "RasterDataset",
+        "path": "path/to/data.tif",
+        "kwargs": {"fn": "test"},
     }
-    dd_out = _parse_data_dict(dd)
-    assert dd_out["test"].path == abspath(join(root, dd["test"]["path"]))
+    adapter = _parse_data_source_dict("test", source, root=root)
+    assert adapter.path == abspath(join(root, source["path"]))
     # check if path in kwargs is also absolute
-    assert dd_out["test"].driver_kwargs["fn"] == abspath(join(root, "test"))
+    assert adapter.driver_kwargs["fn"] == abspath(join(root, "test"))
     # alias
     dd = {
         "test": {
@@ -55,11 +54,12 @@ def test_parser():
         "test1": {"alias": "test"},
     }
     with pytest.deprecated_call():
-        dd = _denormalise_data_dict(dd, catalog_name="tmp")
-
-    dd_out1 = _parse_data_dict(dd[0], root=root)
-    dd_out2 = _parse_data_dict(dd[1], root=root)
-    assert dd_out1["test"].path == dd_out2["test1"].path
+        sources = _denormalise_data_dict(dd)
+    assert len(sources) == 2
+    for name, source in sources:
+        adapter = _parse_data_source_dict(name, source, root=root, catalog_name="tmp")
+        assert adapter.path == abspath(join(root, dd["test"]["path"]))
+        assert adapter.catalog_name == "tmp"
     # placeholder
     dd = {
         "test_{p1}_{p2}": {
@@ -68,16 +68,36 @@ def test_parser():
             "placeholders": {"p1": ["a", "b"], "p2": ["1", "2", "3"]},
         },
     }
-    dd_out = _parse_data_dict(dd, root=root)
-    assert len(dd_out) == 6
-    assert dd_out["test_a_1"].path == abspath(join(root, "data_1.tif"))
-    assert "placeholders" not in dd_out["test_a_1"].to_dict()
+    sources = _denormalise_data_dict(dd)
+    assert len(sources) == 6
+    for name, source in sources:
+        assert "placeholders" not in source
+        adapter = _parse_data_source_dict(name, source, root=root)
+        assert adapter.path == abspath(join(root, f"data_{name[-1]}.tif"))
+    # variants
+    dd = {
+        "test": {
+            "data_type": "RasterDataset",
+            "variants": [
+                {"path": "path/to/data1.tif", "version": "1"},
+                {"path": "path/to/data2.tif", "provider": "local"},
+            ],
+        },
+    }
+    sources = _denormalise_data_dict(dd)
+    assert len(sources) == 2
+    for i, (name, source) in enumerate(sources):
+        assert "variants" not in source
+        adapter = _parse_data_source_dict(name, source, root=root, catalog_name="tmp")
+        assert adapter.version == dd["test"]["variants"][i].get("version", None)
+        assert adapter.provider == dd["test"]["variants"][i].get("provider", None)
+        assert adapter.catalog_name == "tmp"
 
     # errors
     with pytest.raises(ValueError, match="Missing required path argument"):
-        _parse_data_dict({"test": {}})
+        _parse_data_source_dict("test", {})
     with pytest.raises(ValueError, match="Data type error unknown"):
-        _parse_data_dict({"test": {"path": "", "data_type": "error"}})
+        _parse_data_source_dict("test", {"path": "", "data_type": "error"})
     with pytest.raises(
         ValueError, match="alias test not found in data_dict"
     ), pytest.deprecated_call():
@@ -103,49 +123,43 @@ def test_versioned_catalogs(tmpdir):
     # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
-    assert (
-        Path(legacy_data_catalog.get_source("esa_worldcover").path).name
-        == "esa-worldcover.vrt"
-    )
-    assert legacy_data_catalog.get_source("esa_worldcover").data_version == 2020
-
+    assert len(legacy_data_catalog) == 1
+    source = legacy_data_catalog.get_source("esa_worldcover")
+    assert Path(source.path).name == "esa-worldcover.vrt"
+    assert source.version == "2020"
+    # test round trip to and from dict
+    legacy_data_catalog2 = DataCatalog().from_dict(legacy_data_catalog.to_dict())
+    assert legacy_data_catalog2 == legacy_data_catalog
     # make sure we raise deprecation warning here
     with pytest.deprecated_call():
         _ = legacy_data_catalog["esa_worldcover"]
 
+    # second catalog
     aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
     aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
+    assert len(aws_data_catalog) == 1
     # test get_source with all keyword combinations
-    assert (
-        aws_data_catalog.get_source("esa_worldcover").path
-        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
-    )
-    assert aws_data_catalog.get_source("esa_worldcover").data_version == 2021
-    assert (
-        aws_data_catalog.get_source("esa_worldcover", data_version=2021).path
-        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
-    )
-    assert (
-        aws_data_catalog.get_source("esa_worldcover", data_version=2021).data_version
-        == 2021
-    )
-    assert (
-        aws_data_catalog.get_source(
-            "esa_worldcover", data_version=2021, provider="aws"
-        ).path
-        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
-    )
+    source = aws_data_catalog.get_source("esa_worldcover")
+    assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
+    assert source.version == "2021"
+    source = aws_data_catalog.get_source("esa_worldcover", version=2021)
+    assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
+    assert source.version == "2021"
+    source = aws_data_catalog.get_source("esa_worldcover", version=2021, provider="aws")
+    assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
+    # test round trip to and from dict
+    aws_data_catalog2 = DataCatalog().from_dict(aws_data_catalog.to_dict())
+    assert aws_data_catalog2 == aws_data_catalog
 
+    # test errors
+    with pytest.raises(KeyError):
+        aws_data_catalog.get_source("esa_worldcover", version=2021, provider="asdfasdf")
     with pytest.raises(KeyError):
         aws_data_catalog.get_source(
-            "esa_worldcover", data_version=2021, provider="asdfasdf"
+            "esa_worldcover", version="asdfasdf", provider="aws"
         )
     with pytest.raises(KeyError):
-        aws_data_catalog.get_source(
-            "esa_worldcover", data_version="asdfasdf", provider="aws"
-        )
-    with pytest.raises(KeyError):
-        aws_data_catalog.get_source("asdfasdf", data_version=2021, provider="aws")
+        aws_data_catalog.get_source("asdfasdf", version=2021, provider="aws")
 
     # make sure we trigger user warning when overwriting versions
     with pytest.warns(UserWarning):
@@ -153,46 +167,35 @@ def test_versioned_catalogs(tmpdir):
 
     # make sure we can read merged catalogs
     merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
-    read_merged_catalog = DataCatalog(data_libs=[merged_yml_fn])
-    assert (
-        read_merged_catalog.get_source("esa_worldcover").path
-        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
-    )
-    assert (
-        read_merged_catalog.get_source("esa_worldcover", provider="aws").path
-        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
-    )
-    assert (
-        Path(
-            read_merged_catalog.get_source("esa_worldcover", provider="local").path
-        ).name
-        == "esa-worldcover.vrt"
-    )
+    merged_catalog = DataCatalog(data_libs=[merged_yml_fn])
+    assert len(merged_catalog) == 3
+    source_aws = merged_catalog.get_source("esa_worldcover")  # last variant is default
+    assert source_aws.filesystem == "s3"
+    assert merged_catalog.get_source("esa_worldcover", provider="aws") == source_aws
+    source_loc = merged_catalog.get_source("esa_worldcover", provider="local")
+    assert source_loc != source_aws
+    assert source_loc.filesystem == "local"
+    assert source_loc.version == "2021"  # get newest version
+    # test get_source with version only
+    assert merged_catalog.get_source("esa_worldcover", version=2021) == source_loc
+    # test round trip to and from dict
+    merged_catalog2 = DataCatalog().from_dict(merged_catalog.to_dict())
+    assert merged_catalog2 == merged_catalog
 
-    # make sure dataframe doesn't merge different variants
-    assert len(read_merged_catalog.to_dataframe()) == 2
-
-    # Make sure we can queiry for the version we want
-    aws_and_legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
-    assert (
-        aws_and_legacy_data_catalog.get_source("esa_worldcover").path
-        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
+    # Make sure we can query for the version we want
+    aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
+    assert len(aws_and_legacy_catalog) == 2
+    source_aws = aws_and_legacy_catalog.get_source("esa_worldcover")
+    assert source_aws.filesystem == "s3"
+    source_aws2 = aws_and_legacy_catalog.get_source("esa_worldcover", provider="aws")
+    assert source_aws2 == source_aws
+    source_loc = aws_and_legacy_catalog.get_source(
+        "esa_worldcover", provider="legacy_esa_worldcover"  # provider is filename
     )
-
-    assert (
-        aws_and_legacy_data_catalog.get_source("esa_worldcover", provider="aws").path
-        == "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
-    )
-    assert (
-        Path(
-            aws_and_legacy_data_catalog.get_source(
-                "esa_worldcover", provider="legacy_esa_worldcover"
-            ).path
-        ).name
-        == "esa-worldcover.vrt"
-    )
-
-    _ = aws_and_legacy_data_catalog.to_dict()
+    assert Path(source_loc.path).name == "esa-worldcover.vrt"
+    # test round trip to and from dict
+    aws_and_legacy_catalog2 = DataCatalog().from_dict(aws_and_legacy_catalog.to_dict())
+    assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
 def test_data_catalog(tmpdir):
@@ -364,44 +367,85 @@ def test_export_dataframe(tmpdir, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
-def test_get_data(df):
+def test_get_data(df, tmpdir):
     data_catalog = DataCatalog("artifact_data")  # read artifacts
-
+    n = len(data_catalog)
     # raster dataset using three different ways
-    da = data_catalog.get_rasterdataset(data_catalog.get_source("koppen_geiger").path)
+    name = "koppen_geiger"
+    da = data_catalog.get_rasterdataset(data_catalog.get_source(name).path)
+    assert len(data_catalog) == n + 1
     assert isinstance(da, xr.DataArray)
-    da = data_catalog.get_rasterdataset("koppen_geiger")
+    da = data_catalog.get_rasterdataset(name, provider="artifact_data")
     assert isinstance(da, xr.DataArray)
     da = data_catalog.get_rasterdataset(da)
     assert isinstance(da, xr.DataArray)
+    data = {"source": name, "provider": "artifact_data"}
+    da = data_catalog.get_rasterdataset(data)
     with pytest.raises(ValueError, match='Unknown raster data type "list"'):
         data_catalog.get_rasterdataset([])
+    with pytest.raises(FileNotFoundError):
+        data_catalog.get_rasterdataset("test1.tif")
+    with pytest.raises(ValueError, match="Unknown keys in requested data"):
+        data_catalog.get_rasterdataset({"name": "test"})
 
     # vector dataset using three different ways
-    gdf = data_catalog.get_geodataframe(data_catalog.get_source("osm_coastlines").path)
+    name = "osm_coastlines"
+    gdf = data_catalog.get_geodataframe(data_catalog.get_source(name).path)
+    assert len(data_catalog) == n + 2
     assert isinstance(gdf, gpd.GeoDataFrame)
-    gdf = data_catalog.get_geodataframe("osm_coastlines")
+    gdf = data_catalog.get_geodataframe(name, provider="artifact_data")
     assert isinstance(gdf, gpd.GeoDataFrame)
     gdf = data_catalog.get_geodataframe(gdf)
     assert isinstance(gdf, gpd.GeoDataFrame)
+    data = {"source": name, "provider": "artifact_data"}
+    gdf = data_catalog.get_geodataframe(data)
+    assert isinstance(gdf, gpd.GeoDataFrame)
     with pytest.raises(ValueError, match='Unknown vector data type "list"'):
         data_catalog.get_geodataframe([])
+    with pytest.raises(FileNotFoundError):
+        data_catalog.get_geodataframe("test1.gpkg")
+    with pytest.raises(ValueError, match="Unknown keys in requested data"):
+        data_catalog.get_geodataframe({"name": "test"})
 
     # geodataset using three different ways
-    da = data_catalog.get_geodataset(data_catalog.get_source("gtsmv3_eu_era5").path)
+    name = "gtsmv3_eu_era5"
+    da = data_catalog.get_geodataset(data_catalog.get_source(name).path)
+    assert len(data_catalog) == n + 3
     assert isinstance(da, xr.DataArray)
-    da = data_catalog.get_geodataset("gtsmv3_eu_era5")
+    da = data_catalog.get_geodataset(name, provider="artifact_data")
     assert isinstance(da, xr.DataArray)
     da = data_catalog.get_geodataset(da)
     assert isinstance(da, xr.DataArray)
+    data = {"source": name, "provider": "artifact_data"}
+    gdf = data_catalog.get_geodataset(data)
+    assert isinstance(gdf, xr.DataArray)
     with pytest.raises(ValueError, match='Unknown geo data type "list"'):
         data_catalog.get_geodataset([])
+    with pytest.raises(FileNotFoundError):
+        data_catalog.get_geodataset("test1.nc")
+    with pytest.raises(ValueError, match="Unknown keys in requested data"):
+        data_catalog.get_geodataset({"name": "test"})
 
     # dataframe using single way
+    name = "test.csv"
+    fn = str(tmpdir.join(name))
+    df.to_csv(fn)
+    df = data_catalog.get_dataframe(fn, driver_kwargs=dict(index_col=0))
+    assert len(data_catalog) == n + 4
+    assert isinstance(df, pd.DataFrame)
+    df = data_catalog.get_dataframe(name, provider="local")
+    assert isinstance(df, pd.DataFrame)
     df = data_catalog.get_dataframe(df)
     assert isinstance(df, pd.DataFrame)
+    data = {"source": name, "provider": "local"}
+    gdf = data_catalog.get_dataframe(data)
+    assert isinstance(gdf, pd.DataFrame)
     with pytest.raises(ValueError, match='Unknown tabular data type "list"'):
         data_catalog.get_dataframe([])
+    with pytest.raises(FileNotFoundError):
+        data_catalog.get_dataframe("test1.csv")
+    with pytest.raises(ValueError, match="Unknown keys in requested data"):
+        data_catalog.get_dataframe({"name": "test"})
 
 
 def test_deprecation_warnings(artifact_data):

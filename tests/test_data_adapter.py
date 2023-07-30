@@ -57,12 +57,12 @@ def test_rasterdataset(rioda, tmpdir):
     da1 = data_catalog.get_rasterdataset(fn_tif, bbox=rioda.raster.bounds)
     assert np.all(da1 == rioda_utm)
     geom = rioda.raster.box
-    da1 = data_catalog.get_rasterdataset("test", geom=geom)
+    da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
     assert np.all(da1 == rioda_utm)
-    with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
+    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
         data_catalog.get_rasterdataset("no_file.tif")
     with pytest.raises(IndexError, match="RasterDataset: No data within"):
-        data_catalog.get_rasterdataset("test", bbox=[40, 50, 41, 51])
+        data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
 
 
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
@@ -204,7 +204,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     ).sortby("index")
     assert np.allclose(da1, geoda)
     assert da1.name == "test1"
-    ds1 = data_catalog.get_geodataset("test", single_var_as_array=False)
+    ds1 = data_catalog.get_geodataset("test.nc", single_var_as_array=False)
     assert isinstance(ds1, xr.Dataset)
     assert "test" in ds1
     da2 = data_catalog.get_geodataset(
@@ -217,7 +217,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     ).sortby("index")
     assert np.allclose(da3, geoda)
     assert da3.vector.crs.to_epsg() == 4326
-    with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
+    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
         data_catalog.get_geodataset("no_file.geojson")
     # Test nc file writing to file
     with tempfile.TemporaryDirectory() as td:
@@ -272,10 +272,10 @@ def test_geodataframe(geodf, tmpdir):
     assert isinstance(gdf1, gpd.GeoDataFrame)
     assert np.all(gdf1 == geodf)
     gdf1 = data_catalog.get_geodataframe(
-        "test", bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
+        "test.geojson", bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
     )
     assert np.all(gdf1 == geodf)
-    with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
+    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
         data_catalog.get_geodataframe("no_file.geojson")
 
 

@@ -39,7 +39,7 @@ class DataFrameAdapter(DataAdapter):
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider: Optional[str] = None,
-        data_version: Optional[str] = None,
+        version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for 2D tabular data.
@@ -109,7 +109,7 @@ class DataFrameAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            data_version=data_version,
+            version=version,
         )
 
     def to_file(
@@ -202,9 +202,6 @@ class DataFrameAdapter(DataAdapter):
         _ = self.resolve_paths(**so_kwargs)  # throw nice error if data not found
 
         kwargs = self.driver_kwargs.copy()
-        # these are just for internal bookeeping. drivers don't need them
-        _ = kwargs.pop("provider", None)
-        _ = kwargs.pop("data_version", None)
 
         # read and clip
         logger.info(f"DataFrame: Read {self.driver} data.")
