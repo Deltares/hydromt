@@ -27,6 +27,7 @@ class GeoDataFrameAdapter(DataAdapter):
     _DRIVERS = {
         "xy": "xy",
         "csv": "csv",
+        "parquet": "parquet",
         "xls": "xls",
         "xlsx": "xlsx",
     }
@@ -169,7 +170,7 @@ class GeoDataFrameAdapter(DataAdapter):
             return None, None, None
 
         if driver is None:
-            _lst = ["csv", "xls", "xlsx", "xy", "vector_table"]
+            _lst = ["csv", "parquet", "xls", "xlsx", "xy", "vector_table"]
             driver = "csv" if self.driver in _lst else "GPKG"
         # always write netcdf
         if driver == "csv":
@@ -181,6 +182,15 @@ class GeoDataFrameAdapter(DataAdapter):
                 )
             gdf["x"], gdf["y"] = gdf.geometry.x, gdf.geometry.y
             gdf.drop(columns="geometry").to_csv(fn_out, **kwargs)
+        elif driver == "parquet":
+            fn_out = join(data_root, f"{data_name}.parquet")
+            if not np.all(gdf.geometry.type == "Point"):
+                raise ValueError(
+                    f"{data_name} contains other geometries than 'Point' "
+                    "which cannot be written to parquet."
+                )
+            gdf["x"], gdf["y"] = gdf.geometry.x, gdf.geometry.y
+            gdf.drop(columns="geometry").to_parquet(fn_out, **kwargs)
         else:
             driver_extensions = {
                 "ESRI Shapefile": ".shp",
@@ -240,10 +250,23 @@ class GeoDataFrameAdapter(DataAdapter):
 
         # read and clip
         logger.info(f"GeoDataFrame: Read {self.driver} data{clip_str}.")
-        if self.driver in ["csv", "xls", "xlsx", "xy", "vector", "vector_table"]:
+        if self.driver in [
+            "csv",
+            "parquet",
+            "xls",
+            "xlsx",
+            "xy",
+            "vector",
+            "vector_table",
+        ]:
             # "csv", "xls", "xlsx", "xy" deprecated use vector_table instead.
             # specific driver should be added to open_vector kwargs
             if "driver" not in kwargs and self.driver in ["csv", "xls", "xlsx", "xy"]:
+                warnings.warn(
+                    "using the driver setting is deprecated. Please use"
+                    "vector_table instead."
+                )
+
                 kwargs.update(driver=self.driver)
             # Check if file-object is required because of additional options
             gdf = io.open_vector(
