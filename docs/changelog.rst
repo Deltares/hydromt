@@ -13,6 +13,7 @@ Added
 -----
 - docs now include a dropdown for selecting older versions of the docs. (#457)
 - Support for loading the same data source but from different places (e.g. local & aws)
+- Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
 - Versions of HydroMT between releases are now updated automatically when the PR is approved. (#455)
 
 Changed
