@@ -166,7 +166,7 @@ class DataFrameAdapter(DataAdapter):
             logger.warning(str(err))
             return None, None, None
 
-       read_kwargs = dict()
+        read_kwargs = dict()
         if driver is None or driver == "csv":
             # always write as CSV
             driver = "csv"
@@ -179,10 +179,10 @@ class DataFrameAdapter(DataAdapter):
         elif driver == "excel":
             fn_out = join(data_root, f"{data_name}.xlsx")
             obj.to_excel(fn_out, **kwargs)
-        return fn_out, driver, read_kwargs
+        else:
             raise ValueError(f"DataFrame: Driver {driver} is unknown.")
 
-        return fn_out, driver, kwargs
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,
