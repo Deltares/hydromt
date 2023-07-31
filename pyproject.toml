@@ -17,7 +17,6 @@ dependencies = [
     "entrypoints",       # Provide access for Plugins
     "geopandas>=0.10",   # pandas but geo, wraps fiona and shapely
     "gdal>=3.1",         # enable geospacial data manipulation, both  raster and victor
-    "fiona==1.8.22",     # IO for vector and shape files
     "numba",             # speed up computations (used in e.g. stats)
     "numpy>=1.20",       # pin necessary to ensure compatability with C headers
     "netcdf4",           # netcfd IO

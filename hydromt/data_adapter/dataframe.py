@@ -3,7 +3,7 @@ import logging
 import os
 import warnings
 from os.path import join
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -27,9 +27,9 @@ class DataFrameAdapter(DataAdapter):
     def __init__(
         self,
         path: str,
-        driver: str = None,
+        driver: Optional[str] = None,
         filesystem: str = "local",
-        nodata: Union[dict, float, int] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
         rename: dict = {},
         unit_mult: dict = {},
         unit_add: dict = {},
@@ -38,6 +38,8 @@ class DataFrameAdapter(DataAdapter):
         driver_kwargs: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for 2D tabular data.
@@ -106,6 +108,8 @@ class DataFrameAdapter(DataAdapter):
             driver_kwargs=driver_kwargs,
             name=name,
             catalog_name=catalog_name,
+            provider=provider,
+            version=version,
         )
 
     def to_file(
