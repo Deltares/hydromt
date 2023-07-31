@@ -898,7 +898,7 @@ def get_lmom(x, nmom=4):
         vector of (nmom) L-moments
     """
     n = len(x)
-    xs = np.msort(x)
+    xs = np.sort(x, axis=0)
     bb = np.zeros(nmom - 1)
     ll = np.zeros(nmom - 1)
     b0 = xs.mean(axis=0)
