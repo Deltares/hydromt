@@ -178,7 +178,7 @@ class DataFrameAdapter(DataAdapter):
         elif driver == "excel":
             fn_out = join(data_root, f"{data_name}.xlsx")
             obj.to_excel(fn_out, **kwargs)
-        else:
+        return fn_out, driver, read_kwargs
             raise ValueError(f"DataFrame: Driver {driver} is unknown.")
 
         return fn_out, driver, kwargs
