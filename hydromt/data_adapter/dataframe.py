@@ -166,12 +166,13 @@ class DataFrameAdapter(DataAdapter):
             logger.warning(str(err))
             return None, None, None
 
+       read_kwargs = dict()
         if driver is None or driver == "csv":
             # always write as CSV
             driver = "csv"
             fn_out = join(data_root, f"{data_name}.csv")
             obj.to_csv(fn_out, **kwargs)
-            kwargs["index_col"] = obj.index.name
+            read_kwargs["index_col"] = obj.index.name
         elif driver == "parquet":
             fn_out = join(data_root, f"{data_name}.parquet")
             obj.to_parquet(fn_out, **kwargs)
