@@ -50,6 +50,8 @@ class RasterDatasetAdapter(DataAdapter):
         zoom_levels: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        provider=None,
+        version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial raster data.
@@ -127,6 +129,8 @@ class RasterDatasetAdapter(DataAdapter):
             driver_kwargs=driver_kwargs,
             name=name,
             catalog_name=catalog_name,
+            provider=provider,
+            version=version,
         )
         self.crs = crs
         self.zoom_levels = zoom_levels
@@ -273,6 +277,7 @@ class RasterDatasetAdapter(DataAdapter):
         )
 
         kwargs = self.driver_kwargs.copy()
+
         # zarr can use storage options directly, the rest should be converted to
         # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":
