@@ -1,10 +1,7 @@
-
 name: Update Version
 on:
   pull_request_review:
     types: [submitted]
-
-
 
 jobs:
   update-version:
@@ -16,6 +13,9 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: configure git
         run: |
           git config user.name "GitHub Actions Bot"
@@ -24,16 +24,20 @@ jobs:
         run: |
           DEV_VERSION=$(cat hydromt/__init__.py | awk '/__version__/{print $0}' | awk -F'dev' '{print $2}' | tr -d '\"')
           if [[ -z $DEV_VERSION ]]; then
-            echo "NEW_VERSION=.dev1"
+            echo "NEW_VERSION=.dev1" >> $GITHUB_ENV
           else
-            echo "NEW_VERSION=.dev$(( $DEV_VERSION + 1))"
+            echo "NEW_VERSION=.dev$(( $DEV_VERSION + 1))" >> $GITHUB_ENV
           fi
       - name: update version
         env:
           GH_TOKEN: ${{ github.token }}
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number}}
         run: |
+          git checkout -b $BRANCH_NAME
+          git pull
           sed -i "s/__version__\s*=\s*\"\([0-9]\+\.[0-9]\+\.[0-9]\+\).dev[0-9]\+\"/__version__ = \"\1$NEW_VERSION\"/" hydromt/__init__.py
           git add hydromt/__init__.py
           git commit -m "update version"
-          git push origin ${{ github.pull_request.base.ref}}
-          gh pr comment ${{ github.pull_request.number }} -b "I've updated the version for you. Feel free to merge now!"
+          git push origin $BRANCH_NAME
+          gh pr comment $PR_NUMBER -b "I've updated the version for you. Feel free to merge now!"
