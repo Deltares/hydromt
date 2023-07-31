@@ -322,9 +322,13 @@ def test_export_global_datasets(tmpdir):
 def test_export_dataframe(tmpdir, df, df_time):
     # Write two csv files
     fn_df = str(tmpdir.join("test.csv"))
+    fn_df_parquet = str(tmpdir.join("test.parquet"))
     df.to_csv(fn_df)
+    df.to_parquet(fn_df_parquet)
     fn_df_time = str(tmpdir.join("test_ts.csv"))
+    fn_df_time_parquet = str(tmpdir.join("test_ts.parquet"))
     df_time.to_csv(fn_df_time)
+    df_time.to_parquet(fn_df_time_parquet)
 
     # Test to_file method (needs reading)
     data_dict = {
@@ -345,6 +349,16 @@ def test_export_dataframe(tmpdir, df, df_time):
                 "parse_dates": True,
             },
         },
+        "test_df_parquet": {
+            "path": fn_df_parquet,
+            "driver": "parquet",
+            "data_type": "DataFrame",
+        },
+        "test_df_ts_parquet": {
+            "path": fn_df_time_parquet,
+            "driver": "parquet",
+            "data_type": "DataFrame",
+        },
     }
 
     data_catalog = DataCatalog()
@@ -356,11 +370,11 @@ def test_export_dataframe(tmpdir, df, df_time):
         bbox=[11.70, 45.35, 12.95, 46.70],
     )
     data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
-    assert len(data_catalog1.iter_sources()) == 1
+    assert len(data_catalog1.iter_sources()) == 2
 
     data_catalog.export_data(str(tmpdir))
     data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
-    assert len(data_catalog1.iter_sources()) == 2
+    assert len(data_catalog1.iter_sources()) == 4
     for key, source in data_catalog1.iter_sources():
         dtypes = pd.DataFrame
         obj = source.get_data()
