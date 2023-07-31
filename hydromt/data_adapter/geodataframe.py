@@ -46,6 +46,8 @@ class GeoDataFrameAdapter(DataAdapter):
         driver_kwargs: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        provider=None,
+        version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial vector data.
@@ -116,6 +118,8 @@ class GeoDataFrameAdapter(DataAdapter):
             driver_kwargs=driver_kwargs,
             name=name,
             catalog_name=catalog_name,
+            provider=provider,
+            version=version,
         )
         self.crs = crs
 

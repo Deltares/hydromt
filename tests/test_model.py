@@ -125,13 +125,11 @@ def test_write_data_catalog(tmpdir):
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
 
 
-@pytest.mark.filterwarnings(
-    'ignore:Defining "region" based on staticmaps:DeprecationWarning'
-)
 def test_model(model, tmpdir):
     # Staticmaps -> moved from _test_model_api as it is deprecated
     model._API.update({"staticmaps": xr.Dataset})
-    non_compliant = model._test_model_api()
+    with pytest.deprecated_call():
+        non_compliant = model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
     model.set_root(str(tmpdir), mode="w")
@@ -140,16 +138,19 @@ def test_model(model, tmpdir):
         model.read()
     # read model
     model1 = Model(str(tmpdir), mode="r")
-    model1.read()
+    with pytest.deprecated_call():
+        model1.read()
     with pytest.raises(IOError, match="Model opened in read-only mode"):
         model1.write()
     # check if equal
     model._results = {}  # reset results for comparison
-    equal, errors = model._test_equal(model1)
+    with pytest.deprecated_call():
+        equal, errors = model._test_equal(model1)
     assert equal, errors
     # read region from staticmaps
     model._geoms.pop("region")
-    assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
+    with pytest.deprecated_call():
+        assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
 
 @pytest.mark.filterwarnings("ignore:The setup_basemaps")

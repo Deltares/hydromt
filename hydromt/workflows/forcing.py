@@ -80,6 +80,7 @@ def precip(
     p_out.attrs.update(unit="mm")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="sum", logger=logger)
+
         p_out = resample_time(p_out, freq, conserve_mass=True, **resample_kwargs)
     return p_out
 
