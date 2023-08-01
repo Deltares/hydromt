@@ -18,10 +18,12 @@ from hydromt import _compat, raster
 
 def test_open_vector(tmpdir, df, geodf, world):
     fn_csv = str(tmpdir.join("test.csv"))
+    fn_parquet = str(tmpdir.join("test.parquet"))
     fn_xy = str(tmpdir.join("test.xy"))
     fn_xls = str(tmpdir.join("test.xlsx"))
     fn_geojson = str(tmpdir.join("test.geojson"))
     df.to_csv(fn_csv)
+    df.to_parquet(fn_parquet)
     if _compat.HAS_OPENPYXL:
         df.to_excel(fn_xls)
     geodf.to_file(fn_geojson, driver="GeoJSON")
@@ -41,6 +43,9 @@ def test_open_vector(tmpdir, df, geodf, world):
     # read xy
     gdf1 = hydromt.open_vector(fn_xy, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
+    # read parquet
+    gdf1 = hydromt.open_vector(fn_parquet, crs=4326)
+    assert np.all(gdf1 == geodf)
     # filter
     country = "Chile"
     geom = world[world["name"] == country]

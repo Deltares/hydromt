@@ -1,0 +1,18 @@
+esa_worldcover:
+  crs: 4326
+  data_type: RasterDataset
+  driver: raster
+  filesystem: s3
+  version: 2021
+  provider: aws
+  driver_kwargs:
+    storage_options:
+      anon: true
+  meta:
+    category: landuse
+    source_license: CC BY 4.0
+    source_url: https://doi.org/10.5281/zenodo.5571936
+    source_version: v100
+  path: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
+  rename:
+    ESA_WorldCover_10m_2020_v100_Map_AWS: landuse

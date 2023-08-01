@@ -270,7 +270,7 @@ Vector data (GeoDataFrame)
      - :py:meth:`~hydromt.io.open_vector`
      - Point, Line and Polygon geometries. Uses :py:func:`geopandas.read_file`
    * - ``vector_table``
-     - CSV, XY, and EXCEL.
+     - CSV, XY, PARQUET and EXCEL.
      - :py:meth:`~hydromt.io.open_vector`
      - Point geometries only. Uses :py:meth:`~hydromt.io.open_vector_from_table`
 
@@ -349,6 +349,15 @@ options.
       crs: 4326
       driver_kwargs:
         driver: csv
+
+.. _binary_vector:
+
+HydroMT also supports reading and writing verctor data in binary format. Currently only parquet is
+supported, but others could be added if desried. The structure of the files should be the same as
+the text format files described above but writting according to the parquet file spec. Since this is
+a binary format, not exmaples are provided, but for example pandas can wrtie the same data structure
+to parquet as it can csv.
+
 
 .. _GeoDataset:
 
@@ -442,6 +451,7 @@ separate (text) files are parsed to **GeoDataset** using the **vector** driver.
 The GeoDataset must at least contain a location index with point geometries which is referred to by the ``path`` argument
 The path may refer to both GIS vector data such as GeoJSON with only Point geometries
 or tabulated point vector data such as csv files, see earlier examples for GeoDataFrame datasets.
+Finally, certain binary formats such as parquet are also supported.
 In addition a tabulated time-series text file can be passed to be used as a variable of the GeoDataset.
 This data is added by a second file which is referred to using the ``fn_data`` key-word argument.
 The index of the time-series (in the columns header) and point locations must match.
@@ -492,6 +502,9 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
      - Excel files
      - :py:func:`pandas.read_excel`
      - If required, provide a sheet name through driver_kwargs
+   * - ``parquet``
+     - Binary encoded comunar dataformat
+     - :py:func:`pandas.read_parquet`
    * - ``fwf``
      - Fixed width delimited text files
      - :py:func:`pandas.read_fwf`

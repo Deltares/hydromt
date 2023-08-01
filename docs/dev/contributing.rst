@@ -423,14 +423,14 @@ Creating a release
 1. Create a new branch with the name "release/<version>" where <version> is the version number, e.g. v0.7.0
 2. Bump the version number (without "v"!) in the __init__.py, check and update the docs/changelog.rst file and add a short summary to the changelog for this version.
    Check if all dependencies in the toml are up to date. Commit all changes
-3. Create a tag using `git tag <version>`, e.g. git tag v0.7.0
-4. Push your changes to github. To include the tag do `git push origin <version>`. This should trigger a test release to test.pypi.org
-5. If all tests and the test release have succeeded, merge de branch to main.
-6. Create a new release on github under https://github.com/Deltares/hydromt/releases.
+3. Create a new documentation version in the `docs/switcher.json` that has the same structure as the other version entries. Please make sure the list stays sorted as this represents the ordering of the menu.
+4. Create a tag using `git tag <version>`, e.g. git tag v0.7.0
+5. Push your changes to github. To include the tag do `git push origin <version>`. This should trigger a test release to test.pypi.org
+6. If all tests and the test release have succeeded, merge de branch to main.
+7. Create a new release on github under https://github.com/Deltares/hydromt/releases.
    Use the "generate release notes" button and copy the content of the changelog for this version on top of the release notes. This should trigger the release to PyPi.
-7. The new PyPi package will trigger a new PR to the `HydroMT feedstock repos of conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_.
+8. The new PyPi package will trigger a new PR to the `HydroMT feedstock repos of conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_.
    Check if all dependencies are up to date and modify the PR if necessary. Merge the PR to release the new version on conda-forge.
-
 
 .. NOTE::
 
