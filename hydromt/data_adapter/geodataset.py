@@ -184,6 +184,8 @@ class GeoDatasetAdapter(DataAdapter):
         if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
             return None, None, None
 
+        read_kwargs = {}
+
         # much better for mem/storage/processing if dtypes are set correctly
         for name, coord in obj.coords.items():
             if coord.values.dtype != object:
@@ -218,7 +220,7 @@ class GeoDatasetAdapter(DataAdapter):
         else:
             raise ValueError(f"GeoDataset: Driver {driver} unknown.")
 
-        return fn_out, driver, kwargs
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,

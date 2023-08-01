@@ -172,7 +172,7 @@ class DataFrameAdapter(DataAdapter):
             driver = "csv"
             fn_out = join(data_root, f"{data_name}.csv")
             obj.to_csv(fn_out, **kwargs)
-            read_kwargs["index_col"] = obj.index.name
+            read_kwargs["index_col"] = 0
         elif driver == "parquet":
             fn_out = join(data_root, f"{data_name}.parquet")
             obj.to_parquet(fn_out, **kwargs)

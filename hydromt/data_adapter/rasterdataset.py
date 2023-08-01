@@ -194,6 +194,7 @@ class RasterDatasetAdapter(DataAdapter):
             logger.warning(str(err))
             return None, None, None
 
+        read_kwargs = {}
         if driver is None:
             # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
             driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
@@ -230,7 +231,7 @@ class RasterDatasetAdapter(DataAdapter):
                 )
             driver = "raster"
 
-        return fn_out, driver, kwargs
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,

@@ -169,6 +169,7 @@ class GeoDataFrameAdapter(DataAdapter):
         if gdf.index.size == 0:
             return None, None, None
 
+        read_kwargs = {}
         if driver is None:
             _lst = ["csv", "parquet", "xls", "xlsx", "xy", "vector_table"]
             driver = "csv" if self.driver in _lst else "GPKG"
@@ -182,6 +183,7 @@ class GeoDataFrameAdapter(DataAdapter):
                 )
             gdf["x"], gdf["y"] = gdf.geometry.x, gdf.geometry.y
             gdf.drop(columns="geometry").to_csv(fn_out, **kwargs)
+            read_kwargs["index_col"] = 0
         elif driver == "parquet":
             fn_out = join(data_root, f"{data_name}.parquet")
             if not np.all(gdf.geometry.type == "Point"):
@@ -200,7 +202,7 @@ class GeoDataFrameAdapter(DataAdapter):
             gdf.to_file(fn_out, driver=driver, **kwargs)
             driver = "vector"
 
-        return fn_out, driver, kwargs
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,
