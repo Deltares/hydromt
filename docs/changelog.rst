@@ -14,7 +14,6 @@ Added
 - docs now include a dropdown for selecting older versions of the docs. (#457)
 - Support for loading the same data source but from different places (e.g. local & aws)
 - Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
-- New support for configuring HydroMT models using ``toml`` format.
 
 Changed
 -------

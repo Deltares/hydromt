@@ -78,11 +78,12 @@ def configread(
         Configuration dictionary.
     """
     # read
-    if splitext(config_fn)[-1] in [".yaml", ".yml"]:
+    ext = splitext(config_fn)[-1].strip()
+    if ext in [".yaml", ".yml"]:
         with open(config_fn, "rb") as f:
             cfdict = yaml.safe_load(f)
         cfdict = _process_config_in(cfdict)
-    elif str(config_fn).split(".")[-1].strip() == "toml":  # user defined
+    elif ext == ".toml":  # user defined
         with open(config_fn, "rb") as f:
             cfdict = load_toml(f)
         cfdict = _process_config_in(cfdict)
@@ -125,11 +126,12 @@ def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
     """
     root = Path(dirname(config_fn))
     _cfdict = parse_relpath(cfdict.copy(), root)
-    if splitext(config_fn)[-1] in [".yaml", ".yml"]:
+    ext = splitext(config_fn)[-1].strip()
+    if ext in [".yaml", ".yml"]:
         _cfdict = _process_config_out(_cfdict)  # should not be done for ini
         with open(config_fn, "w") as f:
             yaml.dump(_cfdict, f, sort_keys=False)
-    elif splitext(config_fn)[-1] == ".toml":  # user defined
+    elif ext == ".toml":  # user defined
         _cfdict = _process_config_out(_cfdict)
         with open(config_fn, "wb") as f:
             dump_toml(_cfdict, f)

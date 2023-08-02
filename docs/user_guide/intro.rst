@@ -23,7 +23,7 @@ HydroMT is organized in the following way:
 
   HydroMT is data-agnostic through the Data Adapter, which reads a wide range of data formats and unifies
   the input data (e.g., on-the-fly renaming and unit conversion). Datasets are listed and passed to HydroMT
-  in a user defined data catalog :ref:`file <data_file>`.. HydroMT also provides several
+  in a user defined data catalog :ref:`yaml file <data_yaml>`.. HydroMT also provides several
   :ref:`pre-defined data catalogs <existing_catalog>` with mostly global datasets that can be used as is,
   although not all datasets in these catalogs are openly accessible.
   Currently, four different types of input data are supported and represented by a specific Python data
@@ -95,7 +95,7 @@ Configuration (HydroMT)         (.yaml) file describing the complete pipeline wi
 Data catalog                    A set of data sources available for HydroMT. It is build up from *yaml* files containing
                                 one or more data sources with information about how to read and optionally preprocess
                                 the data and contains meta-data about the data source.
-Data source                     Input data to be processed by HydroMT. Data sources are listed in configuration files.
+Data source                     Input data to be processed by HydroMT. Data sources are listed in yaml files.
 Model                           A set of files describing the schematization, forcing, states, simulation configuration
                                 and results for any supported model kernel and model classes. The final set of files is
                                 dependent on the model type (grid, lumped or mesh model for examples) or the model plugin.

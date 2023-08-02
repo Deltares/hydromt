@@ -99,7 +99,7 @@ Multi-variable Virtual Raster Tileset (VRT)
 Multiple raster layers from different files are parsed using the **raster** driver.
 Each raster becomes a variable in the resulting RasterDataset based on its filename.
 The path to multiple files can be set using a sting glob or several keys,
-see description of the ``path`` argument in the :ref:`file description <data_file>`.
+see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
 Note that the rasters should have identical grids.
 
 Here multiple .vrt files (dir.vrt, bas.vrt, etc.) are combined based on their variable name
@@ -202,7 +202,7 @@ is used, where the ``driver_kwargs`` are passed to :py:func:`xarray.open_mfdatas
 (or :py:func:`xarray.open_zarr` for zarr data).
 In case the CRS cannot be inferred from the netcdf data it should be defined with the ``crs`` option here.
 The path to multiple files can be set using a sting glob or several keys,
-see description of the ``path`` argument in the :ref:`file description <data_file>`.
+see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to
 unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`.
 
@@ -335,7 +335,7 @@ of the GeoDataFrame attribute table.
     ...
 
 As the CRS of the coordinates cannot be inferred from the data it must be set in the
-data entry in the configuration file as shown in the example below. The internal data format
+data entry in the yaml file as shown in the example below. The internal data format
 is based on the file extension unless the ``driver_kwargs`` ``driver`` option is set.
 See :py:meth:`~hydromt.io.open_vector` and :py:func:`~hydromt.io.open_vector_from_table` for more
 options.
@@ -414,7 +414,7 @@ is used, where the ``driver_kwargs`` are passed to :py:func:`xarray.open_mfdatas
 (or :py:func:`xarray.open_zarr` for zarr data).
 In case the CRS cannot be inferred from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys,
-see description of the ``path`` argument in the :ref:`file description <data_file>`.
+see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to
 unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`.
 

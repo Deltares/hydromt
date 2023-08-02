@@ -72,7 +72,7 @@ From Python
 -----------
 
 All HydroMT models have a :py:func:`~hydromt.Model.build` method which can be used when building models from Python.
-The data catalog configuration files and logging have to be set when initializing the model.
+The data catalog yaml files and logging have to be set when initializing the model.
 The configuration file can be parsed using :py:func:`~hydromt.config.configread` and passed to the build method using the ``opt`` argument.
 
 **Example usage**

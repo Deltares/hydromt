@@ -21,8 +21,6 @@ import requests
 import xarray as xr
 import yaml
 from packaging.version import Version
-from tomli import load as load_toml
-from tomli_w import dump as dump_toml
 
 from hydromt.utils import partition_dictionaries
 
@@ -124,8 +122,6 @@ class DataCatalog(object):
         for name_or_path in data_libs:
             if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
                 self.from_yml(name_or_path)
-            elif str(name_or_path).split(".")[-1].strip() == "toml":  # user defined
-                self.from_toml(name_or_path)
             else:  # predefined
                 self.from_predefined_catalogs(name_or_path)
 
@@ -581,107 +577,6 @@ class DataCatalog(object):
             mark_used=mark_used,
         )
 
-    def from_toml(
-        self, urlpath: Union[Path, str], root: str = None, mark_used: bool = False
-    ) -> None:
-        """Add data sources based on toml file.
-
-        Parameters
-        ----------
-        urlpath: str, Path
-            Path or url to data source toml files.
-        root: str, Path, optional
-            Global root for all relative paths in toml file(s).
-        mark_used: bool
-            If True, append to used_data list.
-
-        Examples
-        --------
-        A toml data entry is provided below, where all the text between <>
-        should be filled by the user. Multiple data sources of the same
-        data type should be grouped.  Currently the following data types are supported:
-        {'RasterDataset', 'GeoDataset', 'GeoDataFrame'}. See the specific data adapters
-        for more information about the required and optional arguments.
-
-        .. code-block:: toml
-
-            [meta]
-            root = "<path>"
-            category = "<category>"
-            version = "<version>"
-
-            ["<name>"]
-            path = "<path>"
-            data_type = "<data_type>"
-            driver = "<driver>"
-            filesystem = "<filesystem>"
-            crs = "<crs>"
-
-            kwargs = {
-              "<key>" = "<value>",
-            }
-
-              ["<name>".nodata]
-              "<hydromt_variable_name1>" = "<nodata>"
-
-              ["<name>".rename]
-              "<native_variable_name1>" = "<hydromt_variable_name1>"
-              "<native_variable_name2>" = "<hydromt_variable_name2>"
-
-              ["<name>".unit_add]
-              "<hydromt_variable_name1>" = "<float/int>"
-
-              ["<name>".unit_mult]
-              "<hydromt_variable_name1>" = "<float/int>"
-
-              ["<name>".meta]
-              source_url = "<source_url>"
-              source_version = "<source_version>"
-              source_licence = "<source_licence>"
-              paper_ref = "<paper_ref>"
-              paper_doi = "<paper_doi>"
-
-              ["<name>".placeholders]
-              "<placeholder_name_1>" = "<list of names>"
-              "<placeholder_name_2>" = "<list of names>"
-
-              ["<name>".zoom_levels]
-              "<zoom_level_1>" = "<resolution_1>"
-              "<zoom_level_2>" = "<resolution_2>"
-        """
-        self.logger.info(f"Parsing data catalog from {urlpath}")
-        toml = _toml_from_uri_or_path(urlpath)
-        # parse metadata
-        meta = dict()
-        # legacy code with root/category at highest yml level
-        if "root" in toml:
-            meta.update(root=toml.pop("root"))
-        if "category" in toml:
-            meta.update(category=toml.pop("category"))
-        # read meta data
-        meta = toml.pop("meta", meta)
-        self_version = Version(__version__)
-        hydromt_version = meta.get("hydromt_version", __version__)
-        toml_version = Version(hydromt_version)
-
-        if toml_version > self_version:
-            self.logger.warning(
-                f"Specified HydroMT version ({hydromt_version}) \
-                  more recent than installed version ({__version__}).",
-            )
-
-        catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
-
-        if root is None:
-            root = meta.get("root", os.path.dirname(urlpath))
-        self.from_dict(
-            toml,
-            catalog_name=catalog_name,
-            root=root,
-            category=meta.get("category", None),
-            mark_used=mark_used,
-        )
-
     def from_dict(
         self,
         data_dict: Dict,
@@ -793,46 +688,6 @@ class DataCatalog(object):
                 yaml.dump(data_dict, f, default_flow_style=False, sort_keys=False)
         else:
             self.logger.info("The data catalog is empty, no yml file is written.")
-
-    def to_toml(
-        self,
-        path: Union[str, Path],
-        root: str = "auto",
-        source_names: Optional[List] = None,
-        used_only: bool = False,
-        meta: Dict = {},
-    ) -> None:
-        """Write data catalog to toml format.
-
-        Parameters
-        ----------
-        path: str, Path
-            toml output path.
-        root: str, Path, optional
-            Global root for all relative paths in toml file.
-            If "auto" (default) the data source paths are relative to the toml
-            output ``path``.
-        source_names: list, optional
-            List of source names to export, by default None in which case all sources
-            are exported. This argument is ignored if `used_only=True`.
-        used_only: bool, optional
-            If True, export only data entries kept in used_data list, by default False.
-        meta: dict, optional
-            key-value pairs to add to the data catalog meta section, such as 'version',
-            by default empty.
-        """
-        source_names = self._used_data if used_only else source_names
-        toml_dir = os.path.dirname(abspath(path))
-        if root == "auto":
-            root = toml_dir
-        data_dict = self.to_dict(root=root, source_names=source_names, meta=meta)
-        if str(root) == toml_dir:
-            data_dict.pop("root", None)  # remove root if it equals the toml_dir
-        if data_dict:
-            with open(path, "wb") as f:
-                dump_toml(data_dict, f)
-        else:
-            self.logger.info("The data catalog is empty, no toml file is written.")
 
     def to_dict(
         self,
@@ -1502,18 +1357,6 @@ def _parse_data_source_dict(
         driver_kwargs=driver_kwargs,
         **source,
     )
-
-
-def _toml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
-    if _uri_validator(str(uri_or_path)):
-        with requests.get(uri_or_path, stream=True) as r:
-            if r.status_code != 200:
-                raise IOError(f"URL {r.content}: {uri_or_path}")
-            toml = load_toml(r.text)
-    else:
-        with open(uri_or_path, "rb") as stream:
-            toml = load_toml(stream)
-    return toml
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
