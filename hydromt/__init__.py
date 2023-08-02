@@ -3,12 +3,6 @@
 # version number without 'v' at start
 __version__ = "0.8.1.dev0"
 
-# Set environment variables (this will be temporary)
-# to use shapely 2.0 in favor of pygeos (if installed)
-import os
-
-os.environ["USE_PYGEOS"] = "0"
-
 # pkg_resource deprication warnings originate from dependencies
 # so silence them for now
 import warnings

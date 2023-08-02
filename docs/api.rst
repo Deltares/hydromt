@@ -777,16 +777,6 @@ Vector
    gis_utils.nearest_merge
 
 
-PCRaster I/O
-============
-
-.. autosummary::
-   :toctree: _generated
-
-   gis_utils.write_map
-   gis_utils.write_clone
-
-
 .. _statistics:
 
 =====================================
