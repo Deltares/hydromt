@@ -25,7 +25,7 @@ Fixed
 
 Deprecated
 ----------
--
+- the dependencies ``pcraster`` and ``pygeos`` are no longer used and were removed. (PR #467)
 
 
 v0.8.0 (2023-07-18)
