@@ -867,7 +867,7 @@ class DataCatalog(object):
                             unit_add = source.unit_add
                             source.unit_mult = {}
                             source.unit_add = {}
-                        fn_out, driver = source.to_file(
+                        fn_out, driver, driver_kwargs = source.to_file(
                             data_root=data_root,
                             data_name=key,
                             variables=source_vars.get(key, None),
@@ -892,6 +892,8 @@ class DataCatalog(object):
                         source.driver = driver
                         source.filesystem = "local"
                         source.driver_kwargs = {}
+                        if driver_kwargs is not None:
+                            source.driver_kwargs.update(driver_kwargs)
                         source.rename = {}
                         if key in sources_out:
                             self.logger.warning(
