@@ -36,6 +36,8 @@ jobs:
         run: pip install tomli && python make_env.py test
       - uses: conda-incubator/setup-miniconda@v2
         with:
+          cache-downloads: true
+          cache-environment: true
           python-version: ${{ matrix.python-version }}
           miniforge-variant: Mambaforge
           channels: conda-forge, defaults
