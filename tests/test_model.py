@@ -217,9 +217,11 @@ def test_model_build_update(tmpdir, demda, obsda):
             "set_geoms": {"geom": geom, "name": "geom2"},
             "set_maps": {"data": demda, "name": "elevtn2"},
             "set_forcing": {"data": obsda, "name": "temp"},
+            "set_forcing2": {"data": obsda * 0.2, "name": "precip"},
         }
     )
     model.read()
+    assert len(model._defered_file_closes) == 0
     # Check that variables from build AND update are present after read
     assert "dem" in model.config["input"]
     assert "dem2" in model.config["input"]

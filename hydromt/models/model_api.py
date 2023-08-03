@@ -5,12 +5,14 @@ import glob
 import inspect
 import logging
 import os
+import shutil
 import typing
 import warnings
 from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from tempfile import TemporaryDirectory
+from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
 import geopandas as gpd
 import numpy as np
@@ -27,6 +29,14 @@ from ..raster import GEO_MAP_COORD
 __all__ = ["Model"]
 
 logger = logging.getLogger(__name__)
+
+DeferedFileClose = TypedDict(
+    "DeferedFileClose",
+    {"ds": xr.Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
+)
+
+
+TMP_DATA_DIR = TemporaryDirectory()
 
 
 class Model(object, metaclass=ABCMeta):
@@ -115,11 +125,40 @@ class Model(object, metaclass=ABCMeta):
         self._root = ""
         self._read = True
         self._write = False
+        self._defered_file_closes = []
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
         self.set_root(root, mode)  # also creates hydromt.log file
         self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
+
+    def _cleanup(self, forceful_cleanup=False, max_close_attempts=2) -> List[str]:
+        failed_closes = []
+        while len(self._defered_file_closes) > 0:
+            close_handle = self._defered_file_closes.pop()
+            if close_handle["close_attempts"] > max_close_attempts:
+                # already tried to close this to many times so give up
+                self.logger.error(
+                    f"Max write attempts to file {close_handle['org_fn']}"
+                    " exceeded. Skipping..."
+                    f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
+                )
+                continue
+
+            if forceful_cleanup:
+                close_handle["ds"].close()
+            try:
+                shutil.move(close_handle["tmp_fn"], close_handle["org_fn"])
+            except PermissionError:
+                self.logger.error(
+                    f"Could not write to destination file {close_handle['org_fn']} "
+                    "because the following error was raised: {e}"
+                )
+                close_handle["close_attempts"] += 1
+                self._defered_file_closes.append(close_handle)
+                failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
+
+        return list(set(failed_closes))
 
     @property
     def api(self) -> Dict:
@@ -228,6 +267,7 @@ class Model(object, metaclass=ABCMeta):
         model_out: Optional[Union[str, Path]] = None,
         write: Optional[bool] = True,
         opt: Dict = {},
+        forceful_cleanup=False,
     ):
         """Single method to update a model based the settings in `opt`.
 
@@ -263,6 +303,10 @@ class Model(object, metaclass=ABCMeta):
                         ...
                     }
                 }
+          forceful_cleanup:
+            Force open files to close when attempting to write them. In the case you
+            try to write to a file that's already opened. The output will be written
+            to a temporary file in case the original file cannot be written to.
         """
         opt = self._check_get_opt(opt)
 
@@ -297,8 +341,7 @@ class Model(object, metaclass=ABCMeta):
         if write:
             self.write()
 
-        # clean up filehandlers and delete old files / rename tmp ones
-        # @savente93
+        self._cleanup(forcefull_cleanup=forceful_cleanup)
 
     ## general setup methods
 
@@ -1429,29 +1472,20 @@ class Model(object, metaclass=ABCMeta):
                 ds = ds.raster.gdal_compliant(
                     rename_dims=rename_dims, force_sn=force_sn
                 )
-            # if not isfile(_fn):
-            ds.to_netcdf(_fn, **kwargs)
-            # else:
-            #     # Check if file content is identical, then skip writting
-            #     ds_old = xr.open_dataset(_fn, mask_and_scale=False)
-            #     if not ds_old.equals(ds):
-            #         # Close file handle
-            #         ds_old.close()
-            #         # Try append mode
-            #         # try:
-            #         #     ds.to_netcdf(_fn, mode="a", **kwargs)
-            #         # ruff fails on bare except but not sure if this
-            #         # would always be the same error
-            #         # except:
-            #         #     # Write a temporary copy
-            #         #     _fn_tmp = _fn + ".tmp"
-            #         #     ds.to_netcdf(_fn_tmp, **kwargs)
-            #         #     # TODO delete old file and rename when filehandles
-            #         #     # can be closed
-            #         #     # @savente93
-            #     else:
-            #         # identical so skip writting and release filehandle
-            #         ds_old.close()
+            try:
+                ds.to_netcdf(_fn, **kwargs)
+            except PermissionError:
+                logger.warning(f"Could not write to file {_fn}, defering write")
+                tmp_fn = join(str(TMP_DATA_DIR), f"{_fn}.tmp")
+                ds.to_netcdf(tmp_fn, **kwargs)
+                self._defered_file_closes.append(
+                    DeferedFileClose(
+                        ds=ds,
+                        org_fn=join(str(TMP_DATA_DIR), _fn),
+                        tmp_fn=tmp_fn,
+                        close_attempts=1,
+                    )
+                )
 
     # general reader & writer
     def _read_nc(
