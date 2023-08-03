@@ -341,7 +341,7 @@ class Model(object, metaclass=ABCMeta):
         if write:
             self.write()
 
-        self._cleanup(forcefull_cleanup=forceful_cleanup)
+        self._cleanup(forceful_cleanup=forceful_cleanup)
 
     ## general setup methods
 
