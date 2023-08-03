@@ -71,9 +71,9 @@ class DataCatalog(object):
         Arguments
         ---------
         data_libs: (list of) str, Path, optional
-            One or more paths to data catalog yaml files or names of predefined data
-            catalogs. By default the data catalog is initiated without data entries.
-            See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for
+            One or more paths to data catalog configuration files or names of predefined
+            data catalogs. By default the data catalog is initiated without data
+            entries. See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for
             accepted yaml format.
         fallback_lib:
             Name of pre-defined data catalog to read if no data_libs are provided,
@@ -499,7 +499,7 @@ class DataCatalog(object):
         {'RasterDataset', 'GeoDataset', 'GeoDataFrame'}. See the specific data adapters
         for more information about the required and optional arguments.
 
-        .. code-block:: console
+        .. code-block:: yaml
 
             meta:
               root: <path>
@@ -703,7 +703,7 @@ class DataCatalog(object):
             List of source names to export, by default None in which case all sources
             are exported.
         root : str, Path, optional
-            Global root for all relative paths in yml file.
+            Global root for all relative paths in the file.
         meta: dict, optional
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
