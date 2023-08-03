@@ -376,7 +376,6 @@ class GridMixin(object):
         """
         self._assert_read_mode
         # Load grid data in r+ mode to allow overwritting netcdf files
-        # @savente93: grid is an example where I implemented a forced load in r+ mode
         if self._read and self._write:
             kwargs["load"] = True
         for ds in self._read_nc(fn, single_var_as_array=False, **kwargs).values():

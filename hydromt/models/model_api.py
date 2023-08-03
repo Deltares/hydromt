@@ -1503,7 +1503,6 @@ class Model(object, metaclass=ABCMeta):
         for fn in fns:
             name = basename(fn).split(".")[0]
             self.logger.debug(f"Reading model file {name}.")
-            # @savente93: this is where the reading of model object files happens
             # Load data to allow overwritting in r+ mode
             if load:
                 ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs).load()
