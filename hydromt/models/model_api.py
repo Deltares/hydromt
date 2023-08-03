@@ -1429,29 +1429,29 @@ class Model(object, metaclass=ABCMeta):
                 ds = ds.raster.gdal_compliant(
                     rename_dims=rename_dims, force_sn=force_sn
                 )
-            if not isfile(_fn):
-                ds.to_netcdf(_fn, **kwargs)
-            else:
-                # Check if file content is identical, then skip writting
-                ds_old = xr.open_dataset(_fn, mask_and_scale=False)
-                if not ds_old.equals(ds):
-                    # Close file handle
-                    ds_old.close()
-                    # Try append mode
-                    # try:
-                    #     ds.to_netcdf(_fn, mode="a", **kwargs)
-                    # ruff fails on bare except but not sure if this
-                    # would always be the same error
-                    # except:
-                    #     # Write a temporary copy
-                    #     _fn_tmp = _fn + ".tmp"
-                    #     ds.to_netcdf(_fn_tmp, **kwargs)
-                    #     # TODO delete old file and rename when filehandles
-                    #     # can be closed
-                    #     # @savente93
-                else:
-                    # identical so skip writting and release filehandle
-                    ds_old.close()
+            # if not isfile(_fn):
+            ds.to_netcdf(_fn, **kwargs)
+            # else:
+            #     # Check if file content is identical, then skip writting
+            #     ds_old = xr.open_dataset(_fn, mask_and_scale=False)
+            #     if not ds_old.equals(ds):
+            #         # Close file handle
+            #         ds_old.close()
+            #         # Try append mode
+            #         # try:
+            #         #     ds.to_netcdf(_fn, mode="a", **kwargs)
+            #         # ruff fails on bare except but not sure if this
+            #         # would always be the same error
+            #         # except:
+            #         #     # Write a temporary copy
+            #         #     _fn_tmp = _fn + ".tmp"
+            #         #     ds.to_netcdf(_fn_tmp, **kwargs)
+            #         #     # TODO delete old file and rename when filehandles
+            #         #     # can be closed
+            #         #     # @savente93
+            #     else:
+            #         # identical so skip writting and release filehandle
+            #         ds_old.close()
 
     # general reader & writer
     def _read_nc(
