@@ -309,16 +309,12 @@ class MeshMixin(object):
         if self._mesh is None:  # NOTE: mesh is initialized with None
             # Check on crs
             if not data.ugrid.grid.crs:
-                raise ValueError(
-                    "Data should have CRS."
-                )  # FIXME new data coming in should have crs
+                raise ValueError("Data should have CRS.")
             self._mesh = data
         else:
             # Check on crs
             if not data.ugrid.grid.crs == self.crs:
-                raise ValueError(
-                    "Data and self.mesh should have the same CRS."
-                )  # FIXME since data and self.mesh have the same crs, can it be a global property?
+                raise ValueError("Data and self.mesh should have the same CRS.")
             # Save crs as it will be lost when converting to xarray
             crs = self.crs
             # Check on new grid topology
@@ -400,7 +396,7 @@ class MeshMixin(object):
             grid = self.mesh_grids[grid_name]
             uds = xu.UgridDataset(
                 grid.to_dataset(optional_attributes=True)
-            )  # FIXME: it seems optional_attributes is needed when creating a new object for all variables about grid to be written, not needed when reading
+            )  # FIXME: would be nice if always write all attributes https://github.com/Deltares/xugrid/issues/140
             uds.ugrid.grid.set_crs(grid.crs)
             # Look for data_vars that are defined on grid_name
             for var in self.mesh.data_vars:
@@ -420,7 +416,7 @@ class MeshMixin(object):
     def read_mesh(self, fn: str = "mesh/mesh.nc", crs: CRS = None, **kwargs) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
-        key-word arguments are passed to :py:func:`xu.open_dataset`
+        key-word arguments are passed to :py:func:`xr.open_dataset` # FIXME make doc consistent
 
         Parameters
         ----------
@@ -429,16 +425,17 @@ class MeshMixin(object):
         crs : CRS, optional
             Coordinate Reference System (CRS) object representing the spatial reference system of the mesh file.
         **kwargs : dict
-            Additional keyword arguments to be passed to the `open_dataset` method.
+            Additional keyword arguments to be passed to the `_read_nc` method. # FIXME make doc consistent
         """
-        # FIXME: general question, why there is no force overwrite argument for model update?
+        # FIXME: check how read_mesh behaves when multiple files are read
         self._assert_read_mode
-        uds = xu.open_dataset(
-            fn, **kwargs
-        )  # FIXME: switching self._read_nc to xu.open_dataset. is the idea to support single file? or also multiple files? e.g. xu.open_mfdataset
-        if not any(
-            uds.ugrid.crs.values()
-        ):  # FIXME: crs cannot be write/read correctly by xugrid https://github.com/Deltares/xugrid/issues/138
+        for ds in self._read_nc(fn, **kwargs).values():
+            uds = xu.UgridDataset(ds)
+            if ds.rio.crs is not None:  # parse crs
+                uds.ugrid.grid.set_crs(ds.raster.crs)
+                uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
+        # FIXME how to apply crs if crs is missing?
+        if not any(uds.ugrid.crs.values()):
             if not crs:
                 raise ValueError(
                     "no crs is found in the file nor passed to the reader."
@@ -451,7 +448,8 @@ class MeshMixin(object):
         else:
             self.logger.info("crs is read from file")
         self._mesh = uds
-        # self.set_mesh(uds) # FIXME: infinit loop because self.mesh property is called in self.set_mesh, in which read_mesh is called.
+        # FIXME check how self.set_mesh(uds) behaves in the latest fix
+        # self.set_mesh(uds)
 
     def write_mesh(self, fn: str = "mesh/mesh.nc", **kwargs) -> None:
         """Write model grid data to a netCDF file at <root>/<fn>.
@@ -507,6 +505,7 @@ class MeshMixin(object):
     @property
     def mesh_names(self) -> List[str]:
         """List of grid names in mesh."""
+        # FIXME would be nice if xugrid supports it: https://github.com/Deltares/xugrid/issues/141
         if self.mesh is not None:
             return list(self.mesh_grids.keys())
         else:
@@ -529,9 +528,8 @@ class MeshMixin(object):
                     v[f"{grid.name}_node_id"] = xr.DataArray(
                         v[dim].values.astype(str), dims=dim
                     )
-                gdf = (
-                    v.ugrid.to_geodataframe()
-                )  # FIXME xugrid crs not passed on correctly: https://github.com/Deltares/xugrid/issues/138
+                gdf = v.ugrid.to_geodataframe()
+                # FIXME xugrid crs not passed on correctly: https://github.com/Deltares/xugrid/issues/138
                 mesh_gdf[k] = gdf.set_crs(v.ugrid.crs[k])
 
         return mesh_gdf
@@ -539,9 +537,11 @@ class MeshMixin(object):
 
 class MeshModel(MeshMixin, Model):
 
-    """Model class Mesh Model for mesh models in HydroMT."""
+    """Model class Mesh Model for mesh models in HydroMT.
 
-    # FIXME: general remark: good to make it clear that the class supports only mesh created using UGrid and CF convention, and add a link in the doc to the convention
+    Uses xugrid for working with unstructured grids, for data and topology stored according to UGRID conventions.
+    See also: xugrid
+    """
 
     _CLI_ARGS = {"region": "setup_mesh2d", "res": "setup_mesh2d"}
     _NAME = "mesh_model"
@@ -562,7 +562,6 @@ class MeshModel(MeshMixin, Model):
             data_libs=data_libs,
             logger=logger,
         )
-        # FIXME: crs as global property?
 
     ## general setup methods
     def setup_mesh2d(
