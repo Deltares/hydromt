@@ -241,6 +241,7 @@ def build(
 @opt_cli
 @data_opt
 @deltares_data_opt
+@overwrite_opt
 @cache_opt
 @quiet_opt
 @verbose_opt
@@ -255,6 +256,7 @@ def update(
     opt,
     data,
     dd,
+    fo,
     cache,
     verbose,
     quiet,
@@ -306,7 +308,7 @@ def update(
             opt0 = opt.get("setup_config", {})
             opt = {c: opt.get(c, {}) for c in components}
             opt.update({"setup_config": opt0})
-        mod.update(model_out=model_out, opt=opt)
+        mod.update(model_out=model_out, opt=opt, forceful_cleanup=fo)
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise

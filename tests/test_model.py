@@ -220,9 +220,8 @@ def test_model_build_update(tmpdir, demda, obsda):
             "set_forcing2": {"data": obsda * 0.2, "name": "precip"},
         }
     )
-    model.read()
     assert len(model._defered_file_closes) == 0
-    # Check that variables from build AND update are present after read
+    # Check that variables from build AND update are present
     assert "dem" in model.config["input"]
     assert "dem2" in model.config["input"]
     assert "geom1" in model.geoms
@@ -326,7 +325,6 @@ def test_gridmodel(grid_model, tmpdir, demda):
             "write_grid": {},
         }
     )
-    model1.read()
     assert "testdata" in model1.grid
     assert "elevtn" in model1.grid
 
