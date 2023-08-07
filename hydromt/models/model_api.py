@@ -133,6 +133,22 @@ class Model(object, metaclass=ABCMeta):
         self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
 
     def _cleanup(self, forceful_cleanup=False, max_close_attempts=2) -> List[str]:
+        """Try to close all defered file handles.
+
+        Try to overwrite the destination file with the temporary one until either the
+        maximum number of tries is reached or until it succeeds. The forced cleanup
+        also attempts to close the original file handle, which could cause trouble
+        if the user will try to read from the same file handle after this function
+        is called.
+
+        Parameters
+        ----------
+        forceful_cleanup: bool
+            Attempt to force closing defered file handles before writing to them.
+        max_close_attempts: int
+            Number of times to try and overwrite the original file, before giving up.
+
+        """
         failed_closes = []
         while len(self._defered_file_closes) > 0:
             close_handle = self._defered_file_closes.pop()
