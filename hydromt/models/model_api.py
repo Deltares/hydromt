@@ -36,7 +36,7 @@ DeferedFileClose = TypedDict(
 )
 
 
-TMP_DATA_DIR = TemporaryDirectory()
+TMP_DATA_DIR = None
 
 
 class Model(object, metaclass=ABCMeta):
@@ -1492,6 +1492,9 @@ class Model(object, metaclass=ABCMeta):
                 ds.to_netcdf(_fn, **kwargs)
             except PermissionError:
                 logger.warning(f"Could not write to file {_fn}, defering write")
+                if TMP_DATA_DIR is None:  # noqa: F823
+                    TMP_DATA_DIR = TemporaryDirectory()
+
                 tmp_fn = join(str(TMP_DATA_DIR), f"{_fn}.tmp")
                 ds.to_netcdf(tmp_fn, **kwargs)
                 self._defered_file_closes.append(
