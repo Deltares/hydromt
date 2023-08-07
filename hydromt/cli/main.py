@@ -308,7 +308,7 @@ def update(
             opt0 = opt.get("setup_config", {})
             opt = {c: opt.get(c, {}) for c in components}
             opt.update({"setup_config": opt0})
-        mod.update(model_out=model_out, opt=opt, forceful_cleanup=fo)
+        mod.update(model_out=model_out, opt=opt, forceful_overwrite=fo)
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise

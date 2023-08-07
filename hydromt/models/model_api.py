@@ -130,7 +130,7 @@ class Model(object, metaclass=ABCMeta):
         self.set_root(root, mode)  # also creates hydromt.log file
         self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
 
-    def _cleanup(self, forceful_cleanup=False, max_close_attempts=2) -> List[str]:
+    def _cleanup(self, forceful_overwrite=False, max_close_attempts=2) -> List[str]:
         """Try to close all defered file handles.
 
         Try to overwrite the destination file with the temporary one until either the
@@ -141,7 +141,7 @@ class Model(object, metaclass=ABCMeta):
 
         Parameters
         ----------
-        forceful_cleanup: bool
+        forceful_overwrite: bool
             Attempt to force closing defered file handles before writing to them.
         max_close_attempts: int
             Number of times to try and overwrite the original file, before giving up.
@@ -159,7 +159,7 @@ class Model(object, metaclass=ABCMeta):
                 )
                 continue
 
-            if forceful_cleanup:
+            if forceful_overwrite:
                 close_handle["ds"].close()
             try:
                 shutil.move(close_handle["tmp_fn"], close_handle["org_fn"])
@@ -281,7 +281,7 @@ class Model(object, metaclass=ABCMeta):
         model_out: Optional[Union[str, Path]] = None,
         write: Optional[bool] = True,
         opt: Dict = {},
-        forceful_cleanup=False,
+        forceful_overwrite=False,
     ):
         """Single method to update a model based the settings in `opt`.
 
@@ -317,7 +317,7 @@ class Model(object, metaclass=ABCMeta):
                         ...
                     }
                 }
-          forceful_cleanup:
+          forceful_overwrite:
             Force open files to close when attempting to write them. In the case you
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
@@ -355,7 +355,7 @@ class Model(object, metaclass=ABCMeta):
         if write:
             self.write()
 
-        self._cleanup(forceful_cleanup=forceful_cleanup)
+        self._cleanup(forceful_overwrite=forceful_overwrite)
 
     ## general setup methods
 
