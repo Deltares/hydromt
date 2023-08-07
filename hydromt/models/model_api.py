@@ -1385,7 +1385,7 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root and should contain a {name} placeholder,
             by default 'states/{name}.nc'
         **kwargs:
-            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
+            Additional keyword arguments that are passed to the `_write_nc`
             function.
         """
         if len(self._states) == 0:
