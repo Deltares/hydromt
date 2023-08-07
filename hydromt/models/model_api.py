@@ -36,9 +36,6 @@ DeferedFileClose = TypedDict(
 )
 
 
-TMP_DATA_DIR = None
-
-
 class Model(object, metaclass=ABCMeta):
 
     """General and basic API for models in HydroMT."""
@@ -54,6 +51,7 @@ class Model(object, metaclass=ABCMeta):
     # tell hydroMT which methods should receive the res and region arguments
     # TODO: change it back to setup_region and no res --> deprecation
     _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
+    _TMP_DATA_DIR = None
 
     _API = {
         "crs": CRS,
@@ -1492,15 +1490,15 @@ class Model(object, metaclass=ABCMeta):
                 ds.to_netcdf(_fn, **kwargs)
             except PermissionError:
                 logger.warning(f"Could not write to file {_fn}, defering write")
-                if TMP_DATA_DIR is None:  # noqa: F823
-                    TMP_DATA_DIR = TemporaryDirectory()
+                if self._TMP_DATA_DIR is None:
+                    self._TMP_DATA_DIR = TemporaryDirectory()
 
-                tmp_fn = join(str(TMP_DATA_DIR), f"{_fn}.tmp")
+                tmp_fn = join(str(self._TMP_DATA_DIR), f"{_fn}.tmp")
                 ds.to_netcdf(tmp_fn, **kwargs)
                 self._defered_file_closes.append(
                     DeferedFileClose(
                         ds=ds,
-                        org_fn=join(str(TMP_DATA_DIR), _fn),
+                        org_fn=join(str(self._TMP_DATA_DIR), _fn),
                         tmp_fn=tmp_fn,
                         close_attempts=1,
                     )
