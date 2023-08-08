@@ -85,8 +85,8 @@ def test_check_data(demda):
 def test_model_api(grid_model):
     assert np.all(np.isin(["grid", "geoms"], list(grid_model.api.keys())))
     # add some wrong data
-    grid_model._geoms.update({"wrong_geom": xr.Dataset()})
-    grid_model._forcing.update({"test": gpd.GeoDataFrame()})
+    grid_model.geoms.update({"wrong_geom": xr.Dataset()})
+    grid_model.forcing.update({"test": gpd.GeoDataFrame()})
     non_compliant = grid_model._test_model_api()
     assert non_compliant == ["geoms.wrong_geom", "forcing.test"]
 
@@ -152,6 +152,29 @@ def test_model(model, tmpdir):
     model._geoms.pop("region")
     with pytest.deprecated_call():
         assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
+
+
+def test_model_set(demda):
+    # test set methods in an empty model in write mode
+    mod = GridModel(mode="w")
+    mod.set_config("test", "test")
+    assert "test" in mod.config
+    mod.set_grid(demda, name="dem")
+    assert "dem" in mod.grid
+    mod.set_maps(demda, name="dem")
+    assert "dem" in mod.maps
+    mod.set_forcing(demda, name="dem")
+    assert "dem" in mod.forcing
+    mod.set_states(demda, name="dem")
+    assert "dem" in mod.states
+    mod.set_results(demda, name="dem")
+    assert "dem" in mod.results
+    mod.set_geoms(demda.raster.box, name="dem")
+    assert "dem" in mod.geoms
+    # test set method error in read mode
+    mod = GridModel(mode="r+")
+    with pytest.raises(ValueError, match="Root unknown, use set_root method"):
+        mod.set_config("test", "test")
 
 
 @pytest.mark.filterwarnings("ignore:The setup_basemaps")
