@@ -263,7 +263,7 @@ class MeshMixin(object):
         Parameters
         ----------
         data: xugrid.UgridDataArray or xugrid.UgridDataset
-            new layer to add to mesh, TODO support one grid only or multiple grids?
+            new layer to add to mesh, should contain only one grid topology.
         name: str, optional
             Name of new object layer, this is used to overwrite the name of
             a UgridDataArray.
@@ -401,9 +401,7 @@ class MeshMixin(object):
             raise ValueError(f"Grid {grid_name} not found in mesh.")
         if include_data:
             grid = self.mesh_grids[grid_name]
-            uds = xu.UgridDataset(
-                grid.to_dataset(optional_attributes=True)
-            )  # FIXME: would be nice if always write all attributes https://github.com/Deltares/xugrid/issues/140
+            uds = xu.UgridDataset(grid.to_dataset(optional_attributes=True))
             uds.ugrid.grid.set_crs(grid.crs)
             # Look for data_vars that are defined on grid_name
             for var in self.mesh.data_vars:
@@ -420,32 +418,31 @@ class MeshMixin(object):
         else:
             return self.mesh_grids[grid_name]
 
-    def read_mesh(self, fn: str = "mesh/mesh.nc", crs: CRS = None, **kwargs) -> None:
+    def read_mesh(
+        self, fn: str = "mesh/mesh.nc", crs: Union[CRS, int] = None, **kwargs
+    ) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
         key-word arguments are passed to :py:func:`xr.open_dataset`
-        # FIXME make doc consistent
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, by default 'mesh/mesh.nc'
-        crs : CRS, optional
-            Coordinate Reference System (CRS) object representing the spatial reference
-            system of the mesh file.
+        crs : CRS or int, optional
+            Coordinate Reference System (CRS) object or EPSG code representing the
+            spatial reference system of the mesh file. Only used if the CRS is not
+            found when reading the mesh file.
         **kwargs : dict
             Additional keyword arguments to be passed to the `_read_nc` method.
-            # FIXME make doc consistent
         """
-        # FIXME: check how read_mesh behaves when multiple files are read
         self._assert_read_mode
-        for ds in self._read_nc(fn, **kwargs).values():
-            uds = xu.UgridDataset(ds)
-            if ds.rio.crs is not None:  # parse crs
-                uds.ugrid.grid.set_crs(ds.raster.crs)
-                uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
-        # FIXME how to apply crs if crs is missing?
-        if not any(uds.ugrid.crs.values()):
+        ds = xr.merge(self._read_nc(fn, **kwargs).values())
+        uds = xu.UgridDataset(ds)
+        if ds.rio.crs is not None:  # parse crs
+            uds.ugrid.set_crs(ds.raster.crs)
+            uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
+        else:
             if not crs:
                 raise ValueError(
                     "no crs is found in the file nor passed to the reader."
@@ -455,24 +452,28 @@ class MeshMixin(object):
                 self.logger.info(
                     "no crs is found in the file, assigning from user input."
                 )
-        else:
-            self.logger.info("crs is read from file")
         self._mesh = uds
-        # FIXME check how self.set_mesh(uds) behaves in the latest fix
-        # self.set_mesh(uds)
 
-    def write_mesh(self, fn: str = "mesh/mesh.nc", **kwargs) -> None:
+    def write_mesh(
+        self,
+        fn: str = "mesh/mesh.nc",
+        write_optional_ugrid_attributes: bool = True,
+        **kwargs,
+    ) -> None:
         """Write model grid data to a netCDF file at <root>/<fn>.
 
-        Keyword arguments are passed to :py:meth:`xarray.Dataset.ugrid.to_netcdf`.
+        Keyword arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`.
 
         Parameters
         ----------
         fn : str, optional
             Filename relative to the model root directory, by default 'grid/grid.nc'.
+        write_optional_ugrid_attributes : bool, optional
+            If True, write optional ugrid attributes to the netCDF file, by default
+            True.
         **kwargs : dict
             Additional keyword arguments to be passed to the
-            `xarray.Dataset.ugrid.to_netcdf` method.
+            `xarray.Dataset.to_netcdf` method.
         """
         if self._mesh is None:
             self.logger.debug("No mesh data found, skip writing.")
@@ -483,7 +484,9 @@ class MeshMixin(object):
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
         self.logger.debug(f"Writing file {fn}")
-        ds_out = self.mesh.ugrid.to_dataset(optional_attributes=True)
+        ds_out = self.mesh.ugrid.to_dataset(
+            optional_attributes=write_optional_ugrid_attributes,
+        )
         if self.crs is not None:
             # save crs to spatial_ref coordinate
             ds_out = ds_out.rio.write_crs(self.crs)
@@ -494,7 +497,6 @@ class MeshMixin(object):
     def mesh_grids(self) -> Dict[str, Union[xu.Ugrid1d, xu.Ugrid2d]]:
         """Dictionnary of grid names and Ugrid topologies in mesh."""
         grids = dict()
-        # FIXME to be replaced by uds.ugrid.topology. See https://github.com/Deltares/xugrid/issues/141
         if self.mesh is not None:
             for grid in self.mesh.ugrid.grids:
                 grids[grid.name] = grid
@@ -516,20 +518,17 @@ class MeshMixin(object):
     @property
     def mesh_names(self) -> List[str]:
         """List of grid names in mesh."""
-        # FIXME to be replaced by uds.ugrid.name/uds.ugrid.name: https://github.com/Deltares/xugrid/issues/141
         if self.mesh is not None:
-            return list(self.mesh_grids.keys())
+            return [grid.name for grid in self.mesh.ugrid.grids]
         else:
             return []
 
     @property
-    def mesh_gdf(self) -> Dict:
+    def mesh_gdf(self) -> Dict[str, gpd.GeoDataFrame]:
         """Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame."""
         mesh_gdf = dict()
         if self._mesh is not None:
             for k, grid in self.mesh_grids.items():
-                # works better on a Dataarray / Dataset
-                # (need to add dummy variable if empty)
                 if grid.topology_dimension == 1:
                     dim = grid.edge_dimension
                 elif grid.topology_dimension == 2:

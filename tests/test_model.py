@@ -198,7 +198,6 @@ def test_setup_region(model, demda, tmpdir):
     demda.raster.to_raster(grid_fn)
     model.setup_region({"grid": grid_fn})
     assert np.all(demda.raster.bounds == model.region.total_bounds)
-    # # TODO model once we have registered the Model class entrypoint
     # basin
     model._geoms.pop("region")  # remove old region
     model.setup_region({"basin": [12.2, 45.833333333333329]})
