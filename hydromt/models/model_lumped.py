@@ -83,7 +83,8 @@ class LumpedMixin:
 
         Files are read at <root>/<fn> and geojson file at <root>/<fn_geom>.
         The netcdf file contains the attribute data and the geojson file the geometry
-        vector data. key-word arguments are passed to :py:func:`xarray.open_dataset`
+        vector data. key-word arguments are passed to
+        :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
@@ -94,11 +95,11 @@ class LumpedMixin:
             geojson filename relative to model root,
             by default 'response_units/response_units.geojson'
         **kwargs:
-            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
+            Additional keyword arguments that are passed to the `read_nc`
             function.
         """
         self._assert_read_mode
-        ds = xr.merge(self._read_nc(fn, **kwargs).values())
+        ds = xr.merge(self.read_nc(fn, **kwargs).values())
         if isfile(join(self.root, fn_geom)):
             gdf = gpd.read_file(join(self.root, fn_geom))
             # TODO: index name is hard coded. Using GeoDataset.index property once ready
@@ -119,7 +120,7 @@ class LumpedMixin:
         Files are written at <root>/<fn> and at <root>/<fn_geom> respectively.
         The netcdf file contains the attribute data and the geojson file the geometry
         vector data. Key-word arguments are passed to
-        :py:meth:`xarray.Dataset.to_netcdf`
+        :py:meth:`~hydromt.models.Model.write_nc`
 
         Parameters
         ----------
@@ -130,7 +131,7 @@ class LumpedMixin:
             geojson filename relative to model root,
             by default 'response_units/response_units.geojson'
         **kwargs:
-            Additional keyword arguments that are passed to the `_write_nc`
+            Additional keyword arguments that are passed to the `write_nc`
             function.
         """
         if len(self._response_units) == 0:
@@ -143,9 +144,9 @@ class LumpedMixin:
         if not isdir(dirname(join(self.root, fn_geom))):
             os.makedirs(dirname(join(self.root, fn_geom)))
         gdf.to_file(join(self.root, fn_geom), driver="GeoJSON")
-        # _write_nc requires dict - use dummy key
+        # write_nc requires dict - use dummy key
         nc_dict = {"response_units": ds.drop_vars("geometry")}
-        self._write_nc(nc_dict, fn, **kwargs)
+        self.write_nc(nc_dict, fn, **kwargs)
 
 
 class LumpedModel(LumpedMixin, Model):

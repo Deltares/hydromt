@@ -264,17 +264,17 @@ class MeshMixin(object):
     def read_mesh(self, fn: str = "mesh/mesh.nc", **kwargs) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
-        key-word arguments are passed to :py:func:`xr.open_dataset`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, by default 'mesh/mesh.nc'
         **kwargs : dict
-            Additional keyword arguments to be passed to the `_read_nc` method.
+            Additional keyword arguments to be passed to the `read_nc` method.
         """
         self._assert_read_mode
-        for ds in self._read_nc(fn, **kwargs).values():
+        for ds in self.read_nc(fn, **kwargs).values():
             uds = xu.UgridDataset(ds)
             if ds.rio.crs is not None:  # parse crs
                 uds.ugrid.grid.set_crs(ds.raster.crs)

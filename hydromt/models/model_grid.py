@@ -365,21 +365,21 @@ class GridMixin(object):
     def read_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
 
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         **kwargs : dict
-            Additional keyword arguments to be passed to the `_read_nc` method.
+            Additional keyword arguments to be passed to the `read_nc` method.
         """
         self._assert_read_mode
         # Load grid data in r+ mode to allow overwritting netcdf files
         if self._read and self._write:
             kwargs["load"] = True
-        loaded_nc_filies = self._read_nc(fn, single_var_as_array=False, **kwargs)
-        for ds in loaded_nc_filies.values():
+        loaded_nc_files = self.read_nc(fn, single_var_as_array=False, **kwargs)
+        for ds in loaded_nc_files.values():
             for dvar in ds.data_vars:
                 self._grid[dvar] = ds[dvar]
 
@@ -393,14 +393,14 @@ class GridMixin(object):
     ) -> None:
         """Write model grid data to netcdf file at <root>/<fn>.
 
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         **kwargs : dict
-            Additional keyword arguments to be passed to the `_write_nc` method.
+            Additional keyword arguments to be passed to the `write_nc` method.
         gdal_compliant : bool, optional
             If True, write grid data in a way that is compatible with GDAL,
             by default False
@@ -415,8 +415,8 @@ class GridMixin(object):
             self.logger.debug("No grid data found, skip writing.")
         else:
             self._assert_write_mode
-            # _write_nc requires dict - use dummy 'grid' key
-            self._write_nc(
+            # write_nc requires dict - use dummy 'grid' key
+            self.write_nc(
                 {"grid": self._grid},
                 fn,
                 gdal_compliant=gdal_compliant,
