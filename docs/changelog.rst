@@ -15,13 +15,17 @@ Added
 - Support for loading the same data source but from different places (e.g. local & aws)
 - Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
 - Add support for reading model configs in ``TOML`` format. (PR #444)
+- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
+-
 
 Changed
 -------
+- possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
 -
 
 Fixed
 -----
+- when a model component (eg maps, forcing, grid) is updated using the set_ methods, it will first be read to avoid loosing data. (PR #460)
 -
 
 Deprecated
