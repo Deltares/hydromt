@@ -292,7 +292,7 @@ class MeshMixin(object):
                 raise ValueError(
                     f"Cannot set mesh from {str(type(data).__name__)} without a name."
                 )
-            data = data.to_dataset()
+            data = data.to_dataset(optional_attributes=True)
 
         # Checks on grid topology
         # TODO: check if we support setting multiple grids at once. For now just one
@@ -339,7 +339,9 @@ class MeshMixin(object):
                             " data variables in mesh."
                         )
                         grids = [
-                            self.mesh_datasets[g].ugrid.to_dataset()
+                            self.mesh_datasets[g].ugrid.to_dataset(
+                                optional_attributes=True
+                            )
                             for g in self.mesh_names
                             if g != grid_name
                         ]
@@ -355,7 +357,12 @@ class MeshMixin(object):
             else:
                 # We are potentially adding a new grid without any data variables
                 self._mesh = xu.UgridDataset(
-                    xr.merge([self.mesh.ugrid.to_dataset(), data.ugrid.to_dataset()])
+                    xr.merge(
+                        [
+                            self.mesh.ugrid.to_dataset(optional_attributes=True),
+                            data.ugrid.to_dataset(optional_attributes=True),
+                        ]
+                    )
                 )
             # Restore crs
             for grid in self._mesh.ugrid.grids:
@@ -416,16 +423,19 @@ class MeshMixin(object):
     def read_mesh(self, fn: str = "mesh/mesh.nc", crs: CRS = None, **kwargs) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
-        key-word arguments are passed to :py:func:`xr.open_dataset` # FIXME make doc consistent
+        key-word arguments are passed to :py:func:`xr.open_dataset`
+        # FIXME make doc consistent
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, by default 'mesh/mesh.nc'
         crs : CRS, optional
-            Coordinate Reference System (CRS) object representing the spatial reference system of the mesh file.
+            Coordinate Reference System (CRS) object representing the spatial reference
+            system of the mesh file.
         **kwargs : dict
-            Additional keyword arguments to be passed to the `_read_nc` method. # FIXME make doc consistent
+            Additional keyword arguments to be passed to the `_read_nc` method.
+            # FIXME make doc consistent
         """
         # FIXME: check how read_mesh behaves when multiple files are read
         self._assert_read_mode
@@ -473,7 +483,7 @@ class MeshMixin(object):
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
         self.logger.debug(f"Writing file {fn}")
-        ds_out = self.mesh.ugrid.to_dataset()
+        ds_out = self.mesh.ugrid.to_dataset(optional_attributes=True)
         if self.crs is not None:
             # save crs to spatial_ref coordinate
             ds_out = ds_out.rio.write_crs(self.crs)
@@ -481,9 +491,10 @@ class MeshMixin(object):
 
     # Other mesh properties
     @property
-    def mesh_grids(self) -> Dict:
+    def mesh_grids(self) -> Dict[str, Union[xu.Ugrid1d, xu.Ugrid2d]]:
         """Dictionnary of grid names and Ugrid topologies in mesh."""
         grids = dict()
+        # FIXME to be replaced by uds.ugrid.topology. See https://github.com/Deltares/xugrid/issues/141
         if self.mesh is not None:
             for grid in self.mesh.ugrid.grids:
                 grids[grid.name] = grid
@@ -491,7 +502,7 @@ class MeshMixin(object):
         return grids
 
     @property
-    def mesh_datasets(self) -> Dict:
+    def mesh_datasets(self) -> Dict[str, xu.UgridDataset]:
         """Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh."""  # noqa: E501
         datasets = dict()
         if self._mesh is not None:
@@ -505,7 +516,7 @@ class MeshMixin(object):
     @property
     def mesh_names(self) -> List[str]:
         """List of grid names in mesh."""
-        # FIXME would be nice if xugrid supports it: https://github.com/Deltares/xugrid/issues/141
+        # FIXME to be replaced by uds.ugrid.name/uds.ugrid.name: https://github.com/Deltares/xugrid/issues/141
         if self.mesh is not None:
             return list(self.mesh_grids.keys())
         else:
@@ -516,21 +527,18 @@ class MeshMixin(object):
         """Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame."""
         mesh_gdf = dict()
         if self._mesh is not None:
-            for k, v in self.mesh_datasets.items():
+            for k, grid in self.mesh_grids.items():
                 # works better on a Dataarray / Dataset
                 # (need to add dummy variable if empty)
-                if len(v.data_vars) == 0:
-                    grid = v.ugrid.grid
-                    if grid.topology_dimension == 1:
-                        dim = grid.edge_dimension
-                    elif grid.topology_dimension == 2:
-                        dim = grid.face_dimension
-                    v[f"{grid.name}_node_id"] = xr.DataArray(
-                        v[dim].values.astype(str), dims=dim
-                    )
-                gdf = v.ugrid.to_geodataframe()
-                # FIXME xugrid crs not passed on correctly: https://github.com/Deltares/xugrid/issues/138
-                mesh_gdf[k] = gdf.set_crs(v.ugrid.crs[k])
+                if grid.topology_dimension == 1:
+                    dim = grid.edge_dimension
+                elif grid.topology_dimension == 2:
+                    dim = grid.face_dimension
+                gdf = gpd.GeoDataFrame(
+                    index=grid.to_dataset()[dim].values.astype(str),
+                    geometry=grid.to_shapely(dim),
+                )
+                mesh_gdf[k] = gdf.set_crs(grid.crs)
 
         return mesh_gdf
 
@@ -539,7 +547,9 @@ class MeshModel(MeshMixin, Model):
 
     """Model class Mesh Model for mesh models in HydroMT.
 
-    Uses xugrid for working with unstructured grids, for data and topology stored according to UGRID conventions.
+    Uses xugrid for working with unstructured grids, for data and topology stored
+    according to UGRID conventions.
+
     See also: xugrid
     """
 
