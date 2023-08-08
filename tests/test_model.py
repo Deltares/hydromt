@@ -154,27 +154,31 @@ def test_model(model, tmpdir):
         assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
 
-def test_model_set(demda):
-    # test set methods in an empty model in write mode
-    mod = GridModel(mode="w")
-    mod.set_config("test", "test")
-    assert "test" in mod.config
+def test_model_append(demda, tmpdir):
+    # write a model
+    demda.name = "dem"
+    mod = GridModel(mode="w", root=str(tmpdir))
+    mod.set_config("test.data", "dem")
     mod.set_grid(demda, name="dem")
-    assert "dem" in mod.grid
     mod.set_maps(demda, name="dem")
-    assert "dem" in mod.maps
     mod.set_forcing(demda, name="dem")
-    assert "dem" in mod.forcing
     mod.set_states(demda, name="dem")
-    assert "dem" in mod.states
-    mod.set_results(demda, name="dem")
-    assert "dem" in mod.results
     mod.set_geoms(demda.raster.box, name="dem")
-    assert "dem" in mod.geoms
-    # test set method error in read mode
-    mod = GridModel(mode="r+")
-    with pytest.raises(ValueError, match="Root unknown, use set_root method"):
-        mod.set_config("test", "test")
+    mod.write()
+    # append to model and check if previous data is still there
+    mod1 = GridModel(mode="r+", root=str(tmpdir))
+    mod1.set_config("test1.data", "dem")
+    assert mod1.get_config("test.data") == "dem"
+    mod1.set_grid(demda, name="dem1")
+    assert "dem" in mod1.grid
+    mod1.set_maps(demda, name="dem1")
+    assert "dem" in mod1.maps
+    mod1.set_forcing(demda, name="dem1")
+    assert "dem" in mod1.forcing
+    mod1.set_states(demda, name="dem1")
+    assert "dem" in mod1.states
+    mod1.set_geoms(demda.raster.box, name="dem1")
+    assert "dem" in mod1.geoms
 
 
 @pytest.mark.filterwarnings("ignore:The setup_basemaps")

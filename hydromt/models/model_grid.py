@@ -699,7 +699,7 @@ class GridModel(GridMixin, Model):
 
     def write(
         self,
-        components: List = ["config", "grid", "geoms", "forcing", "states"],
+        components: List = ["config", "maps", "grid", "geoms", "forcing", "states"],
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
