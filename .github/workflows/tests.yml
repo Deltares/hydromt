@@ -36,8 +36,8 @@ jobs:
         env:
           ACTIONS_STEP_DEBUG: true
         with:
-          cache-downloads: true
-          cache-environment: true
+          # cache-downloads: true
+          # cache-environment: true
           environment-file: ./environment.yml
           environment-name: hydromt
           init-shell: bash
