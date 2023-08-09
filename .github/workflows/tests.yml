@@ -29,6 +29,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: clear caches
+        if: github.event_name != 'schedule'
+        run: gh cache delete -a
+
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -48,65 +52,29 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /usr/share/miniconda3/envs/hydromt
-          key: docs-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}
+          key: ${{ matrix.python-version }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}
         id: cache
+
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+            auto-update-conda: false
+            use-only-tar-bz2: true
+            channels: conda-forge
+            python-version: ${{ matrix.python-version }}
+            miniforge-variant: Mambaforge
+            miniforge-version: latest
+            activate-environment: hydromt
+            use-mamba: true
 
       - name: Update environment
         run: mamba env update -n hydromt -f environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
-      # - name: Generate env spec
-      #   run: pip install tomli && python make_env.py test --py ${{ matrix.python-version }}
-      # - name: Get current date
-      #   id: date
-      #   run: echo "date=$(date +%Y-%m-%d)" >> "${GITHUB_OUTPUT}"
-      # - name: Setup Micromamba
-      #   uses: mamba-org/setup-micromamba@v1
-      #   env:
-      #     ACTIONS_STEP_DEBUG: true
-      #   with:
-      #     condarc: |
-      #       channels:
-      #         - conda-forge
-      #     cache-environment-key: environment-${{ steps.date.outputs.date }}-${{matrix.python-version}}
-      #     cache-downloads-key: downloads-${{ steps.date.outputs.date }}-${{matrix.python-version}}
-      #     cache-downloads: false
-      #     cache-environment: false
-      #     environment-file: ./environment.yml
-      #     environment-name: hydromt
-      #     # init-shell: bash
-      #     post-cleanup: 'all'
-
-
-
-      # - name: Set cache date
-      #   run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-
-      # - uses: actions/cache@v2
-      #   with:
-      #     path: /usr/share/miniconda3/envs/hydromt
-      #     key: ${{ matrix.python-version }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}
-      #   id: cache
-
-      # - name: Setup Mambaforge
-      #   uses: conda-incubator/setup-miniconda@v2
-      #   with:
-      #       auto-update-conda: false
-      #       use-only-tar-bz2: true
-      #       channels: conda-forge
-      #       python-version: ${{ matrix.python-version }}
-      #       miniforge-variant: Mambaforge
-      #       miniforge-version: latest
-      #       activate-environment: hydromt
-      #       use-mamba: true
-
-      # - name: Update environment
-      #   run: mamba env update -n hydromt -f environment.yml
-      #   if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Test
-        # if: github.event_name != 'schedule'
+        if: github.event_name != 'schedule'
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - name: Upload code coverage
-        # if: github.event_name != 'schedule'
+        if: github.event_name != 'schedule'
         uses: codecov/codecov-action@v3
