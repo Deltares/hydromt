@@ -94,7 +94,7 @@ def get_datasets(data_libs: Union[List, str]) -> Dict:
     Parameters
     ----------
     data_libs: (list of) str, Path, optional
-        One or more paths to data catalog yaml files or names of predefined
+        One or more paths to data catalog configuration files or names of predefined
         data catalogs. By default the data catalog is initiated without data entries.
         See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
         for accepted yaml format.
@@ -139,7 +139,7 @@ def get_region(
     region : dict
         dictionary containing region definition
     data_libs : (list of) str, Path, optional
-        One or more paths to data catalog yaml files or names of predefined
+        One or more paths to data catalog configuration files or names of predefined
         data catalogs. By default the data catalog is initiated without data entries.
         See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
         for accepted yaml format.

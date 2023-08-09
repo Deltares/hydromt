@@ -201,6 +201,9 @@ General methods
    Model.set_results
    Model.read_results
 
+   Model.read_nc
+   Model.write_nc
+
 .. _setup_methods:
 
 Setup methods
