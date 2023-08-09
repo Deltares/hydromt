@@ -61,13 +61,12 @@ jobs:
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
         with:
-            auto-update-conda: false
-            use-only-tar-bz2: true
             channels: conda-forge
             python-version: ${{ matrix.python-version }}
             miniforge-variant: Mambaforge
             miniforge-version: latest
             activate-environment: hydromt
+            environment-file: environment.yml
             use-mamba: true
 
       - name: Update environment
