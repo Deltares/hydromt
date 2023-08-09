@@ -1,16 +1,19 @@
----
-name: Tests
+name: Combined Workflow
 
 on:
+  schedule:
+    - cron: '0 0 * * *' # Run every day at midnight
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - tests/*
       - hydromt/*
       - data/*
       - pyproject.toml
   pull_request:
-    branches: [main]
+    branches:
+      - main
     paths:
       - tests/*
       - hydromt/*
@@ -18,37 +21,47 @@ on:
       - pyproject.toml
 
 jobs:
-  Test-matrix:
-    name: ${{ matrix.os }} - py${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
-    defaults:
-      run:
-        shell: bash -l {0}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ['3.9', '3.10', '3.11']
+  Cache-and-Test:
+    name: Cache and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get Date
+        id: get-date
+        run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_ENV
+        shell: bash
+
       - name: Generate env spec
         run: pip install tomli && python make_env.py test
-      - uses: conda-incubator/setup-miniconda@v2
+
+      - name: Cache conda
+        id: cache
+        uses: actions/cache@v2
         with:
-          cache-downloads: true
-          cache-environment: true
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-py${{ matrix.python-version }}-${{ steps.get-date.outputs.today }}-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
+
+      - name: Set up Conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
           python-version: ${{ matrix.python-version }}
           miniforge-variant: Mambaforge
           channels: conda-forge, defaults
           channel-priority: strict
           environment-file: environment.yml
           activate-environment: hydromt
+          use-only-tar-bz2: true
 
       - name: Test
+        if: github.event_name != 'schedule'
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
-      - uses: codecov/codecov-action@v3
+      - name: Upload code coverage
+        if: github.event_name != 'schedule'
+        uses: codecov/codecov-action@v3
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
