@@ -12,12 +12,8 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-env:
-  CACHE_NUMBER: 0  # increase to reset cache manually
-
 jobs:
   build:
-
     defaults:
       run:
         shell: bash -l {0}
@@ -27,6 +23,9 @@ jobs:
         python-version: ['3.9','3.10','3.11']
     name: py ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v3
 
@@ -48,7 +47,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /usr/share/miniconda3/envs/hydromt
-          key: ${{ matrix.python-version }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+          key: ${{ matrix.python-version }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}
         id: cache
 
       - name: Update environment
@@ -62,7 +61,3 @@ jobs:
       - name: Upload code coverage
         if: github.event_name != 'schedule'
         uses: codecov/codecov-action@v3
-
-# concurrency:
-#   group: ${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: true
