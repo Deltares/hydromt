@@ -43,6 +43,14 @@ jobs:
 
       - name: Generate env spec
         run: pip install tomli && python make_env.py test
+      - name: Set up empty Conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          miniforge-variant: Mambaforge
+          activate-environment: hydromt
+          use-mamba: true
+          miniforge-version: latest
 
       - name: Cache conda
         id: cache
