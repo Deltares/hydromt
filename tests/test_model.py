@@ -85,8 +85,8 @@ def test_check_data(demda):
 def test_model_api(grid_model):
     assert np.all(np.isin(["grid", "geoms"], list(grid_model.api.keys())))
     # add some wrong data
-    grid_model._geoms.update({"wrong_geom": xr.Dataset()})
-    grid_model._forcing.update({"test": gpd.GeoDataFrame()})
+    grid_model.geoms.update({"wrong_geom": xr.Dataset()})
+    grid_model.forcing.update({"test": gpd.GeoDataFrame()})
     non_compliant = grid_model._test_model_api()
     assert non_compliant == ["geoms.wrong_geom", "forcing.test"]
 
@@ -152,6 +152,33 @@ def test_model(model, tmpdir):
     model._geoms.pop("region")
     with pytest.deprecated_call():
         assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
+
+
+def test_model_append(demda, tmpdir):
+    # write a model
+    demda.name = "dem"
+    mod = GridModel(mode="w", root=str(tmpdir))
+    mod.set_config("test.data", "dem")
+    mod.set_grid(demda, name="dem")
+    mod.set_maps(demda, name="dem")
+    mod.set_forcing(demda, name="dem")
+    mod.set_states(demda, name="dem")
+    mod.set_geoms(demda.raster.box, name="dem")
+    mod.write()
+    # append to model and check if previous data is still there
+    mod1 = GridModel(mode="r+", root=str(tmpdir))
+    mod1.set_config("test1.data", "dem")
+    assert mod1.get_config("test.data") == "dem"
+    mod1.set_grid(demda, name="dem1")
+    assert "dem" in mod1.grid
+    mod1.set_maps(demda, name="dem1")
+    assert "dem" in mod1.maps
+    mod1.set_forcing(demda, name="dem1")
+    assert "dem" in mod1.forcing
+    mod1.set_states(demda, name="dem1")
+    assert "dem" in mod1.states
+    mod1.set_geoms(demda.raster.box, name="dem1")
+    assert "dem" in mod1.geoms
 
 
 @pytest.mark.filterwarnings("ignore:The setup_basemaps")
