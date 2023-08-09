@@ -71,5 +71,3 @@ try:
 
 except ModuleNotFoundError:
     pass
-
-print("i like trains")
