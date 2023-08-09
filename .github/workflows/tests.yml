@@ -69,6 +69,8 @@ jobs:
           environment-file: environment.yml
           activate-environment: hydromt
           use-only-tar-bz2: true
+          use-mamba: true
+          miniforge-version: latest
 
       - name: Test
         if: github.event_name != 'schedule'
