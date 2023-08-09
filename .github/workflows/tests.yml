@@ -34,7 +34,6 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.9','3.10','3.11']
-        prefix: /usr/share/miniconda3/envs/hydromt
     name: py ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     steps:
@@ -57,7 +56,7 @@ jobs:
 
       - uses: actions/cache@v2
         with:
-          path: ${{ matrix.prefix }}
+          path: /usr/share/miniconda3/envs/hydromt
           key: ${{ matrix.python-version }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
         id: cache
 
