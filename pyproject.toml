@@ -141,7 +141,6 @@ include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 
 [tool.pytest.ini_options]
-[tool.pytest.ini_options]
 addopts = "--ff --timeout=60"
 testpaths = ["tests"]
 
