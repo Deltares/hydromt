@@ -33,12 +33,15 @@ jobs:
         run: pip install tomli && python make_env.py test --py ${{ matrix.python-version }} --name base
       - name: Setup Micromamba
         uses: mamba-org/setup-micromamba@v1
+        env:
+          ACTIONS_STEP_DEBUG: true
         with:
           cache-downloads: true
           cache-environment: true
           environment-file: ./environment.yml
           environment-name: hydromt
           init-shell: bash
+          log-level: debug
 
 
       # - name: Set cache date
