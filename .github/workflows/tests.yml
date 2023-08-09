@@ -22,9 +22,16 @@ on:
 
 jobs:
   Cache-and-Test:
-    name: Cache and Test
-    runs-on: ubuntu-latest
+    name: Cache and Test ${{ matrix.os }} - py ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash -el {0}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.9','3.10','3.11']
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
