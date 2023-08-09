@@ -62,6 +62,7 @@ deps_not_in_conda = install_config.get("deps_not_in_conda", [])
 channels = install_config.get("channels", ["conda-forge"])
 if args.channels is not None:
     channels.extend(args.channels.split(","))
+    channels.dedup()
 
 # parse environment name
 name = args.name
