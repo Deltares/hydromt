@@ -25,7 +25,6 @@ on:
 jobs:
   # Build docs on Linux
   Docs:
-    timeout-minutes: 10
     name: linux docs
     runs-on: ubuntu-latest
     env:

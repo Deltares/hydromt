@@ -18,7 +18,6 @@ env:
 jobs:
   build:
 
-    timeout-minutes: 10
     defaults:
       run:
         shell: bash -l {0}
