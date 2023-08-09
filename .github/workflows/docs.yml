@@ -33,6 +33,7 @@ jobs:
             python-version: 3.11
             miniforge-variant: Mambaforge
             miniforge-version: latest
+            channels: conda-forge
             activate-environment: hydromt
             use-mamba: true
       - name: Generate env spec
