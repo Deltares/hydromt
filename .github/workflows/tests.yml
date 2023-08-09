@@ -1,11 +1,7 @@
-name: Combined Workflow
+name: Tests
 
 on:
-  schedule:
-    - cron: '0 0 * * *' # Run every day at midnight
   push:
-    branches:
-      - main
     paths:
       - tests/*
       - hydromt/*
@@ -19,12 +15,16 @@ on:
       - hydromt/*
       - data/*
       - pyproject.toml
+  schedule:
+    - cron: '0 0 * * *'
+
+env:
+  CACHE_NUMBER: 0  # increase to reset cache manually
 
 jobs:
-  Cache-and-Test:
-    name: Cache and Test ${{ matrix.os }} - py ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+  build:
+
+    timeout-minutes: 10
     defaults:
       run:
         shell: bash -el {0}
@@ -32,45 +32,36 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.9','3.10','3.11']
+        prefix: /usr/share/miniconda3/envs/hydromt
+    name: py ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Get Date
-        id: get-date
-        run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_ENV
-        shell: bash
-
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+            python-version: ${{ matrix.python-version }}
+            miniforge-variant: Mambaforge
+            miniforge-version: latest
+            activate-environment: hydromt
+            use-mamba: true
       - name: Generate env spec
         run: pip install tomli && python make_env.py test
-      - name: Set up empty Conda environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          miniforge-variant: Mambaforge
-          activate-environment: hydromt
-          use-mamba: true
-          miniforge-version: latest
 
-      - name: Cache conda
+
+      - name: Set cache date
+        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ matrix.prefix }}
+          key: ${{ matrix.python-version }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
         id: cache
-        uses: actions/cache@v2
-        with:
-          path: ~/conda_pkgs_dir
-          key: ${{ runner.os }}-conda-py${{ matrix.python-version }}-${{ steps.get-date.outputs.today }}-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
 
-      - name: Set up Conda environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          miniforge-variant: Mambaforge
-          channels: conda-forge, defaults
-          channel-priority: strict
-          environment-file: environment.yml
-          activate-environment: hydromt
-          use-only-tar-bz2: true
-          use-mamba: true
-          miniforge-version: latest
+      - name: Update environment
+        run: mamba env update -n my-env -f environment.yml
+        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Test
         if: github.event_name != 'schedule'
@@ -80,6 +71,6 @@ jobs:
         if: github.event_name != 'schedule'
         uses: codecov/codecov-action@v3
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: true
