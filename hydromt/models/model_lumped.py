@@ -22,13 +22,15 @@ class LumpedMixin:
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._response_units = xr.Dataset()
+        self._response_units = None  # xr.Dataset()
 
     @property
     def response_units(self) -> xr.Dataset:
         """Model response unit (lumped) data. Returns xr.Dataset geometry coordinate."""
-        if not self._response_units and self._read:
-            self.read_response_units()
+        if self._response_units is None:
+            self._response_units = xr.Dataset()
+            if self._read:
+                self.read_response_units()
         return self._response_units
 
     def set_response_units(
@@ -53,9 +55,9 @@ class LumpedMixin:
         )
         if name is None and name_required:
             raise ValueError(f"Unable to set {type(data).__name__} data without a name")
-        if isinstance(data, np.ndarray) and "geometry" in self._response_units:
+        if isinstance(data, np.ndarray) and "geometry" in self.response_units:
             # TODO: index name is hard coded. Using GeoDataset.index property once ready
-            index = self._response_units["index"]
+            index = self.response_units["index"]
             if data.size != index.size and data.ndim == 1:
                 raise ValueError(
                     "Size of data and number of response_units do not match"
@@ -106,8 +108,7 @@ class LumpedMixin:
             ds = ds.assign_coords(geometry=(["index"], gdf["geometry"]))
             if gdf.crs is not None:  # parse crs
                 ds = ds.rio.write_crs(gdf.crs)
-        for dvar in ds.data_vars:
-            self._response_units[dvar] = ds[dvar]
+        self.set_response_units(ds)
 
     def write_response_units(
         self,
@@ -134,12 +135,12 @@ class LumpedMixin:
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        if len(self._response_units) == 0:
+        if len(self.response_units) == 0:
             self.logger.debug("No response_units data found, skip writing.")
             return
         self._assert_write_mode
         # write geometry
-        ds = self._response_units
+        ds = self.response_units
         gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
         if not isdir(dirname(join(self.root, fn_geom))):
             os.makedirs(dirname(join(self.root, fn_geom)))

@@ -107,17 +107,17 @@ class Model(object, metaclass=ABCMeta):
         # placeholders
         # metadata maps that can be at different resolutions
         # TODO do we want read/write maps?
-        self._config = dict()  # nested dictionary
-        self._maps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
+        self._config = None  # nested dictionary
+        self._maps = None  # dictionary of xr.DataArray and/or xr.Dataset
 
         # NOTE was staticgeoms in <=v0.5
-        self._geoms = dict()  # dictionary of gdp.GeoDataFrame
-        self._forcing = dict()  # dictionary of xr.DataArray and/or xr.Dataset
-        self._states = dict()  # dictionary of xr.DataArray and/or xr.Dataset
-        self._results = dict()  # dictionary of xr.DataArray and/or xr.Dataset
+        self._geoms = None  # dictionary of gdp.GeoDataFrame
+        self._forcing = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._states = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._results = None  # dictionary of xr.DataArray and/or xr.Dataset
         # To be deprecated in future versions!
-        self._staticmaps = xr.Dataset()
-        self._staticgeoms = dict()
+        self._staticmaps = None
+        self._staticgeoms = None
 
         # file system
         self._root = ""
@@ -448,7 +448,7 @@ class Model(object, metaclass=ABCMeta):
         self._read = mode.startswith("r")
         self._write = mode != "r"
         self._overwrite = mode == "w+"
-        if root is not None:
+        if self._root is not None:
             if self._write:
                 for name in self._FOLDERS:
                     path = join(self._root, name)
@@ -484,9 +484,8 @@ class Model(object, metaclass=ABCMeta):
                 log_level = h.level
                 if hasattr(h, "baseFilename"):
                     if dirname(h.baseFilename) != self._root:
-                        self.logger.handlers.pop(
-                            i
-                        ).close()  # remove handler and close file
+                        # remove handler and close file
+                        self.logger.handlers.pop(i).close()
                     else:
                         has_log_file = True
                     break
@@ -595,8 +594,10 @@ class Model(object, metaclass=ABCMeta):
     @property
     def config(self) -> Dict[str, Union[Dict, str]]:
         """Model configuration. Returns a (nested) dictionary."""
-        # initialize default config if in write-mode
-        if not self._config:
+        if self._config is None:
+            # initialize occurs in read_config
+            # model config if in read-mode and it exists
+            # default config if in write-mode
             self.read_config()
         return self._config
 
@@ -625,7 +626,7 @@ class Model(object, metaclass=ABCMeta):
         value = args.pop(-1)
         if len(args) == 1 and "." in args[0]:
             args = args[0].split(".") + args[1:]
-        branch = self.config  # reads config at first call
+        branch = self.config  # trigger initialization / reads config at first call
         for key in args[:-1]:
             if key not in branch or not isinstance(branch[key], dict):
                 branch[key] = {}
@@ -698,7 +699,7 @@ class Model(object, metaclass=ABCMeta):
     def read_config(self, config_fn: Optional[str] = None):
         """Parse config from file.
 
-        If no config file found a default config file is read in writing mode.
+        If no config file found a default config file is returned in writing mode.
         """
         prefix = "User defined"
         if config_fn is None:  # prioritize user defined config path (new v0.4.1)
@@ -758,8 +759,10 @@ class Model(object, metaclass=ABCMeta):
             "versions. Use the grid property of the GridModel class instead.",
             DeprecationWarning,
         )
-        if len(self._staticmaps) == 0 and self._read:
-            self.read_staticmaps()
+        if self._staticmaps is None:
+            self._staticmaps = xr.Dataset()
+            if self._read:
+                self.read_staticmaps()
         return self._staticmaps
 
     def set_staticmaps(
@@ -800,7 +803,7 @@ class Model(object, metaclass=ABCMeta):
         if isinstance(data, xr.DataArray):
             data.name = name
             data = data.to_dataset()
-        if len(self._staticmaps) == 0:  # new data
+        if len(self.staticmaps) == 0:  # new data / trigger read
             self._staticmaps = data
         else:
             if isinstance(data, np.ndarray):
@@ -848,12 +851,12 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `write_nc` function.
         """
-        if len(self._staticmaps) == 0:
+        if len(self.staticmaps) == 0:
             self.logger.debug("No staticmaps data found, skip writing.")
         else:
             self._assert_write_mode
             # write_nc requires dict - use dummy 'staticmaps' key
-            nc_dict = {"staticmaps": self._staticmaps}
+            nc_dict = {"staticmaps": self.staticmaps}
             self.write_nc(nc_dict, fn, **kwargs)
 
     # map files setup methods
@@ -1014,8 +1017,10 @@ class Model(object, metaclass=ABCMeta):
     @property
     def maps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model maps. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if len(self._maps) == 0 and self._read:
-            self.read_maps()
+        if self._maps is None:
+            self._maps = dict()
+            if self._read:
+                self.read_maps()
         return self._maps
 
     def set_maps(
@@ -1041,7 +1046,7 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self.maps:
+            if name in self.maps:  # trigger init / read
                 self.logger.warning(f"Replacing result: {name}")
             self._maps[name] = data_dict[name]
 
@@ -1061,8 +1066,7 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
-            data_dict = _check_data(ds, name=name, split_dataset=True)
-            self._maps[name] = data_dict[name]
+            self.set_maps(ds, name=name)
 
     def write_maps(self, fn="maps/{name}.nc", **kwargs) -> None:
         """Write maps to netcdf file at <root>/<fn>.
@@ -1078,11 +1082,11 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `write_nc` function.
         """
-        if len(self._maps) == 0:
+        if len(self.maps) == 0:
             self.logger.debug("No maps data found, skip writing.")
         else:
             self._assert_write_mode
-            self.write_nc(self._maps, fn, **kwargs)
+            self.write_nc(self.maps, fn, **kwargs)
 
     # model geometry files
     @property
@@ -1092,8 +1096,10 @@ class Model(object, metaclass=ABCMeta):
         Return dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
         ..NOTE: previously call staticgeoms.
         """
-        if not self._geoms and self._read:
-            self.read_geoms()
+        if self._geoms is None:
+            self._geoms = dict()
+            if self._read:
+                self.read_geoms()
         return self._geoms
 
     def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
@@ -1112,7 +1118,7 @@ class Model(object, metaclass=ABCMeta):
                 "First parameter map(s) should be geopandas.GeoDataFrame"
                 " or geopandas.GeoSeries"
             )
-        if name in self.geoms:
+        if name in self.geoms:  # trigger init / read
             self.logger.warning(f"Replacing geom: {name}")
         self._geoms[name] = geom
 
@@ -1134,7 +1140,7 @@ class Model(object, metaclass=ABCMeta):
         for fn in fns:
             name = basename(fn).split(".")[0]
             self.logger.debug(f"Reading model file {name}.")
-            self._geoms[name] = gpd.read_file(fn, **kwargs)
+            self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
 
     def write_geoms(self, fn: str = "geoms/{name}.geojson", **kwargs) -> None:
         """Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
@@ -1150,13 +1156,13 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
         """
-        if len(self._geoms) == 0:
+        if len(self.geoms) == 0:
             self.logger.debug("No geoms data found, skip writing.")
             return
         self._assert_write_mode
         if "driver" not in kwargs:
             kwargs.update(driver="GeoJSON")  # default
-        for name, gdf in self._geoms.items():
+        for name, gdf in self.geoms.items():
             if not isinstance(gdf, (gpd.GeoDataFrame, gpd.GeoSeries)) or len(gdf) == 0:
                 self.logger.warning(
                     f"{name} object of type {type(gdf).__name__} not recognized"
@@ -1180,7 +1186,7 @@ class Model(object, metaclass=ABCMeta):
             " use geoms instead.",
             DeprecationWarning,
         )
-        if not self._geoms and self._read:
+        if self._geoms is None and self._read:
             self.read_staticgeoms()
         self._staticgeoms = self._geoms
         return self._staticgeoms
@@ -1228,8 +1234,10 @@ class Model(object, metaclass=ABCMeta):
     @property
     def forcing(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model forcing. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if not self._forcing and self._read:
-            self.read_forcing()
+        if self._forcing is None:
+            self._forcing = dict()
+            if self._read:
+                self.read_forcing()
         return self._forcing
 
     def set_forcing(
@@ -1251,7 +1259,7 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self.forcing:
+            if name in self.forcing:  # trigger init / read
                 self.logger.warning(f"Replacing forcing: {name}")
             self._forcing[name] = data_dict[name]
 
@@ -1271,8 +1279,7 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
-            data_dict = _check_data(ds, name=name, split_dataset=True)
-            self._forcing[name] = data_dict[name]
+            self.set_forcing(ds, name=name)
 
     def write_forcing(self, fn="forcing/{name}.nc", **kwargs) -> None:
         """Write forcing to netcdf file at <root>/<fn>.
@@ -1288,18 +1295,20 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        if len(self._forcing) == 0:
+        if len(self.forcing) == 0:
             self.logger.debug("No forcing data found, skip writing.")
         else:
             self._assert_write_mode
-            self.write_nc(self._forcing, fn, **kwargs)
+            self.write_nc(self.forcing, fn, **kwargs)
 
     # model state files
     @property
     def states(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model states. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if not self._states and self._read:
-            self.read_states()
+        if self._states is None:
+            self._states = dict()
+            if self._read:
+                self.read_states()
         return self._states
 
     def set_states(
@@ -1321,7 +1330,7 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self.states:
+            if name in self.states:  # trigger init / read
                 self.logger.warning(f"Replacing state: {name}")
             self._states[name] = data_dict[name]
 
@@ -1341,8 +1350,7 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
-            data_dict = _check_data(ds, name=name, split_dataset=True)
-            self._states[name] = data_dict[name]
+            self.set_states(ds, name=name, split_dataset=True)
 
     def write_states(self, fn="states/{name}.nc", **kwargs) -> None:
         """Write states to netcdf file at <root>/<fn>.
@@ -1358,19 +1366,21 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        if len(self._states) == 0:
+        if len(self.states) == 0:
             self.logger.debug("No states data found, skip writing.")
         else:
             self._assert_write_mode
-            self.write_nc(self._states, fn, **kwargs)
+            self.write_nc(self.states, fn, **kwargs)
 
     # model results files; NOTE we don't have a write_results method
     # (that's up to the model kernel)
     @property
     def results(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model results.  Returns dict of xarray.DataArray or xarray.Dataset."""
-        if not self._results and self._read:
-            self.read_results()
+        if self._results is None:
+            self._results = dict()
+            if self._read:
+                self.read_results()
         return self._results
 
     def set_results(
@@ -1396,7 +1406,7 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self.results:
+            if name in self.results:  # trigger init / read
                 self.logger.warning(f"Replacing result: {name}")
             self._results[name] = data_dict[name]
 
@@ -1416,8 +1426,7 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
-            data_dict = _check_data(ds, name=name, split_dataset=True)
-            self._results[name] = data_dict[name]
+            self.set_results(ds, name=name)
 
     # general reader & writer
     def _cleanup(self, forceful_overwrite=False, max_close_attempts=2) -> List[str]:
@@ -1600,7 +1609,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.crs
         else:
             return self.region.crs
@@ -1612,7 +1621,7 @@ class Model(object, metaclass=ABCMeta):
             " components instead.",
             DeprecationWarning,
         )
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.set_crs(crs)
 
     @property
@@ -1621,7 +1630,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.dims
 
     @property
@@ -1630,7 +1639,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.coords
 
     @property
@@ -1639,7 +1648,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.res
 
     @property
@@ -1648,7 +1657,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.transform
 
     @property
@@ -1657,7 +1666,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.width
 
     @property
@@ -1666,7 +1675,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.height
 
     @property
@@ -1675,13 +1684,16 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.shape
 
     @property
     def bounds(self) -> Tuple:
-        """Returns the bounding box of the model region."""
-        if len(self._staticmaps) > 0:
+        """Returns the bounding box of the model region.
+
+        ..NOTE: will be deprecated in future versions.
+        """
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.bounds
         else:
             return self.region.total_bounds
