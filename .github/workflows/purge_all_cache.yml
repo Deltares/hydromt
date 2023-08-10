@@ -1,6 +1,6 @@
 name: cleanup all caches
 on:
-  workflow_disptach:
+  workflow_dispatch:
 
 
 jobs:
