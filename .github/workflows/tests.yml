@@ -7,7 +7,7 @@ on:
       - tests/*
       - hydromt/*
       - data/*
-      - pyptoject.toml
+      - pyproject.toml
   pull_request:
     branches:
       - main
