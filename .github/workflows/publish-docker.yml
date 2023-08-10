@@ -1,13 +1,10 @@
 ---
 name: Build and publish HydroMT to DockerHub
 
-# on:
-#   release:
-#     types:
-#       - published
-#   push:
-#     tags:
-#       - v*
+on:
+  release:
+    types:
+      - published
 
 jobs:
   publish-docker-image:
