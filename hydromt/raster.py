@@ -12,7 +12,7 @@ import math
 import os
 import tempfile
 from itertools import product
-from os.path import basename, dirname, isdir, join
+from os.path import isdir, join
 from typing import Any, Optional, Union
 
 import dask
@@ -2311,53 +2311,35 @@ class RasterDataArray(XRasterBase):
             count = da_out[dim0].size
             da_out = da_out.sortby(dim0)
         # write
-        if driver.lower() == "pcraster" and _compat.HAS_PCRASTER:
-            for i in range(count):
-                if dim0:
-                    bname = basename(raster_path).split(".")[0]
-                    bname = f"{bname[:8]:8s}".replace(" ", "0")
-                    raster_path = join(dirname(raster_path), f"{bname}.{i+1:03d}")
-                    data = da_out.isel({dim0: i}).load().squeeze().data
+        profile = dict(
+            driver=driver,
+            height=da_out.raster.height,
+            width=da_out.raster.width,
+            count=count,
+            dtype=str(da_out.dtype),
+            crs=da_out.raster.crs,
+            transform=da_out.raster.transform,
+            nodata=nodata,
+            **profile_kwargs,
+        )
+        with rasterio.open(raster_path, "w", **profile) as dst:
+            if windowed:
+                window_iter = dst.block_windows(1)
+            else:
+                window_iter = [(None, None)]
+            for _, window in window_iter:
+                if window is not None:
+                    row_slice, col_slice = window.toslices()
+                    sel = {self.x_dim: col_slice, self.y_dim: row_slice}
+                    data = da_out.isel(sel).load().values
                 else:
-                    data = da_out.load().data
-                gis_utils.write_map(
-                    data,
-                    raster_path,
-                    crs=da_out.raster.crs,
-                    transform=da_out.raster.transform,
-                    nodata=nodata,
-                    **profile_kwargs,
-                )
-        else:
-            profile = dict(
-                driver=driver,
-                height=da_out.raster.height,
-                width=da_out.raster.width,
-                count=count,
-                dtype=str(da_out.dtype),
-                crs=da_out.raster.crs,
-                transform=da_out.raster.transform,
-                nodata=nodata,
-                **profile_kwargs,
-            )
-            with rasterio.open(raster_path, "w", **profile) as dst:
-                if windowed:
-                    window_iter = dst.block_windows(1)
+                    data = da_out.load().values
+                if data.ndim == 2:
+                    dst.write(data, 1, window=window)
                 else:
-                    window_iter = [(None, None)]
-                for _, window in window_iter:
-                    if window is not None:
-                        row_slice, col_slice = window.toslices()
-                        sel = {self.x_dim: col_slice, self.y_dim: row_slice}
-                        data = da_out.isel(sel).load().values
-                    else:
-                        data = da_out.load().values
-                    if data.ndim == 2:
-                        dst.write(data, 1, window=window)
-                    else:
-                        dst.write(data, window=window)
-                if tags is not None:
-                    dst.update_tags(**tags)
+                    dst.write(data, window=window)
+            if tags is not None:
+                dst.update_tags(**tags)
 
     def vectorize(self, connectivity=8):
         """Return geometry of grouped pixels with the same value in a DataArray object.

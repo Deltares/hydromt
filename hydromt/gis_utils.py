@@ -6,14 +6,12 @@ import glob
 import logging
 import os
 import subprocess
-from os.path import dirname, isfile, join
+from os.path import dirname, join
 from typing import Optional, Tuple
 
 import geopandas as gpd
 import numpy as np
-import rasterio
 import xarray as xr
-from pyflwdir import core_conversion, core_d8, core_ldd
 from pyflwdir import gis_utils as gis
 from pyproj import CRS
 from rasterio.transform import Affine
@@ -76,7 +74,6 @@ GDAL_DRIVER_CODE_MAP = {
     "jpg": "JPEG",
     "kro": "KRO",
     "lcp": "LCP",
-    "map": "PCRaster",
     "mbtiles": "MBTiles",
     "mpr/mpl": "ILWIS",
     "ntf": "NITF",
@@ -496,121 +493,6 @@ def spread2d(
     ds_out = xr.merge([da_out, da_src, da_dst])
     ds_out.raster.set_crs(da_obs.raster.crs)
     return ds_out
-
-
-## PCRASTER
-
-
-def write_clone(tmpdir, gdal_transform, wkt_projection, shape):
-    """Write pcraster clone file to a tmpdir using gdal."""
-    from osgeo import gdal
-
-    gdal.AllRegister()
-    driver1 = gdal.GetDriverByName("GTiff")
-    driver2 = gdal.GetDriverByName("PCRaster")
-    fn = join(tmpdir, "clone.map")
-    # create temp tif file
-    fn_temp = join(tmpdir, "clone.tif")
-    TempDataset = driver1.Create(fn_temp, shape[1], shape[0], 1, gdal.GDT_Float32)
-    TempDataset.SetGeoTransform(gdal_transform)
-    if wkt_projection is not None:
-        TempDataset.SetProjection(wkt_projection)
-    # TODO set csr
-    # copy to pcraster format
-    driver2.CreateCopy(fn, TempDataset, 0)
-    # close and cleanup
-    TempDataset = None
-    return fn
-
-
-def write_map(
-    data,
-    raster_path,
-    nodata,
-    transform,
-    crs=None,
-    clone_path=None,
-    pcr_vs="scalar",
-    **kwargs,
-):
-    """Write pcraster map files using pcr.report functionality.
-
-    A PCRaster clone map is written to a temporary directory if not provided.
-    For PCRaster types see https://www.gdal.org/frmt_various.html#PCRaster
-
-    Parameters
-    ----------
-    data : ndarray
-        Raster data
-    raster_path : str
-        Path to output map
-    nodata : int, float
-        no data value
-    transform : affine transform
-        Two dimensional affine transform for 2D linear mapping
-    clone_path : str, optional
-        Path to PCRaster clone map, by default None
-    pcr_vs : str, optional
-        pcraster type, by default "scalar"
-    **kwargs:
-        not used in this function, mainly here for compatability reasons.
-    crs:
-        The coordinate reference system of the data.
-
-
-    Raises
-    ------
-    ImportError
-        pcraster package is required
-    ValueError
-        if invalid ldd
-    """
-    if not _compat.HAS_PCRASTER:
-        raise ImportError("The pcraster package is required to write map files")
-    import tempfile
-
-    import pcraster as pcr
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # deal with pcr clone map
-        if clone_path is None:
-            clone_path = write_clone(
-                tmpdir,
-                gdal_transform=transform.to_gdal(),
-                wkt_projection=None if crs is None else CRS.from_user_input(crs).wkt,
-                shape=data.shape,
-            )
-        elif not isfile(clone_path):
-            raise IOError(f'clone_path: "{clone_path}" does not exist')
-        pcr.setclone(clone_path)
-        if nodata is None and pcr_vs != "ldd":
-            raise ValueError("nodata value required to write PCR map")
-        # write to pcrmap
-        if pcr_vs == "ldd":
-            # if d8 convert to ldd
-            data = data.astype(np.uint8)  # force dtype
-            if core_d8.isvalid(data):
-                data = core_conversion.d8_to_ldd(data)
-            elif not core_ldd.isvalid(data):
-                raise ValueError("LDD data not understood")
-            mv = int(core_ldd._mv)
-            ldd = pcr.numpy2pcr(pcr.Ldd, data.astype(int), mv)
-            # make sure it is pcr sound
-            # NOTE this should not be necessary
-            pcrmap = pcr.lddrepair(ldd)
-        elif pcr_vs == "bool":
-            pcrmap = pcr.numpy2pcr(pcr.Boolean, data.astype(bool), np.bool_(nodata))
-        elif pcr_vs == "scalar":
-            pcrmap = pcr.numpy2pcr(pcr.Scalar, data.astype(float), float(nodata))
-        elif pcr_vs == "ordinal":
-            pcrmap = pcr.numpy2pcr(pcr.Ordinal, data.astype(int), int(nodata))
-        elif pcr_vs == "nominal":
-            pcrmap = pcr.numpy2pcr(pcr.Nominal, data.astype(int), int(nodata))
-        pcr.report(pcrmap, raster_path)
-        # set crs (pcrmap ignores this info from clone ??)
-        if crs is not None:
-            with rasterio.open(raster_path, "r+") as dst:
-                dst.crs = crs
 
 
 def create_vrt(
