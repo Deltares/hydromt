@@ -6,7 +6,7 @@ Based on pre-cooked basin index files, basin maps or flow direction maps.
 
 import logging
 import warnings
-from os.path import isdir, isfile
+from os.path import isdir
 from pathlib import Path
 
 import geopandas as gpd
@@ -170,13 +170,13 @@ def _parse_region_value(value, data_catalog):
         kwarg = dict(xy=value)
     elif isinstance(value, int):  # single int
         kwarg = dict(basid=value)
-    elif isinstance(value, (str, Path)) and isfile(value):
+    elif isinstance(value, (str, Path)) and isdir(value):
+        kwarg = dict(root=value)
+    elif isinstance(value, (str, Path)):
         geom = data_catalog.get_geodataframe(value)
         kwarg = dict(geom=geom)
     elif isinstance(value, gpd.GeoDataFrame):  # geometry
         kwarg = dict(geom=value)
-    elif isinstance(value, (str, Path)) and isdir(value):
-        kwarg = dict(root=value)
     if "geom" in kwarg and np.all(kwarg["geom"].geometry.type == "Point"):
         xy = (
             kwarg["geom"].geometry.x.values,

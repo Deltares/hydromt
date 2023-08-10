@@ -10,7 +10,7 @@ import pytest
 import xarray as xr
 
 import hydromt
-from hydromt import raster
+from hydromt import DataCatalog, raster
 from hydromt.models import MODELS
 from hydromt.workflows.basin_mask import (
     _check_size,
@@ -23,6 +23,27 @@ logger = logging.getLogger("tets_basin")
 
 
 def test_region(tmpdir, world, geodf, rioda):
+    # prepare test data
+    fn_gdf = str(tmpdir.join("world.geojson"))
+    world.to_file(fn_gdf, driver="GeoJSON")
+    fn_grid = str(tmpdir.join("grid.tif"))
+    rioda.raster.to_raster(fn_grid)
+    cat = DataCatalog()
+    cat.from_dict(
+        {
+            "world": {
+                "path": fn_gdf,
+                "data_type": "GeoDataFrame",
+                "driver": "vector",
+            },
+            "grid": {
+                "path": fn_grid,
+                "data_type": "RasterDataset",
+                "driver": "raster",
+            },
+        }
+    )
+
     # model
     region = {"region": [0.0, -1.0]}
     with pytest.raises(ValueError, match=r"Region key .* not understood.*"):
@@ -37,15 +58,11 @@ def test_region(tmpdir, world, geodf, rioda):
     assert kind == "model"
 
     # geom
-    region = {"geom": world}
-    kind, region = parse_region(region)
-    assert kind == "geom"
+    kind, region = parse_region({"geom": world})
     assert isinstance(region["geom"], gpd.GeoDataFrame)
-    fn_gdf = str(tmpdir.join("world.geojson"))
-    world.to_file(fn_gdf, driver="GeoJSON")
-    region = {"geom": fn_gdf}
-    kind, region = parse_region(region)
-    assert kind == "geom"
+    kind, region = parse_region({"geom": fn_gdf})
+    assert isinstance(region["geom"], gpd.GeoDataFrame)
+    kind, region = parse_region({"geom": "world"}, data_catalog=cat)
     assert isinstance(region["geom"], gpd.GeoDataFrame)
     # geom:  points should fail
     region = {"geom": geodf}
@@ -53,14 +70,11 @@ def test_region(tmpdir, world, geodf, rioda):
         kind, region = parse_region(region)
 
     # grid
-    region = {"grid": rioda}
-    kind, region = parse_region(region)
-    assert kind == "grid"
+    kind, region = parse_region({"grid": rioda})
     assert isinstance(region["grid"], xr.DataArray)
-    fn_grid = str(tmpdir.join("grid.tif"))
-    rioda.raster.to_raster(fn_grid)
-    region = {"grid": fn_grid}
-    kind, region = parse_region(region)
+    kind, region = parse_region({"grid": fn_grid})
+    assert isinstance(region["grid"], xr.DataArray)
+    kind, region = parse_region({"grid": "grid"}, data_catalog=cat)
     assert isinstance(region["grid"], xr.DataArray)
 
     # basid
