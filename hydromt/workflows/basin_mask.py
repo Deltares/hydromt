@@ -155,7 +155,7 @@ def parse_region(region, logger=logger, data_catalog=DataCatalog()):
     return kind, kwargs
 
 
-def _parse_region_value(value, data_catalog):
+def _parse_region_value(value, data_catalog=DataCatalog()):
     kwarg = {}
     if isinstance(value, np.ndarray):
         value = value.tolist()  # array to list
