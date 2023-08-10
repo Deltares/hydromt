@@ -72,6 +72,7 @@ test = [
     "pytest>=2.7.3", # testing framework
     "pytest-cov",    # test coverage
     "pytest-mock",   # mocking
+    "pytest-timeout", # darn hanging tests
 ]
 doc = [
     "nbsphinx",                     # build notebooks in docs
@@ -136,7 +137,9 @@ include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 
 [tool.pytest.ini_options]
+addopts = "--ff --timeout=60"
 testpaths = ["tests"]
+
 filterwarnings = [
     "ignore:distutils Version classes are deprecated:DeprecationWarning",
     "ignore:getargs:DeprecationWarning",                                     # The 'u' format is deprecated. Use 'U' instead.
