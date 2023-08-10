@@ -17,7 +17,7 @@ dependencies = [
     "entrypoints",       # Provide access for Plugins
     "geopandas>=0.10",   # pandas but geo, wraps fiona and shapely
     "gdal>=3.1",         # enable geospacial data manipulation, both  raster and victor
-    "fiona==1.8.22",     # IO for vector and shape files
+    "numba",             # speed up computations (used in e.g. stats)
     "numpy>=1.20",       # pin necessary to ensure compatability with C headers
     "netcdf4",           # netcfd IO
     "packaging",         # compare versions of hydromt
@@ -28,6 +28,8 @@ dependencies = [
     "rasterio",          # raster wrapper around gdal
     "shapely>=2.0.0",    # geometry transforms
     "scipy",             # scientific utilities
+    "tomli",             # parsing toml files
+    "tomli-w",           # writing toml files
     "xarray",            # ndim data
     "universal_pathlib", # provides path compatability between different filesystems
     "xmltodict",         # xml parser also used to read VRT
@@ -85,10 +87,6 @@ examples = [
     "matplotlib-base", # plotting
     "notebook",        # jupyter integration
 ]
-deprecated = [
-    "pcraster", # Old Wflow model was build on this
-    "pygeos",   # Supersceded by shapely 2
-]
 
 full = ["hydromt[io,extra,dev,test,doc,examples]"]
 slim = ["hydromt[io,extra,examples]"]
@@ -100,8 +98,8 @@ Source = "https://github.com/Deltares/hydromt"
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
 
-[tool.pyproject2conda]
-channels = ["conda-forge", "defaults"]
+[tool.make_env]
+channels = ["conda-forge"]
 deps_not_in_conda  = [
     "sphinx_autosummary_accessors",
     "sphinx_design",
@@ -125,6 +123,7 @@ exclude = ["docs"]
 "tests/**" = ["D103", "D100", "D104"]
 "hydromt/__init__.py" = ["E402", "F401", "F403"]
 "hydromt/workflows/__init__.py" = ["F403"]
+"hydromt/stats/__init__.py" = ["F403"]
 "hydromt/models/__init__.py" = ["F403", "F401", "F405"]
 "hydromt/_compat.py" = ["F401"]
 "tests/conftest.py" = ["E402"]

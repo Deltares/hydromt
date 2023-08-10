@@ -123,7 +123,7 @@ def test_basin(caplog):
     data_catalog = hydromt.DataCatalog(logger=logger)
     ds = data_catalog.get_rasterdataset("merit_hydro")
     gdf_bas_index = data_catalog.get_geodataframe("merit_hydro_index")
-    bas_index = data_catalog["merit_hydro_index"]
+    bas_index = data_catalog.get_source("merit_hydro_index")
 
     with pytest.raises(ValueError, match=r"No basins found"):
         gdf_bas, gdf_out = get_basin_geometry(

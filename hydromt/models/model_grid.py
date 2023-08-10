@@ -28,7 +28,7 @@ class GridMixin(object):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._grid = xr.Dataset()
+        self._grid = None  # xr.Dataset()
 
     # generic grid methods
     def setup_grid_from_constant(
@@ -314,8 +314,10 @@ class GridMixin(object):
     @property
     def grid(self):
         """Model static gridded data as xarray.Dataset."""
-        if len(self._grid) == 0 and self._read:
-            self.read_grid()
+        if self._grid is None:
+            self._grid = xr.Dataset()
+            if self._read:
+                self.read_grid()
         return self._grid
 
     def set_grid(
@@ -352,11 +354,12 @@ class GridMixin(object):
             data = data.to_dataset()
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
-        if len(self._grid) == 0:  # new data
+        # force read in r+ mode
+        if len(self.grid) == 0:  # trigger init / read
             self._grid = data
         else:
             for dvar in data.data_vars:
-                if dvar in self._grid:
+                if dvar in self.grid:
                     if self._read:
                         self.logger.warning(f"Replacing grid map: {dvar}")
                 self._grid[dvar] = data[dvar]
@@ -364,17 +367,21 @@ class GridMixin(object):
     def read_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
 
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         **kwargs : dict
-            Additional keyword arguments to be passed to the `_read_nc` method.
+            Additional keyword arguments to be passed to the `read_nc` method.
         """
         self._assert_read_mode
-        for ds in self._read_nc(fn, **kwargs).values():
+        # Load grid data in r+ mode to allow overwritting netcdf files
+        if self._read and self._write:
+            kwargs["load"] = True
+        loaded_nc_files = self.read_nc(fn, single_var_as_array=False, **kwargs)
+        for ds in loaded_nc_files.values():
             self.set_grid(ds)
 
     def write_grid(
@@ -387,14 +394,14 @@ class GridMixin(object):
     ) -> None:
         """Write model grid data to netcdf file at <root>/<fn>.
 
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         **kwargs : dict
-            Additional keyword arguments to be passed to the `_write_nc` method.
+            Additional keyword arguments to be passed to the `write_nc` method.
         gdal_compliant : bool, optional
             If True, write grid data in a way that is compatible with GDAL,
             by default False
@@ -405,13 +412,13 @@ class GridMixin(object):
             If True and gdal_compliant, forces the dataset to have
             South -> North orientation.
         """
-        if len(self._grid) == 0:
+        if len(self.grid) == 0:
             self.logger.debug("No grid data found, skip writing.")
         else:
             self._assert_write_mode
-            # _write_nc requires dict - use dummy 'grid' key
-            self._write_nc(
-                {"grid": self._grid},
+            # write_nc requires dict - use dummy 'grid' key
+            self.write_nc(
+                {"grid": self.grid},
                 fn,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
@@ -579,7 +586,7 @@ class GridModel(GridMixin, Model):
             # retrieve global hydrography data (lazy!)
             ds_hyd = self.data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=self.data_catalog[basin_index_fn])
+                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = workflows.get_basin_geometry(
                 ds=ds_hyd,
@@ -694,7 +701,7 @@ class GridModel(GridMixin, Model):
 
     def write(
         self,
-        components: List = ["config", "grid", "geoms", "forcing", "states"],
+        components: List = ["config", "maps", "grid", "geoms", "forcing", "states"],
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 

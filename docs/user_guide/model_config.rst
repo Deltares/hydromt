@@ -54,3 +54,9 @@ An example .yaml file is shown below. Note that this .yaml file does not apply t
     setup_manning_roughness:
       lulc_fn: globcover             # source name of landuse-landcover data
       mapping_fn: globcover_mapping  # source name of mapping table converting lulc classes to N values
+
+    setup_infiltration:
+      soil_fn:
+        source: soil_data             # source name of soil data with specific version
+        version: 1.0                  # version of soil data
+      mapping_fn: soil_mapping        # source name of mapping table converting soil classes to infiltration parameters

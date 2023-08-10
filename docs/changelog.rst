@@ -11,11 +11,43 @@ Unreleased
 
 Added
 -----
+- docs now include a dropdown for selecting older versions of the docs. (#457)
+- Support for loading the same data source but from different places (e.g. local & aws)
+- Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
+- Add support for reading model configs in ``TOML`` format. (PR #444)
+- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
+-
+
+Changed
+-------
+- possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
+- Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
+  call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
+
+Fixed
+-----
+- when a model component (eg maps, forcing, grid) is updated using the set_ methods, it will first be read to avoid loosing data. (PR #460)
+-
+
+Deprecated
+----------
+- the dependencies ``pcraster`` and ``pygeos`` are no longer used and were removed. (PR #467)
+
+
+v0.8.0 (2023-07-18)
+===================
+This release contains several new features, including extreme value analysis, new generic methods for the ``GridModel`` class, setting variable attributes like units through the data catalog, and the ability to detect compatability issues between Datacatalog and HydroMT versions. It also includes a minor breaking change since now geometry masks are only set if the `mask` in `raster.clip_geom` is set to `True` to improve memory usage.
+
+
+Added
+-----
 - Support for unit attributes for all data types in the DataCatalog. PR #334
 - Data catalog can now handle specification of HydroMT version
 - New generic methods for ``GridModel``: ``setup_grid``, ``setup_grid_from_constant``, ``setup_grid_from_rasterdataset``, ``setup_grid_from_raster_reclass``, ``setup_grid_from_geodataframe``. PR #333
 - New ``grid`` workflow methods to support the setup methods in ``GridModel``: ``grid_from_constant``, ``grid_from_rasterdataset``, ``grid_from_raster_reclass``, ``grid_from_geodataframe``. PR #333
 - New raster method ``rasterize_geometry``.
+- New extreme valua analysis and design event (creation hydrographs) methods in stats submodule.
+  Note that these methods are experimental and may be moved elsewhere / change in signature. PR #85
 
 Changed
 -------
@@ -27,6 +59,7 @@ Changed
 - Introduced different merge options in `GeoDataset.from_gdf` and `GeoDataFrame.from_gdf`. PR #441
 - ``DataCatalog.get_rasterdataset`` always uses bbox to clip raster data. PR #434
 - ``raster.clip_geom`` only set a geometry mask if the mask argument is true to avoid memory issues. PR #434
+- ``raster.clip_mask`` interface and behavior changed to be consistent with ``raster.clip_geom``. PR #318
 
 Fixed
 -----
@@ -34,9 +67,6 @@ Fixed
 - fix bug in ``get_basin_geometry`` for region kind 'subbasin' if no stream or outlet option is specified.
 - fix use of Path objects in ``DataCatalog.from_dict``. PR #429
 - ``raster.reproject_like`` first clips the data to the target extent before reprojecting. PR #434
-
-Deprecated
-----------
 
 
 v0.7.1 (14 April 2023)
