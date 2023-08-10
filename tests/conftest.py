@@ -1,6 +1,3 @@
-import os
-
-os.environ["USE_PYGEOS"] = "0"
 import geopandas as gpd
 import numpy as np
 import pandas as pd

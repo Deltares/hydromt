@@ -87,10 +87,6 @@ examples = [
     "matplotlib-base", # plotting
     "notebook",        # jupyter integration
 ]
-deprecated = [
-    "pcraster", # Old Wflow model was build on this
-    "pygeos",   # Supersceded by shapely 2
-]
 
 full = ["hydromt[io,extra,dev,test,doc,examples]"]
 slim = ["hydromt[io,extra,examples]"]

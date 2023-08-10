@@ -3,10 +3,8 @@ from packaging.version import Version
 __all__ = []
 
 HAS_XUGRID = False
-HAS_PCRASTER = False
 HAS_SHAPELY20 = False
 HAS_PYET = False
-HAS_PYGEOS = False
 HAS_GCSFS = False
 HAS_S3FS = False
 HAS_OPENPYXL = False
@@ -25,21 +23,6 @@ try:
     HAS_OPENPYXL = True
 except ImportError:
     False
-
-try:
-    import pygeos
-
-    HAS_PYGEOS = True
-except ImportError:
-    pass
-
-try:
-    import pcraster
-
-    HAS_PCRASTER = True
-except ImportError:
-    pass
-
 
 try:
     import xugrid
