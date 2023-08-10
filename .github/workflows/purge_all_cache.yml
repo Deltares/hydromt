@@ -1,0 +1,17 @@
+name: cleanup all caches
+on:
+  workflow_disptach:
+
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Cleanup caches
+        run: |
+          gh cache delete -a
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,6 +1,13 @@
 name: Tests
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
+      - pyptoject.toml
   pull_request:
     branches:
       - main
@@ -9,8 +16,6 @@ on:
       - hydromt/*
       - data/*
       - pyproject.toml
-  schedule:
-    - cron: '0 0 * * *'
 
 jobs:
   build:
@@ -44,20 +49,19 @@ jobs:
       - name: Set cache date
         run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
-      - uses: actions/cache@v2
+      - name: load from cache if it exists for our environment
+        uses: actions/cache@v2
         with:
           path: /usr/share/miniconda3/envs/hydromt
           key: ${{ matrix.python-version }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}
         id: cache
 
-      - name: Update environment
+      - name: Update environment & write to cache
         run: mamba env update -n hydromt -f environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Test
-        if: github.event_name != 'schedule'
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - name: Upload code coverage
-        if: github.event_name != 'schedule'
         uses: codecov/codecov-action@v3
