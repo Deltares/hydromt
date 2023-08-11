@@ -2402,8 +2402,7 @@ class RasterDataArray(XRasterBase):
 
                 temp = obj[u : u + h, l : l + w]
 
-                tile = np.empty((px_size, px_size), np.float64)
-                tile[:] = nodata
+                tile = np.full((px_size, px_size), nodata, dtype=np.float64)
 
                 temp_transform = Affine(
                     obj_res,
@@ -2438,7 +2437,7 @@ class RasterDataArray(XRasterBase):
                             transform[0],
                         )[:px_size],
                     },
-                    data=tile,
+                    data=tile.copy(),
                 )
 
                 del tile
