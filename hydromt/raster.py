@@ -37,6 +37,7 @@ from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
 from . import _compat, gis_utils
+from .utils import create_folder
 
 logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
@@ -2155,10 +2156,6 @@ class RasterDataArray(XRasterBase):
         """
         mName = os.path.normpath(os.path.basename(root))
 
-        def create_folder(path):
-            if not os.path.exists(path):
-                os.makedirs(path)
-
         def tile_window(shape, px):
             """Yield (left, upper, width, height)."""
             nr, nc = shape
@@ -2291,10 +2288,6 @@ class RasterDataArray(XRasterBase):
         obj = obj.transpose(self.y_dim, self.x_dim)
 
         m_name = os.path.normpath(os.path.basename(root))
-
-        def create_folder(path):
-            if not os.path.exists(path):
-                os.makedirs(path)
 
         if bbox:
             minx, miny, maxx, maxy = bbox

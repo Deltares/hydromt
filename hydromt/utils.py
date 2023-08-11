@@ -1,4 +1,5 @@
 """Utility functions for hydromt that have no other home."""
+import os
 
 
 def partition_dictionaries(left, right):
@@ -34,6 +35,11 @@ def partition_dictionaries(left, right):
                 right_less_left[key] = value_right
 
     return common, left_less_right, right_less_left
+
+
+def create_folder(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 
 def _dict_pprint(d):
