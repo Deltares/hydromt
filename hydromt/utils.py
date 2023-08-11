@@ -38,7 +38,7 @@ def partition_dictionaries(left, right):
 
 
 def create_folder(path):
-    """Create a folder if there is none"""
+    """Create a folder if there is none."""
     if not os.path.exists(path):
         os.makedirs(path)
 
