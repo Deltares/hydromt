@@ -18,10 +18,12 @@ from hydromt import _compat, raster
 
 def test_open_vector(tmpdir, df, geodf, world):
     fn_csv = str(tmpdir.join("test.csv"))
+    fn_parquet = str(tmpdir.join("test.parquet"))
     fn_xy = str(tmpdir.join("test.xy"))
     fn_xls = str(tmpdir.join("test.xlsx"))
     fn_geojson = str(tmpdir.join("test.geojson"))
     df.to_csv(fn_csv)
+    df.to_parquet(fn_parquet)
     if _compat.HAS_OPENPYXL:
         df.to_excel(fn_xls)
     geodf.to_file(fn_geojson, driver="GeoJSON")
@@ -41,6 +43,9 @@ def test_open_vector(tmpdir, df, geodf, world):
     # read xy
     gdf1 = hydromt.open_vector(fn_xy, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
+    # read parquet
+    gdf1 = hydromt.open_vector(fn_parquet, crs=4326)
+    assert np.all(gdf1 == geodf)
     # filter
     country = "Chile"
     geom = world[world["name"] == country]
@@ -201,30 +206,3 @@ def test_rasterio_errors(tmpdir, rioda):
         da0.raster.to_raster(str(tmpdir.join("test2.tif")), count=3)
     with pytest.raises(ValueError, match="Extension unknown for driver"):
         da0.to_dataset().raster.to_mapstack(root=str(tmpdir), driver="unknown")
-
-
-@pytest.mark.skipif(not _compat.HAS_PCRASTER, reason="PCRaster not installed.")
-def test_io_pcr(tmpdir):
-    # test write ldd with clone
-    da = raster.full_from_transform(
-        [0.5, 0.0, 3.0, 0.0, -0.5, -9.0], (4, 6), nodata=247, dtype=np.uint8, name="ldd"
-    )
-    fn_ldd = str(tmpdir.join("test_ldd.map"))
-    da.raster.to_raster(fn_ldd, driver="PCRaster", pcr_vs="ldd")
-    assert os.path.isfile(fn_ldd)
-    # test ordinal
-    da.raster.to_raster(fn_ldd, driver="PCRaster", pcr_vs="ordinal", clone_path=fn_ldd)
-    assert os.path.isfile(fn_ldd)
-    da.expand_dims("time").raster.to_raster(
-        tmpdir.join("testldd.map"), driver="PCRaster"
-    )
-    assert os.path.isfile(tmpdir.join("testldd0.001"))
-    ds_in = hydromt.open_mfraster(
-        str(tmpdir.join("testldd*")), concat=True, mask_nodata=True
-    )
-    assert "dim0" in ds_in.coords
-    # mapstack
-    prefix = "test_"
-    root = str(tmpdir)
-    assert np.all([np.isnan(ds_in[n].raster.nodata) for n in ds_in.raster.vars])
-    ds_in.raster.to_mapstack(join(root, "pcr"), prefix=prefix, driver="PCRaster")

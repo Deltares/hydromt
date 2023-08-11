@@ -5,6 +5,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from itertools import product
 from string import Formatter
+from typing import Optional
 
 import geopandas as gpd
 import numpy as np
@@ -125,6 +126,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         driver_kwargs={},
         name="",  # optional for now
         catalog_name="",  # optional for now
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
     ):
         """General Interface to data source for HydroMT.
 
@@ -170,6 +173,8 @@ class DataAdapter(object, metaclass=ABCMeta):
         """
         self.name = name
         self.catalog_name = catalog_name
+        self.provider = provider
+        self.version = str(version) if version is not None else None  # version as str
         # general arguments
         self.path = path
         # driver and driver keyword-arguments
@@ -226,6 +231,13 @@ class DataAdapter(object, metaclass=ABCMeta):
     def __repr__(self):
         """Pretty print string representation of self."""
         return self.__str__()
+
+    def __eq__(self, other: object) -> bool:
+        """Return True if self and other are equal."""
+        if type(other) is type(self):
+            return self.to_dict() == other.to_dict()
+        else:
+            return False
 
     def _parse_zoom_level(
         self,

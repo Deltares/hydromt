@@ -9,11 +9,41 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 import yaml
+from tomli import load as load_toml
+from tomli_w import dump as dump_toml
 
 __all__ = [
     "configread",
     "configwrite",
 ]
+
+
+def _process_config_out(d):
+    ret = {}
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if v is None:
+                ret[k] = "NONE"
+            else:
+                ret[k] = _process_config_out(v)
+    else:
+        ret = d
+
+    return ret
+
+
+def _process_config_in(d):
+    ret = {}
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if v == "NONE":
+                ret[k] = None
+            else:
+                ret[k] = _process_config_in(v)
+    else:
+        ret = d
+
+    return ret
 
 
 def configread(
@@ -48,15 +78,22 @@ def configread(
         Configuration dictionary.
     """
     # read
-    if splitext(config_fn)[-1] in [".yaml", ".yml"]:
+    ext = splitext(config_fn)[-1].strip()
+    if ext in [".yaml", ".yml"]:
         with open(config_fn, "rb") as f:
             cfdict = yaml.safe_load(f)
+        cfdict = _process_config_in(cfdict)
+    elif ext == ".toml":  # user defined
+        with open(config_fn, "rb") as f:
+            cfdict = load_toml(f)
+        cfdict = _process_config_in(cfdict)
     else:
         cfdict = read_ini_config(config_fn, **kwargs)
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_fn))
         cfdict = parse_abspath(cfdict, root, skip_abspath_sections)
+
     # update defaults
     if defaults:
         _cfdict = defaults.copy()
@@ -89,9 +126,15 @@ def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
     """
     root = Path(dirname(config_fn))
     _cfdict = parse_relpath(cfdict.copy(), root)
-    if splitext(config_fn)[-1] in [".yaml", ".yml"]:
+    ext = splitext(config_fn)[-1].strip()
+    if ext in [".yaml", ".yml"]:
+        _cfdict = _process_config_out(_cfdict)  # should not be done for ini
         with open(config_fn, "w") as f:
             yaml.dump(_cfdict, f, sort_keys=False)
+    elif ext == ".toml":  # user defined
+        _cfdict = _process_config_out(_cfdict)
+        with open(config_fn, "wb") as f:
+            dump_toml(_cfdict, f)
     else:
         write_ini_config(config_fn, _cfdict, **kwargs)
 

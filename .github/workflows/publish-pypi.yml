@@ -77,7 +77,6 @@ jobs:
           echo "hydromt --models"
 
   upload-to-test-pypi:
-    timeout-minutes: 10
     needs: test-built-dist
     if: github.event_name == 'push'
     runs-on: ubuntu-latest

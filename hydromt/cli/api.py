@@ -94,19 +94,18 @@ def get_datasets(data_libs: Union[List, str]) -> Dict:
     Parameters
     ----------
     data_libs: (list of) str, Path, optional
-        One or more paths to data catalog yaml files or names of predefined
+        One or more paths to data catalog configuration files or names of predefined
         data catalogs. By default the data catalog is initiated without data entries.
         See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
         for accepted yaml format.
     """
     data_catalog = DataCatalog(data_libs)
-    datasets = data_catalog.sources
     dataset_sources = {
         "RasterDatasetSource": [],
         "GeoDatasetSource": [],
         "GeoDataframeSource": [],
     }
-    for k, v in datasets.items():
+    for k, v in data_catalog.iter_sources():
         if v.data_type == "RasterDataset":
             dataset_sources["RasterDatasetSource"].append(k)
         elif v.data_type == "GeoDataFrame":
@@ -140,7 +139,7 @@ def get_region(
     region : dict
         dictionary containing region definition
     data_libs : (list of) str, Path, optional
-        One or more paths to data catalog yaml files or names of predefined
+        One or more paths to data catalog configuration files or names of predefined
         data catalogs. By default the data catalog is initiated without data entries.
         See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
         for accepted yaml format.
@@ -167,7 +166,7 @@ def get_region(
         # retrieve global hydrography data (lazy!)
         ds_org = data_catalog.get_rasterdataset(hydrography_fn)
         if "bounds" not in region:
-            region.update(basin_index=data_catalog[basin_index_fn])
+            region.update(basin_index=data_catalog.get_source(basin_index_fn))
         # get basin geometry
         geom, xy = workflows.get_basin_geometry(
             ds=ds_org,

@@ -21,3 +21,8 @@ repos:
     hooks:
       - id: black
         args: [--config=pyproject.toml]
+  # - repo: https://github.com/python-jsonschema/check-jsonschema
+  #   rev: 0.24.0
+  #   hooks:
+  #     - id: check-github-workflows
+  #     - id: check-github-actions

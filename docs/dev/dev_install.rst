@@ -99,7 +99,7 @@ Finally, create a developer installation of HydroMT:
     see :ref:`installation guide <installation_guide>` for the difference between both.
 
 Fine tuned installation
-----------------------
+-----------------------
 
 If you want a more fine tuned installation you can also specify exactly
 which dependency groups you'd like. For instance, this will create an environment

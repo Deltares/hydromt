@@ -12,18 +12,26 @@ Unreleased
 Added
 -----
 - New raster method ``to_osm_tiles``: tiling of a raster dataset according to the osm structure.
+- docs now include a dropdown for selecting older versions of the docs. (#457)
+- Support for loading the same data source but from different places (e.g. local & aws)
+- Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
+- Add support for reading model configs in ``TOML`` format. (PR #444)
+- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
 
 Changed
 -------
--
+- possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
+- Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
+  call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
 
 Fixed
 -----
+- when a model component (eg maps, forcing, grid) is updated using the set_ methods, it will first be read to avoid loosing data. (PR #460)
 -
 
 Deprecated
 ----------
--
+- the dependencies ``pcraster`` and ``pygeos`` are no longer used and were removed. (PR #467)
 
 
 v0.8.0 (2023-07-18)

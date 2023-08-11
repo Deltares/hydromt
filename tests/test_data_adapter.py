@@ -41,12 +41,12 @@ def test_resolve_path(tmpdir):
     cat = DataCatalog()
     cat.from_dict(dd)
     # test
-    assert len(cat["test"].resolve_paths()) == 48
-    assert len(cat["test"].resolve_paths(variables=["precip"])) == 24
+    assert len(cat.get_source("test").resolve_paths()) == 48
+    assert len(cat.get_source("test").resolve_paths(variables=["precip"])) == 24
     kwargs = dict(variables=["precip"], time_tuple=("2021-03-01", "2021-05-01"))
-    assert len(cat["test"].resolve_paths(**kwargs)) == 3
+    assert len(cat.get_source("test").resolve_paths(**kwargs)) == 3
     with pytest.raises(FileNotFoundError, match="No such file found:"):
-        cat["test"].resolve_paths(variables=["waves"])
+        cat.get_source("test").resolve_paths(variables=["waves"])
 
 
 def test_rasterdataset(rioda, tmpdir):
@@ -57,12 +57,12 @@ def test_rasterdataset(rioda, tmpdir):
     da1 = data_catalog.get_rasterdataset(fn_tif, bbox=rioda.raster.bounds)
     assert np.all(da1 == rioda_utm)
     geom = rioda.raster.box
-    da1 = data_catalog.get_rasterdataset("test", geom=geom)
+    da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
     assert np.all(da1 == rioda_utm)
-    with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
+    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
         data_catalog.get_rasterdataset("no_file.tif")
     with pytest.raises(IndexError, match="RasterDataset: No data within"):
-        data_catalog.get_rasterdataset("test", bbox=[40, 50, 41, 51])
+        data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
 
 
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
@@ -111,16 +111,23 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     }
     data_catalog = DataCatalog()
     data_catalog.from_dict(yml_dict)
-    assert data_catalog[name]._parse_zoom_level() == 0  # default to first
-    assert data_catalog[name]._parse_zoom_level(zoom_level=1) == 1
-    assert data_catalog[name]._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
-    assert data_catalog[name]._parse_zoom_level(zoom_level=(0.29, "degree")) == 0
-    assert data_catalog[name]._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
-    assert data_catalog[name]._parse_zoom_level(zoom_level=(1, "meter")) == 0
+    assert data_catalog.get_source(name)._parse_zoom_level() == 0  # default to first
+    assert data_catalog.get_source(name)._parse_zoom_level(zoom_level=1) == 1
+    assert (
+        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
+    )
+    assert (
+        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.29, "degree"))
+        == 0
+    )
+    assert (
+        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
+    )
+    assert data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "meter")) == 0
     with pytest.raises(TypeError, match="zoom_level unit"):
-        data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd"))
+        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "asfd"))
     with pytest.raises(TypeError, match="zoom_level argument"):
-        data_catalog[name]._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
+        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
 
 
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
@@ -158,11 +165,11 @@ def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
     datacatalog.from_dict(data_dict2)
     era5_nc = datacatalog.get_rasterdataset("era5_nc")
     assert era5_zarr.equals(era5_nc)
-    datacatalog["era5_zarr"].to_file(tmpdir, "era5_zarr", driver="zarr")
+    datacatalog.get_source("era5_zarr").to_file(tmpdir, "era5_zarr", driver="zarr")
 
 
 def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
-    era5_dict = {"era5": artifact_data.sources["era5"].to_dict()}
+    era5_dict = {"era5": artifact_data.get_source("era5").to_dict()}
     attrs = {
         "temp": {"unit": "degrees C", "long_name": "temperature"},
         "temp_max": {"unit": "degrees C", "long_name": "maximum temperature"},
@@ -175,12 +182,13 @@ def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
+# @pytest.mark.skip()
 def test_geodataset(geoda, geodf, ts, tmpdir):
     # this test can sometimes hang because of threading issues therefore
     # the synchronous scheduler here is necessary
     from dask import config as dask_config
 
-    dask_config.set(scheduler="synchronous")
+    dask_config.set(scheduler="single-threaded")
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
@@ -196,7 +204,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     ).sortby("index")
     assert np.allclose(da1, geoda)
     assert da1.name == "test1"
-    ds1 = data_catalog.get_geodataset("test", single_var_as_array=False)
+    ds1 = data_catalog.get_geodataset("test.nc", single_var_as_array=False)
     assert isinstance(ds1, xr.Dataset)
     assert "test" in ds1
     da2 = data_catalog.get_geodataset(
@@ -209,21 +217,21 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     ).sortby("index")
     assert np.allclose(da3, geoda)
     assert da3.vector.crs.to_epsg() == 4326
-    with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
+    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
         data_catalog.get_geodataset("no_file.geojson")
-    # Test nc file writing to file
     with tempfile.TemporaryDirectory() as td:
+        # Test nc file writing to file
         GeoDatasetAdapter(fn_nc).to_file(
             data_root=td, data_name="test", driver="netcdf"
         )
         GeoDatasetAdapter(fn_nc).to_file(
-            data_root=td, data_name="test1", driver="netcdf", variables="test1"
+            data_root=tmpdir, data_name="test1", driver="netcdf", variables="test1"
         )
         GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
 
 
 def test_geodataset_unit_attrs(artifact_data: DataCatalog):
-    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.sources["gtsmv3_eu_era5"].to_dict()}
+    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.get_source("gtsmv3_eu_era5").to_dict()}
     attrs = {
         "waterlevel": {
             "long_name": "sea surface height above mean sea level",
@@ -239,7 +247,7 @@ def test_geodataset_unit_attrs(artifact_data: DataCatalog):
 
 def test_geodataset_unit_conversion(artifact_data: DataCatalog):
     gtsm_geodataarray = artifact_data.get_geodataset("gtsmv3_eu_era5")
-    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.sources["gtsmv3_eu_era5"].to_dict()}
+    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.get_source("gtsmv3_eu_era5").to_dict()}
     gtsm_dict["gtsmv3_eu_era5"].update(dict(unit_mult=dict(waterlevel=1000)))
     datacatalog = DataCatalog()
     datacatalog.from_dict(gtsm_dict)
@@ -248,7 +256,7 @@ def test_geodataset_unit_conversion(artifact_data: DataCatalog):
 
 
 def test_geodataset_set_nodata(artifact_data: DataCatalog):
-    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.sources["gtsmv3_eu_era5"].to_dict()}
+    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.get_source("gtsmv3_eu_era5").to_dict()}
     gtsm_dict["gtsmv3_eu_era5"].update(dict(nodata=-99))
     datacatalog = DataCatalog()
     datacatalog.from_dict(gtsm_dict)
@@ -264,15 +272,15 @@ def test_geodataframe(geodf, tmpdir):
     assert isinstance(gdf1, gpd.GeoDataFrame)
     assert np.all(gdf1 == geodf)
     gdf1 = data_catalog.get_geodataframe(
-        "test", bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
+        "test.geojson", bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
     )
     assert np.all(gdf1 == geodf)
-    with pytest.raises(FileNotFoundError, match="No such file or catalog key"):
+    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
         data_catalog.get_geodataframe("no_file.geojson")
 
 
 def test_geodataframe_unit_attrs(artifact_data: DataCatalog):
-    gadm_level1 = {"gadm_level1": artifact_data.sources["gadm_level1"].to_dict()}
+    gadm_level1 = {"gadm_level1": artifact_data.get_source("gadm_level1").to_dict()}
     attrs = {"NAME_0": {"long_name": "Country names"}}
     gadm_level1["gadm_level1"].update(dict(attrs=attrs))
     artifact_data.from_dict(gadm_level1)
@@ -289,6 +297,14 @@ def test_dataframe(df, tmpdir):
     assert isinstance(df1, pd.DataFrame)
     pd.testing.assert_frame_equal(df, df1)
 
+    # test reading parquet
+    fn_df_parquet = str(tmpdir.join("test.parquet"))
+    df.to_parquet(fn_df_parquet)
+    data_catalog = DataCatalog()
+    df2 = data_catalog.get_dataframe(fn_df_parquet, driver="parquet")
+    assert isinstance(df2, pd.DataFrame)
+    pd.testing.assert_frame_equal(df, df2)
+
     # Test FWF support
     fn_fwf = str(tmpdir.join("test.txt"))
     df.to_string(fn_fwf, index=False)
@@ -301,9 +317,9 @@ def test_dataframe(df, tmpdir):
     if compat.HAS_OPENPYXL:
         fn_xlsx = str(tmpdir.join("test.xlsx"))
         df.to_excel(fn_xlsx)
-        df2 = data_catalog.get_dataframe(fn_xlsx, driver_kwargs=dict(index_col=0))
-        assert isinstance(df2, pd.DataFrame)
-        assert np.all(df2 == df)
+        df3 = data_catalog.get_dataframe(fn_xlsx, driver_kwargs=dict(index_col=0))
+        assert isinstance(df3, pd.DataFrame)
+        assert np.all(df3 == df)
 
 
 def test_dataframe_unit_attrs(df: pd.DataFrame, tmpdir):
