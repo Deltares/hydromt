@@ -2290,7 +2290,7 @@ class RasterDataArray(XRasterBase):
         obj = self._obj.copy()
         obj = obj.transpose(self.y_dim, self.x_dim)
 
-        mName = os.path.normpath(os.path.basename(root))
+        m_name = os.path.normpath(os.path.basename(root))
 
         def create_folder(path):
             if not os.path.exists(path):
@@ -2471,7 +2471,7 @@ class RasterDataArray(XRasterBase):
 
             file.close()
             # Create a vrt using GDAL
-            vrt_fn = join(root, f"{mName}_zl{zl}.vrt")
+            vrt_fn = join(root, f"{m_name}_zl{zl}.vrt")
             gis_utils.create_vrt(vrt_fn, file_list_path=txt_path)
             zls.update({zl: round(float(px), 2)})
             del obj
@@ -2481,11 +2481,11 @@ class RasterDataArray(XRasterBase):
             "crs": 3857,
             "data_type": "RasterDataset",
             "driver": "raster",
-            "path": f"{mName}_zl{{zoom_level}}.vrt",
+            "path": f"{m_name}_zl{{zoom_level}}.vrt",
             "zoom_levels": zls,
         }
-        with open(join(root, f"{mName}.yml"), "w") as f:
-            yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
+        with open(join(root, f"{m_name}.yml"), "w") as f:
+            yaml.dump({m_name: yml}, f, default_flow_style=False, sort_keys=False)
 
     def to_raster(
         self,
