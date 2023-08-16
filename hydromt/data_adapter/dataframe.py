@@ -216,6 +216,7 @@ class DataFrameAdapter(DataAdapter):
         if self.driver in ["csv"]:
             df = pd.read_csv(self.path, **kwargs)
         elif self.driver == "parquet":
+            _ = kwargs.pop("index_col", None)
             df = pd.read_parquet(self.path, **kwargs)
         elif self.driver in ["xls", "xlsx", "excel"]:
             df = pd.read_excel(self.path, engine="openpyxl", **kwargs)

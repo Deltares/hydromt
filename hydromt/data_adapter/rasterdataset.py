@@ -233,28 +233,9 @@ class RasterDatasetAdapter(DataAdapter):
 
         return fn_out, driver, read_kwargs
 
-    def get_data(
-        self,
-        bbox=None,
-        geom=None,
-        buffer=0,
-        zoom_level=None,
-        align=None,
-        variables=None,
-        time_tuple=None,
-        single_var_as_array=True,
-        cache_root=None,
-        logger=logger,
+    def _read_data(
+        self, time_tuple, variables, zoom_level, geom, bbox, logger, cache_root
     ):
-        """Return a clipped, sliced and unified RasterDataset.
-
-        For a detailed description see:
-        :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
-        """
-        # If variable is string, convert to list
-        if variables:
-            variables = np.atleast_1d(variables).tolist()
-
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         so_kwargs = dict()
         if "storage_options" in self.driver_kwargs:
@@ -287,7 +268,7 @@ class RasterDatasetAdapter(DataAdapter):
             fns = [fs.open(f) for f in fns]
 
         # read using various readers
-        if self.driver in ["netcdf"]:  # TODO complete list
+        if self.driver == "netcdf":  # TODO complete list
             if self.filesystem == "local":
                 if "preprocess" in kwargs:
                     preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
@@ -337,9 +318,13 @@ class RasterDatasetAdapter(DataAdapter):
             ds_out = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
+
         if GEO_MAP_COORD in ds_out.data_vars:
             ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
+        return ds_out, kwargs
+
+    def _rename_vars(self, ds_out, variables):
         # rename and select vars
         if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
             rm = {ds_out.raster.vars[0]: variables[0]}
@@ -362,6 +347,17 @@ class RasterDatasetAdapter(DataAdapter):
         y_dim = ds_out.raster.y_dim
         ds_out = ds_out.transpose(..., y_dim, x_dim)
 
+        # set crs
+        if ds_out.raster.crs is None and self.crs is not None:
+            ds_out.raster.set_crs(self.crs)
+        elif ds_out.raster.crs is None:
+            raise ValueError(
+                "RasterDataset: The data has no CRS, set in RasterDatasetAdapter."
+            )
+
+        return ds_out
+
+    def _clip_tslice(self, ds_out, time_tuple):
         # clip tslice
         if (
             "time" in ds_out.dims
@@ -378,14 +374,9 @@ class RasterDatasetAdapter(DataAdapter):
             if ds_out.time.size == 0:
                 raise IndexError("RasterDataset: Time slice out of range.")
 
-        # set crs
-        if ds_out.raster.crs is None and self.crs is not None:
-            ds_out.raster.set_crs(self.crs)
-        elif ds_out.raster.crs is None:
-            raise ValueError(
-                "RasterDataset: The data has no CRS, set in RasterDatasetAdapter."
-            )
+        return ds_out
 
+    def _clip_spatial(self, ds_out, geom, bbox, buffer=None, align=None):
         # clip
         # make sure bbox is in data crs
         crs = ds_out.raster.crs
@@ -411,17 +402,42 @@ class RasterDatasetAdapter(DataAdapter):
                     f"RasterDataset: No data within spatial domain for {self.path}."
                 )
 
-        # set nodata value
-        if self.nodata is not None:
-            if not isinstance(self.nodata, dict):
-                nodata = {k: self.nodata for k in ds_out.data_vars.keys()}
-            else:
-                nodata = self.nodata
-            for k in ds_out.data_vars:
-                mv = nodata.get(k, None)
-                if mv is not None and ds_out[k].raster.nodata is None:
-                    ds_out[k].raster.set_nodata(mv)
+        return ds_out
 
+    def get_data(
+        self,
+        bbox=None,
+        geom=None,
+        buffer=0,
+        zoom_level=None,
+        align=None,
+        variables=None,
+        time_tuple=None,
+        single_var_as_array=True,
+        cache_root=None,
+        logger=logger,
+    ):
+        """Return a clipped, sliced and unified RasterDataset.
+
+        For a detailed description see:
+        :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+        """
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
+
+        ds_out, kwargs = self._read_data(
+            time_tuple, variables, zoom_level, geom, bbox, logger, cache_root
+        )
+        ds_out = self._rename_vars(ds_out, variables)
+        ds_out = self._clip_tslice(ds_out, time_tuple)
+        ds_out = self._clip_spatial(ds_out, geom, bbox, buffer, align)
+        ds_out = self._unit_conversions(ds_out, logger)
+        ds_out = self._unit_attributes(ds_out, single_var_as_array)
+
+        return ds_out
+
+    def _unit_conversions(self, ds_out, logger):
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds_out.data_vars]
@@ -442,6 +458,19 @@ class RasterDatasetAdapter(DataAdapter):
             ds_out[name].attrs.update(attrs)  # set original attributes
             ds_out[name].raster.set_nodata(nodata)  # reset nodata in case of change
 
+        return ds_out
+
+    def _unit_attributes(self, ds_out, single_var_as_array=True):
+        # set nodata value
+        if self.nodata is not None:
+            if not isinstance(self.nodata, dict):
+                nodata = {k: self.nodata for k in ds_out.data_vars.keys()}
+            else:
+                nodata = self.nodata
+            for k in ds_out.data_vars:
+                mv = nodata.get(k, None)
+                if mv is not None and ds_out[k].raster.nodata is None:
+                    ds_out[k].raster.set_nodata(mv)
         # unit attributes
         for k in self.attrs:
             ds_out[k].attrs.update(self.attrs[k])
@@ -452,4 +481,5 @@ class RasterDatasetAdapter(DataAdapter):
 
         # set meta data
         ds_out.attrs.update(self.meta)
+
         return ds_out
