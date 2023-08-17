@@ -219,7 +219,9 @@ class GeoDataFrameAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
-        varialbes, clip_str, kwargs = self._parse_args(variables, geom, bbox, buffer)
+        varialbes, clip_str, predicate, kwargs = self._parse_args(
+            variables, geom, bbox, buffer
+        )
         gdf = self._read_and_clip(clip_str, geom, predicate)
         gdf = self._rename(gdf, variables)
         gdf = self._unit_conversion(gdf)
@@ -344,5 +346,7 @@ class GeoDataFrameAdapter(DataAdapter):
             clip_str = f"{clip_str} [{bbox_str}]"
         if kwargs.pop("within", False):  # for backward compatibility
             predicate = "contains"
+        else:
+            predicate = None
 
-        return variables, clip_str, kwargs
+        return variables, clip_str, predicate, kwargs
