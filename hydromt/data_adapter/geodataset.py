@@ -237,6 +237,32 @@ class GeoDatasetAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
+        fns, clip_str, variables, kwargs = self._parse_args(
+            variables, time_tuple, geom, bbox, buffer
+        )
+        ds_out = self._read_and_clip(fns, clip_str, geom, **kwargs)
+        ds_out = self._rename_vars(ds_out, variables)
+        ds_out = self._validate_spatial_coords(ds_out, variables)
+        ds_out = self._set_crs(ds_out)
+        ds_out = self._clip_spatial(ds_out, geom, bbox, **kwargs)
+        ds_out = self._clip_tslice(ds_out, time_tuple)
+        ds_out = self._set_nodata(ds_out)
+        ds_out = self._unit_conversion(ds_out)
+        ds_out = self._set_meta(ds_out, single_var_as_array)
+
+        return ds_out
+
+    def _rename_vars(self, ds_out, variables):
+        # rename and select vars
+        if variables and len(ds_out.vector.vars) == 1 and len(self.rename) == 0:
+            rm = {ds_out.vector.vars[0]: variables[0]}
+        else:
+            rm = {k: v for k, v in self.rename.items() if k in ds_out}
+        ds_out = ds_out.rename(rm)
+
+        return ds_out
+
+    def _parse_args(self, variables, time_tuple, geom, bbox, buffer):
         # If variable is string, convert to list
         if variables:
             variables = np.atleast_1d(variables).tolist()
@@ -279,6 +305,9 @@ class GeoDatasetAdapter(DataAdapter):
         if kwargs.pop("within", False):  # for backward compatibility
             kwargs.update(predicate="contains")
 
+        return fns, clip_str, variables, kwargs
+
+    def _read_and_clip(self, fns, clip_str, geom, **kwargs):
         # read and clip
         logger.info(f"GeoDataset: Read {self.driver} data{clip_str}.")
         if self.driver in ["netcdf"]:
@@ -300,12 +329,9 @@ class GeoDatasetAdapter(DataAdapter):
         if GEO_MAP_COORD in ds_out.data_vars:
             ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
-        # rename and select vars
-        if variables and len(ds_out.vector.vars) == 1 and len(self.rename) == 0:
-            rm = {ds_out.vector.vars[0]: variables[0]}
-        else:
-            rm = {k: v for k, v in self.rename.items() if k in ds_out}
-        ds_out = ds_out.rename(rm)
+        return ds_out
+
+    def _validate_spatial_coords(self, ds_out, variables):
         # check spatial dims and make sure all are set as coordinates
         try:
             ds_out.vector.set_spatial_dims()
@@ -322,6 +348,9 @@ class GeoDatasetAdapter(DataAdapter):
                 raise ValueError(f"GeoDataset: Not all variables found: {variables}")
             ds_out = ds_out[variables]
 
+        return ds_out
+
+    def _set_crs(self, ds_out):
         # set crs
         if ds_out.vector.crs is None and self.crs is not None:
             ds_out.vector.set_crs(self.crs)
@@ -329,7 +358,9 @@ class GeoDatasetAdapter(DataAdapter):
             raise ValueError(
                 "GeoDataset: The data has no CRS, set in GeoDatasetAdapter."
             )
+        return ds_out
 
+    def _clip_spatial(self, ds_out, geom=None, bbox=None, **kwargs):
         # clip
         if geom is not None:
             bbox = geom.to_crs(4326).total_bounds
@@ -345,24 +376,25 @@ class GeoDatasetAdapter(DataAdapter):
                 f"GeoDataset: No data within spatial domain for {self.path}."
             )
 
-        # clip tslice
-        if (
-            "time" in ds_out.dims
-            and ds_out["time"].size > 1
-            and np.issubdtype(ds_out["time"].dtype, np.datetime64)
-        ):
-            dt = self.unit_add.get("time", 0)
-            if dt != 0:
-                logger.debug(f"GeoDataset: Shifting time labels with {dt} sec.")
-                ds_out["time"] = ds_out["time"] + pd.to_timedelta(dt, unit="s")
-            if time_tuple is not None:
-                logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
-                ds_out = ds_out.sel(time=slice(*time_tuple))
-            if ds_out.time.size == 0:
-                logger.warning("GeoDataset: Time slice out of range.")
-                drop_vars = [v for v in ds_out.data_vars if "time" in ds_out[v].dims]
-                ds_out = ds_out.drop_vars(drop_vars)
+        return ds_out
 
+    def _set_meta(self, ds_out, single_var_as_array=True):
+        # return data array if single var
+        if single_var_as_array and len(ds_out.vector.vars) == 1:
+            ds_out = ds_out[ds_out.vector.vars[0]]
+        # Set variable attribute data
+        if self.attrs:
+            if isinstance(ds_out, xr.DataArray):
+                ds_out.attrs.update(self.attrs[ds_out.name])
+            else:
+                for k in self.attrs:
+                    ds_out[k].attrs.update(self.attrs[k])
+
+        # set meta data
+        ds_out.attrs.update(self.meta)
+        return ds_out
+
+    def _set_nodata(self, ds_out):
         # set nodata value
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
@@ -374,6 +406,9 @@ class GeoDatasetAdapter(DataAdapter):
                 if mv is not None and ds_out[k].vector.nodata is None:
                     ds_out[k].vector.set_nodata(mv)
 
+        return ds_out
+
+    def _unit_conversion(self, ds_out):
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds_out.data_vars]
@@ -391,19 +426,25 @@ class GeoDatasetAdapter(DataAdapter):
             ds_out[name] = xr.where(data_bool, da * m + a, nodata)
             ds_out[name].attrs.update(attrs)  # set original attributes
 
-        # return data array if single var
-        if single_var_as_array and len(ds_out.vector.vars) == 1:
-            ds_out = ds_out[ds_out.vector.vars[0]]
+        return ds_out
 
-        # Set variable attribute data
-        if self.attrs:
-            if isinstance(ds_out, xr.DataArray):
-                ds_out.attrs.update(self.attrs[ds_out.name])
-            else:
-                for k in self.attrs:
-                    ds_out[k].attrs.update(self.attrs[k])
-
-        # set meta data
-        ds_out.attrs.update(self.meta)
+    def _clip_tslice(self, ds_out, time_tuple):
+        # clip tslice
+        if (
+            "time" in ds_out.dims
+            and ds_out["time"].size > 1
+            and np.issubdtype(ds_out["time"].dtype, np.datetime64)
+        ):
+            dt = self.unit_add.get("time", 0)
+            if dt != 0:
+                logger.debug(f"GeoDataset: Shifting time labels with {dt} sec.")
+                ds_out["time"] = ds_out["time"] + pd.to_timedelta(dt, unit="s")
+            if time_tuple is not None:
+                logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
+                ds_out = ds_out.sel(time=slice(*time_tuple))
+            if ds_out.time.size == 0:
+                logger.warning("GeoDataset: Time slice out of range.")
+                drop_vars = [v for v in ds_out.data_vars if "time" in ds_out[v].dims]
+                ds_out = ds_out.drop_vars(drop_vars)
 
         return ds_out
