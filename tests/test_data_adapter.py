@@ -210,6 +210,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     da2 = data_catalog.get_geodataset(
         fn_gdf, driver_kwargs=dict(fn_data=fn_csv)
     ).sortby("index")
+    assert isinstance(da2, xr.DataArray), type(da2)
     assert np.allclose(da2, geoda)
     # test with xy locs
     da3 = data_catalog.get_geodataset(
