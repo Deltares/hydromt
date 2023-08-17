@@ -233,6 +233,39 @@ class RasterDatasetAdapter(DataAdapter):
 
         return fn_out, driver, read_kwargs
 
+    def get_data(
+        self,
+        bbox=None,
+        geom=None,
+        buffer=0,
+        zoom_level=None,
+        align=None,
+        variables=None,
+        time_tuple=None,
+        single_var_as_array=True,
+        cache_root=None,
+        logger=logger,
+    ):
+        """Return a clipped, sliced and unified RasterDataset.
+
+        For a detailed description see:
+        :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+        """
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
+
+        ds_out, kwargs = self._read_data(
+            time_tuple, variables, zoom_level, geom, bbox, logger, cache_root
+        )
+        ds_out = self._rename_vars(ds_out, variables)
+        ds_out = self._clip_tslice(ds_out, time_tuple)
+        ds_out = self._clip_spatial(ds_out, geom, bbox, buffer, align)
+        ds_out = self._unit_conversions(ds_out, logger)
+        ds_out = self._unit_attributes(ds_out, single_var_as_array)
+
+        return ds_out
+
     def _read_data(
         self, time_tuple, variables, zoom_level, geom, bbox, logger, cache_root
     ):
@@ -401,39 +434,6 @@ class RasterDatasetAdapter(DataAdapter):
                 raise IndexError(
                     f"RasterDataset: No data within spatial domain for {self.path}."
                 )
-
-        return ds_out
-
-    def get_data(
-        self,
-        bbox=None,
-        geom=None,
-        buffer=0,
-        zoom_level=None,
-        align=None,
-        variables=None,
-        time_tuple=None,
-        single_var_as_array=True,
-        cache_root=None,
-        logger=logger,
-    ):
-        """Return a clipped, sliced and unified RasterDataset.
-
-        For a detailed description see:
-        :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
-        """
-        # If variable is string, convert to list
-        if variables:
-            variables = np.atleast_1d(variables).tolist()
-
-        ds_out, kwargs = self._read_data(
-            time_tuple, variables, zoom_level, geom, bbox, logger, cache_root
-        )
-        ds_out = self._rename_vars(ds_out, variables)
-        ds_out = self._clip_tslice(ds_out, time_tuple)
-        ds_out = self._clip_spatial(ds_out, geom, bbox, buffer, align)
-        ds_out = self._unit_conversions(ds_out, logger)
-        ds_out = self._unit_attributes(ds_out, single_var_as_array)
 
         return ds_out
 

@@ -219,6 +219,101 @@ class GeoDataFrameAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
+        varialbes, clip_str, kwargs = self._parse_args(variables, geom, bbox, buffer)
+        gdf = self._read_and_clip(clip_str, geom, predicate)
+        gdf = self._rename(gdf, variables)
+        gdf = self._unit_conversion(gdf)
+        gdf = self._set_meta_data(gdf)
+
+        return gdf
+
+    def _rename(self, gdf, variables):
+        # rename and select columns
+        if self.rename:
+            rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
+            gdf = gdf.rename(columns=rename)
+        if variables is not None:
+            if np.any([var not in gdf.columns for var in variables]):
+                raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")
+            if "geometry" not in variables:  # always keep geometry column
+                variables = variables + ["geometry"]
+            gdf = gdf.loc[:, variables]
+
+        return gdf
+
+    def _unit_conversion(self, gdf):
+        # nodata and unit conversion for numeric data
+        if gdf.index.size == 0:
+            logger.warning(f"GeoDataFrame: No data within spatial domain {self.path}.")
+        else:
+            # parse nodata values
+            cols = gdf.select_dtypes([np.number]).columns
+            if self.nodata is not None and len(cols) > 0:
+                if not isinstance(self.nodata, dict):
+                    nodata = {c: self.nodata for c in cols}
+                else:
+                    nodata = self.nodata
+                for c in cols:
+                    mv = nodata.get(c, None)
+                    if mv is not None:
+                        is_nodata = np.isin(gdf[c], np.atleast_1d(mv))
+                        gdf[c] = np.where(is_nodata, np.nan, gdf[c])
+
+            # unit conversion
+            unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
+            unit_names = [k for k in unit_names if k in gdf.columns]
+            if len(unit_names) > 0:
+                logger.debug(
+                    f"GeoDataFrame: Convert units for {len(unit_names)} columns."
+                )
+            for name in list(set(unit_names)):  # unique
+                m = self.unit_mult.get(name, 1)
+                a = self.unit_add.get(name, 0)
+                gdf[name] = gdf[name] * m + a
+
+        return gdf
+
+    def _set_meta_data(self, gdf):
+        # set meta data
+        gdf.attrs.update(self.meta)
+
+        # set column attributes
+        for col in self.attrs:
+            if col in gdf.columns:
+                gdf[col].attrs.update(**self.attrs[col])
+        return gdf
+
+    def _read_and_clip(self, clip_str, geom, predicate, **kwargs):
+        # read and clip
+        logger.info(f"GeoDataFrame: Read {self.driver} data{clip_str}.")
+        if self.driver in [
+            "csv",
+            "parquet",
+            "xls",
+            "xlsx",
+            "xy",
+            "vector",
+            "vector_table",
+        ]:
+            # "csv", "xls", "xlsx", "xy" deprecated use vector_table instead.
+            # specific driver should be added to open_vector kwargs
+            if "driver" not in kwargs and self.driver in ["csv", "xls", "xlsx", "xy"]:
+                warnings.warn(
+                    "using the driver setting is deprecated. Please use"
+                    "vector_table instead."
+                )
+
+                kwargs.update(driver=self.driver)
+            # Check if file-object is required because of additional options
+            gdf = io.open_vector(
+                self.path, crs=self.crs, geom=geom, predicate=predicate, **kwargs
+            )
+        else:
+            raise ValueError(f"GeoDataFrame: driver {self.driver} unknown.")
+
+        return gdf
+
+    def _parse_args(self, variables, geom, bbox, buffer):
         # If variable is string, convert to list
         if variables:
             variables = np.atleast_1d(variables).tolist()
@@ -250,78 +345,4 @@ class GeoDataFrameAdapter(DataAdapter):
         if kwargs.pop("within", False):  # for backward compatibility
             predicate = "contains"
 
-        # read and clip
-        logger.info(f"GeoDataFrame: Read {self.driver} data{clip_str}.")
-        if self.driver in [
-            "csv",
-            "parquet",
-            "xls",
-            "xlsx",
-            "xy",
-            "vector",
-            "vector_table",
-        ]:
-            # "csv", "xls", "xlsx", "xy" deprecated use vector_table instead.
-            # specific driver should be added to open_vector kwargs
-            if "driver" not in kwargs and self.driver in ["csv", "xls", "xlsx", "xy"]:
-                warnings.warn(
-                    "using the driver setting is deprecated. Please use"
-                    "vector_table instead."
-                )
-
-                kwargs.update(driver=self.driver)
-            # Check if file-object is required because of additional options
-            gdf = io.open_vector(
-                self.path, crs=self.crs, geom=geom, predicate=predicate, **kwargs
-            )
-        else:
-            raise ValueError(f"GeoDataFrame: driver {self.driver} unknown.")
-
-        # rename and select columns
-        if self.rename:
-            rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
-            gdf = gdf.rename(columns=rename)
-        if variables is not None:
-            if np.any([var not in gdf.columns for var in variables]):
-                raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")
-            if "geometry" not in variables:  # always keep geometry column
-                variables = variables + ["geometry"]
-            gdf = gdf.loc[:, variables]
-
-        # nodata and unit conversion for numeric data
-        if gdf.index.size == 0:
-            logger.warning(f"GeoDataFrame: No data within spatial domain {self.path}.")
-        else:
-            # parse nodata values
-            cols = gdf.select_dtypes([np.number]).columns
-            if self.nodata is not None and len(cols) > 0:
-                if not isinstance(self.nodata, dict):
-                    nodata = {c: self.nodata for c in cols}
-                else:
-                    nodata = self.nodata
-                for c in cols:
-                    mv = nodata.get(c, None)
-                    if mv is not None:
-                        is_nodata = np.isin(gdf[c], np.atleast_1d(mv))
-                        gdf[c] = np.where(is_nodata, np.nan, gdf[c])
-
-            # unit conversion
-            unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
-            unit_names = [k for k in unit_names if k in gdf.columns]
-            if len(unit_names) > 0:
-                logger.debug(
-                    f"GeoDataFrame: Convert units for {len(unit_names)} columns."
-                )
-            for name in list(set(unit_names)):  # unique
-                m = self.unit_mult.get(name, 1)
-                a = self.unit_add.get(name, 0)
-                gdf[name] = gdf[name] * m + a
-
-        # set meta data
-        gdf.attrs.update(self.meta)
-
-        # set column attributes
-        for col in self.attrs:
-            if col in gdf.columns:
-                gdf[col].attrs.update(**self.attrs[col])
-        return gdf
+        return variables, clip_str, kwargs

@@ -196,6 +196,17 @@ class DataFrameAdapter(DataAdapter):
         based on the properties of this DataFrameAdapter. For a detailed
         description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
+        kwargs = self._parse_args()
+        df = self._read_and_clip(**kwargs)
+        df = self._rename(df, variables)
+        df = self._unit_conversion_numeric(df)
+        df = self._unit_conversion(df)
+        df = self._clip_tslice(df, time_tuple)
+        df = self._set_meta_data(df)
+
+        return df
+
+    def _parse_args(self):
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         so_kwargs = {}
         if "storage_options" in self.driver_kwargs:
@@ -209,7 +220,9 @@ class DataFrameAdapter(DataAdapter):
         _ = self.resolve_paths(**so_kwargs)  # throw nice error if data not found
 
         kwargs = self.driver_kwargs.copy()
+        return kwargs
 
+    def _read_and_clip(self, **kwargs):
         # read and clip
         logger.info(f"DataFrame: Read {self.driver} data.")
 
@@ -225,6 +238,9 @@ class DataFrameAdapter(DataAdapter):
         else:
             raise IOError(f"DataFrame: driver {self.driver} unknown.")
 
+        return df
+
+    def _rename(self, df, variables):
         # rename and select columns
         if self.rename:
             rename = {k: v for k, v in self.rename.items() if k in df.columns}
@@ -234,6 +250,9 @@ class DataFrameAdapter(DataAdapter):
                 raise ValueError(f"DataFrame: Not all variables found: {variables}")
             df = df.loc[:, variables]
 
+        return df
+
+    def _unit_conversion_numeric(self, df):
         # nodata and unit conversion for numeric data
         if df.index.size == 0:
             logger.warning(f"DataFrame: No data within spatial domain {self.path}.")
@@ -250,17 +269,22 @@ class DataFrameAdapter(DataAdapter):
                     if mv is not None:
                         is_nodata = np.isin(df[c], np.atleast_1d(mv))
                         df[c] = np.where(is_nodata, np.nan, df[c])
+        return df
 
-            # unit conversion
-            unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
-            unit_names = [k for k in unit_names if k in df.columns]
-            if len(unit_names) > 0:
-                logger.debug(f"DataFrame: Convert units for {len(unit_names)} columns.")
-            for name in list(set(unit_names)):  # unique
-                m = self.unit_mult.get(name, 1)
-                a = self.unit_add.get(name, 0)
-                df[name] = df[name] * m + a
+    def _unit_conversion(self, df):
+        # unit conversion
+        unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
+        unit_names = [k for k in unit_names if k in df.columns]
+        if len(unit_names) > 0:
+            logger.debug(f"DataFrame: Convert units for {len(unit_names)} columns.")
+        for name in list(set(unit_names)):  # unique
+            m = self.unit_mult.get(name, 1)
+            a = self.unit_add.get(name, 0)
+            df[name] = df[name] * m + a
 
+        return df
+
+    def _clip_tslice(self, df, time_tuple):
         # clip time slice
         if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
             logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
@@ -268,6 +292,9 @@ class DataFrameAdapter(DataAdapter):
             if df.size == 0:
                 raise IndexError("DataFrame: Time slice out of range.")
 
+        return df
+
+    def _set_meta_data(self, df):
         # set meta data
         df.attrs.update(self.meta)
 
