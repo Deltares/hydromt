@@ -219,21 +219,16 @@ class GeoDataFrameAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
-        varialbes, clip_str, predicate, kwargs = self._parse_args(
-            variables, geom, bbox, buffer
+        varialbes, clip_str, geom, predicate, kwargs = self._parse_args(
+            variables, geom, bbox, buffer, predicate
         )
-        gdf = self._read_and_clip(clip_str, geom, predicate)
-        gdf = self._rename(gdf, variables)
-        gdf = self._unit_conversion(gdf)
-        gdf = self._set_meta_data(gdf)
+        gdf = self._read_data(clip_str, geom, predicate)
+        gdf = self._slice_data(gdf, variables, geom, predicate)
+        gdf = self._uniformize_data(gdf)
 
         return gdf
 
-    def _rename(self, gdf, variables):
-        # rename and select columns
-        if self.rename:
-            rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
-            gdf = gdf.rename(columns=rename)
+    def _slice_data(self, gdf, variables, geom, predicate):
         if variables is not None:
             if np.any([var not in gdf.columns for var in variables]):
                 raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")
@@ -241,10 +236,22 @@ class GeoDataFrameAdapter(DataAdapter):
                 variables = variables + ["geometry"]
             gdf = gdf.loc[:, variables]
 
+        if geom is not None:
+            gdf = gdf.sjoin(
+                gpd.GeoDataFrame(geometry=geom).to_crs(gdf.crs), predicate=predicate
+            )
+            if "index_right" in gdf.columns:
+                gdf = gdf.drop("index_right", axis=1)
+
         return gdf
 
-    def _unit_conversion(self, gdf):
-        # nodata and unit conversion for numeric data
+    def _uniformize_data(self, gdf):
+        # rename and select columns
+        if self.rename:
+            rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
+            gdf = gdf.renae(columns=rename)
+
+        # nodata and unit conversion
         if gdf.index.size == 0:
             logger.warning(f"GeoDataFrame: No data within spatial domain {self.path}.")
         else:
@@ -273,9 +280,6 @@ class GeoDataFrameAdapter(DataAdapter):
                 a = self.unit_add.get(name, 0)
                 gdf[name] = gdf[name] * m + a
 
-        return gdf
-
-    def _set_meta_data(self, gdf):
         # set meta data
         gdf.attrs.update(self.meta)
 
@@ -283,9 +287,10 @@ class GeoDataFrameAdapter(DataAdapter):
         for col in self.attrs:
             if col in gdf.columns:
                 gdf[col].attrs.update(**self.attrs[col])
+
         return gdf
 
-    def _read_and_clip(self, clip_str, geom, predicate, **kwargs):
+    def _read_data(self, clip_str, geom, predicate, **kwargs):
         # read and clip
         logger.info(f"GeoDataFrame: Read {self.driver} data{clip_str}.")
         if self.driver in [
@@ -315,7 +320,7 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def _parse_args(self, variables, geom, bbox, buffer):
+    def _parse_args(self, variables, geom, bbox, buffer, predicate):
         # If variable is string, convert to list
         if variables:
             variables = np.atleast_1d(variables).tolist()
@@ -346,7 +351,5 @@ class GeoDataFrameAdapter(DataAdapter):
             clip_str = f"{clip_str} [{bbox_str}]"
         if kwargs.pop("within", False):  # for backward compatibility
             predicate = "contains"
-        else:
-            predicate = None
 
-        return variables, clip_str, predicate, kwargs
+        return variables, clip_str, geom, predicate, kwargs
