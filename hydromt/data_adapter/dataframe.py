@@ -197,13 +197,24 @@ class DataFrameAdapter(DataAdapter):
         description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
         kwargs = self._parse_args()
+        df = self._load_data(variables, **kwargs)
+        df = self._slice_data(df, time_tuple)
+        df = self._uniformize_data(df)
+        return df
+
+    def _load_data(self, variables, **kwargs):
         df = self._read_and_clip(**kwargs)
         df = self._rename(df, variables)
+        return df
+
+    def _uniformize_data(self, df):
         df = self._unit_conversion_numeric(df)
         df = self._unit_conversion(df)
-        df = self._clip_tslice(df, time_tuple)
         df = self._set_meta_data(df)
+        return df
 
+    def _slice_data(self, df, time_tuple):
+        df = self._clip_tslice(df, time_tuple)
         return df
 
     def _parse_args(self):

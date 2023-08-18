@@ -245,40 +245,39 @@ class GeoDatasetAdapter(DataAdapter):
         fns, clip_str, variables, kwargs = self._parse_args(
             variables, time_tuple, geom, bbox, buffer
         )
-        # ds_out = self._read_and_clip(fns, clip_str, geom, **kwargs)
-        # ds_out = self._rename_vars(ds_out, variables)
-        # ds_out = self._validate_spatial_coords(ds_out, variables)
-        # ds_out = self._set_crs(ds_out)
-        # ds_out = self._clip_spatial(ds_out, geom, bbox, **kwargs)
-        # ds_out = self._clip_tslice(ds_out, time_tuple)
-        # ds_out = self._set_nodata(ds_out)
-        # ds_out = self._unit_conversion(ds_out)
-        # ds_out = self._set_meta(ds_out, single_var_as_array)
-        ds_out = self._read_data(fns, clip_str, geom, variables)
-        ds_out = self._slice_data(ds_out, variables, time_tuple, geom, bbox)
-        ds_out = self._uniformize_data(ds_out, variables, single_var_as_array)
+        ds_out = self._read_and_clip(fns, clip_str, geom, **kwargs)
+        ds_out = self._rename_vars(ds_out, variables)
+        ds_out = self._validate_spatial_coords(ds_out, variables)
+        ds_out = self._set_crs(ds_out)
+        ds_out = self._clip_spatial(ds_out, geom, bbox, **kwargs)
+        ds_out = self._clip_tslice(ds_out, time_tuple)
+        ds_out = self._set_nodata(ds_out)
+        ds_out = self._unit_conversion(ds_out)
+        ds_out = self._set_meta(ds_out, single_var_as_array)
+        # ds_out = self._read_data(fns, clip_str, geom, variables)
+        # ds_out = self._slice_data(ds_out, variables, time_tuple, geom, bbox)
+        # ds_out = self._uniformize_data(ds_out, variables, single_var_as_array)
 
         return ds_out
 
-    def  _read_data(self,fns, clip_str, geom, variables, **kwargs):
+    def _read_data(self, fns, clip_str, geom, variables, **kwargs):
         ds_out = self._read_and_clip(fns, clip_str, geom, **kwargs)
         ds_out = self._rename_vars(ds_out, variables)
         ds_out = self._validate_spatial_coords(ds_out, variables)
         ds_out = self._set_crs(ds_out)
         return ds_out
 
-    def _slice_data(self,ds_out, variables,time_tuple,geom, bbox,**kwargs):
+    def _slice_data(self, ds_out, variables, time_tuple, geom, bbox, **kwargs):
         ds_out = self._clip_spatial(ds_out, geom, bbox, **kwargs)
         ds_out = self._clip_tslice(ds_out, time_tuple)
         return ds_out
 
-    def _uniformize_data(self,ds_out, variables, single_var_as_array):
+    def _uniformize_data(self, ds_out, variables, single_var_as_array):
         ds_out = self._set_nodata(ds_out)
         ds_out = self._unit_conversion(ds_out)
         ds_out = self._set_meta(ds_out, single_var_as_array)
         return ds_out
 
-    
     def _rename_vars(self, ds_out, variables):
         # rename and select vars
         if variables and len(ds_out.vector.vars) == 1 and len(self.rename) == 0:
@@ -420,8 +419,13 @@ class GeoDatasetAdapter(DataAdapter):
         if single_var_as_array:
             if len(ds_out.vector.vars) == 1:
                 ds_out = ds_out[ds_out.vector.vars[0]]
+                if isinstance(ds_out, xr.Dataset):
+                    ds_out = ds_out.to_array()
             else:
-                logger.warning(f"single_var_as_array was set to True, but dataset contained more than one variable: [{ds_out.vector.vars}]. ignoring...")
+                logger.warning(
+                    f"single_var_as_array was set to True, but dataset contained "
+                    f"more than one variable: [{ds_out.vector.vars}]. ignoring..."
+                )
         return ds_out
 
     def _set_nodata(self, ds_out):
