@@ -251,18 +251,20 @@ class RasterDatasetAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
-        # If variable is string, convert to list
-        if variables:
-            variables = np.atleast_1d(variables).tolist()
-
+        variables = self._parse_args(variables)
         ds_out, kwargs = self._load_data(
             time_tuple, variables, zoom_level, geom, bbox, logger, cache_root
         )
-        ds_out = self._rename_vars(ds_out, variables)
         ds_out = self._slice_data(ds_out, time_tuple, geom, bbox, buffer, align)
         ds_out = self._uniformize_data(ds_out, single_var_as_array, logger)
 
         return ds_out
+
+    def _parse_args(self, variables):
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
+        return variables
 
     def _slice_data(self, ds_out, time_tuple, geom, bbox, buffer, align):
         ds_out = self._clip_tslice(ds_out, time_tuple)
@@ -362,6 +364,8 @@ class RasterDatasetAdapter(DataAdapter):
 
         if GEO_MAP_COORD in ds_out.data_vars:
             ds_out = ds_out.set_coords(GEO_MAP_COORD)
+
+        ds_out = self._rename_vars(ds_out, variables)
 
         return ds_out, kwargs
 

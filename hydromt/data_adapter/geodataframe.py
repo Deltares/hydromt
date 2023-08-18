@@ -222,7 +222,7 @@ class GeoDataFrameAdapter(DataAdapter):
         varialbes, clip_str, geom, predicate, kwargs = self._parse_args(
             variables, geom, bbox, buffer, predicate
         )
-        gdf = self._read_data(clip_str, geom, predicate)
+        gdf = self._load_data(clip_str, geom, predicate)
         gdf = self._slice_data(gdf, variables, geom, predicate)
         gdf = self._uniformize_data(gdf)
 
@@ -290,7 +290,7 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def _read_data(self, clip_str, geom, predicate, **kwargs):
+    def _load_data(self, clip_str, geom, predicate, **kwargs):
         # read and clip
         logger.info(f"GeoDataFrame: Read {self.driver} data{clip_str}.")
         if self.driver in [

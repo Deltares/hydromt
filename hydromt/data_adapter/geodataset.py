@@ -237,30 +237,16 @@ class GeoDatasetAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
-        # varialbes, clip_str, geom, predicate, kwargs = self._parse_args(
-        #     variables, geom, bbox, buffer, predicate
-        # )
-
-        # return gdf
         fns, clip_str, variables, kwargs = self._parse_args(
             variables, time_tuple, geom, bbox, buffer
         )
-        ds_out = self._read_and_clip(fns, clip_str, geom, **kwargs)
-        ds_out = self._rename_vars(ds_out, variables)
-        ds_out = self._validate_spatial_coords(ds_out, variables)
-        ds_out = self._set_crs(ds_out)
-        ds_out = self._clip_spatial(ds_out, geom, bbox, **kwargs)
-        ds_out = self._clip_tslice(ds_out, time_tuple)
-        ds_out = self._set_nodata(ds_out)
-        ds_out = self._unit_conversion(ds_out)
-        ds_out = self._set_meta(ds_out, single_var_as_array)
-        # ds_out = self._read_data(fns, clip_str, geom, variables)
-        # ds_out = self._slice_data(ds_out, variables, time_tuple, geom, bbox)
-        # ds_out = self._uniformize_data(ds_out, variables, single_var_as_array)
+        ds_out = self._load_data(fns, clip_str, geom, variables, **kwargs)
+        ds_out = self._slice_data(ds_out, variables, time_tuple, geom, bbox, **kwargs)
+        ds_out = self._uniformize_data(ds_out, variables, single_var_as_array)
 
         return ds_out
 
-    def _read_data(self, fns, clip_str, geom, variables, **kwargs):
+    def _load_data(self, fns, clip_str, geom, variables, **kwargs):
         ds_out = self._read_and_clip(fns, clip_str, geom, **kwargs)
         ds_out = self._rename_vars(ds_out, variables)
         ds_out = self._validate_spatial_coords(ds_out, variables)
@@ -279,7 +265,6 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _rename_vars(self, ds_out, variables):
-        # rename and select vars
         if variables and len(ds_out.vector.vars) == 1 and len(self.rename) == 0:
             rm = {ds_out.vector.vars[0]: variables[0]}
         else:
@@ -289,7 +274,6 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _parse_args(self, variables, time_tuple, geom, bbox, buffer):
-        # If variable is string, convert to list
         if variables:
             variables = np.atleast_1d(variables).tolist()
 
@@ -313,6 +297,7 @@ class GeoDatasetAdapter(DataAdapter):
         )
 
         kwargs = self.driver_kwargs.copy()
+
         # parse geom, bbox and buffer arguments
         clip_str = ""
         if geom is None and bbox is not None:
@@ -334,7 +319,6 @@ class GeoDatasetAdapter(DataAdapter):
         return fns, clip_str, variables, kwargs
 
     def _read_and_clip(self, fns, clip_str, geom, **kwargs):
-        # read and clip
         logger.info(f"GeoDataset: Read {self.driver} data{clip_str}.")
         if self.driver in ["netcdf"]:
             ds_out = xr.open_mfdataset(fns, **kwargs)
@@ -358,7 +342,6 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _validate_spatial_coords(self, ds_out, variables):
-        # check spatial dims and make sure all are set as coordinates
         try:
             ds_out.vector.set_spatial_dims()
             idim = ds_out.vector.index_dim
@@ -377,7 +360,6 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _set_crs(self, ds_out):
-        # set crs
         if ds_out.vector.crs is None and self.crs is not None:
             ds_out.vector.set_crs(self.crs)
         if ds_out.vector.crs is None:
@@ -387,7 +369,6 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _clip_spatial(self, ds_out, geom, bbox, **kwargs):
-        # clip
         if geom is not None:
             bbox = geom.to_crs(4326).total_bounds
         if ds_out.vector.crs.to_epsg() == 4326:
@@ -405,7 +386,6 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _set_meta(self, ds_out, single_var_as_array=True):
-        # Set variable attribute data
         if self.attrs:
             if isinstance(ds_out, xr.DataArray):
                 ds_out.attrs.update(self.attrs[ds_out.name])
@@ -413,9 +393,8 @@ class GeoDatasetAdapter(DataAdapter):
                 for k in self.attrs:
                     ds_out[k].attrs.update(self.attrs[k])
 
-        # set meta data
         ds_out.attrs.update(self.meta)
-        # return data array if single var
+
         if single_var_as_array:
             if len(ds_out.vector.vars) == 1:
                 ds_out = ds_out[ds_out.vector.vars[0]]
@@ -429,7 +408,6 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _set_nodata(self, ds_out):
-        # set nodata value
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
                 nodata = {k: self.nodata for k in ds_out.data_vars.keys()}
@@ -443,7 +421,6 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _unit_conversion(self, ds_out):
-        # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds_out.data_vars]
         if len(unit_names) > 0:
@@ -463,7 +440,6 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _clip_tslice(self, ds_out, time_tuple):
-        # clip tslice
         if (
             "time" in ds_out.dims
             and ds_out["time"].size > 1
