@@ -251,34 +251,63 @@ class RasterDatasetAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
-        variables = self._parse_args(variables)
-        ds_out, kwargs = self._load_data(
-            time_tuple, variables, zoom_level, geom, bbox, logger, cache_root
+        fns, variables, kwargs = self._parse_args(
+            variables,
+            time_tuple,
+            zoom_level,
+            geom,
+            bbox,
+            logger,
+        )
+        ds_out = self._load_data(
+            fns,
+            time_tuple,
+            variables,
+            zoom_level,
+            geom,
+            bbox,
+            logger,
+            cache_root,
+            **kwargs,
         )
         ds_out = self._slice_data(ds_out, time_tuple, geom, bbox, buffer, align)
         ds_out = self._uniformize_data(ds_out, single_var_as_array, logger)
 
         return ds_out
 
-    def _parse_args(self, variables):
-        # If variable is string, convert to list
-        if variables:
-            variables = np.atleast_1d(variables).tolist()
-        return variables
+    def _load_data(
+        self,
+        fns,
+        time_tuple,
+        variables,
+        zoom_level,
+        geom,
+        bbox,
+        logger,
+        cache_root,
+        **kwargs,
+    ):
+        ds_out = self._read_data(fns, geom, bbox, logger, cache_root, **kwargs)
+        ds_out = self._rename_vars(ds_out, variables)
+
+        return ds_out
 
     def _slice_data(self, ds_out, time_tuple, geom, bbox, buffer, align):
-        ds_out = self._clip_tslice(ds_out, time_tuple)
-        ds_out = self._clip_spatial(ds_out, geom, bbox, buffer, align)
+        ds_out = self._slice_time_dimention(ds_out, time_tuple)
+        ds_out = self._slice_spatial_dimentions(ds_out, geom, bbox, buffer, align)
         return ds_out
 
     def _uniformize_data(self, ds_out, single_var_as_array, logger):
         ds_out = self._unit_conversions(ds_out, logger)
-        ds_out = self._unit_attributes(ds_out, single_var_as_array)
+        ds_out = self._set_metadata(ds_out, single_var_as_array)
         return ds_out
 
-    def _load_data(
-        self, time_tuple, variables, zoom_level, geom, bbox, logger, cache_root
+    def _parse_args(
+        self, variables, time_tuple, zoom_level, geom, bbox, logger, **kwargs
     ):
+        # If variable is string, convert to list
+        if variables:
+            variables = np.atleast_1d(variables).tolist()
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         so_kwargs = dict()
         if "storage_options" in self.driver_kwargs:
@@ -302,7 +331,6 @@ class RasterDatasetAdapter(DataAdapter):
         )
 
         kwargs = self.driver_kwargs.copy()
-
         # zarr can use storage options directly, the rest should be converted to
         # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":
@@ -310,6 +338,9 @@ class RasterDatasetAdapter(DataAdapter):
             fs = self.get_filesystem(**storage_options)
             fns = [fs.open(f) for f in fns]
 
+        return fns, variables, kwargs
+
+    def _read_data(self, fns, geom, bbox, logger, cache_root, **kwargs):
         # read using various readers
         if self.driver == "netcdf":
             if self.filesystem == "local":
@@ -365,9 +396,7 @@ class RasterDatasetAdapter(DataAdapter):
         if GEO_MAP_COORD in ds_out.data_vars:
             ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
-        ds_out = self._rename_vars(ds_out, variables)
-
-        return ds_out, kwargs
+        return ds_out
 
     def _rename_vars(self, ds_out, variables):
         # rename and select vars
@@ -402,7 +431,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _clip_tslice(self, ds_out, time_tuple):
+    def _slice_time_dimention(self, ds_out, time_tuple):
         # clip tslice
         if (
             "time" in ds_out.dims
@@ -421,7 +450,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _clip_spatial(self, ds_out, geom, bbox, buffer=None, align=None):
+    def _slice_spatial_dimentions(self, ds_out, geom, bbox, buffer=None, align=None):
         # clip
         # make sure bbox is in data crs
         crs = ds_out.raster.crs
@@ -472,7 +501,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _unit_attributes(self, ds_out, single_var_as_array=True):
+    def _set_metadata(self, ds_out, single_var_as_array=True):
         # set nodata value
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
