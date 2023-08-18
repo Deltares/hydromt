@@ -254,14 +254,14 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     def _slice_data(self, ds_out, variables, time_tuple, geom, bbox, **kwargs):
-        ds_out = self._clip_spatial(ds_out, geom, bbox, **kwargs)
-        ds_out = self._clip_tslice(ds_out, time_tuple)
+        ds_out = self._slice_spatial_dimension(ds_out, geom, bbox, **kwargs)
+        ds_out = self._slice_temporal_dimention(ds_out, time_tuple)
         return ds_out
 
     def _uniformize_data(self, ds_out, variables, single_var_as_array):
         ds_out = self._set_nodata(ds_out)
-        ds_out = self._unit_conversion(ds_out)
-        ds_out = self._set_meta(ds_out, single_var_as_array)
+        ds_out = self._apply_unit_conversion(ds_out)
+        ds_out = self._set_metadata(ds_out, single_var_as_array)
         return ds_out
 
     def _rename_vars(self, ds_out, variables):
@@ -368,7 +368,7 @@ class GeoDatasetAdapter(DataAdapter):
             )
         return ds_out
 
-    def _clip_spatial(self, ds_out, geom, bbox, **kwargs):
+    def _slice_spatial_dimension(self, ds_out, geom, bbox, **kwargs):
         if geom is not None:
             bbox = geom.to_crs(4326).total_bounds
         if ds_out.vector.crs.to_epsg() == 4326:
@@ -385,7 +385,7 @@ class GeoDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _set_meta(self, ds_out, single_var_as_array=True):
+    def _set_metadata(self, ds_out, single_var_as_array=True):
         if self.attrs:
             if isinstance(ds_out, xr.DataArray):
                 ds_out.attrs.update(self.attrs[ds_out.name])
@@ -420,7 +420,7 @@ class GeoDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _unit_conversion(self, ds_out):
+    def _apply_unit_conversion(self, ds_out):
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds_out.data_vars]
         if len(unit_names) > 0:
@@ -439,7 +439,7 @@ class GeoDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _clip_tslice(self, ds_out, time_tuple):
+    def _slice_temporal_dimention(self, ds_out, time_tuple):
         if (
             "time" in ds_out.dims
             and ds_out["time"].size > 1

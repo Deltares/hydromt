@@ -203,18 +203,17 @@ class DataFrameAdapter(DataAdapter):
         return df
 
     def _load_data(self, variables, **kwargs):
-        df = self._read_and_clip(**kwargs)
-        df = self._rename(df, variables)
+        df = self._read_data(**kwargs)
+        df = self._rename_vars(df, variables)
         return df
 
     def _uniformize_data(self, df):
-        df = self._unit_conversion_numeric(df)
-        df = self._unit_conversion(df)
+        df = self._apply_unit_conversion(df)
         df = self._set_meta_data(df)
         return df
 
     def _slice_data(self, df, time_tuple):
-        df = self._clip_tslice(df, time_tuple)
+        df = self._slice_temporal_dimention(df, time_tuple)
         return df
 
     def _parse_args(self):
@@ -233,10 +232,8 @@ class DataFrameAdapter(DataAdapter):
         kwargs = self.driver_kwargs.copy()
         return kwargs
 
-    def _read_and_clip(self, **kwargs):
-        # read and clip
+    def _read_data(self, **kwargs):
         logger.info(f"DataFrame: Read {self.driver} data.")
-
         if self.driver in ["csv"]:
             df = pd.read_csv(self.path, **kwargs)
         elif self.driver == "parquet":
@@ -251,11 +248,11 @@ class DataFrameAdapter(DataAdapter):
 
         return df
 
-    def _rename(self, df, variables):
-        # rename and select columns
+    def _rename_vars(self, df, variables):
         if self.rename:
             rename = {k: v for k, v in self.rename.items() if k in df.columns}
             df = df.rename(columns=rename)
+
         if variables is not None:
             if np.any([var not in df.columns for var in variables]):
                 raise ValueError(f"DataFrame: Not all variables found: {variables}")
@@ -263,8 +260,7 @@ class DataFrameAdapter(DataAdapter):
 
         return df
 
-    def _unit_conversion_numeric(self, df):
-        # nodata and unit conversion for numeric data
+    def _apply_unit_conversion(self, df):
         if df.index.size == 0:
             logger.warning(f"DataFrame: No data within spatial domain {self.path}.")
         else:
@@ -280,10 +276,7 @@ class DataFrameAdapter(DataAdapter):
                     if mv is not None:
                         is_nodata = np.isin(df[c], np.atleast_1d(mv))
                         df[c] = np.where(is_nodata, np.nan, df[c])
-        return df
 
-    def _unit_conversion(self, df):
-        # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in df.columns]
         if len(unit_names) > 0:
@@ -295,8 +288,7 @@ class DataFrameAdapter(DataAdapter):
 
         return df
 
-    def _clip_tslice(self, df, time_tuple):
-        # clip time slice
+    def _slice_temporal_dimention(self, df, time_tuple):
         if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
             logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
             df = df[df.index.slice_indexer(*time_tuple)]
@@ -306,7 +298,6 @@ class DataFrameAdapter(DataAdapter):
         return df
 
     def _set_meta_data(self, df):
-        # set meta data
         df.attrs.update(self.meta)
 
         # set column attributes

@@ -261,9 +261,7 @@ class RasterDatasetAdapter(DataAdapter):
         )
         ds_out = self._load_data(
             fns,
-            time_tuple,
             variables,
-            zoom_level,
             geom,
             bbox,
             logger,
@@ -278,9 +276,7 @@ class RasterDatasetAdapter(DataAdapter):
     def _load_data(
         self,
         fns,
-        time_tuple,
         variables,
-        zoom_level,
         geom,
         bbox,
         logger,
@@ -399,7 +395,6 @@ class RasterDatasetAdapter(DataAdapter):
         return ds_out
 
     def _rename_vars(self, ds_out, variables):
-        # rename and select vars
         if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
             rm = {ds_out.raster.vars[0]: variables[0]}
             if set(rm.keys()) != set(rm.values()):
@@ -432,7 +427,6 @@ class RasterDatasetAdapter(DataAdapter):
         return ds_out
 
     def _slice_time_dimention(self, ds_out, time_tuple):
-        # clip tslice
         if (
             "time" in ds_out.dims
             and ds_out["time"].size > 1
@@ -450,8 +444,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _slice_spatial_dimentions(self, ds_out, geom, bbox, buffer=None, align=None):
-        # clip
+    def _slice_spatial_dimentions(self, ds_out, geom, bbox, buffer, align):
         # make sure bbox is in data crs
         crs = ds_out.raster.crs
         epsg = crs.to_epsg()  # this could return None
@@ -479,7 +472,6 @@ class RasterDatasetAdapter(DataAdapter):
         return ds_out
 
     def _unit_conversions(self, ds_out, logger):
-        # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds_out.data_vars]
         if len(unit_names) > 0:
@@ -501,7 +493,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _set_metadata(self, ds_out, single_var_as_array=True):
+    def _set_metadata(self, ds_out, single_var_as_array):
         # set nodata value
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
@@ -512,6 +504,7 @@ class RasterDatasetAdapter(DataAdapter):
                 mv = nodata.get(k, None)
                 if mv is not None and ds_out[k].raster.nodata is None:
                     ds_out[k].raster.set_nodata(mv)
+
         # unit attributes
         for k in self.attrs:
             ds_out[k].attrs.update(self.attrs[k])
