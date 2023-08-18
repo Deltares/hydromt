@@ -1274,7 +1274,7 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, pd.DataFrame):
-            return DataFrameAdapter.slice_data(data_like, time_tuple)
+            return DataFrameAdapter.slice_temporal_dimention(data_like, time_tuple)
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
