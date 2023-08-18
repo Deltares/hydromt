@@ -223,12 +223,31 @@ class GeoDataFrameAdapter(DataAdapter):
             variables, geom, bbox, buffer, predicate
         )
         gdf = self._load_data(clip_str, geom, predicate)
-        gdf = self._slice_data(gdf, variables, geom, predicate)
+        gdf = self.slice_data(gdf, variables, geom, predicate)
         gdf = self._uniformize_data(gdf)
 
         return gdf
 
-    def _slice_data(self, gdf, variables, geom, predicate):
+    @staticmethod
+    def slice_data(gdf, variables, geom, predicate):
+        """Return a clipped GeoDataFrame (vector).
+
+        Arguments
+        ---------
+        geom : geopandas.GeoDataFrame/Series,
+            A geometry defining the area of interest.
+        predicate : {'intersects', 'within', 'contains', 'overlaps',
+            'crosses', 'touches'}, optional If predicate is provided,
+            the GeoDataFrame is filtered by testing the predicate function
+            against each item. Requires bbox or mask. By default 'intersects'
+        variables : str or list of str, optional.
+            Names of GeoDataFrame columns to return.
+
+        Returns
+        -------
+        gdf: geopandas.GeoDataFrame
+            GeoDataFrame
+        """
         if variables is not None:
             if np.any([var not in gdf.columns for var in variables]):
                 raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")
@@ -334,7 +353,36 @@ class GeoDataFrameAdapter(DataAdapter):
         _ = self.resolve_paths()  # throw nice error if data not found
 
         kwargs = self.driver_kwargs.copy()
-        # parse geom, bbox and buffer arguments
+        geom, clip_str = GeoDataFrameAdapter.parse_geom(geom, bbox, buffer)
+        if kwargs.pop("within", False):  # for backward compatibility
+            predicate = "contains"
+
+        return variables, clip_str, geom, predicate, kwargs
+
+    @staticmethod
+    def parse_geom(geom, bbox, buffer):
+        """Parse geometries.
+
+        The geometry returned by this function can be
+        used by `GeoDataFrameAdapter.slice_data`.
+
+        Arguments
+        ---------
+        geom : geopandas.GeoDataFrame/Series,
+            A geometry defining the area of interest.
+        bbox : array-like of floats
+            (xmin, ymin, xmax, ymax) bounding box of area of interest
+            (in WGS84 coordinates).
+        buffer : float, optional
+            Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+
+        Returns
+        -------
+        geom: geometry
+            the actual geometry
+        clip_str: str
+            the string representation of the geom to be used in logging.
+        """
         clip_str = ""
         if geom is None and bbox is not None:
             # convert bbox to geom with crs EPGS:4326 to apply buffer later
@@ -349,7 +397,5 @@ class GeoDataFrameAdapter(DataAdapter):
             geom = geom.buffer(buffer)  # a buffer with zero fixes some topology errors
             bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
             clip_str = f"{clip_str} [{bbox_str}]"
-        if kwargs.pop("within", False):  # for backward compatibility
-            predicate = "contains"
 
-        return variables, clip_str, geom, predicate, kwargs
+        return geom, clip_str

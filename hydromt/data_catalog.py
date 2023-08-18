@@ -1006,8 +1006,9 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            # TODO apply bbox, geom, buffer, align, variables, time_tuple
-            return data_like
+            return RasterDatasetAdapter.slice_spatial_dimentions(
+                data_like, geom, bbox, buffer, align
+            )
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
@@ -1104,8 +1105,8 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, gpd.GeoDataFrame):
-            # TODO apply bbox, geom, buffer, predicate, variables
-            return data_like
+            geom, _ = GeoDataFrameAdapter.parse_geom(geom, bbox, buffer)
+            return GeoDataFrameAdapter.slice_data(data_like, variables, geom, predicate)
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
@@ -1199,8 +1200,10 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            # TODO apply bbox, geom, buffer, variables, time_tuple
-            return data_like
+            predicate = kwargs.pop("predicate", "intersects")
+            return GeoDatasetAdapter.slice_spatial_dimension(
+                data_like, geom, bbox, predicate
+            )
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
@@ -1271,7 +1274,7 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, pd.DataFrame):
-            return data_like
+            return DataFrameAdapter.slice_data(data_like, time_tuple)
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 

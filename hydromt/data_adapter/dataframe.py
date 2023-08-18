@@ -198,7 +198,7 @@ class DataFrameAdapter(DataAdapter):
         """
         kwargs = self._parse_args()
         df = self._load_data(variables, **kwargs)
-        df = self._slice_data(df, time_tuple)
+        df = DataFrameAdapter.slice_temporal_dimention(df, time_tuple)
         df = self._uniformize_data(df)
         return df
 
@@ -212,8 +212,29 @@ class DataFrameAdapter(DataAdapter):
         df = self._set_meta_data(df)
         return df
 
-    def _slice_data(self, df, time_tuple):
-        df = self._slice_temporal_dimention(df, time_tuple)
+    @staticmethod
+    def slice_temporal_dimention(df, time_tuple):
+        """Return a sliced DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            the dataframe to be sliced.
+        time_tuple : tuple of str, datetime, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned.
+
+        Returns
+        -------
+        pd.DataFrame
+            Tabular data
+        """
+        if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
+            logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
+            df = df[df.index.slice_indexer(*time_tuple)]
+            if df.size == 0:
+                raise IndexError("DataFrame: Time slice out of range.")
+
         return df
 
     def _parse_args(self):
@@ -285,15 +306,6 @@ class DataFrameAdapter(DataAdapter):
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)
             df[name] = df[name] * m + a
-
-        return df
-
-    def _slice_temporal_dimention(self, df, time_tuple):
-        if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
-            logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
-            df = df[df.index.slice_indexer(*time_tuple)]
-            if df.size == 0:
-                raise IndexError("DataFrame: Time slice out of range.")
 
         return df
 

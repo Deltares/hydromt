@@ -199,7 +199,7 @@ class RasterDatasetAdapter(DataAdapter):
             # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
             driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
         # write using various writers
-        if driver in ["netcdf"]:  # TODO complete list
+        if driver == "netcdf":
             dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
             if variables is None:
                 encoding = {k: {"zlib": True} for k in dvars}
@@ -268,7 +268,12 @@ class RasterDatasetAdapter(DataAdapter):
             cache_root,
             **kwargs,
         )
-        ds_out = self._slice_data(ds_out, time_tuple, geom, bbox, buffer, align)
+        # because time dim needs self and spatial slice doesn't
+        # we just do them seleraptely
+        ds_out = self._slice_time_dimention(ds_out, time_tuple)
+        ds_out = RasterDatasetAdapter.slice_spatial_dimentions(
+            ds_out, geom, bbox, buffer, align
+        )
         ds_out = self._uniformize_data(ds_out, single_var_as_array, logger)
 
         return ds_out
@@ -286,11 +291,6 @@ class RasterDatasetAdapter(DataAdapter):
         ds_out = self._read_data(fns, geom, bbox, logger, cache_root, **kwargs)
         ds_out = self._rename_vars(ds_out, variables)
 
-        return ds_out
-
-    def _slice_data(self, ds_out, time_tuple, geom, bbox, buffer, align):
-        ds_out = self._slice_time_dimention(ds_out, time_tuple)
-        ds_out = self._slice_spatial_dimentions(ds_out, geom, bbox, buffer, align)
         return ds_out
 
     def _uniformize_data(self, ds_out, single_var_as_array, logger):
@@ -444,7 +444,27 @@ class RasterDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _slice_spatial_dimentions(self, ds_out, geom, bbox, buffer, align):
+    @staticmethod
+    def slice_spatial_dimentions(ds_out, geom, bbox, buffer, align):
+        """Return a RasterDataset sliced in spatial dimensions.
+
+        Arguments
+        ---------
+        geom : geopandas.GeoDataFrame/Series,
+            A geometry defining the area of interest.
+        bbox : array-like of floats
+            (xmin, ymin, xmax, ymax) bounding box of area of interest
+            (in WGS84 coordinates).
+        buffer : int, optional
+            Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
+        align : float, optional
+            Resolution to align the bounding box, by default None
+
+        Returns
+        -------
+        obj: xarray.Dataset or xarray.DataArray
+            RasterDataset
+        """
         # make sure bbox is in data crs
         crs = ds_out.raster.crs
         epsg = crs.to_epsg()  # this could return None
@@ -465,9 +485,7 @@ class RasterDatasetAdapter(DataAdapter):
             logger.debug(f"RasterDataset: Clip with bbox - [{bbox_str}] (epsg:{epsg}))")
             ds_out = ds_out.raster.clip_bbox(bbox, buffer=buffer, align=align)
             if np.any(np.array(ds_out.raster.shape) < 2):
-                raise IndexError(
-                    f"RasterDataset: No data within spatial domain for {self.path}."
-                )
+                raise IndexError("RasterDataset: No data within spatial domain.")
 
         return ds_out
 

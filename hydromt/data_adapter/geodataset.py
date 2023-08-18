@@ -237,11 +237,14 @@ class GeoDatasetAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
-        fns, clip_str, variables, kwargs = self._parse_args(
+        fns, clip_str, variables, predicate, kwargs = self._parse_args(
             variables, time_tuple, geom, bbox, buffer
         )
         ds_out = self._load_data(fns, clip_str, geom, variables, **kwargs)
-        ds_out = self._slice_data(ds_out, variables, time_tuple, geom, bbox, **kwargs)
+        ds_out = GeoDatasetAdapter.slice_spatial_dimension(
+            ds_out, geom, bbox, predicate
+        )
+        ds_out = self._slice_temporal_dimention(ds_out, time_tuple)
         ds_out = self._uniformize_data(ds_out, variables, single_var_as_array)
 
         return ds_out
@@ -251,11 +254,6 @@ class GeoDatasetAdapter(DataAdapter):
         ds_out = self._rename_vars(ds_out, variables)
         ds_out = self._validate_spatial_coords(ds_out, variables)
         ds_out = self._set_crs(ds_out)
-        return ds_out
-
-    def _slice_data(self, ds_out, variables, time_tuple, geom, bbox, **kwargs):
-        ds_out = self._slice_spatial_dimension(ds_out, geom, bbox, **kwargs)
-        ds_out = self._slice_temporal_dimention(ds_out, time_tuple)
         return ds_out
 
     def _uniformize_data(self, ds_out, variables, single_var_as_array):
@@ -297,6 +295,7 @@ class GeoDatasetAdapter(DataAdapter):
         )
 
         kwargs = self.driver_kwargs.copy()
+        predicate = kwargs.pop("predicate", "intersects")
 
         # parse geom, bbox and buffer arguments
         clip_str = ""
@@ -316,7 +315,7 @@ class GeoDatasetAdapter(DataAdapter):
         if kwargs.pop("within", False):  # for backward compatibility
             kwargs.update(predicate="contains")
 
-        return fns, clip_str, variables, kwargs
+        return fns, clip_str, variables, predicate, kwargs
 
     def _read_and_clip(self, fns, clip_str, geom, **kwargs):
         logger.info(f"GeoDataset: Read {self.driver} data{clip_str}.")
@@ -368,7 +367,26 @@ class GeoDatasetAdapter(DataAdapter):
             )
         return ds_out
 
-    def _slice_spatial_dimension(self, ds_out, geom, bbox, **kwargs):
+    @staticmethod
+    def slice_spatial_dimension(ds_out, geom, bbox, predicate):
+        """Slice the dataset in space according to geoms provided.
+
+        Arguments
+        ---------
+        bbox : array-like of floats
+            (xmin, ymin, xmax, ymax) bounding box of area of interest
+            (in WGS84 coordinates).
+        geom : geopandas.GeoDataFrame/Series,
+            A geometry defining the area of interest.
+        **kwargs:
+            Additional keyword arguments that are passed to the `GeoDatasetAdapter`
+            function. Only used if `data_like` is a path to a geodataset file.
+
+        Returns
+        -------
+        obj: xarray.Dataset or xarray.DataArray
+            GeoDataset
+        """
         if geom is not None:
             bbox = geom.to_crs(4326).total_bounds
         if ds_out.vector.crs.to_epsg() == 4326:
@@ -376,12 +394,9 @@ class GeoDatasetAdapter(DataAdapter):
             if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
                 ds_out = gis_utils.meridian_offset(ds_out, ds_out.vector.x_name, bbox)
         if geom is not None:
-            predicate = kwargs.pop("predicate", "intersects")
             ds_out = ds_out.vector.clip_geom(geom, predicate=predicate)
         if ds_out.vector.index.size == 0:
-            logger.warning(
-                f"GeoDataset: No data within spatial domain for {self.path}."
-            )
+            logger.warning("GeoDataset: No data within spatial domain.")
 
         return ds_out
 
