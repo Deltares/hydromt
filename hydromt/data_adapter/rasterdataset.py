@@ -298,9 +298,7 @@ class RasterDatasetAdapter(DataAdapter):
         ds_out = self._set_metadata(ds_out, single_var_as_array)
         return ds_out
 
-    def _parse_args(
-        self, variables, time_tuple, zoom_level, geom, bbox, logger, **kwargs
-    ):
+    def _parse_args(self, variables, time_tuple, zoom_level, geom, bbox, logger):
         # If variable is string, convert to list
         if variables:
             variables = np.atleast_1d(variables).tolist()
