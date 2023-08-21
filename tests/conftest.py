@@ -4,7 +4,10 @@ import pandas as pd
 import pyflwdir
 import pytest
 import xarray as xr
+from dask import config as dask_config
 from shapely.geometry import box
+
+dask_config.set(scheduler="single-threaded")
 
 from hydromt import (
     MODELS,
