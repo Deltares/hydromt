@@ -212,7 +212,6 @@ class GeoDataFrameAdapter(DataAdapter):
         buffer=0,
         logger=logger,
         variables=None,
-        # **kwargs,  # this is not used, for testing only
     ):
         """Return a clipped and unified GeoDataFrame (vector).
 
@@ -222,7 +221,7 @@ class GeoDataFrameAdapter(DataAdapter):
         varialbes, clip_str, geom, predicate, kwargs = self._parse_args(
             variables, geom, bbox, buffer, predicate
         )
-        gdf = self._load_data(clip_str, geom, predicate)
+        gdf = self._load_data(clip_str, geom, predicate, **kwargs)
         gdf = self.slice_data(gdf, variables, geom, predicate)
         gdf = self._uniformize_data(gdf)
 
