@@ -8,7 +8,7 @@ import pandas as pd
 import xarray as xr
 from shapely.geometry import Polygon
 
-import hydromt
+from ..raster import full
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ def grid_from_constant(
     da: xr.DataArray
         Grid with constant value.
     """
-    da = hydromt.raster.full(
+    da = full(
         coords=grid_like.raster.coords,
         nodata=constant,
         dtype=dtype,

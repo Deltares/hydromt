@@ -328,8 +328,13 @@ Components and attributes
    :toctree: _generated
 
    MeshModel.mesh
+   MeshModel.mesh_names
+   MeshModel.mesh_grids
+   MeshModel.mesh_datasets
+   MeshModel.mesh_gdf
    MeshModel.crs
    MeshModel.region
+   MeshModel.bounds
 
 General methods
 ---------------
@@ -338,6 +343,7 @@ General methods
    :toctree: _generated
 
    MeshModel.set_mesh
+   MeshModel.get_mesh
    MeshModel.read_mesh
    MeshModel.write_mesh
 
@@ -350,10 +356,11 @@ Setup methods
 
    MeshModel.setup_config
    MeshModel.setup_region
+   MeshModel.setup_mesh2d
+   MeshModel.setup_mesh2d_from_rasterdataset
+   MeshModel.setup_mesh2d_from_raster_reclass
    MeshModel.setup_maps_from_rasterdataset
    MeshModel.setup_maps_from_raster_reclass
-   MeshModel.setup_mesh_from_rasterdataset
-   MeshModel.setup_mesh_from_raster_reclass
 
 
 =========
@@ -370,6 +377,14 @@ Grid
    workflows.grid.grid_from_rasterdataset
    workflows.grid.grid_from_raster_reclass
    workflows.grid.grid_from_geodataframe
+
+Mesh
+====
+
+.. autosummary::
+   :toctree: _generated
+
+   workflows.mesh.create_mesh2d
 
 
 Basin mask
