@@ -1,3 +1,5 @@
+from os.path import abspath, dirname, join
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -20,6 +22,8 @@ from hydromt import (
 from hydromt.data_catalog import DataCatalog
 
 dask_config.set(scheduler="single-threaded")
+
+DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture()
@@ -83,7 +87,7 @@ def geodf(df):
 
 @pytest.fixture()
 def world():
-    world = gpd.read_file("tests/data/naturalearth_lowres.geojson")
+    world = gpd.read_file(join(DATADIR, "naturalearth_lowres.geojson"))
     return world
 
 
