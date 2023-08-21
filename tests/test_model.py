@@ -641,7 +641,7 @@ def test_meshmodel_setup(griduda, world):
     mod.setup_mesh2d(region, res=10000, crs=3857, grid_name="mesh2d")
     mod.region
 
-    region = {"mesh": griduda.ugrid.to_dataset()}
+    region = {"mesh": griduda}
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod1.setup_mesh2d(region, grid_name="mesh2d")
     mod1.setup_mesh2d_from_rasterdataset("vito", grid_name="mesh2d")

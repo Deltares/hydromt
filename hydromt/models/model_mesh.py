@@ -292,7 +292,7 @@ class MeshMixin(object):
                 raise ValueError(
                     f"Cannot set mesh from {str(type(data).__name__)} without a name."
                 )
-            data = data.to_dataset(optional_attributes=True)
+            data = data.to_dataset()
 
         # Checks on grid topology
         # TODO: check if we support setting multiple grids at once. For now just one
@@ -371,7 +371,8 @@ class MeshMixin(object):
         # update related geoms if necessary: region
         if overwrite_grid or new_grid:
             # add / updates region
-            self._geoms.pop("region", None)
+            if "region" in self.geoms:
+                self._geoms.pop("region", None)
             self.region
 
     def get_mesh(
@@ -437,7 +438,7 @@ class MeshMixin(object):
             Additional keyword arguments to be passed to the `read_nc` method.
         """
         self._assert_read_mode
-        ds = xr.merge(self._read_nc(fn, **kwargs).values())
+        ds = xr.merge(self.read_nc(fn, **kwargs).values())
         uds = xu.UgridDataset(ds)
         if ds.rio.crs is not None:  # parse crs
             uds.ugrid.set_crs(ds.raster.crs)

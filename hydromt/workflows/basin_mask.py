@@ -148,8 +148,17 @@ def parse_region(region, logger=logger):
         if _compat.HAS_XUGRID:
             if isinstance(value0, (str, Path)) and isfile(value0):
                 kwarg = dict(mesh=xu.open_dataset(value0))
-            elif isinstance(value0, xu.UgridDataset):
+            elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
                 kwarg = dict(mesh=value0)
+            elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
+                kwarg = dict(
+                    mesh=xu.UgridDataset(value0.to_dataset(optional_attributes=True))
+                )
+            else:
+                raise ValueError(
+                    f"Unrecognised type {type(value0)}."
+                    "Should be a path, data catalog key or xugrid object."
+                )
             kwargs.update(kwarg)
         else:
             raise ImportError("xugrid is required to read mesh files.")
