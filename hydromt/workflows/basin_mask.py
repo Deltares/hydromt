@@ -22,6 +22,9 @@ from ..flw import basin_map, flwdir_from_da, outlet_map, stream_map
 from ..io import open_raster
 from ..models import MODELS
 
+if _compat.HAS_XUGRID:
+    import xugrid as xu
+
 logger = logging.getLogger(__name__)
 
 __all__ = ["get_basin_geometry", "parse_region"]
@@ -143,8 +146,6 @@ def parse_region(region, logger=logger):
             kwargs = dict(grid=value0)
     elif kind == "mesh":
         if _compat.HAS_XUGRID:
-            import xugrid as xu
-
             if isinstance(value0, (str, Path)) and isfile(value0):
                 kwarg = dict(mesh=xu.open_dataset(value0))
             elif isinstance(value0, xu.UgridDataset):
