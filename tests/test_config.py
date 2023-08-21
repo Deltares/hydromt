@@ -5,7 +5,7 @@ import pytest
 from hydromt import config
 
 
-@pytest.mark.parametrize("ext", ["ini", "yaml"])
+@pytest.mark.parametrize("ext", ["ini", "yaml", "toml"])
 def test_config(tmpdir, ext):
     cfdict = {
         "section1": {

@@ -22,6 +22,8 @@ General
    :toctree: _generated
 
    data_catalog.DataCatalog
+   data_catalog.DataCatalog.get_source
+   data_catalog.DataCatalog.iter_sources
    data_catalog.DataCatalog.sources
    data_catalog.DataCatalog.keys
    data_catalog.DataCatalog.predefined_catalogs
@@ -36,12 +38,13 @@ Add data sources
 .. autosummary::
    :toctree: _generated
 
-   data_catalog.DataCatalog.set_predefined_catalogs
+   data_catalog.DataCatalog.add_source
+   data_catalog.DataCatalog.update
    data_catalog.DataCatalog.from_predefined_catalogs
    data_catalog.DataCatalog.from_archive
    data_catalog.DataCatalog.from_yml
    data_catalog.DataCatalog.from_dict
-   data_catalog.DataCatalog.update
+   data_catalog.DataCatalog.set_predefined_catalogs
 
 .. _api_data_catalog_get:
 
@@ -54,7 +57,7 @@ Get data
    data_catalog.DataCatalog.get_rasterdataset
    data_catalog.DataCatalog.get_geodataset
    data_catalog.DataCatalog.get_geodataframe
-
+   data_catalog.DataCatalog.get_dataframe
 
 
 RasterDataset
@@ -197,6 +200,9 @@ General methods
 
    Model.set_results
    Model.read_results
+
+   Model.read_nc
+   Model.write_nc
 
 .. _setup_methods:
 
@@ -787,16 +793,6 @@ Vector
    gis_utils.filter_gdf
    gis_utils.nearest
    gis_utils.nearest_merge
-
-
-PCRaster I/O
-============
-
-.. autosummary::
-   :toctree: _generated
-
-   gis_utils.write_map
-   gis_utils.write_clone
 
 
 .. _statistics:

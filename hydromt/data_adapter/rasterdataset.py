@@ -50,6 +50,8 @@ class RasterDatasetAdapter(DataAdapter):
         zoom_levels: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        provider=None,
+        version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial raster data.
@@ -127,6 +129,8 @@ class RasterDatasetAdapter(DataAdapter):
             driver_kwargs=driver_kwargs,
             name=name,
             catalog_name=catalog_name,
+            provider=provider,
+            version=version,
         )
         self.crs = crs
         self.zoom_levels = zoom_levels
@@ -175,6 +179,8 @@ class RasterDatasetAdapter(DataAdapter):
         driver: str
             Name of driver to read data with, see
             :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+        kwargs: dict
+            the additional kwyeord arguments that were passed to `to_netcdf`
         """
         try:
             obj = self.get_data(
@@ -186,8 +192,9 @@ class RasterDatasetAdapter(DataAdapter):
             )
         except IndexError as err:  # out of bounds
             logger.warning(str(err))
-            return None, None
+            return None, None, None
 
+        read_kwargs = {}
         if driver is None:
             # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
             driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
@@ -224,7 +231,7 @@ class RasterDatasetAdapter(DataAdapter):
                 )
             driver = "raster"
 
-        return fn_out, driver
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,
@@ -271,6 +278,7 @@ class RasterDatasetAdapter(DataAdapter):
         )
 
         kwargs = self.driver_kwargs.copy()
+
         # zarr can use storage options directly, the rest should be converted to
         # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":

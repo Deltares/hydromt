@@ -306,7 +306,7 @@ class MeshMixin(object):
             data = workflows.rename_mesh(data, name=grid_name)
 
         # Adding to mesh
-        if self._mesh is None:  # NOTE: mesh is initialized with None
+        if self.mesh is None:  # NOTE: mesh is initialized with None
             # Check on crs
             if not data.ugrid.grid.crs:
                 raise ValueError("Data should have CRS.")
@@ -423,7 +423,7 @@ class MeshMixin(object):
     ) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
-        key-word arguments are passed to :py:func:`xr.open_dataset`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
@@ -434,7 +434,7 @@ class MeshMixin(object):
             spatial reference system of the mesh file. Only used if the CRS is not
             found when reading the mesh file.
         **kwargs : dict
-            Additional keyword arguments to be passed to the `_read_nc` method.
+            Additional keyword arguments to be passed to the `read_nc` method.
         """
         self._assert_read_mode
         ds = xr.merge(self._read_nc(fn, **kwargs).values())
@@ -475,7 +475,7 @@ class MeshMixin(object):
             Additional keyword arguments to be passed to the
             `xarray.Dataset.to_netcdf` method.
         """
-        if self._mesh is None:
+        if self.mesh is None:
             self.logger.debug("No mesh data found, skip writing.")
             return
         self._assert_write_mode
@@ -507,7 +507,7 @@ class MeshMixin(object):
     def mesh_datasets(self) -> Dict[str, xu.UgridDataset]:
         """Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh."""  # noqa: E501
         datasets = dict()
-        if self._mesh is not None:
+        if self.mesh is not None:
             for grid in self.mesh.ugrid.grids:
                 datasets[grid.name] = self.get_mesh(
                     grid_name=grid.name, include_data=True
@@ -527,7 +527,7 @@ class MeshMixin(object):
     def mesh_gdf(self) -> Dict[str, gpd.GeoDataFrame]:
         """Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame."""
         mesh_gdf = dict()
-        if self._mesh is not None:
+        if self.mesh is not None:
             for k, grid in self.mesh_grids.items():
                 if grid.topology_dimension == 1:
                     dim = grid.edge_dimension
@@ -683,14 +683,14 @@ class MeshModel(MeshMixin, Model):
     @property
     def bounds(self) -> Dict:
         """Returns model mesh bounds."""
-        if self._mesh is not None:
-            return self._mesh.ugrid.bounds
+        if self.mesh is not None:
+            return self.mesh.ugrid.bounds
 
     @property
     def crs(self) -> CRS:
         """Returns model mesh crs."""
-        if self._mesh is not None:
-            grid_crs = self._mesh.ugrid.crs
+        if self.mesh is not None:
+            grid_crs = self.mesh.ugrid.crs
             # Check if all the same
             crs = None
             for k, v in grid_crs.items():

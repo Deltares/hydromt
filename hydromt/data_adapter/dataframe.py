@@ -3,7 +3,7 @@ import logging
 import os
 import warnings
 from os.path import join
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -27,9 +27,9 @@ class DataFrameAdapter(DataAdapter):
     def __init__(
         self,
         path: str,
-        driver: str = None,
+        driver: Optional[str] = None,
         filesystem: str = "local",
-        nodata: Union[dict, float, int] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
         rename: dict = {},
         unit_mult: dict = {},
         unit_add: dict = {},
@@ -38,6 +38,8 @@ class DataFrameAdapter(DataAdapter):
         driver_kwargs: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for 2D tabular data.
@@ -52,10 +54,10 @@ class DataFrameAdapter(DataAdapter):
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable}, {year}, {month} placeholders as well as path
             search pattern using a '*' wildcard.
-        driver: {'csv', 'xlsx', 'xls', 'fwf'}, optional
+        driver: {'csv', 'parquet', 'xlsx', 'xls', 'fwf'}, optional
             Driver to read files with, for 'csv' :py:func:`~pandas.read_csv`,
-            for {'xlsx', 'xls'} :py:func:`~pandas.read_excel`, and for 'fwf'
-            :py:func:`~pandas.read_fwf`.
+            for 'parquet' :py:func:`~pandas.read_parquet`, for {'xlsx', 'xls'}
+            :py:func:`~pandas.read_excel`, and for 'fwf' :py:func:`~pandas.read_fwf`.
             By default the driver is inferred from the file extension and falls back to
             'csv' if unknown.
         filesystem: {'local', 'gcs', 's3'}, optional
@@ -106,6 +108,8 @@ class DataFrameAdapter(DataAdapter):
             driver_kwargs=driver_kwargs,
             name=name,
             catalog_name=catalog_name,
+            provider=provider,
+            version=version,
         )
 
     def to_file(
@@ -127,7 +131,7 @@ class DataFrameAdapter(DataAdapter):
         data_name : str
             Name of the output file without extension.
         driver : str, optional
-            Driver to write the file, e.g., 'csv', 'excel'. If None,
+            Driver to write the file, e.g., 'csv','parquet', 'excel'. If None,
             the default behavior is used.
         variables : list of str, optional
             Names of DataFrame columns to include in the output. By default,
@@ -148,6 +152,8 @@ class DataFrameAdapter(DataAdapter):
         driver : str
             Name of the driver used to read the data.
             See :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`.
+        kwargs: dict
+            The additional keyword arguments that were passed in.
 
 
         """
@@ -158,20 +164,25 @@ class DataFrameAdapter(DataAdapter):
             )
         except IndexError as err:  # out of bounds for time
             logger.warning(str(err))
-            return None, None
+            return None, None, None
 
+        read_kwargs = dict()
         if driver is None or driver == "csv":
             # always write as CSV
             driver = "csv"
             fn_out = join(data_root, f"{data_name}.csv")
             obj.to_csv(fn_out, **kwargs)
+            read_kwargs["index_col"] = 0
+        elif driver == "parquet":
+            fn_out = join(data_root, f"{data_name}.parquet")
+            obj.to_parquet(fn_out, **kwargs)
         elif driver == "excel":
             fn_out = join(data_root, f"{data_name}.xlsx")
             obj.to_excel(fn_out, **kwargs)
         else:
             raise ValueError(f"DataFrame: Driver {driver} is unknown.")
 
-        return fn_out, driver
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,
@@ -204,6 +215,8 @@ class DataFrameAdapter(DataAdapter):
 
         if self.driver in ["csv"]:
             df = pd.read_csv(self.path, **kwargs)
+        elif self.driver == "parquet":
+            df = pd.read_parquet(self.path, **kwargs)
         elif self.driver in ["xls", "xlsx", "excel"]:
             df = pd.read_excel(self.path, engine="openpyxl", **kwargs)
         elif self.driver in ["fwf"]:

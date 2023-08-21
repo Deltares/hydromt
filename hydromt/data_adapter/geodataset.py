@@ -47,6 +47,8 @@ class GeoDatasetAdapter(DataAdapter):
         driver_kwargs: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
+        provider=None,
+        version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial timeseries data.
@@ -123,6 +125,8 @@ class GeoDatasetAdapter(DataAdapter):
             driver_kwargs=driver_kwargs,
             name=name,
             catalog_name=catalog_name,
+            provider=provider,
+            version=version,
         )
         self.crs = crs
 
@@ -178,7 +182,9 @@ class GeoDatasetAdapter(DataAdapter):
             single_var_as_array=variables is None,
         )
         if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
-            return None, None
+            return None, None, None
+
+        read_kwargs = {}
 
         # much better for mem/storage/processing if dtypes are set correctly
         for name, coord in obj.coords.items():
@@ -214,7 +220,7 @@ class GeoDatasetAdapter(DataAdapter):
         else:
             raise ValueError(f"GeoDataset: Driver {driver} unknown.")
 
-        return fn_out, driver
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,
@@ -255,7 +261,6 @@ class GeoDatasetAdapter(DataAdapter):
         )
 
         kwargs = self.driver_kwargs.copy()
-
         # parse geom, bbox and buffer arguments
         clip_str = ""
         if geom is None and bbox is not None:

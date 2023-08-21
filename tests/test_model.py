@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 import xarray as xr
 from entrypoints import Distribution, EntryPoint
+from shapely.geometry import box
 
 import hydromt._compat
 import hydromt.models.model_plugins
@@ -84,8 +85,8 @@ def test_check_data(demda):
 def test_model_api(grid_model):
     assert np.all(np.isin(["grid", "geoms"], list(grid_model.api.keys())))
     # add some wrong data
-    grid_model._geoms.update({"wrong_geom": xr.Dataset()})
-    grid_model._forcing.update({"test": gpd.GeoDataFrame()})
+    grid_model.geoms.update({"wrong_geom": xr.Dataset()})
+    grid_model.forcing.update({"test": gpd.GeoDataFrame()})
     non_compliant = grid_model._test_model_api()
     assert non_compliant == ["geoms.wrong_geom", "forcing.test"]
 
@@ -125,13 +126,11 @@ def test_write_data_catalog(tmpdir):
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
 
 
-@pytest.mark.filterwarnings(
-    'ignore:Defining "region" based on staticmaps:DeprecationWarning'
-)
 def test_model(model, tmpdir):
     # Staticmaps -> moved from _test_model_api as it is deprecated
     model._API.update({"staticmaps": xr.Dataset})
-    non_compliant = model._test_model_api()
+    with pytest.deprecated_call():
+        non_compliant = model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
     model.set_root(str(tmpdir), mode="w")
@@ -140,26 +139,58 @@ def test_model(model, tmpdir):
         model.read()
     # read model
     model1 = Model(str(tmpdir), mode="r")
-    model1.read()
+    with pytest.deprecated_call():
+        model1.read()
     with pytest.raises(IOError, match="Model opened in read-only mode"):
         model1.write()
     # check if equal
     model._results = {}  # reset results for comparison
-    equal, errors = model._test_equal(model1)
+    with pytest.deprecated_call():
+        equal, errors = model._test_equal(model1)
     assert equal, errors
     # read region from staticmaps
     model._geoms.pop("region")
-    assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
+    with pytest.deprecated_call():
+        assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
+
+
+def test_model_append(demda, tmpdir):
+    # write a model
+    demda.name = "dem"
+    mod = GridModel(mode="w", root=str(tmpdir))
+    mod.set_config("test.data", "dem")
+    mod.set_grid(demda, name="dem")
+    mod.set_maps(demda, name="dem")
+    mod.set_forcing(demda, name="dem")
+    mod.set_states(demda, name="dem")
+    mod.set_geoms(demda.raster.box, name="dem")
+    mod.write()
+    # append to model and check if previous data is still there
+    mod1 = GridModel(mode="r+", root=str(tmpdir))
+    mod1.set_config("test1.data", "dem")
+    assert mod1.get_config("test.data") == "dem"
+    mod1.set_grid(demda, name="dem1")
+    assert "dem" in mod1.grid
+    mod1.set_maps(demda, name="dem1")
+    assert "dem" in mod1.maps
+    mod1.set_forcing(demda, name="dem1")
+    assert "dem" in mod1.forcing
+    mod1.set_states(demda, name="dem1")
+    assert "dem" in mod1.states
+    mod1.set_geoms(demda.raster.box, name="dem1")
+    assert "dem" in mod1.geoms
 
 
 @pytest.mark.filterwarnings("ignore:The setup_basemaps")
-def test_model_build_update(tmpdir):
+def test_model_build_update(tmpdir, demda, obsda):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    # build model
     model = Model(root=str(tmpdir), mode="w")
     # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
     model._CLI_ARGS.update({"region": "setup_region"})
     model._NAME = "testmodel"
     model.build(
-        region={"bbox": [12.05, 45.30, 12.85, 45.65]},
+        region={"bbox": bbox},
         opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
     )
     assert "region" in model._geoms
@@ -183,6 +214,49 @@ def test_model_build_update(tmpdir):
     model_out = str(tmpdir.join("update"))
     model.update(model_out=model_out, opt={})  # write only
     assert isfile(join(model_out, "model.ini"))
+
+    # Now test update for a model with some data
+    geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+    # Quick check that model can't be overwritten without w+
+    with pytest.raises(
+        IOError, match="Model dir already exists and cannot be overwritten: "
+    ):
+        model = Model(root=str(tmpdir), mode="w")
+    # Build model with some data
+    model = Model(root=str(tmpdir), mode="w+")
+    # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
+    model._CLI_ARGS.update({"region": "setup_region"})
+    model._NAME = "testmodel"
+    model.build(
+        region={"bbox": bbox},
+        opt={
+            "setup_config": {"input": {"dem": "elevtn", "prec": "precip"}},
+            "set_geoms": {"geom": geom, "name": "geom1"},
+            "set_maps": {"data": demda, "name": "elevtn"},
+            "set_forcing": {"data": obsda, "name": "precip"},
+        },
+    )
+    # Now update the model
+    model = Model(root=str(tmpdir), mode="r+")
+    model.update(
+        opt={
+            "setup_config": {"input.dem2": "elevtn2", "input.temp": "temp"},
+            "set_geoms": {"geom": geom, "name": "geom2"},
+            "set_maps": {"data": demda, "name": "elevtn2"},
+            "set_forcing": {"data": obsda, "name": "temp"},
+            "set_forcing2": {"data": obsda * 0.2, "name": "precip"},
+        }
+    )
+    assert len(model._defered_file_closes) == 0
+    # Check that variables from build AND update are present
+    assert "dem" in model.config["input"]
+    assert "dem2" in model.config["input"]
+    assert "geom1" in model.geoms
+    assert "geom2" in model.geoms
+    assert "elevtn" in model.maps
+    assert "elevtn2" in model.maps
+    assert "precip" in model.forcing
+    assert "temp" in model.forcing
 
 
 def test_setup_region(model, demda, tmpdir):
@@ -248,7 +322,7 @@ def test_maps_setup(tmpdir):
     mod.write(components=["config", "geoms", "maps"])
 
 
-def test_gridmodel(grid_model, tmpdir):
+def test_gridmodel(grid_model, tmpdir, demda):
     assert "grid" in grid_model.api
     non_compliant = grid_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
@@ -265,6 +339,20 @@ def test_gridmodel(grid_model, tmpdir):
     # check if equal
     equal, errors = grid_model._test_equal(model1)
     assert equal, errors
+
+    # try update
+    grid_model.set_root(str(join(tmpdir, "update")), mode="w")
+    grid_model.write()
+
+    model1 = GridModel(str(join(tmpdir, "update")), mode="r+")
+    model1.update(
+        opt={
+            "set_grid": {"data": demda, "name": "testdata"},
+            "write_grid": {},
+        }
+    )
+    assert "testdata" in model1.grid
+    assert "elevtn" in model1.grid
 
 
 def test_setup_grid(tmpdir, demda):

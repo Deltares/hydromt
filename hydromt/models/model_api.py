@@ -5,12 +5,14 @@ import glob
 import inspect
 import logging
 import os
+import shutil
 import typing
 import warnings
 from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from tempfile import TemporaryDirectory
+from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
 import geopandas as gpd
 import numpy as np
@@ -28,6 +30,11 @@ __all__ = ["Model"]
 
 logger = logging.getLogger(__name__)
 
+DeferedFileClose = TypedDict(
+    "DeferedFileClose",
+    {"ds": xr.Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
+)
+
 
 class Model(object, metaclass=ABCMeta):
 
@@ -44,6 +51,7 @@ class Model(object, metaclass=ABCMeta):
     # tell hydroMT which methods should receive the res and region arguments
     # TODO: change it back to setup_region and no res --> deprecation
     _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
+    _TMP_DATA_DIR = None
 
     _API = {
         "crs": CRS,
@@ -77,7 +85,7 @@ class Model(object, metaclass=ABCMeta):
             Model simulation configuration file, by default None.
             Note that this is not the HydroMT model setup configuration file!
         data_libs : List[str], optional
-            List of data catalog yaml files, by default None
+            List of data catalog configuration files, by default None
         **artifact_keys:
             Additional keyword arguments to be passed down.
         logger:
@@ -99,22 +107,23 @@ class Model(object, metaclass=ABCMeta):
         # placeholders
         # metadata maps that can be at different resolutions
         # TODO do we want read/write maps?
-        self._config = dict()  # nested dictionary
-        self._maps = dict()  # dictionary of xr.DataArray and/or xr.Dataset
+        self._config = None  # nested dictionary
+        self._maps = None  # dictionary of xr.DataArray and/or xr.Dataset
 
         # NOTE was staticgeoms in <=v0.5
-        self._geoms = dict()  # dictionary of gdp.GeoDataFrame
-        self._forcing = dict()  # dictionary of xr.DataArray and/or xr.Dataset
-        self._states = dict()  # dictionary of xr.DataArray and/or xr.Dataset
-        self._results = dict()  # dictionary of xr.DataArray and/or xr.Dataset
+        self._geoms = None  # dictionary of gdp.GeoDataFrame
+        self._forcing = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._states = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._results = None  # dictionary of xr.DataArray and/or xr.Dataset
         # To be deprecated in future versions!
-        self._staticmaps = xr.Dataset()
-        self._staticgeoms = dict()
+        self._staticmaps = None
+        self._staticgeoms = None
 
         # file system
         self._root = ""
         self._read = True
         self._write = False
+        self._defered_file_closes = []
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
@@ -228,6 +237,7 @@ class Model(object, metaclass=ABCMeta):
         model_out: Optional[Union[str, Path]] = None,
         write: Optional[bool] = True,
         opt: Dict = {},
+        forceful_overwrite=False,
     ):
         """Single method to update a model based the settings in `opt`.
 
@@ -263,6 +273,10 @@ class Model(object, metaclass=ABCMeta):
                         ...
                     }
                 }
+          forceful_overwrite:
+            Force open files to close when attempting to write them. In the case you
+            try to write to a file that's already opened. The output will be written
+            to a temporary file in case the original file cannot be written to.
         """
         opt = self._check_get_opt(opt)
 
@@ -296,6 +310,8 @@ class Model(object, metaclass=ABCMeta):
         # write
         if write:
             self.write()
+
+        self._cleanup(forceful_overwrite=forceful_overwrite)
 
     ## general setup methods
 
@@ -346,10 +362,15 @@ class Model(object, metaclass=ABCMeta):
         kind, region = workflows.parse_region(region, logger=self.logger)
         # NOTE: kind=outlet is deprecated!
         if kind in ["basin", "subbasin", "interbasin", "outlet"]:
+            if kind == "outlet":
+                warnings.warn(
+                    "Using outlet as kind in setup_region is deprecated",
+                    DeprecationWarning,
+                )
             # retrieve global hydrography data (lazy!)
             ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=self.data_catalog[basin_index_fn])
+                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = workflows.get_basin_geometry(
                 ds=ds_org,
@@ -427,7 +448,7 @@ class Model(object, metaclass=ABCMeta):
         self._read = mode.startswith("r")
         self._write = mode != "r"
         self._overwrite = mode == "w+"
-        if root is not None:
+        if self._root is not None:
             if self._write:
                 for name in self._FOLDERS:
                     path = join(self._root, name)
@@ -463,9 +484,8 @@ class Model(object, metaclass=ABCMeta):
                 log_level = h.level
                 if hasattr(h, "baseFilename"):
                     if dirname(h.baseFilename) != self._root:
-                        self.logger.handlers.pop(
-                            i
-                        ).close()  # remove handler and close file
+                        # remove handler and close file
+                        self.logger.handlers.pop(i).close()
                     else:
                         has_log_file = True
                     break
@@ -543,7 +563,7 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         root: str, Path, optional
-            Global root for all relative paths in yaml file.
+            Global root for all relative paths in configuration file.
             If "auto" the data source paths are relative to the yaml output ``path``.
         data_lib_fn: str, Path, optional
             Path of output yml file, absolute or relative to the model root,
@@ -555,7 +575,7 @@ class Model(object, metaclass=ABCMeta):
         """
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
-        # read hydromt_data yaml file and add to data catalog
+        # read hydromt_data configuration file and add to data catalog
         if self._read and isfile(path) and append:
             cat.from_yml(path)
         # update data catalog with new used sources
@@ -574,8 +594,10 @@ class Model(object, metaclass=ABCMeta):
     @property
     def config(self) -> Dict[str, Union[Dict, str]]:
         """Model configuration. Returns a (nested) dictionary."""
-        # initialize default config if in write-mode
-        if not self._config:
+        if self._config is None:
+            # initialize occurs in read_config
+            # model config if in read-mode and it exists
+            # default config if in write-mode
             self.read_config()
         return self._config
 
@@ -604,7 +626,7 @@ class Model(object, metaclass=ABCMeta):
         value = args.pop(-1)
         if len(args) == 1 and "." in args[0]:
             args = args[0].split(".") + args[1:]
-        branch = self.config  # reads config at first call
+        branch = self.config  # trigger initialization / reads config at first call
         for key in args[:-1]:
             if key not in branch or not isinstance(branch[key], dict):
                 branch[key] = {}
@@ -677,7 +699,7 @@ class Model(object, metaclass=ABCMeta):
     def read_config(self, config_fn: Optional[str] = None):
         """Parse config from file.
 
-        If no config file found a default config file is read in writing mode.
+        If no config file found a default config file is returned in writing mode.
         """
         prefix = "User defined"
         if config_fn is None:  # prioritize user defined config path (new v0.4.1)
@@ -737,8 +759,10 @@ class Model(object, metaclass=ABCMeta):
             "versions. Use the grid property of the GridModel class instead.",
             DeprecationWarning,
         )
-        if len(self._staticmaps) == 0 and self._read:
-            self.read_staticmaps()
+        if self._staticmaps is None:
+            self._staticmaps = xr.Dataset()
+            if self._read:
+                self.read_staticmaps()
         return self._staticmaps
 
     def set_staticmaps(
@@ -779,7 +803,7 @@ class Model(object, metaclass=ABCMeta):
         if isinstance(data, xr.DataArray):
             data.name = name
             data = data.to_dataset()
-        if len(self._staticmaps) == 0:  # new data
+        if len(self.staticmaps) == 0:  # new data / trigger read
             self._staticmaps = data
         else:
             if isinstance(data, np.ndarray):
@@ -794,7 +818,7 @@ class Model(object, metaclass=ABCMeta):
     def read_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
         """Read static model maps at <root>/<fn> and add to staticmaps property.
 
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         .. NOTE: this method is deprecated.
         Use the grid property of the GridMixin instead.
@@ -805,16 +829,16 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root, by default "staticmaps/staticmaps.nc"
         **kwargs:
             Additional keyword arguments that are passed to the
-            `_read_nc` function.
+            `read_nc` function.
         """
         self._assert_read_mode
-        for ds in self._read_nc(fn, **kwargs).values():
+        for ds in self.read_nc(fn, **kwargs).values():
             self.set_staticmaps(ds)
 
     def write_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
         """Write static model maps to netcdf file at <root>/<fn>.
 
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
 
         .. NOTE: this method is deprecated.
         Use the grid property of the GridMixin instead.
@@ -825,15 +849,15 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root, by default 'staticmaps/staticmaps.nc'
         **kwargs:
             Additional keyword arguments that are passed to the
-            `_write_nc` function.
+            `write_nc` function.
         """
-        if len(self._staticmaps) == 0:
+        if len(self.staticmaps) == 0:
             self.logger.debug("No staticmaps data found, skip writing.")
         else:
             self._assert_write_mode
-            # _write_nc requires dict - use dummy 'staticmaps' key
-            nc_dict = {"staticmaps": self._staticmaps}
-            self._write_nc(nc_dict, fn, **kwargs)
+            # write_nc requires dict - use dummy 'staticmaps' key
+            nc_dict = {"staticmaps": self.staticmaps}
+            self.write_nc(nc_dict, fn, **kwargs)
 
     # map files setup methods
     def setup_maps_from_rasterdataset(
@@ -993,8 +1017,10 @@ class Model(object, metaclass=ABCMeta):
     @property
     def maps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model maps. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if len(self._maps) == 0 and self._read:
-            self.read_maps()
+        if self._maps is None:
+            self._maps = dict()
+            if self._read:
+                self.read_maps()
         return self._maps
 
     def set_maps(
@@ -1020,14 +1046,14 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self._maps:
+            if name in self.maps:  # trigger init / read
                 self.logger.warning(f"Replacing result: {name}")
             self._maps[name] = data_dict[name]
 
     def read_maps(self, fn: str = "maps/*.nc", **kwargs) -> None:
         """Read model map at <root>/<fn> and add to maps component.
 
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
@@ -1035,17 +1061,17 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root, may wildcards, by default "maps/*.nc"
         **kwargs:
             Additional keyword arguments that are passed to the
-            `_read_nc` function.
+            `read_nc` function.
         """
         self._assert_read_mode
-        ncs = self._read_nc(fn, **kwargs)
+        ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_maps(ds, name=name)
 
     def write_maps(self, fn="maps/{name}.nc", **kwargs) -> None:
         """Write maps to netcdf file at <root>/<fn>.
 
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
 
         Parameters
         ----------
@@ -1054,13 +1080,13 @@ class Model(object, metaclass=ABCMeta):
             by default 'maps/{name}.nc'
         **kwargs:
             Additional keyword arguments that are passed to the
-            `_write_nc` function.
+            `write_nc` function.
         """
-        if len(self._maps) == 0:
+        if len(self.maps) == 0:
             self.logger.debug("No maps data found, skip writing.")
         else:
             self._assert_write_mode
-            self._write_nc(self._maps, fn, **kwargs)
+            self.write_nc(self.maps, fn, **kwargs)
 
     # model geometry files
     @property
@@ -1070,8 +1096,10 @@ class Model(object, metaclass=ABCMeta):
         Return dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
         ..NOTE: previously call staticgeoms.
         """
-        if not self._geoms and self._read:
-            self.read_geoms()
+        if self._geoms is None:
+            self._geoms = dict()
+            if self._read:
+                self.read_geoms()
         return self._geoms
 
     def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
@@ -1090,7 +1118,7 @@ class Model(object, metaclass=ABCMeta):
                 "First parameter map(s) should be geopandas.GeoDataFrame"
                 " or geopandas.GeoSeries"
             )
-        if name in self._geoms:
+        if name in self.geoms:  # trigger init / read
             self.logger.warning(f"Replacing geom: {name}")
         self._geoms[name] = geom
 
@@ -1128,13 +1156,13 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
         """
-        if len(self._geoms) == 0:
+        if len(self.geoms) == 0:
             self.logger.debug("No geoms data found, skip writing.")
             return
         self._assert_write_mode
         if "driver" not in kwargs:
             kwargs.update(driver="GeoJSON")  # default
-        for name, gdf in self._geoms.items():
+        for name, gdf in self.geoms.items():
             if not isinstance(gdf, (gpd.GeoDataFrame, gpd.GeoSeries)) or len(gdf) == 0:
                 self.logger.warning(
                     f"{name} object of type {type(gdf).__name__} not recognized"
@@ -1158,7 +1186,7 @@ class Model(object, metaclass=ABCMeta):
             " use geoms instead.",
             DeprecationWarning,
         )
-        if not self._geoms and self._read:
+        if self._geoms is None and self._read:
             self.read_staticgeoms()
         self._staticgeoms = self._geoms
         return self._staticgeoms
@@ -1206,8 +1234,10 @@ class Model(object, metaclass=ABCMeta):
     @property
     def forcing(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model forcing. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if not self._forcing and self._read:
-            self.read_forcing()
+        if self._forcing is None:
+            self._forcing = dict()
+            if self._read:
+                self.read_forcing()
         return self._forcing
 
     def set_forcing(
@@ -1229,32 +1259,32 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self._forcing:
+            if name in self.forcing:  # trigger init / read
                 self.logger.warning(f"Replacing forcing: {name}")
             self._forcing[name] = data_dict[name]
 
     def read_forcing(self, fn: str = "forcing/*.nc", **kwargs) -> None:
         """Read forcing at <root>/<fn> and add to forcing property.
 
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, may wildcards, by default "forcing/*.nc"
         **kwargs:
-            Additional keyword arguments that are passed to the `_read_nc`
+            Additional keyword arguments that are passed to the `read_nc`
             function.
         """
         self._assert_read_mode
-        ncs = self._read_nc(fn, **kwargs)
+        ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_forcing(ds, name=name)
 
     def write_forcing(self, fn="forcing/{name}.nc", **kwargs) -> None:
         """Write forcing to netcdf file at <root>/<fn>.
 
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
 
         Parameters
         ----------
@@ -1262,21 +1292,23 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root and should contain a {name} placeholder,
             by default 'forcing/{name}.nc'
         **kwargs:
-            Additional keyword arguments that are passed to the `_write_nc`
+            Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        if len(self._forcing) == 0:
+        if len(self.forcing) == 0:
             self.logger.debug("No forcing data found, skip writing.")
         else:
             self._assert_write_mode
-            self._write_nc(self._forcing, fn, **kwargs)
+            self.write_nc(self.forcing, fn, **kwargs)
 
     # model state files
     @property
     def states(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model states. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if not self._states and self._read:
-            self.read_states()
+        if self._states is None:
+            self._states = dict()
+            if self._read:
+                self.read_states()
         return self._states
 
     def set_states(
@@ -1298,32 +1330,32 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self._states:
+            if name in self.states:  # trigger init / read
                 self.logger.warning(f"Replacing state: {name}")
             self._states[name] = data_dict[name]
 
     def read_states(self, fn: str = "states/*.nc", **kwargs) -> None:
         """Read states at <root>/<fn> and add to states property.
 
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, may wildcards, by default "states/*.nc"
         **kwargs:
-            Additional keyword arguments that are passed to the `_read_nc`
+            Additional keyword arguments that are passed to the `read_nc`
             function.
         """
         self._assert_read_mode
-        ncs = self._read_nc(fn, **kwargs)
+        ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
-            self.set_states(ds, name=name)
+            self.set_states(ds, name=name, split_dataset=True)
 
     def write_states(self, fn="states/{name}.nc", **kwargs) -> None:
         """Write states to netcdf file at <root>/<fn>.
 
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
 
         Parameters
         ----------
@@ -1331,22 +1363,24 @@ class Model(object, metaclass=ABCMeta):
             filename relative to model root and should contain a {name} placeholder,
             by default 'states/{name}.nc'
         **kwargs:
-            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
+            Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        if len(self._states) == 0:
+        if len(self.states) == 0:
             self.logger.debug("No states data found, skip writing.")
         else:
             self._assert_write_mode
-            self._write_nc(self._states, fn, **kwargs)
+            self.write_nc(self.states, fn, **kwargs)
 
     # model results files; NOTE we don't have a write_results method
     # (that's up to the model kernel)
     @property
     def results(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model results.  Returns dict of xarray.DataArray or xarray.Dataset."""
-        if not self._results and self._read:
-            self.read_results()
+        if self._results is None:
+            self._results = dict()
+            if self._read:
+                self.read_results()
         return self._results
 
     def set_results(
@@ -1372,29 +1406,74 @@ class Model(object, metaclass=ABCMeta):
         """
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self._results:
+            if name in self.results:  # trigger init / read
                 self.logger.warning(f"Replacing result: {name}")
             self._results[name] = data_dict[name]
 
     def read_results(self, fn: str = "results/*.nc", **kwargs) -> None:
         """Read results at <root>/<fn> and add to results property.
 
-        key-word arguments are passed to :py:func:`xarray.open_dataset`
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
         fn : str, optional
             filename relative to model root, may wildcards, by default "results/*.nc"
         **kwargs:
-            Additional keyword arguments that are passed to the `_read_nc`
+            Additional keyword arguments that are passed to the `read_nc`
             function.
         """
         self._assert_read_mode
-        ncs = self._read_nc(fn, **kwargs)
+        ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_results(ds, name=name)
 
-    def _write_nc(
+    # general reader & writer
+    def _cleanup(self, forceful_overwrite=False, max_close_attempts=2) -> List[str]:
+        """Try to close all defered file handles.
+
+        Try to overwrite the destination file with the temporary one until either the
+        maximum number of tries is reached or until it succeeds. The forced cleanup
+        also attempts to close the original file handle, which could cause trouble
+        if the user will try to read from the same file handle after this function
+        is called.
+
+        Parameters
+        ----------
+        forceful_overwrite: bool
+            Attempt to force closing defered file handles before writing to them.
+        max_close_attempts: int
+            Number of times to try and overwrite the original file, before giving up.
+
+        """
+        failed_closes = []
+        while len(self._defered_file_closes) > 0:
+            close_handle = self._defered_file_closes.pop()
+            if close_handle["close_attempts"] > max_close_attempts:
+                # already tried to close this to many times so give up
+                self.logger.error(
+                    f"Max write attempts to file {close_handle['org_fn']}"
+                    " exceeded. Skipping..."
+                    f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
+                )
+                continue
+
+            if forceful_overwrite:
+                close_handle["ds"].close()
+            try:
+                shutil.move(close_handle["tmp_fn"], close_handle["org_fn"])
+            except PermissionError:
+                self.logger.error(
+                    f"Could not write to destination file {close_handle['org_fn']} "
+                    "because the following error was raised: {e}"
+                )
+                close_handle["close_attempts"] += 1
+                self._defered_file_closes.append(close_handle)
+                failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
+
+        return list(set(failed_closes))
+
+    def write_nc(
         self,
         nc_dict: Dict[str, Union[xr.DataArray, xr.Dataset]],
         fn: str,
@@ -1403,6 +1482,37 @@ class Model(object, metaclass=ABCMeta):
         force_sn: bool = False,
         **kwargs,
     ) -> None:
+        """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
+
+        Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
+        files, using :py:meth:`~hydromt.raster.gdal_compliant`.
+        The function will first try to directly write to file. In case of
+        PermissionError, it will first write a temporary file and add to the
+        self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
+        will be done by calling the self._cleanup function.
+
+        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+
+        Parameters
+        ----------
+        nc_dict: dict
+            Dictionary of xarray.Dataset and/or xarray.DataArray to write
+        fn: str
+            filename relative to model root and should contain a {name} placeholder
+        gdal_compliant: bool, optional
+            If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
+            format using :py:meth:`~hydromt.raster.gdal_compliant`
+        rename_dims: bool, optional
+            If True, rename x_dim and y_dim to standard names depending on the CRS
+            (x/y for projected and lat/lon for geographic). Only used if
+            ``gdal_compliant`` is set to True. By default, False.
+        force_sn: bool, optional
+            If True, forces the dataset to have South -> North orientation. Only used
+            if ``gdal_compliant`` is set to True. By default, False.
+        **kwargs:
+            Additional keyword arguments that are passed to the `to_netcdf`
+            function.
+        """
         for name, ds in nc_dict.items():
             if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
                 self.logger.error(
@@ -1417,12 +1527,62 @@ class Model(object, metaclass=ABCMeta):
                 ds = ds.raster.gdal_compliant(
                     rename_dims=rename_dims, force_sn=force_sn
                 )
-            ds.to_netcdf(_fn, **kwargs)
+            try:
+                ds.to_netcdf(_fn, **kwargs)
+            except PermissionError:
+                logger.warning(f"Could not write to file {_fn}, defering write")
+                if self._TMP_DATA_DIR is None:
+                    self._TMP_DATA_DIR = TemporaryDirectory()
 
-    # general reader & writer
-    def _read_nc(
-        self, fn: str, mask_and_scale=False, single_var_as_array=True, **kwargs
+                tmp_fn = join(str(self._TMP_DATA_DIR), f"{_fn}.tmp")
+                ds.to_netcdf(tmp_fn, **kwargs)
+                self._defered_file_closes.append(
+                    DeferedFileClose(
+                        ds=ds,
+                        org_fn=join(str(self._TMP_DATA_DIR), _fn),
+                        tmp_fn=tmp_fn,
+                        close_attempts=1,
+                    )
+                )
+
+    def read_nc(
+        self,
+        fn: Union[str, Path],
+        mask_and_scale: bool = False,
+        single_var_as_array: bool = True,
+        load: bool = False,
+        **kwargs,
     ) -> Dict[str, xr.Dataset]:
+        """Read netcdf files at <root>/<fn> and return as dict of xarray.Dataset.
+
+        NOTE: Unless `single_var_as_array` is set to False a single-variable data source
+        will be returned as :py:class:`xarray.DataArray` rather than
+        :py:class:`xarray.Dataset`.
+        key-word arguments are passed to :py:func:`xarray.open_dataset`.
+
+        Parameters
+        ----------
+        fn : str
+            filename relative to model root, may contain wildcards
+        mask_and_scale : bool, optional
+            If True, replace array values equal to _FillValue with NA and scale values
+            according to the formula original_values * scale_factor + add_offset, where
+            _FillValue, scale_factor and add_offset are taken from variable attributes
+            (if they exist).
+        single_var_as_array : bool, optional
+            If True, return a DataArray if the dataset consists of a single variable.
+            If False, always return a Dataset. By default True.
+        load : bool, optional
+            If True, the data is loaded into memory. By default False.
+        **kwargs:
+            Additional keyword arguments that are passed to the `xr.open_dataset`
+            function.
+
+        Returns
+        -------
+        Dict[str, xr.Dataset]
+            dict of xarray.Dataset
+        """
         ncs = dict()
         fns = glob.glob(join(self.root, fn))
         if "chunks" not in kwargs:  # read lazy by default
@@ -1430,7 +1590,12 @@ class Model(object, metaclass=ABCMeta):
         for fn in fns:
             name = basename(fn).split(".")[0]
             self.logger.debug(f"Reading model file {name}.")
-            ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs)
+            # Load data to allow overwritting in r+ mode
+            if load:
+                ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs).load()
+                ds.close()
+            else:
+                ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs)
             # set geo coord if present as coordinate of dataset
             if GEO_MAP_COORD in ds.data_vars:
                 ds = ds.set_coords(GEO_MAP_COORD)
@@ -1444,7 +1609,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.crs
         else:
             return self.region.crs
@@ -1456,7 +1621,7 @@ class Model(object, metaclass=ABCMeta):
             " components instead.",
             DeprecationWarning,
         )
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.set_crs(crs)
 
     @property
@@ -1465,7 +1630,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.dims
 
     @property
@@ -1474,7 +1639,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.coords
 
     @property
@@ -1483,7 +1648,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.res
 
     @property
@@ -1492,7 +1657,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.transform
 
     @property
@@ -1501,7 +1666,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.width
 
     @property
@@ -1510,7 +1675,7 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.height
 
     @property
@@ -1519,13 +1684,16 @@ class Model(object, metaclass=ABCMeta):
 
         ..NOTE: will be deprecated in future versions.
         """
-        if len(self._staticmaps) > 0:
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.shape
 
     @property
     def bounds(self) -> Tuple:
-        """Returns the bounding box of the model region."""
-        if len(self._staticmaps) > 0:
+        """Returns the bounding box of the model region.
+
+        ..NOTE: will be deprecated in future versions.
+        """
+        if len(self.staticmaps) > 0:
             return self.staticmaps.raster.bounds
         else:
             return self.region.total_bounds

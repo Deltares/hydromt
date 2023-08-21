@@ -22,13 +22,15 @@ class LumpedMixin:
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._response_units = xr.Dataset()
+        self._response_units = None  # xr.Dataset()
 
     @property
     def response_units(self) -> xr.Dataset:
         """Model response unit (lumped) data. Returns xr.Dataset geometry coordinate."""
-        if not self._response_units and self._read:
-            self.read_response_units()
+        if self._response_units is None:
+            self._response_units = xr.Dataset()
+            if self._read:
+                self.read_response_units()
         return self._response_units
 
     def set_response_units(
@@ -53,9 +55,9 @@ class LumpedMixin:
         )
         if name is None and name_required:
             raise ValueError(f"Unable to set {type(data).__name__} data without a name")
-        if isinstance(data, np.ndarray) and "geometry" in self._response_units:
+        if isinstance(data, np.ndarray) and "geometry" in self.response_units:
             # TODO: index name is hard coded. Using GeoDataset.index property once ready
-            index = self._response_units["index"]
+            index = self.response_units["index"]
             if data.size != index.size and data.ndim == 1:
                 raise ValueError(
                     "Size of data and number of response_units do not match"
@@ -68,7 +70,7 @@ class LumpedMixin:
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
         for dvar in data.data_vars:
-            if dvar in self._response_units:
+            if dvar in self.response_units:
                 self.logger.warning(f"Replacing response_units variable: {dvar}")
             # TODO: check on index coordinate before merging
             self._response_units[dvar] = data[dvar]
@@ -83,7 +85,8 @@ class LumpedMixin:
 
         Files are read at <root>/<fn> and geojson file at <root>/<fn_geom>.
         The netcdf file contains the attribute data and the geojson file the geometry
-        vector data. key-word arguments are passed to :py:func:`xarray.open_dataset`
+        vector data. key-word arguments are passed to
+        :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
@@ -94,11 +97,11 @@ class LumpedMixin:
             geojson filename relative to model root,
             by default 'response_units/response_units.geojson'
         **kwargs:
-            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
+            Additional keyword arguments that are passed to the `read_nc`
             function.
         """
         self._assert_read_mode
-        ds = xr.merge(self._read_nc(fn, **kwargs).values())
+        ds = xr.merge(self.read_nc(fn, **kwargs).values())
         if isfile(join(self.root, fn_geom)):
             gdf = gpd.read_file(join(self.root, fn_geom))
             # TODO: index name is hard coded. Using GeoDataset.index property once ready
@@ -118,7 +121,7 @@ class LumpedMixin:
         Files are written at <root>/<fn> and at <root>/<fn_geom> respectively.
         The netcdf file contains the attribute data and the geojson file the geometry
         vector data. Key-word arguments are passed to
-        :py:meth:`xarray.Dataset.to_netcdf`
+        :py:meth:`~hydromt.models.Model.write_nc`
 
         Parameters
         ----------
@@ -129,22 +132,22 @@ class LumpedMixin:
             geojson filename relative to model root,
             by default 'response_units/response_units.geojson'
         **kwargs:
-            Additional keyword arguments that are passed to the `_write_nc`
+            Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        if len(self._response_units) == 0:
+        if len(self.response_units) == 0:
             self.logger.debug("No response_units data found, skip writing.")
             return
         self._assert_write_mode
         # write geometry
-        ds = self._response_units
+        ds = self.response_units
         gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
         if not isdir(dirname(join(self.root, fn_geom))):
             os.makedirs(dirname(join(self.root, fn_geom)))
         gdf.to_file(join(self.root, fn_geom), driver="GeoJSON")
-        # _write_nc requires dict - use dummy key
+        # write_nc requires dict - use dummy key
         nc_dict = {"response_units": ds.drop_vars("geometry")}
-        self._write_nc(nc_dict, fn, **kwargs)
+        self.write_nc(nc_dict, fn, **kwargs)
 
 
 class LumpedModel(LumpedMixin, Model):
