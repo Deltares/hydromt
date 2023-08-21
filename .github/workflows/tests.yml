@@ -44,7 +44,7 @@ jobs:
             activate-environment: hydromt
             use-mamba: true
       - name: Generate env spec
-        run: pip install tomli && python make_env.py test
+        run: pip install tomli && python make_env.py test,io,extra
 
 
       - name: Set cache date
