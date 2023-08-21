@@ -151,7 +151,9 @@ def parse_region(region, logger=logger):
             elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
                 kwarg = dict(mesh=value0)
             elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
-                kwarg = dict(mesh=value0.to_dataset(optional_attributes=True))
+                kwarg = dict(
+                    mesh=xu.UgridDataset(value0.to_dataset(optional_attributes=True))
+                )
             else:
                 raise ValueError(
                     f"Unrecognised type {type(value0)}."
