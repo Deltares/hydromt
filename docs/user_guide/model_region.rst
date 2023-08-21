@@ -22,6 +22,8 @@ Geospatial region
 
     Based on a raster file: ``{'grid': '/path/to/raster_file'}``
 
+    Based on a mesh file: ``{'mesh': '/path/to/mesh_file'}``
+
 Hydrographic region
 ^^^^^^^^^^^^^^^^^^^
 

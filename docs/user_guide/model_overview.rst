@@ -37,7 +37,7 @@ While a generalized model class can readily be used, it can also be tailored to 
 
 .. NOTE::
 
-  As of version 0.6.0, the grid model (distributed grid model), lumped model (semi-distributed and lumped models), mesh model (unstructured grid models) have been implemented. Other model classes such as network models will follow in future versions.
+  As of version 0.6.0, the grid model (distributed grid model), lumped model (semi-distributed and lumped models), mesh model (unstructured grid(s) models) have been implemented. Other model classes such as network models will follow in future versions.
 
 The table below lists the base model components common to all model classes.
 All base model attributes and methods can be found the :ref:`API reference <model_api>`
@@ -112,9 +112,10 @@ For each generalized model class, the respective computational unit components e
        | :py:func:`~LumpedModel.write_response_units`
    * - mesh
      - :ref:`MeshModel <mesh_model_api>`
-     - Static mesh (unstructured grid) data
+     - Static mesh (unstructured grid(s)) data
      - | :py:attr:`~MeshModel.mesh`
        | :py:func:`~MeshModel.set_mesh`
+       | :py:func:`~MeshModel.get_mesh`
        | :py:func:`~MeshModel.read_mesh`
        | :py:func:`~MeshModel.write_mesh`
 
