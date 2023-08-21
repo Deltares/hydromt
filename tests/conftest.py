@@ -4,6 +4,7 @@ import pandas as pd
 import pyflwdir
 import pytest
 import xarray as xr
+from dask import config as dask_config
 from shapely.geometry import box
 
 from hydromt import (
@@ -17,6 +18,8 @@ from hydromt import (
     vector,
 )
 from hydromt.data_catalog import DataCatalog
+
+dask_config.set(scheduler="single-threaded")
 
 
 @pytest.fixture()

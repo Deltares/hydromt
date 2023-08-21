@@ -73,7 +73,8 @@ test = [
     "pytest-cov",    # test coverage
     "pytest-mock",   # mocking
     "pytest-timeout", # darn hanging tests
-]
+    "xugrid"
+    ]
 doc = [
     "nbsphinx",                     # build notebooks in docs
     "pydata-sphinx-theme",          # theme
