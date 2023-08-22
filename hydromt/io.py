@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "open_raster",
     "open_mfraster",
+    "open_mfcsv",
     "open_raster_from_tindex",
     "open_vector",
     "open_geodataset",
@@ -223,6 +224,40 @@ def open_mfraster(
     if da_lst[0].rio.crs is not None:
         ds.rio.write_crs(da_lst[0].rio.crs, inplace=True)
     ds.rio.write_transform(inplace=True)
+    return ds
+
+
+def open_mfcsv(fns, driver_kwargs, concat_dims, transpose):
+    """Open multiple csv files as single Dataset.
+
+    Arguments
+    ---------
+    TBA
+
+    Returns
+    -------
+    data : Dataset
+        The newly created Dataset.
+    """
+    ds = xr.Dataset()
+    # we're gonna use the structure of the first file found to check
+    # all others agains
+    first_fn = fns.pop(0)
+    first_df = pd.read_csv(first_fn, **driver_kwargs)
+    first_index = first_df.index
+    dfs = [first_df]
+    for fn in fns:
+        df = pd.read_csv(fn, **driver_kwargs)
+        if transpose:
+            df = df.T
+
+        if not df.index.equals(first_index):
+            raise RuntimeError(f"file {fn} has inconsistent index: {df.index}")
+
+        dfs.append(df)
+
+    all_dfs_combined = pd.concat(dfs, axis=0).set_index(concat_dims)
+    ds = xr.Dataset.from_dataframe(all_dfs_combined).drop_vars("Unnamed: 0")
     return ds
 
 
