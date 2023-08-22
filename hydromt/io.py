@@ -389,21 +389,34 @@ def open_timeseries_from_table(
     """
     _, ext = splitext(fn)
     if ext == ".csv":
-        kwargs0 = dict(index_col=0, parse_dates=True)
-        kwargs0.update(**kwargs)
-        df = pd.read_csv(fn, **kwargs0)
+        csv_kwargs = dict(index_col=0, parse_dates=False)
+        csv_kwargs.update(**kwargs)
+        df = pd.read_csv(fn, **csv_kwargs)
     elif ext in [".parquet", ".pq"]:
         df = pd.read_parquet(fn, **kwargs)
     else:
         raise ValueError(f"Unknown table file format: {ext}")
 
-    # check if time index
-    if np.dtype(df.index).type != np.datetime64:
+    first_index_elt = df.index[0]
+    first_col_name = df.columns[0]
+
+    try:
+        if isinstance(first_index_elt, (int, float, np.number)):
+            raise ValueError()
+        pd.to_datetime(first_index_elt)
+        # if this succeeds than axis 0 is the time dim
+    except ValueError:
         try:
-            df.columns = pd.to_datetime(df.columns)
+            if isinstance(first_col_name, (int, float, np.number)):
+                raise ValueError()
+            pd.to_datetime(first_col_name)
             df = df.T
         except ValueError:
             raise ValueError(f"No time index found in file: {fn}")
+
+    if np.dtype(df.index).type != np.datetime64:
+        df.index = pd.to_datetime(df.index)
+
     # try parsing column index to integers
     if isinstance(df.columns[0], str):
         try:
