@@ -41,7 +41,6 @@ class Model(object, metaclass=ABCMeta):
 
     """General and basic API for models in HydroMT."""
 
-    # FIXME
     _DATADIR = ""  # path to the model data folder
     _NAME = "modelname"
     _CONF = "model.ini"
