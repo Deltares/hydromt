@@ -15,8 +15,25 @@ import hydromt.models.model_plugins
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import MODELS, GridModel, LumpedModel, Model, model_plugins
 from hydromt.models.model_api import _check_data
+from hydromt.models.model_grid import GridMixin
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+class _DummyModel(GridModel, GridMixin):
+    _API = {"asdf": "yeah"}
+
+
+def test_api_attrs():
+    dm = _DummyModel()
+    assert hasattr(dm, "_NAME")
+    assert hasattr(dm, "_API")
+    assert "asdf" in dm.api
+    assert dm.api["asdf"] == "yeah"
+    assert "region" in dm.api
+    assert dm.api["region"] == gpd.GeoDataFrame
+    assert "grid" in dm.api
+    assert dm.api["grid"] == xr.Dataset
 
 
 def test_plugins(mocker):
