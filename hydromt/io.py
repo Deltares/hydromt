@@ -227,7 +227,9 @@ def open_mfraster(
     return ds
 
 
-def open_mfcsv(fns, driver_kwargs, concat_dims, transpose):
+def open_mfcsv(
+    fns, driver_kwargs, concat_dim, rename_existing_index_to, variable_axis=1
+):
     """Open multiple csv files as single Dataset.
 
     Arguments
@@ -240,25 +242,35 @@ def open_mfcsv(fns, driver_kwargs, concat_dims, transpose):
         The newly created Dataset.
     """
     ds = xr.Dataset()
+    if variable_axis not in [0, 1]:
+        raise ValueError(f"there is no axis {variable_axis} avaialbe in 2d csv files")
     # we're gonna use the structure of the first file found to check
     # all others agains
-    breakpoint()
-    first_fn = fns.pop(0)
+    first_id, first_fn = fns.popitem()
     first_df = pd.read_csv(first_fn, **driver_kwargs)
+    if variable_axis == 0:
+        first_df = first_df.T
+    first_df.rename_axis(rename_existing_index_to, axis=0, inplace=True)
     first_index = first_df.index
+    first_df[concat_dim] = first_id
     dfs = [first_df]
-    for fn in fns:
+    for id, fn in fns.items():
         df = pd.read_csv(fn, **driver_kwargs)
-        if transpose:
+        if variable_axis == 0:
             df = df.T
+        df[concat_dim] = id
+        df.rename_axis(rename_existing_index_to, axis=0, inplace=True)
 
         if not df.index.equals(first_index):
             raise RuntimeError(f"file {fn} has inconsistent index: {df.index}")
 
         dfs.append(df)
 
-    all_dfs_combined = pd.concat(dfs, axis=0).set_index(concat_dims)
+    all_dfs_combined = pd.concat(dfs, axis=0).set_index(
+        [concat_dim, rename_existing_index_to]
+    )
     ds = xr.Dataset.from_dataframe(all_dfs_combined).drop_vars("Unnamed: 0")
+
     return ds
 
 

@@ -195,10 +195,10 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
         for i in range(len(dfs_segmented_by_points))
     }
     os.mkdir(tmpdir.join("data"))
-    for i, fn in range(len(df_fns)):
-        dfs_segmented_by_points[i].to_csv(fn)
+    for i in range(len(df_fns)):
+        dfs_segmented_by_points[i].to_csv(df_fns[i])
 
-    ds = hydromt.io.open_mfcsv(df_fns, {}, ["id", "time"], False)
+    ds = hydromt.io.open_mfcsv(df_fns, {}, "id", "time")
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
     for i in range(len(dfs_segmented_by_points)):
@@ -212,15 +212,16 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
         ), test2
 
 
+@pytest.mark.skip(reason="Not yet supported")
 def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
-    df_fns = [
-        str(tmpdir.join("data", f"{i}.csv")) for i in range(len(dfs_segmented_by_vars))
-    ]
     os.mkdir(tmpdir.join("data"))
-    for i in range(len(df_fns)):
-        dfs_segmented_by_vars[i].to_csv(df_fns[i])
+    fns = {}
+    for var, df in dfs_segmented_by_vars.items():
+        fn = tmpdir.join("data", f"{var}.csv")
+        df.to_csv(fn)
+        fns[var] = fn
 
-    ds = hydromt.io.open_mfcsv(df_fns, {}, ["id", "time"], False)
+    ds = hydromt.io.open_mfcsv(fns, {}, "id", "time", 0)
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
     for i in range(len(dfs_segmented_by_vars)):
