@@ -4,7 +4,7 @@ import io
 import logging
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
-from typing import Any, Dict, Literal
+from typing import Any, Dict, Literal, Union
 
 import dask
 import geopandas as gpd
@@ -229,7 +229,7 @@ def open_mfraster(
 
 
 def open_mfcsv(
-    fns: Dict[str | int, str | Path],
+    fns: Dict[Union[str, int], Union[str, Path]],
     concat_dim: str,
     driver_kwargs: Dict[str, Any],
     variable_axis: Literal[0, 1] = 1,
