@@ -80,7 +80,7 @@ def dfs_segmented_by_points(df):
                 "test1": np.arange(len(df)) * id,
                 "test2": np.arange(len(df)) ** id,
             }
-        )
+        ).set_index("time")
         for id in range(len(df))
     }
 
