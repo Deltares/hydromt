@@ -88,7 +88,9 @@ def dfs_segmented_by_points(df):
 
 @pytest.fixture()
 def dfs_segmented_by_vars(dfs_segmented_by_points):
-    data_vars = [v for v in dfs_segmented_by_points.columns if v not in ["id", "time"]]
+    data_vars = [
+        v for v in pd.concat(dfs_segmented_by_points).columns if v not in ["id", "time"]
+    ]
     return [
         (
             v,

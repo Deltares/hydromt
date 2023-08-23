@@ -189,7 +189,7 @@ def test_raster_io(tmpdir, rioda):
     assert os.path.isfile(join(root, "test", "test.tif"))
 
 
-def test_open_mfcsv(tmpdir, dfs_segmented_by_points):
+def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
     df_fns = [
         str(tmpdir.join("data", f"{i}.csv"))
         for i in range(len(dfs_segmented_by_points))
@@ -209,6 +209,26 @@ def test_open_mfcsv(tmpdir, dfs_segmented_by_points):
         ), test1
         assert np.all(
             np.equal(test2, np.arange(len(dfs_segmented_by_points)) ** i)
+        ), test2
+
+
+def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
+    df_fns = [
+        str(tmpdir.join("data", f"{i}.csv")) for i in range(len(dfs_segmented_by_vars))
+    ]
+    os.mkdir(tmpdir.join("data"))
+    for i in range(len(df_fns)):
+        dfs_segmented_by_vars[i].to_csv(df_fns[i])
+
+    ds = hydromt.io.open_mfcsv(df_fns, {}, ["id", "time"], False)
+
+    assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
+    for i in range(len(dfs_segmented_by_vars)):
+        test1 = ds.sel(id=i)["test1"]
+        test2 = ds.sel(id=i)["test2"]
+        assert np.all(np.equal(test1, np.arange(len(dfs_segmented_by_vars)) * i)), test1
+        assert np.all(
+            np.equal(test2, np.arange(len(dfs_segmented_by_vars)) ** i)
         ), test2
 
 
