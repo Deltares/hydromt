@@ -73,17 +73,16 @@ def df():
 
 @pytest.fixture()
 def dfs_segmented_by_points(df):
-    return [
-        pd.DataFrame(
+    return {
+        id: pd.DataFrame(
             {
-                "id": [id for _ in range(len(df))],
                 "time": pd.date_range("2023-08-22", periods=len(df), freq="1D"),
                 "test1": np.arange(len(df)) * id,
                 "test2": np.arange(len(df)) ** id,
             }
         )
         for id in range(len(df))
-    ]
+    }
 
 
 @pytest.fixture()
@@ -91,15 +90,12 @@ def dfs_segmented_by_vars(dfs_segmented_by_points):
     data_vars = [
         v for v in pd.concat(dfs_segmented_by_points).columns if v not in ["id", "time"]
     ]
-    return [
-        (
-            v,
-            pd.concat(dfs_segmented_by_points).pivot(
-                index="time", columns="id", values=v
-            ),
+    return {
+        v: pd.concat(dfs_segmented_by_points).pivot(
+            index="time", columns="id", values=v
         )
         for v in data_vars
-    ]
+    }
 
 
 @pytest.fixture()

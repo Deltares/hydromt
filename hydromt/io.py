@@ -242,6 +242,7 @@ def open_mfcsv(fns, driver_kwargs, concat_dims, transpose):
     ds = xr.Dataset()
     # we're gonna use the structure of the first file found to check
     # all others agains
+    breakpoint()
     first_fn = fns.pop(0)
     first_df = pd.read_csv(first_fn, **driver_kwargs)
     first_index = first_df.index

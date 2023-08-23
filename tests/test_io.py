@@ -190,13 +190,13 @@ def test_raster_io(tmpdir, rioda):
 
 
 def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
-    df_fns = [
-        str(tmpdir.join("data", f"{i}.csv"))
+    df_fns = {
+        i: str(tmpdir.join("data", f"{i}.csv"))
         for i in range(len(dfs_segmented_by_points))
-    ]
+    }
     os.mkdir(tmpdir.join("data"))
-    for i in range(len(df_fns)):
-        dfs_segmented_by_points[i].to_csv(df_fns[i])
+    for i, fn in range(len(df_fns)):
+        dfs_segmented_by_points[i].to_csv(fn)
 
     ds = hydromt.io.open_mfcsv(df_fns, {}, ["id", "time"], False)
 
