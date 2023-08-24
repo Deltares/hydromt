@@ -286,7 +286,7 @@ def open_mfcsv(
 
         df[concat_dim] = id
 
-        if not df.index.dtype() == first_index.dtype():
+        if not df.index.dtype == first_index.dtype:
             raise RuntimeError(
                 f"file {fn} has inconsistent index type: {df.index.dtype()}"
                 f"Expected {first_index.dtype()}"
