@@ -1,6 +1,11 @@
 """Utility functions for hydromt that have no other home."""
 
 
+class _classproperty(property):
+    def __get__(self, owner_self, owner_cls):
+        return self.fget(owner_cls)
+
+
 def partition_dictionaries(left, right):
     """Calculate a partitioning of the two dictionaries.
 

@@ -1,15 +1,16 @@
 """Implementations for model mesh workloads."""
 import logging
 import os
-from os.path import dirname, isdir, isfile, join
+from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
 import xugrid as xu
+from pyproj import CRS
 from shapely.geometry import box
 
 from .. import workflows
@@ -32,18 +33,19 @@ class MeshMixin(object):
         self._mesh = None
 
     ## general setup methods
-    def setup_mesh_from_rasterdataset(
+    def setup_mesh2d_from_rasterdataset(
         self,
         raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
+        grid_name: Optional[str] = "mesh2d",
         variables: Optional[list] = None,
         fill_method: Optional[str] = None,
         resampling_method: Optional[str] = "mean",
         all_touched: Optional[bool] = True,
         rename: Optional[Dict] = dict(),
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to mesh object.
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to 2D ``grid_name`` in mesh object.
 
-        Raster data is interpolated to the mesh grid using the ``resampling_method``.
+        Raster data is interpolated to the mesh ``grid_name`` using the ``resampling_method``.
         If raster is a dataset, all variables will be added unless ``variables`` list
         is specified.
 
@@ -55,6 +57,8 @@ class MeshMixin(object):
         ----------
         raster_fn: str, Path, xr.DataArray, xr.Dataset
             Data catalog key, path to raster file or raster xarray data object.
+        grid_name: str, optional
+            Name of the mesh grid to add the data to. By default 'mesh2d'.
         variables: list, optional
             List of variables to add to mesh from raster_fn. By default all.
         fill_method : str, optional
@@ -75,11 +79,14 @@ class MeshMixin(object):
         -------
         list
             List of variables added to mesh.
-        """
+        """  # noqa: E501
         self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
+        # Check if grid name in self.mesh
+        if grid_name not in self.mesh_names:
+            raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
         # Read raster data and select variables
         ds = self.data_catalog.get_rasterdataset(
-            raster_fn, geom=self.region, buffer=2, variables=variables
+            raster_fn, bbox=self.bounds[grid_name], buffer=2, variables=variables
         )
         if isinstance(ds, xr.DataArray):
             ds = ds.to_dataset()
@@ -90,23 +97,26 @@ class MeshMixin(object):
         # Convert mesh grid as geodataframe for sampling
         # Reprojection happens to gdf inside of zonal_stats method
         ds_sample = ds.raster.zonal_stats(
-            gdf=self.mesh_gdf, stats=resampling_method, all_touched=all_touched
+            gdf=self.mesh_gdf[grid_name],
+            stats=resampling_method,
+            all_touched=all_touched,
         )
         # Rename variables
         rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
         ds_sample = ds_sample.rename(rm_dict).rename(rename)
         # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
+        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh_grids[grid_name])
 
-        self.set_mesh(uds_sample)
+        self.set_mesh(uds_sample, grid_name=grid_name, overwrite_grid=False)
 
         return list(ds_sample.data_vars.keys())
 
-    def setup_mesh_from_raster_reclass(
+    def setup_mesh2d_from_raster_reclass(
         self,
         raster_fn: Union[str, Path, xr.DataArray],
         reclass_table_fn: Union[str, Path, pd.DataFrame],
         reclass_variables: list,
+        grid_name: Optional[str] = "mesh2d",
         variable: Optional[str] = None,
         fill_nodata: Optional[str] = None,
         resampling_method: Optional[Union[str, list]] = "mean",
@@ -114,7 +124,7 @@ class MeshMixin(object):
         rename: Optional[Dict] = dict(),
         **kwargs,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to 2D ``grid_name`` in mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         The reclassified raster data
         are subsequently interpolated to the mesh using `resampling_method`.
@@ -135,6 +145,8 @@ class MeshMixin(object):
         reclass_variables : list
             List of reclass_variables from the reclass_table_fn table to add to the
             mesh. The index column should match values in raster_fn.
+        grid_name : str, optional
+            Name of the mesh grid to add the data to. By default 'mesh2d'.
         variable : str, optional
             Name of the raster dataset variable to use. This is only required when
             reading datasets with multiple variables. By default, None.
@@ -173,9 +185,16 @@ class MeshMixin(object):
             f"Preparing mesh data by reclassifying the data in {raster_fn} "
             f"based on {reclass_table_fn}."
         )
+        # Check if grid name in self.mesh
+        if grid_name not in self.mesh_names:
+            raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
         # Read raster data and mapping table
         da = self.data_catalog.get_rasterdataset(
-            raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
+            raster_fn,
+            bbox=self.bounds[grid_name],
+            buffer=2,
+            variables=variable,
+            **kwargs,
         )
         if not isinstance(da, xr.DataArray):
             raise ValueError(
@@ -195,7 +214,7 @@ class MeshMixin(object):
         # Convert mesh grid as geodataframe for sampling
         # Reprojection happens to gdf inside of zonal_stats method
         ds_sample = ds_vars.raster.zonal_stats(
-            gdf=self.mesh_gdf,
+            gdf=self.mesh_gdf[grid_name],
             stats=np.unique(np.atleast_1d(resampling_method)),
             all_touched=all_touched,
         )
@@ -209,15 +228,21 @@ class MeshMixin(object):
         ds_sample = ds_sample.rename(rm_dict).rename(rename)
         ds_sample = ds_sample[reclass_variables]
         # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh.ugrid.grid)
+        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh_grids[grid_name])
 
-        self.set_mesh(uds_sample)
+        self.set_mesh(uds_sample, grid_name=grid_name, overwrite_grid=False)
 
         return list(ds_sample.data_vars.keys())
 
     @property
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
-        """Model static mesh data. Returns a xarray.Dataset."""
+        """
+        Model static mesh data. It returns a xugrid.UgridDataset.
+
+        Mesh can contain several grids (1D, 2D, 3D) defined according
+        to UGRID conventions. To extract a specific grid, use get_mesh
+        method.
+        """
         # XU grid data type Xarray dataset with xu sampling.
         if self._mesh is None and self._read:
             self.read_mesh()
@@ -227,19 +252,34 @@ class MeshMixin(object):
         self,
         data: Union[xu.UgridDataArray, xu.UgridDataset],
         name: Optional[str] = None,
+        grid_name: Optional[str] = None,
+        overwrite_grid: Optional[bool] = False,
     ) -> None:
         """Add data to mesh.
 
         All layers of mesh have identical spatial coordinates in Ugrid conventions.
+        Also updates self.region if grid_name is new or overwrite_grid is True.
 
         Parameters
         ----------
         data: xugrid.UgridDataArray or xugrid.UgridDataset
-            new layer to add to mesh
+            new layer to add to mesh, should contain only one grid topology.
         name: str, optional
             Name of new object layer, this is used to overwrite the name of
             a UgridDataArray.
+        grid_name: str, optional
+            Name of the mesh grid to add data to. If None, inferred from data.
+            Can be used for renaming the grid.
+        overwrite_grid: bool, optional
+            If True, overwrite the grid with the same name as the grid in self.mesh.
         """
+        # Check if new grid_name
+        if grid_name not in self.mesh_names:
+            new_grid = True
+        else:
+            new_grid = False
+
+        # Checks on data
         if not isinstance(data, (xu.UgridDataArray, xu.UgridDataset)):
             raise ValueError(
                 "New mesh data in set_mesh should be of type xu.UgridDataArray"
@@ -253,15 +293,135 @@ class MeshMixin(object):
                     f"Cannot set mesh from {str(type(data).__name__)} without a name."
                 )
             data = data.to_dataset()
+
+        # Checks on grid topology
+        # TODO: check if we support setting multiple grids at once. For now just one
+        if len(data.ugrid.grids) > 1:
+            raise ValueError(
+                "set_mesh methods only supports adding data to one grid at a time."
+            )
+        if grid_name is None:
+            grid_name = data.ugrid.grid.name
+        elif grid_name != data.ugrid.grid.name:
+            data = workflows.rename_mesh(data, name=grid_name)
+
+        # Adding to mesh
         if self.mesh is None:  # NOTE: mesh is initialized with None
+            # Check on crs
+            if not data.ugrid.grid.crs:
+                raise ValueError("Data should have CRS.")
             self._mesh = data
         else:
-            for dvar in data.data_vars:
-                if dvar in self._mesh:
-                    self.logger.warning(f"Replacing mesh parameter: {dvar}")
-                self._mesh[dvar] = data[dvar]
+            # Check on crs
+            if not data.ugrid.grid.crs == self.crs:
+                raise ValueError("Data and self.mesh should have the same CRS.")
+            # Save crs as it will be lost when converting to xarray
+            crs = self.crs
+            # Check on new grid topology
+            if grid_name in self.mesh_names:
+                # check if the two grids are the same
+                if (
+                    not self.mesh_grids[grid_name]
+                    .to_dataset()
+                    .equals(data.ugrid.grid.to_dataset())
+                ):
+                    if not overwrite_grid:
+                        raise ValueError(
+                            f"Grid {grid_name} already exists in mesh"
+                            " and has a different topology. "
+                            "Use overwrite_grid=True to overwrite the grid"
+                            " topology and related data."
+                        )
+                    else:
+                        # Remove grid and all corresponding data variables from mesh
+                        self.logger.warning(
+                            f"Overwriting grid {grid_name} and the corresponding"
+                            " data variables in mesh."
+                        )
+                        grids = [
+                            self.mesh_datasets[g].ugrid.to_dataset(
+                                optional_attributes=True
+                            )
+                            for g in self.mesh_names
+                            if g != grid_name
+                        ]
+                        # Re-define _mesh
+                        grids = xr.merge(grids)
+                        self._mesh = xu.UgridDataset(grids)
+            # Check again mesh_names, could have changed if overwrite_grid=True
+            if grid_name in self.mesh_names:
+                for dvar in data.data_vars:
+                    if dvar in self._mesh:
+                        self.logger.warning(f"Replacing mesh parameter: {dvar}")
+                    self._mesh[dvar] = data[dvar]
+            else:
+                # We are potentially adding a new grid without any data variables
+                self._mesh = xu.UgridDataset(
+                    xr.merge(
+                        [
+                            self.mesh.ugrid.to_dataset(optional_attributes=True),
+                            data.ugrid.to_dataset(optional_attributes=True),
+                        ]
+                    )
+                )
+            # Restore crs
+            for grid in self._mesh.ugrid.grids:
+                grid.set_crs(crs)
 
-    def read_mesh(self, fn: str = "mesh/mesh.nc", **kwargs) -> None:
+        # update related geoms if necessary: region
+        if overwrite_grid or new_grid:
+            # add / updates region
+            if "region" in self.geoms:
+                self._geoms.pop("region", None)
+            self.region
+
+    def get_mesh(
+        self, grid_name: str, include_data: bool = False
+    ) -> Union[xu.UgridDataArray, xu.UgridDataset]:
+        """
+        Return a specific grid topology from mesh based on grid_name.
+
+        If include_data is True, the data variables for that specific
+        grid are also included.
+
+        Parameters
+        ----------
+        grid_name : str
+            Name of the grid to return.
+        include_data : bool, optional
+            If True, also include data variables, by default False.
+
+        Returns
+        -------
+        uds: Union[xu.UgridDataArray, xu.UgridDataset]
+            Grid topology with or without data variables.
+        """
+        if self.mesh is None:
+            raise ValueError("Mesh is not set, please use set_mesh first.")
+        if grid_name not in self.mesh_names:
+            raise ValueError(f"Grid {grid_name} not found in mesh.")
+        if include_data:
+            grid = self.mesh_grids[grid_name]
+            uds = xu.UgridDataset(grid.to_dataset(optional_attributes=True))
+            uds.ugrid.grid.set_crs(grid.crs)
+            # Look for data_vars that are defined on grid_name
+            for var in self.mesh.data_vars:
+                if hasattr(self.mesh[var], "ugrid"):
+                    if self.mesh[var].ugrid.grid.name == grid_name:
+                        uds[var] = self.mesh[var]
+                # additionnal topology properties
+                elif var.startswith(grid_name):
+                    uds[var] = self.mesh[var]
+                # else is global property (not grid specific)
+
+            return uds
+
+        else:
+            return self.mesh_grids[grid_name]
+
+    def read_mesh(
+        self, fn: str = "mesh/mesh.nc", crs: Union[CRS, int] = None, **kwargs
+    ) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
@@ -270,35 +430,53 @@ class MeshMixin(object):
         ----------
         fn : str, optional
             filename relative to model root, by default 'mesh/mesh.nc'
+        crs : CRS or int, optional
+            Coordinate Reference System (CRS) object or EPSG code representing the
+            spatial reference system of the mesh file. Only used if the CRS is not
+            found when reading the mesh file.
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
         self._assert_read_mode
-        for ds in self.read_nc(fn, **kwargs).values():
-            uds = xu.UgridDataset(ds)
-            if ds.rio.crs is not None:  # parse crs
-                uds.ugrid.grid.set_crs(ds.raster.crs)
-                uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
-            if self._mesh is None:
-                self._mesh = uds
+        ds = xr.merge(self.read_nc(fn, **kwargs).values())
+        uds = xu.UgridDataset(ds)
+        if ds.rio.crs is not None:  # parse crs
+            uds.ugrid.set_crs(ds.raster.crs)
+            uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
+        else:
+            if not crs:
+                raise ValueError(
+                    "no crs is found in the file nor passed to the reader."
+                )
             else:
-                for dvar in uds.data_vars:
-                    self._mesh[dvar] = uds[dvar]
+                uds.ugrid.set_crs(crs)
+                self.logger.info(
+                    "no crs is found in the file, assigning from user input."
+                )
+        self._mesh = uds
 
-    def write_mesh(self, fn: str = "mesh/mesh.nc", **kwargs) -> None:
+    def write_mesh(
+        self,
+        fn: str = "mesh/mesh.nc",
+        write_optional_ugrid_attributes: bool = True,
+        **kwargs,
+    ) -> None:
         """Write model grid data to a netCDF file at <root>/<fn>.
 
-        Keyword arguments are passed to :py:meth:`xarray.Dataset.ugrid.to_netcdf`.
+        Keyword arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`.
 
         Parameters
         ----------
         fn : str, optional
             Filename relative to the model root directory, by default 'grid/grid.nc'.
+        write_optional_ugrid_attributes : bool, optional
+            If True, write optional ugrid attributes to the netCDF file, by default
+            True.
         **kwargs : dict
             Additional keyword arguments to be passed to the
-            `xarray.Dataset.ugrid.to_netcdf` method.
+            `xarray.Dataset.to_netcdf` method.
         """
-        if self._mesh is None:
+        if self.mesh is None:
             self.logger.debug("No mesh data found, skip writing.")
             return
         self._assert_write_mode
@@ -307,18 +485,75 @@ class MeshMixin(object):
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
         self.logger.debug(f"Writing file {fn}")
-        ds_out = self.mesh.ugrid.to_dataset()
-        if self.mesh.ugrid.grid.crs is not None:
+        ds_out = self.mesh.ugrid.to_dataset(
+            optional_attributes=write_optional_ugrid_attributes,
+        )
+        if self.crs is not None:
             # save crs to spatial_ref coordinate
-            ds_out = ds_out.rio.write_crs(self.mesh.ugrid.grid.crs)
+            ds_out = ds_out.rio.write_crs(self.crs)
         ds_out.to_netcdf(_fn, **kwargs)
+
+    # Other mesh properties
+    @property
+    def mesh_grids(self) -> Dict[str, Union[xu.Ugrid1d, xu.Ugrid2d]]:
+        """Dictionnary of grid names and Ugrid topologies in mesh."""
+        grids = dict()
+        if self.mesh is not None:
+            for grid in self.mesh.ugrid.grids:
+                grids[grid.name] = grid
+
+        return grids
+
+    @property
+    def mesh_datasets(self) -> Dict[str, xu.UgridDataset]:
+        """Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh."""  # noqa: E501
+        datasets = dict()
+        if self.mesh is not None:
+            for grid in self.mesh.ugrid.grids:
+                datasets[grid.name] = self.get_mesh(
+                    grid_name=grid.name, include_data=True
+                )
+
+        return datasets
+
+    @property
+    def mesh_names(self) -> List[str]:
+        """List of grid names in mesh."""
+        if self.mesh is not None:
+            return [grid.name for grid in self.mesh.ugrid.grids]
+        else:
+            return []
+
+    @property
+    def mesh_gdf(self) -> Dict[str, gpd.GeoDataFrame]:
+        """Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame."""
+        mesh_gdf = dict()
+        if self.mesh is not None:
+            for k, grid in self.mesh_grids.items():
+                if grid.topology_dimension == 1:
+                    dim = grid.edge_dimension
+                elif grid.topology_dimension == 2:
+                    dim = grid.face_dimension
+                gdf = gpd.GeoDataFrame(
+                    index=grid.to_dataset()[dim].values.astype(str),
+                    geometry=grid.to_shapely(dim),
+                )
+                mesh_gdf[k] = gdf.set_crs(grid.crs)
+
+        return mesh_gdf
 
 
 class MeshModel(MeshMixin, Model):
 
-    """Model class Mesh Model for mesh models in HydroMT."""
+    """Model class Mesh Model for mesh models in HydroMT.
 
-    _CLI_ARGS = {"region": "setup_mesh", "res": "setup_mesh"}
+    Uses xugrid for working with unstructured grids, for data and topology stored
+    according to UGRID conventions.
+
+    See also: xugrid
+    """
+
+    _CLI_ARGS = {"region": "setup_mesh2d", "res": "setup_mesh2d"}
     _NAME = "mesh_model"
 
     def __init__(
@@ -329,7 +564,7 @@ class MeshModel(MeshMixin, Model):
         data_libs: List[str] = None,
         logger=logger,
     ):
-        """Initialize a MeshModel for distributed models with an unstructured grid."""
+        """Initialize a MeshModel for models with an unstructured grid."""
         super().__init__(
             root=root,
             mode=mode,
@@ -339,41 +574,49 @@ class MeshModel(MeshMixin, Model):
         )
 
     ## general setup methods
-    def setup_mesh(
+    def setup_mesh2d(
         self,
         region: dict,
         res: Optional[float] = None,
         crs: int = None,
+        grid_name: str = "mesh2d",
     ) -> xu.UgridDataset:
         """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
 
         Grids are read according to UGRID conventions. An 2D unstructured mesh
         will be created as 2D rectangular grid from a geometry (geom_fn) or bbox.
-        If an existing 2D mesh is given, then no new mesh will be generated
+        If an existing 2D mesh is given, then no new mesh will be generated but an extent
+        can be extracted using the `bounds` argument of region.
 
         Note Only existing meshed with only 2D grid can be read.
-        #FIXME: read existing 1D2D network file and extract 2D part.
 
         Adds/Updates model layers:
 
-        * **mesh** mesh topology: add mesh topology to mesh object
+        * **grid_name** mesh topology: add grid_name 2D topology to mesh object
 
         Parameters
         ----------
         region : dict
-            Dictionary describing region of interest, e.g.:
+            Dictionary describing region of interest, bounds can be provided for type 'mesh'.
+            In case of 'mesh', if the file includes several grids, the specific 2D grid can
+            be selected using the 'grid_name' argument.
+            CRS for 'bbox' and 'bounds' should be 4326; e.g.:
 
             * {'bbox': [xmin, ymin, xmax, ymax]}
 
             * {'geom': 'path/to/polygon_geometry'}
 
             * {'mesh': 'path/to/2dmesh_file'}
+
+            * {'mesh': 'path/to/mesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
         res: float
             Resolution used to generate 2D mesh [unit of the CRS], required if region
             is not based on 'mesh'.
         crs : EPSG code, int, optional
-            Optional EPSG code of the model. If None using the one from region,
-            and else 4326.
+            Optional EPSG code of the model or "utm" to let hydromt find the closest projected CRS.
+            If None using the one from region, and else 4326.
+        grid_name : str, optional
+            Name of the 2D grid in mesh, by default "mesh2d".
 
         Returns
         -------
@@ -383,100 +626,17 @@ class MeshModel(MeshMixin, Model):
         """  # noqa: E501
         self.logger.info("Preparing 2D mesh.")
 
-        if "mesh" not in region:
-            if not isinstance(res, (int, float)):
-                raise ValueError("res argument required")
-            kind, region = workflows.parse_region(region, logger=self.logger)
-            if kind == "bbox":
-                bbox = region["bbox"]
-                geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-            elif kind == "geom":
-                geom = region["geom"]
-                if geom.crs is None:
-                    raise ValueError('Model region "geom" has no CRS')
-            else:
-                raise ValueError(
-                    f"Region for mesh must of kind [bbox, geom, mesh], kind {kind} "
-                    "not understood."
-                )
-            if crs is not None:
-                geom = geom.to_crs(crs)
-            # Generate grid based on res for region bbox
-            xmin, ymin, xmax, ymax = geom.total_bounds
-            # note we flood the number of faces within bounds
-            ncol = int((xmax - xmin) // res)
-            nrow = int((ymax - ymin) // res)
-            dx, dy = res, -res
-            faces = []
-            for i in range(nrow):
-                top = ymax + i * dy
-                bottom = ymax + (i + 1) * dy
-                for j in range(ncol):
-                    left = xmin + j * dx
-                    right = xmin + (j + 1) * dx
-                    faces.append(box(left, bottom, right, top))
-            grid = gpd.GeoDataFrame(geometry=faces, crs=geom.crs)
-            # If needed clip to geom
-            if kind != "bbox":
-                # TODO: grid.intersects(geom) does not seem to work ?
-                grid = grid.loc[
-                    gpd.sjoin(
-                        grid, geom, how="left", predicate="intersects"
-                    ).index_right.notna()
-                ].reset_index()
-            # Create mesh from grid
-            grid.index.name = "mesh2d_nFaces"
-            mesh2d = xu.UgridDataset.from_geodataframe(grid)
-            mesh2d.ugrid.grid.set_crs(grid.crs)
+        # Create mesh2d
+        mesh2d = workflows.create_mesh2d(
+            region=region,
+            res=res,
+            crs=crs,
+            logger=self.logger,
+        )
+        # Add mesh2d to self.mesh
+        self.set_mesh(mesh2d, grid_name=grid_name)
 
-        else:
-            mesh2d_fn = region["mesh"]
-            if isinstance(mesh2d_fn, (str, Path)) and isfile(mesh2d_fn):
-                self.logger.info("An existing 2D grid is used to prepare 2D mesh.")
-
-                ds = xr.open_dataset(mesh2d_fn, mask_and_scale=False)
-            elif isinstance(mesh2d_fn, xr.Dataset):
-                ds = mesh2d_fn
-            else:
-                raise ValueError(
-                    f"Region 'mesh' file {mesh2d_fn} not found, please check"
-                )
-            topologies = [
-                k for k in ds.data_vars if ds[k].attrs.get("cf_role") == "mesh_topology"
-            ]
-            for topology in topologies:
-                topodim = ds[topology].attrs["topology_dimension"]
-                if topodim != 2:  # chek if 2d mesh file else throw error
-                    raise NotImplementedError(
-                        f"{mesh2d_fn} cannot be opened. Please check if the existing"
-                        " grid is an 2D mesh and not 1D2D mesh. "
-                        " This option is not yet available for 1D2D meshes."
-                    )
-
-            # Continues with a 2D grid
-            mesh2d = xu.UgridDataset(ds)
-            # Check crs and reproject to model crs
-            if crs is None:
-                crs = 4326
-            if ds.rio.crs is not None:  # parse crs
-                mesh2d.ugrid.grid.set_crs(ds.raster.crs)
-            else:
-                # Assume model crs
-                self.logger.warning(
-                    f"Mesh data from {mesh2d_fn} doesn't have a CRS."
-                    f" Assuming crs option {crs}"
-                )
-                mesh2d.ugrid.grid.set_crs(crs)
-            mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
-
-        # Reproject to user crs option if needed
-        if mesh2d.ugrid.grid.crs != crs and crs is not None:
-            self.logger.info(f"Reprojecting mesh to crs {crs}")
-            mesh2d.ugrid.grid.to_crs(self.crs)
-
-        self.set_mesh(mesh2d)
-
-        # This setup method returns region so that it can be wrapped for models
+        # This setup method returns mesh2d so that it can be wrapped for models
         # which require more information
         return mesh2d
 
@@ -522,27 +682,40 @@ class MeshModel(MeshMixin, Model):
 
     # MeshModel properties
     @property
-    def bounds(self) -> Tuple:
+    def bounds(self) -> Dict:
         """Returns model mesh bounds."""
-        if self._mesh is not None:
-            return self._mesh.ugrid.grid.bounds
+        if self.mesh is not None:
+            return self.mesh.ugrid.bounds
+
+    @property
+    def crs(self) -> CRS:
+        """Returns model mesh crs."""
+        if self.mesh is not None:
+            grid_crs = self.mesh.ugrid.crs
+            # Check if all the same
+            crs = None
+            for k, v in grid_crs.items():
+                if crs is None:
+                    crs = v
+                if v == crs:
+                    continue
+                else:
+                    raise ValueError(
+                        f"Mesh crs is not uniform, please check {grid_crs}"
+                    )
+            return crs
+        else:
+            return None
 
     @property
     def region(self) -> gpd.GeoDataFrame:
-        """Returns geometry of region of the model area of interest."""
+        """Returns geometry of region of the model area of interest based on mesh total bounds."""  # noqa: E501
         region = gpd.GeoDataFrame()
         if "region" in self.geoms:
             region = self.geoms["region"]
         elif self.mesh is not None:
-            crs = self.mesh.ugrid.grid.crs
-            if crs is None and hasattr(crs, "to_epsg"):
-                crs = crs.to_epsg()  # not all CRS have an EPSG code
-            region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
+            region = gpd.GeoDataFrame(
+                geometry=[box(*self.mesh.ugrid.total_bounds)], crs=self.crs
+            )
+            self.set_geoms(region, name="region")
         return region
-
-    @property
-    def mesh_gdf(self) -> gpd.GeoDataFrame:
-        """Returns geometry of mesh as a gpd.GeoDataFrame."""
-        if self._mesh is not None:
-            name = [n for n in self.mesh.data_vars][0]  # works better on a DataArray
-            return self._mesh[name].ugrid.to_geodataframe()

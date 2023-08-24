@@ -15,8 +15,25 @@ import hydromt.models.model_plugins
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import MODELS, GridModel, LumpedModel, Model, model_plugins
 from hydromt.models.model_api import _check_data
+from hydromt.models.model_grid import GridMixin
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+class _DummyModel(GridModel, GridMixin):
+    _API = {"asdf": "yeah"}
+
+
+def test_api_attrs():
+    dm = _DummyModel()
+    assert hasattr(dm, "_NAME")
+    assert hasattr(dm, "_API")
+    assert "asdf" in dm.api
+    assert dm.api["asdf"] == "yeah"
+    assert "region" in dm.api
+    assert dm.api["region"] == gpd.GeoDataFrame
+    assert "grid" in dm.api
+    assert dm.api["grid"] == xr.Dataset
 
 
 def test_plugins(mocker):
@@ -272,7 +289,6 @@ def test_setup_region(model, demda, tmpdir):
     demda.raster.to_raster(grid_fn)
     model.setup_region({"grid": grid_fn})
     assert np.all(demda.raster.bounds == model.region.total_bounds)
-    # # TODO model once we have registered the Model class entrypoint
     # basin
     model._geoms.pop("region")  # remove old region
     model.setup_region({"basin": [12.2, 45.833333333333329]})
@@ -562,24 +578,96 @@ def test_meshmodel(mesh_model, tmpdir):
 
 
 @pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
+def test_setup_mesh(tmpdir, griduda):
+    MeshModel = MODELS.load("mesh_model")
+    # Initialize model
+    model = MeshModel(
+        root=join(tmpdir, "mesh_model"),
+        data_libs=["artifact_data"],
+        mode="w",
+    )
+    # wrong region kind
+    with pytest.raises(ValueError, match="Region for mesh must be of kind "):
+        model.setup_mesh2d(
+            region={"basin": [12.5, 45.5]},
+            res=0.05,
+        )
+    # bbox
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    with pytest.raises(
+        ValueError, match="res argument required for kind 'bbox', 'geom'"
+    ):
+        model.setup_mesh2d({"bbox": bbox})
+    model.setup_mesh2d(
+        region={"bbox": bbox},
+        res=0.05,
+        crs=4326,
+        grid_name="mesh2d",
+    )
+    assert "mesh2d" in model.mesh_names
+    assert model.crs.to_epsg() == 4326
+    assert np.all(np.round(model.region.total_bounds, 3) == bbox)
+    assert model.mesh.ugrid.grid.n_node == 136
+    model._mesh = None  # remove old mesh
+
+    # geom
+    region = model._geoms.pop("region")
+    model.setup_mesh2d(
+        region={"geom": region},
+        res=10000,
+        crs="utm",
+        grid_name="mesh2d",
+    )
+    assert model.crs.to_epsg() == 32633
+    assert model.mesh.ugrid.grid.n_node == 35
+    model._mesh = None  # remove old mesh
+
+    # mesh
+    # create mesh file
+    mesh_fn = str(tmpdir.join("mesh2d.nc"))
+    gridda = griduda.ugrid.to_dataset()
+    gridda = gridda.rio.write_crs(griduda.ugrid.grid.crs)
+    gridda.to_netcdf(mesh_fn)
+
+    model.setup_mesh2d(
+        region={"mesh": mesh_fn},
+        grid_name="mesh2d",
+    )
+    assert np.all(griduda.ugrid.total_bounds == model.region.total_bounds)
+    assert model.mesh.ugrid.grid.n_node == 169
+    model._mesh = None  # remove old mesh
+
+    # mesh with bounds
+    bounds = [12.095, 46.495, 12.10, 46.50]
+    model.setup_mesh2d(
+        {"mesh": mesh_fn, "bounds": bounds},
+        grid_name="mesh1",
+    )
+    assert "mesh1" in model.mesh_names
+    assert model.mesh.ugrid.grid.n_node == 49
+    assert np.all(np.round(model.region.total_bounds, 3) == bounds)
+
+
+@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})
     region = {"geom": world[world.name == "Italy"]}
-    mod.setup_mesh(region, res=10000, crs=3857)
+    mod.setup_mesh2d(region, res=10000, crs=3857, grid_name="mesh2d")
     mod.region
 
-    region = {"mesh": griduda.ugrid.to_dataset()}
+    region = {"mesh": griduda}
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
-    mod1.setup_mesh(region)
-    mod1.setup_mesh_from_rasterdataset("vito")
+    mod1.setup_mesh2d(region, grid_name="mesh2d")
+    mod1.setup_mesh2d_from_rasterdataset("vito", grid_name="mesh2d")
     assert "vito" in mod1.mesh.data_vars
-    mod1.setup_mesh_from_raster_reclass(
+    mod1.setup_mesh2d_from_raster_reclass(
         raster_fn="vito",
         reclass_table_fn="vito_mapping",
         reclass_variables=["roughness_manning"],
         resampling_method="mean",
+        grid_name="mesh2d",
     )
     assert "roughness_manning" in mod1.mesh.data_vars

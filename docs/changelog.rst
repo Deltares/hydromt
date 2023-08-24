@@ -20,6 +20,7 @@ Added
 
 Changed
 -------
+- Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. PR #412
 - possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
 - Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
   call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
