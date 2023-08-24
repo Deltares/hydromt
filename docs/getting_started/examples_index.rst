@@ -33,7 +33,7 @@ GIS operations:
 * `Working with raster data <../_examples/working_with_raster.ipynb>`_
 * `Working with flow direction data <../_examples/working_with_flow_directions.ipynb>`_
 
-Extreme Value Analysis:
+Statistical Analysis:
 ***********************
 
-* `Working with raster data <../_examples/doing_extreme_value_analysis.ipynb>`_
+* `Extreme Value Analysis <../_examples/doing_extreme_value_analysis.ipynb>`_
