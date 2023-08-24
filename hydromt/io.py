@@ -4,7 +4,7 @@ import io
 import logging
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
-from typing import Any, Dict, Literal, Union
+from typing import Any, Dict, Literal, Optional, Union
 
 import dask
 import geopandas as gpd
@@ -231,7 +231,7 @@ def open_mfraster(
 def open_mfcsv(
     fns: Dict[Union[str, int], Union[str, Path]],
     concat_dim: str,
-    driver_kwargs: Dict[str, Any],
+    driver_kwargs: Optional[Dict[str, Any]] = None,
     variable_axis: Literal[0, 1] = 1,
 ) -> xr.Dataset:
     """Open multiple csv files as single Dataset.
@@ -262,7 +262,9 @@ def open_mfcsv(
     # we're gonna use the structure of the first file found to check
     # all others against
     csv_kwargs = {"index_col": 0}
-    csv_kwargs.update(**driver_kwargs)
+    if driver_kwargs is not None:
+        csv_kwargs.update(**driver_kwargs)
+
     first_id, first_fn = next(iter(fns.items()))
     first_df = pd.read_csv(first_fn, **csv_kwargs)
     if variable_axis == 0:
@@ -284,10 +286,10 @@ def open_mfcsv(
 
         df[concat_dim] = id
 
-        if not df.index.equals(first_index):
+        if not df.index.dtype() == first_index.dtype():
             raise RuntimeError(
-                f"file {fn} has inconsistent index: {df.index}"
-                f"Expected {first_index}"
+                f"file {fn} has inconsistent index type: {df.index.dtype()}"
+                f"Expected {first_index.dtype()}"
             )
 
         dfs.append(df)

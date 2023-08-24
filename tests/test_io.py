@@ -198,7 +198,7 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
     for i in range(len(df_fns)):
         dfs_segmented_by_points[i].to_csv(df_fns[i])
 
-    ds = hydromt.io.open_mfcsv(df_fns, "id", {})
+    ds = hydromt.io.open_mfcsv(df_fns, "id")
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
     assert sorted(list(ds.dims)) == ["id", "time"], ds
@@ -217,7 +217,7 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
         dfs_segmented_by_points[i].rename_axis(None, axis=0, inplace=True)
         dfs_segmented_by_points[i].to_csv(df_fns[i])
 
-    ds = hydromt.io.open_mfcsv(df_fns, "id", {})
+    ds = hydromt.io.open_mfcsv(df_fns, "id")
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
     assert sorted(list(ds.dims)) == ["id", "index"], ds
@@ -241,7 +241,7 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
         df.to_csv(fn)
         fns[var] = fn
 
-    ds = hydromt.io.open_mfcsv(fns, {}, "id", "time", 0)
+    ds = hydromt.io.open_mfcsv(fns, "id")
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
     for i in range(len(dfs_segmented_by_vars)):
