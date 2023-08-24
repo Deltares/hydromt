@@ -260,7 +260,7 @@ def open_mfcsv(
     if variable_axis not in [0, 1]:
         raise ValueError(f"there is no axis {variable_axis} available in 2D csv files")
     # we're gonna use the structure of the first file found to check
-    # all others agains
+    # all others against
     csv_kwargs = {"index_col": 0}
     csv_kwargs.update(**driver_kwargs)
     first_id, first_fn = next(iter(fns.items()))
