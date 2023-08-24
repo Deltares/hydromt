@@ -55,6 +55,10 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
         new_variable_name: value
       unit_mult:
         new_variable_name: value
+      attrs:
+        new_variable_name:
+          units: value
+          long_name: variable_long_name
       zoom_levels:
         [zoom_level: zoom_resolution]
 
