@@ -258,7 +258,7 @@ def open_mfcsv(
     """
     ds = xr.Dataset()
     if variable_axis not in [0, 1]:
-        raise ValueError(f"there is no axis {variable_axis} avaialbe in 2d csv files")
+        raise ValueError(f"there is no axis {variable_axis} available in 2D csv files")
     # we're gonna use the structure of the first file found to check
     # all others agains
     csv_kwargs = {"index_col": 0}
