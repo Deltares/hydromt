@@ -233,6 +233,7 @@ def open_mfcsv(
     concat_dim: str,
     driver_kwargs: Optional[Dict[str, Any]] = None,
     variable_axis: Literal[0, 1] = 1,
+    segmented_by: Literal["id", "var"] = "id",
 ) -> xr.Dataset:
     """Open multiple csv files as single Dataset.
 
@@ -240,16 +241,25 @@ def open_mfcsv(
     ---------
     fns : Dict[str | int, str | Path],
         Dictionary containing a id -> filename mapping. Here the ids,
-        should correspond to the values of the `concat_dim` dimension.
+        should correspond to the values of the `concat_dim` dimension and
+        the corresponding setting of `segmented_by`. I.e. if files are
+        segmented by id, these should contain ids. If the files are
+        segmented by var, the keys of this dictionaires should be the
+        names of the variables.
     concat_dim : str,
         name of the dimention that will be created by concatinating
         all of the supplied csv files.
     driver_kwargs : Dict[str, Any],
         Any additional arguments to be passed to pandas' `read_csv` function.
     variable_axis : Literal[0, 1] = 1,
-        The axis along which your variables are. so if the csvs have the
+        The axis along which your variables or ids are. so if the csvs have the
         columns as variable names, you would leave this as 1. If the variables
-        are along the index, set this to 0.
+        are along the index, set this to 0. If you are unsure leave it as default.
+    segmented_by: str
+        How the csv files are segmented. Options are "id" or "var".  "id" should refer
+        to the values of `concat_dim`. Segmented by id means csv files contain all
+        variables for one id. Segmented by var or contain all ids for a
+        single variable.
 
     Returns
     -------
@@ -259,44 +269,74 @@ def open_mfcsv(
     ds = xr.Dataset()
     if variable_axis not in [0, 1]:
         raise ValueError(f"there is no axis {variable_axis} available in 2D csv files")
-    # we're gonna use the structure of the first file found to check
-    # all others against
+    if segmented_by not in ["id", "var"]:
+        raise ValueError(
+            f"Unknown segmentation provided: {segmented_by}, options are ['var','id']"
+        )
+
     csv_kwargs = {"index_col": 0}
     if driver_kwargs is not None:
         csv_kwargs.update(**driver_kwargs)
 
-    first_id, first_fn = next(iter(fns.items()))
-    first_df = pd.read_csv(first_fn, **csv_kwargs)
-    if variable_axis == 0:
-        first_df = first_df.T
-
-    first_index = first_df.index
-
-    if first_df.index.name is None:
-        csv_index_name = "index"
-    else:
-        csv_index_name = first_df.index.name
-
-    first_df[concat_dim] = first_id
+    # we'll just pick the first one we parse
+    csv_index_name = None
     dfs = []
     for id, fn in fns.items():
         df = pd.read_csv(fn, **csv_kwargs)
         if variable_axis == 0:
             df = df.T
 
-        df[concat_dim] = id
-
-        if not df.index.dtype == first_index.dtype:
-            raise ValueError(
-                f"file {fn} has inconsistent index type: {df.index.dtype()}"
-                f"Expected {first_index.dtype()}"
+        if segmented_by == "id":
+            df[concat_dim] = id
+        elif segmented_by == "var":
+            df["var"] = id
+            df = df.reset_index().melt(id_vars=["var", "time"], var_name=concat_dim)
+        else:
+            raise RuntimeError(
+                "Reached unknown segmentation branch (this should be impossible):"
+                f" {segmented_by}, options are ['var','id']"
             )
+
+        if csv_index_name is None:
+            # we're in the first loop
+            if df.index.name is None:
+                csv_index_name = "index"
+            else:
+                csv_index_name = df.index.name
+        else:
+            # could have done this in one giant boolean expression but throught
+            # this was clearer
+            if df.index.name is None:
+                if not csv_index_name == "index":
+                    logger.warn(
+                        f"csv file {fn} has inconsistent index name: {df.index.name}"
+                        f"expected {csv_index_name} as it's the first one found."
+                    )
+            else:
+                if not csv_index_name == df.index.name:
+                    logger.warn(
+                        f"csv file {fn} has inconsistent index name: {df.index.name}"
+                        f"expected {csv_index_name} as it's the first one found."
+                    )
 
         dfs.append(df)
 
-    all_dfs_combined = (
-        pd.concat(dfs, axis=0).reset_index().set_index([concat_dim, csv_index_name])
-    )
+    if segmented_by == "id":
+        all_dfs_combined = (
+            pd.concat(dfs, axis=0).reset_index().set_index([concat_dim, csv_index_name])
+        )
+    elif segmented_by == "var":
+        all_dfs_combined = (
+            pd.concat(dfs, axis=0)
+            .pivot(index=[concat_dim, csv_index_name], columns="var")
+            .droplevel(0, axis=1)
+            .rename_axis(None, axis=1)
+        )
+    else:
+        raise RuntimeError(
+            "Reached unknown segmentation branch (this should be impossible):"
+            f" {segmented_by}, options are ['var','id']"
+        )
     ds = xr.Dataset.from_dataframe(all_dfs_combined)
     if "Unnamed: 0" in ds.data_vars:
         ds = ds.drop_vars("Unnamed: 0")

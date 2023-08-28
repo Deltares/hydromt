@@ -96,6 +96,7 @@ def dfs_segmented_by_vars(dfs_segmented_by_points):
     tmp = dfs_segmented_by_points.copy()
     for i, df in tmp.items():
         df.insert(0, "id", i)
+        df.reset_index(inplace=True)
 
     return {
         v: pd.concat(tmp.values()).pivot(index="time", columns="id", values=v)
