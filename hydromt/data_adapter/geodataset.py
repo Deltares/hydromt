@@ -323,8 +323,20 @@ class GeoDatasetAdapter(DataAdapter):
             ds_out = ds_out[variables]
 
         # set crs
-        if ds_out.vector.crs is None and self.crs is not None:
-            ds_out.vector.set_crs(self.crs)
+        if self.crs is not None:
+            if ds_out.vector.crs is None:
+                ds_out.vector.set_crs(self.crs)
+            elif ds_out.vector.crs != self.crs:
+                raise UserWarning(
+                    f"DataCatalog entry and data attributes specify"
+                    f"inconsistent CRS. Data CRS: {ds_out.vector.crs},"
+                    f" user specified CRS: {self.crs}. The data specified CRS will "
+                    "be used."
+                )
+            else:
+                # specified and data CRS are equal, we don't have to do anything
+                pass
+
         if ds_out.vector.crs is None:
             raise ValueError(
                 "GeoDataset: The data has no CRS, set in GeoDatasetAdapter."

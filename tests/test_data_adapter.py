@@ -215,6 +215,10 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     da3 = data_catalog.get_geodataset(
         fn_csv_locs, driver_kwargs=dict(fn_data=fn_csv), crs=geodf.crs
     ).sortby("index")
+    with pytest.warns(UserWarning):
+        _ = data_catalog.get_geodataset(
+            fn_csv_locs, driver_kwargs=dict(fn_data=fn_csv), crs=2380
+        )
     assert np.allclose(da3, geoda)
     assert da3.vector.crs.to_epsg() == 4326
     with pytest.raises(FileNotFoundError, match="No such file or catalog source"):

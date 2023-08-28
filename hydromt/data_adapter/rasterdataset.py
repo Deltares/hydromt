@@ -379,12 +379,19 @@ class RasterDatasetAdapter(DataAdapter):
                 raise IndexError("RasterDataset: Time slice out of range.")
 
         # set crs
-        if ds_out.raster.crs is None and self.crs is not None:
-            ds_out.raster.set_crs(self.crs)
-        elif ds_out.raster.crs is None:
-            raise ValueError(
-                "RasterDataset: The data has no CRS, set in RasterDatasetAdapter."
-            )
+        if self.crs is not None:
+            if ds_out.raster.crs is None:
+                ds_out.raster.set_crs(self.crs)
+            elif ds_out.raster.crs != self.crs:
+                raise UserWarning(
+                    f"DataCatalog entry and data attributes specify"
+                    f"inconsistent CRS. Data CRS: {ds_out.raster.crs},"
+                    f" user specified CRS: {self.crs}. The data specified CRS will "
+                    "be used."
+                )
+            else:
+                # specified and data CRS are equal, we don't have to do anything
+                pass
 
         # clip
         # make sure bbox is in data crs

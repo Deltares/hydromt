@@ -586,10 +586,22 @@ def open_vector(
             raise ValueError(f"{fn} contains other geometries than {assert_gtype}")
 
     # check if crs and filter
-    if gdf.crs is None and crs is not None:
-        gdf = gdf.set_crs(pyproj.CRS.from_user_input(crs))
-    elif gdf.crs is None:
-        raise ValueError("The GeoDataFrame has no CRS. Set one using the crs option.")
+    if gdf.crs is None:
+        if crs is not None:
+            gdf = gdf.set_crs(pyproj.CRS.from_user_input(crs))
+        else:
+            raise ValueError(
+                "The GeoDataFrame has no CRS. Set one using the crs option."
+            )
+    else:
+        if gdf.crs != dst_crs:
+            logger.warning(
+                f"DataCatalog entry and data attributes specify"
+                f"inconsistent CRS. Data CRS: {gdf.crs},"
+                f" user specified CRS: {dst_crs}. The user specified CRS will "
+                "be used."
+            )
+
     if dst_crs is not None:
         gdf = gdf.to_crs(dst_crs)
     # filter points
