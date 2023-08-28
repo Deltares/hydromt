@@ -286,17 +286,6 @@ def open_mfcsv(
         if variable_axis == 0:
             df = df.T
 
-        if segmented_by == "id":
-            df[concat_dim] = id
-        elif segmented_by == "var":
-            df["var"] = id
-            df = df.reset_index().melt(id_vars=["var", "time"], var_name=concat_dim)
-        else:
-            raise RuntimeError(
-                "Reached unknown segmentation branch (this should be impossible):"
-                f" {segmented_by}, options are ['var','id']"
-            )
-
         if csv_index_name is None:
             # we're in the first loop
             if df.index.name is None:
@@ -318,6 +307,17 @@ def open_mfcsv(
                         f"csv file {fn} has inconsistent index name: {df.index.name}"
                         f"expected {csv_index_name} as it's the first one found."
                     )
+
+        if segmented_by == "id":
+            df[concat_dim] = id
+        elif segmented_by == "var":
+            df["var"] = id
+            df = df.reset_index().melt(id_vars=["var", "time"], var_name=concat_dim)
+        else:
+            raise RuntimeError(
+                "Reached unknown segmentation branch (this should be impossible):"
+                f" {segmented_by}, options are ['var','id']"
+            )
 
         dfs.append(df)
 
