@@ -34,6 +34,8 @@ jobs:
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v3
+      - name: install libxkbcommon-x11-0
+        run: sudo apt-get install libxkbcommon-x11-0
 
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
