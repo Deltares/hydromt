@@ -269,9 +269,9 @@ class RasterDatasetAdapter(DataAdapter):
             **kwargs,
         )
         # because time dim needs self and spatial slice doesn't
-        # we just do them seleraptely
-        ds_out = self._slice_time_dimention(ds_out, time_tuple)
-        ds_out = RasterDatasetAdapter.slice_spatial_dimentions(
+        # we just do them seperately
+        ds_out = self._slice_time_dimension(ds_out, time_tuple)
+        ds_out = RasterDatasetAdapter.slice_spatial_dimensions(
             ds_out, geom, bbox, buffer, align
         )
         ds_out = self._uniformize_data(ds_out, single_var_as_array, logger)
@@ -424,12 +424,13 @@ class RasterDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _slice_time_dimention(self, ds_out, time_tuple):
+    def _slice_time_dimension(self, ds_out, time_tuple):
         if (
             "time" in ds_out.dims
             and ds_out["time"].size > 1
             and np.issubdtype(ds_out["time"].dtype, np.datetime64)
         ):
+            # TODO: move dt to argument of this method
             dt = self.unit_add.get("time", 0)
             if dt != 0:
                 logger.debug(f"RasterDataset: Shifting time labels with {dt} sec.")
@@ -443,7 +444,7 @@ class RasterDatasetAdapter(DataAdapter):
         return ds_out
 
     @staticmethod
-    def slice_spatial_dimentions(ds_out, geom, bbox, buffer, align):
+    def slice_spatial_dimensions(ds_out, geom, bbox, buffer, align):
         """Return a RasterDataset sliced in spatial dimensions.
 
         Arguments

@@ -244,7 +244,7 @@ class GeoDatasetAdapter(DataAdapter):
         ds_out = GeoDatasetAdapter.slice_spatial_dimension(
             ds_out, geom, bbox, predicate
         )
-        ds_out = self._slice_temporal_dimention(ds_out, time_tuple)
+        ds_out = self._slice_time_dimension(ds_out, time_tuple)
         ds_out = self._uniformize_data(ds_out, variables, single_var_as_array)
 
         return ds_out
@@ -454,12 +454,13 @@ class GeoDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _slice_temporal_dimention(self, ds_out, time_tuple):
+    def _slice_time_dimension(self, ds_out, time_tuple):
         if (
             "time" in ds_out.dims
             and ds_out["time"].size > 1
             and np.issubdtype(ds_out["time"].dtype, np.datetime64)
         ):
+            # TODO move dt to argument of this function
             dt = self.unit_add.get("time", 0)
             if dt != 0:
                 logger.debug(f"GeoDataset: Shifting time labels with {dt} sec.")

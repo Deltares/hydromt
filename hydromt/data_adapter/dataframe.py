@@ -198,7 +198,7 @@ class DataFrameAdapter(DataAdapter):
         """
         kwargs = self._parse_args()
         df = self._load_data(variables, **kwargs)
-        df = DataFrameAdapter.slice_temporal_dimention(df, time_tuple)
+        df = DataFrameAdapter.slice_temporal_dimension(df, time_tuple)
         df = self._uniformize_data(df)
         return df
 
@@ -213,7 +213,7 @@ class DataFrameAdapter(DataAdapter):
         return df
 
     @staticmethod
-    def slice_temporal_dimention(df, time_tuple):
+    def slice_temporal_dimension(df, time_tuple):
         """Return a sliced DataFrame.
 
         Parameters

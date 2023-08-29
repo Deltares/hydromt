@@ -1006,7 +1006,8 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            return RasterDatasetAdapter.slice_spatial_dimentions(
+            # TODO: add slicing of time dim
+            return RasterDatasetAdapter.slice_spatial_dimensions(
                 data_like, geom, bbox, buffer, align
             )
         else:
@@ -1201,6 +1202,7 @@ class DataCatalog(object):
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             predicate = kwargs.pop("predicate", "intersects")
+            # TODO add slicing of time dim
             return GeoDatasetAdapter.slice_spatial_dimension(
                 data_like, geom, bbox, predicate
             )
@@ -1274,7 +1276,7 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, pd.DataFrame):
-            return DataFrameAdapter.slice_temporal_dimention(data_like, time_tuple)
+            return DataFrameAdapter.slice_temporal_dimension(data_like, time_tuple)
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
