@@ -55,7 +55,7 @@ Using the template
 ^^^^^^^^^^^^^^^^^^
 
 To make it easier to get started we have provided a `cookiecutter <https://github.com/cookiecutter/cookiecutter>`_ template to help you get started.
-The template itself is located at `https://github.com/savente93/hydromt-plugin-template <https://github.com/savente93/hydromt-plugin-template>`.
+The template itself is located at `https://github.com/Deltares/hydromt-plugin-template <https://github.com/Deltares/hydromt-plugin-template>`.
 
 To use it you must first install cookiecutter itself like so:
 
@@ -68,7 +68,7 @@ following command:
 
 .. code-block:: console
 
-	$ cookiecutter https://github.com/savente93/hydromt-plugin-template
+	$ cookiecutter https://github.com/Deltares/hydromt-plugin-template
 
 You will be prompted for some information. After you've entered the information the project should be automatically created for you! Let's
 say you just created the plugin called `hydromt_plugin` before you can start using it you'll need to initialise git within it like so:
