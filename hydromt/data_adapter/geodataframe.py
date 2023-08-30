@@ -222,13 +222,15 @@ class GeoDataFrameAdapter(DataAdapter):
             variables, geom, bbox, buffer, predicate
         )
         gdf = self._load_data(clip_str, geom, predicate, **kwargs)
-        gdf = GeoDataFrameAdapter.slice_data(gdf, variables, geom, predicate)
+        gdf = GeoDataFrameAdapter.slice_data(
+            gdf, variables, geom, bbox, buffer, predicate
+        )
         gdf = self._uniformize_data(gdf)
 
         return gdf
 
     @staticmethod
-    def slice_data(gdf, variables, geom, predicate):
+    def slice_data(gdf, variables, geom, bbox, buffer, predicate):
         """Return a clipped GeoDataFrame (vector).
 
         Arguments
@@ -247,6 +249,7 @@ class GeoDataFrameAdapter(DataAdapter):
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
+        geom, _ = GeoDataFrameAdapter.parse_geom(geom, bbox, buffer)
         if variables is not None:
             if np.any([var not in gdf.columns for var in variables]):
                 raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")

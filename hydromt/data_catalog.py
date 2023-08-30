@@ -1106,8 +1106,9 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, gpd.GeoDataFrame):
-            geom, _ = GeoDataFrameAdapter.parse_geom(geom, bbox, buffer)
-            return GeoDataFrameAdapter.slice_data(data_like, variables, geom, predicate)
+            return GeoDataFrameAdapter.slice_data(
+                data_like, variables, geom, bbox, buffer, predicate
+            )
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
