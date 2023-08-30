@@ -251,7 +251,7 @@ class RasterDatasetAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
-        fns, variables, kwargs = self._parse_args(
+        fns, variables, dt, kwargs = self._parse_args(
             variables,
             time_tuple,
             zoom_level,
@@ -270,8 +270,9 @@ class RasterDatasetAdapter(DataAdapter):
         )
         # because time dim needs self and spatial slice doesn't
         # we just do them seperately
-        ds_out = self._slice_time_dimension(ds_out, time_tuple)
-        ds_out = RasterDatasetAdapter.slice_spatial_dimensions(
+
+        ds_out = RasterDatasetAdapter._slice_temporal_dimension(ds_out, time_tuple, dt)
+        ds_out = RasterDatasetAdapter._slice_spatial_dimensions(
             ds_out, geom, bbox, buffer, align
         )
         ds_out = self._uniformize_data(ds_out, single_var_as_array, logger)
@@ -332,7 +333,8 @@ class RasterDatasetAdapter(DataAdapter):
             fs = self.get_filesystem(**storage_options)
             fns = [fs.open(f) for f in fns]
 
-        return fns, variables, kwargs
+        dt = self.unit_add.get("time", 0)
+        return fns, variables, dt, kwargs
 
     def _read_data(self, fns, geom, bbox, logger, cache_root, **kwargs):
         # read using various readers
@@ -424,28 +426,9 @@ class RasterDatasetAdapter(DataAdapter):
 
         return ds_out
 
-    def _slice_time_dimension(self, ds_out, time_tuple):
-        if (
-            "time" in ds_out.dims
-            and ds_out["time"].size > 1
-            and np.issubdtype(ds_out["time"].dtype, np.datetime64)
-        ):
-            # TODO: move dt to argument of this method
-            dt = self.unit_add.get("time", 0)
-            if dt != 0:
-                logger.debug(f"RasterDataset: Shifting time labels with {dt} sec.")
-                ds_out["time"] = ds_out["time"] + pd.to_timedelta(dt, unit="s")
-            if time_tuple is not None:
-                logger.debug(f"RasterDataset: Slicing time dim {time_tuple}")
-                ds_out = ds_out.sel({"time": slice(*time_tuple)})
-            if ds_out.time.size == 0:
-                raise IndexError("RasterDataset: Time slice out of range.")
-
-        return ds_out
-
     @staticmethod
-    def slice_spatial_dimensions(ds_out, geom, bbox, buffer, align):
-        """Return a RasterDataset sliced in spatial dimensions.
+    def slice_data(ds_out, geom, bbox, buffer, align, time_tuple, dt=0):
+        """Return a RasterDataset sliced in both spatial and temporal dimensions.
 
         Arguments
         ---------
@@ -458,12 +441,42 @@ class RasterDatasetAdapter(DataAdapter):
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         align : float, optional
             Resolution to align the bounding box, by default None
+        time_tuple : Tuple of datetime
+            a tuple consisting of the lower and upper bounds of time that the
+            result should contain
+        dt : Optional float or int
+            number of secords to shift the time series by before slicing
 
         Returns
         -------
         obj: xarray.Dataset or xarray.DataArray
             RasterDataset
         """
+        ds_out = RasterDatasetAdapter._slice_temporal_dimension(ds_out, time_tuple, dt)
+        return RasterDatasetAdapter._slice_spatial_dimensions(
+            ds_out, geom, bbox, buffer, align
+        )
+
+    @staticmethod
+    def _slice_temporal_dimension(ds_out, time_tuple, dt=0):
+        if (
+            "time" in ds_out.dims
+            and ds_out["time"].size > 1
+            and np.issubdtype(ds_out["time"].dtype, np.datetime64)
+        ):
+            if dt != 0:
+                logger.debug(f"RasterDataset: Shifting time labels with {dt} sec.")
+                ds_out["time"] = ds_out["time"] + pd.to_timedelta(dt, unit="s")
+            if time_tuple is not None:
+                logger.debug(f"RasterDataset: Slicing time dim {time_tuple}")
+                ds_out = ds_out.sel({"time": slice(*time_tuple)})
+            if ds_out.time.size == 0:
+                raise IndexError("RasterDataset: Time slice out of range.")
+
+        return ds_out
+
+    @staticmethod
+    def _slice_spatial_dimensions(ds_out, geom, bbox, buffer, align):
         # make sure bbox is in data crs
         crs = ds_out.raster.crs
         epsg = crs.to_epsg()  # this could return None

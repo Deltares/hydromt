@@ -222,7 +222,7 @@ class GeoDataFrameAdapter(DataAdapter):
             variables, geom, bbox, buffer, predicate
         )
         gdf = self._load_data(clip_str, geom, predicate, **kwargs)
-        gdf = self.slice_data(gdf, variables, geom, predicate)
+        gdf = GeoDataFrameAdapter.slice_data(gdf, variables, geom, predicate)
         gdf = self._uniformize_data(gdf)
 
         return gdf

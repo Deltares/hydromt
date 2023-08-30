@@ -927,6 +927,7 @@ class DataCatalog(object):
         align: Optional[bool] = None,
         variables: Optional[Union[List, str]] = None,
         time_tuple: Optional[Tuple] = None,
+        dt: Optional[Union[int, float]] = 0,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1006,9 +1007,8 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            # TODO: add slicing of time dim
-            return RasterDatasetAdapter.slice_spatial_dimensions(
-                data_like, geom, bbox, buffer, align
+            return RasterDatasetAdapter.slice_data(
+                data_like, geom, bbox, buffer, align, time_tuple, dt
             )
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
@@ -1134,6 +1134,7 @@ class DataCatalog(object):
         buffer: Union[float, int] = 0,
         variables: Optional[List] = None,
         time_tuple: Optional[Tuple] = None,
+        dt: Optional[Union[int, float]] = 0,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1202,9 +1203,8 @@ class DataCatalog(object):
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             predicate = kwargs.pop("predicate", "intersects")
-            # TODO add slicing of time dim
-            return GeoDatasetAdapter.slice_spatial_dimension(
-                data_like, geom, bbox, predicate
+            return GeoDatasetAdapter.slice_data(
+                data_like, geom, bbox, predicate, time_tuple, dt
             )
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
@@ -1276,7 +1276,7 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, pd.DataFrame):
-            return DataFrameAdapter.slice_temporal_dimension(data_like, time_tuple)
+            return DataFrameAdapter.slice_data(data_like, time_tuple)
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 

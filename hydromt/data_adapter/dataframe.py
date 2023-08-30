@@ -198,7 +198,7 @@ class DataFrameAdapter(DataAdapter):
         """
         kwargs = self._parse_args()
         df = self._load_data(variables, **kwargs)
-        df = DataFrameAdapter.slice_temporal_dimension(df, time_tuple)
+        df = DataFrameAdapter.slice_data(df, time_tuple)
         df = self._uniformize_data(df)
         return df
 
@@ -213,7 +213,7 @@ class DataFrameAdapter(DataAdapter):
         return df
 
     @staticmethod
-    def slice_temporal_dimension(df, time_tuple):
+    def slice_data(df, time_tuple):
         """Return a sliced DataFrame.
 
         Parameters
@@ -229,6 +229,10 @@ class DataFrameAdapter(DataAdapter):
         pd.DataFrame
             Tabular data
         """
+        return DataFrameAdapter._slice_temporal_dimension(df, time_tuple)
+
+    @staticmethod
+    def _slice_temporal_dimension(df, time_tuple):
         if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
             logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
             df = df[df.index.slice_indexer(*time_tuple)]

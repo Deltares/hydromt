@@ -237,14 +237,14 @@ class GeoDatasetAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
-        fns, clip_str, variables, predicate, kwargs = self._parse_args(
+        fns, clip_str, variables, predicate, dt, kwargs = self._parse_args(
             variables, time_tuple, geom, bbox, buffer
         )
         ds_out = self._load_data(fns, clip_str, geom, variables, **kwargs)
-        ds_out = GeoDatasetAdapter.slice_spatial_dimension(
+        ds_out = GeoDatasetAdapter._slice_spatial_dimension(
             ds_out, geom, bbox, predicate
         )
-        ds_out = self._slice_time_dimension(ds_out, time_tuple)
+        ds_out = GeoDatasetAdapter._slice_temporal_dimension(ds_out, time_tuple, dt)
         ds_out = self._uniformize_data(ds_out, variables, single_var_as_array)
 
         return ds_out
@@ -315,7 +315,8 @@ class GeoDatasetAdapter(DataAdapter):
         if kwargs.pop("within", False):  # for backward compatibility
             kwargs.update(predicate="contains")
 
-        return fns, clip_str, variables, predicate, kwargs
+        dt = self.unit_add.get("time", 0)
+        return fns, clip_str, variables, predicate, dt, kwargs
 
     def _read_and_clip(self, fns, clip_str, geom, **kwargs):
         logger.info(f"GeoDataset: Read {self.driver} data{clip_str}.")
@@ -368,8 +369,8 @@ class GeoDatasetAdapter(DataAdapter):
         return ds_out
 
     @staticmethod
-    def slice_spatial_dimension(ds_out, geom, bbox, predicate):
-        """Slice the dataset in space according to geoms provided.
+    def slice_data(ds_out, geom, bbox, predicate, time_tuple, dt=0):
+        """Slice the dataset in space and time.
 
         Arguments
         ---------
@@ -385,8 +386,13 @@ class GeoDatasetAdapter(DataAdapter):
         Returns
         -------
         obj: xarray.Dataset or xarray.DataArray
-            GeoDataset
+            the sliced GeoDataset
         """
+        ds_out = GeoDatasetAdapter._slice_temporal_dimension(ds_out, time_tuple, dt)
+        return GeoDatasetAdapter._slice_spatial_dimension(ds_out, geom, bbox, predicate)
+
+    @staticmethod
+    def _slice_spatial_dimension(ds_out, geom, bbox, predicate):
         if geom is not None:
             bbox = geom.to_crs(4326).total_bounds
         if ds_out.vector.crs.to_epsg() == 4326:
@@ -397,6 +403,26 @@ class GeoDatasetAdapter(DataAdapter):
             ds_out = ds_out.vector.clip_geom(geom, predicate=predicate)
         if ds_out.vector.index.size == 0:
             logger.warning("GeoDataset: No data within spatial domain.")
+
+        return ds_out
+
+    @staticmethod
+    def _slice_temporal_dimension(ds_out, time_tuple, dt=0):
+        if (
+            "time" in ds_out.dims
+            and ds_out["time"].size > 1
+            and np.issubdtype(ds_out["time"].dtype, np.datetime64)
+        ):
+            if dt != 0:
+                logger.debug(f"GeoDataset: Shifting time labels with {dt} sec.")
+                ds_out["time"] = ds_out["time"] + pd.to_timedelta(dt, unit="s")
+            if time_tuple is not None:
+                logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
+                ds_out = ds_out.sel(time=slice(*time_tuple))
+            if ds_out.time.size == 0:
+                logger.warning("GeoDataset: Time slice out of range.")
+                drop_vars = [v for v in ds_out.data_vars if "time" in ds_out[v].dims]
+                ds_out = ds_out.drop_vars(drop_vars)
 
         return ds_out
 
@@ -451,26 +477,5 @@ class GeoDatasetAdapter(DataAdapter):
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
             ds_out[name] = xr.where(data_bool, da * m + a, nodata)
             ds_out[name].attrs.update(attrs)  # set original attributes
-
-        return ds_out
-
-    def _slice_time_dimension(self, ds_out, time_tuple):
-        if (
-            "time" in ds_out.dims
-            and ds_out["time"].size > 1
-            and np.issubdtype(ds_out["time"].dtype, np.datetime64)
-        ):
-            # TODO move dt to argument of this function
-            dt = self.unit_add.get("time", 0)
-            if dt != 0:
-                logger.debug(f"GeoDataset: Shifting time labels with {dt} sec.")
-                ds_out["time"] = ds_out["time"] + pd.to_timedelta(dt, unit="s")
-            if time_tuple is not None:
-                logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
-                ds_out = ds_out.sel(time=slice(*time_tuple))
-            if ds_out.time.size == 0:
-                logger.warning("GeoDataset: Time slice out of range.")
-                drop_vars = [v for v in ds_out.data_vars if "time" in ds_out[v].dims]
-                ds_out = ds_out.drop_vars(drop_vars)
 
         return ds_out
