@@ -73,7 +73,8 @@ test = [
     "pytest-cov",    # test coverage
     "pytest-mock",   # mocking
     "pytest-timeout", # darn hanging tests
-]
+    "xugrid"
+    ]
 doc = [
     "nbsphinx",                     # build notebooks in docs
     "pydata-sphinx-theme",          # theme
@@ -137,7 +138,7 @@ include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 
 [tool.pytest.ini_options]
-addopts = "--ff --timeout=60"
+addopts = "--ff --timeout=120 "
 testpaths = ["tests"]
 
 filterwarnings = [

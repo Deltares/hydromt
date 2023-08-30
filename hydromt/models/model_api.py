@@ -25,6 +25,7 @@ from shapely.geometry import box
 from .. import config, log, workflows
 from ..data_catalog import DataCatalog
 from ..raster import GEO_MAP_COORD
+from ..utils import _classproperty
 
 __all__ = ["Model"]
 
@@ -40,7 +41,6 @@ class Model(object, metaclass=ABCMeta):
 
     """General and basic API for models in HydroMT."""
 
-    # FIXME
     _DATADIR = ""  # path to the model data folder
     _NAME = "modelname"
     _CONF = "model.ini"
@@ -130,13 +130,17 @@ class Model(object, metaclass=ABCMeta):
         self.set_root(root, mode)  # also creates hydromt.log file
         self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
 
-    @property
-    def api(self) -> Dict:
+    @_classproperty
+    def api(cls) -> Dict:
         """Return all model components and their data types."""
-        _api = self._API.copy()
-        # loop over parent and mixin classes and update API
-        for base_cls in self.__class__.__bases__:
-            _api.update(getattr(base_cls, "_API", {}))
+        _api = cls._API.copy()
+
+        # reversed is so that child attributes take priority
+        # this does mean that it becomes imporant in which order you
+        # inherit from your base classes.
+        for base_cls in reversed(cls.__mro__):
+            if hasattr(base_cls, "_API"):
+                _api.update(getattr(base_cls, "_API", {}))
         return _api
 
     def _check_get_opt(self, opt):

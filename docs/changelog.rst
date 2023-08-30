@@ -16,10 +16,11 @@ Added
 - Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
 - Add support for reading model configs in ``TOML`` format. (PR #444)
 - new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
--
+- add ``open_mfcsv`` function in ``io`` module for combining multiple CSV files into one dataset. (PR #486)
 
 Changed
 -------
+- Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. PR #412
 - possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
 - Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
   call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)

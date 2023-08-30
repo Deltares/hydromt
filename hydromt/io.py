@@ -4,6 +4,7 @@ import io
 import logging
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
+from typing import Any, Dict, Literal, Optional, Union
 
 import dask
 import geopandas as gpd
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "open_raster",
     "open_mfraster",
+    "open_mfcsv",
     "open_raster_from_tindex",
     "open_vector",
     "open_geodataset",
@@ -226,6 +228,81 @@ def open_mfraster(
     return ds
 
 
+def open_mfcsv(
+    fns: Dict[Union[str, int], Union[str, Path]],
+    concat_dim: str,
+    driver_kwargs: Optional[Dict[str, Any]] = None,
+    variable_axis: Literal[0, 1] = 1,
+) -> xr.Dataset:
+    """Open multiple csv files as single Dataset.
+
+    Arguments
+    ---------
+    fns : Dict[str | int, str | Path],
+        Dictionary containing a id -> filename mapping. Here the ids,
+        should correspond to the values of the `concat_dim` dimension.
+    concat_dim : str,
+        name of the dimention that will be created by concatinating
+        all of the supplied csv files.
+    driver_kwargs : Dict[str, Any],
+        Any additional arguments to be passed to pandas' `read_csv` function.
+    variable_axis : Literal[0, 1] = 1,
+        The axis along which your variables are. so if the csvs have the
+        columns as variable names, you would leave this as 1. If the variables
+        are along the index, set this to 0.
+
+    Returns
+    -------
+    data : Dataset
+        The newly created Dataset.
+    """
+    ds = xr.Dataset()
+    if variable_axis not in [0, 1]:
+        raise ValueError(f"there is no axis {variable_axis} available in 2D csv files")
+    # we're gonna use the structure of the first file found to check
+    # all others against
+    csv_kwargs = {"index_col": 0}
+    if driver_kwargs is not None:
+        csv_kwargs.update(**driver_kwargs)
+
+    first_id, first_fn = next(iter(fns.items()))
+    first_df = pd.read_csv(first_fn, **csv_kwargs)
+    if variable_axis == 0:
+        first_df = first_df.T
+
+    first_index = first_df.index
+
+    if first_df.index.name is None:
+        csv_index_name = "index"
+    else:
+        csv_index_name = first_df.index.name
+
+    first_df[concat_dim] = first_id
+    dfs = []
+    for id, fn in fns.items():
+        df = pd.read_csv(fn, **csv_kwargs)
+        if variable_axis == 0:
+            df = df.T
+
+        df[concat_dim] = id
+
+        if not df.index.dtype == first_index.dtype:
+            raise ValueError(
+                f"file {fn} has inconsistent index type: {df.index.dtype()}"
+                f"Expected {first_index.dtype()}"
+            )
+
+        dfs.append(df)
+
+    all_dfs_combined = (
+        pd.concat(dfs, axis=0).reset_index().set_index([concat_dim, csv_index_name])
+    )
+    ds = xr.Dataset.from_dataframe(all_dfs_combined)
+    if "Unnamed: 0" in ds.data_vars:
+        ds = ds.drop_vars("Unnamed: 0")
+    return ds
+
+
 def open_raster_from_tindex(
     fn_tindex, bbox=None, geom=None, tileindex="location", mosaic_kwargs={}, **kwargs
 ):
@@ -389,21 +466,34 @@ def open_timeseries_from_table(
     """
     _, ext = splitext(fn)
     if ext == ".csv":
-        kwargs0 = dict(index_col=0, parse_dates=True)
-        kwargs0.update(**kwargs)
-        df = pd.read_csv(fn, **kwargs0)
+        csv_kwargs = dict(index_col=0, parse_dates=False)
+        csv_kwargs.update(**kwargs)
+        df = pd.read_csv(fn, **csv_kwargs)
     elif ext in [".parquet", ".pq"]:
         df = pd.read_parquet(fn, **kwargs)
     else:
         raise ValueError(f"Unknown table file format: {ext}")
 
-    # check if time index
-    if np.dtype(df.index).type != np.datetime64:
+    first_index_elt = df.index[0]
+    first_col_name = df.columns[0]
+
+    try:
+        if isinstance(first_index_elt, (int, float, np.number)):
+            raise ValueError()
+        pd.to_datetime(first_index_elt)
+        # if this succeeds than axis 0 is the time dim
+    except ValueError:
         try:
-            df.columns = pd.to_datetime(df.columns)
+            if isinstance(first_col_name, (int, float, np.number)):
+                raise ValueError()
+            pd.to_datetime(first_col_name)
             df = df.T
         except ValueError:
             raise ValueError(f"No time index found in file: {fn}")
+
+    if np.dtype(df.index).type != np.datetime64:
+        df.index = pd.to_datetime(df.index)
+
     # try parsing column index to integers
     if isinstance(df.columns[0], str):
         try:

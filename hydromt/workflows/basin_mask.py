@@ -6,7 +6,7 @@ Based on pre-cooked basin index files, basin maps or flow direction maps.
 
 import logging
 import warnings
-from os.path import isdir
+from os.path import isdir, isfile
 from pathlib import Path
 
 import geopandas as gpd
@@ -14,12 +14,16 @@ import numpy as np
 import xarray as xr
 from shapely.geometry import box
 
+from .. import _compat
 from ..data_adapter import GeoDataFrameAdapter
 from ..data_catalog import DataCatalog
 from ..flw import basin_map, flwdir_from_da, outlet_map, stream_map
 
 # local
 from ..models import MODELS
+
+if _compat.HAS_XUGRID:
+    import xugrid as xu
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +51,10 @@ def parse_region(region, logger=logger, data_catalog=None):
         For a region based of the grid of a raster file:
 
         * {'grid': /path/to/raster}
+
+        For a region based on a mesh grid of a mesh file:
+
+        * {'mesh': /path/to/mesh}
 
         Entire basin can be defined based on an ID, one or multiple point location
         (x, y), or a region of interest (bounding box or geometry) for which the
@@ -125,6 +133,7 @@ def parse_region(region, logger=logger, data_catalog=None):
         "geom": ["geom"],
         "bbox": ["bbox"],
         "grid": ["RasterDataArray"],
+        "mesh": ["UgridDataArray"],
     }
     kind = next(iter(kwargs))  # first key of region
     value0 = kwargs.pop(kind)
@@ -134,6 +143,24 @@ def parse_region(region, logger=logger, data_catalog=None):
         kind = "model"
     elif kind == "grid":
         kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
+    elif kind == "mesh":
+        if _compat.HAS_XUGRID:
+            if isinstance(value0, (str, Path)) and isfile(value0):
+                kwarg = dict(mesh=xu.open_dataset(value0))
+            elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
+                kwarg = dict(mesh=value0)
+            elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
+                kwarg = dict(
+                    mesh=xu.UgridDataset(value0.to_dataset(optional_attributes=True))
+                )
+            else:
+                raise ValueError(
+                    f"Unrecognised type {type(value0)}."
+                    "Should be a path, data catalog key or xugrid object."
+                )
+            kwargs.update(kwarg)
+        else:
+            raise ImportError("xugrid is required to read mesh files.")
     elif kind not in options:
         k_lst = '", "'.join(list(options.keys()) + list(MODELS))
         raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
