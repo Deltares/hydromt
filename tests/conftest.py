@@ -258,7 +258,7 @@ def griduda():
 
 @pytest.fixture()
 def model(demda, world, obsda):
-    mod = Model()
+    mod = Model(data_libs=["artifact_data"])
     mod.setup_region({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
     with pytest.deprecated_call():

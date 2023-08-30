@@ -16,10 +16,10 @@ from shapely.geometry import box
 
 from .. import _compat
 from ..data_adapter import GeoDataFrameAdapter
+from ..data_catalog import DataCatalog
 from ..flw import basin_map, flwdir_from_da, outlet_map, stream_map
 
 # local
-from ..io import open_raster
 from ..models import MODELS
 
 if _compat.HAS_XUGRID:
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 __all__ = ["get_basin_geometry", "parse_region"]
 
 
-def parse_region(region, logger=logger):
+def parse_region(region, logger=logger, data_catalog=None):
     """Check and return parsed region arguments.
 
     Parameters
@@ -121,6 +121,8 @@ def parse_region(region, logger=logger):
     kwargs : dict
         parsed region json
     """
+    if data_catalog is None:
+        data_catalog = DataCatalog()
     kwargs = region.copy()
     # NOTE: the order is important to prioritize the arguments
     options = {
@@ -140,10 +142,7 @@ def parse_region(region, logger=logger):
         kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
         kind = "model"
     elif kind == "grid":
-        if isinstance(value0, (str, Path)) and isfile(value0):
-            kwargs = dict(grid=open_raster(value0, **kwargs))
-        elif isinstance(value0, (xr.Dataset, xr.DataArray)):
-            kwargs = dict(grid=value0)
+        kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
     elif kind == "mesh":
         if _compat.HAS_XUGRID:
             if isinstance(value0, (str, Path)) and isfile(value0):
@@ -166,7 +165,7 @@ def parse_region(region, logger=logger):
         k_lst = '", "'.join(list(options.keys()) + list(MODELS))
         raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
     else:
-        kwarg = _parse_region_value(value0)
+        kwarg = _parse_region_value(value0, data_catalog=data_catalog)
         if len(kwarg) == 0 or next(iter(kwarg)) not in options[kind]:
             v_lst = '", "'.join(list(options[kind]))
             raise ValueError(
@@ -185,10 +184,11 @@ def parse_region(region, logger=logger):
     return kind, kwargs
 
 
-def _parse_region_value(value):
+def _parse_region_value(value, data_catalog):
     kwarg = {}
     if isinstance(value, np.ndarray):
         value = value.tolist()  # array to list
+
     if isinstance(value, list):
         if np.all([isinstance(p0, int) and abs(p0) > 180 for p0 in value]):  # all int
             kwarg = dict(basid=value)
@@ -200,12 +200,16 @@ def _parse_region_value(value):
         kwarg = dict(xy=value)
     elif isinstance(value, int):  # single int
         kwarg = dict(basid=value)
-    elif isinstance(value, (str, Path)) and isfile(value):
-        kwarg = dict(geom=gpd.read_file(value))
-    elif isinstance(value, gpd.GeoDataFrame):  # geometry
-        kwarg = dict(geom=value)
     elif isinstance(value, (str, Path)) and isdir(value):
         kwarg = dict(root=value)
+    elif isinstance(value, (str, Path)):
+        geom = data_catalog.get_geodataframe(value)
+        kwarg = dict(geom=geom)
+    elif isinstance(value, gpd.GeoDataFrame):  # geometry
+        kwarg = dict(geom=value)
+    else:
+        raise ValueError(f"Region value {value} not understood.")
+
     if "geom" in kwarg and np.all(kwarg["geom"].geometry.type == "Point"):
         xy = (
             kwarg["geom"].geometry.x.values,
