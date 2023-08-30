@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 __all__ = ["get_basin_geometry", "parse_region"]
 
 
-def parse_region(region, logger=logger, data_catalog=DataCatalog()):
+def parse_region(region, logger=logger, data_catalog=None):
     """Check and return parsed region arguments.
 
     Parameters
@@ -113,6 +113,8 @@ def parse_region(region, logger=logger, data_catalog=DataCatalog()):
     kwargs : dict
         parsed region json
     """
+    if data_catalog is None:
+        data_catalog = DataCatalog()
     kwargs = region.copy()
     # NOTE: the order is important to prioritize the arguments
     options = {
@@ -155,10 +157,11 @@ def parse_region(region, logger=logger, data_catalog=DataCatalog()):
     return kind, kwargs
 
 
-def _parse_region_value(value, data_catalog=DataCatalog()):
+def _parse_region_value(value, data_catalog):
     kwarg = {}
     if isinstance(value, np.ndarray):
         value = value.tolist()  # array to list
+
     if isinstance(value, list):
         if np.all([isinstance(p0, int) and abs(p0) > 180 for p0 in value]):  # all int
             kwarg = dict(basid=value)
@@ -177,6 +180,9 @@ def _parse_region_value(value, data_catalog=DataCatalog()):
         kwarg = dict(geom=geom)
     elif isinstance(value, gpd.GeoDataFrame):  # geometry
         kwarg = dict(geom=value)
+    else:
+        raise ValueError(f"Region value {value} not understood.")
+
     if "geom" in kwarg and np.all(kwarg["geom"].geometry.type == "Point"):
         xy = (
             kwarg["geom"].geometry.x.values,

@@ -108,14 +108,15 @@ def test_region(tmpdir, world, geodf, rioda):
 
 
 def test_region_value():
+    data_catalog = DataCatalog()
     array = np.array([1001, 1002, 1003, 1004, 1005])
-    kwarg = _parse_region_value(array)
+    kwarg = _parse_region_value(array, data_catalog=data_catalog)
     assert kwarg.get("basid") == array.tolist()
     xy = (1.0, -1.0)
-    kwarg = _parse_region_value(xy)
+    kwarg = _parse_region_value(xy, data_catalog=data_catalog)
     assert kwarg.get("xy") == xy
     root = "./"
-    kwarg = _parse_region_value(root)
+    kwarg = _parse_region_value(root, data_catalog=data_catalog)
     assert kwarg.get("root") == root
 
 
