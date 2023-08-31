@@ -325,3 +325,13 @@ class GeoDataFrameAdapter(DataAdapter):
             if col in gdf.columns:
                 gdf[col].attrs.update(**self.attrs[col])
         return gdf
+
+    @staticmethod
+    def detect_spatial_range(gds):
+        """Detect spatial range."""
+        pass
+
+    @staticmethod
+    def detect_temporal_range(gds):
+        """Detect temporal range."""
+        pass

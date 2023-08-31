@@ -407,3 +407,13 @@ class GeoDatasetAdapter(DataAdapter):
         ds_out.attrs.update(self.meta)
 
         return ds_out
+
+    @staticmethod
+    def detect_spatial_range(gds):
+        """Detect spatial range."""
+        pass
+
+    @staticmethod
+    def detect_temporal_range(gds):
+        """Detect temporal range."""
+        pass
