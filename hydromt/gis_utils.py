@@ -226,7 +226,7 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
             geom = geom.to_crs(gdf.crs)
         # convert geopandas to geometry
         geom = geom.unary_union
-    idx = gdf.sindex.query(geom, predicate=predicate)
+    idx = np.sort(gdf.sindex.query(geom, predicate=predicate))
     return idx
 
 
