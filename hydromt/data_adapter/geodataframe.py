@@ -5,11 +5,10 @@ from os.path import join
 from pathlib import Path
 from typing import NewType, Union
 
-import geopandas as gpd
 import numpy as np
-from shapely.geometry import box
+import pyproj
 
-from .. import io
+from .. import gis_utils, io
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
@@ -166,8 +165,6 @@ class GeoDataFrameAdapter(DataAdapter):
         """
         kwargs.pop("time_tuple", None)
         gdf = self.get_data(bbox=bbox, variables=variables, logger=logger)
-        if gdf.index.size == 0:
-            return None, None, None
 
         read_kwargs = {}
         if driver is None:
@@ -208,8 +205,8 @@ class GeoDataFrameAdapter(DataAdapter):
         self,
         bbox=None,
         geom=None,
-        predicate="intersects",
         buffer=0,
+        predicate="intersects",
         logger=logger,
         variables=None,
     ):
@@ -218,102 +215,42 @@ class GeoDataFrameAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
-        varialbes, clip_str, geom, predicate, kwargs = self._parse_args(
-            variables, geom, bbox, buffer, predicate
-        )
-        gdf = self._load_data(clip_str, geom, predicate, **kwargs)
-        gdf = GeoDataFrameAdapter.slice_data(
-            gdf, variables, geom, bbox, buffer, predicate
-        )
-        gdf = self._uniformize_data(gdf)
-
+        # load
+        fns = self._resolve_paths(variables)
+        gdf = self._read_data(fns, bbox, geom, buffer, predicate)
+        # rename variables and parse crs & nodata
+        gdf = self._rename_vars(gdf)
+        gdf = self._set_crs(gdf)
+        gdf = self._set_nodata(gdf)
+        # slice
+        gdf = self._slice_data(gdf, variables, geom)
+        # uniformize
+        gdf = self._apply_unit_conversions(gdf)
+        gdf = self._set_metadata(gdf)
         return gdf
 
-    @staticmethod
-    def slice_data(gdf, variables, geom, bbox, buffer, predicate):
-        """Return a clipped GeoDataFrame (vector).
-
-        Arguments
-        ---------
-        geom : geopandas.GeoDataFrame/Series,
-            A geometry defining the area of interest.
-        predicate : {'intersects', 'within', 'contains', 'overlaps',
-            'crosses', 'touches'}, optional If predicate is provided,
-            the GeoDataFrame is filtered by testing the predicate function
-            against each item. Requires bbox or mask. By default 'intersects'
-        variables : str or list of str, optional.
-            Names of GeoDataFrame columns to return.
-
-        Returns
-        -------
-        gdf: geopandas.GeoDataFrame
-            GeoDataFrame
-        """
-        geom, _ = GeoDataFrameAdapter.parse_geom(geom, bbox, buffer)
-        if variables is not None:
-            if np.any([var not in gdf.columns for var in variables]):
-                raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")
-            if "geometry" not in variables:  # always keep geometry column
-                variables = variables + ["geometry"]
-            gdf = gdf.loc[:, variables]
-
-        if geom is not None:
-            gdf = gdf.sjoin(
-                gpd.GeoDataFrame(geometry=geom).to_crs(gdf.crs), predicate=predicate
+    def _resolve_paths(self, variables):
+        # storage options for fsspec (TODO: not implemented yet)
+        if "storage_options" in self.driver_kwargs:
+            # not sure if storage options can be passed to fiona.open()
+            # for now throw NotImplemented Error
+            raise NotImplementedError(
+                "Remote file storage_options not implemented for GeoDataFrame"
             )
-            if "index_right" in gdf.columns:
-                gdf = gdf.drop("index_right", axis=1)
 
-        return gdf
+        # resolve paths
+        fns = super()._resolve_paths(variables=variables)
 
-    def _uniformize_data(self, gdf):
-        # rename and select columns
-        if self.rename:
-            rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
-            gdf = gdf.renae(columns=rename)
+        return fns
 
-        # nodata and unit conversion
-        if gdf.index.size == 0:
-            logger.warning(f"GeoDataFrame: No data within spatial domain {self.path}.")
-        else:
-            # parse nodata values
-            cols = gdf.select_dtypes([np.number]).columns
-            if self.nodata is not None and len(cols) > 0:
-                if not isinstance(self.nodata, dict):
-                    nodata = {c: self.nodata for c in cols}
-                else:
-                    nodata = self.nodata
-                for c in cols:
-                    mv = nodata.get(c, None)
-                    if mv is not None:
-                        is_nodata = np.isin(gdf[c], np.atleast_1d(mv))
-                        gdf[c] = np.where(is_nodata, np.nan, gdf[c])
-
-            # unit conversion
-            unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
-            unit_names = [k for k in unit_names if k in gdf.columns]
-            if len(unit_names) > 0:
-                logger.debug(
-                    f"GeoDataFrame: Convert units for {len(unit_names)} columns."
-                )
-            for name in list(set(unit_names)):  # unique
-                m = self.unit_mult.get(name, 1)
-                a = self.unit_add.get(name, 0)
-                gdf[name] = gdf[name] * m + a
-
-        # set meta data
-        gdf.attrs.update(self.meta)
-
-        # set column attributes
-        for col in self.attrs:
-            if col in gdf.columns:
-                gdf[col].attrs.update(**self.attrs[col])
-
-        return gdf
-
-    def _load_data(self, clip_str, geom, predicate, **kwargs):
-        # read and clip
-        logger.info(f"GeoDataFrame: Read {self.driver} data{clip_str}.")
+    def _read_data(self, fns, bbox, geom, buffer, predicate):
+        if len(fns) > 1:
+            raise ValueError(
+                f"GeoDataFrame: Reading multiple {self.driver} files is not supported."
+            )
+        kwargs = self.driver_kwargs.copy()
+        path = fns[0]
+        logger.debug(f"GeoDataFrame: Reading {self.driver} data from {self.path}")
         if self.driver in [
             "csv",
             "parquet",
@@ -330,74 +267,116 @@ class GeoDataFrameAdapter(DataAdapter):
                     "using the driver setting is deprecated. Please use"
                     "vector_table instead."
                 )
-
                 kwargs.update(driver=self.driver)
+            # parse bbox and geom to (buffere) geom
+            if bbox is not None or geom is not None:
+                geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
             # Check if file-object is required because of additional options
             gdf = io.open_vector(
-                self.path, crs=self.crs, geom=geom, predicate=predicate, **kwargs
+                path, crs=self.crs, geom=geom, predicate=predicate, **kwargs
             )
         else:
             raise ValueError(f"GeoDataFrame: driver {self.driver} unknown.")
 
         return gdf
 
-    def _parse_args(self, variables, geom, bbox, buffer, predicate):
-        # If variable is string, convert to list
-        if variables:
-            variables = np.atleast_1d(variables).tolist()
+    def _rename_vars(self, gdf):
+        # rename and select columns
+        if self.rename:
+            rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
+            gdf = gdf.rename(columns=rename)
+        return gdf
 
-        if "storage_options" in self.driver_kwargs:
-            # not sure if storage options can be passed to fiona.open()
-            # for now throw NotImplemented Error
-            raise NotImplementedError(
-                "Remote file storage_options not implemented for GeoDataFrame"
+    def _set_crs(self, gdf):
+        if self.crs is not None and gdf.crs is None:
+            gdf.set_crs(self.crs, inplace=True)
+        elif gdf.crs is None:
+            raise ValueError(
+                f"GeoDataFrame {self.name}: CRS not defined in data catalog or data."
             )
-        _ = self.resolve_paths()  # throw nice error if data not found
-
-        kwargs = self.driver_kwargs.copy()
-        geom, clip_str = GeoDataFrameAdapter.parse_geom(geom, bbox, buffer)
-        if kwargs.pop("within", False):  # for backward compatibility
-            predicate = "contains"
-
-        return variables, clip_str, geom, predicate, kwargs
+        elif self.crs is not None and gdf.crs != pyproj.CRS.from_user_input(self.crs):
+            logger.warning(
+                f"GeoDataFrame {self.name}: CRS from data catalog does not match CRS of"
+                " data. The original CRS will be used. Please check your data catalog."
+            )
+        return gdf
 
     @staticmethod
-    def parse_geom(geom, bbox, buffer):
-        """Parse geometries.
-
-        The geometry returned by this function can be
-        used by `GeoDataFrameAdapter.slice_data`.
+    def _slice_data(
+        gdf, variables=None, geom=None, bbox=None, buffer=0, predicate="intersects"
+    ):
+        """Return a clipped GeoDataFrame (vector).
 
         Arguments
         ---------
-        geom : geopandas.GeoDataFrame/Series,
+        variables : str or list of str, optional.
+            Names of GeoDataFrame columns to return.
+        geom : geopandas.GeoDataFrame/Series, optional
             A geometry defining the area of interest.
-        bbox : array-like of floats
+        bbox : array-like of floats, optional
             (xmin, ymin, xmax, ymax) bounding box of area of interest
             (in WGS84 coordinates).
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+        predicate : str, optional
+            Predicate used to filter the GeoDataFrame, see
+            :py:func:`hydromt.gis_utils.filter_gdf` for details.
 
         Returns
         -------
-        geom: geometry
-            the actual geometry
-        clip_str: str
-            the string representation of the geom to be used in logging.
+        gdf: geopandas.GeoDataFrame
+            GeoDataFrame
         """
-        clip_str = ""
-        if geom is None and bbox is not None:
-            # convert bbox to geom with crs EPGS:4326 to apply buffer later
-            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-            clip_str = " and clip to bbox (epsg:4326)"
-        elif geom is not None:
-            clip_str = f" and clip to geom (epsg:{geom.crs.to_epsg():d})"
-        if geom is not None:
-            # make sure geom is projected > buffer in meters!
-            if geom.crs.is_geographic and buffer > 0:
-                geom = geom.to_crs(3857)
-            geom = geom.buffer(buffer)  # a buffer with zero fixes some topology errors
-            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            clip_str = f"{clip_str} [{bbox_str}]"
+        if variables is not None:
+            variables = np.atleast_1d(variables).tolist()
+            if np.any([var not in gdf.columns for var in variables]):
+                raise ValueError(f"GeoDataFrame: Not all variables found: {variables}")
+            if "geometry" not in variables:  # always keep geometry column
+                variables = variables + ["geometry"]
+            gdf = gdf.loc[:, variables]
 
-        return geom, clip_str
+        if geom is not None or bbox is not None:
+            geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
+            idxs = gis_utils.filter_gdf(gdf, geom=geom, predicate=predicate)
+            if idxs.size == 0:
+                raise IndexError("GeoDataFrame: No data within spatial domain.")
+            gdf = gdf.iloc[idxs]
+        return gdf
+
+    def _set_nodata(self, gdf):
+        # parse nodata values
+        cols = gdf.select_dtypes([np.number]).columns
+        if self.nodata is not None and len(cols) > 0:
+            if not isinstance(self.nodata, dict):
+                nodata = {c: self.nodata for c in cols}
+            else:
+                nodata = self.nodata
+            for c in cols:
+                mv = nodata.get(c, None)
+                if mv is not None:
+                    is_nodata = np.isin(gdf[c], np.atleast_1d(mv))
+                    gdf[c] = np.where(is_nodata, np.nan, gdf[c])
+        return gdf
+
+    def _apply_unit_conversions(self, gdf):
+        # unit conversion
+        unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
+        unit_names = [k for k in unit_names if k in gdf.columns]
+        if len(unit_names) > 0:
+            logger.debug(f"GeoDataFrame: Convert units for {len(unit_names)} columns.")
+        for name in list(set(unit_names)):  # unique
+            m = self.unit_mult.get(name, 1)
+            a = self.unit_add.get(name, 0)
+            gdf[name] = gdf[name] * m + a
+        return gdf
+
+    def _set_metadata(self, gdf):
+        # set meta data
+        gdf.attrs.update(self.meta)
+
+        # set column attributes
+        for col in self.attrs:
+            if col in gdf.columns:
+                gdf[col].attrs.update(**self.attrs[col])
+
+        return gdf

@@ -867,18 +867,17 @@ class DataCatalog(object):
                             unit_add = source.unit_add
                             source.unit_mult = {}
                             source.unit_add = {}
-                        fn_out, driver, driver_kwargs = source.to_file(
-                            data_root=data_root,
-                            data_name=key,
-                            variables=source_vars.get(key, None),
-                            bbox=bbox,
-                            time_tuple=time_tuple,
-                            logger=self.logger,
-                        )
-                        if fn_out is None:
-                            self.logger.warning(
-                                f"{key} file contains no data within domain"
+                        try:
+                            fn_out, driver, driver_kwargs = source.to_file(
+                                data_root=data_root,
+                                data_name=key,
+                                variables=source_vars.get(key, None),
+                                bbox=bbox,
+                                time_tuple=time_tuple,
+                                logger=self.logger,
                             )
+                        except IndexError as e:
+                            self.logger.warning(f"{key} file contains no data: {e}")
                             continue
                         # update path & driver and remove kwargs
                         # and rename in output sources
@@ -927,7 +926,6 @@ class DataCatalog(object):
         align: Optional[bool] = None,
         variables: Optional[Union[List, str]] = None,
         time_tuple: Optional[Tuple] = None,
-        dt: Optional[Union[int, float]] = 0,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1007,12 +1005,16 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            return RasterDatasetAdapter.slice_data(
-                data_like, geom, bbox, buffer, align, time_tuple, dt
+            data_like = RasterDatasetAdapter._slice_data(
+                data_like, variables, geom, bbox, buffer, align, time_tuple
+            )
+            return RasterDatasetAdapter._single_var_as_array(
+                data_like, single_var_as_array, variables
             )
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
+        # TODO add also provider and version to used data
         self._used_data.append(name)
         self.logger.info(
             f"DataCatalog: Getting {name} RasterDataset {source.driver} data from"
@@ -1106,7 +1108,7 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, gpd.GeoDataFrame):
-            return GeoDataFrameAdapter.slice_data(
+            return GeoDataFrameAdapter._slice_data(
                 data_like, variables, geom, bbox, buffer, predicate
             )
         else:
@@ -1133,9 +1135,9 @@ class DataCatalog(object):
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
+        predicate: str = "intersects",
         variables: Optional[List] = None,
         time_tuple: Optional[Tuple] = None,
-        dt: Optional[Union[int, float]] = 0,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1167,6 +1169,10 @@ class DataCatalog(object):
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+        predicate : {'intersects', 'within', 'contains', 'overlaps',
+            'crosses', 'touches'}, optional If predicate is provided,
+            the GeoDataFrame is filtered by testing the predicate function
+            against each item. Requires bbox or mask. By default 'intersects'
         variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
@@ -1203,9 +1209,11 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            predicate = kwargs.pop("predicate", "intersects")
-            return GeoDatasetAdapter.slice_data(
-                data_like, geom, bbox, predicate, time_tuple, dt
+            data_like = GeoDatasetAdapter._slice_data(
+                data_like, variables, geom, bbox, buffer, predicate, time_tuple
+            )
+            return GeoDatasetAdapter._single_var_as_array(
+                data_like, single_var_as_array, variables
             )
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
@@ -1219,6 +1227,7 @@ class DataCatalog(object):
             bbox=bbox,
             geom=geom,
             buffer=buffer,
+            predicate=predicate,
             variables=variables,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
@@ -1277,7 +1286,7 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, pd.DataFrame):
-            return DataFrameAdapter.slice_data(data_like, time_tuple)
+            return DataFrameAdapter._slice_data(data_like, variables, time_tuple)
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 

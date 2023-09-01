@@ -6,6 +6,7 @@ from os import PathLike
 from os.path import join
 from typing import NewType, Union
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyproj
@@ -182,17 +183,13 @@ class RasterDatasetAdapter(DataAdapter):
         kwargs: dict
             the additional kwyeord arguments that were passed to `to_netcdf`
         """
-        try:
-            obj = self.get_data(
-                bbox=bbox,
-                time_tuple=time_tuple,
-                variables=variables,
-                logger=logger,
-                single_var_as_array=variables is None,
-            )
-        except IndexError as err:  # out of bounds
-            logger.warning(str(err))
-            return None, None, None
+        obj = self.get_data(
+            bbox=bbox,
+            time_tuple=time_tuple,
+            variables=variables,
+            logger=logger,
+            single_var_as_array=variables is None,
+        )
 
         read_kwargs = {}
         if driver is None:
@@ -251,58 +248,32 @@ class RasterDatasetAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
-        fns, variables, dt, kwargs = self._parse_args(
-            variables,
-            time_tuple,
-            zoom_level,
-            geom,
-            bbox,
-            logger,
-        )
-        ds_out = self._load_data(
-            fns,
-            variables,
-            geom,
-            bbox,
-            logger,
-            cache_root,
-            **kwargs,
-        )
-        # because time dim needs self and spatial slice doesn't
-        # we just do them seperately
+        # load data
+        fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
+        ds = self._read_data(fns, geom, bbox, logger, cache_root)
+        # rename variables and parse data and attrs
+        ds = self._rename_vars(ds)
+        ds = self._validate_spatial_dims(ds)
+        ds = self._set_crs(ds)
+        ds = self._set_nodata(ds)
+        ds = self._shift_time(ds)
+        # slice data
+        ds = self._slice_data(ds, variables, geom, bbox, buffer, align, time_tuple)
+        # uniformize data
+        ds = self._apply_unit_conversions(ds, logger)
+        ds = self._set_metadata(ds)
+        # return array if single var and single_var_as_array
+        return self._single_var_as_array(ds, single_var_as_array, variables)
 
-        ds_out = RasterDatasetAdapter._slice_temporal_dimension(ds_out, time_tuple, dt)
-        ds_out = RasterDatasetAdapter._slice_spatial_dimensions(
-            ds_out, geom, bbox, buffer, align
-        )
-        ds_out = self._uniformize_data(ds_out, single_var_as_array, logger)
-
-        return ds_out
-
-    def _load_data(
+    def _resolve_paths(
         self,
-        fns,
-        variables,
-        geom,
-        bbox,
-        logger,
-        cache_root,
-        **kwargs,
+        time_tuple: tuple = None,
+        variables: list = None,
+        zoom_level: int = 0,
+        geom: gpd.GeoSeries = None,
+        bbox: list = None,
+        logger=logger,
     ):
-        ds_out = self._read_data(fns, geom, bbox, logger, cache_root, **kwargs)
-        ds_out = self._rename_vars(ds_out, variables)
-
-        return ds_out
-
-    def _uniformize_data(self, ds_out, single_var_as_array, logger):
-        ds_out = self._unit_conversions(ds_out, logger)
-        ds_out = self._set_metadata(ds_out, single_var_as_array)
-        return ds_out
-
-    def _parse_args(self, variables, time_tuple, zoom_level, geom, bbox, logger):
-        # If variable is string, convert to list
-        if variables:
-            variables = np.atleast_1d(variables).tolist()
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         so_kwargs = dict()
         if "storage_options" in self.driver_kwargs:
@@ -314,18 +285,24 @@ class RasterDatasetAdapter(DataAdapter):
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
 
+        # parse zoom level (raster only)
+        if len(self.zoom_levels) > 0:
+            zoom_level = self._parse_zoom_level(zoom_level, geom, bbox, logger=logger)
+
         # resolve path based on time, zoom level and/or variables
-        fns = self.resolve_paths(
+        fns = super()._resolve_paths(
             time_tuple=time_tuple,
             variables=variables,
             zoom_level=zoom_level,
-            geom=geom,
-            bbox=bbox,
             logger=logger,
             **so_kwargs,
         )
 
+        return fns
+
+    def _read_data(self, fns, geom, bbox, logger, cache_root):
         kwargs = self.driver_kwargs.copy()
+
         # zarr can use storage options directly, the rest should be converted to
         # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":
@@ -333,17 +310,13 @@ class RasterDatasetAdapter(DataAdapter):
             fs = self.get_filesystem(**storage_options)
             fns = [fs.open(f) for f in fns]
 
-        dt = self.unit_add.get("time", 0)
-        return fns, variables, dt, kwargs
-
-    def _read_data(self, fns, geom, bbox, logger, cache_root, **kwargs):
         # read using various readers
         if self.driver == "netcdf":
             if self.filesystem == "local":
                 if "preprocess" in kwargs:
                     preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
                     kwargs.update(preprocess=preprocess)
-                ds_out = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
+                ds = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
             else:
                 raise NotImplementedError(
                     "Remote (cloud) RasterDataset not supported with driver netcdf."
@@ -360,14 +333,12 @@ class RasterDatasetAdapter(DataAdapter):
                 if do_preprocess:
                     ds = preprocess(ds)
                 ds_lst.append(ds)
-            ds_out = xr.merge(ds_lst)
+            ds = xr.merge(ds_lst)
         elif self.driver == "raster_tindex":
             if self.filesystem == "local":
                 if np.issubdtype(type(self.nodata), np.number):
                     kwargs.update(nodata=self.nodata)
-                ds_out = io.open_raster_from_tindex(
-                    fns[0], bbox=bbox, geom=geom, **kwargs
-                )
+                ds = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
             else:
                 raise NotImplementedError(
                     "Remote (cloud) RasterDataset not supported "
@@ -385,100 +356,140 @@ class RasterDatasetAdapter(DataAdapter):
                 fns = fns_cached
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
-            ds_out = io.open_mfraster(fns, logger=logger, **kwargs)
+            ds = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
 
-        if GEO_MAP_COORD in ds_out.data_vars:
-            ds_out = ds_out.set_coords(GEO_MAP_COORD)
+        return ds
 
-        return ds_out
+    def _rename_vars(self, ds):
+        rm = {k: v for k, v in self.rename.items() if k in ds}
+        ds = ds.rename(rm)
+        return ds
 
-    def _rename_vars(self, ds_out, variables):
-        if variables and len(ds_out.raster.vars) == 1 and len(self.rename) == 0:
-            rm = {ds_out.raster.vars[0]: variables[0]}
-            if set(rm.keys()) != set(rm.values()):
-                warnings.warn(
-                    "Automatic renaming of single var array will be deprecated, rename"
-                    f" {rm} in the data catalog instead.",
-                    DeprecationWarning,
-                )
-        else:
-            rm = {k: v for k, v in self.rename.items() if k in ds_out}
-        ds_out = ds_out.rename(rm)
-        if variables is not None:
-            if np.any([var not in ds_out.data_vars for var in variables]):
-                raise ValueError(f"RasterDataset: Not all variables found: {variables}")
-            ds_out = ds_out[variables]
-
-        # transpose dims to get y and x dim last
-        x_dim = ds_out.raster.x_dim
-        y_dim = ds_out.raster.y_dim
-        ds_out = ds_out.transpose(..., y_dim, x_dim)
-
-        # set crs
-        if ds_out.raster.crs is None and self.crs is not None:
-            ds_out.raster.set_crs(self.crs)
-        elif ds_out.raster.crs is None:
+    def _validate_spatial_dims(self, ds):
+        if GEO_MAP_COORD in ds.data_vars:
+            ds = ds.set_coords(GEO_MAP_COORD)
+        try:
+            ds.raster.set_spatial_dims()
+            # transpose dims to get y and x dim last
+            x_dim = ds.raster.x_dim
+            y_dim = ds.raster.y_dim
+            ds = ds.transpose(..., y_dim, x_dim)
+        except ValueError:
             raise ValueError(
-                "RasterDataset: The data has no CRS, set in RasterDatasetAdapter."
+                f"RasterDataset: No valid spatial coords found in data {self.path}"
             )
+        return ds
 
-        return ds_out
+    def _set_crs(self, ds):
+        # set crs
+        if ds.raster.crs is None and self.crs is not None:
+            ds.raster.set_crs(self.crs)
+        elif ds.raster.crs is None:
+            raise ValueError(
+                f"RasterDataset {self.name}: CRS not defined in data catalog or data."
+            )
+        elif self.crs is not None and ds.raster.crs != pyproj.CRS.from_user_input(
+            self.crs
+        ):
+            logger.warning(
+                f"RasterDataset {self.name}: CRS from data catalog does not match CRS "
+                " of data. The original CRS will be used. Please check your catalog."
+            )
+        return ds
 
     @staticmethod
-    def slice_data(ds_out, geom, bbox, buffer, align, time_tuple, dt=0):
+    def _slice_data(
+        ds,
+        variables=None,
+        geom=None,
+        bbox=None,
+        buffer=0,
+        align=None,
+        time_tuple=None,
+    ):
         """Return a RasterDataset sliced in both spatial and temporal dimensions.
 
         Arguments
         ---------
-        geom : geopandas.GeoDataFrame/Series,
+        ds : xarray.Dataset or xarray.DataArray
+            The RasterDataset to slice.
+        variables : list of str, optional
+            Names of variables to return. By default all dataset variables
+        geom : geopandas.GeoDataFrame/Series, optional
             A geometry defining the area of interest.
-        bbox : array-like of floats
+        bbox : array-like of floats, optional
             (xmin, ymin, xmax, ymax) bounding box of area of interest
             (in WGS84 coordinates).
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         align : float, optional
             Resolution to align the bounding box, by default None
-        time_tuple : Tuple of datetime
-            a tuple consisting of the lower and upper bounds of time that the
+        time_tuple : Tuple of datetime, optional
+            A tuple consisting of the lower and upper bounds of time that the
             result should contain
-        dt : Optional float or int
-            number of secords to shift the time series by before slicing
 
         Returns
         -------
-        obj: xarray.Dataset or xarray.DataArray
-            RasterDataset
+        ds : xarray.Dataset
+            The sliced RasterDataset.
         """
-        ds_out = RasterDatasetAdapter._slice_temporal_dimension(ds_out, time_tuple, dt)
-        return RasterDatasetAdapter._slice_spatial_dimensions(
-            ds_out, geom, bbox, buffer, align
-        )
+        if isinstance(ds, xr.DataArray):
+            if ds.name is None:
+                # dummy name, required to create dataset
+                # renamed to variable in _single_var_as_array
+                ds.name = "data"
+            ds = ds.to_dataset()
+        elif variables is not None:
+            variables = np.atleast_1d(variables).tolist()
+            if len(variables) > 1 or len(ds.data_vars) > 1:
+                mvars = [var not in ds.data_vars for var in variables]
+                if any(mvars):
+                    raise ValueError(f"RasterDataset: variables not found {mvars}")
+                ds = ds[variables]
+        if time_tuple is not None:
+            ds = RasterDatasetAdapter._slice_temporal_dimension(ds, time_tuple)
+        if geom is not None or bbox is not None:
+            ds = RasterDatasetAdapter._slice_spatial_dimensions(
+                ds, geom, bbox, buffer, align
+            )
+        return ds
+
+    def _shift_time(self, ds):
+        dt = self.unit_add.get("time", 0)
+        if (
+            dt != 0
+            and "time" in ds.dims
+            and ds["time"].size > 1
+            and np.issubdtype(ds["time"].dtype, np.datetime64)
+        ):
+            logger.debug(f"GeoDataset: Shifting time labels with {dt} sec.")
+            ds["time"] = ds["time"] + pd.to_timedelta(dt, unit="s")
+        elif dt != 0:
+            logger.warning(
+                "GeoDataset: Time shift not applied, time dimension not found."
+            )
+        return ds
 
     @staticmethod
-    def _slice_temporal_dimension(ds_out, time_tuple, dt=0):
+    def _slice_temporal_dimension(ds, time_tuple):
         if (
-            "time" in ds_out.dims
-            and ds_out["time"].size > 1
-            and np.issubdtype(ds_out["time"].dtype, np.datetime64)
+            "time" in ds.dims
+            and ds["time"].size > 1
+            and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
-            if dt != 0:
-                logger.debug(f"RasterDataset: Shifting time labels with {dt} sec.")
-                ds_out["time"] = ds_out["time"] + pd.to_timedelta(dt, unit="s")
             if time_tuple is not None:
                 logger.debug(f"RasterDataset: Slicing time dim {time_tuple}")
-                ds_out = ds_out.sel({"time": slice(*time_tuple)})
-            if ds_out.time.size == 0:
-                raise IndexError("RasterDataset: Time slice out of range.")
-
-        return ds_out
+                ds = ds.sel({"time": slice(*time_tuple)})
+                if ds.time.size == 0:
+                    raise IndexError("RasterDataset: Time slice out of range.")
+        return ds
 
     @staticmethod
-    def _slice_spatial_dimensions(ds_out, geom, bbox, buffer, align):
+    def _slice_spatial_dimensions(ds, geom, bbox, buffer, align):
         # make sure bbox is in data crs
-        crs = ds_out.raster.crs
+        crs = ds.raster.crs
         epsg = crs.to_epsg()  # this could return None
         if geom is not None:
             bbox = geom.to_crs(crs).total_bounds
@@ -487,23 +498,24 @@ class RasterDatasetAdapter(DataAdapter):
             bbox = rasterio.warp.transform_bounds(crs4326, crs, *bbox)
         # work with 4326 data that is defined at 0-360 degrees longtitude
         if epsg == 4326:
-            e = ds_out.raster.bounds[2]
+            e = ds.raster.bounds[2]
             if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
-                x_dim = ds_out.raster.x_dim
-                ds_out = gis_utils.meridian_offset(ds_out, x_dim, bbox).sortby(x_dim)
+                x_dim = ds.raster.x_dim
+                ds = gis_utils.meridian_offset(ds, x_dim, bbox).sortby(x_dim)
+
         # clip with bbox
         if bbox is not None:
             bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-            logger.debug(f"RasterDataset: Clip with bbox - [{bbox_str}] (epsg:{epsg}))")
-            ds_out = ds_out.raster.clip_bbox(bbox, buffer=buffer, align=align)
-            if np.any(np.array(ds_out.raster.shape) < 2):
+            logger.debug(f"RasterDataset: Clip to - [{bbox_str}] (epsg:{epsg}))")
+            ds = ds.raster.clip_bbox(bbox, buffer=buffer, align=align)
+            if np.any(np.array(ds.raster.shape) < 2):
                 raise IndexError("RasterDataset: No data within spatial domain.")
 
-        return ds_out
+        return ds
 
-    def _unit_conversions(self, ds_out, logger):
+    def _apply_unit_conversions(self, ds, logger):
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
-        unit_names = [k for k in unit_names if k in ds_out.data_vars]
+        unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
             logger.debug(
                 f"RasterDataset: Convert units for {len(unit_names)} variables."
@@ -511,39 +523,101 @@ class RasterDatasetAdapter(DataAdapter):
         for name in list(set(unit_names)):  # unique
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)
-            da = ds_out[name]
+            da = ds[name]
             attrs = da.attrs.copy()
             nodata_isnan = da.raster.nodata is None or np.isnan(da.raster.nodata)
             # nodata value is explicitly set to NaN in case no nodata value is provided
             nodata = np.nan if nodata_isnan else da.raster.nodata
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
-            ds_out[name] = xr.where(data_bool, da * m + a, nodata)
-            ds_out[name].attrs.update(attrs)  # set original attributes
-            ds_out[name].raster.set_nodata(nodata)  # reset nodata in case of change
+            ds[name] = xr.where(data_bool, da * m + a, nodata)
+            ds[name].attrs.update(attrs)  # set original attributes
+            ds[name].raster.set_nodata(nodata)  # reset nodata in case of change
 
-        return ds_out
+        return ds
 
-    def _set_metadata(self, ds_out, single_var_as_array):
+    def _set_nodata(self, ds):
         # set nodata value
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
-                nodata = {k: self.nodata for k in ds_out.data_vars.keys()}
+                nodata = {k: self.nodata for k in ds.data_vars.keys()}
             else:
                 nodata = self.nodata
-            for k in ds_out.data_vars:
+            for k in ds.data_vars:
                 mv = nodata.get(k, None)
-                if mv is not None and ds_out[k].raster.nodata is None:
-                    ds_out[k].raster.set_nodata(mv)
+                if mv is not None and ds[k].raster.nodata is None:
+                    ds[k].raster.set_nodata(mv)
+        return ds
 
+    def _set_metadata(self, ds):
         # unit attributes
         for k in self.attrs:
-            ds_out[k].attrs.update(self.attrs[k])
-
-        # return data array if single var
-        if single_var_as_array and len(ds_out.raster.vars) == 1:
-            ds_out = ds_out[ds_out.raster.vars[0]]
-
+            ds[k].attrs.update(self.attrs[k])
         # set meta data
-        ds_out.attrs.update(self.meta)
+        ds.attrs.update(self.meta)
+        return ds
 
-        return ds_out
+    def _parse_zoom_level(
+        self,
+        zoom_level: int | tuple = None,
+        geom: gpd.GeoSeries = None,
+        bbox: list = None,
+        logger=logger,
+    ) -> int:
+        """Return nearest smaller zoom level.
+
+        Based on zoom resolutions defined in data catalog.
+        """
+        # common pyproj crs axis units
+        known_units = ["degree", "metre", "US survey foot"]
+        if self.zoom_levels is None or len(self.zoom_levels) == 0:
+            logger.warning("No zoom levels available, default to zero")
+            return 0
+        zls = list(self.zoom_levels.keys())
+        if zoom_level is None:  # return first zoomlevel (assume these are ordered)
+            return next(iter(zls))
+        # parse zoom_level argument
+        if (
+            isinstance(zoom_level, tuple)
+            and isinstance(zoom_level[0], (int, float))
+            and isinstance(zoom_level[1], str)
+            and len(zoom_level) == 2
+        ):
+            res, unit = zoom_level
+            # covert 'meter' and foot to official pyproj units
+            unit = {"meter": "metre", "foot": "US survey foot"}.get(unit, unit)
+            if unit not in known_units:
+                raise TypeError(
+                    f"zoom_level unit {unit} not understood;"
+                    f" should be one of {known_units}"
+                )
+        elif not isinstance(zoom_level, int):
+            raise TypeError(
+                f"zoom_level argument not understood: {zoom_level}; should be a float"
+            )
+        else:
+            return zoom_level
+        if self.crs:
+            # convert res if different unit than crs
+            crs = pyproj.CRS.from_user_input(self.crs)
+            crs_unit = crs.axis_info[0].unit_name
+            if crs_unit != unit and crs_unit not in known_units:
+                raise NotImplementedError(
+                    f"no conversion available for {unit} to {crs_unit}"
+                )
+            if unit != crs_unit:
+                lat = 0
+                if bbox is not None:
+                    lat = (bbox[1] + bbox[3]) / 2
+                elif geom is not None:
+                    lat = geom.to_crs(4326).centroid.y.item()
+                conversions = {
+                    "degree": np.hypot(*gis_utils.cellres(lat=lat)),
+                    "US survey foot": 0.3048,
+                }
+                res = res * conversions.get(unit, 1) / conversions.get(crs_unit, 1)
+        # find nearest smaller zoomlevel
+        eps = 1e-5  # allow for rounding errors
+        smaller = [x < (res + eps) for x in self.zoom_levels.values()]
+        zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
+        logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
+        return zl

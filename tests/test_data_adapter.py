@@ -40,13 +40,16 @@ def test_resolve_path(tmpdir):
     }
     cat = DataCatalog()
     cat.from_dict(dd)
+    source = cat.get_source("test")
     # test
-    assert len(cat.get_source("test").resolve_paths()) == 48
-    assert len(cat.get_source("test").resolve_paths(variables=["precip"])) == 24
-    kwargs = dict(variables=["precip"], time_tuple=("2021-03-01", "2021-05-01"))
-    assert len(cat.get_source("test").resolve_paths(**kwargs)) == 3
+    fns = source._resolve_paths()
+    assert len(fns) == 48
+    fns = source._resolve_paths(variables=["precip"])
+    assert len(fns) == 24
+    fns = source._resolve_paths(("2021-03-01", "2021-05-01"), ["precip"])
+    assert len(fns) == 3
     with pytest.raises(FileNotFoundError, match="No such file found:"):
-        cat.get_source("test").resolve_paths(variables=["waves"])
+        source._resolve_paths(variables=["waves"])
 
 
 def test_rasterdataset(rioda, tmpdir):
