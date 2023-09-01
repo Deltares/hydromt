@@ -425,11 +425,10 @@ class GeoDatasetAdapter(DataAdapter):
             and ds["time"].size > 1
             and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
-            if time_tuple is not None:
-                logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
-                ds = ds.sel(time=slice(*time_tuple))
-                if ds.time.size == 0:
-                    raise IndexError("GeoDataset: Time slice out of range.")
+            logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
+            ds = ds.sel(time=slice(*time_tuple))
+            if ds.time.size == 0:
+                raise IndexError("GeoDataset: Time slice out of range.")
         return ds
 
     def _set_metadata(self, ds):
