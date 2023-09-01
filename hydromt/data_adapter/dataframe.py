@@ -139,9 +139,6 @@ class DataFrameAdapter(DataAdapter):
         time_tuple : tuple of str or datetime, optional
             Start and end date of the period of interest. By default, the entire time
             period of the DataFrame is included.
-        logger : Logger, optional
-            Logger object to log warnings or messages. By default, the module
-            logger is used.
         **kwargs : dict
             Additional keyword arguments to be passed to the file writing method.
 
@@ -192,14 +189,14 @@ class DataFrameAdapter(DataAdapter):
         """
         # load data
         fns = self._resolve_paths(variables)
-        df = self._read_data(fns)
+        df = self._read_data(fns, logger=logger)
         # rename variables and parse nodata
         df = self._rename_vars(df)
         df = self._set_nodata(df)
         # slice data
-        df = self._slice_data(df, variables, time_tuple)
+        df = self._slice_data(df, variables, time_tuple, logger=logger)
         # uniformize data
-        df = self._apply_unit_conversion(df)
+        df = self._apply_unit_conversion(df, logger=logger)
         df = self._set_metadata(df)
         return df
 
@@ -220,14 +217,14 @@ class DataFrameAdapter(DataAdapter):
 
         return fns
 
-    def _read_data(self, fns):
+    def _read_data(self, fns, logger=logger):
         if len(fns) > 1:
             raise ValueError(
                 f"DataFrame: Reading multiple {self.driver} files is not supported."
             )
         kwargs = self.driver_kwargs.copy()
         path = fns[0]
-        logger.info(f"DataFrame: Reading {self.driver} data from {self.path}")
+        logger.info(f"Reading {self.name} {self.driver} data from {self.path}")
         if self.driver in ["csv"]:
             df = pd.read_csv(path, **kwargs)
         elif self.driver == "parquet":
@@ -264,7 +261,7 @@ class DataFrameAdapter(DataAdapter):
         return df
 
     @staticmethod
-    def _slice_data(df, variables, time_tuple):
+    def _slice_data(df, variables=None, time_tuple=None, logger=logger):
         """Return a sliced DataFrame.
 
         Parameters
@@ -289,18 +286,18 @@ class DataFrameAdapter(DataAdapter):
             df = df.loc[:, variables]
 
         if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
-            logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
+            logger.debug(f"Slicing time dime {time_tuple}")
             df = df[df.index.slice_indexer(*time_tuple)]
             if df.size == 0:
                 raise IndexError("DataFrame: Time slice out of range.")
 
         return df
 
-    def _apply_unit_conversion(self, df):
+    def _apply_unit_conversion(self, df, logger=logger):
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in df.columns]
         if len(unit_names) > 0:
-            logger.debug(f"DataFrame: Convert units for {len(unit_names)} columns.")
+            logger.debug(f"Convert units for {len(unit_names)} columns.")
         for name in list(set(unit_names)):  # unique
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)

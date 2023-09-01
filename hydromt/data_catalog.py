@@ -1006,7 +1006,14 @@ class DataCatalog(object):
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = RasterDatasetAdapter._slice_data(
-                data_like, variables, geom, bbox, buffer, align, time_tuple
+                data_like,
+                variables,
+                geom,
+                bbox,
+                buffer,
+                align,
+                time_tuple,
+                logger=self.logger,
             )
             return RasterDatasetAdapter._single_var_as_array(
                 data_like, single_var_as_array, variables
@@ -1016,10 +1023,6 @@ class DataCatalog(object):
 
         # TODO add also provider and version to used data
         self._used_data.append(name)
-        self.logger.info(
-            f"DataCatalog: Getting {name} RasterDataset {source.driver} data from"
-            f" {source.path}"
-        )
         obj = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1109,16 +1112,12 @@ class DataCatalog(object):
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, gpd.GeoDataFrame):
             return GeoDataFrameAdapter._slice_data(
-                data_like, variables, geom, bbox, buffer, predicate
+                data_like, variables, geom, bbox, buffer, predicate, logger=self.logger
             )
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
         self._used_data.append(name)
-        self.logger.info(
-            f"DataCatalog: Getting {name} GeoDataFrame {source.driver} data"
-            f" from {source.path}"
-        )
         gdf = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1210,7 +1209,14 @@ class DataCatalog(object):
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = GeoDatasetAdapter._slice_data(
-                data_like, variables, geom, bbox, buffer, predicate, time_tuple
+                data_like,
+                variables,
+                geom,
+                bbox,
+                buffer,
+                predicate,
+                time_tuple,
+                logger=self.logger,
             )
             return GeoDatasetAdapter._single_var_as_array(
                 data_like, single_var_as_array, variables
@@ -1219,10 +1225,6 @@ class DataCatalog(object):
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
         self._used_data.append(name)
-        self.logger.info(
-            f"DataCatalog: Getting {name} GeoDataset {source.driver} data"
-            f" from {source.path}"
-        )
         obj = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1286,15 +1288,13 @@ class DataCatalog(object):
             else:
                 raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, pd.DataFrame):
-            return DataFrameAdapter._slice_data(data_like, variables, time_tuple)
+            return DataFrameAdapter._slice_data(
+                data_like, variables, time_tuple, logger=self.logger
+            )
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
         self._used_data.append(name)
-        self.logger.info(
-            f"DataCatalog: Getting {name} DataFrame {source.driver} data"
-            f" from {source.path}"
-        )
         obj = source.get_data(
             variables=variables,
             time_tuple=time_tuple,

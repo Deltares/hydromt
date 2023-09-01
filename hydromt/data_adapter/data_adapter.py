@@ -242,7 +242,6 @@ class DataAdapter(object, metaclass=ABCMeta):
         time_tuple: tuple = None,
         variables: list = None,
         zoom_level: int = 0,
-        logger=logger,
         **kwargs,
     ):
         """Resolve {year}, {month} and {variable} keywords in self.path.
@@ -291,6 +290,7 @@ class DataAdapter(object, metaclass=ABCMeta):
             else:
                 path = path + key_str
                 keys.append(key)
+
         # resolve dates: month & year keys
         dates, vrs, postfix = [None], [None], ""
         if time_tuple is not None:
@@ -305,6 +305,7 @@ class DataAdapter(object, metaclass=ABCMeta):
             mv_inv = {v: k for k, v in self.rename.items()}
             vrs = [mv_inv.get(var, var) for var in variables]
             postfix += f"; variables: {variables}"
+
         # get filenames with glob for all date / variable combinations
         fs = self.get_filesystem(**kwargs)
         fmt = {}
@@ -318,6 +319,7 @@ class DataAdapter(object, metaclass=ABCMeta):
             if var is not None:
                 fmt.update(variable=var)
             fns.extend(fs.glob(path.format(**fmt)))
+
         if len(fns) == 0:
             raise FileNotFoundError(f"No such file found: {path}{postfix}")
 

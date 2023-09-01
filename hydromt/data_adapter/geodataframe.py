@@ -149,9 +149,6 @@ class GeoDataFrameAdapter(DataAdapter):
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        logger : logger object, optional
-            The logger object used for logging messages. If not provided, the default
-            logger will be used.
         **kwargs
             Additional keyword arguments that are passed to the geopandas driver.
 
@@ -217,15 +214,17 @@ class GeoDataFrameAdapter(DataAdapter):
         """
         # load
         fns = self._resolve_paths(variables)
-        gdf = self._read_data(fns, bbox, geom, buffer, predicate)
+        gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
         # rename variables and parse crs & nodata
         gdf = self._rename_vars(gdf)
-        gdf = self._set_crs(gdf)
+        gdf = self._set_crs(gdf, logger=logger)
         gdf = self._set_nodata(gdf)
         # slice
-        gdf = self._slice_data(gdf, variables, geom)
+        gdf = self._slice_data(
+            gdf, variables, geom, bbox, buffer, predicate, logger=logger
+        )
         # uniformize
-        gdf = self._apply_unit_conversions(gdf)
+        gdf = self._apply_unit_conversions(gdf, logger=logger)
         gdf = self._set_metadata(gdf)
         return gdf
 
@@ -243,14 +242,14 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return fns
 
-    def _read_data(self, fns, bbox, geom, buffer, predicate):
+    def _read_data(self, fns, bbox, geom, buffer, predicate, logger=logger):
         if len(fns) > 1:
             raise ValueError(
                 f"GeoDataFrame: Reading multiple {self.driver} files is not supported."
             )
         kwargs = self.driver_kwargs.copy()
         path = fns[0]
-        logger.debug(f"GeoDataFrame: Reading {self.driver} data from {self.path}")
+        logger.info(f"Reading {self.name} {self.driver} data from {self.path}")
         if self.driver in [
             "csv",
             "parquet",
@@ -287,7 +286,7 @@ class GeoDataFrameAdapter(DataAdapter):
             gdf = gdf.rename(columns=rename)
         return gdf
 
-    def _set_crs(self, gdf):
+    def _set_crs(self, gdf, logger=logger):
         if self.crs is not None and gdf.crs is None:
             gdf.set_crs(self.crs, inplace=True)
         elif gdf.crs is None:
@@ -303,7 +302,13 @@ class GeoDataFrameAdapter(DataAdapter):
 
     @staticmethod
     def _slice_data(
-        gdf, variables=None, geom=None, bbox=None, buffer=0, predicate="intersects"
+        gdf,
+        variables=None,
+        geom=None,
+        bbox=None,
+        buffer=0,
+        predicate="intersects",
+        logger=logger,
     ):
         """Return a clipped GeoDataFrame (vector).
 
@@ -336,10 +341,14 @@ class GeoDataFrameAdapter(DataAdapter):
             gdf = gdf.loc[:, variables]
 
         if geom is not None or bbox is not None:
+            # NOTE if we read with vector driver this is already done ..
             geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
+            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
+            epsg = geom.crs.to_epsg()
+            logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
             idxs = gis_utils.filter_gdf(gdf, geom=geom, predicate=predicate)
             if idxs.size == 0:
-                raise IndexError("GeoDataFrame: No data within spatial domain.")
+                raise IndexError("No data within spatial domain.")
             gdf = gdf.iloc[idxs]
         return gdf
 
@@ -358,12 +367,12 @@ class GeoDataFrameAdapter(DataAdapter):
                     gdf[c] = np.where(is_nodata, np.nan, gdf[c])
         return gdf
 
-    def _apply_unit_conversions(self, gdf):
+    def _apply_unit_conversions(self, gdf, logger=logger):
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in gdf.columns]
         if len(unit_names) > 0:
-            logger.debug(f"GeoDataFrame: Convert units for {len(unit_names)} columns.")
+            logger.debug(f"Convert units for {len(unit_names)} columns.")
         for name in list(set(unit_names)):  # unique
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)

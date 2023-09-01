@@ -158,9 +158,6 @@ class GeoDatasetAdapter(DataAdapter):
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        logger : logger object, optional
-            The logger object used for logging messages. If not provided, the default
-            logger will be used.
         **kwargs
             Additional keyword arguments that are passed to the `to_zarr`
             function.
@@ -237,17 +234,19 @@ class GeoDatasetAdapter(DataAdapter):
         """
         # load data
         fns = self._resolve_paths(variables, time_tuple)
-        ds = self._read_data(fns)
+        ds = self._read_data(fns, logger=logger)
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_coords(ds)
-        ds = self._set_crs(ds)
+        ds = self._set_crs(ds, logger=logger)
         ds = self._set_nodata(ds)
-        ds = self._shift_time(ds)
+        ds = self._shift_time(ds, logger=logger)
         # slice
-        ds = self._slice_data(ds, variables, geom, bbox, buffer, predicate, time_tuple)
+        ds = self._slice_data(
+            ds, variables, geom, bbox, buffer, predicate, time_tuple, logger=logger
+        )
         # uniformize
-        ds = self._apply_unit_conversion(ds)
+        ds = self._apply_unit_conversion(ds, logger=logger)
         ds = self._set_metadata(ds)
         # return array if single var and single_var_as_array
         return self._single_var_as_array(ds, single_var_as_array, variables)
@@ -276,13 +275,13 @@ class GeoDatasetAdapter(DataAdapter):
 
         return fns
 
-    def _read_data(self, fns):
+    def _read_data(self, fns, logger=logger):
         kwargs = self.driver_kwargs.copy()
         if len(fns) > 1 and self.driver in ["vector", "zarr"]:
             raise ValueError(
                 f"GeoDataset: Reading multiple {self.driver} files is not supported."
             )
-        logger.debug(f"GeoDataFrame: Reading {self.driver} data from {self.path}")
+        logger.info(f"Reading {self.name} {self.driver} data from {self.path}")
         if self.driver in ["netcdf"]:
             ds = xr.open_mfdataset(fns, **kwargs)
         elif self.driver == "zarr":
@@ -316,7 +315,7 @@ class GeoDatasetAdapter(DataAdapter):
             )
         return ds
 
-    def _set_crs(self, ds):
+    def _set_crs(self, ds, logger=logger):
         # set crs
         if ds.vector.crs is None and self.crs is not None:
             ds.vector.set_crs(self.crs)
@@ -342,6 +341,7 @@ class GeoDatasetAdapter(DataAdapter):
         buffer=0,
         predicate="intersects",
         time_tuple=None,
+        logger=logger,
     ):
         """Slice the dataset in space and time.
 
@@ -384,25 +384,27 @@ class GeoDatasetAdapter(DataAdapter):
                     raise ValueError(f"GeoDataset: variables not found {mvars}")
                 ds = ds[variables]
         if time_tuple is not None:
-            ds = GeoDatasetAdapter._slice_temporal_dimension(ds, time_tuple)
+            ds = GeoDatasetAdapter._slice_temporal_dimension(
+                ds, time_tuple, logger=logger
+            )
         if geom is not None or bbox is not None:
             ds = GeoDatasetAdapter._slice_spatial_dimension(
-                ds, geom, bbox, buffer, predicate
+                ds, geom, bbox, buffer, predicate, logger=logger
             )
         return ds
 
     @staticmethod
-    def _slice_spatial_dimension(ds, geom, bbox, buffer, predicate="intersects"):
+    def _slice_spatial_dimension(ds, geom, bbox, buffer, predicate, logger=logger):
         geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
         bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
         epsg = geom.crs.to_epsg()
-        logger.debug(f"GeoDataset: Clip ({predicate}) to [{bbox_str}] (EPSG:{epsg})")
+        logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
         ds = ds.vector.clip_geom(geom, predicate=predicate)
         if ds.vector.index.size == 0:
-            raise IndexError("GeoDataset: No data within spatial domain.")
+            raise IndexError("No data within spatial domain.")
         return ds
 
-    def _shift_time(self, ds):
+    def _shift_time(self, ds, logger=logger):
         dt = self.unit_add.get("time", 0)
         if (
             dt != 0
@@ -410,22 +412,20 @@ class GeoDatasetAdapter(DataAdapter):
             and ds["time"].size > 1
             and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
-            logger.debug(f"GeoDataset: Shifting time labels with {dt} sec.")
+            logger.debug(f"Shifting time labels with {dt} sec.")
             ds["time"] = ds["time"] + pd.to_timedelta(dt, unit="s")
         elif dt != 0:
-            logger.warning(
-                "GeoDataset: Time shift not applied, time dimension not found."
-            )
+            logger.warning("Time shift not applied, time dimension not found.")
         return ds
 
     @staticmethod
-    def _slice_temporal_dimension(ds, time_tuple):
+    def _slice_temporal_dimension(ds, time_tuple, logger=logger):
         if (
             "time" in ds.dims
             and ds["time"].size > 1
             and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
-            logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
+            logger.debug(f"Slicing time dim {time_tuple}")
             ds = ds.sel(time=slice(*time_tuple))
             if ds.time.size == 0:
                 raise IndexError("GeoDataset: Time slice out of range.")
@@ -454,11 +454,11 @@ class GeoDatasetAdapter(DataAdapter):
                     ds[k].vector.set_nodata(mv)
         return ds
 
-    def _apply_unit_conversion(self, ds):
+    def _apply_unit_conversion(self, ds, logger=logger):
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
-            logger.debug(f"GeoDataset: Convert units for {len(unit_names)} variables.")
+            logger.debug(f"Convert units for {len(unit_names)} variables.")
         for name in list(set(unit_names)):  # unique
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)

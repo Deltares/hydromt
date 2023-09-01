@@ -168,9 +168,6 @@ class RasterDatasetAdapter(DataAdapter):
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        logger : logger object, optional
-            The logger object used for logging messages. If not provided, the default
-            logger will be used.
         **kwargs
             Additional keyword arguments that are passed to the `to_netcdf`
             function.
@@ -252,15 +249,17 @@ class RasterDatasetAdapter(DataAdapter):
         """
         # load data
         fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
-        ds = self._read_data(fns, geom, bbox, logger, cache_root)
+        ds = self._read_data(fns, geom, bbox, cache_root, logger)
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_dims(ds)
-        ds = self._set_crs(ds)
+        ds = self._set_crs(ds, logger)
         ds = self._set_nodata(ds)
-        ds = self._shift_time(ds)
+        ds = self._shift_time(ds, logger)
         # slice data
-        ds = self._slice_data(ds, variables, geom, bbox, buffer, align, time_tuple)
+        ds = self._slice_data(
+            ds, variables, geom, bbox, buffer, align, time_tuple, logger
+        )
         # uniformize data
         ds = self._apply_unit_conversions(ds, logger)
         ds = self._set_metadata(ds)
@@ -296,15 +295,13 @@ class RasterDatasetAdapter(DataAdapter):
             time_tuple=time_tuple,
             variables=variables,
             zoom_level=zoom_level,
-            logger=logger,
             **so_kwargs,
         )
 
         return fns
 
-    def _read_data(self, fns, geom, bbox, logger, cache_root):
+    def _read_data(self, fns, geom, bbox, cache_root, logger=logger):
         kwargs = self.driver_kwargs.copy()
-
         # zarr can use storage options directly, the rest should be converted to
         # file-like objects
         if "storage_options" in kwargs and self.driver == "raster":
@@ -313,6 +310,7 @@ class RasterDatasetAdapter(DataAdapter):
             fns = [fs.open(f) for f in fns]
 
         # read using various readers
+        logger.info(f"Reading {self.name} {self.driver} data from {self.path}")
         if self.driver == "netcdf":
             if self.filesystem == "local":
                 if "preprocess" in kwargs:
@@ -384,7 +382,7 @@ class RasterDatasetAdapter(DataAdapter):
             )
         return ds
 
-    def _set_crs(self, ds):
+    def _set_crs(self, ds, logger=logger):
         # set crs
         if ds.raster.crs is None and self.crs is not None:
             ds.raster.set_crs(self.crs)
@@ -410,6 +408,7 @@ class RasterDatasetAdapter(DataAdapter):
         buffer=0,
         align=None,
         time_tuple=None,
+        logger=logger,
     ):
         """Return a RasterDataset sliced in both spatial and temporal dimensions.
 
@@ -451,14 +450,18 @@ class RasterDatasetAdapter(DataAdapter):
                     raise ValueError(f"RasterDataset: variables not found {mvars}")
                 ds = ds[variables]
         if time_tuple is not None:
-            ds = RasterDatasetAdapter._slice_temporal_dimension(ds, time_tuple)
+            ds = RasterDatasetAdapter._slice_temporal_dimension(
+                ds,
+                time_tuple,
+                logger=logger,
+            )
         if geom is not None or bbox is not None:
             ds = RasterDatasetAdapter._slice_spatial_dimensions(
-                ds, geom, bbox, buffer, align
+                ds, geom, bbox, buffer, align, logger=logger
             )
         return ds
 
-    def _shift_time(self, ds):
+    def _shift_time(self, ds, logger=logger):
         dt = self.unit_add.get("time", 0)
         if (
             dt != 0
@@ -466,30 +469,28 @@ class RasterDatasetAdapter(DataAdapter):
             and ds["time"].size > 1
             and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
-            logger.debug(f"GeoDataset: Shifting time labels with {dt} sec.")
+            logger.debug(f"Shifting time labels with {dt} sec.")
             ds["time"] = ds["time"] + pd.to_timedelta(dt, unit="s")
         elif dt != 0:
-            logger.warning(
-                "GeoDataset: Time shift not applied, time dimension not found."
-            )
+            logger.warning("Time shift not applied, time dimension not found.")
         return ds
 
     @staticmethod
-    def _slice_temporal_dimension(ds, time_tuple):
+    def _slice_temporal_dimension(ds, time_tuple, logger=logger):
         if (
             "time" in ds.dims
             and ds["time"].size > 1
             and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
             if time_tuple is not None:
-                logger.debug(f"RasterDataset: Slicing time dim {time_tuple}")
+                logger.debug(f"Slicing time dim {time_tuple}")
                 ds = ds.sel({"time": slice(*time_tuple)})
                 if ds.time.size == 0:
-                    raise IndexError("RasterDataset: Time slice out of range.")
+                    raise IndexError("Time slice out of range.")
         return ds
 
     @staticmethod
-    def _slice_spatial_dimensions(ds, geom, bbox, buffer, align):
+    def _slice_spatial_dimensions(ds, geom, bbox, buffer, align, logger=logger):
         # make sure bbox is in data crs
         crs = ds.raster.crs
         epsg = crs.to_epsg()  # this could return None
@@ -508,20 +509,18 @@ class RasterDatasetAdapter(DataAdapter):
         # clip with bbox
         if bbox is not None:
             bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
-            logger.debug(f"RasterDataset: Clip to - [{bbox_str}] (epsg:{epsg}))")
+            logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
             ds = ds.raster.clip_bbox(bbox, buffer=buffer, align=align)
             if np.any(np.array(ds.raster.shape) < 2):
                 raise IndexError("RasterDataset: No data within spatial domain.")
 
         return ds
 
-    def _apply_unit_conversions(self, ds, logger):
+    def _apply_unit_conversions(self, ds, logger=logger):
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
-            logger.debug(
-                f"RasterDataset: Convert units for {len(unit_names)} variables."
-            )
+            logger.debug(f"Convert units for {len(unit_names)} variables.")
         for name in list(set(unit_names)):  # unique
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)
