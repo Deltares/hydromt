@@ -205,7 +205,6 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     ds1 = data_catalog.get_geodataset("test.nc", single_var_as_array=False)
     assert isinstance(ds1, xr.Dataset)
     assert "test" in ds1
-    # breakpoint()
     da2 = data_catalog.get_geodataset(
         fn_gdf, driver_kwargs=dict(fn_data=fn_csv)
     ).sortby("index")
