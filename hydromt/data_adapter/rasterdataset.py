@@ -12,6 +12,8 @@ import pyproj
 import rasterio
 import xarray as xr
 
+from shapely.geometry import box
+
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
 from .caching import cache_vrt_tiles
@@ -455,11 +457,13 @@ class RasterDatasetAdapter(DataAdapter):
         return ds_out
 
     @staticmethod
-    def detect_spatial_range(gds):
-        """Detect spatial range."""
-        pass
+    def detect_spatial_range(ds):
+        """detect spatial range."""
+        bounds = box(*ds.geometry.total_bounds)
+        return bounds
 
     @staticmethod
-    def detect_temporal_range(gds):
-        """Detect temporal range."""
-        pass
+    def detect_temporal_range(ds):
+        """detect temporal range."""
+
+        return (ds["time"].min(), ds["time"].max())

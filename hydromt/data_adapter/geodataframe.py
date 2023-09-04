@@ -327,11 +327,13 @@ class GeoDataFrameAdapter(DataAdapter):
         return gdf
 
     @staticmethod
-    def detect_spatial_range(gds):
-        """Detect spatial range."""
-        pass
+    def detect_spatial_range(ds):
+        """detect spatial range."""
+        bounds = box(*ds.geometry.total_bounds)
+        return bounds
 
     @staticmethod
-    def detect_temporal_range(gds):
-        """Detect temporal range."""
-        pass
+    def detect_temporal_range(ds):
+        """detect temporal range."""
+
+        return (ds["time"].min(), ds["time"].max())
