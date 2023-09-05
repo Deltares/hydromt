@@ -127,3 +127,4 @@ dask-worker-space/
 
 #ruff linting
 .ruff_cache
+.envrc
