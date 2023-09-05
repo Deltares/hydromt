@@ -6,11 +6,10 @@ from os.path import join
 from pathlib import Path
 from typing import NewType, Union
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pyproj
 import xarray as xr
-from shapely.geometry import box
 
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
@@ -159,9 +158,6 @@ class GeoDatasetAdapter(DataAdapter):
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        logger : logger object, optional
-            The logger object used for logging messages. If not provided, the default
-            logger will be used.
         **kwargs
             Additional keyword arguments that are passed to the `to_zarr`
             function.
@@ -181,8 +177,6 @@ class GeoDatasetAdapter(DataAdapter):
             logger=logger,
             single_var_as_array=variables is None,
         )
-        if obj.vector.index.size == 0 or ("time" in obj.coords and obj.time.size == 0):
-            return None, None, None
 
         read_kwargs = {}
 
@@ -227,6 +221,7 @@ class GeoDatasetAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
+        predicate="intersects",
         variables=None,
         time_tuple=None,
         single_var_as_array=True,
@@ -237,10 +232,26 @@ class GeoDatasetAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
-        # If variable is string, convert to list
-        if variables:
-            variables = np.atleast_1d(variables).tolist()
+        # load data
+        fns = self._resolve_paths(variables, time_tuple)
+        ds = self._read_data(fns, logger=logger)
+        # rename variables and parse data and attrs
+        ds = self._rename_vars(ds)
+        ds = self._validate_spatial_coords(ds)
+        ds = self._set_crs(ds, logger=logger)
+        ds = self._set_nodata(ds)
+        ds = self._shift_time(ds, logger=logger)
+        # slice
+        ds = GeoDatasetAdapter._slice_data(
+            ds, variables, geom, bbox, buffer, predicate, time_tuple, logger=logger
+        )
+        # uniformize
+        ds = self._apply_unit_conversion(ds, logger=logger)
+        ds = self._set_metadata(ds)
+        # return array if single var and single_var_as_array
+        return self._single_var_as_array(ds, single_var_as_array, variables)
 
+    def _resolve_paths(self, variables, time_tuple):
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         so_kwargs = dict()
         if "storage_options" in self.driver_kwargs and self.driver == "zarr":
@@ -256,154 +267,207 @@ class GeoDatasetAdapter(DataAdapter):
             raise NotImplementedError(
                 "Remote (cloud) GeoDataset only supported with driver zarr."
             )
-        fns = self.resolve_paths(
+
+        # resolve paths
+        fns = super()._resolve_paths(
             time_tuple=time_tuple, variables=variables, **so_kwargs
         )
 
-        kwargs = self.driver_kwargs.copy()
-        # parse geom, bbox and buffer arguments
-        clip_str = ""
-        if geom is None and bbox is not None:
-            # convert bbox to geom with crs EPGS:4326 to apply buffer later
-            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-            clip_str = " and clip to bbox (epsg:4326)"
-        elif geom is not None:
-            clip_str = f" and clip to geom (epsg:{geom.crs.to_epsg():d})"
-        if geom is not None:
-            # make sure geom is projected > buffer in meters!
-            if buffer > 0 and geom.crs.is_geographic:
-                geom = geom.to_crs(3857)
-            geom = geom.buffer(buffer)
-            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            clip_str = f"{clip_str} [{bbox_str}]"
-        if kwargs.pop("within", False):  # for backward compatibility
-            kwargs.update(predicate="contains")
+        return fns
 
-        # read and clip
-        logger.info(f"GeoDataset: Read {self.driver} data{clip_str}.")
-        if self.driver in ["netcdf"]:
-            ds_out = xr.open_mfdataset(fns, **kwargs)
-        elif self.driver == "zarr":
-            if len(fns) > 1:
-                raise ValueError(
-                    "GeoDataset: Opening multiple zarr data files is not supported."
-                )
-            ds_out = xr.open_zarr(fns[0], **kwargs)
-        elif self.driver == "vector":
-            # read geodataset from point + time series file
-            ds_out = io.open_geodataset(
-                fn_locs=fns[0], geom=geom, crs=self.crs, **kwargs
+    def _read_data(self, fns, logger=logger):
+        kwargs = self.driver_kwargs.copy()
+        if len(fns) > 1 and self.driver in ["vector", "zarr"]:
+            raise ValueError(
+                f"GeoDataset: Reading multiple {self.driver} files is not supported."
             )
-            geom = None  # already clipped
+        logger.info(f"Reading {self.name} {self.driver} data from {self.path}")
+        if self.driver in ["netcdf"]:
+            ds = xr.open_mfdataset(fns, **kwargs)
+        elif self.driver == "zarr":
+            ds = xr.open_zarr(fns[0], **kwargs)
+        elif self.driver == "vector":
+            ds = io.open_geodataset(fn_locs=fns[0], crs=self.crs, **kwargs)
         else:
             raise ValueError(f"GeoDataset: Driver {self.driver} unknown")
-        if GEO_MAP_COORD in ds_out.data_vars:
-            ds_out = ds_out.set_coords(GEO_MAP_COORD)
 
-        # rename and select vars
-        if variables and len(ds_out.vector.vars) == 1 and len(self.rename) == 0:
-            rm = {ds_out.vector.vars[0]: variables[0]}
-        else:
-            rm = {k: v for k, v in self.rename.items() if k in ds_out}
-        ds_out = ds_out.rename(rm)
-        # check spatial dims and make sure all are set as coordinates
+        return ds
+
+    def _rename_vars(self, ds):
+        rm = {k: v for k, v in self.rename.items() if k in ds}
+        ds = ds.rename(rm)
+        return ds
+
+    def _validate_spatial_coords(self, ds):
+        if GEO_MAP_COORD in ds.data_vars:
+            ds = ds.set_coords(GEO_MAP_COORD)
         try:
-            ds_out.vector.set_spatial_dims()
-            idim = ds_out.vector.index_dim
-            if idim not in ds_out:  # set coordinates for index dimension if missing
-                ds_out[idim] = xr.IndexVariable(idim, np.arange(ds_out.dims[idim]))
-            coords = [ds_out.vector.x_name, ds_out.vector.y_name, idim]
+            ds.vector.set_spatial_dims()
+            idim = ds.vector.index_dim
+            if idim not in ds:  # set coordinates for index dimension if missing
+                ds[idim] = xr.IndexVariable(idim, np.arange(ds.dims[idim]))
+            coords = [ds.vector.x_name, ds.vector.y_name, idim]
             coords = [item for item in coords if item is not None]
-            ds_out = ds_out.set_coords(coords)
+            ds = ds.set_coords(coords)
         except ValueError:
-            raise ValueError(f"GeoDataset: No spatial coords found in data {self.path}")
-        if variables is not None:
-            if np.any([var not in ds_out.data_vars for var in variables]):
-                raise ValueError(f"GeoDataset: Not all variables found: {variables}")
-            ds_out = ds_out[variables]
-
-        # set crs
-        if ds_out.vector.crs is None and self.crs is not None:
-            ds_out.vector.set_crs(self.crs)
-        if ds_out.vector.crs is None:
             raise ValueError(
-                "GeoDataset: The data has no CRS, set in GeoDatasetAdapter."
+                f"GeoDataset: No spatial geometry dimension found in data {self.path}"
             )
+        return ds
 
-        # clip
-        if geom is not None:
-            bbox = geom.to_crs(4326).total_bounds
-        if ds_out.vector.crs.to_epsg() == 4326:
-            e = ds_out.vector.geometry.total_bounds[2]
-            if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
-                ds_out = gis_utils.meridian_offset(ds_out, ds_out.vector.x_name, bbox)
-        if geom is not None:
-            predicate = kwargs.pop("predicate", "intersects")
-            ds_out = ds_out.vector.clip_geom(geom, predicate=predicate)
-        if ds_out.vector.index.size == 0:
-            logger.warning(
-                f"GeoDataset: No data within spatial domain for {self.path}."
+    def _set_crs(self, ds, logger=logger):
+        # set crs
+        if ds.vector.crs is None and self.crs is not None:
+            ds.vector.set_crs(self.crs)
+        elif ds.vector.crs is None:
+            raise ValueError(
+                f"GeoDataset {self.name}: CRS not defined in data catalog or data."
             )
-
-        # clip tslice
-        if (
-            "time" in ds_out.dims
-            and ds_out["time"].size > 1
-            and np.issubdtype(ds_out["time"].dtype, np.datetime64)
+        elif self.crs is not None and ds.vector.crs != pyproj.CRS.from_user_input(
+            self.crs
         ):
-            dt = self.unit_add.get("time", 0)
-            if dt != 0:
-                logger.debug(f"GeoDataset: Shifting time labels with {dt} sec.")
-                ds_out["time"] = ds_out["time"] + pd.to_timedelta(dt, unit="s")
-            if time_tuple is not None:
-                logger.debug(f"GeoDataset: Slicing time dim {time_tuple}")
-                ds_out = ds_out.sel(time=slice(*time_tuple))
-            if ds_out.time.size == 0:
-                logger.warning("GeoDataset: Time slice out of range.")
-                drop_vars = [v for v in ds_out.data_vars if "time" in ds_out[v].dims]
-                ds_out = ds_out.drop_vars(drop_vars)
+            logger.warning(
+                f"GeoDataset {self.name}: CRS from data catalog does not match CRS of"
+                " data. The original CRS will be used. Please check your data catalog."
+            )
+        return ds
 
-        # set nodata value
+    @staticmethod
+    def _slice_data(
+        ds,
+        variables=None,
+        geom=None,
+        bbox=None,
+        buffer=0,
+        predicate="intersects",
+        time_tuple=None,
+        logger=logger,
+    ):
+        """Slice the dataset in space and time.
+
+        Arguments
+        ---------
+        ds : xarray.Dataset or xarray.DataArray
+            The GeoDataset to slice.
+        variables : str or list of str, optional.
+            Names of variables to return.
+        geom : geopandas.GeoDataFrame/Series,
+            A geometry defining the area of interest.
+        bbox : array-like of floats
+            (xmin, ymin, xmax, ymax) bounding box of area of interest
+            (in WGS84 coordinates).
+        buffer : float, optional
+            Buffer distance [m] applied to the geometry or bbox. By default 0 m.
+        predicate : str, optional
+            Predicate used to filter the GeoDataFrame, see
+            :py:func:`hydromt.gis_utils.filter_gdf` for details.
+        time_tuple : tuple of str, datetime, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned.
+
+        Returns
+        -------
+        ds : xarray.Dataset
+            The sliced GeoDataset.
+        """
+        if isinstance(ds, xr.DataArray):
+            if ds.name is None:
+                # dummy name, required to create dataset
+                # renamed to variable in _single_var_as_array
+                ds.name = "data"
+            ds = ds.to_dataset()
+        elif variables is not None:
+            variables = np.atleast_1d(variables).tolist()
+            if len(variables) > 1 or len(ds.data_vars) > 1:
+                mvars = [var not in ds.data_vars for var in variables]
+                if any(mvars):
+                    raise ValueError(f"GeoDataset: variables not found {mvars}")
+                ds = ds[variables]
+        if time_tuple is not None:
+            ds = GeoDatasetAdapter._slice_temporal_dimension(
+                ds, time_tuple, logger=logger
+            )
+        if geom is not None or bbox is not None:
+            ds = GeoDatasetAdapter._slice_spatial_dimension(
+                ds, geom, bbox, buffer, predicate, logger=logger
+            )
+        return ds
+
+    @staticmethod
+    def _slice_spatial_dimension(ds, geom, bbox, buffer, predicate, logger=logger):
+        geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
+        bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
+        epsg = geom.crs.to_epsg()
+        logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
+        ds = ds.vector.clip_geom(geom, predicate=predicate)
+        if ds.vector.index.size == 0:
+            raise IndexError("No data within spatial domain.")
+        return ds
+
+    def _shift_time(self, ds, logger=logger):
+        dt = self.unit_add.get("time", 0)
+        if (
+            dt != 0
+            and "time" in ds.dims
+            and ds["time"].size > 1
+            and np.issubdtype(ds["time"].dtype, np.datetime64)
+        ):
+            logger.debug(f"Shifting time labels with {dt} sec.")
+            ds["time"] = ds["time"] + pd.to_timedelta(dt, unit="s")
+        elif dt != 0:
+            logger.warning("Time shift not applied, time dimension not found.")
+        return ds
+
+    @staticmethod
+    def _slice_temporal_dimension(ds, time_tuple, logger=logger):
+        if (
+            "time" in ds.dims
+            and ds["time"].size > 1
+            and np.issubdtype(ds["time"].dtype, np.datetime64)
+        ):
+            logger.debug(f"Slicing time dim {time_tuple}")
+            ds = ds.sel(time=slice(*time_tuple))
+            if ds.time.size == 0:
+                raise IndexError("GeoDataset: Time slice out of range.")
+        return ds
+
+    def _set_metadata(self, ds):
+        if self.attrs:
+            if isinstance(ds, xr.DataArray):
+                ds.attrs.update(self.attrs[ds.name])
+            else:
+                for k in self.attrs:
+                    ds[k].attrs.update(self.attrs[k])
+
+        ds.attrs.update(self.meta)
+        return ds
+
+    def _set_nodata(self, ds):
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
-                nodata = {k: self.nodata for k in ds_out.data_vars.keys()}
+                nodata = {k: self.nodata for k in ds.data_vars.keys()}
             else:
                 nodata = self.nodata
-            for k in ds_out.data_vars:
+            for k in ds.data_vars:
                 mv = nodata.get(k, None)
-                if mv is not None and ds_out[k].vector.nodata is None:
-                    ds_out[k].vector.set_nodata(mv)
+                if mv is not None and ds[k].vector.nodata is None:
+                    ds[k].vector.set_nodata(mv)
+        return ds
 
-        # unit conversion
+    def _apply_unit_conversion(self, ds, logger=logger):
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
-        unit_names = [k for k in unit_names if k in ds_out.data_vars]
+        unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
-            logger.debug(f"GeoDataset: Convert units for {len(unit_names)} variables.")
+            logger.debug(f"Convert units for {len(unit_names)} variables.")
         for name in list(set(unit_names)):  # unique
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)
-            da = ds_out[name]
+            da = ds[name]
             attrs = da.attrs.copy()
             nodata_isnan = da.vector.nodata is None or np.isnan(da.vector.nodata)
             # nodata value is explicitly set to NaN in case no nodata value is provided
             nodata = np.nan if nodata_isnan else da.vector.nodata
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
-            ds_out[name] = xr.where(data_bool, da * m + a, nodata)
-            ds_out[name].attrs.update(attrs)  # set original attributes
-
-        # return data array if single var
-        if single_var_as_array and len(ds_out.vector.vars) == 1:
-            ds_out = ds_out[ds_out.vector.vars[0]]
-
-        # Set variable attribute data
-        if self.attrs:
-            if isinstance(ds_out, xr.DataArray):
-                ds_out.attrs.update(self.attrs[ds_out.name])
-            else:
-                for k in self.attrs:
-                    ds_out[k].attrs.update(self.attrs[k])
-
-        # set meta data
-        ds_out.attrs.update(self.meta)
-
-        return ds_out
+            ds[name] = xr.where(data_bool, da * m + a, nodata)
+            ds[name].attrs.update(attrs)  # set original attributes
+        return ds

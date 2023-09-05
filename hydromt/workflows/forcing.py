@@ -759,7 +759,7 @@ def delta_freq(da_or_freq, da_or_freq1):
 
 
 def to_timedelta(da_or_freq):
-    """Convert time dimention or frequency to timedelta."""
+    """Convert time dimension or frequency to timedelta."""
     if isinstance(da_or_freq, (xr.DataArray, xr.Dataset)):
         freq = da_to_timedelta(da_or_freq)
     else:

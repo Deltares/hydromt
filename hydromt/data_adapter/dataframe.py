@@ -139,9 +139,6 @@ class DataFrameAdapter(DataAdapter):
         time_tuple : tuple of str or datetime, optional
             Start and end date of the period of interest. By default, the entire time
             period of the DataFrame is included.
-        logger : Logger, optional
-            Logger object to log warnings or messages. By default, the module
-            logger is used.
         **kwargs : dict
             Additional keyword arguments to be passed to the file writing method.
 
@@ -158,13 +155,7 @@ class DataFrameAdapter(DataAdapter):
 
         """
         kwargs.pop("bbox", None)
-        try:
-            obj = self.get_data(
-                time_tuple=time_tuple, variables=variables, logger=logger
-            )
-        except IndexError as err:  # out of bounds for time
-            logger.warning(str(err))
-            return None, None, None
+        obj = self.get_data(time_tuple=time_tuple, variables=variables, logger=logger)
 
         read_kwargs = dict()
         if driver is None or driver == "csv":
@@ -196,6 +187,20 @@ class DataFrameAdapter(DataAdapter):
         based on the properties of this DataFrameAdapter. For a detailed
         description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
+        # load data
+        fns = self._resolve_paths(variables)
+        df = self._read_data(fns, logger=logger)
+        # rename variables and parse nodata
+        df = self._rename_vars(df)
+        df = self._set_nodata(df)
+        # slice data
+        df = DataFrameAdapter._slice_data(df, variables, time_tuple, logger=logger)
+        # uniformize data
+        df = self._apply_unit_conversion(df, logger=logger)
+        df = self._set_metadata(df)
+        return df
+
+    def _resolve_paths(self, variables=None):
         # Extract storage_options from kwargs to instantiate fsspec object correctly
         so_kwargs = {}
         if "storage_options" in self.driver_kwargs:
@@ -206,68 +211,100 @@ class DataFrameAdapter(DataAdapter):
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        _ = self.resolve_paths(**so_kwargs)  # throw nice error if data not found
 
+        # throw nice error if data not found
+        fns = super()._resolve_paths(variables=variables, **so_kwargs)
+
+        return fns
+
+    def _read_data(self, fns, logger=logger):
+        if len(fns) > 1:
+            raise ValueError(
+                f"DataFrame: Reading multiple {self.driver} files is not supported."
+            )
         kwargs = self.driver_kwargs.copy()
-
-        # read and clip
-        logger.info(f"DataFrame: Read {self.driver} data.")
-
+        path = fns[0]
+        logger.info(f"Reading {self.name} {self.driver} data from {self.path}")
         if self.driver in ["csv"]:
-            df = pd.read_csv(self.path, **kwargs)
+            df = pd.read_csv(path, **kwargs)
         elif self.driver == "parquet":
-            df = pd.read_parquet(self.path, **kwargs)
+            _ = kwargs.pop("index_col", None)
+            df = pd.read_parquet(path, **kwargs)
         elif self.driver in ["xls", "xlsx", "excel"]:
-            df = pd.read_excel(self.path, engine="openpyxl", **kwargs)
+            df = pd.read_excel(path, engine="openpyxl", **kwargs)
         elif self.driver in ["fwf"]:
-            df = pd.read_fwf(self.path, **kwargs)
+            df = pd.read_fwf(path, **kwargs)
         else:
             raise IOError(f"DataFrame: driver {self.driver} unknown.")
 
-        # rename and select columns
+        return df
+
+    def _rename_vars(self, df):
         if self.rename:
             rename = {k: v for k, v in self.rename.items() if k in df.columns}
             df = df.rename(columns=rename)
+        return df
+
+    def _set_nodata(self, df):
+        # parse nodata values
+        cols = df.select_dtypes([np.number]).columns
+        if self.nodata is not None and len(cols) > 0:
+            if not isinstance(self.nodata, dict):
+                nodata = {c: self.nodata for c in cols}
+            else:
+                nodata = self.nodata
+            for c in cols:
+                mv = nodata.get(c, None)
+                if mv is not None:
+                    is_nodata = np.isin(df[c], np.atleast_1d(mv))
+                    df[c] = np.where(is_nodata, np.nan, df[c])
+        return df
+
+    @staticmethod
+    def _slice_data(df, variables=None, time_tuple=None, logger=logger):
+        """Return a sliced DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            the dataframe to be sliced.
+        variables : list of str, optional
+            Names of DataFrame columns to include in the output. By default all columns
+        time_tuple : tuple of str, datetime, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned.
+
+        Returns
+        -------
+        pd.DataFrame
+            Tabular data
+        """
         if variables is not None:
+            variables = np.atleast_1d(variables).tolist()
             if np.any([var not in df.columns for var in variables]):
                 raise ValueError(f"DataFrame: Not all variables found: {variables}")
             df = df.loc[:, variables]
 
-        # nodata and unit conversion for numeric data
-        if df.index.size == 0:
-            logger.warning(f"DataFrame: No data within spatial domain {self.path}.")
-        else:
-            # parse nodata values
-            cols = df.select_dtypes([np.number]).columns
-            if self.nodata is not None and len(cols) > 0:
-                if not isinstance(self.nodata, dict):
-                    nodata = {c: self.nodata for c in cols}
-                else:
-                    nodata = self.nodata
-                for c in cols:
-                    mv = nodata.get(c, None)
-                    if mv is not None:
-                        is_nodata = np.isin(df[c], np.atleast_1d(mv))
-                        df[c] = np.where(is_nodata, np.nan, df[c])
-
-            # unit conversion
-            unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
-            unit_names = [k for k in unit_names if k in df.columns]
-            if len(unit_names) > 0:
-                logger.debug(f"DataFrame: Convert units for {len(unit_names)} columns.")
-            for name in list(set(unit_names)):  # unique
-                m = self.unit_mult.get(name, 1)
-                a = self.unit_add.get(name, 0)
-                df[name] = df[name] * m + a
-
-        # clip time slice
         if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
-            logger.debug(f"DataFrame: Slicing time dime {time_tuple}")
+            logger.debug(f"Slicing time dime {time_tuple}")
             df = df[df.index.slice_indexer(*time_tuple)]
             if df.size == 0:
                 raise IndexError("DataFrame: Time slice out of range.")
 
-        # set meta data
+        return df
+
+    def _apply_unit_conversion(self, df, logger=logger):
+        unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
+        unit_names = [k for k in unit_names if k in df.columns]
+        if len(unit_names) > 0:
+            logger.debug(f"Convert units for {len(unit_names)} columns.")
+        for name in list(set(unit_names)):  # unique
+            m = self.unit_mult.get(name, 1)
+            a = self.unit_add.get(name, 0)
+            df[name] = df[name] * m + a
+        return df
+
+    def _set_metadata(self, df):
         df.attrs.update(self.meta)
 
         # set column attributes
