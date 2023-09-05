@@ -247,7 +247,7 @@ def open_mfcsv(
         segmented by var, the keys of this dictionaires should be the
         names of the variables.
     concat_dim : str,
-        name of the dimention that will be created by concatinating
+        name of the dimension that will be created by concatinating
         all of the supplied csv files.
     driver_kwargs : Dict[str, Any],
         Any additional arguments to be passed to pandas' `read_csv` function.
@@ -437,9 +437,9 @@ def open_geodataset(
         Filter features by given bounding box described by [xmin, ymin, xmax, ymax]
         Cannot be used with geom.
     index_dim:
-        The dimention to index on.
+        The dimension to index on.
     chunks:
-        The dimentions of the chunks to store the underlying data in.
+        The dimensions of the chunks to store the underlying data in.
     geom : GeoDataFrame or GeoSeries | shapely Geometry, default None
         Filter for features that intersect with the geom.
         CRS mis-matches are resolved if given a GeoSeries or GeoDataFrame.
@@ -491,7 +491,7 @@ def open_timeseries_from_table(
     name: str
         variable name, derived from basename of fn if None.
     index_dim:
-        the dimention to index on.
+        the dimension to index on.
     **kwargs:
         key-word arguments are passed to the reader method
     logger:

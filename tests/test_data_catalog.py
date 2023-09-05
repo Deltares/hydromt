@@ -5,6 +5,7 @@ from os.path import abspath, dirname, join
 from pathlib import Path
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
@@ -391,10 +392,13 @@ def test_get_data(df, tmpdir):
     assert isinstance(da, xr.DataArray)
     da = data_catalog.get_rasterdataset(name, provider="artifact_data")
     assert isinstance(da, xr.DataArray)
-    da = data_catalog.get_rasterdataset(da)
+    bbox = [12.0, 46.0, 13.0, 46.5]
+    da = data_catalog.get_rasterdataset(da, bbox=bbox)
     assert isinstance(da, xr.DataArray)
+    assert np.allclose(da.raster.bounds, bbox)
     data = {"source": name, "provider": "artifact_data"}
-    da = data_catalog.get_rasterdataset(data)
+    ds = data_catalog.get_rasterdataset(data, single_var_as_array=False)
+    assert isinstance(ds, xr.Dataset)
     with pytest.raises(ValueError, match='Unknown raster data type "list"'):
         data_catalog.get_rasterdataset([])
     with pytest.raises(FileNotFoundError):
@@ -409,8 +413,10 @@ def test_get_data(df, tmpdir):
     assert isinstance(gdf, gpd.GeoDataFrame)
     gdf = data_catalog.get_geodataframe(name, provider="artifact_data")
     assert isinstance(gdf, gpd.GeoDataFrame)
-    gdf = data_catalog.get_geodataframe(gdf)
+    assert gdf.index.size == 2
+    gdf = data_catalog.get_geodataframe(gdf, geom=gdf.iloc[[0],], predicate="within")
     assert isinstance(gdf, gpd.GeoDataFrame)
+    assert gdf.index.size == 1
     data = {"source": name, "provider": "artifact_data"}
     gdf = data_catalog.get_geodataframe(data)
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -427,12 +433,18 @@ def test_get_data(df, tmpdir):
     assert len(data_catalog) == n + 3
     assert isinstance(da, xr.DataArray)
     da = data_catalog.get_geodataset(name, provider="artifact_data")
+    assert da.vector.index.size == 19
     assert isinstance(da, xr.DataArray)
-    da = data_catalog.get_geodataset(da)
+    bbox = [12.22412, 45.25635, 12.25342, 45.271]
+    da = data_catalog.get_geodataset(
+        da, bbox=bbox, time_tuple=("2010-02-01", "2010-02-05")
+    )
+    assert da.vector.index.size == 2
+    assert da.time.size == 720
     assert isinstance(da, xr.DataArray)
     data = {"source": name, "provider": "artifact_data"}
-    gdf = data_catalog.get_geodataset(data)
-    assert isinstance(gdf, xr.DataArray)
+    ds = data_catalog.get_geodataset(data, single_var_as_array=False)
+    assert isinstance(ds, xr.Dataset)
     with pytest.raises(ValueError, match='Unknown geo data type "list"'):
         data_catalog.get_geodataset([])
     with pytest.raises(FileNotFoundError):
@@ -449,8 +461,9 @@ def test_get_data(df, tmpdir):
     assert isinstance(df, pd.DataFrame)
     df = data_catalog.get_dataframe(name, provider="local")
     assert isinstance(df, pd.DataFrame)
-    df = data_catalog.get_dataframe(df)
+    df = data_catalog.get_dataframe(df, variables=["city"])
     assert isinstance(df, pd.DataFrame)
+    assert df.columns == ["city"]
     data = {"source": name, "provider": "local"}
     gdf = data_catalog.get_dataframe(data)
     assert isinstance(gdf, pd.DataFrame)

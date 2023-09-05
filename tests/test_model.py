@@ -283,6 +283,21 @@ def test_setup_region(model, demda, tmpdir):
     # geom
     model.setup_region({"geom": region})
     gpd.testing.assert_geodataframe_equal(region, model.region)
+    # geom via data catalog
+    fn_region = str(tmpdir.join("region.gpkg"))
+    region.to_file(fn_region, driver="GPKG")
+    model.data_catalog.from_dict(
+        {
+            "region": {
+                "path": fn_region,
+                "data_type": "GeoDataFrame",
+                "driver": "vector",
+            }
+        }
+    )
+    model._geoms.pop("region")  # remove old region
+    model.setup_region({"geom": "region"})
+    gpd.testing.assert_geodataframe_equal(region, model.region)
     # grid
     model._geoms.pop("region")  # remove old region
     grid_fn = str(tmpdir.join("grid.tif"))
