@@ -6,7 +6,7 @@ import os
 import warnings
 from os import PathLike
 from os.path import join
-from typing import NewType, Union
+from typing import NewType, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -40,10 +40,10 @@ class RasterDatasetAdapter(DataAdapter):
     def __init__(
         self,
         path: str,
-        driver: str = None,
+        driver: Optional[str] = None,
         filesystem: str = "local",
-        crs: Union[int, str, dict] = None,
-        nodata: Union[dict, float, int] = None,
+        crs: Optional[Union[int, str, dict]] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
         rename: dict = {},
         unit_mult: dict = {},
         unit_add: dict = {},
@@ -257,7 +257,7 @@ class RasterDatasetAdapter(DataAdapter):
         ds = self._set_nodata(ds)
         ds = self._shift_time(ds, logger)
         # slice data
-        ds = self._slice_data(
+        ds = RasterDatasetAdapter._slice_data(
             ds, variables, geom, bbox, buffer, align, time_tuple, logger
         )
         # uniformize data
@@ -268,11 +268,11 @@ class RasterDatasetAdapter(DataAdapter):
 
     def _resolve_paths(
         self,
-        time_tuple: tuple = None,
-        variables: list = None,
+        time_tuple: Optional[tuple] = None,
+        variables: Optional[list] = None,
         zoom_level: int = 0,
         geom: gpd.GeoSeries = None,
-        bbox: list = None,
+        bbox: Optional[list] = None,
         logger=logger,
     ):
         # Extract storage_options from kwargs to instantiate fsspec object correctly
@@ -559,9 +559,9 @@ class RasterDatasetAdapter(DataAdapter):
 
     def _parse_zoom_level(
         self,
-        zoom_level: int | tuple = None,
+        zoom_level: Optional[int | tuple] = None,
         geom: gpd.GeoSeries = None,
-        bbox: list = None,
+        bbox: Optional[list] = None,
         logger=logger,
     ) -> int:
         """Return nearest smaller zoom level.

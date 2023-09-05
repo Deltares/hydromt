@@ -220,7 +220,7 @@ class GeoDataFrameAdapter(DataAdapter):
         gdf = self._set_crs(gdf, logger=logger)
         gdf = self._set_nodata(gdf)
         # slice
-        gdf = self._slice_data(
+        gdf = GeoDataFrameAdapter._slice_data(
             gdf, variables, geom, bbox, buffer, predicate, logger=logger
         )
         # uniformize

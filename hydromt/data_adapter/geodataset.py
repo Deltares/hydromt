@@ -242,7 +242,7 @@ class GeoDatasetAdapter(DataAdapter):
         ds = self._set_nodata(ds)
         ds = self._shift_time(ds, logger=logger)
         # slice
-        ds = self._slice_data(
+        ds = GeoDatasetAdapter._slice_data(
             ds, variables, geom, bbox, buffer, predicate, time_tuple, logger=logger
         )
         # uniformize

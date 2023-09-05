@@ -239,8 +239,8 @@ class DataAdapter(object, metaclass=ABCMeta):
 
     def _resolve_paths(
         self,
-        time_tuple: tuple = None,
-        variables: list = None,
+        time_tuple: Optional[tuple] = None,
+        variables: Optional[list] = None,
         zoom_level: int = 0,
         **kwargs,
     ):

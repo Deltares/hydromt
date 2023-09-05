@@ -194,7 +194,7 @@ class DataFrameAdapter(DataAdapter):
         df = self._rename_vars(df)
         df = self._set_nodata(df)
         # slice data
-        df = self._slice_data(df, variables, time_tuple, logger=logger)
+        df = DataFrameAdapter._slice_data(df, variables, time_tuple, logger=logger)
         # uniformize data
         df = self._apply_unit_conversion(df, logger=logger)
         df = self._set_metadata(df)
