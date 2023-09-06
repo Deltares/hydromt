@@ -18,6 +18,7 @@ Added
 - new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
 - add ``open_mfcsv`` function in ``io`` module for combining multiple CSV files into one dataset. (PR #486)
 - Adapters can now clip data that is passed through a python object the same way as through the data catalog. (PR #481)
+- Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
 
 Changed
 -------
