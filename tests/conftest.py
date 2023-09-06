@@ -9,6 +9,8 @@ import xarray as xr
 from dask import config as dask_config
 from shapely.geometry import box
 
+dask_config.set(scheduler="single-threaded")
+
 import hydromt._compat as compat
 
 if compat.HAS_XUGRID:

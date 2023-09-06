@@ -45,13 +45,16 @@ def test_resolve_path(tmpdir):
     }
     cat = DataCatalog()
     cat.from_dict(dd)
+    source = cat.get_source("test")
     # test
-    assert len(cat.get_source("test").resolve_paths()) == 48
-    assert len(cat.get_source("test").resolve_paths(variables=["precip"])) == 24
-    kwargs = dict(variables=["precip"], time_tuple=("2021-03-01", "2021-05-01"))
-    assert len(cat.get_source("test").resolve_paths(**kwargs)) == 3
+    fns = source._resolve_paths()
+    assert len(fns) == 48
+    fns = source._resolve_paths(variables=["precip"])
+    assert len(fns) == 24
+    fns = source._resolve_paths(("2021-03-01", "2021-05-01"), ["precip"])
+    assert len(fns) == 3
     with pytest.raises(FileNotFoundError, match="No such file found:"):
-        cat.get_source("test").resolve_paths(variables=["waves"])
+        source._resolve_paths(variables=["waves"])
 
 
 def test_rasterdataset(rioda, tmpdir):
@@ -189,11 +192,6 @@ def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
 
 # @pytest.mark.skip()
 def test_geodataset(geoda, geodf, ts, tmpdir):
-    # this test can sometimes hang because of threading issues therefore
-    # the synchronous scheduler here is necessary
-    from dask import config as dask_config
-
-    dask_config.set(scheduler="single-threaded")
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
@@ -215,6 +213,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     da2 = data_catalog.get_geodataset(
         fn_gdf, driver_kwargs=dict(fn_data=fn_csv)
     ).sortby("index")
+    assert isinstance(da2, xr.DataArray), type(da2)
     assert np.allclose(da2, geoda)
     # test with xy locs
     da3 = data_catalog.get_geodataset(

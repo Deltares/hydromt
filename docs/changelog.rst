@@ -17,6 +17,7 @@ Added
 - Add support for reading model configs in ``TOML`` format. (PR #444)
 - new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
 - add ``open_mfcsv`` function in ``io`` module for combining multiple CSV files into one dataset. (PR #486)
+- Adapters can now clip data that is passed through a python object the same way as through the data catalog. (PR #481)
 
 Changed
 -------
@@ -29,7 +30,6 @@ Changed
 Fixed
 -----
 - when a model component (eg maps, forcing, grid) is updated using the set_ methods, it will first be read to avoid loosing data. (PR #460)
--
 
 Deprecated
 ----------

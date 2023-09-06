@@ -1041,6 +1041,8 @@ grdc:
     source_license: https://www.bafg.de/GRDC/EN/02_srvcs/21_tmsrs/210_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
     source_url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
   path: hydro/grdc/GRDC_Stations.xlsx
+  rename:
+    area: uparea
 
 grip_roads:
   alias: grip_roads_v4
