@@ -2,14 +2,16 @@
 import logging
 import os
 import warnings
+from datetime import datetime
 from os.path import join
 from pathlib import Path
-from typing import NewType, Union
+from typing import NewType, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import pyproj
 import xarray as xr
+from shapely import geometry
 from shapely.geometry import box
 
 from .. import gis_utils, io
@@ -473,14 +475,18 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    @staticmethod
-    def detect_spatial_range(ds):
+    def detect_spatial_range(self, ds=None) -> geometry:
         """Detect spatial range."""
+        if ds is None:
+            ds = self.get_data()
         return box(*ds.vector.bounds)
 
-    @staticmethod
-    def detect_temporal_range(ds, time_dim_name="time"):
+    def detect_temporal_range(
+        self, ds=None, time_dim_name="time"
+    ) -> Tuple[datetime, datetime]:
         """Detect temporal range."""
+        if ds is None:
+            ds = self.get_data()
         try:
             time_range = ds[time_dim_name]
         except KeyError:
@@ -493,4 +499,4 @@ class GeoDatasetAdapter(DataAdapter):
             else:
                 time_range = pd.to_datetime(time_range)
 
-        return (time_range.min(), time_range.max())
+        return (time_range.min().values, time_range.max().values)

@@ -10,6 +10,7 @@ import logging
 import os
 import shutil
 import warnings
+from datetime import datetime
 from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, TypedDict, Union
@@ -21,6 +22,7 @@ import requests
 import xarray as xr
 import yaml
 from packaging.version import Version
+from shapely import geometry
 
 from hydromt.utils import partition_dictionaries
 
@@ -153,6 +155,18 @@ class DataCatalog(object):
         if not self._catalogs:
             self.set_predefined_catalogs()
         return self._catalogs
+
+    def get_source_spatial_extent(
+        self, source: str, provider: Optional[str] = None, version: Optional[str] = None
+    ) -> geometry:
+        """Detect the spatial range of the data."""
+        return self.get_source(source, provider, version).detect_spatial_range()
+
+    def get_source_temporal_extent(
+        self, source: str, provider: Optional[str] = None, version: Optional[str] = None
+    ) -> Tuple[datetime, datetime]:
+        """Detect the temporal range of the data."""
+        return self.get_source(source, provider, version).detect_temporal_range()
 
     def get_source(
         self, source: str, provider: Optional[str] = None, version: Optional[str] = None

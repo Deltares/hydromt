@@ -4,9 +4,10 @@ from __future__ import annotations
 import logging
 import os
 import warnings
+from datetime import datetime
 from os import PathLike
 from os.path import join
-from typing import NewType, Optional, Union
+from typing import NewType, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -14,6 +15,7 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
+from shapely import geometry
 from shapely.geometry import box
 
 from .. import gis_utils, io
@@ -624,14 +626,18 @@ class RasterDatasetAdapter(DataAdapter):
         logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
         return zl
 
-    @staticmethod
-    def detect_spatial_range(ds):
+    def detect_spatial_range(self, ds=None) -> geometry:
         """Detect spatial range."""
+        if ds is None:
+            ds = self.get_data()
         return box(*ds.raster.bounds)
 
-    @staticmethod
-    def detect_temporal_range(ds, time_dim_name="time"):
+    def detect_temporal_range(
+        self, ds=None, time_dim_name="time"
+    ) -> Tuple[datetime, datetime]:
         """Detect temporal range."""
+        if ds is None:
+            ds = self.get_data()
         try:
             time_range = ds[time_dim_name]
         except KeyError:
@@ -644,4 +650,4 @@ class RasterDatasetAdapter(DataAdapter):
             else:
                 time_range = pd.to_datetime(time_range)
 
-        return (time_range.min(), time_range.max())
+        return (time_range.min().values, time_range.max().values)
