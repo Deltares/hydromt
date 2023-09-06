@@ -5,7 +5,7 @@ import warnings
 from datetime import datetime
 from os.path import join
 from pathlib import Path
-from typing import NewType, Tuple, Union
+from typing import NewType, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -37,10 +37,10 @@ class GeoDatasetAdapter(DataAdapter):
     def __init__(
         self,
         path: str,
-        driver: str = None,
+        driver: Optional[str] = None,
         filesystem: str = "local",
-        crs: Union[int, str, dict] = None,
-        nodata: Union[dict, float, int] = None,
+        crs: Optional[Union[int, str, dict]] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
         rename: dict = {},
         unit_mult: dict = {},
         unit_add: dict = {},

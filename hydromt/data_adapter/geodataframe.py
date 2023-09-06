@@ -1,10 +1,9 @@
 """The Geodataframe adapter implementation."""
 import logging
 import warnings
-from datetime import datetime
 from os.path import join
 from pathlib import Path
-from typing import NewType, Tuple, Union
+from typing import NewType, Union
 
 import numpy as np
 import pyproj
@@ -398,14 +397,3 @@ class GeoDataFrameAdapter(DataAdapter):
         if ds is None:
             ds = self.get_data()
         return box(*ds.geometry.total_bounds)
-
-    def detect_temporal_range(
-        self, ds=None, time_dim_name="time"
-    ) -> Tuple[datetime, datetime]:
-        """Not implemented.
-
-        This function only exists to fufill the DataAdapter interface. Calling it
-        will always raise an error.
-
-        """
-        raise NotImplementedError("geodataframes do not have time dimensions")

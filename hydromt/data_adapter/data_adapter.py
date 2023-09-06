@@ -3,17 +3,15 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
 from itertools import product
 from string import Formatter
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 import yaml
 from fsspec.implementations import local
-from shapely import geometry
 from upath import UPath
 
 from .. import _compat
@@ -370,16 +368,6 @@ class DataAdapter(object, metaclass=ABCMeta):
 
         If bbox of mask are given, clip data to that extent.
         """
-
-    @abstractmethod
-    def detect_spatial_range(self, ds=None) -> geometry:
-        """Detect spatial range."""
-
-    @abstractmethod
-    def detect_temporal_range(
-        self, ds=None, time_dim_name="time"
-    ) -> Tuple[datetime, datetime]:
-        """Detect temporal range."""
 
     @staticmethod
     def _single_var_as_array(ds, single_var_as_array, variable_name=None):
