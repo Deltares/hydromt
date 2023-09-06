@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
+from copy import deepcopy
 from os.path import abspath, dirname, isfile, join
 
 import geopandas as gpd
@@ -169,6 +170,46 @@ def test_model(model, tmpdir):
     model._geoms.pop("region")
     with pytest.deprecated_call():
         assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
+
+
+@pytest.mark.parametrize("driver", ["csv", "excel", "parquet"])
+def test_model_read_write_tables(model, df, driver, tmpdir):
+    model.set_root(tmpdir)
+    # make a couple copies of the dfs for testing
+    dfs = {str(i): df.copy() for i in range(5)}
+    clean_model = deepcopy(model)
+    model.set_tables(dfs)
+
+    model.write_tables(driver=driver)
+    clean_model.read_tables(driver=driver)
+
+    model_merged = model.get_tables_merged().sort_values(["table_origin", "city"])
+    clean_model_merged = clean_model.get_tables_merged().sort_values(
+        ["table_origin", "city"]
+    )
+    assert np.all(
+        np.equal(model_merged, clean_model_merged)
+    ), f"model: {model_merged}\nclean_model: {clean_model_merged}"
+
+
+def test_model_tables(model, df, tmpdir):
+    # make a couple copies of the dfs for testing
+    dfs = {str(i): df.copy() for i in range(5)}
+    model.set_root(tmpdir)
+
+    with pytest.raises(KeyError):
+        model.get_table(1)
+
+    for i, d in dfs.items():
+        model.set_table(i, d)
+        assert df.equals(model.get_table(i))
+
+    # now do the same but interating over the stables instead
+    for i, d in model.iter_tables():
+        model.set_table(i, d)
+        assert df.equals(model.get_table(i))
+
+    assert list(model.get_table_names()) == list(map(str, range(5)))
 
 
 def test_model_append(demda, tmpdir):

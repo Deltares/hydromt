@@ -12,7 +12,7 @@ from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, TypedDict, Union
 
 import geopandas as gpd
 import numpy as np
@@ -35,6 +35,7 @@ DeferedFileClose = TypedDict(
     "DeferedFileClose",
     {"ds": xr.Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
 )
+XArrayDict = Dict[str, Union[xr.DataArray, xr.Dataset]]
 
 
 class Model(object, metaclass=ABCMeta):
@@ -57,11 +58,11 @@ class Model(object, metaclass=ABCMeta):
         "crs": CRS,
         "config": Dict[str, Any],
         "geoms": Dict[str, gpd.GeoDataFrame],
-        "maps": Dict[str, Union[xr.DataArray, xr.Dataset]],
-        "forcing": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "maps": XArrayDict,
+        "forcing": XArrayDict,
         "region": gpd.GeoDataFrame,
-        "results": Dict[str, Union[xr.DataArray, xr.Dataset]],
-        "states": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "results": XArrayDict,
+        "states": XArrayDict,
     }
 
     def __init__(
@@ -108,13 +109,14 @@ class Model(object, metaclass=ABCMeta):
         # metadata maps that can be at different resolutions
         # TODO do we want read/write maps?
         self._config = None  # nested dictionary
-        self._maps = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._maps: Optional[XArrayDict] = None
+        self._tables: Dict[str, pd.Dataframe] = {}
 
         # NOTE was staticgeoms in <=v0.5
-        self._geoms = None  # dictionary of gdp.GeoDataFrame
-        self._forcing = None  # dictionary of xr.DataArray and/or xr.Dataset
-        self._states = None  # dictionary of xr.DataArray and/or xr.Dataset
-        self._results = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
+        self._forcing: Optional[XArrayDict] = None
+        self._states: Optional[XArrayDict] = None
+        self._results: Optional[XArrayDict] = None
         # To be deprecated in future versions!
         self._staticmaps = None
         self._staticgeoms = None
@@ -701,6 +703,110 @@ class Model(object, metaclass=ABCMeta):
 
     def _configwrite(self, fn: str):
         return config.configwrite(fn, self.config)
+
+    def write_tables(
+        self, driver: Literal["csv", "parquet", "excel"], **kwargs
+    ) -> None:
+        """Write tables at <root>."""
+        if not self._write:
+            raise IOError("Model opened in read-only mode")
+
+        if self._tables:
+            self.logger.info("Writing table files.")
+            for name in self._tables:
+                if driver == "csv":
+                    fn_out = join(self.root, f"{name}.csv")
+                    local_kwargs = {"index": False, "header": True, "sep": ","}
+                    local_kwargs.update(**kwargs)
+                    self._tables[name].to_csv(fn_out, **local_kwargs)
+                elif driver == "parquet":
+                    fn_out = join(self.root, f"{name}.parquet")
+                    local_kwargs = kwargs.copy()
+                    self._tables[name].to_parquet(fn_out, **local_kwargs)
+                elif driver == "excel":
+                    fn_out = join(self.root, f"{name}.xlsx")
+                    local_kwargs = kwargs.copy()
+                    local_kwargs = {"index": False}
+                    self._tables[name].to_excel(fn_out, **local_kwargs)
+                else:
+                    raise ValueError(
+                        f"Driver {driver} not recognised. "
+                        "options are: ['csv','parquet','excel']"
+                    )
+
+    def read_tables(self, driver: Literal["csv", "parquet", "excel"], **kwargs) -> None:
+        """Read table files at <root> and parse to dict of dataframes."""
+        if not self._write:
+            self._tables = dict()  # start fresh in read-only mode
+
+        if driver == "csv":
+            ext = "csv"
+            driver_fn = pd.read_csv
+        elif driver == "parquet":
+            ext = "parquet"
+            driver_fn = pd.read_parquet
+        elif driver == "excel":
+            ext = "xlsx"
+            driver_fn = pd.read_excel
+
+        else:
+            raise ValueError(
+                f"Driver {driver} not recognised. "
+                "options are: ['csv','parquet','excel']"
+            )
+
+        self.logger.info("Reading model table files.")
+        fns = glob.glob(join(self.root, f"*.{ext}"))
+        if len(fns) > 0:
+            for fn in fns:
+                name = basename(fn).split(".")[0]
+                tbl = driver_fn(fn, **kwargs)
+                self.set_table(name, tbl)
+        else:
+            self.logger.warning(
+                f"Attempted to read tables with extention {ext},"
+                " but no files were found in root."
+            )
+
+    def get_table(self, name: str) -> pd.DataFrame:
+        """Return the table associated with a given name."""
+        return self._tables[name]
+
+    def set_table(self, name, df) -> None:
+        """Add a table <pandas.DataFrame> to model."""
+        if not (isinstance(df, pd.DataFrame) or isinstance(df, pd.Series)):
+            raise ValueError(
+                "df type not recognized, should be pandas Dataframe or Series."
+            )
+        if name in self._tables:
+            if not self._write:
+                raise IOError(f"Cannot overwrite table {name} in read-only mode")
+            elif self._read:
+                self.logger.warning(f"Overwriting table: {name}")
+
+        self._tables[name] = df
+
+    def set_tables(self, table_dict) -> None:
+        """Add a table <pandas.DataFrame> to model."""
+        for name, df in table_dict.items():
+            self.set_table(name, df)
+
+    def get_tables_merged(self) -> pd.DataFrame:
+        """Return all tables of a model merged into one dataframe.
+
+        This is mostly used for convinience and testing.
+        """
+        return pd.concat(
+            [df.assign(table_origin=name) for name, df in self._tables.items()], axis=0
+        )
+
+    def get_table_names(self) -> Iterable[str]:
+        """Return the names of all known tables."""
+        return self._tables.keys()
+
+    def iter_tables(self) -> Iterable[Tuple[str, pd.DataFrame]]:
+        """Iterate over all known tables and their names."""
+        return iter(self._tables.items())
 
     def read_config(self, config_fn: Optional[str] = None):
         """Parse config from file.
@@ -1481,7 +1587,7 @@ class Model(object, metaclass=ABCMeta):
 
     def write_nc(
         self,
-        nc_dict: Dict[str, Union[xr.DataArray, xr.Dataset]],
+        nc_dict: XArrayDict,
         fn: str,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
