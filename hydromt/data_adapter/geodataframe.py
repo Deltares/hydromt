@@ -7,6 +7,7 @@ from typing import NewType, Union
 
 import numpy as np
 import pyproj
+from shapely.geometry import box
 
 from .. import gis_utils, io
 from .data_adapter import DataAdapter
@@ -392,12 +393,5 @@ class GeoDataFrameAdapter(DataAdapter):
 
     @staticmethod
     def detect_spatial_range(ds):
-        """detect spatial range."""
-        bounds = box(*ds.geometry.total_bounds)
-        return bounds
-
-    @staticmethod
-    def detect_temporal_range(ds):
-        """detect temporal range."""
-
-        return (ds["time"].min(), ds["time"].max())
+        """Detect spatial range."""
+        return box(*ds.geometry.total_bounds)

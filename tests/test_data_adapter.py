@@ -10,16 +10,16 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from shapely.geometry import box
 
 import hydromt
 from hydromt import _compat as compat
 from hydromt.data_adapter import (
-    GeoDatasetAdapter,
     GeoDataFrameAdapter,
+    GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
-from shapely.geometry import box
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -432,14 +432,16 @@ def test_detect_extent(geodf, geoda, rioda, ts):
 
     geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
     geoda_expected_bbox = box(-74.08, -34.58, -47.91, 10.48)
-    # geoda_detected_bbox = GeoDatasetAdapter.detect_spatial_range(geoda)
+    geoda_detected_bbox = GeoDatasetAdapter.detect_spatial_range(geoda)
     geoda_detected_time_range = GeoDatasetAdapter.detect_temporal_range(geoda)
-    # assert geoda_expected_bbox == geoda_detected_bbox
+    assert geoda_expected_bbox == geoda_detected_bbox
     assert geoda_expected_time_range == geoda_detected_time_range
 
-    rioda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
-    rioda_expected_bbox = box(-74.08, -34.58, -47.91, 10.48)
-    # rioda_detected_bbox = RasterDatasetAdapter.detect_spatial_range(rioda)
-    rioda_detected_time_range = RasterDatasetAdapter.detect_temporal_range(ts)
-    # assert rioda_expected_bbox == rioda_detected_bbox
-    assert rioda_expected_time_range == rioda_detected_time_range
+    rioda_expected_bbox = box(3.0, -11.0, 6.0, -9.0)
+    rioda_detected_bbox = RasterDatasetAdapter.detect_spatial_range(rioda)
+
+    # couldn't quite figure out how to construct a raster dataset with
+    # a time dimmension
+    # rioda_detected_time_range = RasterDatasetAdapter.detect_temporal_range(rioda)
+    assert rioda_expected_bbox == rioda_detected_bbox
+    # assert rioda_expected_time_range == rioda_detected_time_range

@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import pyproj
 import xarray as xr
+from shapely.geometry import box
 
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
@@ -471,3 +472,25 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name] = xr.where(data_bool, da * m + a, nodata)
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
+
+    @staticmethod
+    def detect_spatial_range(ds):
+        """Detect spatial range."""
+        return box(*ds.vector.bounds)
+
+    @staticmethod
+    def detect_temporal_range(ds, time_dim_name="time"):
+        """Detect temporal range."""
+        try:
+            time_range = ds[time_dim_name]
+        except KeyError:
+            time_range = ds.T.index
+            if pd.api.types.is_numeric_dtype(time_range):
+                # pd.to_datetime will simply parse ints etc.
+                # which we don't want so we have to raise the error
+                # ourselves
+                raise KeyError("No time dimension found")
+            else:
+                time_range = pd.to_datetime(time_range)
+
+        return (time_range.min(), time_range.max())
