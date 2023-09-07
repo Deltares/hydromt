@@ -15,8 +15,6 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
-from shapely import geometry
-from shapely.geometry import box
 
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
@@ -626,11 +624,25 @@ class RasterDatasetAdapter(DataAdapter):
         logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
         return zl
 
-    def detect_spatial_range(self, ds=None) -> geometry:
+    def detect_spatial_range(
+        self,
+        ds=None,
+        logger=logger,
+    ) -> Tuple[np.float64, np.float64, np.float64, np.float64,]:
         """Detect spatial range."""
         if ds is None:
             ds = self.get_data()
-        return box(*ds.raster.bounds)
+        source_crs = pyproj.CRS.from_user_input(ds.raster.crs)
+        target_crs = pyproj.CRS.from_user_input(4326)
+        bounds = ds.raster.bounds
+        if source_crs is None:
+            logger.warning("No CRS was set. Assuming WGS84(EPSG 4326)")
+        elif source_crs != target_crs:
+            bounds = rasterio.warp.transform_geom(
+                source_crs, target_crs, bounds, precision=6
+            )
+
+        return bounds
 
     def detect_temporal_range(
         self, ds=None, time_dim_name="time"

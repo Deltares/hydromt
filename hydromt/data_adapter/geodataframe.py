@@ -3,12 +3,11 @@ import logging
 import warnings
 from os.path import join
 from pathlib import Path
-from typing import NewType, Union
+from typing import NewType, Tuple, Union
 
 import numpy as np
 import pyproj
-from shapely import geometry
-from shapely.geometry import box
+from pyproj.transformer import Transformer
 
 from .. import gis_utils, io
 from .data_adapter import DataAdapter
@@ -392,8 +391,23 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def detect_spatial_range(self, ds=None) -> geometry:
+    def detect_spatial_range(
+        self,
+        ds=None,
+        logger=logger,
+    ) -> Tuple[float, float, float, float]:
         """Detect spatial range."""
         if ds is None:
             ds = self.get_data()
-        return box(*ds.geometry.total_bounds)
+
+        source_crs = pyproj.CRS.from_user_input(ds.vector.crs)
+        target_crs = pyproj.CRS.from_user_input(4326)
+        bounds = ds.geometry.bounds
+        if source_crs is None:
+            logger.warning("No CRS was set. Assuming WGS84(EPSG 4326)")
+        elif source_crs != target_crs:
+            bounds = Transformer.from_crs(source_crs, target_crs).transform_bounds(
+                *bounds
+            )
+
+        return bounds

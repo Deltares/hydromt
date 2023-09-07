@@ -11,8 +11,7 @@ import numpy as np
 import pandas as pd
 import pyproj
 import xarray as xr
-from shapely import geometry
-from shapely.geometry import box
+from pyproj.transformer import Transformer
 
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
@@ -475,11 +474,26 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def detect_spatial_range(self, ds=None) -> geometry:
+    def detect_spatial_range(
+        self,
+        ds=None,
+        logger=logger,
+    ) -> Tuple[float, float, float, float]:
         """Detect spatial range."""
         if ds is None:
             ds = self.get_data()
-        return box(*ds.vector.bounds)
+
+        source_crs = pyproj.CRS.from_user_input(ds.vector.crs)
+        target_crs = pyproj.CRS.from_user_input(4326)
+        bounds = ds.vector.bounds
+        if source_crs is None:
+            logger.warning("No CRS was set. Assuming WGS84(EPSG 4326)")
+        elif source_crs != target_crs:
+            bounds = Transformer.from_crs(source_crs, target_crs).transform_bounds(
+                *bounds
+            )
+
+        return bounds
 
     def detect_temporal_range(
         self, ds=None, time_dim_name="time"
