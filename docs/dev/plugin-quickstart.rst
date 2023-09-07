@@ -57,11 +57,11 @@ write the output files in different formats.
 
 Another advantage of writting your own plugin is that other users from the same model can easily build instances of that model
 re-using the plugin. So for example, converting from netcdf to model specific file format, using pre-defined HydroMT building
-configuration templates or paramter default values, but also using more instinctive and guided model building methods.
+configuration templates or parameter default values, but also using more instinctive and guided model building methods.
 
 This is maybe a little more advanced but let's say that your model is a ``GridModel`` for which you need to prepare a *landuse*
-classification map (which when resampled should be done using *mode* to avoid creating new imaginary land use classes which you
-would do if you would use *average*) and two landuse parameters roughness *N* and infiltration *inf*. Well, using HydroMT generic
+classification map (for which resampling should be done using *mode* to avoid creating new imaginary land use classes which you
+would do if you would use e.g., *average*) and two landuse parameters roughness *N* and infiltration *inf*. Well, using HydroMT generic
 methods, for your user, the build configuration file would look like this:
 
 .. code-block:: yaml
@@ -100,14 +100,14 @@ Finally, with the generic methods and sub-model classes of HydroMT, we try to su
 If you find that there is no method available for your case, you can always open an issue and if we think your proposed method can
 be re-used by others, it could be added to the core. However, for some complex or very specific data processing, this will not be
 the case. For example, if your model requires a specific soil parameter that can be computed using only specific equation(s) based
-on soil properties data. In these cases, you can always first build a global map of your parameter and use the core method to
-resample/extract, or then write down your specific workflow/equation in your model plugin.
+on soil properties data. In these cases, you can either pre-compute your parameter and use the core method to
+resample/extract, or write down your specific workflow/equation in your model plugin.
 
 
 To conclude, before getting started **you should ask yourself these questions**:
 
   1. Does HydroMT generic ``Model`` and sub-model classes allow me to prepare most of the data for my model?
-  2. Does my model have complex file formats?
+  2. Does my model have model-specific file formats which are different from the HydroMT defaults?
   3. Does my model require complex data processing workflows that are not covered (or will not be covered) by the generic model classes?
   4. Will there be a lot of users for my model?
 
@@ -123,7 +123,7 @@ Below are a couple of advantages and drawbacks of making your own plugin:
 
 *Drawbacks*
 
-- Need to create and developp a plugin repository.
+- Need to create and develop a plugin repository.
 - Need to support and maintain the plugin repository.
 
 .. _plugin_create:
@@ -162,7 +162,7 @@ Now, how do you define the new plugin ``Model`` class. To make sure that your mo
 ``Model`` class of HydroMT core as a base or one of its sub-model classes: ``GridModel`` for regular gridded or distributed models, ``MeshModel``
 for unstructured grid(s) models, ``LumpedModel`` for lumped or semi-distributed models or ``NetworkModel`` for network models. This allows you
 to use the HydroMT model class methods as well as create any functionality on top of that. To define your new model class, e.g. *WflowModel*,
-you should in a python script define at least:
+you should in the python script that is referenced by the entry-point define at least:
 
 .. code-block:: python
 
@@ -177,7 +177,7 @@ And that's it! If everything has gone well, you should be able to access your co
 
 .. NOTE::
 
-  If you want to mix models functionalities, e.g. your model contains both regular grids and semi-distributed units, most model classes also
+  If you want to mix functionalities from different sub-model classes, e.g. your model contains both regular grids and semi-distributed units, most model classes also
   provide ``Mixin`` variants that you can use to mix and match a bit more modularly. This is actually how the generic sub-classes are defined,
   as a mix of the main HydroMT ``Model`` class and the ``Mixin`` of the additionnal new component defining then:
 
@@ -191,13 +191,13 @@ And that's it! If everything has gone well, you should be able to access your co
   a new HydroMT Model component, ``grid`` for ``GridModel`` or ``mesh`` for ``MeshModel`` and adds the accompanying setup, read and write methods.
   So choosing the one or the other, or adding a Mixin depends on what type of model or input data strucuture you need to prepare. Note that if your
   Model class is defined as (1) *PluginModel(GridModel)* or (2) *PluginModel(Model, GridMixin)*, in both cases the ``grid`` object and relative methods
-  are available. The main difference is the dominant object for your model in case of (2) will be ``grid`` and in case of (1) the ``region geoms``.
-  IE when looking for example for the model CRS property, in case of (1) the crs will be grid.crs and in case of (2) geoms.region.crs. Also, in
-  update mode, in case of (2), no additionnal data can be added to your model if the grid object is not yet defined (ie your model grid extent and
+  are available. The main difference is the dominant object for your model in case of (2) will be ``grid`` and in case of (1) the ``region``.
+  IE when looking for example for the model CRS property, in case of (1) the crs will be grid.crs and in case of (2) region.crs. Also, in
+  update mode, in case of (2), no additional data can be added to your model if the grid object is not yet defined (ie your model grid extent and
   resolution does not yet exist).
 
-Typical HydroMT folder structure
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Typical HydroMT repository structure
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 With HydroMT and some of its plugin, we usually use a classic folder structure and file organisation. It not mandatory to follow this structure
 But if you choose to, a classic folder structure and files for a HydroMT plugin (eg mymodel) looks like this:
 
@@ -287,7 +287,7 @@ After this you can open up the github repository website, and you should see you
 plugin! Well done, and good luck!
 
 
-Conventions and tips to developp your own plugin
+Conventions and tips to develop your own plugin
 ================================================
 To take back the schematic overview of the HydroMT package architecture (figure below), HydroMT is organized in the following way:
 
@@ -367,16 +367,6 @@ Below are the properties and initialisation function, to set for your new plugin
     # tell hydroMT which methods should receive the res and region arguments from CLI
     _CLI_ARGS: Dict[str, str] = {"region": "setup_region", "res": None}
 
-    ### Dictionnary of hydromt model components mapping ###
-    # Can be used for example to rename variables in the different components from
-    # hydromt convention name to the model specific name.
-    _GEOMS: Dict[str, Any] = {}
-    _MAPS: Dict[str, Any] = {"elevtn": "dem"}
-    _FORCINGS: Dict[str, Any] = {}
-    _STATES: Dict[str, Any] = {}
-    _RESULTS: Dict[str, Any] = {}
-    # If your parent class is GridModel, MeshModel, LumpedModel or NetworkModel
-    # you can also add to the list here
 
     ### Name of default folders to create in the model directory ###
     # When initiliasing a new model for a specific region, the folders
@@ -549,13 +539,13 @@ For each generalized model class, the respective computational unit components e
 Reading & Writing model components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Because the way that models consume data is so hyper specialised, the main part of writing a plugin is writing the
+Because the way that models consume data is often model software specific, the main part of writing a plugin is writing the
 Input/Output (IO) methods to prepare data exactly as your model expects them, in the correct format. To do this you'll
 be overwriting most ``read_<component>`` or ``write_<component>`` methods in your model class. That will ensure that the
 data comes in and goes out expecting exactly as you want.
 
 In the default HydroMT CORE read and write methods, xarray objects are written as netcdf files, ``geoms`` as GeoJSON files by
-default but any geopandas driver is allowed, and ``config`` eithey as TOML, YAML or INI file. So again, you could decide to
+default but any geopandas driver is allowed, and ``config`` either as TOML, YAML or INI file. So again, you could decide to
 completely overwrite the parent read and write methods or change the defaults.
 
 Eg if your geoms should be written in GeoPackage format rather than GeoJSON and in a geometry folder in your model:
@@ -572,7 +562,7 @@ Eg if your geoms should be written in GeoPackage format rather than GeoJSON and 
 
 If you are writting your own read/write functions, some good pratice steps of the function:
 
-1. For writting, check first if the object you are writting is not empty, then you can pass. Example:
+1. For writing, check first if the object you are writing is not empty, then you can pass. Example:
 
 .. code-block:: python
 
@@ -580,7 +570,7 @@ If you are writting your own read/write functions, some good pratice steps of th
     self.logger.debug("No geoms data found, skip writing.")
     return
 
-2. For reading or writting, check that you have the right permission. For example, in build mode ('w' or 'w+'),
+2. For reading or writing, check that you have the right permission. For example, in build mode ('w' or 'w+'),
 the model should be empty, so you should not be able to read existing model files. In some cases, python
 users may only want to read a model using HydroMT to visualise or plot data. As a protection, the model
 can then be opened in read only mode ('r') and HydroMT should not be able to overwrite any data. HydroMT
@@ -658,11 +648,11 @@ the other subclasses. Apart from the components here are a couple of useful prop
 - :py:attr:`~Model._read`: flag if the model is in read mode ('r' or 'r+' when initialising).
 - :py:attr:`~Model._write`: flag if the model is in write mode ('w' or 'w+' when initialising).
 
-Some submodel classes can have additionnal attributes based on their additionnal components, so check out the :ref:`API reference <model_api>`.
+Some submodel classes can have additional attributes based on their additional components, so check out the :ref:`API reference <model_api>`.
 
 Adding a new property or component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If you wish to add additionnal properties or attributes to your plugin Model subclass, you can either decide to add simple
+If you wish to add additional properties or attributes to your plugin Model subclass, you can either decide to add simple
 attributes directly in the initiliasation function ``__init__`` or define specific properties. Example for a shortcut to the basin
 vector in the geoms object:
 
@@ -674,17 +664,6 @@ vector in the geoms object:
     # Check in geoms
     if "basins" in self.geoms:
       gdf = self.geoms["basins"]
-    # Check in maps
-    elif self._MAPS["basins"] in self.maps:
-      gdf = (
-          self.maps[self._MAPS["basins"]]
-          .raster.vectorize()
-          .set_index("value")
-          .sort_index()
-      )
-      gdf.index.name = self._MAPS["basins"]
-      # Store in geoms to re-use later
-      self.set_geoms(gdf, name="basins")
     else:
         self.logger.warning(
             f"Basin map {self._MAPS['basins']} not found in maps or geoms."
@@ -761,7 +740,7 @@ model in a proper way. If it is not the case, you can always define your own new
 
 Data processing: setup methods and workflows
 --------------------------------------------
-Now let's focus on the wheel part of the schematic diagram or how to add data to your model using HydroMT, which is what it's all about!
+Now let's focus on the _gear wheels_ of the schematic diagram or how to add data to your model using HydroMT, which is what it's all about!
 Nothing here is really mandatory but more about conventions or tips also from experience with other plugins.
 
 But in general (scheme below):
@@ -900,7 +879,7 @@ A couple of tips if you want to define workflows:
 
 Good practices
 --------------
-On top of code development for your plugin, you can also find some good practices for your plugin repository in the :ref:`Developper guide <contributing>`.
+On top of code development for your plugin, you can also find some good practices for your plugin repository in the :ref:`Developer guide <contributing>`.
 Here are some last tips:
 
 - **Documentation**: for other people to use or contribute to your plugin, good documentation is really key. We really encourage you to write
