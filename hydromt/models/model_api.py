@@ -61,6 +61,7 @@ class Model(object, metaclass=ABCMeta):
         "crs": CRS,
         "config": Dict[str, Any],
         "geoms": Dict[str, gpd.GeoDataFrame],
+        "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
         "region": gpd.GeoDataFrame,
@@ -110,7 +111,6 @@ class Model(object, metaclass=ABCMeta):
 
         # placeholders
         # metadata maps that can be at different resolutions
-        # TODO do we want read/write maps?
         self._config = None  # nested dictionary
         self._maps: Optional[XArrayDict] = None
         self._tables: Dict[str, pd.DataFrame] = None
