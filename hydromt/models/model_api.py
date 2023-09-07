@@ -52,7 +52,8 @@ class Model(object, metaclass=ABCMeta):
     # TODO: change it back to setup_region and no res --> deprecation
     _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
     _TMP_DATA_DIR = None
-    # model version should be filled by the plugins
+    # supported model version should be filled by the plugins
+    # e.g. _MODEL_VERSION = ">=1.0, <1.1"
     _MODEL_VERSION = None
 
     _API = {
