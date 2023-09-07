@@ -175,7 +175,7 @@ def test_model(model, tmpdir):
 def test_model_tables(model, df, tmpdir):
     # make a couple copies of the dfs for testing
     dfs = {str(i): df.copy() for i in range(5)}
-    model.set_root(tmpdir)
+    model.set_root(tmpdir, mode="r+")  # append mode
     clean_model = deepcopy(model)
 
     with pytest.raises(KeyError):
