@@ -647,6 +647,7 @@ class MeshModel(MeshMixin, Model):
             "config",
             "mesh",
             "geoms",
+            "tables",
             "forcing",
             "states",
             "results",
@@ -665,7 +666,7 @@ class MeshModel(MeshMixin, Model):
 
     def write(
         self,
-        components: List = ["config", "mesh", "geoms", "forcing", "states"],
+        components: List = ["config", "mesh", "geoms", "tables", "forcing", "states"],
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -674,7 +675,7 @@ class MeshModel(MeshMixin, Model):
         components : List, optional
             List of model components to write, each should have an
             associated write_<component> method. By default ['config', 'maps',
-            'mesh', 'geoms', 'forcing', 'states']
+            'mesh', 'geoms', 'tables', 'forcing', 'states']
         """
         super().write(components=components)
 

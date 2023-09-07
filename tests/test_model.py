@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
+from copy import deepcopy
 from os.path import abspath, dirname, isfile, join
 
 import geopandas as gpd
@@ -171,7 +172,39 @@ def test_model(model, tmpdir):
         assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
 
-def test_model_append(demda, tmpdir):
+def test_model_tables(model, df, tmpdir):
+    # make a couple copies of the dfs for testing
+    dfs = {str(i): df.copy() for i in range(5)}
+    model.set_root(tmpdir, mode="r+")  # append mode
+    clean_model = deepcopy(model)
+
+    with pytest.raises(KeyError):
+        model.tables[1]
+
+    for i, d in dfs.items():
+        model.set_tables(d, name=i)
+        assert df.equals(model.tables[i])
+
+    # now do the same but interating over the stables instead
+    for i, d in model.tables.items():
+        model.set_tables(d, name=i)
+        assert df.equals(model.tables[i])
+
+    assert list(model.tables.keys()) == list(map(str, range(5)))
+
+    model.write_tables()
+    clean_model.read_tables()
+
+    model_merged = model.get_tables_merged().sort_values(["table_origin", "city"])
+    clean_model_merged = clean_model.get_tables_merged().sort_values(
+        ["table_origin", "city"]
+    )
+    assert np.all(
+        np.equal(model_merged, clean_model_merged)
+    ), f"model: {model_merged}\nclean_model: {clean_model_merged}"
+
+
+def test_model_append(demda, df, tmpdir):
     # write a model
     demda.name = "dem"
     mod = GridModel(mode="w", root=str(tmpdir))
@@ -181,6 +214,7 @@ def test_model_append(demda, tmpdir):
     mod.set_forcing(demda, name="dem")
     mod.set_states(demda, name="dem")
     mod.set_geoms(demda.raster.box, name="dem")
+    mod.set_tables(df, name="df")
     mod.write()
     # append to model and check if previous data is still there
     mod1 = GridModel(mode="r+", root=str(tmpdir))
@@ -196,6 +230,8 @@ def test_model_append(demda, tmpdir):
     assert "dem" in mod1.states
     mod1.set_geoms(demda.raster.box, name="dem1")
     assert "dem" in mod1.geoms
+    mod1.set_tables(df, name="df1")
+    assert "df" in mod1.tables
 
 
 @pytest.mark.filterwarnings("ignore:The setup_basemaps")

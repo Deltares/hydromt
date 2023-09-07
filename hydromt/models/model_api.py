@@ -35,6 +35,7 @@ DeferedFileClose = TypedDict(
     "DeferedFileClose",
     {"ds": xr.Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
 )
+XArrayDict = Dict[str, Union[xr.DataArray, xr.Dataset]]
 
 
 class Model(object, metaclass=ABCMeta):
@@ -52,16 +53,20 @@ class Model(object, metaclass=ABCMeta):
     # TODO: change it back to setup_region and no res --> deprecation
     _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
     _TMP_DATA_DIR = None
+    # supported model version should be filled by the plugins
+    # e.g. _MODEL_VERSION = ">=1.0, <1.1"
+    _MODEL_VERSION = None
 
     _API = {
         "crs": CRS,
         "config": Dict[str, Any],
         "geoms": Dict[str, gpd.GeoDataFrame],
-        "maps": Dict[str, Union[xr.DataArray, xr.Dataset]],
-        "forcing": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "tables": Dict[str, pd.DataFrame],
+        "maps": XArrayDict,
+        "forcing": XArrayDict,
         "region": gpd.GeoDataFrame,
-        "results": Dict[str, Union[xr.DataArray, xr.Dataset]],
-        "states": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "results": XArrayDict,
+        "states": XArrayDict,
     }
 
     def __init__(
@@ -106,15 +111,15 @@ class Model(object, metaclass=ABCMeta):
 
         # placeholders
         # metadata maps that can be at different resolutions
-        # TODO do we want read/write maps?
         self._config = None  # nested dictionary
-        self._maps = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._maps: Optional[XArrayDict] = None
+        self._tables: Dict[str, pd.DataFrame] = None
 
         # NOTE was staticgeoms in <=v0.5
-        self._geoms = None  # dictionary of gdp.GeoDataFrame
-        self._forcing = None  # dictionary of xr.DataArray and/or xr.Dataset
-        self._states = None  # dictionary of xr.DataArray and/or xr.Dataset
-        self._results = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
+        self._forcing: Optional[XArrayDict] = None
+        self._states: Optional[XArrayDict] = None
+        self._results: Optional[XArrayDict] = None
         # To be deprecated in future versions!
         self._staticmaps = None
         self._staticgeoms = None
@@ -506,6 +511,7 @@ class Model(object, metaclass=ABCMeta):
             "config",
             "staticmaps",
             "maps",
+            "tables",
             "geoms",
             "forcing",
             "states",
@@ -534,6 +540,7 @@ class Model(object, metaclass=ABCMeta):
         components: List = [
             "staticmaps",
             "maps",
+            "tables",
             "geoms",
             "forcing",
             "states",
@@ -701,6 +708,77 @@ class Model(object, metaclass=ABCMeta):
 
     def _configwrite(self, fn: str):
         return config.configwrite(fn, self.config)
+
+    @property
+    def tables(self) -> Dict[str, pd.DataFrame]:
+        """Model tables."""
+        if self._tables is None:
+            self._tables = dict()
+            if self._read:
+                self.read_tables()
+        return self._tables
+
+    def write_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
+        """Write tables at <root>/tables."""
+        if self.tables:
+            self._assert_write_mode
+            self.logger.info("Writing table files.")
+            local_kwargs = {"index": False, "header": True, "sep": ","}
+            local_kwargs.update(**kwargs)
+            for name in self.tables:
+                fn_out = join(self.root, fn.format(name=name))
+                os.makedirs(dirname(fn_out), exist_ok=True)
+                self.tables[name].to_csv(fn_out, **local_kwargs)
+        else:
+            self.logger.debug("No tables found, skip writing.")
+
+    def read_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
+        """Read table files at <root>/tables and parse to dict of dataframes."""
+        self._assert_read_mode
+        self.logger.info("Reading model table files.")
+        fns = glob.glob(join(self.root, fn.format(name="*")))
+        if len(fns) > 0:
+            for fn in fns:
+                name = basename(fn).split(".")[0]
+                tbl = pd.read_csv(fn, **kwargs)
+                self.set_tables(tbl, name=name)
+
+    def set_tables(
+        self, tables: Union[pd.DataFrame, pd.Series, Dict], name=None
+    ) -> None:
+        """Add (a) table(s) <pandas.DataFrame> to model.
+
+        Parameters
+        ----------
+        tables : pandas.DataFrame, pandas.Series or dict
+            Table(s) to add to model.
+            Multiple tables can be added at once by passing a dict of tables.
+        name : str, optional
+            Name of table, by default None. Required when tables is not a dict.
+        """
+        if not isinstance(tables, dict) and name is None:
+            raise ValueError("name required when tables is not a dict")
+        elif not isinstance(tables, dict):
+            tables = {name: tables}
+        for name, df in tables.items():
+            if not (isinstance(df, pd.DataFrame) or isinstance(df, pd.Series)):
+                raise ValueError(
+                    "table type not recognized, should be pandas DataFrame or Series."
+                )
+            if name in self.tables:
+                if not self._write:
+                    raise IOError(f"Cannot overwrite table {name} in read-only mode")
+                elif self._read:
+                    self.logger.warning(f"Overwriting table: {name}")
+
+            self.tables[name] = df
+
+    def get_tables_merged(self) -> pd.DataFrame:
+        """Return all tables of a model merged into one dataframe."""
+        # This is mostly used for convenience and testing.
+        return pd.concat(
+            [df.assign(table_origin=name) for name, df in self.tables.items()], axis=0
+        )
 
     def read_config(self, config_fn: Optional[str] = None):
         """Parse config from file.
@@ -1481,7 +1559,7 @@ class Model(object, metaclass=ABCMeta):
 
     def write_nc(
         self,
-        nc_dict: Dict[str, Union[xr.DataArray, xr.Dataset]],
+        nc_dict: XArrayDict,
         fn: str,
         gdal_compliant: bool = False,
         rename_dims: bool = False,

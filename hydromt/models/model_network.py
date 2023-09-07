@@ -46,6 +46,7 @@ class NetworkModel(Model):
             "config",
             "network",
             "geoms",
+            "tables",
             "forcing",
             "states",
             "results",
@@ -58,7 +59,7 @@ class NetworkModel(Model):
         components : List, optional
             List of model components to read, each should have an associated
             read_<component> method. By default ['config', 'maps',
-            'network', 'geoms', 'forcing', 'states', 'results']
+            'network', 'geoms', 'tables', 'forcing', 'states', 'results']
         """
         super().read(components=components)
 
@@ -68,6 +69,7 @@ class NetworkModel(Model):
             "config",
             "network",
             "geoms",
+            "tables",
             "forcing",
             "states",
         ],
@@ -79,7 +81,7 @@ class NetworkModel(Model):
         components : List, optional
             List of model components to write, each should have an
             associated write_<component> method. By default ['config', 'maps',
-            'network', 'geoms', 'forcing', 'states']
+            'network', 'geoms', 'tables', 'forcing', 'states']
         """
         super().write(components=components)
 
