@@ -19,6 +19,7 @@ Added
 - add ``open_mfcsv`` function in ``io`` module for combining multiple CSV files into one dataset. (PR #486)
 - Adapters can now clip data that is passed through a python object the same way as through the data catalog. (PR #481)
 - Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
+- Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
 
 Changed
 -------
