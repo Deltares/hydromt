@@ -511,6 +511,7 @@ class Model(object, metaclass=ABCMeta):
             "config",
             "staticmaps",
             "maps",
+            "tables",
             "geoms",
             "forcing",
             "states",
@@ -539,6 +540,7 @@ class Model(object, metaclass=ABCMeta):
         components: List = [
             "staticmaps",
             "maps",
+            "tables",
             "geoms",
             "forcing",
             "states",
@@ -716,56 +718,64 @@ class Model(object, metaclass=ABCMeta):
                 self.read_tables()
         return self._tables
 
-    def write_tables(self, **kwargs) -> None:
-        """Write tables at <root>."""
-        if not self._write:
-            raise IOError("Model opened in read-only mode")
-
+    def write_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
+        """Write tables at <root>/tables."""
         if self.tables:
+            self._assert_write_mode
             self.logger.info("Writing table files.")
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
             for name in self.tables:
-                fn_out = join(self.root, f"{name}.csv")
+                fn_out = join(self.root, fn.format(name=name))
+                os.makedirs(dirname(fn_out), exist_ok=True)
                 self.tables[name].to_csv(fn_out, **local_kwargs)
+        else:
+            self.logger.debug("No tables found, skip writing.")
 
-    def read_tables(self, **kwargs) -> None:
-        """Read table files at <root> and parse to dict of dataframes."""
-        if not self._write:
-            self.tables = dict()  # start fresh in read-only mode
-
+    def read_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
+        """Read table files at <root>/tables and parse to dict of dataframes."""
+        self._assert_read_mode
         self.logger.info("Reading model table files.")
-        fns = glob.glob(join(self.root, "*.csv"))
+        fns = glob.glob(join(self.root, fn.format(name="*")))
         if len(fns) > 0:
             for fn in fns:
                 name = basename(fn).split(".")[0]
                 tbl = pd.read_csv(fn, **kwargs)
-                self.set_table(name, tbl)
+                self.set_tables(tbl, name=name)
 
-    def set_table(self, name, df) -> None:
-        """Add a table <pandas.DataFrame> to model."""
-        if not (isinstance(df, pd.DataFrame) or isinstance(df, pd.Series)):
-            raise ValueError(
-                "df type not recognized, should be pandas DataFrame or Series."
-            )
-        if name in self.tables:
-            if not self._write:
-                raise IOError(f"Cannot overwrite table {name} in read-only mode")
-            elif self._read:
-                self.logger.warning(f"Overwriting table: {name}")
+    def set_tables(
+        self, tables: Union[pd.DataFrame, pd.Series, Dict], name=None
+    ) -> None:
+        """Add (a) table(s) <pandas.DataFrame> to model.
 
-        self.tables[name] = df
+        Parameters
+        ----------
+        tables : pandas.DataFrame, pandas.Series or dict
+            Table(s) to add to model.
+            Multiple tables can be added at once by passing a dict of tables.
+        name : str, optional
+            Name of table, by default None. Required when tables is not a dict.
+        """
+        if not isinstance(tables, dict) and name is None:
+            raise ValueError("name required when tables is not a dict")
+        elif not isinstance(tables, dict):
+            tables = {name: tables}
+        for name, df in tables.items():
+            if not (isinstance(df, pd.DataFrame) or isinstance(df, pd.Series)):
+                raise ValueError(
+                    "table type not recognized, should be pandas DataFrame or Series."
+                )
+            if name in self.tables:
+                if not self._write:
+                    raise IOError(f"Cannot overwrite table {name} in read-only mode")
+                elif self._read:
+                    self.logger.warning(f"Overwriting table: {name}")
 
-    def set_tables(self, table_dict) -> None:
-        """Add a table <pandas.DataFrame> to model."""
-        for name, df in table_dict.items():
-            self.set_table(name, df)
+            self.tables[name] = df
 
     def get_tables_merged(self) -> pd.DataFrame:
-        """Return all tables of a model merged into one dataframe.
-
-        This is mostly used for convinience and testing.
-        """
+        """Return all tables of a model merged into one dataframe."""
+        # This is mostly used for convenience and testing.
         return pd.concat(
             [df.assign(table_origin=name) for name, df in self.tables.items()], axis=0
         )
