@@ -180,6 +180,7 @@ class LumpedModel(LumpedMixin, Model):
             "config",
             "response_units",
             "geoms",
+            "tables",
             "forcing",
             "states",
             "results",
@@ -192,7 +193,7 @@ class LumpedModel(LumpedMixin, Model):
         components : List, optional
             List of model components to read, each should have an
             associated read_<component> method.
-            By default ['config', 'maps', 'response_units', 'geoms',
+            By default ['config', 'maps', 'response_units', 'geoms', 'tables',
             'forcing', 'states', 'results']
         """
         super().read(components=components)
@@ -203,6 +204,7 @@ class LumpedModel(LumpedMixin, Model):
             "config",
             "response_units",
             "geoms",
+            "tables",
             "forcing",
             "states",
         ],
@@ -214,7 +216,7 @@ class LumpedModel(LumpedMixin, Model):
         components : List, optional
             List of model components to write, each should have an
             associated write_<component> method. By default ['config',
-            'maps', 'response_units', 'geoms', 'forcing', 'states']
+            'maps', 'response_units', 'geoms', 'tables', 'forcing', 'states']
         """
         super().write(components=components)
 
