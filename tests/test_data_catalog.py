@@ -514,17 +514,24 @@ def test_detect_extent():
         46.79985427856445,
     )
     expected_temporal_range = tuple(pd.to_datetime(["2010-02-02", "2010-02-15"]))
-    spatial_range = data_catalog.get_source(name).detect_spatial_range()
-    temporal_range = data_catalog.get_source(name).detect_temporal_range()
-    assert np.all(np.equal(spatial_range, bbox)), spatial_range
-    assert temporal_range == expected_temporal_range, temporal_range
+    detected_spatial_range = data_catalog.get_source(name).detect_spatial_range()
+    detected_temporal_range = data_catalog.get_source(name).detect_temporal_range()
+    reported_spatial_range = data_catalog.get_source(name).get_reported_spatial_range()
+    reported_temporal_range = data_catalog.get_source(
+        name
+    ).get_reported_temporal_range()
+    assert np.all(np.equal(detected_spatial_range, bbox))
+    assert detected_temporal_range == expected_temporal_range
+    assert np.all(np.equal(reported_spatial_range, bbox))
+    assert reported_temporal_range == expected_temporal_range
 
     name = "gadm_level1"
     bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
 
-    spatial_range = data_catalog.get_source(name).detect_spatial_range()
-    assert np.all(np.equal(spatial_range, bbox)), spatial_range
-    assert temporal_range == expected_temporal_range, temporal_range
+    detected_spatial_range = data_catalog.get_source(name).detect_spatial_range()
+    reported_spatial_range = data_catalog.get_source(name).get_reported_spatial_range()
+    assert np.all(np.equal(detected_spatial_range, bbox))
+    assert np.all(np.equal(reported_spatial_range, bbox))
 
     name = "gtsmv3_eu_era5"
     bbox = (12.22412, 45.22705, 12.99316, 45.62256)
@@ -532,7 +539,13 @@ def test_detect_extent():
         np.datetime64("2010-02-01"),
         np.datetime64("2010-02-14T23:50:00.000000000"),
     )
-    spatial_range = data_catalog.get_source(name).detect_spatial_range()
-    temporal_range = data_catalog.get_source(name).detect_temporal_range()
-    assert np.all(np.equal(spatial_range, bbox)), spatial_range
-    assert temporal_range == expected_temporal_range, temporal_range
+    detected_spatial_range = data_catalog.get_source(name).detect_spatial_range()
+    detected_temporal_range = data_catalog.get_source(name).detect_temporal_range()
+    reported_spatial_range = data_catalog.get_source(name).get_reported_spatial_range()
+    reported_temporal_range = data_catalog.get_source(
+        name
+    ).get_reported_temporal_range()
+    assert np.all(np.equal(detected_spatial_range, bbox))
+    assert detected_temporal_range == expected_temporal_range
+    assert np.all(np.equal(reported_spatial_range, bbox))
+    assert reported_temporal_range == expected_temporal_range

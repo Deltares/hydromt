@@ -45,6 +45,7 @@ class GeoDatasetAdapter(DataAdapter):
         unit_add: dict = {},
         meta: dict = {},
         attrs: dict = {},
+        extent: dict = {},
         driver_kwargs: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now

@@ -61,6 +61,9 @@ gtsmv3_eu_era5:
   path: water_level\reanalysis-waterlevel-{year}-m{month:02d}.nc
   data_type: GeoDataset
   driver: netcdf
+  extent:
+    spatial: []
+    temporal: []
   kwargs:
     chunks: {stations: 100, time: 1500}
     concat_dim: time

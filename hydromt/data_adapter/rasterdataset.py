@@ -50,6 +50,7 @@ class RasterDatasetAdapter(DataAdapter):
         unit_add: dict = {},
         meta: dict = {},
         attrs: dict = {},
+        extent: dict = {},
         driver_kwargs: dict = {},
         zoom_levels: dict = {},
         name: str = "",  # optional for now
@@ -138,6 +139,7 @@ class RasterDatasetAdapter(DataAdapter):
         )
         self.crs = crs
         self.zoom_levels = zoom_levels
+        self.extent = extent
 
     def to_file(
         self,
