@@ -400,9 +400,9 @@ class GeoDataFrameAdapter(DataAdapter):
         if ds is None:
             ds = self.get_data()
 
-        source_crs = pyproj.CRS.from_user_input(ds.vector.crs)
+        source_crs = pyproj.CRS.from_user_input(ds.geometry.crs)
         target_crs = pyproj.CRS.from_user_input(4326)
-        bounds = ds.geometry.bounds
+        bounds = ds.geometry.total_bounds
         if source_crs is None:
             logger.warning("No CRS was set. Assuming WGS84(EPSG 4326)")
         elif source_crs != target_crs:

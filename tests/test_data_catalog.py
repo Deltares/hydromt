@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from shapely.geometry import box
 
 from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
 from hydromt.data_catalog import (
@@ -508,29 +507,32 @@ def test_detect_extent():
 
     # raster dataset using three different ways
     name = "chirps_global"
-    bbox = box(
-        11.599998474121094, 45.20000076293945, 13.000083923339844, 46.79985427856445
+    bbox = (
+        11.599998474121094,
+        45.20000076293945,
+        13.000083923339844,
+        46.79985427856445,
     )
     expected_temporal_range = tuple(pd.to_datetime(["2010-02-02", "2010-02-15"]))
     spatial_range = data_catalog.get_source(name).detect_spatial_range()
     temporal_range = data_catalog.get_source(name).detect_temporal_range()
-    assert spatial_range == bbox, spatial_range.bounds
+    assert np.all(np.equal(spatial_range, bbox)), spatial_range
     assert temporal_range == expected_temporal_range, temporal_range
 
     name = "gadm_level1"
-    bbox = box(6.63087893, 35.49291611, 18.52069473, 49.01704407)
+    bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
 
     spatial_range = data_catalog.get_source(name).detect_spatial_range()
-    assert spatial_range == bbox, spatial_range.bounds
+    assert np.all(np.equal(spatial_range, bbox)), spatial_range
     assert temporal_range == expected_temporal_range, temporal_range
 
     name = "gtsmv3_eu_era5"
-    bbox = box(12.22412, 45.22705, 12.99316, 45.62256)
+    bbox = (12.22412, 45.22705, 12.99316, 45.62256)
     expected_temporal_range = (
         np.datetime64("2010-02-01"),
         np.datetime64("2010-02-14T23:50:00.000000000"),
     )
     spatial_range = data_catalog.get_source(name).detect_spatial_range()
     temporal_range = data_catalog.get_source(name).detect_temporal_range()
-    assert spatial_range == bbox, spatial_range.bounds
+    assert np.all(np.equal(spatial_range, bbox)), spatial_range
     assert temporal_range == expected_temporal_range, temporal_range
