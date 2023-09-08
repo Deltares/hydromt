@@ -217,15 +217,6 @@ Setup methods
    Model.setup_maps_from_rasterdataset
    Model.setup_maps_from_raster_reclass
 
-Testing (internal)
-------------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model._test_model_api
-   Model._test_equal
-
 
 .. _grid_model_api:
 

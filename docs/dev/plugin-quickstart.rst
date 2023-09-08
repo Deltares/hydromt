@@ -32,7 +32,29 @@ Getting started
 Plugin or no plugin ?
 ---------------------
 You've discovered HydroMT and would like to use it for your own model and wonder how to get started about it?
-Well the first thing you should ask yourself is if you need a plugin or not. To quote our :ref:`intro_user_guide`::
+Before getting started **you should ask yourself these questions**:
+
+  1. Does my model have model-specific file formats which are different from the HydroMT defaults?
+  2. Does my model require complex data processing workflows that are not covered (or will not be covered) by the generic model classes?
+  3. Will there be a lot of users for my model?
+
+And depending on the answers, you can decide to start your own plugin yes or no. Answering *yes* to any of the previous
+questions could be a protential reason for starting your own plugin. Below are a couple of advantages and drawbacks of making your own plugin:
+
+*Advantages*
+
+- HydroMT outputs are in the correct file format so my freshly built model is ready to run.
+- All required input data can be prepared by HydroMT, even using specific or complex processing methods/workflows.
+- Templates and easy to use/understand functions are more easily available.
+- Maintained and central place for model specific functions/workflows (eg reading/writting in correct format etc.)
+
+*Drawbacks*
+
+- Need to create and develop a plugin repository.
+- Need to support and maintain the plugin repository.
+
+To help you decide some more indepth explanation is also provided below.
+To quote our :ref:`intro_user_guide`::
 
   HydroMT defines any model instance through the model-agnostic Model API
   based on several components: maps, geometries, forcings, results, states,
@@ -104,27 +126,6 @@ on soil properties data. In these cases, you can either pre-compute your paramet
 resample/extract, or write down your specific workflow/equation in your model plugin.
 
 
-To conclude, before getting started **you should ask yourself these questions**:
-
-  1. Does HydroMT generic ``Model`` and sub-model classes allow me to prepare most of the data for my model?
-  2. Does my model have model-specific file formats which are different from the HydroMT defaults?
-  3. Does my model require complex data processing workflows that are not covered (or will not be covered) by the generic model classes?
-  4. Will there be a lot of users for my model?
-
-And depending on the answers, you can decide to start your own plugin yes or no.
-Below are a couple of advantages and drawbacks of making your own plugin:
-
-*Advantages*
-
-- HydroMT outputs are in the correct file format so my freshly built model is ready to run.
-- All required input data can be prepared by HydroMT, even using specific or complex processing methods/workflows.
-- Templates and easy to use/understand functions are more easily available.
-- Maintained and central place for model specific functions/workflows (eg reading/writting in correct format etc.)
-
-*Drawbacks*
-
-- Need to create and develop a plugin repository.
-- Need to support and maintain the plugin repository.
 
 .. _plugin_create:
 
@@ -258,7 +259,7 @@ Here are some detailed information about what each question implies:
 - **project_url**: The url of your project (this will be used as the url of the github repository). Eg *https://github.com/savente93/hydromt_mymodel*
 - **docs_url**: The url of the documentation of your project (this will be used as the url of the documentation). Eg *https://savente93.github.io/hydromt_mymodel*
 - **model_classname**: The name of the new HydroMT Model subclass that you are creating. Eg *MyModelModel*
-- **model_type**: Type of HydroMT model corresponding to your model, one of [``Model``, ``GridModel``, ``MeshModel``, ``LumpedModel``, ``NetworkModel``] (!careful with syntax!). Eg *GridModel*
+- **model_type**: Type of HydroMT model corresponding to your model, one of [``Model``, ``GridModel``, ``MeshModel``, ``LumpedModel``, ``NetworkModel``]. Eg *GridModel*
 - **model_shortname**: The short name of your model. This will be used as the HydroMT Command Line name of your plugin and as the name of the main python file of
   your project (which will contain the definition of your new Model class). Eg *mymodel*
 - **project_tagline**: A short tagline (short description phrase) for your project. Eg *A HydroMT plugin for MyModel models.*
