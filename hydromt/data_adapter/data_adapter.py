@@ -241,7 +241,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self,
         time_tuple: Optional[tuple] = None,
         variables: Optional[list] = None,
-        zoom_level: int = 0,
+        zoom_level: Optional[int] = 0,
         **kwargs,
     ):
         """Resolve {year}, {month} and {variable} keywords in self.path.
@@ -303,7 +303,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         if variables is not None:
             variables = np.atleast_1d(variables).tolist()
             mv_inv = {v: k for k, v in self.rename.items()}
-            vrs = [mv_inv.get(var, var) for var in variables]
+            vrs = [mv_inv.get(var, var) for var in variables]  # type: ignore
             postfix += f"; variables: {variables}"
 
         # get filenames with glob for all date / variable combinations

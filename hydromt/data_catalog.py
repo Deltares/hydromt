@@ -13,7 +13,7 @@ import warnings
 from datetime import datetime
 from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Dict, List, Optional, Tuple, TypedDict, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -46,6 +46,13 @@ __all__ = [
 SourceSpecDict = TypedDict(
     "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
 )
+Extent = TypedDict(
+    "Extent",
+    {
+        "spatial": Tuple[float, float, float, float],
+        "temporal": Tuple[datetime, datetime],
+    },
+)
 
 
 class DataCatalog(object):
@@ -61,8 +68,8 @@ class DataCatalog(object):
         data_libs: Union[List, str] = [],
         fallback_lib: Optional[str] = "artifact_data",
         logger=logger,
-        cache: bool = False,
-        cache_dir: str = None,
+        cache: Optional[bool] = False,
+        cache_dir: Optional[str] = None,
         **artifact_keys,
     ) -> None:
         """Catalog of DataAdapter sources.
@@ -157,16 +164,44 @@ class DataCatalog(object):
         return self._catalogs
 
     def get_source_spatial_extent(
-        self, source: str, provider: Optional[str] = None, version: Optional[str] = None
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
+        strict: bool = False,
     ) -> geometry:
         """Detect the spatial range of the data."""
-        return self.get_source(source, provider, version).detect_spatial_range()
+        s = self.get_source(source, provider, version)
+        try:
+            return s.detect_spatial_range()  # type: ignore
+        except TypeError as e:
+            if strict:
+                raise e
+            else:
+                self.logger.warning(
+                    f"Source of type {type(s)} does not support detecting spatial"
+                    "extents. skipping..."
+                )
 
     def get_source_temporal_extent(
-        self, source: str, provider: Optional[str] = None, version: Optional[str] = None
-    ) -> Tuple[datetime, datetime]:
-        """Detect the temporal range of the data."""
-        return self.get_source(source, provider, version).detect_temporal_range()
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
+        strict: bool = False,
+    ) -> geometry:
+        """Detect the spatial range of the data."""
+        s = self.get_source(source, provider, version)
+        try:
+            return s.detect_temporal_range()  # type: ignore
+        except TypeError as e:
+            if strict:
+                raise e
+            else:
+                self.logger.warning(
+                    f"Source of type {type(s)} does not support detecting"
+                    " temporalextents. skipping..."
+                )
 
     def get_source(
         self, source: str, provider: Optional[str] = None, version: Optional[str] = None
@@ -363,7 +398,9 @@ class DataCatalog(object):
         """Add data sources to library or update them."""
         self.update(**kwargs)
 
-    def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
+    def set_predefined_catalogs(
+        self, urlpath: Optional[Union[Path, str]] = None
+    ) -> Dict:
         """Initialise the predefined catalogs."""
         # get predefined_catalogs
         urlpath = self._url if urlpath is None else urlpath
@@ -450,8 +487,13 @@ class DataCatalog(object):
             self.logger.info(f"Reading data catalog {name} {version}")
             self.from_yml(urlpath, catalog_name=name)
 
+        return self
+
     def from_archive(
-        self, urlpath: Union[Path, str], version: str = None, name: str = None
+        self,
+        urlpath: Union[Path, str],
+        version: Optional[str] = None,
+        name: Optional[str] = None,
     ) -> DataCatalog:
         """Read a data archive including a data_catalog.yml file.
 
@@ -490,8 +532,8 @@ class DataCatalog(object):
     def from_yml(
         self,
         urlpath: Union[Path, str],
-        root: str = None,
-        catalog_name: str = None,
+        root: Optional[str] = None,
+        catalog_name: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
         """Add data sources based on yaml file.
@@ -580,7 +622,9 @@ class DataCatalog(object):
                   more recent than installed version ({__version__}).",
             )
         if catalog_name is None:
-            catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
+            catalog_name = cast(
+                str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
+            )
         if root is None:
             root = meta.get("root", os.path.dirname(urlpath))
         self.from_dict(
@@ -590,13 +634,14 @@ class DataCatalog(object):
             category=meta.get("category", None),
             mark_used=mark_used,
         )
+        return self
 
     def from_dict(
         self,
         data_dict: Dict,
         catalog_name: str = "",
-        root: Union[str, Path] = None,
-        category: str = None,
+        root: Optional[Union[str, Path]] = None,
+        category: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
         """Add data sources based on dictionary.
@@ -1338,8 +1383,8 @@ def _parse_data_source_dict(
     name: str,
     data_source_dict: Dict,
     catalog_name: str = "",
-    root: Union[Path, str] = None,
-    category: str = None,
+    root: Optional[Union[Path, str]] = None,
+    category: Optional[str] = None,
 ) -> Dict:
     """Parse data source dictionary."""
     # link yml keys to adapter classes
@@ -1351,6 +1396,7 @@ def _parse_data_source_dict(
     }
     # parse data
     source = data_source_dict.copy()  # important as we modify with pop
+    extent = source.pop("extent", {})
 
     # parse path
     if "path" not in source:
@@ -1386,6 +1432,7 @@ def _parse_data_source_dict(
         catalog_name=catalog_name,
         meta=meta,
         driver_kwargs=driver_kwargs,
+        extent=extent,
         **source,
     )
 

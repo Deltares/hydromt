@@ -124,6 +124,7 @@ class GeoDataFrameAdapter(DataAdapter):
             version=version,
         )
         self.crs = crs
+        self.extent = extent
 
     def to_file(
         self,
@@ -391,6 +392,13 @@ class GeoDataFrameAdapter(DataAdapter):
                 gdf[col].attrs.update(**self.attrs[col])
 
         return gdf
+
+    def get_reported_spatial_range(self, detect=False):
+        spactial_extent = self.extent.get("spatial", None)
+        if spactial_extent is None and detect:
+            spactial_extent = self.detect_spatial_range()
+
+        return spactial_extent
 
     def detect_spatial_range(
         self,

@@ -55,8 +55,8 @@ class RasterDatasetAdapter(DataAdapter):
         zoom_levels: dict = {},
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
-        provider=None,
-        version=None,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial raster data.
@@ -273,8 +273,8 @@ class RasterDatasetAdapter(DataAdapter):
         self,
         time_tuple: Optional[tuple] = None,
         variables: Optional[list] = None,
-        zoom_level: int = 0,
-        geom: gpd.GeoSeries = None,
+        zoom_level: Optional[int] = 0,
+        geom: Optional[gpd.GeoSeries] = None,
         bbox: Optional[list] = None,
         logger=logger,
     ):
@@ -625,6 +625,20 @@ class RasterDatasetAdapter(DataAdapter):
         zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
         logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
         return zl
+
+    def get_reported_spatial_range(self, detect=False):
+        spactial_extent = self.extent.get("spatial", None)
+        if spactial_extent is None and detect:
+            spactial_extent = self.detect_spatial_range()
+
+        return spactial_extent
+
+    def get_reported_temporal_range(self, detect=False):
+        temporal_extent = self.extent.get("temporal", None)
+        if temporal_extent is None and detect:
+            temporal_extent = self.detect_spatial_range()
+
+        return temporal_extent
 
     def detect_spatial_range(
         self,
