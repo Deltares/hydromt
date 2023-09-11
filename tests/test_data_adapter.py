@@ -443,4 +443,3 @@ def test_detect_extent(geodf, geoda, rioda, ts):
     # a time dimmension
     # rioda_detected_time_range = RasterDatasetAdapter.detect_temporal_range(rioda)
     assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
-    # assert rioda_expected_time_range == rioda_detected_time_range

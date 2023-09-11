@@ -45,14 +45,14 @@ class RasterDatasetAdapter(DataAdapter):
         filesystem: str = "local",
         crs: Optional[Union[int, str, dict]] = None,
         nodata: Optional[Union[dict, float, int]] = None,
-        rename: dict = {},
-        unit_mult: dict = {},
-        unit_add: dict = {},
-        meta: dict = {},
-        attrs: dict = {},
-        extent: dict = {},
-        driver_kwargs: dict = {},
-        zoom_levels: dict = {},
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        extent: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
+        zoom_levels: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider: Optional[str] = None,
@@ -113,6 +113,14 @@ class RasterDatasetAdapter(DataAdapter):
             data CRS.
 
         """
+        rename = rename or {}
+        unit_mult = unit_mult or {}
+        unit_add = unit_add or {}
+        meta = meta or {}
+        attrs = attrs or {}
+        extent = extent or {}
+        driver_kwargs = driver_kwargs or {}
+        zoom_levels = zoom_levels or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "

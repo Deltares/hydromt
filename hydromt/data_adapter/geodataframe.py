@@ -3,7 +3,7 @@ import logging
 import warnings
 from os.path import join
 from pathlib import Path
-from typing import NewType, Tuple, Union
+from typing import NewType, Optional, Tuple, Union
 
 import numpy as np
 import pyproj
@@ -39,13 +39,13 @@ class GeoDataFrameAdapter(DataAdapter):
         filesystem: str = "local",
         crs: Union[int, str, dict] = None,
         nodata: Union[dict, float, int] = None,
-        rename: dict = {},
-        unit_mult: dict = {},
-        unit_add: dict = {},
-        meta: dict = {},
-        attrs: dict = {},
-        extent: dict = {},
-        driver_kwargs: dict = {},
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        extent: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
@@ -99,6 +99,14 @@ class GeoDataFrameAdapter(DataAdapter):
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
         """
+        rename = rename or {}
+        unit_mult = unit_mult or {}
+        unit_add = unit_add or {}
+        meta = meta or {}
+        attrs = attrs or {}
+        extent = extent or {}
+        driver_kwargs = driver_kwargs or {}
+
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
