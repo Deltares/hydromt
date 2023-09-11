@@ -499,7 +499,20 @@ class GeoDatasetAdapter(DataAdapter):
 
         return temporal_extent
 
-    def detect_spatial_range(
+    def detect_bbox(
+        self,
+        ds=None,
+        logger=logger,
+    ) -> Tuple[Tuple[float, float, float, float], int]:
+        """Detect spatial range."""
+        if ds is None:
+            ds = self.get_data()
+
+        crs = pyproj.CRS.from_user_input(ds.vector.crs).to_epsg()
+        bounds = ds.vector.bounds
+        return bounds, crs
+
+    def detect_bbox_geographic(
         self,
         ds=None,
         logger=logger,
@@ -520,7 +533,7 @@ class GeoDatasetAdapter(DataAdapter):
 
         return bounds
 
-    def detect_temporal_range(
+    def detect_time_tuple(
         self, ds=None, time_dim_name="time"
     ) -> Tuple[datetime, datetime]:
         """Detect temporal range."""

@@ -521,8 +521,8 @@ def test_detect_extent():
     )
     expected_temporal_range = tuple(pd.to_datetime(["2010-02-02", "2010-02-15"]))
     ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
-    detected_spatial_range = ds.detect_spatial_range()
-    detected_temporal_range = ds.detect_temporal_range()
+    detected_spatial_range = ds.detect_bbox_geographic()
+    detected_temporal_range = ds.detect_time_tuple()
     # commented out tests should be enabled when extent gets added to data catalogs
     # reported_spatial_range = ds.get_reported_spatial_range()
     # reported_temporal_range = ds.get_reported_temporal_range()
@@ -536,7 +536,7 @@ def test_detect_extent():
     bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
     ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
 
-    detected_spatial_range = ds.detect_spatial_range()
+    detected_spatial_range = ds.detect_bbox_geographic()
     # reported_spatial_range = ds.get_reported_spatial_range()
     assert np.all(np.equal(detected_spatial_range, bbox))
     # assert np.all(np.equal(reported_spatial_range, bbox))
@@ -549,8 +549,8 @@ def test_detect_extent():
         np.datetime64("2010-02-14T23:50:00.000000000"),
     )
     ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
-    detected_spatial_range = ds.detect_spatial_range()
-    detected_temporal_range = ds.detect_temporal_range()
+    detected_spatial_range = ds.detect_bbox_geographic()
+    detected_temporal_range = ds.detect_time_tuple()
     # reported_spatial_range = ds.get_reported_spatial_range()
     # reported_temporal_range = ds.get_reported_temporal_range()
     assert np.all(np.equal(detected_spatial_range, bbox))

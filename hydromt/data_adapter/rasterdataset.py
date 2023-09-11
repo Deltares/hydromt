@@ -650,12 +650,25 @@ class RasterDatasetAdapter(DataAdapter):
 
         return temporal_extent
 
-    def detect_spatial_range(
+    def detect_bbox(
         self,
         ds=None,
         logger=logger,
-    ) -> Tuple[np.float64, np.float64, np.float64, np.float64,]:
-        """Detect spatial range."""
+    ) -> Tuple[Tuple[float, float, float, float], int]:
+        """Detect spatial range in naitive crs."""
+        if ds is None:
+            ds = self.get_data()
+        crs = pyproj.CRS.from_user_input(ds.raster.crs).to_epsg()
+        bounds = ds.raster.bounds
+
+        return bounds, crs
+
+    def detect_bbox_geographic(
+        self,
+        ds=None,
+        logger=logger,
+    ) -> Tuple[float, float, float, float]:
+        """Detect spatial range in WSG84."""
         if ds is None:
             ds = self.get_data()
         source_crs = pyproj.CRS.from_user_input(ds.raster.crs)
@@ -670,7 +683,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bounds
 
-    def detect_temporal_range(
+    def detect_time_tuple(
         self, ds=None, time_dim_name="time"
     ) -> Tuple[datetime, datetime]:
         """Detect temporal range."""

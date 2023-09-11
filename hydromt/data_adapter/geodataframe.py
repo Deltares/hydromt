@@ -401,15 +401,20 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def get_reported_spatial_range(self, detect=False):
-        """Return spatial range reported in data catalog."""
-        spactial_extent = self.extent.get("bbox", None)
-        if spactial_extent is None and detect:
-            spactial_extent = self.detect_spatial_range()
+    def detect_bbox(
+        self,
+        ds=None,
+        logger=logger,
+    ) -> Tuple[Tuple[float, float, float, float], int]:
+        """Detect spatial range."""
+        if ds is None:
+            ds = self.get_data()
 
-        return spactial_extent
+        crs = pyproj.CRS.from_user_input(ds.geometry.crs).to_epsg()
+        bounds = ds.geometry.total_bounds
+        return bounds, crs
 
-    def detect_spatial_range(
+    def detect_bbox_geographic(
         self,
         ds=None,
         logger=logger,
