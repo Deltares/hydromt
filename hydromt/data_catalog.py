@@ -23,9 +23,9 @@ import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
-from hydromt import __version__
 from hydromt.utils import partition_dictionaries
 
+from . import __version__
 from .data_adapter import (
     DataAdapter,
     DataFrameAdapter,
