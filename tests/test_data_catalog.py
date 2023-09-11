@@ -199,23 +199,22 @@ def test_versioned_catalog_entries(tmpdir):
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
-def test_versioned_catalogs(tmpdir):
-    # make sure the catalogs individually still work
-    join(DATADIR, "test_sources_v08.yml")
-    join(DATADIR, "test_sources_v03.yml")
-    join(DATADIR, "test_sources_v1.yml")
+def test_versioned_catalogs(tmpdir, monkeypatch):
     v999_yml_fn = join(DATADIR, "test_sources_v999.yml")
 
-    # with pytest.raises(RuntimeError,match="No compatible catalog found"):
-    #     v03_data_catalog = DataCatalog(data_libs=[v03_yml_fn])
+    DataCatalog().from_predefined_catalogs("deltares_data")
+    DataCatalog().from_predefined_catalogs("deltares_data", "v2022.7")
 
-    # v08_data_catalog = DataCatalog(data_libs=[v08_yml_fn])
+    with pytest.raises(RuntimeError, match="Unknown version requested "):
+        _ = DataCatalog().from_predefined_catalogs("deltares_data", "v1993.7")
 
-    # v1_data_catalog = DataCatalog(data_libs=[v1_yml_fn])
-
-    # with pytest.raises(RuntimeError, match="Data catalog requires Hydromt Version "):
     with pytest.raises(RuntimeError, match="Data catalog requires Hydromt Version"):
         DataCatalog(data_libs=[v999_yml_fn])
+
+    with monkeypatch.context() as m:
+        m.setenv("HYDROMT_VERSION_OVERRIDE", "0.0.3.dev1")
+        with pytest.raises(RuntimeError):
+            _ = DataCatalog().from_predefined_catalogs("deltares_data")
 
 
 def test_data_catalog(tmpdir):

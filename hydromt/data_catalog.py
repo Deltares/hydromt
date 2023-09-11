@@ -23,9 +23,9 @@ import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
+from hydromt import __version__
 from hydromt.utils import partition_dictionaries
 
-from . import __version__
 from .data_adapter import (
     DataAdapter,
     DataFrameAdapter,
@@ -424,18 +424,39 @@ class DataCatalog(object):
         urlpath = self.predefined_catalogs[name].get("urlpath")
         versions_dict = self.predefined_catalogs[name].get("versions")
         if version == "latest" or not isinstance(version, str):
+            # if a specific version is requested, we don't have to try others
             versions = list(versions_dict.keys())
             if len(versions) > 1:
                 version = versions[np.argmax([Version(v) for v in versions])]
             else:
                 version = versions[0]
-        urlpath = urlpath.format(version=versions_dict.get(version, version))
+
+        if version not in versions_dict:
+            raise RuntimeError(
+                f"Unknown version requested {version}. "
+                f"options are :{versions_dict.keys()}"
+            )
+        possible_versions = [(Version(k), v) for k, v in versions_dict.items()]
+        possible_versions_sorted = sorted(possible_versions)
+
+        for v, commit in possible_versions_sorted:
+            try:
+                urlpath = urlpath.format(version=commit)
+                return self._try_from_version(v, urlpath, name)
+            except RuntimeError:
+                continue
+
+        raise RuntimeError("No compatible compatible catalog version could be found")
+
+    def _try_from_version(self, version, urlpath, name):
         if urlpath.split(".")[-1] in ["gz", "zip"]:
             self.logger.info(f"Reading data catalog {name} {version} from archive")
             self.from_archive(urlpath, name=name, version=version)
         else:
             self.logger.info(f"Reading data catalog {name} {version}")
             self.from_yml(urlpath, catalog_name=name)
+
+        return self
 
     def from_archive(
         self, urlpath: Union[Path, str], version: str = None, name: str = None
@@ -559,6 +580,12 @@ class DataCatalog(object):
         meta = yml.pop("meta", meta)
         # check version required hydromt version
         requested_version = meta.get("hydromt_version", None)
+        if requested_version is None:
+            # take from env var if it's set. makes testing much easier
+            requested_version = (
+                f"~={os.environ.get( 'HYDROMT_VERSION_OVERRIDE', __version__)}"
+            )
+
         allow_dev = meta.get("allow_dev_version", True)
         if not self._is_compatible(__version__, requested_version, allow_dev):
             raise RuntimeError(

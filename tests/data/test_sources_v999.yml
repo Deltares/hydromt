@@ -2,7 +2,7 @@
 meta:
   root: d:/hydromt_testdata
   version: 2023.3
-  hydromt_version: '~=999.0'
+  hydromt_version: '==999.*'
 era5:
   path: ERA5/daily/era5_{year}_daily.nc
   data_type: RasterDataset
