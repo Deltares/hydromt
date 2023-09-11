@@ -13,9 +13,9 @@ import xarray as xr
 
 from hydromt.data_adapter import (
     DataAdapter,
-    RasterDatasetAdapter,
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
+    RasterDatasetAdapter,
 )
 from hydromt.data_catalog import (
     DataCatalog,
@@ -523,7 +523,6 @@ def test_detect_extent():
     ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
     detected_spatial_range = ds.detect_spatial_range()
     detected_temporal_range = ds.detect_temporal_range()
-    breakpoint()
     reported_spatial_range = ds.get_reported_spatial_range()
     reported_temporal_range = ds.get_reported_temporal_range()
     assert np.all(np.equal(detected_spatial_range, bbox))

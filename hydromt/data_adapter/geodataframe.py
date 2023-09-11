@@ -394,6 +394,7 @@ class GeoDataFrameAdapter(DataAdapter):
         return gdf
 
     def get_reported_spatial_range(self, detect=False):
+        """Return spatial range reported in data catalog."""
         spactial_extent = self.extent.get("spatial", None)
         if spactial_extent is None and detect:
             spactial_extent = self.detect_spatial_range()

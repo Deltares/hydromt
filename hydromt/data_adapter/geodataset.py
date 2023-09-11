@@ -477,6 +477,7 @@ class GeoDatasetAdapter(DataAdapter):
         return ds
 
     def get_reported_spatial_range(self, detect=False):
+        """Return spatial range reported in data catalog."""
         spactial_extent = self.extent.get("spatial", None)
         if spactial_extent is None and detect:
             spactial_extent = self.detect_spatial_range()
@@ -484,6 +485,7 @@ class GeoDatasetAdapter(DataAdapter):
         return spactial_extent
 
     def get_reported_temporal_range(self, detect=False):
+        """Return temporal range reported in data catalog."""
         temporal_extent = self.extent.get("temporal", None)
         if temporal_extent is None and detect:
             temporal_extent = self.detect_spatial_range()
