@@ -4,6 +4,7 @@
 import glob
 import tempfile
 from os.path import abspath, dirname, join
+from typing import cast
 
 import geopandas as gpd
 import numpy as np
@@ -118,23 +119,17 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     }
     data_catalog = DataCatalog()
     data_catalog.from_dict(yml_dict)
-    assert data_catalog.get_source(name)._parse_zoom_level() == 0  # default to first
-    assert data_catalog.get_source(name)._parse_zoom_level(zoom_level=1) == 1
-    assert (
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
-    )
-    assert (
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.29, "degree"))
-        == 0
-    )
-    assert (
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
-    )
-    assert data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "meter")) == 0
+    rds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    assert rds._parse_zoom_level() == 0  # default to first
+    assert rds._parse_zoom_level(zoom_level=1) == 1
+    assert rds._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
+    assert rds._parse_zoom_level(zoom_level=(0.29, "degree")) == 0
+    assert rds._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
+    assert rds._parse_zoom_level(zoom_level=(1, "meter")) == 0
     with pytest.raises(TypeError, match="zoom_level unit"):
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "asfd"))
+        rds._parse_zoom_level(zoom_level=(1, "asfd"))
     with pytest.raises(TypeError, match="zoom_level argument"):
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
+        rds._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
 
 
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
