@@ -401,6 +401,14 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
+    def get_reported_bbox(self, detect=False):
+        """Return spatial range reported in data catalog."""
+        spactial_extent = self.extent.get("bbox", None)
+        if spactial_extent is None and detect:
+            spactial_extent = self.detect_bbox()
+
+        return spactial_extent
+
     def detect_bbox(
         self,
         ds=None,
