@@ -636,7 +636,7 @@ class RasterDatasetAdapter(DataAdapter):
 
     def get_reported_spatial_range(self, detect=False):
         """Return spatial range reported in data catalog."""
-        spactial_extent = self.extent.get("spatial", None)
+        spactial_extent = self.extent.get("bbox", None)
         if spactial_extent is None and detect:
             spactial_extent = self.detect_spatial_range()
 
@@ -644,7 +644,7 @@ class RasterDatasetAdapter(DataAdapter):
 
     def get_reported_temporal_range(self, detect=False):
         """Return temporal range reported in data catalog."""
-        temporal_extent = self.extent.get("temporal", None)
+        temporal_extent = self.extent.get("time_tuple", None)
         if temporal_extent is None and detect:
             temporal_extent = self.detect_spatial_range()
 
