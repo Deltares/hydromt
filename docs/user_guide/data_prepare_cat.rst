@@ -36,6 +36,9 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
       crs: EPSG/WKT
       data_type: RasterDataset/GeoDataset/GeoDataFrame/DataFrame
       driver: raster/raster_tindex/netcdf/zarr/vector/vector_table/csv/xlsx/xls
+      extent:
+        spatial: [xmin, ymin, xmax, ymax]
+        temporal: [start_time, end_time]
       driver_kwargs:
         key: value
       filesystem: local/gcs/s3
@@ -110,6 +113,8 @@ A full list of **optional data source arguments** is given below
 - **unit_mult**: multiply the input data by a value for unit conversion (e.g. 1000 for conversion from m to mm of precipitation).
 - **attrs** (optional): This argument allows for setting attributes like the unit or long name to variables.
   *NOTE*: New in HydroMT v0.7.2
+- **extent** (optional): The spatial and temporal extent the data covers. The spatial extent should always be in WGS84.
+  *NOTE*: New in HydroMT v0.8.1
 - **placeholder** (optional): this argument can be used to generate multiple sources with a single entry in the data catalog file. If different files follow a logical
   nomenclature, multiple data sources can be defined by iterating through all possible combinations of the placeholders. The placeholder names should be given in the
   source name and the path and its values listed under the placeholder argument.
