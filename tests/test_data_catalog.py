@@ -523,12 +523,13 @@ def test_detect_extent():
     ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
     detected_spatial_range = ds.detect_spatial_range()
     detected_temporal_range = ds.detect_temporal_range()
-    reported_spatial_range = ds.get_reported_spatial_range()
-    reported_temporal_range = ds.get_reported_temporal_range()
+    # commented out tests should be enabled when extent gets added to data catalogs
+    # reported_spatial_range = ds.get_reported_spatial_range()
+    # reported_temporal_range = ds.get_reported_temporal_range()
     assert np.all(np.equal(detected_spatial_range, bbox))
     assert detected_temporal_range == expected_temporal_range
-    assert np.all(np.equal(reported_spatial_range, bbox))
-    assert reported_temporal_range == expected_temporal_range
+    # assert np.all(np.equal(reported_spatial_range, bbox))
+    # assert reported_temporal_range == expected_temporal_range
 
     # geodataframe
     name = "gadm_level1"
@@ -536,9 +537,9 @@ def test_detect_extent():
     ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
 
     detected_spatial_range = ds.detect_spatial_range()
-    reported_spatial_range = ds.get_reported_spatial_range()
+    # reported_spatial_range = ds.get_reported_spatial_range()
     assert np.all(np.equal(detected_spatial_range, bbox))
-    assert np.all(np.equal(reported_spatial_range, bbox))
+    # assert np.all(np.equal(reported_spatial_range, bbox))
 
     # geodataset
     name = "gtsmv3_eu_era5"
@@ -550,9 +551,9 @@ def test_detect_extent():
     ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
     detected_spatial_range = ds.detect_spatial_range()
     detected_temporal_range = ds.detect_temporal_range()
-    reported_spatial_range = ds.get_reported_spatial_range()
-    reported_temporal_range = ds.get_reported_temporal_range()
+    # reported_spatial_range = ds.get_reported_spatial_range()
+    # reported_temporal_range = ds.get_reported_temporal_range()
     assert np.all(np.equal(detected_spatial_range, bbox))
     assert detected_temporal_range == expected_temporal_range
-    assert np.all(np.equal(reported_spatial_range, bbox))
-    assert reported_temporal_range == expected_temporal_range
+    # assert np.all(np.equal(reported_spatial_range, bbox))
+    # assert reported_temporal_range == expected_temporal_range
