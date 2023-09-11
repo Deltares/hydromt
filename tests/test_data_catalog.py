@@ -120,7 +120,7 @@ def test_data_catalog_io(tmpdir):
     print(data_catalog.get_source("merit_hydro"))
 
 
-def test_versioned_catalogs(tmpdir):
+def test_versioned_catalog_entries(tmpdir):
     # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
@@ -197,6 +197,25 @@ def test_versioned_catalogs(tmpdir):
     # test round trip to and from dict
     aws_and_legacy_catalog2 = DataCatalog().from_dict(aws_and_legacy_catalog.to_dict())
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
+
+
+def test_versioned_catalogs(tmpdir):
+    # make sure the catalogs individually still work
+    join(DATADIR, "test_sources_v08.yml")
+    join(DATADIR, "test_sources_v03.yml")
+    join(DATADIR, "test_sources_v1.yml")
+    v999_yml_fn = join(DATADIR, "test_sources_v999.yml")
+
+    # with pytest.raises(RuntimeError,match="No compatible catalog found"):
+    #     v03_data_catalog = DataCatalog(data_libs=[v03_yml_fn])
+
+    # v08_data_catalog = DataCatalog(data_libs=[v08_yml_fn])
+
+    # v1_data_catalog = DataCatalog(data_libs=[v1_yml_fn])
+
+    # with pytest.raises(RuntimeError, match="Data catalog requires Hydromt Version "):
+    with pytest.raises(RuntimeError, match="Data catalog requires Hydromt Version"):
+        DataCatalog(data_libs=[v999_yml_fn])
 
 
 def test_data_catalog(tmpdir):

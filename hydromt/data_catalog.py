@@ -20,6 +20,7 @@ import pandas as pd
 import requests
 import xarray as xr
 import yaml
+from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 from hydromt.utils import partition_dictionaries
@@ -557,13 +558,12 @@ class DataCatalog(object):
         # read meta data
         meta = yml.pop("meta", meta)
         # check version required hydromt version
-        hydromt_version = meta.get("hydromt_version", __version__)
-        self_version = Version(__version__)
-        yml_version = Version(hydromt_version)
-        if yml_version > self_version:
-            self.logger.warning(
-                f"Specified HydroMT version ({hydromt_version}) \
-                  more recent than installed version ({__version__}).",
+        requested_version = meta.get("hydromt_version", None)
+        allow_dev = meta.get("allow_dev_version", True)
+        if not self._is_compatible(__version__, requested_version, allow_dev):
+            raise RuntimeError(
+                f"Data catalog requires Hydromt Version {requested_version} which is "
+                f"incompattible with current hydromt verison {__version__}."
             )
         if catalog_name is None:
             catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
@@ -576,6 +576,19 @@ class DataCatalog(object):
             category=meta.get("category", None),
             mark_used=mark_used,
         )
+
+    def _is_compatible(
+        self, hydromt_version: str, requesed_range: str, allow_prerelease=True
+    ) -> bool:
+        if requesed_range is None:
+            return True
+        requested = SpecifierSet(requesed_range)
+        version = Version(hydromt_version)
+
+        if allow_prerelease:
+            return version in requested or Version(version.base_version) in requested
+        else:
+            return version in requested
 
     def from_dict(
         self,

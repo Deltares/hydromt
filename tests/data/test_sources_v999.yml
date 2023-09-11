@@ -1,0 +1,83 @@
+---
+meta:
+  root: d:/hydromt_testdata
+  version: 2023.3
+  hydromt_version: '~=999.0'
+era5:
+  path: ERA5/daily/era5_{year}_daily.nc
+  data_type: RasterDataset
+  driver: netcdf
+  kwargs:
+    chunks: {time: 100, longitude: 120, latitude: 125}
+    concat_dim: time
+    decode_times: true
+    combine: by_coords
+    parallel: true
+  crs: 4326
+  rename:
+    tp: precip
+    t2m: temp
+    tmin: temp_min
+    tmax: temp_max
+    msl: press_msl
+    ssrd: kin
+    tisr: kout
+  unit_mult:
+    precip: 1000 # mm/day
+    press_msl: 0.01 # hPa
+    kin: 0.000277778 # J hr-1
+    kout: 0.000277778 # J hr-1
+  unit_add:
+    time: 86400 # [sec] 1D shift to set 'right' labels
+    temp: -273.15 # deg. C.
+    temp_min: -273.15 # deg. C.
+    temp_max: -273.15 # deg. C.
+  meta:
+    category: meteo
+    history: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
+    source_version: ERA5 daily data on pressure levels
+    source_url: https://doi.org/10.24381/cds.bd0915c6
+    paper_ref: Hersbach et al. (2019)
+    paper_doi: 10.1002/qj.3803
+    source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+hydro_lakes:
+  path: waterbodies/lake-db.gpkg
+  data_type: GeoDataFrame
+  driver: vector
+  crs: 4326
+  rename:
+    Hylak_id: waterbody_id
+    Lake_area: Area_avg
+    Vol_total: Vol_avg
+    Depth_avg: Depth_avg
+    Dis_avg: Dis_avg
+    Pour_long: xout
+    Pour_lat: yout
+  unit_mult:
+    Area_avg: 1000000.
+  meta:
+    category: surface water
+    source_version: 1.0
+    source_author: Arjen Haag
+    source_info: HydroLAKES.v10_extract
+gtsmv3_eu_era5:
+  path: water_level\reanalysis-waterlevel-{year}-m{month:02d}.nc
+  data_type: GeoDataset
+  driver: netcdf
+  kwargs:
+    chunks: {stations: 100, time: 1500}
+    concat_dim: time
+    decode_times: true
+    combine: by_coords
+    parallel: true
+  crs: 4326
+  rename:
+    station_x_coordinate: lon
+    station_y_coordinate: lat
+  meta:
+    category: ocean
+    source_version: GTSM v3.0
+    paper_doi: 10.24381/cds.8c59054f
+    paper_ref: Copernicus Climate Change Service 2019
+    source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview
+    source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
