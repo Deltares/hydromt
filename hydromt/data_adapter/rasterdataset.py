@@ -653,7 +653,6 @@ class RasterDatasetAdapter(DataAdapter):
     def detect_bbox(
         self,
         ds=None,
-        logger=logger,
     ) -> Tuple[Tuple[float, float, float, float], int]:
         """Detect spatial range in naitive crs."""
         if ds is None:

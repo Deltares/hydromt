@@ -228,7 +228,6 @@ class XGeoBase(object):
     @property
     def time_dim(self):
         """Time dimension name."""
-        # TODO: move to geobase & remove from self.attrs?
         dim = self.get_attrs("time_dim")
         if dim not in self._obj.dims or np.dtype(self._obj[dim]).type != np.datetime64:
             self.set_attrs(time_dim=None)

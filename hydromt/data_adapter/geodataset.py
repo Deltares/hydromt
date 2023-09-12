@@ -501,7 +501,6 @@ class GeoDatasetAdapter(DataAdapter):
     def detect_bbox(
         self,
         ds=None,
-        logger=logger,
     ) -> Tuple[Tuple[float, float, float, float], int]:
         """Detect spatial range."""
         if ds is None:
