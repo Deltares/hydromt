@@ -47,7 +47,7 @@ class GeoDatasetAdapter(DataAdapter):
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
-        version=None,
+        data_version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial timeseries data.
@@ -125,7 +125,7 @@ class GeoDatasetAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            version=version,
+            data_version=data_version,
         )
         self.crs = crs
 

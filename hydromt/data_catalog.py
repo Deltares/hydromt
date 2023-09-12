@@ -43,7 +43,7 @@ __all__ = [
 
 # just for typehints
 SourceSpecDict = TypedDict(
-    "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
+    "SourceSpecDict", {"source": str, "provider": str, "data_version": Union[str, int]}
 )
 
 
@@ -107,16 +107,17 @@ class DataCatalog(object):
             self._cache_dir = cache_dir
 
         # legacy code. to be removed
-        for lib, version in artifact_keys.items():
+        for lib, archive_version in artifact_keys.items():
             warnings.warn(
                 "Adding a predefined data catalog as key-word argument is deprecated, "
-                f"add the catalog as '{lib}={version}' to the data_libs list instead.",
+                f"add the catalog as '{lib}={archive_version}'"
+                " to the data_libs list instead.",
                 DeprecationWarning,
             )
-            if not version:  # False or None
+            if not archive_version:  # False or None
                 continue
-            elif isinstance(version, str):
-                lib += f"={version}"
+            elif isinstance(archive_version, str):
+                lib += f"={archive_version}"
             data_libs = [lib] + data_libs
 
         # parse data catalogs; both user and pre-defined
@@ -156,7 +157,10 @@ class DataCatalog(object):
         return self._catalogs
 
     def get_source(
-        self, source: str, provider: Optional[str] = None, version: Optional[str] = None
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        data_version: Optional[str] = None,
     ) -> DataAdapter:
         """Return a data source.
 
@@ -187,11 +191,11 @@ class DataCatalog(object):
 
         # make sure all arguments are strings
         provider = str(provider) if provider is not None else provider
-        version = str(version) if version is not None else version
+        data_version = str(data_version) if data_version is not None else data_version
 
         # find provider matching requested version
-        if provider is None and version is not None:
-            providers = [p for p, v in available_providers.items() if version in v]
+        if provider is None and data_version is not None:
+            providers = [p for p, v in available_providers.items() if data_version in v]
             if len(providers) > 0:  # error raised later if no provider found
                 provider = providers[-1]
 
@@ -210,10 +214,10 @@ class DataCatalog(object):
 
         # check if version is available, otherwise use last added version which is
         # always the newest version
-        if version is None:
+        if data_version is None:
             requested_version = list(available_versions.keys())[-1]
         else:
-            requested_version = version
+            requested_version = data_version
             if requested_version not in available_versions:
                 data_versions = sorted(list(map(str, available_versions.keys())))
                 raise KeyError(
@@ -239,10 +243,10 @@ class DataCatalog(object):
         if not isinstance(adapter, DataAdapter):
             raise ValueError("Value must be DataAdapter")
 
-        if hasattr(adapter, "version") and adapter.version is not None:
-            version = adapter.version
+        if hasattr(adapter, "data_version") and adapter.data_version is not None:
+            data_version = adapter.data_version
         else:
-            version = "_UNSPECIFIED_"  # make sure this comes first in sorted list
+            data_version = "_UNSPECIFIED_"  # make sure this comes first in sorted list
 
         if hasattr(adapter, "provider") and adapter.provider is not None:
             provider = adapter.provider
@@ -261,20 +265,22 @@ class DataCatalog(object):
                 )
 
         if provider not in self._sources[source]:
-            versions = {version: adapter}
+            data_versions = {data_version: adapter}
         else:
-            versions = self._sources[source][provider]
-            if provider in self._sources[source] and version in versions:
+            data_versions = self._sources[source][provider]
+            if provider in self._sources[source] and data_version in data_versions:
                 warnings.warn(
                     f"overwriting data source '{source}' with "
-                    f"provider {provider} and version {version}.",
+                    f"provider {provider} and version {data_version}.",
                     UserWarning,
                 )
             # update and sort dictionary -> make sure newest version is last
-            versions.update({version: adapter})
-            versions = {k: versions[k] for k in sorted(list(versions.keys()))}
+            data_versions.update({data_version: adapter})
+            data_versions = {
+                k: data_versions[k] for k in sorted(list(data_versions.keys()))
+            }
 
-        self._sources[source][provider] = versions
+        self._sources[source][provider] = data_versions
 
     def __getitem__(self, key: str) -> DataAdapter:
         """Get the source."""
@@ -328,7 +334,7 @@ class DataCatalog(object):
             for name, source in self.iter_sources():
                 try:
                     other_source = other.get_source(
-                        name, provider=source.provider, version=source.version
+                        name, provider=source.provider, data_version=source.data_version
                     )
                 except KeyError:
                     return False
@@ -373,7 +379,7 @@ class DataCatalog(object):
         return self._catalogs
 
     def from_artifacts(
-        self, name: str = "artifact_data", version: str = "latest"
+        self, name: str = "artifact_data", artifact_version: str = "latest"
     ) -> DataCatalog:
         """Parse artifacts.
 
@@ -396,10 +402,10 @@ class DataCatalog(object):
             '"from_artifacts" is deprecated. Use "from_predefined_catalogs instead".',
             DeprecationWarning,
         )
-        return self.from_predefined_catalogs(name, version)
+        return self.from_predefined_catalogs(name, artifact_version)
 
     def from_predefined_catalogs(
-        self, name: str, version: str = "latest"
+        self, name: str, catalog_version: str = "latest"
     ) -> DataCatalog:
         """Add data sources from a predefined data catalog.
 
@@ -416,39 +422,41 @@ class DataCatalog(object):
             DataCatalog object with parsed predefined catalog added.
         """
         if "=" in name:
-            name, version = name.split("=")[0], name.split("=")[-1]
+            name, catalog_version = name.split("=")[0], name.split("=")[-1]
         if name not in self.predefined_catalogs:
             raise ValueError(
                 f'Catalog with name "{name}" not found in predefined catalogs'
             )
         urlpath = self.predefined_catalogs[name].get("urlpath")
         versions_dict = self.predefined_catalogs[name].get("versions")
-        if version == "latest" or not isinstance(version, str):
+        if catalog_version == "latest" or not isinstance(catalog_version, str):
             # if a specific version is requested, we don't have to try others
             versions = list(versions_dict.keys())
             if len(versions) > 1:
-                version = versions[np.argmax([Version(v) for v in versions])]
+                catalog_version = versions[np.argmax([Version(v) for v in versions])]
             else:
-                version = versions[0]
+                catalog_version = versions[0]
 
-        if version not in versions_dict:
+        if catalog_version not in versions_dict:
             raise RuntimeError(
-                f"Unknown version requested {version}. "
+                f"Unknown version requested {catalog_version}. "
                 f"options are :{versions_dict.keys()}"
             )
-        possible_versions = [(Version(k), v) for k, v in versions_dict.items()]
-        possible_versions_sorted = reversed(sorted(possible_versions))
+        possible_catalg_versions = [(Version(k), v) for k, v in versions_dict.items()]
+        possible_catalg_versions_sorted = reversed(sorted(possible_catalg_versions))
 
-        for v, identifier in possible_versions_sorted:
+        for _, identifier in possible_catalg_versions_sorted:
             try:
                 urlpath = urlpath.format(version=identifier)
                 if urlpath.split(".")[-1] in ["gz", "zip"]:
                     self.logger.info(
-                        f"Reading data catalog {name} {version} from archive"
+                        f"Reading data catalog {name} {catalog_version} from archive"
                     )
-                    self.from_archive(urlpath, name=name, version=version)
+                    self.from_archive(
+                        urlpath, name=name, archive_version=catalog_version
+                    )
                 else:
-                    self.logger.info(f"Reading data catalog {name} {version}")
+                    self.logger.info(f"Reading data catalog {name} {catalog_version}")
                     self.from_yml(urlpath, catalog_name=name)
 
                 return self
@@ -458,7 +466,7 @@ class DataCatalog(object):
         raise RuntimeError("No compatible compatible catalog version could be found")
 
     def from_archive(
-        self, urlpath: Union[Path, str], version: str = None, name: str = None
+        self, urlpath: Union[Path, str], archive_version: str = None, name: str = None
     ) -> DataCatalog:
         """Read a data archive including a data_catalog.yml file.
 
@@ -478,8 +486,8 @@ class DataCatalog(object):
         """
         name = basename(urlpath).split(".")[0] if name is None else name
         root = join(self._cache_dir, name)
-        if version is not None:
-            root = join(root, version)
+        if archive_version is not None:
+            root = join(root, archive_version)
         archive_fn = join(root, basename(urlpath))
         yml_fn = join(root, "data_catalog.yml")
         if not isdir(root):
@@ -816,7 +824,7 @@ class DataCatalog(object):
                 {
                     "name": name,
                     "provider": source.provider,
-                    "version": source.version,
+                    "data_version": source.data_version,
                     **source.summary(),
                 }
             )
@@ -874,14 +882,14 @@ class DataCatalog(object):
 
                 source = self.get_source(name)
                 provider = source.provider
-                version = source.version
+                data_version = source.data_version
 
                 if name not in sources:
                     sources[name] = {}
                 if provider not in sources[name]:
                     sources[name][provider] = {}
 
-                sources[name][provider][version] = copy.deepcopy(source)
+                sources[name][provider][data_version] = copy.deepcopy(source)
 
         else:
             sources = copy.deepcopy(self.sources)
@@ -897,7 +905,7 @@ class DataCatalog(object):
         # export data and update sources
         for key, available_variants in sources.items():
             for provider, available_versions in available_variants.items():
-                for version, source in available_versions.items():
+                for data_version, source in available_versions.items():
                     try:
                         # read slice of source and write to file
                         self.logger.debug(f"Exporting {key}.")
@@ -942,7 +950,7 @@ class DataCatalog(object):
                         if provider not in sources_out[key]:
                             sources_out[key][provider] = {}
 
-                        sources_out[key][provider][version] = source
+                        sources_out[key][provider][data_version] = source
                     except FileNotFoundError:
                         self.logger.warning(f"{key} file not found at {source.path}")
 
@@ -950,7 +958,7 @@ class DataCatalog(object):
         data_catalog_out = DataCatalog()
         for key, available_variants in sources_out.items():
             for provider, available_versions in available_variants.items():
-                for version, adapter in available_versions.items():
+                for data_version, adapter in available_versions.items():
                     data_catalog_out.add_source(key, adapter)
 
         data_catalog_out.to_yml(fn, root="auto", meta=meta)
@@ -967,7 +975,7 @@ class DataCatalog(object):
         time_tuple: Optional[Tuple] = None,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified RasterDataset.
@@ -1026,14 +1034,16 @@ class DataCatalog(object):
             RasterDataset
         """
         if isinstance(data_like, dict):
-            data_like, provider, version = _parse_data_like_dict(
-                data_like, provider, version
+            data_like, provider, data_version = _parse_data_like_dict(
+                data_like, provider, data_version
             )
 
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source = self.get_source(
+                    name, provider=provider, data_version=data_version
+                )
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
                 if "provider" not in kwargs:
@@ -1085,7 +1095,7 @@ class DataCatalog(object):
         variables: Optional[Union[List, str]] = None,
         predicate: str = "intersects",
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ):
         """Return a clipped and unified GeoDataFrame (vector).
@@ -1133,13 +1143,15 @@ class DataCatalog(object):
             GeoDataFrame
         """
         if isinstance(data_like, dict):
-            data_like, provider, version = _parse_data_like_dict(
-                data_like, provider, version
+            data_like, provider, data_version = _parse_data_like_dict(
+                data_like, provider, data_version
             )
         if isinstance(data_like, (str, Path)):
             if str(data_like) in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source = self.get_source(
+                    name, provider=provider, data_version=data_version
+                )
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
                 if "provider" not in kwargs:
@@ -1178,7 +1190,7 @@ class DataCatalog(object):
         time_tuple: Optional[Tuple] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified GeoDataset.
@@ -1230,13 +1242,15 @@ class DataCatalog(object):
             GeoDataset
         """
         if isinstance(data_like, dict):
-            data_like, provider, version = _parse_data_like_dict(
-                data_like, provider, version
+            data_like, provider, data_version = _parse_data_like_dict(
+                data_like, provider, data_version
             )
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source = self.get_source(
+                    name, provider=provider, data_version=data_version
+                )
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
                 if "provider" not in kwargs:
@@ -1281,7 +1295,7 @@ class DataCatalog(object):
         variables: Optional[list] = None,
         time_tuple: Optional[Tuple] = None,
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ):
         """Return a unified and sliced DataFrame.
@@ -1310,13 +1324,15 @@ class DataCatalog(object):
             Tabular data
         """
         if isinstance(data_like, dict):
-            data_like, provider, version = _parse_data_like_dict(
-                data_like, provider, version
+            data_like, provider, data_version = _parse_data_like_dict(
+                data_like, provider, data_version
             )
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source = self.get_source(
+                    name, provider=provider, data_version=data_version
+                )
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
                 if "provider" not in kwargs:
@@ -1345,7 +1361,7 @@ class DataCatalog(object):
 def _parse_data_like_dict(
     data_like: SourceSpecDict,
     provider: Optional[str] = None,
-    version: Optional[str] = None,
+    data_version: Optional[str] = None,
 ):
     if not SourceSpecDict.__required_keys__.issuperset(set(data_like.keys())):
         unknown_keys = set(data_like.keys()) - SourceSpecDict.__required_keys__
@@ -1355,8 +1371,8 @@ def _parse_data_like_dict(
     else:
         source = data_like.get("source")
         provider = data_like.get("provider", provider)
-        version = data_like.get("version", version)
-    return source, provider, version
+        data_version = data_like.get("data_version", data_version)
+    return source, provider, data_version
 
 
 def _parse_data_source_dict(

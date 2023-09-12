@@ -54,7 +54,7 @@ class RasterDatasetAdapter(DataAdapter):
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
-        version=None,
+        data_version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial raster data.
@@ -133,7 +133,7 @@ class RasterDatasetAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            version=version,
+            data_version=data_version,
         )
         self.crs = crs
         self.zoom_levels = zoom_levels
