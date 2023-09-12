@@ -428,7 +428,7 @@ def test_detect_extent(geodf, geoda, rioda, ts):
     geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
     geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
     geoda_detected_bbox = to_geographic_bbox(*GeoDatasetAdapter("").detect_bbox(geoda))
-    geoda_detected_time_range = GeoDatasetAdapter("").detect_time_tuple(geoda)
+    geoda_detected_time_range = GeoDatasetAdapter("").detect_time_range(geoda)
     assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
     assert geoda_expected_time_range == geoda_detected_time_range
 
@@ -437,7 +437,4 @@ def test_detect_extent(geodf, geoda, rioda, ts):
         *RasterDatasetAdapter("").detect_bbox(rioda)
     )
 
-    # couldn't quite figure out how to construct a raster dataset with
-    # a time dimmension
-    # rioda_detected_time_range = RasterDatasetAdapter.detect_temporal_range(rioda)
     assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))

@@ -482,7 +482,7 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def get_reported_bbox(self, detect=False):
+    def get_bbox(self, detect=False):
         """Return spatial range reported in data catalog."""
         spactial_extent = self.extent.get("bbox", None)
         if spactial_extent is None and detect:
@@ -490,11 +490,11 @@ class GeoDatasetAdapter(DataAdapter):
 
         return spactial_extent
 
-    def get_reported_time_tuple(self, detect=False):
+    def get_time_tuple(self, detect=False):
         """Return temporal range reported in data catalog."""
         temporal_extent = self.extent.get("time_tuple", None)
         if temporal_extent is None and detect:
-            temporal_extent = self.detect_time_tuple()
+            temporal_extent = self.detect_time_range()
 
         return temporal_extent
 
@@ -511,9 +511,7 @@ class GeoDatasetAdapter(DataAdapter):
         bounds = ds.vector.bounds
         return bounds, crs
 
-    def detect_time_tuple(
-        self, ds=None, time_dim_name="time"
-    ) -> Tuple[datetime, datetime]:
+    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
         """Detect temporal range."""
         if ds is None:
             ds = self.get_data()

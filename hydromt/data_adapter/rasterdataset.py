@@ -634,7 +634,7 @@ class RasterDatasetAdapter(DataAdapter):
         logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
         return zl
 
-    def get_reported_bbox(self, detect=False):
+    def get_bbox(self, detect=False):
         """Return spatial range reported in data catalog."""
         spactial_extent = self.extent.get("bbox", None)
         if spactial_extent is None and detect:
@@ -642,11 +642,11 @@ class RasterDatasetAdapter(DataAdapter):
 
         return spactial_extent
 
-    def get_reported_time_tuple(self, detect=False):
+    def get_time_range(self, detect=False):
         """Return temporal range reported in data catalog."""
         temporal_extent = self.extent.get("time_tuple", None)
         if temporal_extent is None and detect:
-            temporal_extent = self.detect_time_tuple()
+            temporal_extent = self.detect_time_range()
 
         return temporal_extent
 
@@ -663,22 +663,11 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bounds, crs
 
-    def detect_time_tuple(
-        self, ds=None, time_dim_name="time"
-    ) -> Tuple[datetime, datetime]:
+    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
         """Detect temporal range."""
         if ds is None:
             ds = self.get_data()
-        try:
-            time_range = ds[time_dim_name]
-        except KeyError:
-            time_range = ds.T.index
-            if pd.api.types.is_numeric_dtype(time_range):
-                # pd.to_datetime will simply parse ints etc.
-                # which we don't want so we have to raise the error
-                # ourselves
-                raise KeyError("No time dimension found")
-            else:
-                time_range = pd.to_datetime(time_range)
-
-        return (time_range.min().values, time_range.max().values)
+        return (
+            ds[ds.raster.time_dim].min().values,
+            ds[ds.raster.time_dim].max().values,
+        )
