@@ -634,27 +634,86 @@ class RasterDatasetAdapter(DataAdapter):
         logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
         return zl
 
-    def get_bbox(self, detect=False):
-        """Return spatial range reported in data catalog."""
-        spactial_extent = self.extent.get("bbox", None)
-        if spactial_extent is None and detect:
-            spactial_extent = self.detect_bbox()
+    def get_bbox(self, detect=False) -> Tuple[Tuple[float, float, float, float], int]:
+        """Return the bounding box and espg code of the dataset.
 
-        return spactial_extent
+        if the bounding box is not set and detect is True,
+        :py:meth:`hydromt.RasterdatasetAdapter.detect_bbox` will be used to detect it.
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the bounding box if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        bbox = self.extent.get("bbox", None)
+        crs = self.crs
+        if bbox is None and detect:
+            bbox, crs = self.detect_bbox()
+
+        return bbox, crs
 
     def get_time_range(self, detect=False):
-        """Return temporal range reported in data catalog."""
-        temporal_extent = self.extent.get("time_tuple", None)
-        if temporal_extent is None and detect:
-            temporal_extent = self.detect_time_range()
+        """Detect the time range of the dataset.
 
-        return temporal_extent
+        if the time range is not set and detect is True,
+        :py:meth:`hydromt.RasterdatasetAdapter.detect_time_range` will be used
+        to detect it.
+
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the time range if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        time_range = self.extent.get("time_tuple", None)
+        if time_range is None and detect:
+            time_range = self.detect_time_range()
+
+        return time_range
 
     def detect_bbox(
         self,
         ds=None,
     ) -> Tuple[Tuple[float, float, float, float], int]:
-        """Detect spatial range in naitive crs."""
+        """Detect the bounding box and crs of the dataset.
+
+        If no dataset is provided, it will be fetched accodring to the settings in the
+        addapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`. the
+        coordinates are in the CRS of the dataset itself, which is also returned
+        alongside the coordinates.
+
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the bounding box of.
+            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
         if ds is None:
             ds = self.get_data()
         crs = ds.raster.crs.to_epsg()
@@ -663,7 +722,24 @@ class RasterDatasetAdapter(DataAdapter):
         return bounds, crs
 
     def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
-        """Detect temporal range."""
+        """Detect the temporal range of the dataset.
+
+        If no dataset is provided, it will be fetched accodring to the settings in the
+        addapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`.
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the time range of. It must have a time dimentsion set.
+            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
         if ds is None:
             ds = self.get_data()
         return (
