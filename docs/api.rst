@@ -31,6 +31,8 @@ General
    data_catalog.DataCatalog.to_dataframe
    data_catalog.DataCatalog.to_yml
    data_catalog.DataCatalog.export_data
+   data_catalog.DataCatalog.get_source_bbox
+   data_catalog.DataCatalog.get_source_time_range
 
 Add data sources
 ----------------

@@ -634,7 +634,7 @@ class RasterDatasetAdapter(DataAdapter):
         logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
         return zl
 
-    def get_bbox(self, detect=False) -> Tuple[Tuple[float, float, float, float], int]:
+    def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -661,7 +661,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bbox, crs
 
-    def get_time_range(self, detect=False):
+    def get_time_range(self, detect=True):
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,

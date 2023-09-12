@@ -22,7 +22,6 @@ import requests
 import xarray as xr
 import yaml
 from packaging.version import Version
-from shapely import geometry
 
 from hydromt.utils import partition_dictionaries
 
@@ -163,17 +162,43 @@ class DataCatalog(object):
             self.set_predefined_catalogs()
         return self._catalogs
 
-    def get_source_spatial_extent(
+    def get_source_bbox(
         self,
         source: str,
         provider: Optional[str] = None,
         version: Optional[str] = None,
+        detect: bool = True,
         strict: bool = False,
-    ) -> geometry:
-        """Detect the spatial range of the data."""
+    ) -> Optional[Tuple[Tuple[float, float, float, float], int]]:
+        """Retrieve the bounding box and crs of the source.
+
+        Parameters
+        ----------
+        source: str,
+            the name of the data source.
+        provider: Optional[str]
+            the provider of the source to detect the bbox of, if None, the last one
+            added will be used.
+        version: Optional[str]
+            the version of the source to detect the bbox of, if None, the last one
+            added will be used.
+        detect: bool
+            Whether to detect the bbox of the source if it is not set.
+        strict: bool
+            Raise an error if the adapter does not support bbox detection (such as
+            dataframes). In that case, a warning will be logged instead.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
         s = self.get_source(source, provider, version)
         try:
-            return s.detect_spatial_range()  # type: ignore
+            return s.get_bbox(detect=detect)  # type: ignore
         except TypeError as e:
             if strict:
                 raise e
@@ -183,17 +208,41 @@ class DataCatalog(object):
                     "extents. skipping..."
                 )
 
-    def get_source_temporal_extent(
+    def get_source_time_range(
         self,
         source: str,
         provider: Optional[str] = None,
         version: Optional[str] = None,
+        detect: bool = True,
         strict: bool = False,
-    ) -> geometry:
-        """Detect the spatial range of the data."""
+    ) -> Optional[Tuple[datetime, datetime]]:
+        """Detect the temporal range of the dataset.
+
+        Parameters
+        ----------
+        source: str,
+            the name of the data source.
+        provider: Optional[str]
+            the provider of the source to detect the time range of, if None,
+            the last one added will be used.
+        version: Optional[str]
+            the version of the source to detect the time range of, if None, the last one
+            added will be used.
+        detect: bool
+            Whether to detect the time range of the source if it is not set.
+        strict: bool
+            Raise an error if the adapter does not support time range detection (such as
+            dataframes). In that case, a warning will be logged instead.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
         s = self.get_source(source, provider, version)
         try:
-            return s.detect_temporal_range()  # type: ignore
+            return s.get_time_range(detect=detect)  # type: ignore
         except TypeError as e:
             if strict:
                 raise e

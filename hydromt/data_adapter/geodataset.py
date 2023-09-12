@@ -482,7 +482,7 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def get_bbox(self, detect=False):
+    def get_bbox(self, detect=True):
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -509,7 +509,7 @@ class GeoDatasetAdapter(DataAdapter):
 
         return bbox, crs
 
-    def get_time_range(self, detect=False):
+    def get_time_range(self, detect=True):
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
