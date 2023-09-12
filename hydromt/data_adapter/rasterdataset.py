@@ -658,30 +658,10 @@ class RasterDatasetAdapter(DataAdapter):
         """Detect spatial range in naitive crs."""
         if ds is None:
             ds = self.get_data()
-        crs = pyproj.CRS.from_user_input(ds.raster.crs).to_epsg()
+        crs = ds.raster.crs.to_epsg()
         bounds = ds.raster.bounds
 
         return bounds, crs
-
-    def detect_bbox_geographic(
-        self,
-        ds=None,
-        logger=logger,
-    ) -> Tuple[float, float, float, float]:
-        """Detect spatial range in WSG84."""
-        if ds is None:
-            ds = self.get_data()
-        source_crs = pyproj.CRS.from_user_input(ds.raster.crs)
-        target_crs = pyproj.CRS.from_user_input(4326)
-        bounds = ds.raster.bounds
-        if source_crs is None:
-            logger.warning("No CRS was set. Assuming WGS84(EPSG 4326)")
-        elif source_crs != target_crs:
-            bounds = rasterio.warp.transform_geom(
-                source_crs, target_crs, bounds, precision=6
-            )
-
-        return bounds
 
     def detect_time_tuple(
         self, ds=None, time_dim_name="time"

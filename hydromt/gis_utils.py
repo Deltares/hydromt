@@ -14,6 +14,7 @@ import numpy as np
 import xarray as xr
 from pyflwdir import gis_utils as gis
 from pyproj import CRS
+from pyproj.transformer import Transformer
 from rasterio.transform import Affine
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
@@ -577,3 +578,13 @@ def create_vrt(
     cmd = ["gdalbuildvrt", "-input_file_list", file_list_path, vrt_path]
     subprocess.run(cmd)
     return None
+
+
+def to_geographic_bbox(bbox, source_crs):
+    target_crs = CRS.from_user_input(4326)
+    if source_crs is None:
+        logger.warning("No CRS was set. Skipping CRS conversion")
+    elif source_crs != target_crs:
+        bbox = Transformer.from_crs(source_crs, target_crs).transform_bounds(*bbox)
+
+    return bbox

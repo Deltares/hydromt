@@ -83,6 +83,8 @@ class DataFrameAdapter(DataAdapter):
         attrs: dict, optional
             Additional attributes relating to data variables. For instance unit
             or long name of the variable.
+        extent: None
+            Not used in this adapter. Only here for compatability with other adapters.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         name, catalog_name: str, optional

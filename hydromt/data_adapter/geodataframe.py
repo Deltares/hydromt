@@ -7,7 +7,6 @@ from typing import NewType, Optional, Tuple, Union
 
 import numpy as np
 import pyproj
-from pyproj.transformer import Transformer
 
 from .. import gis_utils, io
 from .data_adapter import DataAdapter
@@ -411,34 +410,13 @@ class GeoDataFrameAdapter(DataAdapter):
 
     def detect_bbox(
         self,
-        ds=None,
+        gdf=None,
         logger=logger,
     ) -> Tuple[Tuple[float, float, float, float], int]:
         """Detect spatial range."""
-        if ds is None:
-            ds = self.get_data()
+        if gdf is None:
+            gdf = self.get_data()
 
-        crs = pyproj.CRS.from_user_input(ds.geometry.crs).to_epsg()
-        bounds = ds.geometry.total_bounds
+        crs = gdf.geometry.crs.to_epsg()
+        bounds = gdf.geometry.total_bounds
         return bounds, crs
-
-    def detect_bbox_geographic(
-        self,
-        ds=None,
-        logger=logger,
-    ) -> Tuple[float, float, float, float]:
-        """Detect spatial range."""
-        if ds is None:
-            ds = self.get_data()
-
-        source_crs = pyproj.CRS.from_user_input(ds.geometry.crs)
-        target_crs = pyproj.CRS.from_user_input(4326)
-        bounds = ds.geometry.total_bounds
-        if source_crs is None:
-            logger.warning("No CRS was set. Assuming WGS84(EPSG 4326)")
-        elif source_crs != target_crs:
-            bounds = Transformer.from_crs(source_crs, target_crs).transform_bounds(
-                *bounds
-            )
-
-        return bounds

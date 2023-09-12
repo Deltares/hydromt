@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 import pyproj
 import xarray as xr
-from pyproj.transformer import Transformer
 
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
@@ -508,30 +507,9 @@ class GeoDatasetAdapter(DataAdapter):
         if ds is None:
             ds = self.get_data()
 
-        crs = pyproj.CRS.from_user_input(ds.vector.crs).to_epsg()
+        crs = ds.vector.crs.to_epsg()
         bounds = ds.vector.bounds
         return bounds, crs
-
-    def detect_bbox_geographic(
-        self,
-        ds=None,
-        logger=logger,
-    ) -> Tuple[float, float, float, float]:
-        """Detect spatial range."""
-        if ds is None:
-            ds = self.get_data()
-
-        source_crs = pyproj.CRS.from_user_input(ds.vector.crs)
-        target_crs = pyproj.CRS.from_user_input(4326)
-        bounds = ds.vector.bounds
-        if source_crs is None:
-            logger.warning("No CRS was set. Assuming WGS84(EPSG 4326)")
-        elif source_crs != target_crs:
-            bounds = Transformer.from_crs(source_crs, target_crs).transform_bounds(
-                *bounds
-            )
-
-        return bounds
 
     def detect_time_tuple(
         self, ds=None, time_dim_name="time"
