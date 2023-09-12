@@ -22,6 +22,7 @@ from hydromt.data_catalog import (
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
+from hydromt.gis_utils import to_geographic_bbox
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -521,7 +522,7 @@ def test_detect_extent():
     )
     expected_temporal_range = tuple(pd.to_datetime(["2010-02-02", "2010-02-15"]))
     ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
-    detected_spatial_range = ds.detect_bbox_geographic()
+    detected_spatial_range = to_geographic_bbox(*ds.detect_bbox())
     detected_temporal_range = ds.detect_time_tuple()
     # commented out tests should be enabled when extent gets added to data catalogs
     # reported_spatial_range = ds.get_reported_spatial_range()
@@ -536,7 +537,7 @@ def test_detect_extent():
     bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
     ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
 
-    detected_spatial_range = ds.detect_bbox_geographic()
+    detected_spatial_range = to_geographic_bbox(*ds.detect_bbox())
     # reported_spatial_range = ds.get_reported_spatial_range()
     assert np.all(np.equal(detected_spatial_range, bbox))
     # assert np.all(np.equal(reported_spatial_range, bbox))
@@ -549,7 +550,7 @@ def test_detect_extent():
         np.datetime64("2010-02-14T23:50:00.000000000"),
     )
     ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
-    detected_spatial_range = ds.detect_bbox_geographic()
+    detected_spatial_range = to_geographic_bbox(*ds.detect_bbox())
     detected_temporal_range = ds.detect_time_tuple()
     # reported_spatial_range = ds.get_reported_spatial_range()
     # reported_temporal_range = ds.get_reported_temporal_range()

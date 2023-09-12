@@ -20,6 +20,7 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
+from hydromt.gis_utils import to_geographic_bbox
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -421,18 +422,20 @@ def test_cache_vrt(tmpdir, rioda_large):
 
 def test_detect_extent(geodf, geoda, rioda, ts):
     ts_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
-    ts_detected_bbox = GeoDataFrameAdapter("").detect_bbox_geographic(geodf)
+    ts_detected_bbox = to_geographic_bbox(*GeoDataFrameAdapter("").detect_bbox(geodf))
     assert np.all(np.equal(ts_expected_bbox, ts_detected_bbox))
 
     geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
     geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
-    geoda_detected_bbox = GeoDatasetAdapter("").detect_bbox_geographic(geoda)
+    geoda_detected_bbox = to_geographic_bbox(*GeoDatasetAdapter("").detect_bbox(geoda))
     geoda_detected_time_range = GeoDatasetAdapter("").detect_time_tuple(geoda)
     assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
     assert geoda_expected_time_range == geoda_detected_time_range
 
     rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
-    rioda_detected_bbox = RasterDatasetAdapter("").detect_bbox_geographic(rioda)
+    rioda_detected_bbox = to_geographic_bbox(
+        *RasterDatasetAdapter("").detect_bbox(rioda)
+    )
 
     # couldn't quite figure out how to construct a raster dataset with
     # a time dimmension

@@ -517,16 +517,7 @@ class GeoDatasetAdapter(DataAdapter):
         """Detect temporal range."""
         if ds is None:
             ds = self.get_data()
-        try:
-            time_range = ds[time_dim_name]
-        except KeyError:
-            time_range = ds.T.index
-            if pd.api.types.is_numeric_dtype(time_range):
-                # pd.to_datetime will simply parse ints etc.
-                # which we don't want so we have to raise the error
-                # ourselves
-                raise KeyError("No time dimension found")
-            else:
-                time_range = pd.to_datetime(time_range)
-
-        return (time_range.min().values, time_range.max().values)
+        return (
+            ds[ds.vector.time_dim].min().values,
+            ds[ds.vector.time_dim].max().values,
+        )
