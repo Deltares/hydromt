@@ -490,7 +490,7 @@ class GeoDatasetAdapter(DataAdapter):
 
         return spactial_extent
 
-    def get_time_tuple(self, detect=False):
+    def get_time_range(self, detect=False):
         """Return temporal range reported in data catalog."""
         temporal_extent = self.extent.get("time_tuple", None)
         if temporal_extent is None and detect:
