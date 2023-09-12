@@ -437,26 +437,25 @@ class DataCatalog(object):
                 f"options are :{versions_dict.keys()}"
             )
         possible_versions = [(Version(k), v) for k, v in versions_dict.items()]
-        possible_versions_sorted = sorted(possible_versions)
+        possible_versions_sorted = reversed(sorted(possible_versions))
 
-        for v, commit in possible_versions_sorted:
+        for v, identifier in possible_versions_sorted:
             try:
-                urlpath = urlpath.format(version=commit)
-                return self._try_from_version(v, urlpath, name)
+                urlpath = urlpath.format(version=identifier)
+                if urlpath.split(".")[-1] in ["gz", "zip"]:
+                    self.logger.info(
+                        f"Reading data catalog {name} {version} from archive"
+                    )
+                    self.from_archive(urlpath, name=name, version=version)
+                else:
+                    self.logger.info(f"Reading data catalog {name} {version}")
+                    self.from_yml(urlpath, catalog_name=name)
+
+                return self
             except RuntimeError:
                 continue
 
         raise RuntimeError("No compatible compatible catalog version could be found")
-
-    def _try_from_version(self, version, urlpath, name):
-        if urlpath.split(".")[-1] in ["gz", "zip"]:
-            self.logger.info(f"Reading data catalog {name} {version} from archive")
-            self.from_archive(urlpath, name=name, version=version)
-        else:
-            self.logger.info(f"Reading data catalog {name} {version}")
-            self.from_yml(urlpath, catalog_name=name)
-
-        return self
 
     def from_archive(
         self, urlpath: Union[Path, str], version: str = None, name: str = None
