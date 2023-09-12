@@ -71,6 +71,10 @@ RasterDataset
    data_adapter.RasterDatasetAdapter.get_data
    data_adapter.RasterDatasetAdapter.to_dict
    data_adapter.RasterDatasetAdapter.to_file
+   data_adapter.RasterDatasetAdapter.get_bbox
+   data_adapter.RasterDatasetAdapter.get_time_range
+   data_adapter.RasterDatasetAdapter.detect_bbox
+   data_adapter.RasterDatasetAdapter.detect_time_range
 
 GeoDataset
 ==========
@@ -83,6 +87,10 @@ GeoDataset
    data_adapter.GeoDatasetAdapter.get_data
    data_adapter.GeoDatasetAdapter.to_dict
    data_adapter.GeoDatasetAdapter.to_file
+   data_adapter.GeoDatasetAdapter.get_bbox
+   data_adapter.GeoDatasetAdapter.get_time_range
+   data_adapter.GeoDatasetAdapter.detect_bbox
+   data_adapter.GeoDatasetAdapter.detect_time_range
 
 GeoDataFrame
 ============
@@ -95,6 +103,8 @@ GeoDataFrame
    data_adapter.GeoDataFrameAdapter.get_data
    data_adapter.GeoDataFrameAdapter.to_dict
    data_adapter.GeoDataFrameAdapter.to_file
+   data_adapter.GeoDataFrameAdapter.get_bbox
+   data_adapter.GeoDataFrameAdapter.detect_bbox
 
 DataFrame
 =========
