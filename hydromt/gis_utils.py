@@ -507,7 +507,7 @@ def spread2d(
         obs=da_obs.values,
         msk=msk,
         frc=frc,
-        nodata=da_obs.raster.nodata if nodata is None else nodata,
+        nodata=nodata,
         latlon=da_obs.raster.crs.is_geographic,
         transform=da_obs.raster.transform,
     )
