@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from abc import ABCMeta, abstractmethod
 from itertools import product
+from pathlib import Path
 from string import Formatter
 from typing import Optional
 
@@ -112,20 +113,20 @@ class DataAdapter(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        path,
-        driver=None,
+        path: str | Path,
+        driver: Optional[str] = None,
         filesystem="local",
-        nodata=None,
-        rename={},
-        unit_mult={},
-        unit_add={},
-        meta={},
-        attrs={},
-        driver_kwargs={},
-        name="",  # optional for now
-        catalog_name="",  # optional for now
+        nodata: Optional[str] = None,
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
+        name: str = "",
+        catalog_name: str = "",
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
     ):
         """General Interface to data source for HydroMT.
 
@@ -169,10 +170,18 @@ class DataAdapter(object, metaclass=ABCMeta):
             Name of the dataset and catalog, optional for now.
 
         """
+        unit_mult = unit_mult or {}
+        unit_add = unit_add or {}
+        meta = meta or {}
+        attrs = attrs or {}
+        driver_kwargs = driver_kwargs or {}
+        rename = rename or {}
         self.name = name
         self.catalog_name = catalog_name
         self.provider = provider
-        self.version = str(version) if version is not None else None  # version as str
+        self.data_version = (
+            str(data_version) if data_version is not None else None
+        )  # version as str
         # general arguments
         self.path = path
         # driver and driver keyword-arguments

@@ -34,10 +34,10 @@ class GeoDataFrameAdapter(DataAdapter):
     def __init__(
         self,
         path: str,
-        driver: str = None,
+        driver: Optional[str] = None,
         filesystem: str = "local",
-        crs: Union[int, str, dict] = None,
-        nodata: Union[dict, float, int] = None,
+        crs: Optional[Union[int, str, dict]] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
         rename: Optional[dict] = None,
         unit_mult: Optional[dict] = None,
         unit_add: Optional[dict] = None,
@@ -48,7 +48,7 @@ class GeoDataFrameAdapter(DataAdapter):
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
-        version=None,
+        data_version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial vector data.
@@ -93,10 +93,25 @@ class GeoDataFrameAdapter(DataAdapter):
         attrs: dict, optional
             Additional attributes relating to data variables. For instance unit
             or long name of the variable.
+        extent: Extent(typed dict), Optional
+            Dictionary describing the spatial and time range the dataset covers.
+            should be of the form:
+            {
+                "bbox": [xmin, ymin, xmax, ymax],
+                "time_range": [start_datetime, end_datetime],
+            }
+            bbox coordinates should be in the same CRS as the data, and
+            time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         name, catalog_name: str, optional
-            Name of the dataset and catalog, optional for now.
+            Name of the dataset and catalog, optional.
+        provider: str, optional
+            A name to identifiy the specific provider of the dataset requested.
+            if None is provided, the last added source will be used.
+        data_version: str, optional
+            A name to identifiy the specific version of the dataset requested.
+            if None is provided, the last added source will be used.
         """
         rename = rename or {}
         unit_mult = unit_mult or {}
@@ -128,7 +143,7 @@ class GeoDataFrameAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            version=version,
+            data_version=data_version,
         )
         self.crs = crs
         self.extent = extent

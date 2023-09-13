@@ -7,7 +7,7 @@ import warnings
 from datetime import datetime
 from os import PathLike
 from os.path import join
-from typing import NewType, Optional, Tuple, Union
+from typing import NewType, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -56,7 +56,7 @@ class RasterDatasetAdapter(DataAdapter):
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial raster data.
@@ -104,13 +104,28 @@ class RasterDatasetAdapter(DataAdapter):
         attrs: dict, optional
             Additional attributes relating to data variables. For instance unit
             or long name of the variable.
+        extent: Extent(typed dict), Optional
+            Dictionary describing the spatial and time range the dataset covers.
+            should be of the form:
+            {
+                "bbox": [xmin, ymin, xmax, ymax],
+                "time_range": [start_datetime, end_datetime],
+            }
+            bbox coordinates should be in the same CRS as the data, and
+            time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
-        name, catalog_name: str, optional
-            Name of the dataset and catalog, optional for now.
         zoomlevels: dict, optional
             Dictionary with zoom levels and associated resolution in the unit of the
             data CRS.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional.
+        provider: str, optional
+            A name to identifiy the specific provider of the dataset requested.
+            if None is provided, the last added source will be used.
+        data_version: str, optional
+            A name to identifiy the specific version of the dataset requested.
+            if None is provided, the last added source will be used.
 
         """
         rename = rename or {}
@@ -143,7 +158,7 @@ class RasterDatasetAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            version=version,
+            data_version=data_version,
         )
         self.crs = crs
         self.zoom_levels = zoom_levels
@@ -342,7 +357,7 @@ class RasterDatasetAdapter(DataAdapter):
             for fn in fns:
                 ds = xr.open_zarr(fn, **kwargs)
                 if do_preprocess:
-                    ds = preprocess(ds)
+                    ds = preprocess(ds)  # type: ignore
                 ds_lst.append(ds)
             ds = xr.merge(ds_lst)
         elif self.driver == "raster_tindex":
@@ -655,7 +670,7 @@ class RasterDatasetAdapter(DataAdapter):
             The ESPG code of the CRS of the coordinates returned in bbox
         """
         bbox = self.extent.get("bbox", None)
-        crs = self.crs
+        crs = cast(int, self.crs)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
 
@@ -681,7 +696,7 @@ class RasterDatasetAdapter(DataAdapter):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        time_range = self.extent.get("time_tuple", None)
+        time_range = self.extent.get("time_range", None)
         if time_range is None and detect:
             time_range = self.detect_time_range()
 

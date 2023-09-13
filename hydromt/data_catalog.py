@@ -48,8 +48,8 @@ SourceSpecDict = TypedDict(
 Extent = TypedDict(
     "Extent",
     {
-        "spatial": Tuple[float, float, float, float],
-        "temporal": Tuple[datetime, datetime],
+        "bbox": Tuple[float, float, float, float],
+        "time_range": Tuple[datetime, datetime],
     },
 )
 
@@ -253,7 +253,10 @@ class DataCatalog(object):
                 )
 
     def get_source(
-        self, source: str, provider: Optional[str] = None, version: Optional[str] = None
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        data_version: Optional[str] = None,
     ) -> DataAdapter:
         """Return a data source.
 
@@ -284,11 +287,11 @@ class DataCatalog(object):
 
         # make sure all arguments are strings
         provider = str(provider) if provider is not None else provider
-        version = str(version) if version is not None else version
+        data_version = str(data_version) if data_version is not None else data_version
 
         # find provider matching requested version
-        if provider is None and version is not None:
-            providers = [p for p, v in available_providers.items() if version in v]
+        if provider is None and data_version is not None:
+            providers = [p for p, v in available_providers.items() if data_version in v]
             if len(providers) > 0:  # error raised later if no provider found
                 provider = providers[-1]
 
@@ -307,10 +310,10 @@ class DataCatalog(object):
 
         # check if version is available, otherwise use last added version which is
         # always the newest version
-        if version is None:
+        if data_version is None:
             requested_version = list(available_versions.keys())[-1]
         else:
-            requested_version = version
+            requested_version = data_version
             if requested_version not in available_versions:
                 data_versions = sorted(list(map(str, available_versions.keys())))
                 raise KeyError(
@@ -336,8 +339,8 @@ class DataCatalog(object):
         if not isinstance(adapter, DataAdapter):
             raise ValueError("Value must be DataAdapter")
 
-        if hasattr(adapter, "version") and adapter.version is not None:
-            version = adapter.version
+        if hasattr(adapter, "data_version") and adapter.data_version is not None:
+            version = adapter.data_version
         else:
             version = "_UNSPECIFIED_"  # make sure this comes first in sorted list
 
@@ -425,7 +428,7 @@ class DataCatalog(object):
             for name, source in self.iter_sources():
                 try:
                     other_source = other.get_source(
-                        name, provider=source.provider, version=source.version
+                        name, provider=source.provider, data_version=source.data_version
                     )
                 except KeyError:
                     return False
@@ -885,7 +888,7 @@ class DataCatalog(object):
                 {
                     "name": name,
                     "provider": source.provider,
-                    "version": source.version,
+                    "data_version": source.data_version,
                     **source.summary(),
                 }
             )
@@ -943,14 +946,14 @@ class DataCatalog(object):
 
                 source = self.get_source(name)
                 provider = source.provider
-                version = source.version
+                data_version = source.data_version
 
                 if name not in sources:
                     sources[name] = {}
                 if provider not in sources[name]:
                     sources[name][provider] = {}
 
-                sources[name][provider][version] = copy.deepcopy(source)
+                sources[name][provider][data_version] = copy.deepcopy(source)
 
         else:
             sources = copy.deepcopy(self.sources)
@@ -966,7 +969,7 @@ class DataCatalog(object):
         # export data and update sources
         for key, available_variants in sources.items():
             for provider, available_versions in available_variants.items():
-                for version, source in available_versions.items():
+                for data_version, source in available_versions.items():
                     try:
                         # read slice of source and write to file
                         self.logger.debug(f"Exporting {key}.")
@@ -1011,7 +1014,7 @@ class DataCatalog(object):
                         if provider not in sources_out[key]:
                             sources_out[key][provider] = {}
 
-                        sources_out[key][provider][version] = source
+                        sources_out[key][provider][data_version] = source
                     except FileNotFoundError:
                         self.logger.warning(f"{key} file not found at {source.path}")
 
@@ -1036,7 +1039,7 @@ class DataCatalog(object):
         time_tuple: Optional[Tuple] = None,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified RasterDataset.
@@ -1083,7 +1086,7 @@ class DataCatalog(object):
             If False, always return a Dataset. By default True.
         provider: str, optional
             Data source provider. If None (default) the last added provider is used.
-        version: str, optional
+        data_version: str, optional
             Data source version. If None (default) the newest version is used.
         **kwargs:
             Additional keyword arguments that are passed to the `RasterDatasetAdapter`
@@ -1096,13 +1099,15 @@ class DataCatalog(object):
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
-                data_like, provider, version
+                data_like, provider, data_version
             )
 
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source = self.get_source(
+                    name, provider=provider, data_version=data_version
+                )
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
                 if "provider" not in kwargs:
@@ -1154,7 +1159,7 @@ class DataCatalog(object):
         variables: Optional[Union[List, str]] = None,
         predicate: str = "intersects",
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ):
         """Return a clipped and unified GeoDataFrame (vector).
@@ -1190,7 +1195,7 @@ class DataCatalog(object):
             returned.
         provider: str, optional
             Data source provider. If None (default) the last added provider is used.
-        version: str, optional
+        data_version: str, optional
             Data source version. If None (default) the newest version is used.
         **kwargs:
             Additional keyword arguments that are passed to the `GeoDataFrameAdapter`
@@ -1203,12 +1208,14 @@ class DataCatalog(object):
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
-                data_like, provider, version
+                data_like, provider, data_version
             )
         if isinstance(data_like, (str, Path)):
             if str(data_like) in self.sources:
-                name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                name = str(data_like)
+                source = self.get_source(
+                    name, provider=provider, data_version=data_version
+                )
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
                 if "provider" not in kwargs:
@@ -1247,7 +1254,7 @@ class DataCatalog(object):
         time_tuple: Optional[Tuple] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified GeoDataset.
@@ -1300,12 +1307,14 @@ class DataCatalog(object):
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
-                data_like, provider, version
+                data_like, provider, data_version
             )
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source = self.get_source(
+                    name, provider=provider, data_version=data_version
+                )
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
                 if "provider" not in kwargs:
@@ -1350,7 +1359,7 @@ class DataCatalog(object):
         variables: Optional[list] = None,
         time_tuple: Optional[Tuple] = None,
         provider: Optional[str] = None,
-        version: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ):
         """Return a unified and sliced DataFrame.
@@ -1380,12 +1389,14 @@ class DataCatalog(object):
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
-                data_like, provider, version
+                data_like, provider, data_version
             )
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source = self.get_source(
+                    name, provider=provider, data_version=data_version
+                )
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
                 if "provider" not in kwargs:
@@ -1414,7 +1425,7 @@ class DataCatalog(object):
 def _parse_data_like_dict(
     data_like: SourceSpecDict,
     provider: Optional[str] = None,
-    version: Optional[str] = None,
+    data_version: Optional[str] = None,
 ):
     if not SourceSpecDict.__required_keys__.issuperset(set(data_like.keys())):
         unknown_keys = set(data_like.keys()) - SourceSpecDict.__required_keys__
@@ -1424,8 +1435,8 @@ def _parse_data_like_dict(
     else:
         source = data_like.get("source")
         provider = data_like.get("provider", provider)
-        version = data_like.get("version", version)
-    return source, provider, version
+        data_version = data_like.get("data_version", data_version)
+    return source, provider, data_version
 
 
 def _parse_data_source_dict(
@@ -1445,7 +1456,6 @@ def _parse_data_source_dict(
     }
     # parse data
     source = data_source_dict.copy()  # important as we modify with pop
-    extent = source.pop("extent", {})
 
     # parse path
     if "path" not in source:
@@ -1481,7 +1491,6 @@ def _parse_data_source_dict(
         catalog_name=catalog_name,
         meta=meta,
         driver_kwargs=driver_kwargs,
-        extent=extent,
         **source,
     )
 

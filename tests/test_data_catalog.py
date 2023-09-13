@@ -97,7 +97,9 @@ def test_parser():
     for i, (name, source) in enumerate(sources):
         assert "variants" not in source
         adapter = _parse_data_source_dict(name, source, root=root, catalog_name="tmp")
-        assert adapter.version == dd["test"]["variants"][i].get("version", None)
+        assert adapter.data_version == dd["test"]["variants"][i].get(
+            "data_version", None
+        )
         assert adapter.provider == dd["test"]["variants"][i].get("provider", None)
         assert adapter.catalog_name == "tmp"
 
@@ -134,7 +136,7 @@ def test_versioned_catalogs(tmpdir):
     assert len(legacy_data_catalog) == 1
     source = legacy_data_catalog.get_source("esa_worldcover")
     assert Path(source.path).name == "esa-worldcover.vrt"
-    assert source.version == "2020"
+    assert source.data_version == "2020"
     # test round trip to and from dict
     legacy_data_catalog2 = DataCatalog().from_dict(legacy_data_catalog.to_dict())
     assert legacy_data_catalog2 == legacy_data_catalog
@@ -149,11 +151,13 @@ def test_versioned_catalogs(tmpdir):
     # test get_source with all keyword combinations
     source = aws_data_catalog.get_source("esa_worldcover")
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
-    assert source.version == "2021"
-    source = aws_data_catalog.get_source("esa_worldcover", version=2021)
+    assert source.data_version == "2021"
+    source = aws_data_catalog.get_source("esa_worldcover", data_version="2021")
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
-    assert source.version == "2021"
-    source = aws_data_catalog.get_source("esa_worldcover", version=2021, provider="aws")
+    assert source.data_version == "2021"
+    source = aws_data_catalog.get_source(
+        "esa_worldcover", data_version="2021", provider="aws"
+    )
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
     # test round trip to and from dict
     aws_data_catalog2 = DataCatalog().from_dict(aws_data_catalog.to_dict())
@@ -161,13 +165,15 @@ def test_versioned_catalogs(tmpdir):
 
     # test errors
     with pytest.raises(KeyError):
-        aws_data_catalog.get_source("esa_worldcover", version=2021, provider="asdfasdf")
-    with pytest.raises(KeyError):
         aws_data_catalog.get_source(
-            "esa_worldcover", version="asdfasdf", provider="aws"
+            "esa_worldcover", data_version="2021", provider="asdfasdf"
         )
     with pytest.raises(KeyError):
-        aws_data_catalog.get_source("asdfasdf", version=2021, provider="aws")
+        aws_data_catalog.get_source(
+            "esa_worldcover", data_version="asdfasdf", provider="aws"
+        )
+    with pytest.raises(KeyError):
+        aws_data_catalog.get_source("asdfasdf", data_version="2021", provider="aws")
 
     # make sure we trigger user warning when overwriting versions
     with pytest.warns(UserWarning):
@@ -183,9 +189,11 @@ def test_versioned_catalogs(tmpdir):
     source_loc = merged_catalog.get_source("esa_worldcover", provider="local")
     assert source_loc != source_aws
     assert source_loc.filesystem == "local"
-    assert source_loc.version == "2021"  # get newest version
+    assert source_loc.data_version == "2021"  # get newest version
     # test get_source with version only
-    assert merged_catalog.get_source("esa_worldcover", version=2021) == source_loc
+    assert (
+        merged_catalog.get_source("esa_worldcover", data_version="2021") == source_loc
+    )
     # test round trip to and from dict
     merged_catalog2 = DataCatalog().from_dict(merged_catalog.to_dict())
     assert merged_catalog2 == merged_catalog

@@ -46,10 +46,10 @@ class GeoDatasetAdapter(DataAdapter):
         attrs: Optional[dict] = None,
         extent: Optional[dict] = None,
         driver_kwargs: Optional[dict] = None,
-        name: str = "",  # optional for now
-        catalog_name: str = "",  # optional for now
-        provider=None,
-        version=None,
+        name: str = "",
+        catalog_name: str = "",
+        provider: Optional[str] = None,
+        data_version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial timeseries data.
@@ -100,10 +100,25 @@ class GeoDatasetAdapter(DataAdapter):
         attrs: dict, optional
             Additional attributes relating to data variables. For instance unit
             or long name of the variable.
+        extent: Extent(typed dict), Optional
+            Dictionary describing the spatial and time range the dataset covers.
+            should be of the form:
+            {
+                "bbox": [xmin, ymin, xmax, ymax],
+                "time_range": [start_datetime, end_datetime],
+            }
+            bbox coordinates should be in the same CRS as the data, and
+            time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         name, catalog_name: str, optional
-            Name of the dataset and catalog, optional for now.
+            Name of the dataset and catalog, optional.
+        provider: str, optional
+            A name to identifiy the specific provider of the dataset requested.
+            if None is provided, the last added source will be used.
+        data_version: str, optional
+            A name to identifiy the specific version of the dataset requested.
+            if None is provided, the last added source will be used.
         """
         rename = rename or {}
         unit_mult = unit_mult or {}
@@ -134,7 +149,7 @@ class GeoDatasetAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            version=version,
+            data_version=data_version,
         )
         self.crs = crs
         self.extent = extent
@@ -529,11 +544,11 @@ class GeoDatasetAdapter(DataAdapter):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        temporal_extent = self.extent.get("time_tuple", None)
-        if temporal_extent is None and detect:
-            temporal_extent = self.detect_time_range()
+        time_range = self.extent.get("time_range", None)
+        if time_range is None and detect:
+            time_range = self.detect_time_range()
 
-        return temporal_extent
+        return time_range
 
     def detect_bbox(
         self,
