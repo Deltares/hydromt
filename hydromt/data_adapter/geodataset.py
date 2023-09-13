@@ -121,6 +121,7 @@ class GeoDatasetAdapter(DataAdapter):
             if None is provided, the last added source will be used.
         """
         driver_kwargs = driver_kwargs or {}
+        extent = extent or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "

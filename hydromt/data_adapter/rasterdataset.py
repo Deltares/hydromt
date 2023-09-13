@@ -129,6 +129,8 @@ class RasterDatasetAdapter(DataAdapter):
 
         """
         driver_kwargs = driver_kwargs or {}
+        extent = extent or {}
+        zoom_levels = zoom_levels or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
