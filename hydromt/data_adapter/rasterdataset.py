@@ -693,8 +693,8 @@ class RasterDatasetAdapter(DataAdapter):
     ) -> Tuple[Tuple[float, float, float, float], int]:
         """Detect the bounding box and crs of the dataset.
 
-        If no dataset is provided, it will be fetched accodring to the settings in the
-        addapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`. the
+        If no dataset is provided, it will be fetched according to the settings in the
+        adapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`. the
         coordinates are in the CRS of the dataset itself, which is also returned
         alongside the coordinates.
 
