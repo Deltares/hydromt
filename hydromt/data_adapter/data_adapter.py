@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from itertools import product
 from pathlib import Path
 from string import Formatter
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -116,7 +116,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         path: str | Path,
         driver: Optional[str] = None,
         filesystem="local",
-        nodata: Optional[str] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
         rename: Optional[dict] = None,
         unit_mult: Optional[dict] = None,
         unit_add: Optional[dict] = None,

@@ -215,7 +215,7 @@ def test_versioned_catalogs(tmpdir):
 
 
 def test_data_catalog(tmpdir):
-    data_catalog = DataCatalog(data_libs=None)
+    data_catalog = DataCatalog()
     # initialized with empty dict
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
@@ -232,7 +232,7 @@ def test_data_catalog(tmpdir):
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataAdapter"):
-        data_catalog.add_source("test", "string")
+        data_catalog.add_source("test", "string")  # type: ignore
     # check that no sources are loaded if fallback_lib is None
     assert not DataCatalog(fallback_lib=None).sources
     # test artifact keys (NOTE: legacy code!)

@@ -128,14 +128,7 @@ class RasterDatasetAdapter(DataAdapter):
             if None is provided, the last added source will be used.
 
         """
-        rename = rename or {}
-        unit_mult = unit_mult or {}
-        unit_add = unit_add or {}
-        meta = meta or {}
-        attrs = attrs or {}
-        extent = extent or {}
         driver_kwargs = driver_kwargs or {}
-        zoom_levels = zoom_levels or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
