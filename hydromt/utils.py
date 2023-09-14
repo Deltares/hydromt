@@ -1,5 +1,6 @@
 """Utility functions for hydromt that have no other home."""
 import os
+
 import numpy as np
 
 
@@ -50,7 +51,7 @@ def create_folder(path):
 
 
 def elevation2rgb(val):
-    """Convert elevation to rgb tuple"""
+    """Convert elevation to rgb tuple."""
     val += 32768
     r = np.floor(val / 256).astype(np.uint8)
     g = np.floor(val % 256).astype(np.uint8)
@@ -60,7 +61,7 @@ def elevation2rgb(val):
 
 
 def rgb2elevation(r, g, b):
-    """Convert rgb tuple to elevation"""
+    """Convert rgb tuple to elevation."""
     val = (r * 256 + g + b / 256) - 32768
     return val
 

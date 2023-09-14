@@ -14,6 +14,7 @@ import os
 import tempfile
 from itertools import product
 from os.path import isdir, join
+from pathlib import Path
 from typing import Any, Optional, Union
 
 import dask
@@ -29,7 +30,6 @@ import shapely
 import xarray as xr
 import yaml
 from affine import Affine
-from pathlib import Path
 from PIL import Image
 from pyproj import CRS
 from rasterio import features
@@ -225,9 +225,8 @@ def tile_window_osm(
     maxy,
 ):
     """Generate tiles in the xyz structure (according to OSM)
-    Returns: transform, bounds, x and y of the tile
+    Returns: transform, bounds, x and y of the tile.
     """
-
     # Calculate the dx, px parameters
     dx = (y_ext * 2) / (2**zl)
     px = dx / px_size
@@ -260,7 +259,7 @@ def tile_window_osm(
 
 def tile_window_png(zl, minx, maxx, miny, maxy):
     """Create tile windows according to OSM using mercantile
-    Returns: x, y and bounds of the tile
+    Returns: x, y and bounds of the tile.
     """
     ul = mct.tile(minx, maxy, zl)
     lr = mct.tile(maxx, miny, zl)
@@ -2226,7 +2225,6 @@ class RasterDataArray(XRasterBase):
         **kwargs
             Key-word arguments to write raster files
         """
-
         mName = os.path.normpath(os.path.basename(root))
 
         vrt_fn = None
@@ -2340,7 +2338,6 @@ class RasterDataArray(XRasterBase):
         **kwargs
             Key-word arguments to write raster files
         """
-
         # Ensure root directory exists and set name for datacatalog and stuff
         create_folder(root)
         m_name = os.path.normpath(os.path.basename(root))
@@ -2563,7 +2560,7 @@ class RasterDataArray(XRasterBase):
         method: str = "nearest",
     ):
         """Produce png's in XYZ structure (EPSG:3857)
-        Generally meant for webviewers
+        Generally meant for webviewers.
 
         Parameters
         ----------
@@ -2582,7 +2579,6 @@ class RasterDataArray(XRasterBase):
         ValueError
             2d arrays only
         """
-
         # Ensure the root directory is there
         create_folder(root)
 
@@ -2604,7 +2600,6 @@ class RasterDataArray(XRasterBase):
         obj = obj.transpose(self.y_dim, self.x_dim)
         obj_res = obj.raster.res[0]
         obj_bounds = obj.raster.bounds
-        nodata = obj.raster.nodata
 
         # Calculate the transform and bounds in 3857 for the given object
         # (Mostly just for the resolution)

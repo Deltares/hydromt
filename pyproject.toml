@@ -17,6 +17,7 @@ dependencies = [
     "entrypoints",       # Provide access for Plugins
     "geopandas>=0.10",   # pandas but geo, wraps fiona and shapely
     "gdal>=3.1",         # enable geospacial data manipulation, both  raster and victor
+    "mercantile",        # for easilty tiling in XYZ structure (OSM)
     "numba",             # speed up computations (used in e.g. stats)
     "numpy>=1.20",       # pin necessary to ensure compatability with C headers
     "netcdf4",           # netcfd IO
