@@ -48,7 +48,7 @@ class GeoDataFrameAdapter(DataAdapter):
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
-        data_version=None,
+        version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial vector data.
@@ -109,7 +109,7 @@ class GeoDataFrameAdapter(DataAdapter):
         provider: str, optional
             A name to identifiy the specific provider of the dataset requested.
             if None is provided, the last added source will be used.
-        data_version: str, optional
+        version: str, optional
             A name to identifiy the specific version of the dataset requested.
             if None is provided, the last added source will be used.
         """
@@ -137,7 +137,7 @@ class GeoDataFrameAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            data_version=data_version,
+            version=version,
         )
         self.crs = crs
         self.extent = extent

@@ -126,7 +126,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         name: str = "",
         catalog_name: str = "",
         provider: Optional[str] = None,
-        data_version: Optional[str] = None,
+        version: Optional[str] = None,
     ):
         """General Interface to data source for HydroMT.
 
@@ -179,9 +179,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.name = name
         self.catalog_name = catalog_name
         self.provider = provider
-        self.data_version = (
-            str(data_version) if data_version is not None else None
-        )  # version as str
+        self.version = str(version) if version is not None else None  # version as str
         # general arguments
         self.path = path
         # driver and driver keyword-arguments

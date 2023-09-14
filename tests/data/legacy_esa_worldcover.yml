@@ -12,4 +12,4 @@ esa_worldcover:
     source_url: https://doi.org/10.5281/zenodo.5571936
     source_version: v100
   path: landuse/esa_worldcover/esa-worldcover.vrt
-  data_version: 2020
+  version: 2020
