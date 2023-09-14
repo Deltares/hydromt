@@ -524,7 +524,9 @@ class GridModel(GridMixin, Model):
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             # Do not parse_region for grid as we want to allow for more (file) formats
-            kind, region = workflows.parse_region(region, logger=self.logger)
+            kind, region = workflows.parse_region(
+                region, data_catalog=self.data_catalog, logger=self.logger
+            )
         elif kind != "grid":
             raise ValueError(
                 f"Region for grid must be of kind [grid, bbox, geom, basin, subbasin,"
@@ -681,6 +683,7 @@ class GridModel(GridMixin, Model):
             "config",
             "grid",
             "geoms",
+            "tables",
             "forcing",
             "states",
             "results",
@@ -693,13 +696,21 @@ class GridModel(GridMixin, Model):
         components : List, optional
             List of model components to read, each should have an associated
             read_<component> method. By default ['config', 'maps', 'grid',
-            'geoms', 'forcing', 'states', 'results']
+            'geoms', 'tables', 'forcing', 'states', 'results']
         """
         super().read(components=components)
 
     def write(
         self,
-        components: List = ["config", "maps", "grid", "geoms", "forcing", "states"],
+        components: List = [
+            "config",
+            "maps",
+            "grid",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+        ],
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -707,8 +718,8 @@ class GridModel(GridMixin, Model):
         ----------
         components : List, optional
             List of model components to write, each should have an
-            associated write_<component> method.
-            By default ['config', 'maps', 'grid', 'geoms', 'forcing', 'states']
+            associated write_<component> method. By default
+            ['config', 'maps', 'grid', 'geoms', 'tables', 'forcing', 'states']
         """
         super().write(components=components)
 

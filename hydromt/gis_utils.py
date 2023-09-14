@@ -226,8 +226,40 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
             geom = geom.to_crs(gdf.crs)
         # convert geopandas to geometry
         geom = geom.unary_union
-    idx = gdf.sindex.query(geom, predicate=predicate)
+    idx = np.sort(gdf.sindex.query(geom, predicate=predicate))
     return idx
+
+
+def parse_geom_bbox_buffer(geom=None, bbox=None, buffer=0):
+    """Parse geom or bbox to a (buffered) geometry.
+
+    Arguments
+    ---------
+    geom : geopandas.GeoDataFrame/Series, optional
+        A geometry defining the area of interest.
+    bbox : array-like of floats, optional
+        (xmin, ymin, xmax, ymax) bounding box of area of interest
+        (in WGS84 coordinates).
+    buffer : float, optional
+        Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+
+    Returns
+    -------
+    geom: geometry
+        the actual geometry
+    """
+    if geom is None and bbox is not None:
+        # convert bbox to geom with crs EPGS:4326 to apply buffer later
+        geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+    elif geom is None:
+        raise ValueError("No geom or bbox provided.")
+
+    if buffer > 0:
+        # make sure geom is projected > buffer in meters!
+        if geom.crs.is_geographic:
+            geom = geom.to_crs(3857)
+        geom = geom.buffer(buffer)
+    return geom
 
 
 # REPROJ
@@ -475,7 +507,7 @@ def spread2d(
         obs=da_obs.values,
         msk=msk,
         frc=frc,
-        nodata=da_obs.raster.nodata if nodata is None else nodata,
+        nodata=nodata,
         latlon=da_obs.raster.crs.is_geographic,
         transform=da_obs.raster.transform,
     )

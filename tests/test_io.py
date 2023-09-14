@@ -189,6 +189,70 @@ def test_raster_io(tmpdir, rioda):
     assert os.path.isfile(join(root, "test", "test.tif"))
 
 
+def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
+    df_fns = {
+        i: str(tmpdir.join("data", f"{i}.csv"))
+        for i in range(len(dfs_segmented_by_points))
+    }
+    os.mkdir(tmpdir.join("data"))
+    for i in range(len(df_fns)):
+        dfs_segmented_by_points[i].to_csv(df_fns[i])
+
+    ds = hydromt.io.open_mfcsv(df_fns, "id")
+
+    assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
+    assert sorted(list(ds.dims)) == ["id", "time"], ds
+    for i in range(len(dfs_segmented_by_points)):
+        test1 = ds.sel(id=i)["test1"]
+        test2 = ds.sel(id=i)["test2"]
+        assert np.all(
+            np.equal(test1, np.arange(len(dfs_segmented_by_points)) * i)
+        ), test1
+        assert np.all(
+            np.equal(test2, np.arange(len(dfs_segmented_by_points)) ** i)
+        ), test2
+
+    # again but with a nameless csv index
+    for i in range(len(df_fns)):
+        dfs_segmented_by_points[i].rename_axis(None, axis=0, inplace=True)
+        dfs_segmented_by_points[i].to_csv(df_fns[i])
+
+    ds = hydromt.io.open_mfcsv(df_fns, "id")
+
+    assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
+    assert sorted(list(ds.dims)) == ["id", "index"], ds
+    for i in range(len(dfs_segmented_by_points)):
+        test1 = ds.sel(id=i)["test1"]
+        test2 = ds.sel(id=i)["test2"]
+        assert np.all(
+            np.equal(test1, np.arange(len(dfs_segmented_by_points)) * i)
+        ), test1
+        assert np.all(
+            np.equal(test2, np.arange(len(dfs_segmented_by_points)) ** i)
+        ), test2
+
+
+@pytest.mark.skip(reason="Not yet supported")
+def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
+    os.mkdir(tmpdir.join("data"))
+    fns = {}
+    for var, df in dfs_segmented_by_vars.items():
+        fn = tmpdir.join("data", f"{var}.csv")
+        df.to_csv(fn)
+        fns[var] = fn
+
+    ds = hydromt.io.open_mfcsv(fns, "id")
+
+    assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
+    for i in range(len(dfs_segmented_by_vars)):
+        test1 = ds.sel(id=i)["test1"]
+        test2 = ds.sel(id=i)["test2"]
+        assert np.all(np.equal(test1, np.arange(len(dfs_segmented_by_vars)) * i)), test1
+        assert np.all(
+            np.equal(test2, np.arange(len(dfs_segmented_by_vars)) ** i)
+        ), test2
+
+
 def test_rasterio_errors(tmpdir, rioda):
     with pytest.raises(OSError, match="no files to open"):
         hydromt.open_mfraster(str(tmpdir.join("test*.tiffff")))

@@ -1,10 +1,20 @@
+from os.path import abspath, dirname, join
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyflwdir
 import pytest
 import xarray as xr
+from dask import config as dask_config
 from shapely.geometry import box
+
+dask_config.set(scheduler="single-threaded")
+
+import hydromt._compat as compat
+
+if compat.HAS_XUGRID:
+    import xugrid as xu
 
 from hydromt import (
     MODELS,
@@ -17,6 +27,10 @@ from hydromt import (
     vector,
 )
 from hydromt.data_catalog import DataCatalog
+
+dask_config.set(scheduler="single-threaded")
+
+DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture()
@@ -44,15 +58,51 @@ def rioda_large():
 
 @pytest.fixture()
 def df():
-    df = pd.DataFrame(
-        {
-            "city": ["Buenos Aires", "Brasilia", "Santiago", "Bogota", "Caracas"],
-            "country": ["Argentina", "Brazil", "Chile", "Colombia", "Venezuela"],
-            "latitude": [-34.58, -15.78, -33.45, 4.60, 10.48],
-            "longitude": [-58.66, -47.91, -70.66, -74.08, -66.86],
-        }
+    df = (
+        pd.DataFrame(
+            {
+                "city": ["Buenos Aires", "Brasilia", "Santiago", "Bogota", "Caracas"],
+                "country": ["Argentina", "Brazil", "Chile", "Colombia", "Venezuela"],
+                "latitude": [-34.58, -15.78, -33.45, 4.60, 10.48],
+                "longitude": [-58.66, -47.91, -70.66, -74.08, -66.86],
+            }
+        )
+        .reset_index(drop=False)
+        .rename({"index": "id"}, axis=1)
     )
     return df
+
+
+@pytest.fixture()
+def dfs_segmented_by_points(df):
+    return {
+        id: pd.DataFrame(
+            {
+                "time": pd.date_range("2023-08-22", periods=len(df), freq="1D"),
+                "test1": np.arange(len(df)) * id,
+                "test2": np.arange(len(df)) ** id,
+            }
+        ).set_index("time")
+        for id in range(len(df))
+    }
+
+
+@pytest.fixture()
+def dfs_segmented_by_vars(dfs_segmented_by_points):
+    data_vars = [
+        v
+        for v in pd.concat(dfs_segmented_by_points.values()).columns
+        if v not in ["id", "time"]
+    ]
+
+    tmp = dfs_segmented_by_points.copy()
+    for i, df in tmp.items():
+        df.insert(0, "id", i)
+
+    return {
+        v: pd.concat(tmp.values()).pivot(index="time", columns="id", values=v)
+        for v in data_vars
+    }
 
 
 @pytest.fixture()
@@ -80,7 +130,7 @@ def geodf(df):
 
 @pytest.fixture()
 def world():
-    world = gpd.read_file("tests/data/naturalearth_lowres.geojson")
+    world = gpd.read_file(join(DATADIR, "naturalearth_lowres.geojson"))
     return world
 
 
@@ -192,8 +242,6 @@ def ts_extremes():
 
 @pytest.fixture()
 def griduda():
-    import xugrid as xu
-
     bbox = [12.09, 46.49, 12.10, 46.50]  # Piava river
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     da = data_catalog.get_rasterdataset("merit_hydro", bbox=bbox, variables="elevtn")
@@ -210,7 +258,7 @@ def griduda():
 
 @pytest.fixture()
 def model(demda, world, obsda):
-    mod = Model()
+    mod = Model(data_libs=["artifact_data"])
     mod.setup_region({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
     with pytest.deprecated_call():
