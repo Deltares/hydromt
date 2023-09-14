@@ -224,7 +224,8 @@ def tile_window_osm(
     maxx,
     maxy,
 ):
-    """Generate tiles in the xyz structure (according to OSM)
+    """Generate tiles in the xyz structure (according to OSM).
+
     Returns: transform, bounds, x and y of the tile.
     """
     # Calculate the dx, px parameters
@@ -258,7 +259,8 @@ def tile_window_osm(
 
 
 def tile_window_png(zl, minx, maxx, miny, maxy):
-    """Create tile windows according to OSM using mercantile
+    """Create tile windows according to OSM using mercantile.
+
     Returns: x, y and bounds of the tile.
     """
     ul = mct.tile(minx, maxy, zl)
@@ -2348,7 +2350,8 @@ class RasterDataArray(XRasterBase):
         # Dimension count check before continuing
         if self._obj.ndim != 2:
             raise ValueError(
-                f"Only 2d datasets are accepted: {self._obj.ndim} dimensions are present"
+                f"Only 2d datasets are accepted: {self._obj.ndim} \
+                dimensions are present"
             )
 
         # Extent in y-direction for pseudo mercator (EPSG:3857)
@@ -2559,7 +2562,8 @@ class RasterDataArray(XRasterBase):
         bbox: tuple | list = None,
         method: str = "nearest",
     ):
-        """Produce png's in XYZ structure (EPSG:3857)
+        """Produce png's in XYZ structure (EPSG:3857).
+
         Generally meant for webviewers.
 
         Parameters
@@ -2732,7 +2736,8 @@ class RasterDataArray(XRasterBase):
                         dst_nodata=np.nan,
                         resampling=resampling,
                     )
-                    # Create RGB bands from the warped data and add transparency to nan values
+                    # Create RGB bands from the warped data
+                    # and add transparency to nan values
                     rgb = elevation2rgb(tile.copy())
                     _alpha = np.full((px_size, px_size), 255, dtype=np.uint8)
                     _alpha[np.where(np.isnan(tile))] = 0
@@ -2769,7 +2774,8 @@ class RasterDataArray(XRasterBase):
                             *np.split(data, data.shape[2], axis=2)
                         ).reshape(px_size, px_size)
                         # Use the alpha band to set data to nodata where the alpha is 0
-                        # (This means that these cells were also nodata the previous time around)
+                        # (This means that these cells were 
+                        # also nodata the previous time around)
                         _elev[np.where(data_raw[:, :, 3] == 0)] = np.nan
                         del data_raw
                         # Add it to the temporary array
