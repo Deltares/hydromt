@@ -47,7 +47,7 @@ class GeoDataFrameAdapter(DataAdapter):
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
-        data_version=None,
+        version=None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial vector data.
@@ -119,7 +119,7 @@ class GeoDataFrameAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            data_version=data_version,
+            version=version,
         )
         self.crs = crs
 

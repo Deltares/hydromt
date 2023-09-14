@@ -1,6 +1,6 @@
 ---
 meta:
-  catalog_version: 2023.2
+  version: 2023.2
 esa_worldcover_2020_v100:
   crs: 4326
   data_type: RasterDataset

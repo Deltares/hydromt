@@ -20,7 +20,7 @@ Added
 - Adapters can now clip data that is passed through a python object the same way as through the data catalog. (PR #481)
 - Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
 - Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
-- Data catalogs have a ``catalog_version`` meta key that is used to determine compatibility between the catalog and the installed hydromt version. (PR #506)
+- Data catalogs have a ``version`` and ``hydromt_version`` meta key that is used to determine compatibility between the catalog and the installed hydromt version. (PR #506)
 
 Changed
 -------

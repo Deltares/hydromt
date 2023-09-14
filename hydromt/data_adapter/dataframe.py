@@ -39,7 +39,7 @@ class DataFrameAdapter(DataAdapter):
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider: Optional[str] = None,
-        data_version: Optional[str] = None,
+        version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for 2D tabular data.
@@ -109,7 +109,7 @@ class DataFrameAdapter(DataAdapter):
             name=name,
             catalog_name=catalog_name,
             provider=provider,
-            data_version=data_version,
+            version=version,
         )
 
     def to_file(
