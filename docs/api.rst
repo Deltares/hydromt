@@ -466,6 +466,7 @@ Raster writing methods
 
    DataArray.raster.to_xyz_tiles
    DataArray.raster.to_osm_tiles
+   DataArray.raster.to_webviewer_tiles
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
 

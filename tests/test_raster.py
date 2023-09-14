@@ -526,6 +526,10 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
     with open(os.path.join(path, "dummy_xyz", "2", "filelist.txt"), "r") as f:
         assert len(f.readlines()) == 1
 
+    test_bounds = [2.13, -2.13, 3.2, -1.07]
+    _test_r = open_raster(os.path.join(path, "dummy_xyz", "0", "2", "1.tif"))
+    assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
+
 
 def test_to_osm_tiles(tmpdir, rioda_large):
     path = str(tmpdir)
@@ -538,3 +542,22 @@ def test_to_osm_tiles(tmpdir, rioda_large):
         assert len(f.readlines()) == 1
     with open(os.path.join(path, "dummy_osm", "8", "filelist.txt"), "r") as f:
         assert len(f.readlines()) == 12
+
+    test_bounds = [0.0, -313086.07, 313086.07, -0.0]
+    _test_r = open_raster(os.path.join(path, "dummy_osm", "7", "64", "64.tif"))
+    assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
+
+
+def test_to_png_tiles(tmpdir, rioda_large):
+    path = str(tmpdir)
+    rioda_large.raster.to_webviewer_tiles(
+        os.path.join(path, "dummy_png"),
+    )
+
+    _zl = os.listdir(
+        os.path.join(path, "dummy_png"),
+    )
+    _zl = [int(_n) for _n in _zl]
+    assert len(_zl) == 4
+    assert min(_zl) == 6
+    assert max(_zl) == 9

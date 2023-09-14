@@ -1,5 +1,6 @@
 """Utility functions for hydromt that have no other home."""
 import os
+import numpy as np
 
 
 def partition_dictionaries(left, right):
@@ -41,6 +42,22 @@ def create_folder(path):
     """Create a folder if there is none."""
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def elevation2rgb(val):
+    """Convert elevation to rgb tuple"""
+    val += 32768
+    r = np.floor(val / 256).astype(np.uint8)
+    g = np.floor(val % 256).astype(np.uint8)
+    b = np.floor((val - np.floor(val)) * 256).astype(np.uint8)
+
+    return (r, g, b)
+
+
+def rgb2elevation(r, g, b):
+    """Convert rgb tuple to elevation"""
+    val = (r * 256 + g + b / 256) - 32768
+    return val
 
 
 def _dict_pprint(d):

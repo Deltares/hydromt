@@ -12,6 +12,7 @@ Unreleased
 Added
 -----
 - New raster method ``to_osm_tiles``: tiling of a raster dataset according to the osm structure.
+- New raster method ``to_webviewer_tiles``: tiling of a raster dataset for webviewers (png files)
 - docs now include a dropdown for selecting older versions of the docs. (#457)
 - Support for loading the same data source but from different places (e.g. local & aws)
 - Add support for reading and writing tabular data in ``parquet`` format. (PR #445)

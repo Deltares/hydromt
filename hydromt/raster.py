@@ -18,6 +18,7 @@ from typing import Any, Optional, Union
 
 import dask
 import geopandas as gpd
+import mercantile as mct
 import numpy as np
 import pandas as pd
 import pyproj
@@ -28,6 +29,8 @@ import shapely
 import xarray as xr
 import yaml
 from affine import Affine
+from pathlib import Path
+from PIL import Image
 from pyproj import CRS
 from rasterio import features
 from rasterio.enums import MergeAlg, Resampling
@@ -37,7 +40,7 @@ from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
 from . import _compat, gis_utils
-from .utils import create_folder
+from .utils import create_folder, elevation2rgb, rgb2elevation
 
 logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
@@ -198,6 +201,75 @@ def full_from_transform(
         dims=dims,
     )
     return da
+
+
+def tile_window_xyz(shape, px):
+    """Yield (left, upper, width, height)."""
+    nr, nc = shape
+    lu = product(range(0, nc, px), range(0, nr, px))
+
+    ## create the window
+    for l, u in lu:
+        h = min(px, nr - u)
+        w = min(px, nc - l)
+        yield (l, u, w, h)
+
+
+def tile_window_osm(
+    zl,
+    y_ext,
+    px_size,
+    minx,
+    miny,
+    maxx,
+    maxy,
+):
+    """Generate tiles in the xyz structure (according to OSM)
+    Returns: transform, bounds, x and y of the tile
+    """
+
+    # Calculate the dx, px parameters
+    dx = (y_ext * 2) / (2**zl)
+    px = dx / px_size
+
+    # Origin displacement
+    odx = np.floor(abs(-y_ext - minx) / dx)
+    ody = np.floor(abs(y_ext - maxy) / dx)
+
+    # Set the new origin
+    minx = -y_ext + odx * dx
+    maxy = y_ext - ody * dx
+
+    # Create window generator
+    lu = product(
+        np.arange(round(minx, 2), round(maxx, 2), dx),
+        np.arange(round(maxy, 2), round(miny, 2), -dx),
+    )
+    # Loop through the windows and return the transform, bounds, x and y number
+    for l, u in lu:
+        col = int(round(odx + (l - minx) / dx, 2))
+        row = int(round(ody + (maxy - u) / dx, 2))
+        bounds = [
+            l,
+            u - dx,
+            l + dx,
+            u,
+        ]
+        yield Affine(px, 0, l, 0, -px, u), bounds, col, row
+
+
+def tile_window_png(zl, minx, maxx, miny, maxy):
+    """Create tile windows according to OSM using mercantile
+    Returns: x, y and bounds of the tile
+    """
+    ul = mct.tile(minx, maxy, zl)
+    lr = mct.tile(maxx, miny, zl)
+
+    x_range = range(ul.x, lr.x + 1)
+    y_range = range(ul.y, lr.y + 1)
+
+    for _x, _y in product(x_range, y_range):
+        yield _x, _y, mct.xy_bounds(_x, _y, zl)
 
 
 class XGeoBase(object):
@@ -2154,18 +2226,8 @@ class RasterDataArray(XRasterBase):
         **kwargs
             Key-word arguments to write raster files
         """
+
         mName = os.path.normpath(os.path.basename(root))
-
-        def tile_window(shape, px):
-            """Yield (left, upper, width, height)."""
-            nr, nc = shape
-            lu = product(range(0, nc, px), range(0, nr, px))
-
-            ## create the window
-            for l, u in lu:
-                h = min(px, nr - u)
-                w = min(px, nc - l)
-                yield (l, u, w, h)
 
         vrt_fn = None
         prev = 0
@@ -2196,7 +2258,7 @@ class RasterDataArray(XRasterBase):
             txt_path = join(sd, "filelist.txt")
             file = open(txt_path, "w")
 
-            for l, u, w, h in tile_window(obj.shape, pxzl):
+            for l, u, w, h in tile_window_xyz(obj.shape, pxzl):
                 col = int(np.ceil(l / pxzl))
                 row = int(np.ceil(u / pxzl))
                 ssd = join(sd, f"{col}")
@@ -2278,112 +2340,125 @@ class RasterDataArray(XRasterBase):
         **kwargs
             Key-word arguments to write raster files
         """
+
+        # Ensure root directory exists and set name for datacatalog and stuff
+        create_folder(root)
+        m_name = os.path.normpath(os.path.basename(root))
+
+        # Set variables and flags
+        vrt_fn = None
+
+        # Dimension count check before continuing
+        if self._obj.ndim != 2:
+            raise ValueError(
+                f"Only 2d datasets are accepted: {self._obj.ndim} dimensions are present"
+            )
+
+        # Extent in y-direction for pseudo mercator (EPSG:3857)
+        y_ext = math.atan(math.sinh(math.pi)) * (180 / math.pi)
+        y_ext_pm = mct.xy(0, y_ext)[1]
+
+        # Fixed pixel size for XYZ tiles
+        px_size = 256
+
+        # Check whether the given resampling method is a valid one
         resampling = getattr(Resampling, method, None)
         if resampling is None:
             raise ValueError(f"Resampling method unknown: {method}.")
-        px_size = 256  # Fixed resolution for osm
 
-        assert self._obj.ndim == 2, "Only 2d datasets are accepted..."
+        # Object to local variable, also transpose it and extract some meta
         obj = self._obj.copy()
         obj = obj.transpose(self.y_dim, self.x_dim)
+        nodata = obj.raster.nodata
 
-        m_name = os.path.normpath(os.path.basename(root))
-
+        # Set bounds based on given bbox or extent of object
         if bbox:
             minx, miny, maxx, maxy = bbox
         else:
             minx, miny, maxx, maxy = obj.raster.transform_bounds("EPSG:3857")
 
+        # Make sure it lies within the extent of Pseudo Mercator
         minx, miny = map(
             max,
-            zip((minx, miny), [-20037508.34] * 2),
+            zip((minx, miny), [-y_ext_pm] * 2),
         )
         maxx, maxy = map(
             min,
-            zip((maxx, maxy), [20037508.34] * 2),
+            zip((maxx, maxy), [y_ext_pm] * 2),
         )
 
+        # Calculate the transform in 3857 for the given object
+        # (Mostly just for resolution)
         _obj_tr = rasterio.warp.calculate_default_transform(
             obj.raster.crs,
             "EPSG:3857",
             *obj.shape,
             *obj.raster.bounds,
         )[0]
+
+        # Determine the max number of zoom levels with the resolution
         dres = _obj_tr[0]
-        nzl = int(np.ceil((np.log10((20037508.34 * 2) / (dres * 256)) / np.log10(2))))
+        nzl = int(np.ceil((np.log10((y_ext_pm * 2) / (dres * px_size)) / np.log10(2))))
 
-        def tile_window(zl, minx, miny, maxx, maxy):
-            # Origin displacement
-            odx = np.floor(abs(-20037508.34 - minx) / dx)
-            ody = np.floor(abs(20037508.34 - maxy) / dx)
-
-            # Set the new origin
-            minx = -20037508.34 + odx * dx
-            maxy = 20037508.34 - ody * dx
-
-            # Create window generator
-            lu = product(
-                np.arange(round(minx, 2), round(maxx, 2), dx),
-                np.arange(round(maxy, 2), round(miny, 2), -dx),
-            )
-            for l, u in lu:
-                col = int(round(odx + (l - minx) / dx, 2))
-                row = int(round(ody + (maxy - u) / dx, 2))
-                bounds = [
-                    l,
-                    u - dx,
-                    l + dx,
-                    u,
-                ]
-                yield Affine(px, 0, l, 0, -px, u), bounds, col, row
-
+        # Set the zoom levels to be created
         zoom_levels.sort()
         if zoom_levels[-1] > min_lvl:
             min_lvl = zoom_levels[-1]
         zoom_levels = list(range(zoom_levels[0], min_lvl + 1, 1))
         zoom_levels.reverse()
 
-        create_folder(root)
+        # Dict to save pixels size per zl, for the DataCatalog
+        zls_px_size = {}
 
-        vrt_fn = None
-        nodata = self.nodata
-        zls = {}
+        # Loop through the zoomlevels
         for zl in zoom_levels:
-            dx = (20037508.34 * 2) / (2**zl)
+            dx = (y_ext_pm * 2) / (2**zl)
             px = dx / px_size
 
+            # Simple warning for max zl exceedence
             if max(zoom_levels) > nzl:
                 logger.warning(
                     f"Pixels at zoomlevel {zl} are smaller than the original data"
                 )
 
-            # read data from previous zoomlevel
+            # read data from previous zoomlevel is there is one
             if vrt_fn is not None:
                 obj = xr.open_dataarray(vrt_fn, engine="rasterio").squeeze(
                     "band", drop=True
                 )
 
+            # Acquire some meta from the object
+            # Whether its the previous zl's vrt, or the original object
             obj_bounds = obj.raster.bounds
             obj_res = obj.raster.res[0]
             obj_shape = obj.raster.shape
 
+            # Get the transformer to warp coords to Pseudo Mercator
             t_r = pyproj.Transformer.from_crs(
                 3857, obj.raster.crs.to_epsg(), always_xy=True
             )
 
+            # Ensure the directory is there per zoomlevel
+            # Also create the textfile needed for vrt creation
             sd = join(root, f"{zl}")
             create_folder(sd)
             txt_path = join(sd, "filelist.txt")
             file = open(txt_path, "w")
 
-            for transform, bounds, col, row in tile_window(zl, minx, miny, maxx, maxy):
+            # Loop through the windows
+            for transform, bounds, col, row in tile_window_osm(
+                zl, y_ext_pm, px_size, minx, miny, maxx, maxy
+            ):
+                # Ensure directory per x is there
                 ssd = join(sd, f"{col}")
                 create_folder(ssd)
 
+                # Transform bounding box of tile to 3857
                 ul = t_r.transform(bounds[0], bounds[3])
                 lr = t_r.transform(bounds[2], bounds[1])
                 out_bounds = [ul[0], lr[1], lr[0], ul[1]]
 
+                # Clip tile bounds to the bounds of the total object bounds
                 temp_bounds = [
                     max(out_bounds[0], obj_bounds[0]),
                     max(out_bounds[1], obj_bounds[1]),
@@ -2391,17 +2466,18 @@ class RasterDataArray(XRasterBase):
                     min(out_bounds[3], obj_bounds[3]),
                 ]
 
+                # This honestly is some weird stuff I wrote, but it works...
+                # Its needed because I index by number of rows and cols
                 _window = [
                     abs(x - y) / obj_res for x, y in zip(temp_bounds, obj_bounds)
                 ]
-
                 u = math.floor(round(_window[3], 2))
                 l = math.floor(round(_window[0], 2))
                 h = obj_shape[0] - u - math.floor(round(_window[1], 2))
                 w = obj_shape[1] - l - math.floor(round(_window[2], 2))
-
                 temp = obj[u : u + h, l : l + w]
 
+                # Create empty tile
                 tile = np.full((px_size, px_size), nodata, dtype=np.float64)
 
                 temp_transform = Affine(
@@ -2412,7 +2488,7 @@ class RasterDataArray(XRasterBase):
                     -obj_res,
                     obj_bounds[3] - u * obj_res,
                 )
-
+                # Warp the data and place it into the empty tile
                 rasterio.warp.reproject(
                     temp.values,
                     tile,
@@ -2423,7 +2499,7 @@ class RasterDataArray(XRasterBase):
                     dst_nodata=nodata,
                     resampling=resampling,
                 )
-
+                # Convert the tile (array) to a xr.DataArray in order to save properly
                 temp = xr.DataArray(
                     name=temp.name,
                     dims=("y", "x"),
@@ -2442,10 +2518,11 @@ class RasterDataArray(XRasterBase):
 
                 del tile
 
+                # Set some metadata
                 temp.raster.set_crs(3857)
-
                 temp.raster.set_nodata(nodata)
 
+                # Save the data to the drive according to the driver
                 if driver == "netcdf4":
                     path = join(ssd, f"{row}.nc")
                     temp = temp.raster.gdal_compliant()
@@ -2465,7 +2542,7 @@ class RasterDataArray(XRasterBase):
             # Create a vrt using GDAL
             vrt_fn = join(root, f"{m_name}_zl{zl}.vrt")
             gis_utils.create_vrt(vrt_fn, file_list_path=txt_path)
-            zls.update({zl: round(float(px), 2)})
+            zls_px_size.update({zl: round(float(px), 2)})
             del obj
 
         # Write a quick yaml for the database
@@ -2474,10 +2551,252 @@ class RasterDataArray(XRasterBase):
             "data_type": "RasterDataset",
             "driver": "raster",
             "path": f"{m_name}_zl{{zoom_level}}.vrt",
-            "zoom_levels": zls,
+            "zoom_levels": zls_px_size,
         }
         with open(join(root, f"{m_name}.yml"), "w") as f:
             yaml.dump({m_name: yml}, f, default_flow_style=False, sort_keys=False)
+
+    def to_webviewer_tiles(
+        self,
+        root: Path | str,
+        bbox: tuple | list = None,
+        method: str = "nearest",
+    ):
+        """Produce png's in XYZ structure (EPSG:3857)
+        Generally meant for webviewers
+
+        Parameters
+        ----------
+        root : Path | str
+            Path where the database will be saved
+        bbox : tuple | list, optional
+            A region where the tiles should be generated for
+            (if absent, the entire input raster dataset will be tiled)
+        method : str, optional
+            How to resample the data when downscaling.
+            E.g. 'nearest' for resampling with the nearest value
+            (This is only used for the first/ highest zoomlevel)
+
+        Raises
+        ------
+        ValueError
+            2d arrays only
+        """
+
+        # Ensure the root directory is there
+        create_folder(root)
+
+        # Set some flags and internal variables
+        _from_png = False
+        _count = 0
+        _prev_zl = -1
+
+        # Extent in y-direction for pseudo mercator (EPSG:3857)
+        y_ext = math.atan(math.sinh(math.pi)) * (180 / math.pi)
+        y_ext_pm = mct.xy(0, y_ext)[1]
+
+        # Fixed pixel size for XYZ tiles
+        px_size = 256
+
+        # Object to local variable, also transpose it and extract some meta
+        assert self._obj.ndim == 2, "Only 2d datasets are accepted..."
+        obj = self._obj.copy()
+        obj = obj.transpose(self.y_dim, self.x_dim)
+        obj_res = obj.raster.res[0]
+        obj_bounds = obj.raster.bounds
+        nodata = obj.raster.nodata
+
+        # Calculate the transform and bounds in 3857 for the given object
+        # (Mostly just for the resolution)
+        # Bound is used for determining the lowest zoom level
+        tr_3857 = rasterio.warp.calculate_default_transform(
+            obj.raster.crs,
+            "EPSG:3857",
+            *obj.shape,
+            *obj.raster.bounds,
+        )[0]
+        bounds_3857 = rasterio.warp.transform_bounds(
+            obj.raster.crs,
+            "EPSG:3857",
+            *obj.raster.bounds,
+        )
+        # bounds_3857 = [
+        #     min(max(_n, -y_ext_pm), y_ext_pm) for _n in bounds_3857
+        # ]
+
+        # Determine the max number of zoom levels with the resolution
+        dres = tr_3857[0]
+        nzl = int(
+            math.ceil((math.log10((y_ext_pm * 2) / (dres * px_size)) / math.log10(2)))
+        )
+
+        # Check whether the given resampling method is a valid one
+        resampling = getattr(Resampling, method, None)
+        if resampling is None:
+            raise ValueError(f"Resampling method unknown: {method}.")
+
+        # Set bounds based on given bbox or extent of centroids from object
+        if bbox:
+            minx, miny, maxx, maxy = rasterio.warp.transform_bounds(
+                obj.crs, "EPSG:4326", *bbox
+            )
+        else:
+            minx = obj_bounds[0] + 0.5 * obj_res
+            miny = obj_bounds[1] + 0.5 * obj_res
+            maxx = obj_bounds[2] - 0.5 * obj_res
+            maxy = obj_bounds[3] - 0.5 * obj_res
+            # For work to follow
+            minx, miny, maxx, maxy = rasterio.warp.transform_bounds(
+                obj.raster.crs, "EPSG:4326", minx, miny, maxx, maxy
+            )
+
+        # Make sure it lies within the extent of Pseudo Mercator
+        minx, miny = map(
+            max,
+            zip((minx, miny), (-180, -y_ext)),
+        )
+        maxx, maxy = map(
+            min,
+            zip((maxx, maxy), (180, y_ext)),
+        )
+
+        # For determining the most course zoom level
+        bounds_3857 = rasterio.warp.transform_bounds(
+            "EPSG:4326", "EPSG:3857", minx, miny, maxx, maxy
+        )
+
+        # Determine the lowest zoom level (meaning only one tile, remains)
+        xsize = bounds_3857[2] - bounds_3857[0]
+        ysize = bounds_3857[3] - bounds_3857[1]
+        xlvl = math.floor(math.log((y_ext_pm * 2) / xsize) / math.log(2))
+        ylvl = math.floor(math.log((y_ext_pm * 2) / ysize) / math.log(2))
+        minl = int(min(xlvl, ylvl))
+
+        # Shift for all the tiles from the previous level
+        shift = (
+            (0, 0),
+            (0, 1),
+            (1, 0),
+            (1, 1),
+        )
+
+        # Loop through the zoom levels
+        logger.info(f"Producing tiles from zoomlevel {nzl} to {minl}")
+        for zl in range(nzl, minl - 1, -1):
+            dst_res = (y_ext_pm * 2) / (px_size * 2**zl)  # resolution per zoom level
+            # Create the sub directory for the zoom levels
+            sd = Path(root, f"{zl}")
+            create_folder(sd)
+
+            # The highest zoomlevel has to be done from the original data
+            if not _from_png:
+                # Go through the zoomlevels
+                for x, y, bbox in tile_window_png(zl, minx, maxx, miny, maxy):
+                    # Ensure the directory for every x location is there
+                    ssd = Path(sd, f"{x}")
+                    create_folder(ssd)
+
+                    # Get tile bounds an dst transfrom in 3857
+                    tile_bounds = rasterio.warp.transform_bounds(
+                        "EPSG:3857",
+                        obj.raster.crs,
+                        *bbox,
+                    )
+                    dst_transform = Affine(dst_res, 0, bbox[0], 0, -dst_res, bbox[3])
+
+                    # Clip tile bounds with the boundary of the object
+                    temp_bounds = [
+                        max(tile_bounds[0], obj_bounds[0]),
+                        max(tile_bounds[1], obj_bounds[1]),
+                        min(tile_bounds[2], obj_bounds[2]),
+                        min(tile_bounds[3], obj_bounds[3]),
+                    ]
+                    # Select that data
+                    z = obj.sel(
+                        x=slice(temp_bounds[0] - obj_res, temp_bounds[2] + obj_res),
+                        y=slice(temp_bounds[3] + obj_res, temp_bounds[1] - obj_res),
+                    )
+                    z_bounds = z.raster.bounds
+                    tile = np.full((px_size, px_size), np.nan, dtype=np.float64)
+                    z_transform = Affine(
+                        obj_res,
+                        0,
+                        z_bounds[0],
+                        0,
+                        -obj_res,
+                        z_bounds[3],
+                    )
+                    # Warp that data to Pseudo Mercator
+                    rasterio.warp.reproject(
+                        z.values,
+                        tile,
+                        src_transform=z_transform,
+                        src_crs=obj.raster.crs,
+                        dst_transform=dst_transform,
+                        dst_crs="EPSG:3857",
+                        dst_nodata=np.nan,
+                        resampling=resampling,
+                    )
+                    # Create RGB bands from the warped data and add transparency to nan values
+                    rgb = elevation2rgb(tile.copy())
+                    _alpha = np.full((px_size, px_size), 255, dtype=np.uint8)
+                    _alpha[np.where(np.isnan(tile))] = 0
+                    rgb = np.stack(rgb + (_alpha,), axis=2)
+                    rgb_array = Image.fromarray(rgb)
+                    rgb_array.save(Path(ssd, f"{y}.png"))
+                # Set the flag to True, as now png's can be used from here on out
+                _from_png = True
+                _prev_zl = zl
+
+            # Use png's from the harddrive from the previous zoom level
+            else:
+                for x, y, _ in tile_window_png(zl, minx, maxx, miny, maxy):
+                    # Ensure directory
+                    ssd = Path(sd, f"{x}")
+                    create_folder(ssd)
+                    # Create a temporary array, 4 times the size of a tile
+                    temp = np.full((px_size * 2, px_size * 2), np.nan, dtype=np.float64)
+                    # Every tile from this level has 4 on the previous
+                    # Go though the shift to acquire all of them
+                    for sh in shift:
+                        loc = (x * 2 + sh[0], y * 2 + sh[1])
+                        _im_file = Path(
+                            root, f"{_prev_zl}", f"{loc[0]}", f"{loc[1]}.png"
+                        )
+                        # Check if the file is really there, if not: it was not written
+                        if not _im_file.exists():
+                            continue
+                        # Open the file and load the data as rgba bands
+                        _im = Image.open(_im_file)
+                        data_raw = np.array(_im.resize((px_size, px_size)))
+                        data = data_raw[:, :, :3]
+                        _elev = rgb2elevation(
+                            *np.split(data, data.shape[2], axis=2)
+                        ).reshape(px_size, px_size)
+                        # Use the alpha band to set data to nodata where the alpha is 0
+                        # (This means that these cells were also nodata the previous time around)
+                        _elev[np.where(data_raw[:, :, 3] == 0)] = np.nan
+                        del data_raw
+                        # Add it to the temporary array
+                        temp[
+                            px_size * sh[1] : px_size * (1 + sh[1]),
+                            px_size * sh[0] : px_size * (1 + sh[0]),
+                        ] = _elev
+                    # Downscale the array to the size of a tile
+                    temp = np.nanmean(
+                        np.nanmean(temp.reshape((256, 2, 256, 2)), axis=3), axis=1
+                    )
+                    # Do the rgba funzies again
+                    rgb = elevation2rgb(temp)
+                    _alpha = np.full((px_size, px_size), 255, dtype=np.uint8)
+                    _alpha[np.where(np.isnan(temp))] = 0
+                    del temp
+                    rgb = np.stack(rgb + (_alpha,), axis=2)
+                    rgb_array = Image.fromarray(rgb)
+                    # Save it to the drive
+                    rgb_array.save(Path(ssd, f"{y}.png"))
+                # On to the next zoomlevel
+                _prev_zl = zl
 
     def to_raster(
         self,
