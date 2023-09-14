@@ -2774,7 +2774,7 @@ class RasterDataArray(XRasterBase):
                             *np.split(data, data.shape[2], axis=2)
                         ).reshape(px_size, px_size)
                         # Use the alpha band to set data to nodata where the alpha is 0
-                        # (This means that these cells were 
+                        # (This means that these cells were
                         # also nodata the previous time around)
                         _elev[np.where(data_raw[:, :, 3] == 0)] = np.nan
                         del data_raw
