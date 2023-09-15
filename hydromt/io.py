@@ -377,12 +377,14 @@ def open_geodataset(
     logger=logger,
     **kwargs,
 ):
-    """Open point location GIS file and timeseries file combine a single xarray.Dataset.
+    """Open and combine geometry location GIS file and timeseries file in a xr.Dataset.
 
     Arguments
     ---------
     fn_locs: path, str
-        Path to point location file, see :py:meth:`geopandas.read_file` for options.
+        Path to geometry location file, see :py:meth:`geopandas.read_file` for options.
+        For point location, the file can also be a csv, parquet, xls(x) or xy file,
+        see :py:meth:`hydromt.io.open_vector_from_table` for options.
     fn_data: path, str
         Path to data file of which the index dimension which should match the geospatial
         coordinates index.
@@ -405,7 +407,7 @@ def open_geodataset(
         CRS mis-matches are resolved if given a GeoSeries or GeoDataFrame.
         Cannot be used with bbox.
     **kwargs:
-        Key-word argume
+        Key-word argument
     logger : logger object, optional
         The logger object used for logging messages. If not provided, the default
         logger will be used.
@@ -417,8 +419,11 @@ def open_geodataset(
     """
     if not isfile(fn_locs):
         raise IOError(f"GeoDataset point location file not found: {fn_locs}")
+    # For filetype [], only point geometry is supported
+    filetype = str(fn_locs).split(".")[-1].lower()
+    if filetype in ["csv", "parquet", "xls", "xlsx", "xy"]:
+        kwargs.update(assert_gtype="Point")
     # read geometry file
-    kwargs.update(assert_gtype="Point")
     gdf = open_vector(fn_locs, crs=crs, bbox=bbox, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
