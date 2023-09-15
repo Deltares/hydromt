@@ -21,7 +21,7 @@ Added
 - Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
 - Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
 - Relevant data adapters now have functionality for reporting and detecting the spatial and temporal extent they cover (# 503)
-- Data catalogs have a ``version`` and ``hydromt_version`` meta key that is used to determine compatibility between the catalog and the installed hydromt version. (PR #506)
+- Data catalogs have a ``hydromt_version`` meta key that is used to determine compatibility between the catalog and the installed hydromt version. (PR #506)
 
 Changed
 -------
