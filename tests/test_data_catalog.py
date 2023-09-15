@@ -296,11 +296,15 @@ def test_from_archive(tmpdir):
 
 
 def test_used_sources(tmpdir):
-    data_catalog = DataCatalog("artifact_data=v0.0.8")
-    data_catalog.get_source("koppen_geiger").mark_as_used()
+    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
+    data_catalog = DataCatalog(merged_yml_fn)
+    source = data_catalog.get_source("esa_worldcover")
+    source.mark_as_used()
     sources = data_catalog.iter_sources(used_only=True)
     assert len(sources) == 1
-    assert sources[0][0] == "koppen_geiger"
+    assert sources[0][0] == "esa_worldcover"
+    assert sources[0][1].provider == source.provider
+    assert sources[0][1].version == source.version
 
 
 def test_from_predefined_catalogs():
