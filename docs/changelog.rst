@@ -22,6 +22,7 @@ Added
 - Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
 - Relevant data adapters now have functionality for reporting and detecting the spatial and temporal extent they cover (# 503)
 - Data catalogs have a ``version`` and ``hydromt_version`` meta key that is used to determine compatibility between the catalog and the installed hydromt version. (PR #506)
+- Allow the root of a data catalog to point to an archive, this will be extracted to the ~/.hydromt_data folder. (PR #512)
 
 Changed
 -------
