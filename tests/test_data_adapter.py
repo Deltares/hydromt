@@ -4,6 +4,7 @@
 import glob
 import tempfile
 from os.path import abspath, dirname, join
+from typing import cast
 
 import geopandas as gpd
 import numpy as np
@@ -13,8 +14,13 @@ import xarray as xr
 
 import hydromt
 from hydromt import _compat as compat
-from hydromt.data_adapter import GeoDatasetAdapter
+from hydromt.data_adapter import (
+    GeoDataFrameAdapter,
+    GeoDatasetAdapter,
+    RasterDatasetAdapter,
+)
 from hydromt.data_catalog import DataCatalog
+from hydromt.gis_utils import to_geographic_bbox
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -114,23 +120,17 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     }
     data_catalog = DataCatalog()
     data_catalog.from_dict(yml_dict)
-    assert data_catalog.get_source(name)._parse_zoom_level() == 0  # default to first
-    assert data_catalog.get_source(name)._parse_zoom_level(zoom_level=1) == 1
-    assert (
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
-    )
-    assert (
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.29, "degree"))
-        == 0
-    )
-    assert (
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
-    )
-    assert data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "meter")) == 0
+    rds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    assert rds._parse_zoom_level() == 0  # default to first
+    assert rds._parse_zoom_level(zoom_level=1) == 1
+    assert rds._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
+    assert rds._parse_zoom_level(zoom_level=(0.29, "degree")) == 0
+    assert rds._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
+    assert rds._parse_zoom_level(zoom_level=(1, "meter")) == 0
     with pytest.raises(TypeError, match="zoom_level unit"):
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "asfd"))
+        rds._parse_zoom_level(zoom_level=(1, "asfd"))
     with pytest.raises(TypeError, match="zoom_level argument"):
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
+        rds._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
 
 
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
@@ -418,3 +418,23 @@ def test_cache_vrt(tmpdir, rioda_large):
     cat = DataCatalog(join(root, f"{name}.yml"), cache=True)
     cat.get_rasterdataset(name)
     assert len(glob.glob(join(cat._cache_dir, name, name, "*", "*", "*.tif"))) == 16
+
+
+def test_detect_extent(geodf, geoda, rioda, ts):
+    ts_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
+    ts_detected_bbox = to_geographic_bbox(*GeoDataFrameAdapter("").detect_bbox(geodf))
+    assert np.all(np.equal(ts_expected_bbox, ts_detected_bbox))
+
+    geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
+    geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
+    geoda_detected_bbox = to_geographic_bbox(*GeoDatasetAdapter("").detect_bbox(geoda))
+    geoda_detected_time_range = GeoDatasetAdapter("").detect_time_range(geoda)
+    assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
+    assert geoda_expected_time_range == geoda_detected_time_range
+
+    rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
+    rioda_detected_bbox = to_geographic_bbox(
+        *RasterDatasetAdapter("").detect_bbox(rioda)
+    )
+
+    assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))

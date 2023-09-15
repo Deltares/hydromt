@@ -3,7 +3,7 @@ import logging
 import warnings
 from os.path import join
 from pathlib import Path
-from typing import NewType, Union
+from typing import NewType, Optional, Tuple, Union
 
 import numpy as np
 import pyproj
@@ -34,16 +34,17 @@ class GeoDataFrameAdapter(DataAdapter):
     def __init__(
         self,
         path: str,
-        driver: str = None,
+        driver: Optional[str] = None,
         filesystem: str = "local",
-        crs: Union[int, str, dict] = None,
-        nodata: Union[dict, float, int] = None,
-        rename: dict = {},
-        unit_mult: dict = {},
-        unit_add: dict = {},
-        meta: dict = {},
-        attrs: dict = {},
-        driver_kwargs: dict = {},
+        crs: Optional[Union[int, str, dict]] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        extent: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
@@ -92,11 +93,28 @@ class GeoDataFrameAdapter(DataAdapter):
         attrs: dict, optional
             Additional attributes relating to data variables. For instance unit
             or long name of the variable.
+        extent: Extent(typed dict), Optional
+            Dictionary describing the spatial and time range the dataset covers.
+            should be of the form:
+            {
+                "bbox": [xmin, ymin, xmax, ymax],
+                "time_range": [start_datetime, end_datetime],
+            }
+            bbox coordinates should be in the same CRS as the data, and
+            time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         name, catalog_name: str, optional
-            Name of the dataset and catalog, optional for now.
+            Name of the dataset and catalog, optional.
+        provider: str, optional
+            A name to identifiy the specific provider of the dataset requested.
+            if None is provided, the last added source will be used.
+        version: str, optional
+            A name to identifiy the specific version of the dataset requested.
+            if None is provided, the last added source will be used.
         """
+        driver_kwargs = driver_kwargs or {}
+        extent = extent or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
@@ -122,6 +140,7 @@ class GeoDataFrameAdapter(DataAdapter):
             version=version,
         )
         self.crs = crs
+        self.extent = extent
 
     def to_file(
         self,
@@ -389,3 +408,64 @@ class GeoDataFrameAdapter(DataAdapter):
                 gdf[col].attrs.update(**self.attrs[col])
 
         return gdf
+
+    def get_bbox(self, detect=True):
+        """Return the bounding box and espg code of the dataset.
+
+        if the bounding box is not set and detect is True,
+        :py:meth:`hydromt.GeoDataframeAdapter.detect_bbox` will be used to detect it.
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the bounding box if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        bbox = self.extent.get("bbox", None)
+        crs = self.crs
+        if bbox is None and detect:
+            bbox, crs = self.detect_bbox()
+
+        return bbox, crs
+
+    def detect_bbox(
+        self,
+        gdf=None,
+    ) -> Tuple[Tuple[float, float, float, float], int]:
+        """Detect the bounding box and crs of the dataset.
+
+        If no dataset is provided, it will be fetched acodring to the settings in the
+        adapter. also see :py:meth:`hydromt.GeoDataframeAdapter.get_data`. the
+        coordinates are in the CRS of the dataset itself, which is also returned
+        alongside the coordinates.
+
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the bounding box of.
+            If none is provided, :py:meth:`hydromt.GeoDataframeAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        if gdf is None:
+            gdf = self.get_data()
+
+        crs = gdf.geometry.crs.to_epsg()
+        bounds = gdf.geometry.total_bounds
+        return bounds, crs
