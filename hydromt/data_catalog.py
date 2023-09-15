@@ -1178,7 +1178,6 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
-        source.mark_as_used()
         obj = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1273,7 +1272,6 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
-        source.mark_as_used()
         gdf = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1380,7 +1378,6 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
-        source.mark_as_used()
         obj = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1450,7 +1447,6 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
-        source.mark_as_used()
         obj = source.get_data(
             variables=variables,
             time_tuple=time_tuple,
