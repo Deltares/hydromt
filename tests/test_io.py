@@ -80,6 +80,11 @@ def test_open_vector(tmpdir, df, geodf, world):
 def test_open_geodataset(tmpdir, geodf):
     fn_gdf = str(tmpdir.join("points.geojson"))
     geodf.to_file(fn_gdf, driver="GeoJSON")
+    # create equivalent polygon file
+    fn_gdf_poly = str(tmpdir.join("polygons.geojson"))
+    geodf_poly = geodf.copy()
+    geodf_poly["geometry"] = geodf_poly.buffer(0.1)
+    geodf_poly.to_file(fn_gdf_poly, driver="GeoJSON")
     # create zeros timeseries
     ts = pd.DataFrame(
         index=pd.DatetimeIndex(["01-01-2000", "01-01-2001"]),
@@ -99,6 +104,10 @@ def test_open_geodataset(tmpdir, geodf):
     ds = hydromt.open_geodataset(fn_gdf, fn_ts)
     assert name in ds.data_vars
     assert np.all(ds[name].values == 0)
+    # test for polygon geometry
+    ds = hydromt.open_geodataset(fn_gdf_poly, fn_ts)
+    assert name in ds.data_vars
+    assert ds.vector.geom_type == "Polygon"
     with pytest.raises(IOError, match="GeoDataset point location file not found"):
         hydromt.open_geodataset("missing_file.csv")
     with pytest.raises(IOError, match="GeoDataset data file not found"):
