@@ -688,18 +688,13 @@ class DataCatalog(object):
         meta = yml.pop("meta", meta)
         # check version required hydromt version
         requested_version = meta.get("hydromt_version", None)
-        if requested_version is None:
-            # take from env var if it's set. makes testing much easier
-            requested_version = (
-                f"~={os.environ.get( 'HYDROMT_VERSION_OVERRIDE', __version__)}"
-            )
-
-        allow_dev = meta.get("allow_dev_version", True)
-        if not self._is_compatible(__version__, requested_version, allow_dev):
-            raise RuntimeError(
-                f"Data catalog requires Hydromt Version {requested_version} which is "
-                f"incompattible with current hydromt verison {__version__}."
-            )
+        if requested_version is not None:
+            allow_dev = meta.get("allow_dev_version", True)
+            if not self._is_compatible(__version__, requested_version, allow_dev):
+                raise RuntimeError(
+                    f"Data catalog requires Hydromt Version {requested_version} which "
+                    f"is incompattible with current hydromt verison {__version__}."
+                )
         if catalog_name is None:
             catalog_name = cast(
                 str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
@@ -716,11 +711,11 @@ class DataCatalog(object):
         return self
 
     def _is_compatible(
-        self, hydromt_version: str, requesed_range: str, allow_prerelease=True
+        self, hydromt_version: str, requested_range: str, allow_prerelease=True
     ) -> bool:
-        if requesed_range is None:
+        if requested_range is None:
             return True
-        requested = SpecifierSet(requesed_range)
+        requested = SpecifierSet(requested_range)
         version = Version(hydromt_version)
 
         if allow_prerelease:

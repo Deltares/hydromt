@@ -11,6 +11,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 
+import hydromt.data_catalog
 from hydromt.data_adapter import (
     DataAdapter,
     GeoDataFrameAdapter,
@@ -211,7 +212,14 @@ def test_versioned_catalog_entries(tmpdir):
 
 
 def test_versioned_catalogs(tmpdir, monkeypatch):
-    v999_yml_fn = join(DATADIR, "test_sources_v999.yml")
+    v999_yml_fn = join(tmpdir, "test_sources_v999.yml")
+    with open(v999_yml_fn, "w") as f:
+        f.write(
+            """\
+            meta:
+                hydromt_version: '==999.*'
+            """
+        )
 
     DataCatalog().from_predefined_catalogs("deltares_data")
     DataCatalog().from_predefined_catalogs("deltares_data", "v2022.7")
@@ -223,9 +231,8 @@ def test_versioned_catalogs(tmpdir, monkeypatch):
         DataCatalog(data_libs=[v999_yml_fn])
 
     with monkeypatch.context() as m:
-        m.setenv("HYDROMT_VERSION_OVERRIDE", "0.0.3.dev1")
-        with pytest.raises(RuntimeError):
-            _ = DataCatalog().from_predefined_catalogs("deltares_data")
+        m.setattr(hydromt.data_catalog, "__version__", "999.0.0")
+        DataCatalog(v999_yml_fn)
 
 
 def test_data_catalog(tmpdir):
