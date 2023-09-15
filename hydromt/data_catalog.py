@@ -730,7 +730,7 @@ class DataCatalog(object):
             # save catalog to cache
             with open(join(root, f"{catalog_name}.yml"), "w") as f:
                 data_dict = {"meta": {k: v for k, v in meta.items() if k != "root"}}
-                data_dict.upudate(copy.deepcopy(yml))
+                data_dict.update(copy.deepcopy(yml))
                 yaml.dump(data_dict, f, default_flow_style=False, sort_keys=False)
         self.from_dict(
             yml,
