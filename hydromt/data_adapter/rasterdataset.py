@@ -4,9 +4,10 @@ from __future__ import annotations
 import logging
 import os
 import warnings
+from datetime import datetime
 from os import PathLike
 from os.path import join
-from typing import NewType, Optional, Union
+from typing import NewType, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -44,17 +45,18 @@ class RasterDatasetAdapter(DataAdapter):
         filesystem: str = "local",
         crs: Optional[Union[int, str, dict]] = None,
         nodata: Optional[Union[dict, float, int]] = None,
-        rename: dict = {},
-        unit_mult: dict = {},
-        unit_add: dict = {},
-        meta: dict = {},
-        attrs: dict = {},
-        driver_kwargs: dict = {},
-        zoom_levels: dict = {},
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        extent: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
+        zoom_levels: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
-        provider=None,
-        version=None,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial raster data.
@@ -102,15 +104,33 @@ class RasterDatasetAdapter(DataAdapter):
         attrs: dict, optional
             Additional attributes relating to data variables. For instance unit
             or long name of the variable.
+        extent: Extent(typed dict), Optional
+            Dictionary describing the spatial and time range the dataset covers.
+            should be of the form:
+            {
+                "bbox": [xmin, ymin, xmax, ymax],
+                "time_range": [start_datetime, end_datetime],
+            }
+            bbox coordinates should be in the same CRS as the data, and
+            time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
-        name, catalog_name: str, optional
-            Name of the dataset and catalog, optional for now.
         zoomlevels: dict, optional
             Dictionary with zoom levels and associated resolution in the unit of the
             data CRS.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional.
+        provider: str, optional
+            A name to identifiy the specific provider of the dataset requested.
+            if None is provided, the last added source will be used.
+        version: str, optional
+            A name to identifiy the specific version of the dataset requested.
+            if None is provided, the last added source will be used.
 
         """
+        driver_kwargs = driver_kwargs or {}
+        extent = extent or {}
+        zoom_levels = zoom_levels or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
@@ -137,6 +157,7 @@ class RasterDatasetAdapter(DataAdapter):
         )
         self.crs = crs
         self.zoom_levels = zoom_levels
+        self.extent = extent
 
     def to_file(
         self,
@@ -270,8 +291,8 @@ class RasterDatasetAdapter(DataAdapter):
         self,
         time_tuple: Optional[tuple] = None,
         variables: Optional[list] = None,
-        zoom_level: int = 0,
-        geom: gpd.GeoSeries = None,
+        zoom_level: Optional[int] = 0,
+        geom: Optional[gpd.GeoSeries] = None,
         bbox: Optional[list] = None,
         logger=logger,
     ):
@@ -331,7 +352,7 @@ class RasterDatasetAdapter(DataAdapter):
             for fn in fns:
                 ds = xr.open_zarr(fn, **kwargs)
                 if do_preprocess:
-                    ds = preprocess(ds)
+                    ds = preprocess(ds)  # type: ignore
                 ds_lst.append(ds)
             ds = xr.merge(ds_lst)
         elif self.driver == "raster_tindex":
@@ -622,3 +643,116 @@ class RasterDatasetAdapter(DataAdapter):
         zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
         logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
         return zl
+
+    def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
+        """Return the bounding box and espg code of the dataset.
+
+        if the bounding box is not set and detect is True,
+        :py:meth:`hydromt.RasterdatasetAdapter.detect_bbox` will be used to detect it.
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the bounding box if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        bbox = self.extent.get("bbox", None)
+        crs = cast(int, self.crs)
+        if bbox is None and detect:
+            bbox, crs = self.detect_bbox()
+
+        return bbox, crs
+
+    def get_time_range(self, detect=True):
+        """Detect the time range of the dataset.
+
+        if the time range is not set and detect is True,
+        :py:meth:`hydromt.RasterdatasetAdapter.detect_time_range` will be used
+        to detect it.
+
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the time range if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        time_range = self.extent.get("time_range", None)
+        if time_range is None and detect:
+            time_range = self.detect_time_range()
+
+        return time_range
+
+    def detect_bbox(
+        self,
+        ds=None,
+    ) -> Tuple[Tuple[float, float, float, float], int]:
+        """Detect the bounding box and crs of the dataset.
+
+        If no dataset is provided, it will be fetched according to the settings in the
+        adapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`. the
+        coordinates are in the CRS of the dataset itself, which is also returned
+        alongside the coordinates.
+
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the bounding box of.
+            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        if ds is None:
+            ds = self.get_data()
+        crs = ds.raster.crs.to_epsg()
+        bounds = ds.raster.bounds
+
+        return bounds, crs
+
+    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
+        """Detect the temporal range of the dataset.
+
+        If no dataset is provided, it will be fetched accodring to the settings in the
+        addapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`.
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the time range of. It must have a time dimentsion set.
+            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        if ds is None:
+            ds = self.get_data()
+        return (
+            ds[ds.raster.time_dim].min().values,
+            ds[ds.raster.time_dim].max().values,
+        )

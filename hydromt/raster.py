@@ -226,6 +226,20 @@ class XGeoBase(object):
         return self._obj.coords[GEO_MAP_COORD].attrs.get(key, placeholder)
 
     @property
+    def time_dim(self):
+        """Time dimension name."""
+        dim = self.get_attrs("time_dim")
+        if dim not in self._obj.dims or np.dtype(self._obj[dim]).type != np.datetime64:
+            self.set_attrs(time_dim=None)
+            tdims = []
+            for dim in self._obj.dims:
+                if np.dtype(self._obj[dim]).type == np.datetime64:
+                    tdims.append(dim)
+            if len(tdims) == 1:
+                self.set_attrs(time_dim=tdims[0])
+        return self.get_attrs("time_dim")
+
+    @property
     def crs(self) -> CRS:
         """Return horizontal Coordinate Reference System."""
         # return horizontal crs by default to avoid errors downstream

@@ -4,8 +4,9 @@ from __future__ import annotations
 import logging
 from abc import ABCMeta, abstractmethod
 from itertools import product
+from pathlib import Path
 from string import Formatter
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -112,18 +113,18 @@ class DataAdapter(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        path,
-        driver=None,
+        path: str | Path,
+        driver: Optional[str] = None,
         filesystem="local",
-        nodata=None,
-        rename={},
-        unit_mult={},
-        unit_add={},
-        meta={},
-        attrs={},
-        driver_kwargs={},
-        name="",  # optional for now
-        catalog_name="",  # optional for now
+        nodata: Optional[Union[dict, float, int]] = None,
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
+        name: str = "",
+        catalog_name: str = "",
         provider: Optional[str] = None,
         version: Optional[str] = None,
     ):
@@ -169,6 +170,12 @@ class DataAdapter(object, metaclass=ABCMeta):
             Name of the dataset and catalog, optional for now.
 
         """
+        unit_mult = unit_mult or {}
+        unit_add = unit_add or {}
+        meta = meta or {}
+        attrs = attrs or {}
+        driver_kwargs = driver_kwargs or {}
+        rename = rename or {}
         self.name = name
         self.catalog_name = catalog_name
         self.provider = provider
@@ -241,7 +248,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self,
         time_tuple: Optional[tuple] = None,
         variables: Optional[list] = None,
-        zoom_level: int = 0,
+        zoom_level: Optional[int] = 0,
         **kwargs,
     ):
         """Resolve {year}, {month} and {variable} keywords in self.path.
@@ -303,7 +310,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         if variables is not None:
             variables = np.atleast_1d(variables).tolist()
             mv_inv = {v: k for k, v in self.rename.items()}
-            vrs = [mv_inv.get(var, var) for var in variables]
+            vrs = [mv_inv.get(var, var) for var in variables]  # type: ignore
             postfix += f"; variables: {variables}"
 
         # get filenames with glob for all date / variable combinations

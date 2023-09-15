@@ -20,6 +20,7 @@ Added
 - Adapters can now clip data that is passed through a python object the same way as through the data catalog. (PR #481)
 - Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
 - Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
+- Relevant data adapters now have functionality for reporting and detecting the spatial and temporal extent they cover (# 503)
 - Added documentation for how to start your own plugin (#446)
 
 Changed

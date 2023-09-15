@@ -216,21 +216,6 @@ class GeoBase(raster.XGeoBase):
         return self.geometry.sindex
 
     @property
-    def time_dim(self):
-        """Time dimension name."""
-        # TODO: move to geobase & remove from self.attrs?
-        dim = self.get_attrs("time_dim")
-        if dim not in self._obj.dims or np.dtype(self._obj[dim]).type != np.datetime64:
-            self.set_attrs(time_dim=None)
-            tdims = []
-            for dim in self._obj.dims:
-                if np.dtype(self._obj[dim]).type == np.datetime64:
-                    tdims.append(dim)
-            if len(tdims) == 1:
-                self.set_attrs(time_dim=tdims[0])
-        return self.get_attrs("time_dim")
-
-    @property
     def index(self):
         """Return the index values."""
         return self._obj[self.index_dim]
