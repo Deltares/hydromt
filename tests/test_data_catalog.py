@@ -301,6 +301,7 @@ def test_used_sources(tmpdir):
     source = data_catalog.get_source("esa_worldcover")
     source.mark_as_used()
     sources = data_catalog.iter_sources(used_only=True)
+    assert len(data_catalog) > 1
     assert len(sources) == 1
     assert sources[0][0] == "esa_worldcover"
     assert sources[0][1].provider == source.provider
