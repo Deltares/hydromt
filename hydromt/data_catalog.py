@@ -21,6 +21,7 @@ import pandas as pd
 import requests
 import xarray as xr
 import yaml
+from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 from hydromt.utils import partition_dictionaries
@@ -117,7 +118,8 @@ class DataCatalog(object):
         for lib, version in artifact_keys.items():
             warnings.warn(
                 "Adding a predefined data catalog as key-word argument is deprecated, "
-                f"add the catalog as '{lib}={version}' to the data_libs list instead.",
+                f"add the catalog as '{lib}={version}'"
+                " to the data_libs list instead.",
                 DeprecationWarning,
             )
             if not version:  # False or None
@@ -526,18 +528,38 @@ class DataCatalog(object):
         urlpath = self.predefined_catalogs[name].get("urlpath")
         versions_dict = self.predefined_catalogs[name].get("versions")
         if version == "latest" or not isinstance(version, str):
+            # if a specific version is requested, we don't have to try others
             versions = list(versions_dict.keys())
             if len(versions) > 1:
                 version = versions[np.argmax([Version(v) for v in versions])]
             else:
                 version = versions[0]
-        urlpath = urlpath.format(version=versions_dict.get(version, version))
-        if urlpath.split(".")[-1] in ["gz", "zip"]:
-            self.logger.info(f"Reading data catalog {name} {version} from archive")
-            self.from_archive(urlpath, name=name, version=version)
-        else:
-            self.logger.info(f"Reading data catalog {name} {version}")
-            self.from_yml(urlpath, catalog_name=name)
+
+        if version not in versions_dict:
+            raise RuntimeError(
+                f"Unknown version requested {version}. "
+                f"options are :{versions_dict.keys()}"
+            )
+        possible_catalg_versions = [(Version(k), v) for k, v in versions_dict.items()]
+        possible_catalg_versions_sorted = reversed(sorted(possible_catalg_versions))
+
+        for _, identifier in possible_catalg_versions_sorted:
+            try:
+                urlpath = urlpath.format(version=identifier)
+                if urlpath.split(".")[-1] in ["gz", "zip"]:
+                    self.logger.info(
+                        f"Reading data catalog {name} {version} from archive"
+                    )
+                    self.from_archive(urlpath, name=name, version=version)
+                else:
+                    self.logger.info(f"Reading data catalog {name} {version}")
+                    self.from_yml(urlpath, catalog_name=name)
+
+                return self
+            except RuntimeError:
+                continue
+
+        raise RuntimeError("No compatible compatible catalog version could be found")
 
         return self
 
@@ -665,14 +687,14 @@ class DataCatalog(object):
         # read meta data
         meta = yml.pop("meta", meta)
         # check version required hydromt version
-        hydromt_version = meta.get("hydromt_version", __version__)
-        self_version = Version(__version__)
-        yml_version = Version(hydromt_version)
-        if yml_version > self_version:
-            self.logger.warning(
-                f"Specified HydroMT version ({hydromt_version}) \
-                  more recent than installed version ({__version__}).",
-            )
+        requested_version = meta.get("hydromt_version", None)
+        if requested_version is not None:
+            allow_dev = meta.get("allow_dev_version", True)
+            if not self._is_compatible(__version__, requested_version, allow_dev):
+                raise RuntimeError(
+                    f"Data catalog requires Hydromt Version {requested_version} which "
+                    f"is incompattible with current hydromt verison {__version__}."
+                )
         if catalog_name is None:
             catalog_name = cast(
                 str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
@@ -687,6 +709,19 @@ class DataCatalog(object):
             mark_used=mark_used,
         )
         return self
+
+    def _is_compatible(
+        self, hydromt_version: str, requested_range: str, allow_prerelease=True
+    ) -> bool:
+        if requested_range is None:
+            return True
+        requested = SpecifierSet(requested_range)
+        version = Version(hydromt_version)
+
+        if allow_prerelease:
+            return version in requested or Version(version.base_version) in requested
+        else:
+            return version in requested
 
     def from_dict(
         self,

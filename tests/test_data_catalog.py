@@ -11,6 +11,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 
+import hydromt.data_catalog
 from hydromt.data_adapter import (
     DataAdapter,
     GeoDataFrameAdapter,
@@ -127,7 +128,7 @@ def test_data_catalog_io(tmpdir):
     print(data_catalog.get_source("merit_hydro"))
 
 
-def test_versioned_catalogs(tmpdir):
+def test_versioned_catalog_entries(tmpdir):
     # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
@@ -210,6 +211,30 @@ def test_versioned_catalogs(tmpdir):
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
+def test_versioned_catalogs(tmpdir, monkeypatch):
+    v999_yml_fn = join(tmpdir, "test_sources_v999.yml")
+    with open(v999_yml_fn, "w") as f:
+        f.write(
+            """\
+            meta:
+                hydromt_version: '==999.*'
+            """
+        )
+
+    DataCatalog().from_predefined_catalogs("deltares_data")
+    DataCatalog().from_predefined_catalogs("deltares_data", "v2022.7")
+
+    with pytest.raises(RuntimeError, match="Unknown version requested "):
+        _ = DataCatalog().from_predefined_catalogs("deltares_data", "v1993.7")
+
+    with pytest.raises(RuntimeError, match="Data catalog requires Hydromt Version"):
+        DataCatalog(data_libs=[v999_yml_fn])
+
+    with monkeypatch.context() as m:
+        m.setattr(hydromt.data_catalog, "__version__", "999.0.0")
+        DataCatalog(v999_yml_fn)
+
+
 def test_data_catalog(tmpdir):
     data_catalog = DataCatalog()
     # initialized with empty dict
@@ -239,7 +264,7 @@ def test_data_catalog(tmpdir):
         data_catalog.from_artifacts("deltares_data")
     assert len(data_catalog._sources) > 0
     with pytest.raises(
-        IOError, match="URL b'404: Not Found'"
+        RuntimeError, match="Unknown version requested"
     ), pytest.deprecated_call():
         data_catalog = DataCatalog(deltares_data="unknown_version")
 
