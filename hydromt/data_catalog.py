@@ -10,9 +10,10 @@ import logging
 import os
 import shutil
 import warnings
+from datetime import datetime
 from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Dict, List, Optional, Tuple, TypedDict, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -45,6 +46,13 @@ __all__ = [
 SourceSpecDict = TypedDict(
     "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
 )
+Extent = TypedDict(
+    "Extent",
+    {
+        "bbox": Tuple[float, float, float, float],
+        "time_range": Tuple[datetime, datetime],
+    },
+)
 
 
 class DataCatalog(object):
@@ -60,8 +68,8 @@ class DataCatalog(object):
         data_libs: Union[List, str] = [],
         fallback_lib: Optional[str] = "artifact_data",
         logger=logger,
-        cache: bool = False,
-        cache_dir: str = None,
+        cache: Optional[bool] = False,
+        cache_dir: Optional[str] = None,
         **artifact_keys,
     ) -> None:
         """Catalog of DataAdapter sources.
@@ -155,6 +163,96 @@ class DataCatalog(object):
         if not self._catalogs:
             self.set_predefined_catalogs()
         return self._catalogs
+
+    def get_source_bbox(
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
+        detect: bool = True,
+        strict: bool = False,
+    ) -> Optional[Tuple[Tuple[float, float, float, float], int]]:
+        """Retrieve the bounding box and crs of the source.
+
+        Parameters
+        ----------
+        source: str,
+            the name of the data source.
+        provider: Optional[str]
+            the provider of the source to detect the bbox of, if None, the last one
+            added will be used.
+        version: Optional[str]
+            the version of the source to detect the bbox of, if None, the last one
+            added will be used.
+        detect: bool
+            Whether to detect the bbox of the source if it is not set.
+        strict: bool
+            Raise an error if the adapter does not support bbox detection (such as
+            dataframes). In that case, a warning will be logged instead.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        s = self.get_source(source, provider, version)
+        try:
+            return s.get_bbox(detect=detect)  # type: ignore
+        except TypeError as e:
+            if strict:
+                raise e
+            else:
+                self.logger.warning(
+                    f"Source of type {type(s)} does not support detecting spatial"
+                    "extents. skipping..."
+                )
+
+    def get_source_time_range(
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
+        detect: bool = True,
+        strict: bool = False,
+    ) -> Optional[Tuple[datetime, datetime]]:
+        """Detect the temporal range of the dataset.
+
+        Parameters
+        ----------
+        source: str,
+            the name of the data source.
+        provider: Optional[str]
+            the provider of the source to detect the time range of, if None,
+            the last one added will be used.
+        version: Optional[str]
+            the version of the source to detect the time range of, if None, the last one
+            added will be used.
+        detect: bool
+            Whether to detect the time range of the source if it is not set.
+        strict: bool
+            Raise an error if the adapter does not support time range detection (such as
+            dataframes). In that case, a warning will be logged instead.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        s = self.get_source(source, provider, version)
+        try:
+            return s.get_time_range(detect=detect)  # type: ignore
+        except TypeError as e:
+            if strict:
+                raise e
+            else:
+                self.logger.warning(
+                    f"Source of type {type(s)} does not support detecting"
+                    " temporalextents. skipping..."
+                )
 
     def get_source(
         self,
@@ -354,7 +452,9 @@ class DataCatalog(object):
         """Add data sources to library or update them."""
         self.update(**kwargs)
 
-    def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
+    def set_predefined_catalogs(
+        self, urlpath: Optional[Union[Path, str]] = None
+    ) -> Dict:
         """Initialise the predefined catalogs."""
         # get predefined_catalogs
         urlpath = self._url if urlpath is None else urlpath
@@ -461,8 +561,13 @@ class DataCatalog(object):
 
         raise RuntimeError("No compatible compatible catalog version could be found")
 
+        return self
+
     def from_archive(
-        self, urlpath: Union[Path, str], version: str = None, name: str = None
+        self,
+        urlpath: Union[Path, str],
+        version: Optional[str] = None,
+        name: Optional[str] = None,
     ) -> DataCatalog:
         """Read a data archive including a data_catalog.yml file.
 
@@ -501,8 +606,8 @@ class DataCatalog(object):
     def from_yml(
         self,
         urlpath: Union[Path, str],
-        root: str = None,
-        catalog_name: str = None,
+        root: Optional[str] = None,
+        catalog_name: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
         """Add data sources based on yaml file.
@@ -596,7 +701,9 @@ class DataCatalog(object):
                 f"incompattible with current hydromt verison {__version__}."
             )
         if catalog_name is None:
-            catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
+            catalog_name = cast(
+                str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
+            )
         if root is None:
             root = meta.get("root", os.path.dirname(urlpath))
         self.from_dict(
@@ -606,6 +713,7 @@ class DataCatalog(object):
             category=meta.get("category", None),
             mark_used=mark_used,
         )
+        return self
 
     def _is_compatible(
         self, hydromt_version: str, requesed_range: str, allow_prerelease=True
@@ -624,8 +732,8 @@ class DataCatalog(object):
         self,
         data_dict: Dict,
         catalog_name: str = "",
-        root: Union[str, Path] = None,
-        category: str = None,
+        root: Optional[Union[str, Path]] = None,
+        category: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
         """Add data sources based on dictionary.
@@ -1142,7 +1250,7 @@ class DataCatalog(object):
             )
         if isinstance(data_like, (str, Path)):
             if str(data_like) in self.sources:
-                name = data_like
+                name = str(data_like)
                 source = self.get_source(name, provider=provider, version=version)
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
@@ -1367,8 +1475,8 @@ def _parse_data_source_dict(
     name: str,
     data_source_dict: Dict,
     catalog_name: str = "",
-    root: Union[Path, str] = None,
-    category: str = None,
+    root: Optional[Union[Path, str]] = None,
+    category: Optional[str] = None,
 ) -> Dict:
     """Parse data source dictionary."""
     # link yml keys to adapter classes
