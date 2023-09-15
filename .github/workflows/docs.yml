@@ -33,6 +33,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
+    timeout-minutes: 15
     steps:
       - name: checkout code
         uses: actions/checkout@v3
