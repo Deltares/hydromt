@@ -3,6 +3,7 @@
 import os
 from os.path import abspath, dirname, join
 from pathlib import Path
+from typing import cast
 
 import geopandas as gpd
 import numpy as np
@@ -10,12 +11,18 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
+from hydromt.data_adapter import (
+    DataAdapter,
+    GeoDataFrameAdapter,
+    GeoDatasetAdapter,
+    RasterDatasetAdapter,
+)
 from hydromt.data_catalog import (
     DataCatalog,
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
+from hydromt.gis_utils import to_geographic_bbox
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -143,10 +150,12 @@ def test_versioned_catalogs(tmpdir):
     source = aws_data_catalog.get_source("esa_worldcover")
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
     assert source.version == "2021"
-    source = aws_data_catalog.get_source("esa_worldcover", version=2021)
+    source = aws_data_catalog.get_source("esa_worldcover", version="2021")
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
     assert source.version == "2021"
-    source = aws_data_catalog.get_source("esa_worldcover", version=2021, provider="aws")
+    source = aws_data_catalog.get_source(
+        "esa_worldcover", version="2021", provider="aws"
+    )
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
     # test round trip to and from dict
     aws_data_catalog2 = DataCatalog().from_dict(aws_data_catalog.to_dict())
@@ -154,13 +163,15 @@ def test_versioned_catalogs(tmpdir):
 
     # test errors
     with pytest.raises(KeyError):
-        aws_data_catalog.get_source("esa_worldcover", version=2021, provider="asdfasdf")
+        aws_data_catalog.get_source(
+            "esa_worldcover", version="2021", provider="asdfasdf"
+        )
     with pytest.raises(KeyError):
         aws_data_catalog.get_source(
             "esa_worldcover", version="asdfasdf", provider="aws"
         )
     with pytest.raises(KeyError):
-        aws_data_catalog.get_source("asdfasdf", version=2021, provider="aws")
+        aws_data_catalog.get_source("asdfasdf", version="2021", provider="aws")
 
     # make sure we trigger user warning when overwriting versions
     with pytest.warns(UserWarning):
@@ -178,7 +189,7 @@ def test_versioned_catalogs(tmpdir):
     assert source_loc.filesystem == "local"
     assert source_loc.version == "2021"  # get newest version
     # test get_source with version only
-    assert merged_catalog.get_source("esa_worldcover", version=2021) == source_loc
+    assert merged_catalog.get_source("esa_worldcover", version="2021") == source_loc
     # test round trip to and from dict
     merged_catalog2 = DataCatalog().from_dict(merged_catalog.to_dict())
     assert merged_catalog2 == merged_catalog
@@ -200,7 +211,7 @@ def test_versioned_catalogs(tmpdir):
 
 
 def test_data_catalog(tmpdir):
-    data_catalog = DataCatalog(data_libs=None)
+    data_catalog = DataCatalog()
     # initialized with empty dict
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
@@ -217,7 +228,7 @@ def test_data_catalog(tmpdir):
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataAdapter"):
-        data_catalog.add_source("test", "string")
+        data_catalog.add_source("test", "string")  # type: ignore
     # check that no sources are loaded if fallback_lib is None
     assert not DataCatalog(fallback_lib=None).sources
     # test artifact keys (NOTE: legacy code!)
@@ -499,3 +510,44 @@ def test_deprecation_warnings(artifact_data):
         fn = artifact_data["gtsmv3_eu_era5"].path
         # should be driver_kwargs=dict(chunks={'time': 100})
         artifact_data.get_geodataset(fn, chunks={"time": 100})
+
+
+def test_detect_extent():
+    data_catalog = DataCatalog()  # read artifacts
+    data_catalog.sources  # load artifact data as fallback
+
+    # raster dataset
+    name = "chirps_global"
+    bbox = (
+        11.599998474121094,
+        45.20000076293945,
+        13.000083923339844,
+        46.79985427856445,
+    )
+    expected_temporal_range = tuple(pd.to_datetime(["2010-02-02", "2010-02-15"]))
+    ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    detected_temporal_range = ds.get_time_range(detect=True)
+    assert np.all(np.equal(detected_spatial_range, bbox))
+    assert detected_temporal_range == expected_temporal_range
+
+    # geodataframe
+    name = "gadm_level1"
+    bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
+    ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
+
+    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    assert np.all(np.equal(detected_spatial_range, bbox))
+
+    # geodataset
+    name = "gtsmv3_eu_era5"
+    bbox = (12.22412, 45.22705, 12.99316, 45.62256)
+    expected_temporal_range = (
+        np.datetime64("2010-02-01"),
+        np.datetime64("2010-02-14T23:50:00.000000000"),
+    )
+    ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
+    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    detected_temporal_range = ds.get_time_range(detect=True)
+    assert np.all(np.equal(detected_spatial_range, bbox))
+    assert detected_temporal_range == expected_temporal_range
