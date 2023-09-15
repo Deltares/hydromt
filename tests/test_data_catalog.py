@@ -244,6 +244,7 @@ def test_data_catalog(tmpdir):
     # test keys, getitem,
     keys = [key for key, _ in data_catalog.iter_sources()]
     source = data_catalog.get_source(keys[0])
+    assert keys[0] in data_catalog
     assert isinstance(source, DataAdapter)
     assert keys[0] in data_catalog.get_source_names()
     # add source from dict
@@ -292,6 +293,14 @@ def test_from_archive(tmpdir):
     # failed to download
     with pytest.raises(ConnectionError, match="Data download failed"):
         data_catalog.from_archive("https://asdf.com/asdf.zip")
+
+
+def test_used_sources(tmpdir):
+    data_catalog = DataCatalog("artifact_data=v0.0.8")
+    data_catalog.get_source("koppen_geiger").mark_as_used()
+    sources = data_catalog.iter_sources(used_only=True)
+    assert len(sources) == 1
+    assert sources[0][0] == "koppen_geiger"
 
 
 def test_from_predefined_catalogs():

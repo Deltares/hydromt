@@ -13,7 +13,7 @@ import warnings
 from datetime import datetime
 from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TypedDict, Union, cast
+from typing import Dict, Iterator, List, Optional, Tuple, TypedDict, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -105,7 +105,6 @@ class DataCatalog(object):
             data_libs = np.atleast_1d(data_libs).tolist()
         self._sources = {}  # dictionary of DataAdapter
         self._catalogs = {}  # dictionary of predefined Catalogs
-        self._used_data = []
         self._fallback_lib = fallback_lib
         self.logger = logger
 
@@ -396,24 +395,31 @@ class DataCatalog(object):
         )
         self.add_source(key, value)
 
-    def iter_sources(self) -> List[Tuple[str, DataAdapter]]:
-        """Return a flat list of all available data sources with no duplicates."""
+    def iter_sources(self, used_only=False) -> List[Tuple[str, DataAdapter]]:
+        """Return a flat list of all available data sources.
+
+        Parameters
+        ----------
+        used_only: bool, optional
+            If True, return only data entries marked as used, by default False.
+        """
         ans = []
         for source_name, available_providers in self._sources.items():
             for _, available_versions in available_providers.items():
                 for _, adapter in available_versions.items():
+                    if used_only and not adapter._used:
+                        continue
                     ans.append((source_name, adapter))
 
         return ans
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Tuple[str, DataAdapter]]:
         """Iterate over sources."""
-        warnings.warn(
-            "Using iterating over the DataCatalog directly is deprecated."
-            " Please use cat.iter_sources()",
-            DeprecationWarning,
-        )
-        return self.iter_sources()
+        return iter(self.iter_sources())
+
+    def __contains__(self, key: str) -> bool:
+        """Check if source is in catalog."""
+        return key in self._sources
 
     def __len__(self):
         """Return number of sources."""
@@ -789,9 +795,9 @@ class DataCatalog(object):
                 root=root,
                 category=category,
             )
-            self.add_source(name, adapter)
             if mark_used:
-                self._used_data.append(name)
+                adapter.mark_as_used()
+            self.add_source(name, adapter)
 
         return self
 
@@ -822,11 +828,12 @@ class DataCatalog(object):
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
         """
-        source_names = self._used_data if used_only else source_names
         yml_dir = os.path.dirname(abspath(path))
         if root == "auto":
             root = yml_dir
-        data_dict = self.to_dict(root=root, source_names=source_names, meta=meta)
+        data_dict = self.to_dict(
+            root=root, source_names=source_names, meta=meta, used_only=used_only
+        )
         if str(root) == yml_dir:
             data_dict.pop("root", None)  # remove root if it equals the yml_dir
         if data_dict:
@@ -840,6 +847,7 @@ class DataCatalog(object):
         source_names: Optional[List] = None,
         root: Union[Path, str] = None,
         meta: dict = {},
+        used_only: bool = False,
     ) -> Dict:
         """Export the data catalog to a dictionary.
 
@@ -853,6 +861,8 @@ class DataCatalog(object):
         meta: dict, optional
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
+        used_only: bool, optional
+            If True, export only data entries marked as used, by default False.
 
         Returns
         -------
@@ -864,7 +874,8 @@ class DataCatalog(object):
             root = abspath(root)
             meta.update(**{"root": root})
             root_drive = os.path.splitdrive(root)[0]
-        sorted_sources = sorted(self.iter_sources(), key=lambda x: x[0])
+        sources = self.iter_sources(used_only=used_only)
+        sorted_sources = sorted(sources, key=lambda x: x[0])
         for name, source in sorted_sources:  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
@@ -1167,8 +1178,7 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
-        # TODO add also provider and version to used data
-        self._used_data.append(name)
+        source.mark_as_used()
         obj = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1263,7 +1273,7 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
-        self._used_data.append(name)
+        source.mark_as_used()
         gdf = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1370,7 +1380,7 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
-        self._used_data.append(name)
+        source.mark_as_used()
         obj = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1440,7 +1450,7 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
-        self._used_data.append(name)
+        source.mark_as_used()
         obj = source.get_data(
             variables=variables,
             time_tuple=time_tuple,
