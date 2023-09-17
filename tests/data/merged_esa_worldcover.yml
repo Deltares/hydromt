@@ -24,6 +24,5 @@ esa_worldcover:
       rename:
         ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
       filesystem: s3
-      driver_kwargs:
-        storage_options:
-          anon: true
+      storage_options:
+        anon: true

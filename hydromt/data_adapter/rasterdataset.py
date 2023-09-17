@@ -42,7 +42,7 @@ class RasterDatasetAdapter(DataAdapter):
         self,
         path: str,
         driver: Optional[str] = None,
-        filesystem: str = "local",
+        filesystem: Optional[str] = None,
         crs: Optional[Union[int, str, dict]] = None,
         nodata: Optional[Union[dict, float, int]] = None,
         rename: Optional[dict] = None,
@@ -52,6 +52,7 @@ class RasterDatasetAdapter(DataAdapter):
         attrs: Optional[dict] = None,
         extent: Optional[dict] = None,
         driver_kwargs: Optional[dict] = None,
+        storage_options: Optional[dict] = None,
         zoom_levels: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
@@ -79,9 +80,10 @@ class RasterDatasetAdapter(DataAdapter):
             and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
-        filesystem: {'local', 'gcs', 's3'}, optional
+        filesystem: str, optional
             Filesystem where the data is stored (local, cloud, http etc.).
-            By default, local.
+            If None (default) the filesystem is inferred from the path.
+            See :py:func:`fsspec.registry.known_implementations` for all options.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
             proj (str or dict) or wkt (str). Only used if the data has no native CRS.
@@ -115,6 +117,8 @@ class RasterDatasetAdapter(DataAdapter):
             time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        storage_options: dict, optional
+            Additional key-word arguments passed to the fsspec FileSystem object.
         zoomlevels: dict, optional
             Dictionary with zoom levels and associated resolution in the unit of the
             data CRS.
@@ -150,6 +154,7 @@ class RasterDatasetAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            storage_options=storage_options,
             name=name,
             catalog_name=catalog_name,
             provider=provider,
@@ -296,17 +301,6 @@ class RasterDatasetAdapter(DataAdapter):
         bbox: Optional[list] = None,
         logger=logger,
     ):
-        # Extract storage_options from kwargs to instantiate fsspec object correctly
-        so_kwargs = dict()
-        if "storage_options" in self.driver_kwargs:
-            so_kwargs = self.driver_kwargs["storage_options"]
-            # For s3, anonymous connection still requires --no-sign-request profile to
-            # read the data setting environment variable works
-            if "anon" in so_kwargs:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
-            else:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-
         # parse zoom level (raster only)
         if len(self.zoom_levels) > 0:
             zoom_level = self._parse_zoom_level(zoom_level, geom, bbox, logger=logger)
@@ -316,55 +310,34 @@ class RasterDatasetAdapter(DataAdapter):
             time_tuple=time_tuple,
             variables=variables,
             zoom_level=zoom_level,
-            **so_kwargs,
         )
-
         return fns
 
     def _read_data(self, fns, geom, bbox, cache_root, logger=logger):
         kwargs = self.driver_kwargs.copy()
-        # zarr can use storage options directly, the rest should be converted to
-        # file-like objects
-        if "storage_options" in kwargs and self.driver == "raster":
-            storage_options = kwargs.pop("storage_options")
-            fs = self.get_filesystem(**storage_options)
-            fns = [fs.open(f) for f in fns]
 
         # read using various readers
         logger.info(f"Reading {self.name} {self.driver} data from {self.path}")
         if self.driver == "netcdf":
-            if self.filesystem == "local":
-                if "preprocess" in kwargs:
-                    preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
-                    kwargs.update(preprocess=preprocess)
-                ds = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
-            else:
-                raise NotImplementedError(
-                    "Remote (cloud) RasterDataset not supported with driver netcdf."
-                )
+            if "preprocess" in kwargs:
+                preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
+                kwargs.update(preprocess=preprocess)
+            ds = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
         elif self.driver == "zarr":
+            preprocess = None
             if "preprocess" in kwargs:  # for zarr preprocess is done after reading
                 preprocess = PREPROCESSORS.get(kwargs.pop("preprocess"), None)
-                do_preprocess = True
-            else:
-                do_preprocess = False
             ds_lst = []
             for fn in fns:
                 ds = xr.open_zarr(fn, **kwargs)
-                if do_preprocess:
+                if preprocess:
                     ds = preprocess(ds)  # type: ignore
                 ds_lst.append(ds)
             ds = xr.merge(ds_lst)
         elif self.driver == "raster_tindex":
-            if self.filesystem == "local":
-                if np.issubdtype(type(self.nodata), np.number):
-                    kwargs.update(nodata=self.nodata)
-                ds = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
-            else:
-                raise NotImplementedError(
-                    "Remote (cloud) RasterDataset not supported "
-                    "with driver raster_tindex."
-                )
+            if np.issubdtype(type(self.nodata), np.number):
+                kwargs.update(nodata=self.nodata)
+            ds = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
         elif self.driver == "raster":  # rasterio files
             if cache_root is not None and all([str(fn).endswith(".vrt") for fn in fns]):
                 cache_dir = join(cache_root, self.catalog_name, self.name)

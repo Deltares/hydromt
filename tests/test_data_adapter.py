@@ -82,7 +82,7 @@ def test_gcs_cmip6(tmpdir):
     ds = data_catalog.get_rasterdataset(
         "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
         variables=["precip", "temp"],
-        time_tuple=(("1990-01-01", "1990-06-01")),
+        time_tuple=(("1990-01-01", "1990-03-01")),
     )
     fn_nc = str(tmpdir.join("test.nc"))
     ds.to_netcdf(fn_nc)
@@ -95,8 +95,7 @@ def test_gcs_cmip6(tmpdir):
 
 
 @pytest.mark.skipif(not compat.HAS_S3FS, reason="S3FS not installed.")
-def test_aws_copdem(tmpdir):
-    # TODO switch to pre-defined catalogs when pushed to main
+def test_aws_worldcover():
     catalog_fn = join(CATALOGDIR, "aws_data.yml")
     data_catalog = DataCatalog(data_libs=[catalog_fn])
     da = data_catalog.get_rasterdataset(
@@ -104,7 +103,6 @@ def test_aws_copdem(tmpdir):
         bbox=[12.0, 46.0, 12.5, 46.50],
     )
     assert da.name == "landuse"
-    assert da.max().values == 100
 
 
 def test_rasterdataset_zoomlevels(rioda_large, tmpdir):

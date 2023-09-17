@@ -36,7 +36,7 @@ class GeoDatasetAdapter(DataAdapter):
         self,
         path: str,
         driver: Optional[str] = None,
-        filesystem: str = "local",
+        filesystem: Optional[str] = None,
         crs: Optional[Union[int, str, dict]] = None,
         nodata: Optional[Union[dict, float, int]] = None,
         rename: Optional[dict] = None,
@@ -46,6 +46,7 @@ class GeoDatasetAdapter(DataAdapter):
         attrs: Optional[dict] = None,
         extent: Optional[dict] = None,
         driver_kwargs: Optional[dict] = None,
+        storage_options: Optional[dict] = None,
         name: str = "",
         catalog_name: str = "",
         provider: Optional[str] = None,
@@ -71,9 +72,10 @@ class GeoDatasetAdapter(DataAdapter):
             for 'netcdf' :py:func:`xarray.open_mfdataset`.
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
-        filesystem: {'local', 'gcs', 's3'}, optional
+        filesystem: str, optional
             Filesystem where the data is stored (local, cloud, http etc.).
-            By default, local.
+            If None (default) the filesystem is inferred from the path.
+            See :py:func:`fsspec.registry.known_implementations` for all options.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
             proj (str or dict) or wkt (str). Only used if the data has no native CRS.
@@ -111,6 +113,8 @@ class GeoDatasetAdapter(DataAdapter):
             time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        storage_options: dict, optional
+            Additional key-word arguments passed to the fsspec FileSystem object.
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional.
         provider: str, optional
@@ -141,6 +145,7 @@ class GeoDatasetAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            storage_options=storage_options,
             name=name,
             catalog_name=catalog_name,
             provider=provider,
@@ -270,30 +275,6 @@ class GeoDatasetAdapter(DataAdapter):
         ds = self._set_metadata(ds)
         # return array if single var and single_var_as_array
         return self._single_var_as_array(ds, single_var_as_array, variables)
-
-    def _resolve_paths(self, variables, time_tuple):
-        # Extract storage_options from kwargs to instantiate fsspec object correctly
-        so_kwargs = dict()
-        if "storage_options" in self.driver_kwargs and self.driver == "zarr":
-            so_kwargs = self.driver_kwargs["storage_options"]
-            # For s3, anonymous connection still requires --no-sign-request profile to
-            # read the data
-            # setting environment variable works
-            if "anon" in so_kwargs:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
-            else:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        elif "storage_options" in self.driver_kwargs:
-            raise NotImplementedError(
-                "Remote (cloud) GeoDataset only supported with driver zarr."
-            )
-
-        # resolve paths
-        fns = super()._resolve_paths(
-            time_tuple=time_tuple, variables=variables, **so_kwargs
-        )
-
-        return fns
 
     def _read_data(self, fns, logger=logger):
         kwargs = self.driver_kwargs.copy()
