@@ -108,20 +108,24 @@ def test_aws_copdem(tmpdir):
 
 
 def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
+    # write tif with zoom level 1 in name
+    # NOTE zl 0 not written to check correct functioning
     name = "test_zoom"
+    rioda_large.raster.to_raster(str(tmpdir.join("test_zl1.tif")))
     yml_dict = {
         name: {
             "crs": 4326,
             "data_type": "RasterDataset",
             "driver": "raster",
-            "path": "path/{zoom_level}/test.vrt",
+            "path": f"{str(tmpdir)}/test_zl{{zoom_level}}.tif",
             "zoom_levels": {0: 0.1, 1: 0.3},
         }
     }
+    # test zoom levels in name
     data_catalog = DataCatalog()
     data_catalog.from_dict(yml_dict)
     rds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
-    assert rds._parse_zoom_level() == 0  # default to first
+    assert rds._parse_zoom_level(None) is None
     assert rds._parse_zoom_level(zoom_level=1) == 1
     assert rds._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
     assert rds._parse_zoom_level(zoom_level=(0.29, "degree")) == 0
@@ -129,8 +133,16 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     assert rds._parse_zoom_level(zoom_level=(1, "meter")) == 0
     with pytest.raises(TypeError, match="zoom_level unit"):
         rds._parse_zoom_level(zoom_level=(1, "asfd"))
-    with pytest.raises(TypeError, match="zoom_level argument"):
+    with pytest.raises(TypeError, match="zoom_level not understood"):
         rds._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
+    da1 = data_catalog.get_rasterdataset(name, zoom_level=(0.3, "degree"))
+    assert isinstance(da1, xr.DataArray)
+    # write COG
+    cog_fn = str(tmpdir.join("test_cog.tif"))
+    rioda_large.raster.to_raster(cog_fn, driver="COG", overviews="auto")
+    # test COG zoom levels
+    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(0.01, "degree"))
+    assert da1.raster.shape == (256, 250)
 
 
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
