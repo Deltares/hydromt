@@ -11,6 +11,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyproj
+import rioxarray
 import xarray as xr
 from shapely.geometry import box
 from shapely.geometry.base import GEOMETRY_TYPES
@@ -63,16 +64,14 @@ def open_raster(
     data : DataArray
         DataArray
     """
-    kwargs.update(
-        masked=mask_nodata, default_name="data", engine="rasterio", chunks=chunks
-    )
+    kwargs.update(masked=mask_nodata, default_name="data", chunks=chunks)
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
     if isinstance(filename, io.IOBase):  # file-like does not handle chunks
         logger.warning("Removing chunks to read and load remote data.")
         kwargs.pop("chunks")
     # keep only 2D DataArray
-    da = xr.open_dataarray(filename, **kwargs).squeeze(drop=True)
+    da = rioxarray.open_rasterio(filename, **kwargs).squeeze(drop=True)
     # set missing _FillValue
     if mask_nodata:
         da.raster.set_nodata(np.nan)

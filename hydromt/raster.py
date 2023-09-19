@@ -30,6 +30,7 @@ from affine import Affine
 from pyproj import CRS
 from rasterio import features
 from rasterio.enums import MergeAlg, Resampling
+from rasterio.rio.overview import get_maximum_overview_level
 from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
@@ -2270,6 +2271,8 @@ class RasterDataArray(XRasterBase):
         windowed=False,
         mask=False,
         logger=logger,
+        overviews: Optional[Union[list, str]] = None,
+        overviews_resampling: str = "nearest",
         **profile_kwargs,
     ):
         """Write DataArray object to a gdal-writable raster file.
@@ -2290,6 +2293,14 @@ class RasterDataArray(XRasterBase):
             Default is False.
         mask: bool, optional
             If True, set nodata values where 'mask' coordinate equals False.
+            Default is False.
+        overviews: list, str, optional
+            List of overview levels to build. Default is None.
+            If 'auto', the maximum number of overviews will be built
+            based on a 256x256 tile size.
+        overviews_resampling: str, optional
+            The resampling method to use when building overviews.
+            Default is 'nearest'. See rasterio.enums.Resampling for options.
         **profile_kwargs:
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
@@ -2324,7 +2335,7 @@ class RasterDataArray(XRasterBase):
         if dim0 is not None:
             count = da_out[dim0].size
             da_out = da_out.sortby(dim0)
-        # write
+            # write
         profile = dict(
             driver=driver,
             height=da_out.raster.height,
@@ -2334,8 +2345,20 @@ class RasterDataArray(XRasterBase):
             crs=da_out.raster.crs,
             transform=da_out.raster.transform,
             nodata=nodata,
-            **profile_kwargs,
         )
+        if driver == "COG":
+            profile.update(
+                {
+                    "driver": "GTiff",
+                    "interleave": "pixel",
+                    "tiled": True,
+                    "blockxsize": 256,
+                    "blockysize": 256,
+                    "compress": "LZW",
+                }
+            )
+        if profile_kwargs:
+            profile.update(profile_kwargs)
         with rasterio.open(raster_path, "w", **profile) as dst:
             if windowed:
                 window_iter = dst.block_windows(1)
@@ -2354,6 +2377,24 @@ class RasterDataArray(XRasterBase):
                     dst.write(data, window=window)
             if tags is not None:
                 dst.update_tags(**tags)
+        if overviews is not None:  # build overviews
+            with rasterio.open(raster_path, "r+") as dst:
+                if overviews == "auto":
+                    ts = min(int(profile["blockxsize"]), int(profile["blockysize"]))
+                    max_level = get_maximum_overview_level(dst.width, dst.height, ts)
+                    overviews = [2**j for j in range(1, max_level + 1)]
+                if not isinstance(overviews, list):
+                    raise ValueError(
+                        "overviews should be a list of integers or 'auto'."
+                    )
+                resampling = getattr(Resampling, overviews_resampling, None)
+                if resampling is None:
+                    raise ValueError(
+                        f"Resampling method unknown: {overviews_resampling}"
+                    )
+                no = len(overviews)
+                logger.debug(f"Building {no} overviews with {overviews_resampling}")
+                dst.build_overviews(overviews, resampling)
 
     def vectorize(self, connectivity=8):
         """Return geometry of grouped pixels with the same value in a DataArray object.
