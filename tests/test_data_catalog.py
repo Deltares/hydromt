@@ -1,7 +1,7 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
-from os.path import abspath, dirname, join
+from os.path import abspath, dirname, isfile, join
 from pathlib import Path
 from typing import cast
 
@@ -283,9 +283,8 @@ def test_data_catalog(tmpdir):
 
 def test_from_archive(tmpdir):
     data_catalog = DataCatalog()
-    data_catalog._cache_dir = str(
-        tmpdir.join(".hydromt_data")
-    )  # change cache to tmpdir
+    # change cache to tmpdir
+    data_catalog._cache_dir = str(tmpdir.join(".hydromt_data"))
     urlpath = data_catalog.predefined_catalogs["artifact_data"]["urlpath"]
     version_hash = list(
         data_catalog.predefined_catalogs["artifact_data"]["versions"].values()
@@ -312,6 +311,23 @@ def test_used_sources(tmpdir):
     assert sources[0][0] == "esa_worldcover"
     assert sources[0][1].provider == source.provider
     assert sources[0][1].version == source.version
+
+
+def test_from_yml_with_archive(tmpdir):
+    yml_fn = join(CATALOGDIR, "artifact_data.yml")
+    data_catalog = DataCatalog(yml_fn)
+    sources = list(data_catalog.sources.keys())
+    assert len(sources) > 0
+    # as part of the getting the archive a a local
+    # catalog file is written to the same folder
+    # check if this file exists and we can read it
+    root = dirname(data_catalog[sources[0]].path)
+    yml_dst_fn = join(root, "artifact_data.yml")
+    assert isfile(yml_dst_fn)
+    data_catalog1 = DataCatalog(yml_dst_fn)
+    sources = list(data_catalog1.sources.keys())
+    source = data_catalog1.get_source(sources[0])
+    assert dirname(source.path) == root
 
 
 def test_from_predefined_catalogs():

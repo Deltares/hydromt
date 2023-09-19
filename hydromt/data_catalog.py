@@ -594,21 +594,16 @@ class DataCatalog(object):
             try:
                 urlpath = urlpath.format(version=identifier)
                 if urlpath.split(".")[-1] in ["gz", "zip"]:
-                    self.logger.info(
-                        f"Reading data catalog {name} {version} from archive"
-                    )
+                    self.logger.info(f"Reading data catalog archive {name} {version}")
                     self.from_archive(urlpath, name=name, version=version)
                 else:
                     self.logger.info(f"Reading data catalog {name} {version}")
                     self.from_yml(urlpath, catalog_name=name)
-
                 return self
             except RuntimeError:
                 continue
 
         raise RuntimeError("No compatible compatible catalog version could be found")
-
-        return self
 
     def from_archive(
         self,
@@ -616,7 +611,7 @@ class DataCatalog(object):
         version: Optional[str] = None,
         name: Optional[str] = None,
     ) -> DataCatalog:
-        """Read a data archive including a data_catalog.yml file.
+        """Read and cache a data archive including a data_catalog.yml file.
 
         Parameters
         ----------
@@ -632,23 +627,50 @@ class DataCatalog(object):
         DataCatalog
             DataCatalog object with parsed data archive added.
         """
-        name = basename(urlpath).split(".")[0] if name is None else name
+        # add depreaction warning
+        root = self._cache_archive(urlpath, version=version, name=name)
+        yml_fn = join(root, "data_catalog.yml")
+        # parse catalog
+        return self.from_yml(yml_fn, catalog_name=name)
+
+    def _cache_archive(
+        self,
+        archive_fn: Union[Path, str],
+        version: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> DataCatalog:
+        """Cache a data archive.
+
+        Parameters
+        ----------
+        archive_fn : str, Path
+            Path or url to data archive.
+        version : str, optional
+            Version of data archive, by default None.
+        name : str, optional
+            Name of data catalog, by default None.
+
+        Returns
+        -------
+        DataCatalog
+            DataCatalog object with parsed data archive added.
+        """
+        name = basename(archive_fn).split(".")[0] if name is None else name
         root = join(self._cache_dir, name)
         if version is not None:
             root = join(root, version)
-        archive_fn = join(root, basename(urlpath))
-        yml_fn = join(root, "data_catalog.yml")
+        archive_dst_fn = join(root, basename(archive_fn))
+        # copy archive to cache
         if not isdir(root):
-            os.makedirs(root)
-        # download data if url
-        if _uri_validator(str(urlpath)) and not isfile(archive_fn):
-            _copyfile(urlpath, archive_fn)
-        # unpack data
-        if not isfile(yml_fn):
+            self.logger.debug(f"Caching data from {archive_fn}")
+            os.makedirs(root, exist_ok=True)
+            _copyfile(archive_fn, archive_dst_fn)
+        # unpack data and remove archive
+        if isfile(archive_dst_fn):
             self.logger.debug(f"Unpacking data from {archive_fn}")
-            shutil.unpack_archive(archive_fn, root)
-        # parse catalog
-        return self.from_yml(yml_fn, catalog_name=name)
+            shutil.unpack_archive(archive_dst_fn, root)
+            os.remove(archive_dst_fn)
+        return root
 
     def from_yml(
         self,
@@ -746,8 +768,17 @@ class DataCatalog(object):
             catalog_name = cast(
                 str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
             )
+        version = meta.get("version", None)
         if root is None:
             root = meta.get("root", os.path.dirname(urlpath))
+        if root.split(".")[-1] in ["gz", "zip"]:
+            # if root is an archive, unpack it at the cache dir
+            root = self._cache_archive(root, name=catalog_name, version=version)
+            # save catalog to cache
+            with open(join(root, f"{catalog_name}.yml"), "w") as f:
+                data_dict = {"meta": {k: v for k, v in meta.items() if k != "root"}}
+                data_dict.update(yml)
+                yaml.dump(data_dict, f, default_flow_style=False, sort_keys=False)
         self.from_dict(
             yml,
             catalog_name=catalog_name,
