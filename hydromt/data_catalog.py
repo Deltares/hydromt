@@ -427,16 +427,27 @@ class DataCatalog(object):
         """
         Check if source is in catalog.
 
-        Paramters
-        ---------
-        source: str
-        provider
-        version
-        permissive
+        Parameters
+        ----------
+        source : str
+            Name of the data source.
+        provider : str, optional
+            Name of the data provider, by default None.
+            By default the last added provider is returned.
+        version : str, optional
+            Version of the data source, by default None.
+            By default the newest version of the requested provider is returned.
+        permissive : bool, optional
+            Whether variant checking is necessary. If true, the name of the source
+            only is checked, if false, and at least one of version or provider is
+            not None, this will only return True if that variant specifically is
+            available.
+
 
         Returns
         -------
         bool
+            whether the source (with specified variants if necessary) is available
         """
         if permissive or (version is None and provider is None):
             return source in self._sources
