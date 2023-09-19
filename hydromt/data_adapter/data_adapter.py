@@ -201,11 +201,17 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.meta = {k: v for k, v in meta.items() if v is not None}
         # variable attributes
         self.attrs = {k: v for k, v in attrs.items() if v is not None}
+        # keep track of wether the data is used
+        self._used = False
 
     @property
     def data_type(self):
         """Return the datatype of the addapter."""
         return type(self).__name__.replace("Adapter", "")
+
+    def mark_as_used(self):
+        """Mark the data adapter as used."""
+        self._used = True
 
     def summary(self):
         """Return a dictionary summary of the data adapter."""
@@ -223,7 +229,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         """
         source = dict(data_type=self.data_type)
         for k, v in vars(self).items():
-            if k in ["name", "catalog_name"]:
+            if k in ["name", "catalog_name"] or k.startswith("_"):
                 continue  # do not add these identifiers
             if v is not None and (not isinstance(v, dict) or len(v) > 0):
                 source.update({k: v})

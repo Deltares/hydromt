@@ -255,6 +255,7 @@ class GeoDatasetAdapter(DataAdapter):
         # load data
         fns = self._resolve_paths(variables, time_tuple)
         ds = self._read_data(fns, logger=logger)
+        self.mark_as_used()  # mark used
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_coords(ds)

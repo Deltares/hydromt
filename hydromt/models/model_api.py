@@ -588,17 +588,13 @@ class Model(object, metaclass=ABCMeta):
         """
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
-        # read hydromt_data configuration file and add to data catalog
+        # read hydromt_data yml file and add to data catalog
         if self._read and isfile(path) and append:
             cat.from_yml(path)
         # update data catalog with new used sources
-        source_names = (
-            self.data_catalog._used_data
-            if used_only
-            else list(self.data_catalog.sources.keys())
-        )
-        if len(source_names) > 0:
-            cat.from_dict(self.data_catalog.to_dict(source_names=source_names))
+        for name, source in self.data_catalog.iter_sources(used_only=used_only):
+            cat.add_source(name, source)
+        # write data catalog
         if cat.sources:
             self._assert_write_mode
             cat.to_yml(path, root=root)
