@@ -315,92 +315,6 @@ the default initialisation function of you parent class (the HydroMT core class 
   function in the child class, and within the redefined function, call the parent one use *super()* python class attribute (*super().setup_region*). You will see
   an example below for the initialisation function ``__init__`` .
 
-Below are the properties and initialisation function, to set for your new plugin *MyModelModel* class:
-
-.. code-block:: python
-
-  from hydromt.models import Model
-  from os.path import abspath, join, dirname
-
-
-  class MyModelModel(Model):
-    """This is the HydroMT MyModel class for MyModel models."""
-
-    ### Any global class variables your model should have go here ###
-    # shortname of your model / hydromt model name for CLI
-    _NAME: str = "mymodel"
-    # Default filename for mymodel configuration file / run settings
-    _CONF: str = "model.yaml"
-    # Path to default model building for my model / eg template configuration files to edit
-    # default paremter values etc.
-    # This folder in many existing plugins is usually placed at the same level of the class name
-    # definition in a floder called "data".
-    _DATADIR: Path = abspath(join(dirname(__file__), "data"))
-    # tell hydroMT which methods should receive the res and region arguments from CLI
-    _CLI_ARGS: Dict[str, str] = {"region": "setup_region", "res": None}
-
-
-    ### Name of default folders to create in the model directory ###
-    # When initiliasing a new model for a specific region, the folders
-    # int he list will be created
-    _FOLDERS: List[str] = []
-
-    ### Name of defaults catalogs to include when initialising the model ##
-    # For example to include model specific parameter data or mapping
-    # These default catalogs can be placed in the _DATADIR folder.
-    _CATALOGS: List[str] = []
-
-    def __init__(
-        self,
-        root: Optional[str] = None,
-        mode: str = "w",
-        config_fn: Optional[str] = None,
-        data_libs: Optional[Union[List[str], str]] = None,
-        logger: logging.Logger = logger,
-    ):
-        """
-        The mymodel model class MyModelModel.
-
-        Contains methods to read, write, setup and update mymodel models.
-
-        Parameters
-        ----------
-        root : str, Path, optional
-            Path to the model folder
-        mode : {'w', 'w+', 'r', 'r+'}, optional
-            Mode to open the model, by default 'w'
-        config_fn : str, Path, optional
-            Path to the model configuration file, by default None to read
-            from template in build mode or default name in update mode.
-        data_libs : list of str, optional
-            List of data catalogs to use, by default None.
-        logger : logging.Logger, optional
-            Logger to use, by default logger
-        """
-        # Add model _CATALOGS to the data_libs, if you wish to use default catalogs
-        if self._CATALOGS:
-            if isinstance(data_libs, str):
-                data_libs = [data_libs]
-            if data_libs is None:
-                data_libs = []
-            data_libs = data_libs + self._CATALOGS
-
-        # Call the parent class initialisation method using super()
-        super().__init__(
-            root=root,
-            mode=mode,
-            config_fn=config_fn,
-            data_libs=data_libs,
-            logger=logger,
-        )
-
-        # If your model needs any extra specific initialisation parameter or step
-        # add them here
-        # Example: an extra propery or default value, or a new HydroMT component
-
-
-        # end of the __init__ function
-
 Model components
 ^^^^^^^^^^^^^^^^
 A reminder from the :ref:`Model guide <model_interface>`:
@@ -496,35 +410,27 @@ the other subclasses. Apart from the components here are a couple of useful prop
 
 Some submodel classes can have additional attributes based on their additional components, so check out the :ref:`API reference <model_api>`.
 
-.. _plugin_workflows:
-
-Data processing: setup methods and workflows
---------------------------------------------
-Now let's focus on the _gear wheels_ of the schematic diagram or how to add data to your model using HydroMT, which is what it's all about!
-Nothing here is really mandatory but more about conventions or tips also from experience with other plugins.
-
-But in general (scheme below):
-
-- To build a model we specify ``setup_<>`` methods which transform raw input data to a specific model variable(s), for instance
-  the ``setup_landuse`` method in HydroMT-Wflow to map landuse classes to associated Wflow parameter grids which are part of
-  the ``grid`` component.
-- All public model methods may only contain arguments which require one of the following basic python types: string, numeric
-  integer and float, boolean, None, list and dict types. This requirement makes it possible to expose these methods and their arguments
-  via the hydromt configuration in YAML format.
-- Data is exposed to each model method through the ``Model.data_catalog`` attribute which is an instance of the
-  :py:class:`hydromt.DataCatalog`. Within a model method the data is read by calling any ``DataCatalog.get_<data_type>`` method which work for both source and file names.
-- The region and res (resolution) arguments used in the command line build and clip methods are passed to the model method referred
-  in the internal *_CLI_ARGS* model constant, which by default in the Model class, is the setup_basemaps method for both arguments. This is
-  typically the first model method which should be called when building a model or your base / region setup method.
-- Workflows define (partial) transformations of data from input data to model data. And should, if possible, be kept generic to be
-  shared between model plugins. The input data is passed to the workflow by python data objects consistent with its associated data
-  types (e.g. xarray.Dataset for regular rasters) and not read by the workflow itself.
-
-.. figure:: ../_static/model_building_process.png
-
-  Schematic of model building process with HydroMT
-
 .. _plugin_setup:
+
+Setup basic model objects
+^^^^^^^^^^^^^^^^^^^^^^^^^
+When building a model from scratch, the first thing you should do is take inventory of what your `setup_*` (e.g. `setup_grid`, `setup_mesh`, etc.) need. They typically (though not always) take the region of interest as an argument so that is usually a good place to start. This consistes of the region in the world your model is located in,
+if needed its CRS and its computational unit (grid, mesh, responce_unit etc.). This is usually typically set by a first base or region
+setup method which typically parses the region argument of the HydroMT CLI. The idea is that after this function has been called, the
+user should already be able to have the minimum model properties or files in order to be able to call HydroMT to ``update`` the model to
+add additionnal data (``build`` is not required anymore).
+
+For example, this is what the ``setup_region`` from ``Model`` does by adding ``region`` to ``geoms``, or ``setup_grid`` from ``GridModel`` which
+generates a regular grid based on the region argument, a CRS and a resolution. You can re-use the core methods or decide to define your
+own.
+
+.. NOTE::
+
+  **Order of the setup methods**: apart that your model class should have a base method that at least defines the model region and CRS,
+  there is no real check on the order in which setup methods are called. For Command Line users, the functions in the hydromt configuration
+  yaml file will be executed in the order they appear in the file. So if in your case, a setup method should be called before another
+  (eg you first should have a DEM before you can add rivers to your model), then in the following setup method, check if the required data
+  are already in the model and else send a clear error message. Clear documentation will help your user too.
 
 Setup methods
 ^^^^^^^^^^^^^
@@ -596,25 +502,6 @@ data using an external workflow from hydromt core is:
   prepare the same data but from different type of input data (eg *setup_landuse_from_raster* and *setup_landuse_from_vector*).
 
 
-Base or region setup method(s)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-When building a model from scratch, the first thing you should do is to define the region in the world your model is located in,
-if needed its CRS and its computational unit (grid, mesh, responce_unit etc.). This is usually typically set by a first base or region
-setup method which typically parses the region argument of the HydroMT CLI. The idea is that after this function has been called, the
-user should already be able to have the minimum model properties or files in order to be able to call HydroMT to ``update`` the model to
-add additionnal data (``build`` is not required anymore).
-
-For example, this is what the ``setup_region`` from ``Model`` does by adding ``region`` to ``geoms``, or ``setup_grid`` from ``GridModel`` which
-generates a regular grid based on the region argument, a CRS and a resolution. You can re-use the core methods or decide to define your
-own.
-
-.. NOTE::
-
-  **Order of the setup methods**: apart that your model class should have a base method that at least defines the model region and CRS,
-  there is no real check on the order in which setup methods are called. For Command Line users, the functions in the hydromt configuration
-  yaml file will be executed in the order they appear in the file. So if in your case, a setup method should be called before another
-  (eg you first should have a DEM before you can add rivers to your model), then in the following setup method, check if the required data
-  are already in the model and else send a clear error message. Clear documentation will help your user too.
 
 Workflows
 ^^^^^^^^^
