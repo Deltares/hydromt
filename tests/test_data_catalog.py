@@ -298,9 +298,16 @@ def test_from_yml_with_archive(tmpdir):
     data_catalog = DataCatalog(yml_fn)
     sources = list(data_catalog.sources.keys())
     assert len(sources) > 0
+    # as part of the getting the archive a a local
+    # catalog file is written to the same folder
+    # check if this file exists and we can read it
     root = dirname(data_catalog[sources[0]].path)
     yml_dst_fn = join(root, "artifact_data.yml")
     assert isfile(yml_dst_fn)
+    data_catalog1 = DataCatalog(yml_dst_fn)
+    sources = list(data_catalog1.sources.keys())
+    source = data_catalog1.get_source(sources[0])
+    assert dirname(source.path) == root
 
 
 def test_from_predefined_catalogs():
