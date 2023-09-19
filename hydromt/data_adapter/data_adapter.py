@@ -318,7 +318,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         fmt = {}
         # update based on zoomlevel (size = 1)
         if "zoom_level" in keys:
-            zoom_level = 0 if zoom_level is None else zoom_level
+            zoom_level = zoom_level or 0
             fmt.update(zoom_level=zoom_level)
         # update based on dates and variables  (size >= 1)
         for date, var in product(dates, vrs):
