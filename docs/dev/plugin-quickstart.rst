@@ -6,31 +6,9 @@
 Starting your own HydroMT Plugin
 ================================
 
-Introduction
-============
-
 This page gives you some tips and tricks on how to use HydroMT for your own model and start your own plugin. Before reading this,
 you should already know a little about HydroMT, so please check out at least the :ref:`intro_user_guide` and the :ref:`model_main`
 section.
-
-In short, there are three important concepts in HydroMT core that are important to cover:
-
-- ``DataAdapters`` and ``DataCatalog``: These are what basically hold all information about how to approach and read data as well as some of the metadata
-  about it. While a lot of the work in HydroMT happens here, plugins or users shouldn't really need to know about these beyond using
-  the proper ``data_type`` in their configuration. ``DataCatalog`` are basically just a thin wrapper around the ``DataAdapters`` that does some book keeping.
-- ``Workflows``: These are functions that transform input data and can call a set of methods to for example, resample, fill nodata, reproject, derive
-  other variables etc. The core has some of these workflows but you may need new ones for your plugin.
-- ``Model``: This is where the magic happens (as far as the plugin is concerned). We have provided some generic models that you can
-  override to get basic/generic functionality, but using the model functionality is where it will be at for you. The scheme below lists the current
-  relationship between the HydroMT ``Model`` and generic sub-Model classes and the know plugins.
-
-
-.. figure:: ../_static/plugin_structure.png
-
-  Schematic of Model and plugin structure of HydroMT
-
-Getting started
-===============
 
 Plugin or no plugin ?
 ---------------------
@@ -38,7 +16,7 @@ You've discovered HydroMT and would like to use it for your own model and wonder
 Before getting started **you should ask yourself these questions**:
 
   1. Does my model have model-specific file formats which are different from the HydroMT defaults?
-  2. Does my model require complex data processing workflows that are not covered (or will not be covered) by the generic model classes?
+  2. Does my model require complex data processing workflows that are not covered (and will not be covered) by the generic model classes?
   3. Will there be a lot of users for my model?
 
 And depending on the answers, you can decide to start your own plugin yes or no. Answering *yes* to any of the previous
@@ -74,20 +52,21 @@ To quote our :ref:`intro_user_guide`::
   interface, but with model-specific file readers, writers and workflows.
 
 As mentioned above, HydroMT interacts with models using the ``Model`` API class and also provides several sub-model classes:
-``GridModel``, ``MeshModel``, ``LumpedModel``, ``NetworkModel``. Using these sub-model classes, it might be that actually you are
-already able to prepare most and if you're lucky all of the data you need to build your own model. The only thing is that
-these generic classes write model data in netcdf, geojson (or other formats supported by geopandas), or for configuration
-in either yaml, toml or ini file format. So in case your model needs different file formats, you will need to convert or
-write the output files in different formats.
+``GridModel``, ``MeshModel``, ``LumpedModel``, ``NetworkModel`` which will be described in more detail below. Using
+these sub-model classes, you might be able to already prepare most and if not all of 
+the data you need to build your own model. Do note however that these generic classes can only write model data in netcdf,
+geojson (or other formats supported by geopandas), and configurations in either yaml, toml or ini file format. So
+in case your model needs different file formats, you will need to convert or write the output files in different formats.
 
 Another advantage of writting your own plugin is that other users from the same model can easily build instances of that model
 re-using the plugin. So for example, converting from netcdf to model specific file format, using pre-defined HydroMT building
-configuration templates or parameter default values, but also using more instinctive and guided model building methods.
+configuration templates or parameter default values. It might also be more instinctive and guided for your model building methods.
 
-This is maybe a little more advanced but let's say that your model is a ``GridModel`` for which you need to prepare a *landuse*
-classification map (for which resampling should be done using *mode* to avoid creating new imaginary land use classes which you
-would do if you would use e.g., *average*) and two landuse parameters roughness *N* and infiltration *inf*. Well, using HydroMT generic
-methods, for your user, the build configuration file would look like this:
+For exmaple, let's say that your model is a ``GridModel`` for which you need to prepare a *landuse*
+classification map. The resampleing for this mape should be done using *mode* to avoid creating new imaginary land use classes.
+This could happen for example if you would use e.g., *average*. 
+In addition to the classification map you also need two landuse parameters roughness *N* and infiltration *inf*. 
+Using HydroMT generic methods, for your user, the build configuration file would look like this:
 
 .. code-block:: yaml
 
@@ -121,13 +100,10 @@ look like, but for the user, the same step could then look like:
     landuse_fn: vito
     reclass_table_fn: vito_reclass
 
-Finally, with the generic methods and sub-model classes of HydroMT, we try to support a certain range of data processing methods.
-If you find that there is no method available for your case, you can always open an issue and if we think your proposed method can
-be re-used by others, it could be added to the core. However, for some complex or very specific data processing, this will not be
-the case. For example, if your model requires a specific soil parameter that can be computed using only specific equation(s) based
-on soil properties data. In these cases, you can either pre-compute your parameter and use the core method to
-resample/extract, or write down your specific workflow/equation in your model plugin.
-
+Finally, with the generic methods and sub-model classes of HydroMT, we try to support a certain range of data processing
+methods.  If you find that there is no method available for your case, you can always open a feature request issue
+and if we think your proposed method can be re-used by others, it could be added to the core. However, for some data
+processing workloads, this will not be the case. This could be a very strong reason for you to write your own plugin.
 
 
 .. _plugin_create:
@@ -167,19 +143,10 @@ Now, how do you define the new plugin ``Model`` class? To make sure that your mo
 * ``MeshModel`` for unstructured grid(s) models,
 * ``LumpedModel`` for lumped or semi-distributed models
 * ``NetworkModel`` for network models.
-This allows you to use the HydroMT model class methods as well as create any functionality on top of that. To define your new model class, e.g. *WflowModel*,
-you should make sure that in the python script that is referenced by the entry-point define at least:
 
-.. code-block:: python
-
-  from hydromt.models import GridModel
-
-  class WflowModel(GridModel):
-    """ This is the HydroMT Wflow Model class. """
-
-    _NAME = "wflow"
-
-And that's it! If everything has gone well, you should be able to access your code through HydroMT now!
+This allows you to use the HydroMT model class methods as well as create any functionality on top of that. To define
+your new model class, e.g. *WflowModel*, you should make sure that in the python script that is referenced by the
+entry-point. And that's it! If everything has gone well, you should be able to access your code through HydroMT now!
 
 .. NOTE::
 
@@ -197,14 +164,14 @@ And that's it! If everything has gone well, you should be able to access your co
   a new HydroMT Model component, ``grid`` for ``GridModel`` or ``mesh`` for ``MeshModel`` and adds the accompanying setup, read and write methods.
   So choosing the one or the other, or adding a Mixin depends on what type of model or input data strucuture you need to prepare. Note that if your
   Model class is defined as (1) *PluginModel(GridModel)* or (2) *PluginModel(Model, GridMixin)*, in both cases the ``grid`` object and relative methods
-  are available. The main difference is the dominant object for your model in case of (2) will be ``grid`` and in case of (1) the ``region``.
-  IE when looking for example for the model CRS property, in case of (1) the crs will be grid.crs and in case of (2) region.crs. Also, in
+  are available. The main difference is the dominant object for your model in case of (2) will be ``grid`` and in case of (1) the ``region``,
+  i.e. when looking for example for the model CRS property, in case of (1) the crs will be grid.crs and in case of (2) region.crs. Also, in
   update mode, in case of (2), no additional data can be added to your model if the grid object is not yet defined (ie your model grid extent and
   resolution does not yet exist).
 
 Typical HydroMT repository structure
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-With HydroMT and some of its plugin, we usually use a classic folder structure and file organisation. It not mandatory to follow this structure
+With HydroMT and some of its plugins, we usually use a classic folder structure and file organisation. It not mandatory to follow this structure
 But if you choose to, a classic folder structure and files for a HydroMT plugin (eg mymodel) looks like this:
 
 - **docs**: folder containing your documentation pages.
@@ -309,8 +276,8 @@ the default initialisation function of you parent class (the HydroMT core class 
 
 .. TIP::
 
-  In python, a child class (eg *MyModelModel(Model)*), inherits all methods and properties of the parent class (``Model``). If you wish to overwrite completely one
-  of the parent method (eg ``setup_region``), you can just redefine the function in the child class using the name (``setup_region``). You can also decide to partly
+  In python, a child class (eg *MyModelModel(Model)*), inherits all methods and properties of the parent class (``Model``). If you wish to completely overwrite one
+  of the parent methods (eg ``setup_region``), you can just redefine the function in the child class using the name (``setup_region``). You can also decide to 
   re-use the parent function and for example add some extra steps, change the default values or the docstring of the function. For this, you can redefine the
   function in the child class, and within the redefined function, call the parent one use *super()* python class attribute (*super().setup_region*). You will see
   an example below for the initialisation function ``__init__`` .
@@ -328,7 +295,7 @@ A reminder from the :ref:`Model guide <model_interface>`:
   network models (to be developed).
 
 So typically, when you want to add data to your model (DEM, precipitation, parameters etc.), you add data to one of the
-specific Model component. To add data, to a component, the ``set_<component>`` methods are you use and each of the components can be
+specific Model components. To add data to a component, the ``set_<component>`` methods should be used and each of the components can be
 read and written using the specific ``read_<component>`` and ``write_<component>`` methods.
 
 A table that lists the base model components common to all model classes can be found at
@@ -342,10 +309,10 @@ Reading & Writing model components
 Because the way that models consume data is often model software specific, the main part of writing a plugin is writing the
 Input/Output (IO) methods to prepare data exactly as your model expects them, in the correct format. To do this you'll
 be overwriting most ``read_<component>`` or ``write_<component>`` methods in your model class. That will ensure that the
-data comes in and goes out expecting exactly as you want.
+data comes in and goes out exactly as you want.
 
 In the default HydroMT CORE read and write methods, xarray objects are written as netcdf files, ``geoms`` as GeoJSON files by
-default but any geopandas driver is allowed, and ``config`` either as TOML, YAML or INI file. So again, you could decide to
+default but any geopandas driver is allowed. ``config`` can be either a TOML or YAML file. So again, you could decide to
 completely overwrite the parent read and write methods or change the defaults.
 
 Eg if your geoms should be written in GeoPackage format rather than GeoJSON and in a geometry folder in your model:
@@ -362,7 +329,7 @@ Eg if your geoms should be written in GeoPackage format rather than GeoJSON and 
 
 If you are writting your own read/write functions, some good pratice steps of the function:
 
-1. For writing, check first if the object you are writing is not empty, then you can pass. Example:
+1. For writing, check first if the object you are writing is not empty, if so, you can simply skip the rest. Example:
 
 .. code-block:: python
 
@@ -378,15 +345,15 @@ can then be opened in read only mode ('r') and HydroMT should not be able to ove
 
 - `self._assert_read_mode` if a model can be read
 - `self._assert_write_mode` if a model can be written
-3. If needed transform, and write the component to the right format and file(s). Don't hesitate to put
-some logger information for your user.
+3. If needed, transform and write the component to the right format and file(s). 
+4. Don't hesitate to put some logger information for your user.
 
 Set model components
 ^^^^^^^^^^^^^^^^^^^^
-To add data to one of the model component (e.g. a DEM raster data to maps), the ``set_<component>`` methods should be used.
-In the background, the actual data is stored not directly in the components but in a **placeholder** property
-(``_maps`` for ``maps``). And the component, ``maps``, actually just goes and fetch the data from the placeholder ``_maps`` or
-in read mode, starts reading the component.
+As mentioned previously, to add data to one of the model component (e.g. a DEM raster data to maps), the ``set_<component>``
+methods should be used. In the background, the actual data is stored not directly in the components but in a **placeholder**
+property (``_maps`` for ``maps``). And the component, ``maps``, actually just goes and fetch the data from the placeholder
+``_maps`` or in read mode, starts reading the component.
 
 Using a placeholder allows us to initiate reading when possible (e.g. in update mode 'r+'), only the first time when the
 component is called, to avoid unintentiously overwritting data stored, and allows to add some check or transformation
@@ -414,11 +381,13 @@ Some submodel classes can have additional attributes based on their additional c
 
 Setup basic model objects
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-When building a model from scratch, the first thing you should do is take inventory of what your `setup_*` (e.g. `setup_grid`, `setup_mesh`, etc.) need. They typically (though not always) take the region of interest as an argument so that is usually a good place to start. This consistes of the region in the world your model is located in,
-if needed its CRS and its computational unit (grid, mesh, responce_unit etc.). This is usually typically set by a first base or region
-setup method which typically parses the region argument of the HydroMT CLI. The idea is that after this function has been called, the
-user should already be able to have the minimum model properties or files in order to be able to call HydroMT to ``update`` the model to
-add additionnal data (``build`` is not required anymore).
+When building a model from scratch, the first thing you should do is take inventory of what your `setup_*` functions
+(e.g. `setup_grid`, `setup_mesh`, etc.) need. They typically (though not always) take the region of interest as an
+argument so that is usually a good place to start. This consistes of the region in the world your model is located in,
+if needed its CRS and its computational unit (grid, mesh, responce_unit etc.). This is usually typically set by a first
+base or region setup method which typically parses the region argument of the HydroMT CLI. The idea is that after this
+function has been called, the user should already be able to have the minimum model properties or files in order to
+be able to call HydroMT to ``update`` the model to add additionnal data (``build`` is not required anymore).
 
 For example, this is what the ``setup_region`` from ``Model`` does by adding ``region`` to ``geoms``, or ``setup_grid`` from ``GridModel`` which
 generates a regular grid based on the region argument, a CRS and a resolution. You can re-use the core methods or decide to define your
@@ -445,8 +414,8 @@ In general, a HydroMT ``setup_<>`` method does 4 things:
   3. rename or update attributes from HydroMT variable conventions (name, unit) to the specific model conventions.
   4. adds the data to the corresponding HydroMT model components.
 
-A simplified example of what a setup function would look like for example to add a landuse grid from a raster input
-data using an external workflow from hydromt core is:
+Below is a simplified example of what a setup function would look like for a hypothetical landuse grid from a raster
+input data using an external workflow from hydromt core is:
 
 .. code-block:: python
 
@@ -505,9 +474,9 @@ data using an external workflow from hydromt core is:
 
 Workflows
 ^^^^^^^^^
-Because the python script defining your plugin Model class can get quite long, if complex data processing is required in your ``setup_<>``
-method, we encourage you to use or define external data processing functions that we usually call workflows in HydroMT. These workflows
-are usually stored in separate python scripts that you can decide to store in a workflow subfolder.
+Because the python script defining your plugin Model class can get quite long, we encourage you to use or define
+external data processing functions. In HydroMT these are usually called workflows. These workflows are usually stored in
+separate python scripts that you can decide to store in a workflow subfolder.
 
 A couple of tips if you want to define workflows:
 
@@ -538,7 +507,6 @@ Here are some last tips:
 
 Advanced Topics
 ===============
-
 
 Adding a new property or component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
