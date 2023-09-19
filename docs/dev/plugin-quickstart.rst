@@ -292,40 +292,6 @@ repository and push it (for an organisation, you will need specific rights to do
 After this you can open up the github repository website, and you should see your generated project. You are now ready to start developing your own
 plugin! Well done, and good luck!
 
-
-Conventions and tips to develop your own plugin
-================================================
-To take back the schematic overview of the HydroMT package architecture (figure below), HydroMT is organized in the following way:
-
-  - **Input data**: HydroMT is data-agnostic through the ``DataAdapter``, which reads a wide range of data formats and unifies the input data (e.g.,
-    on-the-fly renaming and unit conversion). Datasets are listed and passed to HydroMT in a ``DataCatalog`` yaml file.
-
-    HydroMT core should normally take care of everything your plugin needs here, so the only thing you should know is how to use it correctly
-    for example in your model methods and workflows (see below).
-  - **Model**: HydroMT defines any model instance through the model-agnostic ``Model`` API based on several components: maps, geometries, forcings,
-    results, states, and the model simulation configuration. For different types of general model classes (i.e., gridded, lumped, mesh and network
-    models) additional model components have been defined. Each component is represented with a specific Python data object to provide a common interface
-    to different model software.
-
-    We will see below how to initialise properly the ``Model`` class and its main attributes as well as how to work with the
-    model components in the :ref:`Model class and components <plugin_components>` section.
-  - **Methods and workflows**: Most of the heavy work in HydroMT is done by Methods and workflows, indicated by the gear wheels in the schematic of
-    HydroMT architecture below. Methods provide the low-level functionality such as GIS rasterization, reprojection, or zonal statistics. Workflows combine
-    several methods to transform data to a model layer or postprocess model results.
-
-    In the :ref:`data processing section <plugin_workflows>`, we will see
-    some examples and best practices of how to process and add data to your model.
-  - **Command line and Python interface**: The CLI is a high-level interface to HydroMT. It is used to run HydroMT methods such as build, update or clip.
-    While most common functionalities can be called through the CLI, the Python interface offers more flexibility for advanced users. It allows you to e.g.
-    interact directly with a model component Model API and apply the many methods and workflows available.
-
-    We saw in the :ref:`section above <plugin_create>`
-    how to properly instantiate your plugin class and register it to HydroMT entrypoints.
-
-.. figure:: ../_static/Architecture_model_data_input.png
-
-  Schematic of HydroMT architecture
-
 .. _plugin_components:
 
 Model class and components
