@@ -23,6 +23,8 @@ Added
 - Relevant data adapters now have functionality for reporting and detecting the spatial and temporal extent they cover (# 503)
 - Data catalogs have a ``hydromt_version`` meta key that is used to determine compatibility between the catalog and the installed hydromt version. (PR #506)
 - Allow the root of a data catalog to point to an archive, this will be extracted to the ~/.hydromt_data folder. (PR #512)
+- Support for reading overviews from (Cloud Optimized) GeoTIFFs using the zoom_level argument of ``DataCatalog.get_rasterdataset``. (PR #514)
+- Support for writing overviews to (Cloud Optimized) GeoTIFFs in the ``raster.to_raster`` method. (PR #514)
 
 Changed
 -------
