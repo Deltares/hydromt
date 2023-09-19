@@ -234,6 +234,7 @@ class GeoDataFrameAdapter(DataAdapter):
         # load
         fns = self._resolve_paths(variables)
         gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
+        self.mark_as_used()  # mark used
         # rename variables and parse crs & nodata
         gdf = self._rename_vars(gdf)
         gdf = self._set_crs(gdf, logger=logger)

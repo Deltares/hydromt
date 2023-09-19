@@ -244,6 +244,13 @@ def test_data_catalog(tmpdir):
     # test keys, getitem,
     keys = [key for key, _ in data_catalog.iter_sources()]
     source = data_catalog.get_source(keys[0])
+    assert data_catalog.contains_source(keys[0])
+    assert data_catalog.contains_source(
+        keys[0], version="asdfasdfasdf", permissive=True
+    )
+    assert not data_catalog.contains_source(
+        keys[0], version="asdfasdf", permissive=False
+    )
     assert isinstance(source, DataAdapter)
     assert keys[0] in data_catalog.get_source_names()
     # add source from dict
@@ -291,6 +298,19 @@ def test_from_archive(tmpdir):
     # failed to download
     with pytest.raises(ConnectionError, match="Data download failed"):
         data_catalog.from_archive("https://asdf.com/asdf.zip")
+
+
+def test_used_sources(tmpdir):
+    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
+    data_catalog = DataCatalog(merged_yml_fn)
+    source = data_catalog.get_source("esa_worldcover")
+    source.mark_as_used()
+    sources = data_catalog.iter_sources(used_only=True)
+    assert len(data_catalog) > 1
+    assert len(sources) == 1
+    assert sources[0][0] == "esa_worldcover"
+    assert sources[0][1].provider == source.provider
+    assert sources[0][1].version == source.version
 
 
 def test_from_yml_with_archive(tmpdir):

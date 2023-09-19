@@ -192,6 +192,7 @@ class DataFrameAdapter(DataAdapter):
         # load data
         fns = self._resolve_paths(variables)
         df = self._read_data(fns, logger=logger)
+        self.mark_as_used()  # mark used
         # rename variables and parse nodata
         df = self._rename_vars(df)
         df = self._set_nodata(df)
