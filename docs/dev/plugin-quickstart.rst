@@ -6,6 +6,9 @@
 Starting your own HydroMT Plugin
 ================================
 
+Introduction
+============
+
 This page gives you some tips and tricks on how to use HydroMT for your own model and start your own plugin. Before reading this,
 you should already know a little about HydroMT, so please check out at least the :ref:`intro_user_guide` and the :ref:`model_main`
 section.
@@ -131,21 +134,20 @@ resample/extract, or write down your specific workflow/equation in your model pl
 
 Create your own plugin repository
 ---------------------------------
-HydroMT makes it pretty easy to create your own plugin and we are quite flexible on how you would like to organise and maintain
+HydroMT makes it pretty easy to create your own plugin. We are quite flexible on how you would like to organise and maintain
 your plugin. Below you can find the minimum requirements to register your own new model plugin for HydroMT.
 
-In case, you want to start creating your own package or GitHub repository from scratch, we have also prepared a cookiecutter template
-to help you set up a whole Github package for your plugin including minimal testing and documentation by just filling out a couple of
-questions :) .
+In case, you want to start creating your own package, we have also prepared a cookiecutter template
+to help you set up a project for your plugin including minimal testing and documentation by just filling out a couple of
+questions :) . This template along with instructions are available at: ``hydromt-plugin-template <https://github.com/Deltares/hydromt-plugin-template>``_.
 
 Requirements
 ^^^^^^^^^^^^
-You do not necessarily need to developp an entire new repository to create a HydroMT plugin. Actually all you need to do is to
-instantiate a new HydroMT ``Model`` class (eg *WflowModel*) in a python script and register it properly. Currently HydroMT uses the
-`entrypoints` package to advertise its, well, entrypoints. Entrypoints are how you can tell HydroMT core about your plugin and they
+All you really need to do to make a new HydroMT plugin is to
+create a new HydroMT ``Model`` class (e.g. *WflowModel*) in a python package and register it properly. Currently HydroMT uses the
+`entrypoints` package to advertise its, well, entrypoints. Entrypoints are how you can tell HydroMT core about your plugin. They
 can be defined within your package setup definition file (typically your pyproject.toml for pypi packages). As an example we can look
-at the current ``hydromt_wflow`` model. Specifically it's this line in the pyproject.toml (for pypi project, this could differ if you
-use other tools to publish or install your package like poetry):
+at the current ``hydromt_wflow`` model. Specifically it's this line in the pyproject.toml:
 
 .. code-block:: toml
 
@@ -155,15 +157,18 @@ use other tools to publish or install your package like poetry):
 
 This snippet will tell HydroMT core three things:
 
-1. there will be a new HydroMT plugin / model class ``WflowModel`` in this repository called "wflow" that HydroMT core can use for example via command line.
-2. it is located in the file hydromt_wflow//wflow.py (or in python import term hydromt_wflow.wflow)
-3. it implements the new plugin class ``WflowModel`` in the ``hydromt.models`` API
+1. there will be a new model class ``WflowModel`` in this package called "hydromt_wflow" that HydroMT core can use for example via command line.
+2. it is located in the file hydromt_wflow//wflow.py
+3. it implements the new plugin class ``WflowModel`` that is compatible with the ``hydromt.models`` API
 
-Now, how do you define the new plugin ``Model`` class. To make sure that your model is compatible with HydroMT core, you can use either the
-``Model`` class of HydroMT core as a base or one of its sub-model classes: ``GridModel`` for regular gridded or distributed models, ``MeshModel``
-for unstructured grid(s) models, ``LumpedModel`` for lumped or semi-distributed models or ``NetworkModel`` for network models. This allows you
-to use the HydroMT model class methods as well as create any functionality on top of that. To define your new model class, e.g. *WflowModel*,
-you should in the python script that is referenced by the entry-point define at least:
+Now, how do you define the new plugin ``Model`` class? To make sure that your model is compatible with HydroMT core, you can use one of the following classes as a base for your model:
+* ``Model`` is the most generic class of HydroMT core which is used as a base for all other model classed.
+* ``GridModel`` for regular gridded or distributed models,
+* ``MeshModel`` for unstructured grid(s) models,
+* ``LumpedModel`` for lumped or semi-distributed models
+* ``NetworkModel`` for network models.
+This allows you to use the HydroMT model class methods as well as create any functionality on top of that. To define your new model class, e.g. *WflowModel*,
+you should make sure that in the python script that is referenced by the entry-point define at least:
 
 .. code-block:: python
 
@@ -377,7 +382,7 @@ Below are the properties and initialisation function, to set for your new plugin
     ### Name of defaults catalogs to include when initialising the model ##
     # For example to include model specific parameter data or mapping
     # These default catalogs can be placed in the _DATADIR folder.
-    _CATALOGS: List[str] = [join(_DATADIR, "parameters_data.yml")]
+    _CATALOGS: List[str] = []
 
     def __init__(
         self,
@@ -446,96 +451,10 @@ So typically, when you want to add data to your model (DEM, precipitation, param
 specific Model component. To add data, to a component, the ``set_<component>`` methods are you use and each of the components can be
 read and written using the specific ``read_<component>`` and ``write_<component>`` methods.
 
-The table below lists the base model components common to all model classes.
+A table that lists the base model components common to all model classes can be found at
+:ref:`The Model Overview Page<list-table>`
 All base model attributes and methods can be found in the :ref:`API reference <model_api>`
 
-.. list-table::
-   :widths: 10 25 20 15
-   :header-rows: 1
-
-   * - Component
-     - Explanation
-     - Python object
-     - API
-   * - maps
-     - Map / raster data (resolution and CRS may vary between maps)
-     - Dictionnary of xarray.DataArray and/or xarray.Dataset
-     - | :py:attr:`~Model.maps`
-       | :py:func:`~Model.set_maps`
-       | :py:func:`~Model.read_maps`
-       | :py:func:`~Model.write_maps`
-   * - geoms
-     - Static (1 or 2D) vector data
-     - Dictionnary of geopandas.GeoDataFrame
-     - | :py:attr:`~Model.geoms`
-       | :py:func:`~Model.set_geoms`
-       | :py:func:`~Model.read_geoms`
-       | :py:func:`~Model.write_geoms`
-   * - forcing
-     - (Dynamic) forcing data (meteo or hydrological for example)
-     - Dictionnary of xarray.DataArray and/or xarray.Dataset
-     - | :py:attr:`~Model.forcing`
-       | :py:func:`~Model.set_forcing`
-       | :py:func:`~Model.read_forcing`
-       | :py:func:`~Model.write_forcing`
-   * - results
-     - Model output
-     - Dictionnary of xarray.DataArray and/or xarray.Dataset
-     - | :py:attr:`~Model.results`
-       | :py:func:`~Model.set_results`
-       | :py:func:`~Model.read_results`
-   * - states
-     - Initial model conditions
-     - Dictionnary of xarray.DataArray and/or xarray.Dataset
-     - | :py:attr:`~Model.states`
-       | :py:func:`~Model.set_states`
-       | :py:func:`~Model.read_states`
-       | :py:func:`~Model.write_states`
-   * - config
-     - Settings for the model kernel simulation or model class
-     - Dictionnary (Any)
-     - | :py:attr:`~Model.config`
-       | :py:func:`~Model.set_config`
-       | :py:func:`~Model.read_config`
-       | :py:func:`~Model.write_config`
-
-
-For each generalized model class, the respective computational unit components exist:
-
-.. list-table::
-   :widths: 15 15 25 20 15
-   :header-rows: 1
-
-   * - Component
-     - Model class
-     - Explanation
-     - Python object
-     - API
-   * - grid
-     - :ref:`GridModel <grid_model_api>`
-     - Static gridded data with on unified grid
-     - xarray.Dataset (compatible with hydromt.raster.RasterDataset)
-     - | :py:attr:`~GridModel.grid`
-       | :py:func:`~GridModel.set_grid`
-       | :py:func:`~GridModel.read_grid`
-       | :py:func:`~GridModel.write_grid`
-   * - response_units
-     - :ref:`LumpedModel <lumped_model_api>`
-     - Static lumped data over the response_units
-     - xarray.Dataset (compatible with hydromt.vector.GeoDataset)
-     - | :py:attr:`~LumpedModel.response_units`
-       | :py:func:`~LumpedModel.set_response_units`
-       | :py:func:`~LumpedModel.read_response_units`
-       | :py:func:`~LumpedModel.write_response_units`
-   * - mesh
-     - :ref:`MeshModel <mesh_model_api>`
-     - Static mesh (unstructured grid(s)) data
-     - xugrid.UgridDataset
-     - | :py:attr:`~MeshModel.mesh`
-       | :py:func:`~MeshModel.set_mesh`
-       | :py:func:`~MeshModel.get_mesh`
-       | :py:func:`~MeshModel.read_mesh`
-       | :py:func:`~MeshModel.write_mesh`
 
 Reading & Writing model components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -589,52 +508,12 @@ In the background, the actual data is stored not directly in the components but 
 (``_maps`` for ``maps``). And the component, ``maps``, actually just goes and fetch the data from the placeholder ``_maps`` or
 in read mode, starts reading the component.
 
-.. code-block:: python
-
-  @property
-  def maps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-      """Model maps. Returns dict of xarray.DataArray or xarray.Dataset."""
-      if self._maps is None:
-          self._maps = dict()
-          if self._read:
-              self.read_maps()
-      return self._maps
-
-Using a placeholder allows to initiate reading when possible (e.g. in update mode 'r+'), the first time when the
+Using a placeholder allows us to initiate reading when possible (e.g. in update mode 'r+'), only the first time when the
 component is called, to avoid unintentiously overwritting data stored, and allows to add some check or transformation
 when adding data to a component using the ``set_<component>`` methods.
 
 So it is usually highly recommended, in your plugin to always use the component (``maps``) and to only modify its placholder
-using the ``set_<component>`` methods. Example of ``set_maps``:
-
-.. code-block:: python
-
-  def set_maps(
-    self,
-    data: Union[xr.DataArray, xr.Dataset],
-    name: Optional[str] = None,
-    split_dataset: Optional[bool] = True,
-  ) -> None:
-    """Add raster data to the maps component.
-
-    Dataset can either be added as is (default) or split into several
-    DataArrays using the split_dataset argument.
-
-    Arguments
-    ---------
-    data: xarray.Dataset or xarray.DataArray
-        New forcing data to add
-    name: str, optional
-        Variable name, only in case data is of type DataArray or if a Dataset is
-        added as is (split_dataset=False).
-    split_dataset: bool, optional
-        If data is a xarray.Dataset split it into several xarray.DataArrays.
-    """
-    data_dict = _check_data(data, name, split_dataset)
-    for name in data_dict:
-        if name in self.maps:  # trigger init / read
-            self.logger.warning(f"Replacing result: {name}")
-        self._maps[name] = data_dict[name]
+using the ``set_<component>`` methods. By and large you should not have to change the `set` methods.
 
 Additional Model properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -650,92 +529,6 @@ the other subclasses. Apart from the components here are a couple of useful prop
 - :py:attr:`~Model._write`: flag if the model is in write mode ('w' or 'w+' when initialising).
 
 Some submodel classes can have additional attributes based on their additional components, so check out the :ref:`API reference <model_api>`.
-
-Adding a new property or component
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If you wish to add additional properties or attributes to your plugin Model subclass, you can either decide to add simple
-attributes directly in the initiliasation function ``__init__`` or define specific properties. Example for a shortcut to the basin
-vector in the geoms object:
-
-.. code-block:: python
-
-  @property
-  def basins(self) -> gpd.GeoDataFrame:
-    """Returns a basin(s) geometry as a geopandas.GeoDataFrame."""
-    # Check in geoms
-    if "basins" in self.geoms:
-      gdf = self.geoms["basins"]
-    else:
-        self.logger.warning(
-            f"Basin map {self._MAPS['basins']} not found in maps or geoms."
-        )
-        gdf = gpd.GeoDataFrame()
-    return gdf
-
-In most cases, we hope that the components defined in HydroMT `Model` classes (``config``, ``geoms``, ``maps``, ``forcing``, ``states``,
-``results``) and its generic subclasses (``grid``, ``mesh``, ``response_units``) should allow you to store any data required by your
-model in a proper way. If it is not the case, you can always define your own new model components by respecting the following steps
-(example if your model has a lot of 2D non-geospatial tabular data that could nicely be stored as pandas.DataFrame objects, *tables*):
-
-1. Initiliase your new component placeholder in the ``__init__`` function, if possible with None.
-
-.. code-block:: python
-
-  self._tables = None
-
-2. Define the component itself as a new property, that looks for the placeholder and tries reading if empty in read mode.
-
-.. code-block:: python
-
-  @property
-  def tables(self) -> Dict[str, pd.DataFrame]:
-      """Returns a dictionary of pandas.DataFrame tabular files."""
-      if self._tables is None:
-        self._tables = dict()
-        if self._read:
-          self.read_tables()
-      return self._tables
-
-3. Define a reading and a writting method for your new component.
-
-.. code-block:: python
-
-  def read_tables(self, **kwargs):
-    """Read table files at <root> and parse to dict of dataframes"""
-    if not self._write:
-      self._tables = dict()  # start fresh in read-only mode
-
-    self.logger.info("Reading model table files.")
-    fns = glob.glob(join(self.root, f"*.csv"))
-    if len(fns) > 0:
-      for fn in fns:
-        name = basename(fn).split(".")[0]
-        tbl = pd.read_csv(fn)
-        self.set_tables(tbl, name=name)
-
-  def write_tables(self):
-    """Write tables at <root>."""
-    self._assert_write_mode
-    if len(self.tables) > 0:
-      self.logger.info("Writing table files.")
-      for name in self.tables:
-        fn_out = join(self.root, f"{name}.csv")
-        self.tables[name].to_csv(fn_out, sep=",", index=False, header=True)
-
-4. Define a set function in order to add or update data in your component.
-
-.. code-block:: python
-
-  def set_tables(self, df: pd.DataFrame, name:str):
-    """Add table <pandas.DataFrame> to model."""
-    if not (isinstance(df, pd.DataFrame) or isinstance(df, pd.Series)):
-      raise ValueError("df type not recognized, should be pandas.DataFrame or pandas.Series.")
-    if name in self._tables:
-      if not self._write:
-        raise IOError(f"Cannot overwrite table {name} in read-only mode")
-      elif self._read:
-        self.logger.warning(f"Overwriting table: {name}")
-    self._tables[name] = df
 
 .. _plugin_workflows:
 
@@ -753,10 +546,7 @@ But in general (scheme below):
   integer and float, boolean, None, list and dict types. This requirement makes it possible to expose these methods and their arguments
   via the hydromt configuration in YAML format.
 - Data is exposed to each model method through the ``Model.data_catalog`` attribute which is an instance of the
-  :py:class:`hydromt.DataCatalog`. Data of :ref:`supported data types <data_types>` is provided to model methods
-  by arguments which end with ``_fn`` (short for filename) which refer to a source in the data catalog
-  based on the source name or a file based on the (relative) path to the file. Within a model method the data is read
-  by calling any ``DataCatalog.get_<data_type>`` method which work for both source and file names.
+  :py:class:`hydromt.DataCatalog`. Within a model method the data is read by calling any ``DataCatalog.get_<data_type>`` method which work for both source and file names.
 - The region and res (resolution) arguments used in the command line build and clip methods are passed to the model method referred
   in the internal *_CLI_ARGS* model constant, which by default in the Model class, is the setup_basemaps method for both arguments. This is
   typically the first model method which should be called when building a model or your base / region setup method.
@@ -892,3 +682,93 @@ Here are some last tips:
 - **Testing**: you should also test the functions you developp for your plugin. We use pytest in HydroMT for this. You can test by developping
   unit test for your functions, or build a model and compare to a previously built one (eg in the examples folder). The ``Model`` API includes a
   couple of functions  that can help you with testing so you can check them out: :py:func:`~Model._test_model_api`, :py:func:`~Model._test_equal`
+
+Advanced Topics
+===============
+
+
+Adding a new property or component
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you wish to add additional properties or attributes to your plugin Model subclass, you can either decide to add simple
+attributes directly in the initiliasation function ``__init__`` or define specific properties. Example for a shortcut to the basin
+vector in the geoms object:
+
+.. code-block:: python
+
+  @property
+  def basins(self) -> gpd.GeoDataFrame:
+    """Returns a basin(s) geometry as a geopandas.GeoDataFrame."""
+    # Check in geoms
+    if "basins" in self.geoms:
+      gdf = self.geoms["basins"]
+    else:
+        self.logger.warning(
+            f"Basin map {self._MAPS['basins']} not found in maps or geoms."
+        )
+        gdf = gpd.GeoDataFrame()
+    return gdf
+
+In most cases, we hope that the components defined in HydroMT `Model` classes (``config``, ``geoms``, ``maps``, ``forcing``, ``states``,
+``results``) and its generic subclasses (``grid``, ``mesh``, ``response_units``) should allow you to store any data required by your
+model in a proper way. If it is not the case, you can always define your own new model components by respecting the following steps
+(example if your model has a lot of 2D non-geospatial tabular data that could nicely be stored as pandas.DataFrame objects, *tables*):
+
+1. Initiliase your new component placeholder in the ``__init__`` function, if possible with None.
+
+.. code-block:: python
+
+  self._tables = None
+
+2. Define the component itself as a new property, that looks for the placeholder and tries reading if empty in read mode.
+
+.. code-block:: python
+
+  @property
+  def tables(self) -> Dict[str, pd.DataFrame]:
+      """Returns a dictionary of pandas.DataFrame tabular files."""
+      if self._tables is None:
+        self._tables = dict()
+        if self._read:
+          self.read_tables()
+      return self._tables
+
+3. Define a reading and a writting method for your new component.
+
+.. code-block:: python
+
+  def read_tables(self, **kwargs):
+    """Read table files at <root> and parse to dict of dataframes"""
+    if not self._write:
+      self._tables = dict()  # start fresh in read-only mode
+
+    self.logger.info("Reading model table files.")
+    fns = glob.glob(join(self.root, f"*.csv"))
+    if len(fns) > 0:
+      for fn in fns:
+        name = basename(fn).split(".")[0]
+        tbl = pd.read_csv(fn)
+        self.set_tables(tbl, name=name)
+
+  def write_tables(self):
+    """Write tables at <root>."""
+    self._assert_write_mode
+    if len(self.tables) > 0:
+      self.logger.info("Writing table files.")
+      for name in self.tables:
+        fn_out = join(self.root, f"{name}.csv")
+        self.tables[name].to_csv(fn_out, sep=",", index=False, header=True)
+
+4. Define a set function in order to add or update data in your component.
+
+.. code-block:: python
+
+  def set_tables(self, df: pd.DataFrame, name:str):
+    """Add table <pandas.DataFrame> to model."""
+    if not (isinstance(df, pd.DataFrame) or isinstance(df, pd.Series)):
+      raise ValueError("df type not recognized, should be pandas.DataFrame or pandas.Series.")
+    if name in self._tables:
+      if not self._write:
+        raise IOError(f"Cannot overwrite table {name} in read-only mode")
+      elif self._read:
+        self.logger.warning(f"Overwriting table: {name}")
+    self._tables[name] = df
