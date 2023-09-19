@@ -7,7 +7,7 @@ import warnings
 from datetime import datetime
 from os import PathLike
 from os.path import join
-from typing import NewType, Optional, Tuple, Union, cast
+from typing import Dict, NewType, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -15,6 +15,7 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
+from rasterio.errors import RasterioIOError
 
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
@@ -275,7 +276,7 @@ class RasterDatasetAdapter(DataAdapter):
         """
         # load data
         fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
-        ds = self._read_data(fns, geom, bbox, cache_root, logger)
+        ds = self._read_data(fns, geom, bbox, cache_root, zoom_level, logger)
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_dims(ds)
@@ -301,8 +302,7 @@ class RasterDatasetAdapter(DataAdapter):
         bbox: Optional[list] = None,
         logger=logger,
     ):
-        # parse zoom level (raster only)
-        if len(self.zoom_levels) > 0:
+        if zoom_level is not None and "{zoom_level}" in self.path:
             zoom_level = self._parse_zoom_level(zoom_level, geom, bbox, logger=logger)
 
         # resolve path based on time, zoom level and/or variables
@@ -313,7 +313,7 @@ class RasterDatasetAdapter(DataAdapter):
         )
         return fns
 
-    def _read_data(self, fns, geom, bbox, cache_root, logger=logger):
+    def _read_data(self, fns, geom, bbox, cache_root, zoom_level=None, logger=logger):
         kwargs = self.driver_kwargs.copy()
 
         # read using various readers
@@ -350,6 +350,13 @@ class RasterDatasetAdapter(DataAdapter):
                 fns = fns_cached
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
+            if zoom_level is not None and "{zoom_level}" not in self.path:
+                zls_dict, crs = self._get_zoom_levels_and_crs(logger=logger)
+                zoom_level = self._parse_zoom_level(
+                    zoom_level, geom, bbox, zls_dict, crs, logger=logger
+                )
+                if isinstance(zoom_level, int):
+                    kwargs.update(overview_level=zoom_level)
             ds = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
@@ -551,70 +558,114 @@ class RasterDatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
+    def _get_zoom_levels_and_crs(self, logger=logger):
+        """Get zoom levels and crs from adapter or detect from tif file if missing."""
+        if self.zoom_levels is not None and self.crs is not None:
+            return self.zoom_levels, self.crs
+        zoom_levels = {}
+        try:
+            with rasterio.open(self.path) as src:
+                res = abs(src.res[0])
+                crs = src.crs
+                overviews = [src.overviews(i) for i in src.indexes]
+                # check if identical
+                if not all([o == overviews[0] for o in overviews]):
+                    raise ValueError("Overviews are not identical across bands")
+                # dict with overview level and corresponding resolution
+                zls = [1] + overviews[0]
+                zoom_levels = {i: res * zl for i, zl in enumerate(zls)}
+        except RasterioIOError as e:
+            logger.warning(f"IO error while detecting zoom levels: {e}")
+        self.zoom_levels = zoom_levels
+        self.crs = crs
+        return zoom_levels, crs
+
     def _parse_zoom_level(
         self,
-        zoom_level: Optional[int | tuple] = None,
-        geom: gpd.GeoSeries = None,
+        zoom_level: Union[int, Tuple[Union[int, float], str]],
+        geom: Optional[gpd.GeoSeries] = None,
         bbox: Optional[list] = None,
+        zls_dict: Optional[Dict[int, float]] = None,
+        dst_crs: pyproj.CRS = None,
         logger=logger,
     ) -> int:
-        """Return nearest smaller zoom level.
+        """Return overview level of data corresponding to zoom level.
 
-        Based on zoom resolutions defined in data catalog.
+        Parameters
+        ----------
+        zoom_level: int or tuple
+            overview level or tuple with resolution and unit
+        geom: gpd.GeoSeries, optional
+            geometry to determine res if zoom_level or source in degree
+        bbox: list, optional
+            bbox to determine res if zoom_level or source in degree
+        zls_dict: dict, optional
+            dictionary with overview levels and corresponding resolution
+        dst_crs: pyproj.CRS, optional
+            destination crs to determine res if zoom_level tuple is provided
+            with different unit than dst_crs
         """
-        # common pyproj crs axis units
-        known_units = ["degree", "metre", "US survey foot"]
-        if self.zoom_levels is None or len(self.zoom_levels) == 0:
-            logger.warning("No zoom levels available, default to zero")
-            return 0
-        zls = list(self.zoom_levels.keys())
-        if zoom_level is None:  # return first zoomlevel (assume these are ordered)
-            return next(iter(zls))
-        # parse zoom_level argument
-        if (
+        # check zoom level
+        zls_dict = self.zoom_levels if zls_dict is None else zls_dict
+        dst_crs = self.crs if dst_crs is None else dst_crs
+        if zls_dict is None or len(zls_dict) == 0 or zoom_level is None:
+            return None
+        elif isinstance(zoom_level, int):
+            if zoom_level not in zls_dict:
+                raise ValueError(
+                    f"Zoom level {zoom_level} not defined."
+                    f"Select from {list(zls_dict.keys())}."
+                )
+            zl = zoom_level
+            dst_res = zls_dict[zoom_level]
+        elif (
             isinstance(zoom_level, tuple)
             and isinstance(zoom_level[0], (int, float))
             and isinstance(zoom_level[1], str)
             and len(zoom_level) == 2
+            and dst_crs is not None
         ):
-            res, unit = zoom_level
-            # covert 'meter' and foot to official pyproj units
-            unit = {"meter": "metre", "foot": "US survey foot"}.get(unit, unit)
-            if unit not in known_units:
-                raise TypeError(
-                    f"zoom_level unit {unit} not understood;"
-                    f" should be one of {known_units}"
-                )
-        elif not isinstance(zoom_level, int):
-            raise TypeError(
-                f"zoom_level argument not understood: {zoom_level}; should be a float"
-            )
-        else:
-            return zoom_level
-        if self.crs:
+            src_res, src_res_unit = zoom_level
             # convert res if different unit than crs
-            crs = pyproj.CRS.from_user_input(self.crs)
-            crs_unit = crs.axis_info[0].unit_name
-            if crs_unit != unit and crs_unit not in known_units:
-                raise NotImplementedError(
-                    f"no conversion available for {unit} to {crs_unit}"
-                )
-            if unit != crs_unit:
-                lat = 0
-                if bbox is not None:
-                    lat = (bbox[1] + bbox[3]) / 2
-                elif geom is not None:
-                    lat = geom.to_crs(4326).centroid.y.item()
+            dst_crs = pyproj.CRS.from_user_input(dst_crs)
+            dst_crs_unit = dst_crs.axis_info[0].unit_name
+            dst_res = src_res
+            if dst_crs_unit != src_res_unit:
+                known_units = ["degree", "metre", "US survey foot", "meter", "foot"]
+                if src_res_unit not in known_units:
+                    raise TypeError(
+                        f"zoom_level unit {src_res_unit} not understood;"
+                        f" should be one of {known_units}"
+                    )
+                if dst_crs_unit not in known_units:
+                    raise NotImplementedError(
+                        f"no conversion available for {src_res_unit} to {dst_crs_unit}"
+                    )
                 conversions = {
-                    "degree": np.hypot(*gis_utils.cellres(lat=lat)),
-                    "US survey foot": 0.3048,
-                }
-                res = res * conversions.get(unit, 1) / conversions.get(crs_unit, 1)
-        # find nearest smaller zoomlevel
-        eps = 1e-5  # allow for rounding errors
-        smaller = [x < (res + eps) for x in self.zoom_levels.values()]
-        zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
-        logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
+                    "foot": 0.3048,
+                    "metre": 1,  # official pyproj units
+                    "US survey foot": 0.3048,  # official pyproj units
+                }  # to meter
+                if src_res_unit == "degree" or dst_crs_unit == "degree":
+                    lat = 0
+                    if bbox is not None:
+                        lat = (bbox[1] + bbox[3]) / 2
+                    elif geom is not None:
+                        lat = geom.to_crs(4326).centroid.y.item()
+                    conversions["degree"] = gis_utils.cellres(lat=lat)[1]
+                fsrc = conversions.get(src_res_unit, 1)
+                fdst = conversions.get(dst_crs_unit, 1)
+                dst_res = src_res * fsrc / fdst
+            # find nearest zoom level
+            eps = 1e-5  # allow for rounding errors
+            zls = list(zls_dict.keys())
+            smaller = [x < (dst_res + eps) for x in zls_dict.values()]
+            zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
+        elif dst_crs is None:
+            raise ValueError("No CRS defined, hence no zoom level can be determined.")
+        else:
+            raise TypeError(f"zoom_level not understood: {type(zoom_level)}")
+        logger.debug(f"Parsed zoom_level {zl} ({dst_res:.2f})")
         return zl
 
     def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
