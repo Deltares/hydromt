@@ -417,9 +417,39 @@ class DataCatalog(object):
         """Iterate over sources."""
         return iter(self.iter_sources())
 
-    def __contains__(self, key: str) -> bool:
-        """Check if source is in catalog."""
-        return key in self._sources
+    def contains_source(
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
+        permissive: bool = True,
+    ) -> bool:
+        """
+        Check if source is in catalog.
+
+        Paramters
+        ---------
+        source: str
+        provider
+        version
+        permissive
+
+        Returns
+        -------
+        bool
+        """
+        if permissive or (version is None and provider is None):
+            return source in self._sources
+        else:
+            if version:
+                if version not in self._sources[source]:
+                    return False
+                else:
+                    selected_version = version
+            else:
+                selected_version = next(iter(self._sources[source].keys()))
+
+            return provider not in self._sources[source][selected_version].keys()
 
     def __len__(self):
         """Return number of sources."""
