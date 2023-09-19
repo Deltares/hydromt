@@ -127,7 +127,7 @@ def test_write_data_catalog(tmpdir):
     model.write_data_catalog()
     assert not isfile(data_lib_fn)
     # write with single source
-    model.data_catalog._used_data.append(sources[0])
+    model.data_catalog.get_source(sources[0]).mark_as_used()
     model.write_data_catalog()
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:1]
     # write to different file
@@ -136,10 +136,10 @@ def test_write_data_catalog(tmpdir):
     assert isfile(data_lib_fn1)
     # append source
     model1 = Model(root=model.root, data_libs=["artifact_data"], mode="r+")
-    model1.data_catalog._used_data.append(sources[1])
+    model1.data_catalog.get_source(sources[1]).mark_as_used()
     model1.write_data_catalog(append=False)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == [sources[1]]
-    model1.data_catalog._used_data.append(sources[0])
+    model1.data_catalog.get_source(sources[0]).mark_as_used()
     model1.write_data_catalog(append=True)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
 

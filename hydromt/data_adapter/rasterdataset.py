@@ -271,6 +271,7 @@ class RasterDatasetAdapter(DataAdapter):
         """
         # load data
         fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
+        self.mark_as_used()  # mark used
         ds = self._read_data(fns, geom, bbox, cache_root, zoom_level, logger)
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
