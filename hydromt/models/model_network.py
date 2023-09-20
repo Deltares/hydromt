@@ -42,15 +42,7 @@ class NetworkModel(Model):
 
     def read(
         self,
-        components: List = [
-            "config",
-            "network",
-            "geoms",
-            "tables",
-            "forcing",
-            "states",
-            "results",
-        ],
+        components: List = None,
     ) -> None:
         """Read the complete model schematization and configuration from model files.
 
@@ -61,18 +53,21 @@ class NetworkModel(Model):
             read_<component> method. By default ['config', 'maps',
             'network', 'geoms', 'tables', 'forcing', 'states', 'results']
         """
+        if components is None:
+            components = [
+                "config",
+                "network",
+                "geoms",
+                "tables",
+                "forcing",
+                "states",
+                "results",
+            ]
         super().read(components=components)
 
     def write(
         self,
-        components: List = [
-            "config",
-            "network",
-            "geoms",
-            "tables",
-            "forcing",
-            "states",
-        ],
+        components: List = None,
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -83,6 +78,8 @@ class NetworkModel(Model):
             associated write_<component> method. By default ['config', 'maps',
             'network', 'geoms', 'tables', 'forcing', 'states']
         """
+        if components is None:
+            components = ["config", "network", "geoms", "tables", "forcing", "states"]
         super().write(components=components)
 
     # TODO: make NetworkMixin class with following properties/methods

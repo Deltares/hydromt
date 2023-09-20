@@ -121,6 +121,7 @@ class GeoDataFrameAdapter(DataAdapter):
                 "GeoDataFrameAdapter driver is deprecated and will be removed "
                 "in a future version. Please use 'driver_kwargs' instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             driver_kwargs.update(kwargs)
         super().__init__(
@@ -284,7 +285,8 @@ class GeoDataFrameAdapter(DataAdapter):
             if "driver" not in kwargs and self.driver in ["csv", "xls", "xlsx", "xy"]:
                 warnings.warn(
                     "using the driver setting is deprecated. Please use"
-                    "vector_table instead."
+                    "vector_table instead.",
+                    stacklevel=2,
                 )
                 kwargs.update(driver=self.driver)
             # parse bbox and geom to (buffere) geom

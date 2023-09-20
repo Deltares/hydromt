@@ -421,6 +421,7 @@ def gaugemap(
     warnings.warn(
         'The "gaugemap" method is deprecated, use  "hydromt.flw.gauge_map" instead.',
         DeprecationWarning,
+        stacklevel=2,
     )
     return gauge_map(
         ds=ds,
@@ -499,7 +500,7 @@ def gauge_map(
         if np.any(dist > max_dist):
             far = len(dist[dist > max_dist])
             msg = f"Snapping distance of {far} gauge(s) exceeds {max_dist} m"
-            warnings.warn(msg, UserWarning)
+            warnings.warn(msg, UserWarning, stacklevel=2)
             logger.warning(msg)
     gauges = np.zeros(ds.raster.shape, dtype=np.int32)
     gauges.flat[idxs] = ids
@@ -660,6 +661,7 @@ def basin_shape(
         "basin_shape is deprecated, use a combination of hydromt.flw.basin_map"
         " and hydromt.raster.RasterDataArray.vectorize instead.",
         DeprecationWarning,
+        stacklevel=2,
     )
     if basin_name not in ds:
         ds[basin_name] = basin_map(ds, flwdir, **kwargs)[0]

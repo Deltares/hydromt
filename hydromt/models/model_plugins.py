@@ -115,8 +115,8 @@ class ModelCatalog:
     def eps(self) -> Dict:
         """Return dictionary with available model entrypoints."""
         if len(self._eps) == 0:
-            self.plugins  # discover plugins
-            self.generic  # get generic local model classes
+            _ = self.plugins  # discover plugins
+            _ = self.generic  # get generic local model classes
         return self._eps
 
     @property

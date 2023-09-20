@@ -100,7 +100,7 @@ class LumpedMixin:
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         ds = xr.merge(self.read_nc(fn, **kwargs).values())
         if isfile(join(self.root, fn_geom)):
             gdf = gpd.read_file(join(self.root, fn_geom))
@@ -138,7 +138,7 @@ class LumpedMixin:
         if len(self.response_units) == 0:
             self.logger.debug("No response_units data found, skip writing.")
             return
-        self._assert_write_mode
+        self._assert_write_mode()
         # write geometry
         ds = self.response_units
         gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
@@ -176,15 +176,7 @@ class LumpedModel(LumpedMixin, Model):
 
     def read(
         self,
-        components: List = [
-            "config",
-            "response_units",
-            "geoms",
-            "tables",
-            "forcing",
-            "states",
-            "results",
-        ],
+        components: List = None,
     ) -> None:
         """Read the complete model schematization and configuration from model files.
 
@@ -196,18 +188,21 @@ class LumpedModel(LumpedMixin, Model):
             By default ['config', 'maps', 'response_units', 'geoms', 'tables',
             'forcing', 'states', 'results']
         """
+        if components is None:
+            components = [
+                "config",
+                "response_units",
+                "geoms",
+                "tables",
+                "forcing",
+                "states",
+                "results",
+            ]
         super().read(components=components)
 
     def write(
         self,
-        components: List = [
-            "config",
-            "response_units",
-            "geoms",
-            "tables",
-            "forcing",
-            "states",
-        ],
+        components: List = None,
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -218,6 +213,15 @@ class LumpedModel(LumpedMixin, Model):
             associated write_<component> method. By default ['config',
             'maps', 'response_units', 'geoms', 'tables', 'forcing', 'states']
         """
+        if components is None:
+            components = [
+                "config",
+                "response_units",
+                "geoms",
+                "tables",
+                "forcing",
+                "states",
+            ]
         super().write(components=components)
 
     @property

@@ -78,7 +78,7 @@ def grid_from_rasterdataset(
     fill_method: Optional[str] = None,
     reproject_method: Optional[Union[List, str]] = "nearest",
     mask_name: Optional[str] = "mask",
-    rename: Optional[Dict] = dict(),
+    rename: Optional[Dict] = None,
 ) -> xr.Dataset:
     """Prepare data by resampling ds to grid_like.
 
@@ -111,6 +111,8 @@ def grid_from_rasterdataset(
     ds_out: xr.Dataset
         Dataset with data from ds resampled to grid_like
     """
+    if rename is None:
+        rename = dict()
     if variables is not None:
         ds = ds[variables]
     if isinstance(ds, xr.DataArray):
@@ -148,7 +150,7 @@ def grid_from_raster_reclass(
     fill_method: Optional[str] = None,
     reproject_method: Optional[Union[List, str]] = "nearest",
     mask_name: Optional[str] = "mask",
-    rename: Optional[Dict] = dict(),
+    rename: Optional[Dict] = None,
 ) -> xr.Dataset:
     """Prepare data variable(s) resampled to grid_like object by reclassifying the data in ``da`` based on ``reclass_table``.
 
@@ -182,6 +184,8 @@ def grid_from_raster_reclass(
     ds_out: xr.Dataset
         Dataset with reclassified data from reclass_table to da resampled to grid_like.
     """  # noqa: E501
+    if rename is None:
+        rename = dict()
     if not isinstance(da, xr.DataArray):
         raise ValueError("da should be a single variable.")
     if reclass_variables is not None:
@@ -221,7 +225,7 @@ def grid_from_geodataframe(
     nodata: Optional[Union[List, int, float]] = -1,
     rasterize_method: Optional[str] = "value",
     mask_name: Optional[str] = "mask",
-    rename: Optional[Union[Dict, str]] = dict(),
+    rename: Optional[Union[Dict, str]] = None,
     all_touched: Optional[bool] = True,
 ) -> xr.Dataset:
     """Prepare data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.
@@ -268,6 +272,8 @@ def grid_from_geodataframe(
         Dataset with data from vector_fn resampled to grid_like.
     """  # noqa: E501
     # Check which method is used
+    if rename is None:
+        rename = dict()
     if rasterize_method == "value":
         ds_lst = []
         vars = np.atleast_1d(variables)

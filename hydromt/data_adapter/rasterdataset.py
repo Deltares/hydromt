@@ -138,6 +138,7 @@ class RasterDatasetAdapter(DataAdapter):
                 "RasterDatasetAdapter driver is deprecated and will be removed "
                 "in a future version. Please use 'driver_kwargs' instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             driver_kwargs.update(kwargs)
         super().__init__(

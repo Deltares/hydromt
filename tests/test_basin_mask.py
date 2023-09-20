@@ -130,8 +130,10 @@ def test_check_size(caplog):
         lazy=True,  # create lazy dask array instead of numpy array
     )
     _check_size(test_raster)
-    assert "Loading very large spatial domain to derive a subbasin. "
-    "Provide initial 'bounds' if this takes too long." in caplog.text
+    assert (
+        "Loading very large spatial domain to derive a subbasin. "
+        "Provide initial 'bounds' if this takes too long." in caplog.text
+    )
 
 
 def test_basin(caplog):

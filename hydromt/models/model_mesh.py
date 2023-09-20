@@ -41,7 +41,7 @@ class MeshMixin(object):
         fill_method: Optional[str] = None,
         resampling_method: Optional[str] = "mean",
         all_touched: Optional[bool] = True,
-        rename: Optional[Dict] = dict(),
+        rename: Optional[Dict] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to 2D ``grid_name`` in mesh object.
 
@@ -80,6 +80,8 @@ class MeshMixin(object):
         list
             List of variables added to mesh.
         """  # noqa: E501
+        if rename is None:
+            rename = dict()
         self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
         # Check if grid name in self.mesh
         if grid_name not in self.mesh_names:
@@ -121,7 +123,7 @@ class MeshMixin(object):
         fill_nodata: Optional[str] = None,
         resampling_method: Optional[Union[str, list]] = "mean",
         all_touched: Optional[bool] = True,
-        rename: Optional[Dict] = dict(),
+        rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to 2D ``grid_name`` in mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
@@ -181,6 +183,8 @@ class MeshMixin(object):
         ValueError
             If `raster_fn` is not a single variable raster.
         """  # noqa: E501
+        if rename is None:
+            rename = dict()
         self.logger.info(
             f"Preparing mesh data by reclassifying the data in {raster_fn} "
             f"based on {reclass_table_fn}."
@@ -373,7 +377,7 @@ class MeshMixin(object):
             # add / updates region
             if "region" in self.geoms:
                 self._geoms.pop("region", None)
-            self.region
+            _ = self.region
 
     def get_mesh(
         self, grid_name: str, include_data: bool = False
@@ -437,7 +441,7 @@ class MeshMixin(object):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         ds = xr.merge(self.read_nc(fn, **kwargs).values())
         uds = xu.UgridDataset(ds)
         if ds.rio.crs is not None:  # parse crs
@@ -479,7 +483,7 @@ class MeshMixin(object):
         if self.mesh is None:
             self.logger.debug("No mesh data found, skip writing.")
             return
-        self._assert_write_mode
+        self._assert_write_mode()
         # filename
         _fn = join(self.root, fn)
         if not isdir(dirname(_fn)):
@@ -643,15 +647,7 @@ class MeshModel(MeshMixin, Model):
     ## I/O
     def read(
         self,
-        components: List = [
-            "config",
-            "mesh",
-            "geoms",
-            "tables",
-            "forcing",
-            "states",
-            "results",
-        ],
+        components: List = None,
     ) -> None:
         """Read the complete model schematization and configuration from model files.
 
@@ -662,11 +658,21 @@ class MeshModel(MeshMixin, Model):
             read_<component> method. By default ['config', 'maps', 'mesh',
             'geoms', 'forcing', 'states', 'results']
         """
+        if components is None:
+            components = [
+                "config",
+                "mesh",
+                "geoms",
+                "tables",
+                "forcing",
+                "states",
+                "results",
+            ]
         super().read(components=components)
 
     def write(
         self,
-        components: List = ["config", "mesh", "geoms", "tables", "forcing", "states"],
+        components: List = None,
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -677,6 +683,8 @@ class MeshModel(MeshMixin, Model):
             associated write_<component> method. By default ['config', 'maps',
             'mesh', 'geoms', 'tables', 'forcing', 'states']
         """
+        if components is None:
+            components = ["config", "mesh", "geoms", "tables", "forcing", "states"]
         super().write(components=components)
 
     # MeshModel specific methods
@@ -695,7 +703,7 @@ class MeshModel(MeshMixin, Model):
             grid_crs = self.mesh.ugrid.crs
             # Check if all the same
             crs = None
-            for k, v in grid_crs.items():
+            for _k, v in grid_crs.items():
                 if crs is None:
                     crs = v
                 if v == crs:

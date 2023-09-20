@@ -22,7 +22,7 @@ try:
 
     HAS_OPENPYXL = True
 except ImportError:
-    False
+    pass
 
 try:
     import xugrid
