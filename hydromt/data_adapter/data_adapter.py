@@ -332,11 +332,11 @@ class DataAdapter(object, metaclass=ABCMeta):
             # resolve dates: month & year keys
             if time_tuple is not None:
                 dt = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
-                trange = pd.to_datetime(list(time_tuple)) - dt
+                t_range = pd.to_datetime(list(time_tuple)) - dt
                 freq, strf = ("m", "%Y-%m") if "month" in keys else ("a", "%Y")
-                dates = pd.period_range(*trange, freq=freq)
-                trange_str = [t.strftime(strf) for t in trange]
-                postfix += "; date range: " + " - ".join(trange_str)
+                dates = pd.period_range(*t_range, freq=freq)
+                t_range_str = [t.strftime(strf) for t in t_range]
+                postfix += "; date range: " + " - ".join(t_range_str)
             # resolve variables
             if variables is not None:
                 variables = np.atleast_1d(variables).tolist()
