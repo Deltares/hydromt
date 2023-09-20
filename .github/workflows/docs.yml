@@ -55,7 +55,7 @@ jobs:
         run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
       - name: load from cache if it exists for our environment
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /usr/share/miniconda3/envs/hydromt
           key: docs-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}
