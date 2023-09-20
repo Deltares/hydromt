@@ -53,7 +53,7 @@ To quote our :ref:`intro_user_guide`::
 
 As mentioned above, HydroMT interacts with models using the ``Model`` API class and also provides several sub-model classes:
 ``GridModel``, ``MeshModel``, ``LumpedModel``, ``NetworkModel`` which will be described in more detail below. Using
-these sub-model classes, you might be able to already prepare most and if not all of 
+these sub-model classes, you might be able to already prepare most and if not all of
 the data you need to build your own model. Do note however that these generic classes can only write model data in netcdf,
 geojson (or other formats supported by geopandas), and configurations in either yaml, toml or ini file format. So
 in case your model needs different file formats, you will need to convert or write the output files in different formats.
@@ -64,8 +64,8 @@ configuration templates or parameter default values. It might also be more insti
 
 For exmaple, let's say that your model is a ``GridModel`` for which you need to prepare a *landuse*
 classification map. The resampleing for this mape should be done using *mode* to avoid creating new imaginary land use classes.
-This could happen for example if you would use e.g., *average*. 
-In addition to the classification map you also need two landuse parameters roughness *N* and infiltration *inf*. 
+This could happen for example if you would use e.g., *average*.
+In addition to the classification map you also need two landuse parameters roughness *N* and infiltration *inf*.
 Using HydroMT generic methods, for your user, the build configuration file would look like this:
 
 .. code-block:: yaml
@@ -277,7 +277,7 @@ the default initialisation function of you parent class (the HydroMT core class 
 .. TIP::
 
   In python, a child class (eg *MyModelModel(Model)*), inherits all methods and properties of the parent class (``Model``). If you wish to completely overwrite one
-  of the parent methods (eg ``setup_region``), you can just redefine the function in the child class using the name (``setup_region``). You can also decide to 
+  of the parent methods (eg ``setup_region``), you can just redefine the function in the child class using the name (``setup_region``). You can also decide to
   re-use the parent function and for example add some extra steps, change the default values or the docstring of the function. For this, you can redefine the
   function in the child class, and within the redefined function, call the parent one use *super()* python class attribute (*super().setup_region*). You will see
   an example below for the initialisation function ``__init__`` .
@@ -345,7 +345,7 @@ can then be opened in read only mode ('r') and HydroMT should not be able to ove
 
 - `self._assert_read_mode` if a model can be read
 - `self._assert_write_mode` if a model can be written
-3. If needed, transform and write the component to the right format and file(s). 
+3. If needed, transform and write the component to the right format and file(s).
 4. Don't hesitate to put some logger information for your user.
 
 Set model components
