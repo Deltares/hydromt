@@ -1,5 +1,4 @@
 """Utility functions for hydromt that have no other home."""
-import os
 
 import numpy as np
 
@@ -42,12 +41,6 @@ def partition_dictionaries(left, right):
                 right_less_left[key] = value_right
 
     return common, left_less_right, right_less_left
-
-
-def create_folder(path):
-    """Create a folder if there is none."""
-    if not os.path.exists(path):
-        os.makedirs(path)
 
 
 def elevation2rgb(val):

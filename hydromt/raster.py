@@ -13,7 +13,7 @@ import math
 import os
 import tempfile
 from itertools import product
-from os.path import isdir, join
+from os.path import join
 from pathlib import Path
 from typing import Any, Optional, Union
 
@@ -40,7 +40,7 @@ from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
 from . import _compat, gis_utils
-from .utils import create_folder, elevation2rgb, rgb2elevation
+from .utils import elevation2rgb, rgb2elevation
 
 logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
@@ -2254,7 +2254,7 @@ class RasterDataArray(XRasterBase):
 
             # Write the raster paths to a text file
             sd = join(root, f"{zl}")
-            create_folder(sd)
+            os.makedirs(sd, exist_ok=True)
             txt_path = join(sd, "filelist.txt")
             file = open(txt_path, "w")
 
@@ -2263,9 +2263,8 @@ class RasterDataArray(XRasterBase):
                 row = int(np.ceil(u / pxzl))
                 ssd = join(sd, f"{col}")
 
-                create_folder(ssd)
-
                 # create temp tile
+                os.makedirs(ssd, exist_ok=True)
                 temp = obj[u : u + h, l : l + w]
                 if zl != 0:
                     temp = temp.coarsen(
@@ -2341,7 +2340,7 @@ class RasterDataArray(XRasterBase):
             Key-word arguments to write raster files
         """
         # Ensure root directory exists and set name for datacatalog and stuff
-        create_folder(root)
+        os.makedirs(root, exist_ok=True)
         m_name = os.path.normpath(os.path.basename(root))
 
         # Set variables and flags
@@ -2441,7 +2440,7 @@ class RasterDataArray(XRasterBase):
             # Ensure the directory is there per zoomlevel
             # Also create the textfile needed for vrt creation
             sd = join(root, f"{zl}")
-            create_folder(sd)
+            os.makedirs(sd, exist_ok=True)
             txt_path = join(sd, "filelist.txt")
             file = open(txt_path, "w")
 
@@ -2451,7 +2450,7 @@ class RasterDataArray(XRasterBase):
             ):
                 # Ensure directory per x is there
                 ssd = join(sd, f"{col}")
-                create_folder(ssd)
+                os.makedirs(ssd, exist_ok=True)
 
                 # Transform bounding box of tile to 3857
                 ul = t_r.transform(bounds[0], bounds[3])
@@ -2584,7 +2583,7 @@ class RasterDataArray(XRasterBase):
             2d arrays only
         """
         # Ensure the root directory is there
-        create_folder(root)
+        os.makedirs(root, exist_ok=True)
 
         # Set some flags and internal variables
         _from_png = False
@@ -2685,7 +2684,7 @@ class RasterDataArray(XRasterBase):
             dst_res = (y_ext_pm * 2) / (px_size * 2**zl)  # resolution per zoom level
             # Create the sub directory for the zoom levels
             sd = Path(root, f"{zl}")
-            create_folder(sd)
+            os.makedirs(sd, exist_ok=True)
 
             # The highest zoomlevel has to be done from the original data
             if not _from_png:
@@ -2693,7 +2692,7 @@ class RasterDataArray(XRasterBase):
                 for x, y, bbox in tile_window_png(zl, minx, maxx, miny, maxy):
                     # Ensure the directory for every x location is there
                     ssd = Path(sd, f"{x}")
-                    create_folder(ssd)
+                    os.makedirs(ssd, exist_ok=True)
 
                     # Get tile bounds an dst transfrom in 3857
                     tile_bounds = rasterio.warp.transform_bounds(
@@ -2753,7 +2752,7 @@ class RasterDataArray(XRasterBase):
                 for x, y, _ in tile_window_png(zl, minx, maxx, miny, maxy):
                     # Ensure directory
                     ssd = Path(sd, f"{x}")
-                    create_folder(ssd)
+                    os.makedirs(ssd, exist_ok=True)
                     # Create a temporary array, 4 times the size of a tile
                     temp = np.full((px_size * 2, px_size * 2), np.nan, dtype=np.float64)
                     # Every tile from this level has 4 on the previous
@@ -3220,8 +3219,7 @@ class RasterDataset(XRasterBase):
         if driver not in gis_utils.GDAL_EXT_CODE_MAP:
             raise ValueError(f"Extension unknown for driver: {driver}")
         ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
-        if not isdir(root):
-            os.makedirs(root)
+        os.makedirs(root, exist_ok=True)
         with tempfile.TemporaryDirectory() as tmpdir:
             if driver == "PCRaster" and _compat.HAS_PCRASTER:
                 clone_path = gis_utils.write_clone(
@@ -3235,8 +3233,7 @@ class RasterDataset(XRasterBase):
                 if "/" in var:
                     # variables with in subfolders
                     folders = "/".join(var.split("/")[:-1])
-                    if not isdir(join(root, folders)):
-                        os.makedirs(join(root, folders))
+                    os.makedirs(join(root, folders), exist_ok=True)
                     var0 = var.split("/")[-1]
                     raster_path = join(root, folders, f"{prefix}{var0}{postfix}.{ext}")
                 else:
