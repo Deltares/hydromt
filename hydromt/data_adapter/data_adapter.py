@@ -2,38 +2,26 @@
 from __future__ import annotations
 
 import logging
+import os
+import pathlib
+import warnings
 from abc import ABCMeta, abstractmethod
 from itertools import product
 from pathlib import Path
 from string import Formatter
 from typing import Optional, Union
 
+import fsspec
 import numpy as np
 import pandas as pd
 import xarray as xr
 import yaml
-from fsspec.implementations import local
 from upath import UPath
-
-from .. import _compat
 
 logger = logging.getLogger(__name__)
 
 
-__all__ = [
-    "DataAdapter",
-]
-
-FILESYSTEMS = ["local"]
-# Add filesystems from optional dependencies
-if _compat.HAS_GCSFS:
-    import gcsfs
-
-    FILESYSTEMS.append("gcs")
-if _compat.HAS_S3FS:
-    import s3fs
-
-    FILESYSTEMS.append("s3")
+__all__ = ["DataAdapter"]
 
 
 def round_latlon(ds, decimals=5):
@@ -115,7 +103,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         self,
         path: str | Path,
         driver: Optional[str] = None,
-        filesystem="local",
+        filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
         rename: Optional[dict] = None,
         unit_mult: Optional[dict] = None,
@@ -123,6 +111,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         meta: Optional[dict] = None,
         attrs: Optional[dict] = None,
         driver_kwargs: Optional[dict] = None,
+        storage_options: Optional[dict] = None,
         name: str = "",
         catalog_name: str = "",
         provider: Optional[str] = None,
@@ -142,9 +131,10 @@ class DataAdapter(object, metaclass=ABCMeta):
             for 'netcdf' :py:func:`xarray.open_mfdataset`.
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
-        filesystem: {'local', 'gcs', 's3'}, optional
+        filesystem: str, optional
             Filesystem where the data is stored (local, cloud, http etc.).
-            By default, local.
+            If None (default) the filesystem is inferred from the path.
+            See :py:func:`fsspec.registry.known_implementations` for all options.
         nodata: float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Nodata values can be differentiated between variables using a dictionary.
@@ -166,6 +156,8 @@ class DataAdapter(object, metaclass=ABCMeta):
             or long name of the variable.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        storage_options: dict, optional
+            Additional key-word arguments passed to the fsspec FileSystem object.
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
 
@@ -175,6 +167,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         meta = meta or {}
         attrs = attrs or {}
         driver_kwargs = driver_kwargs or {}
+        storage_options = storage_options or {}
         rename = rename or {}
         self.name = name
         self.catalog_name = catalog_name
@@ -189,9 +182,18 @@ class DataAdapter(object, metaclass=ABCMeta):
                 str(path).split(".")[-1].lower(), self._DEFAULT_DRIVER
             )
         self.driver = driver
-        self.filesystem = filesystem
+        if "storage_options" in driver_kwargs:
+            warnings.warn(
+                "storage_options should be provided as a separate argument, "
+                "not as part of driver_kwargs",
+                DeprecationWarning,
+            )
+            storage_options.update(driver_kwargs.pop("storage_options"))
         self.driver_kwargs = driver_kwargs
-
+        self.storage_options = storage_options
+        # get filesystem
+        self.filesystem = filesystem
+        self._fs = None  # placeholder for fsspec filesystem object
         # data adapter arguments
         self.nodata = nodata
         self.rename = rename
@@ -250,12 +252,37 @@ class DataAdapter(object, metaclass=ABCMeta):
         else:
             return False
 
+    @property
+    def fs(self):
+        """Return the filesystem object ."""
+        if self._fs is not None:
+            return self._fs
+        fs = None
+        if self.filesystem:  # use filesystem property
+            protocols = {"local": "file"}
+            protocol = protocols.get(self.filesystem, self.filesystem)
+        else:  # infer filesystem from path
+            upath = UPath(self.path)
+            if hasattr(upath, "fs"):
+                fs = upath.fs
+            else:
+                protocol = "file"
+                if hasattr(upath, "protocol"):
+                    protocol = upath.protocol
+                elif not isinstance(upath, (pathlib.PosixPath, pathlib.WindowsPath)):
+                    warnings.warn(
+                        "No filesystem found for path, using default local filesystem"
+                    )
+        if fs is None:
+            fs = fsspec.filesystem(protocol, **self.storage_options)
+        self._fs = fs
+        return fs
+
     def _resolve_paths(
         self,
         time_tuple: Optional[tuple] = None,
         variables: Optional[list] = None,
         zoom_level: Optional[int] = 0,
-        **kwargs,
     ):
         """Resolve {year}, {month} and {variable} keywords in self.path.
 
@@ -273,9 +300,6 @@ class DataAdapter(object, metaclass=ABCMeta):
             See :py:meth:`RasterDataAdapter._parse_zoom_level` for more info
         logger:
             The logger to use. If none is provided, the devault logger will be used.
-        **kwargs
-            key-word arguments are passed to fsspec FileSystem objects. Arguments
-            depend on protocal (local, gcs, s3...).
 
         Returns
         -------
@@ -286,95 +310,82 @@ class DataAdapter(object, metaclass=ABCMeta):
         fns = []
         keys = []
         # rebuild path based on arguments and escape unknown keys
-        path = ""
-        for literal_text, key, fmt, _ in Formatter().parse(self.path):
-            path += literal_text
-            if key is None:
-                continue
-            key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
-            # remove unused fields
-            if key in ["year", "month"] and time_tuple is None:
-                path += "*"
-            elif key == "variable" and variables is None:
-                path += "*"
-            # escape unknown fields
-            elif key is not None and key not in known_keys:
-                path = path + "{" + key_str + "}"
-            else:
-                path = path + key_str
-                keys.append(key)
+        if "{" in self.path:
+            path = ""
+            for literal_text, key, fmt, _ in Formatter().parse(self.path):
+                path += literal_text
+                if key is None:
+                    continue
+                key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
+                # remove unused fields
+                if key in ["year", "month"] and time_tuple is None:
+                    path += "*"
+                elif key == "variable" and variables is None:
+                    path += "*"
+                # escape unknown fields
+                elif key is not None and key not in known_keys:
+                    path = path + "{" + key_str + "}"
+                else:
+                    path = path + key_str
+                    keys.append(key)
+        else:
+            path = self.path
 
-        # resolve dates: month & year keys
+        # expand path based on keys for dates, variables and zoomlevel
         dates, vrs, postfix = [None], [None], ""
-        if time_tuple is not None:
-            dt = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
-            trange = pd.to_datetime(list(time_tuple)) - dt
-            freq, strf = ("m", "%Y-%m") if "month" in keys else ("a", "%Y")
-            dates = pd.period_range(*trange, freq=freq)
-            postfix += "; date range: " + " - ".join([t.strftime(strf) for t in trange])
-        # resolve variables
-        if variables is not None:
-            variables = np.atleast_1d(variables).tolist()
-            mv_inv = {v: k for k, v in self.rename.items()}
-            vrs = [mv_inv.get(var, var) for var in variables]  # type: ignore
-            postfix += f"; variables: {variables}"
-
-        # get filenames with glob for all date / variable combinations
-        fs = self.get_filesystem(**kwargs)
         fmt = {}
-        # update based on zoomlevel (size = 1)
-        if "zoom_level" in keys:
-            zoom_level = zoom_level or 0
-            fmt.update(zoom_level=zoom_level)
-        # update based on dates and variables  (size >= 1)
-        for date, var in product(dates, vrs):
-            if date is not None:
-                fmt.update(year=date.year, month=date.month)
-            if var is not None:
-                fmt.update(variable=var)
-            fns.extend(fs.glob(path.format(**fmt)))
+        if len(keys) > 0:
+            # resolve dates: month & year keys
+            if time_tuple is not None:
+                dt = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
+                t_range = pd.to_datetime(list(time_tuple)) - dt
+                freq, strf = ("m", "%Y-%m") if "month" in keys else ("a", "%Y")
+                dates = pd.period_range(*t_range, freq=freq)
+                t_range_str = [t.strftime(strf) for t in t_range]
+                postfix += "; date range: " + " - ".join(t_range_str)
+            # resolve variables
+            if variables is not None:
+                variables = np.atleast_1d(variables).tolist()
+                mv_inv = {v: k for k, v in self.rename.items()}
+                vrs = [mv_inv.get(var, var) for var in variables]  # type: ignore
+                postfix += f"; variables: {variables}"
+            # update based on zoomlevel (size = 1)
+            if "zoom_level" in keys:
+                zoom_level = zoom_level or 0
+                fmt.update(zoom_level=zoom_level)
+            # update based on dates and variables  (size >= 1)
+            for date, var in product(dates, vrs):
+                if date is not None:
+                    fmt.update(year=date.year, month=date.month)
+                if var is not None:
+                    fmt.update(variable=var)
+                fns.append(path.format(**fmt))
+        else:
+            fns.append(path)
 
-        if len(fns) == 0:
+        # expand path with glob and check if files existW
+        fns_out = []
+        protocol = str(path).split("://")[0] if "://" in path else ""
+        # For s3, anonymous connection still requires --no-sign-request profile to
+        # read the data setting environment variable works
+        if self.storage_options and protocol in ["s3"]:
+            if "anon" in self.storage_options:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
+            else:
+                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
+        for fn in list(set(fns)):
+            if "*" in str(fn):
+                for fn0 in self.fs.glob(fn):
+                    if protocol and not str(fn0).startswith(protocol):
+                        fn0 = f"{protocol}://{fn0}"
+                    fns_out.append(UPath(fn0, **self.storage_options))
+            elif self.fs.exists(fn):
+                fns_out.append(UPath(fn, **self.storage_options))
+
+        if len(fns_out) == 0:
             raise FileNotFoundError(f"No such file found: {path}{postfix}")
 
-        # With some fs like gcfs or s3fs, the first part of the path is not returned
-        # properly with glob
-        if not str(UPath(fns[0])).startswith(str(UPath(path))[0:2]):
-            # Assumes it's the first part of the path that is not
-            # correctly parsed with gcsfs, s3fs etc.
-            last_parent = UPath(path).parents[-1]
-            # add the rest of the path
-            fns = [last_parent.joinpath(*UPath(fn).parts[1:]) for fn in fns]
-        fns = list(set(fns))  # return unique paths
-        return fns
-
-    def get_filesystem(self, **kwargs):
-        """Return an initialised filesystem object."""
-        if self.filesystem == "local":
-            fs = local.LocalFileSystem(**kwargs)
-        elif self.filesystem == "gcs":
-            if _compat.HAS_GCSFS:
-                fs = gcsfs.GCSFileSystem(**kwargs)
-            else:
-                raise ModuleNotFoundError(
-                    "The gcsfs library is required to read data from gcs"
-                    + "(Google Cloud Storage). Please install."
-                )
-        elif self.filesystem == "s3":
-            if _compat.HAS_S3FS:
-                fs = s3fs.S3FileSystem(**kwargs)
-            else:
-                raise ModuleNotFoundError(
-                    "The s3fs library is required to read data from s3"
-                    + " (Amazon Web Storage). Please install."
-                )
-        else:
-            raise ValueError(
-                f"Unknown or unsupported filesystem {self.filesystem}."
-                + f" Use one of {FILESYSTEMS}"
-            )
-
-        return fs
+        return fns_out
 
     @abstractmethod
     def get_data(self, bbox, geom, buffer):

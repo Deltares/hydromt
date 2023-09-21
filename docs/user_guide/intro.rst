@@ -17,7 +17,23 @@ or analyze model results. Furthermore, a Python interface is available that expo
 all functionality for experienced users. A schematic overview of the package architecture is provided
 in the figure below and each HydroMT component is discussed below.
 
-HydroMT is organized in the following way:
+In short, there are three important concepts in HydroMT core that are important to cover:
+
+- ``DataAdapters`` and ``DataCatalog``: These are what basically hold all information about how to approach and read data as well as some of the metadata
+  about it. While a lot of the work in HydroMT happens here, plugins or users shouldn't really need to know about these beyond using
+  the proper ``data_type`` in their configuration. ``DataCatalog`` are basically just a thin wrapper around the ``DataAdapters`` that does some book keeping.
+- ``Workflows``: These are functions that transform input data and can call a set of methods to for example, resample, fill nodata, reproject, derive
+  other variables etc. The core has some of these workflows but you may need new ones for your plugin.
+- ``Model``: This is where the magic happens (as far as the plugin is concerned). We have provided some generic models that you can
+  override to get basic/generic functionality, but using the model functionality is where it will be at for you. The scheme below lists the current
+  relationship between the HydroMT ``Model`` and generic sub-Model classes and the know plugins.
+
+
+.. figure:: ../_static/plugin_structure.png
+
+  Schematic of Model and plugin structure of HydroMT
+
+More concretely HydroMT is organized in the following way:
 
 - **Input Data**
 
@@ -159,3 +175,4 @@ Region                          Argument of the *build* and *clip* CLI methods t
    ../_examples/working_with_raster.ipynb
    ../_examples/working_with_geodatasets.ipynb
    ../_examples/working_with_flow_directions.ipynb
+   ../_examples/doing_extreme_value_analysis.ipynb

@@ -15,6 +15,7 @@ dependencies = [
     "click",             # CLI configuration
     "dask",              # lazy computing
     "entrypoints",       # Provide access for Plugins
+    "fsspec",            # general file systems utilities
     "geopandas>=0.10",   # pandas but geo, wraps fiona and shapely
     "gdal>=3.1",         # enable geospacial data manipulation, both  raster and victor
     "numba",             # speed up computations (used in e.g. stats)
@@ -54,7 +55,6 @@ io = [
     "gcsfs",            # google cloud file system
     "openpyxl",         # excel IO
     "requests",         # donwload stuff
-    "fsspec==2023.5.0", # enable cloud file systems likg GCS and S3
 ]
 extra = [
     "xugrid", # xarray wrapper for mesh processing
