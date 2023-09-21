@@ -417,6 +417,10 @@ class DataCatalog(object):
         """Iterate over sources."""
         return iter(self.iter_sources())
 
+    def __contains__(self, key: str) -> bool:
+        """Check if source is in catalog."""
+        return key in self._sources
+
     def contains_source(
         self,
         source: str,
