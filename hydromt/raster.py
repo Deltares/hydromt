@@ -18,7 +18,6 @@ from typing import Any, Optional, Union
 
 import dask
 import geopandas as gpd
-import mercantile as mct
 import numpy as np
 import pandas as pd
 import pyproj
@@ -29,7 +28,6 @@ import shapely
 import xarray as xr
 import yaml
 from affine import Affine
-from PIL import Image
 from pyproj import CRS
 from rasterio import features
 from rasterio.enums import MergeAlg, Resampling
@@ -2250,10 +2248,12 @@ class RasterDataArray(XRasterBase):
     def to_slippy_tiles(
         self,
         root: Path | str,
-        reproj_method: str = "nearest",
+        reproj_method: str = "average",
         min_lvl: int = None,
         max_lvl: int = None,
         driver="png",
+        cmap=None,
+        norm=None,
         **kwargs,
     ):
         """Produce tiles in /zoom/x/y.<ext> structure (EPSG:3857).
@@ -2279,114 +2279,143 @@ class RasterDataArray(XRasterBase):
             for GTiff, these are passed to ~:py:meth:hydromt.RasterDataArray.to_raster:
             for png, these are passed to ~:py:meth:PIL.Image.Image.save:
         """
-        # TODO add option to use cmap instead of elevation2rgba
+        # for now these are optional dependencies
+        try:
+            import matplotlib.pyplot as plt
+            import mercantile as mct
+            from PIL import Image
+
+        except ImportError:
+            raise ImportError("matplotlib, pillow and mercantile are required")
+
         # Fixed pixel size and CRS for XYZ tiles
-        px_size = 256
+        pxs = 256
         crs = CRS.from_epsg(3857)
         ext = {"png": "png", "netcdf4": "nc", "gtiff": "tif"}.get(driver.lower(), None)
         if ext is None:
             raise ValueError(f"Unkown file driver {driver}, use png, netcdf4 or GTiff")
-        # for now we assume output has float32 dtype
-        kwargs0 = {
-            "netcdf4": {"engine": "netcdf4"},
-            "gtiff": {"driver": "GTiff", "compress": "deflate", "dtype": "float32"},
-        }.get(driver.lower(), {})
-        kwargs = {**kwargs0, **kwargs}
 
         # Object to local variable, also transpose it and extract some meta
-        if not self._obj.ndim == 2:
-            ValueError("Only 2d datasets are accepted...")
+        if not self._obj.ndim == 2 or not isinstance(self._obj, xr.DataArray):
+            ValueError("Only 2d DataArrays are accepted.")
         # make sure the data is N-S oriented, with y-axis as first dimension
         # and nodata values set to nan
         obj = self.mask_nodata().transpose(self.y_dim, self.x_dim)
         if obj.raster.res[1] < 0:
             obj = obj.raster.flipud()
+        # make sure dataarray has a name
+        name = obj.name or "data"
+        obj.name = name
 
-        # Calculate min/max zoomlevel based on the resolution of the data
-        bounds_wgsg84 = self.transform_bounds("EPSG:4326")
-        if min_lvl is None:
+        # colormap output
+        if cmap is not None and driver != "png":
+            raise ValueError("Colormap is only supported for png output")
+        if isinstance(cmap, str):
+            cmap = plt.get_cmap(cmap)
+        if cmap is not None and norm is None:
+            norm = plt.Normalize(
+                vmin=obj.min().load().item(), vmax=obj.max().load().item()
+            )
+
+        # for now we assume output has float32 dtype
+        kwargs0 = {
+            "netcdf4": {"encoding": {name: {"dtype": "float32", "zlib": True}}},
+            "gtiff": {"driver": "GTiff", "compress": "deflate", "dtype": "float32"},
+        }.get(driver.lower(), {})
+        kwargs = {**kwargs0, **kwargs}
+
+        # Calculate min/max zoomlevel based
+        bounds_wgsg84 = obj.raster.transform_bounds("EPSG:4326")
+        if max_lvl is None:  # calculate max zoomlevel close to native resolution
             min_lat = min(np.abs(bounds_wgsg84[1]), np.abs(bounds_wgsg84[3]))
             if self.crs.is_projected and self.crs.axis_info[0].unit_name == "metre":
                 dx_m = obj.raster.res[0]
             else:
                 dx_m = gis_utils.cellres(min_lat, *obj.raster.res)[0]
             C = 2 * np.pi * 6378137  # circumference of the earth
-            min_lvl = int(
-                np.ceil(np.log2(C * np.cos(np.deg2rad(min_lat)) / dx_m / px_size))
+            max_lvl = int(
+                np.ceil(np.log2(C * np.cos(np.deg2rad(min_lat)) / dx_m / pxs))
             )
-        if max_lvl is None:
-            max_lvl = mct.bounding_tile(*bounds_wgsg84).z
+        if min_lvl is None:  # calculate min zoomlevel based on the data extent
+            min_lvl = mct.bounding_tile(*bounds_wgsg84).z
 
         # Loop through the zoom levels
         zoom_levels = {}
         logger.info(f"Producing tiles from zoomlevel {min_lvl} to {max_lvl}")
-        for zl in range(min_lvl, max_lvl - 1, -1):
+        for zl in range(max_lvl, min_lvl - 1, -1):
             fns = []
             # Go through the zoomlevels
             for i, tile in enumerate(mct.tiles(*bounds_wgsg84, zl, truncate=True)):
+                ssd = Path(root, str(zl), f"{tile.x}")
+                os.makedirs(ssd, exist_ok=True)
+                tile_bounds = mct.xy_bounds(tile)
                 if i == 0:
-                    ssd = Path(root, str(zl), f"{tile.x}")
-                    os.makedirs(ssd, exist_ok=True)
-                    bounds0 = mct.xy_bounds(tile)
-                    zoom_levels[zl] = abs(bounds0[2] - bounds0[0]) / px_size
-                if zl == min_lvl:
+                    zoom_levels[zl] = abs(tile_bounds[2] - tile_bounds[0]) / pxs
+                if zl == max_lvl:
                     # For the first zoomlevel, we can just clip the data
                     # does this need a try/except?
                     src_tile = obj.raster.clip_bbox(
-                        mct.xy_bounds(tile), crs=crs, buffer=2, align=True
+                        tile_bounds, crs=crs, buffer=2, align=True
                     )
                 else:
                     # Every tile from this level has 4 child tiles on the previous lvl
-                    children = []
-                    for child in mct.children(tile):
+                    # Create a temporary array, 4 times the size of a tile
+                    temp = np.full((pxs * 2, pxs * 2), np.nan, dtype=np.float64)
+                    for ic, child in enumerate(mct.children(tile)):
                         fn = Path(root, str(child.z), str(child.x), f"{child.y}.{ext}")
                         # Check if the file is really there, if not: it was not written
-                        if fn.exists():
-                            if driver == "netcdf4":
-                                data = xr.open_dataarray(fn).values
-                            elif driver == "GTiff":
-                                data = xr.open_dataarray(
-                                    fn, decode_coords=False, engine="rasterio"
-                                )
-                                data = data.squeeze(drop=True).values
-                            elif driver == "png":
+                        if not fn.exists():
+                            continue
+                        # order: top-left, top-right, bottom-right, bottom-left
+                        yslice = slice(0, pxs) if ic in [0, 1] else slice(pxs, None)
+                        xslice = slice(0, pxs) if ic in [0, 3] else slice(pxs, None)
+                        if driver == "netcdf4":
+                            with xr.open_dataset(fn) as ds:
+                                temp[yslice, xslice] = ds[name].values
+                        elif driver == "GTiff":
+                            with rioxarray.open_rasterio(
+                                fn, parse_coordinates=False
+                            ) as da:
+                                temp[yslice, xslice] = da.squeeze(drop=True).values
+                        elif driver == "png":
+                            if cmap is not None:
+                                fn_bin = str(fn).replace(f".{ext}", ".bin")
+                                with open(fn_bin, "r") as f:
+                                    data = np.fromfile(f, "f4").reshape((pxs, pxs))
+                                os.remove(fn_bin)  # clean up
+                            else:
                                 data = rgba2elevation(np.array(Image.open(fn)))
-                        else:
-                            data = np.full((px_size, px_size), np.nan, dtype=np.float64)
-                        # Add the data to the temporary array
-                        children.append(data)
-                    # Create a temporary array, 4 times the size of a tile
-                    # order of children: top-left, top-right, bottom-right, bottom-left
-                    temp = np.full((px_size * 2, px_size * 2), np.nan, dtype=np.float64)
-                    temp[:px_size, :px_size] = children[0]
-                    temp[:px_size:, px_size:] = children[1]
-                    temp[px_size:, px_size:] = children[2]
-                    temp[px_size:, :px_size] = children[3]
+                            temp[yslice, xslice] = data
                     # create a dataarray from the temporary array
                     src_transform = rasterio.transform.from_bounds(
-                        *mct.xy_bounds(tile), px_size, px_size
+                        *tile_bounds, pxs * 2, pxs * 2
                     )
                     src_tile = RasterDataArray.from_numpy(
                         temp, src_transform, crs=crs, nodata=np.nan
                     )
+                    src_tile.name = name
 
                 # reproject the data to the tile
-                dst_transform = rasterio.transform.from_bounds(
-                    *mct.xy_bounds(tile), px_size, px_size
-                )
+                dst_transform = rasterio.transform.from_bounds(*tile_bounds, pxs, pxs)
                 dst_tile = src_tile.raster.reproject(
                     dst_crs=crs,
                     dst_transform=dst_transform,
-                    dst_width=px_size,
-                    dst_height=px_size,
+                    dst_width=pxs,
+                    dst_height=pxs,
                     method=reproj_method,
                 )
                 # write the data to file
                 fn_out = Path(ssd, f"{tile.y}.{ext}")
                 fns.append(fn_out)
                 if driver.lower() == "png":
-                    # Create RGBA bands from the data and save it as png
-                    rgba = elevation2rgba(dst_tile.values)
+                    if cmap is not None and zl != min_lvl:
+                        # create temp bin file with data for upsampling
+                        fn_bin = str(fn_out).replace(f".{ext}", ".bin")
+                        dst_tile.values.astype("f4").tofile(fn_bin)
+                        rgba = cmap(norm(dst_tile.values), bytes=True)
+                    else:
+                        # Create RGBA bands from the data and save it as png
+                        rgba = elevation2rgba(dst_tile.values)
                     Image.fromarray(rgba).save(fn_out, **kwargs)
                 elif driver.lower() == "netcdf4":
                     # write the data to netcdf
