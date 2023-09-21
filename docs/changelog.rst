@@ -34,6 +34,7 @@ Changed
 - Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
   call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
 - Use the Model.data_catalog to read the model region if defined by a geom or grid. (PR #479)
+- Support for http and other *filesystems* in path of data source (PR #515).
 
 Fixed
 -----

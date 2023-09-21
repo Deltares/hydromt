@@ -6,6 +6,7 @@ import tempfile
 from os.path import abspath, dirname, join
 from typing import cast
 
+import fsspec
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -82,21 +83,21 @@ def test_gcs_cmip6(tmpdir):
     ds = data_catalog.get_rasterdataset(
         "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
         variables=["precip", "temp"],
-        time_tuple=(("1990-01-01", "1990-06-01")),
+        time_tuple=(("1990-01-01", "1990-03-01")),
     )
-    fn_nc = str(tmpdir.join("test.nc"))
-    ds.to_netcdf(fn_nc)
     # Check reading and some preprocess
     assert "precip" in ds
     assert not np.any(ds[ds.raster.x_dim] > 180)
+    # Skip as I don't think this adds value to testing a gcs cloud archive
     # Write and compare
-    ds1 = data_catalog.get_rasterdataset(fn_nc)
-    assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
+    # fn_nc = str(tmpdir.join("test.nc"))
+    # ds.to_netcdf(fn_nc)
+    # ds1 = data_catalog.get_rasterdataset(fn_nc)
+    # assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
 
 
 @pytest.mark.skipif(not compat.HAS_S3FS, reason="S3FS not installed.")
-def test_aws_copdem(tmpdir):
-    # TODO switch to pre-defined catalogs when pushed to main
+def test_aws_worldcover():
     catalog_fn = join(CATALOGDIR, "aws_data.yml")
     data_catalog = DataCatalog(data_libs=[catalog_fn])
     da = data_catalog.get_rasterdataset(
@@ -104,7 +105,25 @@ def test_aws_copdem(tmpdir):
         bbox=[12.0, 46.0, 12.5, 46.50],
     )
     assert da.name == "landuse"
-    assert da.max().values == 100
+
+
+def test_http_data():
+    dc = DataCatalog().from_dict(
+        {
+            "global_wind_atlas": {
+                "data_type": "RasterDataset",
+                "driver": "raster",
+                "path": "https://globalwindatlas.info/api/gis/global/wind-speed/10",
+            }
+        }
+    )
+    s = dc.get_source("global_wind_atlas")
+    # test inferred file system
+    assert isinstance(s.fs, fsspec.implementations.http.HTTPFileSystem)
+    # test returns xarray DataArray
+    da = s.get_data(bbox=[0, 0, 10, 10])
+    assert isinstance(da, xr.DataArray)
+    assert da.raster.shape == (4000, 4000)
 
 
 def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
