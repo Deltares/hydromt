@@ -1,6 +1,5 @@
 """Implementation for the Pandas Dataframe adapter."""
 import logging
-import os
 import warnings
 from os.path import join
 from typing import Optional, Union
@@ -28,7 +27,7 @@ class DataFrameAdapter(DataAdapter):
         self,
         path: str,
         driver: Optional[str] = None,
-        filesystem: str = "local",
+        filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
         rename: dict = None,
         unit_mult: dict = None,
@@ -36,6 +35,7 @@ class DataFrameAdapter(DataAdapter):
         meta: dict = None,
         attrs: dict = None,
         driver_kwargs: dict = None,
+        storage_options: dict = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider: Optional[str] = None,
@@ -60,9 +60,10 @@ class DataFrameAdapter(DataAdapter):
             :py:func:`~pandas.read_excel`, and for 'fwf' :py:func:`~pandas.read_fwf`.
             By default the driver is inferred from the file extension and falls back to
             'csv' if unknown.
-        filesystem: {'local', 'gcs', 's3'}, optional
+        filesystem: str, optional
             Filesystem where the data is stored (local, cloud, http etc.).
-            By default, local.
+            If None (default) the filesystem is inferred from the path.
+            See :py:func:`fsspec.registry.known_implementations` for all options.
         nodata: dict, float, int, optional
             Missing value number. Only used if the data has no native missing value.
             Nodata values can be differentiated between variables using a dictionary.
@@ -86,6 +87,8 @@ class DataFrameAdapter(DataAdapter):
             Not used in this adapter. Only here for compatability with other adapters.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        storage_options: dict, optional
+            Additional key-word arguments passed to the fsspec FileSystem object.
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
         """
@@ -95,6 +98,8 @@ class DataFrameAdapter(DataAdapter):
         unit_add = unit_add or {}
         unit_mult = unit_mult or {}
         rename = rename or {}
+        storage_options = storage_options or {}
+
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
@@ -115,6 +120,7 @@ class DataFrameAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            storage_options=storage_options,
             name=name,
             catalog_name=catalog_name,
             provider=provider,
@@ -209,23 +215,6 @@ class DataFrameAdapter(DataAdapter):
         df = self._apply_unit_conversion(df, logger=logger)
         df = self._set_metadata(df)
         return df
-
-    def _resolve_paths(self, variables=None):
-        # Extract storage_options from kwargs to instantiate fsspec object correctly
-        so_kwargs = {}
-        if "storage_options" in self.driver_kwargs:
-            so_kwargs = self.driver_kwargs["storage_options"]
-            # For s3, anonymous connection still requires --no-sign-request profile
-            # to read the data setting environment variable works
-            if "anon" in so_kwargs:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
-            else:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-
-        # throw nice error if data not found
-        fns = super()._resolve_paths(variables=variables, **so_kwargs)
-
-        return fns
 
     def _read_data(self, fns, logger=logger):
         if len(fns) > 1:

@@ -35,7 +35,7 @@ class GeoDataFrameAdapter(DataAdapter):
         self,
         path: str,
         driver: Optional[str] = None,
-        filesystem: str = "local",
+        filesystem: Optional[str] = None,
         crs: Optional[Union[int, str, dict]] = None,
         nodata: Optional[Union[dict, float, int]] = None,
         rename: Optional[dict] = None,
@@ -45,6 +45,7 @@ class GeoDataFrameAdapter(DataAdapter):
         attrs: Optional[dict] = None,
         extent: Optional[dict] = None,
         driver_kwargs: Optional[dict] = None,
+        storage_options: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
@@ -68,9 +69,10 @@ class GeoDataFrameAdapter(DataAdapter):
             for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
-        filesystem: {'local', 'gcs', 's3'}, optional
+        filesystem: str, optional
             Filesystem where the data is stored (local, cloud, http etc.).
-            By default, local.
+            If None (default) the filesystem is inferred from the path.
+            See :py:func:`fsspec.registry.known_implementations` for all options.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
             proj (str or dict) or wkt (str). Only used if the data has no native CRS.
@@ -104,6 +106,8 @@ class GeoDataFrameAdapter(DataAdapter):
             time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        storage_options: dict, optional
+            Additional key-word arguments passed to the fsspec FileSystem object.
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional.
         provider: str, optional
@@ -135,6 +139,7 @@ class GeoDataFrameAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            storage_options=storage_options,
             name=name,
             catalog_name=catalog_name,
             provider=provider,
@@ -248,20 +253,6 @@ class GeoDataFrameAdapter(DataAdapter):
         gdf = self._apply_unit_conversions(gdf, logger=logger)
         gdf = self._set_metadata(gdf)
         return gdf
-
-    def _resolve_paths(self, variables):
-        # storage options for fsspec (TODO: not implemented yet)
-        if "storage_options" in self.driver_kwargs:
-            # not sure if storage options can be passed to fiona.open()
-            # for now throw NotImplemented Error
-            raise NotImplementedError(
-                "Remote file storage_options not implemented for GeoDataFrame"
-            )
-
-        # resolve paths
-        fns = super()._resolve_paths(variables=variables)
-
-        return fns
 
     def _read_data(self, fns, bbox, geom, buffer, predicate, logger=logger):
         if len(fns) > 1:

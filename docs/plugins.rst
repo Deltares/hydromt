@@ -66,3 +66,12 @@ About the model software
 .. _SFINCS: https://sfincs.readthedocs.io/en/latest/
 .. _Delwaq: https://www.deltares.nl/en/software/module/d-water-quality/
 .. _Delft-FIAT: https://publicwiki.deltares.nl/display/DFIAT/Delft-FIAT+Home
+
+Starting your own plugin
+------------------------
+
+If you would like to start your own HydroMT plugin for another model or software, we have some
+tips or a quick start page for you: :ref:`plugin_quickstart`.
+
+If you would like your plugin to appear on this page, please contact us via the issue board of
+HydroMT!

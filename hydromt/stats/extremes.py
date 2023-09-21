@@ -687,7 +687,7 @@ def plot_return_values(
     ax.legend(loc="upper left")
 
     ymin = 0
-    ymax = np.max([np.max(rvs_obs), np.max(rvs_sim), 0])
+    ymax = np.nanmax([np.nanmax(rvs_obs), np.nanmax(rvs_sim), 0])
     ymax = ymax * 1.1
     ax.set_ylim(ymin, ymax)
 

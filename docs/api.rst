@@ -167,8 +167,8 @@ Model attributes
 
    Model.crs
    Model.region
+   Model.root
    Model.api
-
 
 Model components and attributes
 -------------------------------
@@ -374,6 +374,7 @@ Setup methods
    MeshModel.setup_maps_from_rasterdataset
    MeshModel.setup_maps_from_raster_reclass
 
+.. _workflows_api:
 
 =========
 Workflows
@@ -495,6 +496,7 @@ Raster writing methods
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
 
+.. _raster_api:
 
 ==============
 Raster methods
@@ -639,6 +641,8 @@ Low level methods
 
    gis_utils.axes_attrs
    gis_utils.meridian_offset
+
+.. _geodataset_api:
 
 ==================
 GeoDataset methods
