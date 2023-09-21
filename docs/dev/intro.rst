@@ -13,3 +13,4 @@ Furthermore it informs you on recent and planned developments.
    contributing.rst
    dev_install.rst
    team.rst
+   plugin-quickstart.rst

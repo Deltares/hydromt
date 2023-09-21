@@ -25,6 +25,7 @@ Added
 - Allow the root of a data catalog to point to an archive, this will be extracted to the ~/.hydromt_data folder. (PR #512)
 - Support for reading overviews from (Cloud Optimized) GeoTIFFs using the zoom_level argument of ``DataCatalog.get_rasterdataset``. (PR #514)
 - Support for writing overviews to (Cloud Optimized) GeoTIFFs in the ``raster.to_raster`` method. (PR #514)
+- Added documentation for how to start your own plugin (#446)
 
 Changed
 -------
