@@ -43,20 +43,21 @@ def partition_dictionaries(left, right):
     return common, left_less_right, right_less_left
 
 
-def elevation2rgb(val):
+def elevation2rgba(val):
     """Convert elevation to rgb tuple."""
     val += 32768
     r = np.floor(val / 256).astype(np.uint8)
     g = np.floor(val % 256).astype(np.uint8)
     b = np.floor((val - np.floor(val)) * 256).astype(np.uint8)
+    a = np.where(np.isnan(val), 0, 255).astype(np.uint8)
+    return np.stack((r, g, b, a), axis=2)
 
-    return (r, g, b)
 
-
-def rgb2elevation(r, g, b):
+def rgba2elevation(rgba: np.ndarray):
     """Convert rgb tuple to elevation."""
+    r, g, b, a = np.split(rgba, 4, axis=2)
     val = (r * 256 + g + b / 256) - 32768
-    return val
+    return np.where(a == 0, np.nan, val).squeeze()
 
 
 def _dict_pprint(d):
