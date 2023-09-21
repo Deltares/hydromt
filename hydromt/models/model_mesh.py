@@ -80,8 +80,7 @@ class MeshMixin(object):
         list
             List of variables added to mesh.
         """  # noqa: E501
-        if rename is None:
-            rename = dict()
+        rename = rename or {}
         self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
         # Check if grid name in self.mesh
         if grid_name not in self.mesh_names:
@@ -183,8 +182,7 @@ class MeshMixin(object):
         ValueError
             If `raster_fn` is not a single variable raster.
         """  # noqa: E501
-        if rename is None:
-            rename = dict()
+        rename = rename or {}
         self.logger.info(
             f"Preparing mesh data by reclassifying the data in {raster_fn} "
             f"based on {reclass_table_fn}."
@@ -658,16 +656,15 @@ class MeshModel(MeshMixin, Model):
             read_<component> method. By default ['config', 'maps', 'mesh',
             'geoms', 'forcing', 'states', 'results']
         """
-        if components is None:
-            components = [
-                "config",
-                "mesh",
-                "geoms",
-                "tables",
-                "forcing",
-                "states",
-                "results",
-            ]
+        components = components or [
+            "config",
+            "mesh",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+            "results",
+        ]
         super().read(components=components)
 
     def write(
@@ -683,8 +680,14 @@ class MeshModel(MeshMixin, Model):
             associated write_<component> method. By default ['config', 'maps',
             'mesh', 'geoms', 'tables', 'forcing', 'states']
         """
-        if components is None:
-            components = ["config", "mesh", "geoms", "tables", "forcing", "states"]
+        components = components or [
+            "config",
+            "mesh",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+        ]
         super().write(components=components)
 
     # MeshModel specific methods

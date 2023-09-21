@@ -89,18 +89,12 @@ class DataFrameAdapter(DataAdapter):
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
         """
-        if driver_kwargs is None:
-            driver_kwargs = {}
-        if attrs is None:
-            attrs = {}
-        if meta is None:
-            meta = {}
-        if unit_add is None:
-            unit_add = {}
-        if unit_mult is None:
-            unit_mult = {}
-        if rename is None:
-            rename = {}
+        driver_kwargs = driver_kwargs or {}
+        attrs = attrs or {}
+        meta = meta or {}
+        unit_add = unit_add or {}
+        unit_mult = unit_mult or {}
+        rename = rename or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "

@@ -118,8 +118,7 @@ class GridMixin(object):
         list
             Names of added model map layers
         """
-        if rename is None:
-            rename = dict()
+        rename = rename or {}
         self.logger.info(f"Preparing grid data from raster source {raster_fn}")
         # Read raster data and select variables
         ds = self.data_catalog.get_rasterdataset(
@@ -199,8 +198,7 @@ class GridMixin(object):
         list
             Names of added model grid layers
         """  # noqa: E501
-        if rename is None:
-            rename = dict()
+        rename = rename or dict()
         self.logger.info(
             f"Preparing grid data by reclassifying the data in {raster_fn} based "
             f"on {reclass_table_fn}"
@@ -285,8 +283,7 @@ class GridMixin(object):
         list
             Names of added model grid layers
         """  # noqa: E501
-        if rename is None:
-            rename = dict()
+        rename = rename or dict()
         self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
         gdf = self.data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs
@@ -696,16 +693,15 @@ class GridModel(GridMixin, Model):
             read_<component> method. By default ['config', 'maps', 'grid',
             'geoms', 'tables', 'forcing', 'states', 'results']
         """
-        if components is None:
-            components = [
-                "config",
-                "grid",
-                "geoms",
-                "tables",
-                "forcing",
-                "states",
-                "results",
-            ]
+        components = components or [
+            "config",
+            "grid",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+            "results",
+        ]
         super().read(components=components)
 
     def write(
@@ -721,16 +717,15 @@ class GridModel(GridMixin, Model):
             associated write_<component> method. By default
             ['config', 'maps', 'grid', 'geoms', 'tables', 'forcing', 'states']
         """
-        if components is None:
-            components = [
-                "config",
-                "maps",
-                "grid",
-                "geoms",
-                "tables",
-                "forcing",
-                "states",
-            ]
+        components = components or [
+            "config",
+            "maps",
+            "grid",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+        ]
         super().write(components=components)
 
     # Properties for subclass GridModel

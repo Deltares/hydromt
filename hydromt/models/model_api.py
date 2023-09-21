@@ -96,8 +96,7 @@ class Model(object, metaclass=ABCMeta):
         logger:
             The logger to be used.
         """
-        if data_libs is None:
-            data_libs = []
+        data_libs = data_libs or {}
         from . import MODELS  # avoid circular import
 
         self.logger = logger
@@ -290,8 +289,7 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        if opt is None:
-            opt = {}
+        opt = opt or {}
         opt = self._check_get_opt(opt)
 
         # read current model
@@ -994,8 +992,7 @@ class Model(object, metaclass=ABCMeta):
         list
             Names of added model map layers
         """
-        if rename is None:
-            rename = dict()
+        rename = rename or {}
         self.logger.info(f"Preparing maps data from raster source {raster_fn}")
         # Read raster data and select variables
         ds = self.data_catalog.get_rasterdataset(
@@ -1075,8 +1072,7 @@ class Model(object, metaclass=ABCMeta):
         list
             Names of added model map layers
         """  # noqa: E501
-        if rename is None:
-            rename = dict()
+        rename = rename or {}
         self.logger.info(
             f"Preparing map data by reclassifying the data in {raster_fn} based"
             f" on {reclass_table_fn}"
@@ -1866,8 +1862,7 @@ class Model(object, metaclass=ABCMeta):
         errors: dict
             Dictionary with errors per model component which is not equal
         """
-        if skip_component is None:
-            skip_component = ["root"]
+        skip_component = skip_component or ["root"]
         assert isinstance(other, type(self))
         components = list(self.api.keys())
         components_other = list(other.api.keys())

@@ -188,16 +188,15 @@ class LumpedModel(LumpedMixin, Model):
             By default ['config', 'maps', 'response_units', 'geoms', 'tables',
             'forcing', 'states', 'results']
         """
-        if components is None:
-            components = [
-                "config",
-                "response_units",
-                "geoms",
-                "tables",
-                "forcing",
-                "states",
-                "results",
-            ]
+        components = components or [
+            "config",
+            "response_units",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+            "results",
+        ]
         super().read(components=components)
 
     def write(
@@ -213,15 +212,14 @@ class LumpedModel(LumpedMixin, Model):
             associated write_<component> method. By default ['config',
             'maps', 'response_units', 'geoms', 'tables', 'forcing', 'states']
         """
-        if components is None:
-            components = [
-                "config",
-                "response_units",
-                "geoms",
-                "tables",
-                "forcing",
-                "states",
-            ]
+        components = components or [
+            "config",
+            "response_units",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+        ]
         super().write(components=components)
 
     @property

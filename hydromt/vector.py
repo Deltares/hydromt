@@ -298,8 +298,7 @@ class GeoBase(raster.XGeoBase):
         Dataset, DataArray
             Update GeoDataset/Array
         """
-        if geom_format is None:
-            geom_format = self.geom_format
+        geom_format = geom_format or self.geom_format
         if geometry is None:
             geometry = self.geometry
         elif not isinstance(geometry, GeoSeries):

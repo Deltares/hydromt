@@ -54,8 +54,7 @@ def precip(
     p_out: xarray.DataArray (lazy)
         processed precipitation forcing
     """
-    if resample_kwargs is None:
-        resample_kwargs = {}
+    resample_kwargs = resample_kwargs or {}
     if precip.raster.dim0 != "time":
         raise ValueError(f'First precip dim should be "time", not {precip.raster.dim0}')
     # downscale precip (lazy); global min of zero
@@ -132,8 +131,7 @@ def temp(
     t_out: xarray.DataArray (lazy)
         processed temperature forcing
     """
-    if resample_kwargs is None:
-        resample_kwargs = {}
+    resample_kwargs = resample_kwargs or {}
     if temp.raster.dim0 != "time":
         raise ValueError(f'First temp dim should be "time", not {temp.raster.dim0}')
     # apply lapse rate

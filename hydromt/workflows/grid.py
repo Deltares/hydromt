@@ -111,10 +111,8 @@ def grid_from_rasterdataset(
     ds_out: xr.Dataset
         Dataset with data from ds resampled to grid_like
     """
-    if rename is None:
-        rename = dict()
-    if variables is not None:
-        ds = ds[variables]
+    rename = rename or dict()
+    variables = ds or ds[variables]
     if isinstance(ds, xr.DataArray):
         ds = ds.to_dataset()
     # Fill nodata
@@ -184,8 +182,7 @@ def grid_from_raster_reclass(
     ds_out: xr.Dataset
         Dataset with reclassified data from reclass_table to da resampled to grid_like.
     """  # noqa: E501
-    if rename is None:
-        rename = dict()
+    rename = rename or dict()
     if not isinstance(da, xr.DataArray):
         raise ValueError("da should be a single variable.")
     if reclass_variables is not None:
@@ -272,8 +269,7 @@ def grid_from_geodataframe(
         Dataset with data from vector_fn resampled to grid_like.
     """  # noqa: E501
     # Check which method is used
-    if rename is None:
-        rename = dict()
+    rename = rename or dict()
     if rasterize_method == "value":
         ds_lst = []
         vars = np.atleast_1d(variables)
