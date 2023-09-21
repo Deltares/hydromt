@@ -96,7 +96,7 @@ class Model(object, metaclass=ABCMeta):
         logger:
             The logger to be used.
         """
-        data_libs = data_libs or {}
+        data_libs = data_libs or []
         from . import MODELS  # avoid circular import
 
         self.logger = logger
