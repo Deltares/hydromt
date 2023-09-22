@@ -184,7 +184,7 @@ def merge(
     dest = da_out.values
     kwargs.update(dst_crs=dst_crs, dst_res=dst_res, align=True)
     sf_lst = []
-    for i, da in enumerate(data_arrays):
+    for _, da in enumerate(data_arrays):
         if not da.raster.aligned_grid(da_out):
             # clip with buffer
             src_bbox = da_out.raster.transform_bounds(da.raster.crs)

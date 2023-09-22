@@ -556,11 +556,11 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
 
     # test with cmap
     png_dir = join(tmpdir, "tiles_png_cmap")
-    rioda_large.raster.to_slippy_tiles(png_dir, cmap="viridis", min_lvl=7, max_lvl=7)
+    rioda_large.raster.to_slippy_tiles(png_dir, cmap="viridis", min_lvl=6, max_lvl=7)
     fn = join(png_dir, "7", "64", "64.png")
     im = np.array(Image.open(fn))
     assert im.shape == (256, 256, 4)
-    assert all(im[0, 0, :] == [128, 0, 132, 255])
+    assert all(im[0, 0, :] == [31, 148, 139, 255])
 
     # gtiff
     tif_dir = join(tmpdir, "tiles_tif")

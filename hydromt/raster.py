@@ -18,6 +18,7 @@ from typing import Any, Optional, Union
 
 import dask
 import geopandas as gpd
+import mercantile as mct
 import numpy as np
 import pandas as pd
 import pyproj
@@ -89,7 +90,7 @@ def full(
     nodata=np.nan,
     dtype=np.float32,
     name=None,
-    attrs={},
+    attrs=None,
     crs=None,
     lazy=False,
     shape=None,
@@ -124,6 +125,7 @@ def full(
     da: DataArray
         Filled DataArray
     """
+    attrs = attrs or {}
     f = dask.array.empty if lazy else np.full
     if dims is None:
         dims = tuple([d for d in coords])
@@ -148,7 +150,7 @@ def full_from_transform(
     nodata=np.nan,
     dtype=np.float32,
     name=None,
-    attrs={},
+    attrs=None,
     crs=None,
     lazy=False,
 ):
@@ -180,6 +182,7 @@ def full_from_transform(
     da : DataArray
         Filled DataArray
     """
+    attrs = attrs or {}
     if len(shape) not in [2, 3]:
         raise ValueError("Only 2D and 3D data arrays supported.")
     coords = gis_utils.affine_to_coords(transform, shape[-2:], x_dim="x", y_dim="y")
@@ -294,7 +297,7 @@ class XGeoBase(object):
                         break
                 if crs is not None:
                     # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
-                    crs = crs.strip("+init=") if isinstance(crs, str) else crs
+                    crs = crs.removeprefix("+init=") if isinstance(crs, str) else crs
                     try:
                         input_crs = pyproj.CRS.from_user_input(crs)
                         break
@@ -1670,7 +1673,7 @@ class RasterDataArray(XRasterBase):
         super(RasterDataArray, self).__init__(xarray_obj)
 
     @staticmethod
-    def from_numpy(data, transform, nodata=None, attrs={}, crs=None):
+    def from_numpy(data, transform, nodata=None, attrs=None, crs=None):
         """Transform a 2D/3D numpy array into a DataArray with geospatial attributes.
 
         The data dimensions should have the y and x on the second last
@@ -1695,6 +1698,7 @@ class RasterDataArray(XRasterBase):
         da : RasterDataArray
             xarray.DataArray with geospatial information
         """
+        attrs = attrs or {}
         nrow, ncol = data.shape[-2:]
         dims = ("y", "x")
         if len(data.shape) == 3:
@@ -2302,13 +2306,13 @@ class RasterDataArray(XRasterBase):
             for png, these are passed to ~:py:meth:PIL.Image.Image.save:
         """
         # for now these are optional dependencies
-        try:
-            import matplotlib.pyplot as plt
-            import mercantile as mct
-            from PIL import Image
+        if driver.lower() == "png":
+            try:
+                import matplotlib.pyplot as plt
+                from PIL import Image
 
-        except ImportError:
-            raise ImportError("matplotlib, pillow and mercantile are required")
+            except ImportError:
+                raise ImportError("matplotlib and pillow are required for png output")
 
         # Fixed pixel size and CRS for XYZ tiles
         pxs = 256
@@ -2324,11 +2328,8 @@ class RasterDataArray(XRasterBase):
         # Object to local variable, also transpose it and extract some meta
         if self._obj.ndim != 2:
             raise ValueError("Only 2d DataArrays are accepted.")
-        # make sure the data is N-S oriented, with y-axis as first dimension
-        # and nodata values set to nan
+        # make sure the y-axis as first dimension and nodata values set to nan
         obj = self.mask_nodata().transpose(self.y_dim, self.x_dim)
-        # if obj.raster.res[1] < 0:
-        #     obj = obj.raster.flipud()
         # make sure dataarray has a name
         name = obj.name or "data"
         obj.name = name
@@ -2410,7 +2411,7 @@ class RasterDataArray(XRasterBase):
                 ssd = Path(root, str(zl), f"{tile.x}")
                 os.makedirs(ssd, exist_ok=True)
                 tile_bounds = mct.xy_bounds(tile)
-                if i == 0:
+                if i == 0:  # zoom level : resolution in meters
                     zoom_levels[zl] = abs(tile_bounds[2] - tile_bounds[0]) / pxs
                 if zl == max_lvl:
                     # For the first zoomlevel, we can just clip the data
@@ -2456,7 +2457,7 @@ class RasterDataArray(XRasterBase):
                     )
                     src_tile.name = name
 
-                # reproject the data to the tile
+                # reproject the data to the tile / coares resolution
                 dst_transform = rasterio.transform.from_bounds(*tile_bounds, pxs, pxs)
                 dst_tile = src_tile.raster.reproject(
                     dst_crs=crs,
@@ -2485,8 +2486,9 @@ class RasterDataArray(XRasterBase):
                 elif driver.lower() == "gtiff":
                     # write the data to geotiff
                     dst_tile.raster.to_raster(fn_out, **kwargs)
+
+            # Write files to txt and create a vrt using GDAL
             if driver.lower() != "png":
-                # Write files to txt and create a vrt using GDAL
                 txt_fn = Path(root, str(zl), "filelist.txt")
                 vrt_fn = Path(root, f"lvl{zl}.vrt")
                 with open(txt_fn, "w") as f:
@@ -2494,9 +2496,8 @@ class RasterDataArray(XRasterBase):
                         f.write(f"{fn}\n")
                 gis_utils.create_vrt(vrt_fn, file_list_path=txt_fn)
 
+        # Write a quick yaml for the database
         if driver.lower() != "png":
-            # Write a quick yaml for the database
-            # zoom level : resolution in meters
             yml = {
                 "crs": 3857,
                 "data_type": "RasterDataset",

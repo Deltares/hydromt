@@ -22,7 +22,7 @@ def precip(
     clim=None,
     freq=None,
     reproj_method="nearest_index",
-    resample_kwargs={},
+    resample_kwargs=None,
     logger=logger,
 ):
     """Return the lazy reprojection of precipitation to model.
@@ -54,6 +54,7 @@ def precip(
     p_out: xarray.DataArray (lazy)
         processed precipitation forcing
     """
+    resample_kwargs = resample_kwargs or {}
     if precip.raster.dim0 != "time":
         raise ValueError(f'First precip dim should be "time", not {precip.raster.dim0}')
     # downscale precip (lazy); global min of zero
@@ -94,7 +95,7 @@ def temp(
     freq=None,
     reproj_method="nearest_index",
     lapse_rate=-0.0065,
-    resample_kwargs={},
+    resample_kwargs=None,
     logger=logger,
 ):
     """Return lazy reprojection of temperature to model grid.
@@ -130,6 +131,7 @@ def temp(
     t_out: xarray.DataArray (lazy)
         processed temperature forcing
     """
+    resample_kwargs = resample_kwargs or {}
     if temp.raster.dim0 != "time":
         raise ValueError(f'First temp dim should be "time", not {temp.raster.dim0}')
     # apply lapse rate
@@ -173,7 +175,7 @@ def press(
     freq=None,
     reproj_method="nearest_index",
     lapse_rate=-0.0065,
-    resample_kwargs={},
+    resample_kwargs=None,
     logger=logger,
 ):
     """Return lazy reprojection of pressure to model grid.
@@ -205,6 +207,8 @@ def press(
     press_out: xarray.DataArray (lazy)
         processed pressure forcing
     """
+    if resample_kwargs is None:
+        resample_kwargs = {}
     if press.raster.dim0 != "time":
         raise ValueError(f'First press dim should be "time", not {press.raster.dim0}')
     # downscale pressure (lazy)
@@ -234,7 +238,7 @@ def wind(
     altitude_correction: bool = False,
     freq: pd.Timedelta = None,
     reproj_method: str = "nearest_index",
-    resample_kwargs: dict = {},
+    resample_kwargs: dict = None,
     logger=logger,
 ):
     """Return lazy reprojection of wind speed to model grid.
@@ -271,6 +275,8 @@ def wind(
     wind_out: xarray.DataArray (lazy)
         processed wind forcing
     """
+    if resample_kwargs is None:
+        resample_kwargs = {}
     if wind_u is not None and wind_v is not None:
         wind = np.sqrt(np.power(wind_u, 2) + np.power(wind_v, 2))
     elif wind is None:
@@ -303,7 +309,7 @@ def pet(
     wind_altitude: float = 10,
     reproj_method: str = "nearest_index",
     freq: str = None,
-    resample_kwargs: dict = {},
+    resample_kwargs: dict = None,
     logger=logger,
 ) -> xarray.DataArray:
     """Determine reference evapotranspiration.
@@ -352,6 +358,8 @@ def pet(
         reference evapotranspiration
     """
     # # resample in time
+    if resample_kwargs is None:
+        resample_kwargs = {}
     if temp.raster.dim0 != "time" or ds.raster.dim0 != "time":
         raise ValueError('First dimension of input variables should be "time"')
     # make sure temp and ds align both temporally and spatially
