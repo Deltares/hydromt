@@ -18,6 +18,7 @@ from typing import Any, Optional, Union
 
 import dask
 import geopandas as gpd
+import mercantile as mct
 import numpy as np
 import pandas as pd
 import pyproj
@@ -2295,13 +2296,13 @@ class RasterDataArray(XRasterBase):
             for png, these are passed to ~:py:meth:PIL.Image.Image.save:
         """
         # for now these are optional dependencies
-        try:
-            import matplotlib.pyplot as plt
-            import mercantile as mct
-            from PIL import Image
+        if driver.lower() == "png":
+            try:
+                import matplotlib.pyplot as plt
+                from PIL import Image
 
-        except ImportError:
-            raise ImportError("matplotlib, pillow and mercantile are required")
+            except ImportError:
+                raise ImportError("matplotlib and pillow are required for png output")
 
         # Fixed pixel size and CRS for XYZ tiles
         pxs = 256
