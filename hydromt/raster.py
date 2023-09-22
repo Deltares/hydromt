@@ -2305,6 +2305,10 @@ class RasterDataArray(XRasterBase):
 
         # Fixed pixel size and CRS for XYZ tiles
         pxs = 256
+        # Extent in y-direction for pseudo mercator (EPSG:3857)
+        y_ext = math.atan(math.sinh(math.pi)) * (180 / math.pi)
+        y_ext_pm = mct.xy(0, y_ext)[1]
+
         crs = CRS.from_epsg(3857)
         ext = {"png": "png", "netcdf4": "nc", "gtiff": "tif"}.get(driver.lower(), None)
         if ext is None:
@@ -2316,11 +2320,13 @@ class RasterDataArray(XRasterBase):
         # make sure the data is N-S oriented, with y-axis as first dimension
         # and nodata values set to nan
         obj = self.mask_nodata().transpose(self.y_dim, self.x_dim)
-        if obj.raster.res[1] < 0:
-            obj = obj.raster.flipud()
+        # if obj.raster.res[1] < 0:
+        #     obj = obj.raster.flipud()
         # make sure dataarray has a name
         name = obj.name or "data"
         obj.name = name
+        obj_res = obj.raster.res[0]
+        obj_bounds = list(obj.raster.bounds)
 
         # colormap output
         if cmap is not None and driver != "png":
@@ -2339,20 +2345,53 @@ class RasterDataArray(XRasterBase):
         }.get(driver.lower(), {})
         kwargs = {**kwargs0, **kwargs}
 
+        # Setting up information for zoomlevel calculation and 
+        # determination of tile windows
+        # This section is purely for the resolution
+        bounds_4326_clip = list(obj.raster.transform_bounds("EPSG:4326"))
+        bounds_4326_clip[:2] = map(
+            max,
+            zip(bounds_4326_clip[:2], (-180, -y_ext)),
+        )
+        bounds_4326_clip[2:] = map(
+            min,
+            zip(bounds_4326_clip[2:], (180, y_ext)),
+        )
+        obj_clipped_to_pseudo = obj.raster.clip_bbox(
+            bounds_4326_clip,
+            crs="EPSG:4326",
+        )
+        tr_3857 = rasterio.warp.calculate_default_transform(
+            obj_clipped_to_pseudo.raster.crs,
+            "EPSG:3857",
+            *obj_clipped_to_pseudo.shape,
+            *obj_clipped_to_pseudo.raster.bounds,
+        )[0]
+
+        del obj_clipped_to_pseudo
+
+        # This section is for dealing with rounding errors
+        obj_bounds_cor = [
+            obj_bounds[0] + 0.5 * obj_res,
+            obj_bounds[1] + 0.5 * obj_res,
+            obj_bounds[2] - 0.5 * obj_res,
+            obj_bounds[3] - 0.5 * obj_res,
+        ]
+        bounds_4326 = rasterio.warp.transform_bounds(
+            obj.raster.crs,
+            "EPSG:4326",
+            *obj_bounds_cor,
+        )
+
         # Calculate min/max zoomlevel based
-        bounds_wgsg84 = obj.raster.transform_bounds("EPSG:4326")
         if max_lvl is None:  # calculate max zoomlevel close to native resolution
-            max_lat = max(np.abs(bounds_wgsg84[1]), np.abs(bounds_wgsg84[3]))
-            if self.crs.is_projected and self.crs.axis_info[0].unit_name == "metre":
-                dx_m = obj.raster.res[0]
-            else:
-                dx_m = gis_utils.cellres(max_lat, *obj.raster.res)[0]
-            C = 2 * np.pi * 6378137  # circumference of the earth
+            # Determine the max number of zoom levels with the resolution
+            dres = tr_3857[0]
             max_lvl = int(
-                np.ceil(np.log2(C * np.cos(np.deg2rad(max_lat)) / dx_m / pxs))
+                math.ceil((math.log10((y_ext_pm * 2) / (dres * pxs)) / math.log10(2)))
             )
         if min_lvl is None:  # calculate min zoomlevel based on the data extent
-            min_lvl = mct.bounding_tile(*bounds_wgsg84).z
+            min_lvl = mct.bounding_tile(*bounds_4326).z
 
         # Loop through the zoom levels
         zoom_levels = {}
@@ -2360,7 +2399,7 @@ class RasterDataArray(XRasterBase):
         for zl in range(max_lvl, min_lvl - 1, -1):
             fns = []
             # Go through the zoomlevels
-            for i, tile in enumerate(mct.tiles(*bounds_wgsg84, zl, truncate=True)):
+            for i, tile in enumerate(mct.tiles(*bounds_4326, zl, truncate=True)):
                 ssd = Path(root, str(zl), f"{tile.x}")
                 os.makedirs(ssd, exist_ok=True)
                 tile_bounds = mct.xy_bounds(tile)
