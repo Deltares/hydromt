@@ -419,7 +419,13 @@ class DataCatalog(object):
 
     def __contains__(self, key: str) -> bool:
         """Check if source is in catalog."""
-        return key in self._sources
+        warnings.warn(
+            "Directly checking for containement is deprecated. "
+            " Use 'contains_source' instead.",
+            DeprecationWarning,
+        )
+
+        return self.contains_source(key)
 
     def contains_source(
         self,
