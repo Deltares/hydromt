@@ -608,7 +608,7 @@ def test_networkmodel(network_model, tmpdir):
     with pytest.raises(NotImplementedError):
         network_model.set_network()
     with pytest.raises(NotImplementedError):
-        network_model.network
+        _ = network_model.network
 
 
 @pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
@@ -707,7 +707,7 @@ def test_meshmodel_setup(griduda, world):
     mod.setup_config(**{"header": {"setting": "value"}})
     region = {"geom": world[world.name == "Italy"]}
     mod.setup_mesh2d(region, res=10000, crs=3857, grid_name="mesh2d")
-    mod.region
+    _ = mod.region
 
     region = {"mesh": griduda}
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])

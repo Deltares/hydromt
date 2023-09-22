@@ -14,9 +14,7 @@ from ..models import MODELS
 logger = logging.getLogger(__name__)
 
 
-def get_model_components(
-    model: str, component_types=["read", "write", "setup"]
-) -> Dict:
+def get_model_components(model: str, component_types=None) -> Dict:
     """Get all model components, each described with the following keys.
 
         {
@@ -45,6 +43,7 @@ def get_model_components(
         "GeoDatasetSource",
         "GeoDataframeSource",
     ]
+    component_types = component_types or ["read", "write", "setup"]
     model_class = MODELS.load(model)
     members = inspect.getmembers(model_class)
     components = {}

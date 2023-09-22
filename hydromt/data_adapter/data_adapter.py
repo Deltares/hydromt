@@ -187,6 +187,7 @@ class DataAdapter(object, metaclass=ABCMeta):
                 "storage_options should be provided as a separate argument, "
                 "not as part of driver_kwargs",
                 DeprecationWarning,
+                stacklevel=2,
             )
             storage_options.update(driver_kwargs.pop("storage_options"))
         self.driver_kwargs = driver_kwargs
@@ -271,7 +272,8 @@ class DataAdapter(object, metaclass=ABCMeta):
                     protocol = upath.protocol
                 elif not isinstance(upath, (pathlib.PosixPath, pathlib.WindowsPath)):
                     warnings.warn(
-                        "No filesystem found for path, using default local filesystem"
+                        "No filesystem found for path, using default local filesystem",
+                        stacklevel=2,
                     )
         if fs is None:
             fs = fsspec.filesystem(protocol, **self.storage_options)

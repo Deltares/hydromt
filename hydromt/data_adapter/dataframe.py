@@ -29,13 +29,13 @@ class DataFrameAdapter(DataAdapter):
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
-        rename: dict = {},
-        unit_mult: dict = {},
-        unit_add: dict = {},
-        meta: dict = {},
-        attrs: dict = {},
-        driver_kwargs: dict = {},
-        storage_options: dict = {},
+        rename: dict = None,
+        unit_mult: dict = None,
+        unit_add: dict = None,
+        meta: dict = None,
+        attrs: dict = None,
+        driver_kwargs: dict = None,
+        storage_options: dict = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider: Optional[str] = None,
@@ -92,12 +92,21 @@ class DataFrameAdapter(DataAdapter):
         name, catalog_name: str, optional
             Name of the dataset and catalog, optional for now.
         """
+        driver_kwargs = driver_kwargs or {}
+        attrs = attrs or {}
+        meta = meta or {}
+        unit_add = unit_add or {}
+        unit_mult = unit_mult or {}
+        rename = rename or {}
+        storage_options = storage_options or {}
+
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
                 "DataFrameAdapter driver is deprecated and will be removed "
                 "in a future version. Please use 'driver_kwargs' instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             driver_kwargs.update(kwargs)
         super().__init__(

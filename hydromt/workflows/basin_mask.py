@@ -306,13 +306,16 @@ def get_basin_geometry(
             'kind="outlets" has been deprecated, use outlets=True in combination with '
             'kind="basin" or kind="interbasin" instead.',
             DeprecationWarning,
+            stacklevel=2,
         )
     elif kind not in kind_lst:
         msg = f"Unknown kind: {kind}, select from {kind_lst}."
         raise ValueError(msg)
     if bool(stream_kwargs.pop("within", False)):
         warnings.warn(
-            '"within" stream argument has been deprecated.', DeprecationWarning
+            '"within" stream argument has been deprecated.',
+            DeprecationWarning,
+            stacklevel=2,
         )
 
     # check variables

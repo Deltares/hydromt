@@ -25,7 +25,7 @@ def _uri_validator(uri: Union[str, Path]) -> bool:
     try:
         result = urlparse(str(uri))
         return all([result.scheme, result.netloc])
-    except ValueError | AttributeError:
+    except (ValueError, AttributeError):
         return False
 
 

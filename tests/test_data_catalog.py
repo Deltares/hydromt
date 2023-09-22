@@ -115,7 +115,7 @@ def test_parser():
 
 def test_data_catalog_io(tmpdir):
     data_catalog = DataCatalog()
-    data_catalog.sources  # load artifact data as fallback
+    _ = data_catalog.sources  # load artifact data as fallback
     # read / write
     fn_yml = join(tmpdir, "test.yml")
     data_catalog.to_yml(fn_yml)
@@ -576,7 +576,7 @@ def test_deprecation_warnings(artifact_data):
 
 def test_detect_extent():
     data_catalog = DataCatalog()  # read artifacts
-    data_catalog.sources  # load artifact data as fallback
+    _ = data_catalog.sources  # load artifact data as fallback
 
     # raster dataset
     name = "chirps_global"
