@@ -560,7 +560,7 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
     fn = join(png_dir, "7", "64", "64.png")
     im = np.array(Image.open(fn))
     assert im.shape == (256, 256, 4)
-    assert all(im[0, 0, :] == [128, 0, 132, 255])
+    assert all(im[0, 0, :] == [31, 148, 139, 255])
 
     # gtiff
     tif_dir = join(tmpdir, "tiles_tif")
