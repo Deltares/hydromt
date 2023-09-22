@@ -428,6 +428,7 @@ class DataCatalog(object):
             "Directly checking for containement is deprecated. "
             " Use 'contains_source' instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         return self.contains_source(key)
