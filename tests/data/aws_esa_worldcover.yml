@@ -5,9 +5,8 @@ esa_worldcover:
   filesystem: s3
   version: 2021
   provider: aws
-  driver_kwargs:
-    storage_options:
-      anon: true
+  storage_options:
+    anon: true
   meta:
     category: landuse
     source_license: CC BY 4.0

@@ -38,7 +38,7 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
       driver: raster/raster_tindex/netcdf/zarr/vector/vector_table/csv/xlsx/xls
       driver_kwargs:
         key: value
-      filesystem: local/gcs/s3
+      filesystem: local/gcs/s3/http
       meta:
         source_url: zenodo.org/my_dataset
         source_license: CC-BY-3.0
@@ -68,6 +68,7 @@ The yaml file has an *optional* global **meta** data section:
   If not provided the folder of where the yaml file is located will be used as root.
   This is used in combination with each data source **path** argument to avoid repetition.
 - **version** (recommended): data catalog version; we recommend `calendar versioning <https://calver.org/>`_
+- **hydromt_version** (recommended): range of hydromt version that can read this catalog. Format should be acording to `PEP 440 <https://peps.python.org/pep-0440/#version-specifiers>`_.
 - **category** (optional): used if all data source in catalog belong to the same category. Usual categories within HydroMT are
   *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data*
   but the user is free to define its own categories.
@@ -91,9 +92,11 @@ A full list of **optional data source arguments** is given below
 - **driver_kwargs**: pairs of key value arguments to pass to the driver specific open data method
   (eg xr.open_mfdataset for netdcf raster, see the full list below).
   *NOTE*: New with HydroMT v0.7.2 (was called *kwargs* before)
-- **filesystem** (required if different than local): specify if the data is stored locally or remotely (e.g cloud). Supported filesystems are *local* for local data,
-  *gcs* for data stored on Google Cloud Storage, and *aws* for data stored on Amazon Web Services. Profile or authentication information can be passed to ``driver_kwargs`` via
-  *storage_options*.
+- **filesystem** (optional): specify at what filesystem the data is stored. This is used to select the correct protocol to
+  access different filesystems (e.g. local, gcs, s3, http). If not provided the filesystem is inferred from the path.
+  See `fsspec <https://filesystem-spec.readthedocs.io/en/latest/index.html>`_ for more available protocols.
+- **storage_options** (optional): Additional arguments to pass to the filesystem protocol, these are protocal specific.
+  *NOTE*: New in HydroMT v0.8.1
 - **version** (recommended): data source version
   *NOTE*: New in HydroMT v0.8.1
 - **provider** (recommended): data source provider

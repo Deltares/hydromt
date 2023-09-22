@@ -2,9 +2,10 @@
 import logging
 import os
 import warnings
+from datetime import datetime
 from os.path import join
 from pathlib import Path
-from typing import NewType, Union
+from typing import NewType, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -34,20 +35,22 @@ class GeoDatasetAdapter(DataAdapter):
     def __init__(
         self,
         path: str,
-        driver: str = None,
-        filesystem: str = "local",
-        crs: Union[int, str, dict] = None,
-        nodata: Union[dict, float, int] = None,
-        rename: dict = {},
-        unit_mult: dict = {},
-        unit_add: dict = {},
-        meta: dict = {},
-        attrs: dict = {},
-        driver_kwargs: dict = {},
-        name: str = "",  # optional for now
-        catalog_name: str = "",  # optional for now
-        provider=None,
-        version=None,
+        driver: Optional[str] = None,
+        filesystem: Optional[str] = None,
+        crs: Optional[Union[int, str, dict]] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        extent: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
+        storage_options: Optional[dict] = None,
+        name: str = "",
+        catalog_name: str = "",
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial timeseries data.
@@ -69,9 +72,10 @@ class GeoDatasetAdapter(DataAdapter):
             for 'netcdf' :py:func:`xarray.open_mfdataset`.
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
-        filesystem: {'local', 'gcs', 's3'}, optional
+        filesystem: str, optional
             Filesystem where the data is stored (local, cloud, http etc.).
-            By default, local.
+            If None (default) the filesystem is inferred from the path.
+            See :py:func:`fsspec.registry.known_implementations` for all options.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
             proj (str or dict) or wkt (str). Only used if the data has no native CRS.
@@ -98,11 +102,30 @@ class GeoDatasetAdapter(DataAdapter):
         attrs: dict, optional
             Additional attributes relating to data variables. For instance unit
             or long name of the variable.
+        extent: Extent(typed dict), Optional
+            Dictionary describing the spatial and time range the dataset covers.
+            should be of the form:
+            {
+                "bbox": [xmin, ymin, xmax, ymax],
+                "time_range": [start_datetime, end_datetime],
+            }
+            bbox coordinates should be in the same CRS as the data, and
+            time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        storage_options: dict, optional
+            Additional key-word arguments passed to the fsspec FileSystem object.
         name, catalog_name: str, optional
-            Name of the dataset and catalog, optional for now.
+            Name of the dataset and catalog, optional.
+        provider: str, optional
+            A name to identifiy the specific provider of the dataset requested.
+            if None is provided, the last added source will be used.
+        version: str, optional
+            A name to identifiy the specific version of the dataset requested.
+            if None is provided, the last added source will be used.
         """
+        driver_kwargs = driver_kwargs or {}
+        extent = extent or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
@@ -122,12 +145,14 @@ class GeoDatasetAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            storage_options=storage_options,
             name=name,
             catalog_name=catalog_name,
             provider=provider,
             version=version,
         )
         self.crs = crs
+        self.extent = extent
 
     def to_file(
         self,
@@ -235,6 +260,7 @@ class GeoDatasetAdapter(DataAdapter):
         # load data
         fns = self._resolve_paths(variables, time_tuple)
         ds = self._read_data(fns, logger=logger)
+        self.mark_as_used()  # mark used
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_coords(ds)
@@ -250,30 +276,6 @@ class GeoDatasetAdapter(DataAdapter):
         ds = self._set_metadata(ds)
         # return array if single var and single_var_as_array
         return self._single_var_as_array(ds, single_var_as_array, variables)
-
-    def _resolve_paths(self, variables, time_tuple):
-        # Extract storage_options from kwargs to instantiate fsspec object correctly
-        so_kwargs = dict()
-        if "storage_options" in self.driver_kwargs and self.driver == "zarr":
-            so_kwargs = self.driver_kwargs["storage_options"]
-            # For s3, anonymous connection still requires --no-sign-request profile to
-            # read the data
-            # setting environment variable works
-            if "anon" in so_kwargs:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
-            else:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        elif "storage_options" in self.driver_kwargs:
-            raise NotImplementedError(
-                "Remote (cloud) GeoDataset only supported with driver zarr."
-            )
-
-        # resolve paths
-        fns = super()._resolve_paths(
-            time_tuple=time_tuple, variables=variables, **so_kwargs
-        )
-
-        return fns
 
     def _read_data(self, fns, logger=logger):
         kwargs = self.driver_kwargs.copy()
@@ -471,3 +473,116 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name] = xr.where(data_bool, da * m + a, nodata)
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
+
+    def get_bbox(self, detect=True):
+        """Return the bounding box and espg code of the dataset.
+
+        if the bounding box is not set and detect is True,
+        :py:meth:`hydromt.GeoDatasetAdapter.detect_bbox` will be used to detect it.
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the bounding box if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        bbox = self.extent.get("bbox", None)
+        crs = self.crs
+        if bbox is None and detect:
+            bbox, crs = self.detect_bbox()
+
+        return bbox, crs
+
+    def get_time_range(self, detect=True):
+        """Detect the time range of the dataset.
+
+        if the time range is not set and detect is True,
+        :py:meth:`hydromt.GeoDatasetAdapter.detect_time_range` will be used
+        to detect it.
+
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the time range if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        time_range = self.extent.get("time_range", None)
+        if time_range is None and detect:
+            time_range = self.detect_time_range()
+
+        return time_range
+
+    def detect_bbox(
+        self,
+        ds=None,
+    ) -> Tuple[Tuple[float, float, float, float], int]:
+        """Detect the bounding box and crs of the dataset.
+
+        If no dataset is provided, it will be fetched according to the settings in the
+        adapter. also see :py:meth:`hydromt.GeoDatasetAdapter.get_data`. the
+        coordinates are in the CRS of the dataset itself, which is also returned
+        alongside the coordinates.
+
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the bounding box of.
+            If none is provided, :py:meth:`hydromt.GeoDatasetAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        if ds is None:
+            ds = self.get_data()
+
+        crs = ds.vector.crs.to_epsg()
+        bounds = ds.vector.bounds
+        return bounds, crs
+
+    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
+        """Detect the temporal range of the dataset.
+
+        If no dataset is provided, it will be fetched according to the settings in the
+        adapter. also see :py:meth:`hydromt.GeoDatasetAdapter.get_data`.
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the time range of. It must have a time dimentsion set.
+            If none is provided, :py:meth:`hydromt.GeoDatasetAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        if ds is None:
+            ds = self.get_data()
+        return (
+            ds[ds.vector.time_dim].min().values,
+            ds[ds.vector.time_dim].max().values,
+        )

@@ -31,6 +31,8 @@ General
    data_catalog.DataCatalog.to_dataframe
    data_catalog.DataCatalog.to_yml
    data_catalog.DataCatalog.export_data
+   data_catalog.DataCatalog.get_source_bbox
+   data_catalog.DataCatalog.get_source_time_range
 
 Add data sources
 ----------------
@@ -71,6 +73,10 @@ RasterDataset
    data_adapter.RasterDatasetAdapter.get_data
    data_adapter.RasterDatasetAdapter.to_dict
    data_adapter.RasterDatasetAdapter.to_file
+   data_adapter.RasterDatasetAdapter.get_bbox
+   data_adapter.RasterDatasetAdapter.get_time_range
+   data_adapter.RasterDatasetAdapter.detect_bbox
+   data_adapter.RasterDatasetAdapter.detect_time_range
 
 GeoDataset
 ==========
@@ -83,6 +89,10 @@ GeoDataset
    data_adapter.GeoDatasetAdapter.get_data
    data_adapter.GeoDatasetAdapter.to_dict
    data_adapter.GeoDatasetAdapter.to_file
+   data_adapter.GeoDatasetAdapter.get_bbox
+   data_adapter.GeoDatasetAdapter.get_time_range
+   data_adapter.GeoDatasetAdapter.detect_bbox
+   data_adapter.GeoDatasetAdapter.detect_time_range
 
 GeoDataFrame
 ============
@@ -95,6 +105,8 @@ GeoDataFrame
    data_adapter.GeoDataFrameAdapter.get_data
    data_adapter.GeoDataFrameAdapter.to_dict
    data_adapter.GeoDataFrameAdapter.to_file
+   data_adapter.GeoDataFrameAdapter.get_bbox
+   data_adapter.GeoDataFrameAdapter.detect_bbox
 
 DataFrame
 =========
@@ -155,8 +167,8 @@ Model attributes
 
    Model.crs
    Model.region
+   Model.root
    Model.api
-
 
 Model components and attributes
 -------------------------------
@@ -362,6 +374,7 @@ Setup methods
    MeshModel.setup_maps_from_rasterdataset
    MeshModel.setup_maps_from_raster_reclass
 
+.. _workflows_api:
 
 =========
 Workflows
@@ -484,6 +497,7 @@ Raster writing methods
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
 
+.. _raster_api:
 
 ==============
 Raster methods
@@ -628,6 +642,8 @@ Low level methods
 
    gis_utils.axes_attrs
    gis_utils.meridian_offset
+
+.. _geodataset_api:
 
 ==================
 GeoDataset methods

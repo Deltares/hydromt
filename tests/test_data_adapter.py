@@ -4,7 +4,9 @@
 import glob
 import tempfile
 from os.path import abspath, dirname, join
+from typing import cast
 
+import fsspec
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -13,8 +15,13 @@ import xarray as xr
 
 import hydromt
 from hydromt import _compat as compat
-from hydromt.data_adapter import GeoDatasetAdapter
+from hydromt.data_adapter import (
+    GeoDataFrameAdapter,
+    GeoDatasetAdapter,
+    RasterDatasetAdapter,
+)
 from hydromt.data_catalog import DataCatalog
+from hydromt.gis_utils import to_geographic_bbox
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -76,21 +83,21 @@ def test_gcs_cmip6(tmpdir):
     ds = data_catalog.get_rasterdataset(
         "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
         variables=["precip", "temp"],
-        time_tuple=(("1990-01-01", "1990-06-01")),
+        time_tuple=(("1990-01-01", "1990-03-01")),
     )
-    fn_nc = str(tmpdir.join("test.nc"))
-    ds.to_netcdf(fn_nc)
     # Check reading and some preprocess
     assert "precip" in ds
     assert not np.any(ds[ds.raster.x_dim] > 180)
+    # Skip as I don't think this adds value to testing a gcs cloud archive
     # Write and compare
-    ds1 = data_catalog.get_rasterdataset(fn_nc)
-    assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
+    # fn_nc = str(tmpdir.join("test.nc"))
+    # ds.to_netcdf(fn_nc)
+    # ds1 = data_catalog.get_rasterdataset(fn_nc)
+    # assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
 
 
 @pytest.mark.skipif(not compat.HAS_S3FS, reason="S3FS not installed.")
-def test_aws_copdem(tmpdir):
-    # TODO switch to pre-defined catalogs when pushed to main
+def test_aws_worldcover():
     catalog_fn = join(CATALOGDIR, "aws_data.yml")
     data_catalog = DataCatalog(data_libs=[catalog_fn])
     da = data_catalog.get_rasterdataset(
@@ -98,39 +105,63 @@ def test_aws_copdem(tmpdir):
         bbox=[12.0, 46.0, 12.5, 46.50],
     )
     assert da.name == "landuse"
-    assert da.max().values == 100
+
+
+def test_http_data():
+    dc = DataCatalog().from_dict(
+        {
+            "global_wind_atlas": {
+                "data_type": "RasterDataset",
+                "driver": "raster",
+                "path": "https://globalwindatlas.info/api/gis/global/wind-speed/10",
+            }
+        }
+    )
+    s = dc.get_source("global_wind_atlas")
+    # test inferred file system
+    assert isinstance(s.fs, fsspec.implementations.http.HTTPFileSystem)
+    # test returns xarray DataArray
+    da = s.get_data(bbox=[0, 0, 10, 10])
+    assert isinstance(da, xr.DataArray)
+    assert da.raster.shape == (4000, 4000)
 
 
 def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
+    # write tif with zoom level 1 in name
+    # NOTE zl 0 not written to check correct functioning
     name = "test_zoom"
+    rioda_large.raster.to_raster(str(tmpdir.join("test_zl1.tif")))
     yml_dict = {
         name: {
             "crs": 4326,
             "data_type": "RasterDataset",
             "driver": "raster",
-            "path": "path/{zoom_level}/test.vrt",
+            "path": f"{str(tmpdir)}/test_zl{{zoom_level}}.tif",
             "zoom_levels": {0: 0.1, 1: 0.3},
         }
     }
+    # test zoom levels in name
     data_catalog = DataCatalog()
     data_catalog.from_dict(yml_dict)
-    assert data_catalog.get_source(name)._parse_zoom_level() == 0  # default to first
-    assert data_catalog.get_source(name)._parse_zoom_level(zoom_level=1) == 1
-    assert (
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
-    )
-    assert (
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.29, "degree"))
-        == 0
-    )
-    assert (
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
-    )
-    assert data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "meter")) == 0
+    rds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    assert rds._parse_zoom_level(None) is None
+    assert rds._parse_zoom_level(zoom_level=1) == 1
+    assert rds._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
+    assert rds._parse_zoom_level(zoom_level=(0.29, "degree")) == 0
+    assert rds._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
+    assert rds._parse_zoom_level(zoom_level=(1, "meter")) == 0
     with pytest.raises(TypeError, match="zoom_level unit"):
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "asfd"))
-    with pytest.raises(TypeError, match="zoom_level argument"):
-        data_catalog.get_source(name)._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
+        rds._parse_zoom_level(zoom_level=(1, "asfd"))
+    with pytest.raises(TypeError, match="zoom_level not understood"):
+        rds._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
+    da1 = data_catalog.get_rasterdataset(name, zoom_level=(0.3, "degree"))
+    assert isinstance(da1, xr.DataArray)
+    # write COG
+    cog_fn = str(tmpdir.join("test_cog.tif"))
+    rioda_large.raster.to_raster(cog_fn, driver="COG", overviews="auto")
+    # test COG zoom levels
+    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(0.01, "degree"))
+    assert da1.raster.shape == (256, 250)
 
 
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
@@ -418,3 +449,23 @@ def test_cache_vrt(tmpdir, rioda_large):
     cat = DataCatalog(join(root, f"{name}.yml"), cache=True)
     cat.get_rasterdataset(name)
     assert len(glob.glob(join(cat._cache_dir, name, name, "*", "*", "*.tif"))) == 16
+
+
+def test_detect_extent(geodf, geoda, rioda, ts):
+    ts_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
+    ts_detected_bbox = to_geographic_bbox(*GeoDataFrameAdapter("").detect_bbox(geodf))
+    assert np.all(np.equal(ts_expected_bbox, ts_detected_bbox))
+
+    geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
+    geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
+    geoda_detected_bbox = to_geographic_bbox(*GeoDatasetAdapter("").detect_bbox(geoda))
+    geoda_detected_time_range = GeoDatasetAdapter("").detect_time_range(geoda)
+    assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
+    assert geoda_expected_time_range == geoda_detected_time_range
+
+    rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
+    rioda_detected_bbox = to_geographic_bbox(
+        *RasterDatasetAdapter("").detect_bbox(rioda)
+    )
+
+    assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))

@@ -1,8 +1,9 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
-from os.path import abspath, dirname, join
+from os.path import abspath, dirname, isfile, join
 from pathlib import Path
+from typing import cast
 
 import geopandas as gpd
 import numpy as np
@@ -10,12 +11,19 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from hydromt.data_adapter import DataAdapter, RasterDatasetAdapter
+import hydromt.data_catalog
+from hydromt.data_adapter import (
+    DataAdapter,
+    GeoDataFrameAdapter,
+    GeoDatasetAdapter,
+    RasterDatasetAdapter,
+)
 from hydromt.data_catalog import (
     DataCatalog,
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
+from hydromt.gis_utils import to_geographic_bbox
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -120,7 +128,7 @@ def test_data_catalog_io(tmpdir):
     print(data_catalog.get_source("merit_hydro"))
 
 
-def test_versioned_catalogs(tmpdir):
+def test_versioned_catalog_entries(tmpdir):
     # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
@@ -143,10 +151,12 @@ def test_versioned_catalogs(tmpdir):
     source = aws_data_catalog.get_source("esa_worldcover")
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
     assert source.version == "2021"
-    source = aws_data_catalog.get_source("esa_worldcover", version=2021)
+    source = aws_data_catalog.get_source("esa_worldcover", version="2021")
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
     assert source.version == "2021"
-    source = aws_data_catalog.get_source("esa_worldcover", version=2021, provider="aws")
+    source = aws_data_catalog.get_source(
+        "esa_worldcover", version="2021", provider="aws"
+    )
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
     # test round trip to and from dict
     aws_data_catalog2 = DataCatalog().from_dict(aws_data_catalog.to_dict())
@@ -154,13 +164,15 @@ def test_versioned_catalogs(tmpdir):
 
     # test errors
     with pytest.raises(KeyError):
-        aws_data_catalog.get_source("esa_worldcover", version=2021, provider="asdfasdf")
+        aws_data_catalog.get_source(
+            "esa_worldcover", version="2021", provider="asdfasdf"
+        )
     with pytest.raises(KeyError):
         aws_data_catalog.get_source(
             "esa_worldcover", version="asdfasdf", provider="aws"
         )
     with pytest.raises(KeyError):
-        aws_data_catalog.get_source("asdfasdf", version=2021, provider="aws")
+        aws_data_catalog.get_source("asdfasdf", version="2021", provider="aws")
 
     # make sure we trigger user warning when overwriting versions
     with pytest.warns(UserWarning):
@@ -178,7 +190,7 @@ def test_versioned_catalogs(tmpdir):
     assert source_loc.filesystem == "local"
     assert source_loc.version == "2021"  # get newest version
     # test get_source with version only
-    assert merged_catalog.get_source("esa_worldcover", version=2021) == source_loc
+    assert merged_catalog.get_source("esa_worldcover", version="2021") == source_loc
     # test round trip to and from dict
     merged_catalog2 = DataCatalog().from_dict(merged_catalog.to_dict())
     assert merged_catalog2 == merged_catalog
@@ -199,8 +211,32 @@ def test_versioned_catalogs(tmpdir):
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
+def test_versioned_catalogs(tmpdir, monkeypatch):
+    v999_yml_fn = join(tmpdir, "test_sources_v999.yml")
+    with open(v999_yml_fn, "w") as f:
+        f.write(
+            """\
+            meta:
+                hydromt_version: '==999.*'
+            """
+        )
+
+    DataCatalog().from_predefined_catalogs("deltares_data")
+    DataCatalog().from_predefined_catalogs("deltares_data", "v2022.7")
+
+    with pytest.raises(RuntimeError, match="Unknown version requested "):
+        _ = DataCatalog().from_predefined_catalogs("deltares_data", "v1993.7")
+
+    with pytest.raises(RuntimeError, match="Data catalog requires Hydromt Version"):
+        DataCatalog(data_libs=[v999_yml_fn])
+
+    with monkeypatch.context() as m:
+        m.setattr(hydromt.data_catalog, "__version__", "999.0.0")
+        DataCatalog(v999_yml_fn)
+
+
 def test_data_catalog(tmpdir):
-    data_catalog = DataCatalog(data_libs=None)
+    data_catalog = DataCatalog()
     # initialized with empty dict
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
@@ -208,6 +244,13 @@ def test_data_catalog(tmpdir):
     # test keys, getitem,
     keys = [key for key, _ in data_catalog.iter_sources()]
     source = data_catalog.get_source(keys[0])
+    assert data_catalog.contains_source(keys[0])
+    assert data_catalog.contains_source(
+        keys[0], version="asdfasdfasdf", permissive=True
+    )
+    assert not data_catalog.contains_source(
+        keys[0], version="asdfasdf", permissive=False
+    )
     assert isinstance(source, DataAdapter)
     assert keys[0] in data_catalog.get_source_names()
     # add source from dict
@@ -217,7 +260,7 @@ def test_data_catalog(tmpdir):
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataAdapter"):
-        data_catalog.add_source("test", "string")
+        data_catalog.add_source("test", "string")  # type: ignore
     # check that no sources are loaded if fallback_lib is None
     assert not DataCatalog(fallback_lib=None).sources
     # test artifact keys (NOTE: legacy code!)
@@ -228,7 +271,7 @@ def test_data_catalog(tmpdir):
         data_catalog.from_artifacts("deltares_data")
     assert len(data_catalog._sources) > 0
     with pytest.raises(
-        IOError, match="URL b'404: Not Found'"
+        RuntimeError, match="Unknown version requested"
     ), pytest.deprecated_call():
         data_catalog = DataCatalog(deltares_data="unknown_version")
 
@@ -240,9 +283,8 @@ def test_data_catalog(tmpdir):
 
 def test_from_archive(tmpdir):
     data_catalog = DataCatalog()
-    data_catalog._cache_dir = str(
-        tmpdir.join(".hydromt_data")
-    )  # change cache to tmpdir
+    # change cache to tmpdir
+    data_catalog._cache_dir = str(tmpdir.join(".hydromt_data"))
     urlpath = data_catalog.predefined_catalogs["artifact_data"]["urlpath"]
     version_hash = list(
         data_catalog.predefined_catalogs["artifact_data"]["versions"].values()
@@ -256,6 +298,36 @@ def test_from_archive(tmpdir):
     # failed to download
     with pytest.raises(ConnectionError, match="Data download failed"):
         data_catalog.from_archive("https://asdf.com/asdf.zip")
+
+
+def test_used_sources(tmpdir):
+    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
+    data_catalog = DataCatalog(merged_yml_fn)
+    source = data_catalog.get_source("esa_worldcover")
+    source.mark_as_used()
+    sources = data_catalog.iter_sources(used_only=True)
+    assert len(data_catalog) > 1
+    assert len(sources) == 1
+    assert sources[0][0] == "esa_worldcover"
+    assert sources[0][1].provider == source.provider
+    assert sources[0][1].version == source.version
+
+
+def test_from_yml_with_archive(tmpdir):
+    yml_fn = join(CATALOGDIR, "artifact_data.yml")
+    data_catalog = DataCatalog(yml_fn)
+    sources = list(data_catalog.sources.keys())
+    assert len(sources) > 0
+    # as part of the getting the archive a a local
+    # catalog file is written to the same folder
+    # check if this file exists and we can read it
+    root = dirname(data_catalog[sources[0]].path)
+    yml_dst_fn = join(root, "artifact_data.yml")
+    assert isfile(yml_dst_fn)
+    data_catalog1 = DataCatalog(yml_dst_fn)
+    sources = list(data_catalog1.sources.keys())
+    source = data_catalog1.get_source(sources[0])
+    assert dirname(source.path) == root
 
 
 def test_from_predefined_catalogs():
@@ -499,3 +571,44 @@ def test_deprecation_warnings(artifact_data):
         fn = artifact_data["gtsmv3_eu_era5"].path
         # should be driver_kwargs=dict(chunks={'time': 100})
         artifact_data.get_geodataset(fn, chunks={"time": 100})
+
+
+def test_detect_extent():
+    data_catalog = DataCatalog()  # read artifacts
+    data_catalog.sources  # load artifact data as fallback
+
+    # raster dataset
+    name = "chirps_global"
+    bbox = (
+        11.599998474121094,
+        45.20000076293945,
+        13.000083923339844,
+        46.79985427856445,
+    )
+    expected_temporal_range = tuple(pd.to_datetime(["2010-02-02", "2010-02-15"]))
+    ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    detected_temporal_range = ds.get_time_range(detect=True)
+    assert np.all(np.equal(detected_spatial_range, bbox))
+    assert detected_temporal_range == expected_temporal_range
+
+    # geodataframe
+    name = "gadm_level1"
+    bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
+    ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
+
+    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    assert np.all(np.equal(detected_spatial_range, bbox))
+
+    # geodataset
+    name = "gtsmv3_eu_era5"
+    bbox = (12.22412, 45.22705, 12.99316, 45.62256)
+    expected_temporal_range = (
+        np.datetime64("2010-02-01"),
+        np.datetime64("2010-02-14T23:50:00.000000000"),
+    )
+    ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
+    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    detected_temporal_range = ds.get_time_range(detect=True)
+    assert np.all(np.equal(detected_spatial_range, bbox))
+    assert detected_temporal_range == expected_temporal_range
