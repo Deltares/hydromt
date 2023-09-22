@@ -2294,7 +2294,7 @@ class RasterDataArray(XRasterBase):
             file output driver, one of 'png', 'netcdf4' or 'GTiff'
         cmap : str | object, optional
             A colormap, either defined by a string and imported from matplotlib
-            via that string or as a ListedColormap object from matplotlib itself.
+            via that string or as a Colormap object from matplotlib itself.
         norm : object, optional
             A matplotlib Normalize object that defines a range between a maximum
             and minimum value
@@ -2353,31 +2353,7 @@ class RasterDataArray(XRasterBase):
         }.get(driver.lower(), {})
         kwargs = {**kwargs0, **kwargs}
 
-        # Setting up information for zoomlevel calculation and
-        # determination of tile windows
-        # This section is purely for the resolution
-        bounds_4326_clip = list(obj.raster.transform_bounds("EPSG:4326"))
-        bounds_4326_clip[:2] = map(
-            max,
-            zip(bounds_4326_clip[:2], (-180, -y_ext)),
-        )
-        bounds_4326_clip[2:] = map(
-            min,
-            zip(bounds_4326_clip[2:], (180, y_ext)),
-        )
-        obj_clipped_to_pseudo = obj.raster.clip_bbox(
-            bounds_4326_clip,
-            crs="EPSG:4326",
-        )
-        tr_3857 = rasterio.warp.calculate_default_transform(
-            obj_clipped_to_pseudo.raster.crs,
-            "EPSG:3857",
-            *obj_clipped_to_pseudo.shape,
-            *obj_clipped_to_pseudo.raster.bounds,
-        )[0]
-
-        del obj_clipped_to_pseudo
-
+        # Setting up information for determination of tile windows
         # This section is for dealing with rounding errors
         obj_bounds_cor = [
             obj_bounds[0] + 0.5 * obj_res,
@@ -2394,6 +2370,21 @@ class RasterDataArray(XRasterBase):
         # Calculate min/max zoomlevel based
         if max_lvl is None:  # calculate max zoomlevel close to native resolution
             # Determine the max number of zoom levels with the resolution
+            # This section is purely for the resolution
+            obj_clipped_to_pseudo = obj.raster.clip_bbox(
+                (-180, -y_ext, 180, y_ext),
+                crs="EPSG:4326",
+            )
+            tr_3857 = rasterio.warp.calculate_default_transform(
+                obj_clipped_to_pseudo.raster.crs,
+                "EPSG:3857",
+                *obj_clipped_to_pseudo.shape,
+                *obj_clipped_to_pseudo.raster.bounds,
+            )[0]
+
+            del obj_clipped_to_pseudo
+
+            # Calculate the maximum zoom level
             dres = tr_3857[0]
             max_lvl = int(
                 math.ceil((math.log10((y_ext_pm * 2) / (dres * pxs)) / math.log10(2)))
