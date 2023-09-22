@@ -132,10 +132,12 @@ def download_era5_year(
 def flatten_era5_temp(
     fn,
     nodata=-9999,
-    chunks={"time": 30, "latitude": 250, "longitude": 480},
-    dask_kwargs={},
+    chunks=None,
+    dask_kwargs=None,
 ) -> None:
     """Flatten ERA5 output to remove expver dimension with ERA5T data."""
+    chunks = chunks or {"time": 30, "latitude": 250, "longitude": 480}
+    dask_kwargs = dask_kwargs or {}
     with xr.open_dataset(fn, chunks=chunks) as ds:
         era5t = "expver" in ds.coords
 
@@ -172,8 +174,8 @@ def resample_year(
     var: str,
     decimals: int = None,
     nodata=-9999,
-    chunks: dict = {"time": 30, "latitude": 250, "longitude": 480},
-    dask_kwargs: dict = {},
+    chunks: dict = None,
+    dask_kwargs: dict = None,
 ) -> None:
     """Resample hourly variables to daily timestep.
 
@@ -204,6 +206,9 @@ def resample_year(
     dask_kwargs : dict, optional
         _description_, by default {}
     """
+    chunks = chunks or {"time": 30, "latitude": 250, "longitude": 480}
+    dask_kwargs = dask_kwargs or {}
+
     # nc out settings
     chunksizes = tuple([s for s in chunks.values()])
     e0 = {
@@ -215,7 +220,7 @@ def resample_year(
 
     fns = []
     # read hourly data for year and year-1!
-    for year in [year - 1, year]:
+    for _year in [year - 1, year]:
         fn = join(ddir, var, f"era5_{var:s}_{year:d}_hourly.nc")
         if isfile(fn):
             fns.append(fn)
@@ -406,7 +411,7 @@ def append_zarr(
     ds0 = xr.open_zarr(store, consolidated=False)
     for v in ds.data_vars:
         ds[v] = ds[v].transpose(*ds0[v].dims)
-        for idim, dim in enumerate(ds.dims):
+        for _idim, dim in enumerate(ds.dims):
             if dim == append_dim:
                 continue
             assert ds[v][dim].shape == ds0[v][dim].shape
@@ -438,7 +443,7 @@ def update_hourly_nc(
     end_year: int = None,
     dt_era5t: pd.Timedelta = dt_era5t,
     move_to_ddir: bool = False,
-    dask_kwargs: dict = {},
+    dask_kwargs: dict = None,
 ) -> None:
     """Update the hourly by downloading the latest data from the CDS.
 
@@ -463,6 +468,7 @@ def update_hourly_nc(
     dask_kwargs
             Additional key-word arguments are passed to dask
     """
+    dask_kwargs = dask_kwargs or {}
     t1 = pd.to_datetime("today").to_numpy()
     if end_year:
         t1 = pd.to_datetime(f"{end_year}0101")
@@ -513,7 +519,7 @@ def update_daily_nc(
     end_year: int = None,
     dt_era5t: pd.Timedelta = dt_era5t,
     move_to_ddir: bool = False,
-    dask_kwargs: dict = {},
+    dask_kwargs: dict = None,
 ) -> None:
     """Update the daily nc files based on hourly files.
 
@@ -540,6 +546,7 @@ def update_daily_nc(
     dask_kwargs
             Additional key-word arguments are passed to dask
     """
+    dask_kwargs = dask_kwargs or {}
     if end_year:
         t1 = pd.to_datetime(f"{end_year}0101")
     if start_year:

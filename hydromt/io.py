@@ -34,7 +34,7 @@ __all__ = [
 
 
 def open_raster(
-    filename, mask_nodata=False, chunks={}, nodata=None, logger=logger, **kwargs
+    filename, mask_nodata=False, chunks=None, nodata=None, logger=logger, **kwargs
 ):
     """Open a gdal-readable file with rasterio based on.
 
@@ -64,6 +64,7 @@ def open_raster(
     data : DataArray
         DataArray
     """
+    chunks = chunks or {}
     kwargs.update(masked=mask_nodata, default_name="data", chunks=chunks)
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
@@ -92,11 +93,11 @@ def open_raster(
 
 def open_mfraster(
     paths,
-    chunks={},
+    chunks=None,
     concat=False,
     concat_dim="dim0",
     mosaic=False,
-    mosaic_kwargs={},
+    mosaic_kwargs=None,
     **kwargs,
 ):
     """Open multiple gdal-readable files as single Dataset with geospatial attributes.
@@ -145,6 +146,8 @@ def open_mfraster(
     data : DataSet
         The newly created DataSet.
     """
+    chunks = chunks or {}
+    mosaic_kwargs = mosaic_kwargs or {}
     if concat and mosaic:
         raise ValueError("Only one of 'mosaic' or 'concat' can be True.")
     prefix, postfix = "", ""
@@ -343,7 +346,7 @@ def open_mfcsv(
 
 
 def open_raster_from_tindex(
-    fn_tindex, bbox=None, geom=None, tileindex="location", mosaic_kwargs={}, **kwargs
+    fn_tindex, bbox=None, geom=None, tileindex="location", mosaic_kwargs=None, **kwargs
 ):
     """Read and merge raster tiles.
 
@@ -374,6 +377,7 @@ def open_raster_from_tindex(
     data : Dataset
         A single-variable Dataset of merged raster tiles.
     """
+    mosaic_kwargs = mosaic_kwargs or {}
     if bbox is not None and geom is None:
         geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
     if geom is None:
@@ -409,7 +413,7 @@ def open_geodataset(
     fn_data=None,
     var_name=None,
     index_dim=None,
-    chunks={},
+    chunks=None,
     crs=None,
     bbox=None,
     geom=None,
@@ -456,6 +460,7 @@ def open_geodataset(
     ds: xarray.Dataset
         Dataset with geospatial coordinates.
     """
+    chunks = chunks or {}
     if not isfile(fn_locs):
         raise IOError(f"GeoDataset point location file not found: {fn_locs}")
     # For filetype [], only point geometry is supported

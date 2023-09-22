@@ -65,6 +65,8 @@ docker-clean:
 html:
 	PYDEVD_DISABLE_FILE_VALIDATION=1 $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)"
 
+html_test:
+	PYDEVD_DISABLE_FILE_VALIDATION=1 $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" -b dummy
 # some aliases
 docs: html
 doc: html
