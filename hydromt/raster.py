@@ -2317,11 +2317,8 @@ class RasterDataArray(XRasterBase):
         # Object to local variable, also transpose it and extract some meta
         if self._obj.ndim != 2:
             raise ValueError("Only 2d DataArrays are accepted.")
-        # make sure the data is N-S oriented, with y-axis as first dimension
-        # and nodata values set to nan
+        # make sure the y-axis as first dimension and nodata values set to nan
         obj = self.mask_nodata().transpose(self.y_dim, self.x_dim)
-        if obj.raster.res[1] < 0:
-            obj = obj.raster.flipud()
         # make sure dataarray has a name
         name = obj.name or "data"
         obj.name = name
@@ -2368,7 +2365,7 @@ class RasterDataArray(XRasterBase):
                 ssd = Path(root, str(zl), f"{tile.x}")
                 os.makedirs(ssd, exist_ok=True)
                 tile_bounds = mct.xy_bounds(tile)
-                if i == 0:
+                if i == 0:  # zoom level : resolution in meters
                     zoom_levels[zl] = abs(tile_bounds[2] - tile_bounds[0]) / pxs
                 if zl == max_lvl:
                     # For the first zoomlevel, we can just clip the data
@@ -2414,7 +2411,7 @@ class RasterDataArray(XRasterBase):
                     )
                     src_tile.name = name
 
-                # reproject the data to the tile
+                # reproject the data to the tile / coares resolution
                 dst_transform = rasterio.transform.from_bounds(*tile_bounds, pxs, pxs)
                 dst_tile = src_tile.raster.reproject(
                     dst_crs=crs,
@@ -2443,8 +2440,9 @@ class RasterDataArray(XRasterBase):
                 elif driver.lower() == "gtiff":
                     # write the data to geotiff
                     dst_tile.raster.to_raster(fn_out, **kwargs)
+
+            # Write files to txt and create a vrt using GDAL
             if driver.lower() != "png":
-                # Write files to txt and create a vrt using GDAL
                 txt_fn = Path(root, str(zl), "filelist.txt")
                 vrt_fn = Path(root, f"lvl{zl}.vrt")
                 with open(txt_fn, "w") as f:
@@ -2452,9 +2450,8 @@ class RasterDataArray(XRasterBase):
                         f.write(f"{fn}\n")
                 gis_utils.create_vrt(vrt_fn, file_list_path=txt_fn)
 
+        # Write a quick yaml for the database
         if driver.lower() != "png":
-            # Write a quick yaml for the database
-            # zoom level : resolution in meters
             yml = {
                 "crs": 3857,
                 "data_type": "RasterDataset",
