@@ -2267,8 +2267,8 @@ class RasterDataArray(XRasterBase):
         min_lvl: int = None,
         max_lvl: int = None,
         driver="png",
-        cmap=None,
-        norm=None,
+        cmap: str | object = None,
+        norm: object = None,
         **kwargs,
     ):
         """Produce tiles in /zoom/x/y.<ext> structure (EPSG:3857).
@@ -2288,6 +2288,13 @@ class RasterDataArray(XRasterBase):
             If None, the zoomlevels will be determined based on the data resolution
         driver : str, optional
             file output driver, one of 'png', 'netcdf4' or 'GTiff'
+        cmap : str | object, optional
+            A colormap, either defined by a string and imported from matplotlib
+            via that string or as a ListedColormap object from matplotlib itself.
+        norm : object, optional
+            A matplotlib Normalize object that defines a range between a maximum
+            and minimum value
+
         **kwargs
             Key-word arguments to write file
             for netcdf4, these are passed to ~:py:meth:xarray.DataArray.to_netcdf:
@@ -2345,7 +2352,7 @@ class RasterDataArray(XRasterBase):
         }.get(driver.lower(), {})
         kwargs = {**kwargs0, **kwargs}
 
-        # Setting up information for zoomlevel calculation and 
+        # Setting up information for zoomlevel calculation and
         # determination of tile windows
         # This section is purely for the resolution
         bounds_4326_clip = list(obj.raster.transform_bounds("EPSG:4326"))
