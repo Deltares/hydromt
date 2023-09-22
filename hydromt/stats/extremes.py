@@ -263,11 +263,9 @@ def get_peaks(
     duration = (da["time"][-1] - da["time"][0]).dt.days / 365.2425
     if period in ["year", "quarter", "month"]:
         bins = getattr(da["time"].dt, period).values
-        np.unique(bins).size  # FIXME
     else:
         tstart = da.resample(time=period, label="left").first()["time"]
         bins = tstart.reindex_like(da, method="ffill").values.astype(float)
-        np.unique(bins).size
     if ev_type.upper() != "BM":
         # TODO - Need to fix periods for POT!
         bins = None
@@ -707,7 +705,7 @@ def plot_return_values(
 # credits Ferdinand Diermanse
 
 
-def lmoment_fitopt(x, distributions=["gumb", "gev"], criterium="AIC"):
+def lmoment_fitopt(x, distributions=None, criterium="AIC"):
     """Return parameters based on lmoments fit.
 
     Lmomentfit routine derive parameters of a distribution function
@@ -732,6 +730,8 @@ def lmoment_fitopt(x, distributions=["gumb", "gev"], criterium="AIC"):
     distribution: str
         selected distribution
     """
+    if distributions is None:
+        distributions = ["gumb", "gev"]
     fgof = {"AIC": _aic, "AICC": _aicc, "BIC": _bic}.get(criterium.upper())
     # make sure the timeseries does not contain NaNs
     x = x[~np.isnan(x)]

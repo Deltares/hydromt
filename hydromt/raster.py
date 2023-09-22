@@ -90,7 +90,7 @@ def full(
     nodata=np.nan,
     dtype=np.float32,
     name=None,
-    attrs={},
+    attrs=None,
     crs=None,
     lazy=False,
     shape=None,
@@ -125,6 +125,7 @@ def full(
     da: DataArray
         Filled DataArray
     """
+    attrs = attrs or {}
     f = dask.array.empty if lazy else np.full
     if dims is None:
         dims = tuple([d for d in coords])
@@ -149,7 +150,7 @@ def full_from_transform(
     nodata=np.nan,
     dtype=np.float32,
     name=None,
-    attrs={},
+    attrs=None,
     crs=None,
     lazy=False,
 ):
@@ -181,6 +182,7 @@ def full_from_transform(
     da : DataArray
         Filled DataArray
     """
+    attrs = attrs or {}
     if len(shape) not in [2, 3]:
         raise ValueError("Only 2D and 3D data arrays supported.")
     coords = gis_utils.affine_to_coords(transform, shape[-2:], x_dim="x", y_dim="y")
@@ -295,7 +297,7 @@ class XGeoBase(object):
                         break
                 if crs is not None:
                     # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
-                    crs = crs.strip("+init=") if isinstance(crs, str) else crs
+                    crs = crs.removeprefix("+init=") if isinstance(crs, str) else crs
                     try:
                         input_crs = pyproj.CRS.from_user_input(crs)
                         break
@@ -1671,7 +1673,7 @@ class RasterDataArray(XRasterBase):
         super(RasterDataArray, self).__init__(xarray_obj)
 
     @staticmethod
-    def from_numpy(data, transform, nodata=None, attrs={}, crs=None):
+    def from_numpy(data, transform, nodata=None, attrs=None, crs=None):
         """Transform a 2D/3D numpy array into a DataArray with geospatial attributes.
 
         The data dimensions should have the y and x on the second last
@@ -1696,6 +1698,7 @@ class RasterDataArray(XRasterBase):
         da : RasterDataArray
             xarray.DataArray with geospatial information
         """
+        attrs = attrs or {}
         nrow, ncol = data.shape[-2:]
         dims = ("y", "x")
         if len(data.shape) == 3:

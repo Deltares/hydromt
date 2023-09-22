@@ -65,7 +65,7 @@ class DataCatalog(object):
 
     def __init__(
         self,
-        data_libs: Union[List, str] = [],
+        data_libs: Optional[Union[List, str]] = None,
         fallback_lib: Optional[str] = "artifact_data",
         logger=logger,
         cache: Optional[bool] = False,
@@ -99,7 +99,7 @@ class DataCatalog(object):
             The logger object used for logging messages. If not provided, the default
             logger will be used.
         """
-        if data_libs is None:  # legacy code. to be removed
+        if data_libs is None:
             data_libs = []
         elif not isinstance(data_libs, list):  # make sure data_libs is a list
             data_libs = np.atleast_1d(data_libs).tolist()
@@ -120,6 +120,7 @@ class DataCatalog(object):
                 f"add the catalog as '{lib}={version}'"
                 " to the data_libs list instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             if not version:  # False or None
                 continue
@@ -149,6 +150,7 @@ class DataCatalog(object):
             "Using iterating over the DataCatalog directly is deprecated."
             "Please use cat.get_source()",
             DeprecationWarning,
+            stacklevel=2,
         )
         return list(self._sources.keys())
 
@@ -370,6 +372,7 @@ class DataCatalog(object):
                     f"overwriting data source '{source}' with "
                     f"provider {provider} and version {version}.",
                     UserWarning,
+                    stacklevel=2,
                 )
             # update and sort dictionary -> make sure newest version is last
             versions.update({version: adapter})
@@ -383,6 +386,7 @@ class DataCatalog(object):
             'Using iterating over the DataCatalog directly is deprecated."\
             " Please use cat.get_source("name")',
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.get_source(key)
 
@@ -392,6 +396,7 @@ class DataCatalog(object):
             "Using DataCatalog as a dictionary directly is deprecated."
             " Please use cat.add_source(adapter)",
             DeprecationWarning,
+            stacklevel=2,
         )
         self.add_source(key, value)
 
@@ -416,6 +421,16 @@ class DataCatalog(object):
     def __iter__(self) -> Iterator[Tuple[str, DataAdapter]]:
         """Iterate over sources."""
         return iter(self.iter_sources())
+
+    def __contains__(self, key: str) -> bool:
+        """Check if source is in catalog."""
+        warnings.warn(
+            "Directly checking for containement is deprecated. "
+            " Use 'contains_source' instead.",
+            DeprecationWarning,
+        )
+
+        return self.contains_source(key)
 
     def contains_source(
         self,
@@ -546,6 +561,7 @@ class DataCatalog(object):
         warnings.warn(
             '"from_artifacts" is deprecated. Use "from_predefined_catalogs instead".',
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.from_predefined_catalogs(name, version)
 
@@ -744,12 +760,14 @@ class DataCatalog(object):
             warnings.warn(
                 "The 'root' key is deprecated, use 'meta: root' instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             meta.update(root=yml.pop("root"))
         if "category" in yml:
             warnings.warn(
                 "The 'category' key is deprecated, use 'meta: category' instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             meta.update(category=yml.pop("category"))
 
@@ -879,7 +897,7 @@ class DataCatalog(object):
         root: str = "auto",
         source_names: Optional[List] = None,
         used_only: bool = False,
-        meta: Dict = {},
+        meta: Optional[Dict] = None,
     ) -> None:
         """Write data catalog to yaml format.
 
@@ -900,6 +918,7 @@ class DataCatalog(object):
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
         """
+        meta = meta or []
         yml_dir = os.path.dirname(abspath(path))
         if root == "auto":
             root = yml_dir
@@ -918,7 +937,7 @@ class DataCatalog(object):
         self,
         source_names: Optional[List] = None,
         root: Union[Path, str] = None,
-        meta: dict = {},
+        meta: Optional[dict] = None,
         used_only: bool = False,
     ) -> Dict:
         """Export the data catalog to a dictionary.
@@ -941,6 +960,7 @@ class DataCatalog(object):
         dict
             data catalog dictionary
         """
+        meta = meta or {}
         sources_out = dict()
         if root is not None:
             root = abspath(root)
@@ -996,8 +1016,9 @@ class DataCatalog(object):
             sources_out = {"meta": meta, **sources_out}
         return sources_out
 
-    def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
+    def to_dataframe(self, source_names: Optional[List] = None) -> pd.DataFrame:
         """Return data catalog summary as DataFrame."""
+        source_names = source_names or []
         d = []
         for name, source in self.iter_sources():
             if len(source_names) > 0 and name not in source_names:
@@ -1017,9 +1038,9 @@ class DataCatalog(object):
         data_root: Union[Path, str],
         bbox: List = None,
         time_tuple: Tuple = None,
-        source_names: List = [],
+        source_names: Optional[List] = None,
         unit_conversion: bool = True,
-        meta: Dict = {},
+        meta: Optional[Dict] = None,
         append: bool = False,
     ) -> None:
         """Export a data slice of each dataset and a data_catalog.yml file to disk.
@@ -1047,6 +1068,8 @@ class DataCatalog(object):
         append: bool, optional
             If True, append to existing data catalog, by default False.
         """
+        source_names = source_names or []
+        meta = meta or {}
         data_root = abspath(data_root)
         if not os.path.isdir(data_root):
             os.makedirs(data_root)
@@ -1139,8 +1162,8 @@ class DataCatalog(object):
         # write data catalog to yml
         data_catalog_out = DataCatalog()
         for key, available_variants in sources_out.items():
-            for provider, available_versions in available_variants.items():
-                for version, adapter in available_versions.items():
+            for _provider, available_versions in available_variants.items():
+                for _version, adapter in available_versions.items():
                     data_catalog_out.add_source(key, adapter)
 
         data_catalog_out.to_yml(fn, root="auto", meta=meta)
@@ -1638,6 +1661,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                 "The use of alias is deprecated, please add a version on the aliased"
                 "catalog instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             if alias not in data_dict:
                 raise ValueError(f"alias {alias} not found in data_dict.")

@@ -94,6 +94,7 @@ def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
             warn(
                 "Support for .ini configuration files will be deprecated",
                 PendingDeprecationWarning,
+                stacklevel=2,
             )
         opt = config.configread(
             path, abs_path=True, skip_abspath_sections=["setup_config"]
