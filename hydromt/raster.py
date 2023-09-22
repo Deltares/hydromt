@@ -2506,7 +2506,7 @@ class RasterDataArray(XRasterBase):
                 "zoom_levels": zoom_levels,
             }
             name = os.path.basename(root)
-            with open(join(root, "data.yml"), "w") as f:
+            with open(join(root, f"{name}.yml"), "w") as f:
                 yaml.dump({name: yml}, f, default_flow_style=False, sort_keys=False)
 
     def to_raster(
