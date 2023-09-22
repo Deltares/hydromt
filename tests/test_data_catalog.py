@@ -244,6 +244,7 @@ def test_data_catalog(tmpdir):
     # test keys, getitem,
     keys = [key for key, _ in data_catalog.iter_sources()]
     source = data_catalog.get_source(keys[0])
+    assert keys[0] in data_catalog
     assert data_catalog.contains_source(keys[0])
     assert data_catalog.contains_source(
         keys[0], version="asdfasdfasdf", permissive=True
