@@ -2311,8 +2311,8 @@ class RasterDataArray(XRasterBase):
             raise ValueError(f"Unkown file driver {driver}, use png, netcdf4 or GTiff")
 
         # Object to local variable, also transpose it and extract some meta
-        if not self._obj.ndim == 2 or not isinstance(self._obj, xr.DataArray):
-            ValueError("Only 2d DataArrays are accepted.")
+        if self._obj.ndim != 2:
+            raise ValueError("Only 2d DataArrays are accepted.")
         # make sure the data is N-S oriented, with y-axis as first dimension
         # and nodata values set to nan
         obj = self.mask_nodata().transpose(self.y_dim, self.x_dim)
@@ -2342,14 +2342,14 @@ class RasterDataArray(XRasterBase):
         # Calculate min/max zoomlevel based
         bounds_wgsg84 = obj.raster.transform_bounds("EPSG:4326")
         if max_lvl is None:  # calculate max zoomlevel close to native resolution
-            min_lat = min(np.abs(bounds_wgsg84[1]), np.abs(bounds_wgsg84[3]))
+            max_lat = max(np.abs(bounds_wgsg84[1]), np.abs(bounds_wgsg84[3]))
             if self.crs.is_projected and self.crs.axis_info[0].unit_name == "metre":
                 dx_m = obj.raster.res[0]
             else:
-                dx_m = gis_utils.cellres(min_lat, *obj.raster.res)[0]
+                dx_m = gis_utils.cellres(max_lat, *obj.raster.res)[0]
             C = 2 * np.pi * 6378137  # circumference of the earth
             max_lvl = int(
-                np.ceil(np.log2(C * np.cos(np.deg2rad(min_lat)) / dx_m / pxs))
+                np.ceil(np.log2(C * np.cos(np.deg2rad(max_lat)) / dx_m / pxs))
             )
         if min_lvl is None:  # calculate min zoomlevel based on the data extent
             min_lvl = mct.bounding_tile(*bounds_wgsg84).z
@@ -2441,7 +2441,7 @@ class RasterDataArray(XRasterBase):
                     dst_tile.raster.to_raster(fn_out, **kwargs)
             if driver.lower() != "png":
                 # Write files to txt and create a vrt using GDAL
-                txt_fn = Path(root, f"filelist_lvl{zl}.txt")
+                txt_fn = Path(root, str(zl), "filelist.txt")
                 vrt_fn = Path(root, f"lvl{zl}.vrt")
                 with open(txt_fn, "w") as f:
                     for fn in fns:
