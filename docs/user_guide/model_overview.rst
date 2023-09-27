@@ -30,14 +30,14 @@ HydroMT defines any model through the model-agnostic Model API based on several 
 Each component represents a specific model data type and is parsed to a specific Python data object.
 The general components are **maps** (raster data), **geoms** (vector data), **forcing**, **results**, **states**, and **config** (the model simulation configuration). These are available to all model classes and plugins.
 
-The computational components are different for different types of models: i.e. **grid** for distributed or grid models, **response_units** for lumped or semi-distributed models, **mesh** for mesh or unstructured grid models, and **network** for network models (to be developed).
+The computational components are different for different types of models: i.e. **grid** for distributed or grid models, **vector** for vector or semi-distributed models, **mesh** for mesh or unstructured grid models, and **network** for network models (to be developed).
 
 By default, the model components are returned and read from standard formats, as documented in the :ref:`API reference <api_reference>`.
 While a generalized model class can readily be used, it can also be tailored to specific model software through so-called :ref:`plugins`. These plugins have the same model components (i.e. Model API), but with model-specific file readers and writers and workflows.
 
 .. NOTE::
 
-  As of version 0.6.0, the grid model (distributed grid model), lumped model (semi-distributed and lumped models), mesh model (unstructured grid(s) models) have been implemented. Other model classes such as network models will follow in future versions.
+  As of version 0.6.0, the grid model (distributed grid model), vector model (semi-distributed and lumped models), mesh model (unstructured grid(s) models) have been implemented. Other model classes such as network models will follow in future versions.
 
 The table below lists the base model components common to all model classes.
 All base model attributes and methods can be found the :ref:`API reference <model_api>`
@@ -103,13 +103,13 @@ For each generalized model class, the respective computational unit components e
        | :py:func:`~GridModel.set_grid`
        | :py:func:`~GridModel.read_grid`
        | :py:func:`~GridModel.write_grid`
-   * - response_units
-     - :ref:`LumpedModel <lumped_model_api>`
-     - Static lumped data over the response_units
-     - | :py:attr:`~LumpedModel.response_units`
-       | :py:func:`~LumpedModel.set_response_units`
-       | :py:func:`~LumpedModel.read_response_units`
-       | :py:func:`~LumpedModel.write_response_units`
+   * - vector
+     - :ref:`VectorModel <vector_model_api>`
+     - Static polygon data over the vector units
+     - | :py:attr:`~VectorModel.vector`
+       | :py:func:`~VectorModel.set_vector`
+       | :py:func:`~VectorModel.read_vector`
+       | :py:func:`~VectorModel.write_vector`
    * - mesh
      - :ref:`MeshModel <mesh_model_api>`
      - Static mesh (unstructured grid(s)) data

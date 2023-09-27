@@ -14,7 +14,7 @@ from shapely.geometry import box
 import hydromt._compat
 import hydromt.models.model_plugins
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import MODELS, GridModel, LumpedModel, Model, model_plugins
+from hydromt.models import MODELS, GridModel, Model, VectorModel, model_plugins
 from hydromt.models.model_api import _check_data
 from hydromt.models.model_grid import GridMixin
 
@@ -432,7 +432,7 @@ def test_setup_grid(tmpdir, demda):
     )
     # wrong region kind
     with pytest.raises(ValueError, match="Region for grid must be of kind"):
-        model.setup_grid({"lumped_model": "test_model"})
+        model.setup_grid({"vector_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]
     with pytest.raises(
@@ -584,18 +584,18 @@ def test_gridmodel_setup(tmpdir):
     mod.write(components=["geoms", "grid"])
 
 
-def test_lumpedmodel(lumped_model, tmpdir):
-    assert "response_units" in lumped_model.api
-    non_compliant = lumped_model._test_model_api()
+def test_vectormodel(vector_model, tmpdir):
+    assert "vector" in vector_model.api
+    non_compliant = vector_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    lumped_model.set_root(str(tmpdir), mode="w")
-    lumped_model.write()
+    vector_model.set_root(str(tmpdir), mode="w")
+    vector_model.write()
     # read model
-    model1 = LumpedModel(str(tmpdir), mode="r")
+    model1 = VectorModel(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors = lumped_model._test_equal(model1)
+    equal, errors = vector_model._test_equal(model1)
     assert equal, errors
 
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""HydroMT LumpedModel class definition."""
+"""HydroMT VectorModel class definition."""
 
 import logging
 import os
@@ -13,39 +13,39 @@ from shapely.geometry import box
 
 from .model_api import Model
 
-__all__ = ["LumpedModel"]
+__all__ = ["VectorModel"]
 logger = logging.getLogger(__name__)
 
 
-class LumpedMixin:
-    _API = {"response_units": xr.Dataset}
+class VectorMixin:
+    _API = {"vector": xr.Dataset}
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._response_units = None  # xr.Dataset()
+        self._vector = None  # xr.Dataset()
 
     @property
-    def response_units(self) -> xr.Dataset:
-        """Model response unit (lumped) data. Returns xr.Dataset geometry coordinate."""
-        if self._response_units is None:
-            self._response_units = xr.Dataset()
+    def vector(self) -> xr.Dataset:
+        """Model vector (polygon) data. Returns xr.Dataset geometry coordinate."""
+        if self._vector is None:
+            self._vector = xr.Dataset()
             if self._read:
-                self.read_response_units()
-        return self._response_units
+                self.read_vector()
+        return self._vector
 
-    def set_response_units(
+    def set_vector(
         self,
         data: Union[xr.DataArray, xr.Dataset, np.ndarray],
         name: Optional[str] = None,
     ) -> None:
-        """Add data to response_units.
+        """Add data to vector.
 
-        All layers of response_units must have identical spatial index.
+        All layers of vector must have identical spatial index.
 
         Parameters
         ----------
         data: xarray.DataArray or xarray.Dataset
-            new data to add to response_units
+            new data to add to vector
         name: str, optional
             Name of new data, this is used to overwrite the name of a DataArray
             or to select a variable from a Dataset.
@@ -55,13 +55,11 @@ class LumpedMixin:
         )
         if name is None and name_required:
             raise ValueError(f"Unable to set {type(data).__name__} data without a name")
-        if isinstance(data, np.ndarray) and "geometry" in self.response_units:
+        if isinstance(data, np.ndarray) and "geometry" in self.vector:
             # TODO: index name is hard coded. Using GeoDataset.index property once ready
-            index = self.response_units["index"]
+            index = self.vector["index"]
             if data.size != index.size and data.ndim == 1:
-                raise ValueError(
-                    "Size of data and number of response_units do not match"
-                )
+                raise ValueError("Size of data and number of vector do not match")
             data = xr.DataArray(dims=["index"], data=data)
         if isinstance(data, xr.DataArray):
             if name is not None:  # rename
@@ -70,15 +68,15 @@ class LumpedMixin:
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
         for dvar in data.data_vars:
-            if dvar in self.response_units:
-                self.logger.warning(f"Replacing response_units variable: {dvar}")
+            if dvar in self.vector:
+                self.logger.warning(f"Replacing vector variable: {dvar}")
             # TODO: check on index coordinate before merging
-            self._response_units[dvar] = data[dvar]
+            self._vector[dvar] = data[dvar]
 
-    def read_response_units(
+    def read_vector(
         self,
-        fn: str = "response_units/response_units.nc",
-        fn_geom: str = "response_units/response_units.geojson",
+        fn: str = "vector/vector.nc",
+        fn_geom: str = "vector/vector.geojson",
         **kwargs,
     ) -> None:
         """Read model response units from combined netcdf and geojson file.
@@ -92,10 +90,10 @@ class LumpedMixin:
         ----------
         fn : str, optional
             netcdf filename relative to model root,
-            by default 'response_units/response_units.nc'
+            by default 'vector/vector.nc'
         fn_geom : str, optional
             geojson filename relative to model root,
-            by default 'response_units/response_units.geojson'
+            by default 'vector/vector.geojson'
         **kwargs:
             Additional keyword arguments that are passed to the `read_nc`
             function.
@@ -108,12 +106,12 @@ class LumpedMixin:
             ds = ds.assign_coords(geometry=(["index"], gdf["geometry"]))
             if gdf.crs is not None:  # parse crs
                 ds = ds.rio.write_crs(gdf.crs)
-        self.set_response_units(ds)
+        self.set_vector(ds)
 
-    def write_response_units(
+    def write_vector(
         self,
-        fn: str = "response_units/response_units.nc",
-        fn_geom: str = "response_units/response_units.geojson",
+        fn: str = "vector/vector.nc",
+        fn_geom: str = "vector/vector.geojson",
         **kwargs,
     ):
         """Write model response units to combined netcdf and geojson files.
@@ -127,35 +125,35 @@ class LumpedMixin:
         ----------
         fn : str, optional
             netcdf filename relative to model root,
-            by default 'response_units/response_units.nc'
+            by default 'vector/vector.nc'
         fn_geom : str, optional
             geojson filename relative to model root,
-            by default 'response_units/response_units.geojson'
+            by default 'vector/vector.geojson'
         **kwargs:
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        if len(self.response_units) == 0:
-            self.logger.debug("No response_units data found, skip writing.")
+        if len(self.vector) == 0:
+            self.logger.debug("No vector data found, skip writing.")
             return
         self._assert_write_mode()
         # write geometry
-        ds = self.response_units
+        ds = self.vector
         gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
         if not isdir(dirname(join(self.root, fn_geom))):
             os.makedirs(dirname(join(self.root, fn_geom)))
         gdf.to_file(join(self.root, fn_geom), driver="GeoJSON")
         # write_nc requires dict - use dummy key
-        nc_dict = {"response_units": ds.drop_vars("geometry")}
+        nc_dict = {"vector": ds.drop_vars("geometry")}
         self.write_nc(nc_dict, fn, **kwargs)
 
 
-class LumpedModel(LumpedMixin, Model):
+class VectorModel(VectorMixin, Model):
 
-    """Model class Lumped Model for lumped models in HydroMT."""
+    """Model class Vector Model for vector (polygons) models in HydroMT."""
 
     _CLI_ARGS = {"region": "setup_region"}
-    _NAME = "lumped_model"
+    _NAME = "vector_model"
 
     def __init__(
         self,
@@ -165,7 +163,7 @@ class LumpedModel(LumpedMixin, Model):
         data_libs: List[str] = None,
         logger=logger,
     ):
-        """Initialize a LumpedModel for lumped and semi-distributed models."""
+        """Initialize a VectorModel for lumped and semi-distributed models."""
         super().__init__(
             root=root,
             mode=mode,
@@ -185,12 +183,12 @@ class LumpedModel(LumpedMixin, Model):
         components : List, optional
             List of model components to read, each should have an
             associated read_<component> method.
-            By default ['config', 'maps', 'response_units', 'geoms', 'tables',
+            By default ['config', 'maps', 'vector', 'geoms', 'tables',
             'forcing', 'states', 'results']
         """
         components = components or [
             "config",
-            "response_units",
+            "vector",
             "geoms",
             "tables",
             "forcing",
@@ -210,11 +208,11 @@ class LumpedModel(LumpedMixin, Model):
         components : List, optional
             List of model components to write, each should have an
             associated write_<component> method. By default ['config',
-            'maps', 'response_units', 'geoms', 'tables', 'forcing', 'states']
+            'maps', 'vector', 'geoms', 'tables', 'forcing', 'states']
         """
         components = components or [
             "config",
-            "response_units",
+            "vector",
             "geoms",
             "tables",
             "forcing",
@@ -228,8 +226,8 @@ class LumpedModel(LumpedMixin, Model):
         region = gpd.GeoDataFrame()
         if "region" in self.geoms:
             region = self.geoms["region"]
-        elif len(self.response_units) > 0:
-            ds = self.response_units
+        elif len(self.vector) > 0:
+            ds = self.vector
             gdf = gpd.GeoDataFrame(geometry=ds["geometry"].values, crs=ds.rio.crs)
             region = gpd.GeoDataFrame(geometry=[box(*gdf.total_bounds)], crs=gdf.crs)
         return region
