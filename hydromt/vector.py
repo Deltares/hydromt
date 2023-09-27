@@ -776,7 +776,7 @@ class GeoDataArray(GeoBase):
 
     @staticmethod
     def from_netcdf(
-        path: str,
+        path: Union[str, xr.DataArray],
         parse_geom: bool = True,
         geom_name: str = None,
         x_name: str = None,
@@ -784,11 +784,11 @@ class GeoDataArray(GeoBase):
         crs: int = None,
         **kwargs,
     ) -> xr.DataArray:
-        """Read netcdf file as GeoDataArray.
+        """Read netcdf file or convert xr.DataArray as GeoDataArray.
 
         Parameters
         ----------
-        path : str
+        path : str, xr.DataArray
             path to file
         parse_geom : bool, optional
             Create geometry objects in place of existing x, y or wkt geometry
@@ -805,7 +805,10 @@ class GeoDataArray(GeoBase):
         xr.DataArray
             DataArray with vector as accessor
         """
-        da = xr.open_dataarray(path, **kwargs)
+        if isinstance(path, xr.DataArray):
+            da = path
+        else:
+            da = xr.open_dataarray(path, **kwargs)
         da.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
         # force to geom_format "geom"
         if parse_geom:
@@ -834,7 +837,7 @@ class GeoDataset(GeoBase):
     # i.e. produces xarray.Dataset/ xarray.DataArray
 
     # Constructers
-    # i.e. from other datatypes or filess
+    # i.e. from other datatypes or files
     @staticmethod
     def from_gdf(
         gdf: gpd.GeoDataFrame,
@@ -842,6 +845,7 @@ class GeoDataset(GeoBase):
         coords: dict = None,
         index_dim: str = None,
         keep_cols: bool = True,
+        cols_as_data_vars: bool = False,
         merge_index: str = "gdf",
     ) -> xr.Dataset:
         """Create Dataset with geospatial coordinates.
@@ -863,6 +867,8 @@ class GeoDataset(GeoBase):
             Name of index dimension in data_vars
         keep_cols: bool, optional
             If True, keep gdf columns as extra coordinates in dataset
+        cols_as_data_vars: bool, optional
+            If True, parse gdf columns as data variables rather than coordinates.
         merge_index: {'gdf', 'inner'}, default 'gdf'
             Type of merge to be performed between gdf and data.
 
@@ -925,7 +931,16 @@ class GeoDataset(GeoBase):
         ds = ds.reindex({index_dim: _index}).transpose(index_dim, ...)
         # set gdf geometry and optional other columns
         hdrs = gdf.columns if keep_cols else [geom_name]
-        ds = ds.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs})
+        if cols_as_data_vars:
+            for hdr in hdrs:
+                if hdr != geom_name:
+                    ds[hdr] = (index_dim, gdf.loc[_index, hdr])
+                else:
+                    ds = ds.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr])})
+        else:
+            ds = ds.assign_coords(
+                {hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs}
+            )
         # set geospatial attributes
         ds.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
         ds.vector.set_crs(gdf.crs)
@@ -933,7 +948,7 @@ class GeoDataset(GeoBase):
 
     @staticmethod
     def from_netcdf(
-        path: str,
+        path: Union[str, xr.Dataset],
         parse_geom=True,
         geom_name=None,
         x_name=None,
@@ -941,11 +956,11 @@ class GeoDataset(GeoBase):
         crs=None,
         **kwargs,
     ) -> xr.Dataset:
-        """Create GeoDataset from ogr compliant netCDF4 file.
+        """Create GeoDataset from ogr compliant netCDF4 file or xr.Dataset.
 
         Parameters
         ----------
-        path : str
+        path : str, xr.Dataset
             Path to the netCDF4 file
         parse_geom : bool, optional
             Create geometry objects in place of existing x, y or
@@ -962,7 +977,10 @@ class GeoDataset(GeoBase):
         xr.Dataset
             Dataset containing the geospatial data and attributes
         """
-        ds = xr.open_dataset(path, **kwargs)
+        if isinstance(path, xr.Dataset):
+            ds = path
+        else:
+            ds = xr.open_dataset(path, **kwargs)
         ds.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
         # force geom_format= 'geom'
         if parse_geom:

@@ -291,7 +291,7 @@ def vector_model(ts, geodf):
         coords={"index": ts.index, "time": ts.columns},
         name="zs",
     )
-    da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
+    da = da.assign_coords(geometry=(["index"], geodf["geometry"].buffer(0.1)))
     da.vector.set_crs(geodf.crs)
     mod.set_vector(da)
     return mod
