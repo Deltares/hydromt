@@ -30,7 +30,7 @@ HydroMT defines any model through the model-agnostic Model API based on several 
 Each component represents a specific model data type and is parsed to a specific Python data object.
 The general components are **maps** (raster data), **geoms** (vector data), **forcing**, **results**, **states**, and **config** (the model simulation configuration). These are available to all model classes and plugins.
 
-The computational components are different for different types of models: i.e. **grid** for distributed or grid models, **vector** for vector or semi-distributed models, **mesh** for mesh or unstructured grid models, and **network** for network models (to be developed).
+The computational components are different for different types of models: i.e. **grid** for distributed or grid models, **vector** for lumped or semi-distributed models, **mesh** for mesh or unstructured grid models, and **network** for network models (to be developed).
 
 By default, the model components are returned and read from standard formats, as documented in the :ref:`API reference <api_reference>`.
 While a generalized model class can readily be used, it can also be tailored to specific model software through so-called :ref:`plugins`. These plugins have the same model components (i.e. Model API), but with model-specific file readers and writers and workflows.
