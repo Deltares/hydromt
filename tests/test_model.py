@@ -599,6 +599,84 @@ def test_vectormodel(vector_model, tmpdir):
     assert equal, errors
 
 
+def test_vectormodel_vector(vector_model, tmpdir, geoda):
+    # test set vector
+    testds = vector_model.vector.copy()
+    # np.ndarray
+    with pytest.raises(ValueError, match="Unable to set"):
+        vector_model.set_vector(data=testds["zs"].values)
+    with pytest.raises(
+        ValueError, match="set_vector with np.ndarray is only supported if data is 1D"
+    ):
+        vector_model.set_vector(data=testds["zs"].values, name="precip")
+    # xr.DataArray
+    vector_model.set_vector(data=testds["zs"], name="precip")
+    # geodataframe
+    gdf = testds.vector.geometry.to_frame("geometry")
+    gdf["param1"] = np.random.rand(gdf.shape[0])
+    gdf["param2"] = np.random.rand(gdf.shape[0])
+    vector_model.set_vector(data=gdf)
+    assert "precip" in vector_model.vector
+    assert "param1" in vector_model.vector
+    # geometry and update grid
+    with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
+        vector_model.set_vector(data=geoda)
+    param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop("geometry")
+    with pytest.raises(ValueError, match="Index coordinate of data variable"):
+        vector_model.set_vector(data=param3, name="param3")
+    with pytest.raises(ValueError, match="Geometry of vector must be of type Polygon"):
+        vector_model.set_vector(data=geoda, overwrite_geom=True)
+    geoda = geoda.vector.update_geometry(geoda.vector.geometry.buffer(0.1))
+    vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")
+    assert "param1" not in vector_model.vector
+    assert "zs" in vector_model.vector
+
+    # test write vector
+    vector_model.set_vector(data=gdf)
+    vector_model.set_root(str(tmpdir), mode="w")
+    # netcdf+geojson --> tested in test_vectormodel
+    # netcdf only
+    vector_model.write_vector(fn="vector/vector_full.nc", fn_geom=None)
+    # geojson only
+    # automatic split
+    vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
+    assert isfile(join(vector_model.root, "vector", "vector_split.nc"))
+    # geojson and reducer for 2D data
+    vector_model.write_vector(
+        fn=None, fn_geom="vector/vector_all.geojson", reducer="mean"
+    )
+    assert not isfile(join(vector_model.root, "vector", "vector_all.nc"))
+    # geojson 1D data only
+    vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
+    vector_model.write_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+    assert not isfile(join(vector_model.root, "vector", "vector_all2.nc"))
+
+    # test read vector
+    vector_model1 = VectorModel(str(tmpdir), mode="r")
+    # netcdf only
+    vector_model1.read_vector(fn="vector/vector_full.nc", fn_geom=None)
+    vector0 = vector_model1.vector
+    assert len(vector0["zs"].dims) == 2
+    vector_model1._vector = None
+    # geojson only
+    # automatic split
+    vector_model1.read_vector(
+        fn="vector/vector_split.nc", fn_geom="vector/vector_split.geojson"
+    )
+    vector1 = vector_model1.vector
+    assert len(vector1["zs"].dims) == 2
+    vector_model1._vector = None
+    # geojson and reducer for 2D data
+    vector_model1.read_vector(fn=None, fn_geom="vector/vector_all.geojson")
+    vector2 = vector_model1.vector
+    assert len(vector2["zs"].dims) == 1
+    vector_model1._vector = None
+    # geojson 1D data only
+    vector_model1.read_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+    vector3 = vector_model1.vector
+    assert "zs" not in vector3
+
+
 def test_networkmodel(network_model, tmpdir):
     network_model.set_root(str(tmpdir), mode="r+")
     with pytest.raises(NotImplementedError):

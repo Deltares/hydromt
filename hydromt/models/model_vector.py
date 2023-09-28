@@ -72,8 +72,13 @@ class VectorMixin:
         if isinstance(data, np.ndarray) and "geometry" in self.vector:
             index_dim = self.vector.vector.index_dim
             index = self.vector[index_dim]
-            if data.size != index.size and data.ndim == 1:
-                raise ValueError("Size of data and number of vector do not match")
+            if data.size != index.size:
+                if data.ndim == 1:
+                    raise ValueError("Size of data and number of vector do not match")
+                else:
+                    raise ValueError(
+                        "set_vector with np.ndarray is only supported if data is 1D"
+                    )
             data = xr.DataArray(dims=[index_dim], data=data)
         if isinstance(data, xr.DataArray):
             if name is not None:  # rename
@@ -111,11 +116,13 @@ class VectorMixin:
                     self.logger.warning(f"Replacing vector variable: {dvar}")
                 # check on index coordinate before merging
                 dims = data[dvar].dims
-                if dims[0] == self.index_dim:
+                if np.array_equal(
+                    data[dims[0]].values, self.vector[self.index_dim].values
+                ):
                     self._vector[dvar] = data[dvar]
                 else:
                     raise ValueError(
-                        f"Index coordinate of data variable {dvar}"
+                        f"Index coordinate of data variable {dvar} "
                         "does not match vector index coordinate"
                     )
 
@@ -156,8 +163,15 @@ class VectorMixin:
         """
         self._assert_read_mode()
         if fn is not None:
+            # Disable lazy loading of data
+            # to avoid issues with reading object dtype data
+            if "chunks" not in kwargs:
+                kwargs["chunks"] = None
             ds = xr.merge(self.read_nc(fn, **kwargs).values())
-        if isfile(join(self.root, fn_geom)):
+            # check if ds is empty (default fn has a value)
+            if len(ds.sizes) == 0:
+                fn = None
+        if fn_geom is not None and isfile(join(self.root, fn_geom)):
             gdf = gpd.read_file(join(self.root, fn_geom))
             # geom + netcdf data
             if fn is not None:
@@ -166,14 +180,19 @@ class VectorMixin:
             else:
                 ds = GeoDataset.from_gdf(gdf, keep_cols=True, cols_as_data_vars=True)
         # netcdf only
-        else:
+        elif fn is not None:
             ds = GeoDataset.from_netcdf(ds)
+        else:
+            self.logger.info("No vector data found, skip reading.")
+            return
+
         self.set_vector(ds)
 
     def write_vector(
         self,
         fn: str = "vector/vector.nc",
         fn_geom: str = "vector/vector.geojson",
+        ogr_compliant: bool = False,
         **kwargs,
     ):
         """Write model vector to combined netcdf and geojson files.
@@ -184,7 +203,7 @@ class VectorMixin:
 
             * The netcdf file contains the attribute data and the geojson file the
                 geometry vector data. Key-word arguments are passed to
-                :py:meth:`~hydromt.vector.GeoDataset.to_netcdf`
+                :py:meth:`~hydromt.models.Model.write_nc`
 
             * The netcdf file contains both the attribute and the geometry data
                 (fn_geom set to None). Key-word arguments are passed to
@@ -203,6 +222,10 @@ class VectorMixin:
         fn_geom : str, optional
             geojson filename relative to model root,
             by default 'vector/vector.geojson'
+        ogr_compliant : bool
+            If fn only, write the netCDF4 file in an ogr compliant format
+            This makes it readable as a vector file in e.g. QGIS
+            see :py:meth:`~hydromt.vector.GeoBase.ogr_compliant` for more details.
         **kwargs:
             Additional keyword arguments that are passed to the `write_nc`
             function.
@@ -225,6 +248,8 @@ class VectorMixin:
                 # If no reducer then check if 1D data only is present
                 snames = ["y_name", "x_name", "index_dim", "geom_name"]
                 sdims = [ds.vector.attrs.get(n) for n in snames if n in ds.vector.attrs]
+                if "spatial_ref" in ds:
+                    sdims.append("spatial_ref")
                 for name in ds.vector._all_names:
                     dims = ds[name].dims
                     if name not in sdims:
@@ -232,7 +257,7 @@ class VectorMixin:
                         if len(dims) > 1 or dims[0] != ds.vector.index_dim:
                             fn = join(
                                 dirname(join(self.root, fn_geom)),
-                                f"{basename(fn_geom)}.nc",
+                                f"{basename(fn_geom).split('.')[0]}.nc",
                             )
                             self.logger.warning(
                                 "2D data found in vector,"
@@ -244,12 +269,19 @@ class VectorMixin:
         if fn_geom is None:
             if not isdir(dirname(join(self.root, fn))):
                 os.makedirs(dirname(join(self.root, fn)))
-            ds = ds.vector.to_netcdf(fn, **kwargs)
+            # cannot call directly ds.vector.to_netcdf
+            # because of possible PermissionError
+            if ogr_compliant:
+                ds = ds.vector.ogr_compliant()
+            else:
+                ds = ds.vector.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
+            nc_dict = {"vector": ds}
+            self.write_nc(nc_dict, fn, engine="netcdf4", **kwargs)
         # write to geojson only
         elif fn is None:
             if not isdir(dirname(join(self.root, fn_geom))):
                 os.makedirs(dirname(join(self.root, fn_geom)))
-            gdf = ds.vector.to_gdf(fn_geom, **kwargs)
+            gdf = ds.vector.to_gdf(**kwargs)
             gdf.to_file(join(self.root, fn_geom))
         # write data to netcdf and geometry to geojson
         else:

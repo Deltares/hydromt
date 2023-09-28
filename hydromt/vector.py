@@ -241,6 +241,12 @@ class GeoBase(raster.XGeoBase):
         """
         if self._geometry is not None and self._geometry.index.size == self.size:
             return self._geometry
+        # if no geometry is present return None self._geometry
+        # rather than raising an error
+        try:
+            self.set_spatial_dims()
+        except ValueError:
+            return self._geometry
         gtype = self.geom_format
         if gtype not in ["geom", "xy", "wkt"]:
             raise ValueError("No valid geometry found in object.")
@@ -575,15 +581,17 @@ class GeoBase(raster.XGeoBase):
 
         Arguments
         ---------
-        reducer : callable, optional
+        reducer : callable, str, optional
             method by which multidimensional data is reduced to 1 dimensional
-            e.g. numpy.mean
+            e.g. numpy.mean. If str (e.g. mean), will call the numpy method is found.
 
         Returns
         -------
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
+        if reducer is not None and isinstance(reducer, str):
+            reducer = getattr(np, reducer)
         obj = self._obj
         if isinstance(obj, xr.DataArray):
             # we are looking at a coordinate
