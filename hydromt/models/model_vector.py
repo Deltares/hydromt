@@ -96,9 +96,6 @@ class VectorMixin:
             if data.vector.geometry is None:
                 raise ValueError("Cannot instantiate vector without geometry in data")
             else:
-                # check that geometry is of type polygon
-                if data.vector.geom_type != "Polygon":
-                    raise ValueError("Geometry of vector must be of type Polygon")
                 if overwrite_geom:
                     self.logger.warning("Overwriting vector object with data")
                 self._vector = data

@@ -619,14 +619,12 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
     assert "precip" in vector_model.vector
     assert "param1" in vector_model.vector
     # geometry and update grid
+    geoda_test = geoda.vector.update_geometry(geoda.vector.geometry.buffer(0.1))
     with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
-        vector_model.set_vector(data=geoda)
+        vector_model.set_vector(data=geoda_test)
     param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop("geometry")
     with pytest.raises(ValueError, match="Index coordinate of data variable"):
         vector_model.set_vector(data=param3, name="param3")
-    with pytest.raises(ValueError, match="Geometry of vector must be of type Polygon"):
-        vector_model.set_vector(data=geoda, overwrite_geom=True)
-    geoda = geoda.vector.update_geometry(geoda.vector.geometry.buffer(0.1))
     vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")
     assert "param1" not in vector_model.vector
     assert "zs" in vector_model.vector
