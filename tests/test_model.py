@@ -67,6 +67,7 @@ def test_load():
 
 
 # test both with and without xugrid
+@pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
 def test_global_models(mocker, has_xugrid):
     mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
     keys = list(model_plugins.LOCAL_EPS.keys())
