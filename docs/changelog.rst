@@ -28,10 +28,12 @@ Added
 - Added documentation for how to start your own plugin (PR #446)
 - New raster method ``to_slippy_tiles``: tiling of a raster dataset according to the slippy tile structure for e.g., webviewers (PR #440).
 - Support for http and other *filesystems* in path of data source (PR #515).
+- ``set_forcing`` can now add pandas.DataFrame object to frocing. (PR #534)
 
 Changed
 -------
 - Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. (PR #412)
+- Updated generic setup grid and mesh2d functions names to distinguish better if they add data or create schematisation. (PR #534)
 - possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
 - Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
   call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
@@ -41,6 +43,7 @@ Fixed
 -----
 - when a model component (eg maps, forcing, grid) is updated using the set_ methods, it will first be read to avoid loosing data. (PR #460)
 - open_geodataset with driver vector also works for other geometry type than points. (PR #509)
+- overwrite model in update mode. (PR #534)
 
 Deprecated
 ----------
