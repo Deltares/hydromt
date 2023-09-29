@@ -1,8 +1,11 @@
 """Implementation for mesh based workflows."""
 import logging
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import geopandas as gpd
+import numpy as np
+import pandas as pd
+import xarray as xr
 import xugrid as xu
 from pyproj import CRS
 from shapely.geometry import box
@@ -16,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "create_mesh2d",
+    "mesh2d_from_rasterdataset",
+    "mesh2d_from_raster_reclass",
     "rename_mesh",
 ]
 
@@ -187,12 +192,182 @@ def create_mesh2d(
                 raise IndexError(err)
             mesh2d = subset
 
-    # Reproject to user crs option if needed
-    if mesh2d.ugrid.grid.crs != crs:
-        logger.info(f"Reprojecting mesh to crs {crs}")
-        mesh2d.ugrid.grid.to_crs(crs)
-
     return mesh2d
+
+
+def mesh2d_from_rasterdataset(
+    ds: Union[xr.DataArray, xr.Dataset],
+    mesh2d: Union[xu.UgridDataArray, xu.Ugrid2d],
+    variables: Optional[List] = None,
+    fill_method: Optional[str] = None,
+    resampling_method: Optional[str] = "centroid",
+    rename: Optional[Dict] = None,
+    logger: logging.Logger = logger,
+) -> xu.UgridDataset:
+    """
+    Resamples data in ds to mesh2d.
+
+    Raster data is interpolated to the mesh using the ``resampling_method``.
+
+    Parameters
+    ----------
+    ds: xr.DataArray, xr.Dataset
+        Raster xarray data object.
+    mesh2d: xu.UgridDataArray, xu.Ugrid2d
+        Mesh2d grid to resample to.
+    variables: list, optional
+        List of variables to resample. By default all variables in ds.
+    fill_method : str, optional
+        If specified, fills no data values using fill_nodata method.
+        Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+    resampling_method: str, optional
+        Method to sample from raster data to mesh. By default mean. Options include
+        {"centroid", "barycentric", "mean", "harmonic_mean", "geometric_mean", "sum",
+        "minimum", "maximum", "mode", "median", "max_overlap"}. If centroid, will use
+        :py:meth:`xugrid.CentroidLocatorRegridder` method. If barycentric, will use
+        :py:meth:`xugrid.BarycentricInterpolator` method. If any other, will use
+        :py:meth:`xugrid.OverlapRegridder` method.
+        Can provide a list corresponding to ``variables``.
+    rename: dict, optional
+        Dictionary to rename variable names in ds
+        {'name_ds': 'name_in_uds_out'}. By default empty.
+
+    Returns
+    -------
+    uds_out: xu.UgridDataset
+        Resampled data on mesh2d.
+    """
+    rename = rename or {}
+    if isinstance(ds, xr.DataArray):
+        ds = ds.to_dataset()
+    if variables is not None:
+        ds = ds[variables]
+
+    if fill_method is not None:
+        ds = ds.raster.interpolate_na(method=fill_method)
+
+    # check resampling method
+    resampling_method = np.atleast_1d(resampling_method)
+    if len(resampling_method) == 1:
+        resampling_method = np.repeat(resampling_method, len(ds.data_vars))
+    # one reproject method per variable
+    elif len(resampling_method) != len(variables):
+        raise ValueError(
+            f"resampling_method should have length 1 or {len(ds.data_vars)}"
+        )
+
+    # Prepare regridder
+    regridder = dict()
+    # Get one variable name in ds to simplify to da
+    var = [v for v in ds.data_vars][0]
+    uda = xu.UgridDataArray.from_structured(
+        ds[var].rename({ds.raster.x_dim: "x", ds.raster.y_dim: "y"})
+    )
+    uda.ugrid.set_crs(ds.raster.crs)
+    for method in np.unique(resampling_method):
+        logger.info(f"Preparing regridder for {method} method")
+        if method == "centroid":
+            regridder[method] = xu.CentroidLocatorRegridder(uda, mesh2d)
+        elif method == "barycentric":
+            regridder[method] = xu.BarycentricInterpolator(uda, mesh2d)
+        else:
+            regridder[method] = xu.OverlapRegridder(uda, mesh2d, method=method)
+
+    # Convert ds to xugrid
+    for i, var in enumerate(ds.data_vars):
+        logger.info(f"Resampling {var} to mesh2d using {resampling_method[i]} method")
+        uda = xu.UgridDataArray.from_structured(
+            ds[var].rename({ds.raster.x_dim: "x", ds.raster.y_dim: "y"})
+        )
+        uda.ugrid.set_crs(ds.raster.crs)
+        # Interpolate
+        method = resampling_method[i]
+        # Interpolate
+        uda_out = regridder[method].regrid(uda)
+        # Add to uds_out
+        if i == 0:
+            uds_out = uda_out.to_dataset()
+        else:
+            uds_out[var] = uda_out
+
+    # Rename variables
+    if rename is not None:
+        uds_out = uds_out.rename(rename)
+
+    return uds_out
+
+
+def mesh2d_from_raster_reclass(
+    da: xr.DataArray,
+    df_vars: pd.DataFrame,
+    mesh2d: Union[xu.UgridDataArray, xu.Ugrid2d],
+    reclass_variables: list,
+    fill_method: Optional[str] = None,
+    resampling_method: Optional[Union[str, list]] = "centroid",
+    rename: Optional[Dict] = None,
+    logger: logging.Logger = logger,
+) -> List[str]:
+    """Resample data to ``mesh2d`` grid by reclassifying the data in ``da`` based on ``df_vars``.
+
+    The reclassified raster data
+    are subsequently interpolated to the mesh using `resampling_method`.
+
+    Parameters
+    ----------
+    da : xr.DataArray
+        Raster xarray DataArray object.
+    df_vars : pd.DataFrame
+        Tabular pandas dataframe object for the reclassification table of `da`.
+    mesh2d: xu.UgridDataArray, xu.Ugrid2d
+        Mesh2d grid to resample to.
+    reclass_variables : list
+        List of reclass_variables from the df_vars table to add to the
+        mesh. The index column should match values in da.
+    fill_method : str, optional
+        If specified, fills nodata values in `da` using the `fill_method`
+        method before reclassifying. Available methods are
+        {'linear', 'nearest', 'cubic', 'rio_idw'}.
+    resampling_method: str, list, optional
+        Method to sample from raster data to mesh. By default mean. Options include
+        {"centroid", "barycentric", "mean", "harmonic_mean", "geometric_mean", "sum",
+        "minimum", "maximum", "mode", "median", "max_overlap"}. If centroid, will use
+        :py:meth:`xugrid.CentroidLocatorRegridder` method. If barycentric, will use
+        :py:meth:`xugrid.BarycentricInterpolator` method. If any other, will use
+        :py:meth:`xugrid.OverlapRegridder` method.
+        Can provide a list corresponding to ``reclass_variables``.
+    rename : dict, optional
+        Dictionary to rename variable names in `reclass_variables` before adding
+        them to the mesh. The dictionary should have the form
+        {'name_in_reclass_table': 'name_in_uds_out'}. By default, an empty dictionary.
+
+    Returns
+    -------
+    uds_out : xu.UgridDataset
+        Resampled data on mesh2d.
+
+    See Also
+    --------
+    mesh2d_from_rasterdataset
+    """  # noqa: E501
+    rename = rename or {}
+
+    if fill_method is not None:
+        da = da.raster.interpolate_na(method=fill_method)
+
+    # Mapping function
+    ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
+
+    uds_out = mesh2d_from_rasterdataset(
+        ds_vars,
+        mesh2d,
+        variables=reclass_variables,
+        fill_method=None,
+        resampling_method=resampling_method,
+        rename=rename,
+        logger=logger,
+    )
+
+    return uds_out
 
 
 def rename_mesh(mesh: Union[xu.UgridDataArray, xu.UgridDataset], name: str):

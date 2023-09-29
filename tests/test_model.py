@@ -712,13 +712,16 @@ def test_meshmodel_setup(griduda, world):
     region = {"mesh": griduda}
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod1.setup_mesh2d(region, grid_name="mesh2d")
-    mod1.setup_mesh2d_from_rasterdataset("vito", grid_name="mesh2d")
+    mod1.setup_mesh2d_from_rasterdataset(
+        "vito", grid_name="mesh2d", resampling_method="mode"
+    )
     assert "vito" in mod1.mesh.data_vars
     mod1.setup_mesh2d_from_raster_reclass(
         raster_fn="vito",
         reclass_table_fn="vito_mapping",
-        reclass_variables=["roughness_manning"],
-        resampling_method="mean",
+        reclass_variables=["landuse", "roughness_manning"],
+        resampling_method=["mode", "centroid"],
         grid_name="mesh2d",
     )
     assert "roughness_manning" in mod1.mesh.data_vars
+    assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)

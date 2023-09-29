@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 import xarray as xr
 import xugrid as xu
@@ -39,8 +38,7 @@ class MeshMixin(object):
         grid_name: Optional[str] = "mesh2d",
         variables: Optional[list] = None,
         fill_method: Optional[str] = None,
-        resampling_method: Optional[str] = "mean",
-        all_touched: Optional[bool] = True,
+        resampling_method: Optional[Union[str, List]] = "centroid",
         rename: Optional[Dict] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to 2D ``grid_name`` in mesh object.
@@ -64,13 +62,14 @@ class MeshMixin(object):
         fill_method : str, optional
             If specified, fills no data values using fill_nodata method.
             Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
-        resampling_method: str, optional
+        resampling_method: str, list, optional
             Method to sample from raster data to mesh. By default mean. Options include
-            {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
-        all_touched : bool, optional
-            If True, all pixels touched by geometries will used to define the sample.
-            If False, only pixels whose center is within the geometry or that are
-            selected by Bresenham's line algorithm will be used. By default True.
+            {"centroid", "barycentric", "mean", "harmonic_mean", "geometric_mean", "sum",
+            "minimum", "maximum", "mode", "median", "max_overlap"}. If centroid, will use
+            :py:meth:`xugrid.CentroidLocatorRegridder` method. If barycentric, will use
+            :py:meth:`xugrid.BarycentricInterpolator` method. If any other, will use
+            :py:meth:`xugrid.OverlapRegridder` method.
+            Can provide a list corresponding to ``variables``.
         rename: dict, optional
             Dictionary to rename variable names in raster_fn before adding to mesh
             {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
@@ -80,7 +79,6 @@ class MeshMixin(object):
         list
             List of variables added to mesh.
         """  # noqa: E501
-        rename = rename or {}
         self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
         # Check if grid name in self.mesh
         if grid_name not in self.mesh_names:
@@ -89,28 +87,20 @@ class MeshMixin(object):
         ds = self.data_catalog.get_rasterdataset(
             raster_fn, bbox=self.bounds[grid_name], buffer=2, variables=variables
         )
-        if isinstance(ds, xr.DataArray):
-            ds = ds.to_dataset()
 
-        if fill_method is not None:
-            ds = ds.raster.interpolate_na(method=fill_method)
-
-        # Convert mesh grid as geodataframe for sampling
-        # Reprojection happens to gdf inside of zonal_stats method
-        ds_sample = ds.raster.zonal_stats(
-            gdf=self.mesh_gdf[grid_name],
-            stats=resampling_method,
-            all_touched=all_touched,
+        uds_sample = workflows.mesh2d_from_rasterdataset(
+            ds=ds,
+            mesh2d=self.mesh_grids[grid_name],
+            variables=variables,
+            fill_method=fill_method,
+            resampling_method=resampling_method,
+            rename=rename,
+            logger=self.logger,
         )
-        # Rename variables
-        rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
-        ds_sample = ds_sample.rename(rm_dict).rename(rename)
-        # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh_grids[grid_name])
 
         self.set_mesh(uds_sample, grid_name=grid_name, overwrite_grid=False)
 
-        return list(ds_sample.data_vars.keys())
+        return list(uds_sample.data_vars.keys())
 
     def setup_mesh2d_from_raster_reclass(
         self,
@@ -119,9 +109,8 @@ class MeshMixin(object):
         reclass_variables: list,
         grid_name: Optional[str] = "mesh2d",
         variable: Optional[str] = None,
-        fill_nodata: Optional[str] = None,
-        resampling_method: Optional[Union[str, list]] = "mean",
-        all_touched: Optional[bool] = True,
+        fill_method: Optional[str] = None,
+        resampling_method: Optional[Union[str, list]] = "centroid",
         rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
@@ -151,19 +140,18 @@ class MeshMixin(object):
         variable : str, optional
             Name of the raster dataset variable to use. This is only required when
             reading datasets with multiple variables. By default, None.
-        fill_nodata : str, optional
-            If specified, fills nodata values in `raster_fn` using the `fill_nodata`
+        fill_method : str, optional
+            If specified, fills nodata values in `raster_fn` using the `fill_method`
             method before reclassifying. Available methods are
             {'linear', 'nearest', 'cubic', 'rio_idw'}.
         resampling_method : str or list, optional
-            Method to sample from raster data to the mesh. Can be a list per variable
-            in `reclass_variables` or a single method for all. By default, 'mean' is
-            used for all `reclass_variables`. Options include {'count', 'min', 'max',
-            'sum', 'mean', 'std', 'median', 'q##'}.
-        all_touched : bool, optional
-            If True, all pixels touched by geometries will be used to define the sample.
-            If False, only pixels whose center is within the geometry or that are
-            selected by Bresenham's line algorithm will be used. By default, True.
+            Method to sample from raster data to mesh. By default mean. Options include
+            {"centroid", "barycentric", "mean", "harmonic_mean", "geometric_mean", "sum",
+            "minimum", "maximum", "mode", "median", "max_overlap"}. If centroid, will use
+            :py:meth:`xugrid.CentroidLocatorRegridder` method. If barycentric, will use
+            :py:meth:`xugrid.BarycentricInterpolator` method. If any other, will use
+            :py:meth:`xugrid.OverlapRegridder` method.
+            Can provide a list corresponding to ``reclass_variables``.
         rename : dict, optional
             Dictionary to rename variable names in `reclass_variables` before adding
             them to the mesh. The dictionary should have the form
@@ -182,7 +170,6 @@ class MeshMixin(object):
         ValueError
             If `raster_fn` is not a single variable raster.
         """  # noqa: E501
-        rename = rename or {}
         self.logger.info(
             f"Preparing mesh data by reclassifying the data in {raster_fn} "
             f"based on {reclass_table_fn}."
@@ -207,34 +194,20 @@ class MeshMixin(object):
             reclass_table_fn, variables=reclass_variables
         )
 
-        if fill_nodata is not None:
-            da = da.raster.interpolate_na(method=fill_nodata)
-
-        # Mapping function
-        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
-
-        # Convert mesh grid as geodataframe for sampling
-        # Reprojection happens to gdf inside of zonal_stats method
-        ds_sample = ds_vars.raster.zonal_stats(
-            gdf=self.mesh_gdf[grid_name],
-            stats=np.unique(np.atleast_1d(resampling_method)),
-            all_touched=all_touched,
+        uds_sample = workflows.mesh2d_from_raster_reclass(
+            da=da,
+            df_vars=df_vars,
+            mesh2d=self.mesh_grids[grid_name],
+            reclass_variables=reclass_variables,
+            fill_method=fill_method,
+            resampling_method=resampling_method,
+            rename=rename,
+            logger=self.logger,
         )
-        # Rename variables
-        if isinstance(resampling_method, str):
-            resampling_method = np.repeat(resampling_method, len(reclass_variables))
-        rm_dict = {
-            f"{var}_{mtd}": var
-            for var, mtd in zip(reclass_variables, resampling_method)
-        }
-        ds_sample = ds_sample.rename(rm_dict).rename(rename)
-        ds_sample = ds_sample[reclass_variables]
-        # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh_grids[grid_name])
 
         self.set_mesh(uds_sample, grid_name=grid_name, overwrite_grid=False)
 
-        return list(ds_sample.data_vars.keys())
+        return list(uds_sample.data_vars.keys())
 
     @property
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
