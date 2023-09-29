@@ -299,7 +299,10 @@ class Model(object, metaclass=ABCMeta):
                     '"model_out" directory required when updating in "read-only" mode'
                 )
             self.read()
-            self.set_root(model_out, mode="w")
+            if forceful_overwrite:
+                self.set_root(model_out, mode="w+")
+            else:
+                self.set_root(model_out, mode="w")
 
         # check if model has a region
         if self.region is None:
