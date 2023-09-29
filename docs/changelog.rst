@@ -35,6 +35,7 @@ Changed
 - possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
 - Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
   call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
+- ``setup_mesh2d_from_rasterdataset`` and ``setup_mesh2d_from_raster_reclass`` now use xugrid Regridder methods. (PR #535)
 - Use the Model.data_catalog to read the model region if defined by a geom or grid. (PR #479)
 
 Fixed
