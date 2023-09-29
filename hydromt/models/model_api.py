@@ -1338,21 +1338,28 @@ class Model(object, metaclass=ABCMeta):
 
     def set_forcing(
         self,
-        data: Union[xr.DataArray, xr.Dataset],
+        data: Union[xr.DataArray, xr.Dataset, pd.DataFrame],
         name: Optional[str] = None,
         split_dataset: Optional[bool] = True,
     ):
         """Add data to forcing attribute.
 
+        Data can be xarray.DataArray, xarray.Dataset or pandas.DataFrame.
+        If pandas.DataFrame, indices should be the DataFrame index and the columns
+        the variable names. the DataFrame will then be converted to xr.Dataset using
+        :py:meth:`pandas.DataFrame.to_xarray` method.
+
         Arguments
         ---------
-        data: xarray.Dataset or xarray.DataArray
+        data: xarray.Dataset or xarray.DataArray or pd.DataFrame
             New forcing data to add
         name: str, optional
             Results name, required if data is xarray.Dataset is and split_dataset=False.
         split_dataset: bool, optional
             If True (default), split a Dataset to store each variable as a DataArray.
         """
+        if isinstance(data, pd.DataFrame):
+            data = data.to_xarray()
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
             if name in self.forcing:  # trigger init / read
