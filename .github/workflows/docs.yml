@@ -68,6 +68,11 @@ jobs:
       - name: Install hydromt
         run: pip install .
 
+      - name: Conda info
+        run: |
+         conda info
+         conda list
+
       - name: test docs
         if: ${{ github.event_name == 'pull_request' }}
         run: |

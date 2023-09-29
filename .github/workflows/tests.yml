@@ -61,6 +61,11 @@ jobs:
         run: mamba env update -n hydromt -f environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
+      - name: Conda info
+        run: |
+         conda info
+         conda list
+
       - name: Test
         run: python -m pytest --verbose --cov=hydromt --cov-report xml
 
