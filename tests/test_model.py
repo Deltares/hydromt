@@ -527,44 +527,44 @@ def test_gridmodel_setup(tmpdir):
         add_mask=True,
     )
     # Add data with setup_* methods
-    mod.setup_grid_data_from_constant(
+    mod.setup_grid_from_constant(
         constant=0.01,
         name="c1",
         nodata=-99.0,
     )
-    mod.setup_grid_data_from_constant(
+    mod.setup_grid_from_constant(
         constant=2,
         name="c2",
         dtype=np.int8,
         nodata=-1,
     )
-    mod.setup_grid_data_from_rasterdataset(
+    mod.setup_grid_from_rasterdataset(
         raster_fn="merit_hydro",
         variables=["elevtn", "basins"],
         reproject_method=["average", "mode"],
         mask_name="mask",
     )
-    mod.setup_grid_data_from_rasterdataset(
+    mod.setup_grid_from_rasterdataset(
         raster_fn="vito",
         fill_method="nearest",
         reproject_method="mode",
         rename={"vito": "landuse"},
     )
-    mod.setup_grid_data_from_raster_reclass(
+    mod.setup_grid_from_raster_reclass(
         raster_fn="vito",
         fill_method="nearest",
         reclass_table_fn="vito_mapping",
         reclass_variables=["roughness_manning"],
         reproject_method=["average"],
     )
-    mod.setup_grid_data_from_geodataframe(
+    mod.setup_grid_from_geodataframe(
         vector_fn="hydro_lakes",
         variables=["waterbody_id", "Depth_avg"],
         nodata=[-1, -999.0],
         rasterize_method="value",
         rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
     )
-    mod.setup_grid_data_from_geodataframe(
+    mod.setup_grid_from_geodataframe(
         vector_fn="hydro_lakes",
         rasterize_method="fraction",
         rename={"hydro_lakes": "water_frac"},
@@ -715,9 +715,9 @@ def test_meshmodel_setup(griduda, world):
     region = {"mesh": griduda}
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod1.setup_mesh2d(region, grid_name="mesh2d")
-    mod1.setup_mesh2d_data_from_rasterdataset("vito", grid_name="mesh2d")
+    mod1.setup_mesh2d_from_rasterdataset("vito", grid_name="mesh2d")
     assert "vito" in mod1.mesh.data_vars
-    mod1.setup_mesh2d_data_from_raster_reclass(
+    mod1.setup_mesh2d_from_raster_reclass(
         raster_fn="vito",
         reclass_table_fn="vito_mapping",
         reclass_variables=["roughness_manning"],
