@@ -33,7 +33,7 @@ class MeshMixin(object):
         self._mesh = None
 
     ## general setup methods
-    def setup_mesh2d_from_rasterdataset(
+    def setup_mesh2d_data_from_rasterdataset(
         self,
         raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
         grid_name: Optional[str] = "mesh2d",
@@ -112,7 +112,7 @@ class MeshMixin(object):
 
         return list(ds_sample.data_vars.keys())
 
-    def setup_mesh2d_from_raster_reclass(
+    def setup_mesh2d_data_from_raster_reclass(
         self,
         raster_fn: Union[str, Path, xr.DataArray],
         reclass_table_fn: Union[str, Path, pd.DataFrame],

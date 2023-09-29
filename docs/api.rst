@@ -273,10 +273,10 @@ Setup methods
    GridModel.setup_maps_from_rasterdataset
    GridModel.setup_maps_from_raster_reclass
    GridModel.setup_grid
-   GridModel.setup_grid_from_constant
-   GridModel.setup_grid_from_rasterdataset
-   GridModel.setup_grid_from_raster_reclass
-   GridModel.setup_grid_from_geodataframe
+   GridModel.setup_grid_data_from_constant
+   GridModel.setup_grid_data_from_rasterdataset
+   GridModel.setup_grid_data_from_raster_reclass
+   GridModel.setup_grid_data_from_geodataframe
 
 
 .. _lumped_model_api:
@@ -369,8 +369,8 @@ Setup methods
    MeshModel.setup_config
    MeshModel.setup_region
    MeshModel.setup_mesh2d
-   MeshModel.setup_mesh2d_from_rasterdataset
-   MeshModel.setup_mesh2d_from_raster_reclass
+   MeshModel.setup_mesh2d_data_from_rasterdataset
+   MeshModel.setup_mesh2d_data_from_raster_reclass
    MeshModel.setup_maps_from_rasterdataset
    MeshModel.setup_maps_from_raster_reclass
 

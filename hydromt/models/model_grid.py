@@ -31,7 +31,7 @@ class GridMixin(object):
         self._grid = None  # xr.Dataset()
 
     # generic grid methods
-    def setup_grid_from_constant(
+    def setup_grid_data_from_constant(
         self,
         constant: Union[int, float],
         name: str,
@@ -73,7 +73,7 @@ class GridMixin(object):
 
         return [name]
 
-    def setup_grid_from_rasterdataset(
+    def setup_grid_data_from_rasterdataset(
         self,
         raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
         variables: Optional[List] = None,
@@ -143,7 +143,7 @@ class GridMixin(object):
 
         return list(ds_out.data_vars.keys())
 
-    def setup_grid_from_raster_reclass(
+    def setup_grid_data_from_raster_reclass(
         self,
         raster_fn: Union[str, Path, xr.DataArray],
         reclass_table_fn: Union[str, Path, pd.DataFrame],
@@ -231,7 +231,7 @@ class GridMixin(object):
 
         return list(ds_vars.data_vars.keys())
 
-    def setup_grid_from_geodataframe(
+    def setup_grid_data_from_geodataframe(
         self,
         vector_fn: Union[str, Path, gpd.GeoDataFrame],
         variables: Optional[Union[List, str]] = None,
@@ -291,7 +291,7 @@ class GridMixin(object):
         if gdf.empty:
             self.logger.warning(
                 f"No shapes of {vector_fn} found within region,"
-                " skipping setup_grid_from_vector."
+                " skipping setup_grid_data_from_geodataframe."
             )
             return
         # Data resampling

@@ -10,13 +10,13 @@ setup_grid:
   basin_index_fn: merit_hydro_index
   hydrography_fn: merit_hydro
 
-setup_grid_from_constant:
+setup_grid_data_from_constant:
   constant: 0.01
   name: c1
   dtype: float32
   nodata: -99.0
 
-setup_grid_from_rasterdataset:
+setup_grid_data_from_rasterdataset:
   raster_fn: merit_hydro_1k
   variables:
     - elevtn
@@ -25,14 +25,14 @@ setup_grid_from_rasterdataset:
     - average
     - mode
 
-setup_grid_from_rasterdataset2:
+setup_grid_data_from_rasterdataset2:
   raster_fn: vito
   fill_method: nearest
   reproject_method: mode
   rename:
     vito: landuse
 
-setup_grid_from_raster_reclass:
+setup_grid_data_from_raster_reclass:
   raster_fn: vito
   reclass_table_fn: vito_reclass
   reclass_variables:
@@ -40,7 +40,7 @@ setup_grid_from_raster_reclass:
   reproject_method:
     - average
 
-setup_grid_from_geodataframe:
+setup_grid_data_from_geodataframe:
   vector_fn: hydro_lakes
   variables:
     - waterbody_id
@@ -53,7 +53,7 @@ setup_grid_from_geodataframe:
     waterbody_id: lake_id
     Detph_avg: lake_depth
 
-setup_grid_from_geodataframe2:
+setup_grid_data_from_geodataframe2:
   vector_fn: hydro_lakes
   rasterize_method: fraction
   rename:
