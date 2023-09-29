@@ -67,7 +67,6 @@ def test_load():
 
 
 # test both with and without xugrid
-@pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
 def test_global_models(mocker, has_xugrid):
     mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
     keys = list(model_plugins.LOCAL_EPS.keys())
@@ -611,7 +610,6 @@ def test_networkmodel(network_model, tmpdir):
         _ = network_model.network
 
 
-@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_meshmodel(mesh_model, tmpdir):
     MeshModel = MODELS.load("mesh_model")
     assert "mesh" in mesh_model.api
@@ -628,7 +626,6 @@ def test_meshmodel(mesh_model, tmpdir):
     assert equal, errors
 
 
-@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_setup_mesh(tmpdir, griduda):
     MeshModel = MODELS.load("mesh_model")
     # Initialize model
@@ -699,7 +696,6 @@ def test_setup_mesh(tmpdir, griduda):
     assert np.all(np.round(model.region.total_bounds, 3) == bounds)
 
 
-@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
