@@ -493,6 +493,7 @@ Raster writing methods
    :toctree: _generated
 
    DataArray.raster.to_xyz_tiles
+   DataArray.raster.to_slippy_tiles
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
 

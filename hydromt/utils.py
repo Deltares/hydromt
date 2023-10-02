@@ -1,5 +1,7 @@
 """Utility functions for hydromt that have no other home."""
 
+import numpy as np
+
 
 class _classproperty(property):
     def __get__(self, owner_self, owner_cls):
@@ -39,6 +41,23 @@ def partition_dictionaries(left, right):
                 right_less_left[key] = value_right
 
     return common, left_less_right, right_less_left
+
+
+def elevation2rgba(val):
+    """Convert elevation to rgb tuple."""
+    val += 32768
+    r = np.floor(val / 256).astype(np.uint8)
+    g = np.floor(val % 256).astype(np.uint8)
+    b = np.floor((val - np.floor(val)) * 256).astype(np.uint8)
+    a = np.where(np.isnan(val), 0, 255).astype(np.uint8)
+    return np.stack((r, g, b, a), axis=2)
+
+
+def rgba2elevation(rgba: np.ndarray):
+    """Convert rgb tuple to elevation."""
+    r, g, b, a = np.split(rgba, 4, axis=2)
+    val = (r * 256 + g + b / 256) - 32768
+    return np.where(a == 0, np.nan, val).squeeze()
 
 
 def _dict_pprint(d):
