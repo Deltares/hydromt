@@ -1,0 +1,62 @@
+name: Tests
+
+on:
+  # push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        # python-version: ['3.10','3.11']
+        python-version: ['3.10']
+    name: py ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+
+      - uses: actions/checkout@v3
+
+      # we need environment.yml to see if we have a cache hit
+      - name: Generate env spec
+        run: pip install tomli && python make_env.py test,io,extra -p ${{ matrix.python-version}} -n hydromt
+
+      - name: load from cache
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /usr/share/miniconda3
+            ~/pycache
+          # the below two settings mean we'll alway srestore the cache
+          # but the cache hit output can tell us if we have to update afterwards
+          key: test-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
+          restore-keys: |
+            test-py${{ matrix.python-version }}
+
+      - name: Fail on no cache restore
+        if: steps.cache.outputs.cache-matched-key == ''
+        run: |
+          echo "Failed to restore any cache. exiting..."
+          exit 1
+
+      # by avoiding the mamba setup stage by loading it from cache instead we save
+      # a lot of setup time, but we do have to do our own PATH management
+      # hence the exports
+      - name: Update environment
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          mamba env update -n hydromt -f environment.yml
+
+      - name: Test
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt python -m pytest --verbose --cov=hydromt --cov-report xml

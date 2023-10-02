@@ -33,36 +33,25 @@ jobs:
       group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
+
       - uses: actions/checkout@v3
 
-      - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-            python-version: ${{ matrix.python-version }}
-            miniforge-variant: Mambaforge
-            miniforge-version: latest
-            activate-environment: hydromt
-            use-mamba: true
-      - name: Generate env spec
-        run: pip install tomli && python make_env.py test,io,extra
-
-
-      - name: Set cache date
-        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-
-      - name: load from cache if it exists for our environment
-        uses: actions/cache@v3
+      - name: load from cache
+        uses: actions/cache/restore@v3
         with:
           path: /usr/share/miniconda3/envs/hydromt
-          key: ${{ matrix.python-version }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}
-        id: cache
+          key: ${{ matrix.python-version }}
 
-      - name: Update environment & write to cache
+      # tomli should be installed in cache already
+      - name: Generate env spec
+        run: mamba run -n hydromt python make_env.py test,io,extra -p ${{ matrix.python-version}} -n hydromt
+
+      # since we all just load from one cache now, we always update the environment
+      - name: Update environment
         run: mamba env update -n hydromt -f environment.yml
-        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Test
-        run: python -m pytest --verbose --cov=hydromt --cov-report xml
+        run: mamba run -n hydromt python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - name: Upload code coverage
         uses: codecov/codecov-action@v3
