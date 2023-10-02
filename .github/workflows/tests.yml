@@ -59,7 +59,7 @@ jobs:
 
       - name: Update environment & write to cache
         run: mamba env update -n hydromt -f environment.yml
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: always()
 
       - name: Conda info
         run: |
