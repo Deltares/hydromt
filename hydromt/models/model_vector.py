@@ -3,7 +3,7 @@
 
 import logging
 import os
-from os.path import basename, dirname, isdir, isfile, join
+from os.path import basename, dirname, isfile, join
 from typing import Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -233,7 +233,7 @@ class VectorMixin:
         self._assert_write_mode()
         ds = self.vector
 
-        # If fn is None check that vector contains only 1D data
+        # If fn is None check if vector contains only 1D data
         if fn is None:
             # If the user did specify a reducer, data can be more than 1D data
             if "reducer" in kwargs and kwargs["reducer"] is not None:
@@ -247,49 +247,44 @@ class VectorMixin:
                 sdims = [ds.vector.attrs.get(n) for n in snames if n in ds.vector.attrs]
                 if "spatial_ref" in ds:
                     sdims.append("spatial_ref")
-                for name in ds.vector._all_names:
+                for name in list(set(ds.vector._all_names) - set(sdims)):
                     dims = ds[name].dims
-                    if name not in sdims:
-                        # check 1D variables with matching index_dim
-                        if len(dims) > 1 or dims[0] != ds.vector.index_dim:
-                            fn = join(
-                                dirname(join(self.root, fn_geom)),
-                                f"{basename(fn_geom).split('.')[0]}.nc",
-                            )
-                            self.logger.warning(
-                                "2D data found in vector,"
-                                "will write data to {fn} instead."
-                            )
-                            break
+                    # check 1D variables with matching index_dim
+                    if len(dims) > 1 or dims[0] != ds.vector.index_dim:
+                        fn = join(
+                            dirname(join(self.root, fn_geom)),
+                            f"{basename(fn_geom).split('.')[0]}.nc",
+                        )
+                        self.logger.warning(
+                            "2D data found in vector,"
+                            f"will write data to {fn} instead."
+                        )
+                        break
 
         # write to netcdf only
         if fn_geom is None:
-            if not isdir(dirname(join(self.root, fn))):
-                os.makedirs(dirname(join(self.root, fn)))
+            os.makedirs(dirname(join(self.root, fn)), exist_ok=True)
             # cannot call directly ds.vector.to_netcdf
             # because of possible PermissionError
             if ogr_compliant:
                 ds = ds.vector.ogr_compliant()
             else:
                 ds = ds.vector.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
-            nc_dict = {"vector": ds}
-            self.write_nc(nc_dict, fn, engine="netcdf4", **kwargs)
+            # write_nc requires dict - use dummy key
+            self.write_nc({"vector": ds}, fn, engine="netcdf4", **kwargs)
         # write to geojson only
         elif fn is None:
-            if not isdir(dirname(join(self.root, fn_geom))):
-                os.makedirs(dirname(join(self.root, fn_geom)))
+            os.makedirs(dirname(join(self.root, fn_geom)), exist_ok=True)
             gdf = ds.vector.to_gdf(**kwargs)
             gdf.to_file(join(self.root, fn_geom))
         # write data to netcdf and geometry to geojson
         else:
-            if not isdir(dirname(join(self.root, fn_geom))):
-                os.makedirs(dirname(join(self.root, fn_geom)))
+            os.makedirs(dirname(join(self.root, fn_geom)), exist_ok=True)
             # write geometry
             gdf = ds.vector.geometry.to_frame("geometry")
             gdf.to_file(join(self.root, fn_geom))
             # write_nc requires dict - use dummy key
-            nc_dict = {"vector": ds.drop_vars("geometry")}
-            self.write_nc(nc_dict, fn, **kwargs)
+            self.write_nc({"vector": ds.drop_vars("geometry")}, fn, **kwargs)
 
     # Other vector properties
     @property

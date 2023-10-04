@@ -590,7 +590,7 @@ class GeoBase(raster.XGeoBase):
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
-        if reducer is not None and isinstance(reducer, str):
+        if isinstance(reducer, str):
             reducer = getattr(np, reducer)
         obj = self._obj
         if isinstance(obj, xr.DataArray):
