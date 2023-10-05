@@ -85,7 +85,7 @@ for dep in deps_to_install:
     else:
         conda_deps.append(dep)
 if args.py_version is not None:
-    conda_deps.append(f"python=={args.py_version}")
+    conda_deps.append(f"python~={args.py_version}")
 
 # add pip as a conda dependency if we have pip deps
 if len(pip_deps) > 0:
