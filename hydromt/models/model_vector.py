@@ -92,7 +92,7 @@ class VectorMixin:
         # Add to vector
         # 1. self.vector does not have a geometry yet or overwrite_geom
         # then use data directly
-        if self.geometry is None or overwrite_geom:
+        if self.vector_geometry is None or overwrite_geom:
             if data.vector.geometry is None:
                 raise ValueError("Cannot instantiate vector without geometry in data")
             else:
@@ -104,7 +104,9 @@ class VectorMixin:
             # data has a geometry - check if it is the same as self.vector
             if data.vector.geometry is not None:
                 if not np.all(
-                    data.vector.geometry.geom_almost_equals(self.geometry, decimal=4)
+                    data.vector.geometry.geom_almost_equals(
+                        self.vector_geometry, decimal=4
+                    )
                 ):
                     raise ValueError("Geometry of data and vector do not match")
             # add data (with check on index)
@@ -288,7 +290,7 @@ class VectorMixin:
 
     # Other vector properties
     @property
-    def geometry(self) -> gpd.GeoSeries:
+    def vector_geometry(self) -> gpd.GeoSeries:
         """Returns the geometry of the model vector as gpd.GeoSeries."""
         # check if vector is empty
         if len(self.vector.sizes) == 0:
@@ -381,7 +383,7 @@ class VectorModel(VectorMixin, Model):
         if "region" in self.geoms:
             region = self.geoms["region"]
         elif len(self.vector) > 0:
-            gdf = self.geometry.to_frame("geometry")
+            gdf = self.vector_geometry.to_frame("geometry")
             region = gpd.GeoDataFrame(geometry=[box(*gdf.total_bounds)], crs=gdf.crs)
         return region
 
