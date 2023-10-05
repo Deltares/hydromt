@@ -19,9 +19,9 @@ if compat.HAS_XUGRID:
 from hydromt import (
     MODELS,
     GridModel,
-    LumpedModel,
     Model,
     NetworkModel,
+    VectorModel,
     gis_utils,
     raster,
     vector,
@@ -282,8 +282,8 @@ def grid_model(demda, flwda):
 
 
 @pytest.fixture()
-def lumped_model(ts, geodf):
-    mod = LumpedModel()
+def vector_model(ts, geodf):
+    mod = VectorModel()
     mod.setup_config(**{"header": {"setting": "value"}})
     da = xr.DataArray(
         ts,
@@ -293,7 +293,7 @@ def lumped_model(ts, geodf):
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
     da.vector.set_crs(geodf.crs)
-    mod.set_response_units(da)
+    mod.set_vector(da)
     return mod
 
 

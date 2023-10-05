@@ -95,7 +95,7 @@ look approximately like the one below:
     model plugins:
     generic models (hydromt 0.7.2.dev0):
      - grid_model
-     - lumped_model
+     - vector_model
      - mesh_model
      - network_model
 

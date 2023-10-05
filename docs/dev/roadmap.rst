@@ -12,10 +12,10 @@ contribution from the (hydro) geoscientific community. If you would like to help
 Short-term plans
 ----------------
 
-Support for lumped, mesh and network models
+Support for vector, mesh and network models
 """""""""""""""""""""""""""""""""""""""""""
 Before version 0.6.0, the Model class implementation assumed regular grid data in the staticmaps attribute (grid attribute of the Grid model from v0.6.0).
-These requirements have been relaxed from v0.6.0 by implementing model classes tailored for grid, lumped, mesh and network models. Advanced testing and submodel specific attributes
+These requirements have been relaxed from v0.6.0 by implementing model classes tailored for grid, vector, mesh and network models. Advanced testing and submodel specific attributes
 and generic workflows to support specific submodel class methods are still missing and are planned to be added in future releases.
 
 Sharing data and support for more data formats
