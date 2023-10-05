@@ -14,7 +14,7 @@ from shapely.geometry import box
 import hydromt._compat
 import hydromt.models.model_plugins
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import MODELS, GridModel, LumpedModel, Model, model_plugins
+from hydromt.models import MODELS, GridModel, Model, VectorModel, model_plugins
 from hydromt.models.model_api import _check_data
 from hydromt.models.model_grid import GridMixin
 
@@ -432,7 +432,7 @@ def test_setup_grid(tmpdir, demda):
     )
     # wrong region kind
     with pytest.raises(ValueError, match="Region for grid must be of kind"):
-        model.setup_grid({"lumped_model": "test_model"})
+        model.setup_grid({"vector_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]
     with pytest.raises(
@@ -584,19 +584,86 @@ def test_gridmodel_setup(tmpdir):
     mod.write(components=["geoms", "grid"])
 
 
-def test_lumpedmodel(lumped_model, tmpdir):
-    assert "response_units" in lumped_model.api
-    non_compliant = lumped_model._test_model_api()
+def test_vectormodel(vector_model, tmpdir):
+    assert "vector" in vector_model.api
+    non_compliant = vector_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    lumped_model.set_root(str(tmpdir), mode="w")
-    lumped_model.write()
+    vector_model.set_root(str(tmpdir), mode="w")
+    vector_model.write()
     # read model
-    model1 = LumpedModel(str(tmpdir), mode="r")
+    model1 = VectorModel(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors = lumped_model._test_equal(model1)
+    equal, errors = vector_model._test_equal(model1)
     assert equal, errors
+
+
+def test_vectormodel_vector(vector_model, tmpdir, geoda):
+    # test set vector
+    testds = vector_model.vector.copy()
+    # np.ndarray
+    with pytest.raises(ValueError, match="Unable to set"):
+        vector_model.set_vector(data=testds["zs"].values)
+    with pytest.raises(
+        ValueError, match="set_vector with np.ndarray is only supported if data is 1D"
+    ):
+        vector_model.set_vector(data=testds["zs"].values, name="precip")
+    # xr.DataArray
+    vector_model.set_vector(data=testds["zs"], name="precip")
+    # geodataframe
+    gdf = testds.vector.geometry.to_frame("geometry")
+    gdf["param1"] = np.random.rand(gdf.shape[0])
+    gdf["param2"] = np.random.rand(gdf.shape[0])
+    vector_model.set_vector(data=gdf)
+    assert "precip" in vector_model.vector
+    assert "param1" in vector_model.vector
+    # geometry and update grid
+    geoda_test = geoda.vector.update_geometry(geoda.vector.geometry.buffer(0.1))
+    with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
+        vector_model.set_vector(data=geoda_test)
+    param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop("geometry")
+    with pytest.raises(ValueError, match="Index coordinate of data variable"):
+        vector_model.set_vector(data=param3, name="param3")
+    vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")
+    assert "param1" not in vector_model.vector
+    assert "zs" in vector_model.vector
+
+    # test write vector
+    vector_model.set_vector(data=gdf)
+    vector_model.set_root(str(tmpdir), mode="w")
+    # netcdf+geojson --> tested in test_vectormodel
+    # netcdf only
+    vector_model.write_vector(fn="vector/vector_full.nc", fn_geom=None)
+    # geojson only
+    # automatic split
+    vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
+    assert isfile(join(vector_model.root, "vector", "vector_split.nc"))
+    assert not isfile(join(vector_model.root, "vector", "vector_all.nc"))
+    # geojson 1D data only
+    vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
+    vector_model.write_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+    assert not isfile(join(vector_model.root, "vector", "vector_all2.nc"))
+
+    # test read vector
+    vector_model1 = VectorModel(str(tmpdir), mode="r")
+    # netcdf only
+    vector_model1.read_vector(fn="vector/vector_full.nc", fn_geom=None)
+    vector0 = vector_model1.vector
+    assert len(vector0["zs"].dims) == 2
+    vector_model1._vector = None
+    # geojson only
+    # automatic split
+    vector_model1.read_vector(
+        fn="vector/vector_split.nc", fn_geom="vector/vector_split.geojson"
+    )
+    vector1 = vector_model1.vector
+    assert len(vector1["zs"].dims) == 2
+    vector_model1._vector = None
+    # geojson 1D data only
+    vector_model1.read_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+    vector3 = vector_model1.vector
+    assert "zs" not in vector3
 
 
 def test_networkmodel(network_model, tmpdir):

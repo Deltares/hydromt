@@ -279,15 +279,15 @@ Setup methods
    GridModel.setup_grid_from_geodataframe
 
 
-.. _lumped_model_api:
+.. _vector_model_api:
 
-LumpedModel
+VectorModel
 ===========
 
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel
+   VectorModel
 
 
 Components and attributes
@@ -296,9 +296,9 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel.response_units
-   LumpedModel.crs
-   LumpedModel.region
+   VectorModel.vector
+   VectorModel.crs
+   VectorModel.region
 
 General methods
 ---------------
@@ -306,9 +306,9 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel.set_response_units
-   LumpedModel.read_response_units
-   LumpedModel.write_response_units
+   VectorModel.set_vector
+   VectorModel.read_vector
+   VectorModel.write_vector
 
 Setup methods
 -------------
@@ -316,10 +316,10 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel.setup_config
-   LumpedModel.setup_region
-   LumpedModel.setup_maps_from_rasterdataset
-   LumpedModel.setup_maps_from_raster_reclass
+   VectorModel.setup_config
+   VectorModel.setup_region
+   VectorModel.setup_maps_from_rasterdataset
+   VectorModel.setup_maps_from_raster_reclass
 
 
 .. _mesh_model_api:
