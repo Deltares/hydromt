@@ -237,31 +237,23 @@ class VectorMixin:
 
         # If fn is None check if vector contains only 1D data
         if fn is None:
-            # If the user did specify a reducer, data can be more than 1D data
-            if "reducer" in kwargs and kwargs["reducer"] is not None:
-                self.logger.warning(
-                    "If 2D/3D data found,"
-                    f"they will be reduced to 1D using {kwargs['reducer']}"
-                )
-            else:
-                # If no reducer then check if 1D data only is present
-                snames = ["y_name", "x_name", "index_dim", "geom_name"]
-                sdims = [ds.vector.attrs.get(n) for n in snames if n in ds.vector.attrs]
-                if "spatial_ref" in ds:
-                    sdims.append("spatial_ref")
-                for name in list(set(ds.vector._all_names) - set(sdims)):
-                    dims = ds[name].dims
-                    # check 1D variables with matching index_dim
-                    if len(dims) > 1 or dims[0] != ds.vector.index_dim:
-                        fn = join(
-                            dirname(join(self.root, fn_geom)),
-                            f"{basename(fn_geom).split('.')[0]}.nc",
-                        )
-                        self.logger.warning(
-                            "2D data found in vector,"
-                            f"will write data to {fn} instead."
-                        )
-                        break
+            # Check if 1D data only is present
+            snames = ["y_name", "x_name", "index_dim", "geom_name"]
+            sdims = [ds.vector.attrs.get(n) for n in snames if n in ds.vector.attrs]
+            if "spatial_ref" in ds:
+                sdims.append("spatial_ref")
+            for name in list(set(ds.vector._all_names) - set(sdims)):
+                dims = ds[name].dims
+                # check 1D variables with matching index_dim
+                if len(dims) > 1 or dims[0] != ds.vector.index_dim:
+                    fn = join(
+                        dirname(join(self.root, fn_geom)),
+                        f"{basename(fn_geom).split('.')[0]}.nc",
+                    )
+                    self.logger.warning(
+                        "2D data found in vector," f"will write data to {fn} instead."
+                    )
+                    break
 
         # write to netcdf only
         if fn_geom is None:

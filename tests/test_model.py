@@ -639,10 +639,6 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
     # automatic split
     vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
     assert isfile(join(vector_model.root, "vector", "vector_split.nc"))
-    # geojson and reducer for 2D data
-    vector_model.write_vector(
-        fn=None, fn_geom="vector/vector_all.geojson", reducer="mean"
-    )
     assert not isfile(join(vector_model.root, "vector", "vector_all.nc"))
     # geojson 1D data only
     vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
@@ -663,11 +659,6 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
     )
     vector1 = vector_model1.vector
     assert len(vector1["zs"].dims) == 2
-    vector_model1._vector = None
-    # geojson and reducer for 2D data
-    vector_model1.read_vector(fn=None, fn_geom="vector/vector_all.geojson")
-    vector2 = vector_model1.vector
-    assert len(vector2["zs"].dims) == 1
     vector_model1._vector = None
     # geojson 1D data only
     vector_model1.read_vector(fn=None, fn_geom="vector/vector_all2.geojson")
