@@ -10,32 +10,32 @@ authors = [
   { name = "Sam Vente", email = "sam.vente@deltares.nl" },
 ]
 dependencies = [
-    "affine",            # Spatial rasterers affine transformations (bbox pixel coalision)
-    "bottleneck",        # Spearmen rank computation
-    "click",             # CLI configuration
-    "dask",              # lazy computing
-    "entrypoints",       # Provide access for Plugins
-    "fsspec",            # general file systems utilities
-    "geopandas>=0.10",   # pandas but geo, wraps fiona and shapely
-    "gdal>=3.1",         # enable geospacial data manipulation, both  raster and victor
-    "mercantile",        # tile handling
-    "numba",             # speed up computations (used in e.g. stats)
-    "numpy>=1.20",       # pin necessary to ensure compatability with C headers
-    "netcdf4",           # netcfd IO
-    "packaging",         # compare versions of hydromt
-    "rioxarray",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
-    "pandas",            # Dataframes
-    "pyflwdir>=0.5.4",   # Hight models and derivatives
-    "pyproj",            # projections for Coordinate reference systems
-    "rasterio",          # raster wrapper around gdal
-    "shapely>=2.0.0",    # geometry transforms
-    "scipy",             # scientific utilities
-    "tomli",             # parsing toml files
-    "tomli-w",           # writing toml files
-    "xarray<=2023.9.0",  # ndim data - temporary max to wait for xugrid bugfix release
-    "universal_pathlib", # provides path compatability between different filesystems
-    "xmltodict",         # xml parser also used to read VRT
-    "zarr",              # zarr
+  "affine",            # Spatial rasterers affine transformations (bbox pixel coalision)
+  "bottleneck",        # Spearmen rank computation
+  "click",             # CLI configuration
+  "dask",              # lazy computing
+  "entrypoints",       # Provide access for Plugins
+  "fsspec",            # general file systems utilities
+  "geopandas>=0.10",   # pandas but geo, wraps fiona and shapely
+  "gdal>=3.1",         # enable geospacial data manipulation, both  raster and victor
+  "mercantile",        # tile handling
+  "numba",             # speed up computations (used in e.g. stats)
+  "numpy>=1.20",       # pin necessary to ensure compatability with C headers
+  "netcdf4",           # netcfd IO
+  "packaging",         # compare versions of hydromt
+  "rioxarray",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
+  "pandas",            # Dataframes
+  "pyflwdir>=0.5.4",   # Hight models and derivatives
+  "pyproj",            # projections for Coordinate reference systems
+  "rasterio",          # raster wrapper around gdal
+  "shapely>=2.0.0",    # geometry transforms
+  "scipy",             # scientific utilities
+  "tomli",             # parsing toml files
+  "tomli-w",           # writing toml files
+  "xarray<=2023.9.0",  # ndim data - temporary max to wait for xugrid bugfix release
+  "universal_pathlib", # provides path compatability between different filesystems
+  "xmltodict",         # xml parser also used to read VRT
+  "zarr",              # zarr
 ]
 
 requires-python = ">=3.9"
@@ -52,15 +52,15 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 io = [
-    "gcsfs",            # google cloud file system
-    "openpyxl",         # excel IO
-    "pillow",           # image IO
-    "requests",         # donwload stuff
-    "s3fs",             # S3 file system
+  "gcsfs",    # google cloud file system
+  "openpyxl", # excel IO
+  "pillow",   # image IO
+  "requests", # donwload stuff
+  "s3fs",     # S3 file system
 ]
 extra = [
-  "xugrid", # xarray wrapper for mesh processing
-  "pyet",   # calc evapotraspiration, quite well used, used in all wflow models but domain specific
+  "xugrid>=0.6.5", # xarray wrapper for mesh processing
+  "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
   "black",       # linting

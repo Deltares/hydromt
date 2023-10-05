@@ -42,8 +42,8 @@ def test_api_datasets():
 
 def test_api_model_components():
     # models
-    components = get_model_components("lumped_model", component_types=["write"])
-    name = "write_response_units"
+    components = get_model_components("vector_model", component_types=["write"])
+    name = "write_vector"
     assert name in components
     assert np.all([k.startswith("write") for k in components])
     keys = ["doc", "required", "optional", "kwargs"]

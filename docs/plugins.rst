@@ -47,6 +47,18 @@ Plugins
         +++
         Delft-FIAT plugin :octicon:`link-external`
 
+    .. grid-item-card::
+        :text-align: center
+        :link: https://deltares.github.io/hydromt_delft3dfm/
+        :link-type: url
+
+        .. image:: _static/Delft3D.png
+
+        +++
+        Delwaq plugin :octicon:`link-external`
+
+
+
 
 About the model software
 ------------------------
@@ -61,6 +73,7 @@ About the model software
   of various substances/pollutants in surface water systems.
 - Delft-FIAT_ is Deltares' Flood Impact Assessment Toolbox and used to quantify the impact and risk
   of flooding and other perils.
+- Delft3Dfm_ is Deltares' Delft3D Flexible Mesh Suite (Delft3D FM) for hydrodynamic modelling
 
 .. _Wflow: https://deltares.github.io/Wflow.jl/dev/
 .. _SFINCS: https://sfincs.readthedocs.io/en/latest/
