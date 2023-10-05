@@ -14,7 +14,7 @@ __all__ = ["ModelCatalog"]
 # local generic models
 LOCAL_EPS = {
     "grid_model": "hydromt.models.model_grid:GridModel",
-    "lumped_model": "hydromt.models.model_lumped:LumpedModel",
+    "vector_model": "hydromt.models.model_vector:VectorModel",
     "mesh_model": "hydromt.models.model_mesh:MeshModel",
     "network_model": "hydromt.models.model_network:NetworkModel",
 }

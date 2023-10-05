@@ -3,9 +3,9 @@
 from .. import _compat
 from .model_api import *
 from .model_grid import *
-from .model_lumped import *
 from .model_network import *
 from .model_plugins import *
+from .model_vector import *
 
 if _compat.HAS_XUGRID:
     from .model_mesh import MeshModel

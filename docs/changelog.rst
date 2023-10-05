@@ -33,10 +33,12 @@ Added
 Changed
 -------
 - Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. (PR #412)
+- Renamed ``LumpedModel.response_units`` to ``VectorModel.vector`` and updated the base set, read, write methods. (#531)
 - possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
 - Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
   call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
 - Use the Model.data_catalog to read the model region if defined by a geom or grid. (PR #479)
+- ``vector.GeoDataset.from_gdf`` can use the gdf columns as data_vars instead of external xarray. (PR #412)
 
 Fixed
 -----
