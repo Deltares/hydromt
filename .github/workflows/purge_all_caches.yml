@@ -1,6 +1,7 @@
 name: cleanup all caches
 on:
   workflow_dispatch:
+  workflow_call:
 
 
 jobs:
@@ -12,6 +13,10 @@ jobs:
 
       - name: Cleanup caches
         run: |
-          gh cache delete -a
+          if gh cache list | grep -vq "No cache"; then
+            gh cache delete -a
+          else
+            echo "No caches found. skipping..."
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
