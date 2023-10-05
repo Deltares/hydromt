@@ -41,7 +41,7 @@ questions could be a protential reason for starting your own plugin. Below are a
 To help you decide some more in-depth explanation is also provided below.
 
 As mentioned user guide, HydroMT interacts with models using the ``Model`` API class and also provides several sub-model classes:
-``GridModel``, ``MeshModel``, ``LumpedModel``, ``NetworkModel`` which will be described in more detail below. Using
+``GridModel``, ``MeshModel``, ``VectorModel``, ``NetworkModel`` which will be described in more detail below. Using
 these sub-model classes, you might be able to already prepare most and if not all of
 the data you need to build your own model. Do note however that these generic classes can only write model data in netcdf,
 geojson (or other formats supported by geopandas), and configurations in either yaml, toml or ini file format. So
@@ -131,7 +131,7 @@ you can use one of the following classes as a base for your model:
 * ``Model`` is the most generic class of HydroMT core which is used as a base for all other model classed.
 * ``GridModel`` for regular gridded or distributed models,
 * ``MeshModel`` for unstructured grid(s) models,
-* ``LumpedModel`` for lumped or semi-distributed (vector) models
+* ``VectorModel`` for lumped or semi-distributed (vector) models
 * ``NetworkModel`` for network models.
 
 This allows you to use the HydroMT model class methods as well as create any functionality on top of that. To define
@@ -179,7 +179,7 @@ Here are some detailed information about what each question implies:
 - **project_url**: The url of your project (this will be used as the url of the github repository). Eg *https://github.com/savente93/hydromt_mymodel*
 - **docs_url**: The url of the documentation of your project (this will be used as the url of the documentation). Eg *https://savente93.github.io/hydromt_mymodel*
 - **model_classname**: The name of the new HydroMT Model subclass that you are creating. Eg *MyModelModel*
-- **model_type**: Type of HydroMT model corresponding to your model, one of [``Model``, ``GridModel``, ``MeshModel``, ``LumpedModel``, ``NetworkModel``]. Eg *GridModel*
+- **model_type**: Type of HydroMT model corresponding to your model, one of [``Model``, ``GridModel``, ``MeshModel``, ``VectorModel``, ``NetworkModel``]. Eg *GridModel*
 - **model_shortname**: The short name of your model. This will be used as the HydroMT Command Line name of your plugin and as the name of the main python file of
   your project (which will contain the definition of your new Model class). Eg *mymodel*
 - **project_tagline**: A short tagline (short description phrase) for your project. Eg *A HydroMT plugin for MyModel models.*
@@ -261,7 +261,7 @@ A reminder from the :ref:`Model guide <model_interface>`:
   The general components are **maps** (raster data), **geoms** (vector data), **forcing**, **results**, **states**, and **config**
   (the model simulation configuration). These are available to all model classes and plugins.
   The computational components are different for different types of models: i.e. **grid** for distributed or grid models,
-  **response_units** for lumped or semi-distributed models, **mesh** for mesh or unstructured grid models, and **network** for
+  **vector** for lumped or semi-distributed models, **mesh** for mesh or unstructured grid models, and **network** for
   network models (to be developed).
 
 So typically, when you want to add data to your model (DEM, precipitation, parameters etc.), you add data to one of the
@@ -523,7 +523,7 @@ vector in the geoms object:
     return gdf
 
 In most cases, we hope that the components defined in HydroMT `Model` classes (``config``, ``geoms``, ``maps``, ``forcing``, ``states``,
-``results``) and its generic subclasses (``grid``, ``mesh``, ``response_units``) should allow you to store any data required by your
+``results``) and its generic subclasses (``grid``, ``mesh``, ``vector``) should allow you to store any data required by your
 model in a proper way. If it is not the case, you can always define your own new model components by respecting the following steps
 (example if your model has a lot of 2D non-geospatial tabular data that could nicely be stored as pandas.DataFrame objects, *tables*):
 

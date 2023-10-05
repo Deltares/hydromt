@@ -57,6 +57,11 @@ def test_ogr(tmpdir, gdf):
     ds1 = GeoDataset.from_netcdf(fn)
     assert np.all(ds.vector.geometry == ds1.vector.geometry)
 
+    # open from xarray object
+    ds2 = xr.open_dataset(fn)
+    ds2 = GeoDataset.from_netcdf(ds2)
+    assert np.all(ds.vector.geometry == ds2.vector.geometry)
+
 
 def test_vector(geoda, geodf):
     # vector props
@@ -86,6 +91,9 @@ def test_from_gdf(geoda, geodf):
     assert all([c in da1.coords for c in geodf.columns])
     ds1 = GeoDataset.from_gdf(geodf, geoda0)  # idem for dataset
     xr.testing.assert_equal(ds1[geoda.name], da1)
+    ds2 = GeoDataset.from_gdf(geodf, keep_cols=True, cols_as_data_vars=True)
+    assert all([c in ds2.data_vars for c in geodf.columns if c != "geometry"])
+    assert "geometry" in ds2.coords
     # build from GeoSeries
     da1 = GeoDataArray.from_gdf(geodf["geometry"], geoda0)
     assert np.all(geodf.geometry == da1.vector.geometry)
