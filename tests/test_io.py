@@ -241,7 +241,6 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
         ), test2
 
 
-@pytest.mark.skip(reason="Not yet supported")
 def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
     os.mkdir(tmpdir.join("data"))
     fns = {}
@@ -250,16 +249,15 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
         df.to_csv(fn)
         fns[var] = fn
 
-    ds = hydromt.io.open_mfcsv(fns, "id")
+    ds = hydromt.io.open_mfcsv(fns, "id", segmented_by="var")
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
-    for i in range(len(dfs_segmented_by_vars)):
+    ids = ds.id.values
+    for i in ids:
         test1 = ds.sel(id=i)["test1"]
         test2 = ds.sel(id=i)["test2"]
-        assert np.all(np.equal(test1, np.arange(len(dfs_segmented_by_vars)) * i)), test1
-        assert np.all(
-            np.equal(test2, np.arange(len(dfs_segmented_by_vars)) ** i)
-        ), test2
+        assert np.all(np.equal(test1, np.arange(len(ids)) * int(i))), test1
+        assert np.all(np.equal(test2, np.arange(len(ids)) ** int(i))), test2
 
 
 def test_rasterio_errors(tmpdir, rioda):
