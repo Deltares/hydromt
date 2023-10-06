@@ -65,6 +65,7 @@ jobs:
           export PATH=/usr/share/miniconda3/bin:$PATH
           mamba env update -n hydromt -f environment.yml
 
+
       # if we're not publishing we don't have to write them, so we might as well
       # save ourself a bunch of IO time
       - name: Generate dummy docs

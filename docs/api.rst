@@ -398,6 +398,8 @@ Mesh
    :toctree: _generated
 
    workflows.mesh.create_mesh2d
+   workflows.mesh.mesh2d_from_rasterdataset
+   workflows.mesh.mesh2d_from_raster_reclass
 
 
 Basin mask

@@ -69,7 +69,14 @@ jobs:
           export PATH=/usr/share/miniconda3/bin:$PATH
           mamba env update -n hydromt -f environment.yml
 
+      - name: Conda info
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          conda info
+          conda list -n hydromt
+
       - name: Test
         run: |
           export PATH=/usr/share/miniconda3/bin:$PATH
+          export NUMBA_DISABLE_JIT=1
           PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt python -m pytest --verbose --cov=hydromt --cov-report xml

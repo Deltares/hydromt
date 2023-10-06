@@ -47,8 +47,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Run Tests
-        run: docker run --rm hydromt pytest
-
+        run: docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt pytest
       - name: Test Binder integration with repo2docker
         run: |
           pip install jupyter-repo2docker
