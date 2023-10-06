@@ -226,6 +226,9 @@ def test_model_append(demda, df, tmpdir):
     assert "dem" in mod1.maps
     mod1.set_forcing(demda, name="dem1")
     assert "dem" in mod1.forcing
+    mod1.set_forcing(df, name="df1", split_dataset=False)
+    assert "df1" in mod1.forcing
+    assert isinstance(mod1.forcing["df1"], xr.Dataset)
     mod1.set_states(demda, name="dem1")
     assert "dem" in mod1.states
     mod1.set_geoms(demda.raster.box, name="dem1")

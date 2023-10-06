@@ -28,6 +28,7 @@ Added
 - Added documentation for how to start your own plugin (PR #446)
 - New raster method ``to_slippy_tiles``: tiling of a raster dataset according to the slippy tile structure for e.g., webviewers (PR #440).
 - Support for http and other *filesystems* in path of data source (PR #515).
+- ``set_forcing`` can now add pandas.DataFrame object to frocing. (PR #534)
 
 Changed
 -------
@@ -44,6 +45,7 @@ Fixed
 -----
 - when a model component (eg maps, forcing, grid) is updated using the set_ methods, it will first be read to avoid loosing data. (PR #460)
 - open_geodataset with driver vector also works for other geometry type than points. (PR #509)
+- overwrite model in update mode. (PR #534)
 
 Deprecated
 ----------
