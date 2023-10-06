@@ -767,9 +767,6 @@ def test_setup_mesh(tmpdir, griduda):
     assert np.all(np.round(model.region.total_bounds, 3) == bounds)
 
 
-# allow for longer timeout to compile xugrid methods
-# @pytest.mark.timeout(300)
-# @pytest.mark.usefixtures("_compile_xugrid_regrid")
 def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
