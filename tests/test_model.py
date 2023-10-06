@@ -768,8 +768,8 @@ def test_setup_mesh(tmpdir, griduda):
 
 
 # allow for longer timeout to compile xugrid methods
-@pytest.mark.timeout(300)
-@pytest.mark.usefixtures("_compile_xugrid_regrid")
+# @pytest.mark.timeout(300)
+# @pytest.mark.usefixtures("_compile_xugrid_regrid")
 def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
