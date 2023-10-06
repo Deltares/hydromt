@@ -71,8 +71,9 @@ jobs:
 
       - name: Conda info
         run: |
-         conda info
-         conda list -n hydromt
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          conda info
+          conda list -n hydromt
 
       - name: Test
         run: |
