@@ -32,7 +32,7 @@ dependencies = [
   "scipy",             # scientific utilities
   "tomli",             # parsing toml files
   "tomli-w",           # writing toml files
-  "xarray",            # ndim data - temporary max to wait for xugrid bugfix release
+  "xarray",            # ndim data arrays
   "universal_pathlib", # provides path compatability between different filesystems
   "xmltodict",         # xml parser also used to read VRT
   "zarr",              # zarr
