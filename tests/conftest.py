@@ -321,3 +321,23 @@ def artifact_data():
     datacatalog = DataCatalog()
     datacatalog.from_predefined_catalogs("artifact_data")
     return datacatalog
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _compile_xugrid_methods() -> None:
+    da = xr.DataArray(
+        data=np.random.rand(15, 10),
+        dims=("y", "x"),
+        coords={"y": -np.arange(0, 15), "x": np.arange(0, 10)},
+        attrs=dict(_FillValue=-9999),
+    )
+    da.raster.set_crs(4326)
+    uda_src = xu.UgridDataArray.from_structured(da)
+    uda_src.ugrid.set_crs(da.raster.crs)
+    uda_dst = xu.UgridDataset.from_geodataframe(da.raster.box)
+    uda_dst.ugrid.set_crs(da.raster.crs)
+    # this should trigger the compilation of the numba_celltree methods
+    # used in xugrid to make sure these don't affect the test timeout resutls
+    xu.CentroidLocatorRegridder(uda_src, uda_dst).regrid(uda_src)
+    xu.BarycentricInterpolator(uda_src, uda_dst).regrid(uda_src)
+    xu.OverlapRegridder(uda_src, uda_dst, method="mode").regrid(uda_src)
