@@ -365,7 +365,7 @@ def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
     if not isinstance(transform, Affine):
         transform = Affine(*transform)
     height, width = shape
-    if transform.b == 0:
+    if transform.b == transform.d == 0:
         x_coords, _ = transform * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
         _, y_coords = transform * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
         coords = {
