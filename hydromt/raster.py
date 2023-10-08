@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Credits: This script is based on the rioxarray package (Apache License, Version 2.0)
-# source file: https://github.com/corteva/rioxarray
-# license file: https://github.com/corteva/rioxarray/blob/master/LICENSE
+# Credits: This script is based on an earlier version of the rioxarray package
+# source file: https://github.com/corteva/rioxarray/tree/0.9.0
+# license: Apache License, Version 2.0
+# license file: https://github.com/corteva/rioxarray/blob/0.9.0/LICENSE
 
 """Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
 from __future__ import annotations
@@ -10,7 +11,6 @@ from __future__ import annotations
 import logging
 import math
 import os
-import tempfile
 from itertools import product
 from os.path import join
 from pathlib import Path
@@ -38,7 +38,7 @@ from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
-from . import _compat, gis_utils
+from . import gis_utils
 from .utils import elevation2rgba, rgba2elevation
 
 logger = logging.getLogger(__name__)
@@ -3007,7 +3007,6 @@ class RasterDataset(XRasterBase):
         mask=False,
         prefix="",
         postfix="",
-        pcr_vs_map=gis_utils.PCR_VS_MAP,
         logger=logger,
         **profile_kwargs,
     ):
@@ -3036,9 +3035,6 @@ class RasterDataset(XRasterBase):
             Prefix to filenames in mapstack
         postfix : str, optional
             Postfix to filenames in mapstack
-        pcr_vs_map : dict, optional
-            Only for PCRaster driver: <variable name> : <PCRaster type> key-value pairs
-            e.g.: {'dem': 'scalar'}, see https://www.gdal.org/frmt_various.html#PCRaster
         **profile_kwargs:
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
@@ -3052,33 +3048,22 @@ class RasterDataset(XRasterBase):
             raise ValueError(f"Extension unknown for driver: {driver}")
         ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
         os.makedirs(root, exist_ok=True)
-        with tempfile.TemporaryDirectory() as tmpdir:
-            if driver == "PCRaster" and _compat.HAS_PCRASTER:
-                clone_path = gis_utils.write_clone(
-                    tmpdir,
-                    gdal_transform=self.transform.to_gdal(),
-                    wkt_projection=None if self.crs is None else self.crs.to_wkt(),
-                    shape=self.shape,
-                )
-                profile_kwargs.update({"clone_path": clone_path})
-            for var in self.vars:
-                if "/" in var:
-                    # variables with in subfolders
-                    folders = "/".join(var.split("/")[:-1])
-                    os.makedirs(join(root, folders), exist_ok=True)
-                    var0 = var.split("/")[-1]
-                    raster_path = join(root, folders, f"{prefix}{var0}{postfix}.{ext}")
-                else:
-                    raster_path = join(root, f"{prefix}{var}{postfix}.{ext}")
-                if driver == "PCRaster":
-                    profile_kwargs.update({"pcr_vs": pcr_vs_map.get(var, "scalar")})
-                self._obj[var].raster.to_raster(
-                    raster_path,
-                    driver=driver,
-                    dtype=dtype,
-                    tags=tags,
-                    windowed=windowed,
-                    mask=mask,
-                    logger=logger,
-                    **profile_kwargs,
-                )
+        for var in self.vars:
+            if "/" in var:
+                # variables with in subfolders
+                folders = "/".join(var.split("/")[:-1])
+                os.makedirs(join(root, folders), exist_ok=True)
+                var0 = var.split("/")[-1]
+                raster_path = join(root, folders, f"{prefix}{var0}{postfix}.{ext}")
+            else:
+                raster_path = join(root, f"{prefix}{var}{postfix}.{ext}")
+            self._obj[var].raster.to_raster(
+                raster_path,
+                driver=driver,
+                dtype=dtype,
+                tags=tags,
+                windowed=windowed,
+                mask=mask,
+                logger=logger,
+                **profile_kwargs,
+            )

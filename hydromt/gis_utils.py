@@ -54,7 +54,6 @@ YATTRS = {
         "units": "m",
     },
 }
-PCR_VS_MAP = {"ldd": "ldd"}
 GDAL_DRIVER_CODE_MAP = {
     "asc": "AAIGrid",
     "blx": "BLX",
