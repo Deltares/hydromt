@@ -409,6 +409,8 @@ def test_interpolate_na():
     da3 = da0.fillna(-9999).astype(np.int32)
     da3.raster.set_nodata(-9999)
     assert da3.raster.interpolate_na().dtype == np.int32
+    with pytest.raises(ValueError, match="Nodata value nan of type float"):
+        da3.raster.set_nodata(np.nan)
 
 
 def test_vector_grid(rioda):

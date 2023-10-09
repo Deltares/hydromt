@@ -1748,16 +1748,24 @@ class RasterDataArray(XRasterBase):
         # Only numerical nodata values are supported
         if np.issubdtype(type(nodata), np.number):
             # python naitive types don't play very nice
-            if isinstance(nodata, float):
-                nodata_cast = np.float32(nodata)
-            elif isinstance(nodata, int):
-                nodata_cast = np.int32(nodata)
-            else:
-                nodata_cast = nodata
+            try:
+                if isinstance(nodata, float):
+                    nodata_cast = np.float32(nodata)
+                elif isinstance(nodata, int):
+                    nodata_cast = np.int32(nodata)
+                else:
+                    nodata_cast = nodata
 
-            # cast to float since using int causes inconsistent casting
-            self._obj.rio.set_nodata(nodata_cast, inplace=True)
-            self._obj.rio.write_nodata(nodata_cast, inplace=True)
+                # cast to float since using int causes inconsistent casting
+                self._obj.rio.set_nodata(nodata_cast, inplace=True)
+                self._obj.rio.write_nodata(nodata_cast, inplace=True)
+            except ValueError:
+                raise ValueError(
+                    f"Nodata value {nodata} of type {type(nodata).__name__} is "
+                    f"incompatible with raster dtype {self._obj.dtype}. Please provide"
+                    " a compatible nodata value for example by specifiying it in the"
+                    " data catalog."
+                )
         else:
             logger.warning("No numerical nodata value found, skipping set_nodata")
             self._obj.attrs.pop("_FillValue", None)
