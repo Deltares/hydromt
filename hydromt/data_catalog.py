@@ -23,6 +23,9 @@ import xarray as xr
 import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
 
 from hydromt.utils import partition_dictionaries
 
@@ -157,6 +160,77 @@ class DataCatalog(object):
     def get_source_names(self) -> List[str]:
         """Return a list of all available data source names."""
         return list(self._sources.keys())
+
+    def to_stac(
+        self,
+        catalog_name="hydromt-stac-catalog",
+        description="The stac catalog of hydromt",
+    ):
+        """Generate STAC catalog."""
+        stac_catalog = StacCatalog(id=catalog_name, description=description)
+        for name, source in self.iter_sources():
+            if isinstance(source, RasterDatasetAdapter):
+                try:
+                    start_datetime, end_datetime = source.get_time_range()
+                except (TypeError, KeyError):
+                    # just for now
+                    start_datetime = np.datetime64(datetime(1, 1, 1))
+                    end_datetime = np.datetime64(datetime(1, 1, 1))
+                bbox, source_crs = source.get_bbox()
+                stac_item = StacItem(
+                    name,
+                    geometry=None,
+                    bbox=list(bbox),
+                    properties={**source.meta, "crs": source_crs},
+                    datetime=None,
+                    start_datetime=start_datetime.astype("datetime64[s]").tolist(),
+                    end_datetime=end_datetime.astype("datetime64[s]").tolist(),
+                )
+                stac_asset = StacAsset(str(source.path))
+                stac_item.add_asset("hydromt_path", stac_asset)
+
+                stac_catalog.add_item(stac_item)
+
+            elif isinstance(source, GeoDataFrameAdapter):
+                bbox, source_crs = source.get_bbox()
+                stac_item = StacItem(
+                    name,
+                    geometry=None,
+                    bbox=list(bbox),
+                    properties={**source.meta, "crs": source_crs},
+                    datetime=datetime(
+                        1, 1, 1
+                    ),  # geodataframe doesn't have a time dimension
+                )
+                stac_asset = StacAsset(str(source.path))
+                stac_item.add_asset("hydromt_path", stac_asset)
+
+                stac_catalog.add_item(stac_item)
+
+            elif isinstance(source, GeoDatasetAdapter):
+                start_datetime, end_datetime = source.get_time_range()
+                bbox, source_crs = source.get_bbox()
+                stac_item = StacItem(
+                    name,
+                    geometry=None,
+                    bbox=list(bbox),
+                    properties={**source.meta, "crs": source_crs},
+                    datetime=None,
+                    start_datetime=start_datetime.astype("datetime64[s]").tolist(),
+                    end_datetime=end_datetime.astype("datetime64[s]").tolist(),
+                )
+                stac_asset = StacAsset(str(source.path))
+                stac_item.add_asset("hydromt_path", stac_asset)
+
+                stac_catalog.add_item(stac_item)
+
+            elif isinstance(source, DataFrameAdapter):
+                logger.warn(f"Skipping {name} as it's not spatiotemporal")
+                continue
+            else:
+                raise ValueError(f"Unknown adapter type: {type(source).__name__}")
+
+        return stac_catalog
 
     @property
     def predefined_catalogs(self) -> Dict:

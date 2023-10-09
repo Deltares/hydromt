@@ -2,7 +2,6 @@
 import logging
 import os
 import warnings
-from datetime import datetime
 from os.path import join
 from pathlib import Path
 from typing import NewType, Optional, Tuple, Union
@@ -475,7 +474,7 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def get_bbox(self, detect=True):
+    def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -562,7 +561,7 @@ class GeoDatasetAdapter(DataAdapter):
         bounds = ds.vector.bounds
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
+    def detect_time_range(self, ds=None) -> Tuple[np.datetime64, np.datetime64]:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the

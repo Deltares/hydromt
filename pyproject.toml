@@ -57,6 +57,7 @@ io = [
   "pillow",   # image IO
   "requests", # donwload stuff
   "s3fs",     # S3 file system
+  "pystac",   # interface with STAC catalogues
 ]
 extra = [
   "xugrid>=0.6.5", # xarray wrapper for mesh processing

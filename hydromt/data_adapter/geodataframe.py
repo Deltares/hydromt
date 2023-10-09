@@ -403,7 +403,7 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def get_bbox(self, detect=True):
+    def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,

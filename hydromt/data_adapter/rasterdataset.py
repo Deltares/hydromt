@@ -4,7 +4,6 @@ from __future__ import annotations
 import logging
 import os
 import warnings
-from datetime import datetime
 from os import PathLike
 from os.path import join
 from typing import Dict, NewType, Optional, Tuple, Union, cast
@@ -697,7 +696,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bbox, crs
 
-    def get_time_range(self, detect=True):
+    def get_time_range(self, detect=True) -> Tuple[np.datetime64, np.datetime64]:
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
@@ -757,7 +756,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
+    def detect_time_range(self, ds=None) -> Tuple[np.datetime64, np.datetime64]:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched accodring to the settings in the
