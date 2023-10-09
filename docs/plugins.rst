@@ -55,7 +55,7 @@ Plugins
         .. image:: _static/Delft3D.png
 
         +++
-        Delwaq plugin :octicon:`link-external`
+        Delft3D FM plugin :octicon:`link-external`
 
 
 
