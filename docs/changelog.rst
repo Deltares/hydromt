@@ -46,6 +46,7 @@ Fixed
 - when a model component (eg maps, forcing, grid) is updated using the set_ methods, it will first be read to avoid loosing data. (PR #460)
 - open_geodataset with driver vector also works for other geometry type than points. (PR #509)
 - overwrite model in update mode. (PR #534)
+- raster gives better error on incompatible nodata (PR #544)
 
 Deprecated
 ----------
