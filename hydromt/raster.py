@@ -623,17 +623,17 @@ class XRasterBase(XGeoBase):
     @property
     def origin(self) -> tuple[float, float]:
         """Return origin of grid (x0, y0) tuple."""
-        if self._origin is not None:
+        if self._origin is not None:  # cached origin
             return self._origin
-        elif self._transform is not None:
+        elif self._transform is not None:  # cached transform
             x0, y0 = self._transform * (0, 0)
-        else:
+        else:  # from coordinates
             x0, y0 = 0, 0
             xs, ys = self.xcoords.data, self.ycoords.data
             dx, dy = self.res
-            if xs.ndim == 1:
+            if xs.ndim == 1:  # regular non-rotated
                 x0, y0 = xs[0] - dx / 2, ys[0] - dy / 2
-            elif xs.ndim == 2:
+            elif xs.ndim == 2:  # rotated
                 alpha = math.radians(self.rotation)
                 beta = math.atan(dx / dy)
                 c = math.hypot(dx, dy) / 2.0
