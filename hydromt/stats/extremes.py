@@ -256,9 +256,9 @@ def get_peaks(
         per year and stored as "extreme_rates"
     """
     if not (0 < qthresh < 1.0):
-        raise ValueError('Quantile "qthresh" should be between (0,1)')
+        raise ValueError("Quantile 'qthresh' should be between (0,1)")
     if time_dim not in da.dims:
-        raise ValueError("Input array should have a 'time' dimension")
+        raise ValueError(f"Input array should have a '{time_dim}' dimension")
     if ev_type.upper() not in _DISTS.keys():
         raise ValueError(
             f"Unknown ev_type {ev_type.upper()}, select from {_DISTS.keys()}."
@@ -346,13 +346,13 @@ def get_return_value(
         da_params = da_params.expand_dims("index")
     da_rvs = xr.apply_ufunc(
         _return_values_1d,
-        da_params,  # .chunk({"dparams": -1}),
+        da_params,
         extremes_rate,
         distributions,
         input_core_dims=(["dparams"], [], []),
         output_core_dims=[["rps"]],
         vectorize=True,
-        dask="allowed",
+        dask="parallelized",
         dask_gufunc_kwargs=dict(output_sizes={"rps": rps.size}),
         output_dtypes=[float],
     )
@@ -423,12 +423,12 @@ def fit_extremes(
         da_peaks = da_peaks.expand_dims("index")
     da_params = xr.apply_ufunc(
         _fitopt_1d,
-        da_peaks,  # .chunk({time_dim: -1}),
+        da_peaks,
         input_core_dims=[[time_dim]],
         output_core_dims=[["dparams"]],
         dask_gufunc_kwargs=dict(output_sizes={"dparams": 4}),
         vectorize=True,
-        dask="allowed",
+        dask="parallelized",
         output_dtypes=[float],
     )
     # split output
@@ -858,7 +858,7 @@ def _lmomentfit(lmom, distribution):
         m1 = lmom[0] - (2 + k1) * lmom[1]
         params = (0.0, m1, s1)
     else:
-        raise ValueError("Unknow distribution")
+        raise ValueError("Unknown distribution")
 
     return params
 
