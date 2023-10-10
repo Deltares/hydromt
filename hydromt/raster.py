@@ -317,7 +317,7 @@ class XGeoBase(object):
                 try:
                     input_crs = pyproj.CRS.from_user_input(crs)
                 except RuntimeError:
-                    pass
+                    pass  # continue to next name in crs_names
         if input_crs is not None:
             if write_crs:
                 grid_map_attrs = input_crs.to_cf()
@@ -570,7 +570,7 @@ class XRasterBase(XGeoBase):
                 dx = math.hypot(ddx1, ddy1)  # always positive!
                 dy = math.hypot(ddx0, ddy0)
         rot = self.rotation
-        if rot != 0:
+        if not np.isclose(rot, 0):
             # NOTE rotated rasters with a negative dx are not supported.
             acos = math.cos(math.radians(rot))
             if (
@@ -597,7 +597,7 @@ class XRasterBase(XGeoBase):
         rot = None
         if self._transform is not None:  # cached transform
             # NOTE: it is not always possible to get the rotation from the transform
-            if self._transform.b == self._transform.d == 0:
+            if np.isclose(self._transform.b, 0) and np.isclose(self._transform.d, 0):
                 rot = 0
             elif self._transform.determinant >= 0:
                 rot = self._transform.rotation_angle
@@ -3053,10 +3053,10 @@ class RasterDataset(XRasterBase):
         for var in self.vars:
             if "/" in var:
                 # variables with in subfolders
-                folders = "/".join(var.split("/")[:-1])
-                os.makedirs(join(root, folders), exist_ok=True)
+                var_root = join(root, *var.split("/")[:-1])
+                os.makedirs(var_root, exist_ok=True)
                 var0 = var.split("/")[-1]
-                raster_path = join(root, folders, f"{prefix}{var0}{postfix}.{ext}")
+                raster_path = join(var_root, f"{prefix}{var0}{postfix}.{ext}")
             else:
                 raster_path = join(root, f"{prefix}{var}{postfix}.{ext}")
             self._obj[var].raster.to_raster(
