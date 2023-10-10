@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 import xarray as xr
 import xugrid as xu
@@ -39,9 +38,8 @@ class MeshMixin(object):
         grid_name: Optional[str] = "mesh2d",
         variables: Optional[list] = None,
         fill_method: Optional[str] = None,
-        resampling_method: Optional[str] = "mean",
-        all_touched: Optional[bool] = True,
-        rename: Optional[Dict] = dict(),
+        resampling_method: Optional[Union[str, List]] = "centroid",
+        rename: Optional[Dict] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to 2D ``grid_name`` in mesh object.
 
@@ -64,13 +62,14 @@ class MeshMixin(object):
         fill_method : str, optional
             If specified, fills no data values using fill_nodata method.
             Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
-        resampling_method: str, optional
+        resampling_method: str, list, optional
             Method to sample from raster data to mesh. By default mean. Options include
-            {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
-        all_touched : bool, optional
-            If True, all pixels touched by geometries will used to define the sample.
-            If False, only pixels whose center is within the geometry or that are
-            selected by Bresenham's line algorithm will be used. By default True.
+            {"centroid", "barycentric", "mean", "harmonic_mean", "geometric_mean", "sum",
+            "minimum", "maximum", "mode", "median", "max_overlap"}. If centroid, will use
+            :py:meth:`xugrid.CentroidLocatorRegridder` method. If barycentric, will use
+            :py:meth:`xugrid.BarycentricInterpolator` method. If any other, will use
+            :py:meth:`xugrid.OverlapRegridder` method.
+            Can provide a list corresponding to ``variables``.
         rename: dict, optional
             Dictionary to rename variable names in raster_fn before adding to mesh
             {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
@@ -88,28 +87,20 @@ class MeshMixin(object):
         ds = self.data_catalog.get_rasterdataset(
             raster_fn, bbox=self.bounds[grid_name], buffer=2, variables=variables
         )
-        if isinstance(ds, xr.DataArray):
-            ds = ds.to_dataset()
 
-        if fill_method is not None:
-            ds = ds.raster.interpolate_na(method=fill_method)
-
-        # Convert mesh grid as geodataframe for sampling
-        # Reprojection happens to gdf inside of zonal_stats method
-        ds_sample = ds.raster.zonal_stats(
-            gdf=self.mesh_gdf[grid_name],
-            stats=resampling_method,
-            all_touched=all_touched,
+        uds_sample = workflows.mesh2d_from_rasterdataset(
+            ds=ds,
+            mesh2d=self.mesh_grids[grid_name],
+            variables=variables,
+            fill_method=fill_method,
+            resampling_method=resampling_method,
+            rename=rename,
+            logger=self.logger,
         )
-        # Rename variables
-        rm_dict = {f"{var}_{resampling_method}": var for var in ds.data_vars}
-        ds_sample = ds_sample.rename(rm_dict).rename(rename)
-        # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh_grids[grid_name])
 
         self.set_mesh(uds_sample, grid_name=grid_name, overwrite_grid=False)
 
-        return list(ds_sample.data_vars.keys())
+        return list(uds_sample.data_vars.keys())
 
     def setup_mesh2d_from_raster_reclass(
         self,
@@ -118,10 +109,9 @@ class MeshMixin(object):
         reclass_variables: list,
         grid_name: Optional[str] = "mesh2d",
         variable: Optional[str] = None,
-        fill_nodata: Optional[str] = None,
-        resampling_method: Optional[Union[str, list]] = "mean",
-        all_touched: Optional[bool] = True,
-        rename: Optional[Dict] = dict(),
+        fill_method: Optional[str] = None,
+        resampling_method: Optional[Union[str, list]] = "centroid",
+        rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to 2D ``grid_name`` in mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
@@ -150,19 +140,18 @@ class MeshMixin(object):
         variable : str, optional
             Name of the raster dataset variable to use. This is only required when
             reading datasets with multiple variables. By default, None.
-        fill_nodata : str, optional
-            If specified, fills nodata values in `raster_fn` using the `fill_nodata`
+        fill_method : str, optional
+            If specified, fills nodata values in `raster_fn` using the `fill_method`
             method before reclassifying. Available methods are
             {'linear', 'nearest', 'cubic', 'rio_idw'}.
         resampling_method : str or list, optional
-            Method to sample from raster data to the mesh. Can be a list per variable
-            in `reclass_variables` or a single method for all. By default, 'mean' is
-            used for all `reclass_variables`. Options include {'count', 'min', 'max',
-            'sum', 'mean', 'std', 'median', 'q##'}.
-        all_touched : bool, optional
-            If True, all pixels touched by geometries will be used to define the sample.
-            If False, only pixels whose center is within the geometry or that are
-            selected by Bresenham's line algorithm will be used. By default, True.
+            Method to sample from raster data to mesh. By default mean. Options include
+            {"centroid", "barycentric", "mean", "harmonic_mean", "geometric_mean", "sum",
+            "minimum", "maximum", "mode", "median", "max_overlap"}. If centroid, will use
+            :py:meth:`xugrid.CentroidLocatorRegridder` method. If barycentric, will use
+            :py:meth:`xugrid.BarycentricInterpolator` method. If any other, will use
+            :py:meth:`xugrid.OverlapRegridder` method.
+            Can provide a list corresponding to ``reclass_variables``.
         rename : dict, optional
             Dictionary to rename variable names in `reclass_variables` before adding
             them to the mesh. The dictionary should have the form
@@ -205,34 +194,20 @@ class MeshMixin(object):
             reclass_table_fn, variables=reclass_variables
         )
 
-        if fill_nodata is not None:
-            da = da.raster.interpolate_na(method=fill_nodata)
-
-        # Mapping function
-        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
-
-        # Convert mesh grid as geodataframe for sampling
-        # Reprojection happens to gdf inside of zonal_stats method
-        ds_sample = ds_vars.raster.zonal_stats(
-            gdf=self.mesh_gdf[grid_name],
-            stats=np.unique(np.atleast_1d(resampling_method)),
-            all_touched=all_touched,
+        uds_sample = workflows.mesh2d_from_raster_reclass(
+            da=da,
+            df_vars=df_vars,
+            mesh2d=self.mesh_grids[grid_name],
+            reclass_variables=reclass_variables,
+            fill_method=fill_method,
+            resampling_method=resampling_method,
+            rename=rename,
+            logger=self.logger,
         )
-        # Rename variables
-        if isinstance(resampling_method, str):
-            resampling_method = np.repeat(resampling_method, len(reclass_variables))
-        rm_dict = {
-            f"{var}_{mtd}": var
-            for var, mtd in zip(reclass_variables, resampling_method)
-        }
-        ds_sample = ds_sample.rename(rm_dict).rename(rename)
-        ds_sample = ds_sample[reclass_variables]
-        # Convert to UgridDataset
-        uds_sample = xu.UgridDataset(ds_sample, grids=self.mesh_grids[grid_name])
 
         self.set_mesh(uds_sample, grid_name=grid_name, overwrite_grid=False)
 
-        return list(ds_sample.data_vars.keys())
+        return list(uds_sample.data_vars.keys())
 
     @property
     def mesh(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
@@ -373,7 +348,7 @@ class MeshMixin(object):
             # add / updates region
             if "region" in self.geoms:
                 self._geoms.pop("region", None)
-            self.region
+            _ = self.region
 
     def get_mesh(
         self, grid_name: str, include_data: bool = False
@@ -437,7 +412,7 @@ class MeshMixin(object):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         ds = xr.merge(self.read_nc(fn, **kwargs).values())
         uds = xu.UgridDataset(ds)
         if ds.rio.crs is not None:  # parse crs
@@ -479,7 +454,7 @@ class MeshMixin(object):
         if self.mesh is None:
             self.logger.debug("No mesh data found, skip writing.")
             return
-        self._assert_write_mode
+        self._assert_write_mode()
         # filename
         _fn = join(self.root, fn)
         if not isdir(dirname(_fn)):
@@ -643,14 +618,7 @@ class MeshModel(MeshMixin, Model):
     ## I/O
     def read(
         self,
-        components: List = [
-            "config",
-            "mesh",
-            "geoms",
-            "forcing",
-            "states",
-            "results",
-        ],
+        components: List = None,
     ) -> None:
         """Read the complete model schematization and configuration from model files.
 
@@ -661,11 +629,20 @@ class MeshModel(MeshMixin, Model):
             read_<component> method. By default ['config', 'maps', 'mesh',
             'geoms', 'forcing', 'states', 'results']
         """
+        components = components or [
+            "config",
+            "mesh",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+            "results",
+        ]
         super().read(components=components)
 
     def write(
         self,
-        components: List = ["config", "mesh", "geoms", "forcing", "states"],
+        components: List = None,
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -674,8 +651,16 @@ class MeshModel(MeshMixin, Model):
         components : List, optional
             List of model components to write, each should have an
             associated write_<component> method. By default ['config', 'maps',
-            'mesh', 'geoms', 'forcing', 'states']
+            'mesh', 'geoms', 'tables', 'forcing', 'states']
         """
+        components = components or [
+            "config",
+            "mesh",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+        ]
         super().write(components=components)
 
     # MeshModel specific methods
@@ -694,7 +679,7 @@ class MeshModel(MeshMixin, Model):
             grid_crs = self.mesh.ugrid.crs
             # Check if all the same
             crs = None
-            for k, v in grid_crs.items():
+            for _k, v in grid_crs.items():
                 if crs is None:
                     crs = v
                 if v == crs:

@@ -4,9 +4,10 @@ from __future__ import annotations
 import logging
 import os
 import warnings
+from datetime import datetime
 from os import PathLike
 from os.path import join
-from typing import NewType, Optional, Union
+from typing import Dict, NewType, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -14,6 +15,7 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
+from rasterio.errors import RasterioIOError
 
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
@@ -41,20 +43,22 @@ class RasterDatasetAdapter(DataAdapter):
         self,
         path: str,
         driver: Optional[str] = None,
-        filesystem: str = "local",
+        filesystem: Optional[str] = None,
         crs: Optional[Union[int, str, dict]] = None,
         nodata: Optional[Union[dict, float, int]] = None,
-        rename: dict = {},
-        unit_mult: dict = {},
-        unit_add: dict = {},
-        meta: dict = {},
-        attrs: dict = {},
-        driver_kwargs: dict = {},
-        zoom_levels: dict = {},
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        extent: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
+        storage_options: Optional[dict] = None,
+        zoom_levels: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
-        provider=None,
-        version=None,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial raster data.
@@ -77,9 +81,10 @@ class RasterDatasetAdapter(DataAdapter):
             and for 'zarr' :py:func:`xarray.open_zarr`
             By default the driver is inferred from the file extension and falls back to
             'raster' if unknown.
-        filesystem: {'local', 'gcs', 's3'}, optional
+        filesystem: str, optional
             Filesystem where the data is stored (local, cloud, http etc.).
-            By default, local.
+            If None (default) the filesystem is inferred from the path.
+            See :py:func:`fsspec.registry.known_implementations` for all options.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
             proj (str or dict) or wkt (str). Only used if the data has no native CRS.
@@ -102,21 +107,42 @@ class RasterDatasetAdapter(DataAdapter):
         attrs: dict, optional
             Additional attributes relating to data variables. For instance unit
             or long name of the variable.
+        extent: Extent(typed dict), Optional
+            Dictionary describing the spatial and time range the dataset covers.
+            should be of the form:
+            {
+                "bbox": [xmin, ymin, xmax, ymax],
+                "time_range": [start_datetime, end_datetime],
+            }
+            bbox coordinates should be in the same CRS as the data, and
+            time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
-        name, catalog_name: str, optional
-            Name of the dataset and catalog, optional for now.
+        storage_options: dict, optional
+            Additional key-word arguments passed to the fsspec FileSystem object.
         zoomlevels: dict, optional
             Dictionary with zoom levels and associated resolution in the unit of the
             data CRS.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional.
+        provider: str, optional
+            A name to identifiy the specific provider of the dataset requested.
+            if None is provided, the last added source will be used.
+        version: str, optional
+            A name to identifiy the specific version of the dataset requested.
+            if None is provided, the last added source will be used.
 
         """
+        driver_kwargs = driver_kwargs or {}
+        extent = extent or {}
+        zoom_levels = zoom_levels or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
                 "RasterDatasetAdapter driver is deprecated and will be removed "
                 "in a future version. Please use 'driver_kwargs' instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             driver_kwargs.update(kwargs)
         super().__init__(
@@ -130,6 +156,7 @@ class RasterDatasetAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            storage_options=storage_options,
             name=name,
             catalog_name=catalog_name,
             provider=provider,
@@ -137,6 +164,7 @@ class RasterDatasetAdapter(DataAdapter):
         )
         self.crs = crs
         self.zoom_levels = zoom_levels
+        self.extent = extent
 
     def to_file(
         self,
@@ -249,7 +277,8 @@ class RasterDatasetAdapter(DataAdapter):
         """
         # load data
         fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
-        ds = self._read_data(fns, geom, bbox, cache_root, logger)
+        self.mark_as_used()  # mark used
+        ds = self._read_data(fns, geom, bbox, cache_root, zoom_level, logger)
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_dims(ds)
@@ -270,24 +299,12 @@ class RasterDatasetAdapter(DataAdapter):
         self,
         time_tuple: Optional[tuple] = None,
         variables: Optional[list] = None,
-        zoom_level: int = 0,
-        geom: gpd.GeoSeries = None,
+        zoom_level: Optional[int] = 0,
+        geom: Optional[gpd.GeoSeries] = None,
         bbox: Optional[list] = None,
         logger=logger,
     ):
-        # Extract storage_options from kwargs to instantiate fsspec object correctly
-        so_kwargs = dict()
-        if "storage_options" in self.driver_kwargs:
-            so_kwargs = self.driver_kwargs["storage_options"]
-            # For s3, anonymous connection still requires --no-sign-request profile to
-            # read the data setting environment variable works
-            if "anon" in so_kwargs:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
-            else:
-                os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-
-        # parse zoom level (raster only)
-        if len(self.zoom_levels) > 0:
+        if zoom_level is not None and "{zoom_level}" in self.path:
             zoom_level = self._parse_zoom_level(zoom_level, geom, bbox, logger=logger)
 
         # resolve path based on time, zoom level and/or variables
@@ -295,55 +312,34 @@ class RasterDatasetAdapter(DataAdapter):
             time_tuple=time_tuple,
             variables=variables,
             zoom_level=zoom_level,
-            **so_kwargs,
         )
-
         return fns
 
-    def _read_data(self, fns, geom, bbox, cache_root, logger=logger):
+    def _read_data(self, fns, geom, bbox, cache_root, zoom_level=None, logger=logger):
         kwargs = self.driver_kwargs.copy()
-        # zarr can use storage options directly, the rest should be converted to
-        # file-like objects
-        if "storage_options" in kwargs and self.driver == "raster":
-            storage_options = kwargs.pop("storage_options")
-            fs = self.get_filesystem(**storage_options)
-            fns = [fs.open(f) for f in fns]
 
         # read using various readers
         logger.info(f"Reading {self.name} {self.driver} data from {self.path}")
         if self.driver == "netcdf":
-            if self.filesystem == "local":
-                if "preprocess" in kwargs:
-                    preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
-                    kwargs.update(preprocess=preprocess)
-                ds = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
-            else:
-                raise NotImplementedError(
-                    "Remote (cloud) RasterDataset not supported with driver netcdf."
-                )
+            if "preprocess" in kwargs:
+                preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
+                kwargs.update(preprocess=preprocess)
+            ds = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
         elif self.driver == "zarr":
+            preprocess = None
             if "preprocess" in kwargs:  # for zarr preprocess is done after reading
                 preprocess = PREPROCESSORS.get(kwargs.pop("preprocess"), None)
-                do_preprocess = True
-            else:
-                do_preprocess = False
             ds_lst = []
             for fn in fns:
                 ds = xr.open_zarr(fn, **kwargs)
-                if do_preprocess:
-                    ds = preprocess(ds)
+                if preprocess:
+                    ds = preprocess(ds)  # type: ignore
                 ds_lst.append(ds)
             ds = xr.merge(ds_lst)
         elif self.driver == "raster_tindex":
-            if self.filesystem == "local":
-                if np.issubdtype(type(self.nodata), np.number):
-                    kwargs.update(nodata=self.nodata)
-                ds = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
-            else:
-                raise NotImplementedError(
-                    "Remote (cloud) RasterDataset not supported "
-                    "with driver raster_tindex."
-                )
+            if np.issubdtype(type(self.nodata), np.number):
+                kwargs.update(nodata=self.nodata)
+            ds = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
         elif self.driver == "raster":  # rasterio files
             if cache_root is not None and all([str(fn).endswith(".vrt") for fn in fns]):
                 cache_dir = join(cache_root, self.catalog_name, self.name)
@@ -356,6 +352,13 @@ class RasterDatasetAdapter(DataAdapter):
                 fns = fns_cached
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
+            if zoom_level is not None and "{zoom_level}" not in self.path:
+                zls_dict, crs = self._get_zoom_levels_and_crs(logger=logger)
+                zoom_level = self._parse_zoom_level(
+                    zoom_level, geom, bbox, zls_dict, crs, logger=logger
+                )
+                if isinstance(zoom_level, int):
+                    kwargs.update(overview_level=zoom_level)
             ds = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
@@ -557,68 +560,225 @@ class RasterDatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
+    def _get_zoom_levels_and_crs(self, logger=logger):
+        """Get zoom levels and crs from adapter or detect from tif file if missing."""
+        if self.zoom_levels is not None and self.crs is not None:
+            return self.zoom_levels, self.crs
+        zoom_levels = {}
+        try:
+            with rasterio.open(self.path) as src:
+                res = abs(src.res[0])
+                crs = src.crs
+                overviews = [src.overviews(i) for i in src.indexes]
+                # check if identical
+                if not all([o == overviews[0] for o in overviews]):
+                    raise ValueError("Overviews are not identical across bands")
+                # dict with overview level and corresponding resolution
+                zls = [1] + overviews[0]
+                zoom_levels = {i: res * zl for i, zl in enumerate(zls)}
+        except RasterioIOError as e:
+            logger.warning(f"IO error while detecting zoom levels: {e}")
+        self.zoom_levels = zoom_levels
+        self.crs = crs
+        return zoom_levels, crs
+
     def _parse_zoom_level(
         self,
-        zoom_level: Optional[int | tuple] = None,
-        geom: gpd.GeoSeries = None,
+        zoom_level: Union[int, Tuple[Union[int, float], str]],
+        geom: Optional[gpd.GeoSeries] = None,
         bbox: Optional[list] = None,
+        zls_dict: Optional[Dict[int, float]] = None,
+        dst_crs: pyproj.CRS = None,
         logger=logger,
     ) -> int:
-        """Return nearest smaller zoom level.
+        """Return overview level of data corresponding to zoom level.
 
-        Based on zoom resolutions defined in data catalog.
+        Parameters
+        ----------
+        zoom_level: int or tuple
+            overview level or tuple with resolution and unit
+        geom: gpd.GeoSeries, optional
+            geometry to determine res if zoom_level or source in degree
+        bbox: list, optional
+            bbox to determine res if zoom_level or source in degree
+        zls_dict: dict, optional
+            dictionary with overview levels and corresponding resolution
+        dst_crs: pyproj.CRS, optional
+            destination crs to determine res if zoom_level tuple is provided
+            with different unit than dst_crs
         """
-        # common pyproj crs axis units
-        known_units = ["degree", "metre", "US survey foot"]
-        if self.zoom_levels is None or len(self.zoom_levels) == 0:
-            logger.warning("No zoom levels available, default to zero")
-            return 0
-        zls = list(self.zoom_levels.keys())
-        if zoom_level is None:  # return first zoomlevel (assume these are ordered)
-            return next(iter(zls))
-        # parse zoom_level argument
-        if (
+        # check zoom level
+        zls_dict = self.zoom_levels if zls_dict is None else zls_dict
+        dst_crs = self.crs if dst_crs is None else dst_crs
+        if zls_dict is None or len(zls_dict) == 0 or zoom_level is None:
+            return None
+        elif isinstance(zoom_level, int):
+            if zoom_level not in zls_dict:
+                raise ValueError(
+                    f"Zoom level {zoom_level} not defined."
+                    f"Select from {list(zls_dict.keys())}."
+                )
+            zl = zoom_level
+            dst_res = zls_dict[zoom_level]
+        elif (
             isinstance(zoom_level, tuple)
             and isinstance(zoom_level[0], (int, float))
             and isinstance(zoom_level[1], str)
             and len(zoom_level) == 2
+            and dst_crs is not None
         ):
-            res, unit = zoom_level
-            # covert 'meter' and foot to official pyproj units
-            unit = {"meter": "metre", "foot": "US survey foot"}.get(unit, unit)
-            if unit not in known_units:
-                raise TypeError(
-                    f"zoom_level unit {unit} not understood;"
-                    f" should be one of {known_units}"
-                )
-        elif not isinstance(zoom_level, int):
-            raise TypeError(
-                f"zoom_level argument not understood: {zoom_level}; should be a float"
-            )
-        else:
-            return zoom_level
-        if self.crs:
+            src_res, src_res_unit = zoom_level
             # convert res if different unit than crs
-            crs = pyproj.CRS.from_user_input(self.crs)
-            crs_unit = crs.axis_info[0].unit_name
-            if crs_unit != unit and crs_unit not in known_units:
-                raise NotImplementedError(
-                    f"no conversion available for {unit} to {crs_unit}"
-                )
-            if unit != crs_unit:
-                lat = 0
-                if bbox is not None:
-                    lat = (bbox[1] + bbox[3]) / 2
-                elif geom is not None:
-                    lat = geom.to_crs(4326).centroid.y.item()
+            dst_crs = pyproj.CRS.from_user_input(dst_crs)
+            dst_crs_unit = dst_crs.axis_info[0].unit_name
+            dst_res = src_res
+            if dst_crs_unit != src_res_unit:
+                known_units = ["degree", "metre", "US survey foot", "meter", "foot"]
+                if src_res_unit not in known_units:
+                    raise TypeError(
+                        f"zoom_level unit {src_res_unit} not understood;"
+                        f" should be one of {known_units}"
+                    )
+                if dst_crs_unit not in known_units:
+                    raise NotImplementedError(
+                        f"no conversion available for {src_res_unit} to {dst_crs_unit}"
+                    )
                 conversions = {
-                    "degree": np.hypot(*gis_utils.cellres(lat=lat)),
-                    "US survey foot": 0.3048,
-                }
-                res = res * conversions.get(unit, 1) / conversions.get(crs_unit, 1)
-        # find nearest smaller zoomlevel
-        eps = 1e-5  # allow for rounding errors
-        smaller = [x < (res + eps) for x in self.zoom_levels.values()]
-        zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
-        logger.info(f"Getting data for zoom_level {zl} based on res {zoom_level}")
+                    "foot": 0.3048,
+                    "metre": 1,  # official pyproj units
+                    "US survey foot": 0.3048,  # official pyproj units
+                }  # to meter
+                if src_res_unit == "degree" or dst_crs_unit == "degree":
+                    lat = 0
+                    if bbox is not None:
+                        lat = (bbox[1] + bbox[3]) / 2
+                    elif geom is not None:
+                        lat = geom.to_crs(4326).centroid.y.item()
+                    conversions["degree"] = gis_utils.cellres(lat=lat)[1]
+                fsrc = conversions.get(src_res_unit, 1)
+                fdst = conversions.get(dst_crs_unit, 1)
+                dst_res = src_res * fsrc / fdst
+            # find nearest zoom level
+            eps = 1e-5  # allow for rounding errors
+            zls = list(zls_dict.keys())
+            smaller = [x < (dst_res + eps) for x in zls_dict.values()]
+            zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
+        elif dst_crs is None:
+            raise ValueError("No CRS defined, hence no zoom level can be determined.")
+        else:
+            raise TypeError(f"zoom_level not understood: {type(zoom_level)}")
+        logger.debug(f"Parsed zoom_level {zl} ({dst_res:.2f})")
         return zl
+
+    def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
+        """Return the bounding box and espg code of the dataset.
+
+        if the bounding box is not set and detect is True,
+        :py:meth:`hydromt.RasterdatasetAdapter.detect_bbox` will be used to detect it.
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the bounding box if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        bbox = self.extent.get("bbox", None)
+        crs = cast(int, self.crs)
+        if bbox is None and detect:
+            bbox, crs = self.detect_bbox()
+
+        return bbox, crs
+
+    def get_time_range(self, detect=True):
+        """Detect the time range of the dataset.
+
+        if the time range is not set and detect is True,
+        :py:meth:`hydromt.RasterdatasetAdapter.detect_time_range` will be used
+        to detect it.
+
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the time range if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        time_range = self.extent.get("time_range", None)
+        if time_range is None and detect:
+            time_range = self.detect_time_range()
+
+        return time_range
+
+    def detect_bbox(
+        self,
+        ds=None,
+    ) -> Tuple[Tuple[float, float, float, float], int]:
+        """Detect the bounding box and crs of the dataset.
+
+        If no dataset is provided, it will be fetched according to the settings in the
+        adapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`. the
+        coordinates are in the CRS of the dataset itself, which is also returned
+        alongside the coordinates.
+
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the bounding box of.
+            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        if ds is None:
+            ds = self.get_data()
+        crs = ds.raster.crs.to_epsg()
+        bounds = ds.raster.bounds
+
+        return bounds, crs
+
+    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
+        """Detect the temporal range of the dataset.
+
+        If no dataset is provided, it will be fetched accodring to the settings in the
+        addapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`.
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the time range of. It must have a time dimentsion set.
+            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        if ds is None:
+            ds = self.get_data()
+        return (
+            ds[ds.raster.time_dim].min().values,
+            ds[ds.raster.time_dim].max().values,
+        )

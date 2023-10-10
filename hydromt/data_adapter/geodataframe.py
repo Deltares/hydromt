@@ -3,7 +3,7 @@ import logging
 import warnings
 from os.path import join
 from pathlib import Path
-from typing import NewType, Union
+from typing import NewType, Optional, Tuple, Union
 
 import numpy as np
 import pyproj
@@ -34,16 +34,18 @@ class GeoDataFrameAdapter(DataAdapter):
     def __init__(
         self,
         path: str,
-        driver: str = None,
-        filesystem: str = "local",
-        crs: Union[int, str, dict] = None,
-        nodata: Union[dict, float, int] = None,
-        rename: dict = {},
-        unit_mult: dict = {},
-        unit_add: dict = {},
-        meta: dict = {},
-        attrs: dict = {},
-        driver_kwargs: dict = {},
+        driver: Optional[str] = None,
+        filesystem: Optional[str] = None,
+        crs: Optional[Union[int, str, dict]] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        extent: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
+        storage_options: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider=None,
@@ -67,9 +69,10 @@ class GeoDataFrameAdapter(DataAdapter):
             for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
             By default the driver is inferred from the file extension and falls back to
             'vector' if unknown.
-        filesystem: {'local', 'gcs', 's3'}, optional
+        filesystem: str, optional
             Filesystem where the data is stored (local, cloud, http etc.).
-            By default, local.
+            If None (default) the filesystem is inferred from the path.
+            See :py:func:`fsspec.registry.known_implementations` for all options.
         crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str);
             proj (str or dict) or wkt (str). Only used if the data has no native CRS.
@@ -92,17 +95,37 @@ class GeoDataFrameAdapter(DataAdapter):
         attrs: dict, optional
             Additional attributes relating to data variables. For instance unit
             or long name of the variable.
+        extent: Extent(typed dict), Optional
+            Dictionary describing the spatial and time range the dataset covers.
+            should be of the form:
+            {
+                "bbox": [xmin, ymin, xmax, ymax],
+                "time_range": [start_datetime, end_datetime],
+            }
+            bbox coordinates should be in the same CRS as the data, and
+            time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
+        storage_options: dict, optional
+            Additional key-word arguments passed to the fsspec FileSystem object.
         name, catalog_name: str, optional
-            Name of the dataset and catalog, optional for now.
+            Name of the dataset and catalog, optional.
+        provider: str, optional
+            A name to identifiy the specific provider of the dataset requested.
+            if None is provided, the last added source will be used.
+        version: str, optional
+            A name to identifiy the specific version of the dataset requested.
+            if None is provided, the last added source will be used.
         """
+        driver_kwargs = driver_kwargs or {}
+        extent = extent or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
                 "GeoDataFrameAdapter driver is deprecated and will be removed "
                 "in a future version. Please use 'driver_kwargs' instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             driver_kwargs.update(kwargs)
         super().__init__(
@@ -116,12 +139,14 @@ class GeoDataFrameAdapter(DataAdapter):
             meta=meta,
             attrs=attrs,
             driver_kwargs=driver_kwargs,
+            storage_options=storage_options,
             name=name,
             catalog_name=catalog_name,
             provider=provider,
             version=version,
         )
         self.crs = crs
+        self.extent = extent
 
     def to_file(
         self,
@@ -215,6 +240,7 @@ class GeoDataFrameAdapter(DataAdapter):
         # load
         fns = self._resolve_paths(variables)
         gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
+        self.mark_as_used()  # mark used
         # rename variables and parse crs & nodata
         gdf = self._rename_vars(gdf)
         gdf = self._set_crs(gdf, logger=logger)
@@ -227,20 +253,6 @@ class GeoDataFrameAdapter(DataAdapter):
         gdf = self._apply_unit_conversions(gdf, logger=logger)
         gdf = self._set_metadata(gdf)
         return gdf
-
-    def _resolve_paths(self, variables):
-        # storage options for fsspec (TODO: not implemented yet)
-        if "storage_options" in self.driver_kwargs:
-            # not sure if storage options can be passed to fiona.open()
-            # for now throw NotImplemented Error
-            raise NotImplementedError(
-                "Remote file storage_options not implemented for GeoDataFrame"
-            )
-
-        # resolve paths
-        fns = super()._resolve_paths(variables=variables)
-
-        return fns
 
     def _read_data(self, fns, bbox, geom, buffer, predicate, logger=logger):
         if len(fns) > 1:
@@ -264,7 +276,8 @@ class GeoDataFrameAdapter(DataAdapter):
             if "driver" not in kwargs and self.driver in ["csv", "xls", "xlsx", "xy"]:
                 warnings.warn(
                     "using the driver setting is deprecated. Please use"
-                    "vector_table instead."
+                    "vector_table instead.",
+                    stacklevel=2,
                 )
                 kwargs.update(driver=self.driver)
             # parse bbox and geom to (buffere) geom
@@ -389,3 +402,64 @@ class GeoDataFrameAdapter(DataAdapter):
                 gdf[col].attrs.update(**self.attrs[col])
 
         return gdf
+
+    def get_bbox(self, detect=True):
+        """Return the bounding box and espg code of the dataset.
+
+        if the bounding box is not set and detect is True,
+        :py:meth:`hydromt.GeoDataframeAdapter.detect_bbox` will be used to detect it.
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the bounding box if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        bbox = self.extent.get("bbox", None)
+        crs = self.crs
+        if bbox is None and detect:
+            bbox, crs = self.detect_bbox()
+
+        return bbox, crs
+
+    def detect_bbox(
+        self,
+        gdf=None,
+    ) -> Tuple[Tuple[float, float, float, float], int]:
+        """Detect the bounding box and crs of the dataset.
+
+        If no dataset is provided, it will be fetched acodring to the settings in the
+        adapter. also see :py:meth:`hydromt.GeoDataframeAdapter.get_data`. the
+        coordinates are in the CRS of the dataset itself, which is also returned
+        alongside the coordinates.
+
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the bounding box of.
+            If none is provided, :py:meth:`hydromt.GeoDataframeAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        if gdf is None:
+            gdf = self.get_data()
+
+        crs = gdf.geometry.crs.to_epsg()
+        bounds = gdf.geometry.total_bounds
+        return bounds, crs

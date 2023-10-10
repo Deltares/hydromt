@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
+from copy import deepcopy
 from os.path import abspath, dirname, isfile, join
 
 import geopandas as gpd
@@ -13,7 +14,7 @@ from shapely.geometry import box
 import hydromt._compat
 import hydromt.models.model_plugins
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import MODELS, GridModel, LumpedModel, Model, model_plugins
+from hydromt.models import MODELS, GridModel, Model, VectorModel, model_plugins
 from hydromt.models.model_api import _check_data
 from hydromt.models.model_grid import GridMixin
 
@@ -126,7 +127,7 @@ def test_write_data_catalog(tmpdir):
     model.write_data_catalog()
     assert not isfile(data_lib_fn)
     # write with single source
-    model.data_catalog._used_data.append(sources[0])
+    model.data_catalog.get_source(sources[0]).mark_as_used()
     model.write_data_catalog()
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:1]
     # write to different file
@@ -135,10 +136,10 @@ def test_write_data_catalog(tmpdir):
     assert isfile(data_lib_fn1)
     # append source
     model1 = Model(root=model.root, data_libs=["artifact_data"], mode="r+")
-    model1.data_catalog._used_data.append(sources[1])
+    model1.data_catalog.get_source(sources[1]).mark_as_used()
     model1.write_data_catalog(append=False)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == [sources[1]]
-    model1.data_catalog._used_data.append(sources[0])
+    model1.data_catalog.get_source(sources[0]).mark_as_used()
     model1.write_data_catalog(append=True)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
 
@@ -171,7 +172,39 @@ def test_model(model, tmpdir):
         assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
 
-def test_model_append(demda, tmpdir):
+def test_model_tables(model, df, tmpdir):
+    # make a couple copies of the dfs for testing
+    dfs = {str(i): df.copy() for i in range(5)}
+    model.set_root(tmpdir, mode="r+")  # append mode
+    clean_model = deepcopy(model)
+
+    with pytest.raises(KeyError):
+        model.tables[1]
+
+    for i, d in dfs.items():
+        model.set_tables(d, name=i)
+        assert df.equals(model.tables[i])
+
+    # now do the same but interating over the stables instead
+    for i, d in model.tables.items():
+        model.set_tables(d, name=i)
+        assert df.equals(model.tables[i])
+
+    assert list(model.tables.keys()) == list(map(str, range(5)))
+
+    model.write_tables()
+    clean_model.read_tables()
+
+    model_merged = model.get_tables_merged().sort_values(["table_origin", "city"])
+    clean_model_merged = clean_model.get_tables_merged().sort_values(
+        ["table_origin", "city"]
+    )
+    assert np.all(
+        np.equal(model_merged, clean_model_merged)
+    ), f"model: {model_merged}\nclean_model: {clean_model_merged}"
+
+
+def test_model_append(demda, df, tmpdir):
     # write a model
     demda.name = "dem"
     mod = GridModel(mode="w", root=str(tmpdir))
@@ -181,6 +214,7 @@ def test_model_append(demda, tmpdir):
     mod.set_forcing(demda, name="dem")
     mod.set_states(demda, name="dem")
     mod.set_geoms(demda.raster.box, name="dem")
+    mod.set_tables(df, name="df")
     mod.write()
     # append to model and check if previous data is still there
     mod1 = GridModel(mode="r+", root=str(tmpdir))
@@ -192,10 +226,15 @@ def test_model_append(demda, tmpdir):
     assert "dem" in mod1.maps
     mod1.set_forcing(demda, name="dem1")
     assert "dem" in mod1.forcing
+    mod1.set_forcing(df, name="df1", split_dataset=False)
+    assert "df1" in mod1.forcing
+    assert isinstance(mod1.forcing["df1"], xr.Dataset)
     mod1.set_states(demda, name="dem1")
     assert "dem" in mod1.states
     mod1.set_geoms(demda.raster.box, name="dem1")
     assert "dem" in mod1.geoms
+    mod1.set_tables(df, name="df1")
+    assert "df" in mod1.tables
 
 
 @pytest.mark.filterwarnings("ignore:The setup_basemaps")
@@ -396,7 +435,7 @@ def test_setup_grid(tmpdir, demda):
     )
     # wrong region kind
     with pytest.raises(ValueError, match="Region for grid must be of kind"):
-        model.setup_grid({"lumped_model": "test_model"})
+        model.setup_grid({"vector_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]
     with pytest.raises(
@@ -548,19 +587,86 @@ def test_gridmodel_setup(tmpdir):
     mod.write(components=["geoms", "grid"])
 
 
-def test_lumpedmodel(lumped_model, tmpdir):
-    assert "response_units" in lumped_model.api
-    non_compliant = lumped_model._test_model_api()
+def test_vectormodel(vector_model, tmpdir):
+    assert "vector" in vector_model.api
+    non_compliant = vector_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    lumped_model.set_root(str(tmpdir), mode="w")
-    lumped_model.write()
+    vector_model.set_root(str(tmpdir), mode="w")
+    vector_model.write()
     # read model
-    model1 = LumpedModel(str(tmpdir), mode="r")
+    model1 = VectorModel(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors = lumped_model._test_equal(model1)
+    equal, errors = vector_model._test_equal(model1)
     assert equal, errors
+
+
+def test_vectormodel_vector(vector_model, tmpdir, geoda):
+    # test set vector
+    testds = vector_model.vector.copy()
+    # np.ndarray
+    with pytest.raises(ValueError, match="Unable to set"):
+        vector_model.set_vector(data=testds["zs"].values)
+    with pytest.raises(
+        ValueError, match="set_vector with np.ndarray is only supported if data is 1D"
+    ):
+        vector_model.set_vector(data=testds["zs"].values, name="precip")
+    # xr.DataArray
+    vector_model.set_vector(data=testds["zs"], name="precip")
+    # geodataframe
+    gdf = testds.vector.geometry.to_frame("geometry")
+    gdf["param1"] = np.random.rand(gdf.shape[0])
+    gdf["param2"] = np.random.rand(gdf.shape[0])
+    vector_model.set_vector(data=gdf)
+    assert "precip" in vector_model.vector
+    assert "param1" in vector_model.vector
+    # geometry and update grid
+    geoda_test = geoda.vector.update_geometry(geoda.vector.geometry.buffer(0.1))
+    with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
+        vector_model.set_vector(data=geoda_test)
+    param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop("geometry")
+    with pytest.raises(ValueError, match="Index coordinate of data variable"):
+        vector_model.set_vector(data=param3, name="param3")
+    vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")
+    assert "param1" not in vector_model.vector
+    assert "zs" in vector_model.vector
+
+    # test write vector
+    vector_model.set_vector(data=gdf)
+    vector_model.set_root(str(tmpdir), mode="w")
+    # netcdf+geojson --> tested in test_vectormodel
+    # netcdf only
+    vector_model.write_vector(fn="vector/vector_full.nc", fn_geom=None)
+    # geojson only
+    # automatic split
+    vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
+    assert isfile(join(vector_model.root, "vector", "vector_split.nc"))
+    assert not isfile(join(vector_model.root, "vector", "vector_all.nc"))
+    # geojson 1D data only
+    vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
+    vector_model.write_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+    assert not isfile(join(vector_model.root, "vector", "vector_all2.nc"))
+
+    # test read vector
+    vector_model1 = VectorModel(str(tmpdir), mode="r")
+    # netcdf only
+    vector_model1.read_vector(fn="vector/vector_full.nc", fn_geom=None)
+    vector0 = vector_model1.vector
+    assert len(vector0["zs"].dims) == 2
+    vector_model1._vector = None
+    # geojson only
+    # automatic split
+    vector_model1.read_vector(
+        fn="vector/vector_split.nc", fn_geom="vector/vector_split.geojson"
+    )
+    vector1 = vector_model1.vector
+    assert len(vector1["zs"].dims) == 2
+    vector_model1._vector = None
+    # geojson 1D data only
+    vector_model1.read_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+    vector3 = vector_model1.vector
+    assert "zs" not in vector3
 
 
 def test_networkmodel(network_model, tmpdir):
@@ -572,10 +678,9 @@ def test_networkmodel(network_model, tmpdir):
     with pytest.raises(NotImplementedError):
         network_model.set_network()
     with pytest.raises(NotImplementedError):
-        network_model.network
+        _ = network_model.network
 
 
-@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_meshmodel(mesh_model, tmpdir):
     MeshModel = MODELS.load("mesh_model")
     assert "mesh" in mesh_model.api
@@ -592,7 +697,6 @@ def test_meshmodel(mesh_model, tmpdir):
     assert equal, errors
 
 
-@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_setup_mesh(tmpdir, griduda):
     MeshModel = MODELS.load("mesh_model")
     # Initialize model
@@ -663,7 +767,6 @@ def test_setup_mesh(tmpdir, griduda):
     assert np.all(np.round(model.region.total_bounds, 3) == bounds)
 
 
-@pytest.mark.skipif(not hasattr(hydromt, "MeshModel"), reason="Xugrid not installed.")
 def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")
@@ -671,18 +774,21 @@ def test_meshmodel_setup(griduda, world):
     mod.setup_config(**{"header": {"setting": "value"}})
     region = {"geom": world[world.name == "Italy"]}
     mod.setup_mesh2d(region, res=10000, crs=3857, grid_name="mesh2d")
-    mod.region
+    _ = mod.region
 
     region = {"mesh": griduda}
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod1.setup_mesh2d(region, grid_name="mesh2d")
-    mod1.setup_mesh2d_from_rasterdataset("vito", grid_name="mesh2d")
+    mod1.setup_mesh2d_from_rasterdataset(
+        "vito", grid_name="mesh2d", resampling_method="mode"
+    )
     assert "vito" in mod1.mesh.data_vars
     mod1.setup_mesh2d_from_raster_reclass(
         raster_fn="vito",
         reclass_table_fn="vito_mapping",
-        reclass_variables=["roughness_manning"],
-        resampling_method="mean",
+        reclass_variables=["landuse", "roughness_manning"],
+        resampling_method=["mode", "centroid"],
         grid_name="mesh2d",
     )
     assert "roughness_manning" in mod1.mesh.data_vars
+    assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)

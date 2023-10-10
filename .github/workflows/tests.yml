@@ -17,6 +17,7 @@ on:
       - data/*
       - pyproject.toml
 
+
 jobs:
   build:
     defaults:
@@ -33,36 +34,49 @@ jobs:
       group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
+
       - uses: actions/checkout@v3
 
-      - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-            python-version: ${{ matrix.python-version }}
-            miniforge-variant: Mambaforge
-            miniforge-version: latest
-            activate-environment: hydromt
-            use-mamba: true
+      # we need environment.yml to see if we have a cache hit
       - name: Generate env spec
-        run: pip install tomli && python make_env.py test,io,extra
+        run: pip install tomli && python make_env.py test,io,extra -p ${{ matrix.python-version}} -n hydromt
 
-
-      - name: Set cache date
-        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-
-      - name: load from cache if it exists for our environment
-        uses: actions/cache@v2
-        with:
-          path: /usr/share/miniconda3/envs/hydromt
-          key: ${{ matrix.python-version }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}
+      - name: load from cache
         id: cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /usr/share/miniconda3
+            ~/pycache
+          # the below two settings mean we'll alway srestore the cache
+          # but the cache hit output can tell us if we have to update afterwards
+          key: test-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
+          restore-keys: |
+            test-py${{ matrix.python-version }}
 
-      - name: Update environment & write to cache
-        run: mamba env update -n hydromt -f environment.yml
+      - name: Fail on no cache restore
+        if: steps.cache.outputs.cache-matched-key == ''
+        run: |
+          echo "Failed to restore any cache. exiting..."
+          exit 1
+
+      # by avoiding the mamba setup stage by loading it from cache instead we save
+      # a lot of setup time, but we do have to do our own PATH management
+      # hence the exports
+      - name: Update environment
         if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          mamba env update -n hydromt -f environment.yml
+
+      - name: Conda info
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          conda info
+          conda list -n hydromt
 
       - name: Test
-        run: python -m pytest --verbose --cov=hydromt --cov-report xml
-
-      - name: Upload code coverage
-        uses: codecov/codecov-action@v3
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          export NUMBA_DISABLE_JIT=1
+          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt python -m pytest --verbose --cov=hydromt --cov-report xml

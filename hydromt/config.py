@@ -6,7 +6,7 @@ from ast import literal_eval
 from configparser import ConfigParser
 from os.path import abspath, dirname, exists, join, splitext
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import yaml
 from tomli import load as load_toml
@@ -48,9 +48,9 @@ def _process_config_in(d):
 
 def configread(
     config_fn: Union[Path, str],
-    defaults: Dict = dict(),
+    defaults: Optional[Dict] = None,
     abs_path: bool = False,
-    skip_abspath_sections: List = ["setup_config"],
+    skip_abspath_sections: Optional[List] = None,
     **kwargs,
 ) -> Dict:
     """Read configuration/workflow file and parse to (nested) dictionary.
@@ -77,6 +77,8 @@ def configread(
     cfdict : dict
         Configuration dictionary.
     """
+    defaults = defaults or {}
+    skip_abspath_sections = skip_abspath_sections or ["setup_config"]
     # read
     ext = splitext(config_fn)[-1].strip()
     if ext in [".yaml", ".yml"]:
@@ -144,7 +146,7 @@ def read_ini_config(
     encoding: str = "utf-8",
     cf: ConfigParser = None,
     skip_eval: bool = False,
-    skip_eval_sections: list = [],
+    skip_eval_sections: Optional[list] = None,
     noheader: bool = False,
 ) -> dict:
     """Read configuration ini file and parse to (nested) dictionary.
@@ -170,6 +172,7 @@ def read_ini_config(
     cfdict : dict
         Configuration dictionary.
     """
+    skip_eval_sections = skip_eval_sections or []
     if cf is None:
         cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
     elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
@@ -245,9 +248,10 @@ def parse_relpath(cfdict: dict, root: Path) -> dict:
 
 
 def parse_abspath(
-    cfdict: dict, root: Path, skip_abspath_sections: List = ["setup_config"]
+    cfdict: dict, root: Path, skip_abspath_sections: Optional[List] = None
 ) -> dict:
     """Parse string value to absolute path from config file."""
+    skip_abspath_sections = skip_abspath_sections or ["setup_config"]
 
     def _abspath(value, root):
         if exists(join(root, value)):
@@ -269,7 +273,7 @@ def parse_abspath(
 def parse_values(
     cfdict: dict,
     skip_eval: bool = False,
-    skip_eval_sections: List = [],
+    skip_eval_sections: Optional[List] = None,
 ):
     """Parse string values to python default objects.
 
@@ -287,6 +291,7 @@ def parse_values(
     cfdict : dict
         Configuration dictionary with evaluated values.
     """
+    skip_eval_sections = skip_eval_sections or []
     # loop through two-level dict: section, key-value pairs
     for section in cfdict:
         # evaluate ini items to parse to python default objects:

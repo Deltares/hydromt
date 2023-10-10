@@ -80,6 +80,11 @@ def test_open_vector(tmpdir, df, geodf, world):
 def test_open_geodataset(tmpdir, geodf):
     fn_gdf = str(tmpdir.join("points.geojson"))
     geodf.to_file(fn_gdf, driver="GeoJSON")
+    # create equivalent polygon file
+    fn_gdf_poly = str(tmpdir.join("polygons.geojson"))
+    geodf_poly = geodf.copy()
+    geodf_poly["geometry"] = geodf_poly.buffer(0.1)
+    geodf_poly.to_file(fn_gdf_poly, driver="GeoJSON")
     # create zeros timeseries
     ts = pd.DataFrame(
         index=pd.DatetimeIndex(["01-01-2000", "01-01-2001"]),
@@ -99,6 +104,10 @@ def test_open_geodataset(tmpdir, geodf):
     ds = hydromt.open_geodataset(fn_gdf, fn_ts)
     assert name in ds.data_vars
     assert np.all(ds[name].values == 0)
+    # test for polygon geometry
+    ds = hydromt.open_geodataset(fn_gdf_poly, fn_ts)
+    assert name in ds.data_vars
+    assert ds.vector.geom_type == "Polygon"
     with pytest.raises(IOError, match="GeoDataset point location file not found"):
         hydromt.open_geodataset("missing_file.csv")
     with pytest.raises(IOError, match="GeoDataset data file not found"):
@@ -232,7 +241,6 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
         ), test2
 
 
-@pytest.mark.skip(reason="Not yet supported")
 def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
     os.mkdir(tmpdir.join("data"))
     fns = {}
@@ -241,16 +249,15 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
         df.to_csv(fn)
         fns[var] = fn
 
-    ds = hydromt.io.open_mfcsv(fns, "id")
+    ds = hydromt.io.open_mfcsv(fns, "id", segmented_by="var")
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
-    for i in range(len(dfs_segmented_by_vars)):
+    ids = ds.id.values
+    for i in ids:
         test1 = ds.sel(id=i)["test1"]
         test2 = ds.sel(id=i)["test2"]
-        assert np.all(np.equal(test1, np.arange(len(dfs_segmented_by_vars)) * i)), test1
-        assert np.all(
-            np.equal(test2, np.arange(len(dfs_segmented_by_vars)) ** i)
-        ), test2
+        assert np.all(np.equal(test1, np.arange(len(ids)) * int(i))), test1
+        assert np.all(np.equal(test2, np.arange(len(ids)) ** int(i))), test2
 
 
 def test_rasterio_errors(tmpdir, rioda):

@@ -2,6 +2,7 @@
 """Tests for the hydromt.raster submodule."""
 
 import os
+from os.path import isfile, join
 
 import dask
 import geopandas as gpd
@@ -517,15 +518,90 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
     # NOTE: this method does not work in debug mode because of os.subprocess
     path = str(tmpdir)
     rioda_large.raster.to_xyz_tiles(
-        os.path.join(path, "dummy_xyz"),
+        join(path, "dummy_xyz"),
         tile_size=256,
         zoom_levels=[0, 2],
     )
-    with open(os.path.join(path, "dummy_xyz", "0", "filelist.txt"), "r") as f:
+    with open(join(path, "dummy_xyz", "0", "filelist.txt"), "r") as f:
         assert len(f.readlines()) == 16
-    with open(os.path.join(path, "dummy_xyz", "2", "filelist.txt"), "r") as f:
+    with open(join(path, "dummy_xyz", "2", "filelist.txt"), "r") as f:
         assert len(f.readlines()) == 1
 
+    test_bounds = [2.13, -2.13, 3.2, -1.07]
+    _test_r = open_raster(join(path, "dummy_xyz", "0", "2", "1.tif"))
+    assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
 
-# def test_to_osm(tmpdir, dummy):
-#     dummy.raster.to_osm(
+
+def test_to_slippy_tiles(tmpdir, rioda_large):
+    from PIL import Image
+
+    # for tile at zl 7, x 64, y 64
+    test_bounds = [0.0, -313086.07, 313086.07, -0.0]
+    # populate with random data
+    np.random.seed(0)
+    rioda_large[:] = np.random.random(rioda_large.shape)
+
+    # png
+    png_dir = join(tmpdir, "tiles_png")
+    rioda_large.raster.to_slippy_tiles(png_dir)
+    _zl = os.listdir(png_dir)
+    _zl = [int(_n) for _n in _zl]
+    assert len(_zl) == 4
+    assert min(_zl) == 6
+    assert max(_zl) == 9
+    fn = join(png_dir, "7", "64", "64.png")
+    im = np.array(Image.open(fn))
+    assert im.shape == (256, 256, 4)
+    assert all(im[0, 0, :] == [128, 0, 131, 255])
+
+    # test with cmap
+    png_dir = join(tmpdir, "tiles_png_cmap")
+    rioda_large.raster.to_slippy_tiles(png_dir, cmap="viridis", min_lvl=6, max_lvl=7)
+    fn = join(png_dir, "7", "64", "64.png")
+    im = np.array(Image.open(fn))
+    assert im.shape == (256, 256, 4)
+    assert all(im[0, 0, :] == [31, 148, 139, 255])
+
+    # gtiff
+    tif_dir = join(tmpdir, "tiles_tif")
+    rioda_large.raster.to_slippy_tiles(
+        tif_dir,
+        driver="GTiff",
+        min_lvl=5,
+        max_lvl=8,
+    )
+    with open(join(tif_dir, "5", "filelist.txt"), "r") as f:
+        assert len(f.readlines()) == 1
+    with open(join(tif_dir, "8", "filelist.txt"), "r") as f:
+        assert len(f.readlines()) == 12
+    _test_r = open_raster(join(tif_dir, "7", "64", "64.tif"))
+    assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
+    assert all([isfile(join(tif_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
+    _test_vrt = open_raster(join(tif_dir, "lvl7.vrt"))
+    assert isinstance(_test_vrt, xr.DataArray)
+
+    # nc
+    nc_dir = join(tmpdir, "tiles_nc")
+    rioda_large.raster.to_slippy_tiles(
+        nc_dir,
+        driver="netcdf4",
+        min_lvl=5,
+        max_lvl=8,
+    )
+    with open(join(nc_dir, "5", "filelist.txt"), "r") as f:
+        assert len(f.readlines()) == 1
+    with open(join(nc_dir, "8", "filelist.txt"), "r") as f:
+        assert len(f.readlines()) == 12
+    _test_r = xr.open_dataset(join(nc_dir, "7", "64", "64.nc"))
+    assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
+    assert all([isfile(join(nc_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
+    _test_vrt = open_raster(join(nc_dir, "lvl7.vrt"))
+    assert isinstance(_test_vrt, xr.DataArray)
+
+    # test all errors in to_slippy_tiles
+    with pytest.raises(ValueError, match="Unkown file driver"):
+        rioda_large.raster.to_slippy_tiles(str(tmpdir), driver="unsupported")
+    with pytest.raises(ValueError, match="Only 2d DataArrays"):
+        rioda_large.expand_dims("t").raster.to_slippy_tiles(str(tmpdir))
+    with pytest.raises(ValueError, match="Colormap is only supported for png"):
+        rioda_large.raster.to_slippy_tiles(str(tmpdir), cmap="viridis", driver="GTiff")

@@ -31,6 +31,8 @@ General
    data_catalog.DataCatalog.to_dataframe
    data_catalog.DataCatalog.to_yml
    data_catalog.DataCatalog.export_data
+   data_catalog.DataCatalog.get_source_bbox
+   data_catalog.DataCatalog.get_source_time_range
 
 Add data sources
 ----------------
@@ -71,6 +73,10 @@ RasterDataset
    data_adapter.RasterDatasetAdapter.get_data
    data_adapter.RasterDatasetAdapter.to_dict
    data_adapter.RasterDatasetAdapter.to_file
+   data_adapter.RasterDatasetAdapter.get_bbox
+   data_adapter.RasterDatasetAdapter.get_time_range
+   data_adapter.RasterDatasetAdapter.detect_bbox
+   data_adapter.RasterDatasetAdapter.detect_time_range
 
 GeoDataset
 ==========
@@ -83,6 +89,10 @@ GeoDataset
    data_adapter.GeoDatasetAdapter.get_data
    data_adapter.GeoDatasetAdapter.to_dict
    data_adapter.GeoDatasetAdapter.to_file
+   data_adapter.GeoDatasetAdapter.get_bbox
+   data_adapter.GeoDatasetAdapter.get_time_range
+   data_adapter.GeoDatasetAdapter.detect_bbox
+   data_adapter.GeoDatasetAdapter.detect_time_range
 
 GeoDataFrame
 ============
@@ -95,6 +105,8 @@ GeoDataFrame
    data_adapter.GeoDataFrameAdapter.get_data
    data_adapter.GeoDataFrameAdapter.to_dict
    data_adapter.GeoDataFrameAdapter.to_file
+   data_adapter.GeoDataFrameAdapter.get_bbox
+   data_adapter.GeoDataFrameAdapter.detect_bbox
 
 DataFrame
 =========
@@ -155,8 +167,8 @@ Model attributes
 
    Model.crs
    Model.region
+   Model.root
    Model.api
-
 
 Model components and attributes
 -------------------------------
@@ -267,15 +279,15 @@ Setup methods
    GridModel.setup_grid_from_geodataframe
 
 
-.. _lumped_model_api:
+.. _vector_model_api:
 
-LumpedModel
+VectorModel
 ===========
 
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel
+   VectorModel
 
 
 Components and attributes
@@ -284,9 +296,9 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel.response_units
-   LumpedModel.crs
-   LumpedModel.region
+   VectorModel.vector
+   VectorModel.crs
+   VectorModel.region
 
 General methods
 ---------------
@@ -294,9 +306,9 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel.set_response_units
-   LumpedModel.read_response_units
-   LumpedModel.write_response_units
+   VectorModel.set_vector
+   VectorModel.read_vector
+   VectorModel.write_vector
 
 Setup methods
 -------------
@@ -304,10 +316,10 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel.setup_config
-   LumpedModel.setup_region
-   LumpedModel.setup_maps_from_rasterdataset
-   LumpedModel.setup_maps_from_raster_reclass
+   VectorModel.setup_config
+   VectorModel.setup_region
+   VectorModel.setup_maps_from_rasterdataset
+   VectorModel.setup_maps_from_raster_reclass
 
 
 .. _mesh_model_api:
@@ -362,6 +374,7 @@ Setup methods
    MeshModel.setup_maps_from_rasterdataset
    MeshModel.setup_maps_from_raster_reclass
 
+.. _workflows_api:
 
 =========
 Workflows
@@ -385,6 +398,8 @@ Mesh
    :toctree: _generated
 
    workflows.mesh.create_mesh2d
+   workflows.mesh.mesh2d_from_rasterdataset
+   workflows.mesh.mesh2d_from_raster_reclass
 
 
 Basin mask
@@ -480,9 +495,11 @@ Raster writing methods
    :toctree: _generated
 
    DataArray.raster.to_xyz_tiles
+   DataArray.raster.to_slippy_tiles
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
 
+.. _raster_api:
 
 ==============
 Raster methods
@@ -627,6 +644,8 @@ Low level methods
 
    gis_utils.axes_attrs
    gis_utils.meridian_offset
+
+.. _geodataset_api:
 
 ==================
 GeoDataset methods

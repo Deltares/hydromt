@@ -35,6 +35,7 @@ DeferedFileClose = TypedDict(
     "DeferedFileClose",
     {"ds": xr.Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
 )
+XArrayDict = Dict[str, Union[xr.DataArray, xr.Dataset]]
 
 
 class Model(object, metaclass=ABCMeta):
@@ -52,16 +53,20 @@ class Model(object, metaclass=ABCMeta):
     # TODO: change it back to setup_region and no res --> deprecation
     _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
     _TMP_DATA_DIR = None
+    # supported model version should be filled by the plugins
+    # e.g. _MODEL_VERSION = ">=1.0, <1.1"
+    _MODEL_VERSION = None
 
     _API = {
         "crs": CRS,
         "config": Dict[str, Any],
         "geoms": Dict[str, gpd.GeoDataFrame],
-        "maps": Dict[str, Union[xr.DataArray, xr.Dataset]],
-        "forcing": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "tables": Dict[str, pd.DataFrame],
+        "maps": XArrayDict,
+        "forcing": XArrayDict,
         "region": gpd.GeoDataFrame,
-        "results": Dict[str, Union[xr.DataArray, xr.Dataset]],
-        "states": Dict[str, Union[xr.DataArray, xr.Dataset]],
+        "results": XArrayDict,
+        "states": XArrayDict,
     }
 
     def __init__(
@@ -69,7 +74,7 @@ class Model(object, metaclass=ABCMeta):
         root: Optional[str] = None,
         mode: Optional[str] = "w",
         config_fn: Optional[str] = None,
-        data_libs: Union[List, str] = [],
+        data_libs: Union[List, str] = None,
         logger=logger,
         **artifact_keys,
     ):
@@ -91,6 +96,7 @@ class Model(object, metaclass=ABCMeta):
         logger:
             The logger to be used.
         """
+        data_libs = data_libs or []
         from . import MODELS  # avoid circular import
 
         self.logger = logger
@@ -106,15 +112,15 @@ class Model(object, metaclass=ABCMeta):
 
         # placeholders
         # metadata maps that can be at different resolutions
-        # TODO do we want read/write maps?
         self._config = None  # nested dictionary
-        self._maps = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._maps: Optional[XArrayDict] = None
+        self._tables: Dict[str, pd.DataFrame] = None
 
         # NOTE was staticgeoms in <=v0.5
-        self._geoms = None  # dictionary of gdp.GeoDataFrame
-        self._forcing = None  # dictionary of xr.DataArray and/or xr.Dataset
-        self._states = None  # dictionary of xr.DataArray and/or xr.Dataset
-        self._results = None  # dictionary of xr.DataArray and/or xr.Dataset
+        self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
+        self._forcing: Optional[XArrayDict] = None
+        self._states: Optional[XArrayDict] = None
+        self._results: Optional[XArrayDict] = None
         # To be deprecated in future versions!
         self._staticmaps = None
         self._staticgeoms = None
@@ -179,7 +185,7 @@ class Model(object, metaclass=ABCMeta):
         self,
         region: Optional[dict] = None,
         write: Optional[bool] = True,
-        opt: Optional[dict] = {},
+        opt: Optional[dict] = None,
     ):
         """Single method to build a model from scratch based on settings in `opt`.
 
@@ -216,6 +222,7 @@ class Model(object, metaclass=ABCMeta):
                 }
 
         """
+        opt = opt or {}
         opt = self._check_get_opt(opt)
 
         # merge cli region and res arguments with opt
@@ -240,7 +247,7 @@ class Model(object, metaclass=ABCMeta):
         self,
         model_out: Optional[Union[str, Path]] = None,
         write: Optional[bool] = True,
-        opt: Dict = {},
+        opt: Dict = None,
         forceful_overwrite=False,
     ):
         """Single method to update a model based the settings in `opt`.
@@ -282,6 +289,7 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
+        opt = opt or {}
         opt = self._check_get_opt(opt)
 
         # read current model
@@ -291,7 +299,10 @@ class Model(object, metaclass=ABCMeta):
                     '"model_out" directory required when updating in "read-only" mode'
                 )
             self.read()
-            self.set_root(model_out, mode="w")
+            if forceful_overwrite:
+                self.set_root(model_out, mode="w+")
+            else:
+                self.set_root(model_out, mode="w")
 
         # check if model has a region
         if self.region is None:
@@ -372,6 +383,7 @@ class Model(object, metaclass=ABCMeta):
                 warnings.warn(
                     "Using outlet as kind in setup_region is deprecated",
                     DeprecationWarning,
+                    stacklevel=2,
                 )
             # retrieve global hydrography data (lazy!)
             ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
@@ -409,8 +421,7 @@ class Model(object, metaclass=ABCMeta):
     # build with the current _CLI_ARGS does not raise an error
     def setup_basemaps(self, *args, **kwargs):  # noqa: D102
         warnings.warn(
-            "The setup_basemaps method is not implemented.",
-            UserWarning,
+            "The setup_basemaps method is not implemented.", UserWarning, stacklevel=2
         )
 
     ## file system
@@ -422,12 +433,10 @@ class Model(object, metaclass=ABCMeta):
             raise ValueError("Root unknown, use set_root method")
         return self._root
 
-    @property
     def _assert_write_mode(self):
         if not self._write:
             raise IOError("Model opened in read-only mode")
 
-    @property
     def _assert_read_mode(self):
         if not self._read:
             raise IOError("Model opened in write-only mode")
@@ -502,15 +511,7 @@ class Model(object, metaclass=ABCMeta):
     # I/O
     def read(
         self,
-        components: List = [
-            "config",
-            "staticmaps",
-            "maps",
-            "geoms",
-            "forcing",
-            "states",
-            "results",
-        ],
+        components: List = None,
     ) -> None:
         """Read the complete model schematization and configuration from model files.
 
@@ -521,6 +522,17 @@ class Model(object, metaclass=ABCMeta):
             read_<component> method. By default ['config', 'maps', 'staticmaps',
             'geoms', 'forcing', 'states', 'results']
         """
+        if components is None:
+            components = [
+                "config",
+                "staticmaps",
+                "maps",
+                "tables",
+                "geoms",
+                "forcing",
+                "states",
+                "results",
+            ]
         self.logger.info(f"Reading model data from {self.root}")
         for component in components:
             if not hasattr(self, f"read_{component}"):
@@ -531,14 +543,7 @@ class Model(object, metaclass=ABCMeta):
 
     def write(
         self,
-        components: List = [
-            "staticmaps",
-            "maps",
-            "geoms",
-            "forcing",
-            "states",
-            "config",
-        ],
+        components: List = None,
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -549,6 +554,16 @@ class Model(object, metaclass=ABCMeta):
             associated write_<component> method. By default ['config', 'maps',
             'staticmaps', 'geoms', 'forcing', 'states']
         """
+        if components is None:
+            components = [
+                "staticmaps",
+                "maps",
+                "tables",
+                "geoms",
+                "forcing",
+                "states",
+                "config",
+            ]
         self.logger.info(f"Writing model data to {self.root}")
         for component in components:
             if not hasattr(self, f"write_{component}"):
@@ -581,19 +596,15 @@ class Model(object, metaclass=ABCMeta):
         """
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
-        # read hydromt_data configuration file and add to data catalog
+        # read hydromt_data yml file and add to data catalog
         if self._read and isfile(path) and append:
             cat.from_yml(path)
         # update data catalog with new used sources
-        source_names = (
-            self.data_catalog._used_data
-            if used_only
-            else list(self.data_catalog.sources.keys())
-        )
-        if len(source_names) > 0:
-            cat.from_dict(self.data_catalog.to_dict(source_names=source_names))
+        for name, source in self.data_catalog.iter_sources(used_only=used_only):
+            cat.add_source(name, source)
+        # write data catalog
         if cat.sources:
-            self._assert_write_mode
+            self._assert_write_mode()
             cat.to_yml(path, root=root)
 
     # model configuration
@@ -702,6 +713,77 @@ class Model(object, metaclass=ABCMeta):
     def _configwrite(self, fn: str):
         return config.configwrite(fn, self.config)
 
+    @property
+    def tables(self) -> Dict[str, pd.DataFrame]:
+        """Model tables."""
+        if self._tables is None:
+            self._tables = dict()
+            if self._read:
+                self.read_tables()
+        return self._tables
+
+    def write_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
+        """Write tables at <root>/tables."""
+        if self.tables:
+            self._assert_write_mode()
+            self.logger.info("Writing table files.")
+            local_kwargs = {"index": False, "header": True, "sep": ","}
+            local_kwargs.update(**kwargs)
+            for name in self.tables:
+                fn_out = join(self.root, fn.format(name=name))
+                os.makedirs(dirname(fn_out), exist_ok=True)
+                self.tables[name].to_csv(fn_out, **local_kwargs)
+        else:
+            self.logger.debug("No tables found, skip writing.")
+
+    def read_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
+        """Read table files at <root>/tables and parse to dict of dataframes."""
+        self._assert_read_mode()
+        self.logger.info("Reading model table files.")
+        fns = glob.glob(join(self.root, fn.format(name="*")))
+        if len(fns) > 0:
+            for fn in fns:
+                name = basename(fn).split(".")[0]
+                tbl = pd.read_csv(fn, **kwargs)
+                self.set_tables(tbl, name=name)
+
+    def set_tables(
+        self, tables: Union[pd.DataFrame, pd.Series, Dict], name=None
+    ) -> None:
+        """Add (a) table(s) <pandas.DataFrame> to model.
+
+        Parameters
+        ----------
+        tables : pandas.DataFrame, pandas.Series or dict
+            Table(s) to add to model.
+            Multiple tables can be added at once by passing a dict of tables.
+        name : str, optional
+            Name of table, by default None. Required when tables is not a dict.
+        """
+        if not isinstance(tables, dict) and name is None:
+            raise ValueError("name required when tables is not a dict")
+        elif not isinstance(tables, dict):
+            tables = {name: tables}
+        for name, df in tables.items():
+            if not (isinstance(df, pd.DataFrame) or isinstance(df, pd.Series)):
+                raise ValueError(
+                    "table type not recognized, should be pandas DataFrame or Series."
+                )
+            if name in self.tables:
+                if not self._write:
+                    raise IOError(f"Cannot overwrite table {name} in read-only mode")
+                elif self._read:
+                    self.logger.warning(f"Overwriting table: {name}")
+
+            self.tables[name] = df
+
+    def get_tables_merged(self) -> pd.DataFrame:
+        """Return all tables of a model merged into one dataframe."""
+        # This is mostly used for convenience and testing.
+        return pd.concat(
+            [df.assign(table_origin=name) for name, df in self.tables.items()], axis=0
+        )
+
     def read_config(self, config_fn: Optional[str] = None):
         """Parse config from file.
 
@@ -741,7 +823,7 @@ class Model(object, metaclass=ABCMeta):
         self, config_name: Optional[str] = None, config_root: Optional[str] = None
     ):
         """Write config to <root/config_fn>."""
-        self._assert_write_mode
+        self._assert_write_mode()
         if config_name is not None:
             self._config_fn = config_name
         elif self._config_fn is None:
@@ -764,6 +846,7 @@ class Model(object, metaclass=ABCMeta):
             "The staticmaps property of the Model class will be deprecated in future"
             "versions. Use the grid property of the GridModel class instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         if self._staticmaps is None:
             self._staticmaps = xr.Dataset()
@@ -792,6 +875,7 @@ class Model(object, metaclass=ABCMeta):
             "The set_staticmaps method will be deprecated in future versions, "
             + "use set_grid instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         if name is None:
             if isinstance(data, xr.DataArray) and data.name is not None:
@@ -837,7 +921,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `read_nc` function.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         for ds in self.read_nc(fn, **kwargs).values():
             self.set_staticmaps(ds)
 
@@ -860,7 +944,7 @@ class Model(object, metaclass=ABCMeta):
         if len(self.staticmaps) == 0:
             self.logger.debug("No staticmaps data found, skip writing.")
         else:
-            self._assert_write_mode
+            self._assert_write_mode()
             # write_nc requires dict - use dummy 'staticmaps' key
             nc_dict = {"staticmaps": self.staticmaps}
             self.write_nc(nc_dict, fn, **kwargs)
@@ -874,7 +958,7 @@ class Model(object, metaclass=ABCMeta):
         name: Optional[str] = None,
         reproject_method: Optional[str] = None,
         split_dataset: Optional[bool] = True,
-        rename: Optional[Dict] = dict(),
+        rename: Optional[Dict] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to maps object.
 
@@ -911,6 +995,7 @@ class Model(object, metaclass=ABCMeta):
         list
             Names of added model map layers
         """
+        rename = rename or {}
         self.logger.info(f"Preparing maps data from raster source {raster_fn}")
         # Read raster data and select variables
         ds = self.data_catalog.get_rasterdataset(
@@ -941,7 +1026,7 @@ class Model(object, metaclass=ABCMeta):
         reproject_method: Optional[str] = None,
         name: Optional[str] = None,
         split_dataset: Optional[bool] = True,
-        rename: Optional[Dict] = dict(),
+        rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
@@ -990,6 +1075,7 @@ class Model(object, metaclass=ABCMeta):
         list
             Names of added model map layers
         """  # noqa: E501
+        rename = rename or {}
         self.logger.info(
             f"Preparing map data by reclassifying the data in {raster_fn} based"
             f" on {reclass_table_fn}"
@@ -1069,7 +1155,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `read_nc` function.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_maps(ds, name=name)
@@ -1091,7 +1177,7 @@ class Model(object, metaclass=ABCMeta):
         if len(self.maps) == 0:
             self.logger.debug("No maps data found, skip writing.")
         else:
-            self._assert_write_mode
+            self._assert_write_mode()
             self.write_nc(self.maps, fn, **kwargs)
 
     # model geometry files
@@ -1141,7 +1227,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         fns = glob.glob(join(self.root, fn))
         for fn in fns:
             name = basename(fn).split(".")[0]
@@ -1165,7 +1251,7 @@ class Model(object, metaclass=ABCMeta):
         if len(self.geoms) == 0:
             self.logger.debug("No geoms data found, skip writing.")
             return
-        self._assert_write_mode
+        self._assert_write_mode()
         if "driver" not in kwargs:
             kwargs.update(driver="GeoJSON")  # default
         for name, gdf in self.geoms.items():
@@ -1191,6 +1277,7 @@ class Model(object, metaclass=ABCMeta):
             "The staticgeoms method will be deprecated in future versions,"
             " use geoms instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         if self._geoms is None and self._read:
             self.read_staticgeoms()
@@ -1207,6 +1294,7 @@ class Model(object, metaclass=ABCMeta):
             "The set_staticgeoms method will be deprecated in future versions,"
             " use set_geoms instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.set_geoms(geom, name)
 
@@ -1220,6 +1308,7 @@ class Model(object, metaclass=ABCMeta):
             'The read_staticgeoms" method will be deprecated in future versions," \
             " use read_geoms instead.',
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.read_geoms(fn="staticgeoms/*.geojson")
 
@@ -1233,6 +1322,7 @@ class Model(object, metaclass=ABCMeta):
             'The "write_staticgeoms" method will be deprecated in future versions,"\
              " use  "write_geoms" instead.',
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.write_geoms(fn="staticgeoms/{name}.geojson")
 
@@ -1248,21 +1338,28 @@ class Model(object, metaclass=ABCMeta):
 
     def set_forcing(
         self,
-        data: Union[xr.DataArray, xr.Dataset],
+        data: Union[xr.DataArray, xr.Dataset, pd.DataFrame],
         name: Optional[str] = None,
         split_dataset: Optional[bool] = True,
     ):
         """Add data to forcing attribute.
 
+        Data can be xarray.DataArray, xarray.Dataset or pandas.DataFrame.
+        If pandas.DataFrame, indices should be the DataFrame index and the columns
+        the variable names. the DataFrame will then be converted to xr.Dataset using
+        :py:meth:`pandas.DataFrame.to_xarray` method.
+
         Arguments
         ---------
-        data: xarray.Dataset or xarray.DataArray
+        data: xarray.Dataset or xarray.DataArray or pd.DataFrame
             New forcing data to add
         name: str, optional
             Results name, required if data is xarray.Dataset is and split_dataset=False.
         split_dataset: bool, optional
             If True (default), split a Dataset to store each variable as a DataArray.
         """
+        if isinstance(data, pd.DataFrame):
+            data = data.to_xarray()
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
             if name in self.forcing:  # trigger init / read
@@ -1282,7 +1379,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_forcing(ds, name=name)
@@ -1304,7 +1401,7 @@ class Model(object, metaclass=ABCMeta):
         if len(self.forcing) == 0:
             self.logger.debug("No forcing data found, skip writing.")
         else:
-            self._assert_write_mode
+            self._assert_write_mode()
             self.write_nc(self.forcing, fn, **kwargs)
 
     # model state files
@@ -1353,7 +1450,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_states(ds, name=name, split_dataset=True)
@@ -1375,7 +1472,7 @@ class Model(object, metaclass=ABCMeta):
         if len(self.states) == 0:
             self.logger.debug("No states data found, skip writing.")
         else:
-            self._assert_write_mode
+            self._assert_write_mode()
             self.write_nc(self.states, fn, **kwargs)
 
     # model results files; NOTE we don't have a write_results method
@@ -1429,7 +1526,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_results(ds, name=name)
@@ -1481,7 +1578,7 @@ class Model(object, metaclass=ABCMeta):
 
     def write_nc(
         self,
-        nc_dict: Dict[str, Union[xr.DataArray, xr.Dataset]],
+        nc_dict: XArrayDict,
         fn: str,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
@@ -1626,6 +1723,7 @@ class Model(object, metaclass=ABCMeta):
             '"set_crs" is deprecated. Please set the crs of all model'
             " components instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         if len(self.staticmaps) > 0:
             return self.staticmaps.raster.set_crs(crs)
@@ -1716,6 +1814,7 @@ class Model(object, metaclass=ABCMeta):
                 'Defining "region" based on staticmaps will be deprecated. Either use'
                 " region from GridModel or define your own method.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             crs = self.staticmaps.raster.crs
             if crs is None and hasattr(crs, "to_epsg"):
@@ -1732,6 +1831,7 @@ class Model(object, metaclass=ABCMeta):
             '"test_model_api" is now part of the internal API, use "_test_model_api"'
             " instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self._test_model_api()
 
@@ -1755,7 +1855,7 @@ class Model(object, metaclass=ABCMeta):
 
         return non_compliant
 
-    def _test_equal(self, other, skip_component=["root"]) -> Tuple[bool, Dict]:
+    def _test_equal(self, other, skip_component=None) -> Tuple[bool, Dict]:
         """Test if two models including their data components are equal.
 
         Parameters
@@ -1772,6 +1872,7 @@ class Model(object, metaclass=ABCMeta):
         errors: dict
             Dictionary with errors per model component which is not equal
         """
+        skip_component = skip_component or ["root"]
         assert isinstance(other, type(self))
         components = list(self.api.keys())
         components_other = list(other.api.keys())

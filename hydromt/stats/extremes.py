@@ -717,7 +717,7 @@ def plot_return_values(
     ax.legend(loc="upper left")
 
     ymin = 0
-    ymax = np.max([np.max(rvs_obs), np.max(rvs_sim), 0])
+    ymax = np.nanmax([np.nanmax(rvs_obs), np.nanmax(rvs_sim), 0])
     ymax = ymax * 1.1
     ax.set_ylim(ymin, ymax)
 
@@ -735,7 +735,7 @@ def plot_return_values(
 # credits Ferdinand Diermanse
 
 
-def lmoment_fitopt(x, distributions=["gumb", "gev"], criterium="AIC"):
+def lmoment_fitopt(x, distributions=None, criterium="AIC"):
     """Return parameters based on lmoments fit.
 
     Lmomentfit routine derive parameters of a distribution function
@@ -760,14 +760,10 @@ def lmoment_fitopt(x, distributions=["gumb", "gev"], criterium="AIC"):
     distribution: str
         selected distribution
     """
-    _FGOF = {"AIC": _aic, "AICC": _aicc, "BIC": _bic}
-    fgof = _FGOF.get(criterium.upper())
-    if fgof is None:
-        raise ValueError(f"Unknown criterium {criterium}, select from {_FGOF.keys()}.")
-    x = x[np.isfinite(x)]
-    if x.size <= 2:
-        # logger.warning("Not enough data to fit distribution")
-        return np.array([np.nan, np.nan, np.nan]), "NA"
+    fgof = {"AIC": _aic, "AICC": _aicc, "BIC": _bic}.get(criterium.upper())
+    # make sure the timeseries does not contain NaNs
+    x = x[~np.isnan(x)]
+
     # derive first four L-moments from data
     lmom = get_lmom(x, 4)
     # derive parameters of distribution function

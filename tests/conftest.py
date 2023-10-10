@@ -19,9 +19,9 @@ if compat.HAS_XUGRID:
 from hydromt import (
     MODELS,
     GridModel,
-    LumpedModel,
     Model,
     NetworkModel,
+    VectorModel,
     gis_utils,
     raster,
     vector,
@@ -98,6 +98,7 @@ def dfs_segmented_by_vars(dfs_segmented_by_points):
     tmp = dfs_segmented_by_points.copy()
     for i, df in tmp.items():
         df.insert(0, "id", i)
+        df.reset_index(inplace=True)
 
     return {
         v: pd.concat(tmp.values()).pivot(index="time", columns="id", values=v)
@@ -282,8 +283,8 @@ def grid_model(demda, flwda):
 
 
 @pytest.fixture()
-def lumped_model(ts, geodf):
-    mod = LumpedModel()
+def vector_model(ts, geodf):
+    mod = VectorModel()
     mod.setup_config(**{"header": {"setting": "value"}})
     da = xr.DataArray(
         ts,
@@ -293,7 +294,7 @@ def lumped_model(ts, geodf):
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
     da.vector.set_crs(geodf.crs)
-    mod.set_response_units(da)
+    mod.set_vector(da)
     return mod
 
 

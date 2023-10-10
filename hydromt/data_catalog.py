@@ -10,9 +10,10 @@ import logging
 import os
 import shutil
 import warnings
+from datetime import datetime
 from os.path import abspath, basename, exists, isdir, isfile, join
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Dict, Iterator, List, Optional, Tuple, TypedDict, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -20,6 +21,7 @@ import pandas as pd
 import requests
 import xarray as xr
 import yaml
+from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 from hydromt.utils import partition_dictionaries
@@ -44,6 +46,13 @@ __all__ = [
 SourceSpecDict = TypedDict(
     "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
 )
+Extent = TypedDict(
+    "Extent",
+    {
+        "bbox": Tuple[float, float, float, float],
+        "time_range": Tuple[datetime, datetime],
+    },
+)
 
 
 class DataCatalog(object):
@@ -56,11 +65,11 @@ class DataCatalog(object):
 
     def __init__(
         self,
-        data_libs: Union[List, str] = [],
+        data_libs: Optional[Union[List, str]] = None,
         fallback_lib: Optional[str] = "artifact_data",
         logger=logger,
-        cache: bool = False,
-        cache_dir: str = None,
+        cache: Optional[bool] = False,
+        cache_dir: Optional[str] = None,
         **artifact_keys,
     ) -> None:
         """Catalog of DataAdapter sources.
@@ -90,13 +99,12 @@ class DataCatalog(object):
             The logger object used for logging messages. If not provided, the default
             logger will be used.
         """
-        if data_libs is None:  # legacy code. to be removed
+        if data_libs is None:
             data_libs = []
         elif not isinstance(data_libs, list):  # make sure data_libs is a list
             data_libs = np.atleast_1d(data_libs).tolist()
         self._sources = {}  # dictionary of DataAdapter
         self._catalogs = {}  # dictionary of predefined Catalogs
-        self._used_data = []
         self._fallback_lib = fallback_lib
         self.logger = logger
 
@@ -109,8 +117,10 @@ class DataCatalog(object):
         for lib, version in artifact_keys.items():
             warnings.warn(
                 "Adding a predefined data catalog as key-word argument is deprecated, "
-                f"add the catalog as '{lib}={version}' to the data_libs list instead.",
+                f"add the catalog as '{lib}={version}'"
+                " to the data_libs list instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             if not version:  # False or None
                 continue
@@ -140,6 +150,7 @@ class DataCatalog(object):
             "Using iterating over the DataCatalog directly is deprecated."
             "Please use cat.get_source()",
             DeprecationWarning,
+            stacklevel=2,
         )
         return list(self._sources.keys())
 
@@ -154,8 +165,101 @@ class DataCatalog(object):
             self.set_predefined_catalogs()
         return self._catalogs
 
+    def get_source_bbox(
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
+        detect: bool = True,
+        strict: bool = False,
+    ) -> Optional[Tuple[Tuple[float, float, float, float], int]]:
+        """Retrieve the bounding box and crs of the source.
+
+        Parameters
+        ----------
+        source: str,
+            the name of the data source.
+        provider: Optional[str]
+            the provider of the source to detect the bbox of, if None, the last one
+            added will be used.
+        version: Optional[str]
+            the version of the source to detect the bbox of, if None, the last one
+            added will be used.
+        detect: bool
+            Whether to detect the bbox of the source if it is not set.
+        strict: bool
+            Raise an error if the adapter does not support bbox detection (such as
+            dataframes). In that case, a warning will be logged instead.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        s = self.get_source(source, provider, version)
+        try:
+            return s.get_bbox(detect=detect)  # type: ignore
+        except TypeError as e:
+            if strict:
+                raise e
+            else:
+                self.logger.warning(
+                    f"Source of type {type(s)} does not support detecting spatial"
+                    "extents. skipping..."
+                )
+
+    def get_source_time_range(
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
+        detect: bool = True,
+        strict: bool = False,
+    ) -> Optional[Tuple[datetime, datetime]]:
+        """Detect the temporal range of the dataset.
+
+        Parameters
+        ----------
+        source: str,
+            the name of the data source.
+        provider: Optional[str]
+            the provider of the source to detect the time range of, if None,
+            the last one added will be used.
+        version: Optional[str]
+            the version of the source to detect the time range of, if None, the last one
+            added will be used.
+        detect: bool
+            Whether to detect the time range of the source if it is not set.
+        strict: bool
+            Raise an error if the adapter does not support time range detection (such as
+            dataframes). In that case, a warning will be logged instead.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        s = self.get_source(source, provider, version)
+        try:
+            return s.get_time_range(detect=detect)  # type: ignore
+        except TypeError as e:
+            if strict:
+                raise e
+            else:
+                self.logger.warning(
+                    f"Source of type {type(s)} does not support detecting"
+                    " temporalextents. skipping..."
+                )
+
     def get_source(
-        self, source: str, provider: Optional[str] = None, version: Optional[str] = None
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
     ) -> DataAdapter:
         """Return a data source.
 
@@ -214,11 +318,11 @@ class DataCatalog(object):
         else:
             requested_version = version
             if requested_version not in available_versions:
-                data_versions = sorted(list(map(str, available_versions.keys())))
+                versions = sorted(list(map(str, available_versions.keys())))
                 raise KeyError(
                     f"Requested unknown version '{requested_version}' for "
                     f"data source '{source}' and provider '{requested_provider}' "
-                    f"available versions are {data_versions}"
+                    f"available versions are {versions}"
                 )
 
         return self._sources[source][requested_provider][requested_version]
@@ -268,6 +372,7 @@ class DataCatalog(object):
                     f"overwriting data source '{source}' with "
                     f"provider {provider} and version {version}.",
                     UserWarning,
+                    stacklevel=2,
                 )
             # update and sort dictionary -> make sure newest version is last
             versions.update({version: adapter})
@@ -281,6 +386,7 @@ class DataCatalog(object):
             'Using iterating over the DataCatalog directly is deprecated."\
             " Please use cat.get_source("name")',
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.get_source(key)
 
@@ -290,27 +396,87 @@ class DataCatalog(object):
             "Using DataCatalog as a dictionary directly is deprecated."
             " Please use cat.add_source(adapter)",
             DeprecationWarning,
+            stacklevel=2,
         )
         self.add_source(key, value)
 
-    def iter_sources(self) -> List[Tuple[str, DataAdapter]]:
-        """Return a flat list of all available data sources with no duplicates."""
+    def iter_sources(self, used_only=False) -> List[Tuple[str, DataAdapter]]:
+        """Return a flat list of all available data sources.
+
+        Parameters
+        ----------
+        used_only: bool, optional
+            If True, return only data entries marked as used, by default False.
+        """
         ans = []
         for source_name, available_providers in self._sources.items():
             for _, available_versions in available_providers.items():
                 for _, adapter in available_versions.items():
+                    if used_only and not adapter._used:
+                        continue
                     ans.append((source_name, adapter))
 
         return ans
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Tuple[str, DataAdapter]]:
         """Iterate over sources."""
+        return iter(self.iter_sources())
+
+    def __contains__(self, key: str) -> bool:
+        """Check if source is in catalog."""
         warnings.warn(
-            "Using iterating over the DataCatalog directly is deprecated."
-            " Please use cat.iter_sources()",
+            "Directly checking for containement is deprecated. "
+            " Use 'contains_source' instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
-        return self.iter_sources()
+
+        return self.contains_source(key)
+
+    def contains_source(
+        self,
+        source: str,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
+        permissive: bool = True,
+    ) -> bool:
+        """
+        Check if source is in catalog.
+
+        Parameters
+        ----------
+        source : str
+            Name of the data source.
+        provider : str, optional
+            Name of the data provider, by default None.
+            By default the last added provider is returned.
+        version : str, optional
+            Version of the data source, by default None.
+            By default the newest version of the requested provider is returned.
+        permissive : bool, optional
+            Whether variant checking is necessary. If true, the name of the source
+            only is checked, if false, and at least one of version or provider is
+            not None, this will only return True if that variant specifically is
+            available.
+
+
+        Returns
+        -------
+        bool
+            whether the source (with specified variants if necessary) is available
+        """
+        if permissive or (version is None and provider is None):
+            return source in self._sources
+        else:
+            if version:
+                if version not in self._sources[source]:
+                    return False
+                else:
+                    selected_version = version
+            else:
+                selected_version = next(iter(self._sources[source].keys()))
+
+            return provider not in self._sources[source][selected_version].keys()
 
     def __len__(self):
         """Return number of sources."""
@@ -349,7 +515,9 @@ class DataCatalog(object):
         """Add data sources to library or update them."""
         self.update(**kwargs)
 
-    def set_predefined_catalogs(self, urlpath: Union[Path, str] = None) -> Dict:
+    def set_predefined_catalogs(
+        self, urlpath: Optional[Union[Path, str]] = None
+    ) -> Dict:
         """Initialise the predefined catalogs."""
         # get predefined_catalogs
         urlpath = self._url if urlpath is None else urlpath
@@ -394,6 +562,7 @@ class DataCatalog(object):
         warnings.warn(
             '"from_artifacts" is deprecated. Use "from_predefined_catalogs instead".',
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.from_predefined_catalogs(name, version)
 
@@ -423,23 +592,43 @@ class DataCatalog(object):
         urlpath = self.predefined_catalogs[name].get("urlpath")
         versions_dict = self.predefined_catalogs[name].get("versions")
         if version == "latest" or not isinstance(version, str):
+            # if a specific version is requested, we don't have to try others
             versions = list(versions_dict.keys())
             if len(versions) > 1:
                 version = versions[np.argmax([Version(v) for v in versions])]
             else:
                 version = versions[0]
-        urlpath = urlpath.format(version=versions_dict.get(version, version))
-        if urlpath.split(".")[-1] in ["gz", "zip"]:
-            self.logger.info(f"Reading data catalog {name} {version} from archive")
-            self.from_archive(urlpath, name=name, version=version)
-        else:
-            self.logger.info(f"Reading data catalog {name} {version}")
-            self.from_yml(urlpath, catalog_name=name)
+
+        if version not in versions_dict:
+            raise RuntimeError(
+                f"Unknown version requested {version}. "
+                f"options are :{versions_dict.keys()}"
+            )
+        possible_catalg_versions = [(Version(k), v) for k, v in versions_dict.items()]
+        possible_catalg_versions_sorted = reversed(sorted(possible_catalg_versions))
+
+        for _, identifier in possible_catalg_versions_sorted:
+            try:
+                urlpath = urlpath.format(version=identifier)
+                if urlpath.split(".")[-1] in ["gz", "zip"]:
+                    self.logger.info(f"Reading data catalog archive {name} {version}")
+                    self.from_archive(urlpath, name=name, version=version)
+                else:
+                    self.logger.info(f"Reading data catalog {name} {version}")
+                    self.from_yml(urlpath, catalog_name=name)
+                return self
+            except RuntimeError:
+                continue
+
+        raise RuntimeError("No compatible compatible catalog version could be found")
 
     def from_archive(
-        self, urlpath: Union[Path, str], version: str = None, name: str = None
+        self,
+        urlpath: Union[Path, str],
+        version: Optional[str] = None,
+        name: Optional[str] = None,
     ) -> DataCatalog:
-        """Read a data archive including a data_catalog.yml file.
+        """Read and cache a data archive including a data_catalog.yml file.
 
         Parameters
         ----------
@@ -455,29 +644,56 @@ class DataCatalog(object):
         DataCatalog
             DataCatalog object with parsed data archive added.
         """
-        name = basename(urlpath).split(".")[0] if name is None else name
+        # add depreaction warning
+        root = self._cache_archive(urlpath, version=version, name=name)
+        yml_fn = join(root, "data_catalog.yml")
+        # parse catalog
+        return self.from_yml(yml_fn, catalog_name=name)
+
+    def _cache_archive(
+        self,
+        archive_fn: Union[Path, str],
+        version: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> DataCatalog:
+        """Cache a data archive.
+
+        Parameters
+        ----------
+        archive_fn : str, Path
+            Path or url to data archive.
+        version : str, optional
+            Version of data archive, by default None.
+        name : str, optional
+            Name of data catalog, by default None.
+
+        Returns
+        -------
+        DataCatalog
+            DataCatalog object with parsed data archive added.
+        """
+        name = basename(archive_fn).split(".")[0] if name is None else name
         root = join(self._cache_dir, name)
         if version is not None:
             root = join(root, version)
-        archive_fn = join(root, basename(urlpath))
-        yml_fn = join(root, "data_catalog.yml")
+        archive_dst_fn = join(root, basename(archive_fn))
+        # copy archive to cache
         if not isdir(root):
-            os.makedirs(root)
-        # download data if url
-        if _uri_validator(str(urlpath)) and not isfile(archive_fn):
-            _copyfile(urlpath, archive_fn)
-        # unpack data
-        if not isfile(yml_fn):
+            self.logger.debug(f"Caching data from {archive_fn}")
+            os.makedirs(root, exist_ok=True)
+            _copyfile(archive_fn, archive_dst_fn)
+        # unpack data and remove archive
+        if isfile(archive_dst_fn):
             self.logger.debug(f"Unpacking data from {archive_fn}")
-            shutil.unpack_archive(archive_fn, root)
-        # parse catalog
-        return self.from_yml(yml_fn, catalog_name=name)
+            shutil.unpack_archive(archive_dst_fn, root)
+            os.remove(archive_dst_fn)
+        return root
 
     def from_yml(
         self,
         urlpath: Union[Path, str],
-        root: str = None,
-        catalog_name: str = None,
+        root: Optional[str] = None,
+        catalog_name: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
         """Add data sources based on yaml file.
@@ -545,30 +761,43 @@ class DataCatalog(object):
             warnings.warn(
                 "The 'root' key is deprecated, use 'meta: root' instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             meta.update(root=yml.pop("root"))
         if "category" in yml:
             warnings.warn(
                 "The 'category' key is deprecated, use 'meta: category' instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             meta.update(category=yml.pop("category"))
 
         # read meta data
         meta = yml.pop("meta", meta)
         # check version required hydromt version
-        hydromt_version = meta.get("hydromt_version", __version__)
-        self_version = Version(__version__)
-        yml_version = Version(hydromt_version)
-        if yml_version > self_version:
-            self.logger.warning(
-                f"Specified HydroMT version ({hydromt_version}) \
-                  more recent than installed version ({__version__}).",
-            )
+        requested_version = meta.get("hydromt_version", None)
+        if requested_version is not None:
+            allow_dev = meta.get("allow_dev_version", True)
+            if not self._is_compatible(__version__, requested_version, allow_dev):
+                raise RuntimeError(
+                    f"Data catalog requires Hydromt Version {requested_version} which "
+                    f"is incompattible with current hydromt verison {__version__}."
+                )
         if catalog_name is None:
-            catalog_name = meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
+            catalog_name = cast(
+                str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
+            )
+        version = meta.get("version", None)
         if root is None:
             root = meta.get("root", os.path.dirname(urlpath))
+        if root.split(".")[-1] in ["gz", "zip"]:
+            # if root is an archive, unpack it at the cache dir
+            root = self._cache_archive(root, name=catalog_name, version=version)
+            # save catalog to cache
+            with open(join(root, f"{catalog_name}.yml"), "w") as f:
+                data_dict = {"meta": {k: v for k, v in meta.items() if k != "root"}}
+                data_dict.update(yml)
+                yaml.dump(data_dict, f, default_flow_style=False, sort_keys=False)
         self.from_dict(
             yml,
             catalog_name=catalog_name,
@@ -576,13 +805,27 @@ class DataCatalog(object):
             category=meta.get("category", None),
             mark_used=mark_used,
         )
+        return self
+
+    def _is_compatible(
+        self, hydromt_version: str, requested_range: str, allow_prerelease=True
+    ) -> bool:
+        if requested_range is None:
+            return True
+        requested = SpecifierSet(requested_range)
+        version = Version(hydromt_version)
+
+        if allow_prerelease:
+            return version in requested or Version(version.base_version) in requested
+        else:
+            return version in requested
 
     def from_dict(
         self,
         data_dict: Dict,
         catalog_name: str = "",
-        root: Union[str, Path] = None,
-        category: str = None,
+        root: Optional[Union[str, Path]] = None,
+        category: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
         """Add data sources based on dictionary.
@@ -643,9 +886,9 @@ class DataCatalog(object):
                 root=root,
                 category=category,
             )
-            self.add_source(name, adapter)
             if mark_used:
-                self._used_data.append(name)
+                adapter.mark_as_used()
+            self.add_source(name, adapter)
 
         return self
 
@@ -655,7 +898,7 @@ class DataCatalog(object):
         root: str = "auto",
         source_names: Optional[List] = None,
         used_only: bool = False,
-        meta: Dict = {},
+        meta: Optional[Dict] = None,
     ) -> None:
         """Write data catalog to yaml format.
 
@@ -676,11 +919,13 @@ class DataCatalog(object):
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
         """
-        source_names = self._used_data if used_only else source_names
+        meta = meta or []
         yml_dir = os.path.dirname(abspath(path))
         if root == "auto":
             root = yml_dir
-        data_dict = self.to_dict(root=root, source_names=source_names, meta=meta)
+        data_dict = self.to_dict(
+            root=root, source_names=source_names, meta=meta, used_only=used_only
+        )
         if str(root) == yml_dir:
             data_dict.pop("root", None)  # remove root if it equals the yml_dir
         if data_dict:
@@ -693,7 +938,8 @@ class DataCatalog(object):
         self,
         source_names: Optional[List] = None,
         root: Union[Path, str] = None,
-        meta: dict = {},
+        meta: Optional[dict] = None,
+        used_only: bool = False,
     ) -> Dict:
         """Export the data catalog to a dictionary.
 
@@ -707,18 +953,22 @@ class DataCatalog(object):
         meta: dict, optional
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
+        used_only: bool, optional
+            If True, export only data entries marked as used, by default False.
 
         Returns
         -------
         dict
             data catalog dictionary
         """
+        meta = meta or {}
         sources_out = dict()
         if root is not None:
             root = abspath(root)
             meta.update(**{"root": root})
             root_drive = os.path.splitdrive(root)[0]
-        sorted_sources = sorted(self.iter_sources(), key=lambda x: x[0])
+        sources = self.iter_sources(used_only=used_only)
+        sorted_sources = sorted(sources, key=lambda x: x[0])
         for name, source in sorted_sources:  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
@@ -767,8 +1017,9 @@ class DataCatalog(object):
             sources_out = {"meta": meta, **sources_out}
         return sources_out
 
-    def to_dataframe(self, source_names: List = []) -> pd.DataFrame:
+    def to_dataframe(self, source_names: Optional[List] = None) -> pd.DataFrame:
         """Return data catalog summary as DataFrame."""
+        source_names = source_names or []
         d = []
         for name, source in self.iter_sources():
             if len(source_names) > 0 and name not in source_names:
@@ -788,9 +1039,9 @@ class DataCatalog(object):
         data_root: Union[Path, str],
         bbox: List = None,
         time_tuple: Tuple = None,
-        source_names: List = [],
+        source_names: Optional[List] = None,
         unit_conversion: bool = True,
-        meta: Dict = {},
+        meta: Optional[Dict] = None,
         append: bool = False,
     ) -> None:
         """Export a data slice of each dataset and a data_catalog.yml file to disk.
@@ -818,6 +1069,8 @@ class DataCatalog(object):
         append: bool, optional
             If True, append to existing data catalog, by default False.
         """
+        source_names = source_names or []
+        meta = meta or {}
         data_root = abspath(data_root)
         if not os.path.isdir(data_root):
             os.makedirs(data_root)
@@ -910,8 +1163,8 @@ class DataCatalog(object):
         # write data catalog to yml
         data_catalog_out = DataCatalog()
         for key, available_variants in sources_out.items():
-            for provider, available_versions in available_variants.items():
-                for version, adapter in available_versions.items():
+            for _provider, available_versions in available_variants.items():
+                for _version, adapter in available_versions.items():
                     data_catalog_out.add_source(key, adapter)
 
         data_catalog_out.to_yml(fn, root="auto", meta=meta)
@@ -1021,8 +1274,6 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
-        # TODO add also provider and version to used data
-        self._used_data.append(name)
         obj = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1099,7 +1350,7 @@ class DataCatalog(object):
             )
         if isinstance(data_like, (str, Path)):
             if str(data_like) in self.sources:
-                name = data_like
+                name = str(data_like)
                 source = self.get_source(name, provider=provider, version=version)
             elif exists(abspath(data_like)):
                 path = str(abspath(data_like))
@@ -1117,7 +1368,6 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
-        self._used_data.append(name)
         gdf = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1224,7 +1474,6 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
-        self._used_data.append(name)
         obj = source.get_data(
             bbox=bbox,
             geom=geom,
@@ -1294,7 +1543,6 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
-        self._used_data.append(name)
         obj = source.get_data(
             variables=variables,
             time_tuple=time_tuple,
@@ -1324,8 +1572,8 @@ def _parse_data_source_dict(
     name: str,
     data_source_dict: Dict,
     catalog_name: str = "",
-    root: Union[Path, str] = None,
-    category: str = None,
+    root: Optional[Union[Path, str]] = None,
+    category: Optional[str] = None,
 ) -> Dict:
     """Parse data source dictionary."""
     # link yml keys to adapter classes
@@ -1414,6 +1662,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                 "The use of alias is deprecated, please add a version on the aliased"
                 "catalog instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             if alias not in data_dict:
                 raise ValueError(f"alias {alias} not found in data_dict.")

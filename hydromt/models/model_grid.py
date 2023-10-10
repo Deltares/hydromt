@@ -80,7 +80,7 @@ class GridMixin(object):
         fill_method: Optional[str] = None,
         reproject_method: Optional[Union[List, str]] = "nearest",
         mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = dict(),
+        rename: Optional[Dict] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
 
@@ -118,6 +118,7 @@ class GridMixin(object):
         list
             Names of added model map layers
         """
+        rename = rename or {}
         self.logger.info(f"Preparing grid data from raster source {raster_fn}")
         # Read raster data and select variables
         ds = self.data_catalog.get_rasterdataset(
@@ -151,7 +152,7 @@ class GridMixin(object):
         fill_method: Optional[str] = None,
         reproject_method: Optional[Union[List, str]] = "nearest",
         mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = dict(),
+        rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
@@ -197,6 +198,7 @@ class GridMixin(object):
         list
             Names of added model grid layers
         """  # noqa: E501
+        rename = rename or dict()
         self.logger.info(
             f"Preparing grid data by reclassifying the data in {raster_fn} based "
             f"on {reclass_table_fn}"
@@ -236,7 +238,7 @@ class GridMixin(object):
         nodata: Optional[Union[List, int, float]] = -1,
         rasterize_method: Optional[str] = "value",
         mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = dict(),
+        rename: Optional[Dict] = None,
         all_touched: Optional[bool] = True,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
@@ -281,6 +283,7 @@ class GridMixin(object):
         list
             Names of added model grid layers
         """  # noqa: E501
+        rename = rename or dict()
         self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
         gdf = self.data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs
@@ -376,7 +379,7 @@ class GridMixin(object):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self._assert_read_mode
+        self._assert_read_mode()
         # Load grid data in r+ mode to allow overwritting netcdf files
         if self._read and self._write:
             kwargs["load"] = True
@@ -415,7 +418,7 @@ class GridMixin(object):
         if len(self.grid) == 0:
             self.logger.debug("No grid data found, skip writing.")
         else:
-            self._assert_write_mode
+            self._assert_write_mode()
             # write_nc requires dict - use dummy 'grid' key
             self.write_nc(
                 {"grid": self.grid},
@@ -679,14 +682,7 @@ class GridModel(GridMixin, Model):
     ## I/O
     def read(
         self,
-        components: List = [
-            "config",
-            "grid",
-            "geoms",
-            "forcing",
-            "states",
-            "results",
-        ],
+        components: List = None,
     ) -> None:
         """Read the complete model schematization and configuration from model files.
 
@@ -695,13 +691,22 @@ class GridModel(GridMixin, Model):
         components : List, optional
             List of model components to read, each should have an associated
             read_<component> method. By default ['config', 'maps', 'grid',
-            'geoms', 'forcing', 'states', 'results']
+            'geoms', 'tables', 'forcing', 'states', 'results']
         """
+        components = components or [
+            "config",
+            "grid",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+            "results",
+        ]
         super().read(components=components)
 
     def write(
         self,
-        components: List = ["config", "maps", "grid", "geoms", "forcing", "states"],
+        components: List = None,
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -709,9 +714,18 @@ class GridModel(GridMixin, Model):
         ----------
         components : List, optional
             List of model components to write, each should have an
-            associated write_<component> method.
-            By default ['config', 'maps', 'grid', 'geoms', 'forcing', 'states']
+            associated write_<component> method. By default
+            ['config', 'maps', 'grid', 'geoms', 'tables', 'forcing', 'states']
         """
+        components = components or [
+            "config",
+            "maps",
+            "grid",
+            "geoms",
+            "tables",
+            "forcing",
+            "states",
+        ]
         super().write(components=components)
 
     # Properties for subclass GridModel

@@ -11,25 +11,41 @@ Unreleased
 
 Added
 -----
-- docs now include a dropdown for selecting older versions of the docs. (#457)
-- Support for loading the same data source but from different places (e.g. local & aws)
+- docs now include a dropdown for selecting older versions of the docs. (PR #457)
+- Support for loading the same data source but from different providers (e.g., local & aws) (PR #438)
 - Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
 - Add support for reading model configs in ``TOML`` format. (PR #444)
 - new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
 - add ``open_mfcsv`` function in ``io`` module for combining multiple CSV files into one dataset. (PR #486)
 - Adapters can now clip data that is passed through a python object the same way as through the data catalog. (PR #481)
+- Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
+- Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
+- Relevant data adapters now have functionality for reporting and detecting the spatial and temporal extent they cover (PR #503)
+- Data catalogs have a ``hydromt_version`` meta key that is used to determine compatibility between the catalog and the installed hydromt version. (PR #506)
+- Allow the root of a data catalog to point to an archive, this will be extracted to the ~/.hydromt_data folder. (PR #512)
+- Support for reading overviews from (Cloud Optimized) GeoTIFFs using the zoom_level argument of ``DataCatalog.get_rasterdataset``. (PR #514)
+- Support for writing overviews to (Cloud Optimized) GeoTIFFs in the ``raster.to_raster`` method. (PR #514)
+- Added documentation for how to start your own plugin (PR #446)
+- New raster method ``to_slippy_tiles``: tiling of a raster dataset according to the slippy tile structure for e.g., webviewers (PR #440).
+- Support for http and other *filesystems* in path of data source (PR #515).
+- ``set_forcing`` can now add pandas.DataFrame object to frocing. (PR #534)
 
 Changed
 -------
-- Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. PR #412
+- Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. (PR #412)
+- Renamed ``LumpedModel.response_units`` to ``VectorModel.vector`` and updated the base set, read, write methods. (#531)
 - possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
 - Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
   call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
+- ``setup_mesh2d_from_rasterdataset`` and ``setup_mesh2d_from_raster_reclass`` now use xugrid Regridder methods. (PR #535)
 - Use the Model.data_catalog to read the model region if defined by a geom or grid. (PR #479)
+- ``vector.GeoDataset.from_gdf`` can use the gdf columns as data_vars instead of external xarray. (PR #412)
 
 Fixed
 -----
 - when a model component (eg maps, forcing, grid) is updated using the set_ methods, it will first be read to avoid loosing data. (PR #460)
+- open_geodataset with driver vector also works for other geometry type than points. (PR #509)
+- overwrite model in update mode. (PR #534)
 
 Deprecated
 ----------

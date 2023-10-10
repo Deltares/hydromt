@@ -216,21 +216,6 @@ class GeoBase(raster.XGeoBase):
         return self.geometry.sindex
 
     @property
-    def time_dim(self):
-        """Time dimension name."""
-        # TODO: move to geobase & remove from self.attrs?
-        dim = self.get_attrs("time_dim")
-        if dim not in self._obj.dims or np.dtype(self._obj[dim]).type != np.datetime64:
-            self.set_attrs(time_dim=None)
-            tdims = []
-            for dim in self._obj.dims:
-                if np.dtype(self._obj[dim]).type == np.datetime64:
-                    tdims.append(dim)
-            if len(tdims) == 1:
-                self.set_attrs(time_dim=tdims[0])
-        return self.get_attrs("time_dim")
-
-    @property
     def index(self):
         """Return the index values."""
         return self._obj[self.index_dim]
@@ -255,6 +240,12 @@ class GeoBase(raster.XGeoBase):
             A Series object with shapely geometries
         """
         if self._geometry is not None and self._geometry.index.size == self.size:
+            return self._geometry
+        # if no geometry is present return None self._geometry
+        # rather than raising an error
+        try:
+            self.set_spatial_dims()
+        except ValueError:
             return self._geometry
         gtype = self.geom_format
         if gtype not in ["geom", "xy", "wkt"]:
@@ -313,8 +304,7 @@ class GeoBase(raster.XGeoBase):
         Dataset, DataArray
             Update GeoDataset/Array
         """
-        if geom_format is None:
-            geom_format = self.geom_format
+        geom_format = geom_format or self.geom_format
         if geometry is None:
             geometry = self.geometry
         elif not isinstance(geometry, GeoSeries):
@@ -591,15 +581,17 @@ class GeoBase(raster.XGeoBase):
 
         Arguments
         ---------
-        reducer : callable, optional
+        reducer : callable, str, optional
             method by which multidimensional data is reduced to 1 dimensional
-            e.g. numpy.mean
+            e.g. numpy.mean. If str (e.g. mean), will call the numpy method is found.
 
         Returns
         -------
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
+        if isinstance(reducer, str):
+            reducer = getattr(np, reducer)
         obj = self._obj
         if isinstance(obj, xr.DataArray):
             # we are looking at a coordinate
@@ -792,7 +784,7 @@ class GeoDataArray(GeoBase):
 
     @staticmethod
     def from_netcdf(
-        path: str,
+        path: Union[str, xr.DataArray],
         parse_geom: bool = True,
         geom_name: str = None,
         x_name: str = None,
@@ -800,11 +792,11 @@ class GeoDataArray(GeoBase):
         crs: int = None,
         **kwargs,
     ) -> xr.DataArray:
-        """Read netcdf file as GeoDataArray.
+        """Read netcdf file or convert xr.DataArray as GeoDataArray.
 
         Parameters
         ----------
-        path : str
+        path : str, xr.DataArray
             path to file
         parse_geom : bool, optional
             Create geometry objects in place of existing x, y or wkt geometry
@@ -821,7 +813,10 @@ class GeoDataArray(GeoBase):
         xr.DataArray
             DataArray with vector as accessor
         """
-        da = xr.open_dataarray(path, **kwargs)
+        if isinstance(path, xr.DataArray):
+            da = path
+        else:
+            da = xr.open_dataarray(path, **kwargs)
         da.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
         # force to geom_format "geom"
         if parse_geom:
@@ -850,7 +845,7 @@ class GeoDataset(GeoBase):
     # i.e. produces xarray.Dataset/ xarray.DataArray
 
     # Constructers
-    # i.e. from other datatypes or filess
+    # i.e. from other datatypes or files
     @staticmethod
     def from_gdf(
         gdf: gpd.GeoDataFrame,
@@ -858,6 +853,7 @@ class GeoDataset(GeoBase):
         coords: dict = None,
         index_dim: str = None,
         keep_cols: bool = True,
+        cols_as_data_vars: bool = False,
         merge_index: str = "gdf",
     ) -> xr.Dataset:
         """Create Dataset with geospatial coordinates.
@@ -879,6 +875,8 @@ class GeoDataset(GeoBase):
             Name of index dimension in data_vars
         keep_cols: bool, optional
             If True, keep gdf columns as extra coordinates in dataset
+        cols_as_data_vars: bool, optional
+            If True, parse gdf columns as data variables rather than coordinates.
         merge_index: {'gdf', 'inner'}, default 'gdf'
             Type of merge to be performed between gdf and data.
 
@@ -941,7 +939,16 @@ class GeoDataset(GeoBase):
         ds = ds.reindex({index_dim: _index}).transpose(index_dim, ...)
         # set gdf geometry and optional other columns
         hdrs = gdf.columns if keep_cols else [geom_name]
-        ds = ds.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs})
+        if cols_as_data_vars:
+            for hdr in hdrs:
+                if hdr != geom_name:
+                    ds[hdr] = (index_dim, gdf.loc[_index, hdr])
+                else:
+                    ds = ds.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr])})
+        else:
+            ds = ds.assign_coords(
+                {hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs}
+            )
         # set geospatial attributes
         ds.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
         ds.vector.set_crs(gdf.crs)
@@ -949,7 +956,7 @@ class GeoDataset(GeoBase):
 
     @staticmethod
     def from_netcdf(
-        path: str,
+        path: Union[str, xr.Dataset],
         parse_geom=True,
         geom_name=None,
         x_name=None,
@@ -957,11 +964,11 @@ class GeoDataset(GeoBase):
         crs=None,
         **kwargs,
     ) -> xr.Dataset:
-        """Create GeoDataset from ogr compliant netCDF4 file.
+        """Create GeoDataset from ogr compliant netCDF4 file or xr.Dataset.
 
         Parameters
         ----------
-        path : str
+        path : str, xr.Dataset
             Path to the netCDF4 file
         parse_geom : bool, optional
             Create geometry objects in place of existing x, y or
@@ -978,7 +985,10 @@ class GeoDataset(GeoBase):
         xr.Dataset
             Dataset containing the geospatial data and attributes
         """
-        ds = xr.open_dataset(path, **kwargs)
+        if isinstance(path, xr.Dataset):
+            ds = path
+        else:
+            ds = xr.open_dataset(path, **kwargs)
         ds.vector.set_spatial_dims(geom_name=geom_name, x_name=x_name, y_name=y_name)
         # force geom_format= 'geom'
         if parse_geom:

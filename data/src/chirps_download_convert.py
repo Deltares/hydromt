@@ -12,8 +12,10 @@ import requests
 import xarray as xr
 from requests import HTTPError
 
+FILE_DIR = os.path.dirname(__file__)
 
-def download_file(url, outdir=os.path.dirname(__file__)):
+
+def download_file(url, outdir=FILE_DIR):
     """Download a file from the given URL and save it to the specified output directory.
 
     Args:

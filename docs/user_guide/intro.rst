@@ -17,7 +17,23 @@ or analyze model results. Furthermore, a Python interface is available that expo
 all functionality for experienced users. A schematic overview of the package architecture is provided
 in the figure below and each HydroMT component is discussed below.
 
-HydroMT is organized in the following way:
+In short, there are three important concepts in HydroMT core that are important to cover:
+
+- ``DataAdapters`` and ``DataCatalog``: These are what basically hold all information about how to approach and read data as well as some of the metadata
+  about it. While a lot of the work in HydroMT happens here, plugins or users shouldn't really need to know about these beyond using
+  the proper ``data_type`` in their configuration. ``DataCatalog`` are basically just a thin wrapper around the ``DataAdapters`` that does some book keeping.
+- ``Workflows``: These are functions that transform input data and can call a set of methods to for example, resample, fill nodata, reproject, derive
+  other variables etc. The core has some of these workflows but you may need new ones for your plugin.
+- ``Model``: This is where the magic happens (as far as the plugin is concerned). We have provided some generic models that you can
+  override to get basic/generic functionality, but using the model functionality is where it will be at for you. The scheme below lists the current
+  relationship between the HydroMT ``Model`` and generic sub-Model classes and the know plugins.
+
+
+.. figure:: ../_static/plugin_structure.png
+
+  Schematic of Model and plugin structure of HydroMT
+
+More concretely HydroMT is organized in the following way:
 
 - **Input Data**
 
@@ -39,7 +55,7 @@ HydroMT is organized in the following way:
 
   HydroMT defines any model instance through the model-agnostic Model API based on several components:
   maps, geometries, forcings, results, states, and the model simulation configuration.
-  For different types of general model classes (i.e., gridded, lumped, mesh and network models)
+  For different types of general model classes (i.e., gridded, vector, mesh and network models)
   additional model components have been defined. Each component is represented with a specific
   Python data object to provide a common interface to different model software.
   Model instances can be :ref:`built from scratch <model_build>`,
@@ -98,17 +114,17 @@ Data catalog                    A set of data sources available for HydroMT. It 
 Data source                     Input data to be processed by HydroMT. Data sources are listed in yaml files.
 Model                           A set of files describing the schematization, forcing, states, simulation configuration
                                 and results for any supported model kernel and model classes. The final set of files is
-                                dependent on the model type (grid, lumped or mesh model for examples) or the model plugin.
+                                dependent on the model type (grid, vector or mesh model for examples) or the model plugin.
 Model class                     A model instance can be instantiated from different model schematization concepts. Generalized
-                                model classes currently supported within HydroMT are Grid Model (distributed models), Lumped Model
+                                model classes currently supported within HydroMT are Grid Model (distributed models), vector Model
                                 (semi-distributed), Mesh Model (unstructured) and in the future
                                 Network Model (relational model). Specific model classes for specific softwares have been implemented
                                 as plugins, see Model plugin.
 Model attributes                Direct properties of a model, such as the model root. They can be called when using
                                 HydroMT from python.
 Model component                 A model is described by HydroMT with the following components: maps,
-                                geoms (vector data), forcing, results, states, config, grid (for a grid model), response_units
-                                (for a lumped model), mesh (for a mesh model).
+                                geoms (vector data), forcing, results, states, config, grid (for a grid model), vector
+                                (for a vector model), mesh (for a mesh model).
 Model plugin                    Model software for which HydroMT can build and update models and analyze its simulation results.
                                 For example *Wflow*, *SFINCS* etc.
 Model kernel                    The model software to execute a model simulation. This is *not* part of any HydroMT plugin.
@@ -159,3 +175,4 @@ Region                          Argument of the *build* and *clip* CLI methods t
    ../_examples/working_with_raster.ipynb
    ../_examples/working_with_geodatasets.ipynb
    ../_examples/working_with_flow_directions.ipynb
+   ../_examples/doing_extreme_value_analysis.ipynb

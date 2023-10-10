@@ -130,13 +130,16 @@ def test_check_size(caplog):
         lazy=True,  # create lazy dask array instead of numpy array
     )
     _check_size(test_raster)
-    assert "Loading very large spatial domain to derive a subbasin. "
-    "Provide initial 'bounds' if this takes too long." in caplog.text
+    assert (
+        "Loading very large spatial domain to derive a subbasin. "
+        "Provide initial 'bounds' if this takes too long." in caplog.text
+    )
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_basin(caplog):
-    data_catalog = hydromt.DataCatalog(logger=logger)
-    ds = data_catalog.get_rasterdataset("merit_hydro")
+    data_catalog = hydromt.DataCatalog("artifact_data", logger=logger)
+    ds = data_catalog.get_rasterdataset("merit_hydro_1k")
     gdf_bas_index = data_catalog.get_geodataframe("merit_hydro_index")
     bas_index = data_catalog.get_source("merit_hydro_index")
 
@@ -155,15 +158,15 @@ def test_basin(caplog):
     )
     assert gdf_out is None
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 9346337868.28675)
+    assert np.isclose(gdf_bas.area.sum(), 0.16847222)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds, kind="subbasin", basin_index=bas_index, xy=[12.2051, 45.8331], strord=4
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 8.277817e09)
-    assert np.isclose(gdf_out.geometry.x, 12.205417)
-    assert np.isclose(gdf_out.geometry.y, 45.83375)
+    assert np.isclose(gdf_bas.area.sum(), 0.001875)
+    assert np.isclose(gdf_out.geometry.x, 12.17916667)
+    assert np.isclose(gdf_out.geometry.y, 45.8041666)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -173,9 +176,9 @@ def test_basin(caplog):
         strord=5,
     )
     assert gdf_bas.index.size == 2
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 8.446160e09)
-    assert np.isclose(gdf_out.geometry.x[1], 12.97292)
-    assert np.isclose(gdf_out.geometry.y[1], 45.69958)
+    assert np.isclose(gdf_bas.area.sum(), 0.021389)
+    assert np.isclose(gdf_out.geometry.x[1], 12.970833333333266)
+    assert np.isclose(gdf_out.geometry.y[1], 45.69583333333334)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -185,9 +188,9 @@ def test_basin(caplog):
         bounds=gdf_bas.total_bounds,
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 8.277817e09)
-    assert np.isclose(gdf_out.geometry.x, 12.205417)
-    assert np.isclose(gdf_out.geometry.y, 45.83375)
+    assert np.isclose(gdf_bas.area.sum(), 0.001875)
+    assert np.isclose(gdf_out.geometry.x, 12.179167)
+    assert np.isclose(gdf_out.geometry.y, 45.804167)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -196,8 +199,8 @@ def test_basin(caplog):
         bbox=[12.6, 45.5, 12.9, 45.7],
         buffer=1,
     )
-    assert gdf_bas.index.size == 470
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 18433536552.16195)
+    assert gdf_bas.index.size == 30
+    assert np.isclose(gdf_bas.area.sum(), 1.033125)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -207,30 +210,30 @@ def test_basin(caplog):
         buffer=1,
         strord=4,
     )
-    assert gdf_bas.index.size == 6
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 18407888488.828384)
+    assert gdf_bas.index.size == 4
+    assert np.isclose(gdf_bas.area.sum(), 1.03104167)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="subbasin",
         basin_index=gdf_bas_index,
         bbox=[12.2, 46.2, 12.4, 46.3],
-        strord=8,
+        strord=6,
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 3569393882.735242)
-    assert np.isclose(gdf_out.geometry.x, 12.300417)
+    assert np.isclose(gdf_bas.area.sum(), 0.198055)
+    assert np.isclose(gdf_out.geometry.x, 12.295833)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="interbasin",
         basin_index=gdf_bas_index,
         bbox=[12.2, 46.2, 12.4, 46.3],
-        strord=8,
+        strord=6,
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 307314959.5972775)
-    assert np.isclose(gdf_out.geometry.x, 12.300417)
+    assert np.isclose(gdf_bas.area.sum(), 0.0172222)
+    assert np.isclose(gdf_out.geometry.x, 12.295833)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -239,7 +242,7 @@ def test_basin(caplog):
         bbox=[12.8, 45.55, 12.9, 45.65],
         outlets=True,
     )
-    assert gdf_bas.index.size == 180
+    assert gdf_bas.index.size == 13
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -248,7 +251,7 @@ def test_basin(caplog):
         bbox=[12.8, 45.55, 12.9, 45.65],
         outlets=True,
     )
-    assert gdf_bas.index.size == 180
+    assert gdf_bas.index.size == 13
 
     msg = (
         'kind="outlets" has been deprecated, use outlets=True in combination with'

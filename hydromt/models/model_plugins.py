@@ -14,7 +14,7 @@ __all__ = ["ModelCatalog"]
 # local generic models
 LOCAL_EPS = {
     "grid_model": "hydromt.models.model_grid:GridModel",
-    "lumped_model": "hydromt.models.model_lumped:LumpedModel",
+    "vector_model": "hydromt.models.model_vector:VectorModel",
     "mesh_model": "hydromt.models.model_mesh:MeshModel",
     "network_model": "hydromt.models.model_network:NetworkModel",
 }
@@ -115,8 +115,8 @@ class ModelCatalog:
     def eps(self) -> Dict:
         """Return dictionary with available model entrypoints."""
         if len(self._eps) == 0:
-            self.plugins  # discover plugins
-            self.generic  # get generic local model classes
+            _ = self.plugins  # discover plugins
+            _ = self.generic  # get generic local model classes
         return self._eps
 
     @property

@@ -12,11 +12,13 @@ import math
 import os
 import tempfile
 from itertools import product
-from os.path import isdir, join
+from os.path import join
+from pathlib import Path
 from typing import Any, Optional, Union
 
 import dask
 import geopandas as gpd
+import mercantile as mct
 import numpy as np
 import pandas as pd
 import pyproj
@@ -30,12 +32,14 @@ from affine import Affine
 from pyproj import CRS
 from rasterio import features
 from rasterio.enums import MergeAlg, Resampling
+from rasterio.rio.overview import get_maximum_overview_level
 from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
 from . import _compat, gis_utils
+from .utils import elevation2rgba, rgba2elevation
 
 logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
@@ -86,7 +90,7 @@ def full(
     nodata=np.nan,
     dtype=np.float32,
     name=None,
-    attrs={},
+    attrs=None,
     crs=None,
     lazy=False,
     shape=None,
@@ -121,6 +125,7 @@ def full(
     da: DataArray
         Filled DataArray
     """
+    attrs = attrs or {}
     f = dask.array.empty if lazy else np.full
     if dims is None:
         dims = tuple([d for d in coords])
@@ -145,7 +150,7 @@ def full_from_transform(
     nodata=np.nan,
     dtype=np.float32,
     name=None,
-    attrs={},
+    attrs=None,
     crs=None,
     lazy=False,
 ):
@@ -177,6 +182,7 @@ def full_from_transform(
     da : DataArray
         Filled DataArray
     """
+    attrs = attrs or {}
     if len(shape) not in [2, 3]:
         raise ValueError("Only 2D and 3D data arrays supported.")
     coords = gis_utils.affine_to_coords(transform, shape[-2:], x_dim="x", y_dim="y")
@@ -196,6 +202,18 @@ def full_from_transform(
         dims=dims,
     )
     return da
+
+
+def tile_window_xyz(shape, px):
+    """Yield (left, upper, width, height)."""
+    nr, nc = shape
+    lu = product(range(0, nc, px), range(0, nr, px))
+
+    ## create the window
+    for l, u in lu:
+        h = min(px, nr - u)
+        w = min(px, nc - l)
+        yield (l, u, w, h)
 
 
 class XGeoBase(object):
@@ -224,6 +242,20 @@ class XGeoBase(object):
     def get_attrs(self, key, placeholder=None) -> Any:
         """Return single spatial attribute."""
         return self._obj.coords[GEO_MAP_COORD].attrs.get(key, placeholder)
+
+    @property
+    def time_dim(self):
+        """Time dimension name."""
+        dim = self.get_attrs("time_dim")
+        if dim not in self._obj.dims or np.dtype(self._obj[dim]).type != np.datetime64:
+            self.set_attrs(time_dim=None)
+            tdims = []
+            for dim in self._obj.dims:
+                if np.dtype(self._obj[dim]).type == np.datetime64:
+                    tdims.append(dim)
+            if len(tdims) == 1:
+                self.set_attrs(time_dim=tdims[0])
+        return self.get_attrs("time_dim")
 
     @property
     def crs(self) -> CRS:
@@ -265,7 +297,7 @@ class XGeoBase(object):
                         break
                 if crs is not None:
                     # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
-                    crs = crs.strip("+init=") if isinstance(crs, str) else crs
+                    crs = crs.removeprefix("+init=") if isinstance(crs, str) else crs
                     try:
                         input_crs = pyproj.CRS.from_user_input(crs)
                         break
@@ -1641,7 +1673,7 @@ class RasterDataArray(XRasterBase):
         super(RasterDataArray, self).__init__(xarray_obj)
 
     @staticmethod
-    def from_numpy(data, transform, nodata=None, attrs={}, crs=None):
+    def from_numpy(data, transform, nodata=None, attrs=None, crs=None):
         """Transform a 2D/3D numpy array into a DataArray with geospatial attributes.
 
         The data dimensions should have the y and x on the second last
@@ -1666,6 +1698,7 @@ class RasterDataArray(XRasterBase):
         da : RasterDataArray
             xarray.DataArray with geospatial information
         """
+        attrs = attrs or {}
         nrow, ncol = data.shape[-2:]
         dims = ("y", "x")
         if len(data.shape) == 3:
@@ -2154,21 +2187,6 @@ class RasterDataArray(XRasterBase):
         """
         mName = os.path.normpath(os.path.basename(root))
 
-        def create_folder(path):
-            if not os.path.exists(path):
-                os.makedirs(path)
-
-        def tile_window(shape, px):
-            """Yield (left, upper, width, height)."""
-            nr, nc = shape
-            lu = product(range(0, nc, px), range(0, nr, px))
-
-            ## create the window
-            for l, u in lu:
-                h = min(px, nr - u)
-                w = min(px, nc - l)
-                yield (l, u, w, h)
-
         vrt_fn = None
         prev = 0
         nodata = self.nodata
@@ -2194,18 +2212,17 @@ class RasterDataArray(XRasterBase):
 
             # Write the raster paths to a text file
             sd = join(root, f"{zl}")
-            create_folder(sd)
+            os.makedirs(sd, exist_ok=True)
             txt_path = join(sd, "filelist.txt")
             file = open(txt_path, "w")
 
-            for l, u, w, h in tile_window(obj.shape, pxzl):
+            for l, u, w, h in tile_window_xyz(obj.shape, pxzl):
                 col = int(np.ceil(l / pxzl))
                 row = int(np.ceil(u / pxzl))
                 ssd = join(sd, f"{col}")
 
-                create_folder(ssd)
-
                 # create temp tile
+                os.makedirs(ssd, exist_ok=True)
                 temp = obj[u : u + h, l : l + w]
                 if zl != 0:
                     temp = temp.coarsen(
@@ -2247,6 +2264,242 @@ class RasterDataArray(XRasterBase):
         with open(join(root, f"{mName}.yml"), "w") as f:
             yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
 
+    def to_slippy_tiles(
+        self,
+        root: Path | str,
+        reproj_method: str = "average",
+        min_lvl: int = None,
+        max_lvl: int = None,
+        driver="png",
+        cmap: str | object = None,
+        norm: object = None,
+        **kwargs,
+    ):
+        """Produce tiles in /zoom/x/y.<ext> structure (EPSG:3857).
+
+        Generally meant for webviewers.
+
+        Parameters
+        ----------
+        root : Path | str
+            Path where the database will be saved
+        reproj_method : str, optional
+            How to resample the data when downscaling.
+            E.g. 'nearest' for resampling with the nearest value
+            (This is only used for the first/ highest zoomlevel)
+        min_lvl, max_lvl : int, optional
+            The minimum and maximum zoomlevel to be produced.
+            If None, the zoomlevels will be determined based on the data resolution
+        driver : str, optional
+            file output driver, one of 'png', 'netcdf4' or 'GTiff'
+        cmap : str | object, optional
+            A colormap, either defined by a string and imported from matplotlib
+            via that string or as a Colormap object from matplotlib itself.
+        norm : object, optional
+            A matplotlib Normalize object that defines a range between a maximum
+            and minimum value
+
+        **kwargs
+            Key-word arguments to write file
+            for netcdf4, these are passed to ~:py:meth:xarray.DataArray.to_netcdf:
+            for GTiff, these are passed to ~:py:meth:hydromt.RasterDataArray.to_raster:
+            for png, these are passed to ~:py:meth:PIL.Image.Image.save:
+        """
+        # for now these are optional dependencies
+        if driver.lower() == "png":
+            try:
+                import matplotlib.pyplot as plt
+                from PIL import Image
+
+            except ImportError:
+                raise ImportError("matplotlib and pillow are required for png output")
+
+        # Fixed pixel size and CRS for XYZ tiles
+        pxs = 256
+        # Extent in y-direction for pseudo mercator (EPSG:3857)
+        y_ext = math.atan(math.sinh(math.pi)) * (180 / math.pi)
+        y_ext_pm = mct.xy(0, y_ext)[1]
+
+        crs = CRS.from_epsg(3857)
+        ext = {"png": "png", "netcdf4": "nc", "gtiff": "tif"}.get(driver.lower(), None)
+        if ext is None:
+            raise ValueError(f"Unkown file driver {driver}, use png, netcdf4 or GTiff")
+
+        # Object to local variable, also transpose it and extract some meta
+        if self._obj.ndim != 2:
+            raise ValueError("Only 2d DataArrays are accepted.")
+        # make sure the y-axis as first dimension and nodata values set to nan
+        obj = self.mask_nodata().transpose(self.y_dim, self.x_dim)
+        # make sure dataarray has a name
+        name = obj.name or "data"
+        obj.name = name
+        obj_res = obj.raster.res[0]
+        obj_bounds = list(obj.raster.bounds)
+
+        # colormap output
+        if cmap is not None and driver != "png":
+            raise ValueError("Colormap is only supported for png output")
+        if isinstance(cmap, str):
+            cmap = plt.get_cmap(cmap)
+        if cmap is not None and norm is None:
+            norm = plt.Normalize(
+                vmin=obj.min().load().item(), vmax=obj.max().load().item()
+            )
+
+        # for now we assume output has float32 dtype
+        kwargs0 = {
+            "netcdf4": {"encoding": {name: {"dtype": "float32", "zlib": True}}},
+            "gtiff": {"driver": "GTiff", "compress": "deflate", "dtype": "float32"},
+        }.get(driver.lower(), {})
+        kwargs = {**kwargs0, **kwargs}
+
+        # Setting up information for determination of tile windows
+        # This section is for dealing with rounding errors
+        obj_bounds_cor = [
+            obj_bounds[0] + 0.5 * obj_res,
+            obj_bounds[1] + 0.5 * obj_res,
+            obj_bounds[2] - 0.5 * obj_res,
+            obj_bounds[3] - 0.5 * obj_res,
+        ]
+        bounds_4326 = rasterio.warp.transform_bounds(
+            obj.raster.crs,
+            "EPSG:4326",
+            *obj_bounds_cor,
+        )
+
+        # Calculate min/max zoomlevel based
+        if max_lvl is None:  # calculate max zoomlevel close to native resolution
+            # Determine the max number of zoom levels with the resolution
+            # This section is purely for the resolution
+            obj_clipped_to_pseudo = obj.raster.clip_bbox(
+                (-180, -y_ext, 180, y_ext),
+                crs="EPSG:4326",
+            )
+            tr_3857 = rasterio.warp.calculate_default_transform(
+                obj_clipped_to_pseudo.raster.crs,
+                "EPSG:3857",
+                *obj_clipped_to_pseudo.shape,
+                *obj_clipped_to_pseudo.raster.bounds,
+            )[0]
+
+            del obj_clipped_to_pseudo
+
+            # Calculate the maximum zoom level
+            dres = tr_3857[0]
+            max_lvl = int(
+                math.ceil((math.log10((y_ext_pm * 2) / (dres * pxs)) / math.log10(2)))
+            )
+        if min_lvl is None:  # calculate min zoomlevel based on the data extent
+            min_lvl = mct.bounding_tile(*bounds_4326).z
+
+        # Loop through the zoom levels
+        zoom_levels = {}
+        logger.info(f"Producing tiles from zoomlevel {min_lvl} to {max_lvl}")
+        for zl in range(max_lvl, min_lvl - 1, -1):
+            fns = []
+            # Go through the zoomlevels
+            for i, tile in enumerate(mct.tiles(*bounds_4326, zl, truncate=True)):
+                ssd = Path(root, str(zl), f"{tile.x}")
+                os.makedirs(ssd, exist_ok=True)
+                tile_bounds = mct.xy_bounds(tile)
+                if i == 0:  # zoom level : resolution in meters
+                    zoom_levels[zl] = abs(tile_bounds[2] - tile_bounds[0]) / pxs
+                if zl == max_lvl:
+                    # For the first zoomlevel, we can just clip the data
+                    # does this need a try/except?
+                    src_tile = obj.raster.clip_bbox(
+                        tile_bounds, crs=crs, buffer=2, align=True
+                    )
+                else:
+                    # Every tile from this level has 4 child tiles on the previous lvl
+                    # Create a temporary array, 4 times the size of a tile
+                    temp = np.full((pxs * 2, pxs * 2), np.nan, dtype=np.float64)
+                    for ic, child in enumerate(mct.children(tile)):
+                        fn = Path(root, str(child.z), str(child.x), f"{child.y}.{ext}")
+                        # Check if the file is really there, if not: it was not written
+                        if not fn.exists():
+                            continue
+                        # order: top-left, top-right, bottom-right, bottom-left
+                        yslice = slice(0, pxs) if ic in [0, 1] else slice(pxs, None)
+                        xslice = slice(0, pxs) if ic in [0, 3] else slice(pxs, None)
+                        if driver == "netcdf4":
+                            with xr.open_dataset(fn) as ds:
+                                temp[yslice, xslice] = ds[name].values
+                        elif driver == "GTiff":
+                            with rioxarray.open_rasterio(
+                                fn, parse_coordinates=False
+                            ) as da:
+                                temp[yslice, xslice] = da.squeeze(drop=True).values
+                        elif driver == "png":
+                            if cmap is not None:
+                                fn_bin = str(fn).replace(f".{ext}", ".bin")
+                                with open(fn_bin, "r") as f:
+                                    data = np.fromfile(f, "f4").reshape((pxs, pxs))
+                                os.remove(fn_bin)  # clean up
+                            else:
+                                data = rgba2elevation(np.array(Image.open(fn)))
+                            temp[yslice, xslice] = data
+                    # create a dataarray from the temporary array
+                    src_transform = rasterio.transform.from_bounds(
+                        *tile_bounds, pxs * 2, pxs * 2
+                    )
+                    src_tile = RasterDataArray.from_numpy(
+                        temp, src_transform, crs=crs, nodata=np.nan
+                    )
+                    src_tile.name = name
+
+                # reproject the data to the tile / coares resolution
+                dst_transform = rasterio.transform.from_bounds(*tile_bounds, pxs, pxs)
+                dst_tile = src_tile.raster.reproject(
+                    dst_crs=crs,
+                    dst_transform=dst_transform,
+                    dst_width=pxs,
+                    dst_height=pxs,
+                    method=reproj_method,
+                )
+                # write the data to file
+                fn_out = Path(ssd, f"{tile.y}.{ext}")
+                fns.append(fn_out)
+                if driver.lower() == "png":
+                    if cmap is not None and zl != min_lvl:
+                        # create temp bin file with data for upsampling
+                        fn_bin = str(fn_out).replace(f".{ext}", ".bin")
+                        dst_tile.values.astype("f4").tofile(fn_bin)
+                        rgba = cmap(norm(dst_tile.values), bytes=True)
+                    else:
+                        # Create RGBA bands from the data and save it as png
+                        rgba = elevation2rgba(dst_tile.values)
+                    Image.fromarray(rgba).save(fn_out, **kwargs)
+                elif driver.lower() == "netcdf4":
+                    # write the data to netcdf
+                    dst_tile = dst_tile.raster.gdal_compliant()
+                    dst_tile.to_netcdf(fn_out, **kwargs)
+                elif driver.lower() == "gtiff":
+                    # write the data to geotiff
+                    dst_tile.raster.to_raster(fn_out, **kwargs)
+
+            # Write files to txt and create a vrt using GDAL
+            if driver.lower() != "png":
+                txt_fn = Path(root, str(zl), "filelist.txt")
+                vrt_fn = Path(root, f"lvl{zl}.vrt")
+                with open(txt_fn, "w") as f:
+                    for fn in fns:
+                        f.write(f"{fn}\n")
+                gis_utils.create_vrt(vrt_fn, file_list_path=txt_fn)
+
+        # Write a quick yaml for the database
+        if driver.lower() != "png":
+            yml = {
+                "crs": 3857,
+                "data_type": "RasterDataset",
+                "driver": "raster",
+                "path": "lvl{zoom_level}.vrt",
+                "zoom_levels": zoom_levels,
+            }
+            name = os.path.basename(root)
+            with open(join(root, f"{name}.yml"), "w") as f:
+                yaml.dump({name: yml}, f, default_flow_style=False, sort_keys=False)
+
     def to_raster(
         self,
         raster_path,
@@ -2256,6 +2509,8 @@ class RasterDataArray(XRasterBase):
         windowed=False,
         mask=False,
         logger=logger,
+        overviews: Optional[Union[list, str]] = None,
+        overviews_resampling: str = "nearest",
         **profile_kwargs,
     ):
         """Write DataArray object to a gdal-writable raster file.
@@ -2276,6 +2531,14 @@ class RasterDataArray(XRasterBase):
             Default is False.
         mask: bool, optional
             If True, set nodata values where 'mask' coordinate equals False.
+            Default is False.
+        overviews: list, str, optional
+            List of overview levels to build. Default is None.
+            If 'auto', the maximum number of overviews will be built
+            based on a 256x256 tile size.
+        overviews_resampling: str, optional
+            The resampling method to use when building overviews.
+            Default is 'nearest'. See rasterio.enums.Resampling for options.
         **profile_kwargs:
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
@@ -2310,7 +2573,7 @@ class RasterDataArray(XRasterBase):
         if dim0 is not None:
             count = da_out[dim0].size
             da_out = da_out.sortby(dim0)
-        # write
+            # write
         profile = dict(
             driver=driver,
             height=da_out.raster.height,
@@ -2320,8 +2583,20 @@ class RasterDataArray(XRasterBase):
             crs=da_out.raster.crs,
             transform=da_out.raster.transform,
             nodata=nodata,
-            **profile_kwargs,
         )
+        if driver == "COG":
+            profile.update(
+                {
+                    "driver": "GTiff",
+                    "interleave": "pixel",
+                    "tiled": True,
+                    "blockxsize": 256,
+                    "blockysize": 256,
+                    "compress": "LZW",
+                }
+            )
+        if profile_kwargs:
+            profile.update(profile_kwargs)
         with rasterio.open(raster_path, "w", **profile) as dst:
             if windowed:
                 window_iter = dst.block_windows(1)
@@ -2340,6 +2615,24 @@ class RasterDataArray(XRasterBase):
                     dst.write(data, window=window)
             if tags is not None:
                 dst.update_tags(**tags)
+        if overviews is not None:  # build overviews
+            with rasterio.open(raster_path, "r+") as dst:
+                if overviews == "auto":
+                    ts = min(int(profile["blockxsize"]), int(profile["blockysize"]))
+                    max_level = get_maximum_overview_level(dst.width, dst.height, ts)
+                    overviews = [2**j for j in range(1, max_level + 1)]
+                if not isinstance(overviews, list):
+                    raise ValueError(
+                        "overviews should be a list of integers or 'auto'."
+                    )
+                resampling = getattr(Resampling, overviews_resampling, None)
+                if resampling is None:
+                    raise ValueError(
+                        f"Resampling method unknown: {overviews_resampling}"
+                    )
+                no = len(overviews)
+                logger.debug(f"Building {no} overviews with {overviews_resampling}")
+                dst.build_overviews(overviews, resampling)
 
     def vectorize(self, connectivity=8):
         """Return geometry of grouped pixels with the same value in a DataArray object.
@@ -2668,8 +2961,7 @@ class RasterDataset(XRasterBase):
         if driver not in gis_utils.GDAL_EXT_CODE_MAP:
             raise ValueError(f"Extension unknown for driver: {driver}")
         ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
-        if not isdir(root):
-            os.makedirs(root)
+        os.makedirs(root, exist_ok=True)
         with tempfile.TemporaryDirectory() as tmpdir:
             if driver == "PCRaster" and _compat.HAS_PCRASTER:
                 clone_path = gis_utils.write_clone(
@@ -2683,8 +2975,7 @@ class RasterDataset(XRasterBase):
                 if "/" in var:
                     # variables with in subfolders
                     folders = "/".join(var.split("/")[:-1])
-                    if not isdir(join(root, folders)):
-                        os.makedirs(join(root, folders))
+                    os.makedirs(join(root, folders), exist_ok=True)
                     var0 = var.split("/")[-1]
                     raster_path = join(root, folders, f"{prefix}{var0}{postfix}.{ext}")
                 else:
