@@ -545,20 +545,19 @@ class XRasterBase(XGeoBase):
 
         NOTE: rotated rasters with a negative dx are not supported.
         """
-        # cached transform is leading, then cached res, then coords
-        if self._transform is not None:
+        if self._res is not None:  # cached resolution
+            return self._res
+        elif self._transform is not None:  # cached transform
             if self._transform.b == self._transform.d == 0:
                 dx, dy = self._transform.a, self._transform.e
-            else:
+            else:  # rotated
                 xy0 = self._transform * (0, 0)
                 x1y = self._transform * (1, 0)
                 xy1 = self._transform * (0, 1)
                 ddx0, ddy0 = xy1[0] - xy0[0], xy1[1] - xy0[1]
                 dx = math.hypot(x1y[0] - xy0[0], x1y[1] - xy0[1])
                 dy = math.hypot(xy1[0] - xy0[0], xy1[1] - xy0[1])
-        elif self._res is not None:
-            return self._res
-        else:
+        else:  # from coordinates
             xs, ys = self.xcoords.data, self.ycoords.data
             if xs.ndim == 1:
                 dx = xs[1] - xs[0]
@@ -570,9 +569,9 @@ class XRasterBase(XGeoBase):
                 ddy1 = ys[0, 1] - ys[0, 0]
                 dx = math.hypot(ddx1, ddy1)  # always positive!
                 dy = math.hypot(ddx0, ddy0)
-        if self.rotation != 0:
-            # find grid top-down orientation
-            rot = self.rotation
+        rot = self.rotation
+        if rot != 0:
+            # NOTE rotated rasters with a negative dx are not supported.
             acos = math.cos(math.radians(rot))
             if (
                 (acos < 0 and ddy0 > 0)
@@ -593,17 +592,18 @@ class XRasterBase(XGeoBase):
 
         NOTE: rotated rasters with a negative dx are not supported.
         """
-        # cached transform is leading, then cached rotation, then coords
+        if self._rotation is not None:  # cached rotation
+            return self._rotation
         rot = None
-        if self._transform is not None:
+        if self._transform is not None:  # cached transform
+            # NOTE: it is not always possible to get the rotation from the transform
             if self._transform.b == self._transform.d == 0:
                 rot = 0
             elif self._transform.determinant >= 0:
                 rot = self._transform.rotation_angle
-        if rot is None:
-            if self._rotation is not None:
-                return self._rotation
-            elif self.xcoords.ndim == 1:
+        if rot is None:  # from coordinates
+            # NOTE: rotated rasters with a negative dx are not supported.
+            if self.xcoords.ndim == 1:
                 rot = 0
             elif self.xcoords.ndim == 2:
                 xs, ys = self.xcoords.data, self.ycoords.data
@@ -623,13 +623,12 @@ class XRasterBase(XGeoBase):
     @property
     def origin(self) -> tuple[float, float]:
         """Return origin of grid (x0, y0) tuple."""
-        # cached transform is leading, then cached origin, then coords
-        x0, y0 = 0, 0
-        if self._transform is not None:
-            x0, y0 = self._transform * (0, 0)
-        elif self._origin is not None:
+        if self._origin is not None:
             return self._origin
+        elif self._transform is not None:
+            x0, y0 = self._transform * (0, 0)
         else:
+            x0, y0 = 0, 0
             xs, ys = self.xcoords.data, self.ycoords.data
             dx, dy = self.res
             if xs.ndim == 1:
@@ -1150,6 +1149,9 @@ class XRasterBase(XGeoBase):
         obj.raster._crs = self._crs
         translation = Affine.translation(xslice.start, yslice.start)
         obj.raster._transform = self._transform * translation
+        obj.raster._res = self._res
+        obj.raster._rotation = self._rotation
+
         return obj
 
     def clip_bbox(self, bbox, align=None, buffer=0, crs=None):
