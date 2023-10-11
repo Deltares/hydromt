@@ -12,11 +12,12 @@ Local installation
 
 To run these examples on your local machine you need a copy of the repository and
 an installation of HydroMT including some additional packages. The most reliable
-way to do this installation is by creating a new environment as described below.
+way to do this installation is by using the binder imlementation provided above, however
+if you wish to exectute them locally you should create a new environment as described below.
 
 1 - Install python and conda/mamba
 **********************************
-If not already done, you'll need Python 3.8 or greater and a package manager such as conda or mamba. These package managers help you to install (Python) packages and
+If not already done, you'll need Python 3.9 or greater and a package manager such as conda or mamba. These package managers help you to install (Python) packages and
 `manage environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ such that different installations do not conflict.
 
 We recommend using the `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_ Python distribution. This installs Python and the
@@ -29,20 +30,7 @@ If you already have a python & conda installation but do not yet have mamba inst
 
   $ conda install mamba -n base -c conda-forge
 
-2 - Install HydroMT and the other python dependencies in a separate Python environment
-**************************************************************************************
-The last step is to install all the python dependencies required to run the notebooks, including HydroMT. All required dependencies can be found
-in the `environment.yml <https://github.com/Deltares/hydromt/blob/main/environment.yml>`_ file in the root of the repository. This will create
-a new environment called **hydromt**. If you already have this environment with this name either remove it with `conda env remove -n hydromt`
-**or** set a new name for the environment by adding `-n <name>` to the line below.
-
-Note that you can exchange mamba for conda in the line below if you don't have mamba installed (see above for how to install mamba).
-
-.. code-block:: console
-
-  $ mamba env create -f https://raw.githubusercontent.com/Deltares/hydromt/main/environment.yml
-
-3 - Download the content of the HydroMT github repository
+2 - Download the content of the HydroMT github repository
 *********************************************************
 To run the examples locally, you will need to download the content of the HydroMT repository. You can either do a
 `manual download <https://github.com/Deltares/hydromt/archive/refs/heads/main.zip>`_ and extract the content of the downloaded ZIP folder
@@ -51,6 +39,30 @@ To run the examples locally, you will need to download the content of the HydroM
 .. code-block:: console
 
   $ git clone https://github.com/Deltares/hydromt.git
+
+3 - Install HydroMT and the other python dependencies in a separate Python environment
+**************************************************************************************
+The next step is to install all the python dependencies required to run the notebooks, including HydroMT.
+
+For a more detailed explanation please refer to `the dev instalation guide <https://deltares.github.io/hydromt/latest/dev/dev_install.html>`_
+
+It should be noted however, that due to our release cycle the examples in the repository might not be
+compatible with the version of hydromt you have installed, particulary if you followed the guide on
+`Getting Started <https://deltares.github.io/hydromt/latest/getting_started/installation.html>`_ which
+or installed hydromt through either pip or conda forge. The examples in the repositroy are compatible
+with the latest `dev` version of hydromt. If you follow the dev instalation guide linked above, everything
+should work as intended. However if you already have a version of hydromt installed, you will have to checkout that release in the repository.
+
+For example let's say you want to try out the examples and you already have version 0.7.1 installed.
+Then you can retrieve the correct examples by executing the following command from within the
+hydromt folder you created in the last step:
+
+.. code-block:: console
+
+  $ git checkout v0.7.1
+
+this will give you the example files in the state they were at the time of that release.
+
 
 4 - Running the examples
 ************************
