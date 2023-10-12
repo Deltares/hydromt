@@ -378,7 +378,7 @@ class DataAdapter(object, metaclass=ABCMeta):
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
-        # expand path with glob and check if files existW
+# expand path with glob and check if files exists
         fns_out = []
         for fn in list(set(fns)):
             if "*" in str(fn):
