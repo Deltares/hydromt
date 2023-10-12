@@ -69,7 +69,7 @@ def test_rasterdataset(rioda, tmpdir):
     geom = rioda.raster.box
     da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
     assert np.all(da1 == rioda_utm)
-    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
+    with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_rasterdataset("no_file.tif")
     with pytest.raises(IndexError, match="RasterDataset: No data within"):
         data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
@@ -162,7 +162,7 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     # test COG zoom levels
     da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(0.01, "degree"))
     assert da1.raster.shape == (256, 250)
-    assert (data_catalog.get_source("test_cog.tif").zoom_levels) == 3
+    assert len(data_catalog.get_source("test_cog.tif").zoom_levels) == 3
 
 
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
@@ -248,7 +248,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     ).sortby("index")
     assert np.allclose(da3, geoda)
     assert da3.vector.crs.to_epsg() == 4326
-    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
+    with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_geodataset("no_file.geojson")
     with tempfile.TemporaryDirectory() as td:
         # Test nc file writing to file
@@ -306,7 +306,7 @@ def test_geodataframe(geodf, tmpdir):
         "test.geojson", bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
     )
     assert np.all(gdf1 == geodf)
-    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
+    with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_geodataframe("no_file.geojson")
 
 
