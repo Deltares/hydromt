@@ -11,7 +11,7 @@ import os
 import shutil
 import warnings
 from datetime import datetime
-from os.path import abspath, basename, exists, isdir, isfile, join
+from os.path import abspath, basename, isdir, isfile, join
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Tuple, TypedDict, Union, cast
 
@@ -1248,15 +1248,12 @@ class DataCatalog(object):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
-            elif exists(abspath(data_like)):
-                path = str(abspath(data_like))
+            else:
                 if "provider" not in kwargs:
-                    kwargs.update({"provider": "local"})
-                source = RasterDatasetAdapter(path=path, **kwargs)
+                    kwargs.update({"provider": "user"})
+                source = RasterDatasetAdapter(path=str(data_like), **kwargs)
                 name = basename(data_like)
                 self.add_source(name, source)
-            else:
-                raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = RasterDatasetAdapter._slice_data(
                 data_like,
@@ -1352,15 +1349,12 @@ class DataCatalog(object):
             if str(data_like) in self.sources:
                 name = str(data_like)
                 source = self.get_source(name, provider=provider, version=version)
-            elif exists(abspath(data_like)):
-                path = str(abspath(data_like))
+            else:
                 if "provider" not in kwargs:
-                    kwargs.update({"provider": "local"})
-                source = GeoDataFrameAdapter(path=path, **kwargs)
+                    kwargs.update({"provider": "user"})
+                source = GeoDataFrameAdapter(path=str(data_like), **kwargs)
                 name = basename(data_like)
                 self.add_source(name, source)
-            else:
-                raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, gpd.GeoDataFrame):
             return GeoDataFrameAdapter._slice_data(
                 data_like, variables, geom, bbox, buffer, predicate, logger=self.logger
@@ -1448,15 +1442,12 @@ class DataCatalog(object):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
-            elif exists(abspath(data_like)):
-                path = str(abspath(data_like))
+            else:
                 if "provider" not in kwargs:
-                    kwargs.update({"provider": "local"})
-                source = GeoDatasetAdapter(path=path, **kwargs)
+                    kwargs.update({"provider": "user"})
+                source = GeoDatasetAdapter(path=str(data_like), **kwargs)
                 name = basename(data_like)
                 self.add_source(name, source)
-            else:
-                raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = GeoDatasetAdapter._slice_data(
                 data_like,
@@ -1527,15 +1518,12 @@ class DataCatalog(object):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
-            elif exists(abspath(data_like)):
-                path = str(abspath(data_like))
+            else:
                 if "provider" not in kwargs:
-                    kwargs.update({"provider": "local"})
-                source = DataFrameAdapter(path=path, **kwargs)
+                    kwargs.update({"provider": "user"})
+                source = DataFrameAdapter(path=str(data_like), **kwargs)
                 name = basename(data_like)
                 self.add_source(name, source)
-            else:
-                raise FileNotFoundError(f"No such file or catalog source: {data_like}")
         elif isinstance(data_like, pd.DataFrame):
             return DataFrameAdapter._slice_data(
                 data_like, variables, time_tuple, logger=self.logger

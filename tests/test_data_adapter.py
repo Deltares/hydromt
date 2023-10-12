@@ -162,6 +162,7 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     # test COG zoom levels
     da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(0.01, "degree"))
     assert da1.raster.shape == (256, 250)
+    assert (data_catalog.get_source("test_cog.tif").zoom_levels) == 3
 
 
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
