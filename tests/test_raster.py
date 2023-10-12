@@ -53,6 +53,9 @@ def test_raster_properties(origin, rotation, res, shape, bounds):
     assert np.allclose(da.raster.box.total_bounds, da.raster.bounds)
     assert np.allclose(bounds, da.raster.internal_bounds)
     assert da.raster.box.crs == da.raster.crs
+    # attributes do not persist after slicing
+    assert da[:2, :2].raster._transform is None
+    assert da[:2, :2].raster._crs is None
 
 
 @pytest.mark.parametrize(("transform", "shape"), testdata)
@@ -265,6 +268,14 @@ def test_clip(transform, shape):
     # create rasterdataarray with crs
     da = raster.full_from_transform(transform, shape, nodata=1, name="test", crs=4326)
     da.raster.set_nodata(0)
+    # attributes do not persist with xarray slicing
+    da1 = da[:2, :2]
+    assert da1.raster._transform is None
+    assert da1.raster._crs is None
+    # attributes do persisit when slicing using clip_bbox
+    raster1d = da.raster.clip(slice(1, 2), slice(0, 2))
+    assert raster1d.raster._crs is not None
+    assert raster1d.raster.transform is not None
     # create gdf covering approx half raster
     w, s, _, n = da.raster.bounds
     e, _ = da.raster.transform * (shape[1] // 2, shape[0] // 2)
@@ -295,11 +306,15 @@ def test_clip(transform, shape):
     if da.raster.rotation != 0:
         return
     assert np.all(np.isclose(da_clip0.raster.bounds, gdf.total_bounds))
-    # test bbox - align
-    align = np.round(abs(da.raster.res[0] * 2), 2)
-    da_clip = da.raster.clip_bbox(gdf.total_bounds, align=align)
-    dalign = np.round(da_clip.raster.bounds[2], 2) % align
-    assert np.isclose(dalign, 0) or np.isclose(dalign, align)
+
+
+def test_clip_align(rioda):
+    # test align
+    bbox = (3.5, -10.5, 5.5, -9.5)
+    da_clip = rioda.raster.clip_bbox(bbox)
+    assert np.all(np.isclose(da_clip.raster.bounds, bbox))
+    da_clip = rioda.raster.clip_bbox(bbox, align=1)
+    assert da_clip.raster.bounds == (3, -11, 6, -9)
 
 
 def test_clip_errors(rioda):
@@ -554,7 +569,7 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
     fn = join(png_dir, "7", "64", "64.png")
     im = np.array(Image.open(fn))
     assert im.shape == (256, 256, 4)
-    assert all(im[0, 0, :] == [128, 0, 131, 255])
+    assert all(im[0, 0, :] == [128, 0, 132, 255])
 
     # test with cmap
     png_dir = join(tmpdir, "tiles_png_cmap")
@@ -562,7 +577,7 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
     fn = join(png_dir, "7", "64", "64.png")
     im = np.array(Image.open(fn))
     assert im.shape == (256, 256, 4)
-    assert all(im[0, 0, :] == [31, 148, 139, 255])
+    assert all(im[0, 0, :] == [32, 143, 140, 255])
 
     # gtiff
     tif_dir = join(tmpdir, "tiles_tif")

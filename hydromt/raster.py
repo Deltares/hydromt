@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Credits: This script is based on the rioxarray package (Apache License, Version 2.0)
-# source file: https://github.com/corteva/rioxarray
-# license file: https://github.com/corteva/rioxarray/blob/master/LICENSE
+# Credits: This script is based on an earlier version of the rioxarray package
+# source file: https://github.com/corteva/rioxarray/tree/0.9.0
+# license: Apache License, Version 2.0
+# license file: https://github.com/corteva/rioxarray/blob/0.9.0/LICENSE
 
 """Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
 from __future__ import annotations
 
+import itertools
 import logging
 import math
 import os
-import tempfile
 from itertools import product
 from os.path import join
 from pathlib import Path
@@ -38,7 +39,7 @@ from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
-from . import _compat, gis_utils
+from . import gis_utils
 from .utils import elevation2rgba, rgba2elevation
 
 logger = logging.getLogger(__name__)
@@ -82,6 +83,7 @@ def full_like(
         dims=other.dims,
     )
     da.raster.set_attrs(**other.raster.attrs)
+    da.raster._transform = other.raster.transform
     return da
 
 
@@ -185,6 +187,8 @@ def full_from_transform(
     attrs = attrs or {}
     if len(shape) not in [2, 3]:
         raise ValueError("Only 2D and 3D data arrays supported.")
+    if not isinstance(transform, Affine):
+        transform = Affine(*transform)
     coords = gis_utils.affine_to_coords(transform, shape[-2:], x_dim="x", y_dim="y")
     dims = ("y", "x")
     if len(shape) == 3:
@@ -201,6 +205,7 @@ def full_from_transform(
         shape=shape,
         dims=dims,
     )
+    da.raster._transform = transform
     return da
 
 
@@ -223,6 +228,7 @@ class XGeoBase(object):
     def __init__(self, xarray_obj: xr.DataArray | xr.Dataset) -> None:
         """Initialize new object based on the xarray object provided."""
         self._obj = xarray_obj
+        self._crs = None
         # create new coordinate with attributes in which to save x_dim, y_dim and crs.
         # other spatial properties are always calculated on the fly to ensure
         # consistency with data
@@ -262,13 +268,13 @@ class XGeoBase(object):
         """Return horizontal Coordinate Reference System."""
         # return horizontal crs by default to avoid errors downstream
         # with reproject / rasterize etc.
-        if "crs_wkt" not in self.attrs:
-            self.set_crs()
-        if "crs_wkt" in self.attrs:
-            crs = pyproj.CRS.from_user_input(self.attrs["crs_wkt"])
-            return crs
+        if self._crs is not None:
+            crs = self._crs
+        else:
+            crs = self.set_crs()
+        return crs
 
-    def set_crs(self, input_crs=None):
+    def set_crs(self, input_crs=None, write_crs=True) -> CRS:
         """Set the Coordinate Reference System.
 
         Arguments
@@ -276,39 +282,51 @@ class XGeoBase(object):
         input_crs: int, dict, or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str)
             and proj (str or dict)
+        write_crs: bool, optional
+            If True (default), write CRS to attributes.
         """
         crs_names = ["crs_wkt", "crs", "epsg"]
         names = list(self._obj.coords.keys())
         if isinstance(self._obj, xr.Dataset):
             names = names + list(self._obj.data_vars.keys())
         # user defined
-        if input_crs is not None:
+        if isinstance(input_crs, (int, str, dict)):
             input_crs = pyproj.CRS.from_user_input(input_crs)
         # look in grid_mapping and data variable attributes
+        elif input_crs is not None and not isinstance(input_crs, CRS):
+            raise ValueError(f"Invalid CRS type: {type(input_crs)}")
         else:
+            crs = None
             for name in crs_names:
-                # check default > GEO_MAP_COORDS attrs
-                crs = self._obj.coords[GEO_MAP_COORD].attrs.get(name, None)
-                if crs is None:  # global attrs
-                    crs = self._obj.attrs.pop(name, None)
-                for var in names:  # data var and coords attrs
+                # check default > GEO_MAP_COORDS attrs, then global attrs
+                if name in self.attrs:
+                    crs = self.attrs.get(name)
+                    break
+                if name in self._obj.attrs:
+                    crs = self._obj.attrs.pop(name)
+                    break
+            if crs is None:  # check data var and coords attrs
+                for var, name in itertools.product(names, crs_names):
                     if name in self._obj[var].attrs:
                         crs = self._obj[var].attrs.pop(name)
                         break
-                if crs is not None:
-                    # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
-                    crs = crs.removeprefix("+init=") if isinstance(crs, str) else crs
-                    try:
-                        input_crs = pyproj.CRS.from_user_input(crs)
-                        break
-                    except RuntimeError:
-                        pass
+            if crs is not None:
+                # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
+                if isinstance(crs, str):
+                    crs = crs.removeprefix("+init=")
+                try:
+                    input_crs = pyproj.CRS.from_user_input(crs)
+                except RuntimeError:
+                    pass  # continue to next name in crs_names
         if input_crs is not None:
-            grid_map_attrs = input_crs.to_cf()
-            crs_wkt = input_crs.to_wkt()
-            grid_map_attrs["spatial_ref"] = crs_wkt
-            grid_map_attrs["crs_wkt"] = crs_wkt
-            self.set_attrs(**grid_map_attrs)
+            if write_crs:
+                grid_map_attrs = input_crs.to_cf()
+                crs_wkt = input_crs.to_wkt()
+                grid_map_attrs["spatial_ref"] = crs_wkt
+                grid_map_attrs["crs_wkt"] = crs_wkt
+                self.set_attrs(**grid_map_attrs)
+            self._crs = input_crs
+            return input_crs
 
 
 class XRasterBase(XGeoBase):
@@ -318,6 +336,10 @@ class XRasterBase(XGeoBase):
     def __init__(self, xarray_obj):
         """Initialize new object based on the xarray object provided."""
         super(XRasterBase, self).__init__(xarray_obj)
+        self._res = None
+        self._rotation = None
+        self._origin = None
+        self._transform = None
 
     @property
     def x_dim(self) -> str:
@@ -472,11 +494,14 @@ class XRasterBase(XGeoBase):
     @property
     def transform(self) -> Affine:
         """Return the affine transform of the object."""
+        if self._transform is not None:
+            return self._transform
         transform = (
             Affine.translation(*self.origin)
             * Affine.rotation(self.rotation)
             * Affine.scale(*self.res)
         )
+        self._transform = transform
         return transform
 
     @property
@@ -520,21 +545,34 @@ class XRasterBase(XGeoBase):
 
         NOTE: rotated rasters with a negative dx are not supported.
         """
-        xs, ys = self.xcoords.data, self.ycoords.data
-        dx, dy = 0, 0
-        if xs.ndim == 1:
-            dx = xs[1] - xs[0]
-            dy = ys[1] - ys[0]
-        elif xs.ndim == 2:
-            ddx0 = xs[1, 0] - xs[0, 0]
-            ddy0 = ys[1, 0] - ys[0, 0]
-            ddx1 = xs[0, 1] - xs[0, 0]
-            ddy1 = ys[0, 1] - ys[0, 0]
-            dx = math.hypot(ddx1, ddy1)  # always positive!
-            dy = math.hypot(ddx0, ddy0)
-            rot = self.rotation
+        if self._res is not None:  # cached resolution
+            return self._res
+        elif self._transform is not None:  # cached transform
+            if self._transform.b == self._transform.d == 0:
+                dx, dy = self._transform.a, self._transform.e
+            else:  # rotated
+                xy0 = self._transform * (0, 0)
+                x1y = self._transform * (1, 0)
+                xy1 = self._transform * (0, 1)
+                ddx0, ddy0 = xy1[0] - xy0[0], xy1[1] - xy0[1]
+                dx = math.hypot(x1y[0] - xy0[0], x1y[1] - xy0[1])
+                dy = math.hypot(xy1[0] - xy0[0], xy1[1] - xy0[1])
+        else:  # from coordinates
+            xs, ys = self.xcoords.data, self.ycoords.data
+            if xs.ndim == 1:
+                dx = xs[1] - xs[0]
+                dy = ys[1] - ys[0]
+            elif xs.ndim == 2:
+                ddx0 = xs[1, 0] - xs[0, 0]
+                ddy0 = ys[1, 0] - ys[0, 0]
+                ddx1 = xs[0, 1] - xs[0, 0]
+                ddy1 = ys[0, 1] - ys[0, 0]
+                dx = math.hypot(ddx1, ddy1)  # always positive!
+                dy = math.hypot(ddx0, ddy0)
+        rot = self.rotation
+        if not np.isclose(rot, 0):
+            # NOTE rotated rasters with a negative dx are not supported.
             acos = math.cos(math.radians(rot))
-            # find grid top-down orientation
             if (
                 (acos < 0 and ddy0 > 0)
                 or (acos > 0 and ddy0 < 0)
@@ -545,6 +583,7 @@ class XRasterBase(XGeoBase):
                 )
             ):
                 dy = -1 * dy
+        self._res = dx, dy
         return dx, dy
 
     @property
@@ -553,37 +592,56 @@ class XRasterBase(XGeoBase):
 
         NOTE: rotated rasters with a negative dx are not supported.
         """
-        xs, ys = self.xcoords.data, self.ycoords.data
-        rot = 0
-        if xs.ndim == 2:
-            ddx1 = xs[0, -1] - xs[0, 0]
-            ddy1 = ys[0, -1] - ys[0, 0]
-            if not np.isclose(ddx1, 0):
-                rot = math.degrees(math.atan(ddy1 / ddx1))
-            else:
-                rot = -90
-            if ddx1 < 0:
-                rot = 180 + rot
-            elif ddy1 < 0:
-                rot = 360 + rot
+        if self._rotation is not None:  # cached rotation
+            return self._rotation
+        rot = None
+        if self._transform is not None:  # cached transform
+            # NOTE: it is not always possible to get the rotation from the transform
+            if np.isclose(self._transform.b, 0) and np.isclose(self._transform.d, 0):
+                rot = 0
+            elif self._transform.determinant >= 0:
+                rot = self._transform.rotation_angle
+        if rot is None:  # from coordinates
+            # NOTE: rotated rasters with a negative dx are not supported.
+            if self.xcoords.ndim == 1:
+                rot = 0
+            elif self.xcoords.ndim == 2:
+                xs, ys = self.xcoords.data, self.ycoords.data
+                ddx1 = xs[0, -1] - xs[0, 0]
+                ddy1 = ys[0, -1] - ys[0, 0]
+                if not np.isclose(ddx1, 0):
+                    rot = math.degrees(math.atan(ddy1 / ddx1))
+                else:
+                    rot = -90
+                if ddx1 < 0:
+                    rot = 180 + rot
+                elif ddy1 < 0:
+                    rot = 360 + rot
+        self._rotation = rot
         return rot
 
     @property
     def origin(self) -> tuple[float, float]:
         """Return origin of grid (x0, y0) tuple."""
-        xs, ys = self.xcoords.data, self.ycoords.data
-        x0, y0 = 0, 0
-        dx, dy = self.res
-        if xs.ndim == 1:
-            x0, y0 = xs[0] - dx / 2, ys[0] - dy / 2
-        elif xs.ndim == 2:
-            alpha = math.radians(self.rotation)
-            beta = math.atan(dx / dy)
-            c = math.hypot(dx, dy) / 2.0
-            a = c * math.sin(beta - alpha)
-            b = c * math.cos(beta - alpha)
-            x0 = xs[0, 0] - np.sign(dy) * a
-            y0 = ys[0, 0] - np.sign(dy) * b
+        if self._origin is not None:  # cached origin
+            return self._origin
+        elif self._transform is not None:  # cached transform
+            x0, y0 = self._transform * (0, 0)
+        else:  # from coordinates
+            x0, y0 = 0, 0
+            xs, ys = self.xcoords.data, self.ycoords.data
+            dx, dy = self.res
+            if xs.ndim == 1:  # regular non-rotated
+                x0, y0 = xs[0] - dx / 2, ys[0] - dy / 2
+            elif xs.ndim == 2:  # rotated
+                alpha = math.radians(self.rotation)
+                beta = math.atan(dx / dy)
+                c = math.hypot(dx, dy) / 2.0
+                a = c * math.sin(beta - alpha)
+                b = c * math.cos(beta - alpha)
+                x0 = xs[0, 0] - np.sign(dy) * a
+                y0 = ys[0, 0] - np.sign(dy) * b
+        self._origin = x0, y0
         return x0, y0
 
     def _check_dimensions(self) -> None:
@@ -1074,6 +1132,28 @@ class XRasterBase(XGeoBase):
             ds_out[param] = da_param
         return ds_out
 
+    def clip(self, xslice: slice, yslice: slice):
+        """Clip object based on slices.
+
+        Arguments
+        ---------
+        xslice, yslice : slice
+            x and y slices
+
+        Returns
+        -------
+        xarray.DataSet or DataArray
+            Data clipped to slices
+        """
+        obj = self._obj.isel({self.x_dim: xslice, self.y_dim: yslice})
+        obj.raster._crs = self._crs
+        translation = Affine.translation(xslice.start, yslice.start)
+        obj.raster._transform = self._transform * translation
+        obj.raster._res = self._res
+        obj.raster._rotation = self._rotation
+
+        return obj
+
     def clip_bbox(self, bbox, align=None, buffer=0, crs=None):
         """Clip object based on a bounding box.
 
@@ -1107,32 +1187,20 @@ class XRasterBase(XGeoBase):
             s = (s // align) * align
             e = (e // align + 1) * align
             n = (n // align + 1) * align
-        if self.rotation > 1:  # update bbox based on clip to rotated box
+        xs, ys = [w, e], [s, n]
+        if self.rotation > 0:  # update bbox based on clip to rotated box
             gdf_bbox = gpd.GeoDataFrame(geometry=[box(w, s, e, n)], crs=self.crs).clip(
                 self.box
             )
-            xs, ys = [w, e], [s, n]
             if not np.all(gdf_bbox.is_empty):
                 xs, ys = zip(*gdf_bbox.dissolve().boundary[0].coords[:])
-            cs, rs = ~self.transform * (np.array(xs), np.array(ys))
-            c0 = max(round(int(cs.min() - buffer)), 0)
-            r0 = max(round(int(rs.min() - buffer)), 0)
-            c1 = int(round(cs.max() + buffer))
-            r1 = int(round(rs.max() + buffer))
-            return self._obj.isel(
-                {self.x_dim: slice(c0, c1), self.y_dim: slice(r0, r1)}
-            )
-        else:
-            # TODO remove this part could also be based on row col just like the rotated
-            xres, yres = self.res
-            y0, y1 = (n, s) if yres < 0 else (s, n)
-            x0, x1 = (e, w) if xres < 0 else (w, e)
-            if buffer > 0:
-                y0 -= yres * buffer
-                y1 += yres * buffer
-                x0 -= xres * buffer
-                x1 += xres * buffer
-            return self._obj.sel({self.x_dim: slice(x0, x1), self.y_dim: slice(y0, y1)})
+        cs, rs = ~self.transform * (np.array(xs), np.array(ys))
+        # use round to get integer slices
+        c0 = max(int(round(cs.min() - buffer)), 0)
+        r0 = max(int(round(rs.min() - buffer)), 0)
+        c1 = int(round(cs.max() + buffer))
+        r1 = int(round(rs.max() + buffer))
+        return self.clip(slice(c0, c1), slice(r0, r1))
 
     def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
         """Clip object to region with mask values greater than zero.
@@ -1159,12 +1227,12 @@ class XRasterBase(XGeoBase):
             raise ValueError("No valid values found in mask.")
         # clip
         row_slice, col_slice = ndimage.find_objects(da_mask.values.astype(np.uint8))[0]
-        obj_clip = self._obj.isel({self.x_dim: col_slice, self.y_dim: row_slice})
+        obj = self.clip(xslice=col_slice, yslice=row_slice)
         if mask:  # mask values and add mask coordinate
             mask_bin = da_mask.isel({self.x_dim: col_slice, self.y_dim: row_slice})
-            obj_clip.coords["mask"] = xr.Variable(self.dims, mask_bin.values)
-            obj_clip = obj_clip.raster.mask(obj_clip.coords["mask"])
-        return obj_clip
+            obj.coords["mask"] = xr.Variable(self.dims, mask_bin.values)
+            obj = obj.raster.mask(obj.coords["mask"])
+        return obj
 
     def clip_geom(self, geom, align=None, buffer=0, mask=False):
         """Clip object to bounding box of the geometry.
@@ -1274,6 +1342,8 @@ class XRasterBase(XGeoBase):
         )
         da_out.raster.set_nodata(nodata)
         da_out.raster.set_attrs(**self.attrs)
+        da_out.raster.set_crs(self.crs)
+        da_out.raster._transform = self._transform
         return da_out
 
     def rasterize_geometry(
@@ -1373,8 +1443,9 @@ class XRasterBase(XGeoBase):
             da_out = da_out.fillna(0)
             da_out.name = "fraction"
 
-        da_out.raster.set_crs(ds_like.raster.crs)
         da_out.raster.set_nodata(nodata)
+        da_out.raster.set_crs(self.crs)
+        da_out.raster._transform = self._transform
         # Rename da_area
         if name is not None:
             da_out.name = name
@@ -1491,6 +1562,7 @@ class XRasterBase(XGeoBase):
         )
         da_area.raster.set_nodata(0)
         da_area.raster.set_crs(self.crs)
+        da_area.raster._transform = self._transform
         da_area.attrs.update(unit="m2")
         return da_area.rename("area")
 
@@ -1517,6 +1589,8 @@ class XRasterBase(XGeoBase):
         unit = self._obj.attrs.get("unit", "")
         ds_out = self._obj / area
         ds_out.attrs.update(unit=f"{unit}.m-2")
+        ds_out.raster._crs = self._crs
+        ds_out.raster._transform = self._transform
         return ds_out
 
     def _dst_transform(
@@ -1554,11 +1628,15 @@ class XRasterBase(XGeoBase):
         # check CRS and transform set destination crs if missing
         if self.crs is None:
             raise ValueError("CRS is missing. Use set_crs function to resolve.")
-        if dst_crs == "utm":
+        if isinstance(dst_crs, pyproj.CRS):
+            return dst_crs
+        elif dst_crs == "utm":
             # make sure bounds are in EPSG:4326
-            dst_crs = gis_utils.utm_crs(self.box.to_crs(4326).total_bounds)
+            dst_crs = gis_utils.utm_crs(self.transform_bounds(4326))
+        elif dst_crs is not None:
+            dst_crs = CRS.from_user_input(dst_crs)
         else:
-            dst_crs = CRS.from_user_input(dst_crs) if dst_crs is not None else self.crs
+            dst_crs = self.crs
         return dst_crs
 
     def nearest_index(
@@ -1660,6 +1738,7 @@ class XRasterBase(XGeoBase):
         )
         index.raster.set_crs(dst_crs)
         index.raster.set_nodata(-1)
+        index.raster._tranform = dst_transform
         return index
 
 
@@ -1716,6 +1795,7 @@ class RasterDataArray(XRasterBase):
             da.attrs.update(attrs)
         if crs is not None:
             da.raster.set_crs(input_crs=crs)
+        da.raster._transform = transform
         return da
 
     @property
@@ -1975,6 +2055,7 @@ class RasterDataArray(XRasterBase):
             da_temp = da_temp.chunk(chunks)
             da_reproj = _da.map_blocks(_reproj, kwargs=reproj_kwargs, template=da_temp)
         da_reproj.raster.set_crs(dst_crs)
+        da_reproj.raster._transform = dst_transform
         return da_reproj.raster.reset_spatial_dims_attrs()
 
     def reproject_like(self, other, method="nearest"):
@@ -2172,6 +2253,7 @@ class RasterDataArray(XRasterBase):
         )
         interp_array.raster.set_nodata(self.nodata)
         interp_array.raster.set_crs(self.crs)
+        interp_array.raster._transform = self.transform
         return interp_array
 
     def to_xyz_tiles(
@@ -2231,12 +2313,13 @@ class RasterDataArray(XRasterBase):
 
                 # create temp tile
                 os.makedirs(ssd, exist_ok=True)
-                temp = obj[u : u + h, l : l + w]
+                temp = obj[u : u + h, l : l + w].load()
                 if zl != 0:
                     temp = temp.coarsen(
                         {x_dim: 2**diff, y_dim: 2**diff}, boundary="pad"
                     ).mean()
                 temp.raster.set_nodata(nodata)
+                temp.raster._crs = obj.raster.crs
 
                 if driver == "netcdf4":
                     path = join(ssd, f"{row}.nc")
@@ -2275,7 +2358,7 @@ class RasterDataArray(XRasterBase):
     def to_slippy_tiles(
         self,
         root: Path | str,
-        reproj_method: str = "average",
+        reproj_method: str = "bilinear",
         min_lvl: int = None,
         max_lvl: int = None,
         driver="png",
@@ -2292,9 +2375,9 @@ class RasterDataArray(XRasterBase):
         root : Path | str
             Path where the database will be saved
         reproj_method : str, optional
-            How to resample the data when downscaling.
-            E.g. 'nearest' for resampling with the nearest value
-            (This is only used for the first/ highest zoomlevel)
+            How to resample the data at the finest zoom level, by default 'bilinear'.
+            See :py:meth:`~hydromt.raster.RasterDataArray.reproject` for existing
+            methods.
         min_lvl, max_lvl : int, optional
             The minimum and maximum zoomlevel to be produced.
             If None, the zoomlevels will be determined based on the data resolution
@@ -2306,46 +2389,40 @@ class RasterDataArray(XRasterBase):
         norm : object, optional
             A matplotlib Normalize object that defines a range between a maximum
             and minimum value
-
         **kwargs
             Key-word arguments to write file
             for netcdf4, these are passed to ~:py:meth:xarray.DataArray.to_netcdf:
             for GTiff, these are passed to ~:py:meth:hydromt.RasterDataArray.to_raster:
             for png, these are passed to ~:py:meth:PIL.Image.Image.save:
         """
-        # for now these are optional dependencies
-        if driver.lower() == "png":
+        # check driver
+        ldriver = driver.lower()
+        ext = {"png": "png", "netcdf4": "nc", "gtiff": "tif"}.get(ldriver, None)
+        if ext is None:
+            raise ValueError(f"Unkown file driver {driver}, use png, netcdf4 or GTiff")
+        if ldriver == "png":
             try:
+                # optional imports
                 import matplotlib.pyplot as plt
                 from PIL import Image
 
             except ImportError:
                 raise ImportError("matplotlib and pillow are required for png output")
 
-        # Fixed pixel size and CRS for XYZ tiles
-        pxs = 256
-        # Extent in y-direction for pseudo mercator (EPSG:3857)
-        y_ext = math.atan(math.sinh(math.pi)) * (180 / math.pi)
-        y_ext_pm = mct.xy(0, y_ext)[1]
-
-        crs = CRS.from_epsg(3857)
-        ext = {"png": "png", "netcdf4": "nc", "gtiff": "tif"}.get(driver.lower(), None)
-        if ext is None:
-            raise ValueError(f"Unkown file driver {driver}, use png, netcdf4 or GTiff")
-
-        # Object to local variable, also transpose it and extract some meta
+        # check data and make sure the y-axis as first dimension
         if self._obj.ndim != 2:
             raise ValueError("Only 2d DataArrays are accepted.")
-        # make sure the y-axis as first dimension and nodata values set to nan
-        obj = self.mask_nodata().transpose(self.y_dim, self.x_dim)
-        # make sure dataarray has a name
+        obj = self._obj.transpose(self.y_dim, self.x_dim)
         name = obj.name or "data"
         obj.name = name
+        # get some properties of the data
         obj_res = obj.raster.res[0]
         obj_bounds = list(obj.raster.bounds)
+        nodata = self.nodata
+        dtype = obj.dtype
 
         # colormap output
-        if cmap is not None and driver != "png":
+        if cmap is not None and ldriver != "png":
             raise ValueError("Colormap is only supported for png output")
         if isinstance(cmap, str):
             cmap = plt.get_cmap(cmap)
@@ -2354,11 +2431,19 @@ class RasterDataArray(XRasterBase):
                 vmin=obj.min().load().item(), vmax=obj.max().load().item()
             )
 
-        # for now we assume output has float32 dtype
+        # some tile size, bounds and CRS properties
+        # Fixed pixel size and CRS for XYZ tiles
+        pxs = 256
+        crs = CRS.from_epsg(3857)
+        # Extent in y-direction for pseudo mercator (EPSG:3857)
+        y_ext = math.atan(math.sinh(math.pi)) * (180 / math.pi)
+        y_ext_pm = mct.xy(0, y_ext)[1]
+
+        # default kwargs for writing files
         kwargs0 = {
-            "netcdf4": {"encoding": {name: {"dtype": "float32", "zlib": True}}},
-            "gtiff": {"driver": "GTiff", "compress": "deflate", "dtype": "float32"},
-        }.get(driver.lower(), {})
+            "netcdf4": {"encoding": {name: {"zlib": True}}},
+            "gtiff": {"driver": "GTiff", "compress": "deflate"},
+        }.get(ldriver, {})
         kwargs = {**kwargs0, **kwargs}
 
         # Setting up information for determination of tile windows
@@ -2378,34 +2463,35 @@ class RasterDataArray(XRasterBase):
         # Calculate min/max zoomlevel based
         if max_lvl is None:  # calculate max zoomlevel close to native resolution
             # Determine the max number of zoom levels with the resolution
-            # This section is purely for the resolution
-            obj_clipped_to_pseudo = obj.raster.clip_bbox(
-                (-180, -y_ext, 180, y_ext),
-                crs="EPSG:4326",
-            )
-            tr_3857 = rasterio.warp.calculate_default_transform(
-                obj_clipped_to_pseudo.raster.crs,
-                "EPSG:3857",
-                *obj_clipped_to_pseudo.shape,
-                *obj_clipped_to_pseudo.raster.bounds,
-            )[0]
-
-            del obj_clipped_to_pseudo
+            # using the resolution determined by default transform
+            if self.crs != crs:
+                obj_clipped_to_pseudo = obj.raster.clip_bbox(
+                    (-180, -y_ext, 180, y_ext),
+                    crs="EPSG:4326",
+                )
+                tr_3857 = rasterio.warp.calculate_default_transform(
+                    obj_clipped_to_pseudo.raster.crs,
+                    "EPSG:3857",
+                    *obj_clipped_to_pseudo.shape,
+                    *obj_clipped_to_pseudo.raster.bounds,
+                )[0]
+                dres = tr_3857[0]
+                del obj_clipped_to_pseudo
+            else:
+                dres = obj_res[0]
 
             # Calculate the maximum zoom level
-            dres = tr_3857[0]
             max_lvl = int(
                 math.ceil((math.log10((y_ext_pm * 2) / (dres * pxs)) / math.log10(2)))
             )
         if min_lvl is None:  # calculate min zoomlevel based on the data extent
-            min_lvl = mct.bounding_tile(*bounds_4326).z
+            min_lvl = mct.bounding_tile(*bounds_4326, truncate=True).z
 
         # Loop through the zoom levels
         zoom_levels = {}
         logger.info(f"Producing tiles from zoomlevel {min_lvl} to {max_lvl}")
         for zl in range(max_lvl, min_lvl - 1, -1):
             fns = []
-            # Go through the zoomlevels
             for i, tile in enumerate(mct.tiles(*bounds_4326, zl, truncate=True)):
                 ssd = Path(root, str(zl), f"{tile.x}")
                 os.makedirs(ssd, exist_ok=True)
@@ -2413,15 +2499,27 @@ class RasterDataArray(XRasterBase):
                 if i == 0:  # zoom level : resolution in meters
                     zoom_levels[zl] = abs(tile_bounds[2] - tile_bounds[0]) / pxs
                 if zl == max_lvl:
-                    # For the first zoomlevel, we can just clip the data
-                    # does this need a try/except?
+                    # For the first zoomlevel, first clip the data
                     src_tile = obj.raster.clip_bbox(
-                        tile_bounds, crs=crs, buffer=2, align=True
+                        tile_bounds, crs=crs, buffer=1, align=True
+                    ).load()
+                    # then reproject the data to the tile
+                    dst_transform = rasterio.transform.from_bounds(
+                        *tile_bounds, pxs, pxs
                     )
+                    dst_tile = src_tile.raster.reproject(
+                        dst_crs=crs,
+                        dst_transform=dst_transform,
+                        dst_width=pxs,
+                        dst_height=pxs,
+                        method=reproj_method,
+                    )
+                    dst_tile.name = name
+                    dst_data = dst_tile.values
                 else:
                     # Every tile from this level has 4 child tiles on the previous lvl
                     # Create a temporary array, 4 times the size of a tile
-                    temp = np.full((pxs * 2, pxs * 2), np.nan, dtype=np.float64)
+                    temp = np.full((pxs * 2, pxs * 2), nodata, dtype=dtype)
                     for ic, child in enumerate(mct.children(tile)):
                         fn = Path(root, str(child.z), str(child.x), f"{child.y}.{ext}")
                         # Check if the file is really there, if not: it was not written
@@ -2430,64 +2528,58 @@ class RasterDataArray(XRasterBase):
                         # order: top-left, top-right, bottom-right, bottom-left
                         yslice = slice(0, pxs) if ic in [0, 1] else slice(pxs, None)
                         xslice = slice(0, pxs) if ic in [0, 3] else slice(pxs, None)
-                        if driver == "netcdf4":
-                            with xr.open_dataset(fn) as ds:
+                        if ldriver == "netcdf4":
+                            with xr.open_dataset(fn, mask_and_scale=False) as ds:
                                 temp[yslice, xslice] = ds[name].values
-                        elif driver == "GTiff":
-                            with rioxarray.open_rasterio(
-                                fn, parse_coordinates=False
-                            ) as da:
-                                temp[yslice, xslice] = da.squeeze(drop=True).values
-                        elif driver == "png":
+                        elif ldriver == "gtiff":
+                            with rasterio.open(fn) as src:
+                                temp[yslice, xslice] = src.read(1)
+                        elif ldriver == "png":
                             if cmap is not None:
                                 fn_bin = str(fn).replace(f".{ext}", ".bin")
                                 with open(fn_bin, "r") as f:
-                                    data = np.fromfile(f, "f4").reshape((pxs, pxs))
+                                    data = np.fromfile(f, dtype).reshape((pxs, pxs))
                                 os.remove(fn_bin)  # clean up
                             else:
-                                data = rgba2elevation(np.array(Image.open(fn)))
+                                im = np.array(Image.open(fn))
+                                data = rgba2elevation(im, nodata=nodata, dtype=dtype)
                             temp[yslice, xslice] = data
-                    # create a dataarray from the temporary array
-                    src_transform = rasterio.transform.from_bounds(
-                        *tile_bounds, pxs * 2, pxs * 2
-                    )
-                    src_tile = RasterDataArray.from_numpy(
-                        temp, src_transform, crs=crs, nodata=np.nan
-                    )
-                    src_tile.name = name
+                    # coarsen the data using mean
+                    temp = temp.reshape((pxs, 2, pxs, 2))
+                    dst_data = np.ma.masked_values(temp, nodata).mean(axis=(1, 3)).data
+                    if ldriver != "png":
+                        # create a dataarray from the temporary array
+                        dst_transform = rasterio.transform.from_bounds(
+                            *tile_bounds, pxs, pxs
+                        )
+                        dst_tile = RasterDataArray.from_numpy(
+                            dst_data, dst_transform, crs=crs, nodata=nodata
+                        )
+                        dst_tile.name = name
 
-                # reproject the data to the tile / coares resolution
-                dst_transform = rasterio.transform.from_bounds(*tile_bounds, pxs, pxs)
-                dst_tile = src_tile.raster.reproject(
-                    dst_crs=crs,
-                    dst_transform=dst_transform,
-                    dst_width=pxs,
-                    dst_height=pxs,
-                    method=reproj_method,
-                )
                 # write the data to file
                 fn_out = Path(ssd, f"{tile.y}.{ext}")
                 fns.append(fn_out)
-                if driver.lower() == "png":
+                if ldriver == "png":
                     if cmap is not None and zl != min_lvl:
                         # create temp bin file with data for upsampling
                         fn_bin = str(fn_out).replace(f".{ext}", ".bin")
-                        dst_tile.values.astype("f4").tofile(fn_bin)
-                        rgba = cmap(norm(dst_tile.values), bytes=True)
+                        dst_data.astype(dtype).tofile(fn_bin)
+                        rgba = cmap(norm(dst_data), bytes=True)
                     else:
                         # Create RGBA bands from the data and save it as png
-                        rgba = elevation2rgba(dst_tile.values)
+                        rgba = elevation2rgba(dst_data, nodata=nodata)
                     Image.fromarray(rgba).save(fn_out, **kwargs)
-                elif driver.lower() == "netcdf4":
+                elif ldriver == "netcdf4":
                     # write the data to netcdf
                     dst_tile = dst_tile.raster.gdal_compliant()
                     dst_tile.to_netcdf(fn_out, **kwargs)
-                elif driver.lower() == "gtiff":
+                elif ldriver == "gtiff":
                     # write the data to geotiff
                     dst_tile.raster.to_raster(fn_out, **kwargs)
 
             # Write files to txt and create a vrt using GDAL
-            if driver.lower() != "png":
+            if ldriver != "png":
                 txt_fn = Path(root, str(zl), "filelist.txt")
                 vrt_fn = Path(root, f"lvl{zl}.vrt")
                 with open(txt_fn, "w") as f:
@@ -2496,7 +2588,7 @@ class RasterDataArray(XRasterBase):
                 gis_utils.create_vrt(vrt_fn, file_list_path=txt_fn)
 
         # Write a quick yaml for the database
-        if driver.lower() != "png":
+        if ldriver != "png":
             yml = {
                 "crs": 3857,
                 "data_type": "RasterDataset",
@@ -2925,7 +3017,6 @@ class RasterDataset(XRasterBase):
         mask=False,
         prefix="",
         postfix="",
-        pcr_vs_map=gis_utils.PCR_VS_MAP,
         logger=logger,
         **profile_kwargs,
     ):
@@ -2954,9 +3045,6 @@ class RasterDataset(XRasterBase):
             Prefix to filenames in mapstack
         postfix : str, optional
             Postfix to filenames in mapstack
-        pcr_vs_map : dict, optional
-            Only for PCRaster driver: <variable name> : <PCRaster type> key-value pairs
-            e.g.: {'dem': 'scalar'}, see https://www.gdal.org/frmt_various.html#PCRaster
         **profile_kwargs:
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
@@ -2970,33 +3058,22 @@ class RasterDataset(XRasterBase):
             raise ValueError(f"Extension unknown for driver: {driver}")
         ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
         os.makedirs(root, exist_ok=True)
-        with tempfile.TemporaryDirectory() as tmpdir:
-            if driver == "PCRaster" and _compat.HAS_PCRASTER:
-                clone_path = gis_utils.write_clone(
-                    tmpdir,
-                    gdal_transform=self.transform.to_gdal(),
-                    wkt_projection=None if self.crs is None else self.crs.to_wkt(),
-                    shape=self.shape,
-                )
-                profile_kwargs.update({"clone_path": clone_path})
-            for var in self.vars:
-                if "/" in var:
-                    # variables with in subfolders
-                    folders = "/".join(var.split("/")[:-1])
-                    os.makedirs(join(root, folders), exist_ok=True)
-                    var0 = var.split("/")[-1]
-                    raster_path = join(root, folders, f"{prefix}{var0}{postfix}.{ext}")
-                else:
-                    raster_path = join(root, f"{prefix}{var}{postfix}.{ext}")
-                if driver == "PCRaster":
-                    profile_kwargs.update({"pcr_vs": pcr_vs_map.get(var, "scalar")})
-                self._obj[var].raster.to_raster(
-                    raster_path,
-                    driver=driver,
-                    dtype=dtype,
-                    tags=tags,
-                    windowed=windowed,
-                    mask=mask,
-                    logger=logger,
-                    **profile_kwargs,
-                )
+        for var in self.vars:
+            if "/" in var:
+                # variables with in subfolders
+                var_root = join(root, *var.split("/")[:-1])
+                os.makedirs(var_root, exist_ok=True)
+                var0 = var.split("/")[-1]
+                raster_path = join(var_root, f"{prefix}{var0}{postfix}.{ext}")
+            else:
+                raster_path = join(root, f"{prefix}{var}{postfix}.{ext}")
+            self._obj[var].raster.to_raster(
+                raster_path,
+                driver=driver,
+                dtype=dtype,
+                tags=tags,
+                windowed=windowed,
+                mask=mask,
+                logger=logger,
+                **profile_kwargs,
+            )
