@@ -6,6 +6,15 @@ on:
     types:
       - published
 
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Actually push images'
+        required: true
+        type: boolean
+        default: false
+
+
 jobs:
   publish-docker-image:
     runs-on: ubuntu-latest
@@ -37,29 +46,28 @@ jobs:
 
       #build should be cached from previous steps
       - name: Build and push full image
-        if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
         with:
           context: .
           load: true
           target: full
-          push: ${{ !github.event.act }}
-          tags: deltares/hydromt
+          push:  ${{ inputs.publish }}
+          tags: deltares/hydromt:full
+
       - name: Build and push min image
-        if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
         with:
           context: .
           load: true
           target: min
-          push: ${{ !github.event.act }}
+          push:  ${{ inputs.publish }}
           tags: deltares/hydromt:min
+
       - name: Build and push slim image
-        if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
         with:
           context: .
           load: true
           target: slim
-          push: ${{ !github.event.act }}
-          tags: deltares/hydromt
+          push:  ${{ inputs.publish }}
+          tags: deltares/hydromt:slim
