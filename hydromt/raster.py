@@ -8,6 +8,7 @@
 """Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
 from __future__ import annotations
 
+import itertools
 import logging
 import math
 import os
@@ -305,11 +306,10 @@ class XGeoBase(object):
                     crs = self._obj.attrs.pop(name)
                     break
             if crs is None:  # check data var and coords attrs
-                for var in names:
-                    for name in crs_names:
-                        if name in self._obj[var].attrs:
-                            crs = self._obj[var].attrs.pop(name)
-                            break
+                for var, name in itertools.product(names, crs_names):
+                    if name in self._obj[var].attrs:
+                        crs = self._obj[var].attrs.pop(name)
+                        break
             if crs is not None:
                 # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
                 if isinstance(crs, str):
