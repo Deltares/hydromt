@@ -6,6 +6,8 @@ on:
     types:
       - published
 
+  workflow_dispatch:
+
 jobs:
   publish-docker-image:
     runs-on: ubuntu-latest
@@ -44,7 +46,8 @@ jobs:
           load: true
           target: full
           push: ${{ !github.event.act }}
-          tags: deltares/hydromt
+          tags: deltares/hydromt:full
+
       - name: Build and push min image
         if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
@@ -54,6 +57,7 @@ jobs:
           target: min
           push: ${{ !github.event.act }}
           tags: deltares/hydromt:min
+
       - name: Build and push slim image
         if: ${{ github.event_name == 'release' || github.event.act }}
         uses: docker/build-push-action@v4
@@ -62,4 +66,4 @@ jobs:
           load: true
           target: slim
           push: ${{ !github.event.act }}
-          tags: deltares/hydromt
+          tags: deltares/hydromt:slim
