@@ -8,9 +8,9 @@ import dask
 import geopandas as gpd
 import numpy as np
 import pytest
+import rasterio
 import xarray as xr
 from affine import Affine
-from osgeo import gdal
 from shapely.geometry import LineString, Point, box
 
 from hydromt import gis_utils, open_raster, raster
@@ -114,9 +114,9 @@ def test_gdal(tmpdir):
     # Write to netcdf and reopen with gdal
     fn_nc = str(tmpdir.join("gdal_test.nc"))
     da.to_netcdf(fn_nc)
-    gdal.Info(fn_nc)
-    ds = gdal.Open(fn_nc)
-    assert da[raster.GEO_MAP_COORD].attrs["crs_wkt"] == ds.GetProjection()
+    with rasterio.open(fn_nc) as dst:
+        dst.read()
+        assert da.raster.crs == dst.crs
 
 
 def test_attrs_errors(rioda):
