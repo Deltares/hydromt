@@ -34,6 +34,11 @@ jobs:
           username: ${{ secrets.TEST_DOCKERHUB_USERNAME }}
           password: ${{ secrets.TEST_DOCKERHUB_TOKEN }}
 
+      - name: generate envs
+        run: |
+          pip install tomli
+          python make_env.py -p '3.11' -o full-environment.yml full
+
       - name: Build and test
         uses: docker/build-push-action@v4
         with:
