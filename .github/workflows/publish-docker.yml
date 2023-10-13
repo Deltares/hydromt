@@ -20,6 +20,10 @@ on:
 
 
 jobs:
+  strategy:
+    fail-fast: false
+    matrix:
+      flavour: ['min','slim','full']
   publish-docker-image:
     runs-on: ubuntu-latest
     steps:
@@ -52,34 +56,23 @@ jobs:
       - name: generate envs
         run: |
           pip install tomli
-          python make_env.py -p '3.11' -o full-environment.yml full
-          python make_env.py -p '3.11' -o min-environment.yml min
-          python make_env.py -p '3.11' -o slim-environment.yml slim
+          python make_env.py -p '3.11' -o ${{ matrix.flavour }}-environment.yml ${{ matrix.flavour }}
 
-      #build should be cached from previous steps
-      - name: Build and push min image
+      - name: Build and push ${{ matrix.flavour }} image
         uses: docker/build-push-action@v4
         with:
           context: .
           load: true
-          target: min
+          target: ${{ matrix.flavour }} #
           push:  ${{ env.should_publish }}
-          tags: deltares/hydromt:${{ env.version }}-min
+          tags: deltares/hydromt:${{ env.version }}-${{ matrix.flavour }}
 
-      - name: Build and push slim image
+      - name: Build and push latest image
+        if: matrix.flavour == 'slim'
         uses: docker/build-push-action@v4
         with:
           context: .
           load: true
-          target: slim
+          target: ${{ matrix.flavour }} #
           push:  ${{ env.should_publish }}
-          tags: deltares/hydromt:${{ env.version }}-slim, deltares/hydromt:latest
-
-      - name: Build and push full image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          load: true
-          target: full
-          push:  ${{ env.should_publish }}
-          tags: deltares/hydromt:${{ env.version }}-full
+          tags: deltares/hydromt:${{ env.version }}, deltares/hydromt:latest
