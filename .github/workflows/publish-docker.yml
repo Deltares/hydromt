@@ -13,6 +13,10 @@ on:
         required: true
         type: boolean
         default: false
+      version:
+        description: 'The version to publish'
+        required: true
+        type: text
 
 
 jobs:
@@ -28,15 +32,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Set should_publish variable
-        id: set-should-publish
+      - name: Setup variables
         run: |
           if [ "${{ github.event_name }}" == "release" ]; then
             echo "should_publish=true" >> $GITHUB_ENV
+            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            if [[ -n "${{ github.event.inputs.publish }}" ]]; then
-              echo "should_publish=${{ github.event.inputs.publish }}" >> $GITHUB_ENV
-            fi
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+            echo "should_publish=${{ github.event.inputs.publish }}" >> $GITHUB_ENV
           fi
         shell: bash
 
@@ -53,27 +56,7 @@ jobs:
           python make_env.py -p '3.11' -o min-environment.yml min
           python make_env.py -p '3.11' -o slim-environment.yml slim
 
-      - name: Build and test
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          tags: deltares/hydromt:full
-          target: full
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          push: false
-
       #build should be cached from previous steps
-      - name: Build and push full image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          load: true
-          target: full
-          push:  ${{ env.should_publish }}
-          tags: deltares/hydromt:full
-
       - name: Build and push min image
         uses: docker/build-push-action@v4
         with:
@@ -81,7 +64,7 @@ jobs:
           load: true
           target: min
           push:  ${{ env.should_publish }}
-          tags: deltares/hydromt:min
+          tags: deltares/hydromt:${{ env.version }}-min
 
       - name: Build and push slim image
         uses: docker/build-push-action@v4
@@ -90,4 +73,13 @@ jobs:
           load: true
           target: slim
           push:  ${{ env.should_publish }}
-          tags: deltares/hydromt:slim
+          tags: deltares/hydromt:${{ env.version }}-slim, deltares/hydromt:latest
+
+      - name: Build and push full image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          target: full
+          push:  ${{ env.should_publish }}
+          tags: deltares/hydromt:${{ env.version }}-full
