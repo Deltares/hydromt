@@ -43,8 +43,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          tags: deltares/hydromt:full
-          load: true
+          tags: hydromt:full
           target: full
 
       - name: Run Tests
