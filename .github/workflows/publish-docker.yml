@@ -43,8 +43,12 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          tags: hydromt:full
+          tags: deltares/hydromt:full
           target: full
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: false
 
       - name: Run Tests
         run: docker run --rm hydromt pytest
