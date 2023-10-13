@@ -13,6 +13,7 @@ import pandas as pd
 import pyproj
 import rioxarray
 import xarray as xr
+from pyogrio import read_dataframe
 from shapely.geometry import box
 from shapely.geometry.base import GEOMETRY_TYPES
 
@@ -615,13 +616,12 @@ def open_vector(
     gdf : geopandas.GeoDataFrame
         Parsed geometry file
     """
-    filtered = False
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     else:
-        gdf = gpd.read_file(fn, bbox=bbox, mask=geom, mode=mode, **kwargs)
-        filtered = predicate == "intersects"
+        bbox_reader = gis_utils.prepare_pyogrio_reader_filters(fn, bbox, geom, crs)
+        gdf = read_dataframe(fn, bbox=bbox_reader, mode=mode, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:
@@ -642,7 +642,7 @@ def open_vector(
     if dst_crs is not None:
         gdf = gdf.to_crs(dst_crs)
     # filter points
-    if gdf.index.size > 0 and not filtered and (geom is not None or bbox is not None):
+    if gdf.index.size > 0 and (geom is not None or bbox is not None):
         idx = gis_utils.filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
         gdf = gdf.iloc[idx, :]
     return gdf
