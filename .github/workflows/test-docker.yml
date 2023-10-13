@@ -34,7 +34,7 @@ jobs:
       - name: generate envs
         run: |
           pip install tomli
-          python make_env.py -p '3.11' -o full-environment.yml full
+          python make_env.py -p "3.11" -o full-environment.yml full
 
       - name: Build and test
         uses: docker/build-push-action@v4
