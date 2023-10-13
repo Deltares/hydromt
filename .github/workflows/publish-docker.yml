@@ -50,6 +50,8 @@ jobs:
         run: |
           pip install tomli
           python make_env.py -p '3.11' -o full-environment.yml full
+          python make_env.py -p '3.11' -o min-environment.yml min
+          python make_env.py -p '3.11' -o slim-environment.yml slim
 
       - name: Build and test
         uses: docker/build-push-action@v4
