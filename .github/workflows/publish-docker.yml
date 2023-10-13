@@ -20,11 +20,11 @@ on:
 
 
 jobs:
-  strategy:
-    fail-fast: false
-    matrix:
-      flavour: ['min','slim','full']
   publish-docker-image:
+    strategy:
+      fail-fast: false
+      matrix:
+        flavour: ['min','slim','full']
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
