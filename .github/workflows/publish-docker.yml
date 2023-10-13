@@ -25,6 +25,7 @@ jobs:
       fail-fast: false
       matrix:
         flavour: ['min','slim','full']
+    name: ${{ matrix.flavour }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
