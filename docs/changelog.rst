@@ -47,6 +47,7 @@ Fixed
 - open_geodataset with driver vector also works for other geometry type than points. (PR #509)
 - overwrite model in update mode. (PR #534)
 - fix stats.extremes methods for (dask) 3D arrays. (PR #505)
+- raster gives better error on incompatible nodata (PR #544)
 
 Deprecated
 ----------
