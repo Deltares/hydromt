@@ -595,6 +595,7 @@ Clip
    :template: autosummary/accessor_method.rst
    :toctree: _generated
 
+   DataArray.raster.clip
    DataArray.raster.clip_bbox
    DataArray.raster.clip_mask
    DataArray.raster.clip_geom
