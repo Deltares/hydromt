@@ -77,6 +77,11 @@ Install HydroMT in a new environment
 
     This is our recommended way of installing HydroMT!
 
+.. Note::
+
+    If you intend to run the most up to date examples, you should follow the instalation guide at `the dev guide <https://deltares.github.io/hydromt/latest/dev/dev_install.html>`_ instead, as the dev version of hydromt is necessary to run the current examples. WIth the version installed through the steps
+    in this page, you will be able to run the examples at the time of the last release.
+
 To install HydroMT in a new environment called `hydromt` from the conda-forge channel do:
 
 .. code-block:: console
