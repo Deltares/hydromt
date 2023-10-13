@@ -40,6 +40,7 @@ Changed
 - ``setup_mesh2d_from_rasterdataset`` and ``setup_mesh2d_from_raster_reclass`` now use xugrid Regridder methods. (PR #535)
 - Use the Model.data_catalog to read the model region if defined by a geom or grid. (PR #479)
 - ``vector.GeoDataset.from_gdf`` can use the gdf columns as data_vars instead of external xarray. (PR #412)
+- ``io.open_vector`` now uses `pyogrio` if reading from a non-tabular dataset (PR #583)
 
 Fixed
 -----
