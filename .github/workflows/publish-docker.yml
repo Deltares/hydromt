@@ -28,6 +28,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      - name: Set should_publish variable
+        id: set-should-publish
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            echo "should_publish=true" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [[ -n "${{ github.event.inputs.publish }}" ]]; then
+              echo "should_publish=${{ github.event.inputs.publish }}" >> $GITHUB_ENV
+            fi
+          fi
+        shell: bash
+
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -50,9 +62,6 @@ jobs:
           cache-to: type=gha,mode=max
           push: false
 
-      - name: Run Tests
-        run: docker run --rm hydromt pytest
-
       #build should be cached from previous steps
       - name: Build and push full image
         uses: docker/build-push-action@v4
@@ -60,7 +69,7 @@ jobs:
           context: .
           load: true
           target: full
-          push:  ${{ inputs.publish }}
+          push:  ${{ env.should_publish }}
           tags: deltares/hydromt:full
 
       - name: Build and push min image
@@ -69,7 +78,7 @@ jobs:
           context: .
           load: true
           target: min
-          push:  ${{ inputs.publish }}
+          push:  ${{ env.should_publish }}
           tags: deltares/hydromt:min
 
       - name: Build and push slim image
@@ -78,5 +87,5 @@ jobs:
           context: .
           load: true
           target: slim
-          push:  ${{ inputs.publish }}
+          push:  ${{ env.should_publish }}
           tags: deltares/hydromt:slim
