@@ -43,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          tags: hydromt:full
+          tags: deltares/hydromt:full
           load: true
           target: full
 
