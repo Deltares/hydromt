@@ -284,7 +284,7 @@ def get_peaks(
     peaks = da.where(lmax)
     if ev_type.upper() == "POT":
         peaks = da.where(peaks > da.quantile(qthresh, dim=time_dim))
-    # TODO get extreme rate per year
+    # get extreme rate per year
     da_rate = np.isfinite(peaks).sum(time_dim) / nyears
     peaks = peaks.assign_coords({"extremes_rate": da_rate})
     peaks.name = "peaks"
@@ -412,6 +412,8 @@ def fit_extremes(
         )
 
     def _fitopt_1d(x, distributions=distributions, criterium=criterium):
+        if np.isnan(x).all():
+            return np.array([np.nan, np.nan, np.nan, -1])
         params, d = lmoment_fitopt(x, distributions=distributions, criterium=criterium)
         if len(params) == 2:
             params = np.concatenate([[0], params])
