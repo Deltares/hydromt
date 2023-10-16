@@ -5,8 +5,7 @@
 import glob
 import logging
 import os
-import subprocess
-from os.path import dirname, join
+from os.path import dirname
 from typing import Optional, Tuple
 
 import geopandas as gpd
@@ -26,34 +25,6 @@ __all__ = ["spread2d", "nearest", "nearest_merge"]
 logger = logging.getLogger(__name__)
 
 _R = 6371e3  # Radius of earth in m. Use 3956e3 for miles
-XATTRS = {
-    "geographic": {
-        "standard_name": "longitude",
-        "long_name": "longitude coordinate",
-        "short_name": "lon",
-        "units": "degrees_east",
-    },
-    "projected": {
-        "standard_name": "projection_x_coordinate",
-        "long_name": "x coordinate of projection",
-        "short_name": "x",
-        "units": "m",
-    },
-}
-YATTRS = {
-    "geographic": {
-        "standard_name": "latitude",
-        "long_name": "latitude coordinate",
-        "short_name": "lat",
-        "units": "degrees_north",
-    },
-    "projected": {
-        "standard_name": "projection_y_coordinate",
-        "long_name": "y coordinate of projection",
-        "short_name": "y",
-        "units": "m",
-    },
-}
 GDAL_DRIVER_CODE_MAP = {
     "asc": "AAIGrid",
     "blx": "BLX",
@@ -314,12 +285,16 @@ def axes_attrs(crs):
     x_attr: dict - attributes of variable x
     y_attr: dict - attributes of variable y
     """
-    # check for type of crs
-    crs_type = "geographic" if crs.is_geographic else "projected"
-    y_dim = YATTRS[crs_type]["short_name"]
-    x_dim = XATTRS[crs_type]["short_name"]
-    y_attrs = YATTRS[crs_type]
-    x_attrs = XATTRS[crs_type]
+    # # check for type of crs
+    if not isinstance(crs, CRS):
+        crs = CRS.from_user_input(crs)
+    if crs.is_geographic:
+        x_dim, y_dim = "longitude", "latitude"
+    else:
+        x_dim, y_dim = "x", "y"
+    cf_coords = crs.cs_to_cf()
+    x_attrs = [c for c in cf_coords if c["axis"] == "X"][0]
+    y_attrs = [c for c in cf_coords if c["axis"] == "Y"][0]
     return x_dim, y_dim, x_attrs, y_attrs
 
 
@@ -529,53 +504,44 @@ def spread2d(
 
 def create_vrt(
     vrt_path: str,
-    file_list_path: str = None,
+    files: list = None,
     files_path: str = None,
 ):
     r"""Create a .vrt file from a list op raster datasets.
 
-    Either passing the list directly (file_list_path) or by inferring it by passing
-    a path containing wildcards (files_path) of the location(s) of the
-    raster datasets.
+    Either a list of files (`files`) or a path containing wildcards
+    (`files_path`) to infer the list of files is required.
 
     Parameters
     ----------
     vrt_path : str
         Path of the output vrt
-    file_list_path : str, optional
-        Path to the text file containing the paths to the raster files
+    files : list, optional
+        List of raster datasets filenames, by default None
     files_path : str, optional
         Unix style path containing a pattern using wildcards (*)
         n.b. this is without an extension
         e.g. c:\\temp\\*\\*.tif for all tif files in subfolders of 'c:\temp'
-
-    Raises
-    ------
-    ValueError
-        A Path is needed, either file_list_path or files_path
     """
-    if file_list_path is None and files_path is None:
-        raise ValueError(
-            "Either 'file_list_path' or 'files_path' is required -> None was given"
+    if files is None and files_path is None:
+        raise ValueError("Either 'files' or 'files_path' is required")
+
+    if not _compat.HAS_RIO_VRT:
+        raise ImportError(
+            "rio-vrt is required for execution, install with 'pip install rio-vrt'"
         )
+    import rio_vrt
+
+    if files is None and files_path is not None:
+        files = glob.glob(files_path)
+        if len(files) == 0:
+            raise IOError(f"No files found at {files_path}")
 
     outdir = dirname(vrt_path)
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
 
-    if file_list_path is None:
-        files = glob.glob(files_path)
-        if len(files) == 0:
-            raise IOError(f"No files found at {files_path}")
-        file_list_path = join(outdir, "filelist.txt")
-        with open(file_list_path, "w") as w:
-            for line in files:
-                w.write(f"{line}\n")
-
-    # TODO ability to pass more options
-    # TODO find method to pass dir of gdalbuiltvrt on different OS
-    cmd = ["gdalbuildvrt", "-input_file_list", file_list_path, vrt_path]
-    subprocess.run(cmd)
+    rio_vrt.build_vrt(vrt_path, files=files, relative=True)
     return None
 
 

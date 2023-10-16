@@ -23,7 +23,7 @@ def test_crs():
     assert xattrs["units"] == "degrees_east"
     assert yattrs["units"] == "degrees_north"
     _, _, xattrs, yattrs = gu.axes_attrs(gu.utm_crs(bbox1))
-    assert xattrs["units"] == yattrs["units"] == "m"
+    assert xattrs["units"] == yattrs["units"] == "metre"
 
 
 def test_transform():
@@ -123,9 +123,7 @@ def test_create_vrt(tmpdir, rioda_large):
     gu.create_vrt(vrt_fn, files_path=files_path)
     assert os.path.isfile(vrt_fn)
     assert isinstance(open_raster(vrt_fn).load(), xr.DataArray)  # try reading
-    with pytest.raises(
-        ValueError, match="Either 'file_list_path' or 'files_path' is required"
-    ):
+    with pytest.raises(ValueError, match="Either 'files' or 'files_path' is required"):
         gu.create_vrt(vrt_fn)
     with pytest.raises(IOError, match="No files found at "):
         gu.create_vrt(vrt_fn, files_path=os.path.join(path, "dummy_xyz", "*.abc"))
