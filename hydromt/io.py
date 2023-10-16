@@ -13,7 +13,6 @@ import pandas as pd
 import pyproj
 import rioxarray
 import xarray as xr
-from pyogrio import read_dataframe
 from shapely.geometry import box
 from shapely.geometry.base import GEOMETRY_TYPES
 
@@ -621,7 +620,7 @@ def open_vector(
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     else:
         bbox_reader = gis_utils.prepare_pyogrio_reader_filters(fn, bbox, geom, crs)
-        gdf = read_dataframe(fn, bbox=bbox_reader, mode=mode, **kwargs)
+        gdf = gpd.read_file(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:
