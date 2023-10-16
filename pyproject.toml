@@ -87,7 +87,7 @@ doc = [
 examples = [
   "jupyterlab",      # run examples in jupyter notebook
   "cartopy",         # plotting examples
-  "matplotlib-base", # plotting
+  "matplotlib",      # plotting
   "notebook",        # jupyter integration
 ]
 
