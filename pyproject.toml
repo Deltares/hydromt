@@ -23,7 +23,7 @@ dependencies = [
   "netcdf4",           # netcfd IO
   "packaging",         # compare versions of hydromt
   "rioxarray",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
-  "pandas",            # Dataframes
+  "pandas[parquet]",            # Dataframes
   "pyflwdir>=0.5.4",   # Hight models and derivatives
   "pyproj",            # projections for Coordinate reference systems
   "rasterio",          # raster wrapper around gdal
