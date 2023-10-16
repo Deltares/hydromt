@@ -63,12 +63,16 @@ jobs:
       # by avoiding the mamba setup stage by loading it from cache instead we save
       # a lot of setup time, but we do have to do our own PATH management
       # hence the exports
-      - name: Update environment
-        if: steps.cache.outputs.cache-hit != 'true'
+      # - name: Update environment
+      #   if: steps.cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     export PATH=/usr/share/miniconda3/bin:$PATH
+      #     mamba env update -n hydromt -f environment.yml
+      - name: Fresh install
         run: |
           export PATH=/usr/share/miniconda3/bin:$PATH
           mamba env update -n hydromt -f environment.yml
-
+      
       - name: Conda info
         run: |
           export PATH=/usr/share/miniconda3/bin:$PATH
