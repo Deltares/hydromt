@@ -54,12 +54,12 @@ jobs:
       #     restore-keys: |
       #       test-py${{ matrix.python-version }}
 
-      - name: Fail on no cache restore
-        if: steps.cache.outputs.cache-matched-key == ''
-        run: |
-          echo "Failed to restore any cache. exiting..."
-          exit 1
-
+      # - name: Fail on no cache restore
+      #   if: steps.cache.outputs.cache-matched-key == ''
+      #   run: |
+      #     echo "Failed to restore any cache. exiting..."
+      #     exit 1
+      
       # by avoiding the mamba setup stage by loading it from cache instead we save
       # a lot of setup time, but we do have to do our own PATH management
       # hence the exports
