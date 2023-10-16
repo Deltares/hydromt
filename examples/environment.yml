@@ -1,0 +1,20 @@
+name: hydromt
+
+channels:
+- conda-forge
+
+dependencies:
+- cartopy
+- gcsfs
+- hydromt
+- jupyterlab
+- matplotlib-base
+- notebook
+- openpyxl
+- pillow
+- pip
+- requests
+- s3fs
+- xugrid>=0.6.5
+- pip:
+  - pyet

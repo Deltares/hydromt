@@ -1,0 +1,29 @@
+---
+name: Update examples environment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - pyproject.toml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - pyproject.toml
+
+jobs:
+  generate_examples_environment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate environment file
+        run: pip install tomli && python make_env.py slim -n hydromt -r -o ./examples/environment.yml
+
+      - name: Commit environment file
+        uses: actions/update-file@v4
+        with:
+          path: ./examples/environment.yml
+          content: |
+            {{ include('examples/environment.yml') }}
