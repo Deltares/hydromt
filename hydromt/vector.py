@@ -11,9 +11,6 @@ import shapely
 import xarray as xr
 from geopandas import GeoDataFrame, GeoSeries
 from rasterio import gdal_version
-
-# TODO try getting this version without importing osgeo to avoid
-# conflicts with geopandas/rasterio
 from shapely.geometry.base import BaseGeometry
 
 from hydromt import gis_utils, raster
