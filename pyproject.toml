@@ -26,6 +26,7 @@ dependencies = [
   "rioxarray",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
   "pandas",            # Dataframes
   "pyflwdir>=0.5.4",   # Hight models and derivatives
+  "pyogrio>=0.6",      # io for geopandas dataframes
   "pyproj",            # projections for Coordinate reference systems
   "rasterio",          # raster wrapper around gdal
   "shapely>=2.0.0",    # geometry transforms
