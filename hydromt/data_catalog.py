@@ -33,9 +33,7 @@ import xarray as xr
 import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
-from pystac import Item as StacItem
 
 from hydromt.utils import partition_dictionaries
 
@@ -179,74 +177,10 @@ class DataCatalog(object):
     ):
         """Generate STAC catalog."""
         stac_catalog = StacCatalog(id=catalog_name, description=description)
-        for name, source in self.iter_sources():
-            start_dt = None
-            end_dt = None
-            dt = None
-            bbox = None
-            if isinstance(source, RasterDatasetAdapter):
-                try:
-                    start_dt, end_dt = source.get_time_range()
-                    start_dt = start_dt.astype("datetime64[s]").tolist()
-                    end_dt = end_dt.astype("datetime64[s]").tolist()
-                except (TypeError, KeyError) as e:
-                    if errors == "skip":
-                        logger.warn(
-                            "Skipping {name} during stac conversion because"
-                            "because detecting temporal extent failed."
-                        )
-                        continue
-                    elif errors == "coerce":
-                        start_dt = np.datetime64(datetime(1, 1, 1))
-                        end_dt = np.datetime64(datetime(1, 1, 1))
-                    else:
-                        raise e
-                try:
-                    bbox, source_crs = source.get_bbox()
-                except (TypeError, KeyError) as e:
-                    if errors == "skip":
-                        logger.warn(
-                            "Skipping {name} during stac conversion because"
-                            "because detecting spatial extent failed."
-                        )
-                        continue
-                    elif errors == "coerce":
-                        start_dt = np.datetime64(datetime(1, 1, 1))
-                        end_dt = np.datetime64(datetime(1, 1, 1))
-                    else:
-                        raise e
-
-            elif isinstance(source, GeoDatasetAdapter):
-                start_dt, end_dt = source.get_time_range()
-                start_dt = (start_dt.astype("datetime64[s]").tolist(),)
-                end_dt = (end_dt.astype("datetime64[s]").tolist(),)
-                dt = None
-                bbox, source_crs = source.get_bbox()
-            elif isinstance(source, GeoDataFrameAdapter):
-                bbox, source_crs = source.get_bbox()
-                dt = None
-            elif isinstance(source, DataFrameAdapter):
-                if errors == "skip":
-                    logger.warn(f"Skipping {name} as it's not spatiotemporal")
-                    continue
-                elif errors == "coerce":
-                    pass
-            else:
-                raise ValueError(f"Unknown adapter type: {type(source).__name__}")
-
-            stac_item = StacItem(
-                name,
-                geometry=None,
-                bbox=list(bbox),
-                properties={**source.meta, "crs": source_crs},
-                datetime=dt,
-                start_datetime=start_dt.astype("datetime64[s]").tolist(),
-                end_datetime=end_dt.astype("datetime64[s]").tolist(),
-            )
-            stac_asset = StacAsset(str(source.path))
-            stac_item.add_asset("hydromt_path", stac_asset)
-
-            stac_catalog.add_item(stac_item)
+        for _name, source in self.iter_sources():
+            stac_item = source.to_stac_catalog(catalog_name, description, errors)
+            if stac_item:
+                stac_catalog.add_item(stac_item)
 
         return stac_catalog
 

@@ -1,12 +1,16 @@
 """The Geodataframe adapter implementation."""
 import logging
 import warnings
+from datetime import datetime
 from os.path import join
 from pathlib import Path
-from typing import NewType, Optional, Tuple, Union
+from typing import Literal, NewType, Optional, Tuple, Union
 
 import numpy as np
 import pyproj
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
 
 from .. import gis_utils, io
 from .data_adapter import DataAdapter
@@ -463,3 +467,37 @@ class GeoDataFrameAdapter(DataAdapter):
         crs = gdf.geometry.crs.to_epsg()
         bounds = gdf.geometry.total_bounds
         return bounds, crs
+
+    def to_stac_catalog(
+        self,
+        errors: Literal["raise", "skip", "coerce"] = "coerce",
+    ) -> Optional[StacCatalog]:
+        if errors == "skip":
+            logger.warn(
+                "Skipping {name} during stac conversion because"
+                "because detecting temporal extent failed."
+            )
+            return
+        elif errors == "coerce":
+            stac_catalog = StacCatalog(
+                self.name,
+                description=self.name,
+            )
+            stac_item = StacItem(
+                self.name,
+                geometry=None,
+                bbox=[0, 0, 0, 0],
+                properties=self.meta,
+                datetime=None,
+                start_datetime=np.datetime64(datetime(1, 1, 1)),
+                end_datetime=np.datetime64(datetime(1, 1, 1)),
+            )
+            stac_asset = StacAsset(str(self.path))
+            stac_item.add_asset("hydromt_path", stac_asset)
+
+            stac_catalog.add_item(stac_item)
+            return stac_catalog
+        else:
+            raise NotImplementedError(
+                "DataframeAdapter does not support full stac conversion as it lacks spatio-temporal dimentions"
+            )

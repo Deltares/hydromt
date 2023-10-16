@@ -4,9 +4,10 @@ from __future__ import annotations
 import logging
 import os
 import warnings
+from datetime import datetime
 from os import PathLike
 from os.path import join
-from typing import Dict, NewType, Optional, Tuple, Union, cast
+from typing import Dict, Literal, NewType, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -14,6 +15,9 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
 from rasterio.errors import RasterioIOError
 
 from .. import gis_utils, io
@@ -589,7 +593,7 @@ class RasterDatasetAdapter(DataAdapter):
         zls_dict: Optional[Dict[int, float]] = None,
         dst_crs: pyproj.CRS = None,
         logger=logger,
-    ) -> int:
+    ) -> Optional[int]:
         """Return overview level of data corresponding to zoom level.
 
         Parameters
@@ -781,3 +785,37 @@ class RasterDatasetAdapter(DataAdapter):
             ds[ds.raster.time_dim].min().values,
             ds[ds.raster.time_dim].max().values,
         )
+
+    def to_stac_catalog(
+        self,
+        errors: Literal["raise", "skip", "coerce"] = "coerce",
+    ) -> Optional[StacCatalog]:
+        stac_catalog = StacCatalog(
+            self.name,
+            description=self.name,
+        )
+        if errors == "skip":
+            logger.warn(
+                f"Skipping {self.name} during stac conversion because"
+                "because detecting temporal extent failed."
+            )
+            return
+        elif errors == "coerce":
+            stac_item = StacItem(
+                self.name,
+                geometry=None,
+                bbox=[0, 0, 0, 0],
+                properties=self.meta,
+                datetime=None,
+                start_datetime=np.datetime64(datetime(1, 1, 1)),
+                end_datetime=np.datetime64(datetime(1, 1, 1)),
+            )
+            stac_asset = StacAsset(str(self.path))
+            stac_item.add_asset("hydromt_path", stac_asset)
+
+            stac_catalog.add_item(stac_item)
+            return stac_catalog
+        else:
+            raise NotImplementedError(
+                "DataframeAdapter does not support full stac conversion as it lacks spatio-temporal dimentions"
+            )

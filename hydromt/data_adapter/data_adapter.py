@@ -9,13 +9,16 @@ from abc import ABCMeta, abstractmethod
 from itertools import product
 from pathlib import Path
 from string import Formatter
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import fsspec
 import numpy as np
 import pandas as pd
 import xarray as xr
 import yaml
+
+# from pystac import Item as StacItem
+from pystac import Catalog as StacCatalog
 from upath import UPath
 
 logger = logging.getLogger(__name__)
@@ -414,3 +417,12 @@ class DataAdapter(object, metaclass=ABCMeta):
             return da
         else:
             return ds
+
+    @abstractmethod
+    def to_stac_catalog(
+        self,
+        catalog_name="hydromt-stac-catalog",
+        description="The stac catalog of hydromt",
+        errors: Literal["raise", "skip", "coerce"] = "coerce",
+    ) -> Optional[StacCatalog]:
+        """Create a stac item from the data adatper to be added to a stac catalog."""
