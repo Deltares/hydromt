@@ -134,7 +134,6 @@ class RasterDatasetAdapter(DataAdapter):
         """
         driver_kwargs = driver_kwargs or {}
         extent = extent or {}
-        zoom_levels = zoom_levels or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
@@ -162,6 +161,7 @@ class RasterDatasetAdapter(DataAdapter):
             version=version,
         )
         self.crs = crs
+        # should be None or non-empty dict when initialized
         self.zoom_levels = zoom_levels
         self.extent = extent
 

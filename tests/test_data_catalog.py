@@ -455,7 +455,7 @@ def test_export_dataframe(tmpdir, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
-def test_get_data(df, tmpdir):
+def test_get_rasterdataset():
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)
     # raster dataset using three different ways
@@ -472,6 +472,10 @@ def test_get_data(df, tmpdir):
     data = {"source": name, "provider": "artifact_data"}
     ds = data_catalog.get_rasterdataset(data, single_var_as_array=False)
     assert isinstance(ds, xr.Dataset)
+    data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
+    da = data_catalog.get_rasterdataset(data)
+    assert isinstance(da, xr.DataArray)
+    assert len(data_catalog) == n + 2
     with pytest.raises(ValueError, match='Unknown raster data type "list"'):
         data_catalog.get_rasterdataset([])
     with pytest.raises(FileNotFoundError):
@@ -479,10 +483,14 @@ def test_get_data(df, tmpdir):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_rasterdataset({"name": "test"})
 
+
+def test_get_geodataframe():
+    data_catalog = DataCatalog("artifact_data")  # read artifacts
+    n = len(data_catalog)
     # vector dataset using three different ways
     name = "osm_coastlines"
     gdf = data_catalog.get_geodataframe(data_catalog.get_source(name).path)
-    assert len(data_catalog) == n + 2
+    assert len(data_catalog) == n + 1
     assert isinstance(gdf, gpd.GeoDataFrame)
     gdf = data_catalog.get_geodataframe(name, provider="artifact_data")
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -500,10 +508,14 @@ def test_get_data(df, tmpdir):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataframe({"name": "test"})
 
+
+def test_get_geodataset():
+    data_catalog = DataCatalog("artifact_data")  # read artifacts
+    n = len(data_catalog)
     # geodataset using three different ways
     name = "gtsmv3_eu_era5"
     da = data_catalog.get_geodataset(data_catalog.get_source(name).path)
-    assert len(data_catalog) == n + 3
+    assert len(data_catalog) == n + 1
     assert isinstance(da, xr.DataArray)
     da = data_catalog.get_geodataset(name, provider="artifact_data")
     assert da.vector.index.size == 19
@@ -525,19 +537,23 @@ def test_get_data(df, tmpdir):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataset({"name": "test"})
 
+
+def test_get_dataframe(df, tmpdir):
+    data_catalog = DataCatalog("artifact_data")  # read artifacts
+    n = len(data_catalog)
     # dataframe using single way
     name = "test.csv"
     fn = str(tmpdir.join(name))
     df.to_csv(fn)
     df = data_catalog.get_dataframe(fn, driver_kwargs=dict(index_col=0))
-    assert len(data_catalog) == n + 4
+    assert len(data_catalog) == n + 1
     assert isinstance(df, pd.DataFrame)
-    df = data_catalog.get_dataframe(name, provider="local")
+    df = data_catalog.get_dataframe(name, provider="user")
     assert isinstance(df, pd.DataFrame)
     df = data_catalog.get_dataframe(df, variables=["city"])
     assert isinstance(df, pd.DataFrame)
     assert df.columns == ["city"]
-    data = {"source": name, "provider": "local"}
+    data = {"source": name, "provider": "user"}
     gdf = data_catalog.get_dataframe(data)
     assert isinstance(gdf, pd.DataFrame)
     with pytest.raises(ValueError, match='Unknown tabular data type "list"'):
