@@ -105,7 +105,7 @@ def test_gdal(tmpdir):
     # Update gdal compliant attrs
     da1 = da.raster.gdal_compliant(rename_dims=True, force_sn=True)
     assert raster.GEO_MAP_COORD in da1.coords
-    # assert da1.raster.dims == ("latitude", "longitude")
+    assert da1.raster.dims == ("latitude", "longitude")
     assert da1.raster.res[1] > 0
     # Write to netcdf and reopen with gdal
     fn_nc = str(tmpdir.join("gdal_test.nc"))

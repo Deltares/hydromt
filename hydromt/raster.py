@@ -438,7 +438,7 @@ class XRasterBase(XGeoBase):
         if check_x == False or check_y == False:
             raise ValueError("raster only applies to regular grids")
 
-    def reset_spatial_dims_attrs(self, rename_dims=False) -> xr.DataArray:
+    def reset_spatial_dims_attrs(self, rename_dims=True) -> xr.DataArray:
         """Reset spatial dimension names and attributes.
 
         Needed to make CF-compliant and requires CRS attribute.
