@@ -543,9 +543,9 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
         zoom_levels=[0, 2],
     )
     with rasterio.open(join(path, "dummy_xyz", "dummy_xyz_zl0.vrt"), "r") as src:
-        assert src.shape == rioda_large.shape
+        assert src.shape == (1024, 1024)
     with rasterio.open(join(path, "dummy_xyz", "dummy_xyz_zl2.vrt"), "r") as src:
-        assert src.shape == tuple(np.array(rioda_large.shape) // 4)
+        assert src.shape == (256, 256)
 
     test_bounds = [2.13, -2.13, 3.2, -1.07]
     _test_r = open_raster(join(path, "dummy_xyz", "0", "2", "1.tif"))
