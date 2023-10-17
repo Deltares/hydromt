@@ -1,0 +1,51 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
+      - pyproject.toml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
+      - pyproject.toml
+
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.11']
+    name: py ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+
+      - uses: actions/checkout@v3
+
+      # build environment with pip
+      - name: Generate env spec
+        run: pip install .[test,io,extra]
+
+      # TODO caching
+
+      # run test
+      - name: Test
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          export NUMBA_DISABLE_JIT=1
+          python -m pytest --verbose
