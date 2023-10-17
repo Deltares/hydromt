@@ -10,6 +10,9 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
+from pystac import Asset as StacAsset
 
 import hydromt.data_catalog
 from hydromt.data_adapter import (
@@ -608,6 +611,53 @@ def test_detect_extent():
     detected_temporal_range = ds.get_time_range(detect=True)
     assert np.all(np.equal(detected_spatial_range, bbox))
     assert detected_temporal_range == expected_temporal_range
+
+    # geodataframe
+    name = "gadm_level1"
+    bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
+    ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
+
+    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    assert np.all(np.equal(detected_spatial_range, bbox))
+
+    # geodataset
+    name = "gtsmv3_eu_era5"
+    bbox = (12.22412, 45.22705, 12.99316, 45.62256)
+    expected_temporal_range = (
+        np.datetime64("2010-02-01"),
+        np.datetime64("2010-02-14T23:50:00.000000000"),
+    )
+    ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
+    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    detected_temporal_range = ds.get_time_range(detect=True)
+    assert np.all(np.equal(detected_spatial_range, bbox))
+    assert detected_temporal_range == expected_temporal_range
+
+def test_to_stac():
+    data_catalog = DataCatalog()  # read artifacts
+    _ = data_catalog.sources  # load artifact data as fallback
+
+    # raster dataset
+    name = "chirps_global"
+    ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    bbox, crs = ds.get_bbox()
+    start_dt, end_dt = self.get_time_range(detect=True)
+    expected_stac_catalog = StacCatalog(id=name, description=name)
+    raster_stac_item = StacItem(
+        name,
+        geometry=None,
+        bbox=list(bbox), 
+        properties=ds.meta,
+        datetime=None,
+        start_datetime=start_dt,
+        end_datetime=end_dt
+    )
+    raster_stac_asset = StacAsset(str(ds.path))
+    raster_base_name = basename(ds.path)
+    raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
+
+    expected_stac_catalog.add_item(raster_stac_item)
+
 
     # geodataframe
     name = "gadm_level1"

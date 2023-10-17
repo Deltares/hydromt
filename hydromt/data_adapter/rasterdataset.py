@@ -6,7 +6,7 @@ import os
 import warnings
 from datetime import datetime
 from os import PathLike
-from os.path import join
+from os.path import join, basename
 from typing import Dict, Literal, NewType, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -788,34 +788,63 @@ class RasterDatasetAdapter(DataAdapter):
 
     def to_stac_catalog(
         self,
-        errors: Literal["raise", "skip", "coerce"] = "coerce",
+        on_error: Literal["raise", "skip", "coerce"] = "coerce",
     ) -> Optional[StacCatalog]:
-        stac_catalog = StacCatalog(
-            self.name,
-            description=self.name,
-        )
-        if errors == "skip":
-            logger.warn(
-                f"Skipping {self.name} during stac conversion because"
-                "because detecting temporal extent failed."
+        """
+        Convert a rasterdataset into a STAC Catalog representation.  The collection will 
+        contain an asset for each of the associated files.
+
+
+        Parameters:
+        - on_error (str, optional): The error handling strategy when extracting metadata.
+          Options are: "raise" to raise an error on failure, "skip" to skip
+          the dataset on failure, and "coerce" (default) to set default values on failure.
+
+        Returns:
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
+          if the dataset was skipped.
+        """
+        if on_error not in ["raise", "skip", "coerce"]:
+            raise RuntimeError(
+                f"Invalid error value: {on_error} options are:"
+                " ['raise', 'skip', 'coerce']"
             )
-            return
-        elif errors == "coerce":
+
+        try:
+            bbox, crs = self.get_bbox(detect=True)
+            start_dt, end_dt = self.get_time_range(detect=True)
+            props = {**self.meta, "crs":crs}
+        except Exception as e:
+            if on_error == "skip":
+                logger.warn(
+                    "Skipping {name} during stac conversion because"
+                    "because detecting spacial extent failed."
+                )
+                return
+            elif on_error == "coerce":
+                bbox = [0.0, 0.0, 0.0, 0.0]
+                props = self.meta
+                start_dt = np.datetime64(datetime(1, 1, 1))
+                end_dt = np.datetime64(datetime(1, 1, 1))
+            else:
+                raise e
+
+            stac_catalog = StacCatalog(
+                self.name,
+                description=self.name,
+            )
             stac_item = StacItem(
                 self.name,
                 geometry=None,
-                bbox=[0, 0, 0, 0],
-                properties=self.meta,
+                bbox=bbox, 
+                properties=props,
                 datetime=None,
-                start_datetime=np.datetime64(datetime(1, 1, 1)),
-                end_datetime=np.datetime64(datetime(1, 1, 1)),
+                start_datetime=start_dt,
+                end_datetime=end_dt
             )
             stac_asset = StacAsset(str(self.path))
-            stac_item.add_asset("hydromt_path", stac_asset)
+            base_name = basename(self.path)
+            stac_item.add_asset(base_name, stac_asset)
 
             stac_catalog.add_item(stac_item)
             return stac_catalog
-        else:
-            raise NotImplementedError(
-                "DataframeAdapter does not support full stac conversion as it lacks spatio-temporal dimentions"
-            )

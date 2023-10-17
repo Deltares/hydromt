@@ -421,8 +421,6 @@ class DataAdapter(object, metaclass=ABCMeta):
     @abstractmethod
     def to_stac_catalog(
         self,
-        catalog_name="hydromt-stac-catalog",
-        description="The stac catalog of hydromt",
-        errors: Literal["raise", "skip", "coerce"] = "coerce",
+        on_error: Literal["raise", "skip", "coerce"] = "coerce",
     ) -> Optional[StacCatalog]:
         """Create a stac item from the data adatper to be added to a stac catalog."""

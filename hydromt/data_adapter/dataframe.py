@@ -319,15 +319,15 @@ class DataFrameAdapter(DataAdapter):
 
     def to_stac_catalog(
         self,
-        errors: Literal["raise", "skip", "coerce"] = "coerce",
+        on_error: Literal["raise", "skip", "coerce"] = "coerce",
     ) -> Optional[StacCatalog]:
-        if errors == "skip":
+        if on_error == "skip":
             logger.warn(
                 f"Skipping {self.name} during stac conversion because"
                 "because detecting temporal extent failed."
             )
             return
-        elif errors == "coerce":
+        elif on_error == "coerce":
             stac_catalog = StacCatalog(
                 self.name,
                 description=self.name,
@@ -337,9 +337,7 @@ class DataFrameAdapter(DataAdapter):
                 geometry=None,
                 bbox=[0, 0, 0, 0],
                 properties=self.meta,
-                datetime=None,
-                start_datetime=np.datetime64(datetime(1, 1, 1)),
-                end_datetime=np.datetime64(datetime(1, 1, 1)),
+                datetime=np.datetime64(datetime(1, 1, 1)),
             )
             stac_asset = StacAsset(str(self.path))
             stac_item.add_asset("hydromt_path", stac_asset)
@@ -348,5 +346,6 @@ class DataFrameAdapter(DataAdapter):
             return stac_catalog
         else:
             raise NotImplementedError(
-                "DataframeAdapter does not support full stac conversion as it lacks spatio-temporal dimentions"
+                "DataframeAdapter does not support full stac conversion as it lacks"
+                " spatio-temporal dimentions"
             )
