@@ -2314,6 +2314,7 @@ class RasterDataArray(XRasterBase):
         vrt_fn = None
         prev = 0
         nodata = self.nodata
+        dtype = self._obj.dtype
         obj = self._obj.copy()
         zls = {}
         for zl in zoom_levels:
@@ -2325,6 +2326,10 @@ class RasterDataArray(XRasterBase):
                 obj = xr.open_dataarray(vrt_fn, engine="rasterio").squeeze(
                     "band", drop=True
                 )
+                obj.raster.set_nodata(nodata)
+                obj = (
+                    obj.raster.mask_nodata()
+                )  # set nodata values to nan for coarsening
             x_dim, y_dim = obj.raster.x_dim, obj.raster.y_dim
             obj = obj.chunk({x_dim: pxzl, y_dim: pxzl})
             dst_res = abs(obj.raster.res[-1]) * (2 ** (diff))
@@ -2347,9 +2352,23 @@ class RasterDataArray(XRasterBase):
                 os.makedirs(ssd, exist_ok=True)
                 temp = obj[u : u + h, l : l + w].load()
                 if zl != 0:
-                    temp = temp.coarsen(
-                        {x_dim: 2**diff, y_dim: 2**diff}, boundary="pad"
-                    ).mean()
+                    temp = (
+                        temp.coarsen(
+                            {x_dim: 2**diff, y_dim: 2**diff}, boundary="pad"
+                        )
+                        .mean()
+                        .fillna(nodata)
+                        .astype(dtype)
+                    )
+
+                # pad to tile_size to make sure all tiles have the same size
+                # this is required for the vrt
+                shape, dims = temp.raster.shape, temp.raster.dims
+                pad_sizes = [tile_size - s for s in shape]
+                if any((s > 0 for s in pad_sizes)):
+                    pad_sizes = {d: (0, s) for d, s in zip(dims, pad_sizes) if s > 0}
+                    temp = temp.pad(pad_sizes, mode="constant", constant_values=nodata)
+
                 temp.raster.set_nodata(nodata)
                 temp.raster._crs = obj.raster.crs
 
@@ -2381,6 +2400,7 @@ class RasterDataArray(XRasterBase):
             "driver": "raster",
             "path": f"{mName}_zl{{zoom_level}}.vrt",
             "zoom_levels": zls,
+            "nodata": float(nodata),
         }
         with open(join(root, f"{mName}.yml"), "w") as f:
             yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
