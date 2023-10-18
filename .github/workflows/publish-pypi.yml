@@ -62,7 +62,7 @@ jobs:
         run: |
           python -m pip install dist/hydromt*.whl
           python -c 'from hydromt import __version__ as v; print(v)'
-          echo "hydromt --models"
+          hydromt --models
 
   upload-to-test-pypi:
     needs: test-built-dist
