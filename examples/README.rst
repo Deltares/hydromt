@@ -29,38 +29,66 @@ If you already have a python & conda installation but do not yet have mamba inst
 
   $ conda install mamba -n base -c conda-forge
 
-2 - Download the content of the HydroMT github repository
-*********************************************************
-To run the examples locally, you will need to download the content of the HydroMT repository. You can either do a
-`manual download <https://github.com/Deltares/hydromt/archive/refs/heads/main.zip>`_ and extract the content of the downloaded ZIP folder
-**or** clone the repository locally:
+
+2 - Install HydroMT and the other python dependencies in a separate Python environment
+**************************************************************************************
+The next step is to install all the python dependencies required to run the notebooks, including HydroMT.
+
+**If you do not have HydroMT yet installed**, first create a new empty environment with the base hydromt installation:
+
+.. code-block:: console
+
+  $ mamba create -n hydromt -c conda-forge hydromt
+
+To run the notebooks, you need to install the ``slim`` version of HydroMT using pip. The slim version installs additional dependencies to Hydromt
+such as jupyter notebook to run the notebooks, matplotlib to plot or xugrid to also try out examples for the MeshModel. It is a more complete
+installation of hydromt. To install or update in an existing environment (example hydromt environment), do:
+
+.. code-block:: console
+
+  $ conda activate hydromt
+  $ pip install "hydromt[slim]"
+
+3 - Download the content of the examples and notebooks
+******************************************************
+To run the examples locally, you will need to download the content of the HydroMT repository.
+You have two options:
+
+  1. Download and unzip the examples manually
+  2. Clone the HydroMT GitHub repository
+
+.. warning::
+
+  Depending on your installed version of HydroMT, you will need to download the correct versions of the examples.
+  To check the version of HydroMT that you have installed, do:
+
+  .. code-block:: console
+
+    $ hydromt --version
+
+    hydroMT version: 0.8.0
+
+** Option 1: manual download and unzip**
+
+To manually download the examples on Windows, do (!replace with your own hydromt version!):
+
+.. code-block:: console
+
+  $ curl https://github.com/Deltares/hydromt/archive/refs/tags/v0.8.0.zip -O -L
+  $ tar -xf v0.8.0.zip
+  $ ren hydromt-0.8.0 hydromt
+
+You can also download, unzip and rename manually if you prefer, rather than using the windows command prompt.
+
+** Option 2: cloning the hydromt repository**
+
+For git users, you can also get the examples by cloning the hydromt github repository and checking the version
+you have installed:
 
 .. code-block:: console
 
   $ git clone https://github.com/Deltares/hydromt.git
-
-3 - Install HydroMT and the other python dependencies in a separate Python environment
-**************************************************************************************
-The next step is to install all the python dependencies required to run the notebooks, including HydroMT.
-
-For a more detailed explanation please refer to `the dev instalation guide <https://deltares.github.io/hydromt/latest/dev/dev_install.html>`_
-
-It should be noted however, that due to our release cycle the examples in the repository might not be
-compatible with the version of hydromt you have installed, particulary if you followed the guide on
-`Getting Started <https://deltares.github.io/hydromt/latest/getting_started/installation.html>`_ which
-or installed hydromt through either pip or conda forge. The examples in the repositroy are compatible
-with the latest `dev` version of hydromt. If you follow the dev instalation guide linked above, everything
-should work as intended. However if you already have a version of hydromt installed, you will have to checkout that release in the repository.
-
-For example let's say you want to try out the examples and you already have version 0.7.1 installed.
-Then you can retrieve the correct examples by executing the following command from within the
-hydromt folder you created in the last step:
-
-.. code-block:: console
-
-  $ git checkout v0.7.1
-
-this will give you the example files in the state they were at the time of that release.
+  $ git checkout v0.8.0
 
 
 4 - Running the examples

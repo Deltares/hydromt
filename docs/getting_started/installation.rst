@@ -67,9 +67,14 @@ Installation
 
 HydroMT is available from pypi and conda-forge, but we recommend installing from conda-forge in a new conda environment.
 
-.. Note::
+.. Tip::
 
     In the commands below you can exchange `conda` for `mamba`, see above for the difference between both.
+
+.. Note::
+
+    If you would like to try out the hydromt examples notebook, follow instead the
+    :ref:`examples installation guide <examples>`.
 
 Install HydroMT in a new environment
 ------------------------------------
@@ -93,7 +98,7 @@ look approximately like the one below:
     $ hydromt --models
 
     model plugins:
-    generic models (hydromt 0.7.2.dev0):
+    generic models (hydromt 0.7.2):
      - grid_model
      - vector_model
      - mesh_model
