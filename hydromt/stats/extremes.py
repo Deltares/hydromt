@@ -215,6 +215,7 @@ def get_peaks(
     qthresh: float = 0.9,
     period: str = "year",
     min_sample_size: int = 0,
+    time_dim: str = "time",
 ) -> xr.DataArray:
     """Return peaks from time series.
 
@@ -254,23 +255,23 @@ def get_peaks(
         Average interarrival time calculated based on the average number of peaks
         per year and stored as "extreme_rates"
     """
-    assert 0 < qthresh < 1.0, 'Quantile "qthresh" should be between (0,1)'
+    if not (0 < qthresh < 1.0):
+        raise ValueError("Quantile 'qthresh' should be between (0,1)")
+    if time_dim not in da.dims:
+        raise ValueError(f"Input array should have a '{time_dim}' dimension")
     if ev_type.upper() not in _DISTS.keys():
         raise ValueError(
             f"Unknown ev_type {ev_type.upper()}, select from {_DISTS.keys()}."
         )
     bins = None
-    duration = (da["time"][-1] - da["time"][0]).dt.days / 365.2425
-    if period in ["year", "quarter", "month"]:
-        bins = getattr(da["time"].dt, period).values
-    else:
-        tstart = da.resample(time=period, label="left").first()["time"]
+    nyears = (da[time_dim][-1] - da[time_dim][0]).dt.days / 365.2425
+    if period in ["year", "quarter", "month"] and ev_type.upper() == "BM":
+        bins = getattr(da[time_dim].dt, period).values
+    elif ev_type.upper() == "BM":
+        tstart = da[time_dim].resample(time=period, label="left").first()
         bins = tstart.reindex_like(da, method="ffill").values.astype(float)
-    if ev_type.upper() != "BM":
-        # TODO - Need to fix periods for POT!
-        bins = None
-        min_sample_size = 0
-        # Add nperiods
+    else:
+        min_sample_size = 0  # min_sample_size not used for POT
 
     def func(x):
         return local_max_1d(
@@ -278,20 +279,21 @@ def get_peaks(
         )
 
     duck = dask.array if isinstance(da.data, dask.array.Array) else np
-    lmax = duck.apply_along_axis(func, da.get_axis_num("time"), da)
+    lmax = duck.apply_along_axis(func, da.get_axis_num(time_dim), da)
     # apply POT threshold
     peaks = da.where(lmax)
     if ev_type.upper() == "POT":
-        peaks = da.where(peaks > da.quantile(qthresh, dim="time"))
-    # TODO get extreme rate - this rate is peak rate per period!! not correct
-    # da_rate = np.isfinite(peaks).sum("time") / nperiods
-    da_rate = np.isfinite(peaks).sum("time") / duration
+        peaks = da.where(peaks > da.quantile(qthresh, dim=time_dim))
+    # get extreme rate per year
+    da_rate = np.isfinite(peaks).sum(time_dim) / nyears
     peaks = peaks.assign_coords({"extremes_rate": da_rate})
     peaks.name = "peaks"
     return peaks
 
 
-def get_return_value(da_params: xr.DataArray, rps: np.ndarray = _RPS) -> xr.DataArray:
+def get_return_value(
+    da_params: xr.DataArray, rps: np.ndarray = _RPS, extremes_rate=1.0
+) -> xr.DataArray:
     """Return return value based on EVA.
 
     Return return values based on a fitted extreme value distribution using the
@@ -305,6 +307,9 @@ def get_return_value(da_params: xr.DataArray, rps: np.ndarray = _RPS) -> xr.Data
     rps : np.ndarray, optional
         Array of return periods in years, by default
         [1.5, 2, 5, 10, 20, 50, 100, 200, 500]
+    extremes_rate : float, optional
+        Average number of peaks per period, by default 1.0
+        Only used if extremes_rate is not provided as coordinate in da_params.
 
     Returns
     -------
@@ -313,19 +318,35 @@ def get_return_value(da_params: xr.DataArray, rps: np.ndarray = _RPS) -> xr.Data
     """
 
     def _return_values_1d(p, r, d, rps=rps):
+        if np.isnan(p).all():
+            return np.full(rps.size, np.nan)
         if d == "gumb" and len(p) == 3:
             p = p[1:]
         return _get_return_values(p, d, rps=rps, extremes_rate=r)
 
-    assert "dparams" in da_params.dims, "da_params should have a 'dparams' dimension"
+    if isinstance(rps, list):
+        rps = np.asarray(rps)
+    elif not isinstance(rps, np.ndarray):
+        raise ValueError("rps should be a list or numpy array")
+    if "dparams" not in da_params.dims:
+        raise ValueError("da_params should have a 'dparams' dimension")
+    if "distribution" not in da_params.coords:
+        raise ValueError("da_params should have a 'distribution' coordinate")
     distributions = da_params["distribution"].load()
-    extremes_rate = da_params["extremes_rate"].load()
+    if "extremes_rate" in da_params.coords:
+        extremes_rate = da_params["extremes_rate"].load()
+    elif isinstance(extremes_rate, (int, float)):
+        extremes_rate = np.full(distributions.shape, extremes_rate)
+    elif extremes_rate.shape != distributions.shape:
+        raise ValueError(
+            "extremes_rate should be a scalar or have the same shape as distribution"
+        )
 
     if da_params.ndim == 1:  # fix case of single dim
         da_params = da_params.expand_dims("index")
     da_rvs = xr.apply_ufunc(
         _return_values_1d,
-        da_params.chunk({"dparams": -1}),
+        da_params,
         extremes_rate,
         distributions,
         input_core_dims=(["dparams"], [], []),
@@ -345,6 +366,7 @@ def fit_extremes(
     distribution: Optional[str] = None,
     ev_type: str = "BM",
     criterium: str = "AIC",
+    time_dim: str = "time",
 ) -> xr.DataArray:
     """Return distribution fit from extremes.
 
@@ -378,25 +400,33 @@ def fit_extremes(
     """
     distributions = _DISTS.get(ev_type.upper(), None)
     if distribution is not None:
-        distributions = [distribution]
+        if isinstance(distribution, str):
+            distributions = [distribution]
+        elif not isinstance(distribution, list):
+            raise ValueError(
+                f"distribution should be a string or list, got {type(distribution)}"
+            )
     elif ev_type.upper() not in _DISTS:
         raise ValueError(
             f"Unknown ev_type {ev_type.upper()}, select from {_DISTS.keys()}."
         )
 
     def _fitopt_1d(x, distributions=distributions, criterium=criterium):
+        if np.isnan(x).all():
+            return np.array([np.nan, np.nan, np.nan, -1])
         params, d = lmoment_fitopt(x, distributions=distributions, criterium=criterium)
         if len(params) == 2:
             params = np.concatenate([[0], params])
-        # trick to include distribution name
-        return np.concatenate([params, [distributions.index(d)]])
+        # trick to include distribution name; -1 if too little data to fit -> NA
+        idist = distributions.index(d) if d in distributions else -1
+        return np.concatenate([params, [idist]])
 
     if da_peaks.ndim == 1:  # fix case of single dim
         da_peaks = da_peaks.expand_dims("index")
     da_params = xr.apply_ufunc(
         _fitopt_1d,
-        da_peaks.chunk({"time": -1}),
-        input_core_dims=[["time"]],
+        da_peaks,
+        input_core_dims=[[time_dim]],
         output_core_dims=[["dparams"]],
         dask_gufunc_kwargs=dict(output_sizes={"dparams": 4}),
         vectorize=True,
@@ -405,7 +435,7 @@ def fit_extremes(
     )
     # split output
     idist = da_params.isel(dparams=-1).values.astype(int)
-    distributions = np.atleast_1d(np.array(distributions)[idist])
+    distributions = np.atleast_1d(np.array(distributions + ["NA"])[idist])
     da_params = da_params.isel(dparams=slice(0, -1))
     da_params.name = "parameters"
     # add coordinates
@@ -413,8 +443,10 @@ def fit_extremes(
     coords = dict(
         dparams=xr.IndexVariable("dparams", ["shape", "loc", "scale"]),
         distribution=xr.DataArray(dims=dist_dims, data=distributions),
-        extremes_rate=da_peaks["extremes_rate"],
     )
+    # forward extremes_rate if provided
+    if "extremes_rate" in da_peaks.coords:
+        coords["extremes_rate"] = da_peaks["extremes_rate"]
     da_params = da_params.assign_coords(coords)
     return da_params.squeeze()
 
@@ -492,10 +524,10 @@ def get_dist(distribution):
         "gumb": "gumbel_r",
         "exp": "genpareto",
     }
-    distribution = _DISTS.get(distribution, distribution)
-    dist = getattr(stats, distribution, None)
+    _scipy_dist_name = _DISTS.get(distribution, distribution)
+    dist = getattr(stats, _scipy_dist_name, None)
     if dist is None:
-        raise ValueError(f'Distribution "{distribution}" not found in scipy.stats.')
+        raise ValueError(f'Distribution "{_scipy_dist_name}" not found in scipy.stats.')
     return dist
 
 
@@ -661,7 +693,7 @@ def plot_return_values(
             xsim, rvs_sim, color=color, ls="--", label=f"{distribution.upper()} fit"
         )
 
-    if alpha is not None and nsample > 0 and distribution != "emperical":
+    if alpha is not None and nsample > 0 and distribution != "empirical":
         urvs = lmoment_ci(
             x,
             distribution,
@@ -730,15 +762,12 @@ def lmoment_fitopt(x, distributions=None, criterium="AIC"):
     distribution: str
         selected distribution
     """
-    if distributions is None:
-        distributions = ["gumb", "gev"]
     fgof = {"AIC": _aic, "AICC": _aicc, "BIC": _bic}.get(criterium.upper())
     # make sure the timeseries does not contain NaNs
     x = x[~np.isnan(x)]
 
     # derive first four L-moments from data
     lmom = get_lmom(x, 4)
-
     # derive parameters of distribution function
     params = {}
     gof_values = []
@@ -829,9 +858,9 @@ def _lmomentfit(lmom, distribution):
         k1 = 1e-8
         s1 = (1 + k1) * (2 + k1) * lmom[1]
         m1 = lmom[0] - (2 + k1) * lmom[1]
-        params = (-k1, m1, s1)
+        params = (0.0, m1, s1)
     else:
-        raise ValueError("Unknow distribution")
+        raise ValueError("Unknown distribution")
 
     return params
 
