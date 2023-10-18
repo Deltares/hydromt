@@ -6,7 +6,7 @@ import glob
 import logging
 import os
 from io import IOBase
-from os.path import dirname, join
+from os.path import dirname
 from typing import Optional, Tuple
 
 import geopandas as gpd
