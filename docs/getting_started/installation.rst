@@ -67,20 +67,20 @@ Installation
 
 HydroMT is available from pypi and conda-forge, but we recommend installing from conda-forge in a new conda environment.
 
-.. Note::
+.. Tip::
 
     In the commands below you can exchange `conda` for `mamba`, see above for the difference between both.
+
+.. Note::
+
+    If you would like to try out the hydromt examples notebook, follow instead the
+    :ref:`examples installation guide <examples>`.
 
 Install HydroMT in a new environment
 ------------------------------------
 .. Tip::
 
     This is our recommended way of installing HydroMT!
-
-.. Note::
-
-    If you intend to run the most up to date examples, you should follow the instalation guide at `the dev guide <https://deltares.github.io/hydromt/latest/dev/dev_install.html>`_ instead, as the dev version of hydromt is necessary to run the current examples. WIth the version installed through the steps
-    in this page, you will be able to run the examples at the time of the last release.
 
 To install HydroMT in a new environment called `hydromt` from the conda-forge channel do:
 
@@ -98,7 +98,7 @@ look approximately like the one below:
     $ hydromt --models
 
     model plugins:
-    generic models (hydromt 0.7.2.dev0):
+    generic models (hydromt 0.7.2):
      - grid_model
      - vector_model
      - mesh_model

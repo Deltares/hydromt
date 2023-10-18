@@ -57,7 +57,7 @@ xout                          longitude of the waterbody outlet                 
 yout                          latitude of the waterbody outlet                                         [-]
 Capacity_max                  maximum reservoir capacity volume                                        [m3]
 Capacity_norm                 normal/average reservoir capacity volume                                 [m3]
-Capacity_min                  minimum reservoir capcity volume                                         [m3]
+Capacity_min                  minimum reservoir capacity volume                                        [m3]
 Dam_height                    height of the dam                                                        [m]
 ============================  =======================================================================  ================
 
@@ -88,7 +88,7 @@ Name                          Explanation                                       
 ============================  =======================================================================  ================
 bd_sl*                        bulk density of the different soil layers (1 to 7 in soilgridsv2017)     [g cm-3]
 clyppt_sl*                    clay content of the different soil layers (1 to 7 in soilgridsv2017)     [%]
-oc_sl*                        organic carbon contant of the different soil layers
+oc_sl*                        organic carbon content of the different soil layers
                               (1 to 7 in soilgridsv2017)                                               [%]
 ph_sl*                        pH of the different soil layers (1 to 7 in soilgridsv2017)               [-]
 sltppt_sl*                    silt content of the different soil layers (1 to 7 in soilgridsv2017)     [%]

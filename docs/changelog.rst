@@ -28,7 +28,7 @@ Added
 - Added documentation for how to start your own plugin (PR #446)
 - New raster method ``to_slippy_tiles``: tiling of a raster dataset according to the slippy tile structure for e.g., webviewers (PR #440).
 - Support for http and other *filesystems* in path of data source (PR #515).
-- ``set_forcing`` can now add pandas.DataFrame object to frocing. (PR #534)
+- ``set_forcing`` can now add pandas.DataFrame object to forcing. (PR #534)
 
 Changed
 -------
@@ -178,7 +178,7 @@ Added
 - ModelCatalog to discover generic and plugin model classes. `PR #202 <https://github.com/Deltares/hydromt/pull/202>`_
 - Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
 - API calls to get info about model components and dataset for the dashboard. `PR #118 <https://github.com/Deltares/hydromt/pull/118>`_
-- New submodelclasses in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``
+- New submodel classes in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``
 - Added entrypoints for lumped_model, mesh_model, grid_model
 - New mixin classes created for model specific object: ``GridMixin`` for self.grid, ``LumpedMixin`` for self.response_units, ``MeshMixin`` for self.mesh,
   ``MapsMixin`` for self.maps

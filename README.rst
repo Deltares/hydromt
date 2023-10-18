@@ -49,6 +49,7 @@ Known model plugins include:
 * hydromt_delwaq_: A framework for water quality (D-Water Quality) and emissions (D-Emissions) modelling.
 * hydromt_sfincs_: A fast 2D hydrodynamic flood model (SFINCS).
 * hydromt_fiat_: A flood impact model (FIAT).
+* hydromt_delft3dfm_: A flexible mesh hydrodynamic suite for 1D2D and 2D3D modelling (Delft3D FM).
 
 
 How to cite?
@@ -82,6 +83,7 @@ happy to discuss how it can be implemented for your model.
 .. _hydromt_sfincs: https://deltares.github.io/hydromt_sfincs
 .. _hydromt_delwaq: https://deltares.github.io/hydromt_delwaq
 .. _hydromt_fiat: https://deltares.github.io/hydromt_fiat
+.. _hydromt_delft3dfm: https://deltares.github.io/hydromt_delft3dfm
 
 .. |pypi| image:: https://img.shields.io/pypi/v/hydromt.svg?style=flat
     :alt: PyPI
