@@ -27,6 +27,7 @@ dependencies = [
   "pyflwdir>=0.5.4",   # Hight models and derivatives
   "pyproj",            # projections for Coordinate reference systems
   "rasterio",          # raster wrapper around gdal
+  "requests",          # donwload stuff
   "shapely>=2.0.0",    # geometry transforms
   "scipy",             # scientific utilities
   "tomli",             # parsing toml files
@@ -53,12 +54,14 @@ dynamic = ['version', 'description']
 io = [
   "gcsfs",    # google cloud file system
   "openpyxl", # excel IO
+  "fastparquet", # parquet IO
   "pillow",   # image IO
-  "requests", # donwload stuff
+  "rio-vrt",  # write VRT files
   "s3fs",     # S3 file system
 ]
 extra = [
   "xugrid>=0.6.5", # xarray wrapper for mesh processing
+  "matplotlib",    # plotting; required for slippy tiles
   "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
@@ -87,7 +90,6 @@ doc = [
 examples = [
   "jupyterlab",      # run examples in jupyter notebook
   "cartopy",         # plotting examples
-  "matplotlib-base", # plotting
   "notebook",        # jupyter integration
 ]
 
@@ -103,7 +105,7 @@ hydromt = "hydromt.cli.main:main"
 
 [tool.make_env]
 channels = ["conda-forge"]
-deps_not_in_conda = ["sphinx_autosummary_accessors", "sphinx_design", "pyet"]
+deps_not_in_conda = ["sphinx_autosummary_accessors", "sphinx_design", "pyet", "rio-vrt"]
 
 [tool.black]
 line-length = 88

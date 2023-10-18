@@ -41,7 +41,9 @@ jobs:
 
       # run tests first so that we can also cache all of the artefacts
       - name: Test
-        run: PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt python -m pytest --verbose --cov=hydromt --cov-report xml
+        run: |
+          export NUMBA_DISABLE_JIT=1
+          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - name: Upload cache
         uses: actions/cache/save@v3
