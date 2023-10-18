@@ -163,6 +163,7 @@ Region                          Argument of the *build* and *clip* CLI methods t
    model_region.rst
    ../_examples/working_with_models_basics.ipynb
    ../_examples/working_with_models.ipynb
+   ../_examples/working_with_meshmodel.ipynb
    ../_examples/delineate_basin.ipynb
 
 .. toctree::
