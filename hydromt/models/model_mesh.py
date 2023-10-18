@@ -84,8 +84,13 @@ class MeshMixin(object):
         if grid_name not in self.mesh_names:
             raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
         # Read raster data and select variables
+        bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
         ds = self.data_catalog.get_rasterdataset(
-            raster_fn, bbox=self.bounds[grid_name], buffer=2, variables=variables
+            raster_fn,
+            bbox=bounds,
+            buffer=2,
+            variables=variables,
+            single_var_as_array=False,
         )
 
         uds_sample = workflows.mesh2d_from_rasterdataset(
@@ -178,9 +183,10 @@ class MeshMixin(object):
         if grid_name not in self.mesh_names:
             raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
         # Read raster data and mapping table
+        bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
         da = self.data_catalog.get_rasterdataset(
             raster_fn,
-            bbox=self.bounds[grid_name],
+            bbox=bounds,
             buffer=2,
             variables=variable,
             **kwargs,
@@ -248,12 +254,6 @@ class MeshMixin(object):
         overwrite_grid: bool, optional
             If True, overwrite the grid with the same name as the grid in self.mesh.
         """
-        # Check if new grid_name
-        if grid_name not in self.mesh_names:
-            new_grid = True
-        else:
-            new_grid = False
-
         # Checks on data
         if not isinstance(data, (xu.UgridDataArray, xu.UgridDataset)):
             raise ValueError(
@@ -279,6 +279,12 @@ class MeshMixin(object):
             grid_name = data.ugrid.grid.name
         elif grid_name != data.ugrid.grid.name:
             data = workflows.rename_mesh(data, name=grid_name)
+
+        # Check if new grid_name
+        if grid_name not in self.mesh_names:
+            new_grid = True
+        else:
+            new_grid = False
 
         # Adding to mesh
         if self.mesh is None:  # NOTE: mesh is initialized with None

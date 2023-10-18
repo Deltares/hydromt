@@ -12,6 +12,7 @@ Unreleased
 Added
 -----
 - docs now include a dropdown for selecting older versions of the docs. (PR #457)
+- docs include a new example for MeshModel. (PR #595)
 - Support for loading the same data source but from different providers (e.g., local & aws) (PR #438)
 - Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
 - Add support for reading model configs in ``TOML`` format. (PR #444)

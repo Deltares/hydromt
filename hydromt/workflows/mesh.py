@@ -238,10 +238,10 @@ def mesh2d_from_rasterdataset(
         Resampled data on mesh2d.
     """
     rename = rename or {}
-    if isinstance(ds, xr.DataArray):
-        ds = ds.to_dataset()
     if variables is not None:
         ds = ds[variables]
+    if isinstance(ds, xr.DataArray):
+        ds = ds.to_dataset()
 
     if fill_method is not None:
         ds = ds.raster.interpolate_na(method=fill_method)
@@ -264,6 +264,15 @@ def mesh2d_from_rasterdataset(
         ds[var].rename({ds.raster.x_dim: "x", ds.raster.y_dim: "y"})
     )
     uda.ugrid.set_crs(ds.raster.crs)
+
+    # Need to reproject before calling regridder
+    if hasattr(mesh2d, "ugrid"):
+        mesh2d_crs = mesh2d.ugrid.grid.crs
+    else:  # ugrid2d
+        mesh2d_crs = mesh2d.crs
+    if mesh2d_crs != uda.ugrid.grid.crs:
+        uda = uda.ugrid.to_crs(mesh2d_crs)
+
     for method in np.unique(resampling_method):
         logger.info(f"Preparing regridder for {method} method")
         if method == "centroid":
@@ -280,6 +289,9 @@ def mesh2d_from_rasterdataset(
             ds[var].rename({ds.raster.x_dim: "x", ds.raster.y_dim: "y"})
         )
         uda.ugrid.set_crs(ds.raster.crs)
+        # Reproject
+        if mesh2d_crs != uda.ugrid.grid.crs:
+            uda = uda.ugrid.to_crs(mesh2d_crs)
         # Interpolate
         method = resampling_method[i]
         # Interpolate
