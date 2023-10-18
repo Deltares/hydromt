@@ -22,7 +22,7 @@ in the configuration `.yaml file <https://en.wikipedia.org/wiki/YAML>`_
 
     The HydroMT model configuration (.yaml) file should not be confused with the simulation configuration file of the model kernel.
     While the first defines how HydroMT should build or update a model, the latter defines the simulation for the model kernel.
-    The format of the latter differs with each plugin, but can be accessed in HydroMT trough the :py:meth:`hydromt.Model.config` component.
+    The format of the latter differs with each plugin, but can be accessed in HydroMT trough the :py:meth:`~hydromt.Model.config` component.
 
 
 Model configuration (.yaml) file
@@ -40,7 +40,8 @@ HydroMT configuration file specifications and conventions:
 - HydroMT will execute each method (i.e. section) in the order it is provided in the .yaml file.
 - Methods can be re-used by enumerating the methods by adding a number to the end (without underscore or space!).
   Although this is not enforced in the code, by convention we start enumerating the second call of each method with a number 2, the third call with a number 3 etc.
-- Arguments ending with ``_fn`` (short for filename) are by convention used to set a data source from the data catalog based on its source name, see :ref:`Working with data in HydroMT <get_data>`.
+- Arguments ending with ``_fn`` (short for filename) are typically used to set a data source from the data catalog based on its source name,
+  see :ref:`Working with data in HydroMT <get_data>`.
 
 An example .yaml file is shown below. Note that this .yaml file does not apply to any supported model plugin.
 
@@ -60,3 +61,13 @@ An example .yaml file is shown below. Note that this .yaml file does not apply t
         source: soil_data             # source name of soil data with specific version
         version: 1.0                  # version of soil data
       mapping_fn: soil_mapping        # source name of mapping table converting soil classes to infiltration parameters
+
+
+.. TIP::
+
+    By default the hydromt :py:meth:`~hydromt.Model.build` and :py:meth:`~hydromt.Model.update` commands will write **all** the
+    model files at the end of the workflow using the :py:meth:`~hydromt.Model.write` method. This behaviour can be custumized by
+    adding the write method to the workflow with specific arguments, or adding the write method of a specific model component,
+    for instance :py:meth:`~hydromt.GridModel.write_grid` or :py:meth:`~hydromt.Model.write_forcing`. If a write method is added
+    to the workflow, the default write method will not be executed at the end and the user needs to take care that all required
+    files are written to disk.
