@@ -6,7 +6,7 @@ Developer's environment
 Developing HydroMT requires Python >= 3.9. We prefer developing with the most recent
 version of Python. We strongly encourage you to develop in a separate conda environment.
 To make sure all dependencies are up to dat we only provide a pyproject.toml that lists the dependencies.
-However, there is a script that can generate the conda enviroment specification for you.
+However, there is a script that can generate the conda environment specification for you.
 
 .. _dev_install:
 
@@ -32,7 +32,7 @@ Then, navigate into the the code folder (where the pyproject.toml is located)
 Makefile based installation
 ---------------------------
 
-You wil need a usable instalation of `make`. If you're using linux this should already be installed by default.
+You wil need a usable installation of `make`. If you're using linux this should already be installed by default.
 If you are using windows we recommend you install it using `chocolatey <https://chocolatey.org/install>`_ like so:
 
 .. code-block:: console
@@ -45,15 +45,15 @@ Afterwards to create an environment you can simply call:
 
     $ make dev
 
-This will create an enviromnment file, create an environment called `hydromt-dev` using a package mangager
+This will create an environment file, create an environment called `hydromt-dev` using a package manager
 and install hydromt into it. By default the makefile will attempt to use `mamba`. If you want it to use a
-diferent one like, conda, you only have to set the environment variable like this:
+different one like, conda, you only have to set the environment variable like this:
 
 .. code-block:: console
 
     $ make dev PY_ENV_MANAGER=conda
 
-If you would like this to be the case you can also add make this the default behaviour with the following command:
+If you would like this to be the case you can also add make this the default behavior with the following command:
 
 .. code-block:: console
 

@@ -48,6 +48,7 @@ parser.add_argument("--output", "-o", default="environment.yml")
 parser.add_argument("--channels", "-c", default=None)
 parser.add_argument("--name", "-n", default=None)
 parser.add_argument("--py-version", "-p", default=None)
+parser.add_argument("-r", "--release", action="store_true")
 args = parser.parse_args()
 
 #
@@ -72,7 +73,10 @@ print(f"Environment name: {name}")
 
 # parse dependencies groups and flavours
 # "min" equals no optional dependencies
-deps_to_install = deps.copy()
+if args.release:
+    deps_to_install = ["hydromt"]
+else:
+    deps_to_install = deps.copy()
 if args.profile not in ["", "min"]:
     extra_deps = _parse_profile(args.profile, opt_deps, project_name)
     deps_to_install.extend(extra_deps)
