@@ -1,4 +1,4 @@
-name: Tests
+name: Tests with pip install
 
 on:
   push:
@@ -28,24 +28,28 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.11']
-    name: py ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
-    concurrency:
-      group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
-      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    # concurrency:
+    #   group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
+    #   cancel-in-progress: true
     steps:
 
       - uses: actions/checkout@v3
 
+      - uses: actions/setup-python@v4
+        id: py310
+        with:
+          python-version: '3.10'
+          # cache: 'pip' # TODO caching
+          # true if cache-hit occurred on the primary key
+          # - run: echo '${{ steps.py310.outputs.cache-hit }}'
+
       # build environment with pip
       - name: Generate env spec
-        run: pip install .[test,io,extra]
-
-      # TODO caching
+        run: pip install pyproject.toml[test,io,extra]
 
       # run test
       - name: Test
         run: |
-          export PATH=/usr/share/miniconda3/bin:$PATH
           export NUMBA_DISABLE_JIT=1
           python -m pytest --verbose
