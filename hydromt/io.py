@@ -1,12 +1,13 @@
-"""Implementations for all of the necessary IO for HydroMT."""
+"""Implementations for all of pythe necessary IO for HydroMT."""
 import glob
-import io
+import io as pyio
 import logging
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional, Union
 
 import dask
+import fsspec
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -68,7 +69,7 @@ def open_raster(
     kwargs.update(masked=mask_nodata, default_name="data", chunks=chunks)
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
-    if isinstance(filename, io.IOBase):  # file-like does not handle chunks
+    if isinstance(filename, pyio.IOBase):  # file-like does not handle chunks
         logger.warning("Removing chunks to read and load remote data.")
         kwargs.pop("chunks")
     # keep only 2D DataArray
@@ -576,7 +577,7 @@ def open_vector(
 
     Parameters
     ----------
-    fn : str
+    fn: str or Path-like,
         path to geometry file
     driver: {'csv', 'xls', 'xy', 'vector', 'parquet'}, optional
         driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
@@ -615,12 +616,25 @@ def open_vector(
     gdf : geopandas.GeoDataFrame
         Parsed geometry file
     """
+
+    def _read(f: pyio.IOBase) -> gpd.GeoDataFrame:
+        bbox_reader = gis_utils.prepare_pyogrio_reader_filters(f, bbox, geom, crs)
+        f.seek(0)
+        return gpd.read_file(f, bbox=bbox_reader, mode=mode, **kwargs)
+
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     else:
-        bbox_reader = gis_utils.prepare_pyogrio_reader_filters(fn, bbox, geom, crs)
-        gdf = gpd.read_file(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
+        # check if pathlike
+        if all(
+            map(lambda method: hasattr(fn, method), ("seek", "close", "read", "write"))
+        ):
+            with fn.open(mode="rb") as f:
+                gdf = _read(f)
+        else:
+            with fsspec.open(fn, mode="rb") as f:  # lose storage options here
+                gdf = _read(f)
 
     # check geometry type
     if assert_gtype is not None:

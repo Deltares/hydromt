@@ -6,6 +6,7 @@ import glob
 import logging
 import os
 import subprocess
+from io import IOBase
 from os.path import dirname, join
 from typing import Optional, Tuple
 
@@ -595,7 +596,7 @@ def to_geographic_bbox(bbox, source_crs):
 
 
 def prepare_pyogrio_reader_filters(
-    fn: str,
+    fn: IOBase,
     bbox: GEOM_TYPES | None = None,
     mask: GEOM_TYPES | None = None,
     crs: CRS | None = None,
@@ -608,8 +609,8 @@ def prepare_pyogrio_reader_filters(
 
     Parameters
     ----------
-    fn: str
-        filename
+    fn: IOBase,
+        opened file
     bbox: GeoDataFrame | GeoSeries | BaseGeometry
         bounding box to filter the data while reading
     mask: GeoDataFrame | GeoSeries | BaseGeometry
