@@ -3,7 +3,6 @@
 
 import json
 import logging
-import os
 from ast import literal_eval
 from os.path import isfile
 from pathlib import Path
@@ -11,14 +10,13 @@ from typing import Any, Dict, Union
 from warnings import warn
 
 import click
-import requests
 
 from .. import config
 from ..error import DeprecatedError
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["parse_json", "parse_config", "parse_opt", "download_examples"]
+__all__ = ["parse_json", "parse_config", "parse_opt"]
 
 ### CLI callback methods ###
 
@@ -116,67 +114,3 @@ def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
             for option, value in opt_cli[section].items():
                 opt[section].update({option: value})
     return opt
-
-
-def download_examples(
-    examples_path: Path,
-    examples_out: Path,
-    examples_path_raw: Path = None,
-    logger: logging.Logger = logger,
-):
-    """
-    Discover files in examples_path and download them to examples_out.
-
-    Parameters
-    ----------
-    examples_path : str
-        URL to the examples directory on GitHub for discovery.
-    examples_out : str
-        Local path to the examples directory.
-    examples_path_raw : str, optional
-        URL to the raw examples directory on GitHub if different than examples_path.
-    """
-
-    def download_file(url, destination_path):
-        response = requests.get(url)
-        with open(destination_path, "wb") as f:
-            f.write(response.content)
-
-    def download_folder(examples_path, examples_out, examples_path_raw, logger):
-        try:
-            # Use requests to get the contents of the directory
-            response = requests.get(examples_path)
-            contents = response.json()
-
-            # GitHub https contains a lot of info... we only need the tree items
-            contents = contents["payload"]["tree"]["items"]
-
-            # Create the directory structure
-            for item in contents:
-                # If subdirectory in examples, check for files in them
-                if item["contentType"] == "directory":
-                    os.makedirs(os.path.join(examples_out, item["name"]), exist_ok=True)
-
-                    # Recursively download the contents of the subdirectory
-                    download_folder(
-                        examples_path + "/" + item["name"],
-                        os.path.join(examples_out, item["name"]),
-                        examples_path_raw + "/" + item["name"],
-                        logger,
-                    )
-                else:
-                    logger.debug(f"Downloading {item['name']}")
-                    download_file(
-                        examples_path_raw + "/" + item["name"],
-                        os.path.join(examples_out, item["name"]),
-                    )
-        except Exception as e:
-            logger.error(f"Failed to download folder {examples_path}: {e}")
-
-    if examples_path_raw is None:
-        examples_path_raw = examples_path
-
-    # Create the output directory
-    os.makedirs(examples_out, exist_ok=True)
-    # Download the contents of the examples directory
-    download_folder(examples_path, examples_out, examples_path_raw, logger)

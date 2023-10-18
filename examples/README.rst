@@ -12,8 +12,7 @@ Local installation
 
 To run these examples on your local machine you need a copy of the repository and
 an installation of HydroMT including some additional packages. The most reliable
-way to do this installation is by using the binder imlementation provided above, however
-if you wish to exectute them locally you should create a new environment as described below.
+way to do this installation is by creating a new environment as described below.
 
 1 - Install python and conda/mamba
 **********************************
