@@ -3,7 +3,7 @@ import logging
 import os
 import warnings
 from datetime import datetime
-from os.path import join, basename
+from os.path import basename, join
 from pathlib import Path
 from typing import Literal, NewType, Optional, Tuple, Union
 
@@ -596,16 +596,18 @@ class GeoDatasetAdapter(DataAdapter):
         on_error: Literal["raise", "skip", "coerce"] = "coerce",
     ) -> Optional[StacCatalog]:
         """
-        Convert a geodataset into a STAC Catalog representation.  The collection will 
+        Convert a geodataset into a STAC Catalog representation.  The collection will
         contain an asset for each of the associated files.
 
 
-        Parameters:
+        Parameters
+        ----------
         - on_error (str, optional): The error handling strategy when extracting metadata.
           Options are: "raise" to raise an error on failure, "skip" to skip
           the dataset on failure, and "coerce" (default) to set default values on failure.
 
-        Returns:
+        Returns
+        -------
         - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
           if the dataset was skipped.
         """
@@ -618,7 +620,7 @@ class GeoDatasetAdapter(DataAdapter):
         try:
             bbox, crs = self.get_bbox(detect=True)
             start_dt, end_dt = self.get_time_range(detect=True)
-            props = {**self.meta, "crs":crs}
+            props = {**self.meta, "crs": crs}
         except Exception as e:
             if on_error == "skip":
                 logger.warn(
@@ -629,8 +631,8 @@ class GeoDatasetAdapter(DataAdapter):
             elif on_error == "coerce":
                 bbox = [0.0, 0.0, 0.0, 0.0]
                 props = self.meta
-                start_dt = np.datetime64(datetime(1, 1, 1))
-                end_dt = np.datetime64(datetime(1, 1, 1))
+                start_dt = datetime(1, 1, 1)
+                end_dt = datetime(1, 1, 1)
             else:
                 raise e
 
@@ -641,11 +643,11 @@ class GeoDatasetAdapter(DataAdapter):
             stac_item = StacItem(
                 self.name,
                 geometry=None,
-                bbox=bbox, 
+                bbox=bbox,
                 properties=props,
                 datetime=None,
                 start_datetime=start_dt,
-                end_datetime=end_dt
+                end_datetime=end_dt,
             )
             stac_asset = StacAsset(str(self.path))
             base_name = basename(self.path)

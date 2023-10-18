@@ -2,7 +2,7 @@
 import logging
 import warnings
 from datetime import datetime
-from os.path import join, basename
+from os.path import basename, join
 from pathlib import Path
 from typing import Literal, NewType, Optional, Tuple, Union
 
@@ -479,12 +479,14 @@ class GeoDataFrameAdapter(DataAdapter):
         asset for each of the associated files.
 
 
-        Parameters:
+        Parameters
+        ----------
         - on_error (str, optional): The error handling strategy when extracting metadata.
           Options are: "raise" to raise an error on failure, "skip" to skip
           the dataset on failure, and "coerce" (default) to set default values on failure.
 
-        Returns:
+        Returns
+        -------
         - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
           if the dataset was skipped.
         """
@@ -496,7 +498,7 @@ class GeoDataFrameAdapter(DataAdapter):
 
         try:
             bbox, crs = self.get_bbox(detect=True)
-            props = {**self.meta, "crs":crs}
+            props = {**self.meta, "crs": crs}
         except Exception as e:
             if on_error == "skip":
                 logger.warn(
@@ -517,9 +519,9 @@ class GeoDataFrameAdapter(DataAdapter):
             stac_item = StacItem(
                 self.name,
                 geometry=None,
-                bbox=bbox, 
+                bbox=bbox,
                 properties=props,
-                datetime=np.datetime64(datetime(1, 1, 1)),
+                datetime=datetime(1, 1, 1),
             )
             stac_asset = StacAsset(str(self.path))
             base_name = basename(self.path)

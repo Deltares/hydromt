@@ -35,6 +35,7 @@ dependencies = [
   "universal_pathlib", # provides path compatability between different filesystems
   "xmltodict",         # xml parser also used to read VRT
   "zarr",              # zarr
+  "pystac",
 ]
 
 requires-python = ">=3.9"

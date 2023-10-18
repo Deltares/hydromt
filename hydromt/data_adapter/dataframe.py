@@ -337,7 +337,7 @@ class DataFrameAdapter(DataAdapter):
                 geometry=None,
                 bbox=[0, 0, 0, 0],
                 properties=self.meta,
-                datetime=np.datetime64(datetime(1, 1, 1)),
+                datetime=datetime(1, 1, 1),
             )
             stac_asset = StacAsset(str(self.path))
             stac_item.add_asset("hydromt_path", stac_asset)
