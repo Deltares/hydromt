@@ -61,6 +61,7 @@ io = [
 ]
 extra = [
   "xugrid>=0.6.5", # xarray wrapper for mesh processing
+  "matplotlib",    # plotting; required for slippy tiles
   "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
@@ -89,7 +90,6 @@ doc = [
 examples = [
   "jupyterlab",      # run examples in jupyter notebook
   "cartopy",         # plotting examples
-  "matplotlib",      # plotting (matplotlib-base
   "notebook",        # jupyter integration
 ]
 
