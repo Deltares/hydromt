@@ -25,9 +25,6 @@ jobs:
         shell: bash -l {0}
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ['3.11']
     runs-on: ubuntu-latest
     # concurrency:
     #   group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
@@ -40,13 +37,19 @@ jobs:
         id: py310
         with:
           python-version: '3.10'
-          # cache: 'pip' # TODO caching
-          # true if cache-hit occurred on the primary key
-          # - run: echo '${{ steps.py310.outputs.cache-hit }}'
+          # caching, see https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
+
+      # true if cache-hit occurred on the primary key
+      - name: Cache hit
+        run: echo '${{ steps.py310.outputs.cache-hit }}'
 
       # build environment with pip
-      - name: Generate env spec
-        run: pip install .[test,io,extra]
+      - name: Install hydromt
+        run: |
+          pip install --upgrade pip
+          pip install .[test,io,extra]
 
       # run test
       - name: Test
