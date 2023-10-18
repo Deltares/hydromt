@@ -365,16 +365,21 @@ class DataAdapter(object, metaclass=ABCMeta):
         else:
             fns.append(path)
 
-        # expand path with glob and check if files existW
-        fns_out = []
         protocol = str(path).split("://")[0] if "://" in path else ""
+        if protocol and self.filesystem is None:
+            self.filesystem = protocol
         # For s3, anonymous connection still requires --no-sign-request profile to
         # read the data setting environment variable works
-        if self.storage_options and protocol in ["s3"]:
-            if "anon" in self.storage_options:
+        # assume anonymous connection if storage_options is not set
+        if protocol in ["s3"]:
+            if not self.storage_options:
+                self.storage_options = {"anon": True}
+            if self.storage_options.get("anon", False):
                 os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
             else:
                 os.environ["AWS_NO_SIGN_REQUEST"] = "NO"
+        # expand path with glob and check if files exists
+        fns_out = []
         for fn in list(set(fns)):
             if "*" in str(fn):
                 for fn0 in self.fs.glob(fn):

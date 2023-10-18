@@ -47,8 +47,8 @@ More concretely HydroMT is organized in the following way:
   by :ref:`RasterDataset <RasterDataset>` objects, a raster-specific type of Xarray Datasets);
   tables that can be used to, for example, convert land classes to roughness values (represented by
   Pandas :ref:`DataFrame <DataFrame>` objects); vector datasets such as administrative units or river
-  centerlines (represented by Geopandas :ref:`GeoDataFrame <GeoDataFrame>` objects); and time series with
-  associated geolocations such as observations of discharge (represented by :ref:`GeoDataset <GeoDataset>`
+  center lines (represented by Geopandas :ref:`GeoDataFrame <GeoDataFrame>` objects); and time series with
+  associated geo-locations such as observations of discharge (represented by :ref:`GeoDataset <GeoDataset>`
   objects, a geo-specific type of Xarray Datasets).
 
 - **Models**
@@ -70,7 +70,7 @@ More concretely HydroMT is organized in the following way:
   Most of the heavy work in HydroMT is done by :ref:`Methods and workflows <methods_workflows>`,
   indicated by the gear wheels in the image :ref:`arch` below. Methods provide the low-level functionality
   such as GIS rasterization, reprojection, or zonal statistics. Workflows combine several methods to
-  transform data to a model layer or postprocess model results. Examples of workflows include the
+  transform data to a model layer or post-process model results. Examples of workflows include the
   delineation of hydrological basins (watersheds), conversion of landuse-landcover data to model
   parameter maps, and calculation of model skill statistics. Workflows are implemented for the data
   types mentioned above to allow reusing common workflows between HydroMT plugins for different model software.
@@ -163,6 +163,7 @@ Region                          Argument of the *build* and *clip* CLI methods t
    model_region.rst
    ../_examples/working_with_models_basics.ipynb
    ../_examples/working_with_models.ipynb
+   ../_examples/working_with_meshmodel.ipynb
    ../_examples/delineate_basin.ipynb
 
 .. toctree::

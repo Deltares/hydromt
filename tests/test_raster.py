@@ -8,9 +8,9 @@ import dask
 import geopandas as gpd
 import numpy as np
 import pytest
+import rasterio
 import xarray as xr
 from affine import Affine
-from osgeo import gdal
 from shapely.geometry import LineString, Point, box
 
 from hydromt import gis_utils, open_raster, raster
@@ -53,6 +53,9 @@ def test_raster_properties(origin, rotation, res, shape, bounds):
     assert np.allclose(da.raster.box.total_bounds, da.raster.bounds)
     assert np.allclose(bounds, da.raster.internal_bounds)
     assert da.raster.box.crs == da.raster.crs
+    # attributes do not persist after slicing
+    assert da[:2, :2].raster._transform is None
+    assert da[:2, :2].raster._crs is None
 
 
 @pytest.mark.parametrize(("transform", "shape"), testdata)
@@ -102,18 +105,22 @@ def test_gdal(tmpdir):
     # Update gdal compliant attrs
     da1 = da.raster.gdal_compliant(rename_dims=True, force_sn=True)
     assert raster.GEO_MAP_COORD in da1.coords
-    assert da1.raster.dims == ("lat", "lon")
+    assert da1.raster.dims == ("latitude", "longitude")
     assert da1.raster.res[1] > 0
-    # Update without rename and SN orientation
-    da = da.raster.gdal_compliant(rename_dims=False, force_sn=False)
-    assert da.raster.dims == ("y", "x")
-    assert da.raster.res[1] < 0
     # Write to netcdf and reopen with gdal
     fn_nc = str(tmpdir.join("gdal_test.nc"))
-    da.to_netcdf(fn_nc)
-    gdal.Info(fn_nc)
-    ds = gdal.Open(fn_nc)
-    assert da[raster.GEO_MAP_COORD].attrs["crs_wkt"] == ds.GetProjection()
+    da1.to_netcdf(fn_nc)
+    with rasterio.open(fn_nc) as src:
+        src.read()
+        assert da.raster.crs == src.crs
+    # # test with web mercator dataset
+    da2 = da.raster.reproject(dst_crs=3857)
+    ds2 = da2.to_dataset().raster.gdal_compliant(rename_dims=True, force_sn=True)
+    fn_nc = str(tmpdir.join("gdal_test_epsg3857.nc"))
+    ds2.to_netcdf(fn_nc)
+    with rasterio.open(fn_nc) as src:
+        src.read()
+        assert ds2.raster.crs == src.crs
 
 
 def test_attrs_errors(rioda):
@@ -265,6 +272,14 @@ def test_clip(transform, shape):
     # create rasterdataarray with crs
     da = raster.full_from_transform(transform, shape, nodata=1, name="test", crs=4326)
     da.raster.set_nodata(0)
+    # attributes do not persist with xarray slicing
+    da1 = da[:2, :2]
+    assert da1.raster._transform is None
+    assert da1.raster._crs is None
+    # attributes do persisit when slicing using clip_bbox
+    raster1d = da.raster.clip(slice(1, 2), slice(0, 2))
+    assert raster1d.raster._crs is not None
+    assert raster1d.raster.transform is not None
     # create gdf covering approx half raster
     w, s, _, n = da.raster.bounds
     e, _ = da.raster.transform * (shape[1] // 2, shape[0] // 2)
@@ -295,11 +310,15 @@ def test_clip(transform, shape):
     if da.raster.rotation != 0:
         return
     assert np.all(np.isclose(da_clip0.raster.bounds, gdf.total_bounds))
-    # test bbox - align
-    align = np.round(abs(da.raster.res[0] * 2), 2)
-    da_clip = da.raster.clip_bbox(gdf.total_bounds, align=align)
-    dalign = np.round(da_clip.raster.bounds[2], 2) % align
-    assert np.isclose(dalign, 0) or np.isclose(dalign, align)
+
+
+def test_clip_align(rioda):
+    # test align
+    bbox = (3.5, -10.5, 5.5, -9.5)
+    da_clip = rioda.raster.clip_bbox(bbox)
+    assert np.all(np.isclose(da_clip.raster.bounds, bbox))
+    da_clip = rioda.raster.clip_bbox(bbox, align=1)
+    assert da_clip.raster.bounds == (3, -11, 6, -9)
 
 
 def test_clip_errors(rioda):
@@ -409,6 +428,8 @@ def test_interpolate_na():
     da3 = da0.fillna(-9999).astype(np.int32)
     da3.raster.set_nodata(-9999)
     assert da3.raster.interpolate_na().dtype == np.int32
+    with pytest.raises(ValueError, match="Nodata value nan of type float"):
+        da3.raster.set_nodata(np.nan)
 
 
 def test_vector_grid(rioda):
@@ -515,17 +536,16 @@ def test_rotated(transform, shape, tmpdir):
 
 
 def test_to_xyz_tiles(tmpdir, rioda_large):
-    # NOTE: this method does not work in debug mode because of os.subprocess
     path = str(tmpdir)
     rioda_large.raster.to_xyz_tiles(
         join(path, "dummy_xyz"),
         tile_size=256,
         zoom_levels=[0, 2],
     )
-    with open(join(path, "dummy_xyz", "0", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 16
-    with open(join(path, "dummy_xyz", "2", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 1
+    with rasterio.open(join(path, "dummy_xyz", "dummy_xyz_zl0.vrt"), "r") as src:
+        assert src.shape == (1024, 1024)
+    with rasterio.open(join(path, "dummy_xyz", "dummy_xyz_zl2.vrt"), "r") as src:
+        assert src.shape == (256, 256)
 
     test_bounds = [2.13, -2.13, 3.2, -1.07]
     _test_r = open_raster(join(path, "dummy_xyz", "0", "2", "1.tif"))
@@ -539,7 +559,7 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
     test_bounds = [0.0, -313086.07, 313086.07, -0.0]
     # populate with random data
     np.random.seed(0)
-    rioda_large[:] = np.random.random(rioda_large.shape)
+    rioda_large[:] = np.random.random(rioda_large.shape).astype(np.float32)
 
     # png
     png_dir = join(tmpdir, "tiles_png")
@@ -552,7 +572,7 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
     fn = join(png_dir, "7", "64", "64.png")
     im = np.array(Image.open(fn))
     assert im.shape == (256, 256, 4)
-    assert all(im[0, 0, :] == [128, 0, 131, 255])
+    assert all(im[0, 0, :] == [128, 0, 132, 255])
 
     # test with cmap
     png_dir = join(tmpdir, "tiles_png_cmap")
@@ -560,7 +580,7 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
     fn = join(png_dir, "7", "64", "64.png")
     im = np.array(Image.open(fn))
     assert im.shape == (256, 256, 4)
-    assert all(im[0, 0, :] == [31, 148, 139, 255])
+    assert all(im[0, 0, :] == [32, 143, 140, 255])
 
     # gtiff
     tif_dir = join(tmpdir, "tiles_tif")
@@ -569,11 +589,12 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
         driver="GTiff",
         min_lvl=5,
         max_lvl=8,
+        write_vrt=True,
     )
-    with open(join(tif_dir, "5", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 1
-    with open(join(tif_dir, "8", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 12
+    with rasterio.open(join(tif_dir, "lvl5.vrt"), "r") as src:
+        assert src.shape == (256, 256)
+    with rasterio.open(join(tif_dir, "lvl8.vrt"), "r") as src:
+        assert src.shape == (1024, 768)
     _test_r = open_raster(join(tif_dir, "7", "64", "64.tif"))
     assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
     assert all([isfile(join(tif_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
@@ -587,12 +608,13 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
         driver="netcdf4",
         min_lvl=5,
         max_lvl=8,
+        write_vrt=True,
     )
-    with open(join(nc_dir, "5", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 1
-    with open(join(nc_dir, "8", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 12
-    _test_r = xr.open_dataset(join(nc_dir, "7", "64", "64.nc"))
+    with rasterio.open(join(nc_dir, "lvl5.vrt"), "r") as src:
+        assert src.shape == (256, 256)
+    with rasterio.open(join(nc_dir, "lvl8.vrt"), "r") as src:
+        assert src.shape == (1024, 768)
+    _test_r = open_raster(join(nc_dir, "7", "64", "64.nc"))
     assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
     assert all([isfile(join(nc_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
     _test_vrt = open_raster(join(nc_dir, "lvl7.vrt"))

@@ -16,7 +16,7 @@ way to do this installation is by creating a new environment as described below.
 
 1 - Install python and conda/mamba
 **********************************
-If not already done, you'll need Python 3.8 or greater and a package manager such as conda or mamba. These package managers help you to install (Python) packages and
+If not already done, you'll need Python 3.9 or greater and a package manager such as conda or mamba. These package managers help you to install (Python) packages and
 `manage environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ such that different installations do not conflict.
 
 We recommend using the `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_ Python distribution. This installs Python and the
@@ -29,28 +29,67 @@ If you already have a python & conda installation but do not yet have mamba inst
 
   $ conda install mamba -n base -c conda-forge
 
+
 2 - Install HydroMT and the other python dependencies in a separate Python environment
 **************************************************************************************
-The last step is to install all the python dependencies required to run the notebooks, including HydroMT. All required dependencies can be found
-in the `environment.yml <https://github.com/Deltares/hydromt/blob/main/environment.yml>`_ file in the root of the repository. This will create
-a new environment called **hydromt**. If you already have this environment with this name either remove it with `conda env remove -n hydromt`
-**or** set a new name for the environment by adding `-n <name>` to the line below.
+The next step is to install all the python dependencies required to run the notebooks, including HydroMT.
 
-Note that you can exchange mamba for conda in the line below if you don't have mamba installed (see above for how to install mamba).
+**If you do not have HydroMT yet installed**, first create a new empty environment with the base hydromt installation:
 
 .. code-block:: console
 
-  $ mamba env create -f https://raw.githubusercontent.com/Deltares/hydromt/main/environment.yml
+  $ mamba create -n hydromt -c conda-forge hydromt
 
-3 - Download the content of the HydroMT github repository
-*********************************************************
-To run the examples locally, you will need to download the content of the HydroMT repository. You can either do a
-`manual download <https://github.com/Deltares/hydromt/archive/refs/heads/main.zip>`_ and extract the content of the downloaded ZIP folder
-**or** clone the repository locally:
+To run the notebooks, you need to install the ``slim`` version of HydroMT using pip. The slim version installs additional dependencies to Hydromt
+such as jupyter notebook to run the notebooks, matplotlib to plot or xugrid to also try out examples for the MeshModel. It is a more complete
+installation of hydromt. To install or update in an existing environment (example hydromt environment), do:
+
+.. code-block:: console
+
+  $ conda activate hydromt
+  $ pip install "hydromt[slim]"
+
+3 - Download the content of the examples and notebooks
+******************************************************
+To run the examples locally, you will need to download the content of the HydroMT repository.
+You have two options:
+
+  1. Download and unzip the examples manually
+  2. Clone the HydroMT GitHub repository
+
+.. warning::
+
+  Depending on your installed version of HydroMT, you will need to download the correct versions of the examples.
+  To check the version of HydroMT that you have installed, do:
+
+  .. code-block:: console
+
+    $ hydromt --version
+
+    hydroMT version: 0.8.0
+
+** Option 1: manual download and unzip**
+
+To manually download the examples on Windows, do (!replace with your own hydromt version!):
+
+.. code-block:: console
+
+  $ curl https://github.com/Deltares/hydromt/archive/refs/tags/v0.8.0.zip -O -L
+  $ tar -xf v0.8.0.zip
+  $ ren hydromt-0.8.0 hydromt
+
+You can also download, unzip and rename manually if you prefer, rather than using the windows command prompt.
+
+** Option 2: cloning the hydromt repository**
+
+For git users, you can also get the examples by cloning the hydromt github repository and checking the version
+you have installed:
 
 .. code-block:: console
 
   $ git clone https://github.com/Deltares/hydromt.git
+  $ git checkout v0.8.0
+
 
 4 - Running the examples
 ************************
