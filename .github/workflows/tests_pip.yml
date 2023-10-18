@@ -46,7 +46,7 @@ jobs:
 
       # build environment with pip
       - name: Generate env spec
-        run: pip install pyproject.toml[test,io,extra]
+        run: pip install .[test,io,extra]
 
       # run test
       - name: Test
