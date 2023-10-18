@@ -116,7 +116,7 @@ in the mean time your colleague does the same:
   $ git add hydromt/feature-B.py
   $ git commit -m "implement feature B!"
 
-If you want to syncronize with your colleague, it is important that you both make sure that you have the up to date version by using the `git pull` command.
+If you want to synchronize with your colleague, it is important that you both make sure that you have the up to date version by using the `git pull` command.
 After that you can bring your branch up to date this by using the `git merge` command:
 
 .. code-block:: console
@@ -128,7 +128,7 @@ After that you can bring your branch up to date this by using the `git merge` co
    1 file changed, 0 insertions(+), 0 deletions(-)
    create mode 100644 tmp-a.py
 
-This means that git detected that you didt not make changes to the same file and therefore no problem occured. However if we imagine that you both make changes to the same file, things will be different:
+This means that git detected that you did not make changes to the same file and therefore no problem occurred. However if we imagine that you both make changes to the same file, things will be different:
 
 .. code-block:: console
 
@@ -173,7 +173,7 @@ It's telling us we first need to tell it what we want to do with the current con
 
 .. code-block:: console
 
-  $ echo 'print("Pruple is the best color") # a comporomise' > feature-c.py
+  $ echo 'print("Purple is the best color") # a compromise' > feature-c.py
   $ git add feature-c.py
   $ git commit
   [feature-c-colleague 7dd3f576] Merge branch 'feature-c' into feature-c-colleague
@@ -273,7 +273,7 @@ Docstrings
 ^^^^^^^^^^
 - We use the `numpy docstring format <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
   You can easily create these docstring once method arguments have type hints (see above) with
-  the VSCode `autoDocstring pluging <https://github.com/NilsJPWerner/autoDocstring>`_.
+  the VSCode `autoDocstring plugin <https://github.com/NilsJPWerner/autoDocstring>`_.
 
 .. _code-format:
 
@@ -287,13 +287,13 @@ You can install pre-commit by running:
 
   $ pip install pre-commit
 
-It is best to install pre-commit in your existing enviromnment. After that simply install the necessary hooks with
+It is best to install pre-commit in your existing environment. After that simply install the necessary hooks with
 
 .. code-block:: console
 
   $ pre-commit install
 
-After doing this pre-commit will check all your staged files when commiting.
+After doing this pre-commit will check all your staged files when committing.
 
 For example say that you've added the following new feature:
 
@@ -391,7 +391,7 @@ We use `pytest <https://pytest.org>`__ for testing and `github actions <https://
 - Unit tests are mandatory for new methods and workflows and integration tests are highly recommended for various
 - All tests should be contained in the tests directory in functions named `test_*`.
 - We use `CodeCov <https://app.codecov.io/gh/Deltares/hydromt>`_ to monitor the coverage of the tests and aim for high (>90%) coverage. This is work in progress.
-- Checkout this `comprehensive guide to pytests <https://levelup.gitconnected.com/a-comprehensive-guide-to-pytest-3676f05df5a0>`_ for more info and tips.
+- Checkout this `comprehensive guide to pytest <https://levelup.gitconnected.com/a-comprehensive-guide-to-pytest-3676f05df5a0>`_ for more info and tips.
 
 Running the tests
 ^^^^^^^^^^^^^^^^^
