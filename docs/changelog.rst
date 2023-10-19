@@ -9,31 +9,51 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 
 v0.9.0 (2023-10-19)
 ==========
+This release contains several new features, here we highlight a few:
+- Support in the DataCatalog for data sources from different providers or versions with better support for cloud and http data.
+- Developers documentation to start your own plugin and accompanying template.
+- Support multigrids in meshmodel (with example) and improved implementation VectorModel (was LumpedModel)
+- Support for reading overviews (zoom levels) of Cloud Optimized GeoTIFFs (COGs).
 
 Added
 -----
+
+Documentation
+^^^^^^^^^^^^^
 - docs now include a dropdown for selecting older versions of the docs. (PR #457)
 - docs include a new example for MeshModel. (PR #595)
-- Support for loading the same data source but from different providers (e.g., local & aws) (PR #438)
+- Added documentation for how to start your own plugin (PR #446)
+
+Data
+^^^^
+- Support for loading the same data source but from different providers (e.g., local & aws) and versions  (PR #438)
 - Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
 - Add support for reading model configs in ``TOML`` format. (PR #444)
-- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
 - add ``open_mfcsv`` function in ``io`` module for combining multiple CSV files into one dataset. (PR #486)
 - Adapters can now clip data that is passed through a python object the same way as through the data catalog. (PR #481)
-- Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
-- Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
 - Relevant data adapters now have functionality for reporting and detecting the spatial and temporal extent they cover (PR #503)
 - Data catalogs have a ``hydromt_version`` meta key that is used to determine compatibility between the catalog and the installed hydromt version. (PR #506)
 - Allow the root of a data catalog to point to an archive, this will be extracted to the ~/.hydromt_data folder. (PR #512)
 - Support for reading overviews from (Cloud Optimized) GeoTIFFs using the zoom_level argument of ``DataCatalog.get_rasterdataset``. (PR #514)
-- Support for writing overviews to (Cloud Optimized) GeoTIFFs in the ``raster.to_raster`` method. (PR #514)
-- Added documentation for how to start your own plugin (PR #446)
-- New raster method ``to_slippy_tiles``: tiling of a raster dataset according to the slippy tile structure for e.g., webviewers (PR #440).
 - Support for http and other *filesystems* in path of data source (PR #515).
+
+Model
+^^^^^
+- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
+- Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
 - ``set_forcing`` can now add pandas.DataFrame object to forcing. (PR #534)
+
+Raster
+^^^^^^
+- Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
+- Support for writing overviews to (Cloud Optimized) GeoTIFFs in the ``raster.to_raster`` method. (PR #514)
+- New raster method ``to_slippy_tiles``: tiling of a raster dataset according to the slippy tile structure for e.g., webviewers (PR #440).
 
 Changed
 -------
+
+Model
+^^^^^
 - Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. (PR #412)
 - Renamed ``LumpedModel.response_units`` to ``VectorModel.vector`` and updated the base set, read, write methods. (#531)
 - possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
@@ -41,6 +61,9 @@ Changed
   call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
 - ``setup_mesh2d_from_rasterdataset`` and ``setup_mesh2d_from_raster_reclass`` now use xugrid Regridder methods. (PR #535)
 - Use the Model.data_catalog to read the model region if defined by a geom or grid. (PR #479)
+
+Vector
+^^^^^^
 - ``vector.GeoDataset.from_gdf`` can use the gdf columns as data_vars instead of external xarray. (PR #412)
 
 Fixed
