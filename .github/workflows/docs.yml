@@ -53,11 +53,11 @@ jobs:
       - name: show file tree
         run: |
           set -o xtrace
-          echo $(realpath .)
+          echo "$PWD"
           ls
           ls docs
           ls ~
-          ls ~/docs
+          ls ~/docs/_build
 
       - name: Fail on no cache restore
         if: steps.cache.outputs.cache-matched-key == ''
