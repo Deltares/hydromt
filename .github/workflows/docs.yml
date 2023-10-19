@@ -74,7 +74,12 @@ jobs:
         run: |
           export PATH=/usr/share/miniconda3/bin:$PATH
           PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build ./docs ./docs/_build -b dummy -M html
+
+      - name: print debug info
+        run: |
           ls ./docs/_build
+          echo "$PWD"
+          ls ./docs
 
       - name: Generate docs
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
@@ -85,7 +90,7 @@ jobs:
 
       - name: Upload to GitHub Pages
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
-        uses: peaceiris/actions-gh-pages@v3.8.0
+        uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/_build/html
