@@ -52,6 +52,7 @@ jobs:
 
       - name: show file tree
         run: |
+          set -o xtrace
           echo $(realpath .)
           ls
           ls docs
