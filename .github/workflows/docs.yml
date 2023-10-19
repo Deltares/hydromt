@@ -57,7 +57,7 @@ jobs:
           ls
           ls docs
           ls ~
-          ls ~/docs/_build
+          ls ./docs/_build
 
       - name: Fail on no cache restore
         if: steps.cache.outputs.cache-matched-key == ''
@@ -87,7 +87,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
         run: |
           export PATH=/usr/share/miniconda3/bin:$PATH
-          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build docs docs/_build
+          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build ./docs ./docs/_build
           echo "DOC_VERSION=$(mamba run -n hydromt python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
@@ -95,7 +95,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ~/docs/_build/html
+          publish_dir: ./docs/_build/html
           exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
           destination_dir: ./${{ env.DOC_VERSION }}
           keep_files: false
