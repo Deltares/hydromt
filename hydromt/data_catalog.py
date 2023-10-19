@@ -30,6 +30,7 @@ from . import __version__
 from .data_adapter import (
     DataAdapter,
     DataFrameAdapter,
+    DatasetAdapter,
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
     RasterDatasetAdapter,
@@ -1386,7 +1387,7 @@ class DataCatalog(object):
         buffer: Union[float, int] = 0,
         predicate: str = "intersects",
         variables: Optional[List] = None,
-        time_tuple: Optional[Tuple] = None,
+        time_tuple: Optional[Tuple[str] | Tuple[datetime]] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1479,6 +1480,85 @@ class DataCatalog(object):
             geom=geom,
             buffer=buffer,
             predicate=predicate,
+            variables=variables,
+            time_tuple=time_tuple,
+            single_var_as_array=single_var_as_array,
+        )
+        return obj
+
+    def get_dataset(
+        self,
+        data_like: str | SourceSpecDict | Path | xr.Dataset | xr.DataArray,
+        variables: Optional[List] = None,
+        time_tuple: Optional[Tuple[str] | Tuple[datetime]] = None,
+        single_var_as_array: bool = True,
+        provider: Optional[str] = None,
+        version: Optional[str] = None,
+        **kwargs,
+    ) -> xr.Dataset:
+        """Return a clipped, sliced and unified Dataset.
+
+        To slice the data to the time period of interest, provide the
+        `time_tuple` argument. To return only the dataset variables
+        of interest provide the `variables` argument.
+
+        NOTE: Unless `single_var_as_array` is set to False a single-variable data source
+        will be returned as xarray.DataArray rather than Dataset.
+
+        Arguments
+        ---------
+        data_like: str, Path, xr.Dataset, xr.DataArray
+            Data catalog key, path to geodataset file or geodataset xarray object.
+            The catalog key can be a string or a dictionary with the following keys:
+            {'name', 'provider', 'version'}.
+            If a path to a file is provided it will be added
+            to the catalog with its based on the file basename.
+        time_tuple : tuple of str, datetime, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned.
+        single_var_as_array: bool, optional
+            If True, return a DataArray if the dataset consists of a single variable.
+            If False, always return a Dataset. By default True.
+        **kwargs:
+            Additional keyword arguments that are passed to the `DatasetAdapter`
+            function. Only used if `data_like` is a path to a geodataset file.
+
+        Returns
+        -------
+        obj: xarray.Dataset or xarray.DataArray
+            Dataset
+        """
+        if isinstance(data_like, dict):
+            data_like, provider, version = _parse_data_like_dict(
+                data_like, provider, version
+            )
+        if isinstance(data_like, (str, Path)):
+            if isinstance(data_like, str) and data_like in self.sources:
+                name = data_like
+                source = self.get_source(name, provider=provider, version=version)
+            elif exists(abspath(data_like)):
+                path = str(abspath(data_like))
+                if "provider" not in kwargs:
+                    kwargs.update({"provider": "local"})
+                source = DatasetAdapter(path=path, **kwargs)
+                name = basename(data_like)
+                self.add_source(name, source)
+            else:
+                raise FileNotFoundError(f"No such file or catalog source: {data_like}")
+        elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
+            data_like = DatasetAdapter._slice_data(
+                data_like,
+                variables,
+                time_tuple,
+                logger=self.logger,
+            )
+            return DatasetAdapter._single_var_as_array(
+                data_like, single_var_as_array, variables
+            )
+        else:
+            raise ValueError(f'Unknown data type "{type(data_like).__name__}"')
+
+        obj = source.get_data(
             variables=variables,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
@@ -1582,6 +1662,7 @@ def _parse_data_source_dict(
         "GeoDataFrame": GeoDataFrameAdapter,
         "GeoDataset": GeoDatasetAdapter,
         "DataFrame": DataFrameAdapter,
+        "Dataset": DatasetAdapter,
     }
     # parse data
     source = data_source_dict.copy()  # important as we modify with pop

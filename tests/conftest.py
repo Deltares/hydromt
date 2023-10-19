@@ -74,6 +74,27 @@ def df():
 
 
 @pytest.fixture()
+def timeseries_df():
+    # Create a date range from 2020-01-01 to 2020-12-31
+    dates = pd.date_range(start="2020-01-01", end="2020-12-31", freq="D")
+
+    # Generate random values for three columns
+    np.random.seed(42)  # for reproducibility
+    col1 = np.random.randint(0, 100, len(dates))  # integers from 0 to 99
+    col2 = np.random.normal(
+        50, 10, len(dates)
+    )  # normal distribution with mean 50 and standard deviation 10
+    col3 = np.random.choice(
+        ["A", "B", "C"], len(dates)
+    )  # categorical values from A, B, or C
+
+    # Create a dataframe with the dates as index and the columns as values
+    df = pd.DataFrame({"col1": col1, "col2": col2, "col3": col3}, index=dates)
+    df.index.rename("time", inplace=True)
+    return df
+
+
+@pytest.fixture()
 def dfs_segmented_by_points(df):
     return {
         id: pd.DataFrame(
