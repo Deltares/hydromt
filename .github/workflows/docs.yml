@@ -73,7 +73,8 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           export PATH=/usr/share/miniconda3/bin:$PATH
-          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build ./docs ./docs/_build -b dummy
+          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build ./docs ./docs/_build -b dummy -M html
+          ls ./docs/_build
 
       - name: Generate docs
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
