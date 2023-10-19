@@ -85,7 +85,7 @@ jobs:
 
       # run tests first so that we can also cache all of the artefacts
       - name: Generate docs
-        run: PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build ./docs ./docs/_build
+        run: PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build -M html ./docs ./docs/_build
 
       - name: Upload cache
         uses: actions/cache/save@v3
