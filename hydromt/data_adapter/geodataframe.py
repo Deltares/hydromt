@@ -9,7 +9,8 @@ import numpy as np
 import pyproj
 
 from .. import gis_utils, io
-from .data_adapter import DataAdapter
+from ..exceptions import NoDataException
+from .data_adapter import DataAdapter, NoDataStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -228,6 +229,7 @@ class GeoDataFrameAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
+        handle_missing=NoDataStrategy.RAISE,
         predicate="intersects",
         logger=logger,
         variables=None,
@@ -240,6 +242,10 @@ class GeoDataFrameAdapter(DataAdapter):
         # load
         fns = self._resolve_paths(variables)
         gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
+        if gdf.is_empty and handle_missing == NoDataStrategy.RAISE:
+            raise NoDataException(f"No data available for {self.name}.")
+        else:
+            logger.warning(f"No data available for {self.name}.")
         self.mark_as_used()  # mark used
         # rename variables and parse crs & nodata
         gdf = self._rename_vars(gdf)

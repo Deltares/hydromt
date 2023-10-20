@@ -6,6 +6,7 @@ import os
 import pathlib
 import warnings
 from abc import ABCMeta, abstractmethod
+from enum import Enum
 from itertools import product
 from pathlib import Path
 from string import Formatter
@@ -22,6 +23,11 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = ["DataAdapter"]
+
+
+class NoDataStrategy(Enum):
+    RAISE = "raise"
+    IGNORE = "ignore"
 
 
 def round_latlon(ds, decimals=5):
@@ -395,7 +401,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         return fns_out
 
     @abstractmethod
-    def get_data(self, bbox, geom, buffer):
+    def get_data(self, bbox, geom, buffer, handle_missing=NoDataStrategy._raise):
         """Return a view (lazy if possible) of the data with standardized field names.
 
         If bbox of mask are given, clip data to that extent.

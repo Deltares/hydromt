@@ -18,9 +18,10 @@ import xarray as xr
 from rasterio.errors import RasterioIOError
 
 from .. import gis_utils, io
+from ..exceptions import NoDataException
 from ..raster import GEO_MAP_COORD
 from .caching import cache_vrt_tiles
-from .data_adapter import PREPROCESSORS, DataAdapter
+from .data_adapter import PREPROCESSORS, DataAdapter, NoDataStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +263,7 @@ class RasterDatasetAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
+        handle_missing=NoDataStrategy.RAISE,
         zoom_level=None,
         align=None,
         variables=None,
@@ -279,6 +281,10 @@ class RasterDatasetAdapter(DataAdapter):
         fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
         self.mark_as_used()  # mark used
         ds = self._read_data(fns, geom, bbox, cache_root, zoom_level, logger)
+        if len(ds.data_vars.keys()) == 0 and handle_missing == NoDataStrategy.RAISE:
+            raise NoDataException(f"No data found for {self.name}")
+        else:
+            logger.warning(f"No data found for {self.name}")
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_dims(ds)

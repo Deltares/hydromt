@@ -32,6 +32,7 @@ from .data_adapter import (
     DataFrameAdapter,
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
+    NoDataStrategy,
     RasterDatasetAdapter,
 )
 from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
@@ -1176,6 +1177,7 @@ class DataCatalog(object):
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom_level: Optional[int | tuple] = None,
         buffer: Union[float, int] = 0,
+        handle_missing=NoDataStrategy.RAISE,
         align: Optional[bool] = None,
         variables: Optional[Union[List, str]] = None,
         time_tuple: Optional[Tuple] = None,

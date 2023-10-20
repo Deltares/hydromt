@@ -13,8 +13,9 @@ import pyproj
 import xarray as xr
 
 from .. import gis_utils, io
+from ..exceptions import NoDataException
 from ..raster import GEO_MAP_COORD
-from .data_adapter import DataAdapter
+from .data_adapter import DataAdapter, NoDataStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -247,6 +248,7 @@ class GeoDatasetAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
+        handle_missing=NoDataStrategy.RAISE,
         predicate="intersects",
         variables=None,
         time_tuple=None,
@@ -261,6 +263,10 @@ class GeoDatasetAdapter(DataAdapter):
         # load data
         fns = self._resolve_paths(variables, time_tuple)
         ds = self._read_data(fns, logger=logger)
+        if len(ds.data_vars.keys()) and handle_missing == NoDataStrategy.RAISE:
+            raise NoDataException(f"No data available for {self.name}")
+        else:
+            logger.warning(f"No data available for {self.name}")
         self.mark_as_used()  # mark used
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)

@@ -7,7 +7,8 @@ from typing import Optional, Union
 import numpy as np
 import pandas as pd
 
-from .data_adapter import DataAdapter
+from ..exceptions import NoDataException
+from .data_adapter import DataAdapter, NoDataStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -195,6 +196,7 @@ class DataFrameAdapter(DataAdapter):
         variables=None,
         time_tuple=None,
         logger=logger,
+        handle_missing=NoDataStrategy.RAISE,
     ):
         """Return a DataFrame.
 
@@ -205,6 +207,10 @@ class DataFrameAdapter(DataAdapter):
         # load data
         fns = self._resolve_paths(variables)
         df = self._read_data(fns, logger=logger)
+        if df.empty and handle_missing == NoDataStrategy.RAISE:
+            raise NoDataException(f"No data available for {self.name}.")
+        else:
+            logger.warning(f"No data available for {self.name}.")
         self.mark_as_used()  # mark used
         # rename variables and parse nodata
         df = self._rename_vars(df)
