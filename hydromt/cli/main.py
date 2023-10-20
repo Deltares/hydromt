@@ -374,7 +374,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         mod.read()
         mod.set_root(model_destination, mode="w")
         logger.info("Clipping staticmaps")
-        mod.clip_staticmaps(region)
+        mod.clip_grid(region)
         logger.info("Clipping forcing")
         mod.clip_forcing()
         logger.info("Writting clipped model")
