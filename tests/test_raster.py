@@ -105,18 +105,22 @@ def test_gdal(tmpdir):
     # Update gdal compliant attrs
     da1 = da.raster.gdal_compliant(rename_dims=True, force_sn=True)
     assert raster.GEO_MAP_COORD in da1.coords
-    assert da1.raster.dims == ("lat", "lon")
+    assert da1.raster.dims == ("latitude", "longitude")
     assert da1.raster.res[1] > 0
-    # Update without rename and SN orientation
-    da = da.raster.gdal_compliant(rename_dims=False, force_sn=False)
-    assert da.raster.dims == ("y", "x")
-    assert da.raster.res[1] < 0
     # Write to netcdf and reopen with gdal
     fn_nc = str(tmpdir.join("gdal_test.nc"))
-    da.to_netcdf(fn_nc)
-    with rasterio.open(fn_nc) as dst:
-        dst.read()
-        assert da.raster.crs == dst.crs
+    da1.to_netcdf(fn_nc)
+    with rasterio.open(fn_nc) as src:
+        src.read()
+        assert da.raster.crs == src.crs
+    # # test with web mercator dataset
+    da2 = da.raster.reproject(dst_crs=3857)
+    ds2 = da2.to_dataset().raster.gdal_compliant(rename_dims=True, force_sn=True)
+    fn_nc = str(tmpdir.join("gdal_test_epsg3857.nc"))
+    ds2.to_netcdf(fn_nc)
+    with rasterio.open(fn_nc) as src:
+        src.read()
+        assert ds2.raster.crs == src.crs
 
 
 def test_attrs_errors(rioda):
@@ -532,17 +536,16 @@ def test_rotated(transform, shape, tmpdir):
 
 
 def test_to_xyz_tiles(tmpdir, rioda_large):
-    # NOTE: this method does not work in debug mode because of os.subprocess
     path = str(tmpdir)
     rioda_large.raster.to_xyz_tiles(
         join(path, "dummy_xyz"),
         tile_size=256,
         zoom_levels=[0, 2],
     )
-    with open(join(path, "dummy_xyz", "0", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 16
-    with open(join(path, "dummy_xyz", "2", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 1
+    with rasterio.open(join(path, "dummy_xyz", "dummy_xyz_zl0.vrt"), "r") as src:
+        assert src.shape == (1024, 1024)
+    with rasterio.open(join(path, "dummy_xyz", "dummy_xyz_zl2.vrt"), "r") as src:
+        assert src.shape == (256, 256)
 
     test_bounds = [2.13, -2.13, 3.2, -1.07]
     _test_r = open_raster(join(path, "dummy_xyz", "0", "2", "1.tif"))
@@ -556,7 +559,7 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
     test_bounds = [0.0, -313086.07, 313086.07, -0.0]
     # populate with random data
     np.random.seed(0)
-    rioda_large[:] = np.random.random(rioda_large.shape)
+    rioda_large[:] = np.random.random(rioda_large.shape).astype(np.float32)
 
     # png
     png_dir = join(tmpdir, "tiles_png")
@@ -586,11 +589,12 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
         driver="GTiff",
         min_lvl=5,
         max_lvl=8,
+        write_vrt=True,
     )
-    with open(join(tif_dir, "5", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 1
-    with open(join(tif_dir, "8", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 12
+    with rasterio.open(join(tif_dir, "lvl5.vrt"), "r") as src:
+        assert src.shape == (256, 256)
+    with rasterio.open(join(tif_dir, "lvl8.vrt"), "r") as src:
+        assert src.shape == (1024, 768)
     _test_r = open_raster(join(tif_dir, "7", "64", "64.tif"))
     assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
     assert all([isfile(join(tif_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
@@ -604,12 +608,13 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
         driver="netcdf4",
         min_lvl=5,
         max_lvl=8,
+        write_vrt=True,
     )
-    with open(join(nc_dir, "5", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 1
-    with open(join(nc_dir, "8", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 12
-    _test_r = xr.open_dataset(join(nc_dir, "7", "64", "64.nc"))
+    with rasterio.open(join(nc_dir, "lvl5.vrt"), "r") as src:
+        assert src.shape == (256, 256)
+    with rasterio.open(join(nc_dir, "lvl8.vrt"), "r") as src:
+        assert src.shape == (1024, 768)
+    _test_r = open_raster(join(nc_dir, "7", "64", "64.nc"))
     assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
     assert all([isfile(join(nc_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
     _test_vrt = open_raster(join(nc_dir, "lvl7.vrt"))

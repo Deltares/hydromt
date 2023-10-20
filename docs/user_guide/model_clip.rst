@@ -25,7 +25,7 @@ From CLI
 
 **Example usage**
 
-The ``hydromt clip`` command line intrefce (CLI) method can be run from the command line after the right conda environment is activated.
+The ``hydromt clip`` command line interface (CLI) method can be run from the command line after the right conda environment is activated.
 
 The following example clips a ``subbasin`` region (based on its outflow location) from an existing Wflow model
 at `/path/to/model_root` and saves the output to `/path/to/model_destination`. The subbasin is defined based

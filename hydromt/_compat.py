@@ -8,6 +8,7 @@ HAS_PYET = False
 HAS_GCSFS = False
 HAS_S3FS = False
 HAS_OPENPYXL = False
+HAS_RIO_VRT = False
 
 try:
     from shapely import __version__ as SH_VERSION
@@ -51,6 +52,15 @@ try:
     import pyet
 
     HAS_PYET = True
+
+except ModuleNotFoundError:
+    pass
+
+
+try:
+    import rio_vrt
+
+    HAS_RIO_VRT = True
 
 except ModuleNotFoundError:
     pass

@@ -352,10 +352,10 @@ options.
 
 .. _binary_vector:
 
-HydroMT also supports reading and writing verctor data in binary format. Currently only parquet is
-supported, but others could be added if desried. The structure of the files should be the same as
-the text format files described above but writting according to the parquet file spec. Since this is
-a binary format, not exmaples are provided, but for example pandas can wrtie the same data structure
+HydroMT also supports reading and writing vector data in binary format. Currently only parquet is
+supported, but others could be added if desired. The structure of the files should be the same as
+the text format files described above but writing according to the parquet file spec. Since this is
+a binary format, not examples are provided, but for example pandas can write the same data structure
 to parquet as it can csv.
 
 
@@ -503,7 +503,7 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
      - :py:func:`pandas.read_excel`
      - If required, provide a sheet name through driver_kwargs
    * - ``parquet``
-     - Binary encoded comunar dataformat
+     - Binary encoded columnar data format
      - :py:func:`pandas.read_parquet`
    * - ``fwf``
      - Fixed width delimited text files
@@ -523,7 +523,7 @@ The DataFrameAdapter is quite flexible in supporting different types of tabular 
 files: for example both mapping tables and time series data are supported. Please note that for timeseries, the driver_kwargs need to be used to
 set the correct column for indexing, and formatting and parsing of datetime-strings. See the relevant pandas function for which arguments
 can be used. Also note that the **csv** driver is not restricted to comma-separated files, as the delimiter can be given to the reader
-throught the driver_kwargs.
+through the driver_kwargs.
 
 .. code-block:: yaml
 
@@ -539,5 +539,5 @@ throught the driver_kwargs.
         parse_dates: false
 
 .. note::
-    The yml-parser does not correctly parses `None` arguments. When this is required, the `null` argment should be used instead.
+    The yml-parser does not correctly parses `None` arguments. When this is required, the `null` argument should be used instead.
     This is parsed to the Python code as a `None`.

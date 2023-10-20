@@ -39,7 +39,7 @@ from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
-from . import gis_utils
+from . import _compat, gis_utils
 from .utils import elevation2rgba, rgba2elevation
 
 logger = logging.getLogger(__name__)
@@ -232,8 +232,9 @@ class XGeoBase(object):
         # create new coordinate with attributes in which to save x_dim, y_dim and crs.
         # other spatial properties are always calculated on the fly to ensure
         # consistency with data
-        if GEO_MAP_COORD not in self._obj.coords:
-            # zero is used by rioxarray
+        if isinstance(self._obj, xr.Dataset) and GEO_MAP_COORD in self._obj.data_vars:
+            self._obj = self._obj.set_coords(GEO_MAP_COORD)
+        elif GEO_MAP_COORD not in self._obj.coords:
             self._obj.coords[GEO_MAP_COORD] = xr.Variable((), 0)
 
     @property
@@ -437,7 +438,7 @@ class XRasterBase(XGeoBase):
         if check_x == False or check_y == False:
             raise ValueError("raster only applies to regular grids")
 
-    def reset_spatial_dims_attrs(self):
+    def reset_spatial_dims_attrs(self, rename_dims=True) -> xr.DataArray:
         """Reset spatial dimension names and attributes.
 
         Needed to make CF-compliant and requires CRS attribute.
@@ -446,11 +447,13 @@ class XRasterBase(XGeoBase):
             raise ValueError("CRS is missing. Use set_crs function to resolve.")
         _da = self._obj
         x_dim, y_dim, x_attrs, y_attrs = gis_utils.axes_attrs(self.crs)
-        if x_dim != self.x_dim or y_dim != self.y_dim:
+        if rename_dims and (x_dim != self.x_dim or y_dim != self.y_dim):
             _da = _da.rename({self.x_dim: x_dim, self.y_dim: y_dim})
+            _da.raster.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
+        else:
+            x_dim, y_dim = self.x_dim, self.y_dim
         _da[x_dim].attrs.update(x_attrs)
         _da[y_dim].attrs.update(y_attrs)
-        _da.raster.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
         return _da
 
     @property
@@ -719,25 +722,44 @@ class XRasterBase(XGeoBase):
         """
         obj_out = self._obj
         crs = obj_out.raster.crs
-        if (
-            obj_out.raster.res[1] < 0 and force_sn
-        ):  # write data with South -> North orientation
+        # write data with South -> North orientation
+        if self.res[1] < 0 and force_sn:
             obj_out = obj_out.raster.flipud()
+            transform = obj_out.raster.transform
+        else:
+            transform = self.transform
         x_dim, y_dim, x_attrs, y_attrs = gis_utils.axes_attrs(crs)
         if rename_dims:
-            obj_out = obj_out.rename(
-                {obj_out.raster.x_dim: x_dim, obj_out.raster.y_dim: y_dim}
-            )
+            obj_out = obj_out.rename({self.x_dim: x_dim, self.y_dim: y_dim})
         else:
-            x_dim = obj_out.raster.x_dim
-            y_dim = obj_out.raster.y_dim
+            x_dim, y_dim = obj_out.raster.x_dim, obj_out.raster.y_dim
         obj_out[x_dim].attrs.update(x_attrs)
         obj_out[y_dim].attrs.update(y_attrs)
-        obj_out = obj_out.drop_vars(["spatial_ref"], errors="ignore")
-        obj_out.rio.write_crs(crs, inplace=True)
-        obj_out.rio.write_transform(obj_out.raster.transform, inplace=True)
-        obj_out.raster.set_spatial_dims()
-
+        # get grid mapping attributes
+        try:
+            grid_map_attrs = crs.to_cf()
+        except KeyError:
+            grid_map_attrs = {}
+            pass
+        # spatial_ref is for compatibility with GDAL
+        crs_wkt = crs.to_wkt()
+        grid_map_attrs["spatial_ref"] = crs_wkt
+        grid_map_attrs["crs_wkt"] = crs_wkt
+        if transform is not None:
+            grid_map_attrs["GeoTransform"] = " ".join(
+                [str(item) for item in transform.to_gdal()]
+            )
+        grid_map_attrs.update({"x_dim": x_dim, "y_dim": y_dim})
+        # reset and write grid mapping attributes
+        obj_out.coords[GEO_MAP_COORD] = xr.Variable((), 0)
+        obj_out.coords[GEO_MAP_COORD].attrs.update(**grid_map_attrs)
+        # set grid mapping attribute for each data variable
+        if hasattr(obj_out, "data_vars"):
+            for var in obj_out.data_vars:
+                if x_dim in obj_out[var].dims and y_dim in obj_out[var].dims:
+                    obj_out[var].attrs.update(grid_mapping=GEO_MAP_COORD)
+        else:
+            obj_out.attrs.update(grid_mapping=GEO_MAP_COORD)
         return obj_out
 
     def transform_bounds(
@@ -782,6 +804,7 @@ class XRasterBase(XGeoBase):
         # y_dim is typically a dimension without coords in rotated grids
         if y_dim not in self._obj.coords:
             obj_filpud = obj_filpud.drop_vars(y_dim)
+        obj_filpud.raster._crs = self._crs
         return obj_filpud
 
     def rowcol(
@@ -2275,11 +2298,23 @@ class RasterDataArray(XRasterBase):
         **kwargs
             Key-word arguments to write raster files
         """
+        # default kwargs for writing files
+        kwargs0 = {
+            "gtiff": {
+                "compress": "deflate",
+                "blockxsize": tile_size,
+                "blockysize": tile_size,
+                "tiled": True,
+            },
+        }.get(driver.lower(), {})
+        kwargs = {**kwargs0, **kwargs}
+
         mName = os.path.normpath(os.path.basename(root))
 
         vrt_fn = None
         prev = 0
         nodata = self.nodata
+        dtype = self._obj.dtype
         obj = self._obj.copy()
         zls = {}
         for zl in zoom_levels:
@@ -2291,6 +2326,10 @@ class RasterDataArray(XRasterBase):
                 obj = xr.open_dataarray(vrt_fn, engine="rasterio").squeeze(
                     "band", drop=True
                 )
+                obj.raster.set_nodata(nodata)
+                obj = (
+                    obj.raster.mask_nodata()
+                )  # set nodata values to nan for coarsening
             x_dim, y_dim = obj.raster.x_dim, obj.raster.y_dim
             obj = obj.chunk({x_dim: pxzl, y_dim: pxzl})
             dst_res = abs(obj.raster.res[-1]) * (2 ** (diff))
@@ -2303,9 +2342,7 @@ class RasterDataArray(XRasterBase):
             # Write the raster paths to a text file
             sd = join(root, f"{zl}")
             os.makedirs(sd, exist_ok=True)
-            txt_path = join(sd, "filelist.txt")
-            file = open(txt_path, "w")
-
+            fns = []
             for l, u, w, h in tile_window_xyz(obj.shape, pxzl):
                 col = int(np.ceil(l / pxzl))
                 row = int(np.ceil(u / pxzl))
@@ -2315,9 +2352,23 @@ class RasterDataArray(XRasterBase):
                 os.makedirs(ssd, exist_ok=True)
                 temp = obj[u : u + h, l : l + w].load()
                 if zl != 0:
-                    temp = temp.coarsen(
-                        {x_dim: 2**diff, y_dim: 2**diff}, boundary="pad"
-                    ).mean()
+                    temp = (
+                        temp.coarsen(
+                            {x_dim: 2**diff, y_dim: 2**diff}, boundary="pad"
+                        )
+                        .mean()
+                        .fillna(nodata)
+                        .astype(dtype)
+                    )
+
+                # pad to tile_size to make sure all tiles have the same size
+                # this is required for the vrt
+                shape, dims = temp.raster.shape, temp.raster.dims
+                pad_sizes = [tile_size - s for s in shape]
+                if any((s > 0 for s in pad_sizes)):
+                    pad_sizes = {d: (0, s) for d, s in zip(dims, pad_sizes) if s > 0}
+                    temp = temp.pad(pad_sizes, mode="constant", constant_values=nodata)
+
                 temp.raster.set_nodata(nodata)
                 temp.raster._crs = obj.raster.crs
 
@@ -2331,15 +2382,13 @@ class RasterDataArray(XRasterBase):
                     temp.raster.to_raster(path, driver=driver, **kwargs)
                 else:
                     raise ValueError(f"Unkown file driver {driver}")
-
-                file.write(f"{path}\n")
+                fns.append(path)
 
                 del temp
 
-            file.close()
             # Create a vrt using GDAL
             vrt_fn = join(root, f"{mName}_zl{zl}.vrt")
-            gis_utils.create_vrt(vrt_fn, file_list_path=txt_path)
+            gis_utils.create_vrt(vrt_fn, files=fns)
             prev = zl
             zls.update({zl: float(dst_res)})
             del obj
@@ -2351,6 +2400,7 @@ class RasterDataArray(XRasterBase):
             "driver": "raster",
             "path": f"{mName}_zl{{zoom_level}}.vrt",
             "zoom_levels": zls,
+            "nodata": float(nodata),
         }
         with open(join(root, f"{mName}.yml"), "w") as f:
             yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
@@ -2364,6 +2414,7 @@ class RasterDataArray(XRasterBase):
         driver="png",
         cmap: str | object = None,
         norm: object = None,
+        write_vrt: bool = False,
         **kwargs,
     ):
         """Produce tiles in /zoom/x/y.<ext> structure (EPSG:3857).
@@ -2389,6 +2440,9 @@ class RasterDataArray(XRasterBase):
         norm : object, optional
             A matplotlib Normalize object that defines a range between a maximum
             and minimum value
+        write_vrt : bool, optional
+            If True, a vrt file per zoom level will be written to the root directory.
+            Note that this only works for GTiff output.
         **kwargs
             Key-word arguments to write file
             for netcdf4, these are passed to ~:py:meth:xarray.DataArray.to_netcdf:
@@ -2408,6 +2462,10 @@ class RasterDataArray(XRasterBase):
 
             except ImportError:
                 raise ImportError("matplotlib and pillow are required for png output")
+        if write_vrt and ldriver == "png":
+            raise ValueError("VRT files are not supported for PNG output")
+        elif write_vrt and not _compat.HAS_RIO_VRT:
+            raise ImportError("rio-vrt is required, install with 'pip install rio-vrt'")
 
         # check data and make sure the y-axis as first dimension
         if self._obj.ndim != 2:
@@ -2442,7 +2500,13 @@ class RasterDataArray(XRasterBase):
         # default kwargs for writing files
         kwargs0 = {
             "netcdf4": {"encoding": {name: {"zlib": True}}},
-            "gtiff": {"driver": "GTiff", "compress": "deflate"},
+            "gtiff": {
+                "driver": "GTiff",
+                "compress": "deflate",
+                "blockxsize": 256,
+                "blockysize": 256,
+                "tiled": True,
+            },
         }.get(ldriver, {})
         kwargs = {**kwargs0, **kwargs}
 
@@ -2545,8 +2609,9 @@ class RasterDataArray(XRasterBase):
                                 data = rgba2elevation(im, nodata=nodata, dtype=dtype)
                             temp[yslice, xslice] = data
                     # coarsen the data using mean
-                    temp = temp.reshape((pxs, 2, pxs, 2))
-                    dst_data = np.ma.masked_values(temp, nodata).mean(axis=(1, 3)).data
+                    temp = np.ma.masked_values(temp.reshape((pxs, 2, pxs, 2)), nodata)
+                    # dtype may change, fix using astype
+                    dst_data = temp.mean(axis=(1, 3)).data.astype(dtype)
                     if ldriver != "png":
                         # create a dataarray from the temporary array
                         dst_transform = rasterio.transform.from_bounds(
@@ -2572,23 +2637,20 @@ class RasterDataArray(XRasterBase):
                     Image.fromarray(rgba).save(fn_out, **kwargs)
                 elif ldriver == "netcdf4":
                     # write the data to netcdf
-                    dst_tile = dst_tile.raster.gdal_compliant()
+                    # EPSG:3857 not understood by gdal -> fix in gdal_compliant
+                    dst_tile = dst_tile.raster.gdal_compliant(rename_dims=False)
                     dst_tile.to_netcdf(fn_out, **kwargs)
                 elif ldriver == "gtiff":
                     # write the data to geotiff
                     dst_tile.raster.to_raster(fn_out, **kwargs)
 
             # Write files to txt and create a vrt using GDAL
-            if ldriver != "png":
-                txt_fn = Path(root, str(zl), "filelist.txt")
+            if write_vrt:
                 vrt_fn = Path(root, f"lvl{zl}.vrt")
-                with open(txt_fn, "w") as f:
-                    for fn in fns:
-                        f.write(f"{fn}\n")
-                gis_utils.create_vrt(vrt_fn, file_list_path=txt_fn)
+                gis_utils.create_vrt(vrt_fn, files=fns)
 
         # Write a quick yaml for the database
-        if ldriver != "png":
+        if write_vrt:
             yml = {
                 "crs": 3857,
                 "data_type": "RasterDataset",

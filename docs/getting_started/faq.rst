@@ -38,7 +38,7 @@ Working with data in HydroMT
 
  | **Q**: Does HydroMT contain (global) datasets which can be used to build/update models?
 
-HydroMT does not contain any datasets. A small spatial subset for the Piava basin in northern Italy
+HydroMT does not contain any datasets. A small spatial subset for the Piave basin in northern Italy
 of some data that is often used in combination with HydroMT is made available for testing purposes.
 The data will automatically be downloaded to the "~/.hydromt_data" folder on your machine if no
 other data catalogs are provided. See also :ref:`Working with data in HydroMT <get_data>` page.

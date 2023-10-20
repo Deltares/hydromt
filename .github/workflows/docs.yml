@@ -1,6 +1,7 @@
 ---
 name: Build Documentation
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -43,7 +44,7 @@ jobs:
           path: |
             /usr/share/miniconda3
             ~/pycache
-            ~/docs/_build
+            ./docs/_build
           # the below two settings mean we'll alway srestore the cache
           # but the cache hit output can tell us if we have to update afterwards
           key: docs-${{ hashFiles('environment.yml')  }}
@@ -72,13 +73,13 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           export PATH=/usr/share/miniconda3/bin:$PATH
-          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build docs docs/_build -b dummy
+          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build ./docs ./docs/_build -b dummy
 
       - name: Generate docs
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
         run: |
           export PATH=/usr/share/miniconda3/bin:$PATH
-          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build docs docs/_build
+          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build -M html ./docs ./docs/_build
           echo "DOC_VERSION=$(mamba run -n hydromt python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
