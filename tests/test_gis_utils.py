@@ -133,7 +133,7 @@ def test_create_vrt(tmpdir, rioda_large):
         gu.create_vrt(vrt_fn, files_path=os.path.join(path, "dummy_xyz", "*.abc"))
 
 
-class TestPreparePyogrioReaderFilters:
+class TestBBoxFromFileAndFilters:
     @pytest.fixture(scope="class")
     def vector_data_with_crs(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> Path:
         example_data = geodf.set_crs(crs=CRS.from_user_input(4326))
@@ -165,7 +165,7 @@ class TestPreparePyogrioReaderFilters:
     def test_gdf_bbox_crs_source_crs(
         self, gdf_bbox_with_crs: gpd.GeoDataFrame, vector_data_with_crs: Path
     ):
-        bbox = gu.prepare_pyogrio_reader_filters(
+        bbox = gu.bbox_from_file_and_filters(
             vector_data_with_crs, bbox=gdf_bbox_with_crs
         )
         # assert converted to CRS of source data EPSG:3857
@@ -174,7 +174,7 @@ class TestPreparePyogrioReaderFilters:
     def test_gdf_mask_no_crs_source_crs(
         self, gdf_mask_without_crs: gpd.GeoDataFrame, vector_data_with_crs: Path
     ):
-        bbox = gu.prepare_pyogrio_reader_filters(
+        bbox = gu.bbox_from_file_and_filters(
             vector_data_with_crs, bbox=gdf_mask_without_crs
         )
         # assert converted to CRS of source data EPSG:3857
@@ -183,7 +183,7 @@ class TestPreparePyogrioReaderFilters:
     def test_gdf_mask_crs_source_no_crs(
         self, gdf_mask_without_crs: gpd.GeoDataFrame, vector_data_without_crs: Path
     ):
-        bbox = gu.prepare_pyogrio_reader_filters(
+        bbox = gu.bbox_from_file_and_filters(
             vector_data_without_crs, bbox=gdf_mask_without_crs
         )
         assert all(map(lambda x: abs(x) < 180, bbox))
@@ -191,19 +191,17 @@ class TestPreparePyogrioReaderFilters:
     def test_gdf_mask_no_crs_source_no_crs(
         self, gdf_mask_without_crs: gpd.GeoDataFrame, vector_data_without_crs: Path
     ):
-        bbox = gu.prepare_pyogrio_reader_filters(
+        bbox = gu.bbox_from_file_and_filters(
             vector_data_without_crs, bbox=gdf_mask_without_crs, crs=4326
         )
         assert all(map(lambda x: abs(x) < 180, bbox))
 
     def test_shapely_input(self, shapely_bbox: Polygon, vector_data_with_crs: Path):
-        bbox = gu.prepare_pyogrio_reader_filters(
-            vector_data_with_crs, bbox=shapely_bbox
-        )
+        bbox = gu.bbox_from_file_and_filters(vector_data_with_crs, bbox=shapely_bbox)
         assert all(map(lambda x: abs(x) > 180, bbox))
 
     def test_does_not_filter(self, vector_data_with_crs: Path):
-        bbox = gu.prepare_pyogrio_reader_filters(vector_data_with_crs)
+        bbox = gu.bbox_from_file_and_filters(vector_data_with_crs)
         assert bbox is None
 
     def test_raises_valueerror(
@@ -213,6 +211,6 @@ class TestPreparePyogrioReaderFilters:
             ValueError,
             match="Both 'bbox' and 'mask' are provided. Please provide only one.",
         ):
-            gu.prepare_pyogrio_reader_filters(
+            gu.bbox_from_file_and_filters(
                 vector_data_with_crs, bbox=gdf_bbox_with_crs, mask=gdf_bbox_with_crs
             )

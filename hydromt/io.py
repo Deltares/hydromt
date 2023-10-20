@@ -618,7 +618,7 @@ def open_vector(
     """
 
     def _read(f: pyio.IOBase) -> gpd.GeoDataFrame:
-        bbox_reader = gis_utils.prepare_pyogrio_reader_filters(f, bbox, geom, crs)
+        bbox_reader = gis_utils.bbox_from_file_and_filters(f, bbox, geom, crs)
         f.seek(0)
         return gpd.read_file(f, bbox=bbox_reader, mode=mode, **kwargs)
 

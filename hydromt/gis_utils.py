@@ -560,17 +560,19 @@ def to_geographic_bbox(bbox, source_crs):
     return bbox
 
 
-def prepare_pyogrio_reader_filters(
+def bbox_from_file_and_filters(
     fn: IOBase,
     bbox: GEOM_TYPES | None = None,
     mask: GEOM_TYPES | None = None,
     crs: CRS | None = None,
 ) -> Tuple[float, float, float, float] | None:
-    """Create a pyogrio-compatible bbox filter.
+    """Create a bbox from the file metadata and filter options.
 
     Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.
     This function takes the possible bbox filter, mask filter and crs of the input data
     and returns a bbox in the same crs as the data based on the input filters.
+    As pyogrio currently does not support filtering using a mask, the mask is converted
+    to a bbox and the bbox is returned so that the data has some geospatial filtering.
 
     Parameters
     ----------
