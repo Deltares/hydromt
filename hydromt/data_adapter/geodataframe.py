@@ -473,22 +473,24 @@ class GeoDataFrameAdapter(DataAdapter):
         on_error: Literal["raise", "skip", "coerce"] = "coerce",
     ) -> Optional[StacCatalog]:
         """
-        Convert a geodataframe into a STAC Catalog representation. Since
-        geodataframes don't support temporal dimension the `datetime`
+        Convert a geodataframe into a STAC Catalog representation.
+
+        Since geodataframes don't support temporal dimension the `datetime`
         property will always be set to 0001-01-01. The collection will contain an
         asset for each of the associated files.
 
 
         Parameters
         ----------
-        - on_error (str, optional): The error handling strategy when extracting metadata.
+        - on_error (str, optional): The error handling strategy.
           Options are: "raise" to raise an error on failure, "skip" to skip
-          the dataset on failure, and "coerce" (default) to set default values on failure.
+          the dataset on failure, and "coerce" (default) to set
+          default values on failure.
 
         Returns
         -------
-        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
-          if the dataset was skipped.
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or
+          None if the dataset was skipped.
         """
         if on_error not in ["raise", "skip", "coerce"]:
             raise RuntimeError(
@@ -501,7 +503,7 @@ class GeoDataFrameAdapter(DataAdapter):
             props = {**self.meta, "crs": crs}
         except Exception as e:
             if on_error == "skip":
-                logger.warn(
+                logger.warning(
                     "Skipping {name} during stac conversion because"
                     "because detecting spacial extent failed."
                 )
@@ -511,7 +513,7 @@ class GeoDataFrameAdapter(DataAdapter):
                 props = self.meta
             else:
                 raise e
-
+        else:
             stac_catalog = StacCatalog(
                 self.name,
                 description=self.name,
@@ -519,7 +521,7 @@ class GeoDataFrameAdapter(DataAdapter):
             stac_item = StacItem(
                 self.name,
                 geometry=None,
-                bbox=bbox,
+                bbox=list(bbox),
                 properties=props,
                 datetime=datetime(1, 1, 1),
             )

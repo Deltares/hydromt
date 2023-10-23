@@ -321,8 +321,25 @@ class DataFrameAdapter(DataAdapter):
         self,
         on_error: Literal["raise", "skip", "coerce"] = "coerce",
     ) -> Optional[StacCatalog]:
+        """
+        Convert a rasterdataset into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
+
+
+        Parameters
+        ----------
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip the
+          dataset on failure, and "coerce" (default) to set default values on failure.
+
+        Returns
+        -------
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
+          if the dataset was skipped.
+        """
         if on_error == "skip":
-            logger.warn(
+            logger.warning(
                 f"Skipping {self.name} during stac conversion because"
                 "because detecting temporal extent failed."
             )

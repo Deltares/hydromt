@@ -596,20 +596,22 @@ class GeoDatasetAdapter(DataAdapter):
         on_error: Literal["raise", "skip", "coerce"] = "coerce",
     ) -> Optional[StacCatalog]:
         """
-        Convert a geodataset into a STAC Catalog representation.  The collection will
-        contain an asset for each of the associated files.
+        Convert a geodataset into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
 
 
         Parameters
         ----------
-        - on_error (str, optional): The error handling strategy when extracting metadata.
+        - on_error (str, optional): The error handling strategy.
           Options are: "raise" to raise an error on failure, "skip" to skip
-          the dataset on failure, and "coerce" (default) to set default values on failure.
+          the dataset on failure, and "coerce" (default) to set default
+          values on failure.
 
         Returns
         -------
-        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
-          if the dataset was skipped.
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or
+          None if the dataset was skipped.
         """
         if on_error not in ["raise", "skip", "coerce"]:
             raise RuntimeError(
@@ -620,10 +622,12 @@ class GeoDatasetAdapter(DataAdapter):
         try:
             bbox, crs = self.get_bbox(detect=True)
             start_dt, end_dt = self.get_time_range(detect=True)
+            start_dt = pd.to_datetime(start_dt)
+            end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
         except Exception as e:
             if on_error == "skip":
-                logger.warn(
+                logger.warning(
                     "Skipping {name} during stac conversion because"
                     "because detecting spacial extent failed."
                 )
@@ -636,22 +640,22 @@ class GeoDatasetAdapter(DataAdapter):
             else:
                 raise e
 
-            stac_catalog = StacCatalog(
-                self.name,
-                description=self.name,
-            )
-            stac_item = StacItem(
-                self.name,
-                geometry=None,
-                bbox=bbox,
-                properties=props,
-                datetime=None,
-                start_datetime=start_dt,
-                end_datetime=end_dt,
-            )
-            stac_asset = StacAsset(str(self.path))
-            base_name = basename(self.path)
-            stac_item.add_asset(base_name, stac_asset)
+        stac_catalog = StacCatalog(
+            self.name,
+            description=self.name,
+        )
+        stac_item = StacItem(
+            self.name,
+            geometry=None,
+            bbox=bbox,
+            properties=props,
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        stac_asset = StacAsset(str(self.path))
+        base_name = basename(self.path)
+        stac_item.add_asset(base_name, stac_asset)
 
-            stac_catalog.add_item(stac_item)
-            return stac_catalog
+        stac_catalog.add_item(stac_item)
+        return stac_catalog

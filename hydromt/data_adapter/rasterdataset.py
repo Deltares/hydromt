@@ -791,15 +791,16 @@ class RasterDatasetAdapter(DataAdapter):
         on_error: Literal["raise", "skip", "coerce"] = "coerce",
     ) -> Optional[StacCatalog]:
         """
-        Convert a rasterdataset into a STAC Catalog representation.  The collection will
-        contain an asset for each of the associated files.
+        Convert a rasterdataset into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
 
 
         Parameters
         ----------
-        - on_error (str, optional): The error handling strategy when extracting metadata.
-          Options are: "raise" to raise an error on failure, "skip" to skip
-          the dataset on failure, and "coerce" (default) to set default values on failure.
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip the
+          dataset on failure, and "coerce" (default) to set default values on failure.
 
         Returns
         -------
@@ -815,10 +816,12 @@ class RasterDatasetAdapter(DataAdapter):
         try:
             bbox, crs = self.get_bbox(detect=True)
             start_dt, end_dt = self.get_time_range(detect=True)
+            start_dt = pd.to_datetime(start_dt)
+            end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
         except Exception as e:
             if on_error == "skip":
-                logger.warn(
+                logger.warning(
                     "Skipping {name} during stac conversion because"
                     "because detecting spacial extent failed."
                 )
@@ -831,6 +834,8 @@ class RasterDatasetAdapter(DataAdapter):
             else:
                 raise e
 
+        else:
+            # else makes type checkers a bit happier
             stac_catalog = StacCatalog(
                 self.name,
                 description=self.name,
@@ -838,7 +843,7 @@ class RasterDatasetAdapter(DataAdapter):
             stac_item = StacItem(
                 self.name,
                 geometry=None,
-                bbox=bbox,
+                bbox=list(bbox),
                 properties=props,
                 datetime=None,
                 start_datetime=start_dt,

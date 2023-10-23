@@ -476,28 +476,36 @@ def test_detect_extent(geodf, geoda, rioda, ts):
     assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
 
 
-def test_to_stac_geodataframe():
+def test_to_stac_geodataframe(geodf, tmpdir):
+    fn_gdf = str(tmpdir.join("test.geojson"))
+    geodf.to_file(fn_gdf, driver="GeoJSON")
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
 
     # geodataframe
     name = "gadm_level1"
-    ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
-    bbox, crs = ds.get_bbox()
+    adapter = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
+    bbox, crs = adapter.get_bbox()
     gdf_stac_catalog = StacCatalog(id=name, description=name)
     gds_stac_item = StacItem(
         name,
         geometry=None,
         bbox=list(bbox),
-        properties=ds.meta,
+        properties=adapter.meta,
         datetime=datetime(1, 1, 1),
     )
-    gds_stac_asset = StacAsset(str(ds.path))
-    gds_base_name = basename(ds.path)
+    gds_stac_asset = StacAsset(str(adapter.path))
+    gds_base_name = basename(adapter.path)
     gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
     gdf_stac_catalog.add_item(gds_stac_item)
-    assert gdf_stac_catalog == ds.to_stac_catalog(on_error="raise")
+    outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="coerce"))
+    assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+    # make sure links are initialised
+    outcome.normalize_hrefs("")
+    outcome.validate()
+    del adapter.crs  # manually create an invalid adapter by deleting the crs
+    assert adapter.to_stac_catalog("skip") is None
 
 
 def test_to_stac_raster():
@@ -506,9 +514,9 @@ def test_to_stac_raster():
 
     # raster dataset
     name = "chirps_global"
-    ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
-    bbox, crs = ds.get_bbox()
-    start_dt, end_dt = ds.get_time_range(detect=True)
+    adapter = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    bbox, crs = adapter.get_bbox()
+    start_dt, end_dt = adapter.get_time_range(detect=True)
     start_dt = pd.to_datetime(start_dt)
     end_dt = pd.to_datetime(end_dt)
     raster_stac_catalog = StacCatalog(id=name, description=name)
@@ -516,29 +524,36 @@ def test_to_stac_raster():
         name,
         geometry=None,
         bbox=list(bbox),
-        properties=ds.meta,
+        properties=adapter.meta,
         datetime=None,
         start_datetime=start_dt,
         end_datetime=end_dt,
     )
-    raster_stac_asset = StacAsset(str(ds.path))
-    raster_base_name = basename(ds.path)
+    raster_stac_asset = StacAsset(str(adapter.path))
+    raster_base_name = basename(adapter.path)
     raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
 
     raster_stac_catalog.add_item(raster_stac_item)
 
-    assert raster_stac_catalog == ds.to_stac_catalog(on_error="raise")
+    outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="raise"))
+
+    assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+    # make sure links are initialised
+    outcome.normalize_hrefs("")
+    outcome.validate()
+    del adapter.crs  # manually create an invalid adapter by deleting the crs
+    assert adapter.to_stac_catalog("skip") is None
 
 
-def test_to_stac_geodataset(gda):
+def test_to_stac_geodataset(geoda, tmpdir):
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
 
     # geodataset
     name = "gtsmv3_eu_era5"
-    ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
-    bbox, crs = ds.get_bbox()
-    start_dt, end_dt = ds.get_time_range(detect=True)
+    adapter = cast(GeoDatasetAdapter, data_catalog.get_source(name))
+    bbox, crs = adapter.get_bbox()
+    start_dt, end_dt = adapter.get_time_range(detect=True)
     start_dt = pd.to_datetime(start_dt)
     end_dt = pd.to_datetime(end_dt)
     gds_stac_catalog = StacCatalog(id=name, description=name)
@@ -546,17 +561,24 @@ def test_to_stac_geodataset(gda):
         name,
         geometry=None,
         bbox=list(bbox),
-        properties=ds.meta,
+        properties=adapter.meta,
         datetime=None,
         start_datetime=start_dt,
         end_datetime=end_dt,
     )
-    gds_stac_asset = StacAsset(str(ds.path))
-    gds_base_name = basename(ds.path)
+    gds_stac_asset = StacAsset(str(adapter.path))
+    gds_base_name = basename(adapter.path)
     gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
     gds_stac_catalog.add_item(gds_stac_item)
-    assert gds_stac_catalog == ds.to_stac_catalog(on_error="raise")
+
+    outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="coerce"))
+    assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+    # make sure links are initialised
+    outcome.normalize_hrefs("")
+    outcome.validate()
+    del adapter.crs  # manually create an invalid adapter by deleting the crs
+    assert adapter.to_stac_catalog("skip") is None
 
 
 def test_to_stac_dataframe(df, tmpdir):
@@ -597,5 +619,8 @@ def test_to_stac_dataframe(df, tmpdir):
     stac_item.add_asset("hydromt_path", stac_asset)
 
     stac_catalog.add_item(stac_item)
-    outcome = adapter.to_stac_catalog(on_error="coerce")
-    assert stac_catalog.to_dict() == outcome.to_dict()
+    outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="coerce"))
+    assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+    # make sure links are initialised
+    outcome.normalize_hrefs("")
+    outcome.validate()

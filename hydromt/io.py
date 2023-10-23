@@ -300,13 +300,13 @@ def open_mfcsv(
             # this was clearer
             if df.index.name is None:
                 if not csv_index_name == "index":
-                    logger.warn(
+                    logger.warning(
                         f"csv file {fn} has inconsistent index name: {df.index.name}"
                         f"expected {csv_index_name} as it's the first one found."
                     )
             else:
                 if not csv_index_name == df.index.name:
-                    logger.warn(
+                    logger.warning(
                         f"csv file {fn} has inconsistent index name: {df.index.name}"
                         f"expected {csv_index_name} as it's the first one found."
                     )
