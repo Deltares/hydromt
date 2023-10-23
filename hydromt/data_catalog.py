@@ -171,13 +171,14 @@ class DataCatalog(object):
 
     def to_stac(
         self,
-        catalog_name="hydromt-stac-catalog",
-        description="The stac catalog of hydromt",
+        catalog_name: str = "hydromt-stac-catalog",
+        description: str = "The stac catalog of hydromt",
+        used_only: bool = False,
         errors: Literal["raise", "skip", "coerce"] = "coerce",
     ):
         """Generate STAC catalog."""
         stac_catalog = StacCatalog(id=catalog_name, description=description)
-        for _name, source in self.iter_sources():
+        for _name, source in self.iter_sources(used_only):
             stac_child_catalog = source.to_stac_catalog(errors)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
