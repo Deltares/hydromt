@@ -1,6 +1,7 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
+from datetime import datetime
 from os.path import abspath, basename, dirname, isfile, join
 from pathlib import Path
 from typing import cast
@@ -643,6 +644,8 @@ def test_to_stac():
     ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
     bbox, crs = ds.get_bbox()
     start_dt, end_dt = ds.get_time_range(detect=True)
+    start_dt = pd.to_datetime(start_dt)
+    end_dt = pd.to_datetime(end_dt)
     expected_stac_catalog = StacCatalog(id=name, description=name)
     raster_stac_item = StacItem(
         name,
@@ -658,33 +661,34 @@ def test_to_stac():
     raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
 
     expected_stac_catalog.add_item(raster_stac_item)
+    assert expected_stac_catalog == ds.to_stac_catalog(on_error="raise")
 
     # geodataframe
     name = "gadm_level1"
     ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
     bbox, crs = ds.get_bbox()
-    start_dt, end_dt = ds.get_time_range(detect=True)
     expected_stac_catalog = StacCatalog(id=name, description=name)
     raster_stac_item = StacItem(
         name,
         geometry=None,
         bbox=list(bbox),
         properties=ds.meta,
-        datetime=None,
-        start_datetime=start_dt,
-        end_datetime=end_dt,
+        datetime=datetime(1, 1, 1),
     )
     raster_stac_asset = StacAsset(str(ds.path))
     raster_base_name = basename(ds.path)
     raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
 
     expected_stac_catalog.add_item(raster_stac_item)
+    assert expected_stac_catalog == ds.to_stac_catalog(on_error="raise")
 
     # geodataset
     name = "gtsmv3_eu_era5"
     ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
     bbox, crs = ds.get_bbox()
     start_dt, end_dt = ds.get_time_range(detect=True)
+    start_dt = pd.to_datetime(start_dt)
+    end_dt = pd.to_datetime(end_dt)
     expected_stac_catalog = StacCatalog(id=name, description=name)
     raster_stac_item = StacItem(
         name,
@@ -700,3 +704,4 @@ def test_to_stac():
     raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
 
     expected_stac_catalog.add_item(raster_stac_item)
+    assert expected_stac_catalog == ds.to_stac_catalog(on_error="raise")

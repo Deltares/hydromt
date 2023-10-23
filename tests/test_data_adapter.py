@@ -476,7 +476,31 @@ def test_detect_extent(geodf, geoda, rioda, ts):
     assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
 
 
-def test_to_stac():
+def test_to_stac_geodataframe():
+    data_catalog = DataCatalog()  # read artifacts
+    _ = data_catalog.sources  # load artifact data as fallback
+
+    # geodataframe
+    name = "gadm_level1"
+    ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
+    bbox, crs = ds.get_bbox()
+    gdf_stac_catalog = StacCatalog(id=name, description=name)
+    gds_stac_item = StacItem(
+        name,
+        geometry=None,
+        bbox=list(bbox),
+        properties=ds.meta,
+        datetime=datetime(1, 1, 1),
+    )
+    gds_stac_asset = StacAsset(str(ds.path))
+    gds_base_name = basename(ds.path)
+    gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
+
+    gdf_stac_catalog.add_item(gds_stac_item)
+    assert gdf_stac_catalog == ds.to_stac_catalog(on_error="raise")
+
+
+def test_to_stac_raster():
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
 
@@ -503,25 +527,12 @@ def test_to_stac():
 
     raster_stac_catalog.add_item(raster_stac_item)
 
-    assert raster_stac_catalog == ds.to_stac_catalog()
+    assert raster_stac_catalog == ds.to_stac_catalog(on_error="raise")
 
-    # geodataframe
-    name = "gadm_level1"
-    ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
-    bbox, crs = ds.get_bbox()
-    gdf_stac_catalog = StacCatalog(id=name, description=name)
-    gds_stac_item = StacItem(
-        name,
-        geometry=None,
-        bbox=list(bbox),
-        properties=ds.meta,
-        datetime=datetime(1, 1, 1),
-    )
-    gds_stac_asset = StacAsset(str(ds.path))
-    gds_base_name = basename(ds.path)
-    gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
-    gdf_stac_catalog.add_item(gds_stac_item)
+def test_to_stac_geodataset(gda):
+    data_catalog = DataCatalog()  # read artifacts
+    _ = data_catalog.sources  # load artifact data as fallback
 
     # geodataset
     name = "gtsmv3_eu_era5"
@@ -545,3 +556,46 @@ def test_to_stac():
     gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
     gds_stac_catalog.add_item(gds_stac_item)
+    assert gds_stac_catalog == ds.to_stac_catalog(on_error="raise")
+
+
+def test_to_stac_dataframe(df, tmpdir):
+    fn_df = str(tmpdir.join("test.csv"))
+    name = "test_dataframe"
+    df.to_csv(fn_df)
+    dc = DataCatalog().from_dict(
+        {
+            name: {
+                "data_type": "DataFrame",
+                "path": fn_df,
+            }
+        }
+    )
+
+    adapter = dc.get_source(name)
+
+    with pytest.raises(
+        NotImplementedError,
+        match="DataframeAdapter does not support full stac conversion ",
+    ):
+        adapter.to_stac_catalog("raise")
+
+    assert adapter.to_stac_catalog("skip") is None
+
+    stac_catalog = StacCatalog(
+        name,
+        description=name,
+    )
+    stac_item = StacItem(
+        name,
+        geometry=None,
+        bbox=[0, 0, 0, 0],
+        properties=adapter.meta,
+        datetime=datetime(1, 1, 1),
+    )
+    stac_asset = StacAsset(str(fn_df))
+    stac_item.add_asset("hydromt_path", stac_asset)
+
+    stac_catalog.add_item(stac_item)
+    outcome = adapter.to_stac_catalog(on_error="coerce")
+    assert stac_catalog.to_dict() == outcome.to_dict()

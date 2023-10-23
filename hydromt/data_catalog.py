@@ -178,9 +178,9 @@ class DataCatalog(object):
         """Generate STAC catalog."""
         stac_catalog = StacCatalog(id=catalog_name, description=description)
         for _name, source in self.iter_sources():
-            stac_item = source.to_stac_catalog(catalog_name, description, errors)
-            if stac_item:
-                stac_catalog.add_item(stac_item)
+            stac_child_catalog = source.to_stac_catalog(errors)
+            if stac_child_catalog:
+                stac_catalog.add_child(stac_child_catalog)
 
         return stac_catalog
 
