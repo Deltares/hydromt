@@ -500,6 +500,7 @@ class GeoDataFrameAdapter(DataAdapter):
 
         try:
             bbox, crs = self.get_bbox(detect=True)
+            bbox = list(bbox)
             props = {**self.meta, "crs": crs}
         except Exception as e:
             if on_error == "skip":

@@ -621,6 +621,7 @@ class GeoDatasetAdapter(DataAdapter):
 
         try:
             bbox, crs = self.get_bbox(detect=True)
+            bbox = list(bbox)
             start_dt, end_dt = self.get_time_range(detect=True)
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)

@@ -34,6 +34,7 @@ import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 from pystac import Catalog as StacCatalog
+from pystac import CatalogType
 
 from hydromt.utils import partition_dictionaries
 
@@ -169,10 +170,7 @@ class DataCatalog(object):
         """Return a list of all available data source names."""
         return list(self._sources.keys())
 
-    # because serialised stac files require things like links
-    # and in memory stac objects made from cursom objects might not have those
-    # we need to have different functions for them.
-    def to_stac_file(
+    def to_stac_catalog(
         self,
         path: Union[str, Path],
         root: str = "auto",
@@ -181,19 +179,7 @@ class DataCatalog(object):
         catalog_name: str = "hydromt-stac-catalog",
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
-        errors: Literal["raise", "skip", "coerce"] = "coerce",
-    ):
-        pass
-
-    def to_stac_object(
-        self,
-        path: Union[str, Path],
-        root: str = "auto",
-        source_names: Optional[List] = None,
-        meta: Optional[Dict] = None,
-        catalog_name: str = "hydromt-stac-catalog",
-        description: str = "The stac catalog of hydromt",
-        used_only: bool = False,
+        catalog_type=CatalogType.RELATIVE_PUBLISHED,
         errors: Literal["raise", "skip", "coerce"] = "coerce",
     ):
         """Write data catalog to STAC format.
@@ -215,7 +201,7 @@ class DataCatalog(object):
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
         """
-        meta = meta or []
+        meta = meta or {}
         stac_dir = os.path.dirname(abspath(path))
         if root == "auto":
             root = stac_dir
@@ -225,7 +211,7 @@ class DataCatalog(object):
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
-        stac_catalog.normalize_hrefs(catalog_name)
+        stac_catalog.normalize_and_save(path, catalog_type=catalog_type)
         return stac_catalog
 
     @property

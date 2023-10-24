@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pystac import Catalog as StacCatalog
 
 import hydromt.data_catalog
 from hydromt.data_adapter import (
@@ -631,7 +632,7 @@ def test_detect_extent():
     assert detected_temporal_range == expected_temporal_range
 
 
-def test_to_stac():
+def test_to_stac(tmpdir):
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
 
@@ -639,15 +640,14 @@ def test_to_stac():
     _ = data_catalog.get_geodataframe("gadm_level1")
     _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
 
-    stac_catalog = data_catalog.to_stac(used_only=True)
+    stac_catalog = data_catalog.to_stac_catalog(
+        join(DATADIR, "stac_catalog"), used_only=True
+    )
 
-    import json
+    expected_stac_catalog = StacCatalog.from_file(join(DATADIR, "stac_catalog"))
 
-    print(json.dumps(stac_catalog.to_dict(), indent=2))
-    print(list(stac_catalog.get_children()))
-    for item in stac_catalog.get_items(recursive=True):
-        print(json.dumps(item.to_dict(), indent=2))
-    raise AssertionError()
+    assert stac_catalog.to_dict() == expected_stac_catalog.to_dict()
+
     # # raster dataset
     # name =
     # ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
