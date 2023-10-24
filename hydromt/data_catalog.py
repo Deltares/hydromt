@@ -33,8 +33,7 @@ import xarray as xr
 import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-from pystac import Catalog as StacCatalog
-from pystac import CatalogType
+from pystac import Catalog as StacCatalog, CatalogType
 
 from hydromt.utils import partition_dictionaries
 
@@ -172,14 +171,12 @@ class DataCatalog(object):
 
     def to_stac_catalog(
         self,
-        path: Union[str, Path],
-        root: str = "auto",
+        root: Union[str, Path],
         source_names: Optional[List] = None,
         meta: Optional[Dict] = None,
         catalog_name: str = "hydromt-stac-catalog",
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
-        catalog_type=CatalogType.RELATIVE_PUBLISHED,
         errors: Literal["raise", "skip", "coerce"] = "coerce",
     ):
         """Write data catalog to STAC format.
@@ -202,16 +199,13 @@ class DataCatalog(object):
             by default empty.
         """
         meta = meta or {}
-        stac_dir = os.path.dirname(abspath(path))
-        if root == "auto":
-            root = stac_dir
         stac_catalog = StacCatalog(id=catalog_name, description=description)
         for _name, source in self.iter_sources(used_only):
             stac_child_catalog = source.to_stac_catalog(errors)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
-        stac_catalog.normalize_and_save(path, catalog_type=catalog_type)
+        stac_catalog.normalize_and_save(root)
         return stac_catalog
 
     @property

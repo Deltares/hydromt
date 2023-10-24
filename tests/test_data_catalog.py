@@ -640,77 +640,8 @@ def test_to_stac(tmpdir):
     _ = data_catalog.get_geodataframe("gadm_level1")
     _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
 
-    stac_catalog = data_catalog.to_stac_catalog(
-        join(DATADIR, "stac_catalog"), used_only=True
-    )
+    stac_dir = join(DATADIR, "stac_catalog")
+    stac_catalog = data_catalog.to_stac_catalog(stac_dir, used_only=True)
 
-    expected_stac_catalog = StacCatalog.from_file(join(DATADIR, "stac_catalog"))
-
+    assert stac_catalog.get_children()
     assert stac_catalog.to_dict() == expected_stac_catalog.to_dict()
-
-    # # raster dataset
-    # name =
-    # ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
-    # bbox, crs = ds.get_bbox()
-    # start_dt, end_dt = ds.get_time_range(detect=True)
-    # start_dt = pd.to_datetime(start_dt)
-    # end_dt = pd.to_datetime(end_dt)
-    # expected_stac_catalog = StacCatalog(id=name, description=name)
-    # raster_stac_item = StacItem(
-    #     name,
-    #     geometry=None,
-    #     bbox=list(bbox),
-    #     properties=ds.meta,
-    #     datetime=None,
-    #     start_datetime=start_dt,
-    #     end_datetime=end_dt,
-    # )
-    # raster_stac_asset = StacAsset(str(ds.path))
-    # raster_base_name = basename(ds.path)
-    # raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
-
-    # expected_stac_catalog.add_item(raster_stac_item)
-    # assert expected_stac_catalog == ds.to_stac_catalog(on_error="raise")
-
-    # # geodataframe
-    # name =
-    # ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
-    # bbox, crs = ds.get_bbox()
-    # expected_stac_catalog = StacCatalog(id=name, description=name)
-    # raster_stac_item = StacItem(
-    #     name,
-    #     geometry=None,
-    #     bbox=list(bbox),
-    #     properties=ds.meta,
-    #     datetime=datetime(1, 1, 1),
-    # )
-    # raster_stac_asset = StacAsset(str(ds.path))
-    # raster_base_name = basename(ds.path)
-    # raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
-
-    # expected_stac_catalog.add_item(raster_stac_item)
-    # assert expected_stac_catalog == ds.to_stac_catalog(on_error="raise")
-
-    # # geodataset
-    # name =
-    # ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
-    # bbox, crs = ds.get_bbox()
-    # start_dt, end_dt = ds.get_time_range(detect=True)
-    # start_dt = pd.to_datetime(start_dt)
-    # end_dt = pd.to_datetime(end_dt)
-    # expected_stac_catalog = StacCatalog(id=name, description=name)
-    # raster_stac_item = StacItem(
-    #     name,
-    #     geometry=None,
-    #     bbox=list(bbox),
-    #     properties=ds.meta,
-    #     datetime=None,
-    #     start_datetime=start_dt,
-    #     end_datetime=end_dt,
-    # )
-    # raster_stac_asset = StacAsset(str(ds.path))
-    # raster_base_name = basename(ds.path)
-    # raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
-
-    # expected_stac_catalog.add_item(raster_stac_item)
-    # assert expected_stac_catalog == ds.to_stac_catalog(on_error="raise")
