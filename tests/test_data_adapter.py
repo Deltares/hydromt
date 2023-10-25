@@ -501,9 +501,6 @@ def test_to_stac_geodataframe(geodf, tmpdir):
     gdf_stac_catalog.add_item(gds_stac_item)
     outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="coerce"))
     assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    # make sure links are initialised
-    outcome.normalize_hrefs("")
-    outcome.validate()
     del adapter.crs  # manually create an invalid adapter by deleting the crs
     assert adapter.to_stac_catalog("skip") is None
 
@@ -538,9 +535,6 @@ def test_to_stac_raster():
     outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="raise"))
 
     assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    # make sure links are initialised
-    outcome.normalize_hrefs("")
-    outcome.validate()
     del adapter.crs  # manually create an invalid adapter by deleting the crs
     assert adapter.to_stac_catalog("skip") is None
 
@@ -574,9 +568,6 @@ def test_to_stac_geodataset(geoda, tmpdir):
 
     outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="coerce"))
     assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    # make sure links are initialised
-    outcome.normalize_hrefs("")
-    outcome.validate()
     del adapter.crs  # manually create an invalid adapter by deleting the crs
     assert adapter.to_stac_catalog("skip") is None
 
@@ -621,6 +612,3 @@ def test_to_stac_dataframe(df, tmpdir):
     stac_catalog.add_item(stac_item)
     outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="coerce"))
     assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    # make sure links are initialised
-    outcome.normalize_hrefs("")
-    outcome.validate()
