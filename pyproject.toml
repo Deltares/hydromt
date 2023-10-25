@@ -20,7 +20,7 @@ dependencies = [
   "mercantile",        # tile handling
   "netcdf4",           # netcfd IO
   "numba",             # speed up computations (used in e.g. stats)
-  "numpy>=1.20",       # pin necessary to ensure compatability with C headers
+  "numpy>=1.23",       # pin necessary to ensure compatability with C headers
   "packaging",         # compare versions of hydromt
   "pandas",            # Dataframes
   "pyflwdir>=0.5.4",   # Hight models and derivatives
