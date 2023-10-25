@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pystac import Catalog as StacCatalog
 
 import hydromt.data_catalog
 from hydromt.data_adapter import (
@@ -640,8 +639,16 @@ def test_to_stac(tmpdir):
     _ = data_catalog.get_geodataframe("gadm_level1")
     _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
 
-    stac_dir = join(DATADIR, "stac_catalog")
-    stac_catalog = data_catalog.to_stac_catalog(stac_dir, used_only=True)
+    sources = [
+        "chirps_global",
+        "gadm_level1",
+        "gtsmv3_eu_era5",
+    ]
 
-    assert stac_catalog.get_children()
-    assert stac_catalog.to_dict() == expected_stac_catalog.to_dict()
+    stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
+
+    assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
+    # the two empty strings are for the root and self link which are destinct
+    assert sorted(list(map(lambda x: x.get_href(), stac_catalog.get_links()))) == [
+        join(tmpdir, p, "catalog.json") for p in ["", "", *sources]
+    ]
