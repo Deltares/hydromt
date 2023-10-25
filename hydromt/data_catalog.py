@@ -33,7 +33,7 @@ import xarray as xr
 import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-from pystac import Catalog as StacCatalog, CatalogType
+from pystac import Catalog as StacCatalog
 
 from hydromt.utils import partition_dictionaries
 
