@@ -2353,9 +2353,7 @@ class RasterDataArray(XRasterBase):
                 temp = obj[u : u + h, l : l + w].load()
                 if zl != 0:
                     temp = (
-                        temp.coarsen(
-                            {x_dim: 2**diff, y_dim: 2**diff}, boundary="pad"
-                        )
+                        temp.coarsen({x_dim: 2**diff, y_dim: 2**diff}, boundary="pad")
                         .mean()
                         .fillna(nodata)
                         .astype(dtype)
