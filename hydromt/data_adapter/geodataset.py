@@ -68,7 +68,7 @@ class GeoDatasetAdapter(DataAdapter):
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable}, {year}, {month} placeholders as well as path
-            search pattern using a '*' wildcard.
+            search pattern using a ``*`` wildcard.
         driver: {'vector', 'netcdf', 'zarr'}, optional
             Driver to read files with,
             for 'vector' :py:func:`~hydromt.io.open_geodataset`,
@@ -108,12 +108,9 @@ class GeoDatasetAdapter(DataAdapter):
         extent: Extent(typed dict), Optional
             Dictionary describing the spatial and time range the dataset covers.
             should be of the form:
-            {
-                "bbox": [xmin, ymin, xmax, ymax],
-                "time_range": [start_datetime, end_datetime],
-            }
-            bbox coordinates should be in the same CRS as the data, and
-            time_range should be inclusive on both sides.
+            -  "bbox": [xmin, ymin, xmax, ymax],
+            -  "time_range": [start_datetime, end_datetime],
+            data, and time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         storage_options: dict, optional

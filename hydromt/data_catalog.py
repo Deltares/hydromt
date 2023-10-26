@@ -1369,10 +1369,11 @@ class DataCatalog(object):
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
-        predicate : {'intersects', 'within', 'contains', 'overlaps',
-            'crosses', 'touches'}, optional If predicate is provided,
-            the GeoDataFrame is filtered by testing the predicate function
-            against each item. Requires bbox or mask. By default 'intersects'
+        predicate : optional
+            If predicate is provided, the GeoDataFrame is filtered by testing
+            the predicate function against each item. Requires bbox or mask.
+            By default 'intersects' options are:
+            {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
         align : float, optional
             Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
@@ -1462,10 +1463,11 @@ class DataCatalog(object):
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
-        predicate : {'intersects', 'within', 'contains', 'overlaps',
-            'crosses', 'touches'}, optional If predicate is provided,
-            the GeoDataFrame is filtered by testing the predicate function
-            against each item. Requires bbox or mask. By default 'intersects'
+        predicate : optional
+            If predicate is provided, the GeoDataFrame is filtered by testing
+            the predicate function against each item. Requires bbox or mask.
+            By default 'intersects' options are:
+            {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
         variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.

@@ -90,6 +90,7 @@ def clean_str(s):
     if not isinstance(s, str):
         return s
     clean = s.replace("*", "\\*")
+    clean = clean.replace("_", "\\_")
     idx = clean.find("p:/")
     if idx > -1:
         clean = clean[idx:]

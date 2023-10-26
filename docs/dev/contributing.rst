@@ -279,7 +279,7 @@ Docstrings
 
 Code format
 ^^^^^^^^^^^
-- We use the `black code style <https://black.readthedocs.io/en/stable/the_black_code_style.html>`_ and `pre-commit <https://pre-commit.com>`_ to keep everything formatted. Please make sure all hooks pass before commiting. Pre-commit will do this for you if it's installed correctly.
+- We use the `black code style <https://black.readthedocs.io/en/stable/the_black_code_style.html>`_ and `pre-commit <https://pre-commit.com>`_ to keep everything formatted. We use the formatter included with `ruff <https://docs.astral.sh/ruff/formatter/>`_ which is black compatible, but much faster. Please make sure all hooks pass before commiting. Pre-commit will do this for you if it's installed correctly.
 
 You can install pre-commit by running:
 
@@ -330,10 +330,11 @@ Then you can add the new feature to the git staging area and try to commit as us
     - exit code: 1
     - files were modified by this hook
 
+    ruff-format..............................................................Passed
+
     hydromt/new_feature.py:1:1: D100 Missing docstring in public module
     Found 2 errors (1 fixed, 1 remaining).
 
-    black....................................................................Passed
 
 This means that pre-commit has found issues in the code you submitted. In the case of the import it was able to fix it automatically. However `ruff` has also detected that you have not added a docstring for the new feature. You can find this out by running:
 
@@ -364,7 +365,6 @@ After you've fixed this problem by for example adding the docstring """Implement
   Mixed line ending........................................................Passed
   Format YAML files....................................(no files to check)Skipped
   ruff.....................................................................Passed
-  black....................................................................Passed
   [linting a5e9b683] The feature you've all been waiting for.
    1 file changed, 4 insertions(+)
    create mode 100644 hydromt/new_feature.py
