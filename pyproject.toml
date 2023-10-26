@@ -20,7 +20,7 @@ dependencies = [
   "mercantile",        # tile handling
   "netcdf4",           # netcfd IO
   "numba",             # speed up computations (used in e.g. stats)
-  "numpy>=1.20",       # pin necessary to ensure compatability with C headers
+  "numpy>=1.23",       # pin necessary to ensure compatability with C headers
   "packaging",         # compare versions of hydromt
   "pandas",            # Dataframes
   "pyflwdir>=0.5.4",   # Hight models and derivatives
@@ -114,17 +114,15 @@ deps_not_in_conda = [
   "rio-vrt",
 ]
 
-[tool.black]
-line-length = 88
-target-version = ['py39']
 
 [tool.ruff]
 line-length = 88
+target-version = "py39"
 
 # enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
 select = ["E", "F", "I", "PT", "D", "B"]
 ignore-init-module-imports = true
-ignore = ["D211", "D213", "E741", "D105", "E712", "B904"]
+ignore = ["D211", "D213", 'D206', 'E501', "E741", "D105", "E712", "B904"]
 exclude = ["docs"]
 
 [tool.ruff.per-file-ignores]
