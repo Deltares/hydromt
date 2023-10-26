@@ -505,6 +505,7 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
    * - ``parquet``
      - Binary encoded columnar data format
      - :py:func:`pandas.read_parquet`
+     -
    * - ``fwf``
      - Fixed width delimited text files
      - :py:func:`pandas.read_fwf`

@@ -104,7 +104,7 @@ your plugin. Below you can find the minimum requirements to register your own ne
 
 In case, you want to start creating your own package, we have also prepared a cookiecutter template
 to help you set up a project for your plugin including minimal testing and documentation by just filling out a couple of
-questions :) . This template along with instructions are available at: ``hydromt-plugin-template <https://github.com/Deltares/hydromt-plugin-template>``_.
+questions :) . This template along with instructions are available at: `hydromt-plugin-template <https://github.com/Deltares/hydromt-plugin-template>`_.
 
 Requirements
 ^^^^^^^^^^^^
@@ -269,7 +269,7 @@ specific Model components. To add data to a component, the ``set_<component>`` m
 read and written using the specific ``read_<component>`` and ``write_<component>`` methods.
 
 A table that lists the base model components common to all model classes can be found at
-:ref:`The Model Overview Page<list-table>`
+:ref:`The Model Overview Page<model_main>`
 All base model attributes and methods can be found in the :ref:`API reference <model_api>`
 
 
@@ -313,8 +313,9 @@ users may only want to read a model using HydroMT to visualise or plot data. As 
 can then be opened in read only mode ('r') and HydroMT should not be able to overwrite any data. HydroMT
 `Model` class has two properties you can use to check for this:
 
-- `self._assert_read_mode` if a model can be read
-- `self._assert_write_mode` if a model can be written
+  - `self._assert_read_mode` if a model can be read
+  - `self._assert_write_mode` if a model can be written
+
 3. If needed, transform and write the component to the right format and file(s).
 4. Don't hesitate to put some logger information for your user.
 
@@ -476,6 +477,7 @@ Here are some last tips:
   unit test for your functions, or build a model and compare to a previously built one (eg in the examples folder). The ``Model`` API includes a
   couple of functions  that can help you with testing so you can check them out: :py:func:`~Model._test_model_api`, :py:func:`~Model._test_equal`
 
+===============
 Advanced Topics
 ===============
 

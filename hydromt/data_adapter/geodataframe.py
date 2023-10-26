@@ -63,7 +63,7 @@ class GeoDataFrameAdapter(DataAdapter):
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable} placeholders as well as path
-            search pattern using a '*' wildcard.
+            search pattern using a ``*`` wildcard.
         driver: {'vector', 'vector_table'}, optional
             Driver to read files with, for 'vector' :py:func:`~geopandas.read_file`,
             for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
@@ -87,8 +87,12 @@ class GeoDataFrameAdapter(DataAdapter):
             data unit to the output data unit as required by hydroMT.
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license',
-            'paper_ref', 'paper_doi', 'category'}
+            - 'source_version'
+            - 'source_url'
+            - 'source_license'
+            - 'paper_ref'
+            - 'paper_doi'
+            - 'category'
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
@@ -98,12 +102,9 @@ class GeoDataFrameAdapter(DataAdapter):
         extent: Extent(typed dict), Optional
             Dictionary describing the spatial and time range the dataset covers.
             should be of the form:
-            {
-                "bbox": [xmin, ymin, xmax, ymax],
-                "time_range": [start_datetime, end_datetime],
-            }
-            bbox coordinates should be in the same CRS as the data, and
-            time_range should be inclusive on both sides.
+            -  "bbox": [xmin, ymin, xmax, ymax],
+            -  "time_range": [start_datetime, end_datetime],
+            data, and time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         storage_options: dict, optional
@@ -174,7 +175,7 @@ class GeoDataFrameAdapter(DataAdapter):
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        **kwargs
+        kwargs
             Additional keyword arguments that are passed to the geopandas driver.
 
         Returns
