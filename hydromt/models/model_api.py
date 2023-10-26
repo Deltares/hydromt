@@ -1150,7 +1150,8 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default ``maps/*.nc``
+            filename relative to model root, may contain wildcards,
+            by default ``maps/*.nc``
         kwargs:
             Additional keyword arguments that are passed to the
             `read_nc` function.
@@ -1222,7 +1223,8 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default ``geoms/*.nc``
+            filename relative to model root, may contain wildcards,
+            by default ``geoms/*.nc``
         **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
@@ -1374,7 +1376,8 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default ``forcing/*.nc``
+            filename relative to model root, may contain wildcards,
+            by default ``forcing/*.nc``
         kwargs:
             Additional keyword arguments that are passed to the `read_nc`
             function.
@@ -1445,7 +1448,8 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default ``states/*.nc``
+            filename relative to model root, may contain wildcards,
+            by default ``states/*.nc``
         kwargs:
             Additional keyword arguments that are passed to the `read_nc`
             function.
@@ -1521,7 +1525,8 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default ``results/*.nc``
+            filename relative to model root, may contain wildcards,
+            by default ``results/*.nc``
         kwargs:
             Additional keyword arguments that are passed to the `read_nc`
             function.
