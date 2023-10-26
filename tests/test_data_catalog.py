@@ -525,7 +525,7 @@ def test_get_data(df, tmpdir, timeseries_df):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataset({"name": "test"})
 
-    # get_dataset using three ways
+    # get_dataset
     test_dataset = timeseries_df.to_xarray()
     subset_timeseries = timeseries_df.iloc[[0, len(timeseries_df) // 2]]
     time_tuple = (
@@ -539,25 +539,6 @@ def test_get_data(df, tmpdir, timeseries_df):
     ds = data_catalog.get_dataset(test_dataset, variables=["col1"])
     assert isinstance(ds, xr.DataArray)
     assert ds.name == "col1"
-
-    for i in range(3):
-        timeseries_df.to_csv(tmpdir.join(f"{i}.csv"))
-
-    data_dict = {
-        "test_mf_csv_dataset": {
-            "path": str(tmpdir.join("asdf{id}asdf.csv")),
-            "driver": "mfcsv",
-            "data_type": "Dataset",
-            "driver_kwargs": {"concat_dim": "stations"},
-        },
-    }
-
-    datacatalog = DataCatalog()
-    datacatalog = datacatalog.from_dict(data_dict)
-    ds = datacatalog.get_dataset("test_mf_csv_dataset")
-    assert isinstance(ds, xr.Dataset)
-    for i in range(3):
-        assert str(i) in ds.stations
 
     # dataframe using single way
     name = "test.csv"

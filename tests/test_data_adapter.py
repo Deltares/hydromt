@@ -16,6 +16,7 @@ import xarray as xr
 import hydromt
 from hydromt import _compat as compat
 from hydromt.data_adapter import (
+    DatasetAdapter,
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
     RasterDatasetAdapter,
@@ -292,6 +293,30 @@ def test_geodataset_set_nodata(artifact_data: DataCatalog):
     datacatalog.from_dict(gtsm_dict)
     ds = datacatalog.get_geodataset("gtsmv3_eu_era5")
     assert ds.vector.nodata == -99
+
+
+def test_dataset_get_data(timeseries_df, tmpdir):
+    ds = timeseries_df.to_xarray()
+    path = str(tmpdir.join("test.nc"))
+    ds.to_netcdf(path)
+    dataset_adapter = DatasetAdapter(path=path, driver="netcdf")
+    ds1 = dataset_adapter.get_data()
+    assert isinstance(ds1, xr.Dataset)
+    assert ds1.identical(ds)
+
+
+def test_dataset_to_file(timeseries_df, tmpdir):
+    ds = timeseries_df.to_xarray()
+    path = str(tmpdir.join("test1.nc"))
+    ds.to_netcdf(path)
+    dataset_adapter = DatasetAdapter(path=path, driver="netcdf")
+    fn_out, driver = dataset_adapter.to_file(
+        data_root=tmpdir, data_name="test2.nc", driver="netcdf"
+    )
+    assert driver == "netcdf"
+    assert fn_out == str(tmpdir.join("test2.nc"))
+    ds2 = xr.open_dataset(fn_out)
+    assert ds2.identical(ds)
 
 
 def test_geodataframe(geodf, tmpdir):
