@@ -18,10 +18,10 @@ import xarray as xr
 from rasterio.errors import RasterioIOError
 
 from .. import gis_utils, io
-from ..exceptions import NoDataException
+from ..nodata import NoDataStrategy, _exec_strat
 from ..raster import GEO_MAP_COORD
 from .caching import cache_vrt_tiles
-from .data_adapter import PREPROCESSORS, DataAdapter, NoDataStrategy
+from .data_adapter import PREPROCESSORS, DataAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -263,7 +263,6 @@ class RasterDatasetAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
-        handle_missing=NoDataStrategy.RAISE,
         zoom_level=None,
         align=None,
         variables=None,
@@ -281,10 +280,6 @@ class RasterDatasetAdapter(DataAdapter):
         fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
         self.mark_as_used()  # mark used
         ds = self._read_data(fns, geom, bbox, cache_root, zoom_level, logger)
-        if len(ds.data_vars.keys()) == 0 and handle_missing == NoDataStrategy.RAISE:
-            raise NoDataException(f"No data found for {self.name}")
-        else:
-            logger.warning(f"No data found for {self.name}")
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_dims(ds)
@@ -293,7 +288,7 @@ class RasterDatasetAdapter(DataAdapter):
         ds = self._shift_time(ds, logger)
         # slice data
         ds = RasterDatasetAdapter._slice_data(
-            ds, variables, geom, bbox, buffer, align, time_tuple, logger
+            ds, variables, geom, bbox, buffer, align, time_tuple, logger=logger
         )
         # uniformize data
         ds = self._apply_unit_conversions(ds, logger)
@@ -417,6 +412,7 @@ class RasterDatasetAdapter(DataAdapter):
         buffer=0,
         align=None,
         time_tuple=None,
+        handle_nodata=NoDataStrategy.RAISE,
         logger=logger,
     ):
         """Return a RasterDataset sliced in both spatial and temporal dimensions.
@@ -439,6 +435,8 @@ class RasterDatasetAdapter(DataAdapter):
         time_tuple : Tuple of datetime, optional
             A tuple consisting of the lower and upper bounds of time that the
             result should contain
+        handle_nodata: NoDataStrategy, optional
+            How to handle no data values, by default NoDataStrategy.RAISE
 
         Returns
         -------
@@ -462,11 +460,18 @@ class RasterDatasetAdapter(DataAdapter):
             ds = RasterDatasetAdapter._slice_temporal_dimension(
                 ds,
                 time_tuple,
+                handle_nodata,
                 logger=logger,
             )
         if geom is not None or bbox is not None:
             ds = RasterDatasetAdapter._slice_spatial_dimensions(
-                ds, geom, bbox, buffer, align, logger=logger
+                ds,
+                geom,
+                bbox,
+                buffer,
+                align,
+                handle_nodata,
+                logger=logger,
             )
         return ds
 
@@ -485,7 +490,9 @@ class RasterDatasetAdapter(DataAdapter):
         return ds
 
     @staticmethod
-    def _slice_temporal_dimension(ds, time_tuple, logger=logger):
+    def _slice_temporal_dimension(
+        ds, time_tuple, handle_nodata=NoDataStrategy.RAISE, logger=logger
+    ):
         if (
             "time" in ds.dims
             and ds["time"].size > 1
@@ -495,11 +502,19 @@ class RasterDatasetAdapter(DataAdapter):
                 logger.debug(f"Slicing time dim {time_tuple}")
                 ds = ds.sel({"time": slice(*time_tuple)})
                 if ds.time.size == 0:
-                    raise IndexError("Time slice out of range.")
+                    _exec_strat("Time slice out of range.", handle_nodata, logger)
         return ds
 
     @staticmethod
-    def _slice_spatial_dimensions(ds, geom, bbox, buffer, align, logger=logger):
+    def _slice_spatial_dimensions(
+        ds,
+        geom,
+        bbox,
+        buffer,
+        align,
+        handle_nodata=NoDataStrategy.RAISE,
+        logger=logger,
+    ):
         # make sure bbox is in data crs
         crs = ds.raster.crs
         epsg = crs.to_epsg()  # this could return None
@@ -521,7 +536,11 @@ class RasterDatasetAdapter(DataAdapter):
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
             ds = ds.raster.clip_bbox(bbox, buffer=buffer, align=align)
             if np.any(np.array(ds.raster.shape) < 2):
-                raise IndexError("RasterDataset: No data within spatial domain.")
+                _exec_strat(
+                    "RasterDataset: No data within spatial domain",
+                    handle_nodata,
+                    logger,
+                )
 
         return ds
 

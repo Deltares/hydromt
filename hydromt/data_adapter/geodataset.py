@@ -13,9 +13,9 @@ import pyproj
 import xarray as xr
 
 from .. import gis_utils, io
-from ..exceptions import NoDataException
+from ..nodata import NoDataStrategy, _exec_strat
 from ..raster import GEO_MAP_COORD
-from .data_adapter import DataAdapter, NoDataStrategy
+from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -248,7 +248,6 @@ class GeoDatasetAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
-        handle_missing=NoDataStrategy.RAISE,
         predicate="intersects",
         variables=None,
         time_tuple=None,
@@ -263,10 +262,6 @@ class GeoDatasetAdapter(DataAdapter):
         # load data
         fns = self._resolve_paths(variables, time_tuple)
         ds = self._read_data(fns, logger=logger)
-        if len(ds.data_vars.keys()) and handle_missing == NoDataStrategy.RAISE:
-            raise NoDataException(f"No data available for {self.name}")
-        else:
-            logger.warning(f"No data available for {self.name}")
         self.mark_as_used()  # mark used
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
@@ -350,6 +345,7 @@ class GeoDatasetAdapter(DataAdapter):
         buffer=0,
         predicate="intersects",
         time_tuple=None,
+        handle_nodata=NoDataStrategy.RAISE,
         logger=logger,
     ):
         """Slice the dataset in space and time.
@@ -370,6 +366,8 @@ class GeoDatasetAdapter(DataAdapter):
         predicate : str, optional
             Predicate used to filter the GeoDataFrame, see
             :py:func:`hydromt.gis_utils.filter_gdf` for details.
+        handle_nodata : NoDataStrategy, optional
+            How to handle no data values. By default NoDataStrategy.RAISE.
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
@@ -394,23 +392,25 @@ class GeoDatasetAdapter(DataAdapter):
                 ds = ds[variables]
         if time_tuple is not None:
             ds = GeoDatasetAdapter._slice_temporal_dimension(
-                ds, time_tuple, logger=logger
+                ds, time_tuple, handle_nodata, logger=logger
             )
         if geom is not None or bbox is not None:
             ds = GeoDatasetAdapter._slice_spatial_dimension(
-                ds, geom, bbox, buffer, predicate, logger=logger
+                ds, geom, bbox, buffer, predicate, handle_nodata, logger=logger
             )
         return ds
 
     @staticmethod
-    def _slice_spatial_dimension(ds, geom, bbox, buffer, predicate, logger=logger):
+    def _slice_spatial_dimension(
+        ds, geom, bbox, buffer, predicate, handle_nodata, logger=logger
+    ):
         geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
         bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
         epsg = geom.crs.to_epsg()
         logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
         ds = ds.vector.clip_geom(geom, predicate=predicate)
         if ds.vector.index.size == 0:
-            raise IndexError("No data within spatial domain.")
+            _exec_strat("No data within spatial domain.", handle_nodata, logger)
         return ds
 
     def _shift_time(self, ds, logger=logger):
@@ -428,7 +428,9 @@ class GeoDatasetAdapter(DataAdapter):
         return ds
 
     @staticmethod
-    def _slice_temporal_dimension(ds, time_tuple, logger=logger):
+    def _slice_temporal_dimension(
+        ds, time_tuple, handle_nodata=NoDataStrategy.RAISE, logger=logger
+    ):
         if (
             "time" in ds.dims
             and ds["time"].size > 1
@@ -437,6 +439,7 @@ class GeoDatasetAdapter(DataAdapter):
             logger.debug(f"Slicing time dim {time_tuple}")
             ds = ds.sel(time=slice(*time_tuple))
             if ds.time.size == 0:
+                _exec_strat(handle_nodata, logger=logger)
                 raise IndexError("GeoDataset: Time slice out of range.")
         return ds
 

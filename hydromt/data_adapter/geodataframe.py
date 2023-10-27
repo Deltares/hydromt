@@ -9,8 +9,8 @@ import numpy as np
 import pyproj
 
 from .. import gis_utils, io
-from ..exceptions import NoDataException
-from .data_adapter import DataAdapter, NoDataStrategy
+from ..nodata import NoDataStrategy, _exec_strat
+from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -229,9 +229,9 @@ class GeoDataFrameAdapter(DataAdapter):
         bbox=None,
         geom=None,
         buffer=0,
-        handle_missing=NoDataStrategy.RAISE,
         predicate="intersects",
         logger=logger,
+        handle_nodata=NoDataStrategy.RAISE,
         variables=None,
     ):
         """Return a clipped and unified GeoDataFrame (vector).
@@ -242,10 +242,6 @@ class GeoDataFrameAdapter(DataAdapter):
         # load
         fns = self._resolve_paths(variables)
         gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
-        if gdf.is_empty and handle_missing == NoDataStrategy.RAISE:
-            raise NoDataException(f"No data available for {self.name}.")
-        else:
-            logger.warning(f"No data available for {self.name}.")
         self.mark_as_used()  # mark used
         # rename variables and parse crs & nodata
         gdf = self._rename_vars(gdf)
@@ -253,7 +249,7 @@ class GeoDataFrameAdapter(DataAdapter):
         gdf = self._set_nodata(gdf)
         # slice
         gdf = GeoDataFrameAdapter._slice_data(
-            gdf, variables, geom, bbox, buffer, predicate, logger=logger
+            gdf, variables, geom, bbox, buffer, predicate, handle_nodata, logger=logger
         )
         # uniformize
         gdf = self._apply_unit_conversions(gdf, logger=logger)
@@ -327,6 +323,7 @@ class GeoDataFrameAdapter(DataAdapter):
         bbox=None,
         buffer=0,
         predicate="intersects",
+        handle_nodata=NoDataStrategy.RAISE,
         logger=logger,
     ):
         """Return a clipped GeoDataFrame (vector).
@@ -342,6 +339,8 @@ class GeoDataFrameAdapter(DataAdapter):
             (in WGS84 coordinates).
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle no data values. By default NoDataStrategy.RAISE.
         predicate : str, optional
             Predicate used to filter the GeoDataFrame, see
             :py:func:`hydromt.gis_utils.filter_gdf` for details.
@@ -367,7 +366,9 @@ class GeoDataFrameAdapter(DataAdapter):
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
             idxs = gis_utils.filter_gdf(gdf, geom=geom, predicate=predicate)
             if idxs.size == 0:
-                raise IndexError("No data within spatial domain.")
+                _exec_strat(
+                    "No data within spatial domain.", handle_nodata, logger=logger
+                )
             gdf = gdf.iloc[idxs]
         return gdf
 
