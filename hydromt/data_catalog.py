@@ -35,6 +35,7 @@ from .data_adapter import (
     RasterDatasetAdapter,
 )
 from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
+from .exceptions import NoDataException
 from .nodata import NoDataStrategy
 
 logger = logging.getLogger(__name__)
@@ -1130,7 +1131,7 @@ class DataCatalog(object):
                                 time_tuple=time_tuple,
                                 logger=self.logger,
                             )
-                        except IndexError as e:
+                        except NoDataException as e:
                             self.logger.warning(f"{key} file contains no data: {e}")
                             continue
                         # update path & driver and remove kwargs
