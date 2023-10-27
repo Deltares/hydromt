@@ -1,4 +1,6 @@
 from os.path import abspath, dirname, join
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import geopandas as gpd
 import numpy as np
@@ -33,6 +35,12 @@ dask_config.set(scheduler="single-threaded")
 DATADIR = join(dirname(abspath(__file__)), "data")
 
 
+@pytest.fixture(scope="class")
+def tmp_dir() -> Path:
+    with TemporaryDirectory() as tempdirname:
+        yield Path(tempdirname)
+
+
 @pytest.fixture()
 def rioda():
     return raster.full_from_transform(
@@ -56,7 +64,7 @@ def rioda_large():
     return da
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def df():
     df = (
         pd.DataFrame(
@@ -119,7 +127,7 @@ def df_time():
     return df_time
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def geodf(df):
     gdf = gpd.GeoDataFrame(
         data=df.copy().drop(columns=["longitude", "latitude"]),
@@ -129,7 +137,7 @@ def geodf(df):
     return gdf
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def world():
     world = gpd.read_file(join(DATADIR, "naturalearth_lowres.geojson"))
     return world

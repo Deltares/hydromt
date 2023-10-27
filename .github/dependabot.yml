@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # there is no conda support for dependabot so this is the closest analog
+  # since the conda deps are also built from pyproject.toml it should work well enough
+  - package-ecosystem: "pip"
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"

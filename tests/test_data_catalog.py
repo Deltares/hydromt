@@ -203,7 +203,8 @@ def test_versioned_catalog_entries(tmpdir):
     source_aws2 = aws_and_legacy_catalog.get_source("esa_worldcover", provider="aws")
     assert source_aws2 == source_aws
     source_loc = aws_and_legacy_catalog.get_source(
-        "esa_worldcover", provider="legacy_esa_worldcover"  # provider is filename
+        "esa_worldcover",
+        provider="legacy_esa_worldcover",  # provider is filename
     )
     assert Path(source_loc.path).name == "esa-worldcover.vrt"
     # test round trip to and from dict
