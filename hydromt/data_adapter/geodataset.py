@@ -439,8 +439,9 @@ class GeoDatasetAdapter(DataAdapter):
             logger.debug(f"Slicing time dim {time_tuple}")
             ds = ds.sel(time=slice(*time_tuple))
             if ds.time.size == 0:
-                _exec_strat(handle_nodata, logger=logger)
-                raise IndexError("GeoDataset: Time slice out of range.")
+                _exec_strat(
+                    "GeoDataset: Time slice out of range.", handle_nodata, logger=logger
+                )
         return ds
 
     def _set_metadata(self, ds):
