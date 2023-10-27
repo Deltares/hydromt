@@ -16,6 +16,7 @@ Added
 
 Changed
 -------
+- `DataAdapter._slice_data` and `DataCatalog.get_<data type>` now have a `handle_nodata` argument.
 
 Fixed
 -----
