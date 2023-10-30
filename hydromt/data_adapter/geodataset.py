@@ -3,14 +3,18 @@ import logging
 import os
 import warnings
 from datetime import datetime
-from os.path import join
-from pathlib import Path
-from typing import NewType, Optional, Tuple, Union
+from os.path import basename, join
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
 import pyproj
 import xarray as xr
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
+
+from hydromt.typing import ErrorHandleMethod, GeoDatasetSource, TimeRange, TotalBounds
 
 from .. import gis_utils, io
 from ..nodata import NoDataStrategy, _exec_nodata_strat
@@ -20,8 +24,6 @@ from .data_adapter import DataAdapter
 logger = logging.getLogger(__name__)
 
 __all__ = ["GeoDatasetAdapter", "GeoDatasetSource"]
-
-GeoDatasetSource = NewType("GeoDatasetSource", Union[str, Path])
 
 
 class GeoDatasetAdapter(DataAdapter):
@@ -482,7 +484,7 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def get_bbox(self, detect=True):
+    def get_bbox(self, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -503,13 +505,14 @@ class GeoDatasetAdapter(DataAdapter):
             The ESPG code of the CRS of the coordinates returned in bbox
         """
         bbox = self.extent.get("bbox", None)
-        crs = self.crs
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
 
+        crs = self.crs
+
         return bbox, crs
 
-    def get_time_range(self, detect=True):
+    def get_time_range(self, detect=True) -> TimeRange:
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
@@ -538,7 +541,7 @@ class GeoDatasetAdapter(DataAdapter):
     def detect_bbox(
         self,
         ds=None,
-    ) -> Tuple[Tuple[float, float, float, float], int]:
+    ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -569,7 +572,7 @@ class GeoDatasetAdapter(DataAdapter):
         bounds = ds.vector.bounds
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
+    def detect_time_range(self, ds=None) -> TimeRange:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -594,3 +597,67 @@ class GeoDatasetAdapter(DataAdapter):
             ds[ds.vector.time_dim].min().values,
             ds[ds.vector.time_dim].max().values,
         )
+
+    def to_stac_catalog(
+        self,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+    ) -> Optional[StacCatalog]:
+        """
+        Convert a geodataset into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
+
+
+        Parameters
+        ----------
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip
+          the dataset on failure, and "coerce" (default) to set default
+          values on failure.
+
+        Returns
+        -------
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or
+          None if the dataset was skipped.
+        """
+        try:
+            bbox, crs = self.get_bbox(detect=True)
+            bbox = list(bbox)
+            start_dt, end_dt = self.get_time_range(detect=True)
+            start_dt = pd.to_datetime(start_dt)
+            end_dt = pd.to_datetime(end_dt)
+            props = {**self.meta, "crs": crs}
+        except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
+            if on_error == ErrorHandleMethod.SKIP:
+                logger.warning(
+                    "Skipping {name} during stac conversion because"
+                    "because detecting spacial extent failed."
+                )
+                return
+            elif on_error == ErrorHandleMethod.COERCE:
+                bbox = [0.0, 0.0, 0.0, 0.0]
+                props = self.meta
+                start_dt = datetime(1, 1, 1)
+                end_dt = datetime(1, 1, 1)
+            else:
+                raise e
+
+        stac_catalog = StacCatalog(
+            self.name,
+            description=self.name,
+        )
+        stac_item = StacItem(
+            self.name,
+            geometry=None,
+            bbox=bbox,
+            properties=props,
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        stac_asset = StacAsset(str(self.path))
+        base_name = basename(self.path)
+        stac_item.add_asset(base_name, stac_asset)
+
+        stac_catalog.add_item(stac_item)
+        return stac_catalog

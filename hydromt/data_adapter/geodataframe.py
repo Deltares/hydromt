@@ -1,12 +1,17 @@
 """The Geodataframe adapter implementation."""
 import logging
 import warnings
-from os.path import join
-from pathlib import Path
-from typing import NewType, Optional, Tuple, Union
+from datetime import datetime
+from os.path import basename, join
+from typing import Optional, Union
 
 import numpy as np
 import pyproj
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
+
+from hydromt.typing import ErrorHandleMethod, GeoDataframeSource, TotalBounds
 
 from .. import gis_utils, io
 from ..nodata import NoDataStrategy, _exec_nodata_strat
@@ -15,8 +20,6 @@ from .data_adapter import DataAdapter
 logger = logging.getLogger(__name__)
 
 __all__ = ["GeoDataFrameAdapter", "GeoDataframeSource"]
-
-GeoDataframeSource = NewType("GeoDataframeSource", Union[str, Path])
 
 
 class GeoDataFrameAdapter(DataAdapter):
@@ -411,7 +414,7 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def get_bbox(self, detect=True):
+    def get_bbox(self, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -441,7 +444,7 @@ class GeoDataFrameAdapter(DataAdapter):
     def detect_bbox(
         self,
         gdf=None,
-    ) -> Tuple[Tuple[float, float, float, float], int]:
+    ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched acodring to the settings in the
@@ -471,3 +474,62 @@ class GeoDataFrameAdapter(DataAdapter):
         crs = gdf.geometry.crs.to_epsg()
         bounds = gdf.geometry.total_bounds
         return bounds, crs
+
+    def to_stac_catalog(
+        self,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+    ) -> Optional[StacCatalog]:
+        """
+        Convert a geodataframe into a STAC Catalog representation.
+
+        Since geodataframes don't support temporal dimension the `datetime`
+        property will always be set to 0001-01-01. The collection will contain an
+        asset for each of the associated files.
+
+
+        Parameters
+        ----------
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip
+          the dataset on failure, and "coerce" (default) to set
+          default values on failure.
+
+        Returns
+        -------
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or
+          None if the dataset was skipped.
+        """
+        try:
+            bbox, crs = self.get_bbox(detect=True)
+            bbox = list(bbox)
+            props = {**self.meta, "crs": crs}
+        except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
+            if on_error == ErrorHandleMethod.SKIP:
+                logger.warning(
+                    "Skipping {name} during stac conversion because"
+                    "because detecting spacial extent failed."
+                )
+                return
+            elif on_error == ErrorHandleMethod.COERCE:
+                bbox = [0.0, 0.0, 0.0, 0.0]
+                props = self.meta
+            else:
+                raise e
+        else:
+            stac_catalog = StacCatalog(
+                self.name,
+                description=self.name,
+            )
+            stac_item = StacItem(
+                self.name,
+                geometry=None,
+                bbox=list(bbox),
+                properties=props,
+                datetime=datetime(1, 1, 1),
+            )
+            stac_asset = StacAsset(str(self.path))
+            base_name = basename(self.path)
+            stac_item.add_asset(base_name, stac_asset)
+
+            stac_catalog.add_item(stac_item)
+            return stac_catalog

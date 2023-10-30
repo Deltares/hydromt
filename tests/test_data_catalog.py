@@ -630,3 +630,26 @@ def test_detect_extent():
     detected_temporal_range = ds.get_time_range(detect=True)
     assert np.all(np.equal(detected_spatial_range, bbox))
     assert detected_temporal_range == expected_temporal_range
+
+
+def test_to_stac(tmpdir):
+    data_catalog = DataCatalog()  # read artifacts
+    _ = data_catalog.sources  # load artifact data as fallback
+
+    _ = data_catalog.get_rasterdataset("chirps_global")
+    _ = data_catalog.get_geodataframe("gadm_level1")
+    _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
+
+    sources = [
+        "chirps_global",
+        "gadm_level1",
+        "gtsmv3_eu_era5",
+    ]
+
+    stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
+
+    assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
+    # the two empty strings are for the root and self link which are destinct
+    assert sorted(list(map(lambda x: x.get_href(), stac_catalog.get_links()))) == [
+        join(tmpdir, p, "catalog.json") for p in ["", "", *sources]
+    ]

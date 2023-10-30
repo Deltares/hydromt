@@ -5,9 +5,8 @@ import logging
 import os
 import warnings
 from datetime import datetime
-from os import PathLike
-from os.path import join
-from typing import Dict, NewType, Optional, Tuple, Union, cast
+from os.path import basename, join
+from typing import Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -15,7 +14,17 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
 from rasterio.errors import RasterioIOError
+
+from hydromt.typing import (
+    ErrorHandleMethod,
+    RasterDatasetSource,
+    TimeRange,
+    TotalBounds,
+)
 
 from .. import gis_utils, io
 from ..nodata import NoDataStrategy, _exec_nodata_strat
@@ -26,8 +35,6 @@ from .data_adapter import PREPROCESSORS, DataAdapter
 logger = logging.getLogger(__name__)
 
 __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
-
-RasterDatasetSource = NewType("RasterDatasetSource", Union[str, PathLike])
 
 
 class RasterDatasetAdapter(DataAdapter):
@@ -618,7 +625,7 @@ class RasterDatasetAdapter(DataAdapter):
         zls_dict: Optional[Dict[int, float]] = None,
         dst_crs: pyproj.CRS = None,
         logger=logger,
-    ) -> int:
+    ) -> Optional[int]:
         """Return overview level of data corresponding to zoom level.
 
         Parameters
@@ -698,7 +705,7 @@ class RasterDatasetAdapter(DataAdapter):
         logger.debug(f"Parsed zoom_level {zl} ({dst_res:.2f})")
         return zl
 
-    def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
+    def get_bbox(self, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -725,7 +732,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bbox, crs
 
-    def get_time_range(self, detect=True):
+    def get_time_range(self, detect=True) -> TimeRange:
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
@@ -754,7 +761,7 @@ class RasterDatasetAdapter(DataAdapter):
     def detect_bbox(
         self,
         ds=None,
-    ) -> Tuple[Tuple[float, float, float, float], int]:
+    ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -785,7 +792,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
+    def detect_time_range(self, ds=None) -> TimeRange:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched accodring to the settings in the
@@ -810,3 +817,68 @@ class RasterDatasetAdapter(DataAdapter):
             ds[ds.raster.time_dim].min().values,
             ds[ds.raster.time_dim].max().values,
         )
+
+    def to_stac_catalog(
+        self,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+    ) -> Optional[StacCatalog]:
+        """
+        Convert a rasterdataset into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
+
+
+        Parameters
+        ----------
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip the
+          dataset on failure, and "coerce" (default) to set default values on failure.
+
+        Returns
+        -------
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
+          if the dataset was skipped.
+        """
+        try:
+            bbox, crs = self.get_bbox(detect=True)
+            bbox = list(bbox)
+            start_dt, end_dt = self.get_time_range(detect=True)
+            start_dt = pd.to_datetime(start_dt)
+            end_dt = pd.to_datetime(end_dt)
+            props = {**self.meta, "crs": crs}
+        except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
+            if on_error == ErrorHandleMethod.SKIP:
+                logger.warning(
+                    "Skipping {name} during stac conversion because"
+                    "because detecting spacial extent failed."
+                )
+                return
+            elif on_error == ErrorHandleMethod.COERCE:
+                bbox = [0.0, 0.0, 0.0, 0.0]
+                props = self.meta
+                start_dt = datetime(1, 1, 1)
+                end_dt = datetime(1, 1, 1)
+            else:
+                raise e
+
+        else:
+            # else makes type checkers a bit happier
+            stac_catalog = StacCatalog(
+                self.name,
+                description=self.name,
+            )
+            stac_item = StacItem(
+                self.name,
+                geometry=None,
+                bbox=list(bbox),
+                properties=props,
+                datetime=None,
+                start_datetime=start_dt,
+                end_datetime=end_dt,
+            )
+            stac_asset = StacAsset(str(self.path))
+            base_name = basename(self.path)
+            stac_item.add_asset(base_name, stac_asset)
+
+            stac_catalog.add_item(stac_item)
+            return stac_catalog

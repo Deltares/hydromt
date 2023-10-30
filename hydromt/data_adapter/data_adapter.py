@@ -16,7 +16,12 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import yaml
+
+# from pystac import Item as StacItem
+from pystac import Catalog as StacCatalog
 from upath import UPath
+
+from hydromt.typing import ErrorHandleMethod
 
 logger = logging.getLogger(__name__)
 
@@ -414,3 +419,10 @@ class DataAdapter(object, metaclass=ABCMeta):
             return da
         else:
             return ds
+
+    @abstractmethod
+    def to_stac_catalog(
+        self,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+    ) -> Optional[StacCatalog]:
+        """Create a stac item from the data adatper to be added to a stac catalog."""

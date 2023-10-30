@@ -13,7 +13,17 @@ import warnings
 from datetime import datetime
 from os.path import abspath, basename, isdir, isfile, join
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Tuple, TypedDict, Union, cast
+from typing import (
+    Dict,
+    Iterator,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    TypedDict,
+    Union,
+    cast,
+)
 
 import geopandas as gpd
 import numpy as np
@@ -23,6 +33,7 @@ import xarray as xr
 import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
+from pystac import Catalog as StacCatalog
 
 from hydromt.utils import partition_dictionaries
 
@@ -159,6 +170,45 @@ class DataCatalog(object):
     def get_source_names(self) -> List[str]:
         """Return a list of all available data source names."""
         return list(self._sources.keys())
+
+    def to_stac_catalog(
+        self,
+        root: Union[str, Path],
+        source_names: Optional[List] = None,
+        meta: Optional[Dict] = None,
+        catalog_name: str = "hydromt-stac-catalog",
+        description: str = "The stac catalog of hydromt",
+        used_only: bool = False,
+        errors: Literal["raise", "skip", "coerce"] = "coerce",
+    ):
+        """Write data catalog to STAC format.
+
+        Parameters
+        ----------
+        path: str, Path
+            stac output path.
+        root: str, Path, optional
+            Global root for all relative paths in yaml file.
+            If "auto" (default) the data source paths are relative to the yaml
+            output ``path``.
+        source_names: list, optional
+            List of source names to export, by default None in which case all sources
+            are exported. This argument is ignored if `used_only=True`.
+        used_only: bool, optional
+            If True, export only data entries kept in used_data list, by default False.
+        meta: dict, optional
+            key-value pairs to add to the data catalog meta section, such as 'version',
+            by default empty.
+        """
+        meta = meta or {}
+        stac_catalog = StacCatalog(id=catalog_name, description=description)
+        for _name, source in self.iter_sources(used_only):
+            stac_child_catalog = source.to_stac_catalog(errors)
+            if stac_child_catalog:
+                stac_catalog.add_child(stac_child_catalog)
+
+        stac_catalog.normalize_and_save(root)
+        return stac_catalog
 
     @property
     def predefined_catalogs(self) -> Dict:

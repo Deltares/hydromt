@@ -13,6 +13,8 @@ Unreleased
 
 Added
 -----
+- Support for exporting data catalogs to STAC catalog formats. (#617)
+
 
 Changed
 -------
