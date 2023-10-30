@@ -82,7 +82,7 @@ class DatasetAdapter(DataAdapter):
         if driver is None or driver == "netcdf":
             # always write netcdf
             driver = "netcdf"
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.vector.vars
+            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.data_vars
             if variables is None:
                 encoding = {k: {"zlib": True} for k in dvars}
                 fn_out = join(data_root, f"{data_name}.nc")
