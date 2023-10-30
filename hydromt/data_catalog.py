@@ -32,6 +32,7 @@ import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 from pystac import Catalog as StacCatalog
+from pystac import MediaType
 
 from hydromt.typing import ErrorHandleMethod, SourceSpecDict
 from hydromt.utils import partition_dictionaries
@@ -201,7 +202,7 @@ class DataCatalog(object):
 
     def from_stac_catalog(
         self,
-        root: Union[str, Path],
+        stac_like: Union[str, Path, StacCatalog, dict],
         on_error: ErrorHandleMethod = ErrorHandleMethod.SKIP,
     ):
         """Write data catalog to STAC format.
@@ -213,7 +214,41 @@ class DataCatalog(object):
         on_error: ErrorHandleMethod
             What to do on error when converting from STAC
         """
-        return None
+        if isinstance(stac_like, (str, Path)):
+            stac_catalog = StacCatalog.from_file(stac_like)
+        elif isinstance(stac_like, dict):
+            stac_catalog = StacCatalog.from_dict(stac_like)
+        elif isinstance(stac_like, StacCatalog):
+            stac_catalog = stac_like
+        else:
+            raise ValueError(
+                f"Unsupported type for stac_like: {type(stac_like).__name__}"
+            )
+
+        for item in stac_catalog.get_items(recursive=True):
+            source_name = item.id
+            for _asset_name, asset in item.get_assets().items():
+                match asset.media_type:
+                    case (
+                        MediaType.HDF
+                        | MediaType.HDF5
+                        | MediaType.COG
+                        | MediaType.TIFF
+                    ):
+                        adapter_kind = RasterDatasetAdapter
+                    case MediaType.GEOPACKAGE | MediaType.FLATGEOBUF:
+                        adapter_kind = GeoDataFrameAdapter
+                    case MediaType.GEOJSON:
+                        adapter_kind = GeoDatasetAdapter
+                    case MediaType.JSON:
+                        adapter_kind = DataFrameAdapter
+                    case _:
+                        continue
+
+                adapter = adapter_kind(str(asset.get_absolute_href()))
+                self.add_source(source_name, adapter)
+
+        return self
 
     @property
     def predefined_catalogs(self) -> Dict:

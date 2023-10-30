@@ -645,6 +645,9 @@ def test_to_stac(tmpdir):
         "gtsmv3_eu_era5",
     ]
 
+    # stac_catalog = data_catalog.to_stac_catalog(
+    #     str("./tests/data/stac"), used_only=True
+    # )
     stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
 
     assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
@@ -652,3 +655,13 @@ def test_to_stac(tmpdir):
     assert sorted(list(map(lambda x: x.get_href(), stac_catalog.get_links()))) == [
         join(tmpdir, p, "catalog.json") for p in ["", "", *sources]
     ]
+
+
+def test_from_stac(tmpdir):
+    catalog_from_stac = DataCatalog().from_stac_catalog(
+        "./tests/data/stac/catalog.json"
+    )
+
+    assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetAdapter
+    assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameAdapter
+    # assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == GeoDatasetAdapter

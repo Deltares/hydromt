@@ -2,7 +2,7 @@
 import logging
 import warnings
 from datetime import datetime
-from os.path import basename, join
+from os.path import basename, join, splitext
 from typing import Optional, Union
 
 import numpy as np
@@ -11,6 +11,7 @@ from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
+from pystac import MediaType
 
 from hydromt.typing import ErrorHandleMethod, GeoDataframeSource, TotalBounds
 
@@ -504,6 +505,14 @@ class GeoDataFrameAdapter(DataAdapter):
             bbox, crs = self.get_bbox(detect=True)
             bbox = list(bbox)
             props = {**self.meta, "crs": crs}
+            ext = splitext(self.path)[-1]
+            match ext:
+                case ".gpkg":
+                    media_type = MediaType.GEOPACKAGE
+                case _:
+                    raise RuntimeError(
+                        f"Unknown extention: {ext} cannot determine media type"
+                    )
         except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
@@ -514,6 +523,7 @@ class GeoDataFrameAdapter(DataAdapter):
             elif on_error == ErrorHandleMethod.COERCE:
                 bbox = [0.0, 0.0, 0.0, 0.0]
                 props = self.meta
+                media_type = MediaType.JSON
             else:
                 raise e
         else:
@@ -528,7 +538,7 @@ class GeoDataFrameAdapter(DataAdapter):
                 properties=props,
                 datetime=datetime(1, 1, 1),
             )
-            stac_asset = StacAsset(str(self.path))
+            stac_asset = StacAsset(str(self.path), media_type=media_type)
             base_name = basename(self.path)
             stac_item.add_asset(base_name, stac_asset)
 

@@ -1,0 +1,48 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "id": "chirps_global",
+  "properties": {
+    "category": "meteo",
+    "paper_doi": "10.3133/ds832",
+    "paper_ref": "Funk et al (2014)",
+    "source_license": "CC",
+    "source_url": "https://www.chc.ucsb.edu/data/chirps",
+    "source_version": "v2.0",
+    "crs": 4326,
+    "start_datetime": "2010-02-02T00:00:00Z",
+    "end_datetime": "2010-02-15T00:00:00Z",
+    "datetime": null
+  },
+  "geometry": null,
+  "links": [
+    {
+      "rel": "root",
+      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/chirps_global/catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/chirps_global/chirps_global/chirps_global.json",
+      "type": "application/json"
+    }
+  ],
+  "assets": {
+    "chirps_global.nc": {
+      "href": "/home/sam/.hydromt_data/artifact_data/v0.0.8/chirps_global.nc",
+      "type": "application/x-hdf5"
+    }
+  },
+  "bbox": [
+    11.599998474121094,
+    45.20000076293945,
+    13.000083923339844,
+    46.79985427856445
+  ],
+  "stac_extensions": []
+}
