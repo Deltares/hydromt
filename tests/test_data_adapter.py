@@ -306,12 +306,13 @@ def test_dataset_get_data(timeseries_df, tmpdir):
 
 
 def test_dataset_to_file(timeseries_df, tmpdir):
-    ds = timeseries_df.to_xarray()
+    ds = timeseries_df[["col1", "col2"]].to_xarray()
     path = str(tmpdir.join("test1.nc"))
-    ds.to_netcdf(path)
+    encoding = {k: {"zlib": True} for k in ds.vector.vars}
+    ds.to_netcdf(path, encoding=encoding)
     dataset_adapter = DatasetAdapter(path=path, driver="netcdf")
     fn_out, driver = dataset_adapter.to_file(
-        data_root=tmpdir, data_name="test2.nc", driver="netcdf"
+        data_root=tmpdir, data_name="test2", driver="netcdf"
     )
     assert driver == "netcdf"
     assert fn_out == str(tmpdir.join("test2.nc"))
