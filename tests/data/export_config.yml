@@ -1,13 +1,13 @@
 meta:
-   version: hmt_version
+   version: 0.9.0
 args:
    catalog:
-      - /path/
+      - tests/data/test_sources.yml
    region:
-      subbasin: asdf
+      subbasin: [-7.24, 62.09] 
+      uparea: 50
 
 sources:
-  - source: era5
+  - source: hydro_lakes
     variables: [precip]
-    provider: asdf
-    version: asdf
+  - source: gtsmv3_eu_era5

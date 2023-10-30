@@ -5,6 +5,7 @@ import logging
 from os.path import join
 
 import click
+from hydromt.data_catalog import DataCatalog
 import numpy as np
 
 from .. import __version__, log
@@ -378,8 +379,14 @@ def export(
     )
     logger.info(f"Output dir: {export_dest_path}")
 
+    data_libs = list(data)  # add data catalogs from cli
+    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+        data_libs = ["deltares_data"] + data_libs  # prepend!
+
     try:
-        pass
+        data_catalog = DataCatalog(data_libs=data_libs)
+        data_catalog.export_data(export_dest_path, )
+
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
