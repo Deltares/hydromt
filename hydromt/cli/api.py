@@ -3,7 +3,7 @@
 import inspect
 import logging
 import typing
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from hydromt.gis_utils import utm_crs
 
@@ -127,7 +127,7 @@ def get_predifined_catalogs() -> Dict:
 
 def get_region(
     region: dict,
-    data_libs: Union[List, str] = None,
+    data_libs: Optional[Union[List, str]] = None,
     hydrography_fn: str = "merit_hydro",
     basin_index_fn: str = "merit_hydro_index",
 ) -> str:

@@ -1,0 +1,13 @@
+meta:
+   version: hmt_version
+args:
+   catalog:
+      - /path/
+   region:
+      subbasin: asdf
+
+sources:
+  - source: era5
+    variables: [precip]
+    provider: asdf
+    version: asdf

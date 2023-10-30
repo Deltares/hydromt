@@ -49,6 +49,10 @@ opt_config = click.option(
     type=click.Path(resolve_path=True),
     help="Path to hydroMT configuration file, for the model specific implementation.",
 )
+export_dest_path = click.argument(
+    "export_dest_path",
+    type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
+)
 arg_root = click.argument(
     "MODEL_ROOT",
     type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
@@ -110,6 +114,14 @@ cache_opt = click.option(
     help="Flag: If provided cache tiled rasterdatasets",
 )
 
+export_config_opt = click.option(
+    "-f",
+    "--export-config-file",
+    callback=cli_utils.parse_export_config_yaml,
+    help="read options from a config file for exporting. options from CLI will "
+    "override these options",
+)
+
 ## MAIN
 
 
@@ -131,8 +143,6 @@ def main(ctx, models):  # , quiet, verbose):
 
 
 ## BUILD
-
-
 @main.command(short_help="Build models")
 @click.argument(
     "MODEL",
@@ -309,6 +319,67 @@ def update(
             opt = {c: opt.get(c, {}) for c in components}
             opt.update({"setup_config": opt0})
         mod.update(model_out=model_out, opt=opt, forceful_overwrite=fo)
+    except Exception as e:
+        logger.exception(e)  # catch and log errors
+        raise
+    finally:
+        for handler in logger.handlers[:]:
+            handler.close()
+            logger.removeHandler(handler)
+
+
+## Export
+@main.command(
+    short_help="Export data",
+)
+@click.option(
+    "-t",
+    "--target",
+)
+@region_opt
+@export_dest_path
+@export_config_opt
+@data_opt
+@deltares_data_opt
+@overwrite_opt
+@quiet_opt
+@verbose_opt
+@click.pass_context
+def export(
+    ctx,
+    export_dest_path,
+    target,
+    export_config_file,
+    region,
+    data,
+    dd,
+    fo,
+    quiet,
+    verbose,
+):
+    """Export the data from a catalog.
+
+    Example usage:
+    --------------
+
+    Extract the data of in a single source, in a pertcular region
+    hydromt extract /path/to/output_dir -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" river_atlas_v10 -d /path/to/catalog.yml
+
+    Extract all data of in a single source and compress it to a zip file
+    hydromt extract /path/to/output_dir river_atlas_v10 -d /path/to/catalog.yml --compression=zip
+
+    Extract data as detailed in an export config yaml file
+    hydromt extract -f /path/to/export_config.yaml
+    """  # noqa: E501
+    # logger
+    log_level = max(10, 30 - 10 * (verbose - quiet))
+    logger = log.setuplog(
+        "export", join(export_dest_path, "hydromt.log"), log_level=log_level
+    )
+    logger.info(f"Output dir: {export_dest_path}")
+
+    try:
+        pass
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise

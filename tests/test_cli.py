@@ -94,6 +94,41 @@ def test_cli(tmpdir):
         raise r.exception
 
 
+def test_export_cli(tmpdir):
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-t",
+            "river_atlas_v10",
+            "-r",
+            "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
+            "-dd",
+        ],
+    )
+
+    assert r.exit_code == 0, r.output
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-t",
+            "river_atlas_v10",
+            "-d",
+            "path/to/catalog.yml",
+        ],
+    )
+    assert r.exit_code == 0, r.output
+
+    r = CliRunner().invoke(
+        hydromt_cli,
+        ["export", ".", "-f", "tests/data/export_config.yml"],
+    )
+    assert r.exit_code == 0, r.output
+
+
 def test_api_datasets():
     # datasets
     assert "artifact_data" in hydromt_api.get_predifined_catalogs()
