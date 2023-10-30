@@ -25,6 +25,7 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
+from hydromt.exceptions import NoDataException
 from hydromt.gis_utils import to_geographic_bbox
 from hydromt.typing import ErrorHandleMethod
 
@@ -76,7 +77,7 @@ def test_rasterdataset(rioda, tmpdir):
     assert np.all(da1 == rioda_utm)
     with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_rasterdataset("no_file.tif")
-    with pytest.raises(IndexError, match="RasterDataset: No data within"):
+    with pytest.raises(NoDataException, match="RasterDataset: No data within"):
         data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
 
 
