@@ -12,7 +12,7 @@ class NoDataStrategy(Enum):
     IGNORE = "ignore"
 
 
-def _exec_strat(msg: str, strategy: NoDataStrategy, logger: Logger) -> None:
+def _exec_nodata_strat(msg: str, strategy: NoDataStrategy, logger: Logger) -> None:
     """Execute nodata strategy."""
     if strategy == NoDataStrategy.RAISE:
         raise NoDataException(msg)

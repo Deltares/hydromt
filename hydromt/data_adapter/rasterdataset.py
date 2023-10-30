@@ -18,7 +18,7 @@ import xarray as xr
 from rasterio.errors import RasterioIOError
 
 from .. import gis_utils, io
-from ..nodata import NoDataStrategy, _exec_strat
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from ..raster import GEO_MAP_COORD
 from .caching import cache_vrt_tiles
 from .data_adapter import PREPROCESSORS, DataAdapter
@@ -503,7 +503,9 @@ class RasterDatasetAdapter(DataAdapter):
                 logger.debug(f"Slicing time dim {time_tuple}")
                 ds = ds.sel({"time": slice(*time_tuple)})
                 if ds.time.size == 0:
-                    _exec_strat("Time slice out of range.", handle_nodata, logger)
+                    _exec_nodata_strat(
+                        "Time slice out of range.", handle_nodata, logger
+                    )
         return ds
 
     @staticmethod
@@ -537,7 +539,7 @@ class RasterDatasetAdapter(DataAdapter):
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
             ds = ds.raster.clip_bbox(bbox, buffer=buffer, align=align)
             if np.any(np.array(ds.raster.shape) < 2):
-                _exec_strat(
+                _exec_nodata_strat(
                     "RasterDataset: No data within spatial domain",
                     handle_nodata,
                     logger,

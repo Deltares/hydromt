@@ -13,7 +13,7 @@ import pyproj
 import xarray as xr
 
 from .. import gis_utils, io
-from ..nodata import NoDataStrategy, _exec_strat
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from ..raster import GEO_MAP_COORD
 from .data_adapter import DataAdapter
 
@@ -407,7 +407,7 @@ class GeoDatasetAdapter(DataAdapter):
         logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
         ds = ds.vector.clip_geom(geom, predicate=predicate)
         if ds.vector.index.size == 0:
-            _exec_strat("No data within spatial domain.", handle_nodata, logger)
+            _exec_nodata_strat("No data within spatial domain.", handle_nodata, logger)
         return ds
 
     def _shift_time(self, ds, logger=logger):
@@ -436,7 +436,7 @@ class GeoDatasetAdapter(DataAdapter):
             logger.debug(f"Slicing time dim {time_tuple}")
             ds = ds.sel(time=slice(*time_tuple))
             if ds.time.size == 0:
-                _exec_strat(
+                _exec_nodata_strat(
                     "GeoDataset: Time slice out of range.", handle_nodata, logger=logger
                 )
         return ds

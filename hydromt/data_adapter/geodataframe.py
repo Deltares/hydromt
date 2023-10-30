@@ -9,7 +9,7 @@ import numpy as np
 import pyproj
 
 from .. import gis_utils, io
-from ..nodata import NoDataStrategy, _exec_strat
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
@@ -367,7 +367,7 @@ class GeoDataFrameAdapter(DataAdapter):
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
             idxs = gis_utils.filter_gdf(gdf, geom=geom, predicate=predicate)
             if idxs.size == 0:
-                _exec_strat(
+                _exec_nodata_strat(
                     "No data within spatial domain.", handle_nodata, logger=logger
                 )
             gdf = gdf.iloc[idxs]

@@ -7,7 +7,7 @@ from typing import Optional, Union
 import numpy as np
 import pandas as pd
 
-from ..nodata import NoDataStrategy, _exec_strat
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
@@ -297,7 +297,7 @@ class DataFrameAdapter(DataAdapter):
             logger.debug(f"Slicing time dime {time_tuple}")
             df = df[df.index.slice_indexer(*time_tuple)]
             if df.size == 0:
-                _exec_strat(
+                _exec_nodata_strat(
                     "DataFrame: Time slice out of range.", handle_nodata, logger=logger
                 )
 
