@@ -645,9 +645,6 @@ def test_to_stac(tmpdir):
         "gtsmv3_eu_era5",
     ]
 
-    # stac_catalog = data_catalog.to_stac_catalog(
-    #     str("./tests/data/stac"), used_only=True
-    # )
     stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
 
     assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources

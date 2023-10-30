@@ -32,7 +32,7 @@ import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 from pystac import Catalog as StacCatalog
-from pystac import MediaType
+from pystac import CatalogType, MediaType
 
 from hydromt.typing import ErrorHandleMethod, SourceSpecDict
 from hydromt.utils import partition_dictionaries
@@ -169,6 +169,7 @@ class DataCatalog(object):
         catalog_name: str = "hydromt-stac-catalog",
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
+        catalog_type: CatalogType = CatalogType.RELATIVE_PUBLISHED,
         on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ):
         """Write data catalog to STAC format.
@@ -197,7 +198,7 @@ class DataCatalog(object):
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
-        stac_catalog.normalize_and_save(root)
+        stac_catalog.normalize_and_save(root, catalog_type=catalog_type)
         return stac_catalog
 
     def from_stac_catalog(

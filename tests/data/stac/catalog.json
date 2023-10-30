@@ -6,22 +6,22 @@
   "links": [
     {
       "rel": "root",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/catalog.json",
+      "href": "./catalog.json",
       "type": "application/json"
     },
     {
       "rel": "child",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/chirps_global/catalog.json",
+      "href": "./chirps_global/catalog.json",
       "type": "application/json"
     },
     {
       "rel": "child",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/gadm_level1/catalog.json",
+      "href": "./gadm_level1/catalog.json",
       "type": "application/json"
     },
     {
       "rel": "child",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/gtsmv3_eu_era5/catalog.json",
+      "href": "./gtsmv3_eu_era5/catalog.json",
       "type": "application/json"
     },
     {

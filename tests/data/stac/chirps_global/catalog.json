@@ -6,22 +6,17 @@
   "links": [
     {
       "rel": "root",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/catalog.json",
+      "href": "../catalog.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/chirps_global/chirps_global/chirps_global.json",
+      "href": "./chirps_global/chirps_global.json",
       "type": "application/json"
     },
     {
       "rel": "parent",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/catalog.json",
-      "type": "application/json"
-    },
-    {
-      "rel": "self",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/chirps_global/catalog.json",
+      "href": "../catalog.json",
       "type": "application/json"
     }
   ]

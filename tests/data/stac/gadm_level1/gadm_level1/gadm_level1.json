@@ -16,17 +16,12 @@
   "links": [
     {
       "rel": "root",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/catalog.json",
+      "href": "../../catalog.json",
       "type": "application/json"
     },
     {
       "rel": "parent",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/gadm_level1/catalog.json",
-      "type": "application/json"
-    },
-    {
-      "rel": "self",
-      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/gadm_level1/gadm_level1/gadm_level1.json",
+      "href": "../catalog.json",
       "type": "application/json"
     }
   ],
