@@ -650,7 +650,7 @@ def test_to_stac(tmpdir):
     assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
     # the two empty strings are for the root and self link which are destinct
     assert sorted(list(map(lambda x: x.get_href(), stac_catalog.get_links()))) == [
-        join(p, "catalog.json") for p in ["", "", *sources]
+        join(".", p, "catalog.json") for p in ["", *sources, str(tmpdir)]
     ]
 
 
