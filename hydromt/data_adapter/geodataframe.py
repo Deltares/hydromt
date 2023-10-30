@@ -7,6 +7,7 @@ from typing import Optional, Union
 
 import numpy as np
 import pyproj
+from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
@@ -503,7 +504,7 @@ class GeoDataFrameAdapter(DataAdapter):
             bbox, crs = self.get_bbox(detect=True)
             bbox = list(bbox)
             props = {**self.meta, "crs": crs}
-        except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
+        except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
                     "Skipping {name} during stac conversion because"

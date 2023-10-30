@@ -14,6 +14,7 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
+from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
@@ -846,7 +847,7 @@ class RasterDatasetAdapter(DataAdapter):
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
-        except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
+        except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
                     "Skipping {name} during stac conversion because"

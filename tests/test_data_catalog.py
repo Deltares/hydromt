@@ -245,7 +245,6 @@ def test_data_catalog(tmpdir):
     # test keys, getitem,
     keys = [key for key, _ in data_catalog.iter_sources()]
     source = data_catalog.get_source(keys[0])
-    assert keys[0] in data_catalog
     assert data_catalog.contains_source(keys[0])
     assert data_catalog.contains_source(
         keys[0], version="asdfasdfasdf", permissive=True
@@ -323,7 +322,7 @@ def test_from_yml_with_archive(tmpdir):
     # as part of the getting the archive a a local
     # catalog file is written to the same folder
     # check if this file exists and we can read it
-    root = dirname(data_catalog[sources[0]].path)
+    root = dirname(data_catalog.get_source(sources[0]).path)
     yml_dst_fn = join(root, "artifact_data.yml")
     assert isfile(yml_dst_fn)
     data_catalog1 = DataCatalog(yml_dst_fn)

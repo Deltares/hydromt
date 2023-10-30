@@ -17,10 +17,8 @@ from typing import (
     Dict,
     Iterator,
     List,
-    Literal,
     Optional,
     Tuple,
-    TypedDict,
     Union,
     cast,
 )
@@ -35,6 +33,7 @@ from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 from pystac import Catalog as StacCatalog
 
+from hydromt.typing import ErrorHandleMethod, SourceSpecDict
 from hydromt.utils import partition_dictionaries
 
 from . import __version__
@@ -56,16 +55,6 @@ __all__ = [
 ]
 
 # just for typehints
-SourceSpecDict = TypedDict(
-    "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
-)
-Extent = TypedDict(
-    "Extent",
-    {
-        "bbox": Tuple[float, float, float, float],
-        "time_range": Tuple[datetime, datetime],
-    },
-)
 
 
 class DataCatalog(object):
@@ -179,7 +168,7 @@ class DataCatalog(object):
         catalog_name: str = "hydromt-stac-catalog",
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
-        errors: Literal["raise", "skip", "coerce"] = "coerce",
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ):
         """Write data catalog to STAC format.
 
@@ -203,12 +192,28 @@ class DataCatalog(object):
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
         for _name, source in self.iter_sources(used_only):
-            stac_child_catalog = source.to_stac_catalog(errors)
+            stac_child_catalog = source.to_stac_catalog(on_error)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
         stac_catalog.normalize_and_save(root)
         return stac_catalog
+
+    def from_stac_catalog(
+        self,
+        root: Union[str, Path],
+        on_error: ErrorHandleMethod = ErrorHandleMethod.SKIP,
+    ):
+        """Write data catalog to STAC format.
+
+        Parameters
+        ----------
+        path: str, Path
+            stac path.
+        on_error: ErrorHandleMethod
+            What to do on error when converting from STAC
+        """
+        return None
 
     @property
     def predefined_catalogs(self) -> Dict:

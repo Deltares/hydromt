@@ -104,8 +104,8 @@ class VectorMixin:
             # data has a geometry - check if it is the same as self.vector
             if data.vector.geometry is not None:
                 if not np.all(
-                    data.vector.geometry.geom_almost_equals(
-                        self.vector_geometry, decimal=4
+                    data.vector.geometry.geom_equals_exact(
+                        self.vector_geometry, tolerance=0.0001
                     )
                 ):
                     raise ValueError("Geometry of data and vector do not match")
