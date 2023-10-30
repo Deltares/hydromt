@@ -319,6 +319,51 @@ def test_dataset_to_file(timeseries_df, tmpdir):
     ds2 = xr.open_dataset(fn_out)
     assert ds2.identical(ds)
 
+    variables = ["col1", "col2"]
+    fn_out, driver = dataset_adapter.to_file(
+        data_root=tmpdir, data_name="test3", driver="netcdf", variables=variables
+    )
+    for variable in variables:
+        ds3 = xr.open_dataset(fn_out.format(variable=variable))
+        assert variable in ds3.vector.vars
+
+    fn_out, driver = dataset_adapter.to_file(
+        data_root=tmpdir, data_name="test4", driver="zarr"
+    )
+
+    ds_zarr = xr.open_zarr(fn_out)
+    assert ds_zarr.identical(ds)
+
+    with pytest.raises(ValueError, match="Dataset: Driver fake-driver unknown."):
+        dataset_adapter.to_file(
+            data_root=tmpdir, data_name="test4", driver="fake-driver"
+        )
+
+
+def test_dataset__read_data(tmpdir, timeseries_df):
+    ds = timeseries_df[["col1", "col2"]].to_xarray()
+    zarr_path = str(tmpdir.join("zarr_data"))
+
+    ds.to_zarr(zarr_path)
+    dataset_adapter = DatasetAdapter(path=zarr_path, driver="zarr")
+    dataset_adapter.get_data(variables=["col1", "col2"])
+
+    dataset_adapter = DatasetAdapter(path=zarr_path, driver="fake-driver")
+    with pytest.raises(ValueError, match=r"Dataset: Driver fake-driver unknown"):
+        dataset_adapter.get_data(variables=["col1", "col2"])
+
+
+def test_dataset__set_nodata(tmpdir, timeseries_df):
+    ds = timeseries_df[["col1", "col2"]].to_xarray()
+    path = str(tmpdir.join("test.nc"))
+    ds.to_netcdf(path)
+
+    dataset_adapter = DatasetAdapter(
+        path=path, driver="netcdf", nodata=dict(nodata=-99)
+    )
+    ds = dataset_adapter.get_data()
+    raise NotImplementedError
+
 
 def test_geodataframe(geodf, tmpdir):
     fn_gdf = str(tmpdir.join("test.geojson"))
