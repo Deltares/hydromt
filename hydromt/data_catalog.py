@@ -35,6 +35,8 @@ from .data_adapter import (
     RasterDatasetAdapter,
 )
 from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
+from .exceptions import NoDataException
+from .nodata import NoDataStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -1129,7 +1131,7 @@ class DataCatalog(object):
                                 time_tuple=time_tuple,
                                 logger=self.logger,
                             )
-                        except IndexError as e:
+                        except NoDataException as e:
                             self.logger.warning(f"{key} file contains no data: {e}")
                             continue
                         # update path & driver and remove kwargs
@@ -1176,6 +1178,7 @@ class DataCatalog(object):
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom_level: Optional[int | tuple] = None,
         buffer: Union[float, int] = 0,
+        handle_nodata=NoDataStrategy.RAISE,
         align: Optional[bool] = None,
         variables: Optional[Union[List, str]] = None,
         time_tuple: Optional[Tuple] = None,
@@ -1263,6 +1266,7 @@ class DataCatalog(object):
                 buffer,
                 align,
                 time_tuple,
+                handle_nodata,
                 logger=self.logger,
             )
             return RasterDatasetAdapter._single_var_as_array(
@@ -1291,6 +1295,7 @@ class DataCatalog(object):
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
+        handle_nodata=NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
         predicate: str = "intersects",
         provider: Optional[str] = None,
@@ -1319,6 +1324,8 @@ class DataCatalog(object):
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+        handle_nodata : NoDataStrategy, optional
+            How to handle no data values, by default NoDataStrategy.RAISE
         predicate : optional
             If predicate is provided, the GeoDataFrame is filtered by testing
             the predicate function against each item. Requires bbox or mask.
@@ -1358,7 +1365,14 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             return GeoDataFrameAdapter._slice_data(
-                data_like, variables, geom, bbox, buffer, predicate, logger=self.logger
+                data_like,
+                variables,
+                geom,
+                bbox,
+                buffer,
+                predicate,
+                handle_nodata,
+                logger=self.logger,
             )
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
@@ -1379,6 +1393,7 @@ class DataCatalog(object):
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         predicate: str = "intersects",
         variables: Optional[List] = None,
         time_tuple: Optional[Tuple] = None,
@@ -1459,6 +1474,7 @@ class DataCatalog(object):
                 buffer,
                 predicate,
                 time_tuple,
+                handle_nodata,
                 logger=self.logger,
             )
             return GeoDatasetAdapter._single_var_as_array(
@@ -1483,6 +1499,7 @@ class DataCatalog(object):
         data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
         variables: Optional[list] = None,
         time_tuple: Optional[Tuple] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
@@ -1528,7 +1545,7 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
             return DataFrameAdapter._slice_data(
-                data_like, variables, time_tuple, logger=self.logger
+                data_like, variables, time_tuple, handle_nodata, logger=self.logger
             )
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')

@@ -7,6 +7,7 @@ from typing import Optional, Union
 import numpy as np
 import pandas as pd
 
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
@@ -260,7 +261,13 @@ class DataFrameAdapter(DataAdapter):
         return df
 
     @staticmethod
-    def _slice_data(df, variables=None, time_tuple=None, logger=logger):
+    def _slice_data(
+        df,
+        variables=None,
+        time_tuple=None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger=logger,
+    ):
         """Return a sliced DataFrame.
 
         Parameters
@@ -272,6 +279,8 @@ class DataFrameAdapter(DataAdapter):
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle no data values. Default is NoDataStrategy.RAISE.
 
         Returns
         -------
@@ -288,7 +297,9 @@ class DataFrameAdapter(DataAdapter):
             logger.debug(f"Slicing time dime {time_tuple}")
             df = df[df.index.slice_indexer(*time_tuple)]
             if df.size == 0:
-                raise IndexError("DataFrame: Time slice out of range.")
+                _exec_nodata_strat(
+                    "DataFrame: Time slice out of range.", handle_nodata, logger=logger
+                )
 
         return df
 
