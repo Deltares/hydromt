@@ -11,6 +11,8 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
+from hydromt.typing import ErrorHandleMethod
+
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
@@ -338,13 +340,13 @@ class DataFrameAdapter(DataAdapter):
         - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
           if the dataset was skipped.
         """
-        if on_error == "skip":
+        if on_error == ErrorHandleMethod.SKIP:
             logger.warning(
                 f"Skipping {self.name} during stac conversion because"
                 "because detecting temporal extent failed."
             )
             return
-        elif on_error == "coerce":
+        elif on_error == ErrorHandleMethod.COERCE:
             stac_catalog = StacCatalog(
                 self.name,
                 description=self.name,

@@ -6,7 +6,7 @@ import os
 import warnings
 from datetime import datetime
 from os.path import basename, join
-from typing import Dict, Literal, Optional, Tuple, Union, cast
+from typing import Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -20,6 +20,7 @@ from pystac import Item as StacItem
 from rasterio.errors import RasterioIOError
 
 from hydromt.typing import (
+    ErrorHandleMethod,
     RasterDatasetSource,
     TimeRange,
     TotalBounds,
@@ -792,7 +793,7 @@ class RasterDatasetAdapter(DataAdapter):
 
     def to_stac_catalog(
         self,
-        on_error: Literal["raise", "skip", "coerce"] = "coerce",
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> Optional[StacCatalog]:
         """
         Convert a rasterdataset into a STAC Catalog representation.
@@ -811,12 +812,6 @@ class RasterDatasetAdapter(DataAdapter):
         - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
           if the dataset was skipped.
         """
-        if on_error not in ["raise", "skip", "coerce"]:
-            raise RuntimeError(
-                f"Invalid error value: {on_error} options are:"
-                " ['raise', 'skip', 'coerce']"
-            )
-
         try:
             bbox, crs = self.get_bbox(detect=True)
             bbox = list(bbox)
@@ -825,13 +820,13 @@ class RasterDatasetAdapter(DataAdapter):
             end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
         except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
-            if on_error == "skip":
+            if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
                     "Skipping {name} during stac conversion because"
                     "because detecting spacial extent failed."
                 )
                 return
-            elif on_error == "coerce":
+            elif on_error == ErrorHandleMethod.COERCE:
                 bbox = [0.0, 0.0, 0.0, 0.0]
                 props = self.meta
                 start_dt = datetime(1, 1, 1)

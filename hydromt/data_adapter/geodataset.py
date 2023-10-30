@@ -4,7 +4,7 @@ import os
 import warnings
 from datetime import datetime
 from os.path import basename, join
-from typing import Literal, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -14,11 +14,7 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt.typing import (
-    GeoDatasetSource,
-    TimeRange,
-    TotalBounds,
-)
+from hydromt.typing import ErrorHandleMethod, GeoDatasetSource, TimeRange, TotalBounds
 
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
@@ -594,7 +590,7 @@ class GeoDatasetAdapter(DataAdapter):
 
     def to_stac_catalog(
         self,
-        on_error: Literal["raise", "skip", "coerce"] = "coerce",
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> Optional[StacCatalog]:
         """
         Convert a geodataset into a STAC Catalog representation.
@@ -614,12 +610,6 @@ class GeoDatasetAdapter(DataAdapter):
         - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or
           None if the dataset was skipped.
         """
-        if on_error not in ["raise", "skip", "coerce"]:
-            raise RuntimeError(
-                f"Invalid error value: {on_error} options are:"
-                " ['raise', 'skip', 'coerce']"
-            )
-
         try:
             bbox, crs = self.get_bbox(detect=True)
             bbox = list(bbox)
@@ -628,13 +618,13 @@ class GeoDatasetAdapter(DataAdapter):
             end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
         except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
-            if on_error == "skip":
+            if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
                     "Skipping {name} during stac conversion because"
                     "because detecting spacial extent failed."
                 )
                 return
-            elif on_error == "coerce":
+            elif on_error == ErrorHandleMethod.COERCE:
                 bbox = [0.0, 0.0, 0.0, 0.0]
                 props = self.meta
                 start_dt = datetime(1, 1, 1)

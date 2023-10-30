@@ -26,6 +26,7 @@ from hydromt.data_adapter import (
 )
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis_utils import to_geographic_bbox
+from hydromt.typing import ErrorHandleMethod
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -499,10 +500,12 @@ def test_to_stac_geodataframe(geodf, tmpdir):
     gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
     gdf_stac_catalog.add_item(gds_stac_item)
-    outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="coerce"))
+    outcome = cast(
+        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+    )
     assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
     adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
-    assert adapter.to_stac_catalog("skip") is None
+    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
 
 def test_to_stac_raster():
@@ -532,11 +535,13 @@ def test_to_stac_raster():
 
     raster_stac_catalog.add_item(raster_stac_item)
 
-    outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="raise"))
+    outcome = cast(
+        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+    )
 
     assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
     adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
-    assert adapter.to_stac_catalog("skip") is None
+    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
 
 def test_to_stac_geodataset(geoda, tmpdir):
@@ -566,10 +571,12 @@ def test_to_stac_geodataset(geoda, tmpdir):
 
     gds_stac_catalog.add_item(gds_stac_item)
 
-    outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="coerce"))
+    outcome = cast(
+        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+    )
     assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
     adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
-    assert adapter.to_stac_catalog("skip") is None
+    assert adapter.to_stac_catalog(ErrorHandleMethod.SKIP) is None
 
 
 def test_to_stac_dataframe(df, tmpdir):
@@ -591,9 +598,9 @@ def test_to_stac_dataframe(df, tmpdir):
         NotImplementedError,
         match="DataframeAdapter does not support full stac conversion ",
     ):
-        adapter.to_stac_catalog("raise")
+        adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
 
-    assert adapter.to_stac_catalog("skip") is None
+    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
     stac_catalog = StacCatalog(
         name,
@@ -610,5 +617,7 @@ def test_to_stac_dataframe(df, tmpdir):
     stac_item.add_asset("hydromt_path", stac_asset)
 
     stac_catalog.add_item(stac_item)
-    outcome = cast(StacCatalog, adapter.to_stac_catalog(on_error="coerce"))
+    outcome = cast(
+        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.COERCE)
+    )
     assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
