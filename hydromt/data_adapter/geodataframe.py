@@ -3,8 +3,7 @@ import logging
 import warnings
 from datetime import datetime
 from os.path import basename, join
-from pathlib import Path
-from typing import Literal, NewType, Optional, Tuple, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 import pyproj
@@ -12,14 +11,17 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
+from hydromt.typing import (
+    GeoDataframeSource,
+    TotalBounds,
+)
+
 from .. import gis_utils, io
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["GeoDataFrameAdapter", "GeoDataframeSource"]
-
-GeoDataframeSource = NewType("GeoDataframeSource", Union[str, Path])
 
 
 class GeoDataFrameAdapter(DataAdapter):
@@ -408,7 +410,7 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
+    def get_bbox(self, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -438,7 +440,7 @@ class GeoDataFrameAdapter(DataAdapter):
     def detect_bbox(
         self,
         gdf=None,
-    ) -> Tuple[Tuple[float, float, float, float], int]:
+    ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched acodring to the settings in the
@@ -503,7 +505,7 @@ class GeoDataFrameAdapter(DataAdapter):
             bbox, crs = self.get_bbox(detect=True)
             bbox = list(bbox)
             props = {**self.meta, "crs": crs}
-        except Exception as e:
+        except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
             if on_error == "skip":
                 logger.warning(
                     "Skipping {name} during stac conversion because"

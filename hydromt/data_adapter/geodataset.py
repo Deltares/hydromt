@@ -4,8 +4,7 @@ import os
 import warnings
 from datetime import datetime
 from os.path import basename, join
-from pathlib import Path
-from typing import Literal, NewType, Optional, Tuple, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -15,6 +14,12 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
+from hydromt.typing import (
+    GeoDatasetSource,
+    TimeRange,
+    TotalBounds,
+)
+
 from .. import gis_utils, io
 from ..raster import GEO_MAP_COORD
 from .data_adapter import DataAdapter
@@ -22,8 +27,6 @@ from .data_adapter import DataAdapter
 logger = logging.getLogger(__name__)
 
 __all__ = ["GeoDatasetAdapter", "GeoDatasetSource"]
-
-GeoDatasetSource = NewType("GeoDatasetSource", Union[str, Path])
 
 
 class GeoDatasetAdapter(DataAdapter):
@@ -475,7 +478,7 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
+    def get_bbox(self, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -496,13 +499,14 @@ class GeoDatasetAdapter(DataAdapter):
             The ESPG code of the CRS of the coordinates returned in bbox
         """
         bbox = self.extent.get("bbox", None)
-        crs = self.crs
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
 
+        crs = self.crs
+
         return bbox, crs
 
-    def get_time_range(self, detect=True):
+    def get_time_range(self, detect=True) -> TimeRange:
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
@@ -531,7 +535,7 @@ class GeoDatasetAdapter(DataAdapter):
     def detect_bbox(
         self,
         ds=None,
-    ) -> Tuple[Tuple[float, float, float, float], int]:
+    ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -562,7 +566,7 @@ class GeoDatasetAdapter(DataAdapter):
         bounds = ds.vector.bounds
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> Tuple[np.datetime64, np.datetime64]:
+    def detect_time_range(self, ds=None) -> TimeRange:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -623,7 +627,7 @@ class GeoDatasetAdapter(DataAdapter):
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
-        except Exception as e:
+        except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
             if on_error == "skip":
                 logger.warning(
                     "Skipping {name} during stac conversion because"
