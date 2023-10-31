@@ -4,7 +4,7 @@ args:
    catalog:
       - tests/data/test_sources.yml
    region:
-      subbasin: [-7.24, 62.09] 
+      subbasin: [-7.24, 62.09]
       uparea: 50
 
 sources:

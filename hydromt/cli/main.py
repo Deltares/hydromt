@@ -5,8 +5,9 @@ import logging
 from os.path import join
 
 import click
-from hydromt.data_catalog import DataCatalog
 import numpy as np
+
+from hydromt.data_catalog import DataCatalog
 
 from .. import __version__, log
 from ..models import MODELS
@@ -385,7 +386,9 @@ def export(
 
     try:
         data_catalog = DataCatalog(data_libs=data_libs)
-        data_catalog.export_data(export_dest_path, )
+        data_catalog.export_data(
+            export_dest_path,
+        )
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
