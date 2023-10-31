@@ -5,7 +5,7 @@ import logging
 import os
 import warnings
 from datetime import datetime
-from os.path import basename, join
+from os.path import basename, join, splitext
 from typing import Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -14,9 +14,11 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
+from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
+from pystac import MediaType
 from rasterio.errors import RasterioIOError
 
 from hydromt.typing import (
@@ -846,7 +848,21 @@ class RasterDatasetAdapter(DataAdapter):
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
-        except (IndexError, KeyError, pyproj.exceptions.CRSError) as e:
+            ext = splitext(self.path)[-1]
+            match ext:
+                case ".nc" | ".vrt":
+                    media_type = MediaType.HDF5
+                case ".tiff":
+                    media_type = MediaType.TIFF
+                case ".cog":
+                    media_type = MediaType.COG
+                case ".png":
+                    media_type = MediaType.PNG
+                case _:
+                    raise RuntimeError(
+                        f"Unknown extention: {ext} cannot determine media type"
+                    )
+        except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
                     "Skipping {name} during stac conversion because"
@@ -858,6 +874,7 @@ class RasterDatasetAdapter(DataAdapter):
                 props = self.meta
                 start_dt = datetime(1, 1, 1)
                 end_dt = datetime(1, 1, 1)
+                media_type = MediaType.JSON
             else:
                 raise e
 
@@ -876,7 +893,7 @@ class RasterDatasetAdapter(DataAdapter):
                 start_datetime=start_dt,
                 end_datetime=end_dt,
             )
-            stac_asset = StacAsset(str(self.path))
+            stac_asset = StacAsset(str(self.path), media_type=media_type)
             base_name = basename(self.path)
             stac_item.add_asset(base_name, stac_asset)
 
