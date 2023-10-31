@@ -147,7 +147,7 @@ def test_export_cli_catalog(tmpdir):
 def test_export_cli_config_file(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
-        ["export", ".", "-f", "tests/data/export_config.yml"],
+        ["export", str(tmpdir), "-f", "tests/data/export_config.yml"],
     )
     assert r.exit_code == 0, r.output
 
