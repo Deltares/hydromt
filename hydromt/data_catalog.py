@@ -17,10 +17,8 @@ from typing import (
     Dict,
     Iterator,
     List,
-    Literal,
     Optional,
     Tuple,
-    TypedDict,
     Union,
     cast,
 )
@@ -34,7 +32,9 @@ import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 from pystac import Catalog as StacCatalog
+from pystac import CatalogType, MediaType
 
+from hydromt.typing import ErrorHandleMethod, SourceSpecDict
 from hydromt.utils import partition_dictionaries
 
 from . import __version__
@@ -56,16 +56,6 @@ __all__ = [
 ]
 
 # just for typehints
-SourceSpecDict = TypedDict(
-    "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
-)
-Extent = TypedDict(
-    "Extent",
-    {
-        "bbox": Tuple[float, float, float, float],
-        "time_range": Tuple[datetime, datetime],
-    },
-)
 
 
 class DataCatalog(object):
@@ -179,7 +169,8 @@ class DataCatalog(object):
         catalog_name: str = "hydromt-stac-catalog",
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
-        errors: Literal["raise", "skip", "coerce"] = "coerce",
+        catalog_type: CatalogType = CatalogType.RELATIVE_PUBLISHED,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ):
         """Write data catalog to STAC format.
 
@@ -203,12 +194,62 @@ class DataCatalog(object):
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
         for _name, source in self.iter_sources(used_only):
-            stac_child_catalog = source.to_stac_catalog(errors)
+            stac_child_catalog = source.to_stac_catalog(on_error)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
-        stac_catalog.normalize_and_save(root)
+        stac_catalog.normalize_and_save(root, catalog_type=catalog_type)
         return stac_catalog
+
+    def from_stac_catalog(
+        self,
+        stac_like: Union[str, Path, StacCatalog, dict],
+        on_error: ErrorHandleMethod = ErrorHandleMethod.SKIP,
+    ):
+        """Write data catalog to STAC format.
+
+        Parameters
+        ----------
+        path: str, Path
+            stac path.
+        on_error: ErrorHandleMethod
+            What to do on error when converting from STAC
+        """
+        if isinstance(stac_like, (str, Path)):
+            stac_catalog = StacCatalog.from_file(stac_like)
+        elif isinstance(stac_like, dict):
+            stac_catalog = StacCatalog.from_dict(stac_like)
+        elif isinstance(stac_like, StacCatalog):
+            stac_catalog = stac_like
+        else:
+            raise ValueError(
+                f"Unsupported type for stac_like: {type(stac_like).__name__}"
+            )
+
+        for item in stac_catalog.get_items(recursive=True):
+            source_name = item.id
+            for _asset_name, asset in item.get_assets().items():
+                match asset.media_type:
+                    case (
+                        MediaType.HDF
+                        | MediaType.HDF5
+                        | MediaType.COG
+                        | MediaType.TIFF
+                    ):
+                        adapter_kind = RasterDatasetAdapter
+                    case MediaType.GEOPACKAGE | MediaType.FLATGEOBUF:
+                        adapter_kind = GeoDataFrameAdapter
+                    case MediaType.GEOJSON:
+                        adapter_kind = GeoDatasetAdapter
+                    case MediaType.JSON:
+                        adapter_kind = DataFrameAdapter
+                    case _:
+                        continue
+
+                adapter = adapter_kind(str(asset.get_absolute_href()))
+                self.add_source(source_name, adapter)
+
+        return self
 
     @property
     def predefined_catalogs(self) -> Dict:
