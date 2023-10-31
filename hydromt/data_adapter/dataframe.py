@@ -3,7 +3,7 @@ import logging
 import warnings
 from datetime import datetime
 from os.path import join
-from typing import Literal, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -332,7 +332,7 @@ class DataFrameAdapter(DataAdapter):
 
     def to_stac_catalog(
         self,
-        on_error: Literal["raise", "skip", "coerce"] = "coerce",
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> Optional[StacCatalog]:
         """
         Convert a rasterdataset into a STAC Catalog representation.

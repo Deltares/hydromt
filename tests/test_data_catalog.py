@@ -245,7 +245,6 @@ def test_data_catalog(tmpdir):
     # test keys, getitem,
     keys = [key for key, _ in data_catalog.iter_sources()]
     source = data_catalog.get_source(keys[0])
-    assert keys[0] in data_catalog
     assert data_catalog.contains_source(keys[0])
     assert data_catalog.contains_source(
         keys[0], version="asdfasdfasdf", permissive=True
@@ -323,7 +322,7 @@ def test_from_yml_with_archive(tmpdir):
     # as part of the getting the archive a a local
     # catalog file is written to the same folder
     # check if this file exists and we can read it
-    root = dirname(data_catalog[sources[0]].path)
+    root = dirname(data_catalog.get_source(sources[0]).path)
     yml_dst_fn = join(root, "artifact_data.yml")
     assert isfile(yml_dst_fn)
     data_catalog1 = DataCatalog(yml_dst_fn)
@@ -651,5 +650,15 @@ def test_to_stac(tmpdir):
     assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
     # the two empty strings are for the root and self link which are destinct
     assert sorted(list(map(lambda x: x.get_href(), stac_catalog.get_links()))) == [
-        join(tmpdir, p, "catalog.json") for p in ["", "", *sources]
+        join(".", p, "catalog.json") for p in ["", *sources, str(tmpdir)]
     ]
+
+
+def test_from_stac(tmpdir):
+    catalog_from_stac = DataCatalog().from_stac_catalog(
+        "./tests/data/stac/catalog.json"
+    )
+
+    assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetAdapter
+    assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameAdapter
+    # assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == GeoDatasetAdapter

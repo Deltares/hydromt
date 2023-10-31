@@ -1,0 +1,33 @@
+{
+  "type": "Catalog",
+  "id": "hydromt-stac-catalog",
+  "stac_version": "1.0.0",
+  "description": "The stac catalog of hydromt",
+  "links": [
+    {
+      "rel": "root",
+      "href": "./catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "child",
+      "href": "./chirps_global/catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "child",
+      "href": "./gadm_level1/catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "child",
+      "href": "./gtsmv3_eu_era5/catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "/home/sam/Documents/work/hydromt/tests/data/stac/catalog.json",
+      "type": "application/json"
+    }
+  ]
+}
