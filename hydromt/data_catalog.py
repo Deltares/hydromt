@@ -1172,7 +1172,16 @@ class DataCatalog(object):
         source_vars = {}
         if len(source_names) > 0:
             sources = {}
-            for name in source_names:
+            for source in source_names:
+                # support both strings and SourceSpecDicts here
+                if isinstance(source, str):
+                    name = source
+                elif isinstance(source, Dict):
+                    name = source["source"]
+                else:
+                    raise RuntimeError(
+                        f"unknown source type: {source} of type {type(source).__name__}"
+                    )
                 # deduce variables from name
                 if "[" in name:
                     variables = name.split("[")[-1].split("]")[0].split(",")

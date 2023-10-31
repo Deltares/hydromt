@@ -1,5 +1,3 @@
-meta:
-   version: 0.9.0
 args:
    catalog:
       - tests/data/test_sources.yml
@@ -8,6 +6,5 @@ args:
       uparea: 50
 
 sources:
-  - source: hydro_lakes
-    variables: [precip]
+  - source: hydro_lakes[precip]
   - source: gtsmv3_eu_era5

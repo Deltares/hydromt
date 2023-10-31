@@ -119,7 +119,7 @@ def test_export_cli_deltared_data(tmpdir):
             "export",
             str(tmpdir),
             "-t",
-            "river_atlas_v10",
+            "hydro_lakes",
             "-r",
             "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
             "--dd",
@@ -136,7 +136,7 @@ def test_export_cli_catalog(tmpdir):
             "export",
             str(tmpdir),
             "-t",
-            "river_atlas_v10",
+            "hydro_lakes",
             "-d",
             "tests/data/test_sources.yml",
         ],
@@ -148,6 +148,7 @@ def test_export_cli_config_file(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
         ["export", str(tmpdir), "-f", "tests/data/export_config.yml"],
+        catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
 

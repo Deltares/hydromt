@@ -2,12 +2,16 @@
 """command line interface for hydromt models."""
 
 import logging
+from json import loads as json_decode
 from os.path import join
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 import click
 import numpy as np
 
 from hydromt.data_catalog import DataCatalog
+from hydromt.typing import ExportConfigDict
 
 from .. import __version__, log
 from ..models import MODELS
@@ -118,7 +122,7 @@ cache_opt = click.option(
 
 export_config_opt = click.option(
     "-f",
-    "--export-config-file",
+    "--export-config",
     callback=cli_utils.parse_export_config_yaml,
     help="read options from a config file for exporting. options from CLI will "
     "override these options",
@@ -348,16 +352,16 @@ def update(
 @verbose_opt
 @click.pass_context
 def export(
-    ctx,
-    export_dest_path,
-    target,
-    export_config_file,
-    region,
-    data,
-    dd,
-    fo,
-    quiet,
-    verbose,
+    ctx: click.Context,
+    export_dest_path: Path,
+    target: Optional[Union[str, Path]],
+    export_config: Optional[ExportConfigDict],
+    region: Optional[Dict[Any, Any]],
+    data: Optional[List[Path]],
+    dd: bool,
+    fo: bool,
+    quiet: int,
+    verbose: int,
 ):
     """Export the data from a catalog.
 
@@ -380,14 +384,39 @@ def export(
     )
     logger.info(f"Output dir: {export_dest_path}")
 
-    data_libs = list(data)  # add data catalogs from cli
+    if data:
+        data_libs = list(data)  # add data catalogs from cli
+    else:
+        data_libs = []
+
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
         data_libs = ["deltares_data"] + data_libs  # prepend!
+
+    if export_config:
+        args = export_config.pop("args", {})
+        if "catalog" in args.keys():
+            data_libs = data_libs + args.pop("catalog")
+        time_tuple = args.pop("time_tuple", None)
+        region = region or args.pop("region", None)
+        if isinstance(region, str):
+            region = json_decode(region)
+    else:
+        time_tuple = ()
+        region = None
+
+    if target:
+        export_targets = [{"source": target}]
+    elif export_config:
+        export_targets = export_config["sources"]
+    else:
+        export_targets = None
 
     try:
         data_catalog = DataCatalog(data_libs=data_libs)
         data_catalog.export_data(
             export_dest_path,
+            source_names=export_targets,
+            time_tuple=time_tuple,
         )
 
     except Exception as e:
