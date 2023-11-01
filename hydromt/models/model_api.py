@@ -12,7 +12,7 @@ from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -22,6 +22,8 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt.typing import DeferedFileClose, XArrayDict
+
 from .. import config, log, workflows
 from ..data_catalog import DataCatalog
 from ..raster import GEO_MAP_COORD
@@ -30,12 +32,6 @@ from ..utils import _classproperty
 __all__ = ["Model"]
 
 logger = logging.getLogger(__name__)
-
-DeferedFileClose = TypedDict(
-    "DeferedFileClose",
-    {"ds": xr.Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
-)
-XArrayDict = Dict[str, Union[xr.DataArray, xr.Dataset]]
 
 
 class Model(object, metaclass=ABCMeta):

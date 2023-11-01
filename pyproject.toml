@@ -23,6 +23,7 @@ dependencies = [
   "numpy>=1.23",       # pin necessary to ensure compatability with C headers
   "packaging",         # compare versions of hydromt
   "pandas",            # Dataframes
+  "pydantic",          # Validation
   "pyflwdir>=0.5.4",   # Hight models and derivatives
   "pyogrio>=0.6",      # io for geopandas dataframes
   "pyproj",            # projections for Coordinate reference systems
@@ -55,12 +56,12 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 io = [
-  "gcsfs",        # google cloud file system
-  "openpyxl",     # excel IO
-  "fastparquet",  # parquet IO
-  "pillow",       # image IO
-  "rio-vrt",      # write VRT files
-  "s3fs",         # S3 file system
+  "gcsfs",       # google cloud file system
+  "openpyxl",    # excel IO
+  "fastparquet", # parquet IO
+  "pillow",      # image IO
+  "rio-vrt",     # write VRT files
+  "s3fs",        # S3 file system
 ]
 extra = [
   "matplotlib",    # plotting; required for slippy tiles
