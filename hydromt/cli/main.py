@@ -368,14 +368,14 @@ def export(
     Example usage:
     --------------
 
-    Extract the data of in a single source, in a pertcular region
-    hydromt extract /path/to/output_dir -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" river_atlas_v10 -d /path/to/catalog.yml
+    export the data of in a single source, in a pertcular region
+    hydromt export /path/to/output_dir -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" river_atlas_v10 -d /path/to/catalog.yml
 
-    Extract all data of in a single source and compress it to a zip file
-    hydromt extract /path/to/output_dir river_atlas_v10 -d /path/to/catalog.yml --compression=zip
+    export all data of in a single source and compress it to a zip file
+    hydromt export /path/to/output_dir river_atlas_v10 -d /path/to/catalog.yml --compression=zip
 
-    Extract data as detailed in an export config yaml file
-    hydromt extract -f /path/to/export_config.yaml
+    export data as detailed in an export config yaml file
+    hydromt export -f /path/to/export_config.yaml
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
