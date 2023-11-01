@@ -649,9 +649,12 @@ def test_to_stac(tmpdir):
 
     assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
     # the two empty strings are for the root and self link which are destinct
-    assert sorted(list(map(lambda x: x.get_href(), stac_catalog.get_links()))) == [
-        join(".", p, "catalog.json") for p in ["", *sources, str(tmpdir)]
-    ]
+    assert sorted(
+        [
+            Path(join(tmpdir, x.get_href())) if x != str(tmpdir) else tmpdir
+            for x in stac_catalog.get_links()
+        ]
+    ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
 
 
 def test_from_stac(tmpdir):
