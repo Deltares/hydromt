@@ -369,10 +369,10 @@ def export(
     --------------
 
     export the data of in a single source, in a pertcular region
-    hydromt export /path/to/output_dir -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" river_atlas_v10 -d /path/to/catalog.yml
+    hydromt export -t hydro_lakes -dd -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" /path/to/output_dir
 
-    export all data of in a single source and compress it to a zip file
-    hydromt export /path/to/output_dir river_atlas_v10 -d /path/to/catalog.yml --compression=zip
+    export all data of in a single source
+    hydromt export -d tests/data/test_sources.yml /path/to/output_dir
 
     export data as detailed in an export config yaml file
     hydromt export -f /path/to/export_config.yaml
