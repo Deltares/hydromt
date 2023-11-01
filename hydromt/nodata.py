@@ -1,4 +1,4 @@
-"""Functions to handle nodata values.""" ""
+"""Functions to handle nodata values."""
 from enum import Enum
 from logging import Logger
 

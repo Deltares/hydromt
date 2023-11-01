@@ -34,7 +34,7 @@ from packaging.version import Version
 from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
-from hydromt.typing import ErrorHandleMethod, SourceSpecDict
+from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt.utils import partition_dictionaries
 
 from . import __version__
@@ -1130,8 +1130,8 @@ class DataCatalog(object):
     def export_data(
         self,
         data_root: Union[Path, str],
-        bbox: List = None,
-        time_tuple: Tuple = None,
+        bbox: Optional[Bbox] = None,
+        time_tuple: Optional[TimeRange] = None,
         source_names: Optional[List] = None,
         unit_conversion: bool = True,
         meta: Optional[Dict] = None,
@@ -1172,7 +1172,16 @@ class DataCatalog(object):
         source_vars = {}
         if len(source_names) > 0:
             sources = {}
-            for name in source_names:
+            for source in source_names:
+                # support both strings and SourceSpecDicts here
+                if isinstance(source, str):
+                    name = source
+                elif isinstance(source, Dict):
+                    name = source["source"]
+                else:
+                    raise RuntimeError(
+                        f"unknown source type: {source} of type {type(source).__name__}"
+                    )
                 # deduce variables from name
                 if "[" in name:
                     variables = name.split("[")[-1].split("]")[0].split(",")

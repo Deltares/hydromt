@@ -1,0 +1,10 @@
+args:
+   catalog:
+      - tests/data/test_sources.yml
+   region:
+      subbasin: [-7.24, 62.09]
+      uparea: 50
+
+sources:
+  - source: hydro_lakes[precip]
+  - source: gtsmv3_eu_era5

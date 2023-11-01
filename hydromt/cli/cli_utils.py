@@ -6,10 +6,11 @@ import logging
 from ast import literal_eval
 from os.path import isfile
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 from warnings import warn
 
 import click
+import yaml
 
 from .. import config
 from ..error import DeprecatedError
@@ -86,7 +87,9 @@ def parse_json(ctx, param, value: str) -> Dict[str, Any]:
 ### general parsing methods ##
 
 
-def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
+def parse_config(
+    path: Optional[Union[Path, str]] = None, opt_cli: Optional[Dict] = None
+) -> Dict:
     """Parse config from ini `path` and combine with command line options `opt_cli`."""
     opt = {}
     if path is not None and isfile(path):
@@ -114,3 +117,12 @@ def parse_config(path: Union[Path, str] = None, opt_cli: Dict = None) -> Dict:
             for option, value in opt_cli[section].items():
                 opt[section].update({option: value})
     return opt
+
+
+def parse_export_config_yaml(ctx, param, value) -> Dict:
+    if value:
+        with open(value, "r") as stream:
+            yml = yaml.load(stream, Loader=yaml.FullLoader)
+        return yml
+    else:
+        return {}
