@@ -369,13 +369,13 @@ def export(
     --------------
 
     export the data of in a single source, in a pertcular region
-    hydromt export -t hydro_lakes -dd -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" /path/to/output_dir
+    hydromt export -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -t era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml .
 
     export all data of in a single source
-    hydromt export -d tests/data/test_sources.yml /path/to/output_dir
+    hydromt export --dd -t era5_hourly .
 
     export data as detailed in an export config yaml file
-    hydromt export -f /path/to/export_config.yaml
+    hydromt export -f /path/to/export_config.yaml .
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -401,7 +401,7 @@ def export(
         if isinstance(region, str):
             region = json_decode(region)
     else:
-        time_tuple = ()
+        time_tuple = None
         region = None
 
     if target:

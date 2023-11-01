@@ -34,7 +34,7 @@ from packaging.version import Version
 from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
-from hydromt.typing import ErrorHandleMethod, SourceSpecDict
+from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt.utils import partition_dictionaries
 
 from . import __version__
@@ -1130,8 +1130,8 @@ class DataCatalog(object):
     def export_data(
         self,
         data_root: Union[Path, str],
-        bbox: List = None,
-        time_tuple: Tuple = None,
+        bbox: Optional[Bbox] = None,
+        time_tuple: Optional[TimeRange] = None,
         source_names: Optional[List] = None,
         unit_conversion: bool = True,
         meta: Optional[Dict] = None,
