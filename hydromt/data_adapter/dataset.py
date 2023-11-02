@@ -2,15 +2,19 @@
 import logging
 import os
 from datetime import datetime
-from os.path import join
+from os.path import basename, join, splitext
 from pathlib import Path
 from typing import List, NewType, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import xarray as xr
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
+from pystac import MediaType
 
-from hydromt.typing import ErrorHandleMethod
+from hydromt.typing import ErrorHandleMethod, TimeRange
 
 from .. import io
 from .data_adapter import DataAdapter
@@ -216,10 +220,6 @@ class DatasetAdapter(DataAdapter):
         # return array if single var and single_var_as_array
         return self._single_var_as_array(ds, single_var_as_array, variables)
 
-    def to_stac_catalog(self, on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE):
-        """Docstring."""
-        raise NotImplementedError
-
     def _read_data(self, fns, logger=logger):
         kwargs = self.driver_kwargs.copy()
         if len(fns) > 1 and self.driver in ["zarr"]:
@@ -358,3 +358,98 @@ class DatasetAdapter(DataAdapter):
             if ds.time.size == 0:
                 raise IndexError("Dataset: Time slice out of range.")
         return ds
+
+    def get_time_range(
+        self, ds: Optional[xr.DataArray | xr.Dataset] = None
+    ) -> TimeRange:
+        """Getvthe temporal range of a dataset.
+
+        Parameters
+        ----------
+        ds : Optional[xr.DataArray  |  xr.Dataset]
+            The dataset to detect the time range of. It must have a time dimentsion set.
+            If none is provided, :py:meth:`hydromt.DatasetAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        if ds is None:
+            ds = self.get_data()
+
+        try:
+            return (ds.time[0].values, ds.time[-1].values)
+        except AttributeError:
+            raise AttributeError("Dataset has no dimension called 'time'")
+
+    def to_stac_catalog(self, on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE):
+        """
+        Convert a dataset into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
+
+
+        Parameters
+        ----------
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip the
+          dataset on failure, and "coerce" (default) to set default values on failure.
+
+        Returns
+        -------
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
+          if the dataset was skipped.
+        """
+        try:
+            start_dt, end_dt = self.get_time_range()
+            start_dt = pd.to_datetime(start_dt)
+            end_dt = pd.to_datetime(end_dt)
+            props = {**self.meta}
+            ext = splitext(self.path)[-1]
+            bbox = [0.0, 0.0, 0.0, 0.0]
+
+            match ext:
+                case ".nc":
+                    media_type = MediaType.HDF5
+
+                case ".zarr":
+                    raise RuntimeError("STAC does not support zarr datasets")
+
+                case _:
+                    raise RuntimeError(
+                        f"Unknown extention: {ext} cannot determine media type"
+                    )
+        except (IndexError, KeyError) as e:
+            if on_error == ErrorHandleMethod.SKIP:
+                logger.warning(
+                    "Skipping {name} during stac conversion because"
+                    "because detecting temporal extent failed."
+                )
+                return
+            elif on_error == ErrorHandleMethod.COERCE:
+                bbox = [0.0, 0.0, 0.0, 0.0]
+                props = self.meta
+                start_dt = datetime(1, 1, 1)
+                end_dt = datetime(1, 1, 1)
+                media_type = MediaType.JSON
+            else:
+                raise e
+        stac_catalog = StacCatalog(self.name, description=self.name)
+        stac_item = StacItem(
+            self.name,
+            geometry=None,
+            bbox=bbox,
+            properties=props,
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        stac_asset = StacAsset(str(self.path), media_type=media_type)
+        base_name = basename(self.path)
+        stac_item.add_asset(base_name, stac_asset)
+        stac_catalog.add_item(stac_item)
+        return stac_catalog

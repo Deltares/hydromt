@@ -302,21 +302,19 @@ def test_geodataset_set_nodata(artifact_data: DataCatalog):
     assert ds.vector.nodata == -99
 
 
-def test_dataset_get_data(timeseries_df, tmpdir):
-    ds = timeseries_df.to_xarray()
+def test_dataset_get_data(timeseries_ds, tmpdir):
     path = str(tmpdir.join("test.nc"))
-    ds.to_netcdf(path)
+    timeseries_ds.to_netcdf(path)
     dataset_adapter = DatasetAdapter(path=path, driver="netcdf")
     ds1 = dataset_adapter.get_data()
     assert isinstance(ds1, xr.Dataset)
-    assert ds1.identical(ds)
+    assert ds1.identical(timeseries_ds)
 
 
-def test_dataset_to_file(timeseries_df, tmpdir):
-    ds = timeseries_df[["col1", "col2"]].to_xarray()
+def test_dataset_to_file(timeseries_ds, tmpdir):
     path = str(tmpdir.join("test1.nc"))
-    encoding = {k: {"zlib": True} for k in ds.vector.vars}
-    ds.to_netcdf(path, encoding=encoding)
+    encoding = {k: {"zlib": True} for k in timeseries_ds.vector.vars}
+    timeseries_ds.to_netcdf(path, encoding=encoding)
     dataset_adapter = DatasetAdapter(path=path, driver="netcdf")
     fn_out, driver = dataset_adapter.to_file(
         data_root=tmpdir, data_name="test2", driver="netcdf"
@@ -324,7 +322,7 @@ def test_dataset_to_file(timeseries_df, tmpdir):
     assert driver == "netcdf"
     assert fn_out == str(tmpdir.join("test2.nc"))
     ds2 = xr.open_dataset(fn_out)
-    assert ds2.identical(ds)
+    assert ds2.identical(timeseries_ds)
 
     variables = ["col1", "col2"]
     fn_out, driver = dataset_adapter.to_file(
@@ -339,7 +337,7 @@ def test_dataset_to_file(timeseries_df, tmpdir):
     )
 
     ds_zarr = xr.open_zarr(fn_out)
-    assert ds_zarr.identical(ds)
+    assert ds_zarr.identical(timeseries_ds)
 
     with pytest.raises(ValueError, match="Dataset: Driver fake-driver unknown."):
         dataset_adapter.to_file(
@@ -347,11 +345,9 @@ def test_dataset_to_file(timeseries_df, tmpdir):
         )
 
 
-def test_dataset_read_data(tmpdir, timeseries_df):
-    ds = timeseries_df[["col1", "col2"]].to_xarray()
+def test_dataset_read_data(tmpdir, timeseries_ds):
     zarr_path = str(tmpdir.join("zarr_data"))
-
-    ds.to_zarr(zarr_path)
+    timeseries_ds.to_zarr(zarr_path)
     dataset_adapter = DatasetAdapter(path=zarr_path, driver="zarr")
     dataset_adapter.get_data(variables=["col1", "col2"])
 
@@ -360,10 +356,9 @@ def test_dataset_read_data(tmpdir, timeseries_df):
         dataset_adapter.get_data(variables=["col1", "col2"])
 
 
-def test_dataset_set_nodata(tmpdir, timeseries_df):
-    ds = timeseries_df[["col1", "col2"]].to_xarray()
+def test_dataset_set_nodata(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
-    ds.to_netcdf(path)
+    timeseries_ds.to_netcdf(path)
 
     nodata = -999
     dataset_adapter = DatasetAdapter(path=path, driver="netcdf", nodata=nodata)
@@ -378,10 +373,9 @@ def test_dataset_set_nodata(tmpdir, timeseries_df):
     assert ds["col1"].attrs["_FillValue"] == nodata["col1"]
 
 
-def test_dataset_apply_unit_conversion(tmpdir, timeseries_df):
-    ds = timeseries_df[["col1", "col2"]].to_xarray()
+def test_dataset_apply_unit_conversion(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
-    ds.to_netcdf(path)
+    timeseries_ds.to_netcdf(path)
 
     dataset_adapter = DatasetAdapter(
         path=path,
@@ -389,17 +383,16 @@ def test_dataset_apply_unit_conversion(tmpdir, timeseries_df):
     )
     ds1 = dataset_adapter.get_data()
 
-    assert ds1["col1"].equals(ds["col1"] * 1000)
+    assert ds1["col1"].equals(timeseries_ds["col1"] * 1000)
 
     dataset_adapter = DatasetAdapter(path=path, unit_add={"time": 10})
     ds2 = dataset_adapter.get_data()
     assert ds2["time"][-1].values == np.datetime64("2020-12-31T00:00:10")
 
 
-def test_dataset_set_metadata(tmpdir, timeseries_df):
-    ds = timeseries_df[["col1", "col2"]].to_xarray()
+def test_dataset_set_metadata(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
-    ds.to_netcdf(path)
+    timeseries_ds.to_netcdf(path)
     meta_data = {"col1": {"long_name": "column1"}, "col2": {"long_name": "column2"}}
     dataset_adapter = DatasetAdapter(path=path, meta=meta_data)
     ds = dataset_adapter.get_data()
@@ -411,7 +404,7 @@ def test_dataset_set_metadata(tmpdir, timeseries_df):
     assert ds["col1"].attrs["long_name"] == "column1"
     assert ds["col2"].attrs["long_name"] == "column2"
 
-    da = timeseries_df[["col1"]].to_xarray().to_array()
+    da = timeseries_ds["col1"]
     da.name = "col1"
 
     path = str(tmpdir.join("da.nc"))
@@ -422,6 +415,17 @@ def test_dataset_set_metadata(tmpdir, timeseries_df):
     )
     da = dataset_adapter.get_data()
     assert da.attrs["long_name"] == "column1"
+
+
+def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
+    path = str(tmpdir.join("test.nc"))
+    timeseries_ds.to_netcdf(path)
+    dataset_adapter = DatasetAdapter(path=path, name="timeseries_dataset")
+
+    stac_catalog = dataset_adapter.to_stac_catalog()
+    assert isinstance(stac_catalog, StacCatalog)
+    stac_item = next(stac_catalog.get_items("timeseries_dataset"), None)
+    assert list(stac_item.assets.keys())[0] == "test.nc"
 
 
 def test_geodataframe(geodf, tmpdir):

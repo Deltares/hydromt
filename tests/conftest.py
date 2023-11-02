@@ -103,6 +103,11 @@ def timeseries_df():
 
 
 @pytest.fixture()
+def timeseries_ds(timeseries_df):
+    return timeseries_df[["col1", "col2"]].to_xarray()
+
+
+@pytest.fixture()
 def dfs_segmented_by_points(df):
     return {
         id: pd.DataFrame(
