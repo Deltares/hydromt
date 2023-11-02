@@ -377,5 +377,5 @@ class DataFrameAdapter(DataAdapter):
         else:
             raise NotImplementedError(
                 "DataframeAdapter does not support full stac conversion as it lacks"
-                " spatio-temporal dimentions"
+                " spatio-temporal dimensions"
             )
