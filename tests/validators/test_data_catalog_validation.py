@@ -1,4 +1,4 @@
-"""Tests for the cli submodule."""
+"""Testing of the Pydantic models for validation of Data catalogs."""
 
 
 from pathlib import Path
@@ -71,13 +71,7 @@ def test_valid_catalog_with_alias():
             "path": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
         },
     }
-    entry = DataCatalogValidator.from_dict(d)
-
-
-# def test_valid_alias():
-#     d = {"alias": "chelsa_v1.2"}
-#     entry = DataCatalogAlias(**d)
-#     assert entry.alias == "chelsa_v1.2"
+    _ = DataCatalogValidator.from_dict(d)
 
 
 def test_dangling_alias_catalog_entry():
@@ -86,7 +80,7 @@ def test_dangling_alias_catalog_entry():
     }
 
     with pytest.raises(AssertionError):
-        entry = DataCatalogValidator.from_dict(d)
+        _ = DataCatalogValidator.from_dict(d)
 
 
 def test_valid_alias_catalog_entry():

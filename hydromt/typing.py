@@ -26,13 +26,6 @@ DeferedFileClose = TypedDict(
 XArrayDict = Dict[str, Union[DataArray, Dataset]]
 
 
-class AdapterType(Enum):
-    GEODATAFRAME = 1
-    DATAFRAME = 2
-    RASTERDATSET = 3
-    GEODATASET = 4
-
-
 class ErrorHandleMethod(Enum):
     """Strategies for error handling withing hydromt."""
 

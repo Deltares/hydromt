@@ -1,3 +1,4 @@
+"""Pydantic models for the validation of Data catalogs."""
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
@@ -8,6 +9,8 @@ from hydromt.typing import Bbox, Number, TimeRange
 
 
 class SourceSpecDict(BaseModel):
+    """A complete source variant specification."""
+
     source: str
     provider: Optional[str] = None
     version: Optional[Union[str, int]] = None
@@ -18,18 +21,23 @@ class SourceSpecDict(BaseModel):
 
 
 class Extent(BaseModel):
+    """A validation model for describing the space and time a dataset covers."""
+
     time_range: TimeRange
     bbox: Bbox
 
 
 class DataCatalogMetaData(BaseModel):
+    """The metadata section of a Hydromt data catalog."""
+
     root: Optional[Path] = None
     version: Optional[Union[str, int]] = None
     name: Optional[str] = None
     model_config = ConfigDict(extra="allow")
 
     @staticmethod
-    def from_dict(input_dict):
+    def from_dict(input_dict: Optional[Dict]) -> "DataCatalogMetaData":
+        """Convert a dictionary into a validated data catalog metadata item."""
         if input_dict is None:
             return DataCatalogMetaData()
         else:
@@ -37,6 +45,8 @@ class DataCatalogMetaData(BaseModel):
 
 
 class DataCatalogItemMetadata(BaseModel):
+    """The metadata for a data source."""
+
     category: Optional[str] = None
     paper_doi: Optional[str] = None
     paper_ref: Optional[str] = None
@@ -47,18 +57,21 @@ class DataCatalogItemMetadata(BaseModel):
 
     @staticmethod
     def from_dict(input_dict):
+        """Convert a dictionary into a validated source metadata item."""
         if input_dict is None:
             return DataCatalogItemMetadata()
         else:
             item_source_url = input_dict.pop("source_url", None)
             if item_source_url:
-                source_url = Url(item_source_url)
+                Url(item_source_url)
             else:
-                source_url = None
+                pass
             return DataCatalogItemMetadata(**input_dict, source_url=item_source_url)
 
 
 class DataCatalogItem(BaseModel):
+    """A validated data source."""
+
     name: str
     data_type: str
     driver: str
@@ -75,6 +88,7 @@ class DataCatalogItem(BaseModel):
 
     @staticmethod
     def from_dict(input_dict, name=None):
+        """Convert a dictionary into a validated source item."""
         dict_name = input_dict.pop("name", None)
         if name is None:
             entry_name = dict_name
@@ -92,15 +106,9 @@ class DataCatalogItem(BaseModel):
         )
 
 
-# class DataCatalogAlias(BaseModel):
-#     alias: str
-
-#     @staticmethod
-#     def from_dict(input_dict):
-#         return DataCatalogAlias(**input_dict)
-
-
 class DataCatalogValidator(BaseModel):
+    """A validated complete data catalog."""
+
     meta: Optional[DataCatalogMetaData] = None
     sources: Dict[str, DataCatalogItem] = {}
     # aliases: Dict[str, DataCatalogAlias] = {}
