@@ -6,9 +6,8 @@ esa_worldcover_2020_v100:
   data_type: RasterDataset
   driver: raster
   filesystem: s3
-  kwargs:
-    storage_options:
-      anon: true
+  storage_options:
+    anon: true
   meta:
     category: landuse
     source_license: CC BY 4.0

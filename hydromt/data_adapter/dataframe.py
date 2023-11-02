@@ -1,12 +1,19 @@
 """Implementation for the Pandas Dataframe adapter."""
 import logging
 import warnings
+from datetime import datetime
 from os.path import join
 from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
 
+from hydromt.typing import ErrorHandleMethod
+
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
@@ -29,13 +36,13 @@ class DataFrameAdapter(DataAdapter):
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
-        rename: dict = None,
-        unit_mult: dict = None,
-        unit_add: dict = None,
-        meta: dict = None,
-        attrs: dict = None,
-        driver_kwargs: dict = None,
-        storage_options: dict = None,
+        rename: Optional[dict] = None,
+        unit_mult: Optional[dict] = None,
+        unit_add: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        attrs: Optional[dict] = None,
+        driver_kwargs: Optional[dict] = None,
+        storage_options: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
         provider: Optional[str] = None,
@@ -260,7 +267,13 @@ class DataFrameAdapter(DataAdapter):
         return df
 
     @staticmethod
-    def _slice_data(df, variables=None, time_tuple=None, logger=logger):
+    def _slice_data(
+        df,
+        variables=None,
+        time_tuple=None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger=logger,
+    ):
         """Return a sliced DataFrame.
 
         Parameters
@@ -272,6 +285,8 @@ class DataFrameAdapter(DataAdapter):
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle no data values. Default is NoDataStrategy.RAISE.
 
         Returns
         -------
@@ -288,7 +303,9 @@ class DataFrameAdapter(DataAdapter):
             logger.debug(f"Slicing time dime {time_tuple}")
             df = df[df.index.slice_indexer(*time_tuple)]
             if df.size == 0:
-                raise IndexError("DataFrame: Time slice out of range.")
+                _exec_nodata_strat(
+                    "DataFrame: Time slice out of range.", handle_nodata, logger=logger
+                )
 
         return df
 
@@ -312,3 +329,53 @@ class DataFrameAdapter(DataAdapter):
                 df[col].attrs.update(**self.attrs[col])
 
         return df
+
+    def to_stac_catalog(
+        self,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+    ) -> Optional[StacCatalog]:
+        """
+        Convert a rasterdataset into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
+
+
+        Parameters
+        ----------
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip the
+          dataset on failure, and "coerce" (default) to set default values on failure.
+
+        Returns
+        -------
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
+          if the dataset was skipped.
+        """
+        if on_error == ErrorHandleMethod.SKIP:
+            logger.warning(
+                f"Skipping {self.name} during stac conversion because"
+                "because detecting temporal extent failed."
+            )
+            return
+        elif on_error == ErrorHandleMethod.COERCE:
+            stac_catalog = StacCatalog(
+                self.name,
+                description=self.name,
+            )
+            stac_item = StacItem(
+                self.name,
+                geometry=None,
+                bbox=[0, 0, 0, 0],
+                properties=self.meta,
+                datetime=datetime(1, 1, 1),
+            )
+            stac_asset = StacAsset(str(self.path))
+            stac_item.add_asset("hydromt_path", stac_asset)
+
+            stac_catalog.add_item(stac_item)
+            return stac_catalog
+        else:
+            raise NotImplementedError(
+                "DataframeAdapter does not support full stac conversion as it lacks"
+                " spatio-temporal dimentions"
+            )

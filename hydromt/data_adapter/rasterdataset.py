@@ -5,9 +5,8 @@ import logging
 import os
 import warnings
 from datetime import datetime
-from os import PathLike
-from os.path import join
-from typing import Dict, NewType, Optional, Tuple, Union, cast
+from os.path import basename, join, splitext
+from typing import Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -15,9 +14,22 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
+from pyproj.exceptions import CRSError
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
+from pystac import MediaType
 from rasterio.errors import RasterioIOError
 
+from hydromt.typing import (
+    ErrorHandleMethod,
+    RasterDatasetSource,
+    TimeRange,
+    TotalBounds,
+)
+
 from .. import gis_utils, io
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from ..raster import GEO_MAP_COORD
 from .caching import cache_vrt_tiles
 from .data_adapter import PREPROCESSORS, DataAdapter
@@ -25,8 +37,6 @@ from .data_adapter import PREPROCESSORS, DataAdapter
 logger = logging.getLogger(__name__)
 
 __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
-
-RasterDatasetSource = NewType("RasterDatasetSource", Union[str, PathLike])
 
 
 class RasterDatasetAdapter(DataAdapter):
@@ -73,7 +83,7 @@ class RasterDatasetAdapter(DataAdapter):
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable}, {year}, {month} placeholders as well as path
-            search pattern using a '*' wildcard.
+            search pattern using a ``*`` wildcard.
         driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
             Driver to read files with,
             for 'raster' :py:func:`~hydromt.io.open_mfraster`,
@@ -99,8 +109,12 @@ class RasterDatasetAdapter(DataAdapter):
             data unit to the output data unit as required by hydroMT.
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license',
-            'paper_ref', 'paper_doi', 'category'}
+            - 'source_version'
+            - 'source_url'
+            - 'source_license'
+            - 'paper_ref'
+            - 'paper_doi'
+            - 'category'
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
@@ -110,12 +124,9 @@ class RasterDatasetAdapter(DataAdapter):
         extent: Extent(typed dict), Optional
             Dictionary describing the spatial and time range the dataset covers.
             should be of the form:
-            {
-                "bbox": [xmin, ymin, xmax, ymax],
-                "time_range": [start_datetime, end_datetime],
-            }
-            bbox coordinates should be in the same CRS as the data, and
-            time_range should be inclusive on both sides.
+            -  "bbox": [xmin, ymin, xmax, ymax],
+            -  "time_range": [start_datetime, end_datetime],
+            data, and time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         storage_options: dict, optional
@@ -135,7 +146,6 @@ class RasterDatasetAdapter(DataAdapter):
         """
         driver_kwargs = driver_kwargs or {}
         extent = extent or {}
-        zoom_levels = zoom_levels or {}
         if kwargs:
             warnings.warn(
                 "Passing additional keyword arguments to be used by the "
@@ -163,6 +173,7 @@ class RasterDatasetAdapter(DataAdapter):
             version=version,
         )
         self.crs = crs
+        # should be None or non-empty dict when initialized
         self.zoom_levels = zoom_levels
         self.extent = extent
 
@@ -287,7 +298,7 @@ class RasterDatasetAdapter(DataAdapter):
         ds = self._shift_time(ds, logger)
         # slice data
         ds = RasterDatasetAdapter._slice_data(
-            ds, variables, geom, bbox, buffer, align, time_tuple, logger
+            ds, variables, geom, bbox, buffer, align, time_tuple, logger=logger
         )
         # uniformize data
         ds = self._apply_unit_conversions(ds, logger)
@@ -411,6 +422,7 @@ class RasterDatasetAdapter(DataAdapter):
         buffer=0,
         align=None,
         time_tuple=None,
+        handle_nodata=NoDataStrategy.RAISE,
         logger=logger,
     ):
         """Return a RasterDataset sliced in both spatial and temporal dimensions.
@@ -433,6 +445,8 @@ class RasterDatasetAdapter(DataAdapter):
         time_tuple : Tuple of datetime, optional
             A tuple consisting of the lower and upper bounds of time that the
             result should contain
+        handle_nodata: NoDataStrategy, optional
+            How to handle no data values, by default NoDataStrategy.RAISE
 
         Returns
         -------
@@ -456,11 +470,18 @@ class RasterDatasetAdapter(DataAdapter):
             ds = RasterDatasetAdapter._slice_temporal_dimension(
                 ds,
                 time_tuple,
+                handle_nodata,
                 logger=logger,
             )
         if geom is not None or bbox is not None:
             ds = RasterDatasetAdapter._slice_spatial_dimensions(
-                ds, geom, bbox, buffer, align, logger=logger
+                ds,
+                geom,
+                bbox,
+                buffer,
+                align,
+                handle_nodata,
+                logger=logger,
             )
         return ds
 
@@ -479,7 +500,9 @@ class RasterDatasetAdapter(DataAdapter):
         return ds
 
     @staticmethod
-    def _slice_temporal_dimension(ds, time_tuple, logger=logger):
+    def _slice_temporal_dimension(
+        ds, time_tuple, handle_nodata=NoDataStrategy.RAISE, logger=logger
+    ):
         if (
             "time" in ds.dims
             and ds["time"].size > 1
@@ -489,11 +512,21 @@ class RasterDatasetAdapter(DataAdapter):
                 logger.debug(f"Slicing time dim {time_tuple}")
                 ds = ds.sel({"time": slice(*time_tuple)})
                 if ds.time.size == 0:
-                    raise IndexError("Time slice out of range.")
+                    _exec_nodata_strat(
+                        "Time slice out of range.", handle_nodata, logger
+                    )
         return ds
 
     @staticmethod
-    def _slice_spatial_dimensions(ds, geom, bbox, buffer, align, logger=logger):
+    def _slice_spatial_dimensions(
+        ds,
+        geom,
+        bbox,
+        buffer,
+        align,
+        handle_nodata=NoDataStrategy.RAISE,
+        logger=logger,
+    ):
         # make sure bbox is in data crs
         crs = ds.raster.crs
         epsg = crs.to_epsg()  # this could return None
@@ -515,7 +548,11 @@ class RasterDatasetAdapter(DataAdapter):
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
             ds = ds.raster.clip_bbox(bbox, buffer=buffer, align=align)
             if np.any(np.array(ds.raster.shape) < 2):
-                raise IndexError("RasterDataset: No data within spatial domain.")
+                _exec_nodata_strat(
+                    "RasterDataset: No data within spatial domain",
+                    handle_nodata,
+                    logger,
+                )
 
         return ds
 
@@ -590,7 +627,7 @@ class RasterDatasetAdapter(DataAdapter):
         zls_dict: Optional[Dict[int, float]] = None,
         dst_crs: pyproj.CRS = None,
         logger=logger,
-    ) -> int:
+    ) -> Optional[int]:
         """Return overview level of data corresponding to zoom level.
 
         Parameters
@@ -670,7 +707,7 @@ class RasterDatasetAdapter(DataAdapter):
         logger.debug(f"Parsed zoom_level {zl} ({dst_res:.2f})")
         return zl
 
-    def get_bbox(self, detect=True) -> Tuple[Tuple[float, float, float, float], int]:
+    def get_bbox(self, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -697,7 +734,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bbox, crs
 
-    def get_time_range(self, detect=True):
+    def get_time_range(self, detect=True) -> TimeRange:
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
@@ -726,7 +763,7 @@ class RasterDatasetAdapter(DataAdapter):
     def detect_bbox(
         self,
         ds=None,
-    ) -> Tuple[Tuple[float, float, float, float], int]:
+    ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -757,7 +794,7 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
+    def detect_time_range(self, ds=None) -> TimeRange:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched accodring to the settings in the
@@ -782,3 +819,83 @@ class RasterDatasetAdapter(DataAdapter):
             ds[ds.raster.time_dim].min().values,
             ds[ds.raster.time_dim].max().values,
         )
+
+    def to_stac_catalog(
+        self,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+    ) -> Optional[StacCatalog]:
+        """
+        Convert a rasterdataset into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
+
+
+        Parameters
+        ----------
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip the
+          dataset on failure, and "coerce" (default) to set default values on failure.
+
+        Returns
+        -------
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
+          if the dataset was skipped.
+        """
+        try:
+            bbox, crs = self.get_bbox(detect=True)
+            bbox = list(bbox)
+            start_dt, end_dt = self.get_time_range(detect=True)
+            start_dt = pd.to_datetime(start_dt)
+            end_dt = pd.to_datetime(end_dt)
+            props = {**self.meta, "crs": crs}
+            ext = splitext(self.path)[-1]
+            match ext:
+                case ".nc" | ".vrt":
+                    media_type = MediaType.HDF5
+                case ".tiff":
+                    media_type = MediaType.TIFF
+                case ".cog":
+                    media_type = MediaType.COG
+                case ".png":
+                    media_type = MediaType.PNG
+                case _:
+                    raise RuntimeError(
+                        f"Unknown extention: {ext} cannot determine media type"
+                    )
+        except (IndexError, KeyError, CRSError) as e:
+            if on_error == ErrorHandleMethod.SKIP:
+                logger.warning(
+                    "Skipping {name} during stac conversion because"
+                    "because detecting spacial extent failed."
+                )
+                return
+            elif on_error == ErrorHandleMethod.COERCE:
+                bbox = [0.0, 0.0, 0.0, 0.0]
+                props = self.meta
+                start_dt = datetime(1, 1, 1)
+                end_dt = datetime(1, 1, 1)
+                media_type = MediaType.JSON
+            else:
+                raise e
+
+        else:
+            # else makes type checkers a bit happier
+            stac_catalog = StacCatalog(
+                self.name,
+                description=self.name,
+            )
+            stac_item = StacItem(
+                self.name,
+                geometry=None,
+                bbox=list(bbox),
+                properties=props,
+                datetime=None,
+                start_datetime=start_dt,
+                end_datetime=end_dt,
+            )
+            stac_asset = StacAsset(str(self.path), media_type=media_type)
+            base_name = basename(self.path)
+            stac_item.add_asset(base_name, stac_asset)
+
+            stac_catalog.add_item(stac_item)
+            return stac_catalog

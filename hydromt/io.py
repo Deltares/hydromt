@@ -1,12 +1,13 @@
-"""Implementations for all of the necessary IO for HydroMT."""
+"""Implementations for all of pythe necessary IO for HydroMT."""
 import glob
-import io
+import io as pyio
 import logging
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional, Union
 
 import dask
+import fsspec
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -68,7 +69,7 @@ def open_raster(
     kwargs.update(masked=mask_nodata, default_name="data", chunks=chunks)
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
-    if isinstance(filename, io.IOBase):  # file-like does not handle chunks
+    if isinstance(filename, pyio.IOBase):  # file-like does not handle chunks
         logger.warning("Removing chunks to read and load remote data.")
         kwargs.pop("chunks")
     # keep only 2D DataArray
@@ -299,13 +300,13 @@ def open_mfcsv(
             # this was clearer
             if df.index.name is None:
                 if not csv_index_name == "index":
-                    logger.warn(
+                    logger.warning(
                         f"csv file {fn} has inconsistent index name: {df.index.name}"
                         f"expected {csv_index_name} as it's the first one found."
                     )
             else:
                 if not csv_index_name == df.index.name:
-                    logger.warn(
+                    logger.warning(
                         f"csv file {fn} has inconsistent index name: {df.index.name}"
                         f"expected {csv_index_name} as it's the first one found."
                     )
@@ -576,7 +577,7 @@ def open_vector(
 
     Parameters
     ----------
-    fn : str
+    fn: str or Path-like,
         path to geometry file
     driver: {'csv', 'xls', 'xy', 'vector', 'parquet'}, optional
         driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
@@ -615,13 +616,25 @@ def open_vector(
     gdf : geopandas.GeoDataFrame
         Parsed geometry file
     """
-    filtered = False
+
+    def _read(f: pyio.IOBase) -> gpd.GeoDataFrame:
+        bbox_reader = gis_utils.bbox_from_file_and_filters(f, bbox, geom, crs)
+        f.seek(0)
+        return gpd.read_file(f, bbox=bbox_reader, mode=mode, **kwargs)
+
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     else:
-        gdf = gpd.read_file(fn, bbox=bbox, mask=geom, mode=mode, **kwargs)
-        filtered = predicate == "intersects"
+        # check if pathlike
+        if all(
+            map(lambda method: hasattr(fn, method), ("seek", "close", "read", "write"))
+        ):
+            with fn.open(mode="rb") as f:
+                gdf = _read(f)
+        else:
+            with fsspec.open(fn, mode="rb") as f:  # lose storage options here
+                gdf = _read(f)
 
     # check geometry type
     if assert_gtype is not None:
@@ -642,7 +655,7 @@ def open_vector(
     if dst_crs is not None:
         gdf = gdf.to_crs(dst_crs)
     # filter points
-    if gdf.index.size > 0 and not filtered and (geom is not None or bbox is not None):
+    if gdf.index.size > 0 and (geom is not None or bbox is not None):
         idx = gis_utils.filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
         gdf = gdf.iloc[idx, :]
     return gdf

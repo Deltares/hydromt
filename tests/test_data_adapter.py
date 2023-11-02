@@ -3,7 +3,8 @@
 
 import glob
 import tempfile
-from os.path import abspath, dirname, join
+from datetime import datetime
+from os.path import abspath, basename, dirname, join
 from typing import cast
 
 import fsspec
@@ -12,6 +13,9 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
 
 import hydromt
 from hydromt import _compat as compat
@@ -22,7 +26,9 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
+from hydromt.exceptions import NoDataException
 from hydromt.gis_utils import to_geographic_bbox
+from hydromt.typing import ErrorHandleMethod
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -70,9 +76,9 @@ def test_rasterdataset(rioda, tmpdir):
     geom = rioda.raster.box
     da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
     assert np.all(da1 == rioda_utm)
-    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
+    with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_rasterdataset("no_file.tif")
-    with pytest.raises(IndexError, match="RasterDataset: No data within"):
+    with pytest.raises(NoDataException, match="RasterDataset: No data within"):
         data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
 
 
@@ -163,6 +169,7 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     # test COG zoom levels
     da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(0.01, "degree"))
     assert da1.raster.shape == (256, 250)
+    assert len(data_catalog.get_source("test_cog.tif").zoom_levels) == 3
 
 
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
@@ -248,7 +255,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     ).sortby("index")
     assert np.allclose(da3, geoda)
     assert da3.vector.crs.to_epsg() == 4326
-    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
+    with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_geodataset("no_file.geojson")
     with tempfile.TemporaryDirectory() as td:
         # Test nc file writing to file
@@ -428,7 +435,7 @@ def test_geodataframe(geodf, tmpdir):
         "test.geojson", bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
     )
     assert np.all(gdf1 == geodf)
-    with pytest.raises(FileNotFoundError, match="No such file or catalog source"):
+    with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_geodataframe("no_file.geojson")
 
 
@@ -592,3 +599,149 @@ def test_detect_extent(geodf, geoda, rioda, ts):
     )
 
     assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
+
+
+def test_to_stac_geodataframe(geodf, tmpdir):
+    fn_gdf = str(tmpdir.join("test.geojson"))
+    geodf.to_file(fn_gdf, driver="GeoJSON")
+    data_catalog = DataCatalog()  # read artifacts
+    _ = data_catalog.sources  # load artifact data as fallback
+
+    # geodataframe
+    name = "gadm_level1"
+    adapter = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
+    bbox, crs = adapter.get_bbox()
+    gdf_stac_catalog = StacCatalog(id=name, description=name)
+    gds_stac_item = StacItem(
+        name,
+        geometry=None,
+        bbox=list(bbox),
+        properties=adapter.meta,
+        datetime=datetime(1, 1, 1),
+    )
+    gds_stac_asset = StacAsset(str(adapter.path))
+    gds_base_name = basename(adapter.path)
+    gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
+
+    gdf_stac_catalog.add_item(gds_stac_item)
+    outcome = cast(
+        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+    )
+    assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+    adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
+    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+
+
+def test_to_stac_raster():
+    data_catalog = DataCatalog()  # read artifacts
+    _ = data_catalog.sources  # load artifact data as fallback
+
+    # raster dataset
+    name = "chirps_global"
+    adapter = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    bbox, crs = adapter.get_bbox()
+    start_dt, end_dt = adapter.get_time_range(detect=True)
+    start_dt = pd.to_datetime(start_dt)
+    end_dt = pd.to_datetime(end_dt)
+    raster_stac_catalog = StacCatalog(id=name, description=name)
+    raster_stac_item = StacItem(
+        name,
+        geometry=None,
+        bbox=list(bbox),
+        properties=adapter.meta,
+        datetime=None,
+        start_datetime=start_dt,
+        end_datetime=end_dt,
+    )
+    raster_stac_asset = StacAsset(str(adapter.path))
+    raster_base_name = basename(adapter.path)
+    raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
+
+    raster_stac_catalog.add_item(raster_stac_item)
+
+    outcome = cast(
+        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+    )
+
+    assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+    adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
+    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+
+
+def test_to_stac_geodataset(geoda, tmpdir):
+    data_catalog = DataCatalog()  # read artifacts
+    _ = data_catalog.sources  # load artifact data as fallback
+
+    # geodataset
+    name = "gtsmv3_eu_era5"
+    adapter = cast(GeoDatasetAdapter, data_catalog.get_source(name))
+    bbox, crs = adapter.get_bbox()
+    start_dt, end_dt = adapter.get_time_range(detect=True)
+    start_dt = pd.to_datetime(start_dt)
+    end_dt = pd.to_datetime(end_dt)
+    gds_stac_catalog = StacCatalog(id=name, description=name)
+    gds_stac_item = StacItem(
+        name,
+        geometry=None,
+        bbox=list(bbox),
+        properties=adapter.meta,
+        datetime=None,
+        start_datetime=start_dt,
+        end_datetime=end_dt,
+    )
+    gds_stac_asset = StacAsset(str(adapter.path))
+    gds_base_name = basename(adapter.path)
+    gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
+
+    gds_stac_catalog.add_item(gds_stac_item)
+
+    outcome = cast(
+        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+    )
+    assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+    adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
+    assert adapter.to_stac_catalog(ErrorHandleMethod.SKIP) is None
+
+
+def test_to_stac_dataframe(df, tmpdir):
+    fn_df = str(tmpdir.join("test.csv"))
+    name = "test_dataframe"
+    df.to_csv(fn_df)
+    dc = DataCatalog().from_dict(
+        {
+            name: {
+                "data_type": "DataFrame",
+                "path": fn_df,
+            }
+        }
+    )
+
+    adapter = dc.get_source(name)
+
+    with pytest.raises(
+        NotImplementedError,
+        match="DataframeAdapter does not support full stac conversion ",
+    ):
+        adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+
+    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+
+    stac_catalog = StacCatalog(
+        name,
+        description=name,
+    )
+    stac_item = StacItem(
+        name,
+        geometry=None,
+        bbox=[0, 0, 0, 0],
+        properties=adapter.meta,
+        datetime=datetime(1, 1, 1),
+    )
+    stac_asset = StacAsset(str(fn_df))
+    stac_item.add_asset("hydromt_path", stac_asset)
+
+    stac_catalog.add_item(stac_item)
+    outcome = cast(
+        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.COERCE)
+    )
+    assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore

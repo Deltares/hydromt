@@ -1,4 +1,4 @@
-"""Implementaion of the vector workloads."""
+"""Implementation of the vector workloads."""
 from __future__ import annotations
 
 import logging
@@ -10,15 +10,13 @@ import pyproj
 import shapely
 import xarray as xr
 from geopandas import GeoDataFrame, GeoSeries
-
-# TODO try getting this version without importing osgeo to avoid
-# conflicts with geopandas/rasterio
-from osgeo import __version__ as GDAL_VERSION
+from rasterio import gdal_version
 from shapely.geometry.base import BaseGeometry
 
 from hydromt import gis_utils, raster
 
 logger = logging.getLogger(__name__)
+GDAL_VERSION = gdal_version()
 
 
 class GeoBase(raster.XGeoBase):

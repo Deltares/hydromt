@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+from hydromt.typing import ErrorHandleMethod
+
 from .. import io
 from .data_adapter import DataAdapter
 
@@ -127,6 +129,10 @@ class DatasetAdapter(DataAdapter):
         ds = self._set_metadata(ds)
         # return array if single var and single_var_as_array
         return self._single_var_as_array(ds, single_var_as_array, variables)
+
+    def to_stac_catalog(self, on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE):
+        """Docstring."""
+        raise NotImplementedError
 
     def _read_data(self, fns, logger=logger):
         kwargs = self.driver_kwargs.copy()

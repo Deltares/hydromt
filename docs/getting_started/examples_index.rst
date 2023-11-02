@@ -23,8 +23,9 @@ Data and DataCatalog:
 Working with models:
 ********************
 
-* `Working with models from CLI <../_examples/working_with_models_basics.ipynb>`_
-* `Working with models in python <../_examples/working_with_models.ipynb>`_
+* `Working with (grid) models from CLI <../_examples/working_with_models_basics.ipynb>`_
+* `Working with (grid) models in python <../_examples/working_with_models.ipynb>`_
+* `Working with mesh models <../_examples/working_with_meshmodel.ipynb>`_
 * `Define hydrological model regions <../_examples/delineate_basin.ipynb>`_
 
 GIS operations:

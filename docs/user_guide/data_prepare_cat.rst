@@ -95,7 +95,7 @@ A full list of **optional data source arguments** is given below
 - **filesystem** (optional): specify at what filesystem the data is stored. This is used to select the correct protocol to
   access different filesystems (e.g. local, gcs, s3, http). If not provided the filesystem is inferred from the path.
   See `fsspec <https://filesystem-spec.readthedocs.io/en/latest/index.html>`_ for more available protocols.
-- **storage_options** (optional): Additional arguments to pass to the filesystem protocol, these are protocal specific.
+- **storage_options** (optional): Additional arguments to pass to the filesystem protocol, these are protocol specific.
   *NOTE*: New in HydroMT v0.8.1
 - **version** (recommended): data source version
   *NOTE*: New in HydroMT v0.8.1

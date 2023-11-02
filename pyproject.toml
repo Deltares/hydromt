@@ -18,21 +18,25 @@ dependencies = [
   "fsspec",            # general file systems utilities
   "geopandas>=0.10",   # pandas but geo, wraps fiona and shapely
   "mercantile",        # tile handling
-  "numba",             # speed up computations (used in e.g. stats)
-  "numpy>=1.20",       # pin necessary to ensure compatability with C headers
   "netcdf4",           # netcfd IO
+  "numba",             # speed up computations (used in e.g. stats)
+  "numpy>=1.23",       # pin necessary to ensure compatability with C headers
   "packaging",         # compare versions of hydromt
-  "rioxarray",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
   "pandas",            # Dataframes
   "pyflwdir>=0.5.4",   # Hight models and derivatives
+  "pyogrio>=0.6",      # io for geopandas dataframes
   "pyproj",            # projections for Coordinate reference systems
+  "pystac",            # STAC integration
+  "pyyaml",            # yaml interface
   "rasterio",          # raster wrapper around gdal
-  "shapely>=2.0.0",    # geometry transforms
+  "requests",          # donwload stuff
+  "rioxarray",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
   "scipy",             # scientific utilities
+  "shapely>=2.0.0",    # geometry transforms
   "tomli",             # parsing toml files
   "tomli-w",           # writing toml files
-  "xarray",            # ndim data arrays
   "universal_pathlib", # provides path compatability between different filesystems
+  "xarray",            # ndim data arrays
   "xmltodict",         # xml parser also used to read VRT
   "zarr",              # zarr
 ]
@@ -51,22 +55,24 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 io = [
-  "gcsfs",    # google cloud file system
-  "openpyxl", # excel IO
-  "pillow",   # image IO
-  "requests", # donwload stuff
-  "s3fs",     # S3 file system
+  "gcsfs",        # google cloud file system
+  "openpyxl",     # excel IO
+  "fastparquet",  # parquet IO
+  "pillow",       # image IO
+  "rio-vrt",      # write VRT files
+  "s3fs",         # S3 file system
 ]
 extra = [
-  "xugrid>=0.6.5", # xarray wrapper for mesh processing
+  "matplotlib",    # plotting; required for slippy tiles
   "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
+  "xugrid>=0.6.5", # xarray wrapper for mesh processing
 ]
 dev = [
   "black",       # linting
-  "ruff",        # linting
-  "pre-commit",  # linting
-  "pip>=23.1.2", # needed for recursive dependencies
   "flit",        # needed to publish to pypi
+  "pip>=23.1.2", # needed for recursive dependencies
+  "pre-commit",  # linting
+  "ruff",        # linting
   "twine",       # needed to publish to pypi
 ]
 test = [
@@ -77,18 +83,17 @@ test = [
   "xugrid",
 ]
 doc = [
+  "hydromt[examples,extra]",      # examples are included in the docs
   "nbsphinx",                     # build notebooks in docs
   "pydata-sphinx-theme",          # theme
+  "sphinx_autosummary_accessors", # doc layout
   "sphinx",                       # build docks
   "sphinx_design",                # doc layout
-  "sphinx_autosummary_accessors", # doc layout
-  "hydromt[examples,extra]",      # examples are included in the docs
 ]
 examples = [
-  "jupyterlab",      # run examples in jupyter notebook
-  "cartopy",         # plotting examples
-  "matplotlib-base", # plotting
-  "notebook",        # jupyter integration
+  "cartopy",    # plotting examples
+  "jupyterlab", # run examples in jupyter notebook
+  "notebook",   # jupyter integration
 ]
 
 full = ["hydromt[io,extra,dev,test,doc,examples]"]
@@ -103,23 +108,26 @@ hydromt = "hydromt.cli.main:main"
 
 [tool.make_env]
 channels = ["conda-forge"]
-deps_not_in_conda = ["sphinx_autosummary_accessors", "sphinx_design", "pyet"]
+deps_not_in_conda = [
+  "sphinx_autosummary_accessors",
+  "sphinx_design",
+  "pyet",
+  "rio-vrt",
+]
 
-[tool.black]
-line-length = 88
-target-version = ['py39']
 
 [tool.ruff]
 line-length = 88
+target-version = "py39"
 
 # enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
 select = ["E", "F", "I", "PT", "D", "B"]
 ignore-init-module-imports = true
-ignore = ["D211", "D213", "E741", "D105", "E712", "B904"]
+ignore = ["D211", "D213", 'D206', 'E501', "E741", "D105", "E712", "B904"]
 exclude = ["docs"]
 
 [tool.ruff.per-file-ignores]
-"tests/**" = ["D103", "D100", "D104"]
+"tests/**" = ["D100", "D101", "D102", "D103", "D104"]
 "hydromt/__init__.py" = ["E402", "F401", "F403"]
 "hydromt/workflows/__init__.py" = ["F403"]
 "hydromt/stats/__init__.py" = ["F403"]

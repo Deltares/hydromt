@@ -2,10 +2,16 @@
 """command line interface for hydromt models."""
 
 import logging
+from json import loads as json_decode
 from os.path import join
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 import click
 import numpy as np
+
+from hydromt.data_catalog import DataCatalog
+from hydromt.typing import ExportConfigDict
 
 from .. import __version__, log
 from ..models import MODELS
@@ -48,6 +54,10 @@ opt_config = click.option(
     "--config",
     type=click.Path(resolve_path=True),
     help="Path to hydroMT configuration file, for the model specific implementation.",
+)
+export_dest_path = click.argument(
+    "export_dest_path",
+    type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
 )
 arg_root = click.argument(
     "MODEL_ROOT",
@@ -110,6 +120,14 @@ cache_opt = click.option(
     help="Flag: If provided cache tiled rasterdatasets",
 )
 
+export_config_opt = click.option(
+    "-f",
+    "--export-config",
+    callback=cli_utils.parse_export_config_yaml,
+    help="read options from a config file for exporting. options from CLI will "
+    "override these options",
+)
+
 ## MAIN
 
 
@@ -131,8 +149,6 @@ def main(ctx, models):  # , quiet, verbose):
 
 
 ## BUILD
-
-
 @main.command(short_help="Build models")
 @click.argument(
     "MODEL",
@@ -318,6 +334,100 @@ def update(
             logger.removeHandler(handler)
 
 
+## Export
+@main.command(
+    short_help="Export data",
+)
+@click.option(
+    "-t",
+    "--target",
+)
+@region_opt
+@export_dest_path
+@export_config_opt
+@data_opt
+@deltares_data_opt
+@overwrite_opt
+@quiet_opt
+@verbose_opt
+@click.pass_context
+def export(
+    ctx: click.Context,
+    export_dest_path: Path,
+    target: Optional[Union[str, Path]],
+    export_config: Optional[ExportConfigDict],
+    region: Optional[Dict[Any, Any]],
+    data: Optional[List[Path]],
+    dd: bool,
+    fo: bool,
+    quiet: int,
+    verbose: int,
+):
+    """Export the data from a catalog.
+
+    Example usage:
+    --------------
+
+    export the data of in a single source, in a pertcular region
+    hydromt export -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -t era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml .
+
+    export all data of in a single source
+    hydromt export --dd -t era5_hourly .
+
+    export data as detailed in an export config yaml file
+    hydromt export -f /path/to/export_config.yaml .
+    """  # noqa: E501
+    # logger
+    log_level = max(10, 30 - 10 * (verbose - quiet))
+    logger = log.setuplog(
+        "export", join(export_dest_path, "hydromt.log"), log_level=log_level
+    )
+    logger.info(f"Output dir: {export_dest_path}")
+
+    if data:
+        data_libs = list(data)  # add data catalogs from cli
+    else:
+        data_libs = []
+
+    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+        data_libs = ["deltares_data"] + data_libs  # prepend!
+
+    if export_config:
+        args = export_config.pop("args", {})
+        if "catalog" in args.keys():
+            data_libs = data_libs + args.pop("catalog")
+        time_tuple = args.pop("time_tuple", None)
+        region = region or args.pop("region", None)
+        if isinstance(region, str):
+            region = json_decode(region)
+    else:
+        time_tuple = None
+        region = None
+
+    if target:
+        export_targets = [{"source": target}]
+    elif export_config:
+        export_targets = export_config["sources"]
+    else:
+        export_targets = None
+
+    try:
+        data_catalog = DataCatalog(data_libs=data_libs)
+        data_catalog.export_data(
+            export_dest_path,
+            source_names=export_targets,
+            time_tuple=time_tuple,
+        )
+
+    except Exception as e:
+        logger.exception(e)  # catch and log errors
+        raise
+    finally:
+        for handler in logger.handlers[:]:
+            handler.close()
+            logger.removeHandler(handler)
+
+
 ## CLIP
 
 
@@ -374,7 +484,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         mod.read()
         mod.set_root(model_destination, mode="w")
         logger.info("Clipping staticmaps")
-        mod.clip_staticmaps(region)
+        mod.clip_grid(region)
         logger.info("Clipping forcing")
         mod.clip_forcing()
         logger.info("Writting clipped model")
