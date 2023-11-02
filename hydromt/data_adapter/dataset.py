@@ -46,7 +46,62 @@ class DatasetAdapter(DataAdapter):
         provider: Optional[str] = None,
         version: Optional[str] = None,
     ):
-        """Docstring."""
+        """Initiate data adapter for n-dimensional timeseries data.
+
+        This object contains all properties required to read supported files into
+        a single unified Dataset, i.e. :py:class:`xarray.Dataset`. In addition it keeps meta data to be able to reproduce which
+        data is used.
+
+        Parameters
+        ----------
+        path: str, Path
+            Path to data source. If the dataset consists of multiple files, the path may
+            contain {variable}, {year}, {month} placeholders as well as path
+            search pattern using a ``*`` wildcard.
+        driver: {'netcdf', 'zarr'}, optional
+            Driver to read files with,
+            for 'netcdf' :py:func:`xarray.open_mfdataset`.
+            By default the driver is inferred from the file extension.
+        filesystem: str, optional
+            Filesystem where the data is stored (local, cloud, http etc.).
+            If None (default) the filesystem is inferred from the path.
+            See :py:func:`fsspec.registry.known_implementations` for all options.
+        nodata: float, int, optional
+            Missing value number. Only used if the data has no native missing value.
+            Nodata values can be differentiated between variables using a dictionary.
+        rename: dict, optional
+            Mapping of native data source variable to output source variable name as
+            required by hydroMT.
+        unit_mult, unit_add: dict, optional
+            Scaling multiplication and addition to change to map from the native
+            data unit to the output data unit as required by hydroMT.
+        meta: dict, optional
+            Metadata information of dataset, prefably containing the following keys:
+            - 'source_version'
+            - 'source_url'
+            - 'source_license'
+            - 'paper_ref'
+            - 'paper_doi'
+            - 'category'
+        placeholders: dict, optional
+            Placeholders to expand yaml entry to multiple entries (name and path)
+            based on placeholder values
+        attrs: dict, optional
+            Additional attributes relating to data variables. For instance unit
+            or long name of the variable.
+        driver_kwargs, dict, optional
+            Additional key-word arguments passed to the driver.
+        storage_options: dict, optional
+            Additional key-word arguments passed to the fsspec FileSystem object.
+        name, catalog_name: str, optional
+            Name of the dataset and catalog, optional.
+        provider: str, optional
+            A name to identifiy the specific provider of the dataset requested.
+            if None is provided, the last added source will be used.
+        version: str, optional
+            A name to identifiy the specific version of the dataset requested.
+            if None is provided, the last added source will be used.
+        """
         super().__init__(
             path=path,
             driver=driver,
@@ -74,7 +129,34 @@ class DatasetAdapter(DataAdapter):
         driver: Optional[str] = None,
         **kwargs,
     ) -> Tuple[str, str]:
-        """Docstring."""
+        """Save a dataset slice to file.
+
+        Parameters
+        ----------
+        data_root : str, Path
+            Path to output folder
+        data_name : str
+            Name of output file without extension.
+        variables : list of str, optional
+            Names of Dataset variables to return. By default all dataset variables
+            are returned.
+        time_tuple : tuple of str, datetime, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned.
+        driver : str, optional
+            Driver to write file, e.g.: 'netcdf', 'zarr', by default None
+        **kwargs
+            Additional keyword arguments that are passed to the `to_zarr`
+            function.
+
+        Returns
+        -------
+        fn_out: str
+            Absolute path to output file
+        driver: str
+            Name of driver to read data with, see
+            :py:func:`~hydromt.data_catalog.DataCatalog.get_dataset`
+        """
         obj = self.get_data(
             time_tuple=time_tuple,
             variables=variables,
@@ -113,7 +195,11 @@ class DatasetAdapter(DataAdapter):
         single_var_as_array: Optional[bool] = True,
         logger: Optional[logging.Logger] = logger,
     ) -> xr.Dataset:
-        """Docstring."""
+        """Return a clipped, sliced and unified Dataset.
+
+        For a detailed description see:
+        :py:func:`~hydromt.data_catalog.DataCatalog.get_dataset`
+        """
         # load data
         fns = self._resolve_paths(variables, time_tuple)
         ds = self._read_data(fns, logger=logger)
@@ -245,8 +331,6 @@ class DatasetAdapter(DataAdapter):
         """
         if isinstance(ds, xr.DataArray):
             if ds.name is None:
-                # dummy name, required to create dataset
-                # renamed to variable in _single_var_as_array
                 ds.name = "data"
             ds = ds.to_dataset()
         elif variables is not None:
