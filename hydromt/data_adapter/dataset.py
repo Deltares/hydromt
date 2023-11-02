@@ -171,8 +171,8 @@ class DatasetAdapter(DataAdapter):
                 nodata = self.nodata
             for k in ds.data_vars:
                 mv = nodata.get(k, None)
-                if mv is not None and ds[k].vector.nodata is None:
-                    ds[k].vector.set_nodata(mv)
+                if mv is not None and ds[k].attrs.get("_FillValue", None) is None:
+                    ds[k].attrs["_FillValue"] = mv
         return ds
 
     def _apply_unit_conversion(
@@ -187,9 +187,11 @@ class DatasetAdapter(DataAdapter):
             a = self.unit_add.get(name, 0)
             da = ds[name]
             attrs = da.attrs.copy()
-            nodata_isnan = da.vector.nodata is None or np.isnan(da.vector.nodata)
+            nodata_isnan = da.attrs.get("_FillValue", None) is None or np.isnan(
+                da.attrs.get("_FillValue", None)
+            )
             # nodata value is explicitly set to NaN in case no nodata value is provided
-            nodata = np.nan if nodata_isnan else da.vector.nodata
+            nodata = np.nan if nodata_isnan else da.attrs["_FillValue"]
             data_bool = ~np.isnan(da) if nodata_isnan else da != nodata
             ds[name] = xr.where(data_bool, da * m + a, nodata)
             ds[name].attrs.update(attrs)  # set original attributes

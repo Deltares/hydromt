@@ -340,7 +340,7 @@ def test_dataset_to_file(timeseries_df, tmpdir):
         )
 
 
-def test_dataset__read_data(tmpdir, timeseries_df):
+def test_dataset_read_data(tmpdir, timeseries_df):
     ds = timeseries_df[["col1", "col2"]].to_xarray()
     zarr_path = str(tmpdir.join("zarr_data"))
 
@@ -353,16 +353,68 @@ def test_dataset__read_data(tmpdir, timeseries_df):
         dataset_adapter.get_data(variables=["col1", "col2"])
 
 
-def test_dataset__set_nodata(tmpdir, timeseries_df):
+def test_dataset_set_nodata(tmpdir, timeseries_df):
+    ds = timeseries_df[["col1", "col2"]].to_xarray()
+    path = str(tmpdir.join("test.nc"))
+    ds.to_netcdf(path)
+
+    nodata = -999
+    dataset_adapter = DatasetAdapter(path=path, driver="netcdf", nodata=nodata)
+    ds = dataset_adapter.get_data()
+    for k in ds.data_vars:
+        assert ds[k].attrs["_FillValue"] == nodata
+
+    nodata = {"col1": -999, "col2": np.nan}
+    dataset_adapter = DatasetAdapter(path=path, driver="netcdf", nodata=nodata)
+    ds = dataset_adapter.get_data()
+    assert np.isnan(ds["col2"].attrs["_FillValue"])
+    assert ds["col1"].attrs["_FillValue"] == nodata["col1"]
+
+
+def test_dataset_apply_unit_conversion(tmpdir, timeseries_df):
     ds = timeseries_df[["col1", "col2"]].to_xarray()
     path = str(tmpdir.join("test.nc"))
     ds.to_netcdf(path)
 
     dataset_adapter = DatasetAdapter(
-        path=path, driver="netcdf", nodata=dict(nodata=-99)
+        path=path,
+        unit_mult=dict(col1=1000),
     )
+    ds1 = dataset_adapter.get_data()
+
+    assert ds1["col1"].equals(ds["col1"] * 1000)
+
+    dataset_adapter = DatasetAdapter(path=path, unit_add={"time": 10})
+    ds2 = dataset_adapter.get_data()
+    assert ds2["time"][-1].values == np.datetime64("2020-12-31T00:00:10")
+
+
+def test_dataset_set_metadata(tmpdir, timeseries_df):
+    ds = timeseries_df[["col1", "col2"]].to_xarray()
+    path = str(tmpdir.join("test.nc"))
+    ds.to_netcdf(path)
+    meta_data = {"col1": {"long_name": "column1"}, "col2": {"long_name": "column2"}}
+    dataset_adapter = DatasetAdapter(path=path, meta=meta_data)
     ds = dataset_adapter.get_data()
-    raise NotImplementedError
+    assert ds.attrs["col1"].get("long_name") == "column1"
+    assert ds.attrs["col2"].get("long_name") == "column2"
+
+    dataset_adapter = DatasetAdapter(path=path, attrs=meta_data)
+    ds = dataset_adapter.get_data()
+    assert ds["col1"].attrs["long_name"] == "column1"
+    assert ds["col2"].attrs["long_name"] == "column2"
+
+    da = timeseries_df[["col1"]].to_xarray().to_array()
+    da.name = "col1"
+
+    path = str(tmpdir.join("da.nc"))
+    da.to_netcdf(path)
+
+    dataset_adapter = DatasetAdapter(
+        path=path, attrs={"col1": {"long_name": "column1"}}
+    )
+    da = dataset_adapter.get_data()
+    assert da.attrs["long_name"] == "column1"
 
 
 def test_geodataframe(geodf, tmpdir):
