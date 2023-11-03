@@ -9,6 +9,42 @@ building and analyzing spatial geoscientific models with a focus on water system
 It does so by automating the workflow to go from raw data to a complete model instance which
 is ready to run and to analyse model results once the simulation has finished.
 As such it is an interface between *user*, *data* and hydro *models*.
+The image below displays what part of the pre-analysis workflow HydroMT covers:
+
+.. figure:: ../_static/hydromt_before.jpg
+
+  A sequence of a typical pre-analysis workflow, before HydroMT was invented and which part of that workflow HydroMT covers.
+
+.. figure:: ../_static/hydromt_using.jpg
+
+  A sequence describing how the pre-analysis goes using HydroMT
+
+.. figure:: ../_static/hydromt_arch.jpg
+
+  A diagram showing an overview of HydroMT and it's plugin archetecture.
+
+Using HydroMT the workflow can be simplified like so:
+
+.. figure:: ../_static/hydromt_run.jpg
+
+  A diagram showing the workflow using HydroMT
+
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Component        | Reproducibility  | Data Access  | Data Processing  | Input Data | Output Data | Plugin Connection  | Provided by |
++==================+==================+==============+==================+============+=============+====================+=============+
+| Data Adapter     |                  | x            | x                | x          |             |                    | Core        |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Data Catalog     | x                | x            |                  | x          |             |                    | User        |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Workflow         |                  |              | x                |            | x           |                    | Core/Plugin |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Model (object)   |                  |              |                  |            | x           | x                  | Core/Plugin |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Model (config)   | x                |              |                  |            | x           | x                  | User        |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+
+
+
 
 The functionality of HydroMT can be broken down into three components, which are around input data,
 model instances, and methods and workflows. Users can interact with HydroMT through a high-level
@@ -32,6 +68,12 @@ In short, there are three important concepts in HydroMT core that are important 
 .. figure:: ../_static/plugin_structure.png
 
   Schematic of Model and plugin structure of HydroMT
+
+A more detailed overview of how HydroMT functions internally is picutred below:
+
+.. figure:: ../_static/hydromt_run.jpg
+
+  A schematic overview of the sequence of steps that are involved in a HydroMT run.
 
 More concretely HydroMT is organized in the following way:
 
