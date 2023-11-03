@@ -13,15 +13,15 @@ The image below displays what part of the pre-analysis workflow HydroMT covers:
 
 .. figure:: ../_static/hydromt_before.jpg
 
-  A sequence of a typical pre-analysis workflow, and which part of it HydroMT covers.
+  A sequence of a typical pre-analysis workflow, before HydroMT was invented and which part of that workflow HydroMT covers.
 
 .. figure:: ../_static/hydromt_using.jpg
 
-  A sequence of a typical pre-analysis workflow, and which part of it HydroMT covers.
+  A sequence describing how the pre-analysis goes using HydroMT
 
 .. figure:: ../_static/hydromt_arch.jpg
 
-  A sequence of a typical pre-analysis workflow, and which part of it HydroMT covers.
+  A diagram showing an overview of HydroMT and it's plugin archetecture.
 
 Using HydroMT the workflow can be simplified like so:
 
