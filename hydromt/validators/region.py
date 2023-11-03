@@ -111,9 +111,9 @@ class PointLikeRegion(BaseModel):
     def from_list(input_list: Union[List, Tuple[float, float]]) -> "PointLikeRegion":
         """Create a region specification from a [x,y] list or tuple."""
         if isinstance(input_list, Tuple):
-            return PointLikeRegion(point=WGS84Point.from_list(list(input_list)))
+            return PointLikeRegion(points=[WGS84Point.from_list(list(input_list))])
         else:
-            return PointLikeRegion(point=WGS84Point.from_list(input_list))
+            return PointLikeRegion(points=[WGS84Point.from_list(input_list)])
 
     @staticmethod
     def from_xy(x: float, y: float) -> "PointLikeRegion":

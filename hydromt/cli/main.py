@@ -12,6 +12,7 @@ import numpy as np
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.typing import ExportConfigDict
+from hydromt.validators.data_catalog import DataCatalogValidator
 
 from .. import __version__, log
 from ..models import MODELS
@@ -325,6 +326,48 @@ def update(
             opt = {c: opt.get(c, {}) for c in components}
             opt.update({"setup_config": opt0})
         mod.update(model_out=model_out, opt=opt, forceful_overwrite=fo)
+    except Exception as e:
+        logger.exception(e)  # catch and log errors
+        raise
+    finally:
+        for handler in logger.handlers[:]:
+            handler.close()
+            logger.removeHandler(handler)
+
+
+@main.command(
+    short_help="Validate config files are correct",
+)
+@data_opt
+@deltares_data_opt
+@quiet_opt
+@verbose_opt
+@click.pass_context
+def check(
+    ctx,
+    data,
+    dd,
+    quiet: int,
+    verbose: int,
+):
+    """Verify that provided data catalog files are in the correct format.
+
+    Example usage:
+    --------------
+
+    hydromt check -d /path/to/data_catalog.yml
+
+    """  # noqa: E501
+    # logger
+    log_level = max(10, 30 - 10 * (verbose - quiet))
+    logger = log.setuplog("check", join(".", "hydromt.log"), log_level=log_level)
+    logger.info(f"Output dir: {export_dest_path}")
+    try:
+        for cat_path in data:
+            logger.info(f"Validating catalog at {cat_path}")
+            DataCatalogValidator.from_yml(cat_path)
+            logger.info("Catalog is valid!")
+
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise

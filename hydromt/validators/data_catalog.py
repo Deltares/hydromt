@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Union
 from pydantic import AnyUrl, BaseModel, ConfigDict
 from pydantic_core import Url
 
+from hydromt.data_catalog import _yml_from_uri_or_path
 from hydromt.typing import Bbox, Number, TimeRange
 
 
@@ -60,7 +61,7 @@ class DataCatalogItemMetadata(BaseModel):
     notes: Optional[str] = None
 
     model_config: ConfigDict = ConfigDict(
-        str_strip_whitespace=True,
+        str_strip_whitespace=True, coerce_numbers_to_str=True
     )
 
     @staticmethod
@@ -72,8 +73,6 @@ class DataCatalogItemMetadata(BaseModel):
             item_source_url = input_dict.pop("source_url", None)
             if item_source_url:
                 Url(item_source_url)
-            else:
-                pass
             return DataCatalogItemMetadata(**input_dict, source_url=item_source_url)
 
 
@@ -95,7 +94,6 @@ class DataCatalogItem(BaseModel):
     unit_mult: Optional[Dict[str, Number]] = None
 
     model_config: ConfigDict = ConfigDict(
-        # str_to_lower=True,
         str_strip_whitespace=True,
         extra="forbid",
     )
@@ -125,11 +123,9 @@ class DataCatalogValidator(BaseModel):
 
     meta: Optional[DataCatalogMetaData] = None
     sources: Dict[str, DataCatalogItem] = {}
-    # aliases: Dict[str, DataCatalogAlias] = {}
     aliases: Dict[str, str] = {}
 
     model_config: ConfigDict = ConfigDict(
-        # str_to_lower=True,
         str_strip_whitespace=True,
         extra="forbid",
     )
@@ -159,3 +155,9 @@ class DataCatalogValidator(BaseModel):
             return DataCatalogValidator(
                 meta=catalog_meta, sources=catalog_entries, aliases=catalog_aliases
             )
+
+    @staticmethod
+    def from_yml(path: str):
+        """Create a validated datacatalog loaded from the provided path."""
+        yml_dict = _yml_from_uri_or_path(path)
+        return DataCatalogValidator.from_dict(yml_dict)
