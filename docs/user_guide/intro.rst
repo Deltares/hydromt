@@ -11,15 +11,38 @@ is ready to run and to analyse model results once the simulation has finished.
 As such it is an interface between *user*, *data* and hydro *models*.
 The image below displays what part of the pre-analysis workflow HydroMT covers:
 
-.. image:: ../_static/hydromt_what.jpg
+.. figure:: ../_static/hydromt_before.jpg
+
+  A sequence of a typical pre-analysis workflow, and which part of it HydroMT covers.
+
+.. figure:: ../_static/hydromt_using.jpg
+
+  A sequence of a typical pre-analysis workflow, and which part of it HydroMT covers.
+
+.. figure:: ../_static/hydromt_arch.jpg
 
   A sequence of a typical pre-analysis workflow, and which part of it HydroMT covers.
 
 Using HydroMT the workflow can be simplified like so:
 
-.. figure:: ../_static/hydromt_how.jpg
+.. figure:: ../_static/hydromt_run.jpg
 
   A diagram showing the workflow using HydroMT
+
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Component        | Reproducibility  | Data Access  | Data Processing  | Input Data | Output Data | Plugin Connection  | Provided by |
++==================+==================+==============+==================+============+=============+====================+=============+
+| Data Adapter     |                  | x            | x                | x          |             |                    | Core        |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Data Catalog     | x                | x            |                  | x          |             |                    | User        |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Workflow         |                  |              | x                |            | x           |                    | Core/Plugin |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Model (object)   |                  |              |                  |            | x           | x                  | Core/Plugin |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Model (config)   | x                |              |                  |            | x           | x                  | User        |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+
 
 
 
