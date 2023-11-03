@@ -3,7 +3,7 @@
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Tuple, TypedDict, Union
 
 from xarray import DataArray, Dataset
 
@@ -24,6 +24,11 @@ DeferedFileClose = TypedDict(
     {"ds": Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
 )
 XArrayDict = Dict[str, Union[DataArray, Dataset]]
+
+ExportConfigDict = TypedDict(
+    "ExportConfigDict",
+    {"args": Dict[str, Any], "meta": Dict[str, Any], "sources": List[SourceSpecDict]},
+)
 
 
 class ErrorHandleMethod(Enum):
