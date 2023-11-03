@@ -243,8 +243,8 @@ class Model(object, metaclass=ABCMeta):
         self,
         model_out: Optional[Union[str, Path]] = None,
         write: Optional[bool] = True,
-        opt: Dict = None,
-        forceful_overwrite=False,
+        opt: Optional[Dict] = None,
+        forceful_overwrite: bool = False,
     ):
         """Single method to update a model based the settings in `opt`.
 

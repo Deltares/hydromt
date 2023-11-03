@@ -4,6 +4,7 @@
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 from pydantic_core import Url
 
 from hydromt.validators.data_catalog import (
@@ -144,3 +145,24 @@ def test_raster_dataset_entry_validation():
     assert entry.meta.source_license == "CC BY 4.0"
     assert entry.meta.source_url == Url("http://chelsa-climate.org/downloads/")
     assert entry.meta.source_version == "1.2"
+
+
+def test_dataset_entry_with_typo_validation():
+    d = {
+        "crs_num": 4326,
+        "datatype": "RasterDataset",
+        "diver": "raster",
+        "kw_args": {
+            "chunks": {
+                "x": 3600,
+                "y": 3600,
+            }
+        },
+        "filepath": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
+    }
+
+    # 8 errors are:
+    #  - missing crs, data_type, driver and path (4)
+    #  - extra crs_num, datatype, diver, and filepath (5)
+    with pytest.raises(ValidationError, match="8 validation errors"):
+        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")

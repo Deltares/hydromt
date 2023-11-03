@@ -57,7 +57,7 @@ def test_geom_validator():
 def test_geom_non_existant_path_validator():
     b = {"geom": "tests/data/masdfasdfasdf.geojson"}
 
-    with pytest.raises(ValueError, match="File not found at path"):
+    with pytest.raises(ValueError, match="1 validation error"):
         _ = validate_region(b)
 
 

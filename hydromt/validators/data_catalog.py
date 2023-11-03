@@ -17,6 +17,7 @@ class SourceSpecDict(BaseModel):
 
     @staticmethod
     def from_dict(input_dict):
+        """Create a source variant specification from a dictionary."""
         return SourceSpecDict(**input_dict)
 
 
@@ -33,7 +34,10 @@ class DataCatalogMetaData(BaseModel):
     root: Optional[Path] = None
     version: Optional[Union[str, int]] = None
     name: Optional[str] = None
-    model_config = ConfigDict(extra="allow")
+    model_config: ConfigDict = ConfigDict(
+        str_strip_whitespace=True,
+        extra="allow",
+    )
 
     @staticmethod
     def from_dict(input_dict: Optional[Dict]) -> "DataCatalogMetaData":
@@ -54,6 +58,10 @@ class DataCatalogItemMetadata(BaseModel):
     source_url: Optional[AnyUrl] = None
     source_version: Optional[str] = None
     notes: Optional[str] = None
+
+    model_config: ConfigDict = ConfigDict(
+        str_strip_whitespace=True,
+    )
 
     @staticmethod
     def from_dict(input_dict):
@@ -86,6 +94,12 @@ class DataCatalogItem(BaseModel):
     unit_add: Optional[Dict[str, Number]] = None
     unit_mult: Optional[Dict[str, Number]] = None
 
+    model_config: ConfigDict = ConfigDict(
+        # str_to_lower=True,
+        str_strip_whitespace=True,
+        extra="forbid",
+    )
+
     @staticmethod
     def from_dict(input_dict, name=None):
         """Convert a dictionary into a validated source item."""
@@ -114,8 +128,15 @@ class DataCatalogValidator(BaseModel):
     # aliases: Dict[str, DataCatalogAlias] = {}
     aliases: Dict[str, str] = {}
 
+    model_config: ConfigDict = ConfigDict(
+        # str_to_lower=True,
+        str_strip_whitespace=True,
+        extra="forbid",
+    )
+
     @staticmethod
     def from_dict(input_dict):
+        """Create a validated datacatalog from a dictionary."""
         if input_dict is None:
             return DataCatalogValidator()
         else:

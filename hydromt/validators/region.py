@@ -14,28 +14,36 @@ class WGS84Point(BaseModel):
 
     @staticmethod
     def from_dict(input_dict: Dict) -> "WGS84Point":
-        "Create a WGS84Point from a {x:,y:} dictionary."
+        """Create a WGS84Point from a {x:,y:} dictionary."""
         return WGS84Point(**input_dict)
 
     @staticmethod
     def from_list(input_list: List) -> "WGS84Point":
-        "Create a WGS84Point from a [x,y] list."
+        """Create a WGS84Point from a [x,y] list."""
         return WGS84Point(x=input_list[0], y=input_list[1])
 
     @staticmethod
     def from_xy(x: float, y: float) -> "WGS84Point":
-        "Create a WGS84Point from two coordinates."
+        """Create a WGS84Point from two coordinates."""
         return WGS84Point(x=x, y=y)
+
+
+class VariableThreshold(BaseModel):
+    """A threshold to be applied to a region specification."""
+
+    name: str
+    threshold: float = Field(ge=0)
 
 
 class PathlikeRegion(BaseModel):
     """A validation model for a region loaded from a file."""
 
     path: Path
+    threshold: Optional[VariableThreshold] = None
 
     @staticmethod
     def from_path(path: Union[Path, str]) -> "PathlikeRegion":
-        "Create a region that will be loaded from a file."
+        """Create a region that will be loaded from a file."""
         if isinstance(path, Path):
             return PathlikeRegion(path=path)
         else:
@@ -60,7 +68,7 @@ class BoundingBoxLikeRegion(BaseModel):
     def from_list(
         input: Union[Tuple[float, float, float, float], List[float]]
     ) -> "BoundingBoxLikeRegion":
-        "Create a region specification from a [xmin,ymin,xmax,ymax] list."
+        """Create a region specification from a [xmin,ymin,xmax,ymax] list."""
         xmin, ymin, xmax, ymax = input
         return BoundingBoxLikeRegion(
             xmin=xmin,
@@ -71,7 +79,7 @@ class BoundingBoxLikeRegion(BaseModel):
 
     @staticmethod
     def from_dict(input_dict: Dict) -> "BoundingBoxLikeRegion":
-        "Create a region specification from dictionary specifying values for xmin, ymin, xmax, ymax."
+        """Create a region specification from dictionary specifying values for xmin, ymin, xmax, ymax."""
         xmin, ymin, xmax, ymax = input_dict["bbox"]
 
         return BoundingBoxLikeRegion(
@@ -96,12 +104,12 @@ class PointLikeRegion(BaseModel):
 
     @staticmethod
     def from_dict(input_dict: Dict) -> "PointLikeRegion":
-        "Create a region specification from dictionary specifying values for x and y."
-        return PointLikeRegion(point=WGS84Point.from_dict(input_dict))
+        """Create a region specification from dictionary specifying values for x and y."""
+        return PointLikeRegion(points=[WGS84Point.from_dict(input_dict)])
 
     @staticmethod
     def from_list(input_list: Union[List, Tuple[float, float]]) -> "PointLikeRegion":
-        "Create a region specification from a [x,y] list or tuple."
+        """Create a region specification from a [x,y] list or tuple."""
         if isinstance(input_list, Tuple):
             return PointLikeRegion(point=WGS84Point.from_list(list(input_list)))
         else:
@@ -109,17 +117,17 @@ class PointLikeRegion(BaseModel):
 
     @staticmethod
     def from_xy(x: float, y: float) -> "PointLikeRegion":
-        "Create a region specification by specifying values for x and y."
+        """Create a region specification by specifying values for x and y."""
         return PointLikeRegion(points=[WGS84Point.from_xy(x=x, y=y)])
 
     @staticmethod
     def from_points(l: List[WGS84Point]) -> "PointLikeRegion":
-        "Create a region specification by specifying values for x and y."
+        """Create a region specification by specifying values for x and y."""
         return PointLikeRegion(points=l)
 
     @staticmethod
     def from_xy_lists(xs: list[float], ys: list[float]) -> "PointLikeRegion":
-        "Create a region specification from lists specifying [x1,...,xn] and [y1,...,yn] respectively."
+        """Create a region specification from lists specifying [x1,...,xn] and [y1,...,yn] respectively."""
         tups = zip(xs, ys)
 
         return PointLikeRegion(points=[WGS84Point.from_xy(x=x, y=y) for (x, y) in tups])
@@ -140,13 +148,6 @@ BoundingBoxRegion = BoundingBoxLikeRegion
 PointBasinRegion = PointLikeRegion
 MultiPointBasinRegion = PointLikeRegion
 BoundingBoxBasinRegion = BoundingBoxLikeRegion
-
-
-class VariableThreshold(BaseModel):
-    """A threshold to be applied to a region specification."""
-
-    name: str
-    threshold: float = Field(ge=0)
 
 
 Region = Union[
@@ -209,7 +210,7 @@ def validate_region(input: Dict[str, Any]) -> Optional[Region]:
                 return PointSubBasinRegion.from_xy(x=val[0], y=val[1])
             elif (
                 isinstance(val[0], (float, int)) and len(val) == 4
-            ):  # [xmin,ymin, xmaxn ymax]
+            ):  # [xmin, ymin, xmaxn, ymax]
                 return BoundingBoxSubBasinRegion.from_list(val)
             elif isinstance(val[0], list):  # [[x1,...,xn], [y1,..,yn]]
                 return MultiPointSubBasinRegion.from_xy_lists(xs=val[0], ys=val[1])
@@ -224,7 +225,7 @@ def validate_region(input: Dict[str, Any]) -> Optional[Region]:
         if isinstance(val, list):
             if (
                 isinstance(val[0], (float, int)) and len(val) == 4
-            ):  # [xmin,ymin, xmaxn ymax]
+            ):  # [xmin, ymin, xmaxn, ymax]
                 return BoundingBoxInterBasinRegion.from_list(val)
             else:
                 raise ValidationError(f"Unknown subbasin kind: {val}")
