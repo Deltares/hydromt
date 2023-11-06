@@ -8,6 +8,18 @@ platforms = ["linux-64", "win-64"]
 
 [tasks]
 
+dev = { depends_on = [
+  "dev-env",
+  "dev-create-mamba-env",
+  "dev-install-hydromt",
+  "dev-install-pre-commit",
+] }
+dev-env = "python make_env.py full -n hydromt-dev"
+dev-create-mamba-env = "mamba env remove -n hydromt-dev; mamba env create -f environment.yml"
+dev-install-hydromt = "mamba run -n hydromt-dev pip install -e ."
+dev-install-pre-commit = "mamba run -n hydromt-dev pre-commit install"
+
+lint = { cmd = ["pre-commit", "run", "--all"] }
 install = { depends_on = ["pixi-install", "install-pip-deps"] }
 pixi-install = "pixi install"
 env-slim = { cmd = [
@@ -63,16 +75,7 @@ docker-publish = { depends_on = [
 ] }
 docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
 
-html = { cmd = [
-  "sphinx-build",
-  "-M",
-  "html",
-  "docs",
-  "docs/_build",
-  "-W",
-], depends_on = [
-  "install-pip-deps",
-] }
+html = { cmd = ["sphinx-build", "-M", "html", "docs", "docs/_build", "-W"] }
 docs = { depends_on = ["html"] }
 doc = { depends_on = ["html"] }
 pypi = { depends_on = [
@@ -94,12 +97,7 @@ clean = { depends_on = [
   "clean-docs-build",
   "clean-docs-exmaples",
 ] }
-clean-env-files = { cmd = [
-  "rm",
-  "-f",
-  "environment.yml",
-  "min-environment.yml",
-] }
+clean-env-files = { cmd = ["rm", "-f", "*environment.yml"] }
 clean-dist = { cmd = ["rm", "-rf", "dist"] }
 clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
 clean-docs-build = { cmd = ["rm", "-rf", "docs/_build"] }
@@ -146,7 +144,6 @@ pillow = "*"
 pip = ">=23.1.2"
 pre-commit = "*"
 pydata-sphinx-theme = "*"
-# pyet = "*"
 pyflwdir = ">=0.5.4"
 pyogrio = ">=0.6"
 pyproj = "*"
@@ -158,15 +155,12 @@ pytest-timeout = "*"
 pyyaml = "*"
 rasterio = "*"
 requests = "*"
-# rio-vrt = "*"
 rioxarray = "*"
 ruff = "*"
 s3fs = "*"
 scipy = "*"
 shapely = ">=2.0.0"
-# sphinx_autosummary_accessors = "*"
 sphinx = "*"
-# sphinx_design = "*"
 tomli = "*"
 tomli-w = "*"
 twine = "*"
