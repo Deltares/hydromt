@@ -115,9 +115,14 @@ clean = { depends_on = [
   "clean-env-files",
   "clean-dist",
   "clean-docs-generated",
-  "clean-docs-examples",
+  "clean-docs-exmaples",
 ] }
-clean-env-files = { cmd = ["rm", "-f", "*environment.yml"] }
+clean-env-files = { cmd = [
+  "rm",
+  "-f",
+  "environment.yml",
+  "min-environment.yml",
+] }
 clean-dist = { cmd = ["rm", "-rf", "dist"] }
 clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
 clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
