@@ -13,7 +13,7 @@ However, there is a script that can generate the conda environment specification
 Developer installation guide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here we describe two ways to install HydroMT for development.
+Here we describe three ways to install HydroMT for development.
 The first is using the `makefile` which boils down to running a single command.
 The second is a step-by-step guide that shows you exactly what the makefile does
 and how to do it manually.
@@ -58,6 +58,25 @@ If you would like this to be the case you can also add make this the default beh
 .. code-block:: console
 
     $ echo 'export PY_ENV_MANAGER=conda' >> ~/.$(basename $0)rc
+
+
+Pixi based installation
+---------------------------
+
+As a more cross-platform compatible alternative, we use `pixi <https://prefix.dev/docs/pixi/overview>`_ as our task runner. For more information about installing pixi please refer to the linked webpage.
+
+Once pixi is installed you can create a developer instalation by running the following command:
+
+.. code-block:: console
+
+    $ pixi run dev
+
+This will create an environment file, create an environment called `hydromt-dev` using mamba as a package manager and install hydromt into it. As of yet, using other package managers is not supported out of the box, though you can edit the `pixi.toml` file directly
+
+.. warning::
+
+    Because pixi does not support all the features that HydroMT uses at the time of writing, pixi is only used as a task runner. The pixi tasks (aside from `dev`) still assume that HydroMT is already instlled. We plan to expand support for installing via pixi as soon as the necessary features are released.
+
 
 Step-by-step installation
 --------------------------
@@ -135,4 +154,4 @@ We also have 3 "flavors". These are more or less just collections of one or more
 2. `slim` Just the operational bits, what most people will probably want if you using HydroMT and what the cloud will most likely use
 3. `full` absolutely everything, useful for developing.
 
-We also have docker images for each of the flavours that should be published soon (but are not yet as the writing of this section)
+We also have docker images for each of the flavours available on the deltares dockerhub page.
