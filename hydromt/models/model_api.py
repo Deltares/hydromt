@@ -91,7 +91,7 @@ class Model(object, metaclass=ABCMeta):
             Note that this is not the HydroMT model setup configuration file!
         data_libs : List[str], optional
             List of data catalog configuration files, by default None
-        \\**artifact_keys:
+        \**artifact_keys:
             Additional keyword arguments to be passed down.
         logger:
             The logger to be used.
@@ -191,9 +191,9 @@ class Model(object, metaclass=ABCMeta):
 
         Methods will be run one by one based on the order of appearance in `opt`
         (.ini configuration file). All model methods are supported including
-        setup\\_\\*, read\\_\\* and write\\_\\* methods.
+        setup\_\*, read\_\* and write\_\* methods.
 
-        If a write\\_\\* option is listed in `opt` (ini file) the full writing of the
+        If a write\_\* option is listed in `opt` (ini file) the full writing of the
         model at the end of the update process is skipped.
 
         Parameters
@@ -255,8 +255,8 @@ class Model(object, metaclass=ABCMeta):
         Methods will be run one by one based on the order of appearance in `opt`
         (ini configuration file).
 
-        All model methods are supported including setup\\_\\*, read\\_\\* and write\\_\\* methods.
-        If a write\\_\\* option is listed in `opt` (ini file) the full writing of the model
+        All model methods are supported including setup\_\*, read\_\* and write\_\* methods.
+        If a write\_\* option is listed in `opt` (ini file) the full writing of the model
         at the end of the update process is skipped.
 
         Parameters
@@ -1449,7 +1449,7 @@ class Model(object, metaclass=ABCMeta):
         ----------
         fn : str, optional
             filename relative to model root, may contain wildcards,
-            by default states/\\*.nc
+            by default states/\*.nc
         kwargs:
             Additional keyword arguments that are passed to the `read_nc`
             function.
