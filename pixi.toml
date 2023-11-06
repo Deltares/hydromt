@@ -9,19 +9,17 @@ platforms = ["linux-64", "win-64"]
 [tasks]
 
 dev = { depends_on = [
-  "dev-env",
+  "dev-env-file",
   "dev-create-mamba-env",
   "dev-install-hydromt",
   "dev-install-pre-commit",
 ] }
-dev-env = "python make_env.py full -n hydromt-dev"
+dev-env-file = "python make_env.py full -n hydromt-dev"
 dev-create-mamba-env = "mamba env remove -n hydromt-dev; mamba env create -f environment.yml"
 dev-install-hydromt = "mamba run -n hydromt-dev pip install -e ."
 dev-install-pre-commit = "mamba run -n hydromt-dev pre-commit install"
 
 lint = { cmd = ["pre-commit", "run", "--all"] }
-install = { depends_on = ["pixi-install", "install-pip-deps"] }
-pixi-install = "pixi install"
 env-slim = { cmd = [
   "python",
   "make_env.py",
@@ -34,32 +32,32 @@ env-full = { cmd = [
   "make_env.py",
   "full",
   "-o",
-  "slim-environment.yml",
+  "full-environment.yml",
 ] }
-env-min = { cmd = ["python", "make_env.py", "-o", "slim-environment.yml"] }
+env-min = { cmd = ["python", "make_env.py", "-o", "min-environment.yml"] }
 
-docker-min = { cmd = [
+docker-build-min = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:min",
   "--target=min .",
 ], depends_on = "env-min" }
-docker-full = { cmd = [
+docker-build-full = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:full",
   " --target=full .",
 ], depends_on = "env-full" }
-docker-slim = { cmd = [
+docker-build-slim = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:slim",
   " --target=slim .",
 ], depends_on = "env-slim" }
-docker-latest = { cmd = [
+docker-build-latest = { cmd = [
   "docker",
   "build",
   "-t",
@@ -67,11 +65,39 @@ docker-latest = { cmd = [
   " --target=slim .",
 ], depends_on = "env-slim" }
 
+docker-publish-min = { cmd = [
+  "docker",
+  "push",
+  "deltares/hydromt:min",
+], depends_on = [
+  "docker-build-min ",
+] }
+docker-publish-slim = { cmd = [
+  "docker",
+  "push",
+  "deltares/hydromt:slim",
+], depends_on = [
+  "docker-build-slim ",
+] }
+docker-publish-latest = { cmd = [
+  "docker",
+  "push",
+  "deltares/hydromt:latest",
+], depends_on = [
+  "docker-build-latest ",
+] }
+docker-publish-full = { cmd = [
+  "docker",
+  "push",
+  "deltares/hydromt:full",
+], depends_on = [
+  "docker-build-full ",
+] }
 docker-publish = { depends_on = [
-  "docker-min",
-  "docker-slim",
-  "docker-latest",
-  "docker-full",
+  "docker-publish-min",
+  "docker-publish-slim",
+  "docker-publish-latest",
+  "docker-publish-full",
 ] }
 docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
 
@@ -103,69 +129,5 @@ clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
 clean-docs-build = { cmd = ["rm", "-rf", "docs/_build"] }
 clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
-install-pip-deps = { cmd = [
-  "pip",
-  "install",
-  "pyet",
-  "sphinx_autosummary_accessors",
-  "rio-vrt",
-  "sphinx_design",
-] }
-
-[dependencies]
-# For now pixi doesn't support optinal dependencies so just add everything
-# support this in make_env.py
-
-affine = "*"
-black = "*"
-bottleneck = "*"
-cartopy = "*"
-click = "*"
-dask = "*"
-entrypoints = "*"
-fastparquet = "*"
-flit = "*"
-fsspec = "*"
-gcsfs = "*"
-geopandas = ">=0.10"
-hydromt = "*"
-jupyterlab = "*"
-matplotlib = "*"
-mercantile = "*"
-nbsphinx = "*"
-netcdf4 = "*"
-notebook = "*"
-numba = "*"
-numpy = ">=1.23"
-openpyxl = "*"
-packaging = "*"
-pandas = "*"
-pillow = "*"
-pip = ">=23.1.2"
-pre-commit = "*"
-pydata-sphinx-theme = "*"
-pyflwdir = ">=0.5.4"
-pyogrio = ">=0.6"
-pyproj = "*"
-pystac = "*"
-pytest = ">=2.7.3"
-pytest-cov = "*"
-pytest-mock = "*"
-pytest-timeout = "*"
-pyyaml = "*"
-rasterio = "*"
-requests = "*"
-rioxarray = "*"
-ruff = "*"
-s3fs = "*"
-scipy = "*"
-shapely = ">=2.0.0"
-sphinx = "*"
-tomli = "*"
-tomli-w = "*"
-twine = "*"
-universal_pathlib = "*"
-xarray = "*"
-xmltodict = "*"
-xugrid = ">=0.6.5"
-zarr = "*"
+test = { cmd = ["pytest"] }
+test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
