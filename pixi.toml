@@ -4,8 +4,191 @@ version = "0.1.0"
 description = "Add a short description here"
 authors = ["Sam Vente <savente93@gmail.com>"]
 channels = ["conda-forge"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 
 [tasks]
 
+# dev = { cmd = [
+#   "python",
+#   "make_env.py",
+#   "full",
+#   "-n",
+#   "hydromt-dev",
+#   "mamba",
+#   "env",
+#   "create",
+#   "-f",
+#   "environment.yml",
+#   "mamba",
+#   "run",
+#   "-n",
+#   "hydromt-dev",
+#   "pip",
+#   "install",
+#   "-e",
+#   ".",
+#   "mamba",
+#   "run",
+#   "-n",
+#   "hydromt-dev",
+#   "pre-commit",
+#   "install",
+# ] }
+env-slim = { cmd = [
+  "python",
+  "make_env.py",
+  "slim",
+  "-o",
+  "slim-environment.yml",
+] }
+env-full = { cmd = [
+  "python",
+  "make_env.py",
+  "full",
+  "-o",
+  "slim-environment.yml",
+] }
+env-min = { cmd = ["python", "make_env.py", "-o", "slim-environment.yml"] }
+
+docker-min = { cmd = [
+  "docker",
+  "build",
+  "-t",
+  "deltares/hydromt:min",
+  "--target=min .",
+], depends_on = "env-min" }
+docker-full = { cmd = [
+  "docker",
+  "build",
+  "-t",
+  "deltares/hydromt:full",
+  " --target=full .",
+], depends_on = "env-full" }
+docker-slim = { cmd = [
+  "docker",
+  "build",
+  "-t",
+  "deltares/hydromt:slim",
+  " --target=slim .",
+], depends_on = "env-slim" }
+docker-latest = { cmd = [
+  "docker",
+  "build",
+  "-t",
+  "deltares/hydromt:latest",
+  " --target=slim .",
+], depends_on = "env-slim" }
+
+docker-publish = { depends_on = [
+  "docker-min",
+  "docker-slim",
+  "docker-latest",
+  "docker-full",
+] }
+docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
+
+html = { cmd = [
+  "sphinx-build",
+  "-M",
+  "html",
+  "docs",
+  "docs/_build",
+  "-W",
+], depends_on = [
+  "install-pip-deps",
+] }
+docs = { depends_on = ["html"] }
+doc = { depends_on = ["html"] }
+pypi = { depends_on = [
+  "pypi-git-clean",
+  "pypi-git-restore",
+  "pypi-flit-build",
+  "pypi-twine",
+] }
+pypi-git-clean = { cmd = ["git", "clean", "-xdf"] }
+pypi-git-resore = { cmd = ["git", "restore", "-SW", "."] }
+pypi-flit-build = { cmd = ["flit", "build"] }
+pypi-twine = { cmd = ["python", "-m", "twine", "check", "dist/*"] }
+
+# clean
+clean = { depends_on = [
+  "clean-env-files",
+  "clean-dist",
+  "clean-docs-generated",
+  "clean-docs-examples",
+] }
+clean-env-files = { cmd = ["rm", "-f", "*environment.yml"] }
+clean-dist = { cmd = ["rm", "-rf", "dist"] }
+clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
+clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
+
+install-pip-deps = { cmd = [
+  "pip",
+  "install",
+  "pyet",
+  "sphinx_autosummary_accessors",
+  "rio-vrt",
+  "sphinx_design",
+] }
+
 [dependencies]
+# For now pixi doesn't support optinal dependencies so just add everything
+# support this in make_env.py
+
+affine = "*"
+black = "*"
+bottleneck = "*"
+cartopy = "*"
+click = "*"
+dask = "*"
+entrypoints = "*"
+fastparquet = "*"
+flit = "*"
+fsspec = "*"
+gcsfs = "*"
+geopandas = ">=0.10"
+hydromt = "*"
+jupyterlab = "*"
+matplotlib = "*"
+mercantile = "*"
+nbsphinx = "*"
+netcdf4 = "*"
+notebook = "*"
+numba = "*"
+numpy = ">=1.23"
+openpyxl = "*"
+packaging = "*"
+pandas = "*"
+pillow = "*"
+pip = ">=23.1.2"
+pre-commit = "*"
+pydata-sphinx-theme = "*"
+# pyet = "*"
+pyflwdir = ">=0.5.4"
+pyogrio = ">=0.6"
+pyproj = "*"
+pystac = "*"
+pytest = ">=2.7.3"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest-timeout = "*"
+pyyaml = "*"
+rasterio = "*"
+requests = "*"
+# rio-vrt = "*"
+rioxarray = "*"
+ruff = "*"
+s3fs = "*"
+scipy = "*"
+shapely = ">=2.0.0"
+# sphinx_autosummary_accessors = "*"
+sphinx = "*"
+# sphinx_design = "*"
+tomli = "*"
+tomli-w = "*"
+twine = "*"
+universal_pathlib = "*"
+xarray = "*"
+xmltodict = "*"
+xugrid = ">=0.6.5"
+zarr = "*"
