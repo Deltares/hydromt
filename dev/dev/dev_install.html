@@ -415,6 +415,7 @@ document.write(`
 
 
 
+
 <li class="toctree-l1"><a class="reference internal" href="team.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin-quickstart.html">Starting your own HydroMT Plugin</a></li>
 
@@ -483,7 +484,7 @@ To make sure all dependencies are up to dat we only provide a pyproject.toml tha
 However, there is a script that can generate the conda environment specification for you.</p>
 <section id="developer-installation-guide">
 <span id="dev-install"></span><h2>Developer installation guide<a class="headerlink" href="#developer-installation-guide" title="Link to this heading">#</a></h2>
-<p>Here we describe two ways to install HydroMT for development.
+<p>Here we describe three ways to install HydroMT for development.
 The first is using the <cite>makefile</cite> which boils down to running a single command.
 The second is a step-by-step guide that shows you exactly what the makefile does
 and how to do it manually.</p>
@@ -517,6 +518,19 @@ different one like, conda, you only have to set the environment variable like th
 <p>If you would like this to be the case you can also add make this the default behavior with the following command:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PY_ENV_MANAGER=conda&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.<span class="k">$(</span>basename<span class="w"> </span><span class="nv">$0</span><span class="k">)</span>rc
 </pre></div>
+</div>
+</section>
+<section id="pixi-based-installation">
+<h1>Pixi based installation<a class="headerlink" href="#pixi-based-installation" title="Link to this heading">#</a></h1>
+<p>As a more cross-platform compatible alternative, we use <a class="reference external" href="https://prefix.dev/docs/pixi/overview">pixi</a> as our task runner. For more information about installing pixi please refer to the linked webpage.</p>
+<p>Once pixi is installed you can create a developer instalation by running the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pixi<span class="w"> </span>run<span class="w"> </span>dev
+</pre></div>
+</div>
+<p>This will create an environment file, create an environment called <cite>hydromt-dev</cite> using mamba as a package manager and install hydromt into it. As of yet, using other package managers is not supported out of the box, though you can edit the <cite>pixi.toml</cite> file directly</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Because pixi does not support all the features that HydroMT uses at the time of writing, pixi is only used as a task runner. The pixi tasks (aside from <cite>dev</cite>) still assume that HydroMT is already instlled. We plan to expand support for installing via pixi as soon as the necessary features are released.</p>
 </div>
 </section>
 <section id="step-by-step-installation">
@@ -576,7 +590,7 @@ with the extra, io and doc dependencies.</p>
 1. <cite>min</cite> no optional dependencies. mostly as a base to build your DIY stack on.
 2. <cite>slim</cite> Just the operational bits, what most people will probably want if you using HydroMT and what the cloud will most likely use
 3. <cite>full</cite> absolutely everything, useful for developing.</p>
-<p>We also have docker images for each of the flavours that should be published soon (but are not yet as the writing of this section)</p>
+<p>We also have docker images for each of the flavours available on the deltares dockerhub page.</p>
 </section>
 
 
@@ -627,6 +641,7 @@ with the extra, io and doc dependencies.</p>
 </ul>
 </li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#makefile-based-installation">Makefile based installation</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#pixi-based-installation">Pixi based installation</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-by-step-installation">Step-by-step installation</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#fine-tuned-installation">Fine tuned installation</a></li>
 </ul>

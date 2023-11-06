@@ -532,7 +532,7 @@ document.write(`
         <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
         <span class="o">**</span><span class="n">artifact_keys</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize a model.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -545,7 +545,7 @@ document.write(`
 <span class="sd">            Note that this is not the HydroMT model setup configuration file!</span>
 <span class="sd">        data_libs : List[str], optional</span>
 <span class="sd">            List of data catalog configuration files, by default None</span>
-<span class="sd">        **artifact_keys:</span>
+<span class="sd">        \**artifact_keys:</span>
 <span class="sd">            Additional keyword arguments to be passed down.</span>
 <span class="sd">        logger:</span>
 <span class="sd">            The logger to be used.</span>
@@ -644,13 +644,13 @@ document.write(`
         <span class="n">write</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">opt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Single method to build a model from scratch based on settings in `opt`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Single method to build a model from scratch based on settings in `opt`.</span>
 
 <span class="sd">        Methods will be run one by one based on the order of appearance in `opt`</span>
 <span class="sd">        (.ini configuration file). All model methods are supported including</span>
-<span class="sd">        setup_*, read_* and write_* methods.</span>
+<span class="sd">        setup\_\*, read\_\* and write\_\* methods.</span>
 
-<span class="sd">        If a write_* option is listed in `opt` (ini file) the full writing of the</span>
+<span class="sd">        If a write\_\* option is listed in `opt` (ini file) the full writing of the</span>
 <span class="sd">        model at the end of the update process is skipped.</span>
 
 <span class="sd">        Parameters</span>
@@ -664,7 +664,7 @@ document.write(`
 <span class="sd">            Model build configuration. The configuration can be parsed from a</span>
 <span class="sd">            .ini file using :py:meth:`~hydromt.config.configread`.</span>
 <span class="sd">            This is a nested dictionary where the first-level keys are the names</span>
-<span class="sd">            of model specific (setup) methods and the second-level contain</span>
+<span class="sd">            of model specific methods and the second-level contain</span>
 <span class="sd">            argument-value pairs of the method.</span>
 
 <span class="sd">            .. code-block:: text</span>
@@ -710,13 +710,13 @@ document.write(`
         <span class="n">opt</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">forceful_overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Single method to update a model based the settings in `opt`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Single method to update a model based the settings in `opt`.</span>
 
 <span class="sd">        Methods will be run one by one based on the order of appearance in `opt`</span>
 <span class="sd">        (ini configuration file).</span>
 
-<span class="sd">        All model methods are supported including setup_*, read_* and write_* methods.</span>
-<span class="sd">        If a write_* option is listed in `opt` (ini file) the full writing of the model</span>
+<span class="sd">        All model methods are supported including setup\_\*, read\_\* and write\_\* methods.</span>
+<span class="sd">        If a write\_\* option is listed in `opt` (ini file) the full writing of the model</span>
 <span class="sd">        at the end of the update process is skipped.</span>
 
 <span class="sd">        Parameters</span>
@@ -731,7 +731,7 @@ document.write(`
 <span class="sd">            Model build configuration. The configuration can be parsed from a</span>
 <span class="sd">            .ini file using :py:meth:`~hydromt.config.configread`.</span>
 <span class="sd">            This is a nested dictionary where the first-level keys</span>
-<span class="sd">            are the names of model specific (setup) methods and</span>
+<span class="sd">            are the names of model specific methods and</span>
 <span class="sd">            the second-level contain argument-value pairs of the method.</span>
 
 <span class="sd">            .. code-block:: text</span>
@@ -1397,7 +1397,7 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">_staticmaps</span><span class="p">[</span><span class="n">dvar</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dvar</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">read_staticmaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;staticmaps/staticmaps.nc&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read static model maps at &lt;root&gt;/&lt;fn&gt; and add to staticmaps property.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Read static model maps at &lt;root&gt;/&lt;fn&gt; and add to staticmaps property.</span>
 
 <span class="sd">        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`</span>
 
@@ -1408,7 +1408,7 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        fn : str, optional</span>
 <span class="sd">            filename relative to model root, by default &quot;staticmaps/staticmaps.nc&quot;</span>
-<span class="sd">        **kwargs:</span>
+<span class="sd">        \**kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the</span>
 <span class="sd">            `read_nc` function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1417,7 +1417,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">set_staticmaps</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">write_staticmaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;staticmaps/staticmaps.nc&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write static model maps to netcdf file at &lt;root&gt;/&lt;fn&gt;.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Write static model maps to netcdf file at &lt;root&gt;/&lt;fn&gt;.</span>
 
 <span class="sd">        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`</span>
 
@@ -1428,7 +1428,7 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        fn : str, optional</span>
 <span class="sd">            filename relative to model root, by default &#39;staticmaps/staticmaps.nc&#39;</span>
-<span class="sd">        **kwargs:</span>
+<span class="sd">        \**kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the</span>
 <span class="sd">            `write_nc` function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1525,7 +1525,7 @@ document.write(`
         <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.</span>
 
 <span class="sd">        This is done by reclassifying the data in</span>
 <span class="sd">        ``raster_fn`` based on ``reclass_table_fn``.</span>
@@ -1562,7 +1562,7 @@ document.write(`
 <span class="sd">        rename: dict, optional</span>
 <span class="sd">            Dictionary to rename variable names in reclass_variables before adding to</span>
 <span class="sd">            grid {&#39;name_in_reclass_table&#39;: &#39;name_in_grid&#39;}. By default empty.</span>
-<span class="sd">        **kwargs:</span>
+<span class="sd">        \**kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the</span>
 <span class="sd">            `data_catalog.get_rasterdataset` function.</span>
 
@@ -1645,7 +1645,7 @@ document.write(`
 <div class="viewcode-block" id="Model.read_maps">
 <a class="viewcode-back" href="../../../_generated/hydromt.Model.read_maps.html#hydromt.Model.read_maps">[docs]</a>
     <span class="k">def</span> <span class="nf">read_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;maps/*.nc&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read model map at &lt;root&gt;/&lt;fn&gt; and add to maps component.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Read model map at &lt;root&gt;/&lt;fn&gt; and add to maps component.</span>
 
 <span class="sd">        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`</span>
 
@@ -1653,7 +1653,7 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        fn : str, optional</span>
 <span class="sd">            filename relative to model root, may contain wildcards,</span>
-<span class="sd">            by default ``maps/*.nc``</span>
+<span class="sd">            by default ``maps/\*.nc``</span>
 <span class="sd">        kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the</span>
 <span class="sd">            `read_nc` function.</span>
@@ -1667,7 +1667,7 @@ document.write(`
 <div class="viewcode-block" id="Model.write_maps">
 <a class="viewcode-back" href="../../../_generated/hydromt.Model.write_maps.html#hydromt.Model.write_maps">[docs]</a>
     <span class="k">def</span> <span class="nf">write_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="s2">&quot;maps/</span><span class="si">{name}</span><span class="s2">.nc&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write maps to netcdf file at &lt;root&gt;/&lt;fn&gt;.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Write maps to netcdf file at &lt;root&gt;/&lt;fn&gt;.</span>
 
 <span class="sd">        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`</span>
 
@@ -1676,7 +1676,7 @@ document.write(`
 <span class="sd">        fn : str, optional</span>
 <span class="sd">            filename relative to model root and should contain a {name} placeholder,</span>
 <span class="sd">            by default &#39;maps/{name}.nc&#39;</span>
-<span class="sd">        **kwargs:</span>
+<span class="sd">        \**kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the</span>
 <span class="sd">            `write_nc` function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1727,7 +1727,7 @@ document.write(`
 <div class="viewcode-block" id="Model.read_geoms">
 <a class="viewcode-back" href="../../../_generated/hydromt.Model.read_geoms.html#hydromt.Model.read_geoms">[docs]</a>
     <span class="k">def</span> <span class="nf">read_geoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;geoms/*.geojson&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read model geometries files at &lt;root&gt;/&lt;fn&gt; and add to geoms property.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Read model geometries files at &lt;root&gt;/&lt;fn&gt; and add to geoms property.</span>
 
 <span class="sd">        key-word arguments are passed to :py:func:`geopandas.read_file`</span>
 
@@ -1735,7 +1735,7 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        fn : str, optional</span>
 <span class="sd">            filename relative to model root, may contain wildcards,</span>
-<span class="sd">            by default ``geoms/*.nc``</span>
+<span class="sd">            by default ``geoms/\*.nc``</span>
 <span class="sd">        **kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the</span>
 <span class="sd">            `geopandas.read_file` function.</span>
@@ -1751,7 +1751,7 @@ document.write(`
 <div class="viewcode-block" id="Model.write_geoms">
 <a class="viewcode-back" href="../../../_generated/hydromt.Model.write_geoms.html#hydromt.Model.write_geoms">[docs]</a>
     <span class="k">def</span> <span class="nf">write_geoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;geoms/</span><span class="si">{name}</span><span class="s2">.geojson&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write model geometries to a vector file (by default GeoJSON) at &lt;root&gt;/&lt;fn&gt;.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Write model geometries to a vector file (by default GeoJSON) at &lt;root&gt;/&lt;fn&gt;.</span>
 
 <span class="sd">        key-word arguments are passed to :py:meth:`geopandas.GeoDataFrame.to_file`</span>
 
@@ -1760,7 +1760,7 @@ document.write(`
 <span class="sd">        fn : str, optional</span>
 <span class="sd">            filename relative to model root and should contain a {name} placeholder,</span>
 <span class="sd">            by default &#39;geoms/{name}.geojson&#39;</span>
-<span class="sd">        **kwargs:</span>
+<span class="sd">        \**kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the</span>
 <span class="sd">            `geopandas.to_file` function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1897,7 +1897,7 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        fn : str, optional</span>
 <span class="sd">            filename relative to model root, may contain wildcards,</span>
-<span class="sd">            by default ``forcing/*.nc``</span>
+<span class="sd">            by default forcing/.nc</span>
 <span class="sd">        kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the `read_nc`</span>
 <span class="sd">            function.</span>
@@ -1970,7 +1970,7 @@ document.write(`
 <div class="viewcode-block" id="Model.read_states">
 <a class="viewcode-back" href="../../../_generated/hydromt.Model.read_states.html#hydromt.Model.read_states">[docs]</a>
     <span class="k">def</span> <span class="nf">read_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;states/*.nc&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read states at &lt;root&gt;/&lt;fn&gt; and add to states property.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Read states at &lt;root&gt;/&lt;fn&gt; and add to states property.</span>
 
 <span class="sd">        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`</span>
 
@@ -1978,7 +1978,7 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        fn : str, optional</span>
 <span class="sd">            filename relative to model root, may contain wildcards,</span>
-<span class="sd">            by default ``states/*.nc``</span>
+<span class="sd">            by default states/\*.nc</span>
 <span class="sd">        kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the `read_nc`</span>
 <span class="sd">            function.</span>
