@@ -23,7 +23,7 @@ dependencies = [
   "numpy>=1.23",       # pin necessary to ensure compatability with C headers
   "packaging",         # compare versions of hydromt
   "pandas",            # Dataframes
-  "pydantic",          # Validation
+  "pydantic~=2.4.0",   # Validation
   "pyflwdir>=0.5.4",   # Hight models and derivatives
   "pyogrio>=0.6",      # io for geopandas dataframes
   "pyproj",            # projections for Coordinate reference systems
