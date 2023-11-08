@@ -7,8 +7,6 @@ from pydantic import BaseModel
 class HydromtStep(BaseModel):
     """A Pydantic model for the validation of model config files."""
 
-    # fn: Callable
-    # args: Dict[str, Any]
     fn: str
     args: Dict[str, Any]
 
@@ -16,7 +14,6 @@ class HydromtStep(BaseModel):
     def from_dict(input_dict):
         """Generate a validated model of a step in a model config files."""
         fn_name, arg_dict = next(iter(input_dict.items()))
-        # TODO figure out where funcs are actually comming from
-        # fn = getattr(hydromt, fn_name)
-        # return HydromtStep(fn=getattr(hydromt, fn_name), args=arg_dict)
+        # TODO figure out how to actually load the correct functions form the correct
+        # namespace from the provided names
         return HydromtStep(fn=fn_name, args=arg_dict)

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, ConfigDict
+from pydantic.fields import Field
 from pydantic_core import Url
 
 from hydromt.data_catalog import _yml_from_uri_or_path
@@ -85,9 +86,9 @@ class DataCatalogItem(BaseModel):
     path: Path
     crs: Optional[int] = None
     filesystem: Optional[str] = None
-    kwargs: Dict[str, Any] = {}
-    storage_options: Dict[str, Any] = {}
-    rename: Dict[str, str] = {}
+    kwargs: Dict[str, Any] = Field(default_factory=dict)
+    storage_options: Dict[str, Any] = Field(default_factory=dict)
+    rename: Dict[str, str] = Field(default_factory=dict)
     nodata: Optional[Number] = None
     meta: Optional[DataCatalogItemMetadata] = None
     unit_add: Optional[Dict[str, Number]] = None
@@ -122,8 +123,8 @@ class DataCatalogValidator(BaseModel):
     """A validated complete data catalog."""
 
     meta: Optional[DataCatalogMetaData] = None
-    sources: Dict[str, DataCatalogItem] = {}
-    aliases: Dict[str, str] = {}
+    sources: Dict[str, DataCatalogItem] = Field(default_factory=dict)
+    aliases: Dict[str, str] = Field(default_factory=dict)
 
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
