@@ -1,19 +1,54 @@
 """Pydantic models for the validation of model config files."""
-from typing import Any, Dict
+from inspect import Parameter, signature
+from typing import Any, Callable, Dict, Type
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
+
+from hydromt.models import Model
 
 
-class HydromtStep(BaseModel):
+class BaseHydromtStep(BaseModel):
     """A Pydantic model for the validation of model config files."""
 
-    fn: str
-    args: Dict[str, Any]
+    model: Type[Model]
+    fn: Callable
+    args: Dict[str, Any] = Field(default_factory=dict)
+
+    model_config: ConfigDict = ConfigDict(
+        str_strip_whitespace=True,
+        extra="forbid",
+    )
 
     @staticmethod
-    def from_dict(input_dict):
+    def from_dict(input_dict, model_clf=Model):
         """Generate a validated model of a step in a model config files."""
         fn_name, arg_dict = next(iter(input_dict.items()))
-        # TODO figure out how to actually load the correct functions form the correct
-        # namespace from the provided names
-        return HydromtStep(fn=fn_name, args=arg_dict)
+        try:
+            fn = getattr(model_clf, fn_name)
+        except AttributeError:
+            raise ValueError(f"Model does not have function {fn_name}")
+
+        sig = signature(fn)
+        sig_has_var_keyword = (
+            len(
+                [
+                    param_name
+                    for param_name, param in sig.parameters.items()
+                    if param.kind == Parameter.VAR_KEYWORD
+                ]
+            )
+            > 0
+        )  # I think there can only be one of these
+        unknown_parameters = {
+            param_name
+            for param_name, param_value in arg_dict.items()
+            if param_name not in sig.parameters.keys()
+            and (not isinstance(param_value, dict) and not sig_has_var_keyword)
+        }
+
+        if len(unknown_parameters) > 0:
+            raise ValueError(
+                f"Unknown parameters for function {fn_name}:{unknown_parameters}"
+            )
+
+        return BaseHydromtStep(model=Model, fn=fn, args=arg_dict)
