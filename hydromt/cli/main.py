@@ -9,10 +9,12 @@ from typing import Any, Dict, List, Optional, Union
 
 import click
 import numpy as np
+from pydantic import ValidationError
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.typing import ExportConfigDict
 from hydromt.validators.data_catalog import DataCatalogValidator
+from hydromt.validators.model_config import HydromtModelStep
 
 from .. import __version__, log
 from ..models import MODELS
@@ -312,7 +314,7 @@ def update(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
-        mod = MODELS.load(model)(
+        mod = MODELS.load(model).__init__(
             root=model_root,
             mode=mode,
             data_libs=data_libs,
@@ -338,6 +340,11 @@ def update(
 @main.command(
     short_help="Validate config files are correct",
 )
+@click.argument(
+    "MODEL",
+    type=str,
+)
+@opt_config
 @data_opt
 @deltares_data_opt
 @quiet_opt
@@ -345,6 +352,8 @@ def update(
 @click.pass_context
 def check(
     ctx,
+    model,
+    config,
     data,
     dd,
     quiet: int,
@@ -355,7 +364,7 @@ def check(
     Example usage:
     --------------
 
-    hydromt check -d /path/to/data_catalog.yml
+    hydromt check grid -d /path/to/data_catalog.yml -i /path/to/model_config.yml
 
     """  # noqa: E501
     # logger
@@ -363,10 +372,30 @@ def check(
     logger = log.setuplog("check", join(".", "hydromt.log"), log_level=log_level)
     logger.info(f"Output dir: {export_dest_path}")
     try:
+        all_exceptions = []
         for cat_path in data:
             logger.info(f"Validating catalog at {cat_path}")
-            DataCatalogValidator.from_yml(cat_path)
-            logger.info("Catalog is valid!")
+            try:
+                DataCatalogValidator.from_yml(cat_path)
+                logger.info("Catalog is valid!")
+            except ValidationError as e:
+                all_exceptions.append(e)
+                logger.info("Catalog has errors")
+
+        mod = MODELS.load(model)
+        try:
+            config_dict = cli_utils.parse_config(config)
+            logger.info(f"Validating config at {config}")
+
+            HydromtModelStep.from_dict(config_dict, model=mod)
+            logger.info("Model config valid!")
+
+        except (ValidationError, ValueError) as e:
+            logger.info("Model has errors")
+            all_exceptions.append(e)
+
+        if len(all_exceptions) > 0:
+            raise Exception(all_exceptions)
 
     except Exception as e:
         logger.exception(e)  # catch and log errors

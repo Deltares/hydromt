@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from hydromt.models import Model
 
 
-class BaseHydromtStep(BaseModel):
+class HydromtModelStep(BaseModel):
     """A Pydantic model for the validation of model config files."""
 
     model: Type[Model]
@@ -16,15 +16,17 @@ class BaseHydromtStep(BaseModel):
 
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
+        arbitrary_types_allowed=True,
         extra="forbid",
     )
 
     @staticmethod
-    def from_dict(input_dict, model_clf=Model):
+    def from_dict(input_dict: Dict[str, Any], model: Model):
         """Generate a validated model of a step in a model config files."""
         fn_name, arg_dict = next(iter(input_dict.items()))
+        fn_name = fn_name.strip("0123456789")
         try:
-            fn = getattr(model_clf, fn_name)
+            fn = getattr(model, fn_name)
         except AttributeError:
             raise ValueError(f"Model does not have function {fn_name}")
 
@@ -51,4 +53,4 @@ class BaseHydromtStep(BaseModel):
                 f"Unknown parameters for function {fn_name}:{unknown_parameters}"
             )
 
-        return BaseHydromtStep(model=Model, fn=fn, args=arg_dict)
+        return HydromtModelStep(model=model, fn=fn, args=arg_dict)
