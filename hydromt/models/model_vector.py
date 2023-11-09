@@ -104,8 +104,8 @@ class VectorMixin:
             # data has a geometry - check if it is the same as self.vector
             if data.vector.geometry is not None:
                 if not np.all(
-                    data.vector.geometry.geom_almost_equals(
-                        self.vector_geometry, decimal=4
+                    data.vector.geometry.geom_equals_exact(
+                        self.vector_geometry, tolerance=0.0001
                     )
                 ):
                     raise ValueError("Geometry of data and vector do not match")
@@ -136,15 +136,12 @@ class VectorMixin:
         Files are read at <root>/<fn> and geojson file at <root>/<fn_geom>.
 
         Three options are possible:
-
             * The netcdf file contains the attribute data and the geojson file the
-            geometry vector data.
-
+                geometry vector data.
             * The netcdf file contains both the attribute and the geometry data.
-            (fn_geom is ignored)
-
+                (fn_geom is ignored)
             * The geojson file contains both the attribute and the geometry data.
-            (fn is ignored)
+                (fn is ignored)
 
         Key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
@@ -156,7 +153,7 @@ class VectorMixin:
         fn_geom : str, optional
             geojson filename relative to model root,
             by default 'vector/vector.geojson'
-        **kwargs:
+        kwargs:
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """

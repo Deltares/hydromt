@@ -6,6 +6,7 @@ import os
 from os.path import join
 from pathlib import Path
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pytest
@@ -16,7 +17,9 @@ import hydromt
 from hydromt import _compat, raster
 
 
-def test_open_vector(tmpdir, df, geodf, world):
+@pytest.mark.parametrize("engine", ["fiona", "pyogrio"])
+def test_open_vector(engine, tmpdir, df, geodf, world):
+    gpd.io_engine = engine
     fn_csv = str(tmpdir.join("test.csv"))
     fn_parquet = str(tmpdir.join("test.parquet"))
     fn_xy = str(tmpdir.join("test.xy"))

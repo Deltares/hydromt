@@ -7,8 +7,31 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
 
-v0.9.0 (2023-10-19)
+
+Unreleased
 ==========
+
+Added
+-----
+- Support for exporting data catalogs to STAC catalog formats. (#617)
+- Support for reading data catalogs from STAC catalog formats. (#625)
+- Pixi is now available as an additional task runner. (#634)
+- Support exporting data from catalogs from the CLI. (#627)
+- Support for validating data catalogs from the CLI. (#632)
+
+
+Changed
+-------
+- `DataAdapter._slice_data` and `DataCatalog.get_<data type>` now have a `handle_nodata` argument.
+
+Fixed
+-----
+
+Deprecated
+----------
+
+v0.9.0 (2023-10-19)
+===================
 This release contains several new features, here we highlight a few:
 - Support in the DataCatalog for data sources from different providers or versions with better support for cloud and http data.
 - Developers documentation to start your own plugin and accompanying template.
@@ -56,7 +79,7 @@ Model
 ^^^^^
 - Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. (PR #412)
 - Renamed ``LumpedModel.response_units`` to ``VectorModel.vector`` and updated the base set, read, write methods. (#531)
-- possibility to ``load`` the data in the model read_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
+- possibility to ``load`` the data in the model read\_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
 - Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
   call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
 - ``setup_mesh2d_from_rasterdataset`` and ``setup_mesh2d_from_raster_reclass`` now use xugrid Regridder methods. (PR #535)
@@ -65,10 +88,11 @@ Model
 Vector
 ^^^^^^
 - ``vector.GeoDataset.from_gdf`` can use the gdf columns as data_vars instead of external xarray. (PR #412)
+- ``io.open_vector`` now can use `pyogrio` if reading from a non-tabular dataset (PR #583)
 
 Fixed
 -----
-- when a model component (eg maps, forcing, grid) is updated using the set_ methods, it will first be read to avoid loosing data. (PR #460)
+- when a model component (eg maps, forcing, grid) is updated using the set\_ methods, it will first be read to avoid loosing data. (PR #460)
 - open_geodataset with driver vector also works for other geometry type than points. (PR #509)
 - overwrite model in update mode. (PR #534)
 - fix stats.extremes methods for (dask) 3D arrays. (PR #505)

@@ -1,21 +1,27 @@
 """The Geodataframe adapter implementation."""
 import logging
 import warnings
-from os.path import join
-from pathlib import Path
-from typing import NewType, Optional, Tuple, Union
+from datetime import datetime
+from os.path import basename, join, splitext
+from typing import Optional, Union
 
 import numpy as np
 import pyproj
+from pyproj.exceptions import CRSError
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
+from pystac import MediaType
+
+from hydromt.typing import ErrorHandleMethod, GeoDataframeSource, TotalBounds
 
 from .. import gis_utils, io
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["GeoDataFrameAdapter", "GeoDataframeSource"]
-
-GeoDataframeSource = NewType("GeoDataframeSource", Union[str, Path])
 
 
 class GeoDataFrameAdapter(DataAdapter):
@@ -63,7 +69,7 @@ class GeoDataFrameAdapter(DataAdapter):
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable} placeholders as well as path
-            search pattern using a '*' wildcard.
+            search pattern using a ``*`` wildcard.
         driver: {'vector', 'vector_table'}, optional
             Driver to read files with, for 'vector' :py:func:`~geopandas.read_file`,
             for {'vector_table'} :py:func:`hydromt.io.open_vector_from_table`
@@ -87,8 +93,12 @@ class GeoDataFrameAdapter(DataAdapter):
             data unit to the output data unit as required by hydroMT.
         meta: dict, optional
             Metadata information of dataset, prefably containing the following keys:
-            {'source_version', 'source_url', 'source_license',
-            'paper_ref', 'paper_doi', 'category'}
+            - 'source_version'
+            - 'source_url'
+            - 'source_license'
+            - 'paper_ref'
+            - 'paper_doi'
+            - 'category'
         placeholders: dict, optional
             Placeholders to expand yaml entry to multiple entries (name and path)
             based on placeholder values
@@ -98,12 +108,9 @@ class GeoDataFrameAdapter(DataAdapter):
         extent: Extent(typed dict), Optional
             Dictionary describing the spatial and time range the dataset covers.
             should be of the form:
-            {
-                "bbox": [xmin, ymin, xmax, ymax],
-                "time_range": [start_datetime, end_datetime],
-            }
-            bbox coordinates should be in the same CRS as the data, and
-            time_range should be inclusive on both sides.
+            -  "bbox": [xmin, ymin, xmax, ymax],
+            -  "time_range": [start_datetime, end_datetime],
+            data, and time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         storage_options: dict, optional
@@ -174,7 +181,7 @@ class GeoDataFrameAdapter(DataAdapter):
         variables : list of str, optional
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        **kwargs
+        kwargs
             Additional keyword arguments that are passed to the geopandas driver.
 
         Returns
@@ -230,6 +237,7 @@ class GeoDataFrameAdapter(DataAdapter):
         buffer=0,
         predicate="intersects",
         logger=logger,
+        handle_nodata=NoDataStrategy.RAISE,
         variables=None,
     ):
         """Return a clipped and unified GeoDataFrame (vector).
@@ -247,7 +255,7 @@ class GeoDataFrameAdapter(DataAdapter):
         gdf = self._set_nodata(gdf)
         # slice
         gdf = GeoDataFrameAdapter._slice_data(
-            gdf, variables, geom, bbox, buffer, predicate, logger=logger
+            gdf, variables, geom, bbox, buffer, predicate, handle_nodata, logger=logger
         )
         # uniformize
         gdf = self._apply_unit_conversions(gdf, logger=logger)
@@ -321,6 +329,7 @@ class GeoDataFrameAdapter(DataAdapter):
         bbox=None,
         buffer=0,
         predicate="intersects",
+        handle_nodata=NoDataStrategy.RAISE,
         logger=logger,
     ):
         """Return a clipped GeoDataFrame (vector).
@@ -336,6 +345,8 @@ class GeoDataFrameAdapter(DataAdapter):
             (in WGS84 coordinates).
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle no data values. By default NoDataStrategy.RAISE.
         predicate : str, optional
             Predicate used to filter the GeoDataFrame, see
             :py:func:`hydromt.gis_utils.filter_gdf` for details.
@@ -361,7 +372,9 @@ class GeoDataFrameAdapter(DataAdapter):
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
             idxs = gis_utils.filter_gdf(gdf, geom=geom, predicate=predicate)
             if idxs.size == 0:
-                raise IndexError("No data within spatial domain.")
+                _exec_nodata_strat(
+                    "No data within spatial domain.", handle_nodata, logger=logger
+                )
             gdf = gdf.iloc[idxs]
         return gdf
 
@@ -403,7 +416,7 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def get_bbox(self, detect=True):
+    def get_bbox(self, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -433,7 +446,7 @@ class GeoDataFrameAdapter(DataAdapter):
     def detect_bbox(
         self,
         gdf=None,
-    ) -> Tuple[Tuple[float, float, float, float], int]:
+    ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched acodring to the settings in the
@@ -463,3 +476,71 @@ class GeoDataFrameAdapter(DataAdapter):
         crs = gdf.geometry.crs.to_epsg()
         bounds = gdf.geometry.total_bounds
         return bounds, crs
+
+    def to_stac_catalog(
+        self,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+    ) -> Optional[StacCatalog]:
+        """
+        Convert a geodataframe into a STAC Catalog representation.
+
+        Since geodataframes don't support temporal dimension the `datetime`
+        property will always be set to 0001-01-01. The collection will contain an
+        asset for each of the associated files.
+
+
+        Parameters
+        ----------
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip
+          the dataset on failure, and "coerce" (default) to set
+          default values on failure.
+
+        Returns
+        -------
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or
+          None if the dataset was skipped.
+        """
+        try:
+            bbox, crs = self.get_bbox(detect=True)
+            bbox = list(bbox)
+            props = {**self.meta, "crs": crs}
+            ext = splitext(self.path)[-1]
+            match ext:
+                case ".gpkg":
+                    media_type = MediaType.GEOPACKAGE
+                case _:
+                    raise RuntimeError(
+                        f"Unknown extention: {ext} cannot determine media type"
+                    )
+        except (IndexError, KeyError, CRSError) as e:
+            if on_error == ErrorHandleMethod.SKIP:
+                logger.warning(
+                    "Skipping {name} during stac conversion because"
+                    "because detecting spacial extent failed."
+                )
+                return
+            elif on_error == ErrorHandleMethod.COERCE:
+                bbox = [0.0, 0.0, 0.0, 0.0]
+                props = self.meta
+                media_type = MediaType.JSON
+            else:
+                raise e
+        else:
+            stac_catalog = StacCatalog(
+                self.name,
+                description=self.name,
+            )
+            stac_item = StacItem(
+                self.name,
+                geometry=None,
+                bbox=list(bbox),
+                properties=props,
+                datetime=datetime(1, 1, 1),
+            )
+            stac_asset = StacAsset(str(self.path), media_type=media_type)
+            base_name = basename(self.path)
+            stac_item.add_asset(base_name, stac_asset)
+
+            stac_catalog.add_item(stac_item)
+            return stac_catalog

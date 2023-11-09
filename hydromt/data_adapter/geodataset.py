@@ -3,24 +3,29 @@ import logging
 import os
 import warnings
 from datetime import datetime
-from os.path import join
-from pathlib import Path
-from typing import NewType, Optional, Tuple, Union
+from os.path import basename, join, splitext
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
 import pyproj
 import xarray as xr
+from pyproj.exceptions import CRSError
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
+from pystac import MediaType
+
+from hydromt.typing import ErrorHandleMethod, GeoDatasetSource, TimeRange, TotalBounds
 
 from .. import gis_utils, io
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from ..raster import GEO_MAP_COORD
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["GeoDatasetAdapter", "GeoDatasetSource"]
-
-GeoDatasetSource = NewType("GeoDatasetSource", Union[str, Path])
 
 
 class GeoDatasetAdapter(DataAdapter):
@@ -65,7 +70,7 @@ class GeoDatasetAdapter(DataAdapter):
         path: str, Path
             Path to data source. If the dataset consists of multiple files, the path may
             contain {variable}, {year}, {month} placeholders as well as path
-            search pattern using a '*' wildcard.
+            search pattern using a ``*`` wildcard.
         driver: {'vector', 'netcdf', 'zarr'}, optional
             Driver to read files with,
             for 'vector' :py:func:`~hydromt.io.open_geodataset`,
@@ -105,12 +110,9 @@ class GeoDatasetAdapter(DataAdapter):
         extent: Extent(typed dict), Optional
             Dictionary describing the spatial and time range the dataset covers.
             should be of the form:
-            {
-                "bbox": [xmin, ymin, xmax, ymax],
-                "time_range": [start_datetime, end_datetime],
-            }
-            bbox coordinates should be in the same CRS as the data, and
-            time_range should be inclusive on both sides.
+            -  "bbox": [xmin, ymin, xmax, ymax],
+            -  "time_range": [start_datetime, end_datetime],
+            data, and time_range should be inclusive on both sides.
         driver_kwargs, dict, optional
             Additional key-word arguments passed to the driver.
         storage_options: dict, optional
@@ -344,6 +346,7 @@ class GeoDatasetAdapter(DataAdapter):
         buffer=0,
         predicate="intersects",
         time_tuple=None,
+        handle_nodata=NoDataStrategy.RAISE,
         logger=logger,
     ):
         """Slice the dataset in space and time.
@@ -364,6 +367,8 @@ class GeoDatasetAdapter(DataAdapter):
         predicate : str, optional
             Predicate used to filter the GeoDataFrame, see
             :py:func:`hydromt.gis_utils.filter_gdf` for details.
+        handle_nodata : NoDataStrategy, optional
+            How to handle no data values. By default NoDataStrategy.RAISE.
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
@@ -388,23 +393,25 @@ class GeoDatasetAdapter(DataAdapter):
                 ds = ds[variables]
         if time_tuple is not None:
             ds = GeoDatasetAdapter._slice_temporal_dimension(
-                ds, time_tuple, logger=logger
+                ds, time_tuple, handle_nodata, logger=logger
             )
         if geom is not None or bbox is not None:
             ds = GeoDatasetAdapter._slice_spatial_dimension(
-                ds, geom, bbox, buffer, predicate, logger=logger
+                ds, geom, bbox, buffer, predicate, handle_nodata, logger=logger
             )
         return ds
 
     @staticmethod
-    def _slice_spatial_dimension(ds, geom, bbox, buffer, predicate, logger=logger):
+    def _slice_spatial_dimension(
+        ds, geom, bbox, buffer, predicate, handle_nodata, logger=logger
+    ):
         geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
         bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
         epsg = geom.crs.to_epsg()
         logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
         ds = ds.vector.clip_geom(geom, predicate=predicate)
         if ds.vector.index.size == 0:
-            raise IndexError("No data within spatial domain.")
+            _exec_nodata_strat("No data within spatial domain.", handle_nodata, logger)
         return ds
 
     def _shift_time(self, ds, logger=logger):
@@ -422,7 +429,9 @@ class GeoDatasetAdapter(DataAdapter):
         return ds
 
     @staticmethod
-    def _slice_temporal_dimension(ds, time_tuple, logger=logger):
+    def _slice_temporal_dimension(
+        ds, time_tuple, handle_nodata=NoDataStrategy.RAISE, logger=logger
+    ):
         if (
             "time" in ds.dims
             and ds["time"].size > 1
@@ -431,7 +440,9 @@ class GeoDatasetAdapter(DataAdapter):
             logger.debug(f"Slicing time dim {time_tuple}")
             ds = ds.sel(time=slice(*time_tuple))
             if ds.time.size == 0:
-                raise IndexError("GeoDataset: Time slice out of range.")
+                _exec_nodata_strat(
+                    "GeoDataset: Time slice out of range.", handle_nodata, logger=logger
+                )
         return ds
 
     def _set_metadata(self, ds):
@@ -475,7 +486,7 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def get_bbox(self, detect=True):
+    def get_bbox(self, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -496,13 +507,14 @@ class GeoDatasetAdapter(DataAdapter):
             The ESPG code of the CRS of the coordinates returned in bbox
         """
         bbox = self.extent.get("bbox", None)
-        crs = self.crs
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
 
+        crs = self.crs
+
         return bbox, crs
 
-    def get_time_range(self, detect=True):
+    def get_time_range(self, detect=True) -> TimeRange:
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
@@ -531,7 +543,7 @@ class GeoDatasetAdapter(DataAdapter):
     def detect_bbox(
         self,
         ds=None,
-    ) -> Tuple[Tuple[float, float, float, float], int]:
+    ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -562,7 +574,7 @@ class GeoDatasetAdapter(DataAdapter):
         bounds = ds.vector.bounds
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> Tuple[datetime, datetime]:
+    def detect_time_range(self, ds=None) -> TimeRange:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -587,3 +599,76 @@ class GeoDatasetAdapter(DataAdapter):
             ds[ds.vector.time_dim].min().values,
             ds[ds.vector.time_dim].max().values,
         )
+
+    def to_stac_catalog(
+        self,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+    ) -> Optional[StacCatalog]:
+        """
+        Convert a geodataset into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
+
+
+        Parameters
+        ----------
+        - on_error (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "skip" to skip
+          the dataset on failure, and "coerce" (default) to set default
+          values on failure.
+
+        Returns
+        -------
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or
+          None if the dataset was skipped.
+        """
+        try:
+            bbox, crs = self.get_bbox(detect=True)
+            bbox = list(bbox)
+            start_dt, end_dt = self.get_time_range(detect=True)
+            start_dt = pd.to_datetime(start_dt)
+            end_dt = pd.to_datetime(end_dt)
+            props = {**self.meta, "crs": crs}
+            ext = splitext(self.path)[-1]
+            match ext:
+                case ".nc" | ".vrt":
+                    media_type = MediaType.HDF5
+                case _:
+                    raise RuntimeError(
+                        f"Unknown extention: {ext} cannot determine media type"
+                    )
+        except (IndexError, KeyError, CRSError) as e:
+            if on_error == ErrorHandleMethod.SKIP:
+                logger.warning(
+                    "Skipping {name} during stac conversion because"
+                    "because detecting spacial extent failed."
+                )
+                return
+            elif on_error == ErrorHandleMethod.COERCE:
+                bbox = [0.0, 0.0, 0.0, 0.0]
+                props = self.meta
+                start_dt = datetime(1, 1, 1)
+                end_dt = datetime(1, 1, 1)
+                media_type = MediaType.JSON
+            else:
+                raise e
+
+        stac_catalog = StacCatalog(
+            self.name,
+            description=self.name,
+        )
+        stac_item = StacItem(
+            self.name,
+            geometry=None,
+            bbox=bbox,
+            properties=props,
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        stac_asset = StacAsset(str(self.path), media_type=media_type)
+        base_name = basename(self.path)
+        stac_item.add_asset(base_name, stac_asset)
+
+        stac_catalog.add_item(stac_item)
+        return stac_catalog

@@ -13,7 +13,15 @@ import warnings
 from datetime import datetime
 from os.path import abspath, basename, isdir, isfile, join
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Tuple, TypedDict, Union, cast
+from typing import (
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 import geopandas as gpd
 import numpy as np
@@ -23,7 +31,10 @@ import xarray as xr
 import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
+from pystac import Catalog as StacCatalog
+from pystac import CatalogType, MediaType
 
+from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt.utils import partition_dictionaries
 
 from . import __version__
@@ -35,6 +46,8 @@ from .data_adapter import (
     RasterDatasetAdapter,
 )
 from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
+from .exceptions import NoDataException
+from .nodata import NoDataStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -43,16 +56,6 @@ __all__ = [
 ]
 
 # just for typehints
-SourceSpecDict = TypedDict(
-    "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
-)
-Extent = TypedDict(
-    "Extent",
-    {
-        "bbox": Tuple[float, float, float, float],
-        "time_range": Tuple[datetime, datetime],
-    },
-)
 
 
 class DataCatalog(object):
@@ -157,6 +160,96 @@ class DataCatalog(object):
     def get_source_names(self) -> List[str]:
         """Return a list of all available data source names."""
         return list(self._sources.keys())
+
+    def to_stac_catalog(
+        self,
+        root: Union[str, Path],
+        source_names: Optional[List] = None,
+        meta: Optional[Dict] = None,
+        catalog_name: str = "hydromt-stac-catalog",
+        description: str = "The stac catalog of hydromt",
+        used_only: bool = False,
+        catalog_type: CatalogType = CatalogType.RELATIVE_PUBLISHED,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+    ):
+        """Write data catalog to STAC format.
+
+        Parameters
+        ----------
+        path: str, Path
+            stac output path.
+        root: str, Path, optional
+            Global root for all relative paths in yaml file.
+            If "auto" (default) the data source paths are relative to the yaml
+            output ``path``.
+        source_names: list, optional
+            List of source names to export, by default None in which case all sources
+            are exported. This argument is ignored if `used_only=True`.
+        used_only: bool, optional
+            If True, export only data entries kept in used_data list, by default False.
+        meta: dict, optional
+            key-value pairs to add to the data catalog meta section, such as 'version',
+            by default empty.
+        """
+        meta = meta or {}
+        stac_catalog = StacCatalog(id=catalog_name, description=description)
+        for _name, source in self.iter_sources(used_only):
+            stac_child_catalog = source.to_stac_catalog(on_error)
+            if stac_child_catalog:
+                stac_catalog.add_child(stac_child_catalog)
+
+        stac_catalog.normalize_and_save(root, catalog_type=catalog_type)
+        return stac_catalog
+
+    def from_stac_catalog(
+        self,
+        stac_like: Union[str, Path, StacCatalog, dict],
+        on_error: ErrorHandleMethod = ErrorHandleMethod.SKIP,
+    ):
+        """Write data catalog to STAC format.
+
+        Parameters
+        ----------
+        path: str, Path
+            stac path.
+        on_error: ErrorHandleMethod
+            What to do on error when converting from STAC
+        """
+        if isinstance(stac_like, (str, Path)):
+            stac_catalog = StacCatalog.from_file(stac_like)
+        elif isinstance(stac_like, dict):
+            stac_catalog = StacCatalog.from_dict(stac_like)
+        elif isinstance(stac_like, StacCatalog):
+            stac_catalog = stac_like
+        else:
+            raise ValueError(
+                f"Unsupported type for stac_like: {type(stac_like).__name__}"
+            )
+
+        for item in stac_catalog.get_items(recursive=True):
+            source_name = item.id
+            for _asset_name, asset in item.get_assets().items():
+                match asset.media_type:
+                    case (
+                        MediaType.HDF
+                        | MediaType.HDF5
+                        | MediaType.COG
+                        | MediaType.TIFF
+                    ):
+                        adapter_kind = RasterDatasetAdapter
+                    case MediaType.GEOPACKAGE | MediaType.FLATGEOBUF:
+                        adapter_kind = GeoDataFrameAdapter
+                    case MediaType.GEOJSON:
+                        adapter_kind = GeoDatasetAdapter
+                    case MediaType.JSON:
+                        adapter_kind = DataFrameAdapter
+                    case _:
+                        continue
+
+                adapter = adapter_kind(str(asset.get_absolute_href()))
+                self.add_source(source_name, adapter)
+
+        return self
 
     @property
     def predefined_catalogs(self) -> Dict:
@@ -1037,8 +1130,8 @@ class DataCatalog(object):
     def export_data(
         self,
         data_root: Union[Path, str],
-        bbox: List = None,
-        time_tuple: Tuple = None,
+        bbox: Optional[Bbox] = None,
+        time_tuple: Optional[TimeRange] = None,
         source_names: Optional[List] = None,
         unit_conversion: bool = True,
         meta: Optional[Dict] = None,
@@ -1079,7 +1172,16 @@ class DataCatalog(object):
         source_vars = {}
         if len(source_names) > 0:
             sources = {}
-            for name in source_names:
+            for source in source_names:
+                # support both strings and SourceSpecDicts here
+                if isinstance(source, str):
+                    name = source
+                elif isinstance(source, Dict):
+                    name = source["source"]
+                else:
+                    raise RuntimeError(
+                        f"unknown source type: {source} of type {type(source).__name__}"
+                    )
                 # deduce variables from name
                 if "[" in name:
                     variables = name.split("[")[-1].split("]")[0].split(",")
@@ -1129,7 +1231,7 @@ class DataCatalog(object):
                                 time_tuple=time_tuple,
                                 logger=self.logger,
                             )
-                        except IndexError as e:
+                        except NoDataException as e:
                             self.logger.warning(f"{key} file contains no data: {e}")
                             continue
                         # update path & driver and remove kwargs
@@ -1176,6 +1278,7 @@ class DataCatalog(object):
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom_level: Optional[int | tuple] = None,
         buffer: Union[float, int] = 0,
+        handle_nodata=NoDataStrategy.RAISE,
         align: Optional[bool] = None,
         variables: Optional[Union[List, str]] = None,
         time_tuple: Optional[Tuple] = None,
@@ -1263,6 +1366,7 @@ class DataCatalog(object):
                 buffer,
                 align,
                 time_tuple,
+                handle_nodata,
                 logger=self.logger,
             )
             return RasterDatasetAdapter._single_var_as_array(
@@ -1291,6 +1395,7 @@ class DataCatalog(object):
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
+        handle_nodata=NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
         predicate: str = "intersects",
         provider: Optional[str] = None,
@@ -1319,10 +1424,13 @@ class DataCatalog(object):
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
-        predicate : {'intersects', 'within', 'contains', 'overlaps',
-            'crosses', 'touches'}, optional If predicate is provided,
-            the GeoDataFrame is filtered by testing the predicate function
-            against each item. Requires bbox or mask. By default 'intersects'
+        handle_nodata : NoDataStrategy, optional
+            How to handle no data values, by default NoDataStrategy.RAISE
+        predicate : optional
+            If predicate is provided, the GeoDataFrame is filtered by testing
+            the predicate function against each item. Requires bbox or mask.
+            By default 'intersects' options are:
+            {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
         align : float, optional
             Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
@@ -1357,7 +1465,14 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             return GeoDataFrameAdapter._slice_data(
-                data_like, variables, geom, bbox, buffer, predicate, logger=self.logger
+                data_like,
+                variables,
+                geom,
+                bbox,
+                buffer,
+                predicate,
+                handle_nodata,
+                logger=self.logger,
             )
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
@@ -1378,6 +1493,7 @@ class DataCatalog(object):
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         predicate: str = "intersects",
         variables: Optional[List] = None,
         time_tuple: Optional[Tuple] = None,
@@ -1412,10 +1528,11 @@ class DataCatalog(object):
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
-        predicate : {'intersects', 'within', 'contains', 'overlaps',
-            'crosses', 'touches'}, optional If predicate is provided,
-            the GeoDataFrame is filtered by testing the predicate function
-            against each item. Requires bbox or mask. By default 'intersects'
+        predicate : optional
+            If predicate is provided, the GeoDataFrame is filtered by testing
+            the predicate function against each item. Requires bbox or mask.
+            By default 'intersects' options are:
+            {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
         variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
@@ -1457,6 +1574,7 @@ class DataCatalog(object):
                 buffer,
                 predicate,
                 time_tuple,
+                handle_nodata,
                 logger=self.logger,
             )
             return GeoDatasetAdapter._single_var_as_array(
@@ -1481,6 +1599,7 @@ class DataCatalog(object):
         data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
         variables: Optional[list] = None,
         time_tuple: Optional[Tuple] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
@@ -1526,7 +1645,7 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
             return DataFrameAdapter._slice_data(
-                data_like, variables, time_tuple, logger=self.logger
+                data_like, variables, time_tuple, handle_nodata, logger=self.logger
             )
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')

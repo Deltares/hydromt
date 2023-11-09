@@ -203,7 +203,8 @@ def test_versioned_catalog_entries(tmpdir):
     source_aws2 = aws_and_legacy_catalog.get_source("esa_worldcover", provider="aws")
     assert source_aws2 == source_aws
     source_loc = aws_and_legacy_catalog.get_source(
-        "esa_worldcover", provider="legacy_esa_worldcover"  # provider is filename
+        "esa_worldcover",
+        provider="legacy_esa_worldcover",  # provider is filename
     )
     assert Path(source_loc.path).name == "esa-worldcover.vrt"
     # test round trip to and from dict
@@ -244,7 +245,6 @@ def test_data_catalog(tmpdir):
     # test keys, getitem,
     keys = [key for key, _ in data_catalog.iter_sources()]
     source = data_catalog.get_source(keys[0])
-    assert keys[0] in data_catalog
     assert data_catalog.contains_source(keys[0])
     assert data_catalog.contains_source(
         keys[0], version="asdfasdfasdf", permissive=True
@@ -322,7 +322,7 @@ def test_from_yml_with_archive(tmpdir):
     # as part of the getting the archive a a local
     # catalog file is written to the same folder
     # check if this file exists and we can read it
-    root = dirname(data_catalog[sources[0]].path)
+    root = dirname(data_catalog.get_source(sources[0]).path)
     yml_dst_fn = join(root, "artifact_data.yml")
     assert isfile(yml_dst_fn)
     data_catalog1 = DataCatalog(yml_dst_fn)
@@ -629,3 +629,39 @@ def test_detect_extent():
     detected_temporal_range = ds.get_time_range(detect=True)
     assert np.all(np.equal(detected_spatial_range, bbox))
     assert detected_temporal_range == expected_temporal_range
+
+
+def test_to_stac(tmpdir):
+    data_catalog = DataCatalog()  # read artifacts
+    _ = data_catalog.sources  # load artifact data as fallback
+
+    _ = data_catalog.get_rasterdataset("chirps_global")
+    _ = data_catalog.get_geodataframe("gadm_level1")
+    _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
+
+    sources = [
+        "chirps_global",
+        "gadm_level1",
+        "gtsmv3_eu_era5",
+    ]
+
+    stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
+
+    assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
+    # the two empty strings are for the root and self link which are destinct
+    assert sorted(
+        [
+            Path(join(tmpdir, x.get_href())) if x != str(tmpdir) else tmpdir
+            for x in stac_catalog.get_links()
+        ]
+    ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
+
+
+def test_from_stac(tmpdir):
+    catalog_from_stac = DataCatalog().from_stac_catalog(
+        "./tests/data/stac/catalog.json"
+    )
+
+    assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetAdapter
+    assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameAdapter
+    # assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == GeoDatasetAdapter

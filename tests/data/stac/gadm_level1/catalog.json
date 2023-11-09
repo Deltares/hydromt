@@ -1,0 +1,23 @@
+{
+  "type": "Catalog",
+  "id": "gadm_level1",
+  "stac_version": "1.0.0",
+  "description": "gadm_level1",
+  "links": [
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./gadm_level1/gadm_level1.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json"
+    }
+  ]
+}

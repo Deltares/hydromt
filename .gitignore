@@ -129,3 +129,5 @@ dask-worker-space/
 .ruff_cache
 .envrc
 pyrightconfig.json
+
+pixi.lock

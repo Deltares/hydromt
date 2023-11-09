@@ -12,7 +12,7 @@ from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -22,6 +22,8 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt.typing import DeferedFileClose, XArrayDict
+
 from .. import config, log, workflows
 from ..data_catalog import DataCatalog
 from ..raster import GEO_MAP_COORD
@@ -30,12 +32,6 @@ from ..utils import _classproperty
 __all__ = ["Model"]
 
 logger = logging.getLogger(__name__)
-
-DeferedFileClose = TypedDict(
-    "DeferedFileClose",
-    {"ds": xr.Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
-)
-XArrayDict = Dict[str, Union[xr.DataArray, xr.Dataset]]
 
 
 class Model(object, metaclass=ABCMeta):
@@ -78,7 +74,7 @@ class Model(object, metaclass=ABCMeta):
         logger=logger,
         **artifact_keys,
     ):
-        """Initialize a model.
+        r"""Initialize a model.
 
         Parameters
         ----------
@@ -91,7 +87,7 @@ class Model(object, metaclass=ABCMeta):
             Note that this is not the HydroMT model setup configuration file!
         data_libs : List[str], optional
             List of data catalog configuration files, by default None
-        **artifact_keys:
+        \**artifact_keys:
             Additional keyword arguments to be passed down.
         logger:
             The logger to be used.
@@ -187,13 +183,13 @@ class Model(object, metaclass=ABCMeta):
         write: Optional[bool] = True,
         opt: Optional[dict] = None,
     ):
-        """Single method to build a model from scratch based on settings in `opt`.
+        r"""Single method to build a model from scratch based on settings in `opt`.
 
         Methods will be run one by one based on the order of appearance in `opt`
         (.ini configuration file). All model methods are supported including
-        setup_*, read_* and write_* methods.
+        setup\_\*, read\_\* and write\_\* methods.
 
-        If a write_* option is listed in `opt` (ini file) the full writing of the
+        If a write\_\* option is listed in `opt` (ini file) the full writing of the
         model at the end of the update process is skipped.
 
         Parameters
@@ -207,7 +203,7 @@ class Model(object, metaclass=ABCMeta):
             Model build configuration. The configuration can be parsed from a
             .ini file using :py:meth:`~hydromt.config.configread`.
             This is a nested dictionary where the first-level keys are the names
-            of model specific (setup) methods and the second-level contain
+            of model specific methods and the second-level contain
             argument-value pairs of the method.
 
             .. code-block:: text
@@ -247,16 +243,16 @@ class Model(object, metaclass=ABCMeta):
         self,
         model_out: Optional[Union[str, Path]] = None,
         write: Optional[bool] = True,
-        opt: Dict = None,
-        forceful_overwrite=False,
+        opt: Optional[Dict] = None,
+        forceful_overwrite: bool = False,
     ):
-        """Single method to update a model based the settings in `opt`.
+        r"""Single method to update a model based the settings in `opt`.
 
         Methods will be run one by one based on the order of appearance in `opt`
         (ini configuration file).
 
-        All model methods are supported including setup_*, read_* and write_* methods.
-        If a write_* option is listed in `opt` (ini file) the full writing of the model
+        All model methods are supported including setup\_\*, read\_\* and write\_\* methods.
+        If a write\_\* option is listed in `opt` (ini file) the full writing of the model
         at the end of the update process is skipped.
 
         Parameters
@@ -271,7 +267,7 @@ class Model(object, metaclass=ABCMeta):
             Model build configuration. The configuration can be parsed from a
             .ini file using :py:meth:`~hydromt.config.configread`.
             This is a nested dictionary where the first-level keys
-            are the names of model specific (setup) methods and
+            are the names of model specific methods and
             the second-level contain argument-value pairs of the method.
 
             .. code-block:: text
@@ -906,7 +902,7 @@ class Model(object, metaclass=ABCMeta):
                 self._staticmaps[dvar] = data[dvar]
 
     def read_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
-        """Read static model maps at <root>/<fn> and add to staticmaps property.
+        r"""Read static model maps at <root>/<fn> and add to staticmaps property.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
@@ -917,7 +913,7 @@ class Model(object, metaclass=ABCMeta):
         ----------
         fn : str, optional
             filename relative to model root, by default "staticmaps/staticmaps.nc"
-        **kwargs:
+        \**kwargs:
             Additional keyword arguments that are passed to the
             `read_nc` function.
         """
@@ -926,7 +922,7 @@ class Model(object, metaclass=ABCMeta):
             self.set_staticmaps(ds)
 
     def write_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
-        """Write static model maps to netcdf file at <root>/<fn>.
+        r"""Write static model maps to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
 
@@ -937,7 +933,7 @@ class Model(object, metaclass=ABCMeta):
         ----------
         fn : str, optional
             filename relative to model root, by default 'staticmaps/staticmaps.nc'
-        **kwargs:
+        \**kwargs:
             Additional keyword arguments that are passed to the
             `write_nc` function.
         """
@@ -1029,7 +1025,7 @@ class Model(object, metaclass=ABCMeta):
         rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        r"""HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         This is done by reclassifying the data in
         ``raster_fn`` based on ``reclass_table_fn``.
@@ -1066,7 +1062,7 @@ class Model(object, metaclass=ABCMeta):
         rename: dict, optional
             Dictionary to rename variable names in reclass_variables before adding to
             grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
-        **kwargs:
+        \**kwargs:
             Additional keyword arguments that are passed to the
             `data_catalog.get_rasterdataset` function.
 
@@ -1143,15 +1139,16 @@ class Model(object, metaclass=ABCMeta):
             self._maps[name] = data_dict[name]
 
     def read_maps(self, fn: str = "maps/*.nc", **kwargs) -> None:
-        """Read model map at <root>/<fn> and add to maps component.
+        r"""Read model map at <root>/<fn> and add to maps component.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default "maps/*.nc"
-        **kwargs:
+            filename relative to model root, may contain wildcards,
+            by default ``maps/\*.nc``
+        kwargs:
             Additional keyword arguments that are passed to the
             `read_nc` function.
         """
@@ -1161,7 +1158,7 @@ class Model(object, metaclass=ABCMeta):
             self.set_maps(ds, name=name)
 
     def write_maps(self, fn="maps/{name}.nc", **kwargs) -> None:
-        """Write maps to netcdf file at <root>/<fn>.
+        r"""Write maps to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
 
@@ -1170,7 +1167,7 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'maps/{name}.nc'
-        **kwargs:
+        \**kwargs:
             Additional keyword arguments that are passed to the
             `write_nc` function.
         """
@@ -1215,14 +1212,15 @@ class Model(object, metaclass=ABCMeta):
         self._geoms[name] = geom
 
     def read_geoms(self, fn: str = "geoms/*.geojson", **kwargs) -> None:
-        """Read model geometries files at <root>/<fn> and add to geoms property.
+        r"""Read model geometries files at <root>/<fn> and add to geoms property.
 
         key-word arguments are passed to :py:func:`geopandas.read_file`
 
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default "geoms/*.nc"
+            filename relative to model root, may contain wildcards,
+            by default ``geoms/\*.nc``
         **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
@@ -1235,7 +1233,7 @@ class Model(object, metaclass=ABCMeta):
             self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
 
     def write_geoms(self, fn: str = "geoms/{name}.geojson", **kwargs) -> None:
-        """Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
+        r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`geopandas.GeoDataFrame.to_file`
 
@@ -1244,7 +1242,7 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'geoms/{name}.geojson'
-        **kwargs:
+        \**kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
         """
@@ -1374,8 +1372,9 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default "forcing/*.nc"
-        **kwargs:
+            filename relative to model root, may contain wildcards,
+            by default forcing/.nc
+        kwargs:
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
@@ -1394,7 +1393,7 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'forcing/{name}.nc'
-        **kwargs:
+        kwargs:
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
@@ -1438,15 +1437,16 @@ class Model(object, metaclass=ABCMeta):
             self._states[name] = data_dict[name]
 
     def read_states(self, fn: str = "states/*.nc", **kwargs) -> None:
-        """Read states at <root>/<fn> and add to states property.
+        r"""Read states at <root>/<fn> and add to states property.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default "states/*.nc"
-        **kwargs:
+            filename relative to model root, may contain wildcards,
+            by default states/\*.nc
+        kwargs:
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
@@ -1521,8 +1521,9 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
         fn : str, optional
-            filename relative to model root, may wildcards, by default "results/*.nc"
-        **kwargs:
+            filename relative to model root, may contain wildcards,
+            by default ``results/*.nc``
+        kwargs:
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """

@@ -10,28 +10,56 @@ It does so by automating the workflow to go from raw data to a complete model in
 is ready to run and to analyse model results once the simulation has finished.
 As such it is an interface between *user*, *data* and hydro *models*.
 
-The functionality of HydroMT can be broken down into three components, which are around input data,
+This process, before HydroMT is introduced is pictured below:
+
+.. figure:: ../_static/hydromt_before.jpg
+
+  A sequence of a typical pre-analysis workflow, before HydroMT was invented
+
+In contrast to the image above, the same workflow using HydroMT is depicted in the next image:
+
+.. figure:: ../_static/hydromt_using.jpg
+
+  A sequence describing how the pre-analysis goes using HydroMT
+
+
+The functionality of HydroMT can be broken down into five components, which are around input data,
 model instances, and methods and workflows. Users can interact with HydroMT through a high-level
 command line interface (CLI) to build model instances from scratch, update existing model instances
 or analyze model results. Furthermore, a Python interface is available that exposes
-all functionality for experienced users. A schematic overview of the package architecture is provided
-in the figure below and each HydroMT component is discussed below.
+all functionality for experienced users. An overview of the package components and the concepts they are concerned with can be seen in the table below.
+
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Component        | Reproducibility  | Data Access  | Data Processing  | Input Data | Output Data | Plugin Connection  | Provided by |
++==================+==================+==============+==================+============+=============+====================+=============+
+| Data Adapter     |                  | x            | x                | x          |             |                    | Core        |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Data Catalog     | x                | x            |                  | x          |             |                    | User        |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Workflow         |                  |              | x                |            | x           |                    | Core/Plugin |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Model (object)   |                  |              |                  |            | x           | x                  | Core/Plugin |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+| Model (config)   | x                |              |                  |            | x           | x                  | User        |
++------------------+------------------+--------------+------------------+------------+-------------+--------------------+-------------+
+
+
 
 In short, there are three important concepts in HydroMT core that are important to cover:
 
-- ``DataAdapters`` and ``DataCatalog``: These are what basically hold all information about how to approach and read data as well as some of the metadata
-  about it. While a lot of the work in HydroMT happens here, plugins or users shouldn't really need to know about these beyond using
-  the proper ``data_type`` in their configuration. ``DataCatalog`` are basically just a thin wrapper around the ``DataAdapters`` that does some book keeping.
+- ``DataCatalog``: This is what is used to tell HydroMT where the data can be found and how it can be read, as well as what maintains the administration of exactly what data was used to maintain reproducibility. As a user or plugin developer you do not need to worry about the code for this, but you will need to provide a correct catalog for HydroMT to use.
+- ``DataAdapters``: These are what do the actual reading of the data and get instructed and instantiated by the DataCatalog.  While a lot of the work in HydroMT happens here, plugins or users shouldn't really need to know about these beyond using the proper ``data_type`` in their configuration.
 - ``Workflows``: These are functions that transform input data and can call a set of methods to for example, resample, fill nodata, reproject, derive
   other variables etc. The core has some of these workflows but you may need new ones for your plugin.
-- ``Model``: This is where the magic happens (as far as the plugin is concerned). We have provided some generic models that you can
+- ``Model`` (object): This is where the magic happens (as far as the plugin is concerned). We have provided some generic models that you can
   override to get basic/generic functionality, but using the model functionality is where it will be at for you. The scheme below lists the current
   relationship between the HydroMT ``Model`` and generic sub-Model classes and the know plugins.
+- ``Model`` (config): While the object model is what actually performs the operations and what plugin developers are generally concerned with, the config file of the model is what instructs HydroMT and the plugins on what to do. This is the second file a user will need to provide in order to perform a HydroMT run from the commandline.
 
 
-.. figure:: ../_static/plugin_structure.png
+.. figure:: ../_static/hydromt_arch.jpg
 
-  Schematic of Model and plugin structure of HydroMT
+  A diagram showing an overview of HydroMT and it's plugin archetecture.
 
 More concretely HydroMT is organized in the following way:
 
@@ -88,11 +116,13 @@ A user can interact with HydroMT through the following interfaces:
   It allows you to e.g. interact directly with a model component :ref:`Model API <model_interface>` and apply the many
   methods and workflows available. Please find all available functions :ref:`API reference <api_reference>`
 
+A more detailed overview of how HydroMT functions internally along with a more indepth explanation are picutred below:
+
 .. _arch:
 
-.. figure:: ../_static/Architecture_model_data_input.png
+.. figure:: ../_static/hydromt_run.jpg
 
-  Schematic of HydroMT architecture
+  A schematic overview of the sequence of steps that are involved in a HydroMT run.
 
 
 .. _terminology:
