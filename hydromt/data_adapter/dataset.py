@@ -16,7 +16,6 @@ from pystac import MediaType
 
 from hydromt.typing import ErrorHandleMethod, TimeRange
 
-from .. import io
 from .data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
@@ -232,8 +231,8 @@ class DatasetAdapter(DataAdapter):
         elif self.driver == "zarr":
             ds = xr.open_zarr(fns[0], **kwargs)
         elif self.driver == "mfcsv":
-            fn_dict = {fn.stem: fn for fn in fns}
-            ds = io.open_mfcsv(fn_dict, **kwargs)
+            raise NotImplementedError
+            # ds = io.open_mfcsv(fn_dict, **kwargs)
         else:
             raise ValueError(f"Dataset: Driver {self.driver} unknown")
 
