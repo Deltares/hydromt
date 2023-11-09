@@ -130,5 +130,4 @@ dask-worker-space/
 .envrc
 pyrightconfig.json
 
-# lock files
-.lock
+pixi.lock

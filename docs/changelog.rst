@@ -15,7 +15,9 @@ Added
 -----
 - Support for exporting data catalogs to STAC catalog formats. (#617)
 - Support for reading data catalogs from STAC catalog formats. (#625)
-- Support exporting data from catalogs from the CLI (#627)
+- Pixi is now available as an additional task runner. (#634)
+- Support exporting data from catalogs from the CLI. (#627)
+- Support for validating data catalogs from the CLI. (#632)
 
 
 Changed

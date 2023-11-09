@@ -5,6 +5,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, TypedDict, Union
 
+from xarray import DataArray, Dataset
+
 GeoDataframeSource = Union[str, Path]
 GeoDatasetSource = Union[str, Path]
 RasterDatasetSource = Union[str, Path]
@@ -12,17 +14,16 @@ Bbox = Tuple[float, float, float, float]
 Crs = int
 TotalBounds = Tuple[Bbox, Crs]
 TimeRange = Tuple[datetime, datetime]
-
+Number = Union[int, float]
 SourceSpecDict = TypedDict(
     "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
 )
-Extent = TypedDict(
-    "Extent",
-    {
-        "bbox": Tuple[float, float, float, float],
-        "time_range": Tuple[datetime, datetime],
-    },
+
+DeferedFileClose = TypedDict(
+    "DeferedFileClose",
+    {"ds": Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
 )
+XArrayDict = Dict[str, Union[DataArray, Dataset]]
 
 ExportConfigDict = TypedDict(
     "ExportConfigDict",
