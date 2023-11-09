@@ -1,6 +1,5 @@
 """Implementation for the geodataset DataAdapter."""
 import logging
-import os
 import warnings
 from datetime import datetime
 from os.path import basename, join, splitext
@@ -22,6 +21,7 @@ from .. import gis_utils, io
 from ..nodata import NoDataStrategy, _exec_nodata_strat
 from ..raster import GEO_MAP_COORD
 from .data_adapter import DataAdapter
+from .utils import netcdf_writer
 
 logger = logging.getLogger(__name__)
 
@@ -221,19 +221,9 @@ class GeoDatasetAdapter(DataAdapter):
 
         if driver is None or driver == "netcdf":
             # always write netcdf
-            driver = "netcdf"
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.vector.vars
-            if variables is None:
-                encoding = {k: {"zlib": True} for k in dvars}
-                fn_out = join(data_root, f"{data_name}.nc")
-                obj.to_netcdf(fn_out, encoding=encoding)
-            else:  # save per variable
-                if not os.path.isdir(join(data_root, data_name)):
-                    os.makedirs(join(data_root, data_name))
-                for var in dvars:
-                    fn_out = join(data_root, data_name, f"{var}.nc")
-                    obj[var].to_netcdf(fn_out, encoding={var: {"zlib": True}})
-                fn_out = join(data_root, data_name, "{variable}.nc")
+            fn_out, driver = netcdf_writer(
+                obj=obj, data_root=data_root, data_name=data_name, variables=variables
+            )
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
             if isinstance(obj, xr.DataArray):
