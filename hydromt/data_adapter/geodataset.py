@@ -221,7 +221,7 @@ class GeoDatasetAdapter(DataAdapter):
 
         if driver is None or driver == "netcdf":
             # always write netcdf
-            fn_out, driver = netcdf_writer(
+            fn_out = netcdf_writer(
                 obj=obj, data_root=data_root, data_name=data_name, variables=variables
             )
         elif driver == "zarr":

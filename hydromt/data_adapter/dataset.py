@@ -220,7 +220,6 @@ class DatasetAdapter(DataAdapter):
             ds = xr.open_zarr(fns[0], **kwargs)
         elif self.driver == "mfcsv":
             raise NotImplementedError
-            # ds = io.open_mfcsv(fn_dict, **kwargs)
         else:
             raise ValueError(f"Dataset: Driver {self.driver} unknown")
 
