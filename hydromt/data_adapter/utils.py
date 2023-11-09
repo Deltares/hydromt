@@ -1,9 +1,12 @@
 """Utility functions for data adapters."""
+import logging
 import os
 from os.path import isdir, join
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
+import numpy as np
+import pandas as pd
 import xarray as xr
 
 
@@ -12,8 +15,8 @@ def netcdf_writer(
     data_root: str | Path,
     data_name: str,
     variables: Optional[List[str]] = None,
-) -> Tuple[str, str]:
-    """Utiliy function for writing a xarray dataset/data array to file.
+) -> str:
+    """Utiliy function for writing a xarray dataset/data array to a netcdf file.
 
     Parameters
     ----------
@@ -30,10 +33,7 @@ def netcdf_writer(
     -------
     fn_out: str
         Absolute path to output file
-    driver: str
-        Name of driver to read data with
     """
-    driver = "netcdf"
     dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.data_vars
     if variables is None:
         encoding = {k: {"zlib": True} for k in dvars}
@@ -46,4 +46,60 @@ def netcdf_writer(
             fn_out = join(data_root, data_name, f"{var}.nc")
             obj[var].to_netcdf(fn_out, encoding={var: {"zlib": True}})
         fn_out = join(data_root, data_name, "{variable}.nc")
-    return fn_out, driver
+    return fn_out
+
+
+def zarr_writer(
+    obj: xr.Dataset | xr.DataArray, data_root: str | Path, data_name: str, **kwargs
+) -> str:
+    """Utiliy function for writing a xarray dataset/data array to a netcdf file.
+
+    Parameters
+    ----------
+    obj : xr.Dataset | xr.DataArray
+        Dataset.
+    data_root : str | Path
+        root to write the data to.
+    data_name : str
+        filename to write to.
+
+    Returns
+    -------
+    fn_out: str
+        Absolute path to output file
+    """
+    fn_out = join(data_root, f"{data_name}.zarr")
+    if isinstance(obj, xr.DataArray):
+        obj = obj.to_dataset()
+    obj.to_zarr(fn_out, **kwargs)
+    return fn_out
+
+
+def shift_dataset_time(dt: int, ds: xr.Dataset, logger: logging.Logger) -> xr.Dataset:
+    """Shifts time of a xarray dataset.
+
+    Parameters
+    ----------
+    dt : int
+        time delta to shift the time of the dataset
+    ds : xr.Dataset
+        xarray dataset
+    logger : logging.Logger
+        logger
+
+    Returns
+    -------
+    xr.Dataset
+        time shifted dataset
+    """
+    if (
+        dt != 0
+        and "time" in ds.dims
+        and ds["time"].size > 1
+        and np.issubdtype(ds["time"].dtype, np.datetime64)
+    ):
+        logger.debug(f"Shifting time labels with {dt} sec.")
+        ds["time"] = ds["time"] + pd.to_timedelta(dt, unit="s")
+    elif dt != 0:
+        logger.warning("Time shift not applied, time dimension not found.")
+    return ds

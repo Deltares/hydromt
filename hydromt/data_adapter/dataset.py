@@ -1,7 +1,7 @@
 """Implementation for the dataset DataAdapter."""
 import logging
 from datetime import datetime
-from os.path import basename, join, splitext
+from os.path import basename, splitext
 from pathlib import Path
 from typing import List, NewType, Optional, Tuple
 
@@ -16,7 +16,7 @@ from pystac import MediaType
 from hydromt.typing import ErrorHandleMethod, TimeRange
 
 from .data_adapter import DataAdapter
-from .utils import netcdf_writer
+from .utils import netcdf_writer, shift_dataset_time, zarr_writer
 
 logger = logging.getLogger(__name__)
 
@@ -167,14 +167,13 @@ class DatasetAdapter(DataAdapter):
             single_var_as_array=variables is None,
         )
         if driver is None or driver == "netcdf":
-            fn_out, driver = netcdf_writer(
+            fn_out = netcdf_writer(
                 obj=obj, data_root=data_root, data_name=data_name, variables=variables
             )
         elif driver == "zarr":
-            fn_out = join(data_root, f"{data_name}.zarr")
-            if isinstance(obj, xr.DataArray):
-                obj = obj.to_dataset()
-            obj.to_zarr(fn_out, **kwargs)
+            fn_out = zarr_writer(
+                obj=obj, data_root=data_root, data_name=data_name, **kwargs
+            )
         else:
             raise ValueError(f"Dataset: Driver {driver} unknown.")
 
@@ -281,17 +280,7 @@ class DatasetAdapter(DataAdapter):
         self, ds: xr.Dataset, logger: logging.Logger = logger
     ) -> xr.Dataset:
         dt = self.unit_add.get("time", 0)
-        if (
-            dt != 0
-            and "time" in ds.dims
-            and ds["time"].size > 1
-            and np.issubdtype(ds["time"].dtype, np.datetime64)
-        ):
-            logger.debug(f"Shifting time labels with {dt} sec.")
-            ds["time"] = ds["time"] + pd.to_timedelta(dt, unit="s")
-        elif dt != 0:
-            logger.warning("Time shift not applied, time dimension not found.")
-        return ds
+        return shift_dataset_time(dt=dt, ds=ds, logger=logger)
 
     @staticmethod
     def _slice_data(
