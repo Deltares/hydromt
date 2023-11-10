@@ -169,6 +169,15 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(0.01, "degree"))
     assert da1.raster.shape == (256, 250)
     assert len(data_catalog.get_source("test_cog.tif").zoom_levels) == 3
+    # test if file hase no overviews
+    tif_fn = str(tmpdir.join("test_tif_no_overviews.tif"))
+    rioda_large.raster.to_raster(tif_fn, driver="GTiff")
+    da1 = data_catalog.get_rasterdataset(tif_fn, zoom_level=(0.01, "degree"))
+    xr.testing.assert_allclose(da1, rioda_large)
+    # test if file has {variable} in path
+    data_catalog.from_predefined_catalogs("artifact_data")
+    da1 = data_catalog.get_rasterdataset("merit_hydro", zoom_level=(0.01, "degree"))
+    assert isinstance(da1, xr.Dataset)
 
 
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):

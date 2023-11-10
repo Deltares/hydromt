@@ -26,6 +26,7 @@ Changed
 
 Fixed
 -----
+- Bug in zoom level detection in `RasterDatasetAdapter` for Tifs without overviews and paths with placeholders. (#642)
 
 Deprecated
 ----------

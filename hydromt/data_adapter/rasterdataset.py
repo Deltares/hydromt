@@ -364,7 +364,7 @@ class RasterDatasetAdapter(DataAdapter):
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
             if zoom_level is not None and "{zoom_level}" not in self.path:
-                zls_dict, crs = self._get_zoom_levels_and_crs(logger=logger)
+                zls_dict, crs = self._get_zoom_levels_and_crs(fns[0], logger=logger)
                 zoom_level = self._parse_zoom_level(
                     zoom_level, geom, bbox, zls_dict, crs, logger=logger
                 )
@@ -597,26 +597,31 @@ class RasterDatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
-    def _get_zoom_levels_and_crs(self, logger=logger):
+    def _get_zoom_levels_and_crs(self, fn=None, logger=logger):
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         if self.zoom_levels is not None and self.crs is not None:
             return self.zoom_levels, self.crs
         zoom_levels = {}
+        crs = None
+        if fn is None:
+            fn = self.path
         try:
-            with rasterio.open(self.path) as src:
+            with rasterio.open(fn) as src:
                 res = abs(src.res[0])
                 crs = src.crs
                 overviews = [src.overviews(i) for i in src.indexes]
-                # check if identical
-                if not all([o == overviews[0] for o in overviews]):
-                    raise ValueError("Overviews are not identical across bands")
-                # dict with overview level and corresponding resolution
-                zls = [1] + overviews[0]
-                zoom_levels = {i: res * zl for i, zl in enumerate(zls)}
+                if len(overviews[0]) > 0:  # check overviews for band 0
+                    # check if identical
+                    if not all([o == overviews[0] for o in overviews]):
+                        raise ValueError("Overviews are not identical across bands")
+                    # dict with overview level and corresponding resolution
+                    zls = [1] + overviews[0]
+                    zoom_levels = {i: res * zl for i, zl in enumerate(zls)}
         except RasterioIOError as e:
             logger.warning(f"IO error while detecting zoom levels: {e}")
         self.zoom_levels = zoom_levels
-        self.crs = crs
+        if self.crs is None:
+            self.crs = crs
         return zoom_levels, crs
 
     def _parse_zoom_level(
