@@ -314,7 +314,7 @@ def update(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
-        mod = MODELS.load(model).__init__(
+        mod = MODELS.load(model)(
             root=model_root,
             mode=mode,
             data_libs=data_libs,
