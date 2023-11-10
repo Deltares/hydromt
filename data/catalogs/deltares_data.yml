@@ -313,6 +313,7 @@ eobs_v24.0e:
     source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_version: 24.0e
+    processing_script: meteo/eobs/scripts/v24.0e_fix_qq_dims_and_match_extent.py
   path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
   rename:
     pp: press_msl
@@ -341,6 +342,7 @@ eobs_v25.0e:
     source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_version: 25.0e
+    processing_script: v25.0e_fix_qq_dims_and_match_extent.py
   path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
   rename:
     pp: press_msl
@@ -469,6 +471,7 @@ era5_daily:
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
     source_version: ERA5 daily data on pressure levels
+    processing_script: meteo/era5_daily/src/
   path: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
   rename:
     d2m: temp_dew
@@ -499,6 +502,15 @@ era5_daily_zarr:
   driver: zarr
   kwargs:
     chunks: auto
+  meta:
+    category: meteo
+    notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    source_url: https://doi.org/10.24381/cds.bd0915c6
+    source_version: ERA5 daily data on pressure levels
+    processing_script: meteo/era5_zarr/scripts/
   path: meteo/era5_daily.zarr
 
 era5_hourly:
@@ -521,6 +533,7 @@ era5_hourly:
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.adbb2d47
     source_version: ERA5 hourly data on single levels from 1940 to present
+    processing_script: meteo/era5/src/
   path: meteo/era5/{variable}/era5_{variable}_{year}*_hourly.nc
   rename:
     d2m: temp_dew
@@ -548,6 +561,15 @@ era5_hourly_zarr:
   driver: zarr
   kwargs:
     chunks: auto
+  meta:
+    category: meteo
+    notes: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    source_url: https://doi.org/10.24381/cds.adbb2d47
+    source_version: ERA5 hourly data on single levels from 1940 to present
+    processing_script: meteo/era5_zarr/scripts/
   path: meteo/era5.zarr
 
 era5_ocean:
@@ -735,9 +757,10 @@ gebco_v2020:
     paper_doi: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9
     paper_ref: Weatherall et al (2020)
     source_license: https://www.gebco.net/data_and_products/gridded_bathymetry_data/#a1
-    source_url: https://www.bodc.ac.uk/data/open_download/gebco/gebco_2020/geotiff/
+    source_url: https://www.bodc.ac.uk/data/hosted_data_systems/gebco_gridded_bathymetry_data/
     source_version: 2020
     unit: m+MSL
+    processing_script: bathymetry/gebco/gebco_tiles.ipynb
   path: bathymetry/gebco/gebco.vrt
   rename:
     gebco: elevtn
@@ -854,6 +877,7 @@ glofas_era5_v31:
     source_license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
     source_url: https://doi.org/10.24381/cds.a4fdd6b9
     source_version: v31
+    processing_script: hydro/glofas_era5/glofas_cds_get.py
   path: hydro/glofas_era5/glofas_v31_{year}.nc
   rename:
     dis24: discharge
@@ -1059,6 +1083,7 @@ grip_roads_v4:
     paper_doi: 10.1088/1748-9326/aabd42
     source_license: CC0-1.0
     source_version: v4
+    processing_script: infrastructure/grip/merge.ipynb
   path: infrastructure/grip/GRIP4_world.fgb
   rename:
     GP_RTP: road_type
@@ -1243,6 +1268,7 @@ mdt_cnes_cls18:
     source_url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
     source_version: 18
     unit: m+GOCO05S
+    processing_script: topography/mdt_cnes_cls18/convert_lon_fill_mdt.ipynb
   path: topography/mdt_cnes_cls18/MDT_CNES_CLS18_global_filled.tif
 
 merit:
@@ -1313,6 +1339,7 @@ merit_hydro_ihu_30sec_v1.0:
     source_url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
     source_doi: 10.5281/zenodo.5166932
     source_version: 1.0
+    processing_notes: topography/merit_hydro_ihu/README
   path: topography/merit_hydro_ihu/30sec/*.tif
   rename:
     30sec_basids: basins
@@ -1333,6 +1360,7 @@ merit_hydro_ihu_index:
     paper_ref: Eilander et al. (2021)
     source_license: CC-BY-NC 4.0
     source_url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
+    processing_notes: topography/merit_hydro_ihu/README
   path: topography/merit_hydro_ihu/30sec/basins.gpkg
 
 merit_hydro_index:
@@ -1365,6 +1393,7 @@ merit_hydro_patch_v1.0:
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
     source_version: 1.0 Deltares patch
+    processing_script: topography/merit_hydro/patches/scripts
   path: topography/merit_hydro/patches/*.vrt
   rename:
     bas: basins
@@ -1395,6 +1424,9 @@ modis_mcd15a3h_v006:
     source_license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
     source_url: https://lpdaac.usgs.gov/products/mcd15a3hv006/
     source_version: MCD15A3H V006
+    processing_script:
+      GEE_script: landuse/modis/MODIS_MCD15A3H_LAI/GEE_MODIS_LAI.js
+      merge_script: landuse/modis/MODIS_MCD15A3H_LAI/merge_rasters_GEE_LAI.py
   path: landuse/modis/MODIS_MCD15A3H_LAI/*.tif
   unit_mult:
     LAI: 0.1
@@ -1464,6 +1496,7 @@ rivers_lin2019_v1:
     source_license: CC-BY-NC 4.0
     source_url: https://zenodo.org/record/3552776#.YVbOrppByUk
     source_version: 1
+    processing_notes: hydrography/rivers_lin2019/README
   path: hydrography/rivers_lin2019/rivers_ge30m.fgb
   rename:
     width_m: rivwth
@@ -1502,6 +1535,7 @@ SM2RAIN_ASCAT_monthly_025_v1.4:
     paper_ref: Brocca et al. (2019)
     source_license: https://creativecommons.org/licenses/by/4.0/legalcode
     source_url: https://zenodo.org/record/4570192#.YueKJWNByUl
+    source_version: 1.4
   path: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_025_2007_2020.nc
   rename:
     rainfall: precip
@@ -1636,6 +1670,8 @@ soilgrids_v2.0:
     source_license: CC BY 4.0
     source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids
     source_version: 2020
+    processing_script: soil/soilgrids_v2.0/src/preprocess_soilgrids_v2020.ipynb
+    processing_notes: soil/soilgrids_v2.0/src/readme.txt
   path: soil/soilgrids_v2.0/*/*_mean.vrt
   rename:
     bdod_0-5cm_mean: bd_sl1
@@ -1856,6 +1892,7 @@ worldpop_2020_constrained:
     paper_ref: Stevens et al. (2015)
     source_license: CC BY 4.0
     source_url: https://www.worldpop.org/doi/10.5258/SOTON/WP00684
+    processing_script: socio_economic/worldpop/src/
   nodata: -99999
   path: socio_economic/worldpop/ppp_2020_constrained.vrt
   rename:
@@ -1863,6 +1900,8 @@ worldpop_2020_constrained:
 
 worldpop_2020_UNadj_constrained:
   alias: worldpop_2020_constrained
+  meta:
+    processing_script: socio_economic/worldpop/src/
   path: socio_economic/worldpop/ppp_2020_UNadj_constrained.vrt
   rename:
     ppp_2020_UNadj_constrained: population
