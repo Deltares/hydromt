@@ -620,7 +620,8 @@ class RasterDatasetAdapter(DataAdapter):
         except RasterioIOError as e:
             logger.warning(f"IO error while detecting zoom levels: {e}")
         self.zoom_levels = zoom_levels
-        self.crs = crs
+        if self.crs is None:
+            self.crs = crs
         return zoom_levels, crs
 
     def _parse_zoom_level(
