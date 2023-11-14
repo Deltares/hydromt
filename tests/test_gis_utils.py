@@ -31,7 +31,8 @@ def test_crs():
 
 
 def test_transform():
-    transform = from_origin(0, 90, 1, 1)
+    # create grid with x from 0-360E
+    transform = from_origin(0, 90, 1, 1)  # upper left corner
     shape = (180, 360)
     coords = gu.affine_to_coords(transform, shape)
     xs, ys = coords["x"][1], coords["y"][1]
@@ -41,12 +42,28 @@ def test_transform():
     # offset for geographic crs
     da = full_from_transform(transform, shape, crs=4326)
     assert np.allclose(da.raster.origin, np.array([0, 90]))
-    da1 = gu.meridian_offset(da, x_name="x")
+    da1 = gu.meridian_offset(da)
     assert da1.raster.bounds[0] == -180
-    da2 = gu.meridian_offset(da1, x_name="x", bbox=[170, 0, 190, 10])
+    da2 = gu.meridian_offset(da1, bbox=[170, 0, 190, 10])
     assert da2.raster.bounds[0] == 0
-    da3 = gu.meridian_offset(da1, x_name="x", bbox=[-190, 0, -170, 10])
+    da3 = gu.meridian_offset(da1, bbox=[-190, 0, -170, 10])
     assert da3.raster.bounds[2] == 0
+
+    # test with raster with typical small rounding errors
+    # based on modis_lai dataset where lons should not be offset
+    transform = Affine(
+        0.00449157642060527,
+        0.0,
+        -180.00441663186973,
+        0.0,
+        -0.00449157642060527,
+        90.00220831593487,
+    )
+    shape = (40076, 80152)
+    da_mod = full_from_transform(transform, shape, crs=4326, lazy=True)
+    assert da_mod.raster.bounds[2] > 180
+    da_mod1 = gu.meridian_offset(da_mod)
+    assert np.isclose(da_mod.raster.bounds, da_mod1.raster.bounds).all()
 
 
 def test_transform_rotation():
