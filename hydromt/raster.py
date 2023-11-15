@@ -2372,7 +2372,8 @@ class RasterDataArray(XRasterBase):
                     for d, s in zip(dims, pad_sizes):
                         if s > 0:
                             coords = temp[d].values
-                            coords[-s:] = np.arange(1, s + 1) * dst_res + coords[-s - 1]
+                            res = dst_res if d == x_dim else -dst_res
+                            coords[-s:] = np.arange(1, s + 1) * res + coords[-s - 1]
                             temp[d] = xr.IndexVariable(d, coords)
 
                 temp.raster.set_nodata(nodata)
