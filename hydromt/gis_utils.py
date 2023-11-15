@@ -306,7 +306,11 @@ def axes_attrs(crs):
 def meridian_offset(ds, bbox=None):
     """re-arrange data along x dim."""
     w, _, e, _ = ds.raster.bounds
-    if ds.raster.crs is None or ds.raster.crs.is_projected or (e - w) < (360 - 1e-3):
+    if (
+        ds.raster.crs is None
+        or ds.raster.crs.is_projected
+        or not np.isclose(e - w, 360)
+    ):
         raise ValueError("The method is only applicable to global geographic CRS")
     x_name = ds.raster.x_dim
     lons = np.copy(ds[x_name].values)
@@ -314,7 +318,7 @@ def meridian_offset(ds, bbox=None):
         lons = np.where(lons > 0, lons - 360, lons)
     elif bbox is not None and bbox[2] > e and bbox[2] > 180:  # 180W - 180E > 0E-360E
         lons = np.where(lons < 0, lons + 360, lons)
-    elif e >= (360 - 1e-3):  # 0E-360E > 180W - 180E (allow for rounding errors)
+    elif np.isclose(e, 360):  # 0W - 360E > 180W - 180E (allow for rounding errors)
         lons = np.where(lons > 180, lons - 360, lons)
     else:
         return ds

@@ -537,7 +537,7 @@ class RasterDatasetAdapter(DataAdapter):
             bbox = rasterio.warp.transform_bounds(crs4326, crs, *bbox)
         # work with 4326 data that is defined at 0-360 degrees longtitude
         w, _, e, _ = ds.raster.bounds
-        if epsg == 4326 and (e - w) >= (360 - 1e-3):  # allow for rounding errors
+        if epsg == 4326 and np.isclose(e - w, 360):  # allow for rounding errors
             ds = gis_utils.meridian_offset(ds, bbox)
 
         # clip with bbox

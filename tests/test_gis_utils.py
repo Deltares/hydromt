@@ -30,7 +30,7 @@ def test_crs():
     assert xattrs["units"] == yattrs["units"] == "metre"
 
 
-def test_transform():
+def test_affine_to_coords():
     # create grid with x from 0-360E
     transform = from_origin(0, 90, 1, 1)  # upper left corner
     shape = (180, 360)
@@ -39,7 +39,11 @@ def test_transform():
     assert np.all(ys == 90 - np.arange(0.5, shape[0]))
     assert np.all(xs == np.arange(0.5, shape[1]))
 
-    # offset for geographic crs
+
+def test_meridian_offset():
+    # create grid with x from 0-360E
+    transform = from_origin(0, 90, 1, 1)  # upper left corner
+    shape = (180, 360)
     da = full_from_transform(transform, shape, crs=4326)
     assert np.allclose(da.raster.origin, np.array([0, 90]))
     da1 = gu.meridian_offset(da)
@@ -49,21 +53,9 @@ def test_transform():
     da3 = gu.meridian_offset(da1, bbox=[-190, 0, -170, 10])
     assert da3.raster.bounds[2] == 0
 
-    # test with raster with typical small rounding errors
-    # based on modis_lai dataset where lons should not be offset
-    transform = Affine(
-        0.00449157642060527,
-        0.0,
-        -180.00441663186973,
-        0.0,
-        -0.00449157642060527,
-        90.00220831593487,
-    )
-    shape = (40076, 80152)
-    da_mod = full_from_transform(transform, shape, crs=4326, lazy=True)
-    assert da_mod.raster.bounds[2] > 180
-    da_mod1 = gu.meridian_offset(da_mod)
-    assert np.isclose(da_mod.raster.bounds, da_mod1.raster.bounds).all()
+    # test error
+    with pytest.raises(ValueError, match="The method is only applicable to"):
+        gu.meridian_offset(da.raster.clip_bbox([0, 0, 10, 10]))
 
 
 def test_transform_rotation():

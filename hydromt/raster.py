@@ -433,11 +433,6 @@ class XRasterBase(XGeoBase):
                 + " functions with correct y_dim argument provided."
             )
 
-        check_x = np.all(np.isclose(np.diff(np.diff(self._obj[x_dim])), 0, atol=1e-4))
-        check_y = np.all(np.isclose(np.diff(np.diff(self._obj[y_dim])), 0, atol=1e-4))
-        if check_x == False or check_y == False:
-            raise ValueError("raster only applies to regular grids")
-
     def reset_spatial_dims_attrs(self, rename_dims=True) -> xr.DataArray:
         """Reset spatial dimension names and attributes.
 
@@ -560,18 +555,25 @@ class XRasterBase(XGeoBase):
                 ddx0, ddy0 = xy1[0] - xy0[0], xy1[1] - xy0[1]
                 dx = math.hypot(x1y[0] - xy0[0], x1y[1] - xy0[1])
                 dy = math.hypot(xy1[0] - xy0[0], xy1[1] - xy0[1])
-        else:  # from coordinates
+        else:  # from coordinates; based on mean distance between cell centers
             xs, ys = self.xcoords.data, self.ycoords.data
             if xs.ndim == 1:
-                dx = xs[1] - xs[0]
-                dy = ys[1] - ys[0]
+                dxs, dys = np.diff(xs), np.diff(ys)
+                dx, dy = dxs.mean(), dys.mean()
             elif xs.ndim == 2:
-                ddx0 = xs[1, 0] - xs[0, 0]
-                ddy0 = ys[1, 0] - ys[0, 0]
-                ddx1 = xs[0, 1] - xs[0, 0]
-                ddy1 = ys[0, 1] - ys[0, 0]
-                dx = math.hypot(ddx1, ddy1)  # always positive!
-                dy = math.hypot(ddx0, ddy0)
+                dxs, dys = np.diff(xs[0, :]), np.diff(ys[:, 0])
+                ddx0 = xs[-1, 0] - xs[0, 0]
+                ddy0 = ys[-1, 0] - ys[0, 0]
+                ddx1 = xs[0, -1] - xs[0, 0]
+                ddy1 = ys[0, -1] - ys[0, 0]
+                dx = math.hypot(ddx1, ddy1) / (xs.shape[1] - 1)  # always positive!
+                dy = math.hypot(ddx0, ddy0) / (xs.shape[0] - 1)
+            # check if regular grid; not water tight for rotated grids, but close enough
+            # allow rtol 0.05% * resolution for rounding errors in geographic coords
+            xreg = np.allclose(dxs, dxs[0], atol=5e-4)
+            yreg = np.allclose(dys, dys[0], atol=5e-4)
+            if not xreg or not yreg:
+                raise ValueError("The 'raster' accessor only applies to regular grids")
         rot = self.rotation
         if not np.isclose(rot, 0):
             # NOTE rotated rasters with a negative dx are not supported.
@@ -2364,8 +2366,14 @@ class RasterDataArray(XRasterBase):
                 shape, dims = temp.raster.shape, temp.raster.dims
                 pad_sizes = [tile_size - s for s in shape]
                 if any((s > 0 for s in pad_sizes)):
-                    pad_sizes = {d: (0, s) for d, s in zip(dims, pad_sizes) if s > 0}
-                    temp = temp.pad(pad_sizes, mode="constant", constant_values=nodata)
+                    pad_dict = {d: (0, s) for d, s in zip(dims, pad_sizes) if s > 0}
+                    temp = temp.pad(pad_dict, mode="constant", constant_values=nodata)
+                    # pad nan coordinates; this is not done by xarray
+                    for d, s in zip(dims, pad_sizes):
+                        if s > 0:
+                            coords = temp[d].values
+                            coords[-s:] = np.arange(1, s + 1) * dst_res + coords[-s - 1]
+                            temp[d] = xr.IndexVariable(d, coords)
 
                 temp.raster.set_nodata(nodata)
                 temp.raster._crs = obj.raster.crs
