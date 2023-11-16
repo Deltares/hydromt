@@ -41,28 +41,32 @@ docker-build-min = { cmd = [
   "build",
   "-t",
   "deltares/hydromt:min",
-  "--target=min .",
+  "--target=min",
+  ".",
 ], depends_on = "env-min" }
 docker-build-full = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:full",
-  " --target=full .",
+  "--target=full",
+  ".",
 ], depends_on = "env-full" }
 docker-build-slim = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:slim",
-  " --target=slim .",
+  "--target=slim",
+  ".",
 ], depends_on = "env-slim" }
 docker-build-latest = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:latest",
-  " --target=slim .",
+  "--target=slim",
+  ".",
 ], depends_on = "env-slim" }
 
 docker-publish-min = { cmd = [
@@ -70,28 +74,28 @@ docker-publish-min = { cmd = [
   "push",
   "deltares/hydromt:min",
 ], depends_on = [
-  "docker-build-min ",
+  "docker-build-min",
 ] }
 docker-publish-slim = { cmd = [
   "docker",
   "push",
   "deltares/hydromt:slim",
 ], depends_on = [
-  "docker-build-slim ",
+  "docker-build-slim",
 ] }
 docker-publish-latest = { cmd = [
   "docker",
   "push",
   "deltares/hydromt:latest",
 ], depends_on = [
-  "docker-build-latest ",
+  "docker-build-latest",
 ] }
 docker-publish-full = { cmd = [
   "docker",
   "push",
   "deltares/hydromt:full",
 ], depends_on = [
-  "docker-build-full ",
+  "docker-build-full",
 ] }
 docker-publish = { depends_on = [
   "docker-publish-min",
