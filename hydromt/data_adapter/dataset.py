@@ -287,6 +287,7 @@ class DatasetAdapter(DataAdapter):
         variables: Optional[str | List[str]] = None,
         time_tuple=Optional[Tuple[str] | Tuple[datetime]],
         logger: logging.Logger = logger,
+        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> xr.Dataset:
         """Slice the dataset in space and time.
 
@@ -317,7 +318,21 @@ class DatasetAdapter(DataAdapter):
                     raise ValueError(f"Dataset: variables not found {mvars}")
                 ds = ds[variables]
         if time_tuple is not None:
-            ds = DatasetAdapter._slice_temporal_dimension(ds, time_tuple, logger=logger)
+            try:
+                ds = DatasetAdapter._slice_temporal_dimension(
+                    ds, time_tuple, logger=logger
+                )
+            except IndexError as e:
+                if on_error == ErrorHandleMethod.SKIP:
+                    logger.warning(
+                        "Skipping slicing data on temporal dimension because time slice is out of range."
+                    )
+                    return ds
+                elif on_error == ErrorHandleMethod.COERCE:
+                    return ds
+                else:
+                    raise e
+
         return ds
 
     @staticmethod
