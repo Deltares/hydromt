@@ -1645,15 +1645,13 @@ class DataCatalog(object):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
-            elif os.path.exists(abspath(data_like)):
-                path = str(abspath(data_like))
+            else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "local"})
-                source = DatasetAdapter(path=path, **kwargs)
+                source = DatasetAdapter(path=str(data_like), **kwargs)
                 name = basename(data_like)
                 self.add_source(name, source)
-            else:
-                raise FileNotFoundError(f"No such file or catalog source: {data_like}")
+
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = DatasetAdapter._slice_data(
                 data_like,
