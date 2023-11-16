@@ -153,6 +153,21 @@ def test_export_cli_config_file(tmpdir):
     assert r.exit_code == 0, r.output
 
 
+def test_check_cli():
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "check",
+            "grid_model",
+            "-d",
+            "tests/data/test_sources.yml",
+            "-i",
+            "tests/data/test_model_config.yml",
+        ],
+    )
+    assert r.exit_code == 0, r.output
+
+
 def test_api_datasets():
     # datasets
     assert "artifact_data" in hydromt_api.get_predifined_catalogs()

@@ -1497,7 +1497,7 @@ class DataCatalog(object):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         predicate: str = "intersects",
         variables: Optional[List] = None,
-        time_tuple: Optional[Tuple[str] | Tuple[datetime]] = None,
+        time_tuple: Optional[Tuple[str, str] | Tuple[datetime, datetime]] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1599,7 +1599,7 @@ class DataCatalog(object):
         self,
         data_like: str | SourceSpecDict | Path | xr.Dataset | xr.DataArray,
         variables: Optional[List] = None,
-        time_tuple: Optional[Tuple[str] | Tuple[datetime]] = None,
+        time_tuple: Optional[Tuple[str, str] | Tuple[datetime, datetime]] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1612,11 +1612,11 @@ class DataCatalog(object):
         of interest provide the `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
-        will be returned as xarray.DataArray rather than Dataset.
+        will be returned as xarray.DataArray rather than a xarray.Dataset.
 
         Arguments
         ---------
-        data_like: str, Path, xr.Dataset, xr.DataArray
+        data_like: str, Path, xr.Dataset, xr.DataArray, SourceSpecDict
             Data catalog key, path to geodataset file or geodataset xarray object.
             The catalog key can be a string or a dictionary with the following keys:
             {'name', 'provider', 'version'}.

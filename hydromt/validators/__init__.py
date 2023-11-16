@@ -6,7 +6,7 @@ from .data_catalog import (
     DataCatalogMetaData,
     DataCatalogValidator,
 )
-from .model_config import HydromtStep
+from .model_config import HydromtModelStep
 from .region import (
     BoundingBoxBasinRegion,
     BoundingBoxInterBasinRegion,
@@ -47,5 +47,5 @@ __all__ = [
     "PointSubBasinRegion",
     "WGS84Point",
     "validate_region",
-    "HydromtStep",
+    "HydromtModelStep",
 ]

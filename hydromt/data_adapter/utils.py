@@ -15,6 +15,7 @@ def netcdf_writer(
     data_root: str | Path,
     data_name: str,
     variables: Optional[List[str]] = None,
+    encoder: str = "zlib",
 ) -> str:
     """Utiliy function for writing a xarray dataset/data array to a netcdf file.
 
@@ -26,7 +27,7 @@ def netcdf_writer(
         root to write the data to.
     data_name : str
         filename to write to.
-    variables : Optional[List[str]], optional
+    variables : Optional[List[str]]
         list of dataset variables to write, by default None
 
     Returns
@@ -36,7 +37,7 @@ def netcdf_writer(
     """
     dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.data_vars
     if variables is None:
-        encoding = {k: {"zlib": True} for k in dvars}
+        encoding = {k: {encoder: True} for k in dvars}
         fn_out = join(data_root, f"{data_name}.nc")
         obj.to_netcdf(fn_out, encoding=encoding)
     else:  # save per variable
@@ -44,7 +45,7 @@ def netcdf_writer(
             os.makedirs(join(data_root, data_name))
         for var in dvars:
             fn_out = join(data_root, data_name, f"{var}.nc")
-            obj[var].to_netcdf(fn_out, encoding={var: {"zlib": True}})
+            obj[var].to_netcdf(fn_out, encoding={var: {encoder: True}})
         fn_out = join(data_root, data_name, "{variable}.nc")
     return fn_out
 
@@ -75,7 +76,9 @@ def zarr_writer(
     return fn_out
 
 
-def shift_dataset_time(dt: int, ds: xr.Dataset, logger: logging.Logger) -> xr.Dataset:
+def shift_dataset_time(
+    dt: int, ds: xr.Dataset, logger: logging.Logger, time_unit: str = "s"
+) -> xr.Dataset:
     """Shifts time of a xarray dataset.
 
     Parameters
@@ -98,8 +101,8 @@ def shift_dataset_time(dt: int, ds: xr.Dataset, logger: logging.Logger) -> xr.Da
         and ds["time"].size > 1
         and np.issubdtype(ds["time"].dtype, np.datetime64)
     ):
-        logger.debug(f"Shifting time labels with {dt} sec.")
-        ds["time"] = ds["time"] + pd.to_timedelta(dt, unit="s")
+        logger.debug(f"Shifting time labels with {dt} {time_unit}.")
+        ds["time"] = ds["time"] + pd.to_timedelta(dt, unit=time_unit)
     elif dt != 0:
         logger.warning("Time shift not applied, time dimension not found.")
     return ds

@@ -18,7 +18,11 @@ Added
 - Pixi is now available as an additional task runner. (#634)
 - Support exporting data from catalogs from the CLI. (#627)
 - Support for validating data catalogs from the CLI. (#632)
+<<<<<<< HEAD
 - New data adapter (DatasetAdapter) for non-spatial n-dimensional data. (#372)
+=======
+- Support for validating model configurations from the CLI. (#643)
+>>>>>>> main
 
 
 Changed
@@ -27,6 +31,7 @@ Changed
 
 Fixed
 -----
+- Bug in zoom level detection in `RasterDatasetAdapter` for Tifs without overviews and paths with placeholders. (#642)
 
 Deprecated
 ----------

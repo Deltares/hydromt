@@ -51,7 +51,7 @@ class DatasetAdapter(DataAdapter):
     ):
         """Initiate data adapter for n-dimensional timeseries data.
 
-        This object contains all properties required to read supported files into
+        This object contains all properties required to read supported files(netcdf, zarr) into
         a single unified Dataset, i.e. :py:class:`xarray.Dataset`. In addition it keeps meta data to be able to reproduce which
         data is used.
 
@@ -127,12 +127,12 @@ class DatasetAdapter(DataAdapter):
         self,
         data_root: str | Path,
         data_name: str,
-        time_tuple: Optional[Tuple[str | datetime]] = None,
+        time_tuple: Optional[Tuple[str, str] | Tuple[datetime, datetime]] = None,
         variables: Optional[List[str]] = None,
         driver: Optional[str] = None,
         **kwargs,
     ) -> Tuple[str, str]:
-        """Save a dataset slice to file.
+        """Save a dataset slice to file. By default the data is saved as a NetCDF file.
 
         Parameters
         ----------
@@ -182,7 +182,7 @@ class DatasetAdapter(DataAdapter):
     def get_data(
         self,
         variables: Optional[List[str]] = None,
-        time_tuple: Optional[Tuple[str | datetime]] = None,
+        time_tuple: Optional[Tuple[str, str] | Tuple[datetime, datetime]] = None,
         single_var_as_array: Optional[bool] = True,
         logger: Optional[logging.Logger] = logger,
     ) -> xr.Dataset:

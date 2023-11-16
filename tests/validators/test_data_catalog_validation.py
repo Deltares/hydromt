@@ -66,7 +66,7 @@ def test_valid_catalog_with_alias():
                 "paper_doi": "10.1038/sdata.2017.122",
                 "paper_ref": "Karger et al. (2017)",
                 "source_license": "CC BY 4.0",
-                "source_url": "http://chelsa-climate.org/downloads/",
+                "source_url": "https://chelsa-climate.org/downloads/",
                 "source_version": "1.2",
             },
             "path": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
@@ -125,7 +125,7 @@ def test_raster_dataset_entry_validation():
             "paper_doi": "10.1038/sdata.2017.122",
             "paper_ref": "Karger et al. (2017)",
             "source_license": "CC BY 4.0",
-            "source_url": "http://chelsa-climate.org/downloads/",
+            "source_url": "https://chelsa-climate.org/downloads/",
             "source_version": "1.2",
         },
         "path": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
@@ -143,7 +143,7 @@ def test_raster_dataset_entry_validation():
     assert entry.meta.paper_doi == "10.1038/sdata.2017.122"
     assert entry.meta.paper_ref == "Karger et al. (2017)"
     assert entry.meta.source_license == "CC BY 4.0"
-    assert entry.meta.source_url == Url("http://chelsa-climate.org/downloads/")
+    assert entry.meta.source_url == Url("https://chelsa-climate.org/downloads/")
     assert entry.meta.source_version == "1.2"
 
 
