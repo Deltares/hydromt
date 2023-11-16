@@ -338,7 +338,7 @@ class DatasetAdapter(DataAdapter):
     def get_time_range(
         self, ds: Optional[xr.DataArray | xr.Dataset] = None
     ) -> TimeRange:
-        """Getvthe temporal range of a dataset.
+        """Get the temporal range of a dataset.
 
         Parameters
         ----------
