@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """GIS related convenience functions."""
+from __future__ import annotations
+
 import glob
 import logging
 import os
