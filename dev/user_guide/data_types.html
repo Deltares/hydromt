@@ -521,7 +521,7 @@ document.write(`
 </ul>
 <p>Internally the RasterDataset and GeoDataset are represented by <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2023.10.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects,
 the GeoDataFrame by <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v0.dev+untagged)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a>, and the DataFrame by
-<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>. We use drivers, typically from third-party packages and sometimes
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>. We use drivers, typically from third-party packages and sometimes
 wrapped in HydroMT functions, to parse many different file formats to this standardized internal
 data representation.</p>
 <div class="admonition note">
@@ -938,7 +938,7 @@ For more options see the <a class="reference internal" href="../_generated/hydro
 </div>
 <p><em>Tabulated time series text file</em></p>
 <p>This data is read using the <a class="reference internal" href="../_generated/hydromt.io.open_timeseries_from_table.html#hydromt.io.open_timeseries_from_table" title="hydromt.io.open_timeseries_from_table"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_timeseries_from_table()</span></code></a> method. To
-read the time stamps the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html#pandas.to_datetime" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.to_datetime()</span></code></a> method is used.</p>
+read the time stamps the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html#pandas.to_datetime" title="(in pandas v2.1.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.to_datetime()</span></code></a> method is used.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">time, &lt;ID1&gt;, &lt;ID2&gt;</span>
 <span class="go">&lt;time1&gt;, &lt;value&gt;, &lt;value&gt;</span>
 <span class="go">&lt;time2&gt;, &lt;value&gt;, &lt;value&gt;</span>
@@ -966,22 +966,22 @@ read the time stamps the <a class="reference external" href="https://pandas.pyda
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">csv</span></code></p></td>
 <td><p>Comma-separated files (or using another delimiter)</p></td>
-<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_csv()</span></code></a></p></td>
-<td><p>See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_csv()</span></code></a> for all</p></td>
+<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.1.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_csv()</span></code></a></p></td>
+<td><p>See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.1.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_csv()</span></code></a> for all</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">excel</span></code></p></td>
 <td><p>Excel files</p></td>
-<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_excel()</span></code></a></p></td>
+<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.1.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_excel()</span></code></a></p></td>
 <td><p>If required, provide a sheet name through driver_kwargs</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parquet</span></code></p></td>
 <td><p>Binary encoded columnar data format</p></td>
-<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_parquet()</span></code></a></p></td>
+<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.1.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_parquet()</span></code></a></p></td>
 <td></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fwf</span></code></p></td>
 <td><p>Fixed width delimited text files</p></td>
-<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.1.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_fwf()</span></code></a></p></td>
+<td><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.1.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_fwf()</span></code></a></p></td>
 <td><p>The formatting of these files can either be inferred or defined by the user, both through the driver_kwargs.</p></td>
 </tr>
 </tbody>

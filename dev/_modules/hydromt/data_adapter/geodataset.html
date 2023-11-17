@@ -1103,13 +1103,12 @@ document.write(`
             <span class="n">end_dt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">end_dt</span><span class="p">)</span>
             <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">:</span> <span class="n">crs</span><span class="p">}</span>
             <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">match</span> <span class="n">ext</span><span class="p">:</span>
-                <span class="k">case</span> <span class="s2">&quot;.nc&quot;</span> <span class="o">|</span> <span class="s2">&quot;.vrt&quot;</span><span class="p">:</span>
-                    <span class="n">media_type</span> <span class="o">=</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">HDF5</span>
-                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Unknown extention: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2"> cannot determine media type&quot;</span>
-                    <span class="p">)</span>
+            <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.nc&quot;</span><span class="p">,</span> <span class="s2">&quot;.vrt&quot;</span><span class="p">]:</span>
+                <span class="n">media_type</span> <span class="o">=</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">HDF5</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unknown extention: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2"> cannot determine media type&quot;</span>
+                <span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="n">CRSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">on_error</span> <span class="o">==</span> <span class="n">ErrorHandleMethod</span><span class="o">.</span><span class="n">SKIP</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>

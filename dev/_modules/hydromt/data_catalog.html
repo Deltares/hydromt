@@ -684,22 +684,21 @@ document.write(`
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">stac_catalog</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="n">source_name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">id</span>
             <span class="k">for</span> <span class="n">_asset_name</span><span class="p">,</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">get_assets</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">match</span> <span class="n">asset</span><span class="o">.</span><span class="n">media_type</span><span class="p">:</span>
-                    <span class="k">case</span> <span class="p">(</span>
-                        <span class="n">MediaType</span><span class="o">.</span><span class="n">HDF</span>
-                        <span class="o">|</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">HDF5</span>
-                        <span class="o">|</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">COG</span>
-                        <span class="o">|</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">TIFF</span>
-                    <span class="p">):</span>
-                        <span class="n">adapter_kind</span> <span class="o">=</span> <span class="n">RasterDatasetAdapter</span>
-                    <span class="k">case</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">GEOPACKAGE</span> <span class="o">|</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">FLATGEOBUF</span><span class="p">:</span>
-                        <span class="n">adapter_kind</span> <span class="o">=</span> <span class="n">GeoDataFrameAdapter</span>
-                    <span class="k">case</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">GEOJSON</span><span class="p">:</span>
-                        <span class="n">adapter_kind</span> <span class="o">=</span> <span class="n">GeoDatasetAdapter</span>
-                    <span class="k">case</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">JSON</span><span class="p">:</span>
-                        <span class="n">adapter_kind</span> <span class="o">=</span> <span class="n">DataFrameAdapter</span>
-                    <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                        <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">asset</span><span class="o">.</span><span class="n">media_type</span> <span class="ow">in</span> <span class="p">[</span>
+                    <span class="n">MediaType</span><span class="o">.</span><span class="n">HDF</span><span class="p">,</span>
+                    <span class="n">MediaType</span><span class="o">.</span><span class="n">HDF5</span><span class="p">,</span>
+                    <span class="n">MediaType</span><span class="o">.</span><span class="n">COG</span><span class="p">,</span>
+                    <span class="n">MediaType</span><span class="o">.</span><span class="n">TIFF</span><span class="p">,</span>
+                <span class="p">]:</span>
+                    <span class="n">adapter_kind</span> <span class="o">=</span> <span class="n">RasterDatasetAdapter</span>
+                <span class="k">elif</span> <span class="n">asset</span><span class="o">.</span><span class="n">media_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">MediaType</span><span class="o">.</span><span class="n">GEOPACKAGE</span><span class="p">,</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">FLATGEOBUF</span><span class="p">]:</span>
+                    <span class="n">adapter_kind</span> <span class="o">=</span> <span class="n">GeoDataFrameAdapter</span>
+                <span class="k">elif</span> <span class="n">asset</span><span class="o">.</span><span class="n">media_type</span> <span class="o">==</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">GEOJSON</span><span class="p">:</span>
+                    <span class="n">adapter_kind</span> <span class="o">=</span> <span class="n">GeoDatasetAdapter</span>
+                <span class="k">elif</span> <span class="n">asset</span><span class="o">.</span><span class="n">media_type</span> <span class="o">==</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">JSON</span><span class="p">:</span>
+                    <span class="n">adapter_kind</span> <span class="o">=</span> <span class="n">DataFrameAdapter</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
 
                 <span class="n">adapter</span> <span class="o">=</span> <span class="n">adapter_kind</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">get_absolute_href</span><span class="p">()))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_source</span><span class="p">(</span><span class="n">source_name</span><span class="p">,</span> <span class="n">adapter</span><span class="p">)</span>
