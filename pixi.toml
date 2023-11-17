@@ -14,7 +14,7 @@ dev = { depends_on = [
   "dev-install-hydromt",
   "dev-install-pre-commit",
 ] }
-dev-env-file = "python make_env.py full -n hydromt-dev"
+dev-env-file = "python make_env.py full -n hydromt-dev -p 3.9"
 dev-create-mamba-env = "mamba env remove -n hydromt-dev; mamba env create -f environment.yml"
 dev-install-hydromt = "mamba run -n hydromt-dev pip install -e ."
 dev-install-pre-commit = "mamba run -n hydromt-dev pre-commit install"

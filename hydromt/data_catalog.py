@@ -229,22 +229,21 @@ class DataCatalog(object):
         for item in stac_catalog.get_items(recursive=True):
             source_name = item.id
             for _asset_name, asset in item.get_assets().items():
-                match asset.media_type:
-                    case (
-                        MediaType.HDF
-                        | MediaType.HDF5
-                        | MediaType.COG
-                        | MediaType.TIFF
-                    ):
-                        adapter_kind = RasterDatasetAdapter
-                    case MediaType.GEOPACKAGE | MediaType.FLATGEOBUF:
-                        adapter_kind = GeoDataFrameAdapter
-                    case MediaType.GEOJSON:
-                        adapter_kind = GeoDatasetAdapter
-                    case MediaType.JSON:
-                        adapter_kind = DataFrameAdapter
-                    case _:
-                        continue
+                if asset.media_type in [
+                    MediaType.HDF,
+                    MediaType.HDF5,
+                    MediaType.COG,
+                    MediaType.TIFF,
+                ]:
+                    adapter_kind = RasterDatasetAdapter
+                elif asset.media_type in [MediaType.GEOPACKAGE, MediaType.FLATGEOBUF]:
+                    adapter_kind = GeoDataFrameAdapter
+                elif asset.media_type == MediaType.GEOJSON:
+                    adapter_kind = GeoDatasetAdapter
+                elif asset.media_type == MediaType.JSON:
+                    adapter_kind = DataFrameAdapter
+                else:
+                    continue
 
                 adapter = adapter_kind(str(asset.get_absolute_href()))
                 self.add_source(source_name, adapter)
