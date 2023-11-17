@@ -9,7 +9,7 @@ import logging
 import os
 from io import IOBase
 from os.path import dirname
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -69,8 +69,8 @@ GDAL_DRIVER_CODE_MAP = {
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
 
-GPD_TYPES = gpd.GeoDataFrame | gpd.GeoSeries
-GEOM_TYPES = GPD_TYPES | BaseGeometry
+GPD_TYPES = Union[gpd.GeoDataFrame, gpd.GeoSeries]
+GEOM_TYPES = Union[GPD_TYPES, BaseGeometry]
 
 ## GEOM functions
 
@@ -569,7 +569,7 @@ def to_geographic_bbox(bbox, source_crs):
 
 def bbox_from_file_and_filters(
     fn: IOBase,
-    bbox: GEOM_TYPES | None = None,
+    bbox: Union[GEOM_TYPES, None] = None,
     mask: GEOM_TYPES | None = None,
     crs: CRS | None = None,
 ) -> Tuple[float, float, float, float] | None:

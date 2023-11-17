@@ -852,19 +852,18 @@ class RasterDatasetAdapter(DataAdapter):
             end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
             ext = splitext(self.path)[-1]
-            match ext:
-                case ".nc" | ".vrt":
-                    media_type = MediaType.HDF5
-                case ".tiff":
-                    media_type = MediaType.TIFF
-                case ".cog":
-                    media_type = MediaType.COG
-                case ".png":
-                    media_type = MediaType.PNG
-                case _:
-                    raise RuntimeError(
-                        f"Unknown extention: {ext} cannot determine media type"
-                    )
+            if ext == ".nc" or ext == ".vrt":
+                media_type = MediaType.HDF5
+            elif ext == ".tiff":
+                media_type = MediaType.TIFF
+            elif ext == ".cog":
+                media_type = MediaType.COG
+            elif ext == ".png":
+                media_type = MediaType.PNG
+            else:
+                raise RuntimeError(
+                    f"Unknown extention: {ext} cannot determine media type"
+                )
         except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
