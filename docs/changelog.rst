@@ -13,6 +13,23 @@ Unreleased
 
 Added
 -----
+
+Changed
+-------
+
+Fixed
+-----
+- Bug in `raster.set_crs` if input_crs is of type CRS. (#659)
+
+Deprecated
+----------
+
+v0.9.1 (2023-11-16)
+===================
+This release contains several bugfixes to 0.9.0 as well two new CLI methods and support for STAC.
+
+Added
+-----
 - Support for exporting data catalogs to STAC catalog formats. (#617)
 - Support for reading data catalogs from STAC catalog formats. (#625)
 - Pixi is now available as an additional task runner. (#634)
@@ -29,9 +46,6 @@ Fixed
 -----
 - Bug in zoom level detection in `RasterDatasetAdapter` for Tifs without overviews and paths with placeholders. (#642)
 - Bug in gis_utils.meridian_offset for grids with rounding errors. (#649)
-
-Deprecated
-----------
 
 v0.9.0 (2023-10-19)
 ===================
