@@ -296,7 +296,7 @@ class XGeoBase(object):
         # look in grid_mapping and data variable attributes
         elif input_crs is not None and not isinstance(input_crs, CRS):
             raise ValueError(f"Invalid CRS type: {type(input_crs)}")
-        else:
+        elif not isinstance(input_crs, CRS):
             crs = None
             for name in crs_names:
                 # check default > GEO_MAP_COORDS attrs, then global attrs
