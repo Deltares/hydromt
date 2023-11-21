@@ -572,8 +572,8 @@ create a new HydroMT <code class="docutils literal notranslate"><span class="pre
 <cite>entrypoints</cite> package to advertise its, well, entrypoints. Entrypoints are how you can tell HydroMT core about your plugin. They
 can be defined within your package setup definition file (typically your pyproject.toml for pypi packages). As an example we can look
 at the current <code class="docutils literal notranslate"><span class="pre">hydromt_wflow</span></code> model. Specifically it’s this line in the pyproject.toml:</p>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[project.entry-points.&quot;hydromt.models&quot;]</span>
-<span class="n">wflow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;hydromt_wflow.wflow:WflowModel&quot;</span>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[project.entry-points.</span><span class="s2">&quot;hydromt.models&quot;</span><span class="k">]</span>
+<span class="n">wflow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;hydromt_wflow.wflow:WflowModel&quot;</span>
 </pre></div>
 </div>
 <p>This snippet will tell HydroMT core three things:</p>
