@@ -61,6 +61,23 @@ A special exception is made for the Deltares data catalog which can be accessed 
     data sources with the same names, the sources from the last catalog in the list are used.
     If the ``--dd (--deltares-data)`` flag is used the deltares_data catalog is read first.
 
+The CLI also provides two other utility subcommands: `export` and `check`. THe export function can be used
+to export a subset of the data avaialble in your data catalogs for e.g. collaboration. This sub command supports
+providing a region (bounding box or path to geom only), data catalogs, data catalgo entry names, and time ranges
+for example:
+
+.. code-block:: console
+
+    hydromt export -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -s era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml -t '["2010-01-01", "2022-12-31"]' path/to/output_dir
+
+
+Finally the CLI also provides a lightweight command to check your files for compliance without having to build the model.
+Note that this does not yet validate the data specified, but only the syntax of the files themselfes.
+However, we do plan to expand it's functionality over time. It can be use for example like so:
+
+.. code-block:: console
+
+    hydromt check grid -d /path/to/data_catalog.yml -i /path/to/model_config.yml
 
 .. _get_data_python:
 
