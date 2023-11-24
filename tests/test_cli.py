@@ -112,21 +112,38 @@ def test_cli_clip_unknown_model(tmpdir):
         )
 
 
-def test_export_cli_deltared_data(tmpdir):
+def test_export_cli_deltares_data(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "export",
             str(tmpdir),
-            "-t",
+            "-s",
             "hydro_lakes",
             "-r",
-            "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
+            "{'bbox': [12.05,45.30,12.85,45.65]}",
             "--dd",
         ],
     )
 
     assert r.exit_code == 0, r.output
+
+
+def test_export_cli_unsupported_region(tmpdir):
+    with pytest.raises(NotImplementedError):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "export",
+                str(tmpdir),
+                "-s",
+                "hydro_lakes",
+                "-r",
+                "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
+                "--dd",
+            ],
+            catch_exceptions=False,
+        )
 
 
 def test_export_cli_catalog(tmpdir):
@@ -135,8 +152,46 @@ def test_export_cli_catalog(tmpdir):
         [
             "export",
             str(tmpdir),
-            "-t",
+            "-s",
             "hydro_lakes",
+            "-d",
+            "tests/data/test_sources.yml",
+        ],
+    )
+    assert r.exit_code == 0, r.output
+
+
+def test_export_time_tuple(tmpdir):
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-s",
+            "hydro_lakes",
+            "-t",
+            "['2010-01-01','2020-12-31']",
+            "-d",
+            "tests/data/test_sources.yml",
+        ],
+    )
+    assert r.exit_code == 0, r.output
+
+
+def test_export__multiple_sources(tmpdir):
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-s",
+            "hydro_lakes",
+            "-s",
+            "gtsmv3_eu_era5",
+            "-t",
+            "['2010-01-01','2014-12-31']",
+            "-d",
+            "tests/data/test_sources.yml",
             "-d",
             "tests/data/test_sources.yml",
         ],
@@ -147,7 +202,7 @@ def test_export_cli_catalog(tmpdir):
 def test_export_cli_config_file(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
-        ["export", str(tmpdir), "-f", "tests/data/export_config.yml"],
+        ["export", str(tmpdir), "-i", "tests/data/export_config.yml"],
         catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output

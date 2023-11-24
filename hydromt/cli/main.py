@@ -2,17 +2,18 @@
 """command line interface for hydromt models."""
 
 import logging
+from ast import literal_eval
+from datetime import datetime
 from json import loads as json_decode
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import click
 import numpy as np
 from pydantic import ValidationError
 
 from hydromt.data_catalog import DataCatalog
-from hydromt.typing import ExportConfigDict
 from hydromt.validators.data_catalog import DataCatalogValidator
 from hydromt.validators.model_config import HydromtModelStep
 
@@ -121,14 +122,6 @@ cache_opt = click.option(
     is_flag=True,
     default=False,
     help="Flag: If provided cache tiled rasterdatasets",
-)
-
-export_config_opt = click.option(
-    "-f",
-    "--export-config",
-    callback=cli_utils.parse_export_config_yaml,
-    help="read options from a config file for exporting. options from CLI will "
-    "override these options",
 )
 
 ## MAIN
@@ -411,12 +404,17 @@ def check(
     short_help="Export data",
 )
 @click.option(
+    "-s",
+    "--source",
+    multiple=True,
+)
+@click.option(
     "-t",
-    "--target",
+    "--time-tuple",
 )
 @region_opt
 @export_dest_path
-@export_config_opt
+@opt_config
 @data_opt
 @deltares_data_opt
 @overwrite_opt
@@ -426,8 +424,9 @@ def check(
 def export(
     ctx: click.Context,
     export_dest_path: Path,
-    target: Optional[Union[str, Path]],
-    export_config: Optional[ExportConfigDict],
+    source: Optional[str],
+    time_tuple: Optional[str],
+    config: Optional[Path],
     region: Optional[Dict[Any, Any]],
     data: Optional[List[Path]],
     dd: bool,
@@ -440,14 +439,15 @@ def export(
     Example usage:
     --------------
 
-    export the data of in a single source, in a pertcular region
-    hydromt export -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -t era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml .
+    export the data of in a single source, in a particular region, in a particular time range
+    hydromt export -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -s era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml -t '["2010-01-01", "2022-12-31"]' path/to/output_dir
+    note to sam: only support BBOX and GEOM
 
-    export all data of in a single source
-    hydromt export --dd -t era5_hourly .
+    export all data of in a single source of the deltares data catalog
+    hydromt export --dd -s era5_hourly path/to/output_dir
 
     export data as detailed in an export config yaml file
-    hydromt export -f /path/to/export_config.yaml .
+    hydromt export -i /path/to/export_config.yaml path/to/output_dir
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -464,31 +464,58 @@ def export(
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
         data_libs = ["deltares_data"] + data_libs  # prepend!
 
-    if export_config:
-        args = export_config.pop("args", {})
+    sources: List[str] = []
+
+    if source:
+        if isinstance(source, str):
+            sources = [source]
+        else:
+            sources = list(source)
+
+    if config:
+        config_dict = cli_utils.parse_config(config)["export_data"]
+        args = config_dict.pop("args", {})
         if "catalog" in args.keys():
             data_libs = data_libs + args.pop("catalog")
         time_tuple = args.pop("time_tuple", None)
         region = region or args.pop("region", None)
         if isinstance(region, str):
             region = json_decode(region)
-    else:
-        time_tuple = None
-        region = None
 
-    if target:
-        export_targets = [{"source": target}]
-    elif export_config:
-        export_targets = export_config["sources"]
+        sources = sources + config_dict["sources"]
+
+    data_catalog = DataCatalog(data_libs=data_libs)
+    _ = data_catalog.sources  # initialise lazy loading
+
+    if region:
+        if "bbox" in region:
+            bbox = region["bbox"]
+        elif "geom" in region:
+            bbox = data_catalog.get_geodataframe(region["geom"]).total_bounds
+        else:
+            raise NotImplementedError("Only bbox and geom are supported for export")
+
+        if not set(region.keys()).issubset({"bbox", "geom"}):
+            logger.warning(
+                "Found unsupported arguments for region in addition to bbox or geom. these will be ignored"
+            )
     else:
-        export_targets = None
+        bbox = None
+
+    if time_tuple:
+        tup = literal_eval(time_tuple)
+        time_start = datetime.strptime(tup[0], "%Y-%m-%d")
+        time_end = datetime.strptime(tup[1], "%Y-%m-%d")
+        time_tup = (time_start, time_end)
+    else:
+        time_tup = None
 
     try:
-        data_catalog = DataCatalog(data_libs=data_libs)
         data_catalog.export_data(
             export_dest_path,
-            source_names=export_targets,
-            time_tuple=time_tuple,
+            source_names=sources,
+            bbox=bbox,
+            time_tuple=time_tup,
         )
 
     except Exception as e:
