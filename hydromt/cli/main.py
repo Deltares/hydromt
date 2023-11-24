@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional
 
 import click
 import numpy as np
+from geopandas import GeoDataFrame
 from pydantic import ValidationError
 
 from hydromt.data_catalog import DataCatalog
@@ -491,7 +492,7 @@ def export(
         if "bbox" in region:
             bbox = region["bbox"]
         elif "geom" in region:
-            bbox = data_catalog.get_geodataframe(region["geom"]).total_bounds
+            bbox = GeoDataFrame.from_file(region["geom"]).total_bounds
         else:
             raise NotImplementedError("Only bbox and geom are supported for export")
 
