@@ -106,7 +106,7 @@ class DataAdapter(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        path: str | Path,
+        path: Union[str, Path],
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,

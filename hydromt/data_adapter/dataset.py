@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from os.path import basename, splitext
 from pathlib import Path
-from typing import List, NewType, Optional, Tuple
+from typing import List, NewType, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -20,7 +20,7 @@ from .utils import netcdf_writer, shift_dataset_time, zarr_writer
 
 logger = logging.getLogger(__name__)
 
-DatasetSource = NewType("DatasetSource", str | Path)
+DatasetSource = NewType("DatasetSource", Union[str, Path])
 
 
 class DatasetAdapter(DataAdapter):
@@ -33,10 +33,10 @@ class DatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path: str | Path,
+        path: Union[str, Path],
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
-        nodata: Optional[dict | float | int] = None,
+        nodata: Optional[Union[dict, float, int]] = None,
         rename: Optional[dict] = None,
         unit_mult: Optional[dict] = None,
         unit_add: Optional[dict] = None,
@@ -125,9 +125,9 @@ class DatasetAdapter(DataAdapter):
 
     def to_file(
         self,
-        data_root: str | Path,
+        data_root: Union[str, Path],
         data_name: str,
-        time_tuple: Optional[Tuple[str, str] | Tuple[datetime, datetime]] = None,
+        time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
         variables: Optional[List[str]] = None,
         driver: Optional[str] = None,
         **kwargs,
@@ -182,7 +182,7 @@ class DatasetAdapter(DataAdapter):
     def get_data(
         self,
         variables: Optional[List[str]] = None,
-        time_tuple: Optional[Tuple[str, str] | Tuple[datetime, datetime]] = None,
+        time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
         single_var_as_array: Optional[bool] = True,
         logger: Optional[logging.Logger] = logger,
     ) -> xr.Dataset:
@@ -230,7 +230,9 @@ class DatasetAdapter(DataAdapter):
         ds = ds.rename(rm)
         return ds
 
-    def _set_metadata(self, ds: xr.DataArray | xr.Dataset) -> xr.Dataset | xr.DataArray:
+    def _set_metadata(
+        self, ds: Union[xr.DataArray, xr.Dataset]
+    ) -> Union[xr.Dataset, xr.DataArray]:
         if self.attrs:
             if isinstance(ds, xr.DataArray):
                 ds.attrs.update(self.attrs[ds.name])
@@ -284,8 +286,8 @@ class DatasetAdapter(DataAdapter):
     @staticmethod
     def _slice_data(
         ds: xr.Dataset,
-        variables: Optional[str | List[str]] = None,
-        time_tuple=Optional[Tuple[str] | Tuple[datetime]],
+        variables: Optional[Union[str, List[str]]] = None,
+        time_tuple=Optional[Union[Tuple[str], Tuple[datetime]]],
         logger: logging.Logger = logger,
         on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> xr.Dataset:
@@ -351,7 +353,7 @@ class DatasetAdapter(DataAdapter):
         return ds
 
     def get_time_range(
-        self, ds: Optional[xr.DataArray | xr.Dataset] = None
+        self, ds: Optional[Union[xr.DataArray, xr.Dataset]] = None
     ) -> TimeRange:
         """Get the temporal range of a dataset.
 

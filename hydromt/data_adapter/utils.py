@@ -3,7 +3,7 @@ import logging
 import os
 from os.path import isdir, join
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -11,8 +11,8 @@ import xarray as xr
 
 
 def netcdf_writer(
-    obj: xr.Dataset | xr.DataArray,
-    data_root: str | Path,
+    obj: Union[xr.Dataset, xr.DataArray],
+    data_root: Union[str, Path],
     data_name: str,
     variables: Optional[List[str]] = None,
     encoder: str = "zlib",
@@ -51,7 +51,10 @@ def netcdf_writer(
 
 
 def zarr_writer(
-    obj: xr.Dataset | xr.DataArray, data_root: str | Path, data_name: str, **kwargs
+    obj: Union[xr.Dataset, xr.DataArray],
+    data_root: Union[str, Path],
+    data_name: str,
+    **kwargs,
 ) -> str:
     """Utiliy function for writing a xarray dataset/data array to a netcdf file.
 
