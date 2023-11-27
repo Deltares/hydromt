@@ -403,17 +403,16 @@ class DatasetAdapter(DataAdapter):
             ext = splitext(self.path)[-1]
             bbox = [0.0, 0.0, 0.0, 0.0]
 
-            match ext:
-                case ".nc":
-                    media_type = MediaType.HDF5
+            if ext == ".nc":
+                media_type = MediaType.HDF5
 
-                case ".zarr":
-                    raise RuntimeError("STAC does not support zarr datasets")
+            elif ext == ".zarr":
+                raise RuntimeError("STAC does not support zarr datasets")
 
-                case _:
-                    raise RuntimeError(
-                        f"Unknown extention: {ext} cannot determine media type"
-                    )
+            else:
+                raise RuntimeError(
+                    f"Unknown extention: {ext} cannot determine media type"
+                )
         except (IndexError, KeyError) as e:
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
