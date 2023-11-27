@@ -609,13 +609,12 @@ class GeoDatasetAdapter(DataAdapter):
             end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
             ext = splitext(self.path)[-1]
-            match ext:
-                case ".nc" | ".vrt":
-                    media_type = MediaType.HDF5
-                case _:
-                    raise RuntimeError(
-                        f"Unknown extention: {ext} cannot determine media type"
-                    )
+            if ext in [".nc", ".vrt"]:
+                media_type = MediaType.HDF5
+            else:
+                raise RuntimeError(
+                    f"Unknown extention: {ext} cannot determine media type"
+                )
         except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(

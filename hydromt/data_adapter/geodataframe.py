@@ -506,13 +506,12 @@ class GeoDataFrameAdapter(DataAdapter):
             bbox = list(bbox)
             props = {**self.meta, "crs": crs}
             ext = splitext(self.path)[-1]
-            match ext:
-                case ".gpkg":
-                    media_type = MediaType.GEOPACKAGE
-                case _:
-                    raise RuntimeError(
-                        f"Unknown extention: {ext} cannot determine media type"
-                    )
+            if ext == ".gpkg":
+                media_type = MediaType.GEOPACKAGE
+            else:
+                raise RuntimeError(
+                    f"Unknown extention: {ext} cannot determine media type"
+                )
         except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
