@@ -491,6 +491,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">.data_adapter</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DataAdapter</span><span class="p">,</span>
     <span class="n">DataFrameAdapter</span><span class="p">,</span>
+    <span class="n">DatasetAdapter</span><span class="p">,</span>
     <span class="n">GeoDataFrameAdapter</span><span class="p">,</span>
     <span class="n">GeoDatasetAdapter</span><span class="p">,</span>
     <span class="n">RasterDatasetAdapter</span><span class="p">,</span>
@@ -1777,7 +1778,7 @@ document.write(`
         <span class="n">data_like</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SourceSpecDict</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
         <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">buffer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
         <span class="n">align</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2003,7 +2004,7 @@ document.write(`
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
         <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">single_var_as_array</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">provider</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2101,6 +2102,83 @@ document.write(`
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">obj</span></div>
 
+
+    <span class="k">def</span> <span class="nf">get_dataset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_like</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SourceSpecDict</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">single_var_as_array</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">provider</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a clipped, sliced and unified Dataset.</span>
+
+<span class="sd">        To slice the data to the time period of interest, provide the</span>
+<span class="sd">        `time_tuple` argument. To return only the dataset variables</span>
+<span class="sd">        of interest provide the `variables` argument.</span>
+
+<span class="sd">        NOTE: Unless `single_var_as_array` is set to False a single-variable data source</span>
+<span class="sd">        will be returned as xarray.DataArray rather than a xarray.Dataset.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        data_like: str, Path, xr.Dataset, xr.DataArray, SourceSpecDict</span>
+<span class="sd">            Data catalog key, path to geodataset file or geodataset xarray object.</span>
+<span class="sd">            The catalog key can be a string or a dictionary with the following keys:</span>
+<span class="sd">            {&#39;name&#39;, &#39;provider&#39;, &#39;version&#39;}.</span>
+<span class="sd">            If a path to a file is provided it will be added</span>
+<span class="sd">            to the catalog with its based on the file basename.</span>
+<span class="sd">        time_tuple : tuple of str, datetime, optional</span>
+<span class="sd">            Start and end date of period of interest. By default the entire time period</span>
+<span class="sd">            of the dataset is returned.</span>
+<span class="sd">        single_var_as_array: bool, optional</span>
+<span class="sd">            If True, return a DataArray if the dataset consists of a single variable.</span>
+<span class="sd">            If False, always return a Dataset. By default True.</span>
+<span class="sd">        **kwargs:</span>
+<span class="sd">            Additional keyword arguments that are passed to the `DatasetAdapter`</span>
+<span class="sd">            function. Only used if `data_like` is a path to a geodataset file.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        obj: xarray.Dataset or xarray.DataArray</span>
+<span class="sd">            Dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">data_like</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">_parse_data_like_dict</span><span class="p">(</span>
+                <span class="n">data_like</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="n">version</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data_like</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">data_like</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">provider</span><span class="o">=</span><span class="n">provider</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;provider&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="s2">&quot;local&quot;</span><span class="p">})</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="n">DatasetAdapter</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_like</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)):</span>
+            <span class="n">data_like</span> <span class="o">=</span> <span class="n">DatasetAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
+                <span class="n">data_like</span><span class="p">,</span>
+                <span class="n">variables</span><span class="p">,</span>
+                <span class="n">time_tuple</span><span class="p">,</span>
+                <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">DatasetAdapter</span><span class="o">.</span><span class="n">_single_var_as_array</span><span class="p">(</span>
+                <span class="n">data_like</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variables</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown data type &quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+            <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
+            <span class="n">time_tuple</span><span class="o">=</span><span class="n">time_tuple</span><span class="p">,</span>
+            <span class="n">single_var_as_array</span><span class="o">=</span><span class="n">single_var_as_array</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span>
 
 <div class="viewcode-block" id="DataCatalog.get_dataframe">
 <a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.get_dataframe.html#hydromt.data_catalog.DataCatalog.get_dataframe">[docs]</a>
@@ -2201,6 +2279,7 @@ document.write(`
         <span class="s2">&quot;GeoDataFrame&quot;</span><span class="p">:</span> <span class="n">GeoDataFrameAdapter</span><span class="p">,</span>
         <span class="s2">&quot;GeoDataset&quot;</span><span class="p">:</span> <span class="n">GeoDatasetAdapter</span><span class="p">,</span>
         <span class="s2">&quot;DataFrame&quot;</span><span class="p">:</span> <span class="n">DataFrameAdapter</span><span class="p">,</span>
+        <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span> <span class="n">DatasetAdapter</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># parse data</span>
     <span class="n">source</span> <span class="o">=</span> <span class="n">data_source_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># important as we modify with pop</span>

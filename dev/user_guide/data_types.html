@@ -517,9 +517,10 @@ document.write(`
 <li><p><a class="reference internal" href="#rasterdataset"><span class="std std-ref">RasterDataset</span></a>: static and dynamic raster (or gridded) data</p></li>
 <li><p><a class="reference internal" href="#geodataframe"><span class="std std-ref">GeoDataFrame</span></a>: static vector data</p></li>
 <li><p><a class="reference internal" href="#geodataset"><span class="std std-ref">GeoDataset</span></a>: dynamic point location data</p></li>
+<li><p><a class="reference internal" href="#dataset"><span class="std std-ref">Dataset</span></a>:  non-spatial n-dimensional data</p></li>
 <li><p><a class="reference internal" href="#dataframe"><span class="std std-ref">DataFrame</span></a>: 2D tabular data</p></li>
 </ul>
-<p>Internally the RasterDataset and GeoDataset are represented by <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2023.11.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects,
+<p>Internally the RasterDataset, GeoDataset, and Dataset are represented by <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2023.11.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects,
 the GeoDataFrame by <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v0.dev+untagged)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a>, and the DataFrame by
 <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>. We use drivers, typically from third-party packages and sometimes
 wrapped in HydroMT functions, to parse many different file formats to this standardized internal
@@ -947,6 +948,42 @@ read the time stamps the <a class="reference external" href="https://pandas.pyda
 </div>
 </section>
 </section>
+<section id="netcdf-time-series-dataset-dataset">
+<span id="dataset"></span><h2>NetCDF time-series dataset (Dataset)<a class="headerlink" href="#netcdf-time-series-dataset-dataset" title="Link to this heading">#</a></h2>
+<table class="table" id="dataset-formats">
+<colgroup>
+<col style="width: 17.0%" />
+<col style="width: 25.0%" />
+<col style="width: 28.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Driver</p></th>
+<th class="head"><p>File formats</p></th>
+<th class="head"><p>Method</p></th>
+<th class="head"><p>Comments</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">netcdf</span></code> or <code class="docutils literal notranslate"><span class="pre">zarr</span></code></p></td>
+<td><p>NetCDF and Zarr</p></td>
+<td><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2023.11.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2023.11.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a></p></td>
+<td><p>required time and index <a class="reference internal" href="#dimensions">dimensions</a>.</p></td>
+</tr>
+</tbody>
+</table>
+<section id="netcdf-time-series-dataset">
+<span id="nc-timeseries"></span><h3>Netcdf time-series dataset<a class="headerlink" href="#netcdf-time-series-dataset" title="Link to this heading">#</a></h3>
+<p>NetCDF and zarr timeseries data are parsed to <strong>Dataset</strong> with the <strong>netcdf</strong> and <strong>zarr</strong> drivers.
+The resulting dataset is similar to the <strong>GeoDataset</strong> except that it lacks a spatial dimension.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">timeseries_dataset</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/timeseries.netcdf</span>
+<span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dataset</span>
+<span class="w">  </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">netcdf</span>
+</pre></div>
+</div>
+</section>
+</section>
 <section id="d-tabular-data-dataframe">
 <span id="dataframe"></span><h2>2D tabular data (DataFrame)<a class="headerlink" href="#d-tabular-data-dataframe" title="Link to this heading">#</a></h2>
 <table class="table" id="dataframe-formats">
@@ -1079,6 +1116,10 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geospatial-point-time-series-geodataset">Geospatial point time-series (GeoDataset)</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#netcdf-point-time-series-dataset">Netcdf point time-series dataset</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#csv-point-time-series-data">CSV point time-series data</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#netcdf-time-series-dataset-dataset">NetCDF time-series dataset (Dataset)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#netcdf-time-series-dataset">Netcdf time-series dataset</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#d-tabular-data-dataframe">2D tabular data (DataFrame)</a><ul class="nav section-nav flex-column">

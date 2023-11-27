@@ -796,7 +796,7 @@ document.write(`
         <span class="n">on_error</span><span class="p">:</span> <span class="n">ErrorHandleMethod</span> <span class="o">=</span> <span class="n">ErrorHandleMethod</span><span class="o">.</span><span class="n">COERCE</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StacCatalog</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert a rasterdataset into a STAC Catalog representation.</span>
+<span class="sd">        Convert a dataframe into a STAC Catalog representation.</span>
 
 <span class="sd">        The collection will contain an asset for each of the associated files.</span>
 
@@ -838,7 +838,7 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;DataframeAdapter does not support full stac conversion as it lacks&quot;</span>
-                <span class="s2">&quot; spatio-temporal dimentions&quot;</span>
+                <span class="s2">&quot; spatio-temporal dimensions&quot;</span>
             <span class="p">)</span></div>
 
 </pre></div>
