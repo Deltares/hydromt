@@ -335,7 +335,7 @@ class DataFrameAdapter(DataAdapter):
         on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> Optional[StacCatalog]:
         """
-        Convert a rasterdataset into a STAC Catalog representation.
+        Convert a dataframe into a STAC Catalog representation.
 
         The collection will contain an asset for each of the associated files.
 
@@ -377,5 +377,5 @@ class DataFrameAdapter(DataAdapter):
         else:
             raise NotImplementedError(
                 "DataframeAdapter does not support full stac conversion as it lacks"
-                " spatio-temporal dimentions"
+                " spatio-temporal dimensions"
             )

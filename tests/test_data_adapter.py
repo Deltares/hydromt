@@ -20,6 +20,7 @@ from pystac import Item as StacItem
 import hydromt
 from hydromt import _compat as compat
 from hydromt.data_adapter import (
+    DatasetAdapter,
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
     RasterDatasetAdapter,
@@ -308,6 +309,132 @@ def test_geodataset_set_nodata(artifact_data: DataCatalog):
     datacatalog.from_dict(gtsm_dict)
     ds = datacatalog.get_geodataset("gtsmv3_eu_era5")
     assert ds.vector.nodata == -99
+
+
+def test_dataset_get_data(timeseries_ds, tmpdir):
+    path = str(tmpdir.join("test.nc"))
+    timeseries_ds.to_netcdf(path)
+    dataset_adapter = DatasetAdapter(path=path, driver="netcdf")
+    ds1 = dataset_adapter.get_data()
+    assert isinstance(ds1, xr.Dataset)
+    assert ds1.identical(timeseries_ds)
+
+
+def test_dataset_to_file(timeseries_ds, tmpdir):
+    path = str(tmpdir.join("test1.nc"))
+    encoding = {k: {"zlib": True} for k in timeseries_ds.vector.vars}
+    timeseries_ds.to_netcdf(path, encoding=encoding)
+    dataset_adapter = DatasetAdapter(path=path, driver="netcdf")
+    fn_out, driver = dataset_adapter.to_file(
+        data_root=tmpdir, data_name="test2", driver="netcdf"
+    )
+    assert driver == "netcdf"
+    assert fn_out == str(tmpdir.join("test2.nc"))
+    ds2 = xr.open_dataset(fn_out)
+    assert ds2.identical(timeseries_ds)
+
+    variables = ["col1", "col2"]
+    fn_out, driver = dataset_adapter.to_file(
+        data_root=tmpdir, data_name="test3", driver="netcdf", variables=variables
+    )
+    for variable in variables:
+        ds3 = xr.open_dataset(fn_out.format(variable=variable))
+        assert variable in ds3.vector.vars
+
+    fn_out, driver = dataset_adapter.to_file(
+        data_root=tmpdir, data_name="test4", driver="zarr"
+    )
+
+    ds_zarr = xr.open_zarr(fn_out)
+    assert ds_zarr.identical(timeseries_ds)
+
+    with pytest.raises(ValueError, match="Dataset: Driver fake-driver unknown."):
+        dataset_adapter.to_file(
+            data_root=tmpdir, data_name="test4", driver="fake-driver"
+        )
+
+
+def test_dataset_read_data(tmpdir, timeseries_ds):
+    zarr_path = str(tmpdir.join("zarr_data"))
+    timeseries_ds.to_zarr(zarr_path)
+    dataset_adapter = DatasetAdapter(path=zarr_path, driver="zarr")
+    dataset_adapter.get_data(variables=["col1", "col2"])
+
+    dataset_adapter = DatasetAdapter(path=zarr_path, driver="fake-driver")
+    with pytest.raises(ValueError, match=r"Dataset: Driver fake-driver unknown"):
+        dataset_adapter.get_data(variables=["col1", "col2"])
+
+
+def test_dataset_set_nodata(tmpdir, timeseries_ds):
+    path = str(tmpdir.join("test.nc"))
+    timeseries_ds.to_netcdf(path)
+
+    nodata = -999
+    dataset_adapter = DatasetAdapter(path=path, driver="netcdf", nodata=nodata)
+    ds = dataset_adapter.get_data()
+    for k in ds.data_vars:
+        assert ds[k].attrs["_FillValue"] == nodata
+
+    nodata = {"col1": -999, "col2": np.nan}
+    dataset_adapter = DatasetAdapter(path=path, driver="netcdf", nodata=nodata)
+    ds = dataset_adapter.get_data()
+    assert np.isnan(ds["col2"].attrs["_FillValue"])
+    assert ds["col1"].attrs["_FillValue"] == nodata["col1"]
+
+
+def test_dataset_apply_unit_conversion(tmpdir, timeseries_ds):
+    path = str(tmpdir.join("test.nc"))
+    timeseries_ds.to_netcdf(path)
+
+    dataset_adapter = DatasetAdapter(
+        path=path,
+        unit_mult=dict(col1=1000),
+    )
+    ds1 = dataset_adapter.get_data()
+
+    assert ds1["col1"].equals(timeseries_ds["col1"] * 1000)
+
+    dataset_adapter = DatasetAdapter(path=path, unit_add={"time": 10})
+    ds2 = dataset_adapter.get_data()
+    assert ds2["time"][-1].values == np.datetime64("2020-12-31T00:00:10")
+
+
+def test_dataset_set_metadata(tmpdir, timeseries_ds):
+    path = str(tmpdir.join("test.nc"))
+    timeseries_ds.to_netcdf(path)
+    meta_data = {"col1": {"long_name": "column1"}, "col2": {"long_name": "column2"}}
+    dataset_adapter = DatasetAdapter(path=path, meta=meta_data)
+    ds = dataset_adapter.get_data()
+    assert ds.attrs["col1"].get("long_name") == "column1"
+    assert ds.attrs["col2"].get("long_name") == "column2"
+
+    dataset_adapter = DatasetAdapter(path=path, attrs=meta_data)
+    ds = dataset_adapter.get_data()
+    assert ds["col1"].attrs["long_name"] == "column1"
+    assert ds["col2"].attrs["long_name"] == "column2"
+
+    da = timeseries_ds["col1"]
+    da.name = "col1"
+
+    path = str(tmpdir.join("da.nc"))
+    da.to_netcdf(path)
+
+    dataset_adapter = DatasetAdapter(
+        path=path, attrs={"col1": {"long_name": "column1"}}
+    )
+    da = dataset_adapter.get_data()
+    assert da.attrs["long_name"] == "column1"
+
+
+def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
+    path = str(tmpdir.join("test.nc"))
+    timeseries_ds.to_netcdf(path)
+    dataset_adapter = DatasetAdapter(path=path, name="timeseries_dataset")
+
+    stac_catalog = dataset_adapter.to_stac_catalog()
+    assert isinstance(stac_catalog, StacCatalog)
+    stac_item = next(stac_catalog.get_items("timeseries_dataset"), None)
+    assert list(stac_item.assets.keys())[0] == "test.nc"
 
 
 def test_geodataframe(geodf, tmpdir):
