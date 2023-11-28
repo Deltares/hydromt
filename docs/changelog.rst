@@ -14,6 +14,7 @@ Unreleased
 Added
 -----
 - Export CLI now also accepts time tuples (#660)
+- Check CLI command can now validate bbox and geom regions (#664)
 
 Changed
 -------
