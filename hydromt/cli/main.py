@@ -17,6 +17,7 @@ from pydantic import ValidationError
 from hydromt.data_catalog import DataCatalog
 from hydromt.validators.data_catalog import DataCatalogValidator
 from hydromt.validators.model_config import HydromtModelStep
+from hydromt.validators.region import validate_region
 
 from .. import __version__, log
 from ..models import MODELS
@@ -343,6 +344,7 @@ def update(
 @deltares_data_opt
 @quiet_opt
 @verbose_opt
+@region_opt
 @click.pass_context
 def check(
     ctx,
@@ -350,6 +352,7 @@ def check(
     config,
     data,
     dd,
+    region: Optional[Dict[Any, Any]],
     quiet: int,
     verbose: int,
 ):
@@ -376,24 +379,33 @@ def check(
                 all_exceptions.append(e)
                 logger.info("Catalog has errors")
 
-        mod = MODELS.load(model)
         try:
-            config_dict = cli_utils.parse_config(config)
-            logger.info(f"Validating config at {config}")
+            if region:
+                validate_region(region)
 
-            HydromtModelStep.from_dict(config_dict, model=mod)
-            logger.info("Model config valid!")
-
-        except (ValidationError, ValueError) as e:
-            logger.info("Model has errors")
+        except (ValidationError, ValueError, NotImplementedError) as e:
+            logger.info("region has errors")
             all_exceptions.append(e)
 
+        if config:
+            mod = MODELS.load(model)
+            try:
+                config_dict = cli_utils.parse_config(config)
+                logger.info(f"Validating config at {config}")
+
+                HydromtModelStep.from_dict(config_dict, model=mod)
+                logger.info("Model config valid!")
+
+            except (ValidationError, ValueError) as e:
+                logger.info("Model has errors")
+                all_exceptions.append(e)
+
         if len(all_exceptions) > 0:
-            raise Exception(all_exceptions)
+            raise ValueError(all_exceptions)
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
-        raise
+        raise e
     finally:
         for handler in logger.handlers[:]:
             handler.close()

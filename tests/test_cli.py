@@ -227,6 +227,69 @@ def test_check_cli():
     assert r.exit_code == 0, r.output
 
 
+def test_check_cli_unsupported_region(tmpdir):
+    with pytest.raises(Exception, match="Unknown region kind"):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "check",
+                "grid_model",
+                "-r",
+                "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
+                "-i",
+                "tests/data/test_model_config.yml",
+            ],
+            catch_exceptions=False,
+        )
+
+
+def test_check_cli_bbox_valid(tmpdir):
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "check",
+            "grid_model",
+            "-r",
+            "{'bbox': [12.05,45.30,12.85,45.65]}",
+            "-i",
+            "tests/data/test_model_config.yml",
+        ],
+    )
+    assert r.exit_code == 0, r.output
+
+
+def test_check_cli_geom_valid(tmpdir):
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "check",
+            "grid_model",
+            "-r",
+            "{'geom': 'tests/data/naturalearth_lowres.geojson'}",
+            "-i",
+            "tests/data/test_model_config.yml",
+        ],
+        catch_exceptions=False,
+    )
+    assert r.exit_code == 0, r.output
+
+
+def test_check_cli_geom_missing_file(tmpdir):
+    with pytest.raises(Exception, match="Path not found at asdf"):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "check",
+                "grid_model",
+                "-r",
+                "{'geom': 'asdfasdf'}",
+                "-i",
+                "tests/data/test_model_config.yml",
+            ],
+            catch_exceptions=False,
+        )
+
+
 def test_api_datasets():
     # datasets
     assert "artifact_data" in hydromt_api.get_predifined_catalogs()
