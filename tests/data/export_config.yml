@@ -2,7 +2,7 @@ export_data:
    data_libs:
       - tests/data/test_sources.yml
    region:
-      - bbox: [4.6891,52.9750,4.9576,53.1994]
+      bbox: [4.6891,52.9750,4.9576,53.1994]
    time_tuple: ['2010-01-01', '2020-12-31']
    sources:
      - hydro_lakes[xout]

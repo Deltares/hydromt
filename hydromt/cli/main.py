@@ -480,7 +480,7 @@ def export(
     if config:
         config_dict = cli_utils.parse_config(config)["export_data"]
         if "data_libs" in config_dict.keys():
-            data_libs = data_libs + config_dict.pop("catalog")
+            data_libs = data_libs + config_dict.pop("data_libs")
         time_tuple = config_dict.pop("time_tuple", None)
         region = region or config_dict.pop("region", None)
         if isinstance(region, str):
@@ -501,7 +501,9 @@ def export(
         elif "geom" in region:
             bbox = GeoDataFrame.from_file(region["geom"]).total_bounds
         else:
-            raise NotImplementedError("Only bbox and geom are supported for export")
+            raise NotImplementedError(
+                f"Only bbox and geom are supported for export. recieved {region}"
+            )
 
         if not set(region.keys()).issubset({"bbox", "geom"}):
             logger.warning(
@@ -511,7 +513,10 @@ def export(
         bbox = None
 
     if time_tuple:
-        tup = literal_eval(time_tuple)
+        if isinstance(time_tuple, str):
+            tup = literal_eval(time_tuple)
+        else:
+            tup = time_tuple
         time_start = datetime.strptime(tup[0], "%Y-%m-%d")
         time_end = datetime.strptime(tup[1], "%Y-%m-%d")
         time_tup = (time_start, time_end)

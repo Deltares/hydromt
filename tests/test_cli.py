@@ -124,6 +124,7 @@ def test_export_cli_deltares_data(tmpdir):
             "{'bbox': [12.05,45.30,12.85,45.65]}",
             "--dd",
         ],
+        catch_exceptions=False,
     )
 
     assert r.exit_code == 0, r.output
@@ -157,6 +158,7 @@ def test_export_cli_catalog(tmpdir):
             "-d",
             "tests/data/test_sources.yml",
         ],
+        catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
 
@@ -174,6 +176,7 @@ def test_export_time_tuple(tmpdir):
             "-d",
             "tests/data/test_sources.yml",
         ],
+        catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
 
@@ -195,6 +198,7 @@ def test_export__multiple_sources(tmpdir):
             "-d",
             "tests/data/test_sources.yml",
         ],
+        catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
 
