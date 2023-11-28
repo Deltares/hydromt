@@ -558,6 +558,19 @@ If no version is specified, the latest version available is used.</p>
 data sources with the same names, the sources from the last catalog in the list are used.
 If the <code class="docutils literal notranslate"><span class="pre">--dd</span> <span class="pre">(--deltares-data)</span></code> flag is used the deltares_data catalog is read first.</p>
 </div>
+<p>The CLI also provides two other utility subcommands: <cite>export</cite> and <cite>check</cite>. The export function can be used
+to export a subset of the data available in your data catalogs for e.g. collaboration. This sub command supports
+providing a region (bounding box or path to geom only), data catalogs, data source names, and time ranges
+for example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt export -r &quot;{&#39;bbox&#39;: [4.6891,52.9750,4.9576,53.1994]}&quot; -s era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml -t &#39;[&quot;2010-01-01&quot;, &quot;2022-12-31&quot;]&#39; path/to/output_dir</span>
+</pre></div>
+</div>
+<p>Finally the CLI also provides a lightweight command to check your files for compliance without having to build the model.
+Note that this does not yet validate the data specified, but only the syntax of the files themselves.
+However, we do plan to expand its functionality over time. It can be use for example like so:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt check grid -d /path/to/data_catalog.yml -i /path/to/model_config.yml</span>
+</pre></div>
+</div>
 </section>
 <section id="from-python">
 <span id="get-data-python"></span><h2>From Python<a class="headerlink" href="#from-python" title="Link to this heading">#</a></h2>
