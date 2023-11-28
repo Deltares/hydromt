@@ -538,6 +538,24 @@ def test_get_geodataset():
         data_catalog.get_geodataset({"name": "test"})
 
 
+def test_get_dataset(timeseries_df):
+    # get_dataset
+    data_catalog = DataCatalog("artifact_data")
+    test_dataset = timeseries_df.to_xarray()
+    subset_timeseries = timeseries_df.iloc[[0, len(timeseries_df) // 2]]
+    time_tuple = (
+        subset_timeseries.index[0].to_pydatetime(),
+        subset_timeseries.index[1].to_pydatetime(),
+    )
+    ds = data_catalog.get_dataset(test_dataset, time_tuple=time_tuple)
+    assert isinstance(ds, xr.Dataset)
+    assert ds.time[-1].values == subset_timeseries.index[1].to_datetime64()
+
+    ds = data_catalog.get_dataset(test_dataset, variables=["col1"])
+    assert isinstance(ds, xr.DataArray)
+    assert ds.name == "col1"
+
+
 def test_get_dataframe(df, tmpdir):
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)

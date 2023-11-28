@@ -106,7 +106,7 @@ class DataAdapter(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        path: str | Path,
+        path: Union[str, Path],
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
@@ -425,4 +425,4 @@ class DataAdapter(object, metaclass=ABCMeta):
         self,
         on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> Optional[StacCatalog]:
-        """Create a stac item from the data adatper to be added to a stac catalog."""
+        """Create a stac item from the data adapter to be added to a stac catalog."""
