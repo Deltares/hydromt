@@ -472,17 +472,25 @@ def export(
         else:
             sources = list(source)
 
+    # these need to be defined even if config does not exist
+    unit_conversion = True
+    meta = {}
+    append = False
+
     if config:
         config_dict = cli_utils.parse_config(config)["export_data"]
-        args = config_dict.pop("args", {})
-        if "catalog" in args.keys():
-            data_libs = data_libs + args.pop("catalog")
-        time_tuple = args.pop("time_tuple", None)
-        region = region or args.pop("region", None)
+        if "data_libs" in config_dict.keys():
+            data_libs = data_libs + config_dict.pop("catalog")
+        time_tuple = config_dict.pop("time_tuple", None)
+        region = region or config_dict.pop("region", None)
         if isinstance(region, str):
             region = json_decode(region)
 
         sources = sources + config_dict["sources"]
+
+        unit_conversion = config_dict.pop("unit_conversion", True)
+        meta = config_dict.pop("meta", {})
+        append = config_dict.pop("append", False)
 
     data_catalog = DataCatalog(data_libs=data_libs)
     _ = data_catalog.sources  # initialise lazy loading
@@ -516,6 +524,9 @@ def export(
             source_names=sources,
             bbox=bbox,
             time_tuple=time_tup,
+            unit_conversion=unit_conversion,
+            meta=meta,
+            append=append,
         )
 
     except Exception as e:
