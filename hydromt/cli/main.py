@@ -440,12 +440,11 @@ def export(
     Example usage:
     --------------
 
-    export the data of in a single source, in a particular region, in a particular time range
+    export the data of a single data source, in a particular region, for a particular time range
     hydromt export -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -s era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml -t '["2010-01-01", "2022-12-31"]' path/to/output_dir
-    note to sam: only support BBOX and GEOM
 
-    export all data of in a single source of the deltares data catalog
-    hydromt export --dd -s era5_hourly path/to/output_dir
+    export a single data source from the deltares data catalog without time/space slicing
+    hydromt export -d deltares_data -s era5_hourly path/to/output_dir
 
     export data as detailed in an export config yaml file
     hydromt export -i /path/to/export_config.yaml path/to/output_dir

@@ -13,7 +13,7 @@ Unreleased
 
 Added
 -----
-- Export CLI now also accetps time tuples (#660)
+- Export CLI now also accepts time tuples (#660)
 
 Changed
 -------
