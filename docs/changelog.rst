@@ -13,13 +13,16 @@ Unreleased
 
 Added
 -----
+- Export CLI now also accepts time tuples (#660)
 
 Changed
 -------
+- Export CLI now uses '-s' for source, '-t' for time and '-i' for config. (#660)
 
 Fixed
 -----
 - Bug in `raster.set_crs` if input_crs is of type CRS. (#659)
+- Export CLI now actually parses provided geoms. (#660)
 
 Deprecated
 ----------

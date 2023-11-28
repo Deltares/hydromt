@@ -31,6 +31,7 @@ jobs:
         python-version: ['3.9','3.10','3.11']
     name: py ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     concurrency:
       group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
       cancel-in-progress: true
