@@ -2,9 +2,11 @@
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional, Union
 
-from pydantic import AnyUrl, BaseModel, ConfigDict
+from pydantic import AnyUrl, BaseModel, ConfigDict, model_validator
 from pydantic.fields import Field
 from pydantic_core import Url
+from pyproj import CRS
+from pyproj.exceptions import CRSError
 
 from hydromt.data_catalog import _yml_from_uri_or_path
 from hydromt.typing import Bbox, Number, TimeRange
@@ -34,7 +36,7 @@ class DataCatalogMetaData(BaseModel):
     """The metadata section of a Hydromt data catalog."""
 
     root: Optional[Path] = None
-    version: Optional[Union[str, int]] = None
+    version: Optional[Union[str, Number]] = None
     name: Optional[str] = None
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
@@ -82,12 +84,25 @@ class DataCatalogItem(BaseModel):
 
     name: str
     data_type: Literal["RasterDataset", "GeoDataset", "GeoDataFrame", "DataFrame"]
-    driver: str
+    driver: Literal[
+        "csv",
+        "fwf",
+        "netcdf",
+        "parquet",
+        "raster",
+        "raster_tindex",
+        "vector",
+        "vector_table",
+        "xls",
+        "xlsx",
+        "zarr",
+    ]
     path: Path
     crs: Optional[int] = None
     filesystem: Optional[str] = None
     kwargs: Dict[str, Any] = Field(default_factory=dict)
     storage_options: Dict[str, Any] = Field(default_factory=dict)
+    placeholders: Optional[Dict[str, Any]] = None
     rename: Dict[str, str] = Field(default_factory=dict)
     nodata: Optional[Number] = None
     meta: Optional[DataCatalogItemMetadata] = None
@@ -98,6 +113,19 @@ class DataCatalogItem(BaseModel):
         str_strip_whitespace=True,
         extra="forbid",
     )
+
+    @model_validator(mode="after")
+    def _check_valid_crs(self) -> "DataCatalogItem":
+        # maybe not the most elegant solution but it'll do for now.
+        try:
+            if self.crs:
+                _ = CRS.from_user_input(self.crs)
+        except CRSError:
+            try:
+                _ = CRS.from_user_input(f"ESRI:{self.crs}")
+            except CRSError as e:
+                raise ValueError(e)
+        return self
 
     @staticmethod
     def from_dict(input_dict, name=None):

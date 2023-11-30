@@ -84,4 +84,10 @@ def validate_region(input: Dict[str, Any]) -> Optional[Region]:
         val = input["geom"]
         return PathRegion.from_path(val)
     else:
+        for region_type in ["grid", "mesh", "basin", "subbasin", "interbasin"]:
+            if region_type in input:
+                raise NotImplementedError(
+                    f"region kind {region_type} is not supported in region validation yet, but is recognised by HydroMT."
+                )
+
         raise NotImplementedError(f"Unknown region kind: {input}")

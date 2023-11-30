@@ -7,11 +7,19 @@ import pytest
 from pydantic import ValidationError
 from pydantic_core import Url
 
+from hydromt.data_catalog import _yml_from_uri_or_path
 from hydromt.validators.data_catalog import (
     DataCatalogItem,
     DataCatalogMetaData,
     DataCatalogValidator,
 )
+
+
+def test_deltares_data_catalog():
+    p = "data/catalogs/deltares_data.yml"
+    yml_dict = _yml_from_uri_or_path(p)
+    # whould raise error if something goes wrong
+    _ = DataCatalogValidator.from_dict(yml_dict)
 
 
 def test_geodataframe_entry_validation():
@@ -165,4 +173,26 @@ def test_dataset_entry_with_typo_validation():
     #  - missing crs, data_type, driver and path (4)
     #  - extra crs_num, datatype, diver, and filepath (5)
     with pytest.raises(ValidationError, match="8 validation errors"):
+        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+
+
+def test_data_type_typo():
+    d = {
+        "crs": 4326,
+        "data_type": "RaserDataset",
+        "driver": "raster",
+        "path": ".",
+    }
+    with pytest.raises(ValidationError, match="1 validation error"):
+        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+
+
+def test_data_invalid_crs():
+    d = {
+        "crs": 123456789,
+        "data_type": "RasterDataset",
+        "driver": "raster",
+        "path": ".",
+    }
+    with pytest.raises(ValidationError, match="1 validation error"):
         _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
