@@ -8,7 +8,7 @@ basin_atlas_level12_v10:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
-  kwargs:
+  driver_kwargs:
     layer: BasinATLAS_v10_lev12
   meta:
     category: hydrography
@@ -40,7 +40,7 @@ lake_atlas_pol_v10:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
-  kwargs:
+  driver_driver_kwargs:
     layer: LakeATLAS_v10_pol
   meta:
     category: hydrography
@@ -60,7 +60,7 @@ chelsa_v1.2:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -79,7 +79,7 @@ chirps_africa_daily_v2.0:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_driver_kwargs:
     chunks:
       lat: 160
       lon: 150
@@ -106,7 +106,7 @@ chirps_global_daily_v2.0:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_driver_kwargs:
     chunks:
       latitude: 112
       longitude: 400
@@ -132,7 +132,7 @@ copdem30:
 copdem30_v2021.1:
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -151,7 +151,7 @@ copdem30_mask:
 copdem30_mask_v2021.1:
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -170,7 +170,7 @@ copdem30_masked:
 copdem30_masked_v2021.1:
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -188,7 +188,7 @@ corine:
 corine_2018_v2020_u1:
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 6000
       y: 6000
@@ -204,7 +204,7 @@ dtu10mdt:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -221,7 +221,7 @@ dtu10mdt_egm96:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -242,7 +242,7 @@ eobs_v22.0e:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 100
       longitude: 100
@@ -270,7 +270,7 @@ eobs_v23.1e:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 100
       longitude: 100
@@ -298,7 +298,7 @@ eobs_v24.0e:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 100
       longitude: 100
@@ -327,7 +327,7 @@ eobs_v25.0e:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 100
       longitude: 100
@@ -356,7 +356,7 @@ eobs_orography_v20.0e:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 100
       longitude: 100
@@ -377,7 +377,7 @@ eobs_orography_v22.0e:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 100
       longitude: 100
@@ -396,7 +396,7 @@ eobs_orography_v23.1e:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 100
       longitude: 100
@@ -415,7 +415,7 @@ eobs_orography_v24.0e:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 100
       longitude: 100
@@ -434,7 +434,7 @@ eobs_orography_v25.0e:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 100
       longitude: 100
@@ -455,7 +455,7 @@ era5_daily:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 250
       longitude: 240
@@ -500,7 +500,7 @@ era5_daily_zarr:
   crs: 4326
   data_type: RasterDataset
   driver: zarr
-  kwargs:
+  driver_kwargs:
     chunks: auto
   meta:
     category: meteo
@@ -517,7 +517,7 @@ era5_hourly:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 125
       longitude: 120
@@ -559,7 +559,7 @@ era5_hourly_zarr:
   crs: 4326
   data_type: RasterDataset
   driver: zarr
-  kwargs:
+  driver_kwargs:
     chunks: auto
   meta:
     category: meteo
@@ -576,7 +576,7 @@ era5_ocean:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 60
       longitude: 60
@@ -597,7 +597,7 @@ era5_orography:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 120
       longitude: 125
@@ -620,7 +620,7 @@ esa_worldcover_2020_v100:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 36000
       y: 36000
@@ -635,7 +635,7 @@ fabdem:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -671,7 +671,7 @@ gadm_level2_v3.6:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
-  kwargs:
+  driver_kwargs:
     layer: level2
   meta:
     category: geography
@@ -688,7 +688,7 @@ gadm_level3_v3.6:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
-  kwargs:
+  driver_kwargs:
     layer: level3
   meta:
     category: geography
@@ -706,7 +706,7 @@ gcn250:
 gcn250_v1:
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -748,7 +748,7 @@ gebco_v2020:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -771,7 +771,7 @@ ghs_pop_2015_4326_v2019a:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -789,7 +789,7 @@ ghs_pop_2015_54009_v2019a:
   crs: 54009
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 1000
       y: 1000
@@ -807,7 +807,7 @@ ghs_smod_2015_54009_v2016a:
   crs: 54009
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -824,7 +824,7 @@ ghs_smod_2015_54009_v2019a:
   crs: 54009
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -844,7 +844,7 @@ globcover_2009_v2.3:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -861,7 +861,7 @@ glofas_era5_v31:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       time: 180
       latitude: 150
@@ -885,7 +885,7 @@ glofas_era5_v31:
 glofas_uparea:
   alias: glofas_era5_v31
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 150
       y: 360
@@ -901,7 +901,7 @@ glw_buffaloes_v3:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -921,7 +921,7 @@ glw_cattle_v3:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -941,7 +941,7 @@ glw_chicken_v3:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -961,7 +961,7 @@ glw_ducks_v3:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -981,7 +981,7 @@ glw_goats_v3:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1001,7 +1001,7 @@ glw_horses_v3:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1021,7 +1021,7 @@ glw_pigs_v3:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1041,7 +1041,7 @@ glw_sheeps_v3:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1059,7 +1059,7 @@ grdc:
   crs: 4326
   data_type: GeoDataFrame
   driver: xlsx
-  kwargs:
+  driver_kwargs:
     index_col: grdc_no
   meta:
     category: observed data
@@ -1108,11 +1108,11 @@ grwl_mask:
 grwl_mask_v1.01:
   data_type: RasterDataset
   driver: raster_tindex
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3000
       y: 3000
-    mosaic_kwargs:
+    mosaic_driver_kwargs:
       method: nearest
     tileindex: location
   meta:
@@ -1130,7 +1130,7 @@ gswo:
 gswo_v2019:
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 4000
       y: 4000
@@ -1147,7 +1147,7 @@ gtsm_codec_reanalysis_{freq}_v1:
   crs: 4326
   data_type: GeoDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       stations: 10
       time: -1
@@ -1172,7 +1172,7 @@ guf_bld_2012_v02:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 1000
       y: 1000
@@ -1240,7 +1240,7 @@ koppen_geiger:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1257,7 +1257,7 @@ mdt_cnes_cls18:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 720
       y: 720
@@ -1277,7 +1277,7 @@ merit_v1.0.3:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     drop_variables: projection
     chunks:
       lat: 6000
@@ -1299,7 +1299,7 @@ merit_hydro_v1.0:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 6000
       y: 6000
@@ -1327,7 +1327,7 @@ merit_hydro_ihu_30sec_v1.0:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 6000
       y: 6000
@@ -1382,7 +1382,7 @@ merit_hydro_patch_v1.0:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 6000
       y: 6000
@@ -1411,7 +1411,7 @@ modis_mcd15a3h_v006:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1508,7 +1508,7 @@ simard_v2011:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1523,7 +1523,7 @@ SM2RAIN_ASCAT_monthly_025_v1.4:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 360
       longitude: 720
@@ -1544,7 +1544,7 @@ SM2RAIN_ASCAT_monthly_05_v1.4:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       latitude: 180
       longitude: 360
@@ -1566,7 +1566,7 @@ soilgrids_v1.0:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 2400
       y: 2400
@@ -1655,7 +1655,7 @@ soilgrids_2020:
 soilgrids_v2.0:
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 2400
       y: 2400
@@ -1762,7 +1762,7 @@ vito_2015_v2.0.2:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1778,7 +1778,7 @@ vito_2016_v3.0.1:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1794,7 +1794,7 @@ vito_2017_v3.0.1:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1810,7 +1810,7 @@ vito_2018_v3.0.1:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1826,7 +1826,7 @@ vito_2019_v3.0.1:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -1866,7 +1866,7 @@ worldclim_v2.0:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
-  kwargs:
+  driver_kwargs:
     chunks:
       lat: 3600
       lon: 3600
@@ -1884,7 +1884,7 @@ worldclim_v2.0:
 worldpop_2020_constrained:
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks: auto
   meta:
     category: socio-economic
@@ -1912,7 +1912,7 @@ wsf_bld_2015_v1:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 1000
       y: 1000
