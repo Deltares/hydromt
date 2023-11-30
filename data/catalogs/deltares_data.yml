@@ -635,7 +635,7 @@ ghs_pop:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3600
       y: 3600
@@ -654,7 +654,7 @@ ghs_pop_2015_54009_v2019a:
   crs: 54009
   data_type: RasterDataset
   driver: raster
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 1000
       y: 1000
@@ -709,7 +709,7 @@ globcover:
     paper_ref: Arino et al (2012)
     source_license: CC-BY-3.0
     source_url: http://due.esrin.esa.int/page_globcover.php
-    source_version: v2.3
+    source_version: 2.3
   version: 2.3
   path: landuse/globcover/GLOBCOVER_L4_200901_200912_V2.3.tif
 
@@ -732,7 +732,7 @@ glofas_era5_v31:
     paper_ref: Harrigan et al. (2020)
     source_license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
     source_url: https://doi.org/10.24381/cds.a4fdd6b9
-    source_version: v31
+    source_version: 31
     processing_script: hydro/glofas_era5/glofas_cds_get.py
   version: 31
   path: hydro/glofas_era5/glofas_v31_{year}.nc
