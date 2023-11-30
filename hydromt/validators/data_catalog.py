@@ -1,6 +1,6 @@
 """Pydantic models for the validation of Data catalogs."""
 from pathlib import Path
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, model_validator
 from pydantic.fields import Field
@@ -23,6 +23,17 @@ class SourceSpecDict(BaseModel):
     def from_dict(input_dict):
         """Create a source variant specification from a dictionary."""
         return SourceSpecDict(**input_dict)
+
+
+class SourceVariant(BaseModel):
+    """A variant for a data source."""
+
+    provider: Optional[Literal["local", "aws", "gcs"]] = None
+    version: Optional[Union[str, Number]] = None
+    path: Path
+    rename: Optional[Dict[str, str]] = None
+    filesystem: Optional[Literal["local", "s3", "gcs"]] = None
+    storage_options: Optional[Dict[str, Any]] = None
 
 
 class Extent(BaseModel):
@@ -97,7 +108,7 @@ class DataCatalogItem(BaseModel):
         "xlsx",
         "zarr",
     ]
-    path: Path
+    path: Optional[Path] = None
     crs: Optional[Union[int, str]] = None
     filesystem: Optional[str] = None
     kwargs: Dict[str, Any] = Field(default_factory=dict)
@@ -108,6 +119,7 @@ class DataCatalogItem(BaseModel):
     meta: Optional[DataCatalogItemMetadata] = None
     unit_add: Optional[Dict[str, Number]] = None
     unit_mult: Optional[Dict[str, Number]] = None
+    variants: Optional[List[SourceVariant]] = None
 
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
