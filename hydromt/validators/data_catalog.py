@@ -1,6 +1,6 @@
 """Pydantic models for the validation of Data catalogs."""
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Literal, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, ConfigDict
 from pydantic.fields import Field
@@ -81,7 +81,7 @@ class DataCatalogItem(BaseModel):
     """A validated data source."""
 
     name: str
-    data_type: str
+    data_type: Literal["RasterDataset", "GeoDataset", "GeoDataFrame", "DataFrame"]
     driver: str
     path: Path
     crs: Optional[int] = None
