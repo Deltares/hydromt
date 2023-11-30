@@ -829,6 +829,7 @@ Statistics and performance metrics
 
    stats.skills.bias
    stats.skills.percentual_bias
+   stats.skills.volumetric_error
    stats.skills.nashsutcliffe
    stats.skills.lognashsutcliffe
    stats.skills.pearson_correlation
@@ -840,6 +841,7 @@ Statistics and performance metrics
    stats.skills.rsquared
    stats.skills.mse
    stats.skills.rmse
+   stats.skills.rsr
 
 Extreme Value Analysis
 =======================
