@@ -98,7 +98,7 @@ class DataCatalogItem(BaseModel):
         "zarr",
     ]
     path: Path
-    crs: Optional[int] = None
+    crs: Optional[Union[int, str]] = None
     filesystem: Optional[str] = None
     kwargs: Dict[str, Any] = Field(default_factory=dict)
     storage_options: Dict[str, Any] = Field(default_factory=dict)
@@ -120,11 +120,8 @@ class DataCatalogItem(BaseModel):
         try:
             if self.crs:
                 _ = CRS.from_user_input(self.crs)
-        except CRSError:
-            try:
-                _ = CRS.from_user_input(f"ESRI:{self.crs}")
-            except CRSError as e:
-                raise ValueError(e)
+        except CRSError as e:
+            raise ValueError(e)
         return self
 
     @staticmethod
