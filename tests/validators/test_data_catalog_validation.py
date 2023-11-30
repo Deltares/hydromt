@@ -90,7 +90,7 @@ def test_valid_catalog_variants():
             "data_type": "RasterDataset",
             "driver": "raster",
             "filesystem": "local",
-            "driver_kwargs": {"chunks": {"x": 36000, "y": 36000}},
+            "kwargs": {"chunks": {"x": 36000, "y": 36000}},
             "meta": {
                 "category": "landuse",
                 "source_license": "CC BY 4.0",

@@ -120,6 +120,7 @@ class DataCatalogItem(BaseModel):
     unit_add: Optional[Dict[str, Number]] = None
     unit_mult: Optional[Dict[str, Number]] = None
     variants: Optional[List[SourceVariant]] = None
+    version: Optional[Union[str, Number]] = None
 
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
