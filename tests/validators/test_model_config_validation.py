@@ -89,6 +89,17 @@ def test_setup_grid_from_geodataframe_validation():
     HydromtModelStep.from_dict(d, model=model)
 
 
+def test_setup_non_existing_grid_model_function():
+    model = GridModel
+    d = {
+        "setup_precip_forcing": {
+            "precip_fn": "era5",
+        },
+    }
+    with pytest.raises(ValueError, match="Model does not have function"):
+        HydromtModelStep.from_dict(d, model=model)
+
+
 def test_setup_grid_from_raster_reclass_validation():
     model = GridModel
     d = {
