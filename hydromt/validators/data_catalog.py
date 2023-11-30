@@ -116,7 +116,6 @@ class DataCatalogItem(BaseModel):
 
     @model_validator(mode="after")
     def _check_valid_crs(self) -> "DataCatalogItem":
-        # maybe not the most elegant solution but it'll do for now.
         try:
             if self.crs:
                 _ = CRS.from_user_input(self.crs)
