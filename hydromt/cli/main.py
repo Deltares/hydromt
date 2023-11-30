@@ -16,7 +16,7 @@ from pydantic import ValidationError
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.validators.data_catalog import DataCatalogValidator
-from hydromt.validators.model_config import HydromtModelStep
+from hydromt.validators.model_config import HydromtModelSetup
 from hydromt.validators.region import validate_region
 
 from .. import __version__, log
@@ -378,7 +378,6 @@ def check(
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
     logger = log.setuplog("check", join(".", "hydromt.log"), log_level=log_level)
-    logger.info(f"Output dir: {export_dest_path}")
     try:
         all_exceptions = []
         for cat_path in data:
@@ -402,11 +401,12 @@ def check(
 
         if config:
             mod = MODELS.load(model)
+            logger.info(f"Validating for model {model} of type {type(mod).__name__}")
             try:
                 config_dict = cli_utils.parse_config(config)
                 logger.info(f"Validating config at {config}")
 
-                HydromtModelStep.from_dict(config_dict, model=mod)
+                HydromtModelSetup.from_dict(config_dict, model=mod)
                 logger.info("Model config valid!")
 
             except (ValidationError, ValueError) as e:

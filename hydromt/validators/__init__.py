@@ -6,7 +6,7 @@ from .data_catalog import (
     DataCatalogMetaData,
     DataCatalogValidator,
 )
-from .model_config import HydromtModelStep
+from .model_config import HydromtModelSetup, HydromtModelStep
 from .region import (
     BoundingBoxRegion,
     PathRegion,
@@ -24,4 +24,5 @@ __all__ = [
     "Region",
     "validate_region",
     "HydromtModelStep",
+    "HydromtModelSetup",
 ]
