@@ -185,7 +185,7 @@ def test_export_time_tuple(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-def test_export__multiple_sources(tmpdir):
+def test_export_multiple_sources(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
         [
@@ -233,7 +233,7 @@ def test_check_cli():
 
 
 def test_check_cli_unsupported_region(tmpdir):
-    with pytest.raises(Exception, match="Unknown region kind"):
+    with pytest.raises(Exception, match="is not supported in region validation yet"):
         _ = CliRunner().invoke(
             hydromt_cli,
             [
@@ -242,6 +242,23 @@ def test_check_cli_unsupported_region(tmpdir):
                 "grid_model",
                 "-r",
                 "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
+                "-i",
+                "tests/data/test_model_config.yml",
+            ],
+            catch_exceptions=False,
+        )
+
+
+def test_check_cli_known_region(tmpdir):
+    with pytest.raises(Exception, match="Unknown region kind"):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "check",
+                "-m",
+                "grid_model",
+                "-r",
+                "{'asdfasdfasdf': [-7.24, 62.09], 'uparea': 50}",
                 "-i",
                 "tests/data/test_model_config.yml",
             ],
