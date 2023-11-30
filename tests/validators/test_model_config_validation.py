@@ -4,7 +4,7 @@
 import pytest
 
 from hydromt.models import GridModel, Model
-from hydromt.validators.model_config import HydromtModelStep
+from hydromt.validators.model_config import HydromtModelSetup, HydromtModelStep
 
 
 def test_base_model_build():
@@ -92,12 +92,20 @@ def test_setup_grid_from_geodataframe_validation():
 def test_setup_non_existing_grid_model_function():
     model = GridModel
     d = {
-        "setup_precip_forcing": {
-            "precip_fn": "era5",
+        "setup_config": {
+            "starttime": "2009-04-01T00:00:00",
+            "endtime": "2011-01-30T00:00:00",
+            "timestepsecs": 86400,
+            "input.path_forcing": "inmaps.nc",
+        },
+        "setup_precip_forcing": {"precip_fn": "era5"},
+        "setup_grid_from_rasterdataset": {
+            "raster_fn": "pet_nc",
+            "fill_method": "nearest",
         },
     }
     with pytest.raises(ValueError, match="Model does not have function"):
-        HydromtModelStep.from_dict(d, model=model)
+        HydromtModelSetup.from_dict(d, model=model)
 
 
 def test_setup_grid_from_raster_reclass_validation():
