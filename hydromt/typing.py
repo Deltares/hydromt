@@ -32,7 +32,7 @@ ExportConfigDict = TypedDict(
 
 
 class ErrorHandleMethod(Enum):
-    """Strategies for error handling withing hydromt."""
+    """Strategies for error handling within hydromt."""
 
     RAISE = 1
     SKIP = 2

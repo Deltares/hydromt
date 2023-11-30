@@ -131,3 +131,4 @@ dask-worker-space/
 pyrightconfig.json
 
 pixi.lock
+.pixi

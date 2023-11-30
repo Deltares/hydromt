@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """GIS related convenience functions."""
+from __future__ import annotations
+
 import glob
 import logging
 import os
 from io import IOBase
 from os.path import dirname
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -67,8 +69,8 @@ GDAL_DRIVER_CODE_MAP = {
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
 
-GPD_TYPES = gpd.GeoDataFrame | gpd.GeoSeries
-GEOM_TYPES = GPD_TYPES | BaseGeometry
+GPD_TYPES = Union[gpd.GeoDataFrame, gpd.GeoSeries]
+GEOM_TYPES = Union[GPD_TYPES, BaseGeometry]
 
 ## GEOM functions
 
@@ -303,17 +305,22 @@ def axes_attrs(crs):
     return x_dim, y_dim, x_attrs, y_attrs
 
 
-def meridian_offset(ds, x_name="x", bbox=None):
+def meridian_offset(ds, bbox=None):
     """re-arrange data along x dim."""
-    if ds.raster.crs is None or ds.raster.crs.is_projected:
-        raise ValueError("The method is only applicable to geographic CRS")
+    w, _, e, _ = ds.raster.bounds
+    if (
+        ds.raster.crs is None
+        or ds.raster.crs.is_projected
+        or not np.isclose(e - w, 360)
+    ):
+        raise ValueError("The method is only applicable to global geographic CRS")
+    x_name = ds.raster.x_dim
     lons = np.copy(ds[x_name].values)
-    w, e = lons.min(), lons.max()
     if bbox is not None and bbox[0] < w and bbox[0] < -180:  # 180W - 180E > 360W - 0W
         lons = np.where(lons > 0, lons - 360, lons)
     elif bbox is not None and bbox[2] > e and bbox[2] > 180:  # 180W - 180E > 0E-360E
         lons = np.where(lons < 0, lons + 360, lons)
-    elif e > 181 and w > -1:  # 0E-360E > 180W - 180E, temp fix for rounding errors
+    elif np.isclose(e, 360):  # 0W - 360E > 180W - 180E (allow for rounding errors)
         lons = np.where(lons > 180, lons - 360, lons)
     else:
         return ds
@@ -562,7 +569,7 @@ def to_geographic_bbox(bbox, source_crs):
 
 def bbox_from_file_and_filters(
     fn: IOBase,
-    bbox: GEOM_TYPES | None = None,
+    bbox: Union[GEOM_TYPES, None] = None,
     mask: GEOM_TYPES | None = None,
     crs: CRS | None = None,
 ) -> Tuple[float, float, float, float] | None:

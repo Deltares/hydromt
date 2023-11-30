@@ -1,10 +1,45 @@
 """Tests for the cli submodule."""
 
 
-from hydromt.validators.model_config import HydromtStep
+import pytest
+
+from hydromt.models import GridModel, Model
+from hydromt.validators.model_config import HydromtModelStep
+
+
+def test_base_model_build():
+    d = {
+        "update": {
+            "model_out": "./",
+            "write": False,
+            "forceful_overwrite": False,
+            "opt": {},
+        },
+    }
+    HydromtModelStep.from_dict(d, Model)
+
+
+def test_base_model_unknown_fn():
+    d = {
+        "asdfasdf": {"some_arg": "some_val"},
+    }
+
+    with pytest.raises(ValueError, match="Model does not have function"):
+        HydromtModelStep.from_dict(d, model=Model)
+
+
+def test_base_model_build_unknown_params():
+    model = Model
+    d = {
+        "build": {"asdfasdf": "whatever"},
+    }
+
+    with pytest.raises(ValueError, match="Unknown parameters for function build"):
+        HydromtModelStep.from_dict(d, model=model)
 
 
 def test_setup_config_validation():
+    model = GridModel
     d = {
         "setup_config": {
             "header.settings": "value",
@@ -12,10 +47,11 @@ def test_setup_config_validation():
             "timers.start": "2010-02-05",
         },
     }
-    HydromtStep.from_dict(d)
+    HydromtModelStep.from_dict(d, model=model)
 
 
 def test_setup_grid_from_constant_validation():
+    model = GridModel
     d = {
         "setup_grid_from_constant": {
             "constant": 0.01,
@@ -24,10 +60,11 @@ def test_setup_grid_from_constant_validation():
             "nodata": -99.0,
         },
     }
-    HydromtStep.from_dict(d)
+    HydromtModelStep.from_dict(d, model=model)
 
 
 def test_setup_grid_from_rasterdataset_validation():
+    model = GridModel
     d = {
         "setup_grid_from_rasterdataset": {
             "raster_fn": "merit_hydro_1k",
@@ -35,24 +72,13 @@ def test_setup_grid_from_rasterdataset_validation():
             "reproject_method": ["average", "mode"],
         },
     }
-    HydromtStep.from_dict(d)
-
-
-def test_setup_grid_from_rasterdataset2_validation():
-    d = {
-        "setup_grid_from_rasterdataset2": {
-            "raster_fn": "vito",
-            "fill_method": "nearest",
-            "reproject_method": "mode",
-            "rename": {"vito": "landuse"},
-        },
-    }
-    HydromtStep.from_dict(d)
+    HydromtModelStep.from_dict(d, model=model)
 
 
 def test_setup_grid_from_geodataframe_validation():
+    model = GridModel
     d = {
-        "setup_grid_from_geodataframe": {
+        "setup_grid_from_geodataframe2": {
             "vector_fn": "hydro_lakes",
             "variables": ["waterbody_id", "Depth_avg"],
             "nodata": [-1, -999.0],
@@ -60,34 +86,25 @@ def test_setup_grid_from_geodataframe_validation():
             "rename": {"waterbody_id": "lake_id", "Detph_avg": "lake_depth"},
         },
     }
-    HydromtStep.from_dict(d)
+    HydromtModelStep.from_dict(d, model=model)
 
 
 def test_setup_grid_from_raster_reclass_validation():
+    model = GridModel
     d = {
-        "setup_grid_from_raster_reclass": {
+        "setup_grid_from_raster_reclass2": {
             "raster_fn": "vito",
             "reclass_table_fn": "vito_reclass",
             "reclass_variables": ["manning"],
             "reproject_method": ["average"],
         },
     }
-    HydromtStep.from_dict(d)
-
-
-def test_setup_grid_from_geodataframe2_validation():
-    d = {
-        "setup_grid_from_geodataframe2": {
-            "vector_fn": "hydro_lakes",
-            "rasterize_method": "fraction",
-            "rename": {"hydro_lakes": "water_frac"},
-        },
-    }
-    HydromtStep.from_dict(d)
+    HydromtModelStep.from_dict(d, model=model)
 
 
 def test_write_validation_validation():
+    model = GridModel
     d = {
         "write": {"components": ["config", "geoms", "grid"]},
     }
-    HydromtStep.from_dict(d)
+    HydromtModelStep.from_dict(d, model=model)

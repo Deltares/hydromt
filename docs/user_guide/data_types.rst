@@ -8,9 +8,10 @@ HydroMT currently supports the following data types:
 - :ref:`RasterDataset <RasterDataset>`: static and dynamic raster (or gridded) data
 - :ref:`GeoDataFrame <GeoDataFrame>`: static vector data
 - :ref:`GeoDataset <GeoDataset>`: dynamic point location data
+- :ref:`Dataset <Dataset>`:  non-spatial n-dimensional data
 - :ref:`DataFrame <DataFrame>`: 2D tabular data
 
-Internally the RasterDataset and GeoDataset are represented by :py:class:`xarray.Dataset` objects,
+Internally the RasterDataset, GeoDataset, and Dataset are represented by :py:class:`xarray.Dataset` objects,
 the GeoDataFrame by :py:class:`geopandas.GeoDataFrame`, and the DataFrame by
 :py:class:`pandas.DataFrame`. We use drivers, typically from third-party packages and sometimes
 wrapped in HydroMT functions, to parse many different file formats to this standardized internal
@@ -478,6 +479,44 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
     <time1>, <value>, <value>
     <time2>, <value>, <value>
     ...
+
+
+.. _Dataset:
+
+NetCDF time-series dataset (Dataset)
+------------------------------------
+.. _dataset_formats:
+
+.. list-table::
+   :widths: 17, 25, 28, 30
+   :header-rows: 1
+
+   * - Driver
+     - File formats
+     - Method
+     - Comments
+   * - ``netcdf`` or ``zarr``
+     - NetCDF and Zarr
+     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
+     - required time and index dimensions_.
+
+.. _NC_timeseries:
+
+
+Netcdf time-series dataset
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+NetCDF and zarr timeseries data are parsed to **Dataset** with the **netcdf** and **zarr** drivers.
+The resulting dataset is similar to the **GeoDataset** except that it lacks a spatial dimension.
+
+.. code-block:: yaml
+
+    timeseries_dataset:
+      path: /path/to/timeseries.netcdf
+      data_type: Dataset
+      driver: netcdf
+
+
 
 .. _DataFrame:
 

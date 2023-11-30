@@ -134,9 +134,6 @@ def test_attrs_errors(rioda):
     with pytest.raises(ValueError, match="dimension not found"):
         rioda.raster.set_spatial_dims()
     rioda = rioda.rename({"yyyy": "y"})
-    rioda["x"] = np.random.rand(rioda["x"].size)
-    with pytest.raises(ValueError, match="only applies to regular grids"):
-        rioda.raster.set_spatial_dims()
     with pytest.raises(ValueError, match="Invalid dimension order."):
         rioda.transpose("x", "y").raster._check_dimensions()
 

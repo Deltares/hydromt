@@ -30,23 +30,32 @@ def test_crs():
     assert xattrs["units"] == yattrs["units"] == "metre"
 
 
-def test_transform():
-    transform = from_origin(0, 90, 1, 1)
+def test_affine_to_coords():
+    # create grid with x from 0-360E
+    transform = from_origin(0, 90, 1, 1)  # upper left corner
     shape = (180, 360)
     coords = gu.affine_to_coords(transform, shape)
     xs, ys = coords["x"][1], coords["y"][1]
     assert np.all(ys == 90 - np.arange(0.5, shape[0]))
     assert np.all(xs == np.arange(0.5, shape[1]))
 
-    # offset for geographic crs
+
+def test_meridian_offset():
+    # create grid with x from 0-360E
+    transform = from_origin(0, 90, 1, 1)  # upper left corner
+    shape = (180, 360)
     da = full_from_transform(transform, shape, crs=4326)
     assert np.allclose(da.raster.origin, np.array([0, 90]))
-    da1 = gu.meridian_offset(da, x_name="x")
+    da1 = gu.meridian_offset(da)
     assert da1.raster.bounds[0] == -180
-    da2 = gu.meridian_offset(da1, x_name="x", bbox=[170, 0, 190, 10])
+    da2 = gu.meridian_offset(da1, bbox=[170, 0, 190, 10])
     assert da2.raster.bounds[0] == 0
-    da3 = gu.meridian_offset(da1, x_name="x", bbox=[-190, 0, -170, 10])
+    da3 = gu.meridian_offset(da1, bbox=[-190, 0, -170, 10])
     assert da3.raster.bounds[2] == 0
+
+    # test error
+    with pytest.raises(ValueError, match="The method is only applicable to"):
+        gu.meridian_offset(da.raster.clip_bbox([0, 0, 10, 10]))
 
 
 def test_transform_rotation():

@@ -364,7 +364,7 @@ class RasterDatasetAdapter(DataAdapter):
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
             if zoom_level is not None and "{zoom_level}" not in self.path:
-                zls_dict, crs = self._get_zoom_levels_and_crs(logger=logger)
+                zls_dict, crs = self._get_zoom_levels_and_crs(fns[0], logger=logger)
                 zoom_level = self._parse_zoom_level(
                     zoom_level, geom, bbox, zls_dict, crs, logger=logger
                 )
@@ -536,11 +536,9 @@ class RasterDatasetAdapter(DataAdapter):
             crs4326 = pyproj.CRS.from_epsg(4326)
             bbox = rasterio.warp.transform_bounds(crs4326, crs, *bbox)
         # work with 4326 data that is defined at 0-360 degrees longtitude
-        if epsg == 4326:
-            e = ds.raster.bounds[2]
-            if e > 180 or (bbox is not None and (bbox[0] < -180 or bbox[2] > 180)):
-                x_dim = ds.raster.x_dim
-                ds = gis_utils.meridian_offset(ds, x_dim, bbox).sortby(x_dim)
+        w, _, e, _ = ds.raster.bounds
+        if epsg == 4326 and np.isclose(e - w, 360):  # allow for rounding errors
+            ds = gis_utils.meridian_offset(ds, bbox)
 
         # clip with bbox
         if bbox is not None:
@@ -597,26 +595,31 @@ class RasterDatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
-    def _get_zoom_levels_and_crs(self, logger=logger):
+    def _get_zoom_levels_and_crs(self, fn=None, logger=logger):
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         if self.zoom_levels is not None and self.crs is not None:
             return self.zoom_levels, self.crs
         zoom_levels = {}
+        crs = None
+        if fn is None:
+            fn = self.path
         try:
-            with rasterio.open(self.path) as src:
+            with rasterio.open(fn) as src:
                 res = abs(src.res[0])
                 crs = src.crs
                 overviews = [src.overviews(i) for i in src.indexes]
-                # check if identical
-                if not all([o == overviews[0] for o in overviews]):
-                    raise ValueError("Overviews are not identical across bands")
-                # dict with overview level and corresponding resolution
-                zls = [1] + overviews[0]
-                zoom_levels = {i: res * zl for i, zl in enumerate(zls)}
+                if len(overviews[0]) > 0:  # check overviews for band 0
+                    # check if identical
+                    if not all([o == overviews[0] for o in overviews]):
+                        raise ValueError("Overviews are not identical across bands")
+                    # dict with overview level and corresponding resolution
+                    zls = [1] + overviews[0]
+                    zoom_levels = {i: res * zl for i, zl in enumerate(zls)}
         except RasterioIOError as e:
             logger.warning(f"IO error while detecting zoom levels: {e}")
         self.zoom_levels = zoom_levels
-        self.crs = crs
+        if self.crs is None:
+            self.crs = crs
         return zoom_levels, crs
 
     def _parse_zoom_level(
@@ -849,19 +852,18 @@ class RasterDatasetAdapter(DataAdapter):
             end_dt = pd.to_datetime(end_dt)
             props = {**self.meta, "crs": crs}
             ext = splitext(self.path)[-1]
-            match ext:
-                case ".nc" | ".vrt":
-                    media_type = MediaType.HDF5
-                case ".tiff":
-                    media_type = MediaType.TIFF
-                case ".cog":
-                    media_type = MediaType.COG
-                case ".png":
-                    media_type = MediaType.PNG
-                case _:
-                    raise RuntimeError(
-                        f"Unknown extention: {ext} cannot determine media type"
-                    )
+            if ext == ".nc" or ext == ".vrt":
+                media_type = MediaType.HDF5
+            elif ext == ".tiff":
+                media_type = MediaType.TIFF
+            elif ext == ".cog":
+                media_type = MediaType.COG
+            elif ext == ".png":
+                media_type = MediaType.PNG
+            else:
+                raise RuntimeError(
+                    f"Unknown extention: {ext} cannot determine media type"
+                )
         except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
