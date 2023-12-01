@@ -199,6 +199,7 @@ def test_versioned_catalog_entries(tmpdir):
         "esa_worldcover", version="2020", provider="local"
     )
     assert source_2020_local.meta["source_author"] == "Test Dummy"
+    assert source_2020_local.meta["source_license"] == "CC BY 4.0"
 
     # Make sure we can query for the version we want
     aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
