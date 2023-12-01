@@ -14,6 +14,7 @@ Unreleased
 Added
 -----
 - Export CLI now also accepts time tuples (#660)
+- New stats.skills VE and RSR (#666)
 
 Changed
 -------
@@ -23,6 +24,7 @@ Fixed
 -----
 - Bug in `raster.set_crs` if input_crs is of type CRS. (#659)
 - Export CLI now actually parses provided geoms. (#660)
+- Bug in stats.skills for computation of pbias and MSE / RMSE. (#666)
 
 Deprecated
 ----------
