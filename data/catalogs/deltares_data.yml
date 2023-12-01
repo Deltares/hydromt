@@ -17,7 +17,6 @@ basin_atlas_level12_v10:
     paper_ref: Linke et al. (2019)
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
-    source_version: 10
   version: 10
   path: hydrography/hydro_atlas/basin_atlas_v10.gpkg
 
@@ -32,7 +31,6 @@ river_atlas_v10:
     paper_ref: Linke et al. (2019)
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
-    source_version: 10
   path: hydrography/hydro_atlas/river_atlas_v10.gpkg
   version: 10
   rename:
@@ -51,7 +49,6 @@ lake_atlas_pol_v10:
     paper_ref: Lehner et al. (2022)
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
-    source_version: 10
   path: hydrography/hydro_atlas/lake_atlas_v10.gpkg
   version: 10
   rename:
@@ -71,7 +68,6 @@ chelsa:
     paper_ref: Karger et al. (2017)
     source_license: CC BY 4.0
     source_url: http://chelsa-climate.org/downloads/
-    source_version: 1.2
   version: 1.2
   path: meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif
 
@@ -93,7 +89,6 @@ chirps:
     paper_ref: Funk et al (2015)
     source_license: CC
     source_url: https://www.chc.ucsb.edu/data/chirps
-    source_version: v2.0
   version: 2.0
   path: meteo/chirps_africa_daily_v2.0/CHIRPS_rainfall_{year}.nc
   rename:
@@ -119,7 +114,6 @@ chirps_global:
     paper_ref: Funk et al (2014)
     source_license: CC
     source_url: https://www.chc.ucsb.edu/data/chirps
-    source_version: v2.0
   version: 2.0
   path: meteo/chirps_global_daily_v2.0/chirps-v2.0.{year}.days_p05.nc
   rename:
@@ -138,7 +132,6 @@ copdem30:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p_l_back_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    source_version: '2021_1'
   version: 2021.1
   path: topography/copdem/copdem.vrt
   nodata: -9999 # copdem has no actual nodata, this is to suppress a missing nodata warning
@@ -156,7 +149,6 @@ copdem30_mask:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p_l_back_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    source_version: '2021_1'
   version: 2021.1
   path: topography/copdem/copdem_mask.vrt
   nodata: -1 # copdem has no actual nodata, this is to suppress a missing nodata warning
@@ -174,7 +166,6 @@ copdem30_masked:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p_l_back_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    source_version: '2021_1'
   version: 2021.1
   path: topography/copdem/copdem_masked.vrt
   rename:
@@ -192,7 +183,6 @@ corine:
     source_author: European Environment Agency
     source_license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
     source_url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
-    source_version: v.2020_20u1
   provider: local
   version:  2020_20u1
   path: landuse/corine/CLC2018_CLC2018_V2018_20.tif
@@ -211,7 +201,6 @@ dtu10mdt:
     paper_doi: 10.1029/2008JC005179
     paper_ref: Andersen and Knudsen (2009)
     source_url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
-    source_version: 2010
     unit: m+EGM2008
   version: 2010
   path: topography/dtu10mdt/DTU10MDT_1min_float32.tif
@@ -229,7 +218,6 @@ dtu10mdt_egm96:
     paper_doi: 10.1029/2008JC005179
     paper_ref: Andersen and Knudsen (2009)
     source_url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
-    source_version: 2010
     processing_notes: /topography/dtu10mdt/READ_ME.txt
     processing_script: /topography/dtu10mdt/DTU10MDT_egm96_1min.ipynb
     unit: m+EGM96
@@ -257,21 +245,15 @@ eobs:
   variants:
   - version: 22.0e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
-    meta:
-      source_version: 22.0e
   - version: 23.1e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v23.1e.nc
-    meta:
-      source_version: 23.1e
   - version: 24.0e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
     meta:
-      source_version: 24.0e
       processing_script: meteo/eobs/scripts/v24.0e_fix_qq_dims_and_match_extent.py
   - version: 25.0e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
     meta:
-      source_version: 25.0e
       processing_script: v25.0e_fix_qq_dims_and_match_extent.py
   rename:
     pp: press_msl
@@ -295,28 +277,17 @@ eobs_orography:
     paper_ref: Cornes et al (2018)
     source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    source_version: 20.0e
   variants:
     - version: 20.0e
       path: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
-      meta:
-        source_version: 20.0e
     - version: 22.0e
       path: meteo/eobs/elev_ens_0.1deg_reg_v22.0e.nc
-      meta:
-        source_version: 22.0e
     - version: 23.1e
       path: meteo/eobs/elev_ens_0.1deg_reg_v23.1e.nc
-      meta:
-        source_version: 23.1e
     - version: 24.0e
       path: meteo/eobs/elev_ens_0.1deg_reg_v24.0e.nc
-      meta:
-        source_version: 24.0e
     - version: 25.0e
       path:  meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
-      meta:
-        source_version: 25.0e
 
   rename:
     elevation: elevtn
@@ -341,7 +312,6 @@ era5:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    source_version: ERA5 daily data on pressure levels
     processing_script: meteo/era5_daily/src/
   path: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
   rename:
@@ -379,7 +349,6 @@ era5_daily_zarr:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    source_version: ERA5 daily data on pressure levels
     processing_script: meteo/era5_zarr/scripts/
   path: meteo/era5_daily.zarr
 
@@ -402,7 +371,6 @@ era5_hourly:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.adbb2d47
-    source_version: ERA5 hourly data on single levels from 1940 to present
     processing_script: meteo/era5/src/
   path: meteo/era5/{variable}/era5_{variable}_{year}*_hourly.nc
   rename:
@@ -437,7 +405,6 @@ era5_hourly_zarr:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.adbb2d47
-    source_version: ERA5 hourly data on single levels from 1940 to present
     processing_script: meteo/era5_zarr/scripts/
   path: meteo/era5.zarr
 
@@ -495,7 +462,6 @@ esa_worldcover:
     category: landuse
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.5571936
-    source_version: 100
   version: 100
   path: landuse/esa_worldcover/esa-worldcover.vrt
 
@@ -513,7 +479,6 @@ fabdem:
     paper_ref: Hawker et al. (2022)
     source_license: CC BY-NC-SA 4.0
     source_url: https://data.bris.ac.uk/data/dataset/25wfy0f9ukoge2gs7a5mqpq2j7
-    source_version: 1.0
   version: 1.0
   path: topography/fabdem/fabdem.vrt
   rename:
@@ -529,7 +494,6 @@ gadm:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 3.6
   version: 3.6
   path: geography/gadm/gadm36_levels.gpkg
   rename:
@@ -547,7 +511,6 @@ gadm_level2_v3.6:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 3.6
   version: 3.6
   path: geography/gadm/gadm36_levels.gpkg
   rename:
@@ -565,7 +528,6 @@ gadm_level3_v3.6:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 3.6
   path: geography/gadm/gadm36_levels.gpkg
   rename:
     fid: gadm_level3
@@ -583,7 +545,6 @@ gcn250:
     paper_ref: Jaafar et al. (2019)
     source_license: CC BY 4.0
     source_url: https://doi.org/10.6084/m9.figshare.7756202.v1
-    source_version: 1
   nodata: 255
   version: 1
   path: landuse/gcn250/GCN250_*.tif
@@ -601,7 +562,6 @@ gdp_world:
     notes: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD) and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
     source_author: Wilfred Altena
     source_license: CC BY-4.0
-    source_version: 1.0
   version: 1.0
   path: socio_economic/gdp_world/World_countries_GDPpcPPP.fgb
   rename:
@@ -623,7 +583,6 @@ gebco:
     paper_ref: Weatherall et al (2020)
     source_license: https://www.gebco.net/data_and_products/gridded_bathymetry_data/#a1
     source_url: https://www.bodc.ac.uk/data/hosted_data_systems/gebco_gridded_bathymetry_data/
-    source_version: 2020
     unit: m+MSL
     processing_script: bathymetry/gebco/gebco_tiles.ipynb
   version: 2020
@@ -646,7 +605,6 @@ ghs_pop:
     source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
     source_url: https://data.jrc.ec.europa.eu/dataset/0c6b9751-a71f-4062-830b-43c9f432370f
-    source_version: R2019A_v1.0
   version: R2019A_v1.0
   path: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_4326_9ss_V1_0.tif
 
@@ -664,7 +622,6 @@ ghs_pop_2015_54009_v2019a:
     paper_ref: Florczyk et al (2019)
     source_license: CC BY 4.0
     source_url: https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
-    source_version: R2019A_54009_250_v1.0
   version: R2019A_54009_250_v1.0
   path: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_54009_250_V1_0.tif
 
@@ -686,14 +643,13 @@ ghs_smod:
       meta:
         paper_ref: Pesaresi and Freire (2016)
         source_url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
-        source_version: R2016A_v1.0
     - version: R2019A_v2.0
       path: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2019A_54009_1K_V2_0.tif
       meta:
         paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
         paper_ref: Pesaresi et al (2019)
         source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
-        source_version: R2019A_v2.0
+
 
 globcover:
   crs: 4326
@@ -709,7 +665,6 @@ globcover:
     paper_ref: Arino et al (2012)
     source_license: CC-BY-3.0
     source_url: http://due.esrin.esa.int/page_globcover.php
-    source_version: 2.3
   version: 2.3
   path: landuse/globcover/GLOBCOVER_L4_200901_200912_V2.3.tif
 
@@ -732,7 +687,6 @@ glofas_era5_v31:
     paper_ref: Harrigan et al. (2020)
     source_license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
     source_url: https://doi.org/10.24381/cds.a4fdd6b9
-    source_version: 31
     processing_script: hydro/glofas_era5/glofas_cds_get.py
   version: 31
   path: hydro/glofas_era5/glofas_v31_{year}.nc
@@ -752,7 +706,6 @@ glofas_uparea:
     paper_ref: Harrigan et al. (2020)
     source_license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
     source_url: https://doi.org/10.24381/cds.a4fdd6b9
-    source_version: 31
   version: 31
   path: hydro/glofas_era5/glofas_v31_uparea.tif
   rename:
@@ -775,7 +728,6 @@ glw_buffaloes:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: v3
   version: 3
   path: socio_economic/glw/5_Bf_2010_Da.tif
 
@@ -794,7 +746,6 @@ glw_cattle:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: v3
   version: 3
   path: socio_economic/glw/5_Ct_2010_Da.tif
 
@@ -813,7 +764,6 @@ glw_chicken:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: v3
   version: 3
   path: socio_economic/glw/5_Ch_2010_Da.tif
 
@@ -832,7 +782,6 @@ glw_ducks:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: v3
   version: 3
   path: socio_economic/glw/5_Dk_2010_Da.tif
 
@@ -851,7 +800,6 @@ glw_goats:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: v3
   version: 3
   path: socio_economic/glw/5_Gt_2010_Da.tif
 
@@ -870,7 +818,6 @@ glw_horses:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: v3
   version: 3
   path: socio_economic/glw/5_Ho_2010_Da.tif
 
@@ -889,7 +836,6 @@ glw_pigs:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: v3
   version: 3
   path: socio_economic/glw/5_Pg_2010_Da.tif
 
@@ -908,7 +854,6 @@ glw_sheeps:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: v3
   version: 3
   path: socio_economic/glw/5_Sh_2010_Da.tif
 
@@ -937,7 +882,6 @@ grip_roads:
     paper_ref: Meijer et al, 2018
     paper_doi: 10.1088/1748-9326/aabd42
     source_license: CC0-1.0
-    source_version: v4
     processing_script: infrastructure/grip/merge.ipynb
   version: 4
   path: infrastructure/grip/GRIP4_world.fgb
@@ -954,7 +898,6 @@ grwl:
     paper_ref: Allen and Pavelsky (2018)
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.1297434
-    source_version: 1.01
   version: 1.01
   path: hydrography/grwl/GRWL_vector_V01.01/grwl.fgb
 
@@ -974,7 +917,6 @@ grwl_mask:
     paper_ref: Allen and Pavelsky (2018)
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.1297434
-    source_version: 1.01
   nodata: 0
   version: 1.01
   path: hydrography/grwl/tindex.gpkg
@@ -991,7 +933,6 @@ gswo:
     paper_doi: 10.1038/nature20584
     paper_ref: Pekel et al. (2016)
     source_url: https://global-surface-water.appspot.com/download
-    source_version: v1_1_2019
   nodata: 255
   version: v1_1_2019
   path: hydrography/gswo/occur.vrt
@@ -1010,7 +951,6 @@ gtsm_codec_reanalysis_{freq}_v1:
     paper_ref: Muis at al (2020)
     source_license: https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
     source_url: https://doi.org/10.24381/cds.8c59054f
-    source_version: 1
   version: 1
   path: p:/11205028-c3s_435/01_data/01_Timeseries/timeseries2/{variable}/reanalysis_{variable}_{freq}_{year}_{month:02d}_v1.nc
   placeholders:
@@ -1044,7 +984,6 @@ hydro_lakes:
     category: surface water
     notes: HydroLAKES.v10_extract
     source_author: Arjen Haag
-    source_version: 1.0
   version: 1.0
   path: hydrography/lakes/lake-db.fgb
   rename:
@@ -1066,7 +1005,6 @@ hydro_reservoirs:
     category: surface water
     notes: GRanD.v1.1_HydroLAKES.v10_JRC.2016
     source_author: Alessia Matano
-    source_version: 1.0
   nodata: -99
   version: 1.0
   path: hydrography/reservoirs/reservoir-db.fgb
@@ -1103,7 +1041,6 @@ koppen_geiger:
     paper_doi: 10.1127/0941-2948/2006/0130
     paper_ref: Kottek et al. (2006)
     source_url: http://koeppen-geiger.vu-wien.ac.at/present.htm
-    source_version: 2017
   nodata: 0
   version: 2017
   path: meteo/climate_classification_v2017/Map_KG-Global.tif
@@ -1121,7 +1058,6 @@ mdt_cnes_cls18:
     paper_doi: 10.5194/os-17-789-2021
     paper_ref: Mulet et al (2021)
     source_url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
-    source_version: 18
     unit: m+GOCO05S
     processing_script: topography/mdt_cnes_cls18/convert_lon_fill_mdt.ipynb
   version: 18
@@ -1142,7 +1078,6 @@ merit:
     paper_ref: Yamazaki et al. (2018)
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_DEM/
-    source_version: 1.0.3
   version: 1.0.3
   path: topography/merit/merit.nc
   rename:
@@ -1162,7 +1097,6 @@ merit_hydro:
     paper_ref: Yamazaki et al. (2019)
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
-    source_version: 1.0
   version: 1.0
   path: topography/merit_hydro/*.vrt
   rename:
@@ -1190,7 +1124,6 @@ merit_hydro_ihu:
     source_license: ODC-By 1.0
     source_url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
     source_doi: 10.5281/zenodo.5166932
-    source_version: 1.0
     processing_notes: topography/merit_hydro_ihu/README
   path: topography/merit_hydro_ihu/30sec/*.tif
   version: 1.0
@@ -1225,7 +1158,6 @@ merit_hydro_index:
     paper_doi: 10.5194/hess-25-5287-2021
     paper_ref: Eilander et al. (2021)
     source_license: CC-BY-NC 4.0
-    source_version: 1.0
   version: 1.0
   path: topography/merit_hydro/basin_index.fgb
 
@@ -1243,7 +1175,6 @@ merit_hydro_patch:
     paper_ref: Yamazaki et al. (2019)
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
-    source_version: 1.0 Deltares patch
     processing_script: topography/merit_hydro/patches/scripts
   version: 1.0
   path: topography/merit_hydro/patches/*.vrt
@@ -1273,7 +1204,6 @@ modis_lai:
     paper_ref: Myneni et al (2015)
     source_license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
     source_url: https://lpdaac.usgs.gov/products/mcd15a3hv006/
-    source_version: MCD15A3H V006
     processing_script:
       GEE_script: landuse/modis/MODIS_MCD15A3H_LAI/GEE_MODIS_LAI.js
       merge_script: landuse/modis/MODIS_MCD15A3H_LAI/merge_rasters_GEE_LAI.py
@@ -1292,7 +1222,6 @@ osm_coastlines:
     source_author: OpenStreetMap
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
-    source_version: 1.0
   version: 1.0
   path: geography/osm/osm_coastlines-db.fgb
   rename:
@@ -1308,7 +1237,6 @@ osm_landareas:
     source_author: OpenStreetMap
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
-    source_version: 1.0
   version: 1.0
   path: geography/osm/osm_landareas-db.fgb
   rename:
@@ -1325,7 +1253,6 @@ rgi:
     paper_ref: Pfeffer et al. (2014)
     source_license: CC BY 4.0
     source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
-    source_version: 6.0
   version: 6.0
   path: hydrography/rgi/rgi.fgb
   rename:
@@ -1343,7 +1270,6 @@ rivers_lin2019_v1:
     paper_ref: Lin et al. (2019)
     source_license: CC-BY-NC 4.0
     source_url: https://zenodo.org/record/3552776#.YVbOrppByUk
-    source_version: 1
     processing_notes: hydrography/rivers_lin2019/README
   version: 1
   path: hydrography/rivers_lin2019/rivers_ge30m.fgb
@@ -1364,7 +1290,6 @@ simard:
     paper_doi: 10.1029/2011JG001708
     paper_ref: Simard et al (2011)
     source_url: https://webmap.ornl.gov/ogc/dataset.jsp?ds_id=10023
-    source_version: 2011
   version: 2011
   path: landuse/simard/sdat_10023_canopy_height_simard.tif
 
@@ -1384,7 +1309,6 @@ SM2RAIN_ASCAT_monthly_025_v1.4:
     paper_ref: Brocca et al. (2019)
     source_license: https://creativecommons.org/licenses/by/4.0/legalcode
     source_url: https://zenodo.org/record/4570192#.YueKJWNByUl
-    source_version: 1.4
   version: 1.4
   path: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_025_2007_2020.nc
   rename:
@@ -1406,7 +1330,6 @@ SM2RAIN_ASCAT_monthly_05_v1.4:
     paper_ref: Brocca et al. (2019)
     source_license: https://creativecommons.org/licenses/by/4.0/legalcode
     source_url: https://zenodo.org/record/4570192#.YueKJWNByUl
-    source_version: 1.4
   version: 1.4
   path: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_05_2007_2020.nc
   rename:
@@ -1433,8 +1356,7 @@ soilgrids:
         paper_doi: 10.1371/journal.pone.0169748
         paper_ref: Hengl et al. (2017)
         source_license: ODbL
-        source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids-2017
-        source_version: 2017
+        source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids-201
       rename:
         BLDFIE_M_sl1_250m_ll: bd_sl1
         BLDFIE_M_sl2_250m_ll: bd_sl2
@@ -1509,7 +1431,6 @@ soilgrids:
         paper_ref: de Sousa et al. (2020)
         source_license: CC BY 4.0
         source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids
-        source_version: 2020
         processing_script: soil/soilgrids_v2.0/src/preprocess_soilgrids_v2020.ipynb
         processing_notes: soil/soilgrids_v2.0/src/readme.txt
       rename:
@@ -1609,7 +1530,6 @@ vito:
     paper_doi: 10.5281/zenodo.3939038
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
-    source_version: v2.0.2
   path: landuse/vito/ProbaV_LC100_epoch2015_global_v2.0.2_discrete-classification_EPSG-4326.tif
 
 vito_2016_v3.0.1:
@@ -1625,7 +1545,6 @@ vito_2016_v3.0.1:
     paper_doi: 10.5281/zenodo.3518026
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
-    source_version: v3.0.1
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2016-conso_Discrete-Classification-map_EPSG-4326.tif
 
 vito_2017_v3.0.1:
@@ -1641,7 +1560,6 @@ vito_2017_v3.0.1:
     paper_doi: 10.5281/zenodo.3518036
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
-    source_version: v3.0.1
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2017-conso_Discrete-Classification-map_EPSG-4326.tif
 
 vito_2018_v3.0.1:
@@ -1657,7 +1575,6 @@ vito_2018_v3.0.1:
     paper_doi: 10.5281/zenodo.3518038
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
-    source_version: v3.0.1
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2018-conso_Discrete-Classification-map_EPSG-4326.tif
 
 vito_2019_v3.0.1:
@@ -1673,7 +1590,6 @@ vito_2019_v3.0.1:
     paper_doi: 10.5281/zenodo.3939050
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
-    source_version: v3.0.1
   path: landuse/vito/ProbaV_LC100_global_v3.0.1_2019-nrt_discrete-classification-map_EPSG-4326.tif
 
 wb_countries:
@@ -1685,7 +1601,6 @@ wb_countries:
     source_author: World Bank
     source_url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
     source_license: CC-BY 4.0
-    source_version: 20200319
     timestamp: February 2020
   version: 20200319
   path: geography/wb/WB_countries_Admin0.fgb
@@ -1711,7 +1626,6 @@ worldclim:
     paper_doi: 10.1002/joc.5086
     paper_ref: Fick and Hijmans (2017)
     source_url: https://www.worldclim.org/data/worldclim21.html
-    source_version: 2.0
     nodata: -999.0
   version: 2.0
   path: meteo/worldclim_v2.0/wc2.0_30s_prec.nc
@@ -1762,6 +1676,5 @@ wsf_bld_2015_v1:
     paper_ref: Marconcini at al (2020)
     source_license: CC0 1.0
     source_url: https://un-spider.org/links-and-resources/data-sources/world-settlement-footprint-2015-wsf-dlr-eoc
-    source_version: 1
   version: 1
   path: infrastructure/wsf/WSF2015_v1_EPSG4326.vrt
