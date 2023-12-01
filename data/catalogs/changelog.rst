@@ -5,6 +5,26 @@ Change log predefined datasets
 deltares_data
 =============
 
+version: 2023.3
+---------------
+
+changed
+^^^^^^^
+- removed source_version from data source meta
+- kwargs to driver_kwargs
+- updated source_url if url was not working anymore
+
+
+added
+^^^^^
+- version argument to data source where applicable
+- variants argument for data sources that are of the same dataset but different versions
+- processing_script / processing_notes arguments to data sources that have been (pre-) processed
+
+
+deltares_data
+=============
+
 version: 2023.2
 ----------------
 
