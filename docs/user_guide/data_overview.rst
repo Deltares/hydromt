@@ -77,7 +77,9 @@ However, we do plan to expand its functionality over time. It can be use for exa
 
 .. code-block:: console
 
-    hydromt check grid -d /path/to/data_catalog.yml -i /path/to/model_config.yml
+    hydromt check grid -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r '{'bbox': [-1,-1,1,1]}'
+
+currently only `bbox` and `geom` variants of regions are supported in validation. Also note that the geom variant will only check whether the file exists not its contents. We also plan to expand this functionality in the future.
 
 .. _get_data_python:
 

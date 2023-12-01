@@ -15,6 +15,7 @@ Added
 -----
 - Export CLI now also accepts time tuples (#660)
 - New stats.skills VE and RSR (#666)
+- Check CLI command can now validate bbox and geom regions (#664)
 
 Changed
 -------
