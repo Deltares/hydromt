@@ -568,9 +568,10 @@ for example:</p>
 <p>Finally the CLI also provides a lightweight command to check your files for compliance without having to build the model.
 Note that this does not yet validate the data specified, but only the syntax of the files themselves.
 However, we do plan to expand its functionality over time. It can be use for example like so:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt check grid -d /path/to/data_catalog.yml -i /path/to/model_config.yml</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt check grid -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r &#39;{&#39;bbox&#39;: [-1,-1,1,1]}&#39;</span>
 </pre></div>
 </div>
+<p>currently only <cite>bbox</cite> and <cite>geom</cite> variants of regions are supported in validation. Also note that the geom variant will only check whether the file exists not its contents. We also plan to expand this functionality in the future.</p>
 </section>
 <section id="from-python">
 <span id="get-data-python"></span><h2>From Python<a class="headerlink" href="#from-python" title="Link to this heading">#</a></h2>
