@@ -836,6 +836,7 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.bias.html">hydromt.stats.skills.bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.percentual_bias.html">hydromt.stats.skills.percentual_bias</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.volumetric_error.html">hydromt.stats.skills.volumetric_error</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.nashsutcliffe.html">hydromt.stats.skills.nashsutcliffe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.lognashsutcliffe.html">hydromt.stats.skills.lognashsutcliffe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.pearson_correlation.html">hydromt.stats.skills.pearson_correlation</a></li>
@@ -847,6 +848,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.rsquared.html">hydromt.stats.skills.rsquared</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.mse.html">hydromt.stats.skills.mse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.rmse.html">hydromt.stats.skills.rmse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.skills.rsr.html">hydromt.stats.skills.rsr</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.stats.extremes.get_peaks.html">hydromt.stats.extremes.get_peaks</a></li>
@@ -2296,38 +2298,44 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.percentual_bias.html#hydromt.stats.skills.percentual_bias" title="hydromt.stats.skills.percentual_bias"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.percentual_bias</span></code></a>(sim, obs[, dim])</p></td>
 <td><p>Return the percentual bias between two time series.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.nashsutcliffe.html#hydromt.stats.skills.nashsutcliffe" title="hydromt.stats.skills.nashsutcliffe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.nashsutcliffe</span></code></a>(sim, obs[, dim])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.volumetric_error.html#hydromt.stats.skills.volumetric_error" title="hydromt.stats.skills.volumetric_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.volumetric_error</span></code></a>(sim, obs[, dim])</p></td>
+<td><p>Return the volumetric error between two time series.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.nashsutcliffe.html#hydromt.stats.skills.nashsutcliffe" title="hydromt.stats.skills.nashsutcliffe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.nashsutcliffe</span></code></a>(sim, obs[, dim])</p></td>
 <td><p>Return the Nash-Sutcliffe model efficiency.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.lognashsutcliffe.html#hydromt.stats.skills.lognashsutcliffe" title="hydromt.stats.skills.lognashsutcliffe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.lognashsutcliffe</span></code></a>(sim, obs[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.lognashsutcliffe.html#hydromt.stats.skills.lognashsutcliffe" title="hydromt.stats.skills.lognashsutcliffe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.lognashsutcliffe</span></code></a>(sim, obs[, ...])</p></td>
 <td><p>Return the log Nash-Sutcliffe model efficiency.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.pearson_correlation.html#hydromt.stats.skills.pearson_correlation" title="hydromt.stats.skills.pearson_correlation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.pearson_correlation</span></code></a>(sim, obs[, dim])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.pearson_correlation.html#hydromt.stats.skills.pearson_correlation" title="hydromt.stats.skills.pearson_correlation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.pearson_correlation</span></code></a>(sim, obs[, dim])</p></td>
 <td><p>Return the Pearson correlation coefficient of two time series.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.spearman_rank_correlation.html#hydromt.stats.skills.spearman_rank_correlation" title="hydromt.stats.skills.spearman_rank_correlation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.spearman_rank_correlation</span></code></a>(sim, obs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.spearman_rank_correlation.html#hydromt.stats.skills.spearman_rank_correlation" title="hydromt.stats.skills.spearman_rank_correlation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.spearman_rank_correlation</span></code></a>(sim, obs)</p></td>
 <td><p>Return the spearman rank correlation coefficient of two time series.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.kge.html#hydromt.stats.skills.kge" title="hydromt.stats.skills.kge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.kge</span></code></a>(sim, obs[, dim])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.kge.html#hydromt.stats.skills.kge" title="hydromt.stats.skills.kge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.kge</span></code></a>(sim, obs[, dim])</p></td>
 <td><p>Return the Kling-Gupta Efficiency (KGE) of two time series.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.kge_2012.html#hydromt.stats.skills.kge_2012" title="hydromt.stats.skills.kge_2012"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.kge_2012</span></code></a>(sim, obs[, dim])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.kge_2012.html#hydromt.stats.skills.kge_2012" title="hydromt.stats.skills.kge_2012"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.kge_2012</span></code></a>(sim, obs[, dim])</p></td>
 <td><p>Return the Kling-Gupta Efficiency (KGE, 2012) of two time series.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.kge_non_parametric.html#hydromt.stats.skills.kge_non_parametric" title="hydromt.stats.skills.kge_non_parametric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.kge_non_parametric</span></code></a>(sim, obs[, dim])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.kge_non_parametric.html#hydromt.stats.skills.kge_non_parametric" title="hydromt.stats.skills.kge_non_parametric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.kge_non_parametric</span></code></a>(sim, obs[, dim])</p></td>
 <td><p>Return the Non Parametric Kling-Gupta Efficiency (KGE, 2018).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.kge_non_parametric_flood.html#hydromt.stats.skills.kge_non_parametric_flood" title="hydromt.stats.skills.kge_non_parametric_flood"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.kge_non_parametric_flood</span></code></a>(sim, obs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.kge_non_parametric_flood.html#hydromt.stats.skills.kge_non_parametric_flood" title="hydromt.stats.skills.kge_non_parametric_flood"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.kge_non_parametric_flood</span></code></a>(sim, obs)</p></td>
 <td><p>Return the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.rsquared.html#hydromt.stats.skills.rsquared" title="hydromt.stats.skills.rsquared"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.rsquared</span></code></a>(sim, obs[, dim])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.rsquared.html#hydromt.stats.skills.rsquared" title="hydromt.stats.skills.rsquared"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.rsquared</span></code></a>(sim, obs[, dim])</p></td>
 <td><p>Return the coefficient of determination of two time series.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.mse.html#hydromt.stats.skills.mse" title="hydromt.stats.skills.mse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.mse</span></code></a>(sim, obs[, dim])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.mse.html#hydromt.stats.skills.mse" title="hydromt.stats.skills.mse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.mse</span></code></a>(sim, obs[, dim])</p></td>
 <td><p>Return the mean squared error (MSE) between two time series.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.rmse.html#hydromt.stats.skills.rmse" title="hydromt.stats.skills.rmse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.rmse</span></code></a>(sim, obs[, dim])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.rmse.html#hydromt.stats.skills.rmse" title="hydromt.stats.skills.rmse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.rmse</span></code></a>(sim, obs[, dim])</p></td>
 <td><p>Return the root mean squared error between two time series.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.stats.skills.rsr.html#hydromt.stats.skills.rsr" title="hydromt.stats.skills.rsr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stats.skills.rsr</span></code></a>(sim, obs[, dim])</p></td>
+<td><p>Return the RMSE-observations standard deviation (RSR) between two time series.</p></td>
 </tr>
 </tbody>
 </table>

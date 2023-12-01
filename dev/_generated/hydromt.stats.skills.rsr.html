@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>hydromt.data_adapter.DataFrameAdapter.to_dict &#8212; HydroMT  documentation</title>
+    <title>hydromt.stats.skills.rsr &#8212; HydroMT  documentation</title>
   
   
   
@@ -42,7 +42,9 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/hydromt.data_adapter.DataFrameAdapter.to_dict';</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/hydromt.stats.skills.rsr';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.14.3';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
@@ -52,8 +54,8 @@
     <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hydromt.data_adapter.DataFrameAdapter.to_file" href="hydromt.data_adapter.DataFrameAdapter.to_file.html" />
-    <link rel="prev" title="hydromt.data_adapter.DataFrameAdapter.get_data" href="hydromt.data_adapter.DataFrameAdapter.get_data.html" />
+    <link rel="next" title="hydromt.stats.extremes.get_peaks" href="hydromt.stats.extremes.get_peaks.html" />
+    <link rel="prev" title="hydromt.stats.skills.rmse" href="hydromt.stats.skills.rmse.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -466,11 +468,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.get_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.get_bbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.html">hydromt.data_adapter.DataFrameAdapter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.summary.html">hydromt.data_adapter.DataFrameAdapter.summary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.get_data.html">hydromt.data_adapter.DataFrameAdapter.get_data</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">hydromt.data_adapter.DataFrameAdapter.to_dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_dict.html">hydromt.data_adapter.DataFrameAdapter.to_dict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_file.html">hydromt.data_adapter.DataFrameAdapter.to_file</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -833,7 +835,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.gis_utils.nearest.html">hydromt.gis_utils.nearest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.gis_utils.nearest_merge.html">hydromt.gis_utils.nearest_merge</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.bias.html">hydromt.stats.skills.bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.percentual_bias.html">hydromt.stats.skills.percentual_bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.volumetric_error.html">hydromt.stats.skills.volumetric_error</a></li>
@@ -848,7 +850,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.rsquared.html">hydromt.stats.skills.rsquared</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.mse.html">hydromt.stats.skills.mse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.rmse.html">hydromt.stats.skills.rmse</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.stats.skills.rsr.html">hydromt.stats.skills.rsr</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">hydromt.stats.skills.rsr</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.stats.extremes.get_peaks.html">hydromt.stats.extremes.get_peaks</a></li>
@@ -905,7 +907,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">hydromt.data...</li>
+    <li class="breadcrumb-item active" aria-current="page">hydromt.stat...</li>
   </ul>
 </nav>
 </div>
@@ -922,13 +924,30 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="hydromt-data-adapter-dataframeadapter-to-dict">
-<h1>hydromt.data_adapter.DataFrameAdapter.to_dict<a class="headerlink" href="#hydromt-data-adapter-dataframeadapter-to-dict" title="Link to this heading">#</a></h1>
-<dl class="py method">
-<dt class="sig sig-object py" id="hydromt.data_adapter.DataFrameAdapter.to_dict">
-<span class="sig-prename descclassname"><span class="pre">DataFrameAdapter.</span></span><span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hydromt.data_adapter.DataFrameAdapter.to_dict" title="Link to this definition">#</a></dt>
-<dd><p>Return a dictionary view of the data source.</p>
-<p>Can be used to initialize the data adapter.</p>
+  <section id="hydromt-stats-skills-rsr">
+<h1>hydromt.stats.skills.rsr<a class="headerlink" href="#hydromt-stats-skills-rsr" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="hydromt.stats.skills.rsr">
+<span class="sig-prename descclassname"><span class="pre">hydromt.stats.skills.</span></span><span class="sig-name descname"><span class="pre">rsr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hydromt/stats/skills.html#rsr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.stats.skills.rsr" title="Link to this definition">#</a></dt>
+<dd><p>Return the RMSE-observations standard deviation (RSR) between two time series.</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\begin{split}RSR=\\frac{RMSE}{STDEVobs}\end{split}\]</div>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">xarray</span> <span class="pre">DataArray</span></code>) – simulations time series</p></li>
+<li><p><strong>obs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">xarray</span> <span class="pre">DataArray</span></code>) – observations time series</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the root squared error</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray</span> <span class="pre">DataArray</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -944,20 +963,20 @@ document.write(`
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="hydromt.data_adapter.DataFrameAdapter.get_data.html"
+       href="hydromt.stats.skills.rmse.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">hydromt.data_adapter.DataFrameAdapter.get_data</p>
+        <p class="prev-next-title">hydromt.stats.skills.rmse</p>
       </div>
     </a>
     <a class="right-next"
-       href="hydromt.data_adapter.DataFrameAdapter.to_file.html"
+       href="hydromt.stats.extremes.get_peaks.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">hydromt.data_adapter.DataFrameAdapter.to_file</p>
+        <p class="prev-next-title">hydromt.stats.extremes.get_peaks</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -976,14 +995,14 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hydromt.data_adapter.DataFrameAdapter.to_dict"><code class="docutils literal notranslate"><span class="pre">DataFrameAdapter.to_dict()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hydromt.stats.skills.rsr"><code class="docutils literal notranslate"><span class="pre">rsr()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/Deltares/hydromt/edit/main/docs/_generated/hydromt.data_adapter.DataFrameAdapter.to_dict.rst">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/_generated/hydromt.stats.skills.rsr.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
@@ -997,7 +1016,7 @@ document.write(`
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/_generated/hydromt.data_adapter.DataFrameAdapter.to_dict.rst.txt">
+    <a href="../_sources/_generated/hydromt.stats.skills.rsr.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

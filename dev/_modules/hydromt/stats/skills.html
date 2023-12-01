@@ -524,6 +524,38 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="volumetric_error">
+<a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.volumetric_error.html#hydromt.stats.skills.volumetric_error">[docs]</a>
+<span class="k">def</span> <span class="nf">volumetric_error</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the volumetric error between two time series.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">         VE= 1 - \\frac{\\sum_{i=1}^{N}(|sim_{i}-obs_{i}|)}{\\sum_{i=1}^{N}(obs_{i})}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sim : xarray DataArray</span>
+<span class="sd">        simulations time series</span>
+<span class="sd">    obs : xarray DataArray</span>
+<span class="sd">        observations time series</span>
+<span class="sd">    dim : str, optional</span>
+<span class="sd">        name of time dimension in sim and obs (the default is &#39;time&#39;)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xarray DataArray</span>
+<span class="sd">        volumetric error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># wrap numpy function</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">input_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="n">dim</span><span class="p">],</span> <span class="p">[</span><span class="n">dim</span><span class="p">]],</span> <span class="n">dask</span><span class="o">=</span><span class="s2">&quot;parallelized&quot;</span><span class="p">,</span> <span class="n">output_dtypes</span><span class="o">=</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">ve</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span><span class="n">_ve</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">ve</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;ve&quot;</span>
+    <span class="k">return</span> <span class="n">ve</span></div>
+
+
+
 <div class="viewcode-block" id="nashsutcliffe">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.nashsutcliffe.html#hydromt.stats.skills.nashsutcliffe">[docs]</a>
 <span class="k">def</span> <span class="nf">nashsutcliffe</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
@@ -834,6 +866,36 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="rsr">
+<a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.rsr.html#hydromt.stats.skills.rsr">[docs]</a>
+<span class="k">def</span> <span class="nf">rsr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the RMSE-observations standard deviation (RSR) between two time series.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">         RSR=\\frac{RMSE}{STDEVobs}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sim : xarray DataArray</span>
+<span class="sd">        simulations time series</span>
+<span class="sd">    obs : xarray DataArray</span>
+<span class="sd">        observations time series</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xarray DataArray</span>
+<span class="sd">        the root squared error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># wrap numpy function</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">input_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="n">dim</span><span class="p">],</span> <span class="p">[</span><span class="n">dim</span><span class="p">]],</span> <span class="n">dask</span><span class="o">=</span><span class="s2">&quot;parallelized&quot;</span><span class="p">,</span> <span class="n">output_dtypes</span><span class="o">=</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">rsr</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span><span class="n">_rsr</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">rsr</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;rsr&quot;</span>
+    <span class="k">return</span> <span class="n">rsr</span></div>
+
+
+
 <div class="viewcode-block" id="kge">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.kge.html#hydromt.stats.skills.kge">[docs]</a>
 <span class="k">def</span> <span class="nf">kge</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
@@ -947,13 +1009,31 @@ document.write(`
 
 <span class="k">def</span> <span class="nf">_pbias</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Percentual bias.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">sim</span> <span class="o">-</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">sim</span> <span class="o">-</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_ve</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Volumetric Error.&quot;&quot;&quot;</span>
+    <span class="n">ve</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">sim</span> <span class="o">-</span> <span class="n">obs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ve</span>
 
 
 <span class="k">def</span> <span class="nf">_mse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Mean squared error.&quot;&quot;&quot;</span>
-    <span class="n">mse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">obs</span> <span class="o">-</span> <span class="n">sim</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="n">mse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">obs</span> <span class="o">-</span> <span class="n">sim</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">obs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="n">mse</span>
+
+
+<span class="k">def</span> <span class="nf">_rsr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RMSE-observations standard deviation.&quot;&quot;&quot;</span>
+    <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">_mse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">))</span>
+    <span class="n">stdev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">obs</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+        <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">obs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">rmse</span> <span class="o">/</span> <span class="n">stdev</span>
 
 
 <span class="k">def</span> <span class="nf">_nse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
