@@ -15,9 +15,11 @@ Added
 -----
 - Export CLI now also accepts time tuples (#660)
 
+
 Changed
 -------
 - Export CLI now uses '-s' for source, '-t' for time and '-i' for config. (#660)
+- Updated deltares_data data catalog to incorporate the newest data catalog features (#667)
 
 Fixed
 -----
