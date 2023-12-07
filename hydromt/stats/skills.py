@@ -68,6 +68,35 @@ def percentual_bias(sim, obs, dim="time"):
     return pbias
 
 
+def volumetric_error(sim, obs, dim="time"):
+    r"""Return the volumetric error between two time series.
+
+        .. math::
+         VE= 1 - \\frac{\\sum_{i=1}^{N}(|sim_{i}-obs_{i}|)}{\\sum_{i=1}^{N}(obs_{i})}
+
+    Parameters
+    ----------
+    sim : xarray DataArray
+        simulations time series
+    obs : xarray DataArray
+        observations time series
+    dim : str, optional
+        name of time dimension in sim and obs (the default is 'time')
+
+    Returns
+    -------
+    xarray DataArray
+        volumetric error
+    """
+    # wrap numpy function
+    kwargs = dict(
+        input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
+    )
+    ve = xr.apply_ufunc(_ve, sim, obs, **kwargs)
+    ve.name = "ve"
+    return ve
+
+
 def nashsutcliffe(sim, obs, dim="time"):
     r"""Return the Nash-Sutcliffe model efficiency.
 
@@ -351,6 +380,33 @@ def rmse(sim, obs, dim="time"):
     return rmse
 
 
+def rsr(sim, obs, dim="time"):
+    r"""Return the RMSE-observations standard deviation (RSR) between two time series.
+
+        .. math::
+         RSR=\\frac{RMSE}{STDEVobs}
+
+    Parameters
+    ----------
+    sim : xarray DataArray
+        simulations time series
+    obs : xarray DataArray
+        observations time series
+
+    Returns
+    -------
+    xarray DataArray
+        the root squared error
+    """
+    # wrap numpy function
+    kwargs = dict(
+        input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
+    )
+    rsr = xr.apply_ufunc(_rsr, sim, obs, **kwargs)
+    rsr.name = "rsr"
+    return rsr
+
+
 def kge(sim, obs, dim="time"):
     r"""Return the Kling-Gupta Efficiency (KGE) of two time series.
 
@@ -458,13 +514,31 @@ def _bias(sim, obs, axis=-1):
 
 def _pbias(sim, obs, axis=-1):
     """Percentual bias."""
-    return np.nansum(sim - obs, axis=axis) / np.nansum(obs, axis=axis)
+    return 100 * np.nansum(sim - obs, axis=axis) / np.nansum(obs, axis=axis)
+
+
+def _ve(sim, obs, axis=-1):
+    """Volumetric Error."""
+    ve = 1 - np.nansum(np.absolute(sim - obs), axis=axis) / np.nansum(obs, axis=axis)
+    return ve
 
 
 def _mse(sim, obs, axis=-1):
     """Mean squared error."""
-    mse = np.nansum((obs - sim) ** 2, axis=axis)
+    mse = np.nansum((obs - sim) ** 2, axis=axis) / np.nansum(
+        np.isfinite(obs), axis=axis
+    )
     return mse
+
+
+def _rsr(sim, obs, axis=-1):
+    """RMSE-observations standard deviation."""
+    rmse = np.sqrt(_mse(sim, obs, axis=axis))
+    stdev = np.sqrt(
+        np.nansum((obs - np.nanmean(obs, axis=axis)) ** 2, axis=axis)
+        / np.nansum(np.isfinite(obs), axis=axis)
+    )
+    return rmse / stdev
 
 
 def _nse(sim, obs, axis=-1):

@@ -761,7 +761,7 @@ ghs_pop_2015_4326_v2019a:
   path: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_4326_9ss_V1_0.tif
 
 ghs_pop_2015_54009_v2019a:
-  crs: 54009
+  crs: "ESRI:54009"
   data_type: RasterDataset
   driver: raster
   kwargs:
@@ -779,7 +779,7 @@ ghs_pop_2015_54009_v2019a:
 ghs_smod:
   alias: ghs_smod_2015_54009_v2019a
 ghs_smod_2015_54009_v2016a:
-  crs: 54009
+  crs: "ESRI:54009"
   data_type: RasterDataset
   driver: raster
   kwargs:
@@ -796,7 +796,7 @@ ghs_smod_2015_54009_v2016a:
   path: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
 
 ghs_smod_2015_54009_v2019a:
-  crs: 54009
+  crs: "ESRI:54009"
   data_type: RasterDataset
   driver: raster
   kwargs:

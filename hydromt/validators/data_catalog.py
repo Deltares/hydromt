@@ -1,10 +1,12 @@
 """Pydantic models for the validation of Data catalogs."""
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic import AnyUrl, BaseModel, ConfigDict
+from pydantic import AnyUrl, BaseModel, ConfigDict, model_validator
 from pydantic.fields import Field
 from pydantic_core import Url
+from pyproj import CRS
+from pyproj.exceptions import CRSError
 
 from hydromt.data_catalog import _yml_from_uri_or_path
 from hydromt.typing import Bbox, Number, TimeRange
@@ -23,6 +25,17 @@ class SourceSpecDict(BaseModel):
         return SourceSpecDict(**input_dict)
 
 
+class SourceVariant(BaseModel):
+    """A variant for a data source."""
+
+    provider: Optional[Literal["local", "aws", "gcs"]] = None
+    version: Optional[Union[str, Number]] = None
+    path: Path
+    rename: Optional[Dict[str, str]] = None
+    filesystem: Optional[Literal["local", "s3", "gcs"]] = None
+    storage_options: Optional[Dict[str, Any]] = None
+
+
 class Extent(BaseModel):
     """A validation model for describing the space and time a dataset covers."""
 
@@ -34,7 +47,7 @@ class DataCatalogMetaData(BaseModel):
     """The metadata section of a Hydromt data catalog."""
 
     root: Optional[Path] = None
-    version: Optional[Union[str, int]] = None
+    version: Optional[Union[str, Number]] = None
     name: Optional[str] = None
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
@@ -81,23 +94,47 @@ class DataCatalogItem(BaseModel):
     """A validated data source."""
 
     name: str
-    data_type: str
-    driver: str
-    path: Path
-    crs: Optional[int] = None
+    data_type: Literal["RasterDataset", "GeoDataset", "GeoDataFrame", "DataFrame"]
+    driver: Literal[
+        "csv",
+        "fwf",
+        "netcdf",
+        "parquet",
+        "raster",
+        "raster_tindex",
+        "vector",
+        "vector_table",
+        "xls",
+        "xlsx",
+        "zarr",
+    ]
+    path: Optional[Path] = None
+    crs: Optional[Union[int, str]] = None
     filesystem: Optional[str] = None
     kwargs: Dict[str, Any] = Field(default_factory=dict)
     storage_options: Dict[str, Any] = Field(default_factory=dict)
+    placeholders: Optional[Dict[str, Any]] = None
     rename: Dict[str, str] = Field(default_factory=dict)
     nodata: Optional[Number] = None
     meta: Optional[DataCatalogItemMetadata] = None
     unit_add: Optional[Dict[str, Number]] = None
     unit_mult: Optional[Dict[str, Number]] = None
+    variants: Optional[List[SourceVariant]] = None
+    version: Optional[Union[str, Number]] = None
 
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
         extra="forbid",
     )
+
+    @model_validator(mode="after")
+    def _check_valid_crs(self) -> "DataCatalogItem":
+        try:
+            if self.crs:
+                _ = CRS.from_user_input(self.crs)
+        except CRSError as e:
+            raise ValueError(e)
+        return self
 
     @staticmethod
     def from_dict(input_dict, name=None):

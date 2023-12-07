@@ -7,11 +7,19 @@ import pytest
 from pydantic import ValidationError
 from pydantic_core import Url
 
+from hydromt.data_catalog import _yml_from_uri_or_path
 from hydromt.validators.data_catalog import (
     DataCatalogItem,
     DataCatalogMetaData,
     DataCatalogValidator,
 )
+
+
+def test_deltares_data_catalog():
+    p = "data/catalogs/deltares_data.yml"
+    yml_dict = _yml_from_uri_or_path(p)
+    # whould raise error if something goes wrong
+    _ = DataCatalogValidator.from_dict(yml_dict)
 
 
 def test_geodataframe_entry_validation():
@@ -71,6 +79,44 @@ def test_valid_catalog_with_alias():
             },
             "path": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
         },
+    }
+    _ = DataCatalogValidator.from_dict(d)
+
+
+def test_valid_catalog_variants():
+    d = {
+        "esa_worldcover": {
+            "crs": 4326,
+            "data_type": "RasterDataset",
+            "driver": "raster",
+            "filesystem": "local",
+            "kwargs": {"chunks": {"x": 36000, "y": 36000}},
+            "meta": {
+                "category": "landuse",
+                "source_license": "CC BY 4.0",
+                "source_url": "https://doi.org/10.5281/zenodo.5571936",
+            },
+            "variants": [
+                {
+                    "provider": "local",
+                    "version": 2021,
+                    "path": "landuse/esa_worldcover_2021/esa-worldcover.vrt",
+                },
+                {
+                    "provider": "local",
+                    "version": 2020,
+                    "path": "landuse/esa_worldcover/esa-worldcover.vrt",
+                },
+                {
+                    "provider": "aws",
+                    "version": 2020,
+                    "path": "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt",
+                    "rename": {"ESA_WorldCover_10m_2020_v100_Map_AWS": "landuse"},
+                    "filesystem": "s3",
+                    "storage_options": {"anon": True},
+                },
+            ],
+        }
     }
     _ = DataCatalogValidator.from_dict(d)
 
@@ -162,7 +208,29 @@ def test_dataset_entry_with_typo_validation():
     }
 
     # 8 errors are:
-    #  - missing crs, data_type, driver and path (4)
+    #  - missing crs, data_type and driver (3)
     #  - extra crs_num, datatype, diver, and filepath (5)
-    with pytest.raises(ValidationError, match="8 validation errors"):
+    with pytest.raises(ValidationError, match="7 validation errors"):
+        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+
+
+def test_data_type_typo():
+    d = {
+        "crs": 4326,
+        "data_type": "RaserDataset",
+        "driver": "raster",
+        "path": ".",
+    }
+    with pytest.raises(ValidationError, match="1 validation error"):
+        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+
+
+def test_data_invalid_crs():
+    d = {
+        "crs": 123456789,
+        "data_type": "RasterDataset",
+        "driver": "raster",
+        "path": ".",
+    }
+    with pytest.raises(ValidationError, match="1 validation error"):
         _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
