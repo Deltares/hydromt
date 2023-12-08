@@ -694,6 +694,7 @@ glofas_era5_v31:
     dis24: discharge
 
 glofas_uparea:
+  data_type: RasterDataset
   driver: raster
   driver_kwargs:
     chunks:
