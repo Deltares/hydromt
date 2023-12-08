@@ -312,8 +312,8 @@ era5:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    processing_script: meteo/era5_daily/src/
-  path: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
+    source_version: ERA5 daily data on pressure levels
+  path: meteo/era5_daily/nc_merged/era5_{year}_daily.nc
   rename:
     d2m: temp_dew
     msl: press_msl
@@ -371,8 +371,8 @@ era5_hourly:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.adbb2d47
-    processing_script: meteo/era5/src/
-  path: meteo/era5/{variable}/era5_{variable}_{year}*_hourly.nc
+    source_version: ERA5 hourly data on single levels from 1940 to present
+  path: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
   rename:
     d2m: temp_dew
     msl: press_msl
