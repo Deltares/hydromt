@@ -2,13 +2,14 @@
 """Tests for the hydromt.models module of HydroMT."""
 
 from copy import deepcopy
+from importlib.metadata import EntryPoint, EntryPoints
 from os.path import abspath, dirname, isfile, join
+from unittest.mock import MagicMock
 
 import geopandas as gpd
 import numpy as np
 import pytest
 import xarray as xr
-from entrypoints import Distribution, EntryPoint
 from shapely.geometry import box
 
 import hydromt._compat
@@ -38,10 +39,15 @@ def test_api_attrs():
 
 
 def test_plugins(mocker):
-    distro = Distribution("hydromt", "x.x.x")
-    ep_lst = [
-        EntryPoint.from_string("hydromt.models.model_api:Model", "test_model", distro)
-    ]
+    ep_lst = EntryPoints(
+        [
+            EntryPoint(
+                name="test_model",
+                value="hydromt.models.model_api:Model",
+                group="hydromt.models",
+            )
+        ]
+    )
     mocker.patch("hydromt.models.model_plugins._discover", return_value=ep_lst)
     eps = model_plugins.get_plugin_eps()
     assert "test_model" in eps
@@ -58,11 +64,17 @@ def test_plugin_duplicates(mocker):
 def test_load():
     with pytest.raises(ValueError, match="Model plugin type not recognized"):
         model_plugins.load(
-            EntryPoint.from_string("hydromt.data_catalog:DataCatalog", "error")
+            EntryPoint(
+                name="error",
+                value="hydromt.data_catalog:DataCatalog",
+                group="hydromt.data_catalog",
+            )
         )
     with pytest.raises(ImportError, match="Error while loading model plugin"):
         model_plugins.load(
-            EntryPoint.from_string("hydromt.models:DataCatalog", "error")
+            EntryPoint(
+                name="error", value="hydromt.models:DataCatalog", group="hydromt.models"
+            )
         )
 
 

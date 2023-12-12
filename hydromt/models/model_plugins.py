@@ -1,9 +1,9 @@
 """Implementation of the mechanism to access the plugin entrypoints."""
 import logging
+from importlib.metadata import EntryPoint, EntryPoints, entry_points
 from typing import Dict, Iterator, List
 
-from entrypoints import Distribution, EntryPoint, get_group_all
-
+# from entrypoints import Distribution, EntryPoint, get_group_all
 from .. import __version__, _compat
 from .model_api import Model
 
@@ -29,20 +29,21 @@ def get_general_eps() -> Dict:
         Entrypoints dict
     """
     eps = {}
-    distro = Distribution("hydromt", __version__)
+    # distro = Distribution.from_name("hydromt", __version__)
     for name, epstr in LOCAL_EPS.items():
         if name == "mesh_model" and not _compat.HAS_XUGRID:
             continue
-        eps[name] = EntryPoint.from_string(epstr, name, distro)
+        eps[name] = EntryPoint(name=name, value=epstr, group="hydromt.models")
+
     return eps
 
 
-def _discover(path=None) -> List:
+def _discover() -> EntryPoints:
     """Discover drivers via entrypoints."""
-    return get_group_all("hydromt.models", path=path)
+    return entry_points(group="hydromt.models")
 
 
-def get_plugin_eps(path=None, logger=logger) -> Dict:
+def get_plugin_eps(logger=logger) -> Dict:
     """Discover hydromt model plugins based on 'hydromt.models' entrypoints.
 
     Parameters
@@ -59,15 +60,19 @@ def get_plugin_eps(path=None, logger=logger) -> Dict:
         Entrypoints dict
     """
     eps = {}
-    for ep in _discover():
+    for ep in list(_discover()):
         name = ep.name
         if name in eps or name in LOCAL_EPS:
-            plugin = f"{ep.module_name}.{ep.object_name}"
+            plugin = f"{ep.module}.{ep.value}"
             logger.warning(f"Duplicated model plugin '{name}'; skipping {plugin}")
             continue
+        if ep.dist:
+            dist_version = ep.dist.name
+        else:
+            dist_version = __version__
+
         logger.debug(
-            f"Discovered model plugin '{name} = {ep.module_name}.{ep.object_name}' "
-            f"({ep.distro.version})"
+            f"Discovered model plugin '{name} = {ep.value}' " f"({dist_version})"
         )
         eps[ep.name] = ep
     return eps
@@ -89,7 +94,7 @@ def load(ep, logger=logger) -> Model:
     model_class : Model
         plugin model class
     """
-    _str = f"{ep.name} = {ep.module_name}.{ep.object_name}"
+    _str = f"{ep.name} = {ep.value}"
     try:
         model_class = ep.load()
         if not issubclass(model_class, Model):
