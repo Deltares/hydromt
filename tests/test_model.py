@@ -4,7 +4,6 @@
 from copy import deepcopy
 from importlib.metadata import EntryPoint, EntryPoints
 from os.path import abspath, dirname, isfile, join
-from unittest.mock import MagicMock
 
 import geopandas as gpd
 import numpy as np
