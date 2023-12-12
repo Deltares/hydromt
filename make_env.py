@@ -47,7 +47,9 @@ parser.add_argument("profile", default="dev,test", nargs="?")
 parser.add_argument("--output", "-o", default="environment.yml")
 parser.add_argument("--channels", "-c", default=None)
 parser.add_argument("--name", "-n", default=None)
-parser.add_argument("--py-version", "-p", default=None)
+parser.add_argument(
+    "--py-version", "-p", default="3.11", choices=["3.9", "3.10", "3.11"]
+)
 parser.add_argument("-r", "--release", action="store_true")
 args = parser.parse_args()
 
@@ -89,7 +91,7 @@ for dep in deps_to_install:
     else:
         conda_deps.append(dep)
 if args.py_version is not None:
-    conda_deps.append(f"python~={args.py_version}")
+    conda_deps.append(f"python~={args.py_version}.0")
 
 # add pip as a conda dependency if we have pip deps
 if len(pip_deps) > 0:

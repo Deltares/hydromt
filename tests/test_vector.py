@@ -79,6 +79,7 @@ def test_vector(geoda, geodf):
     da1 = geoda.vector.to_crs(3857)
     gdf1 = geodf.to_crs(3857)
     assert np.all(da1.vector.geometry == gdf1.geometry)
+    assert da1.vector.crs == gdf1.crs
 
 
 def test_from_gdf(geoda, geodf):

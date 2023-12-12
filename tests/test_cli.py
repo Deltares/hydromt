@@ -1,6 +1,8 @@
 """Tests for the cli submodule."""
 
 
+from os.path import abspath, dirname, join
+
 import numpy as np
 import pytest
 from click.testing import CliRunner
@@ -8,6 +10,8 @@ from click.testing import CliRunner
 from hydromt import __version__
 from hydromt.cli import api as hydromt_api
 from hydromt.cli.main import main as hydromt_cli
+
+DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 def test_cli_verison(tmpdir):
@@ -112,21 +116,39 @@ def test_cli_clip_unknown_model(tmpdir):
         )
 
 
-def test_export_cli_deltared_data(tmpdir):
+def test_export_cli_deltares_data(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "export",
             str(tmpdir),
-            "-t",
+            "-s",
             "hydro_lakes",
             "-r",
-            "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
+            "{'bbox': [12.05,45.30,12.85,45.65]}",
             "--dd",
         ],
+        catch_exceptions=False,
     )
 
     assert r.exit_code == 0, r.output
+
+
+def test_export_cli_unsupported_region(tmpdir):
+    with pytest.raises(NotImplementedError):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "export",
+                str(tmpdir),
+                "-s",
+                "hydro_lakes",
+                "-r",
+                "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
+                "--dd",
+            ],
+            catch_exceptions=False,
+        )
 
 
 def test_export_cli_catalog(tmpdir):
@@ -135,11 +157,52 @@ def test_export_cli_catalog(tmpdir):
         [
             "export",
             str(tmpdir),
-            "-t",
+            "-s",
             "hydro_lakes",
+            "-d",
+            join(DATADIR, "test_sources.yml"),
+        ],
+        catch_exceptions=False,
+    )
+    assert r.exit_code == 0, r.output
+
+
+def test_export_time_tuple(tmpdir):
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-s",
+            "hydro_lakes",
+            "-t",
+            "['2010-01-01','2020-12-31']",
             "-d",
             "tests/data/test_sources.yml",
         ],
+        catch_exceptions=False,
+    )
+    assert r.exit_code == 0, r.output
+
+
+def test_export_multiple_sources(tmpdir):
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-s",
+            "hydro_lakes",
+            "-s",
+            "gtsmv3_eu_era5",
+            "-t",
+            "['2010-01-01','2014-12-31']",
+            "-d",
+            "tests/data/test_sources.yml",
+            "-d",
+            "tests/data/test_sources.yml",
+        ],
+        catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
 
@@ -147,7 +210,7 @@ def test_export_cli_catalog(tmpdir):
 def test_export_cli_config_file(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
-        ["export", str(tmpdir), "-f", "tests/data/export_config.yml"],
+        ["export", str(tmpdir), "-i", "tests/data/export_config.yml"],
         catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
@@ -158,6 +221,7 @@ def test_check_cli():
         hydromt_cli,
         [
             "check",
+            "-m",
             "grid_model",
             "-d",
             "tests/data/test_sources.yml",
@@ -166,6 +230,90 @@ def test_check_cli():
         ],
     )
     assert r.exit_code == 0, r.output
+
+
+def test_check_cli_unsupported_region(tmpdir):
+    with pytest.raises(Exception, match="is not supported in region validation yet"):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "check",
+                "-m",
+                "grid_model",
+                "-r",
+                "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
+                "-i",
+                "tests/data/test_model_config.yml",
+            ],
+            catch_exceptions=False,
+        )
+
+
+def test_check_cli_known_region(tmpdir):
+    with pytest.raises(Exception, match="Unknown region kind"):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "check",
+                "-m",
+                "grid_model",
+                "-r",
+                "{'asdfasdfasdf': [-7.24, 62.09], 'uparea': 50}",
+                "-i",
+                "tests/data/test_model_config.yml",
+            ],
+            catch_exceptions=False,
+        )
+
+
+def test_check_cli_bbox_valid(tmpdir):
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "check",
+            "-m",
+            "grid_model",
+            "-r",
+            "{'bbox': [12.05,45.30,12.85,45.65]}",
+            "-i",
+            "tests/data/test_model_config.yml",
+        ],
+    )
+    assert r.exit_code == 0, r.output
+
+
+def test_check_cli_geom_valid(tmpdir):
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "check",
+            "-m",
+            "grid_model",
+            "-r",
+            "{'geom': 'tests/data/naturalearth_lowres.geojson'}",
+            "-i",
+            "tests/data/test_model_config.yml",
+        ],
+        catch_exceptions=False,
+    )
+    assert r.exit_code == 0, r.output
+
+
+def test_check_cli_geom_missing_file(tmpdir):
+    with pytest.raises(Exception, match="Path not found at asdf"):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "check",
+                "-m",
+                "grid_model",
+                "-r",
+                "{'geom': 'asdfasdf'}",
+                "-i",
+                "tests/data/test_model_config.yml",
+            ],
+            catch_exceptions=False,
+        )
 
 
 def test_api_datasets():

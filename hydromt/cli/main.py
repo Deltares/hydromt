@@ -2,19 +2,22 @@
 """command line interface for hydromt models."""
 
 import logging
+from ast import literal_eval
+from datetime import datetime
 from json import loads as json_decode
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import click
 import numpy as np
+from geopandas import GeoDataFrame
 from pydantic import ValidationError
 
 from hydromt.data_catalog import DataCatalog
-from hydromt.typing import ExportConfigDict
 from hydromt.validators.data_catalog import DataCatalogValidator
-from hydromt.validators.model_config import HydromtModelStep
+from hydromt.validators.model_config import HydromtModelSetup
+from hydromt.validators.region import validate_region
 
 from .. import __version__, log
 from ..models import MODELS
@@ -121,14 +124,6 @@ cache_opt = click.option(
     is_flag=True,
     default=False,
     help="Flag: If provided cache tiled rasterdatasets",
-)
-
-export_config_opt = click.option(
-    "-f",
-    "--export-config",
-    callback=cli_utils.parse_export_config_yaml,
-    help="read options from a config file for exporting. options from CLI will "
-    "override these options",
 )
 
 ## MAIN
@@ -338,39 +333,51 @@ def update(
 
 
 @main.command(
-    short_help="Validate config files are correct",
+    short_help="Validate config / data catalog / region",
 )
-@click.argument(
-    "MODEL",
+@click.option(
+    "-m",
+    "--model",
     type=str,
+    default=None,
+    help="Model name, e.g. wflow, sfincs, etc. to validate config file.",
 )
 @opt_config
 @data_opt
-@deltares_data_opt
 @quiet_opt
 @verbose_opt
+@region_opt
 @click.pass_context
 def check(
     ctx,
     model,
     config,
     data,
-    dd,
+    region: Optional[Dict[Any, Any]],
     quiet: int,
     verbose: int,
 ):
-    """Verify that provided data catalog files are in the correct format.
+    """
+    Verify that provided data catalog and config files are in the correct format.
+
+    Additionnaly region bbox and geom can also be validated.
 
     Example usage:
     --------------
 
-    hydromt check grid -d /path/to/data_catalog.yml -i /path/to/model_config.yml
+    Check data catalog file:
+    hydromt check -d /path/to/data_catalog.yml -v
+
+    Check data catalog and grid_model config file:
+    hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -v
+
+    With region:
+    hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r '{'bbox': [-1,-1,1,1]}' -v
 
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
     logger = log.setuplog("check", join(".", "hydromt.log"), log_level=log_level)
-    logger.info(f"Output dir: {export_dest_path}")
     try:
         all_exceptions = []
         for cat_path in data:
@@ -382,24 +389,36 @@ def check(
                 all_exceptions.append(e)
                 logger.info("Catalog has errors")
 
-        mod = MODELS.load(model)
-        try:
-            config_dict = cli_utils.parse_config(config)
-            logger.info(f"Validating config at {config}")
+        if region:
+            logger.info(f"Validating region {region}")
+            try:
+                validate_region(region)
+                logger.info("Region is valid!")
 
-            HydromtModelStep.from_dict(config_dict, model=mod)
-            logger.info("Model config valid!")
+            except (ValidationError, ValueError, NotImplementedError) as e:
+                logger.info("region has errors")
+                all_exceptions.append(e)
 
-        except (ValidationError, ValueError) as e:
-            logger.info("Model has errors")
-            all_exceptions.append(e)
+        if config:
+            mod = MODELS.load(model)
+            logger.info(f"Validating for model {model} of type {type(mod).__name__}")
+            try:
+                config_dict = cli_utils.parse_config(config)
+                logger.info(f"Validating config at {config}")
+
+                HydromtModelSetup.from_dict(config_dict, model=mod)
+                logger.info("Model config valid!")
+
+            except (ValidationError, ValueError) as e:
+                logger.info("Model has errors")
+                all_exceptions.append(e)
 
         if len(all_exceptions) > 0:
-            raise Exception(all_exceptions)
+            raise ValueError(all_exceptions)
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
-        raise
+        raise e
     finally:
         for handler in logger.handlers[:]:
             handler.close()
@@ -411,12 +430,17 @@ def check(
     short_help="Export data",
 )
 @click.option(
+    "-s",
+    "--source",
+    multiple=True,
+)
+@click.option(
     "-t",
-    "--target",
+    "--time-tuple",
 )
 @region_opt
 @export_dest_path
-@export_config_opt
+@opt_config
 @data_opt
 @deltares_data_opt
 @overwrite_opt
@@ -426,8 +450,9 @@ def check(
 def export(
     ctx: click.Context,
     export_dest_path: Path,
-    target: Optional[Union[str, Path]],
-    export_config: Optional[ExportConfigDict],
+    source: Optional[str],
+    time_tuple: Optional[str],
+    config: Optional[Path],
     region: Optional[Dict[Any, Any]],
     data: Optional[List[Path]],
     dd: bool,
@@ -440,14 +465,14 @@ def export(
     Example usage:
     --------------
 
-    export the data of in a single source, in a pertcular region
-    hydromt export -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -t era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml .
+    export the data of a single data source, in a particular region, for a particular time range
+    hydromt export -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -s era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml -t '["2010-01-01", "2022-12-31"]' path/to/output_dir
 
-    export all data of in a single source
-    hydromt export --dd -t era5_hourly .
+    export a single data source from the deltares data catalog without time/space slicing
+    hydromt export -d deltares_data -s era5_hourly path/to/output_dir
 
     export data as detailed in an export config yaml file
-    hydromt export -f /path/to/export_config.yaml .
+    hydromt export -i /path/to/export_config.yaml path/to/output_dir
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -464,31 +489,74 @@ def export(
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
         data_libs = ["deltares_data"] + data_libs  # prepend!
 
-    if export_config:
-        args = export_config.pop("args", {})
-        if "catalog" in args.keys():
-            data_libs = data_libs + args.pop("catalog")
-        time_tuple = args.pop("time_tuple", None)
-        region = region or args.pop("region", None)
+    sources: List[str] = []
+
+    if source:
+        if isinstance(source, str):
+            sources = [source]
+        else:
+            sources = list(source)
+
+    # these need to be defined even if config does not exist
+    unit_conversion = True
+    meta = {}
+    append = False
+
+    if config:
+        config_dict = cli_utils.parse_config(config)["export_data"]
+        if "data_libs" in config_dict.keys():
+            data_libs = data_libs + config_dict.pop("data_libs")
+        time_tuple = config_dict.pop("time_tuple", None)
+        region = region or config_dict.pop("region", None)
         if isinstance(region, str):
             region = json_decode(region)
-    else:
-        time_tuple = None
-        region = None
 
-    if target:
-        export_targets = [{"source": target}]
-    elif export_config:
-        export_targets = export_config["sources"]
+        sources = sources + config_dict["sources"]
+
+        unit_conversion = config_dict.pop("unit_conversion", True)
+        meta = config_dict.pop("meta", {})
+        append = config_dict.pop("append", False)
+
+    data_catalog = DataCatalog(data_libs=data_libs)
+    _ = data_catalog.sources  # initialise lazy loading
+
+    if region:
+        if "bbox" in region:
+            bbox = region["bbox"]
+        elif "geom" in region:
+            bbox = GeoDataFrame.from_file(region["geom"]).total_bounds
+        else:
+            raise NotImplementedError(
+                f"Only bbox and geom are supported for export. recieved {region}"
+            )
+
+        if not set(region.keys()).issubset({"bbox", "geom"}):
+            logger.warning(
+                "Found unsupported arguments for region in addition to bbox or geom. these will be ignored"
+            )
     else:
-        export_targets = None
+        bbox = None
+
+    if time_tuple:
+        if isinstance(time_tuple, str):
+            tup = literal_eval(time_tuple)
+        else:
+            tup = time_tuple
+        time_start = datetime.strptime(tup[0], "%Y-%m-%d")
+        time_end = datetime.strptime(tup[1], "%Y-%m-%d")
+        time_tup = (time_start, time_end)
+    else:
+        time_tup = None
 
     try:
-        data_catalog = DataCatalog(data_libs=data_libs)
         data_catalog.export_data(
             export_dest_path,
-            source_names=export_targets,
-            time_tuple=time_tuple,
+            source_names=sources,
+            bbox=bbox,
+            time_tuple=time_tup,
+            unit_conversion=unit_conversion,
+            meta=meta,
+            append=append,
         )
 
     except Exception as e:

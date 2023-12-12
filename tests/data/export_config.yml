@@ -1,10 +1,13 @@
-args:
-   catalog:
+export_data:
+   data_libs:
       - tests/data/test_sources.yml
    region:
-      subbasin: [-7.24, 62.09]
-      uparea: 50
-
-sources:
-  - source: hydro_lakes[precip]
-  - source: gtsmv3_eu_era5
+      bbox: [4.6891,52.9750,4.9576,53.1994]
+   time_tuple: ['2010-01-01', '2020-12-31']
+   sources:
+     - hydro_lakes[xout]
+     - gtsmv3_eu_era5
+   unit_conversion: False
+   append: False
+   meta:
+      version: 0.1
