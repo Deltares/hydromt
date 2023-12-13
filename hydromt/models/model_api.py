@@ -22,6 +22,8 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt import __version__
+from hydromt._compat import Distribution
 from hydromt.typing import DeferedFileClose, XArrayDict
 
 from .. import config, log, workflows
@@ -96,10 +98,17 @@ class Model(object, metaclass=ABCMeta):
         from . import MODELS  # avoid circular import
 
         self.logger = logger
-        dist, version = "unknown", "NA"
+        dist_name, version = "unknown", "NA"
         if self._NAME in MODELS:
             ep = MODELS[self._NAME]
-            dist, version = ep.distro.name, ep.distro.version
+            dist: Distribution | None = ep.dist
+            if dist:
+                dist_name = dist.name
+                version = dist.version
+            else:
+                # insert hydromt defaults
+                dist_name = "hydromt"
+                version = __version__
 
         # link to data
         self.data_catalog = DataCatalog(
@@ -130,7 +139,9 @@ class Model(object, metaclass=ABCMeta):
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
         self.set_root(root, mode)  # also creates hydromt.log file
-        self.logger.info(f"Initializing {self._NAME} model from {dist} (v{version}).")
+        self.logger.info(
+            f"Initializing {self._NAME} model from {dist_name} (v{version})."
+        )
 
     @_classproperty
     def api(cls) -> Dict:

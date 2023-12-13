@@ -14,9 +14,9 @@ dependencies = [
   "bottleneck",            # Spearmen rank computation
   "click",                 # CLI configuration
   "dask",                  # lazy computing
-  "entrypoints",           # Provide access for Plugins
   "fsspec",                # general file systems utilities
   "geopandas>=0.10",       # pandas but geo, wraps fiona and shapely
+  "importlib_metadata",    # entrypoints backport
   "mercantile",            # tile handling
   "netcdf4",               # netcfd IO
   "numba",                 # speed up computations (used in e.g. stats)
@@ -142,7 +142,7 @@ include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 
 [tool.pytest.ini_options]
-addopts = "--ff --timeout=120 "
+addopts = "--ff "
 testpaths = ["tests"]
 
 filterwarnings = [

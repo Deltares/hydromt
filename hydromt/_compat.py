@@ -1,3 +1,5 @@
+import sys
+
 from packaging.version import Version
 
 __all__ = []
@@ -64,3 +66,11 @@ try:
 
 except ModuleNotFoundError:
     pass
+
+
+# entrypoints in standard library only compatible from 3.10 onwards
+py_version = sys.version_info
+if py_version[0] >= 3 and py_version[1] >= 10:
+    from importlib.metadata import entry_points, Distribution, EntryPoint, EntryPoints  # noqa: I001
+else:
+    from importlib_metadata import entry_points, Distribution, EntryPoint, EntryPoints  # noqa: I001
