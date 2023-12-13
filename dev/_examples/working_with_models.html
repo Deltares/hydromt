@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-theme="light">
+<html lang="en" data-content_root="../" data-theme="light">
 
   <head>
     <meta charset="utf-8" />
@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,9 +34,9 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
@@ -47,7 +47,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/working_with_models';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.14.3';
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.2';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
@@ -120,6 +120,7 @@
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -145,7 +146,8 @@
     
     <div class="me-auto navbar-header-items__center">
       
-        <div class="navbar-item"><nav class="navbar-nav">
+        <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -198,6 +200,7 @@
       
         <div class="navbar-item navbar-persistent--container">
           
+
  <script>
  document.write(`
    <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -266,6 +269,7 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
+
  <script>
  document.write(`
    <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -299,7 +303,8 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -406,7 +411,8 @@ document.write(`
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
@@ -544,7 +550,7 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-01 10:04:01,407 - working with models - log - INFO - HydroMT version: 0.9.2.dev
+2023-12-13 10:32:49,469 - working with models - log - INFO - HydroMT version: 0.9.2.dev
 </pre></div></div>
 </div>
 <section id="Available-models-in-HydroMT">
@@ -993,7 +999,7 @@ dl.xr-attrs {
 </style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt;
 Dimensions:  ()
 Data variables:
-    *empty*</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-a3c69ea2-d2de-4709-8326-d1984b5d11b2' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-a3c69ea2-d2de-4709-8326-d1984b5d11b2' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-b5139e9f-e4aa-430c-b94d-d455cf4320da' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-b5139e9f-e4aa-430c-b94d-d455cf4320da' class='xr-section-summary'  title='Expand/collapse section'>Coordinates: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-6e8e512d-a797-4011-8ee3-f8eea1659f57' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-6e8e512d-a797-4011-8ee3-f8eea1659f57' class='xr-section-summary'  title='Expand/collapse section'>Data variables: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-9e05891f-b3e3-4f5b-ae22-39fb4375b70a' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-9e05891f-b3e3-4f5b-ae22-39fb4375b70a' class='xr-section-summary'  title='Expand/collapse section'>Indexes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-bede9bc6-7d65-451d-9f73-5cb030ef8331' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-bede9bc6-7d65-451d-9f73-5cb030ef8331' class='xr-section-summary'  title='Expand/collapse section'>Attributes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'></dl></div></li></ul></div></div></div>
+    *empty*</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-76e62e6c-1a2b-4da7-995b-27282b440a71' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-76e62e6c-1a2b-4da7-995b-27282b440a71' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-d9d3d96f-b8a7-485d-8387-5acdd1383990' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-d9d3d96f-b8a7-485d-8387-5acdd1383990' class='xr-section-summary'  title='Expand/collapse section'>Coordinates: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-fdd90437-06c6-463a-8f27-85a20f91e946' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-fdd90437-06c6-463a-8f27-85a20f91e946' class='xr-section-summary'  title='Expand/collapse section'>Data variables: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-4f7e3e50-726c-4c2a-9765-2e370b0b60bf' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-4f7e3e50-726c-4c2a-9765-2e370b0b60bf' class='xr-section-summary'  title='Expand/collapse section'>Indexes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-8d17811a-1363-416f-b8e0-53134f93e7c7' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-8d17811a-1363-416f-b8e0-53134f93e7c7' class='xr-section-summary'  title='Expand/collapse section'>Attributes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'></dl></div></li></ul></div></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -1040,11 +1046,11 @@ Data variables:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-01 10:04:01,469 - working with models - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
-2023-12-01 10:04:01,470 - working with models - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
-2023-12-01 10:04:01,514 - working with models - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
-2023-12-01 10:04:01,516 - working with models - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py/hydromt.log.
-2023-12-01 10:04:01,516 - working with models - model_api - INFO - Initializing grid_model model from hydromt (v0.9.2.dev).
+2023-12-13 10:32:49,530 - working with models - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
+2023-12-13 10:32:49,531 - working with models - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-12-13 10:32:49,576 - working with models - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2023-12-13 10:32:49,577 - working with models - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py/hydromt.log.
+2023-12-13 10:32:49,578 - working with models - model_api - INFO - Initializing grid_model model from hydromt (v0.9.2.dev).
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1070,13 +1076,13 @@ Data variables:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-01 10:04:01,521 - working with models - model_grid - INFO - Preparing 2D grid.
-2023-12-01 10:04:01,522 - working with models - basin_mask - DEBUG - Parsed region (kind=subbasin): {&#39;uparea&#39;: 50, &#39;xy&#39;: [12.2051, 45.8331]}
-2023-12-01 10:04:01,524 - working with models - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
-2023-12-01 10:04:01,683 - working with models - basin_mask - DEBUG - Getting basin IDs at point locations.
-2023-12-01 10:04:05,005 - working with models - basin_mask - INFO - subbasin bbox: [11.7750, 45.8042, 12.7450, 46.6900]
-2023-12-01 10:04:05,042 - working with models - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
-2023-12-01 10:04:05,057 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
+2023-12-13 10:32:49,582 - working with models - model_grid - INFO - Preparing 2D grid.
+2023-12-13 10:32:49,583 - working with models - basin_mask - DEBUG - Parsed region (kind=subbasin): {&#39;uparea&#39;: 50, &#39;xy&#39;: [12.2051, 45.8331]}
+2023-12-13 10:32:49,584 - working with models - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+2023-12-13 10:32:49,746 - working with models - basin_mask - DEBUG - Getting basin IDs at point locations.
+2023-12-13 10:32:53,048 - working with models - basin_mask - INFO - subbasin bbox: [11.7750, 45.8042, 12.7450, 46.6900]
+2023-12-13 10:32:53,083 - working with models - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+2023-12-13 10:32:53,098 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
 {&#39;region&#39;:                                             geometry  value
 0  POLYGON ((304637.761 5173886.488, 304634.754 5...    1.0}
 &lt;xarray.Dataset&gt;
@@ -1144,8 +1150,8 @@ Data variables:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-01 10:04:05,706 - working with models - model_api - DEBUG - Setting model config options.
-2023-12-01 10:04:05,707 - working with models - model_api - ERROR - Default config file not found at grid_model/model.ini
+2023-12-13 10:32:53,737 - working with models - model_api - DEBUG - Setting model config options.
+2023-12-13 10:32:53,738 - working with models - model_api - ERROR - Default config file not found at grid_model/model.ini
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1188,13 +1194,13 @@ Delft3D-FM that will interpolate input data on the fly to the model mesh, or aux
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-01 10:04:05,713 - working with models - model_grid - INFO - Preparing grid data from raster source merit_hydro_1k
-2023-12-01 10:04:05,714 - working with models - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
-2023-12-01 10:04:05,731 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
-2023-12-01 10:04:05,746 - working with models - model_grid - INFO - Preparing grid data by reclassifying the data in vito based on vito_reclass
-2023-12-01 10:04:05,747 - working with models - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
-2023-12-01 10:04:05,761 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
-2023-12-01 10:04:05,763 - working with models - dataframe - INFO - Reading vito_reclass csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2023-12-13 10:32:53,744 - working with models - model_grid - INFO - Preparing grid data from raster source merit_hydro_1k
+2023-12-13 10:32:53,745 - working with models - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
+2023-12-13 10:32:53,763 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
+2023-12-13 10:32:53,777 - working with models - model_grid - INFO - Preparing grid data by reclassifying the data in vito based on vito_reclass
+2023-12-13 10:32:53,778 - working with models - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
+2023-12-13 10:32:53,793 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
+2023-12-13 10:32:53,794 - working with models - dataframe - INFO - Reading vito_reclass csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1606,13 +1612,13 @@ Coordinates:
   * x            (x) float64 2.495e+05 2.505e+05 ... 3.275e+05 3.285e+05
     spatial_ref  int64 0
 Attributes:
-    _FillValue:  -999.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'manning'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>y</span>: 102</li><li><span class='xr-has-index'>x</span>: 80</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-ef466619-5448-47c5-82e4-e5f514999d4a' class='xr-array-in' type='checkbox' checked><label for='section-ef466619-5448-47c5-82e4-e5f514999d4a' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>-999.0 -999.0 -999.0 -999.0 -999.0 ... -999.0 -999.0 -999.0 -999.0</span></div><div class='xr-array-data'><pre>array([[-999., -999., -999., ..., -999., -999., -999.],
+    _FillValue:  -999.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'manning'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>y</span>: 102</li><li><span class='xr-has-index'>x</span>: 80</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-69fd582f-9b40-400e-a6f1-a9a0ebcc9764' class='xr-array-in' type='checkbox' checked><label for='section-69fd582f-9b40-400e-a6f1-a9a0ebcc9764' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>-999.0 -999.0 -999.0 -999.0 -999.0 ... -999.0 -999.0 -999.0 -999.0</span></div><div class='xr-array-data'><pre>array([[-999., -999., -999., ..., -999., -999., -999.],
        [-999., -999., -999., ..., -999., -999., -999.],
        [-999., -999., -999., ..., -999., -999., -999.],
        ...,
        [-999., -999., -999., ..., -999., -999., -999.],
        [-999., -999., -999., ..., -999., -999., -999.],
-       [-999., -999., -999., ..., -999., -999., -999.]], dtype=float32)</pre></div></div></li><li class='xr-section-item'><input id='section-ac7cdbc7-eade-47c3-8942-bf9e14f31785' class='xr-section-summary-in' type='checkbox'  checked><label for='section-ac7cdbc7-eade-47c3-8942-bf9e14f31785' class='xr-section-summary' >Coordinates: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>5.176e+06 5.174e+06 ... 5.074e+06</div><input id='attrs-32750cc1-eab8-40c0-9f23-737b74a073f7' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-32750cc1-eab8-40c0-9f23-737b74a073f7' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d686f98d-a1ee-4ed7-a86f-26c045162dcb' class='xr-var-data-in' type='checkbox'><label for='data-d686f98d-a1ee-4ed7-a86f-26c045162dcb' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([5175500., 5174500., 5173500., 5172500., 5171500., 5170500., 5169500.,
+       [-999., -999., -999., ..., -999., -999., -999.]], dtype=float32)</pre></div></div></li><li class='xr-section-item'><input id='section-7625cd9c-d290-4e16-89c3-e8fba689a94e' class='xr-section-summary-in' type='checkbox'  checked><label for='section-7625cd9c-d290-4e16-89c3-e8fba689a94e' class='xr-section-summary' >Coordinates: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>5.176e+06 5.174e+06 ... 5.074e+06</div><input id='attrs-bab4ca2e-6365-4310-867a-a21391fc531e' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-bab4ca2e-6365-4310-867a-a21391fc531e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4bd6e23c-8eaa-403d-8989-be791d4a78a3' class='xr-var-data-in' type='checkbox'><label for='data-4bd6e23c-8eaa-403d-8989-be791d4a78a3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([5175500., 5174500., 5173500., 5172500., 5171500., 5170500., 5169500.,
        5168500., 5167500., 5166500., 5165500., 5164500., 5163500., 5162500.,
        5161500., 5160500., 5159500., 5158500., 5157500., 5156500., 5155500.,
        5154500., 5153500., 5152500., 5151500., 5150500., 5149500., 5148500.,
@@ -1626,7 +1632,7 @@ Attributes:
        5098500., 5097500., 5096500., 5095500., 5094500., 5093500., 5092500.,
        5091500., 5090500., 5089500., 5088500., 5087500., 5086500., 5085500.,
        5084500., 5083500., 5082500., 5081500., 5080500., 5079500., 5078500.,
-       5077500., 5076500., 5075500., 5074500.])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>2.495e+05 2.505e+05 ... 3.285e+05</div><input id='attrs-5081b677-a779-4e61-ba0f-98d370cc2610' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-5081b677-a779-4e61-ba0f-98d370cc2610' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6623576d-5741-4098-a7da-9d0bf5790d86' class='xr-var-data-in' type='checkbox'><label for='data-6623576d-5741-4098-a7da-9d0bf5790d86' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([249500., 250500., 251500., 252500., 253500., 254500., 255500., 256500.,
+       5077500., 5076500., 5075500., 5074500.])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>2.495e+05 2.505e+05 ... 3.285e+05</div><input id='attrs-7a85fdb9-bed0-439c-97dc-6d905b8aec67' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-7a85fdb9-bed0-439c-97dc-6d905b8aec67' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e3190a99-6d7d-4981-82e5-e2b4003a6435' class='xr-var-data-in' type='checkbox'><label for='data-e3190a99-6d7d-4981-82e5-e2b4003a6435' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([249500., 250500., 251500., 252500., 253500., 254500., 255500., 256500.,
        257500., 258500., 259500., 260500., 261500., 262500., 263500., 264500.,
        265500., 266500., 267500., 268500., 269500., 270500., 271500., 272500.,
        273500., 274500., 275500., 276500., 277500., 278500., 279500., 280500.,
@@ -1635,12 +1641,12 @@ Attributes:
        297500., 298500., 299500., 300500., 301500., 302500., 303500., 304500.,
        305500., 306500., 307500., 308500., 309500., 310500., 311500., 312500.,
        313500., 314500., 315500., 316500., 317500., 318500., 319500., 320500.,
-       321500., 322500., 323500., 324500., 325500., 326500., 327500., 328500.])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-d5ebf452-d773-4922-a86c-d7c2afe3007c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d5ebf452-d773-4922-a86c-d7c2afe3007c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2495472b-25a4-4b51-84ac-f8e2e58a00a6' class='xr-var-data-in' type='checkbox'><label for='data-2495472b-25a4-4b51-84ac-f8e2e58a00a6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>PROJCRS[&quot;WGS 84 / UTM zone 33N&quot;,BASEGEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]],CONVERSION[&quot;UTM zone 33N&quot;,METHOD[&quot;Transverse Mercator&quot;,ID[&quot;EPSG&quot;,9807]],PARAMETER[&quot;Latitude of natural origin&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],ID[&quot;EPSG&quot;,8801]],PARAMETER[&quot;Longitude of natural origin&quot;,15,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],ID[&quot;EPSG&quot;,8802]],PARAMETER[&quot;Scale factor at natural origin&quot;,0.9996,SCALEUNIT[&quot;unity&quot;,1],ID[&quot;EPSG&quot;,8805]],PARAMETER[&quot;False easting&quot;,500000,LENGTHUNIT[&quot;metre&quot;,1],ID[&quot;EPSG&quot;,8806]],PARAMETER[&quot;False northing&quot;,0,LENGTHUNIT[&quot;metre&quot;,1],ID[&quot;EPSG&quot;,8807]]],CS[Cartesian,2],AXIS[&quot;(E)&quot;,east,ORDER[1],LENGTHUNIT[&quot;metre&quot;,1]],AXIS[&quot;(N)&quot;,north,ORDER[2],LENGTHUNIT[&quot;metre&quot;,1]],USAGE[SCOPE[&quot;Navigation and medium accuracy spatial referencing.&quot;],AREA[&quot;Between 12°E and 18°E, northern hemisphere between equator and 84°N, onshore and offshore. Austria. Bosnia and Herzegovina. Cameroon. Central African Republic. Chad. Congo. Croatia. Czechia. Democratic Republic of the Congo (Zaire). Gabon. Germany. Hungary. Italy. Libya. Malta. Niger. Nigeria. Norway. Poland. San Marino. Slovakia. Slovenia. Svalbard. Sweden. Vatican City State.&quot;],BBOX[0,12,84,18]],ID[&quot;EPSG&quot;,32633]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984 ensemble</dd><dt><span>projected_crs_name :</span></dt><dd>WGS 84 / UTM zone 33N</dd><dt><span>grid_mapping_name :</span></dt><dd>transverse_mercator</dd><dt><span>latitude_of_projection_origin :</span></dt><dd>0.0</dd><dt><span>longitude_of_central_meridian :</span></dt><dd>15.0</dd><dt><span>false_easting :</span></dt><dd>500000.0</dd><dt><span>false_northing :</span></dt><dd>0.0</dd><dt><span>scale_factor_at_central_meridian :</span></dt><dd>0.9996</dd><dt><span>spatial_ref :</span></dt><dd>PROJCRS[&quot;WGS 84 / UTM zone 33N&quot;,BASEGEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]],CONVERSION[&quot;UTM zone 33N&quot;,METHOD[&quot;Transverse Mercator&quot;,ID[&quot;EPSG&quot;,9807]],PARAMETER[&quot;Latitude of natural origin&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],ID[&quot;EPSG&quot;,8801]],PARAMETER[&quot;Longitude of natural origin&quot;,15,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],ID[&quot;EPSG&quot;,8802]],PARAMETER[&quot;Scale factor at natural origin&quot;,0.9996,SCALEUNIT[&quot;unity&quot;,1],ID[&quot;EPSG&quot;,8805]],PARAMETER[&quot;False easting&quot;,500000,LENGTHUNIT[&quot;metre&quot;,1],ID[&quot;EPSG&quot;,8806]],PARAMETER[&quot;False northing&quot;,0,LENGTHUNIT[&quot;metre&quot;,1],ID[&quot;EPSG&quot;,8807]]],CS[Cartesian,2],AXIS[&quot;(E)&quot;,east,ORDER[1],LENGTHUNIT[&quot;metre&quot;,1]],AXIS[&quot;(N)&quot;,north,ORDER[2],LENGTHUNIT[&quot;metre&quot;,1]],USAGE[SCOPE[&quot;Navigation and medium accuracy spatial referencing.&quot;],AREA[&quot;Between 12°E and 18°E, northern hemisphere between equator and 84°N, onshore and offshore. Austria. Bosnia and Herzegovina. Cameroon. Central African Republic. Chad. Congo. Croatia. Czechia. Democratic Republic of the Congo (Zaire). Gabon. Germany. Hungary. Italy. Libya. Malta. Niger. Nigeria. Norway. Poland. San Marino. Slovakia. Slovenia. Svalbard. Sweden. Vatican City State.&quot;],BBOX[0,12,84,18]],ID[&quot;EPSG&quot;,32633]]</dd><dt><span>x_dim :</span></dt><dd>x</dd><dt><span>y_dim :</span></dt><dd>y</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-e9d954a7-e117-45d1-97f5-9314b40a1313' class='xr-section-summary-in' type='checkbox'  ><label for='section-e9d954a7-e117-45d1-97f5-9314b40a1313' class='xr-section-summary' >Indexes: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-63e49f11-a5b9-4338-bb8d-75ee65c81b85' class='xr-index-data-in' type='checkbox'/><label for='index-63e49f11-a5b9-4338-bb8d-75ee65c81b85' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([5175500.0, 5174500.0, 5173500.0, 5172500.0, 5171500.0, 5170500.0,
+       321500., 322500., 323500., 324500., 325500., 326500., 327500., 328500.])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-c4a0e284-839d-4e5f-9cdb-6a58e8855d6b' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c4a0e284-839d-4e5f-9cdb-6a58e8855d6b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2a3e309e-3387-4852-86bf-02fdfcabbb71' class='xr-var-data-in' type='checkbox'><label for='data-2a3e309e-3387-4852-86bf-02fdfcabbb71' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>PROJCRS[&quot;WGS 84 / UTM zone 33N&quot;,BASEGEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]],CONVERSION[&quot;UTM zone 33N&quot;,METHOD[&quot;Transverse Mercator&quot;,ID[&quot;EPSG&quot;,9807]],PARAMETER[&quot;Latitude of natural origin&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],ID[&quot;EPSG&quot;,8801]],PARAMETER[&quot;Longitude of natural origin&quot;,15,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],ID[&quot;EPSG&quot;,8802]],PARAMETER[&quot;Scale factor at natural origin&quot;,0.9996,SCALEUNIT[&quot;unity&quot;,1],ID[&quot;EPSG&quot;,8805]],PARAMETER[&quot;False easting&quot;,500000,LENGTHUNIT[&quot;metre&quot;,1],ID[&quot;EPSG&quot;,8806]],PARAMETER[&quot;False northing&quot;,0,LENGTHUNIT[&quot;metre&quot;,1],ID[&quot;EPSG&quot;,8807]]],CS[Cartesian,2],AXIS[&quot;(E)&quot;,east,ORDER[1],LENGTHUNIT[&quot;metre&quot;,1]],AXIS[&quot;(N)&quot;,north,ORDER[2],LENGTHUNIT[&quot;metre&quot;,1]],USAGE[SCOPE[&quot;Navigation and medium accuracy spatial referencing.&quot;],AREA[&quot;Between 12°E and 18°E, northern hemisphere between equator and 84°N, onshore and offshore. Austria. Bosnia and Herzegovina. Cameroon. Central African Republic. Chad. Congo. Croatia. Czechia. Democratic Republic of the Congo (Zaire). Gabon. Germany. Hungary. Italy. Libya. Malta. Niger. Nigeria. Norway. Poland. San Marino. Slovakia. Slovenia. Svalbard. Sweden. Vatican City State.&quot;],BBOX[0,12,84,18]],ID[&quot;EPSG&quot;,32633]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984 ensemble</dd><dt><span>projected_crs_name :</span></dt><dd>WGS 84 / UTM zone 33N</dd><dt><span>grid_mapping_name :</span></dt><dd>transverse_mercator</dd><dt><span>latitude_of_projection_origin :</span></dt><dd>0.0</dd><dt><span>longitude_of_central_meridian :</span></dt><dd>15.0</dd><dt><span>false_easting :</span></dt><dd>500000.0</dd><dt><span>false_northing :</span></dt><dd>0.0</dd><dt><span>scale_factor_at_central_meridian :</span></dt><dd>0.9996</dd><dt><span>spatial_ref :</span></dt><dd>PROJCRS[&quot;WGS 84 / UTM zone 33N&quot;,BASEGEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]],CONVERSION[&quot;UTM zone 33N&quot;,METHOD[&quot;Transverse Mercator&quot;,ID[&quot;EPSG&quot;,9807]],PARAMETER[&quot;Latitude of natural origin&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],ID[&quot;EPSG&quot;,8801]],PARAMETER[&quot;Longitude of natural origin&quot;,15,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],ID[&quot;EPSG&quot;,8802]],PARAMETER[&quot;Scale factor at natural origin&quot;,0.9996,SCALEUNIT[&quot;unity&quot;,1],ID[&quot;EPSG&quot;,8805]],PARAMETER[&quot;False easting&quot;,500000,LENGTHUNIT[&quot;metre&quot;,1],ID[&quot;EPSG&quot;,8806]],PARAMETER[&quot;False northing&quot;,0,LENGTHUNIT[&quot;metre&quot;,1],ID[&quot;EPSG&quot;,8807]]],CS[Cartesian,2],AXIS[&quot;(E)&quot;,east,ORDER[1],LENGTHUNIT[&quot;metre&quot;,1]],AXIS[&quot;(N)&quot;,north,ORDER[2],LENGTHUNIT[&quot;metre&quot;,1]],USAGE[SCOPE[&quot;Navigation and medium accuracy spatial referencing.&quot;],AREA[&quot;Between 12°E and 18°E, northern hemisphere between equator and 84°N, onshore and offshore. Austria. Bosnia and Herzegovina. Cameroon. Central African Republic. Chad. Congo. Croatia. Czechia. Democratic Republic of the Congo (Zaire). Gabon. Germany. Hungary. Italy. Libya. Malta. Niger. Nigeria. Norway. Poland. San Marino. Slovakia. Slovenia. Svalbard. Sweden. Vatican City State.&quot;],BBOX[0,12,84,18]],ID[&quot;EPSG&quot;,32633]]</dd><dt><span>x_dim :</span></dt><dd>x</dd><dt><span>y_dim :</span></dt><dd>y</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-33459722-4c84-47e3-afd8-abc33a75cf2d' class='xr-section-summary-in' type='checkbox'  ><label for='section-33459722-4c84-47e3-afd8-abc33a75cf2d' class='xr-section-summary' >Indexes: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-e2c08a63-dfc8-41e2-99e9-412af9a86613' class='xr-index-data-in' type='checkbox'/><label for='index-e2c08a63-dfc8-41e2-99e9-412af9a86613' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([5175500.0, 5174500.0, 5173500.0, 5172500.0, 5171500.0, 5170500.0,
        5169500.0, 5168500.0, 5167500.0, 5166500.0,
        ...
        5083500.0, 5082500.0, 5081500.0, 5080500.0, 5079500.0, 5078500.0,
        5077500.0, 5076500.0, 5075500.0, 5074500.0],
-      dtype=&#x27;float64&#x27;, name=&#x27;y&#x27;, length=102))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-d7da4952-eea0-4296-99da-41ee53f0967d' class='xr-index-data-in' type='checkbox'/><label for='index-d7da4952-eea0-4296-99da-41ee53f0967d' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([249500.0, 250500.0, 251500.0, 252500.0, 253500.0, 254500.0, 255500.0,
+      dtype=&#x27;float64&#x27;, name=&#x27;y&#x27;, length=102))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-5b7601e7-c8d8-4699-9ba5-ba78ea7e71a5' class='xr-index-data-in' type='checkbox'/><label for='index-5b7601e7-c8d8-4699-9ba5-ba78ea7e71a5' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([249500.0, 250500.0, 251500.0, 252500.0, 253500.0, 254500.0, 255500.0,
        256500.0, 257500.0, 258500.0, 259500.0, 260500.0, 261500.0, 262500.0,
        263500.0, 264500.0, 265500.0, 266500.0, 267500.0, 268500.0, 269500.0,
        270500.0, 271500.0, 272500.0, 273500.0, 274500.0, 275500.0, 276500.0,
@@ -1652,7 +1658,7 @@ Attributes:
        312500.0, 313500.0, 314500.0, 315500.0, 316500.0, 317500.0, 318500.0,
        319500.0, 320500.0, 321500.0, 322500.0, 323500.0, 324500.0, 325500.0,
        326500.0, 327500.0, 328500.0],
-      dtype=&#x27;float64&#x27;, name=&#x27;x&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-f7abbeea-82c4-418d-a150-53e6e8c5a076' class='xr-section-summary-in' type='checkbox'  checked><label for='section-f7abbeea-82c4-418d-a150-53e6e8c5a076' class='xr-section-summary' >Attributes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>-999.0</dd></dl></div></li></ul></div></div></div>
+      dtype=&#x27;float64&#x27;, name=&#x27;x&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-2b5c3bfd-794c-4d23-8652-42c4b8676950' class='xr-section-summary-in' type='checkbox'  checked><label for='section-2b5c3bfd-794c-4d23-8652-42c4b8676950' class='xr-section-summary' >Attributes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>-999.0</dd></dl></div></li></ul></div></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
@@ -1707,10 +1713,10 @@ Text(0.5, 1.0, &#39;Manning roughness&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-01 10:04:06,467 - working with models - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py
-2023-12-01 10:04:06,467 - working with models - model_api - DEBUG - Writing file grid/grid.nc
-2023-12-01 10:04:06,495 - working with models - model_api - DEBUG - Writing file geoms/region.geojson
-2023-12-01 10:04:06,524 - working with models - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py/model.ini
+2023-12-13 10:32:54,498 - working with models - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py
+2023-12-13 10:32:54,499 - working with models - model_api - DEBUG - Writing file grid/grid.nc
+2023-12-13 10:32:54,528 - working with models - model_api - DEBUG - Writing file geoms/region.geojson
+2023-12-13 10:32:54,549 - working with models - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py/model.ini
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1763,17 +1769,17 @@ tmp_grid_model_py/grid
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-01 10:04:06,534 - working with models - model_api - INFO - Initializing grid_model model from hydromt (v0.9.2.dev).
-2023-12-01 10:04:06,535 - working with models - model_api - INFO - Reading model data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py
-2023-12-01 10:04:06,536 - working with models - model_api - DEBUG - Model config read from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py/model.ini
-2023-12-01 10:04:06,537 - working with models - model_api - DEBUG - Reading model file region.
-2023-12-01 10:04:06,553 - working with models - model_api - DEBUG - Reading model file region.
-2023-12-01 10:04:06,568 - working with models - model_api - WARNING - Replacing geom: region
-2023-12-01 10:04:06,568 - working with models - model_api - DEBUG - Reading model file grid.
-2023-12-01 10:04:06,590 - working with models - model_api - DEBUG - Reading model file grid.
-2023-12-01 10:04:06,594 - working with models - model_grid - WARNING - Replacing grid map: mask
-2023-12-01 10:04:06,595 - working with models - model_grid - WARNING - Replacing grid map: DEM
-2023-12-01 10:04:06,596 - working with models - model_grid - WARNING - Replacing grid map: manning
+2023-12-13 10:32:54,559 - working with models - model_api - INFO - Initializing grid_model model from hydromt (v0.9.2.dev).
+2023-12-13 10:32:54,560 - working with models - model_api - INFO - Reading model data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py
+2023-12-13 10:32:54,561 - working with models - model_api - DEBUG - Model config read from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py/model.ini
+2023-12-13 10:32:54,562 - working with models - model_api - DEBUG - Reading model file region.
+2023-12-13 10:32:54,576 - working with models - model_api - DEBUG - Reading model file region.
+2023-12-13 10:32:54,589 - working with models - model_api - WARNING - Replacing geom: region
+2023-12-13 10:32:54,589 - working with models - model_api - DEBUG - Reading model file grid.
+2023-12-13 10:32:54,611 - working with models - model_api - DEBUG - Reading model file grid.
+2023-12-13 10:32:54,615 - working with models - model_grid - WARNING - Replacing grid map: mask
+2023-12-13 10:32:54,616 - working with models - model_grid - WARNING - Replacing grid map: DEM
+2023-12-13 10:32:54,617 - working with models - model_grid - WARNING - Replacing grid map: manning
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1876,100 +1882,100 @@ model grid: [&#39;mask&#39;, &#39;DEM&#39;, &#39;manning&#39;]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2023-12-01 10:04:06,639 - working with models - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
-2023-12-01 10:04:06,639 - working with models - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
-2023-12-01 10:04:06,683 - working with models - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
-2023-12-01 10:04:06,685 - working with models - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1/hydromt.log.
-2023-12-01 10:04:06,685 - working with models - model_api - INFO - Initializing grid_model model from hydromt (v0.9.2.dev).
-2023-12-01 10:04:06,686 - working with models - model_api - DEBUG - Setting model config options.
-2023-12-01 10:04:06,686 - working with models - model_api - ERROR - Default config file not found at grid_model/model.ini
-2023-12-01 10:04:06,687 - working with models - model_api - INFO - setup_grid.region: {&#39;subbasin&#39;: [12.2051, 45.8331], &#39;uparea&#39;: 50}
-2023-12-01 10:04:06,687 - working with models - model_api - INFO - setup_grid.res: 0.05
-2023-12-01 10:04:06,688 - working with models - model_api - INFO - setup_grid.crs: 4326
-2023-12-01 10:04:06,688 - working with models - model_api - INFO - setup_grid.rotated: False
-2023-12-01 10:04:06,688 - working with models - model_api - INFO - setup_grid.hydrography_fn: merit_hydro
-2023-12-01 10:04:06,689 - working with models - model_api - INFO - setup_grid.basin_index_fn: merit_hydro_index
-2023-12-01 10:04:06,689 - working with models - model_api - INFO - setup_grid.add_mask: True
-2023-12-01 10:04:06,690 - working with models - model_api - INFO - setup_grid.align: True
-2023-12-01 10:04:06,690 - working with models - model_api - INFO - setup_grid.dec_origin: 0
-2023-12-01 10:04:06,691 - working with models - model_api - INFO - setup_grid.dec_rotation: 3
-2023-12-01 10:04:06,691 - working with models - model_grid - INFO - Preparing 2D grid.
-2023-12-01 10:04:06,691 - working with models - basin_mask - DEBUG - Parsed region (kind=subbasin): {&#39;uparea&#39;: 50, &#39;xy&#39;: [12.2051, 45.8331]}
-2023-12-01 10:04:06,694 - working with models - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
-2023-12-01 10:04:06,794 - working with models - basin_mask - DEBUG - Getting basin IDs at point locations.
-2023-12-01 10:04:07,060 - working with models - basin_mask - INFO - subbasin bbox: [11.7750, 45.8042, 12.7450, 46.6900]
-2023-12-01 10:04:07,097 - working with models - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
-2023-12-01 10:04:07,110 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
-2023-12-01 10:04:07,128 - working with models - model_api - INFO - setup_grid_from_constant.constant: 0.01
-2023-12-01 10:04:07,129 - working with models - model_api - INFO - setup_grid_from_constant.name: c1
-2023-12-01 10:04:07,129 - working with models - model_api - INFO - setup_grid_from_constant.dtype: float32
-2023-12-01 10:04:07,129 - working with models - model_api - INFO - setup_grid_from_constant.nodata: -99.0
-2023-12-01 10:04:07,130 - working with models - model_api - INFO - setup_grid_from_constant.mask_name: mask
-2023-12-01 10:04:07,136 - working with models - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: merit_hydro_1k
-2023-12-01 10:04:07,137 - working with models - model_api - INFO - setup_grid_from_rasterdataset.variables: [&#39;elevtn&#39;, &#39;basins&#39;]
-2023-12-01 10:04:07,137 - working with models - model_api - INFO - setup_grid_from_rasterdataset.fill_method: None
-2023-12-01 10:04:07,138 - working with models - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: [&#39;average&#39;, &#39;mode&#39;]
-2023-12-01 10:04:07,138 - working with models - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
-2023-12-01 10:04:07,138 - working with models - model_api - INFO - setup_grid_from_rasterdataset.rename: None
-2023-12-01 10:04:07,139 - working with models - model_grid - INFO - Preparing grid data from raster source merit_hydro_1k
-2023-12-01 10:04:07,140 - working with models - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
-2023-12-01 10:04:07,165 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
-2023-12-01 10:04:07,196 - working with models - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: vito
-2023-12-01 10:04:07,197 - working with models - model_api - INFO - setup_grid_from_rasterdataset.variables: None
-2023-12-01 10:04:07,197 - working with models - model_api - INFO - setup_grid_from_rasterdataset.fill_method: nearest
-2023-12-01 10:04:07,198 - working with models - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: mode
-2023-12-01 10:04:07,198 - working with models - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
-2023-12-01 10:04:07,199 - working with models - model_api - INFO - setup_grid_from_rasterdataset.rename: {&#39;vito&#39;: &#39;landuse&#39;}
-2023-12-01 10:04:07,199 - working with models - model_grid - INFO - Preparing grid data from raster source vito
-2023-12-01 10:04:07,200 - working with models - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
-2023-12-01 10:04:07,213 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
-2023-12-01 10:04:07,332 - working with models - model_api - INFO - setup_grid_from_raster_reclass.raster_fn: vito
-2023-12-01 10:04:07,333 - working with models - model_api - INFO - setup_grid_from_raster_reclass.reclass_table_fn: vito_reclass
-2023-12-01 10:04:07,333 - working with models - model_api - INFO - setup_grid_from_raster_reclass.reclass_variables: [&#39;manning&#39;]
-2023-12-01 10:04:07,334 - working with models - model_api - INFO - setup_grid_from_raster_reclass.variable: None
-2023-12-01 10:04:07,334 - working with models - model_api - INFO - setup_grid_from_raster_reclass.fill_method: None
-2023-12-01 10:04:07,334 - working with models - model_api - INFO - setup_grid_from_raster_reclass.reproject_method: [&#39;average&#39;]
-2023-12-01 10:04:07,335 - working with models - model_api - INFO - setup_grid_from_raster_reclass.mask_name: mask
-2023-12-01 10:04:07,335 - working with models - model_api - INFO - setup_grid_from_raster_reclass.rename: None
-2023-12-01 10:04:07,336 - working with models - model_grid - INFO - Preparing grid data by reclassifying the data in vito based on vito_reclass
-2023-12-01 10:04:07,336 - working with models - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
-2023-12-01 10:04:07,354 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
-2023-12-01 10:04:07,355 - working with models - dataframe - INFO - Reading vito_reclass csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
-2023-12-01 10:04:07,377 - working with models - model_api - INFO - setup_grid_from_geodataframe.vector_fn: hydro_lakes
-2023-12-01 10:04:07,378 - working with models - model_api - INFO - setup_grid_from_geodataframe.variables: [&#39;waterbody_id&#39;, &#39;Depth_avg&#39;]
-2023-12-01 10:04:07,378 - working with models - model_api - INFO - setup_grid_from_geodataframe.nodata: [-1, -999.0]
-2023-12-01 10:04:07,379 - working with models - model_api - INFO - setup_grid_from_geodataframe.rasterize_method: value
-2023-12-01 10:04:07,379 - working with models - model_api - INFO - setup_grid_from_geodataframe.mask_name: mask
-2023-12-01 10:04:07,379 - working with models - model_api - INFO - setup_grid_from_geodataframe.rename: {&#39;waterbody_id&#39;: &#39;lake_id&#39;, &#39;Detph_avg&#39;: &#39;lake_depth&#39;}
-2023-12-01 10:04:07,380 - working with models - model_api - INFO - setup_grid_from_geodataframe.all_touched: True
-2023-12-01 10:04:07,380 - working with models - model_grid - INFO - Preparing grid data from vector &#39;hydro_lakes&#39;.
-2023-12-01 10:04:07,382 - working with models - geodataframe - INFO - Reading hydro_lakes vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/hydro_lakes.gpkg
-2023-12-01 10:04:07,400 - working with models - geodataframe - DEBUG - Clip intersects [11.775, 45.804, 12.745, 46.690] (EPSG:4326)
-2023-12-01 10:04:07,402 - working with models - geodataframe - DEBUG - Convert units for 1 columns.
-2023-12-01 10:04:07,420 - working with models - model_api - INFO - setup_grid_from_geodataframe.vector_fn: hydro_lakes
-2023-12-01 10:04:07,421 - working with models - model_api - INFO - setup_grid_from_geodataframe.variables: None
-2023-12-01 10:04:07,421 - working with models - model_api - INFO - setup_grid_from_geodataframe.nodata: -1
-2023-12-01 10:04:07,422 - working with models - model_api - INFO - setup_grid_from_geodataframe.rasterize_method: fraction
-2023-12-01 10:04:07,422 - working with models - model_api - INFO - setup_grid_from_geodataframe.mask_name: mask
-2023-12-01 10:04:07,423 - working with models - model_api - INFO - setup_grid_from_geodataframe.rename: {&#39;hydro_lakes&#39;: &#39;water_frac&#39;}
-2023-12-01 10:04:07,423 - working with models - model_api - INFO - setup_grid_from_geodataframe.all_touched: True
-2023-12-01 10:04:07,423 - working with models - model_grid - INFO - Preparing grid data from vector &#39;hydro_lakes&#39;.
-2023-12-01 10:04:07,426 - working with models - geodataframe - INFO - Reading hydro_lakes vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/hydro_lakes.gpkg
-2023-12-01 10:04:07,442 - working with models - geodataframe - DEBUG - Clip intersects [11.775, 45.804, 12.745, 46.690] (EPSG:4326)
-2023-12-01 10:04:07,443 - working with models - geodataframe - DEBUG - Convert units for 1 columns.
-2023-12-01 10:04:12,999 - working with models - model_api - INFO - write.components: [&#39;config&#39;, &#39;geoms&#39;, &#39;grid&#39;]
-2023-12-01 10:04:12,999 - working with models - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1
-2023-12-01 10:04:13,000 - working with models - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1/model.ini
-2023-12-01 10:04:13,001 - working with models - model_api - DEBUG - Writing file geoms/region.geojson
-2023-12-01 10:04:13,026 - working with models - model_api - DEBUG - Writing file grid/grid.nc
-2023-12-01 10:04:13,289 - working with models - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1
-2023-12-01 10:04:13,290 - working with models - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1/model.ini
-2023-12-01 10:04:13,291 - working with models - model_api - DEBUG - No maps data found, skip writing.
-2023-12-01 10:04:13,291 - working with models - model_api - DEBUG - Writing file grid/grid.nc
-2023-12-01 10:04:13,556 - working with models - model_api - DEBUG - Writing file geoms/region.geojson
-2023-12-01 10:04:13,583 - working with models - model_api - DEBUG - No tables found, skip writing.
-2023-12-01 10:04:13,583 - working with models - model_api - DEBUG - No forcing data found, skip writing.
-2023-12-01 10:04:13,584 - working with models - model_api - DEBUG - No states data found, skip writing.
+2023-12-13 10:32:54,668 - working with models - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
+2023-12-13 10:32:54,668 - working with models - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-12-13 10:32:54,713 - working with models - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2023-12-13 10:32:54,715 - working with models - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1/hydromt.log.
+2023-12-13 10:32:54,715 - working with models - model_api - INFO - Initializing grid_model model from hydromt (v0.9.2.dev).
+2023-12-13 10:32:54,716 - working with models - model_api - DEBUG - Setting model config options.
+2023-12-13 10:32:54,716 - working with models - model_api - ERROR - Default config file not found at grid_model/model.ini
+2023-12-13 10:32:54,717 - working with models - model_api - INFO - setup_grid.region: {&#39;subbasin&#39;: [12.2051, 45.8331], &#39;uparea&#39;: 50}
+2023-12-13 10:32:54,717 - working with models - model_api - INFO - setup_grid.res: 0.05
+2023-12-13 10:32:54,717 - working with models - model_api - INFO - setup_grid.crs: 4326
+2023-12-13 10:32:54,718 - working with models - model_api - INFO - setup_grid.rotated: False
+2023-12-13 10:32:54,718 - working with models - model_api - INFO - setup_grid.hydrography_fn: merit_hydro
+2023-12-13 10:32:54,718 - working with models - model_api - INFO - setup_grid.basin_index_fn: merit_hydro_index
+2023-12-13 10:32:54,719 - working with models - model_api - INFO - setup_grid.add_mask: True
+2023-12-13 10:32:54,719 - working with models - model_api - INFO - setup_grid.align: True
+2023-12-13 10:32:54,719 - working with models - model_api - INFO - setup_grid.dec_origin: 0
+2023-12-13 10:32:54,720 - working with models - model_api - INFO - setup_grid.dec_rotation: 3
+2023-12-13 10:32:54,720 - working with models - model_grid - INFO - Preparing 2D grid.
+2023-12-13 10:32:54,721 - working with models - basin_mask - DEBUG - Parsed region (kind=subbasin): {&#39;uparea&#39;: 50, &#39;xy&#39;: [12.2051, 45.8331]}
+2023-12-13 10:32:54,723 - working with models - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+2023-12-13 10:32:54,829 - working with models - basin_mask - DEBUG - Getting basin IDs at point locations.
+2023-12-13 10:32:55,105 - working with models - basin_mask - INFO - subbasin bbox: [11.7750, 45.8042, 12.7450, 46.6900]
+2023-12-13 10:32:55,141 - working with models - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+2023-12-13 10:32:55,155 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
+2023-12-13 10:32:55,173 - working with models - model_api - INFO - setup_grid_from_constant.constant: 0.01
+2023-12-13 10:32:55,174 - working with models - model_api - INFO - setup_grid_from_constant.name: c1
+2023-12-13 10:32:55,174 - working with models - model_api - INFO - setup_grid_from_constant.dtype: float32
+2023-12-13 10:32:55,175 - working with models - model_api - INFO - setup_grid_from_constant.nodata: -99.0
+2023-12-13 10:32:55,175 - working with models - model_api - INFO - setup_grid_from_constant.mask_name: mask
+2023-12-13 10:32:55,182 - working with models - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: merit_hydro_1k
+2023-12-13 10:32:55,182 - working with models - model_api - INFO - setup_grid_from_rasterdataset.variables: [&#39;elevtn&#39;, &#39;basins&#39;]
+2023-12-13 10:32:55,183 - working with models - model_api - INFO - setup_grid_from_rasterdataset.fill_method: None
+2023-12-13 10:32:55,183 - working with models - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: [&#39;average&#39;, &#39;mode&#39;]
+2023-12-13 10:32:55,184 - working with models - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
+2023-12-13 10:32:55,185 - working with models - model_api - INFO - setup_grid_from_rasterdataset.rename: None
+2023-12-13 10:32:55,185 - working with models - model_grid - INFO - Preparing grid data from raster source merit_hydro_1k
+2023-12-13 10:32:55,186 - working with models - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
+2023-12-13 10:32:55,212 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
+2023-12-13 10:32:55,244 - working with models - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: vito
+2023-12-13 10:32:55,244 - working with models - model_api - INFO - setup_grid_from_rasterdataset.variables: None
+2023-12-13 10:32:55,244 - working with models - model_api - INFO - setup_grid_from_rasterdataset.fill_method: nearest
+2023-12-13 10:32:55,245 - working with models - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: mode
+2023-12-13 10:32:55,246 - working with models - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
+2023-12-13 10:32:55,246 - working with models - model_api - INFO - setup_grid_from_rasterdataset.rename: {&#39;vito&#39;: &#39;landuse&#39;}
+2023-12-13 10:32:55,247 - working with models - model_grid - INFO - Preparing grid data from raster source vito
+2023-12-13 10:32:55,247 - working with models - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
+2023-12-13 10:32:55,261 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
+2023-12-13 10:32:55,381 - working with models - model_api - INFO - setup_grid_from_raster_reclass.raster_fn: vito
+2023-12-13 10:32:55,382 - working with models - model_api - INFO - setup_grid_from_raster_reclass.reclass_table_fn: vito_reclass
+2023-12-13 10:32:55,382 - working with models - model_api - INFO - setup_grid_from_raster_reclass.reclass_variables: [&#39;manning&#39;]
+2023-12-13 10:32:55,382 - working with models - model_api - INFO - setup_grid_from_raster_reclass.variable: None
+2023-12-13 10:32:55,383 - working with models - model_api - INFO - setup_grid_from_raster_reclass.fill_method: None
+2023-12-13 10:32:55,383 - working with models - model_api - INFO - setup_grid_from_raster_reclass.reproject_method: [&#39;average&#39;]
+2023-12-13 10:32:55,383 - working with models - model_api - INFO - setup_grid_from_raster_reclass.mask_name: mask
+2023-12-13 10:32:55,384 - working with models - model_api - INFO - setup_grid_from_raster_reclass.rename: None
+2023-12-13 10:32:55,384 - working with models - model_grid - INFO - Preparing grid data by reclassifying the data in vito based on vito_reclass
+2023-12-13 10:32:55,385 - working with models - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
+2023-12-13 10:32:55,400 - working with models - rasterdataset - DEBUG - Clip to [11.775, 45.804, 12.745, 46.690] (epsg:4326))
+2023-12-13 10:32:55,401 - working with models - dataframe - INFO - Reading vito_reclass csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2023-12-13 10:32:55,424 - working with models - model_api - INFO - setup_grid_from_geodataframe.vector_fn: hydro_lakes
+2023-12-13 10:32:55,424 - working with models - model_api - INFO - setup_grid_from_geodataframe.variables: [&#39;waterbody_id&#39;, &#39;Depth_avg&#39;]
+2023-12-13 10:32:55,424 - working with models - model_api - INFO - setup_grid_from_geodataframe.nodata: [-1, -999.0]
+2023-12-13 10:32:55,425 - working with models - model_api - INFO - setup_grid_from_geodataframe.rasterize_method: value
+2023-12-13 10:32:55,425 - working with models - model_api - INFO - setup_grid_from_geodataframe.mask_name: mask
+2023-12-13 10:32:55,426 - working with models - model_api - INFO - setup_grid_from_geodataframe.rename: {&#39;waterbody_id&#39;: &#39;lake_id&#39;, &#39;Detph_avg&#39;: &#39;lake_depth&#39;}
+2023-12-13 10:32:55,426 - working with models - model_api - INFO - setup_grid_from_geodataframe.all_touched: True
+2023-12-13 10:32:55,426 - working with models - model_grid - INFO - Preparing grid data from vector &#39;hydro_lakes&#39;.
+2023-12-13 10:32:55,429 - working with models - geodataframe - INFO - Reading hydro_lakes vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/hydro_lakes.gpkg
+2023-12-13 10:32:55,446 - working with models - geodataframe - DEBUG - Clip intersects [11.775, 45.804, 12.745, 46.690] (EPSG:4326)
+2023-12-13 10:32:55,448 - working with models - geodataframe - DEBUG - Convert units for 1 columns.
+2023-12-13 10:32:55,466 - working with models - model_api - INFO - setup_grid_from_geodataframe.vector_fn: hydro_lakes
+2023-12-13 10:32:55,466 - working with models - model_api - INFO - setup_grid_from_geodataframe.variables: None
+2023-12-13 10:32:55,467 - working with models - model_api - INFO - setup_grid_from_geodataframe.nodata: -1
+2023-12-13 10:32:55,467 - working with models - model_api - INFO - setup_grid_from_geodataframe.rasterize_method: fraction
+2023-12-13 10:32:55,467 - working with models - model_api - INFO - setup_grid_from_geodataframe.mask_name: mask
+2023-12-13 10:32:55,468 - working with models - model_api - INFO - setup_grid_from_geodataframe.rename: {&#39;hydro_lakes&#39;: &#39;water_frac&#39;}
+2023-12-13 10:32:55,468 - working with models - model_api - INFO - setup_grid_from_geodataframe.all_touched: True
+2023-12-13 10:32:55,469 - working with models - model_grid - INFO - Preparing grid data from vector &#39;hydro_lakes&#39;.
+2023-12-13 10:32:55,470 - working with models - geodataframe - INFO - Reading hydro_lakes vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/hydro_lakes.gpkg
+2023-12-13 10:32:55,487 - working with models - geodataframe - DEBUG - Clip intersects [11.775, 45.804, 12.745, 46.690] (EPSG:4326)
+2023-12-13 10:32:55,489 - working with models - geodataframe - DEBUG - Convert units for 1 columns.
+2023-12-13 10:33:00,944 - working with models - model_api - INFO - write.components: [&#39;config&#39;, &#39;geoms&#39;, &#39;grid&#39;]
+2023-12-13 10:33:00,944 - working with models - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1
+2023-12-13 10:33:00,945 - working with models - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1/model.ini
+2023-12-13 10:33:00,946 - working with models - model_api - DEBUG - Writing file geoms/region.geojson
+2023-12-13 10:33:00,966 - working with models - model_api - DEBUG - Writing file grid/grid.nc
+2023-12-13 10:33:01,196 - working with models - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1
+2023-12-13 10:33:01,196 - working with models - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1/model.ini
+2023-12-13 10:33:01,197 - working with models - model_api - DEBUG - No maps data found, skip writing.
+2023-12-13 10:33:01,198 - working with models - model_api - DEBUG - Writing file grid/grid.nc
+2023-12-13 10:33:01,465 - working with models - model_api - DEBUG - Writing file geoms/region.geojson
+2023-12-13 10:33:01,486 - working with models - model_api - DEBUG - No tables found, skip writing.
+2023-12-13 10:33:01,486 - working with models - model_api - DEBUG - No forcing data found, skip writing.
+2023-12-13 10:33:01,487 - working with models - model_api - DEBUG - No states data found, skip writing.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -2056,7 +2062,7 @@ Text(0.5, 1.0, &#39;Manning roughness&#39;)
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="working_with_models_basics.html"
@@ -2086,6 +2092,7 @@ Text(0.5, 1.0, &#39;Manning roughness&#39;)
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
   <div class="sidebar-secondary-item">
+
   <div class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
@@ -2100,6 +2107,7 @@ Text(0.5, 1.0, &#39;Manning roughness&#39;)
   </nav></div>
 
   <div class="sidebar-secondary-item">
+
   
   <div class="tocsection editthispage">
     <a href="https://github.com/Deltares/hydromt/edit/main/docs/_examples/working_with_models.ipynb">
@@ -2115,6 +2123,7 @@ Text(0.5, 1.0, &#39;Manning roughness&#39;)
 </div>
 
   <div class="sidebar-secondary-item">
+
   <div class="tocsection sourcelink">
     <a href="../_sources/_examples/working_with_models.ipynb.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
@@ -2135,8 +2144,8 @@ Text(0.5, 1.0, &#39;Manning roughness&#39;)
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2144,6 +2153,7 @@ Text(0.5, 1.0, &#39;Manning roughness&#39;)
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
       © Copyright Deltares.
@@ -2153,6 +2163,7 @@ Text(0.5, 1.0, &#39;Manning roughness&#39;)
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
@@ -2165,8 +2176,9 @@ Text(0.5, 1.0, &#39;Manning roughness&#39;)
   
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
 </p></div>
       
     </div>
