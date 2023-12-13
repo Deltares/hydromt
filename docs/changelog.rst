@@ -23,6 +23,7 @@ Changed
 
 Fixed
 -----
+- Removed deprecated entrypoints library. (#676)
 - Bug in `raster.set_crs` if input_crs is of type CRS. (#659)
 - Export CLI now actually parses provided geoms. (#660)
 - Bug in stats.skills for computation of pbias and MSE / RMSE. (#666)
