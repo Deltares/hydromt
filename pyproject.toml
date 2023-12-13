@@ -56,12 +56,12 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 io = [
-  "gcsfs",       # google cloud file system
-  "openpyxl",    # excel IO
-  "fastparquet", # parquet IO
-  "pillow",      # image IO
-  "rio-vrt",     # write VRT files
-  "s3fs",        # S3 file system
+  "gcsfs>=2023.12.1", # google cloud file system
+  "openpyxl",         # excel IO
+  "fastparquet",      # parquet IO
+  "pillow",           # image IO
+  "rio-vrt",          # write VRT files
+  "s3fs",             # S3 file system
 ]
 extra = [
   "matplotlib",    # plotting; required for slippy tiles
