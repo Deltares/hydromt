@@ -14,7 +14,14 @@ import hydromt._compat
 import hydromt.models.model_plugins
 from hydromt._compat import EntryPoint, EntryPoints
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import MODELS, GridModel, Model, VectorModel, model_plugins
+from hydromt.models import (
+    MODELS,
+    GridModel,
+    Model,
+    ModelCatalog,
+    VectorModel,
+    model_plugins,
+)
 from hydromt.models.model_api import _check_data
 from hydromt.models.model_grid import GridMixin
 
@@ -80,17 +87,20 @@ def test_load():
 # test both with and without xugrid
 @pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
 def test_global_models(mocker, has_xugrid):
+    _MODELS = ModelCatalog()
     mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
     keys = list(model_plugins.LOCAL_EPS.keys())
     if not hydromt._compat.HAS_XUGRID:
         keys.remove("mesh_model")
-    assert isinstance(MODELS[keys[0]], EntryPoint)
-    assert issubclass(MODELS.load(keys[0]), Model)
-    assert keys[0] in MODELS.__str__()
-    assert all([k in MODELS for k in keys])  # eps
-    assert all([k in MODELS.cls for k in keys])
+    # set first local model as plugin for testing
+    _MODELS._plugins.append(keys[0])
+    assert isinstance(_MODELS[keys[0]], EntryPoint)
+    assert issubclass(_MODELS.load(keys[0]), Model)
+    assert keys[0] in _MODELS.__str__()
+    assert all([k in _MODELS for k in keys])  # eps
+    assert all([k in _MODELS.cls for k in keys])
     with pytest.raises(ValueError, match="Unknown model"):
-        MODELS["unknown"]
+        _MODELS["unknown"]
 
 
 def test_check_data(demda):

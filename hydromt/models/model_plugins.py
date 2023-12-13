@@ -2,7 +2,7 @@
 import logging
 from typing import Dict, Iterator, List
 
-from hydromt._compat import EntryPoint, EntryPoints, entry_points
+from hydromt._compat import Distribution, EntryPoint, EntryPoints, entry_points
 
 from .. import __version__, _compat
 from .model_api import Model
@@ -29,11 +29,12 @@ def get_general_eps() -> Dict:
         Entrypoints dict
     """
     eps = {}
-    # distro = Distribution.from_name("hydromt", __version__)
+    dist = Distribution.from_name("hydromt")
     for name, epstr in LOCAL_EPS.items():
         if name == "mesh_model" and not _compat.HAS_XUGRID:
             continue
         eps[name] = EntryPoint(name=name, value=epstr, group="hydromt.models")
+        eps[name]._for(dist)  # add distribution info
 
     return eps
 
@@ -161,8 +162,8 @@ class ModelCatalog:
         """Generate string representation containing the registered entrypoints."""
         plugins = "".join(
             [
-                f" - {name} ({self.eps[name].distro.name}"
-                f" {self.eps[name].distro.version})\n"
+                f" - {name} ({self.eps[name].dist.name}"
+                f" {self.eps[name].dist.version})\n"
                 for name in self.plugins
             ]
         )
