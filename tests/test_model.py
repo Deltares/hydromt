@@ -2,7 +2,6 @@
 """Tests for the hydromt.models module of HydroMT."""
 
 from copy import deepcopy
-from importlib.metadata import EntryPoint, EntryPoints
 from os.path import abspath, dirname, isfile, join
 
 import geopandas as gpd
@@ -13,6 +12,7 @@ from shapely.geometry import box
 
 import hydromt._compat
 import hydromt.models.model_plugins
+from hydromt._compat import EntryPoint, EntryPoints
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import MODELS, GridModel, Model, VectorModel, model_plugins
 from hydromt.models.model_api import _check_data

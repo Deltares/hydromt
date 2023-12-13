@@ -16,6 +16,7 @@ dependencies = [
   "dask",                  # lazy computing
   "fsspec",                # general file systems utilities
   "geopandas>=0.10",       # pandas but geo, wraps fiona and shapely
+  "importlib_metadata"     # entrypoints backport
   "mercantile",            # tile handling
   "netcdf4",               # netcfd IO
   "numba",                 # speed up computations (used in e.g. stats)

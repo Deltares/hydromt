@@ -1,9 +1,9 @@
 """Implementation of the mechanism to access the plugin entrypoints."""
 import logging
-from importlib.metadata import EntryPoint, EntryPoints, entry_points
 from typing import Dict, Iterator, List
 
-# from entrypoints import Distribution, EntryPoint, get_group_all
+from hydromt._compat import EntryPoint, EntryPoints, entry_points
+
 from .. import __version__, _compat
 from .model_api import Model
 

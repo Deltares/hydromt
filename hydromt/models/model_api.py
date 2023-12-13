@@ -9,7 +9,6 @@ import shutil
 import typing
 import warnings
 from abc import ABCMeta
-from importlib.metadata import Distribution
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -24,6 +23,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt import __version__
+from hydromt._compat import Distribution
 from hydromt.typing import DeferedFileClose, XArrayDict
 
 from .. import config, log, workflows
