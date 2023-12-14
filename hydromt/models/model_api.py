@@ -1220,6 +1220,10 @@ class Model(object, metaclass=ABCMeta):
             )
         if name in self.geoms:  # trigger init / read
             self.logger.warning(f"Replacing geom: {name}")
+        if hasattr(self, "crs"):
+            # Verify if a geom is set to model crs and if not sets geom to model crs
+            if self.crs.to_epsg() != geom.crs.to_epsg():
+                geom.to_crs(self.crs.to_epsg(), inplace=True)
         self._geoms[name] = geom
 
     def read_geoms(self, fn: str = "geoms/*.geojson", **kwargs) -> None:
@@ -1243,7 +1247,9 @@ class Model(object, metaclass=ABCMeta):
             self.logger.debug(f"Reading model file {name}.")
             self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
 
-    def write_geoms(self, fn: str = "geoms/{name}.geojson", **kwargs) -> None:
+    def write_geoms(
+        self, fn: str = "geoms/{name}.geojson", to_wgs84: bool = False, **kwargs
+    ) -> None:
         r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`geopandas.GeoDataFrame.to_file`
@@ -1273,6 +1279,8 @@ class Model(object, metaclass=ABCMeta):
             _fn = join(self.root, fn.format(name=name))
             if not isdir(dirname(_fn)):
                 os.makedirs(dirname(_fn))
+            if kwargs.get("driver") == "GeoJSON" and to_wgs84:
+                gdf.to_crs(4326, inplace=True)
             gdf.to_file(_fn, **kwargs)
 
     @property

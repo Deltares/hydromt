@@ -370,6 +370,40 @@ def test_setup_region(model, demda, tmpdir):
     assert np.all(model.region["value"] == 210000039)  # basin id
 
 
+def test_model_write_geoms(tmpdir):
+    model = Model(root=str(tmpdir), mode="w")
+    bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
+    geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
+    geom.to_crs(epsg=28992, inplace=True)
+    fn_region = str(join(tmpdir, "region.gpkg"))
+    geom.to_file(fn_region, driver="GPKG")
+    model.data_catalog.from_dict(
+        {
+            "region": {
+                "path": fn_region,
+                "data_type": "GeoDataFrame",
+                "driver": "vector",
+            }
+        }
+    )
+    model.setup_region({"geom": "region"})
+    model.write_geoms(to_wgs84=True)
+    region_geom = gpd.read_file(str(join(tmpdir, "geoms/region.geojson")))
+    assert region_geom.crs.to_epsg() == 4326
+
+
+def test_model_set_geoms(tmpdir):
+    bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
+    geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
+    geom_28992 = geom.to_crs(epsg=28992)
+    # fn_region = str(join(tmpdir, "region.gpkg"))
+    # geom_28992.to_file(fn_region, driver="GPKG")
+    model = Model(root=str(tmpdir), mode="w")
+    model.setup_region({"geom": geom_28992})
+    model.set_geoms(geom, "geom_wgs84")
+    assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
+
+
 def test_config(model, tmpdir):
     # config
     model.set_root(str(tmpdir))
