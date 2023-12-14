@@ -1222,7 +1222,7 @@ class Model(object, metaclass=ABCMeta):
             self.logger.warning(f"Replacing geom: {name}")
         if hasattr(self, "crs"):
             # Verify if a geom is set to model crs and if not sets geom to model crs
-            if self.crs.to_epsg() != geom.crs.to_epsg():
+            if self.crs and self.crs != geom.crs:
                 geom.to_crs(self.crs.to_epsg(), inplace=True)
         self._geoms[name] = geom
 
