@@ -1259,6 +1259,8 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'geoms/{name}.geojson'
+        to_wgs84: bool, optional
+            Option to enforce writing GeoJSONs with WGS84(EPSG:4326) coordinates.
         \**kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
