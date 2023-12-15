@@ -693,6 +693,10 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize new object based on the xarray object provided.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">xarray_obj</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return dictionary of spatial attributes.&quot;&quot;&quot;</span>
         <span class="c1"># create new coordinate with attributes in which to save x_dim, y_dim and crs.</span>
         <span class="c1"># other spatial properties are always calculated on the fly to ensure</span>
         <span class="c1"># consistency with data</span>
@@ -700,19 +704,17 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">set_coords</span><span class="p">(</span><span class="n">GEO_MAP_COORD</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">GEO_MAP_COORD</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">GEO_MAP_COORD</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">((),</span> <span class="mi">0</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return dictionary of spatial attributes.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">GEO_MAP_COORD</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">GEO_MAP_COORD</span><span class="p">]</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>  <span class="c1"># make sure spatial ref is not lazy</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">GEO_MAP_COORD</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span>
 
     <span class="k">def</span> <span class="nf">set_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update spatial attributes. Usage raster.set_attr(key=value).&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">GEO_MAP_COORD</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return single spatial attribute.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">GEO_MAP_COORD</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">placeholder</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">placeholder</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">time_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1122,7 +1124,7 @@ document.write(`
             <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">)</span> <span class="o">+</span> <span class="n">dims</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="n">dim0</span><span class="o">=</span><span class="n">extra_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">GEO_MAP_COORD</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dim0&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dim0&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only 2D and 3D data arrays supported.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
@@ -1217,8 +1219,8 @@ document.write(`
             <span class="p">)</span>
         <span class="n">grid_map_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;x_dim&quot;</span><span class="p">:</span> <span class="n">x_dim</span><span class="p">,</span> <span class="s2">&quot;y_dim&quot;</span><span class="p">:</span> <span class="n">y_dim</span><span class="p">})</span>
         <span class="c1"># reset and write grid mapping attributes</span>
-        <span class="n">obj_out</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">GEO_MAP_COORD</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">((),</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">obj_out</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">GEO_MAP_COORD</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">grid_map_attrs</span><span class="p">)</span>
+        <span class="n">obj_out</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">GEO_MAP_COORD</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="n">obj_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="o">**</span><span class="n">grid_map_attrs</span><span class="p">)</span>
         <span class="c1"># set grid mapping attribute for each data variable</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj_out</span><span class="p">,</span> <span class="s2">&quot;data_vars&quot;</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">obj_out</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
@@ -2563,11 +2565,11 @@ document.write(`
 <span class="sd">        da : xarray.DataArray</span>
 <span class="sd">            Reprojected object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># clip first; then reproject</span>
-        <span class="n">da</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aligned_grid</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">identical_grid</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+            <span class="n">da</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">aligned_grid</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>  <span class="c1"># aligned grid; just clip</span>
             <span class="n">da</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_bbox</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">identical_grid</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># clip first; then reproject</span>
             <span class="n">da_clip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_bbox</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">),</span> <span class="n">buffer</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">da_clip</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">):</span>
                 <span class="c1"># out of bounds -&gt; return empty array</span>
@@ -2583,6 +2585,7 @@ document.write(`
                     <span class="n">dst_height</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
                     <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
                 <span class="p">)</span>
+
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span>
             <span class="ow">or</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span>
@@ -2657,6 +2660,7 @@ document.write(`
             <span class="n">da_temp</span> <span class="o">=</span> <span class="n">da_temp</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
             <span class="c1"># map blocks</span>
             <span class="n">da_reproj</span> <span class="o">=</span> <span class="n">_da</span><span class="o">.</span><span class="n">map_blocks</span><span class="p">(</span><span class="n">_reindex2d</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="n">da_temp</span><span class="p">)</span>
+        <span class="n">da_reproj</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
         <span class="n">da_reproj</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="n">dst_nodata</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">da_reproj</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reset_spatial_dims_attrs</span><span class="p">()</span>
 
