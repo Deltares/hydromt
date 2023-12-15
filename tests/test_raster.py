@@ -377,6 +377,8 @@ def test_reproject():
     )
     assert isinstance(da2_lazy.data, dask.array.core.Array)
     assert np.all(ds2_index["test"] == da2_lazy.compute())
+    # make sure spatial ref is not lazy
+    assert not isinstance(da2_lazy.spatial_ref.data, dask.array.Array)
     # check error messages
     with pytest.raises(ValueError, match="Resampling method unknown"):
         ds1.raster.reproject(dst_crs=3857, method="unknown")
