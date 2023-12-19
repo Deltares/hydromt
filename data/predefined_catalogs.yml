@@ -9,7 +9,7 @@
 #
 # Notes:
 # if new versions of the data_catalogs are created to table below should be updated by:
-#  - adding the new verion with a reference to main, e.g., v2023.2: main
+#  - adding the new version with a reference to main, e.g., v2023.2: main
 #  - updating the git hash or git tag of the previous version, e.g., v2023.1: 0bf8e2a1e716095dc6df54a5e9114ce88da0701b
 #    the git hash of the previous version can be found by browsing to the catalog file in the github main branch and then clicking on the history button
 
