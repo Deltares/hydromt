@@ -318,10 +318,15 @@ class GridMixin(object):
     def grid(self):
         """Model static gridded data as xarray.Dataset."""
         if self._grid is None:
-            self._grid = xr.Dataset()
-            if self._read:
-                self.read_grid()
+            self._initialize_grid()
         return self._grid
+
+    def _initialize_grid(self, skip_read=False) -> None:
+        """Initialize grid object."""
+        if self._grid is None:
+            self._grid = xr.Dataset()
+            if self._read and not skip_read:
+                self.read_grid()
 
     def set_grid(
         self,
@@ -340,6 +345,7 @@ class GridMixin(object):
             Name of new map layer, this is used to overwrite the name of a DataArray
             and ignored if data is a Dataset
         """
+        self._initialize_grid()
         # NOTE: variables in a dataset are not longer renamed as used to be the case in
         # set_staticmaps
         name_required = isinstance(data, np.ndarray) or (
@@ -357,12 +363,12 @@ class GridMixin(object):
             data = data.to_dataset()
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
-        # force read in r+ mode
-        if len(self.grid) == 0:  # trigger init / read
+
+        if len(self._grid) == 0:  # empty grid
             self._grid = data
         else:
             for dvar in data.data_vars:
-                if dvar in self.grid:
+                if dvar in self._grid:
                     if self._read:
                         self.logger.warning(f"Replacing grid map: {dvar}")
                 self._grid[dvar] = data[dvar]
@@ -380,6 +386,8 @@ class GridMixin(object):
             Additional keyword arguments to be passed to the `read_nc` method.
         """
         self._assert_read_mode()
+        self._initialize_grid(skip_read=True)
+
         # Load grid data in r+ mode to allow overwritting netcdf files
         if self._read and self._write:
             kwargs["load"] = True
