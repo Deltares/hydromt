@@ -28,7 +28,7 @@ Fixed
 - Export CLI now actually parses provided geoms. (#660)
 - Bug in stats.skills for computation of pbias and MSE / RMSE. (#666)
 - Fix bug with lazy spatial_ref coordinate (#682)
-- Bug in gis_utils.meridian_offset. (#688)
+- Bug in gis_utils.meridian_offset. (#692)
 
 Deprecated
 ----------
