@@ -627,55 +627,63 @@ fabdem:
     fabdem: elevtn
 
 gadm:
-  alias: gadm_level1_v3.6
-gadm_level1_v3.6:
-  crs: 4326
-  data_type: GeoDataFrame
-  driver: vector
-  meta:
-    category: geography
-    notes: last downloaded 2020-10-19; license required for commercial use
-    source_author: gadm
-    source_license: https://gadm.org/license.html
-    source_url: https://gadm.org/download_world.html
-    source_version: 3.6
-  path: geography/gadm/gadm36_levels.gpkg
-  rename:
-    ID: gadm_level1
+  alias: gadm_level0
 
-gadm_level2_v3.6:
+gadm_level0:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
-  kwargs:
-    layer: level2
   meta:
     category: geography
-    notes: last downloaded 2020-10-19; license required for commercial use
+    notes: last downloaded 2023-12-18; license required for commercial use
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 3.6
-  path: geography/gadm/gadm36_levels.gpkg
-  rename:
-    fid: gadm_level2
+    source_version: 4.1
+    processing_script: geography/gadm/version4_1/run_dissolve_level_0.sh
+  path: geography/gadm/version4_1/gadm_level0.fgb
 
-gadm_level3_v3.6:
+gadm_level1:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
-  kwargs:
-    layer: level3
   meta:
     category: geography
-    notes: last downloaded 2020-10-19; license required for commercial use
+    notes: last downloaded 2023-12-18; license required for commercial use
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 3.6
-  path: geography/gadm/gadm36_levels.gpkg
-  rename:
-    fid: gadm_level3
+    source_version: 4.1
+    processing_script: geography/gadm/version4_1/run_dissolve_level_1.sh
+  path: geography/gadm/version4_1/gadm_level1.fgb
+
+gadm_level2:
+  crs: 4326
+  data_type: GeoDataFrame
+  driver: vector
+  meta:
+    category: geography
+    notes: last downloaded 2023-12-18; license required for commercial use
+    source_author: gadm
+    source_license: https://gadm.org/license.html
+    source_url: https://gadm.org/download_world.html
+    source_version: 4.1
+    processing_script: geography/gadm/version4_1/run_dissolve_level_2.sh
+  path: geography/gadm/version4_1/gadm_level2.fgb
+
+gadm_level3:
+  crs: 4326
+  data_type: GeoDataFrame
+  driver: vector
+  meta:
+    category: geography
+    notes: last downloaded 2023-12-18; license required for commercial use
+    source_author: gadm
+    source_license: https://gadm.org/license.html
+    source_url: https://gadm.org/download_world.html
+    source_version: 4.1
+    processing_script: geography/gadm/version4_1/run_dissolve_level_3.sh
+  path: geography/gadm/version4_1/gadm_level3.fgb
 
 gcn250:
   alias: gcn250_v1
