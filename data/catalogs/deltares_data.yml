@@ -1037,22 +1037,8 @@ glw_sheeps_v3:
     source_version: GLW 3, last downloaded 2020-06-11
   path: socio_economic/glw/5_Sh_2010_Da.tif
 
-grdc:
-  crs: 4326
-  data_type: GeoDataFrame
-  driver: xlsx
-  kwargs:
-    index_col: grdc_no
-  meta:
-    category: observed data
-    notes: GRDC-Station Catalogue, last downloaded 2020-07-16
-    source_license: https://www.bafg.de/GRDC/EN/02_srvcs/21_tmsrs/210_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
-    source_url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
-  path: hydro/grdc/GRDC_Stations.xlsx
-  rename:
-    area: uparea
 
-grdc_csv:
+grdc:
   crs: 4326
   data_type: GeoDataFrame
   driver: csv
