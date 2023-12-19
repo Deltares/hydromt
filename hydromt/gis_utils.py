@@ -311,17 +311,21 @@ def meridian_offset(ds, bbox=None):
     if (
         ds.raster.crs is None
         or ds.raster.crs.is_projected
-        or not np.isclose(e - w, 360)
+        or not np.isclose(e - w, 360)  # grid should span 360 degrees!
     ):
         raise ValueError("The method is only applicable to global geographic CRS")
     x_name = ds.raster.x_dim
     lons = np.copy(ds[x_name].values)
-    if bbox is not None and bbox[0] < w and bbox[0] < -180:  # 180W - 180E > 360W - 0W
-        lons = np.where(lons > 0, lons - 360, lons)
-    elif bbox is not None and bbox[2] > e and bbox[2] > 180:  # 180W - 180E > 0E-360E
-        lons = np.where(lons < 0, lons + 360, lons)
-    elif np.isclose(e, 360):  # 0W - 360E > 180W - 180E (allow for rounding errors)
-        lons = np.where(lons > 180, lons - 360, lons)
+    if bbox is not None:  # bbox west and east
+        bbox_w, bbox_e = bbox[0], bbox[2]
+    else:  # global west and east in case of no bbox
+        bbox_w, bbox_e = -180, 180
+    if bbox_w < w:  # shift lons east of x0 by 360 degrees west
+        x0 = 180 if bbox_w >= -180 else 0
+        lons = np.where(lons > max(bbox_e, x0), lons - 360, lons)
+    elif bbox_e > e:  # shift lons west of x0 by 360 degrees east
+        x0 = -180 if bbox_e <= 180 else 0
+        lons = np.where(lons < min(bbox_w, x0), lons + 360, lons)
     else:
         return ds
     ds = ds.copy(deep=False)  # make sure not to overwrite original ds
