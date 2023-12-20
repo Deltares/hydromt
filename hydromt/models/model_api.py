@@ -1248,6 +1248,10 @@ class Model(object, metaclass=ABCMeta):
             )
         if name in self._geoms:
             self.logger.warning(f"Replacing geom: {name}")
+        if hasattr(self, "crs"):
+            # Verify if a geom is set to model crs and if not sets geom to model crs
+            if self.crs and self.crs != geom.crs:
+                geom.to_crs(self.crs.to_epsg(), inplace=True)
         self._geoms[name] = geom
 
     def read_geoms(self, fn: str = "geoms/*.geojson", **kwargs) -> None:
@@ -1272,7 +1276,9 @@ class Model(object, metaclass=ABCMeta):
             self.logger.debug(f"Reading model file {name}.")
             self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
 
-    def write_geoms(self, fn: str = "geoms/{name}.geojson", **kwargs) -> None:
+    def write_geoms(
+        self, fn: str = "geoms/{name}.geojson", to_wgs84: bool = False, **kwargs
+    ) -> None:
         r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`geopandas.GeoDataFrame.to_file`
@@ -1282,6 +1288,8 @@ class Model(object, metaclass=ABCMeta):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'geoms/{name}.geojson'
+        to_wgs84: bool, optional
+            Option to enforce writing GeoJSONs with WGS84(EPSG:4326) coordinates.
         \**kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
@@ -1290,8 +1298,6 @@ class Model(object, metaclass=ABCMeta):
             self.logger.debug("No geoms data found, skip writing.")
             return
         self._assert_write_mode()
-        if "driver" not in kwargs:
-            kwargs.update(driver="GeoJSON")  # default
         for name, gdf in self.geoms.items():
             if not isinstance(gdf, (gpd.GeoDataFrame, gpd.GeoSeries)) or len(gdf) == 0:
                 self.logger.warning(
@@ -1302,6 +1308,11 @@ class Model(object, metaclass=ABCMeta):
             _fn = join(self.root, fn.format(name=name))
             if not isdir(dirname(_fn)):
                 os.makedirs(dirname(_fn))
+            if to_wgs84 and (
+                kwargs.get("driver") == "GeoJSON"
+                or str(fn).lower().endswith(".geojson")
+            ):
+                gdf = gdf.to_crs(4326)
             gdf.to_file(_fn, **kwargs)
 
     @property
