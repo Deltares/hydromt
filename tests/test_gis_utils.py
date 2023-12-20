@@ -44,7 +44,7 @@ def test_meridian_offset():
     # test global grids with different west origins
     for x0 in [-180, 0, -360, 1]:
         da = full_from_transform(
-            transform=Affine.identity() * Affine.translation(x0, -90),
+            transform=Affine(1.0, 0.0, x0, 0.0, -1.0, 90.0),
             shape=(180, 360),
             crs="epsg:4326",
         )
@@ -56,7 +56,7 @@ def test_meridian_offset():
             [-2, -2, 2, 2],  # bbox crossing 0
             [178, -2, 182, 2],  # bbox crossing 180
             [-10, -2, 190, 2],  # bbox crossing 0 and 180
-            [-190, -2, 170, 2],  # bbox crossing -180
+            [-190, -2, -170, 2],  # bbox crossing -180
         ]:
             da2 = gu.meridian_offset(da, bbox=bbox)
             assert (
@@ -67,7 +67,7 @@ def test_meridian_offset():
             ), f"{da2.raster.bounds[2]} >= {bbox[2]}"
 
     # test error
-    with pytest.raises(ValueError, match="The method is only applicable to"):
+    with pytest.raises(ValueError, match="This method is only applicable to data"):
         gu.meridian_offset(da.raster.clip_bbox([0, 0, 10, 10]))
 
 

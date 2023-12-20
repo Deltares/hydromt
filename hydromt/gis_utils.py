@@ -306,14 +306,37 @@ def axes_attrs(crs):
 
 
 def meridian_offset(ds, bbox=None):
-    """re-arrange data along x dim."""
+    """Shift data along the x-axis of global datasets avoid issues along the 180 meridian.
+
+    Without a bbox the data is shifted to span 180W to 180E.
+    With bbox the data is shifted to span the bbox west to east, also if the bbox
+    crosses the 180 meridian.
+
+    Note that this method is only applicable to data that spans 360 degrees longitude
+    and is set in a global geographic CRS (WGS84).
+
+    Parameters
+    ----------
+    ds: xarray.Dataset
+        input dataset
+    bbox: tuple of float
+        bounding box (west, south, east, north) in degrees
+
+    Returns
+    -------
+    ds: xarray.Dataset
+        dataset with x dim re-arranged if needed
+    """
     w, _, e, _ = ds.raster.bounds
     if (
         ds.raster.crs is None
         or ds.raster.crs.is_projected
         or not np.isclose(e - w, 360)  # grid should span 360 degrees!
     ):
-        raise ValueError("The method is only applicable to global geographic CRS")
+        raise ValueError(
+            "This method is only applicable to data that spans 360 degrees "
+            "longitude and is set in a global geographic CRS"
+        )
     x_name = ds.raster.x_dim
     lons = np.copy(ds[x_name].values)
     if bbox is not None:  # bbox west and east
