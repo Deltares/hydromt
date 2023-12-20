@@ -1,7 +1,7 @@
 ---
 meta:
   root: p:/wflow_global/hydromt
-  version: 2023.3
+  version: 2023.12
 
 
 basin_atlas_level12_v10:
