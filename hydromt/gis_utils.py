@@ -306,11 +306,11 @@ def axes_attrs(crs):
 
 
 def meridian_offset(ds, bbox=None):
-    """Shift data along the x-axis of global datasets avoid issues along the 180 meridian.
+    """Shift data along the x-axis of global datasets to avoid issues along the 180 meridian.
 
     Without a bbox the data is shifted to span 180W to 180E.
-    With bbox the data is shifted to span the bbox west to east, also if the bbox
-    crosses the 180 meridian.
+    With bbox the data is shifted to at least span the bbox west to east,
+    also if the bbox crosses the 180 meridian.
 
     Note that this method is only applicable to data that spans 360 degrees longitude
     and is set in a global geographic CRS (WGS84).
