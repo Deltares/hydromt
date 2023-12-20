@@ -41,20 +41,33 @@ def test_affine_to_coords():
 
 
 def test_meridian_offset():
-    # create grid with x from 0-360E
-    transform = from_origin(0, 90, 1, 1)  # upper left corner
-    shape = (180, 360)
-    da = full_from_transform(transform, shape, crs=4326)
-    assert np.allclose(da.raster.origin, np.array([0, 90]))
-    da1 = gu.meridian_offset(da)
-    assert da1.raster.bounds[0] == -180
-    da2 = gu.meridian_offset(da1, bbox=[170, 0, 190, 10])
-    assert da2.raster.bounds[0] == 0
-    da3 = gu.meridian_offset(da1, bbox=[-190, 0, -170, 10])
-    assert da3.raster.bounds[2] == 0
+    # test global grids with different west origins
+    for x0 in [-180, 0, -360, 1]:
+        da = full_from_transform(
+            transform=Affine(1.0, 0.0, x0, 0.0, -1.0, 90.0),
+            shape=(180, 360),
+            crs="epsg:4326",
+        )
+        # return W180-E180 grid if no bbox is provided
+        da1 = gu.meridian_offset(da)
+        assert da1.raster.bounds == (-180, -90, 180, 90)
+        # make sure bbox is respected
+        for bbox in [
+            [-2, -2, 2, 2],  # bbox crossing 0
+            [178, -2, 182, 2],  # bbox crossing 180
+            [-10, -2, 190, 2],  # bbox crossing 0 and 180
+            [-190, -2, -170, 2],  # bbox crossing -180
+        ]:
+            da2 = gu.meridian_offset(da, bbox=bbox)
+            assert (
+                da2.raster.bounds[0] <= bbox[0]
+            ), f"{da2.raster.bounds[0]} <= {bbox[0]}"
+            assert (
+                da2.raster.bounds[2] >= bbox[2]
+            ), f"{da2.raster.bounds[2]} >= {bbox[2]}"
 
     # test error
-    with pytest.raises(ValueError, match="The method is only applicable to"):
+    with pytest.raises(ValueError, match="This method is only applicable to data"):
         gu.meridian_offset(da.raster.clip_bbox([0, 0, 10, 10]))
 
 
