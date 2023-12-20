@@ -385,11 +385,9 @@ def test_model_set_geoms(tmpdir):
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom_28992 = geom.to_crs(epsg=28992)
-    # fn_region = str(join(tmpdir, "region.gpkg"))
-    # geom_28992.to_file(fn_region, driver="GPKG")
     model = Model(root=str(tmpdir), mode="w")
-    model.setup_region({"geom": geom_28992})
-    model.set_geoms(geom, "geom_wgs84")
+    model.setup_region({"geom": geom_28992})  # set model crs based on epsg28992
+    model.set_geoms(geom, "geom_wgs84")  # this should convert the geom crs to epsg28992
     assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
 
 
