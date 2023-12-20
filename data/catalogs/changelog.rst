@@ -5,6 +5,15 @@ Change log predefined datasets
 deltares_data
 =============
 
+version: 2023.12
+-----------------
+
+changed
+^^^^^^^
+- Updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
+
+
+
 version: 2023.2
 ----------------
 
