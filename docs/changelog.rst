@@ -27,7 +27,7 @@ Fixed
 - Bug in `raster.set_crs` if input_crs is of type CRS. (#659)
 - Export CLI now actually parses provided geoms. (#660)
 - Bug in stats.skills for computation of pbias and MSE / RMSE. (#666)
-- `Model.write_geoms` now enforces GeoJSON to write coordinates in WGS84 if specified (#510)
+- `Model.write_geoms` ow has an option to write GeoJSON coordinates in WGS84 if specified (#510)
 
 Deprecated
 ----------

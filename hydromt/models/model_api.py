@@ -1269,8 +1269,6 @@ class Model(object, metaclass=ABCMeta):
             self.logger.debug("No geoms data found, skip writing.")
             return
         self._assert_write_mode()
-        if "driver" not in kwargs:
-            kwargs.update(driver="GeoJSON")  # default
         for name, gdf in self.geoms.items():
             if not isinstance(gdf, (gpd.GeoDataFrame, gpd.GeoSeries)) or len(gdf) == 0:
                 self.logger.warning(
@@ -1281,8 +1279,11 @@ class Model(object, metaclass=ABCMeta):
             _fn = join(self.root, fn.format(name=name))
             if not isdir(dirname(_fn)):
                 os.makedirs(dirname(_fn))
-            if kwargs.get("driver") == "GeoJSON" and to_wgs84:
-                gdf.to_crs(4326, inplace=True)
+            if to_wgs84 and (
+                kwargs.get("driver") == "GeoJSON"
+                or str(fn).lower().endswith(".geojson")
+            ):
+                gdf = gdf.to_crs(4326)
             gdf.to_file(_fn, **kwargs)
 
     @property

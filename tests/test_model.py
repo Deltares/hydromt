@@ -375,18 +375,7 @@ def test_model_write_geoms(tmpdir):
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom.to_crs(epsg=28992, inplace=True)
-    fn_region = str(join(tmpdir, "region.gpkg"))
-    geom.to_file(fn_region, driver="GPKG")
-    model.data_catalog.from_dict(
-        {
-            "region": {
-                "path": fn_region,
-                "data_type": "GeoDataFrame",
-                "driver": "vector",
-            }
-        }
-    )
-    model.setup_region({"geom": "region"})
+    model.set_geoms(geom=geom, name="region")
     model.write_geoms(to_wgs84=True)
     region_geom = gpd.read_file(str(join(tmpdir, "geoms/region.geojson")))
     assert region_geom.crs.to_epsg() == 4326
