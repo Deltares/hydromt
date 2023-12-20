@@ -933,7 +933,26 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="hydromt.gis_utils.meridian_offset">
 <span class="sig-prename descclassname"><span class="pre">hydromt.gis_utils.</span></span><span class="sig-name descname"><span class="pre">meridian_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hydromt/gis_utils.html#meridian_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.gis_utils.meridian_offset" title="Link to this definition">#</a></dt>
-<dd><p>re-arrange data along x dim.</p>
+<dd><p>Shift data along the x-axis of global datasets to avoid issues along the 180 meridian.</p>
+<p>Without a bbox the data is shifted to span 180W to 180E.
+With bbox the data is shifted to at least span the bbox west to east,
+also if the bbox crosses the 180 meridian.</p>
+<p>Note that this method is only applicable to data that spans 360 degrees longitude
+and is set in a global geographic CRS (WGS84).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2023.12.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>) – input dataset</p></li>
+<li><p><strong>bbox</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – bounding box (west, south, east, north) in degrees</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ds</strong> – dataset with x dim re-arranged if needed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2023.12.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

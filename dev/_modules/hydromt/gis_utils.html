@@ -781,22 +781,49 @@ document.write(`
 <div class="viewcode-block" id="meridian_offset">
 <a class="viewcode-back" href="../../_generated/hydromt.gis_utils.meridian_offset.html#hydromt.gis_utils.meridian_offset">[docs]</a>
 <span class="k">def</span> <span class="nf">meridian_offset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;re-arrange data along x dim.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Shift data along the x-axis of global datasets to avoid issues along the 180 meridian.</span>
+
+<span class="sd">    Without a bbox the data is shifted to span 180W to 180E.</span>
+<span class="sd">    With bbox the data is shifted to at least span the bbox west to east,</span>
+<span class="sd">    also if the bbox crosses the 180 meridian.</span>
+
+<span class="sd">    Note that this method is only applicable to data that spans 360 degrees longitude</span>
+<span class="sd">    and is set in a global geographic CRS (WGS84).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ds: xarray.Dataset</span>
+<span class="sd">        input dataset</span>
+<span class="sd">    bbox: tuple of float</span>
+<span class="sd">        bounding box (west, south, east, north) in degrees</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ds: xarray.Dataset</span>
+<span class="sd">        dataset with x dim re-arranged if needed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">w</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="ow">or</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_projected</span>
-        <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">e</span> <span class="o">-</span> <span class="n">w</span><span class="p">,</span> <span class="mi">360</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">e</span> <span class="o">-</span> <span class="n">w</span><span class="p">,</span> <span class="mi">360</span><span class="p">)</span>  <span class="c1"># grid should span 360 degrees!</span>
     <span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The method is only applicable to global geographic CRS&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;This method is only applicable to data that spans 360 degrees &quot;</span>
+            <span class="s2">&quot;longitude and is set in a global geographic CRS&quot;</span>
+        <span class="p">)</span>
     <span class="n">x_name</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span>
     <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="n">x_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">w</span> <span class="ow">and</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">180</span><span class="p">:</span>  <span class="c1"># 180W - 180E &gt; 360W - 0W</span>
-        <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">lons</span> <span class="o">-</span> <span class="mi">360</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">e</span> <span class="ow">and</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">:</span>  <span class="c1"># 180W - 180E &gt; 0E-360E</span>
-        <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">lons</span> <span class="o">+</span> <span class="mi">360</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="mi">360</span><span class="p">):</span>  <span class="c1"># 0W - 360E &gt; 180W - 180E (allow for rounding errors)</span>
-        <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">,</span> <span class="n">lons</span> <span class="o">-</span> <span class="mi">360</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># bbox west and east</span>
+        <span class="n">bbox_w</span><span class="p">,</span> <span class="n">bbox_e</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># global west and east in case of no bbox</span>
+        <span class="n">bbox_w</span><span class="p">,</span> <span class="n">bbox_e</span> <span class="o">=</span> <span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span>
+    <span class="k">if</span> <span class="n">bbox_w</span> <span class="o">&lt;</span> <span class="n">w</span><span class="p">:</span>  <span class="c1"># shift lons east of x0 by 360 degrees west</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="mi">180</span> <span class="k">if</span> <span class="n">bbox_w</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">180</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">bbox_e</span><span class="p">,</span> <span class="n">x0</span><span class="p">),</span> <span class="n">lons</span> <span class="o">-</span> <span class="mi">360</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">bbox_e</span> <span class="o">&gt;</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># shift lons west of x0 by 360 degrees east</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">180</span> <span class="k">if</span> <span class="n">bbox_e</span> <span class="o">&lt;=</span> <span class="mi">180</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">bbox_w</span><span class="p">,</span> <span class="n">x0</span><span class="p">),</span> <span class="n">lons</span> <span class="o">+</span> <span class="mi">360</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ds</span>
     <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># make sure not to overwrite original ds</span>
