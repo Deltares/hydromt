@@ -1454,7 +1454,7 @@ pcr_globwb:
     source_version: 2017.11b1
     processing_script: hydro/pcr_globwb/prep_glob.py
   nodata: -9999
-  path: hydro/pcr_globwb/glob_{year}.zarr
+  path: hydro/pcr_globwb/glob_2005.zarr
   rename:
     domesticNettoDemand: dom_net
     domesticGrossDemand: dom_gross
