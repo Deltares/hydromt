@@ -1439,6 +1439,37 @@ osm_landareas_v20200109:
   rename:
     fid: land_id
 
+pcr_globwb:
+  crs: 4326
+  data_type: RasterDataset
+  driver: zarr
+  kwargs:
+    chunks: auto
+  meta:
+    category: water demand
+    notes: last downloaded 2023-11-23
+    paper_doi: 10.5281/zenodo.1045339
+    paper_ref: Sutanudjaja, E. H., et al (2017)
+    source_url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+    source_version: 2017.11b1
+    processing_script: hydro/pcr_globwb/prep_glob.py
+  nodata: -9999
+  path: hydro/pcr_globwb/glob_{year}.zarr
+  rename:
+    domesticNettoDemand: dom_net
+    domesticGrossDemand: dom_gross
+    industryNettoDemand: ind_net
+    industryGrossDemand: ind_gross
+    livestockNettoDemand: lsk_net
+    livestockGrossDemand: lsk_gross
+  unit_mult:
+    dom_net: 1000
+    dom_gross: 1000
+    ind_net: 1000
+    ind_gross: 1000
+    lsk_net: 1000
+    lsk_gross: 1000
+
 rgi:
   alias: rgi_v0.6
 rgi_v0.6:
