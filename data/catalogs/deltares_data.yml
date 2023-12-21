@@ -89,6 +89,9 @@ chirps:
     paper_ref: Funk et al (2015)
     source_license: CC
     source_url: https://www.chc.ucsb.edu/data/chirps
+    source_temporal_extent:
+      start: '1981-01-02'
+      end: '2022-04-01'
   version: 2.0
   path: meteo/chirps_africa_daily_v2.0/CHIRPS_rainfall_{year}.nc
   rename:
@@ -114,6 +117,9 @@ chirps_global:
     paper_ref: Funk et al (2014)
     source_license: CC
     source_url: https://www.chc.ucsb.edu/data/chirps
+    source_temporal_extent:
+      start: '1981-01-02'
+      end: '2023-02-01'
   version: 2.0
   path: meteo/chirps_global_daily_v2.0/chirps-v2.0.{year}.days_p05.nc
   rename:
@@ -134,7 +140,7 @@ copdem30:
     source_url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p_l_back_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
   version: 2021.1
   path: topography/copdem/copdem.vrt
-  nodata: -9999 # copdem has no actual nodata, this is to suppress a missing nodata warning
+  nodata: -9999
   rename:
     copdem: elevtn
 
@@ -151,7 +157,7 @@ copdem30_mask:
     source_url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p_l_back_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
   version: 2021.1
   path: topography/copdem/copdem_mask.vrt
-  nodata: -1 # copdem has no actual nodata, this is to suppress a missing nodata warning
+  nodata: -1
   rename:
     copdem_mask: mask
 
@@ -184,9 +190,8 @@ corine:
     source_license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
     source_url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
   provider: local
-  version:  2020_20u1
+  version: 2020_20u1
   path: landuse/corine/CLC2018_CLC2018_V2018_20.tif
-
 
 dtu10mdt:
   crs: 4326
@@ -242,6 +247,9 @@ eobs:
     paper_ref: Cornes et al (2018)
     source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_temporal_extent:
+      start: '1950-01-02'
+      end: '2022-01-01'
   variants:
   - version: 22.0e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
@@ -278,20 +286,18 @@ eobs_orography:
     source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
   variants:
-    - version: 20.0e
-      path: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
-    - version: 22.0e
-      path: meteo/eobs/elev_ens_0.1deg_reg_v22.0e.nc
-    - version: 23.1e
-      path: meteo/eobs/elev_ens_0.1deg_reg_v23.1e.nc
-    - version: 24.0e
-      path: meteo/eobs/elev_ens_0.1deg_reg_v24.0e.nc
-    - version: 25.0e
-      path:  meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
-
+  - version: 20.0e
+    path: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
+  - version: 22.0e
+    path: meteo/eobs/elev_ens_0.1deg_reg_v22.0e.nc
+  - version: 23.1e
+    path: meteo/eobs/elev_ens_0.1deg_reg_v23.1e.nc
+  - version: 24.0e
+    path: meteo/eobs/elev_ens_0.1deg_reg_v24.0e.nc
+  - version: 25.0e
+    path: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
   rename:
     elevation: elevtn
-
 
 era5:
   crs: 4326
@@ -307,12 +313,16 @@ era5:
     parallel: true
   meta:
     category: meteo
-    notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
+    notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+      daily frequency
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
     source_version: ERA5 daily data on pressure levels
+    source_temporal_extent:
+      start: '1950-01-02'
+      end: '2023-11-30'
   path: meteo/era5_daily/nc_merged/era5_{year}_daily.nc
   rename:
     d2m: temp_dew
@@ -344,12 +354,16 @@ era5_daily_zarr:
     chunks: auto
   meta:
     category: meteo
-    notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
+    notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+      daily frequency
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
     processing_script: meteo/era5_zarr/scripts/
+    source_temporal_extent:
+      start: '1950-01-02'
+      end: '2023-02-01'
   path: meteo/era5_daily.zarr
 
 era5_hourly:
@@ -372,6 +386,9 @@ era5_hourly:
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.adbb2d47
     source_version: ERA5 hourly data on single levels from 1940 to present
+    source_temporal_extent:
+      start: '1950-01-01'
+      end: '2023-03-01'
   path: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
   rename:
     d2m: temp_dew
@@ -406,6 +423,9 @@ era5_hourly_zarr:
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.adbb2d47
     processing_script: meteo/era5_zarr/scripts/
+    source_temporal_extent:
+      start: '1950-01-01'
+      end: '2023-02-01'
   path: meteo/era5.zarr
 
 era5_ocean:
@@ -427,6 +447,9 @@ era5_ocean:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
+    source_temporal_extent:
+      start: '1979-01-01'
+      end: '2022-04-08'
   path: ocean/era5/{variable}/era5_{variable}_{year}_hourly.nc
 
 era5_orography:
@@ -444,6 +467,9 @@ era5_orography:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://apps.ecmwf.int/codes/grib/param-db?id=129
+    source_temporal_extent:
+      start: '2018-01-01'
+      end: '2018-01-01'
   path: meteo/era5/meta/era5_orography_2018.nc
   rename:
     z: elevtn
@@ -483,7 +509,6 @@ fabdem:
   path: topography/fabdem/fabdem.vrt
   rename:
     fabdem: elevtn
-
 
 gadm_level0:
   crs: 4326
@@ -568,7 +593,8 @@ gdp_world:
   driver: vector
   meta:
     category: socio-economic
-    notes: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD) and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
+    notes: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
+      and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
     source_author: Wilfred Altena
     source_license: CC BY-4.0
   version: 1.0
@@ -618,7 +644,7 @@ ghs_pop:
   path: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_4326_9ss_V1_0.tif
 
 ghs_pop_2015_54009_v2019a:
-  crs: "ESRI:54009"
+  crs: ESRI:54009
   data_type: RasterDataset
   driver: raster
   driver_kwargs:
@@ -647,18 +673,17 @@ ghs_smod:
     source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
   variants:
-    - version: R2016A_v1.0
-      path: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
-      meta:
-        paper_ref: Pesaresi and Freire (2016)
-        source_url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
-    - version: R2019A_v2.0
-      path: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2019A_54009_1K_V2_0.tif
-      meta:
-        paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
-        paper_ref: Pesaresi et al (2019)
-        source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
-
+  - version: R2016A_v1.0
+    path: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
+    meta:
+      paper_ref: Pesaresi and Freire (2016)
+      source_url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
+  - version: R2019A_v2.0
+    path: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2019A_54009_1K_V2_0.tif
+    meta:
+      paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+      paper_ref: Pesaresi et al (2019)
+      source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
 
 globcover:
   crs: 4326
@@ -697,6 +722,9 @@ glofas_era5_v31:
     source_license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
     source_url: https://doi.org/10.24381/cds.a4fdd6b9
     processing_script: hydro/glofas_era5/glofas_cds_get.py
+    source_temporal_extent:
+      start: '1980-01-01'
+      end: '2021-05-31'
   version: 31
   path: hydro/glofas_era5/glofas_v31_{year}.nc
   rename:
@@ -721,7 +749,7 @@ glofas_uparea:
   rename:
     glofas_v31_uparea: uparea
   unit_mult:
-    uparea: 0.000001
+    uparea: 1.0e-06
 
 glw_buffaloes:
   crs: 4326
@@ -964,7 +992,10 @@ gtsm_codec_reanalysis_{freq}_v1:
   version: 1
   path: p:/11205028-c3s_435/01_data/01_Timeseries/timeseries2/{variable}/reanalysis_{variable}_{freq}_{year}_{month:02d}_v1.nc
   placeholders:
-    freq: [10min, hourly, dailymax]
+    freq:
+    - 10min
+    - hourly
+    - dailymax
   rename:
     station_x_coordinate: lon
     station_y_coordinate: lat
@@ -1209,7 +1240,8 @@ modis_lai:
     concat: true
   meta:
     category: landuse
-    notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the period '2003-01-01', '2017-12-31'
+    notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the
+      period '2003-01-01', '2017-12-31'
     paper_doi: 10.5067/MODIS/MCD15A3H.006
     paper_ref: Myneni et al (2015)
     source_license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
@@ -1314,11 +1346,15 @@ SM2RAIN_ASCAT_monthly_025_v1.4:
       time: 84
   meta:
     category: meteo
-    notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.25-degree resolution
+    notes: crs guessed as it is neither mentioned in the data nor in the literature,
+      0.25-degree resolution
     paper_doi: 10.5194/essd-11-1583-2019
     paper_ref: Brocca et al. (2019)
     source_license: https://creativecommons.org/licenses/by/4.0/legalcode
     source_url: https://zenodo.org/record/4570192#.YueKJWNByUl
+    source_temporal_extent:
+      start: '2007-01-01'
+      end: '2020-12-01'
   version: 1.4
   path: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_025_2007_2020.nc
   rename:
@@ -1335,11 +1371,15 @@ SM2RAIN_ASCAT_monthly_05_v1.4:
       time: 84
   meta:
     category: meteo
-    notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.5-degree resolution
+    notes: crs guessed as it is neither mentioned in the data nor in the literature,
+      0.5-degree resolution
     paper_doi: 10.5194/essd-11-1583-2019
     paper_ref: Brocca et al. (2019)
     source_license: https://creativecommons.org/licenses/by/4.0/legalcode
     source_url: https://zenodo.org/record/4570192#.YueKJWNByUl
+    source_temporal_extent:
+      start: '2007-01-01'
+      end: '2020-12-01'
   version: 1.4
   path: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_05_2007_2020.nc
   rename:
@@ -1356,176 +1396,178 @@ soilgrids:
   meta:
     category: soil
   variants:
-    - version: 2017
-      path: soil/soilgrids_v1.0/*_250m_ll.tif
-      meta:
-        notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil
-        database distribution version 2.0, european commission and the European soil bureau\n network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos,
-        P., Van Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre: Response to european policy support  and public data requirements.
-        Land Use Policy 29 (2), 329â€“338. \n"
-        paper_doi: 10.1371/journal.pone.0169748
-        paper_ref: Hengl et al. (2017)
-        source_license: ODbL
-        source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids-201
-      rename:
-        BLDFIE_M_sl1_250m_ll: bd_sl1
-        BLDFIE_M_sl2_250m_ll: bd_sl2
-        BLDFIE_M_sl3_250m_ll: bd_sl3
-        BLDFIE_M_sl4_250m_ll: bd_sl4
-        BLDFIE_M_sl5_250m_ll: bd_sl5
-        BLDFIE_M_sl6_250m_ll: bd_sl6
-        BLDFIE_M_sl7_250m_ll: bd_sl7
-        CLYPPT_M_sl1_250m_ll: clyppt_sl1
-        CLYPPT_M_sl2_250m_ll: clyppt_sl2
-        CLYPPT_M_sl3_250m_ll: clyppt_sl3
-        CLYPPT_M_sl4_250m_ll: clyppt_sl4
-        CLYPPT_M_sl5_250m_ll: clyppt_sl5
-        CLYPPT_M_sl6_250m_ll: clyppt_sl6
-        CLYPPT_M_sl7_250m_ll: clyppt_sl7
-        ORCDRC_M_sl1_250m_ll: oc_sl1
-        ORCDRC_M_sl2_250m_ll: oc_sl2
-        ORCDRC_M_sl3_250m_ll: oc_sl3
-        ORCDRC_M_sl4_250m_ll: oc_sl4
-        ORCDRC_M_sl5_250m_ll: oc_sl5
-        ORCDRC_M_sl6_250m_ll: oc_sl6
-        ORCDRC_M_sl7_250m_ll: oc_sl7
-        PHIHOX_M_sl1_250m_ll: ph_sl1
-        PHIHOX_M_sl2_250m_ll: ph_sl2
-        PHIHOX_M_sl3_250m_ll: ph_sl3
-        PHIHOX_M_sl4_250m_ll: ph_sl4
-        PHIHOX_M_sl5_250m_ll: ph_sl5
-        PHIHOX_M_sl6_250m_ll: ph_sl6
-        PHIHOX_M_sl7_250m_ll: ph_sl7
-        SLTPPT_M_sl1_250m_ll: sltppt_sl1
-        SLTPPT_M_sl2_250m_ll: sltppt_sl2
-        SLTPPT_M_sl3_250m_ll: sltppt_sl3
-        SLTPPT_M_sl4_250m_ll: sltppt_sl4
-        SLTPPT_M_sl5_250m_ll: sltppt_sl5
-        SLTPPT_M_sl6_250m_ll: sltppt_sl6
-        SLTPPT_M_sl7_250m_ll: sltppt_sl7
-        SNDPPT_M_sl1_250m_ll: sndppt_sl1
-        SNDPPT_M_sl2_250m_ll: sndppt_sl2
-        SNDPPT_M_sl3_250m_ll: sndppt_sl3
-        SNDPPT_M_sl4_250m_ll: sndppt_sl4
-        SNDPPT_M_sl5_250m_ll: sndppt_sl5
-        SNDPPT_M_sl6_250m_ll: sndppt_sl6
-        SNDPPT_M_sl7_250m_ll: sndppt_sl7
-        SoilThickness_250m_ll: soilthickness
-        TAXOUSDA_250m_ll: tax_usda
-      unit_mult:
-        bd_sl1: 0.001
-        bd_sl2: 0.001
-        bd_sl3: 0.001
-        bd_sl4: 0.001
-        bd_sl5: 0.001
-        bd_sl6: 0.001
-        bd_sl7: 0.001
-        oc_sl1: 0.1
-        oc_sl2: 0.1
-        oc_sl3: 0.1
-        oc_sl4: 0.1
-        oc_sl5: 0.1
-        oc_sl6: 0.1
-        oc_sl7: 0.1
-        ph_sl1: 0.1
-        ph_sl2: 0.1
-        ph_sl3: 0.1
-        ph_sl4: 0.1
-        ph_sl5: 0.1
-        ph_sl6: 0.1
-        ph_sl7: 0.1
-    - version: 2020
-      path: soil/soilgrids_v2.0/*/*_mean.vrt
-      meta:
-        paper_doi: https://doi.org/10.5194/soil-2020-65
-        paper_ref: de Sousa et al. (2020)
-        source_license: CC BY 4.0
-        source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids
-        processing_script: soil/soilgrids_v2.0/src/preprocess_soilgrids_v2020.ipynb
-        processing_notes: soil/soilgrids_v2.0/src/readme.txt
-      rename:
-        bdod_0-5cm_mean: bd_sl1
-        bdod_5-15cm_mean: bd_sl2
-        bdod_15-30cm_mean: bd_sl3
-        bdod_30-60cm_mean: bd_sl4
-        bdod_60-100cm_mean: bd_sl5
-        bdod_100-200cm_mean: bd_sl6
-        clay_0-5cm_mean: clyppt_sl1
-        clay_5-15cm_mean: clyppt_sl2
-        clay_15-30cm_mean: clyppt_sl3
-        clay_30-60cm_mean: clyppt_sl4
-        clay_60-100cm_mean: clyppt_sl5
-        clay_100-200cm_mean: clyppt_sl6
-        soc_0-5cm_mean: oc_sl1
-        soc_5-15cm_mean: oc_sl2
-        soc_15-30cm_mean: oc_sl3
-        soc_30-60cm_mean: oc_sl4
-        soc_60-100cm_mean: oc_sl5
-        soc_100-200cm_mean: oc_sl6
-        phh2o_0-5cm_mean: ph_sl1
-        phh2o_5-15cm_mean: ph_sl2
-        phh2o_15-30cm_mean: ph_sl3
-        phh2o_30-60cm_mean: ph_sl4
-        phh2o_60-100cm_mean: ph_sl5
-        phh2o_100-200cm_mean: ph_sl6
-        silt_0-5cm_mean: sltppt_sl1
-        silt_5-15cm_mean: sltppt_sl2
-        silt_15-30cm_mean: sltppt_sl3
-        silt_30-60cm_mean: sltppt_sl4
-        silt_60-100cm_mean: sltppt_sl5
-        silt_100-200cm_mean: sltppt_sl6
-        sand_0-5cm_mean: sndppt_sl1
-        sand_5-15cm_mean: sndppt_sl2
-        sand_15-30cm_mean: sndppt_sl3
-        sand_30-60cm_mean: sndppt_sl4
-        sand_60-100cm_mean: sndppt_sl5
-        sand_100-200cm_mean: sndppt_sl6
-        SoilThickness_250_mean: soilthickness
-        TAXOUSDA_250_mean: tax_usda
-      unit_mult:
-        bd_sl1: 0.01
-        bd_sl2: 0.01
-        bd_sl3: 0.01
-        bd_sl4: 0.01
-        bd_sl5: 0.01
-        bd_sl6: 0.01
-        bd_sl7: 0.01
-        oc_sl1: 0.01
-        oc_sl2: 0.01
-        oc_sl3: 0.01
-        oc_sl4: 0.01
-        oc_sl5: 0.01
-        oc_sl6: 0.01
-        oc_sl7: 0.01
-        ph_sl1: 0.1
-        ph_sl2: 0.1
-        ph_sl3: 0.1
-        ph_sl4: 0.1
-        ph_sl5: 0.1
-        ph_sl6: 0.1
-        ph_sl7: 0.1
-        clyppt_sl1: 0.1
-        clyppt_sl2: 0.1
-        clyppt_sl3: 0.1
-        clyppt_sl4: 0.1
-        clyppt_sl5: 0.1
-        clyppt_sl6: 0.1
-        clyppt_sl7: 0.1
-        sltppt_sl1: 0.1
-        sltppt_sl2: 0.1
-        sltppt_sl3: 0.1
-        sltppt_sl4: 0.1
-        sltppt_sl5: 0.1
-        sltppt_sl6: 0.1
-        sltppt_sl7: 0.1
-        sndppt_sl1: 0.1
-        sndppt_sl2: 0.1
-        sndppt_sl3: 0.1
-        sndppt_sl4: 0.1
-        sndppt_sl5: 0.1
-        sndppt_sl6: 0.1
-        sndppt_sl7: 0.1
-
+  - version: 2017
+    path: soil/soilgrids_v1.0/*_250m_ll.tif
+    meta:
+      notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
+        \ (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database\
+        \ distribution version 2.0, european commission and the European soil bureau\n\
+        \ network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van\
+        \ Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre:\
+        \ Response to european policy support  and public data requirements. Land\
+        \ Use Policy 29 (2), 329\xC3\xA2\xE2\u201A\xAC\xE2\u20AC\u0153338. \n"
+      paper_doi: 10.1371/journal.pone.0169748
+      paper_ref: Hengl et al. (2017)
+      source_license: ODbL
+      source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids-201
+    rename:
+      BLDFIE_M_sl1_250m_ll: bd_sl1
+      BLDFIE_M_sl2_250m_ll: bd_sl2
+      BLDFIE_M_sl3_250m_ll: bd_sl3
+      BLDFIE_M_sl4_250m_ll: bd_sl4
+      BLDFIE_M_sl5_250m_ll: bd_sl5
+      BLDFIE_M_sl6_250m_ll: bd_sl6
+      BLDFIE_M_sl7_250m_ll: bd_sl7
+      CLYPPT_M_sl1_250m_ll: clyppt_sl1
+      CLYPPT_M_sl2_250m_ll: clyppt_sl2
+      CLYPPT_M_sl3_250m_ll: clyppt_sl3
+      CLYPPT_M_sl4_250m_ll: clyppt_sl4
+      CLYPPT_M_sl5_250m_ll: clyppt_sl5
+      CLYPPT_M_sl6_250m_ll: clyppt_sl6
+      CLYPPT_M_sl7_250m_ll: clyppt_sl7
+      ORCDRC_M_sl1_250m_ll: oc_sl1
+      ORCDRC_M_sl2_250m_ll: oc_sl2
+      ORCDRC_M_sl3_250m_ll: oc_sl3
+      ORCDRC_M_sl4_250m_ll: oc_sl4
+      ORCDRC_M_sl5_250m_ll: oc_sl5
+      ORCDRC_M_sl6_250m_ll: oc_sl6
+      ORCDRC_M_sl7_250m_ll: oc_sl7
+      PHIHOX_M_sl1_250m_ll: ph_sl1
+      PHIHOX_M_sl2_250m_ll: ph_sl2
+      PHIHOX_M_sl3_250m_ll: ph_sl3
+      PHIHOX_M_sl4_250m_ll: ph_sl4
+      PHIHOX_M_sl5_250m_ll: ph_sl5
+      PHIHOX_M_sl6_250m_ll: ph_sl6
+      PHIHOX_M_sl7_250m_ll: ph_sl7
+      SLTPPT_M_sl1_250m_ll: sltppt_sl1
+      SLTPPT_M_sl2_250m_ll: sltppt_sl2
+      SLTPPT_M_sl3_250m_ll: sltppt_sl3
+      SLTPPT_M_sl4_250m_ll: sltppt_sl4
+      SLTPPT_M_sl5_250m_ll: sltppt_sl5
+      SLTPPT_M_sl6_250m_ll: sltppt_sl6
+      SLTPPT_M_sl7_250m_ll: sltppt_sl7
+      SNDPPT_M_sl1_250m_ll: sndppt_sl1
+      SNDPPT_M_sl2_250m_ll: sndppt_sl2
+      SNDPPT_M_sl3_250m_ll: sndppt_sl3
+      SNDPPT_M_sl4_250m_ll: sndppt_sl4
+      SNDPPT_M_sl5_250m_ll: sndppt_sl5
+      SNDPPT_M_sl6_250m_ll: sndppt_sl6
+      SNDPPT_M_sl7_250m_ll: sndppt_sl7
+      SoilThickness_250m_ll: soilthickness
+      TAXOUSDA_250m_ll: tax_usda
+    unit_mult:
+      bd_sl1: 0.001
+      bd_sl2: 0.001
+      bd_sl3: 0.001
+      bd_sl4: 0.001
+      bd_sl5: 0.001
+      bd_sl6: 0.001
+      bd_sl7: 0.001
+      oc_sl1: 0.1
+      oc_sl2: 0.1
+      oc_sl3: 0.1
+      oc_sl4: 0.1
+      oc_sl5: 0.1
+      oc_sl6: 0.1
+      oc_sl7: 0.1
+      ph_sl1: 0.1
+      ph_sl2: 0.1
+      ph_sl3: 0.1
+      ph_sl4: 0.1
+      ph_sl5: 0.1
+      ph_sl6: 0.1
+      ph_sl7: 0.1
+  - version: 2020
+    path: soil/soilgrids_v2.0/*/*_mean.vrt
+    meta:
+      paper_doi: https://doi.org/10.5194/soil-2020-65
+      paper_ref: de Sousa et al. (2020)
+      source_license: CC BY 4.0
+      source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids
+      processing_script: soil/soilgrids_v2.0/src/preprocess_soilgrids_v2020.ipynb
+      processing_notes: soil/soilgrids_v2.0/src/readme.txt
+    rename:
+      bdod_0-5cm_mean: bd_sl1
+      bdod_5-15cm_mean: bd_sl2
+      bdod_15-30cm_mean: bd_sl3
+      bdod_30-60cm_mean: bd_sl4
+      bdod_60-100cm_mean: bd_sl5
+      bdod_100-200cm_mean: bd_sl6
+      clay_0-5cm_mean: clyppt_sl1
+      clay_5-15cm_mean: clyppt_sl2
+      clay_15-30cm_mean: clyppt_sl3
+      clay_30-60cm_mean: clyppt_sl4
+      clay_60-100cm_mean: clyppt_sl5
+      clay_100-200cm_mean: clyppt_sl6
+      soc_0-5cm_mean: oc_sl1
+      soc_5-15cm_mean: oc_sl2
+      soc_15-30cm_mean: oc_sl3
+      soc_30-60cm_mean: oc_sl4
+      soc_60-100cm_mean: oc_sl5
+      soc_100-200cm_mean: oc_sl6
+      phh2o_0-5cm_mean: ph_sl1
+      phh2o_5-15cm_mean: ph_sl2
+      phh2o_15-30cm_mean: ph_sl3
+      phh2o_30-60cm_mean: ph_sl4
+      phh2o_60-100cm_mean: ph_sl5
+      phh2o_100-200cm_mean: ph_sl6
+      silt_0-5cm_mean: sltppt_sl1
+      silt_5-15cm_mean: sltppt_sl2
+      silt_15-30cm_mean: sltppt_sl3
+      silt_30-60cm_mean: sltppt_sl4
+      silt_60-100cm_mean: sltppt_sl5
+      silt_100-200cm_mean: sltppt_sl6
+      sand_0-5cm_mean: sndppt_sl1
+      sand_5-15cm_mean: sndppt_sl2
+      sand_15-30cm_mean: sndppt_sl3
+      sand_30-60cm_mean: sndppt_sl4
+      sand_60-100cm_mean: sndppt_sl5
+      sand_100-200cm_mean: sndppt_sl6
+      SoilThickness_250_mean: soilthickness
+      TAXOUSDA_250_mean: tax_usda
+    unit_mult:
+      bd_sl1: 0.01
+      bd_sl2: 0.01
+      bd_sl3: 0.01
+      bd_sl4: 0.01
+      bd_sl5: 0.01
+      bd_sl6: 0.01
+      bd_sl7: 0.01
+      oc_sl1: 0.01
+      oc_sl2: 0.01
+      oc_sl3: 0.01
+      oc_sl4: 0.01
+      oc_sl5: 0.01
+      oc_sl6: 0.01
+      oc_sl7: 0.01
+      ph_sl1: 0.1
+      ph_sl2: 0.1
+      ph_sl3: 0.1
+      ph_sl4: 0.1
+      ph_sl5: 0.1
+      ph_sl6: 0.1
+      ph_sl7: 0.1
+      clyppt_sl1: 0.1
+      clyppt_sl2: 0.1
+      clyppt_sl3: 0.1
+      clyppt_sl4: 0.1
+      clyppt_sl5: 0.1
+      clyppt_sl6: 0.1
+      clyppt_sl7: 0.1
+      sltppt_sl1: 0.1
+      sltppt_sl2: 0.1
+      sltppt_sl3: 0.1
+      sltppt_sl4: 0.1
+      sltppt_sl5: 0.1
+      sltppt_sl6: 0.1
+      sltppt_sl7: 0.1
+      sndppt_sl1: 0.1
+      sndppt_sl2: 0.1
+      sndppt_sl3: 0.1
+      sndppt_sl4: 0.1
+      sndppt_sl5: 0.1
+      sndppt_sl6: 0.1
+      sndppt_sl7: 0.1
 
 vito:
   crs: 4326
@@ -1671,8 +1713,6 @@ worldpop_2020_UNadj_constrained:
     ppp_2020_UNadj_constrained: population
 
 wsf_bld_2015:
-  alias: wsf_bld_2015_v1
-wsf_bld_2015_v1:
   crs: 4326
   data_type: RasterDataset
   driver: raster
