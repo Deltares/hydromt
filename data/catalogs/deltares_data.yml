@@ -1453,8 +1453,16 @@ pcr_globwb:
     source_url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
     source_version: 2017.11b1
     processing_script: hydro/pcr_globwb/prep_glob.py
+  variants:
+  - version: 1990
+    path: hydro/pcr_globwb/glob_1990.zarr
+  - version: 1995
+    path: hydro/pcr_globwb/glob_1995.zarr
+  - version: 2000
+    path: hydro/pcr_globwb/glob_2000.zarr
+  - version: 2005
+    path: hydro/pcr_globwb/glob_2005.zarr
   nodata: -9999
-  path: hydro/pcr_globwb/glob_2005.zarr
   rename:
     domesticNettoDemand: dom_net
     domesticGrossDemand: dom_gross
