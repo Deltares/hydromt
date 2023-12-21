@@ -12,6 +12,9 @@ changed
 ^^^^^^^
 - Updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
 
+added
+^^^^^
+- Added waterdemand pcr_globwb dataset
 
 
 version: 2023.2
