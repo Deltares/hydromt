@@ -5,15 +5,15 @@ Change log predefined datasets
 deltares_data
 =============
 
-version: 2023.3
----------------
+version: 2023.12
+-----------------
 
 changed
 ^^^^^^^
+- Updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
 - removed source_version from data source meta
 - kwargs to driver_kwargs
 - updated source_url if url was not working anymore
-
 
 added
 ^^^^^
@@ -22,8 +22,6 @@ added
 - processing_script / processing_notes arguments to data sources that have been (pre-) processed
 
 
-deltares_data
-=============
 
 version: 2023.2
 ----------------

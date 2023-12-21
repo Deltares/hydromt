@@ -6,11 +6,18 @@
 #    versions:
 #       <calendar_version>: <git hash / tag>
 #    notes: <notes used in >
-# if new versions of the data_catalogs are created, the current file predefined_catalogs.yml should be edited in main (not in the branch).
+#
+# Notes:
+# if new versions of the data_catalogs are created to table below should be updated by:
+#  - adding the new version with a reference to main, e.g., v2023.2: main
+#  - updating the git hash or git tag of the previous version, e.g., v2023.1: 0bf8e2a1e716095dc6df54a5e9114ce88da0701b
+#    the git hash of the previous version can be found by browsing to the catalog file in the github main branch and then clicking on the history button
+
 deltares_data:
   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/deltares_data.yml
   versions:
-    v2023.2: main
+    v2023.12: main
+    v2023.2: 0bf8e2a1e716095dc6df54a5e9114ce88da0701b
     v2022.7: e082da339f22cb1fc3571eec5a901a21d1c8a7bd
     v2022.5: d88cc47bd4ecc83de38c00aa554a7d48ad23ec23
   notes: This data is only accessible when connected to the Deltares network.

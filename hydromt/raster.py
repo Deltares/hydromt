@@ -229,6 +229,10 @@ class XGeoBase(object):
         """Initialize new object based on the xarray object provided."""
         self._obj = xarray_obj
         self._crs = None
+
+    @property
+    def attrs(self) -> dict:
+        """Return dictionary of spatial attributes."""
         # create new coordinate with attributes in which to save x_dim, y_dim and crs.
         # other spatial properties are always calculated on the fly to ensure
         # consistency with data
@@ -236,19 +240,17 @@ class XGeoBase(object):
             self._obj = self._obj.set_coords(GEO_MAP_COORD)
         elif GEO_MAP_COORD not in self._obj.coords:
             self._obj.coords[GEO_MAP_COORD] = xr.Variable((), 0)
-
-    @property
-    def attrs(self) -> dict:
-        """Return dictionary of spatial attributes."""
+        if isinstance(self._obj.coords[GEO_MAP_COORD].data, dask.array.Array):
+            self._obj[GEO_MAP_COORD].load()  # make sure spatial ref is not lazy
         return self._obj.coords[GEO_MAP_COORD].attrs
 
     def set_attrs(self, **kwargs) -> None:
         """Update spatial attributes. Usage raster.set_attr(key=value)."""
-        self._obj.coords[GEO_MAP_COORD].attrs.update(**kwargs)
+        self.attrs.update(**kwargs)
 
     def get_attrs(self, key, placeholder=None) -> Any:
         """Return single spatial attribute."""
-        return self._obj.coords[GEO_MAP_COORD].attrs.get(key, placeholder)
+        return self.attrs.get(key, placeholder)
 
     @property
     def time_dim(self):
@@ -658,7 +660,7 @@ class XRasterBase(XGeoBase):
             dims = tuple(extra_dims) + dims
             self.set_attrs(dim0=extra_dims[0])
         elif len(extra_dims) == 0:
-            self._obj.coords[GEO_MAP_COORD].attrs.pop("dim0", None)
+            self.attrs.pop("dim0", None)
         elif len(extra_dims) > 1:
             raise ValueError("Only 2D and 3D data arrays supported.")
         if isinstance(self._obj, xr.Dataset):
@@ -753,8 +755,8 @@ class XRasterBase(XGeoBase):
             )
         grid_map_attrs.update({"x_dim": x_dim, "y_dim": y_dim})
         # reset and write grid mapping attributes
-        obj_out.coords[GEO_MAP_COORD] = xr.Variable((), 0)
-        obj_out.coords[GEO_MAP_COORD].attrs.update(**grid_map_attrs)
+        obj_out.drop(GEO_MAP_COORD, errors="ignore")
+        obj_out.raster.set_attrs(**grid_map_attrs)
         # set grid mapping attribute for each data variable
         if hasattr(obj_out, "data_vars"):
             for var in obj_out.data_vars:
@@ -2099,11 +2101,11 @@ class RasterDataArray(XRasterBase):
         da : xarray.DataArray
             Reprojected object.
         """
-        # clip first; then reproject
-        da = self._obj
-        if self.aligned_grid(other):
+        if self.identical_grid(other):
+            da = self._obj
+        elif self.aligned_grid(other):  # aligned grid; just clip
             da = self.clip_bbox(other.raster.bounds)
-        elif not self.identical_grid(other):
+        else:  # clip first; then reproject
             da_clip = self.clip_bbox(other.raster.transform_bounds(self.crs), buffer=2)
             if np.any(np.array(da_clip.raster.shape) < 2):
                 # out of bounds -> return empty array
@@ -2119,6 +2121,7 @@ class RasterDataArray(XRasterBase):
                     dst_height=other.raster.height,
                     method=method,
                 )
+
         if (
             da.raster.x_dim != other.raster.x_dim
             or da.raster.y_dim != other.raster.y_dim
@@ -2193,6 +2196,7 @@ class RasterDataArray(XRasterBase):
             da_temp = da_temp.chunk(chunks)
             # map blocks
             da_reproj = _da.map_blocks(_reindex2d, kwargs=kwargs, template=da_temp)
+        da_reproj.raster.set_crs(index.raster.crs)
         da_reproj.raster.set_nodata(dst_nodata)
         return da_reproj.raster.reset_spatial_dims_attrs()
 

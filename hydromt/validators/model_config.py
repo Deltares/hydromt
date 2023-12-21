@@ -1,6 +1,6 @@
 """Pydantic models for the validation of model config files."""
 from inspect import Parameter, signature
-from typing import Any, Callable, Dict, Type
+from typing import Any, Callable, Dict, List, Type
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -8,7 +8,7 @@ from hydromt.models import Model
 
 
 class HydromtModelStep(BaseModel):
-    """A Pydantic model for the validation of model config files."""
+    """A Pydantic model for the validation of model setup functions."""
 
     model: Type[Model]
     fn: Callable
@@ -28,7 +28,9 @@ class HydromtModelStep(BaseModel):
         try:
             fn = getattr(model, fn_name)
         except AttributeError:
-            raise ValueError(f"Model does not have function {fn_name}")
+            raise ValueError(
+                f"Model of type {model.__name__} does not have function {fn_name}"
+            )
 
         sig = signature(fn)
         sig_has_var_keyword = (
@@ -54,3 +56,19 @@ class HydromtModelStep(BaseModel):
             )
 
         return HydromtModelStep(model=model, fn=fn, args=arg_dict)
+
+
+class HydromtModelSetup(BaseModel):
+    """A Pydantic model for the validation of model setup files."""
+
+    steps: List[HydromtModelStep]
+
+    @staticmethod
+    def from_dict(input_dict: Dict[str, Any], model: Model):
+        """Generate a validated model of a sequence steps in a model config file."""
+        return HydromtModelSetup(
+            steps=[
+                HydromtModelStep.from_dict({fn_name: fn_args}, model)
+                for fn_name, fn_args in input_dict.items()
+            ]
+        )

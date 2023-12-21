@@ -551,6 +551,12 @@ class RasterDatasetAdapter(DataAdapter):
                     handle_nodata,
                     logger,
                 )
+            # check if bbox is fully covered
+            w, s, e, n = ds.raster.bounds
+            if not (w <= bbox[0] and s <= bbox[1] and e >= bbox[2] and n >= bbox[3]):
+                logger.warning(
+                    f"Dataset does [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
+                )
 
         return ds
 
