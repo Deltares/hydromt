@@ -22,6 +22,9 @@ added
 - processing_script / processing_notes arguments to data sources that have been (pre-) processed
 - temporal extent of datasets that have a temporal dimension.
 
+added
+^^^^^
+- Added waterdemand pcr_globwb dataset
 
 
 version: 2023.2
