@@ -18,9 +18,11 @@ Added
 - Check CLI command can now validate bbox and geom regions (#664)
 - Added GADM 4.1 as FlatGeoBuff files to deltares_data catalog (#686)
 
+
 Changed
 -------
 - Export CLI now uses '-s' for source, '-t' for time and '-i' for config. (#660)
+- Updated deltares_data data catalog to incorporate the newest data catalog features (#667)
 
 Fixed
 -----
