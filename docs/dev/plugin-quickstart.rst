@@ -313,11 +313,13 @@ users may only want to read a model using HydroMT to visualise or plot data. As 
 can then be opened in read only mode ('r') and HydroMT should not be able to overwrite any data. HydroMT
 `Model` class has two properties you can use to check for this:
 
-  - `self._assert_read_mode` if a model can be read
-  - `self._assert_write_mode` if a model can be written
+  - `self._assert_read_mode()` if a model can be read
+  - `self._assert_write_mode()` if a model can be written
 
-3. If needed, transform and write the component to the right format and file(s).
-4. Don't hesitate to put some logger information for your user.
+3. For reading, initialise the model component with, e.g. for geoms `self._initialize_geom(skip_read=True)`. This will
+   initialise the component with an empty object, but ensure that the component is not read twice.
+4. If needed, transform and write the component to the right format and file(s).
+5. Don't hesitate to put some logger information for your user.
 
 Set model components
 ^^^^^^^^^^^^^^^^^^^^

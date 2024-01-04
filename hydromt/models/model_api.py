@@ -12,7 +12,7 @@ from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -117,11 +117,10 @@ class Model(object, metaclass=ABCMeta):
 
         # placeholders
         # metadata maps that can be at different resolutions
-        self._config = None  # nested dictionary
+        self._config: Optional[Dict[str:Literal]] = None  # nested dictionary
         self._maps: Optional[XArrayDict] = None
         self._tables: Dict[str, pd.DataFrame] = None
 
-        # NOTE was staticgeoms in <=v0.5
         self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
         self._forcing: Optional[XArrayDict] = None
         self._states: Optional[XArrayDict] = None
@@ -619,11 +618,18 @@ class Model(object, metaclass=ABCMeta):
     def config(self) -> Dict[str, Union[Dict, str]]:
         """Model configuration. Returns a (nested) dictionary."""
         if self._config is None:
-            # initialize occurs in read_config
-            # model config if in read-mode and it exists
-            # default config if in write-mode
-            self.read_config()
+            self._initialize_config()
         return self._config
+
+    def _initialize_config(self, skip_read=False) -> None:
+        """Initialize the model config."""
+        if self._config is None:
+            self._config = dict()
+            if not skip_read:
+                # no check for read mode here
+                # model config is read if in read-mode and it exists
+                # default config if in write-mode
+                self.read_config()
 
     def set_config(self, *args):
         """Update the config dictionary at key(s) with values.
@@ -644,18 +650,76 @@ class Model(object, metaclass=ABCMeta):
         >> set_config('b', 'c', 'd', 99) # identical to set_config('b.d.e', 99)
         >> {'a': 1, 'b': {'c': {'d': 99}}}
         """
+        self._initialize_config()
         if len(args) < 2:
             raise TypeError("set_config() requires a least one key and one value.")
         args = list(args)
         value = args.pop(-1)
         if len(args) == 1 and "." in args[0]:
             args = args[0].split(".") + args[1:]
-        branch = self.config  # trigger initialization / reads config at first call
+        branch = self._config
         for key in args[:-1]:
             if key not in branch or not isinstance(branch[key], dict):
                 branch[key] = {}
             branch = branch[key]
         branch[args[-1]] = value
+
+    def read_config(self, config_fn: Optional[str] = None):
+        """Parse config from file.
+
+        If no config file found a default config file is returned in writing mode.
+        """
+        prefix = "User defined"
+        if config_fn is None:  # prioritize user defined config path (new v0.4.1)
+            if not self._read:  # write-only mode > read default config
+                config_fn = join(self._DATADIR, self._NAME, self._CONF)
+                prefix = "Default"
+            elif self.root is not None:  # append or write mode > read model config
+                config_fn = join(self.root, self._config_fn)
+                prefix = "Model"
+        cfdict = dict()
+        if config_fn is not None:
+            if isfile(config_fn):
+                cfdict = self._configread(config_fn)
+                self.logger.debug(f"{prefix} config read from {config_fn}")
+            elif (
+                self._root is not None
+                and not isabs(config_fn)
+                and isfile(join(self._root, config_fn))
+            ):
+                cfdict = self._configread(join(self.root, config_fn))
+                self.logger.debug(
+                    f"{prefix} config read from {join(self.root,config_fn)}"
+                )
+            elif isfile(abspath(config_fn)):
+                cfdict = self._configread(abspath(config_fn))
+                self.logger.debug(f"{prefix} config read from {abspath(config_fn)}")
+            else:  # skip for missing default
+                self.logger.error(f"{prefix} config file not found at {config_fn}")
+
+        # always overwrite config when reading
+        self._config = cfdict
+
+    def write_config(
+        self, config_name: Optional[str] = None, config_root: Optional[str] = None
+    ):
+        """Write config to <root/config_fn>."""
+        self._assert_write_mode()
+        if config_name is not None:
+            self._config_fn = config_name
+        elif self._config_fn is None:
+            self._config_fn = self._CONF
+        if config_root is None:
+            config_root = self.root
+        fn = join(config_root, self._config_fn)
+        self.logger.info(f"Writing model config to {fn}")
+        self._configwrite(fn)
+
+    def _configread(self, fn: str):
+        return config.configread(fn, abs_path=False)
+
+    def _configwrite(self, fn: str):
+        return config.configwrite(fn, self.config)
 
     def setup_config(self, **cfdict):
         """Update config with a dictionary."""
@@ -714,20 +778,19 @@ class Model(object, metaclass=ABCMeta):
                 value = Path(abspath(join(self.root, value)))
         return value
 
-    def _configread(self, fn: str):
-        return config.configread(fn, abs_path=False)
-
-    def _configwrite(self, fn: str):
-        return config.configwrite(fn, self.config)
-
     @property
     def tables(self) -> Dict[str, pd.DataFrame]:
         """Model tables."""
         if self._tables is None:
-            self._tables = dict()
-            if self._read:
-                self.read_tables()
+            self._initialize_tables()
         return self._tables
+
+    def _initialize_tables(self, skip_read=False) -> None:
+        """Initialize the model tables."""
+        if self._tables is None:
+            self._tables = dict()
+            if self._read and not skip_read:
+                self.read_tables()
 
     def write_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Write tables at <root>/tables."""
@@ -746,6 +809,7 @@ class Model(object, metaclass=ABCMeta):
     def read_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Read table files at <root>/tables and parse to dict of dataframes."""
         self._assert_read_mode()
+        self._initialize_tables(skip_read=True)
         self.logger.info("Reading model table files.")
         fns = glob.glob(join(self.root, fn.format(name="*")))
         if len(fns) > 0:
@@ -767,6 +831,7 @@ class Model(object, metaclass=ABCMeta):
         name : str, optional
             Name of table, by default None. Required when tables is not a dict.
         """
+        self._initialize_tables()
         if not isinstance(tables, dict) and name is None:
             raise ValueError("name required when tables is not a dict")
         elif not isinstance(tables, dict):
@@ -776,13 +841,13 @@ class Model(object, metaclass=ABCMeta):
                 raise ValueError(
                     "table type not recognized, should be pandas DataFrame or Series."
                 )
-            if name in self.tables:
+            if name in self._tables:
                 if not self._write:
                     raise IOError(f"Cannot overwrite table {name} in read-only mode")
                 elif self._read:
                     self.logger.warning(f"Overwriting table: {name}")
 
-            self.tables[name] = df
+            self._tables[name] = df
 
     def get_tables_merged(self) -> pd.DataFrame:
         """Return all tables of a model merged into one dataframe."""
@@ -790,56 +855,6 @@ class Model(object, metaclass=ABCMeta):
         return pd.concat(
             [df.assign(table_origin=name) for name, df in self.tables.items()], axis=0
         )
-
-    def read_config(self, config_fn: Optional[str] = None):
-        """Parse config from file.
-
-        If no config file found a default config file is returned in writing mode.
-        """
-        prefix = "User defined"
-        if config_fn is None:  # prioritize user defined config path (new v0.4.1)
-            if not self._read:  # write-only mode > read default config
-                config_fn = join(self._DATADIR, self._NAME, self._CONF)
-                prefix = "Default"
-            elif self.root is not None:  # append or write mode > read model config
-                config_fn = join(self.root, self._config_fn)
-                prefix = "Model"
-        cfdict = dict()
-        if config_fn is not None:
-            if isfile(config_fn):
-                cfdict = self._configread(config_fn)
-                self.logger.debug(f"{prefix} config read from {config_fn}")
-            elif (
-                self._root is not None
-                and not isabs(config_fn)
-                and isfile(join(self._root, config_fn))
-            ):
-                cfdict = self._configread(join(self.root, config_fn))
-                self.logger.debug(
-                    f"{prefix} config read from {join(self.root,config_fn)}"
-                )
-            elif isfile(abspath(config_fn)):
-                cfdict = self._configread(abspath(config_fn))
-                self.logger.debug(f"{prefix} config read from {abspath(config_fn)}")
-            else:  # skip for missing default
-                self.logger.error(f"{prefix} config file not found at {config_fn}")
-
-        self._config = cfdict
-
-    def write_config(
-        self, config_name: Optional[str] = None, config_root: Optional[str] = None
-    ):
-        """Write config to <root/config_fn>."""
-        self._assert_write_mode()
-        if config_name is not None:
-            self._config_fn = config_name
-        elif self._config_fn is None:
-            self._config_fn = self._CONF
-        if config_root is None:
-            config_root = self.root
-        fn = join(config_root, self._config_fn)
-        self.logger.info(f"Writing model config to {fn}")
-        self._configwrite(fn)
 
     # model static maps
     @property
@@ -1117,10 +1132,15 @@ class Model(object, metaclass=ABCMeta):
     def maps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model maps. Returns dict of xarray.DataArray or xarray.Dataset."""
         if self._maps is None:
-            self._maps = dict()
-            if self._read:
-                self.read_maps()
+            self._initialize_maps()
         return self._maps
+
+    def _initialize_maps(self, skip_read=False) -> None:
+        """Initialize maps."""
+        if self._maps is None:
+            self._maps = dict()
+            if self._read and not skip_read:
+                self.read_maps()
 
     def set_maps(
         self,
@@ -1143,9 +1163,10 @@ class Model(object, metaclass=ABCMeta):
         split_dataset: bool, optional
             If data is a xarray.Dataset split it into several xarray.DataArrays.
         """
+        self._initialize_maps()
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self.maps:  # trigger init / read
+            if name in self._maps:
                 self.logger.warning(f"Replacing result: {name}")
             self._maps[name] = data_dict[name]
 
@@ -1164,6 +1185,7 @@ class Model(object, metaclass=ABCMeta):
             `read_nc` function.
         """
         self._assert_read_mode()
+        self._initialize_maps(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_maps(ds, name=name)
@@ -1197,10 +1219,15 @@ class Model(object, metaclass=ABCMeta):
         ..NOTE: previously call staticgeoms.
         """
         if self._geoms is None:
-            self._geoms = dict()
-            if self._read:
-                self.read_geoms()
+            self._initialize_geoms()
         return self._geoms
+
+    def _initialize_geoms(self, skip_read=False) -> None:
+        """Initialize geoms."""
+        if self._geoms is None:
+            self._geoms = dict()
+            if self._read and not skip_read:
+                self.read_geoms()
 
     def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
         """Add data to the geoms attribute.
@@ -1212,13 +1239,14 @@ class Model(object, metaclass=ABCMeta):
         name: str
             Geometry name.
         """
+        self._initialize_geoms()
         gtypes = [gpd.GeoDataFrame, gpd.GeoSeries]
         if not np.any([isinstance(geom, t) for t in gtypes]):
             raise ValueError(
                 "First parameter map(s) should be geopandas.GeoDataFrame"
                 " or geopandas.GeoSeries"
             )
-        if name in self.geoms:  # trigger init / read
+        if name in self._geoms:
             self.logger.warning(f"Replacing geom: {name}")
         if hasattr(self, "crs"):
             # Verify if a geom is set to model crs and if not sets geom to model crs
@@ -1241,6 +1269,7 @@ class Model(object, metaclass=ABCMeta):
             `geopandas.read_file` function.
         """
         self._assert_read_mode()
+        self._initialize_geoms(skip_read=True)
         fns = glob.glob(join(self.root, fn))
         for fn in fns:
             name = basename(fn).split(".")[0]
@@ -1351,10 +1380,15 @@ class Model(object, metaclass=ABCMeta):
     def forcing(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model forcing. Returns dict of xarray.DataArray or xarray.Dataset."""
         if self._forcing is None:
-            self._forcing = dict()
-            if self._read:
-                self.read_forcing()
+            self._initialize_forcing()
         return self._forcing
+
+    def _initialize_forcing(self, skip_read=False) -> None:
+        """Initialize forcing."""
+        if self._forcing is None:
+            self._forcing = dict()
+            if self._read and not skip_read:
+                self.read_forcing()
 
     def set_forcing(
         self,
@@ -1378,11 +1412,12 @@ class Model(object, metaclass=ABCMeta):
         split_dataset: bool, optional
             If True (default), split a Dataset to store each variable as a DataArray.
         """
+        self._initialize_forcing()
         if isinstance(data, pd.DataFrame):
             data = data.to_xarray()
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self.forcing:  # trigger init / read
+            if name in self._forcing:
                 self.logger.warning(f"Replacing forcing: {name}")
             self._forcing[name] = data_dict[name]
 
@@ -1401,6 +1436,7 @@ class Model(object, metaclass=ABCMeta):
             function.
         """
         self._assert_read_mode()
+        self._initialize_forcing(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_forcing(ds, name=name)
@@ -1430,10 +1466,15 @@ class Model(object, metaclass=ABCMeta):
     def states(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
         """Model states. Returns dict of xarray.DataArray or xarray.Dataset."""
         if self._states is None:
-            self._states = dict()
-            if self._read:
-                self.read_states()
+            self._initialize_states()
         return self._states
+
+    def _initialize_states(self, skip_read=False) -> None:
+        """Initialize states."""
+        if self._states is None:
+            self._states = dict()
+            if self._read and not skip_read:
+                self.read_states()
 
     def set_states(
         self,
@@ -1452,9 +1493,10 @@ class Model(object, metaclass=ABCMeta):
         split_dataset: bool, optional
             If True (default), split a Dataset to store each variable as a DataArray.
         """
+        self._initialize_states()
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self.states:  # trigger init / read
+            if name in self._states:
                 self.logger.warning(f"Replacing state: {name}")
             self._states[name] = data_dict[name]
 
@@ -1473,6 +1515,7 @@ class Model(object, metaclass=ABCMeta):
             function.
         """
         self._assert_read_mode()
+        self._initialize_states(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_states(ds, name=name, split_dataset=True)
@@ -1501,12 +1544,17 @@ class Model(object, metaclass=ABCMeta):
     # (that's up to the model kernel)
     @property
     def results(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Model results.  Returns dict of xarray.DataArray or xarray.Dataset."""
+        """Model results. Returns dict of xarray.DataArray or xarray.Dataset."""
+        if self._results is None:
+            self._initialize_results()
+        return self._results
+
+    def _initialize_results(self, skip_read=False) -> None:
+        """Initialize results."""
         if self._results is None:
             self._results = dict()
-            if self._read:
+            if self._read and not skip_read:
                 self.read_results()
-        return self._results
 
     def set_results(
         self,
@@ -1529,9 +1577,10 @@ class Model(object, metaclass=ABCMeta):
             If True (False by default), split a Dataset to store each variable
             as a DataArray.
         """
+        self._initialize_results()
         data_dict = _check_data(data, name, split_dataset)
         for name in data_dict:
-            if name in self.results:  # trigger init / read
+            if name in self._results:
                 self.logger.warning(f"Replacing result: {name}")
             self._results[name] = data_dict[name]
 
@@ -1550,6 +1599,7 @@ class Model(object, metaclass=ABCMeta):
             function.
         """
         self._assert_read_mode()
+        self._initialize_results(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
             self.set_results(ds, name=name)
