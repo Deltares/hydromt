@@ -26,6 +26,7 @@ Changed
 
 Fixed
 -----
+- Double reading of model components when in appending mode. (#695)
 - Removed deprecated entrypoints library. (#676)
 - Bug in `raster.set_crs` if input_crs is of type CRS. (#659)
 - Export CLI now actually parses provided geoms. (#660)
