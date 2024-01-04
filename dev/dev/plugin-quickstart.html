@@ -757,11 +757,13 @@ can then be opened in read only mode (‘r’) and HydroMT should not be able to
 <cite>Model</cite> class has two properties you can use to check for this:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><cite>self._assert_read_mode</cite> if a model can be read</p></li>
-<li><p><cite>self._assert_write_mode</cite> if a model can be written</p></li>
+<li><p><cite>self._assert_read_mode()</cite> if a model can be read</p></li>
+<li><p><cite>self._assert_write_mode()</cite> if a model can be written</p></li>
 </ul>
 </div></blockquote>
 <ol class="arabic simple" start="3">
+<li><p>For reading, initialise the model component with, e.g. for geoms <cite>self._initialize_geom(skip_read=True)</cite>. This will
+initialise the component with an empty object, but ensure that the component is not read twice.</p></li>
 <li><p>If needed, transform and write the component to the right format and file(s).</p></li>
 <li><p>Don’t hesitate to put some logger information for your user.</p></li>
 </ol>
