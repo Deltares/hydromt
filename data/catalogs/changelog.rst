@@ -11,16 +11,6 @@ version: 2023.12
 changed
 ^^^^^^^
 - Updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
-- removed source_version from data source meta
-- kwargs to driver_kwargs
-- updated source_url if url was not working anymore
-
-added
-^^^^^
-- version argument to data source where applicable
-- variants argument for data sources that are of the same dataset but different versions
-- processing_script / processing_notes arguments to data sources that have been (pre-) processed
-- temporal extent of datasets that have a temporal dimension.
 
 added
 ^^^^^
