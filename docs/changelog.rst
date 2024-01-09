@@ -13,10 +13,22 @@ Unreleased
 
 Added
 -----
+
+Changed
+-------
+
+Fixed
+-----
+
+v0.9.2 (2024-01-09)
+===================
+This release adds additional bug fixes for the meridian offset functinality, and improvements to the new CLI commands.
+
+Added
+-----
 - Export CLI now also accepts time tuples (#660)
 - New stats.skills VE and RSR (#666)
 - Check CLI command can now validate bbox and geom regions (#664)
-- Added GADM 4.1 as FlatGeoBuff files to deltares_data catalog (#686)
 
 Changed
 -------
@@ -33,9 +45,6 @@ Fixed
 - Fix bug with lazy spatial_ref coordinate (#682)
 - Bug in gis_utils.meridian_offset. (#692)
 
-
-Deprecated
-----------
 
 v0.9.1 (2023-11-16)
 ===================
