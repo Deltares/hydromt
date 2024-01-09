@@ -15,6 +15,7 @@ changed
 added
 ^^^^^
 - Added waterdemand pcr_globwb dataset
+- Added GADM 4.1 as FlatGeoBuff files to deltares_data catalog (#686)
 
 
 version: 2023.2
