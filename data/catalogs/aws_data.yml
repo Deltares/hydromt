@@ -1,6 +1,8 @@
 ---
 meta:
   version: 2023.2
+  hydromt_version: '>=0.9'
+
 esa_worldcover_2020_v100:
   crs: 4326
   data_type: RasterDataset
