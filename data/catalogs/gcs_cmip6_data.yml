@@ -1,6 +1,6 @@
 ---
 meta:
-  version: 2023.2
+  version: 2024.1
   hydromt_version: '>=0.8.1'
 
 cmip6_{model}_historical_{member}_{timestep}:
