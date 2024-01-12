@@ -16,6 +16,7 @@ import xarray as xr
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
+from shapely import box
 
 import hydromt
 from hydromt import _compat as compat
@@ -439,15 +440,32 @@ def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
 
 def test_geodataframe(geodf, tmpdir):
     fn_gdf = str(tmpdir.join("test.geojson"))
+    fn_shp = str(tmpdir.join("test.shp"))
     geodf.to_file(fn_gdf, driver="GeoJSON")
+    geodf.to_file(fn_shp)
     data_catalog = DataCatalog()
+    # test read geojson using total bounds
     gdf1 = data_catalog.get_geodataframe(fn_gdf, bbox=geodf.total_bounds)
     assert isinstance(gdf1, gpd.GeoDataFrame)
     assert np.all(gdf1 == geodf)
+    # test read shapefile using total bounds
+    gdf1 = data_catalog.get_geodataframe(fn_shp, bbox=geodf.total_bounds)
+    assert isinstance(gdf1, gpd.GeoDataFrame)
+    assert np.all(gdf1 == geodf)
+    # testt read shapefile using mask
+    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]})
+    gdf1 = hydromt.open_vector(fn_shp, mask=mask)
+    assert np.all(gdf1 == geodf)
+    # test read with buffer
     gdf1 = data_catalog.get_geodataframe(
-        "test.geojson", bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
+        fn_gdf, bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
     )
     assert np.all(gdf1 == geodf)
+    gdf1 = data_catalog.get_geodataframe(
+        fn_shp, bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
+    )
+    assert np.all(gdf1 == geodf)
+
     with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_geodataframe("no_file.geojson")
 

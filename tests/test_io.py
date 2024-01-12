@@ -12,6 +12,7 @@ import pandas as pd
 import pytest
 import rasterio
 import xarray as xr
+from shapely.geometry import box
 
 import hydromt
 from hydromt import _compat, raster
@@ -51,7 +52,10 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
     gdf1 = hydromt.open_vector(fn_xy, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
     # read shapefile
-    gdf1 = hydromt.open_vector(fn_shp)
+    gdf1 = hydromt.open_vector(fn_shp, bbox=list(geodf.total_bounds))
+    assert np.all(gdf1 == geodf)
+    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]})
+    gdf1 = hydromt.open_vector(fn_shp, mask=mask)
     assert np.all(gdf1 == geodf)
     # read geopackage
     gdf1 = hydromt.open_vector(fn_gpkg)

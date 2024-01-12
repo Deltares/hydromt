@@ -625,6 +625,11 @@ def open_vector(
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
+    # drivers with multiple relevant files cannot be opened directly, we should pass the uri only
+    elif driver in ["shp"]:
+        gdf = gpd.read_file(
+            fn, mode=mode
+        )  # todo check old way of bbox/mask filter at read
     else:
         # check if filelike
         if all(
@@ -632,10 +637,6 @@ def open_vector(
         ):
             with fn.open(mode="rb") as f:
                 gdf = _read(f)
-        elif isinstance(fn, str) and fn.endswith(
-            ".shp"
-        ):  # check if string and consisting of strings
-            gdf = gpd.read_file(fn, mode=mode)
         else:
             with fsspec.open(fn, mode="rb") as f:  # lose storage options here
                 gdf = _read(f)
