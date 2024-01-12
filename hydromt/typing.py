@@ -3,7 +3,7 @@
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Tuple, TypedDict, Union, Literal
 
 from xarray import DataArray, Dataset
 
@@ -29,6 +29,8 @@ ExportConfigDict = TypedDict(
     "ExportConfigDict",
     {"args": Dict[str, Any], "meta": Dict[str, Any], "sources": List[SourceSpecDict]},
 )
+
+ModelModes = Literal["r", "r+", "w", "w+"]
 
 
 class ErrorHandleMethod(Enum):
