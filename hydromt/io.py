@@ -632,7 +632,7 @@ def open_vector(
             fn, mode=mode
         )  # todo check old way of bbox/mask filter at read
     else:
-        with warnings.catch_warnings(modulecategory=RuntimeWarning):
+        with warnings.catch_warnings(category=RuntimeWarning):
             warnings.simplefilter("ignore")
             # check if filelike
             if all(
