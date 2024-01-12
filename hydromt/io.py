@@ -2,6 +2,7 @@
 import glob
 import io as pyio
 import logging
+import warnings
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional, Union
@@ -631,15 +632,20 @@ def open_vector(
             fn, mode=mode
         )  # todo check old way of bbox/mask filter at read
     else:
-        # check if filelike
-        if all(
-            map(lambda method: hasattr(fn, method), ("seek", "close", "read", "write"))
-        ):
-            with fn.open(mode="rb") as f:
-                gdf = _read(f)
-        else:
-            with fsspec.open(fn, mode="rb") as f:  # lose storage options here
-                gdf = _read(f)
+        with warnings.catch_warnings(modulecategory=RuntimeWarning):
+            warnings.simplefilter("ignore")
+            # check if filelike
+            if all(
+                map(
+                    lambda method: hasattr(fn, method),
+                    ("seek", "close", "read", "write"),
+                )
+            ):
+                with fn.open(mode="rb") as f:
+                    gdf = _read(f)
+            else:
+                with fsspec.open(fn, mode="rb") as f:  # lose storage options here
+                    gdf = _read(f)
 
     # check geometry type
     if assert_gtype is not None:
