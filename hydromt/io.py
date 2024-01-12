@@ -626,12 +626,16 @@ def open_vector(
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     else:
-        # check if pathlike
+        # check if filelike
         if all(
             map(lambda method: hasattr(fn, method), ("seek", "close", "read", "write"))
         ):
             with fn.open(mode="rb") as f:
                 gdf = _read(f)
+        elif isinstance(fn, str) and fn.endswith(
+            ".shp"
+        ):  # check if string and consisting of strings
+            gdf = gpd.read_file(fn, mode=mode)
         else:
             with fsspec.open(fn, mode="rb") as f:  # lose storage options here
                 gdf = _read(f)

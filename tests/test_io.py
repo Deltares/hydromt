@@ -25,12 +25,14 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
     fn_xy = str(tmpdir.join("test.xy"))
     fn_xls = str(tmpdir.join("test.xlsx"))
     fn_geojson = str(tmpdir.join("test.geojson"))
+    fn_shp = str(tmpdir.join("test.shp"))
     df.to_csv(fn_csv)
     df.to_parquet(fn_parquet)
     if _compat.HAS_OPENPYXL:
         df.to_excel(fn_xls)
     geodf.to_file(fn_geojson, driver="GeoJSON")
     hydromt.write_xy(fn_xy, geodf)
+    geodf.to_file(fn_shp)
     # read csv
     gdf1 = hydromt.open_vector(fn_csv, assert_gtype="Point", crs=4326)
     assert gdf1.crs == geodf.crs
@@ -46,6 +48,8 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
     # read xy
     gdf1 = hydromt.open_vector(fn_xy, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
+    gdf1 = hydromt.open_vector(fn_shp)
+    assert np.all(gdf1 == geodf)
     # read parquet
     gdf1 = hydromt.open_vector(fn_parquet, crs=4326)
     assert np.all(gdf1 == geodf)
