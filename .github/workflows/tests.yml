@@ -3,7 +3,7 @@ name: Tests
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, v1]
     paths:
       - tests/*
       - hydromt/*
@@ -12,6 +12,7 @@ on:
   pull_request:
     branches:
       - main
+      - v1
     paths:
       - tests/*
       - hydromt/*
@@ -29,11 +30,12 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.9','3.10','3.11']
-    name: py ${{ matrix.python-version }}
+        version: ['main', 'v1']
+    name: py ${{ matrix.python-version }} (${{ matrix.version }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     concurrency:
-      group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ matrix.version }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
 
@@ -52,9 +54,10 @@ jobs:
             ~/pycache
           # the below two settings mean we'll alway srestore the cache
           # but the cache hit output can tell us if we have to update afterwards
-          key: test-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
+          key: test-${{ matrix.version}}-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
           restore-keys: |
-            test-py${{ matrix.python-version }}
+            test-${{ matrix.version}}-py${{ matrix.python-version }}
+            test-${{ matrix.version}}
 
       - name: Fail on no cache restore
         if: steps.cache.outputs.cache-matched-key == ''

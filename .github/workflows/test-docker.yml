@@ -3,13 +3,13 @@ name: Test Docker images and Binder integration
 
 on:
   push:
-    branches: [main]
+    branches: [main, v1]
     paths:
       - .binder/*
       - Dockerfile
       - pyproject.toml
   pull_request:
-    branches: [main]
+    branches: [main, v1]
     paths:
       - .binder/*
       - Dockerfile
@@ -44,8 +44,6 @@ jobs:
           load: true
           target: full
           tags: hydromt
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Run Tests
         run: docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt pytest

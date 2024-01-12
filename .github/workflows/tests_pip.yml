@@ -2,7 +2,7 @@ name: Tests with pip install
 
 on:
   push:
-    branches: [main]
+    branches: [main, v1]
     paths:
       - tests/*
       - hydromt/*
@@ -11,6 +11,7 @@ on:
   pull_request:
     branches:
       - main
+      - v1
     paths:
       - tests/*
       - hydromt/*

@@ -3,7 +3,7 @@ name: Build Documentation
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, v1]
     paths:
       - tests/*
       - hydromt/*
@@ -12,7 +12,7 @@ on:
       - examples/*
       - pyproject.toml
   pull_request:
-    branches: [main]
+    branches: [main, v1]
     paths:
       - tests/*
       - hydromt/*
@@ -26,6 +26,10 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['main', 'v1']
     env:
       DOC_PYTHON_VERSION: '3.11'
     timeout-minutes: 30
@@ -84,7 +88,8 @@ jobs:
           echo "DOC_VERSION=$(mamba run -n hydromt python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
-        if: ${{ github.event_name != 'pull_request' && !github.event.act }}
+        # only publish docs for main
+        if: ${{ github.event_name != 'pull_request' && !github.event.act  && matrix.version == 'main' }}
         uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
