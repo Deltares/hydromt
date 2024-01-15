@@ -69,6 +69,11 @@ chelsa:
     paper_ref: Karger et al. (2017)
     source_license: CC BY 4.0
     source_url: http://chelsa-climate.org/downloads/
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 84.0
   version: 1.2
   path: meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif
 
@@ -93,6 +98,11 @@ chirps:
     source_temporal_extent:
       start: '1981-01-02'
       end: '2022-04-01'
+    source_spatial_extent:
+      West: -20.0
+      South: -40.0
+      East: 55.0
+      North: 40.0
   version: 2.0
   path: meteo/chirps_africa_daily_v2.0/CHIRPS_rainfall_{year}.nc
   rename:
@@ -121,6 +131,11 @@ chirps_global:
     source_temporal_extent:
       start: '1981-01-02'
       end: '2023-02-01'
+    source_spatial_extent:
+      West: -180.0
+      South: -50.0
+      East: 180.0
+      North: 50.0
   version: 2.0
   path: meteo/chirps_global_daily_v2.0/chirps-v2.0.{year}.days_p05.nc
   rename:
@@ -139,6 +154,11 @@ copdem30:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p_l_back_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+    source_spatial_extent:
+      West: -180.001
+      South: -90.0
+      East: 180.0
+      North: 84.0
   version: 2021.1
   path: topography/copdem/copdem.vrt
   nodata: -9999
@@ -156,6 +176,11 @@ copdem30_mask:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p_l_back_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+    source_spatial_extent:
+      West: -180.001
+      South: -90.0
+      East: 180.0
+      North: 84.0
   version: 2021.1
   path: topography/copdem/copdem_mask.vrt
   nodata: -1
@@ -173,6 +198,11 @@ copdem30_masked:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p_l_back_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+    source_spatial_extent:
+      West: -180.001
+      South: -90.0
+      East: 180.0
+      North: 84.0
   version: 2021.1
   path: topography/copdem/copdem_masked.vrt
   rename:
@@ -190,6 +220,11 @@ corine:
     source_author: European Environment Agency
     source_license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
     source_url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
+    source_spatial_extent:
+      West: 900000.0
+      South: 900000.0
+      East: 7400000.0
+      North: 5500000.0
   provider: local
   version: 2020_20u1
   path: landuse/corine/CLC2018_CLC2018_V2018_20.tif
@@ -208,6 +243,11 @@ dtu10mdt:
     paper_ref: Andersen and Knudsen (2009)
     source_url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
     unit: m+EGM2008
+    source_spatial_extent:
+      West: -179.992
+      South: -89.992
+      East: 179.992
+      North: 89.992
   version: 2010
   path: topography/dtu10mdt/DTU10MDT_1min_float32.tif
 
@@ -227,6 +267,11 @@ dtu10mdt_egm96:
     processing_notes: /topography/dtu10mdt/READ_ME.txt
     processing_script: /topography/dtu10mdt/DTU10MDT_egm96_1min.ipynb
     unit: m+EGM96
+    source_spatial_extent:
+      West: -179.992
+      South: -89.985
+      East: 179.995
+      North: 89.992
   version: 2010
   path: topography/dtu10mdt/DTU10MDT_1min_egm96.tif
 
@@ -251,6 +296,11 @@ eobs:
     source_temporal_extent:
       start: '1950-01-02'
       end: '2022-01-01'
+    source_spatial_extent:
+      West: -25.0
+      South: 25.0
+      East: 45.5
+      North: 71.5
   variants:
   - version: 22.0e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
@@ -286,6 +336,11 @@ eobs_orography:
     paper_ref: Cornes et al (2018)
     source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_spatial_extent:
+      West: -25.0
+      South: 25.0
+      East: 45.5
+      North: 71.5
   variants:
   - version: 20.0e
     path: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
@@ -324,6 +379,11 @@ era5:
     source_temporal_extent:
       start: '1950-01-02'
       end: '2023-11-30'
+    source_spatial_extent:
+      West: -0.125
+      South: -90.125
+      East: 359.875
+      North: 90.125
   path: meteo/era5_daily/nc_merged/era5_{year}_daily.nc
   rename:
     d2m: temp_dew
@@ -365,6 +425,11 @@ era5_daily_zarr:
     source_temporal_extent:
       start: '1950-01-02'
       end: '2023-02-01'
+    source_spatial_extent:
+      West: -0.125
+      South: -90.125
+      East: 359.875
+      North: 90.125
   path: meteo/era5_daily.zarr
 
 era5_hourly:
@@ -390,6 +455,11 @@ era5_hourly:
     source_temporal_extent:
       start: '1950-01-01'
       end: '2023-03-01'
+    source_spatial_extent:
+      West: -0.125
+      South: -90.125
+      East: 359.875
+      North: 90.125
   path: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
   rename:
     d2m: temp_dew
@@ -427,6 +497,11 @@ era5_hourly_zarr:
     source_temporal_extent:
       start: '1950-01-01'
       end: '2023-02-01'
+    source_spatial_extent:
+      West: -0.125
+      South: -90.125
+      East: 359.875
+      North: 90.125
   path: meteo/era5.zarr
 
 era5_ocean:
@@ -451,6 +526,11 @@ era5_ocean:
     source_temporal_extent:
       start: '1979-01-01'
       end: '2022-04-08'
+    source_spatial_extent:
+      West: -0.25
+      South: -90.25
+      East: 359.75
+      North: 90.25
   path: ocean/era5/{variable}/era5_{variable}_{year}_hourly.nc
 
 era5_orography:
@@ -471,6 +551,11 @@ era5_orography:
     source_temporal_extent:
       start: '2018-01-01'
       end: '2018-01-01'
+    source_spatial_extent:
+      West: -0.125
+      South: -90.125
+      East: 359.875
+      North: 90.125
   path: meteo/era5/meta/era5_orography_2018.nc
   rename:
     z: elevtn
@@ -489,6 +574,11 @@ esa_worldcover:
     category: landuse
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.5571936
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 84.0
   version: 100
   path: landuse/esa_worldcover/esa-worldcover.vrt
 
@@ -506,6 +596,11 @@ fabdem:
     paper_ref: Hawker et al. (2022)
     source_license: CC BY-NC-SA 4.0
     source_url: https://data.bris.ac.uk/data/dataset/25wfy0f9ukoge2gs7a5mqpq2j7
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
   version: 1.0
   path: topography/fabdem/fabdem.vrt
   rename:
@@ -580,6 +675,11 @@ gcn250:
     paper_ref: Jaafar et al. (2019)
     source_license: CC BY 4.0
     source_url: https://doi.org/10.6084/m9.figshare.7756202.v1
+    source_spatial_extent:
+      West: -180.0
+      South: -56.0
+      East: 180.0
+      North: 84.0
   nodata: 255
   version: 1
   path: landuse/gcn250/GCN250_*.tif
@@ -621,6 +721,11 @@ gebco:
     source_url: https://www.bodc.ac.uk/data/hosted_data_systems/gebco_gridded_bathymetry_data/
     unit: m+MSL
     processing_script: bathymetry/gebco/gebco_tiles.ipynb
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 2020
   path: bathymetry/gebco/gebco.vrt
   rename:
@@ -641,6 +746,11 @@ ghs_pop:
     source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
     source_url: https://data.jrc.ec.europa.eu/dataset/0c6b9751-a71f-4062-830b-43c9f432370f
+    source_spatial_extent:
+      West: -180.0
+      South: -59.485
+      East: 180.0
+      North: 83.628
   version: R2019A_v1.0
   path: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_4326_9ss_V1_0.tif
 
@@ -658,6 +768,11 @@ ghs_pop_2015_54009_v2019a:
     paper_ref: Florczyk et al (2019)
     source_license: CC BY 4.0
     source_url: https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
+    source_spatial_extent:
+      West: -18041000.0
+      South: -9000000.0
+      East: 18041000.0
+      North: 9000000.0
   version: R2019A_54009_250_v1.0
   path: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_54009_250_V1_0.tif
 
@@ -673,6 +788,11 @@ ghs_smod:
     category: socio-economic
     source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
+    source_spatial_extent:
+      West: -18041000.0
+      South: -9000000.0
+      East: 18041000.0
+      North: 9000000.0
   variants:
   - version: R2016A_v1.0
     path: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
@@ -700,6 +820,11 @@ globcover:
     paper_ref: Arino et al (2012)
     source_license: CC-BY-3.0
     source_url: http://due.esrin.esa.int/page_globcover.php
+    source_spatial_extent:
+      West: -180.001
+      South: -64.999
+      East: 179.999
+      North: 90.001
   version: 2.3
   path: landuse/globcover/GLOBCOVER_L4_200901_200912_V2.3.tif
 
@@ -726,6 +851,11 @@ glofas_era5_v31:
     source_temporal_extent:
       start: '1980-01-01'
       end: '2021-05-31'
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 90.0
   version: 31
   path: hydro/glofas_era5/glofas_v31_{year}.nc
   rename:
@@ -745,6 +875,11 @@ glofas_uparea:
     paper_ref: Harrigan et al. (2020)
     source_license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
     source_url: https://doi.org/10.24381/cds.a4fdd6b9
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 90.0
   version: 31
   path: hydro/glofas_era5/glofas_v31_uparea.tif
   rename:
@@ -767,6 +902,11 @@ glw_buffaloes:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 3
   path: socio_economic/glw/5_Bf_2010_Da.tif
 
@@ -785,6 +925,11 @@ glw_cattle:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 3
   path: socio_economic/glw/5_Ct_2010_Da.tif
 
@@ -803,6 +948,11 @@ glw_chicken:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 3
   path: socio_economic/glw/5_Ch_2010_Da.tif
 
@@ -821,6 +971,11 @@ glw_ducks:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 3
   path: socio_economic/glw/5_Dk_2010_Da.tif
 
@@ -839,6 +994,11 @@ glw_goats:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 3
   path: socio_economic/glw/5_Gt_2010_Da.tif
 
@@ -857,6 +1017,11 @@ glw_horses:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 3
   path: socio_economic/glw/5_Ho_2010_Da.tif
 
@@ -875,6 +1040,11 @@ glw_pigs:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 3
   path: socio_economic/glw/5_Pg_2010_Da.tif
 
@@ -893,6 +1063,11 @@ glw_sheeps:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 3
   path: socio_economic/glw/5_Sh_2010_Da.tif
 
@@ -907,6 +1082,11 @@ grdc:
     notes: GRDC-Station Catalogue, last downloaded 2020-07-16
     source_license: https://www.bafg.de/GRDC/EN/02_srvcs/21_tmsrs/210_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
     source_url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
+    source_spatial_extent:
+      West: -179.25
+      South: -90.0
+      East: 180.0
+      North: 80.6
   path: hydro/grdc/GRDC_Stations.xlsx
   rename:
     area: uparea
@@ -972,6 +1152,11 @@ gswo:
     paper_doi: 10.1038/nature20584
     paper_ref: Pekel et al. (2016)
     source_url: https://global-surface-water.appspot.com/download
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
   nodata: 255
   version: v1_1_2019
   path: hydrography/gswo/occur.vrt
@@ -1016,6 +1201,11 @@ guf_bld_2012:
     paper_ref: Esch et al (2017)
     source_license: https://www.dlr.de/eoc/en/PortalData/60/Resources/dokumente/guf/DLR-GUF_LicenseAgreement-and-OrderForm.pdf
     source_url: http://www.dlr.de/guf
+    source_spatial_extent:
+      West: -180.0
+      South: -65.0
+      East: 180.0
+      North: 85.0
   path: infrastructure/guf/GUF04_DLR_v02.vrt
 
 hydro_lakes:
@@ -1083,6 +1273,11 @@ koppen_geiger:
     paper_doi: 10.1127/0941-2948/2006/0130
     paper_ref: Kottek et al. (2006)
     source_url: http://koeppen-geiger.vu-wien.ac.at/present.htm
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   nodata: 0
   version: 2017
   path: meteo/climate_classification_v2017/Map_KG-Global.tif
@@ -1102,6 +1297,11 @@ mdt_cnes_cls18:
     source_url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
     unit: m+GOCO05S
     processing_script: topography/mdt_cnes_cls18/convert_lon_fill_mdt.ipynb
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 18
   path: topography/mdt_cnes_cls18/MDT_CNES_CLS18_global_filled.tif
 
@@ -1120,6 +1320,11 @@ merit:
     paper_ref: Yamazaki et al. (2018)
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_DEM/
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 1.0.3
   path: topography/merit/merit.nc
   rename:
@@ -1139,6 +1344,11 @@ merit_hydro:
     paper_ref: Yamazaki et al. (2019)
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 85.0
   version: 1.0
   path: topography/merit_hydro/*.vrt
   rename:
@@ -1167,6 +1377,11 @@ merit_hydro_ihu:
     source_url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
     source_doi: 10.5281/zenodo.5166932
     processing_notes: topography/merit_hydro_ihu/README
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 85.0
   path: topography/merit_hydro_ihu/30sec/*.tif
   version: 1.0
   rename:
@@ -1218,6 +1433,11 @@ merit_hydro_patch:
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
     processing_script: topography/merit_hydro/patches/scripts
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 85.0
   version: 1.0
   path: topography/merit_hydro/patches/*.vrt
   rename:
@@ -1250,6 +1470,11 @@ modis_lai:
     processing_script:
       GEE_script: landuse/modis/MODIS_MCD15A3H_LAI/GEE_MODIS_LAI.js
       merge_script: landuse/modis/MODIS_MCD15A3H_LAI/merge_rasters_GEE_LAI.py
+    source_spatial_extent:
+      West: -180.004
+      South: -90.002
+      East: 180.004
+      North: 90.002
   version: MCD15A3H V006
   path: landuse/modis/MODIS_MCD15A3H_LAI/*.tif
   unit_mult:
@@ -1299,6 +1524,11 @@ pcr_globwb:
     source_url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
     source_version: 2017.11b1
     processing_script: hydro/pcr_globwb/prep_glob.py
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   variants:
   - version: 1990
     path: hydro/pcr_globwb/glob_1990.zarr
@@ -1372,6 +1602,11 @@ simard:
     paper_doi: 10.1029/2011JG001708
     paper_ref: Simard et al (2011)
     source_url: https://webmap.ornl.gov/ogc/dataset.jsp?ds_id=10023
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 2011
   path: landuse/simard/sdat_10023_canopy_height_simard.tif
 
@@ -1395,6 +1630,11 @@ SM2RAIN_ASCAT_monthly_025_v1.4:
     source_temporal_extent:
       start: '2007-01-01'
       end: '2020-12-01'
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 1.4
   path: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_025_2007_2020.nc
   rename:
@@ -1420,6 +1660,11 @@ SM2RAIN_ASCAT_monthly_05_v1.4:
     source_temporal_extent:
       start: '2007-01-01'
       end: '2020-12-01'
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 1.4
   path: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_05_2007_2020.nc
   rename:
@@ -1435,6 +1680,11 @@ soilgrids:
       y: 2400
   meta:
     category: soil
+    source_spatial_extent:
+      West: -19949000.0
+      South: -6147500.0
+      East: 19861750.0
+      North: 8361000.0
   variants:
   - version: 2017
     path: soil/soilgrids_v1.0/*_250m_ll.tif
@@ -1622,6 +1872,11 @@ vito:
     paper_doi: 10.5281/zenodo.3939038
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
   path: landuse/vito/ProbaV_LC100_epoch2015_global_v2.0.2_discrete-classification_EPSG-4326.tif
 
 vito_2016_v3.0.1:
@@ -1637,6 +1892,11 @@ vito_2016_v3.0.1:
     paper_doi: 10.5281/zenodo.3518026
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2016-conso_Discrete-Classification-map_EPSG-4326.tif
 
 vito_2017_v3.0.1:
@@ -1652,6 +1912,11 @@ vito_2017_v3.0.1:
     paper_doi: 10.5281/zenodo.3518036
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2017-conso_Discrete-Classification-map_EPSG-4326.tif
 
 vito_2018_v3.0.1:
@@ -1667,6 +1932,11 @@ vito_2018_v3.0.1:
     paper_doi: 10.5281/zenodo.3518038
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2018-conso_Discrete-Classification-map_EPSG-4326.tif
 
 vito_2019_v3.0.1:
@@ -1682,6 +1952,11 @@ vito_2019_v3.0.1:
     paper_doi: 10.5281/zenodo.3939050
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
   path: landuse/vito/ProbaV_LC100_global_v3.0.1_2019-nrt_discrete-classification-map_EPSG-4326.tif
 
 wb_countries:
@@ -1719,6 +1994,11 @@ worldclim:
     paper_ref: Fick and Hijmans (2017)
     source_url: https://www.worldclim.org/data/worldclim21.html
     nodata: -999.0
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 2.0
   path: meteo/worldclim_v2.0/wc2.0_30s_prec.nc
   rename:
@@ -1736,6 +2016,11 @@ worldpop_2020_constrained:
     source_license: CC BY 4.0
     source_url: https://www.worldpop.org/doi/10.5258/SOTON/WP00684
     processing_script: socio_economic/worldpop/src/
+    source_spatial_extent:
+      West: -180.0
+      South: -55.985
+      East: 180.0
+      North: 83.628
   nodata: -99999
   path: socio_economic/worldpop/ppp_2020_constrained.vrt
   rename:
@@ -1748,6 +2033,11 @@ worldpop_2020_UNadj_constrained:
     chunks: auto
   meta:
     processing_script: socio_economic/worldpop/src/
+    source_spatial_extent:
+      West: -180.0
+      South: -55.985
+      East: 180.0
+      North: 83.628
   path: socio_economic/worldpop/ppp_2020_UNadj_constrained.vrt
   rename:
     ppp_2020_UNadj_constrained: population
@@ -1766,5 +2056,10 @@ wsf_bld_2015:
     paper_ref: Marconcini at al (2020)
     source_license: CC0 1.0
     source_url: https://un-spider.org/links-and-resources/data-sources/world-settlement-footprint-2015-wsf-dlr-eoc
+    source_spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
   version: 1
   path: infrastructure/wsf/WSF2015_v1_EPSG4326.vrt
