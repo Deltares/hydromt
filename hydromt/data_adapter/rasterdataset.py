@@ -21,6 +21,7 @@ from pystac import Item as StacItem
 from pystac import MediaType
 from rasterio.errors import RasterioIOError
 
+from hydromt.exceptions import NoDataException
 from hydromt.typing import (
     ErrorHandleMethod,
     RasterDatasetSource,
@@ -277,6 +278,7 @@ class RasterDatasetAdapter(DataAdapter):
         align=None,
         variables=None,
         time_tuple=None,
+        handle_nodata=NoDataStrategy.RAISE,
         single_var_as_array=True,
         cache_root=None,
         logger=logger,
@@ -289,7 +291,15 @@ class RasterDatasetAdapter(DataAdapter):
         # load data
         fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
         self.mark_as_used()  # mark used
-        ds = self._read_data(fns, geom, bbox, cache_root, zoom_level, logger)
+        ds = self._read_data(
+            fns,
+            geom,
+            bbox,
+            cache_root,
+            handle_nodata=handle_nodata,
+            zoom_level=zoom_level,
+            logger=logger,
+        )
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_dims(ds)
@@ -298,7 +308,15 @@ class RasterDatasetAdapter(DataAdapter):
         ds = self._shift_time(ds, logger)
         # slice data
         ds = RasterDatasetAdapter._slice_data(
-            ds, variables, geom, bbox, buffer, align, time_tuple, logger=logger
+            ds,
+            variables,
+            geom,
+            bbox,
+            buffer,
+            align,
+            time_tuple,
+            handle_nodata=handle_nodata,
+            logger=logger,
         )
         # uniformize data
         ds = self._apply_unit_conversions(ds, logger)
@@ -326,7 +344,16 @@ class RasterDatasetAdapter(DataAdapter):
         )
         return fns
 
-    def _read_data(self, fns, geom, bbox, cache_root, zoom_level=None, logger=logger):
+    def _read_data(
+        self,
+        fns,
+        geom,
+        bbox,
+        cache_root,
+        handle_nodata=NoDataStrategy.RAISE,
+        zoom_level=None,
+        logger=logger,
+    ):
         kwargs = self.driver_kwargs.copy()
 
         # read using various readers
@@ -373,6 +400,12 @@ class RasterDatasetAdapter(DataAdapter):
             ds = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
+
+        if len(ds) == 0:
+            if handle_nodata == NoDataStrategy.RAISE:
+                raise NoDataException(f"No data was read from files {fns}")
+            elif handle_nodata == NoDataStrategy.IGNORE:
+                logger.warning(f"no data was found at {fns}. skipping...")
 
         return ds
 
@@ -512,9 +545,14 @@ class RasterDatasetAdapter(DataAdapter):
                 logger.debug(f"Slicing time dim {time_tuple}")
                 ds = ds.sel({"time": slice(*time_tuple)})
                 if ds.time.size == 0:
-                    _exec_nodata_strat(
-                        "Time slice out of range.", handle_nodata, logger
-                    )
+                    if handle_nodata == NoDataStrategy.RAISE:
+                        _exec_nodata_strat(
+                            "Time slice out of range.",
+                            handle_nodata,
+                            logger=logger,
+                        )
+                    elif handle_nodata == NoDataStrategy.IGNORE:
+                        logger.warning("Time slice out of range.")
         return ds
 
     @staticmethod
@@ -557,6 +595,14 @@ class RasterDatasetAdapter(DataAdapter):
                 logger.warning(
                     f"Dataset does [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
                 )
+
+        if ds.raster.size == 0:
+            if handle_nodata == NoDataStrategy.RAISE:
+                _exec_nodata_strat(
+                    "No data within spatial domain.", handle_nodata, logger
+                )
+            elif handle_nodata == NoDataStrategy.IGNORE:
+                logger.warning("No data within spatial domain. Skipping...")
 
         return ds
 
