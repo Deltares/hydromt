@@ -1166,32 +1166,6 @@ gswo:
   version: v1_1_2019
   path: hydrography/gswo/occur.vrt
 
-gtsm_codec_reanalysis_{freq}_v1:
-  crs: 4326
-  data_type: GeoDataset
-  driver: netcdf
-  driver_kwargs:
-    chunks:
-      stations: 10
-      time: -1
-  meta:
-    category: ocean
-    paper_doi: 10.3389/fmars.2020.00263
-    paper_ref: Muis at al (2020)
-    source_license: https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
-    source_url: https://doi.org/10.24381/cds.8c59054f
-  version: 1
-  path: p:/11205028-c3s_435/01_data/01_Timeseries/timeseries2/{variable}/reanalysis_{variable}_{freq}_{year}_{month:02d}_v1.nc
-  placeholders:
-    freq:
-    - 10min
-    - hourly
-    - dailymax
-  rename:
-    station_x_coordinate: lon
-    station_y_coordinate: lat
-    stations: index
-
 guf_bld_2012:
   crs: 4326
   data_type: RasterDataset
