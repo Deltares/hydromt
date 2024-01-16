@@ -8,19 +8,13 @@ deltares_data
 version: 2024.1
 ----------------
 
-added
-^^^^^
-- hydromt_version to data catalog meta
-
-version: 2023.12
------------------
-
 changed
 ^^^^^^^
-- Updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
+- updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
 - removed source_version from data source meta
 - kwargs to driver_kwargs
 - updated source_url if url was not working anymore
+- sorted datasets by alphabetical order
 
 added
 ^^^^^
@@ -28,10 +22,9 @@ added
 - variants argument for data sources that are of the same dataset but different versions
 - processing_script / processing_notes arguments to data sources that have been (pre-) processed
 - temporal extent of datasets that have a temporal dimension.
-
-added
-^^^^^
-- Added waterdemand pcr_globwb dataset
+- hydromt_version to data catalog meta
+- waterdemand pcr_globwb dataset
+- spatial extents to datasets
 
 
 version: 2023.2
