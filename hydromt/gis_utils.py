@@ -208,7 +208,7 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
     return idx
 
 
-def parse_geom_bbox_buffer(geom=None, bbox=None, buffer=0):
+def parse_geom_bbox_buffer(geom=None, bbox=None, buffer=0, crs=None):
     """Parse geom or bbox to a (buffered) geometry.
 
     Arguments
@@ -220,15 +220,20 @@ def parse_geom_bbox_buffer(geom=None, bbox=None, buffer=0):
         (in WGS84 coordinates).
     buffer : float, optional
         Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+    crs: pyproj.CRS, optional
+        projection of the bbox or geometry. If the geometry already has a crs, this
+        argument is ignored. Defaults to EPSG:4236.
 
     Returns
     -------
     geom: geometry
         the actual geometry
     """
+    if crs is None:
+        crs = CRS("EPSG:4326")
     if geom is None and bbox is not None:
         # convert bbox to geom with crs EPGS:4326 to apply buffer later
-        geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+        geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=crs)
     elif geom is None:
         raise ValueError("No geom or bbox provided.")
 
@@ -611,11 +616,11 @@ def bbox_from_file_and_filters(
     Parameters
     ----------
     fn: IOBase,
-        opened file
+        opened file.
     bbox: GeoDataFrame | GeoSeries | BaseGeometry
-        bounding box to filter the data while reading
+        bounding box to filter the data while reading.
     mask: GeoDataFrame | GeoSeries | BaseGeometry
-        mask to filter the data while reading
+        mask to filter the data while reading.
     crs: pyproj.CRS
         coordinate reference system of the bounding box or geometry. If already set,
         this argument is ignored.

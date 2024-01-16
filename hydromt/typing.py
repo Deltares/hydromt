@@ -5,6 +5,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, TypedDict, Union
 
+import geopandas as gpd
+from shapely.geometry.base import BaseGeometry
 from xarray import DataArray, Dataset
 
 GeoDataframeSource = Union[str, Path]
@@ -29,6 +31,8 @@ ExportConfigDict = TypedDict(
     "ExportConfigDict",
     {"args": Dict[str, Any], "meta": Dict[str, Any], "sources": List[SourceSpecDict]},
 )
+GPD_TYPES = gpd.GeoDataFrame | gpd.GeoSeries
+GEOM_TYPES = GPD_TYPES | BaseGeometry
 
 
 class ErrorHandleMethod(Enum):

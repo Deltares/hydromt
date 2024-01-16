@@ -5,8 +5,7 @@ from logging import Logger
 import geopandas as gpd
 from pyproj import CRS
 
-from hydromt.nodata import NoDataStrategy
-
+# from hydromt.nodata import NoDataStrategy
 from .abstract_driver import AbstractDriver
 
 
@@ -30,9 +29,9 @@ class GeoDataFrameDriver(AbstractDriver):
         bbox: list[int] | None = None,
         mask: gpd.GeoDataFrame | None = None,
         buffer: float = 0.0,
-        predicate: str = "intersects",
+        predicate: str = "intersects",  # ??
         logger: Logger | None = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """
         Read in any compatible data source to a geopandas `GeoDataFrame`.

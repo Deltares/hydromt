@@ -6,12 +6,11 @@ from pyogrio import read_dataframe, read_info
 from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
 
-from hydromt.nodata import NoDataStrategy
+from hydromt.gis_utils import parse_geom_bbox_buffer
+from hydromt.typing import GEOM_TYPES, GPD_TYPES
 
+# from hydromt.nodata import NoDataStrategy
 from .geodataframe_driver import GeoDataFrameDriver
-
-GPD_TYPES = gpd.GeoDataFrame | gpd.GeoSeries
-GEOM_TYPES = GPD_TYPES | BaseGeometry
 
 
 class PyogrioDriver(GeoDataFrameDriver):
@@ -24,19 +23,21 @@ class PyogrioDriver(GeoDataFrameDriver):
         buffer: float = 0,
         predicate: str = "intersects",
         logger: Logger | None = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """
-        read data using pyogrio.
+        Read data using pyogrio.
 
         args:
         """
-        bbox_reader = bbox_from_file_and_filters(self.uri, bbox, mask, self.crs)
+        if bbox:  # buffer bbox
+            bbox_gpd: GPD_TYPES = parse_geom_bbox_buffer(bbox, mask, buffer, self.crs)
+        bbox_reader = bbox_from_file_and_filters(self.uri, bbox_gpd, mask, self.crs)
         return read_dataframe(self.uri, bbox=bbox_reader, mode="r")
 
 
 def bbox_from_file_and_filters(
-    fn: str,
+    uri: str,
     bbox: GEOM_TYPES | None = None,
     mask: GEOM_TYPES | None = None,
     crs: CRS | None = None,
@@ -51,12 +52,12 @@ def bbox_from_file_and_filters(
 
     Parameters
     ----------
-    fn: IOBase,
-        opened file
+    uri: str,
+        URI of the data.
     bbox: GeoDataFrame | GeoSeries | BaseGeometry
-        bounding box to filter the data while reading
+        bounding box to filter the data while reading.
     mask: GeoDataFrame | GeoSeries | BaseGeometry
-        mask to filter the data while reading
+        mask to filter the data while reading.
     crs: pyproj.CRS
         coordinate reference system of the bounding box or geometry. If already set,
         this argument is ignored.
@@ -67,7 +68,7 @@ def bbox_from_file_and_filters(
         )
     if bbox is None and mask is None:
         return None
-    if source_crs_str := read_info(fn).get("crs"):
+    if source_crs_str := read_info(uri).get("crs"):
         source_crs = CRS(source_crs_str)
     elif crs:
         source_crs = crs
