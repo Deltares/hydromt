@@ -5,7 +5,7 @@ from abc import ABC
 class AbstractDriver(ABC):
     """Abstract class for Driver to implement."""
 
-    def __init__(self, uri: str):
+    def __init__(self, uri: str, **kwargs):
         self._uri = uri
 
     _uri: str

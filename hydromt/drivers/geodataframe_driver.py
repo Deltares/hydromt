@@ -14,8 +14,8 @@ class GeoDataFrameDriver(AbstractDriver):
 
     _crs: CRS
 
-    def __init__(self, uri: str, crs: CRS):
-        super.__init__(uri)
+    def __init__(self, uri: str, crs: CRS, **kwargs):
+        super.__init__(uri, **kwargs)
         self._crs = crs
 
     @property
@@ -29,7 +29,8 @@ class GeoDataFrameDriver(AbstractDriver):
         bbox: list[int] | None = None,
         mask: gpd.GeoDataFrame | None = None,
         buffer: float = 0.0,
-        predicate: str = "intersects",  # ??
+        crs: CRS | None = None,
+        predicate: str = "intersects",
         logger: Logger | None = None,
         # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:

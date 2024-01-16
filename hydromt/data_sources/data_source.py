@@ -15,7 +15,12 @@ class PlaceHolderURI:
 
     _uri_placeholders = {"year", "month", "variable"}
 
-    def __init__(self, uri: str, time_tuple: tuple[str, str], variables: list[str]):
+    def __init__(
+        self,
+        uri: str,
+        time_tuple: tuple[str, str] | None = None,
+        variables: list[str] | None = None,
+    ):
         keys: list[str] = []
 
         if "{" in self.uri:
