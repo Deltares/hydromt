@@ -91,6 +91,13 @@ def test_rasterdataset(rioda, tmpdir):
     )
 
     assert len(da1) == 0
+    with pytest.raises(NoDataException):
+        da1 = data_catalog.get_rasterdataset(
+            fn_tif,
+            # only really care that the bbox doesn't intersect with anythign
+            bbox=[12.5, 12.6, 12.7, 12.8],
+            handle_nodata=NoDataStrategy.RAISE,
+        )
 
 
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
@@ -283,6 +290,14 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
         bbox=[12.5, 12.6, 12.7, 12.8],
         handle_nodata=NoDataStrategy.IGNORE,
     )
+
+    with pytest.raises(NoDataException):
+        da3 = data_catalog.get_geodataset(
+            "test.nc",
+            # only really care that the bbox doesn't intersect with anythign
+            bbox=[12.5, 12.6, 12.7, 12.8],
+            handle_nodata=NoDataStrategy.RAISE,
+        )
 
     assert len(da3) == 0
     with tempfile.TemporaryDirectory() as td:
@@ -494,6 +509,15 @@ def test_geodataframe(geodf, tmpdir):
     )
 
     assert len(gdf1) == 0
+
+    with pytest.raises(NoDataException):
+        gdf1 = data_catalog.get_geodataframe(
+            fn_gdf,
+            # only really care that the bbox doesn't intersect with anythign
+            bbox=[12.5, 12.6, 12.7, 12.8],
+            predicate="within",
+            handle_nodata=NoDataStrategy.RAISE,
+        )
 
     with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_geodataframe("no_file.geojson")
