@@ -13,10 +13,23 @@ Unreleased
 
 Added
 -----
+
+Changed
+-------
+
+Fixed
+-----
+- Reading Vector formats that consist of more than one file via geopandas. (#691)
+
+v0.9.2 (2024-01-09)
+===================
+This release adds additional bug fixes for the meridian offset functinality, and improvements to the new CLI commands.
+
+Added
+-----
 - Export CLI now also accepts time tuples (#660)
 - New stats.skills VE and RSR (#666)
 - Check CLI command can now validate bbox and geom regions (#664)
-- Added GADM 4.1 as FlatGeoBuff files to deltares_data catalog (#686)
 
 
 Changed
@@ -26,6 +39,7 @@ Changed
 
 Fixed
 -----
+- Double reading of model components when in appending mode. (#695)
 - Removed deprecated entrypoints library. (#676)
 - Bug in `raster.set_crs` if input_crs is of type CRS. (#659)
 - Export CLI now actually parses provided geoms. (#660)
@@ -34,9 +48,6 @@ Fixed
 - Fix bug with lazy spatial_ref coordinate (#682)
 - Bug in gis_utils.meridian_offset. (#692)
 
-
-Deprecated
-----------
 
 v0.9.1 (2023-11-16)
 ===================

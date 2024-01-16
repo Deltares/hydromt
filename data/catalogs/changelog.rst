@@ -23,8 +23,9 @@ added
 - processing_script / processing_notes arguments to data sources that have been (pre-) processed
 - temporal extent of datasets that have a temporal dimension.
 - hydromt_version to data catalog meta
-- waterdemand pcr_globwb dataset
 - spatial extents to datasets
+- Added waterdemand pcr_globwb dataset
+- Added GADM 4.1 as FlatGeoBuff files to deltares_data catalog (#686)
 
 
 version: 2023.2

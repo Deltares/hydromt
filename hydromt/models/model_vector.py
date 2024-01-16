@@ -23,7 +23,7 @@ class VectorMixin:
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._vector = None  # xr.Dataset()
+        self._vector: xr.Dataset = None
 
     @property
     def vector(self) -> xr.Dataset:
@@ -32,10 +32,15 @@ class VectorMixin:
         Returns xr.Dataset with a polygon geometry coordinate.
         """
         if self._vector is None:
-            self._vector = xr.Dataset()
-            if self._read:
-                self.read_vector()
+            self._initialize_vector()
         return self._vector
+
+    def _initialize_vector(self, skip_read=False) -> None:
+        """Initialize vector data."""
+        if self._vector is None:
+            self._vector = xr.Dataset()
+            if self._read and not skip_read:
+                self.read_vector()
 
     def set_vector(
         self,
@@ -62,6 +67,7 @@ class VectorMixin:
         overwrite_geom: bool, optional
             If True, overwrite the complete vector object with data, by default False
         """
+        self._initialize_vector()
         name_required = isinstance(data, np.ndarray) or (
             isinstance(data, xr.DataArray) and data.name is None
         )
@@ -111,12 +117,12 @@ class VectorMixin:
                     raise ValueError("Geometry of data and vector do not match")
             # add data (with check on index)
             for dvar in data.data_vars:
-                if dvar in self.vector:
+                if dvar in self._vector:
                     self.logger.warning(f"Replacing vector variable: {dvar}")
                 # check on index coordinate before merging
                 dims = data[dvar].dims
                 if np.array_equal(
-                    data[dims[0]].values, self.vector[self.index_dim].values
+                    data[dims[0]].values, self._vector[self.index_dim].values
                 ):
                     self._vector[dvar] = data[dvar]
                 else:
@@ -158,6 +164,7 @@ class VectorMixin:
             function.
         """
         self._assert_read_mode()
+        self._initialize_vector(skip_read=True)
         if fn is not None:
             # Disable lazy loading of data
             # to avoid issues with reading object dtype data
@@ -226,11 +233,11 @@ class VectorMixin:
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        if len(self.vector) == 0:
+        ds = self.vector
+        if len(ds) == 0:
             self.logger.debug("No vector data found, skip writing.")
             return
         self._assert_write_mode()
-        ds = self.vector
 
         # If fn is None check if vector contains only 1D data
         if fn is None:
