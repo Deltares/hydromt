@@ -4,7 +4,6 @@ meta:
   version: 2024.1
   hydromt_version: '>=0.9'
 
-
 basin_atlas_level12_v10:
   crs: 4326
   data_type: GeoDataFrame
@@ -18,42 +17,13 @@ basin_atlas_level12_v10:
     paper_ref: Linke et al. (2019)
     source_license: CC BY 4.0
     source_url: https://www.hydrosheds.org/hydroatlas
+    source_spatial_extent:
+      West: -180.0
+      South: -55.988
+      East: 180.001
+      North: 83.626
   version: 10
   path: hydrography/hydro_atlas/basin_atlas_v10.gpkg
-
-river_atlas_v10:
-  crs: 4326
-  data_type: GeoDataFrame
-  driver: vector
-  meta:
-    category: hydrography
-    notes: renaming and units might require some revision
-    paper_doi: 10.1038/s41597-019-0300-6
-    paper_ref: Linke et al. (2019)
-    source_license: CC BY 4.0
-    source_url: https://www.hydrosheds.org/hydroatlas
-  path: hydrography/hydro_atlas/river_atlas_v10.gpkg
-  version: 10
-  rename:
-    dis_m3_pyr: Dis_avg
-
-lake_atlas_pol_v10:
-  crs: 4326
-  data_type: GeoDataFrame
-  driver: vector
-  driver_kwargs:
-    layer: LakeATLAS_v10_pol
-  meta:
-    category: hydrography
-    notes: renaming and units might require some revision
-    paper_doi: 10.1038/s41597-022-01425-z
-    paper_ref: Lehner et al. (2022)
-    source_license: CC BY 4.0
-    source_url: https://www.hydrosheds.org/hydroatlas
-  path: hydrography/hydro_atlas/lake_atlas_v10.gpkg
-  version: 10
-  rename:
-    dis_m3_pyr: Dis_avg
 
 chelsa:
   crs: 4326
@@ -618,6 +588,11 @@ gadm_level0:
     source_url: https://gadm.org/download_world.html
     source_version: 4.1
     processing_script: geography/gadm/version4_1/run_dissolve_level_0.sh
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.658
   path: geography/gadm/version4_1/gadm_level0.fgb
 
 gadm_level1:
@@ -632,6 +607,11 @@ gadm_level1:
     source_url: https://gadm.org/download_world.html
     source_version: 4.1
     processing_script: geography/gadm/version4_1/run_dissolve_level_1.sh
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.658
   path: geography/gadm/version4_1/gadm_level1.fgb
 
 gadm_level2:
@@ -646,6 +626,11 @@ gadm_level2:
     source_url: https://gadm.org/download_world.html
     source_version: 4.1
     processing_script: geography/gadm/version4_1/run_dissolve_level_2.sh
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.658
   path: geography/gadm/version4_1/gadm_level2.fgb
 
 gadm_level3:
@@ -660,6 +645,11 @@ gadm_level3:
     source_url: https://gadm.org/download_world.html
     source_version: 4.1
     processing_script: geography/gadm/version4_1/run_dissolve_level_3.sh
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.658
   path: geography/gadm/version4_1/gadm_level3.fgb
 
 gcn250:
@@ -698,6 +688,11 @@ gdp_world:
       and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
     source_author: Wilfred Altena
     source_license: CC BY-4.0
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.665
   version: 1.0
   path: socio_economic/gdp_world/World_countries_GDPpcPPP.fgb
   rename:
@@ -1102,6 +1097,11 @@ grip_roads:
     paper_doi: 10.1088/1748-9326/aabd42
     source_license: CC0-1.0
     processing_script: infrastructure/grip/merge.ipynb
+    source_spatial_extent:
+      West: -179.999
+      South: -55.055
+      East: 180.0
+      North: 73.836
   version: 4
   path: infrastructure/grip/GRIP4_world.fgb
   rename:
@@ -1117,6 +1117,11 @@ grwl:
     paper_ref: Allen and Pavelsky (2018)
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.1297434
+    source_spatial_extent:
+      West: -180.0
+      South: -54.31
+      East: 180.0
+      North: 82.311
   version: 1.01
   path: hydrography/grwl/GRWL_vector_V01.01/grwl.fgb
 
@@ -1216,6 +1221,11 @@ hydro_lakes:
     category: surface water
     notes: HydroLAKES.v10_extract
     source_author: Arjen Haag
+    source_spatial_extent:
+      West: -180.0
+      South: -55.865
+      East: 180.0
+      North: 83.576
   version: 1.0
   path: hydrography/lakes/lake-db.fgb
   rename:
@@ -1237,6 +1247,11 @@ hydro_reservoirs:
     category: surface water
     notes: GRanD.v1.1_HydroLAKES.v10_JRC.2016
     source_author: Alessia Matano
+    source_spatial_extent:
+      West: -153.059
+      South: -45.881
+      East: 176.825
+      North: 70.396
   nodata: -99
   version: 1.0
   path: hydrography/reservoirs/reservoir-db.fgb
@@ -1281,6 +1296,29 @@ koppen_geiger:
   nodata: 0
   version: 2017
   path: meteo/climate_classification_v2017/Map_KG-Global.tif
+
+lake_atlas_pol_v10:
+  crs: 4326
+  data_type: GeoDataFrame
+  driver: vector
+  driver_kwargs:
+    layer: LakeATLAS_v10_pol
+  meta:
+    category: hydrography
+    notes: renaming and units might require some revision
+    paper_doi: 10.1038/s41597-022-01425-z
+    paper_ref: Lehner et al. (2022)
+    source_license: CC BY 4.0
+    source_url: https://www.hydrosheds.org/hydroatlas
+    source_spatial_extent:
+      West: -180.0
+      South: -55.865
+      East: 180.0
+      North: 83.576
+  path: hydrography/hydro_atlas/lake_atlas_v10.gpkg
+  version: 10
+  rename:
+    dis_m3_pyr: Dis_avg
 
 mdt_cnes_cls18:
   crs: 4326
@@ -1404,6 +1442,11 @@ merit_hydro_ihu_index:
     source_license: CC-BY-NC 4.0
     source_url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
     processing_notes: topography/merit_hydro_ihu/README
+    source_spatial_extent:
+      West: -180.025
+      South: -59.467
+      East: 190.35
+      North: 83.683
   path: topography/merit_hydro_ihu/30sec/basins.gpkg
 
 merit_hydro_index:
@@ -1415,6 +1458,11 @@ merit_hydro_index:
     paper_doi: 10.5194/hess-25-5287-2021
     paper_ref: Eilander et al. (2021)
     source_license: CC-BY-NC 4.0
+    source_spatial_extent:
+      West: -180.028
+      South: -59.46
+      East: 190.338
+      North: 83.661
   version: 1.0
   path: topography/merit_hydro/basin_index.fgb
 
@@ -1490,6 +1538,11 @@ osm_coastlines:
     source_author: OpenStreetMap
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
+    source_spatial_extent:
+      West: -180.0
+      South: -78.733
+      East: 180.0
+      North: 90.0
   version: 1.0
   path: geography/osm/osm_coastlines-db.fgb
   rename:
@@ -1505,6 +1558,11 @@ osm_landareas:
     source_author: OpenStreetMap
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
+    source_spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.666
   version: 1.0
   path: geography/osm/osm_landareas-db.fgb
   rename:
@@ -1565,6 +1623,11 @@ rgi:
     paper_ref: Pfeffer et al. (2014)
     source_license: CC BY 4.0
     source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
+    source_spatial_extent:
+      West: -179.921
+      South: -78.309
+      East: 179.751
+      North: 83.608
   version: 6.0
   path: hydrography/rgi/rgi.fgb
   rename:
@@ -1572,6 +1635,27 @@ rgi:
     GLIMSID: GLIMS_id
     ID: simple_id
     RGIID: RGI_id
+
+river_atlas_v10:
+  crs: 4326
+  data_type: GeoDataFrame
+  driver: vector
+  meta:
+    category: hydrography
+    notes: renaming and units might require some revision
+    paper_doi: 10.1038/s41597-019-0300-6
+    paper_ref: Linke et al. (2019)
+    source_license: CC BY 4.0
+    source_url: https://www.hydrosheds.org/hydroatlas
+    source_spatial_extent:
+      West: -179.998
+      South: -55.877
+      East: 179.998
+      North: 83.59
+  path: hydrography/hydro_atlas/river_atlas_v10.gpkg
+  version: 10
+  rename:
+    dis_m3_pyr: Dis_avg
 
 rivers_lin2019_v1:
   data_type: GeoDataFrame
@@ -1583,6 +1667,11 @@ rivers_lin2019_v1:
     source_license: CC-BY-NC 4.0
     source_url: https://zenodo.org/record/3552776#.YVbOrppByUk
     processing_notes: hydrography/rivers_lin2019/README
+    source_spatial_extent:
+      West: -177.204
+      South: -55.414
+      East: 180.237
+      North: 82.112
   version: 1
   path: hydrography/rivers_lin2019/rivers_ge30m.fgb
   rename:
@@ -1969,6 +2058,11 @@ wb_countries:
     source_url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
     source_license: CC-BY 4.0
     timestamp: February 2020
+    source_spatial_extent:
+      West: -180.0
+      South: -59.473
+      East: 180.0
+      North: 83.634
   version: 20200319
   path: geography/wb/WB_countries_Admin0.fgb
   rename:
