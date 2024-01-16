@@ -19,6 +19,7 @@ Changed
 
 Fixed
 -----
+- Reading Vector formats that consist of more than one file via geopandas. (#691)
 
 v0.9.2 (2024-01-09)
 ===================

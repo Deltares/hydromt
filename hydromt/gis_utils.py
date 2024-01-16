@@ -626,7 +626,12 @@ def bbox_from_file_and_filters(
         )
     if bbox is None and mask is None:
         return None
-    source_crs = CRS(read_info(fn).get("crs", "EPSG:4326"))  # assume WGS84
+    if source_crs_str := read_info(fn).get("crs"):
+        source_crs = CRS(source_crs_str)
+    elif crs:
+        source_crs = crs
+    else:  # assume WGS84
+        source_crs = CRS("EPSG:4326")
 
     if mask is not None:
         bbox = mask
