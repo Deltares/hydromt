@@ -400,7 +400,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         return fns_out
 
     @abstractmethod
-    def get_data(self, bbox, geom, buffer):
+    def get_data(self, bbox, geom, buffer, handle_nodata):
         """Return a view (lazy if possible) of the data with standardized field names.
 
         If bbox of mask are given, clip data to that extent.
