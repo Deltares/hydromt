@@ -18,5 +18,5 @@ class ModelComponent:
     def data(self) -> Optional[Any]:
         return self._data
 
-    def set(self, value: Any) -> None:
+    def set_data(self, value: Any) -> None:
         self._data = value

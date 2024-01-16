@@ -16,4 +16,5 @@ class ModelRegion:
 
     def set(self, data: gpd.GeoDataFrame):
         self.data: gpd.GeoDataFrame = data
-        self.crs: CRS = data.crs
+        if data is not None:
+            self.crs: CRS = data.crs
