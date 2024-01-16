@@ -602,7 +602,7 @@ class RasterDatasetAdapter(DataAdapter):
                     "No data within spatial domain.", handle_nodata, logger
                 )
             elif handle_nodata == NoDataStrategy.IGNORE:
-                logger.warning("No data within spacial domain for")
+                logger.warning("No data within spatial domain. Skipping...")
 
         return ds
 
