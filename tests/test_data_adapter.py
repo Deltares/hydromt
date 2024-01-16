@@ -290,6 +290,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
         bbox=[12.5, 12.6, 12.7, 12.8],
         handle_nodata=NoDataStrategy.IGNORE,
     )
+    assert len(da3) == 0
 
     with pytest.raises(NoDataException):
         da3 = data_catalog.get_geodataset(
@@ -299,7 +300,6 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
             handle_nodata=NoDataStrategy.RAISE,
         )
 
-    assert len(da3) == 0
     with tempfile.TemporaryDirectory() as td:
         # Test nc file writing to file
         GeoDatasetAdapter(fn_nc).to_file(

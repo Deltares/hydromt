@@ -405,7 +405,7 @@ class RasterDatasetAdapter(DataAdapter):
             if handle_nodata == NoDataStrategy.RAISE:
                 raise NoDataException(f"No data was read from files {fns}")
             elif handle_nodata == NoDataStrategy.IGNORE:
-                logger.warn(f"no data was found at {fns}. skipping...")
+                logger.warning(f"no data was found at {fns}. skipping...")
 
         return ds
 
@@ -552,7 +552,7 @@ class RasterDatasetAdapter(DataAdapter):
                             logger=logger,
                         )
                     elif handle_nodata == NoDataStrategy.IGNORE:
-                        logger.warn("Time slice out of range.")
+                        logger.warning("Time slice out of range.")
         return ds
 
     @staticmethod
@@ -602,7 +602,7 @@ class RasterDatasetAdapter(DataAdapter):
                     "No data within spatial domain.", handle_nodata, logger
                 )
             elif handle_nodata == NoDataStrategy.IGNORE:
-                logger.warn("No data within spacial domain for")
+                logger.warning("No data within spacial domain for")
 
         return ds
 

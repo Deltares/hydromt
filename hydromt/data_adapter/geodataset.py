@@ -303,7 +303,7 @@ class GeoDatasetAdapter(DataAdapter):
             if handle_nodata == NoDataStrategy.RAISE:
                 raise NoDataException(f"No data was read from files {fns}")
             elif handle_nodata == NoDataStrategy.IGNORE:
-                logger.warn(f"no data was found at {fns}. skipping...")
+                logger.warning(f"no data was found at {fns}. skipping...")
 
         return ds
 
@@ -425,7 +425,7 @@ class GeoDatasetAdapter(DataAdapter):
                     "No data within spatial domain.", handle_nodata, logger
                 )
             elif handle_nodata == NoDataStrategy.IGNORE:
-                logger.warn("No data within spacial domain for")
+                logger.warning("No data within spacial domain. skipping...")
         return ds
 
     def _shift_time(self, ds, logger=logger):
@@ -451,7 +451,7 @@ class GeoDatasetAdapter(DataAdapter):
                         logger=logger,
                     )
                 elif handle_nodata == NoDataStrategy.IGNORE:
-                    logger.warn("GeoDataset: Time slice out of range.")
+                    logger.warning("GeoDataset: Time slice out of range.")
         return ds
 
     def _set_metadata(self, ds):
