@@ -15,6 +15,7 @@ changed
 - kwargs to driver_kwargs
 - updated source_url if url was not working anymore
 - sorted datasets by alphabetical order
+- removed gtsm_codec_reanalysis dataset
 
 added
 ^^^^^
