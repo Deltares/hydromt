@@ -19,6 +19,7 @@ from hydromt.typing import (
     ErrorHandleMethod,
     GeoDataframeSource,
     Geom,
+    GeomBuffer,
     Predicate,
     StrPath,
     TotalBounds,
@@ -250,7 +251,7 @@ class GeoDataFrameAdapter(DataAdapter):
         self,
         bbox: Optional[Bbox] = None,
         geom: Optional[Geom] = None,
-        buffer: int = 0,
+        buffer: GeomBuffer = 0,
         predicate: Predicate = "intersects",
         logger: Logger = logger,
         handle_nodata=NoDataStrategy.RAISE,
@@ -283,7 +284,7 @@ class GeoDataFrameAdapter(DataAdapter):
         fns: List[str],
         bbox: Optional[Bbox],
         geom: Optional[Geom],
-        buffer: Optional[int],
+        buffer: Optional[GeomBuffer],
         predicate: Optional[Predicate],
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
@@ -325,14 +326,16 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def _rename_vars(self, gdf: gpd.GeoDataFrame):
+    def _rename_vars(self, gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # rename and select columns
         if self.rename:
             rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
             gdf = gdf.rename(columns=rename)
         return gdf
 
-    def _set_crs(self, gdf: gpd.GeoDataFrame, logger=logger):
+    def _set_crs(
+        self, gdf: gpd.GeoDataFrame, logger: Logger = logger
+    ) -> gpd.GeoDataFrame:
         if self.crs is not None and gdf.crs is None:
             gdf.set_crs(self.crs, inplace=True)
         elif gdf.crs is None:
@@ -403,7 +406,7 @@ class GeoDataFrameAdapter(DataAdapter):
             gdf = gdf.iloc[idxs]
         return gdf
 
-    def _set_nodata(self, gdf: gpd.GeoDataFrame):
+    def _set_nodata(self, gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # parse nodata values
         cols = gdf.select_dtypes([np.number]).columns
         if self.nodata is not None and len(cols) > 0:
@@ -418,7 +421,9 @@ class GeoDataFrameAdapter(DataAdapter):
                     gdf[c] = np.where(is_nodata, np.nan, gdf[c])
         return gdf
 
-    def _apply_unit_conversions(self, gdf: gpd.GeoDataFrame, logger: Logger = logger):
+    def _apply_unit_conversions(
+        self, gdf: gpd.GeoDataFrame, logger: Logger = logger
+    ) -> gpd.GeoDataFrame:
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in gdf.columns]
@@ -430,7 +435,7 @@ class GeoDataFrameAdapter(DataAdapter):
             gdf[name] = gdf[name] * m + a
         return gdf
 
-    def _set_metadata(self, gdf):
+    def _set_metadata(self, gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # set meta data
         gdf.attrs.update(self.meta)
 

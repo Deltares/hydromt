@@ -180,7 +180,7 @@ class GeoDatasetAdapter(DataAdapter):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
-    ):
+    ) -> Optional[Union[str, str]]:
         """Save a data slice to file.
 
         Parameters
@@ -220,10 +220,9 @@ class GeoDatasetAdapter(DataAdapter):
             single_var_as_array=variables is None,
         )
 
+        # early return if no data
         if len(obj) == 0:
-            _exec_nodata_strat(
-                "No data to export", strategy=handle_nodata, logger=logger
-            )
+            return
 
         read_kwargs = {}
 
@@ -270,8 +269,13 @@ class GeoDatasetAdapter(DataAdapter):
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`
         """
         # load data
-        fns = self._resolve_paths(variables, time_tuple)
+        fns = self._resolve_paths(variables=variables, time_tuple=time_tuple)
         ds = self._read_data(fns, handle_nodata=handle_nodata, logger=logger)
+
+        # early return if no data
+        if len(ds) == 0:
+            return
+
         self.mark_as_used()  # mark used
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
@@ -291,6 +295,10 @@ class GeoDatasetAdapter(DataAdapter):
             handle_nodata=handle_nodata,
             logger=logger,
         )
+
+        # early return if no data
+        if len(ds) == 0:
+            return
         # uniformize
         ds = self._apply_unit_conversion(ds, logger=logger)
         ds = self._set_metadata(ds)
@@ -302,7 +310,7 @@ class GeoDatasetAdapter(DataAdapter):
         fns: List[StrPath],
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ):
+    ) -> Data:
         kwargs = self.driver_kwargs.copy()
         if len(fns) > 1 and self.driver in ["vector", "zarr"]:
             raise ValueError(
@@ -325,12 +333,12 @@ class GeoDatasetAdapter(DataAdapter):
 
         return ds
 
-    def _rename_vars(self, ds: Data):
+    def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
         ds = ds.rename(rm)
         return ds
 
-    def _validate_spatial_coords(self, ds: Data):
+    def _validate_spatial_coords(self, ds: Data) -> Data:
         if GEO_MAP_COORD in ds.data_vars:
             ds = ds.set_coords(GEO_MAP_COORD)
         try:
@@ -347,7 +355,7 @@ class GeoDatasetAdapter(DataAdapter):
             )
         return ds
 
-    def _set_crs(self, ds: Data, logger: Logger = logger):
+    def _set_crs(self, ds: Data, logger: Logger = logger) -> Data:
         # set crs
         if ds.vector.crs is None and self.crs is not None:
             ds.vector.set_crs(self.crs)
@@ -375,7 +383,7 @@ class GeoDatasetAdapter(DataAdapter):
         time_tuple: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ):
+    ) -> Data:
         """Slice the dataset in space and time.
 
         Arguments
@@ -437,7 +445,7 @@ class GeoDatasetAdapter(DataAdapter):
         predicate: Predicate,
         handle_nodata: NoDataStrategy,
         logger: Logger = logger,
-    ):
+    ) -> Data:
         geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
         bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
         epsg = geom.crs.to_epsg()
