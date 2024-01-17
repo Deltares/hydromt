@@ -1,10 +1,11 @@
 """The Geodataframe adapter implementation."""
-import logging
 import warnings
 from datetime import datetime
+from logging import Logger, getLogger
 from os.path import basename, join, splitext
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+import geopandas as gpd
 import numpy as np
 import pyproj
 from pyproj.exceptions import CRSError
@@ -13,13 +14,21 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.typing import ErrorHandleMethod, GeoDataframeSource, TotalBounds
+from hydromt.typing import (
+    Bbox,
+    ErrorHandleMethod,
+    GeoDataframeSource,
+    Geom,
+    Predicate,
+    StrPath,
+    TotalBounds,
+)
 
 from .. import gis_utils, io
 from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 __all__ = ["GeoDataFrameAdapter", "GeoDataframeSource"]
 
@@ -39,7 +48,7 @@ class GeoDataFrameAdapter(DataAdapter):
 
     def __init__(
         self,
-        path: str,
+        path: StrPath,
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         crs: Optional[Union[int, str, dict]] = None,
@@ -54,8 +63,8 @@ class GeoDataFrameAdapter(DataAdapter):
         storage_options: Optional[dict] = None,
         name: str = "",  # optional for now
         catalog_name: str = "",  # optional for now
-        provider=None,
-        version=None,
+        provider: Optional[str] = None,
+        version: Optional[Union[int, str]] = None,
         **kwargs,
     ):
         """Initiate data adapter for geospatial vector data.
@@ -157,14 +166,15 @@ class GeoDataFrameAdapter(DataAdapter):
 
     def to_file(
         self,
-        data_root,
-        data_name,
-        bbox=None,
-        driver=None,
-        variables=None,
-        logger=logger,
+        data_root: StrPath,
+        data_name: str,
+        bbox: Optional[Bbox] = None,
+        driver: Optional[str] = None,
+        variables: Optional[List[str]] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
         **kwargs,
-    ):
+    ) -> Optional[Tuple[str, str, Dict[Any, Any]]]:
         """Save a data slice to file.
 
         Parameters
@@ -198,6 +208,8 @@ class GeoDataFrameAdapter(DataAdapter):
             _exec_nodata_strat(
                 "No data to export", strategy=handle_nodata, logger=logger
             )
+            # even if we ignore, we don't have to do anything else
+            return
 
         read_kwargs = {}
         if driver is None:
@@ -236,13 +248,13 @@ class GeoDataFrameAdapter(DataAdapter):
 
     def get_data(
         self,
-        bbox=None,
-        geom=None,
-        buffer=0,
-        predicate="intersects",
-        logger=logger,
+        bbox: Optional[Bbox] = None,
+        geom: Optional[Geom] = None,
+        buffer: int = 0,
+        predicate: Predicate = "intersects",
+        logger: Logger = logger,
         handle_nodata=NoDataStrategy.RAISE,
-        variables=None,
+        variables: Optional[List[str]] = None,
     ):
         """Return a clipped and unified GeoDataFrame (vector).
 
@@ -268,13 +280,13 @@ class GeoDataFrameAdapter(DataAdapter):
 
     def _read_data(
         self,
-        fns,
-        bbox,
-        geom,
-        buffer,
-        predicate,
-        handle_nodata=NoDataStrategy.RAISE,
-        logger=logger,
+        fns: List[str],
+        bbox: Optional[Bbox],
+        geom: Optional[Geom],
+        buffer: Optional[int],
+        predicate: Optional[Predicate],
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
     ):
         if len(fns) > 1:
             raise ValueError(
@@ -313,14 +325,14 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def _rename_vars(self, gdf):
+    def _rename_vars(self, gdf: gpd.GeoDataFrame):
         # rename and select columns
         if self.rename:
             rename = {k: v for k, v in self.rename.items() if k in gdf.columns}
             gdf = gdf.rename(columns=rename)
         return gdf
 
-    def _set_crs(self, gdf, logger=logger):
+    def _set_crs(self, gdf: gpd.GeoDataFrame, logger=logger):
         if self.crs is not None and gdf.crs is None:
             gdf.set_crs(self.crs, inplace=True)
         elif gdf.crs is None:
@@ -336,14 +348,14 @@ class GeoDataFrameAdapter(DataAdapter):
 
     @staticmethod
     def _slice_data(
-        gdf,
-        variables=None,
-        geom=None,
-        bbox=None,
-        buffer=0,
-        predicate="intersects",
-        handle_nodata=NoDataStrategy.RAISE,
-        logger=logger,
+        gdf: gpd.GeoDataFrame,
+        variables: Optional[List[str]] = None,
+        geom: Optional[Geom] = None,
+        bbox: Optional[Bbox] = None,
+        buffer: Optional[int] = 0,
+        predicate: Predicate = "intersects",
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
     ):
         """Return a clipped GeoDataFrame (vector).
 
@@ -391,7 +403,7 @@ class GeoDataFrameAdapter(DataAdapter):
             gdf = gdf.iloc[idxs]
         return gdf
 
-    def _set_nodata(self, gdf):
+    def _set_nodata(self, gdf: gpd.GeoDataFrame):
         # parse nodata values
         cols = gdf.select_dtypes([np.number]).columns
         if self.nodata is not None and len(cols) > 0:
@@ -406,7 +418,7 @@ class GeoDataFrameAdapter(DataAdapter):
                     gdf[c] = np.where(is_nodata, np.nan, gdf[c])
         return gdf
 
-    def _apply_unit_conversions(self, gdf, logger=logger):
+    def _apply_unit_conversions(self, gdf: gpd.GeoDataFrame, logger: Logger = logger):
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in gdf.columns]
@@ -431,8 +443,8 @@ class GeoDataFrameAdapter(DataAdapter):
 
     def get_bbox(
         self,
-        detect=True,
-        handle_nodata=NoDataStrategy.RAISE,
+        detect: bool = True,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
@@ -462,8 +474,8 @@ class GeoDataFrameAdapter(DataAdapter):
 
     def detect_bbox(
         self,
-        gdf=None,
-        handle_nodata=NoDataStrategy.RAISE,
+        gdf: Optional[gpd.GeoDataFrame] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 

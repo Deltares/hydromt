@@ -1720,7 +1720,7 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = DataFrameAdapter(path=str(data_like), **kwargs)
+                source = DataFrameAdapter(path=data_like, **kwargs)
                 name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):

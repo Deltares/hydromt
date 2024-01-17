@@ -601,6 +601,7 @@ def test_deprecation_warnings(artifact_data):
     with pytest.deprecated_call():
         fn = artifact_data["grdc"].path
         # should be driver_kwargs=dict(index_col=0)
+        # this one type errors
         artifact_data.get_dataframe(fn, index_col=0)
     with pytest.deprecated_call():
         fn = artifact_data["gtsmv3_eu_era5"].path

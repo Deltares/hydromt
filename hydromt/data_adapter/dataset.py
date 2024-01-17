@@ -1,8 +1,7 @@
 """Implementation for the dataset DataAdapter."""
-import logging
 from datetime import datetime
+from logging import Logger, getLogger
 from os.path import basename, splitext
-from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
@@ -13,13 +12,13 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.typing import TimeRange
+from hydromt.typing import Data, ErrorHandleMethod, StrPath, TimeRange, Variables
 
 from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 from .utils import netcdf_writer, shift_dataset_time, zarr_writer
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class DatasetAdapter(DataAdapter):
@@ -32,7 +31,7 @@ class DatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path: Union[str, Path],
+        path: StrPath,
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
@@ -124,12 +123,12 @@ class DatasetAdapter(DataAdapter):
 
     def to_file(
         self,
-        data_root: Union[str, Path],
+        data_root: StrPath,
         data_name: str,
-        time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        time_tuple: Optional[TimeRange] = None,
         variables: Optional[List[str]] = None,
         driver: Optional[str] = None,
-        handle_nodata=NoDataStrategy.RAISE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
     ) -> Tuple[str, str]:
         """Save a dataset slice to file. By default the data is saved as a NetCDF file.
@@ -188,10 +187,10 @@ class DatasetAdapter(DataAdapter):
     def get_data(
         self,
         variables: Optional[List[str]] = None,
-        time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        time_tuple: Optional[TimeRange] = None,
         single_var_as_array: Optional[bool] = True,
-        handle_nodata=NoDataStrategy.RAISE,
-        logger: Optional[logging.Logger] = logger,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified Dataset.
 
@@ -214,7 +213,12 @@ class DatasetAdapter(DataAdapter):
         # return array if single var and single_var_as_array
         return self._single_var_as_array(ds, single_var_as_array, variables)
 
-    def _read_data(self, fns, handle_nodata=NoDataStrategy.RAISE, logger=logger):
+    def _read_data(
+        self,
+        fns: List[StrPath],
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
+    ) -> Data:
         kwargs = self.driver_kwargs.copy()
         if len(fns) > 1 and self.driver in ["zarr"]:
             raise ValueError(
@@ -232,14 +236,12 @@ class DatasetAdapter(DataAdapter):
 
         return ds
 
-    def _rename_vars(self, ds: xr.Dataset) -> xr.Dataset:
+    def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
         ds = ds.rename(rm)
         return ds
 
-    def _set_metadata(
-        self, ds: Union[xr.DataArray, xr.Dataset]
-    ) -> Union[xr.Dataset, xr.DataArray]:
+    def _set_metadata(self, ds: Data) -> Data:
         if self.attrs:
             if isinstance(ds, xr.DataArray):
                 ds.attrs.update(self.attrs[ds.name])
@@ -250,7 +252,7 @@ class DatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
-    def _set_nodata(self, ds: xr.Dataset) -> xr.Dataset:
+    def _set_nodata(self, ds: Data) -> Data:
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
                 nodata = {k: self.nodata for k in ds.data_vars.keys()}
@@ -262,9 +264,7 @@ class DatasetAdapter(DataAdapter):
                     ds[k].attrs["_FillValue"] = mv
         return ds
 
-    def _apply_unit_conversion(
-        self, ds: xr.Dataset, logger: logging.Logger = logger
-    ) -> xr.Dataset:
+    def _apply_unit_conversion(self, ds: Data, logger: Logger = logger) -> Data:
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
@@ -284,20 +284,18 @@ class DatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def _shift_time(
-        self, ds: xr.Dataset, logger: logging.Logger = logger
-    ) -> xr.Dataset:
+    def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
         dt = self.unit_add.get("time", 0)
         return shift_dataset_time(dt=dt, ds=ds, logger=logger)
 
     @staticmethod
     def _slice_data(
-        ds: xr.Dataset,
-        variables: Optional[Union[str, List[str]]] = None,
-        time_tuple=Optional[Union[Tuple[str], Tuple[datetime]]],
-        logger: logging.Logger = logger,
+        ds: Data,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        logger: Logger = logger,
         on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
-    ) -> xr.Dataset:
+    ) -> Data:
         """Slice the dataset in space and time.
 
         Arguments
@@ -346,11 +344,11 @@ class DatasetAdapter(DataAdapter):
 
     @staticmethod
     def _slice_temporal_dimension(
-        ds: xr.Dataset,
-        time_tuple: tuple,
-        handle_nodata=NoDataStrategy.RAISE,
-        logger: logging.Logger = logger,
-    ) -> xr.Dataset:
+        ds: Data,
+        time_tuple: TimeRange,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
+    ) -> Data:
         if (
             "time" in ds.dims
             and ds["time"].size > 1
@@ -364,8 +362,8 @@ class DatasetAdapter(DataAdapter):
 
     def get_time_range(
         self,
-        ds: Optional[Union[xr.DataArray, xr.Dataset]] = None,
-        handle_nodata=NoDataStrategy.RAISE,
+        ds: Optional[Data] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> TimeRange:
         """Get the temporal range of a dataset.
 

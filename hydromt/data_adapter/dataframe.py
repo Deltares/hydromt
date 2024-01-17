@@ -1,9 +1,9 @@
 """Implementation for the Pandas Dataframe adapter."""
-import logging
 import warnings
 from datetime import datetime
+from logging import Logger, getLogger
 from os.path import join
-from typing import Optional, Union
+from typing import List, Optional, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -11,12 +11,12 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt.typing import ErrorHandleMethod
+from hydromt.typing import ErrorHandleMethod, StrPath, TimeRange, Variables
 
 from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 __all__ = [
     "DataFrameAdapter",
@@ -32,7 +32,7 @@ class DataFrameAdapter(DataAdapter):
 
     def __init__(
         self,
-        path: str,
+        path: StrPath,
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
@@ -136,13 +136,13 @@ class DataFrameAdapter(DataAdapter):
 
     def to_file(
         self,
-        data_root,
-        data_name,
-        driver=None,
-        variables=None,
-        time_tuple=None,
-        handle_nodata=NoDataStrategy.RAISE,
-        logger=logger,
+        data_root: StrPath,
+        data_name: str,
+        driver: Optional[str] = None,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
         **kwargs,
     ):
         """Save a dataframe slice to a file.
@@ -207,10 +207,10 @@ class DataFrameAdapter(DataAdapter):
 
     def get_data(
         self,
-        variables=None,
-        time_tuple=None,
-        handle_nodata=NoDataStrategy.RAISE,
-        logger=logger,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
     ):
         """Return a DataFrame.
 
@@ -234,7 +234,12 @@ class DataFrameAdapter(DataAdapter):
         df = self._set_metadata(df)
         return df
 
-    def _read_data(self, fns, handle_nodata=NoDataStrategy.RAISE, logger=logger):
+    def _read_data(
+        self,
+        fns: List[StrPath],
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
+    ) -> Optional[pd.DataFrame]:
         if len(fns) > 1:
             raise ValueError(
                 f"DataFrame: Reading multiple {self.driver} files is not supported."
@@ -254,15 +259,15 @@ class DataFrameAdapter(DataAdapter):
         else:
             raise IOError(f"DataFrame: driver {self.driver} unknown.")
 
-        return df
+        return cast(pd.DataFrame, df)
 
-    def _rename_vars(self, df):
+    def _rename_vars(self, df: pd.DataFrame) -> pd.DataFrame:
         if self.rename:
             rename = {k: v for k, v in self.rename.items() if k in df.columns}
             df = df.rename(columns=rename)
         return df
 
-    def _set_nodata(self, df):
+    def _set_nodata(self, df: pd.DataFrame) -> pd.DataFrame:
         # parse nodata values
         cols = df.select_dtypes([np.number]).columns
         if self.nodata is not None and len(cols) > 0:
@@ -279,12 +284,12 @@ class DataFrameAdapter(DataAdapter):
 
     @staticmethod
     def _slice_data(
-        df,
-        variables=None,
-        time_tuple=None,
+        df: pd.DataFrame,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger=logger,
-    ):
+        logger: Logger = logger,
+    ) -> Optional[pd.DataFrame]:
         """Return a sliced DataFrame.
 
         Parameters
@@ -320,7 +325,9 @@ class DataFrameAdapter(DataAdapter):
 
         return df
 
-    def _apply_unit_conversion(self, df, logger=logger):
+    def _apply_unit_conversion(
+        self, df: pd.DataFrame, logger: Logger = logger
+    ) -> pd.DataFrame:
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in df.columns]
         if len(unit_names) > 0:
@@ -331,7 +338,7 @@ class DataFrameAdapter(DataAdapter):
             df[name] = df[name] * m + a
         return df
 
-    def _set_metadata(self, df):
+    def _set_metadata(self, df: pd.DataFrame) -> pd.DataFrame:
         df.attrs.update(self.meta)
 
         # set column attributes

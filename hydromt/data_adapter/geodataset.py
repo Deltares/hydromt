@@ -1,9 +1,9 @@
 """Implementation for the geodataset DataAdapter."""
-import logging
 import warnings
 from datetime import datetime
+from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -15,7 +15,19 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.typing import GeoDatasetSource, TimeRange, TotalBounds
+from hydromt.typing import (
+    Bbox,
+    Data,
+    ErrorHandleMethod,
+    GeoDatasetSource,
+    Geom,
+    GeomBuffer,
+    Predicate,
+    StrPath,
+    TimeRange,
+    TotalBounds,
+    Variables,
+)
 
 from .. import gis_utils, io
 from ..nodata import NoDataStrategy, _exec_nodata_strat
@@ -23,7 +35,7 @@ from ..raster import GEO_MAP_COORD
 from .data_adapter import DataAdapter
 from .utils import netcdf_writer, shift_dataset_time, zarr_writer
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 __all__ = ["GeoDatasetAdapter", "GeoDatasetSource"]
 
@@ -39,7 +51,7 @@ class GeoDatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path: str,
+        path: StrPath,
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         crs: Optional[Union[int, str, dict]] = None,
@@ -159,14 +171,14 @@ class GeoDatasetAdapter(DataAdapter):
 
     def to_file(
         self,
-        data_root,
-        data_name,
-        bbox=None,
-        time_tuple=None,
-        variables=None,
-        driver=None,
-        handle_nodata=NoDataStrategy.RAISE,
-        logger=logger,
+        data_root: StrPath,
+        data_name: str,
+        bbox: Optional[Bbox] = None,
+        time_tuple: Optional[TimeRange] = None,
+        variables: Optional[List[str]] = None,
+        driver: Optional[str] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
         **kwargs,
     ):
         """Save a data slice to file.
@@ -242,15 +254,15 @@ class GeoDatasetAdapter(DataAdapter):
 
     def get_data(
         self,
-        bbox=None,
-        geom=None,
-        buffer=0,
-        predicate="intersects",
-        handle_nodata=NoDataStrategy.RAISE,
-        variables=None,
-        time_tuple=None,
-        single_var_as_array=True,
-        logger=logger,
+        bbox: Optional[Bbox] = None,
+        geom: Optional[Geom] = None,
+        buffer: Optional[GeomBuffer] = 0,
+        predicate: Predicate = "intersects",
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        single_var_as_array: bool = True,
+        logger: Logger = logger,
     ):
         """Return a clipped, sliced and unified GeoDataset.
 
@@ -286,7 +298,10 @@ class GeoDatasetAdapter(DataAdapter):
         return self._single_var_as_array(ds, single_var_as_array, variables)
 
     def _read_data(
-        self, fns, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE, logger=logger
+        self,
+        fns: List[StrPath],
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
     ):
         kwargs = self.driver_kwargs.copy()
         if len(fns) > 1 and self.driver in ["vector", "zarr"]:
@@ -310,12 +325,12 @@ class GeoDatasetAdapter(DataAdapter):
 
         return ds
 
-    def _rename_vars(self, ds):
+    def _rename_vars(self, ds: Data):
         rm = {k: v for k, v in self.rename.items() if k in ds}
         ds = ds.rename(rm)
         return ds
 
-    def _validate_spatial_coords(self, ds):
+    def _validate_spatial_coords(self, ds: Data):
         if GEO_MAP_COORD in ds.data_vars:
             ds = ds.set_coords(GEO_MAP_COORD)
         try:
@@ -332,7 +347,7 @@ class GeoDatasetAdapter(DataAdapter):
             )
         return ds
 
-    def _set_crs(self, ds, logger=logger):
+    def _set_crs(self, ds: Data, logger: Logger = logger):
         # set crs
         if ds.vector.crs is None and self.crs is not None:
             ds.vector.set_crs(self.crs)
@@ -351,15 +366,15 @@ class GeoDatasetAdapter(DataAdapter):
 
     @staticmethod
     def _slice_data(
-        ds,
-        variables=None,
-        geom=None,
-        bbox=None,
-        buffer=0,
-        predicate="intersects",
-        time_tuple=None,
-        handle_nodata=NoDataStrategy.RAISE,
-        logger=logger,
+        ds: Data,
+        variables: Optional[Variables] = None,
+        geom: Optional[Geom] = None,
+        bbox: Optional[Bbox] = None,
+        buffer: Optional[GeomBuffer] = 0,
+        predicate: Predicate = "intersects",
+        time_tuple: Optional[TimeRange] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
     ):
         """Slice the dataset in space and time.
 
@@ -415,7 +430,13 @@ class GeoDatasetAdapter(DataAdapter):
 
     @staticmethod
     def _slice_spatial_dimension(
-        ds, geom, bbox, buffer, predicate, handle_nodata, logger=logger
+        ds: Data,
+        geom: Optional[Geom],
+        bbox: Optional[Bbox],
+        buffer: Optional[GeomBuffer],
+        predicate: Predicate,
+        handle_nodata: NoDataStrategy,
+        logger: Logger = logger,
     ):
         geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
         bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
@@ -431,14 +452,17 @@ class GeoDatasetAdapter(DataAdapter):
                 logger.warning("No data within spacial domain. skipping...")
         return ds
 
-    def _shift_time(self, ds, logger=logger):
+    def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
         dt = self.unit_add.get("time", 0)
         return shift_dataset_time(dt=dt, ds=ds, logger=logger)
 
     @staticmethod
     def _slice_temporal_dimension(
-        ds, time_tuple, handle_nodata=NoDataStrategy.RAISE, logger=logger
-    ):
+        ds: Data,
+        time_tuple: Optional[TimeRange],
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
+    ) -> Data:
         if (
             "time" in ds.dims
             and ds["time"].size > 1
@@ -457,7 +481,7 @@ class GeoDatasetAdapter(DataAdapter):
                     logger.warning("GeoDataset: Time slice out of range.")
         return ds
 
-    def _set_metadata(self, ds):
+    def _set_metadata(self, ds: Data) -> Data:
         if self.attrs:
             if isinstance(ds, xr.DataArray):
                 ds.attrs.update(self.attrs[ds.name])
@@ -468,7 +492,7 @@ class GeoDatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
-    def _set_nodata(self, ds):
+    def _set_nodata(self, ds: Data) -> Data:
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
                 nodata = {k: self.nodata for k in ds.data_vars.keys()}
@@ -480,7 +504,7 @@ class GeoDatasetAdapter(DataAdapter):
                     ds[k].vector.set_nodata(mv)
         return ds
 
-    def _apply_unit_conversion(self, ds, logger=logger):
+    def _apply_unit_conversion(self, ds: Data, logger: Logger = logger) -> Data:
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
@@ -498,7 +522,9 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def get_bbox(self, detect=True, handle_nodata=NoDataStrategy.RAISE) -> TotalBounds:
+    def get_bbox(
+        self, detect: bool = True, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE
+    ) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -527,7 +553,7 @@ class GeoDatasetAdapter(DataAdapter):
         return bbox, crs
 
     def get_time_range(
-        self, detect=True, handle_nodata=NoDataStrategy.RAISE
+        self, detect: bool = True, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE
     ) -> TimeRange:
         """Detect the time range of the dataset.
 
@@ -554,7 +580,11 @@ class GeoDatasetAdapter(DataAdapter):
 
         return time_range
 
-    def detect_bbox(self, ds=None, handle_nodata=NoDataStrategy.RAISE) -> TotalBounds:
+    def detect_bbox(
+        self,
+        ds: Optional[Data] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+    ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -586,7 +616,9 @@ class GeoDatasetAdapter(DataAdapter):
         return bounds, crs
 
     def detect_time_range(
-        self, ds=None, handle_nodata=NoDataStrategy.RAISE
+        self,
+        ds: Optional[Data] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> TimeRange:
         """Detect the temporal range of the dataset.
 
@@ -607,7 +639,7 @@ class GeoDatasetAdapter(DataAdapter):
             inclusive on both sides.
         """
         if ds is None:
-            ds = self.get_data()
+            ds = self.get_data(handle_nodata=handle_nodata)
         return (
             ds[ds.vector.time_dim].min().values,
             ds[ds.vector.time_dim].max().values,
