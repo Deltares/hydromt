@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from os.path import basename, splitext
 from pathlib import Path
-from typing import List, NewType, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -13,14 +13,13 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.typing import ErrorHandleMethod, TimeRange
+from hydromt.typing import TimeRange
 
+from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 from .utils import netcdf_writer, shift_dataset_time, zarr_writer
 
 logger = logging.getLogger(__name__)
-
-DatasetSource = NewType("DatasetSource", Union[str, Path])
 
 
 class DatasetAdapter(DataAdapter):
@@ -44,8 +43,8 @@ class DatasetAdapter(DataAdapter):
         attrs: Optional[dict] = None,
         driver_kwargs: Optional[dict] = None,
         storage_options: Optional[dict] = None,
-        name: Optional[str] = "",
-        catalog_name: Optional[str] = "",
+        name: str = "",
+        catalog_name: str = "",
         provider: Optional[str] = None,
         version: Optional[str] = None,
     ):
@@ -130,6 +129,7 @@ class DatasetAdapter(DataAdapter):
         time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
         variables: Optional[List[str]] = None,
         driver: Optional[str] = None,
+        handle_nodata=NoDataStrategy.RAISE,
         **kwargs,
     ) -> Tuple[str, str]:
         """Save a dataset slice to file. By default the data is saved as a NetCDF file.
@@ -162,10 +162,16 @@ class DatasetAdapter(DataAdapter):
         """
         obj = self.get_data(
             time_tuple=time_tuple,
+            handle_nodata=handle_nodata,
             variables=variables,
             logger=logger,
             single_var_as_array=variables is None,
         )
+        if len(obj) == 0:
+            _exec_nodata_strat(
+                "No data to export", strategy=handle_nodata, logger=logger
+            )
+
         if driver is None or driver == "netcdf":
             fn_out = netcdf_writer(
                 obj=obj, data_root=data_root, data_name=data_name, variables=variables
@@ -184,6 +190,7 @@ class DatasetAdapter(DataAdapter):
         variables: Optional[List[str]] = None,
         time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
         single_var_as_array: Optional[bool] = True,
+        handle_nodata=NoDataStrategy.RAISE,
         logger: Optional[logging.Logger] = logger,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified Dataset.
@@ -207,7 +214,7 @@ class DatasetAdapter(DataAdapter):
         # return array if single var and single_var_as_array
         return self._single_var_as_array(ds, single_var_as_array, variables)
 
-    def _read_data(self, fns, logger=logger):
+    def _read_data(self, fns, handle_nodata=NoDataStrategy.RAISE, logger=logger):
         kwargs = self.driver_kwargs.copy()
         if len(fns) > 1 and self.driver in ["zarr"]:
             raise ValueError(
@@ -339,7 +346,10 @@ class DatasetAdapter(DataAdapter):
 
     @staticmethod
     def _slice_temporal_dimension(
-        ds: xr.Dataset, time_tuple: tuple, logger: logging.Logger = logger
+        ds: xr.Dataset,
+        time_tuple: tuple,
+        handle_nodata=NoDataStrategy.RAISE,
+        logger: logging.Logger = logger,
     ) -> xr.Dataset:
         if (
             "time" in ds.dims
@@ -353,7 +363,9 @@ class DatasetAdapter(DataAdapter):
         return ds
 
     def get_time_range(
-        self, ds: Optional[Union[xr.DataArray, xr.Dataset]] = None
+        self,
+        ds: Optional[Union[xr.DataArray, xr.Dataset]] = None,
+        handle_nodata=NoDataStrategy.RAISE,
     ) -> TimeRange:
         """Get the temporal range of a dataset.
 

@@ -186,6 +186,7 @@ class RasterDatasetAdapter(DataAdapter):
         time_tuple=None,
         driver=None,
         variables=None,
+        handle_nodata=NoDataStrategy.RAISE,
         logger=logger,
         **kwargs,
     ):
@@ -229,6 +230,11 @@ class RasterDatasetAdapter(DataAdapter):
             logger=logger,
             single_var_as_array=variables is None,
         )
+
+        if len(obj) == 0:
+            _exec_nodata_strat(
+                "No data to export", strategy=handle_nodata, logger=logger
+            )
 
         read_kwargs = {}
         if driver is None:
@@ -333,7 +339,7 @@ class RasterDatasetAdapter(DataAdapter):
         bbox: Optional[list] = None,
         logger=logger,
     ):
-        if zoom_level is not None and "{zoom_level}" in self.path:
+        if zoom_level is not None and "{zoom_level}" in str(self.path):
             zoom_level = self._parse_zoom_level(zoom_level, geom, bbox, logger=logger)
 
         # resolve path based on time, zoom level and/or variables
@@ -390,7 +396,7 @@ class RasterDatasetAdapter(DataAdapter):
                 fns = fns_cached
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
-            if zoom_level is not None and "{zoom_level}" not in self.path:
+            if zoom_level is not None and "{zoom_level}" not in str(self.path):
                 zls_dict, crs = self._get_zoom_levels_and_crs(fns[0], logger=logger)
                 zoom_level = self._parse_zoom_level(
                     zoom_level, geom, bbox, zls_dict, crs, logger=logger
@@ -402,10 +408,9 @@ class RasterDatasetAdapter(DataAdapter):
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
 
         if len(ds) == 0:
-            if handle_nodata == NoDataStrategy.RAISE:
-                raise NoDataException(f"No data was read from files {fns}")
-            elif handle_nodata == NoDataStrategy.IGNORE:
-                logger.warning(f"no data was found at {fns}. skipping...")
+            _exec_nodata_strat(
+                f"no data was found at {fns}.", strategy=handle_nodata, logger=logger
+            )
 
         return ds
 
@@ -680,7 +685,7 @@ class RasterDatasetAdapter(DataAdapter):
         geom: Optional[gpd.GeoSeries] = None,
         bbox: Optional[list] = None,
         zls_dict: Optional[Dict[int, float]] = None,
-        dst_crs: pyproj.CRS = None,
+        dst_crs: Optional[pyproj.CRS] = None,
         logger=logger,
     ) -> Optional[int]:
         """Return overview level of data corresponding to zoom level.
@@ -762,7 +767,7 @@ class RasterDatasetAdapter(DataAdapter):
         logger.debug(f"Parsed zoom_level {zl} ({dst_res:.2f})")
         return zl
 
-    def get_bbox(self, detect=True) -> TotalBounds:
+    def get_bbox(self, handle_nodata=NoDataStrategy.RAISE, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -789,7 +794,11 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bbox, crs
 
-    def get_time_range(self, detect=True) -> TimeRange:
+    def get_time_range(
+        self,
+        detect=True,
+        handle_nodata=NoDataStrategy.RAISE,
+    ) -> TimeRange:
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
@@ -818,6 +827,7 @@ class RasterDatasetAdapter(DataAdapter):
     def detect_bbox(
         self,
         ds=None,
+        handle_nodata=NoDataStrategy.RAISE,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
@@ -849,7 +859,11 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> TimeRange:
+    def detect_time_range(
+        self,
+        ds=None,
+        handle_nodata=NoDataStrategy.RAISE,
+    ) -> TimeRange:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched accodring to the settings in the

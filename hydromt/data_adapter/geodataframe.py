@@ -194,6 +194,10 @@ class GeoDataFrameAdapter(DataAdapter):
         """
         kwargs.pop("time_tuple", None)
         gdf = self.get_data(bbox=bbox, variables=variables, logger=logger)
+        if len(gdf) == 0:
+            _exec_nodata_strat(
+                "No data to export", strategy=handle_nodata, logger=logger
+            )
 
         read_kwargs = {}
         if driver is None:
@@ -262,7 +266,16 @@ class GeoDataFrameAdapter(DataAdapter):
         gdf = self._set_metadata(gdf)
         return gdf
 
-    def _read_data(self, fns, bbox, geom, buffer, predicate, logger=logger):
+    def _read_data(
+        self,
+        fns,
+        bbox,
+        geom,
+        buffer,
+        predicate,
+        handle_nodata=NoDataStrategy.RAISE,
+        logger=logger,
+    ):
         if len(fns) > 1:
             raise ValueError(
                 f"GeoDataFrame: Reading multiple {self.driver} files is not supported."
@@ -416,7 +429,11 @@ class GeoDataFrameAdapter(DataAdapter):
 
         return gdf
 
-    def get_bbox(self, detect=True) -> TotalBounds:
+    def get_bbox(
+        self,
+        detect=True,
+        handle_nodata=NoDataStrategy.RAISE,
+    ) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -446,6 +463,7 @@ class GeoDataFrameAdapter(DataAdapter):
     def detect_bbox(
         self,
         gdf=None,
+        handle_nodata=NoDataStrategy.RAISE,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 

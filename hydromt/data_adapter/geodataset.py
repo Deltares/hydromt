@@ -15,8 +15,7 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.exceptions import NoDataException
-from hydromt.typing import ErrorHandleMethod, GeoDatasetSource, TimeRange, TotalBounds
+from hydromt.typing import GeoDatasetSource, TimeRange, TotalBounds
 
 from .. import gis_utils, io
 from ..nodata import NoDataStrategy, _exec_nodata_strat
@@ -209,6 +208,11 @@ class GeoDatasetAdapter(DataAdapter):
             single_var_as_array=variables is None,
         )
 
+        if len(obj) == 0:
+            _exec_nodata_strat(
+                "No data to export", strategy=handle_nodata, logger=logger
+            )
+
         read_kwargs = {}
 
         # much better for mem/storage/processing if dtypes are set correctly
@@ -300,10 +304,9 @@ class GeoDatasetAdapter(DataAdapter):
             raise ValueError(f"GeoDataset: Driver {self.driver} unknown")
 
         if len(ds) == 0:
-            if handle_nodata == NoDataStrategy.RAISE:
-                raise NoDataException(f"No data was read from files {fns}")
-            elif handle_nodata == NoDataStrategy.IGNORE:
-                logger.warning(f"no data was found at {fns}. skipping...")
+            _exec_nodata_strat(
+                f"no data was found at {fns}.", strategy=handle_nodata, logger=logger
+            )
 
         return ds
 
@@ -495,7 +498,7 @@ class GeoDatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def get_bbox(self, detect=True) -> TotalBounds:
+    def get_bbox(self, detect=True, handle_nodata=NoDataStrategy.RAISE) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -523,7 +526,9 @@ class GeoDatasetAdapter(DataAdapter):
 
         return bbox, crs
 
-    def get_time_range(self, detect=True) -> TimeRange:
+    def get_time_range(
+        self, detect=True, handle_nodata=NoDataStrategy.RAISE
+    ) -> TimeRange:
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
@@ -549,10 +554,7 @@ class GeoDatasetAdapter(DataAdapter):
 
         return time_range
 
-    def detect_bbox(
-        self,
-        ds=None,
-    ) -> TotalBounds:
+    def detect_bbox(self, ds=None, handle_nodata=NoDataStrategy.RAISE) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
@@ -583,7 +585,9 @@ class GeoDatasetAdapter(DataAdapter):
         bounds = ds.vector.bounds
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> TimeRange:
+    def detect_time_range(
+        self, ds=None, handle_nodata=NoDataStrategy.RAISE
+    ) -> TimeRange:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the

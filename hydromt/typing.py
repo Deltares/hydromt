@@ -1,7 +1,6 @@
 """Type aliases used by hydromt."""
 
 from datetime import datetime
-from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, TypedDict, Union
 
@@ -10,6 +9,7 @@ from xarray import DataArray, Dataset
 GeoDataframeSource = Union[str, Path]
 GeoDatasetSource = Union[str, Path]
 RasterDatasetSource = Union[str, Path]
+DatasetSource = Union[str, Path]
 Bbox = Tuple[float, float, float, float]
 Crs = int
 TotalBounds = Tuple[Bbox, Crs]

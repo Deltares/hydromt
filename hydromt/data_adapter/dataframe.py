@@ -141,6 +141,7 @@ class DataFrameAdapter(DataAdapter):
         driver=None,
         variables=None,
         time_tuple=None,
+        handle_nodata=NoDataStrategy.RAISE,
         logger=logger,
         **kwargs,
     ):
@@ -179,6 +180,13 @@ class DataFrameAdapter(DataAdapter):
         kwargs.pop("bbox", None)
         obj = self.get_data(time_tuple=time_tuple, variables=variables, logger=logger)
 
+        if len(obj) == 0:
+            _exec_nodata_strat(
+                f"no data to export for {self.name}.",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+
         read_kwargs = dict()
         if driver is None or driver == "csv":
             # always write as CSV
@@ -201,6 +209,7 @@ class DataFrameAdapter(DataAdapter):
         self,
         variables=None,
         time_tuple=None,
+        handle_nodata=NoDataStrategy.RAISE,
         logger=logger,
     ):
         """Return a DataFrame.
@@ -211,19 +220,21 @@ class DataFrameAdapter(DataAdapter):
         """
         # load data
         fns = self._resolve_paths(variables)
-        df = self._read_data(fns, logger=logger)
+        df = self._read_data(fns, handle_nodata=handle_nodata, logger=logger)
         self.mark_as_used()  # mark used
         # rename variables and parse nodata
         df = self._rename_vars(df)
         df = self._set_nodata(df)
         # slice data
-        df = DataFrameAdapter._slice_data(df, variables, time_tuple, logger=logger)
+        df = DataFrameAdapter._slice_data(
+            df, variables, time_tuple, handle_nodata=handle_nodata, logger=logger
+        )
         # uniformize data
         df = self._apply_unit_conversion(df, logger=logger)
         df = self._set_metadata(df)
         return df
 
-    def _read_data(self, fns, logger=logger):
+    def _read_data(self, fns, handle_nodata=NoDataStrategy.RAISE, logger=logger):
         if len(fns) > 1:
             raise ValueError(
                 f"DataFrame: Reading multiple {self.driver} files is not supported."
