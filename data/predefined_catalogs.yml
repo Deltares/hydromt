@@ -16,7 +16,7 @@
 deltares_data:
   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/deltares_data.yml
   versions:
-    v2023.12: main
+    v2024.1: main
     v2023.2: 0bf8e2a1e716095dc6df54a5e9114ce88da0701b
     v2022.7: e082da339f22cb1fc3571eec5a901a21d1c8a7bd
     v2022.5: d88cc47bd4ecc83de38c00aa554a7d48ad23ec23
@@ -24,12 +24,14 @@ deltares_data:
 gcs_cmip6_data:
   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/gcs_cmip6_data.yml
   versions:
-    v2023.2: main
+    v2024.1: main
+    v2023.2: 0144d5dadfb76a9f2bdb22226b484e83c9751c34
   notes: This data uses CMIP6 data stored in Google Cloud Service.
 aws_data:
   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/aws_data.yml
   versions:
-    v2023.2: main
+    v2024.1: main
+    v2023.2: 897e5c5272875f1c066f393798b7ae59721c9e9d
   notes: This data are stored in public Amazon Web Services.
 artifact_data:
   urlpath: https://github.com/DirkEilander/hydromt-artifacts/releases/download/{version}/data.tar.gz
