@@ -3,7 +3,7 @@ import warnings
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import join
-from typing import List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -144,7 +144,7 @@ class DataFrameAdapter(DataAdapter):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
-    ):
+    ) -> Optional[Tuple[StrPath, str, Dict[str, Any]]]:
         """Save a dataframe slice to a file.
 
         Parameters
@@ -186,6 +186,7 @@ class DataFrameAdapter(DataAdapter):
                 strategy=handle_nodata,
                 logger=logger,
             )
+            return
 
         read_kwargs = dict()
         if driver is None or driver == "csv":
@@ -211,7 +212,7 @@ class DataFrameAdapter(DataAdapter):
         time_tuple: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ):
+    ) -> pd.DataFrame:
         """Return a DataFrame.
 
         Returned data is optionally sliced by time and variables,
@@ -219,16 +220,27 @@ class DataFrameAdapter(DataAdapter):
         description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
         # load data
-        fns = self._resolve_paths(variables)
-        df = self._read_data(fns, handle_nodata=handle_nodata, logger=logger)
-        self.mark_as_used()  # mark used
+        fns = self._resolve_paths(variables=variables)
+        df = self._read_data(fns, logger=logger)
+        if len(df) == 0:
+            _exec_nodata_strat(
+                "No data was read from source", strategy=handle_nodata, logger=logger
+            )
+            return df
         # rename variables and parse nodata
         df = self._rename_vars(df)
         df = self._set_nodata(df)
         # slice data
-        df = DataFrameAdapter._slice_data(
-            df, variables, time_tuple, handle_nodata=handle_nodata, logger=logger
-        )
+        df = DataFrameAdapter._slice_data(df, variables, time_tuple, logger=logger)
+        if len(df) == 0:
+            _exec_nodata_strat(
+                "No data was left after slicing", strategy=handle_nodata, logger=logger
+            )
+            return df
+
+        # only if data is actually returned
+        self.mark_as_used()  # mark used
+
         # uniformize data
         df = self._apply_unit_conversion(df, logger=logger)
         df = self._set_metadata(df)
@@ -237,9 +249,8 @@ class DataFrameAdapter(DataAdapter):
     def _read_data(
         self,
         fns: List[StrPath],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> Optional[pd.DataFrame]:
+    ) -> pd.DataFrame:
         if len(fns) > 1:
             raise ValueError(
                 f"DataFrame: Reading multiple {self.driver} files is not supported."
@@ -287,9 +298,8 @@ class DataFrameAdapter(DataAdapter):
         df: pd.DataFrame,
         variables: Optional[Variables] = None,
         time_tuple: Optional[TimeRange] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> Optional[pd.DataFrame]:
+    ) -> pd.DataFrame:
         """Return a sliced DataFrame.
 
         Parameters
@@ -317,11 +327,11 @@ class DataFrameAdapter(DataAdapter):
 
         if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
             logger.debug(f"Slicing time dime {time_tuple}")
-            df = df[df.index.slice_indexer(*time_tuple)]
-            if df.size == 0:
-                _exec_nodata_strat(
-                    "DataFrame: Time slice out of range.", handle_nodata, logger=logger
-                )
+            try:
+                df = df[df.index.slice_indexer(*time_tuple)]
+            except IndexError:
+                # if no data return empty df
+                df = pd.DataFrame()
 
         return df
 

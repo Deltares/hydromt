@@ -36,6 +36,7 @@ from pystac import CatalogType, MediaType
 
 from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt.utils import partition_dictionaries
+from hydromt.nodata import _exec_nodata_strat
 
 from . import __version__
 from .data_adapter import (
@@ -1366,12 +1367,24 @@ class DataCatalog(object):
                 buffer,
                 align,
                 time_tuple,
-                handle_nodata,
                 logger=self.logger,
             )
-            return RasterDatasetAdapter._single_var_as_array(
+            if len(ds) == 0:
+                _exec_nodata_strat(
+                    "No data was read from source",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
+            ds = RasterDatasetAdapter._single_var_as_array(
                 data_like, single_var_as_array, variables
             )
+            if len(ds) == 0:
+                _exec_nodata_strat(
+                    "No data was read from source",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
+            return ds
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
@@ -1388,6 +1401,12 @@ class DataCatalog(object):
             cache_root=self._cache_dir if self.cache else None,
             logger=self.logger,
         )
+        if len(obj) == 0:
+            _exec_nodata_strat(
+                "No data was read from source",
+                strategy=handle_nodata,
+                logger=logger,
+            )
         return obj
 
     def get_geodataframe(
@@ -1472,7 +1491,6 @@ class DataCatalog(object):
                 bbox,
                 buffer,
                 predicate,
-                handle_nodata,
                 logger=self.logger,
             )
         else:
@@ -1576,7 +1594,6 @@ class DataCatalog(object):
                 buffer,
                 predicate,
                 time_tuple,
-                handle_nodata,
                 logger=self.logger,
             )
             return GeoDatasetAdapter._single_var_as_array(
@@ -1724,9 +1741,16 @@ class DataCatalog(object):
                 name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
-            return DataFrameAdapter._slice_data(
-                data_like, variables, time_tuple, handle_nodata, logger=self.logger
+            df = DataFrameAdapter._slice_data(
+                data_like, variables, time_tuple, logger=self.logger
             )
+            if len(df) == 0:
+                _exec_nodata_strat(
+                    "No data was read from source",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
+            return df
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 

@@ -191,7 +191,7 @@ class DatasetAdapter(DataAdapter):
         single_var_as_array: Optional[bool] = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> xr.Dataset:
+    ) -> Data:
         """Return a clipped, sliced and unified Dataset.
 
         For a detailed description see:
@@ -200,16 +200,30 @@ class DatasetAdapter(DataAdapter):
         # load data
         fns = self._resolve_paths(variables, time_tuple)
         ds = self._read_data(fns, logger=logger)
-        self.mark_as_used()  # mark used
+        if len(ds) == 0:
+            _exec_nodata_strat(
+                "No data was read from source",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return ds
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._set_nodata(ds)
         ds = self._shift_time(ds, logger=logger)
         # slice
         ds = DatasetAdapter._slice_data(ds, variables, time_tuple, logger=logger)
+        if len(ds) == 0:
+            _exec_nodata_strat(
+                "No data was read from source",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return ds
         # uniformize
         ds = self._apply_unit_conversion(ds, logger=logger)
         ds = self._set_metadata(ds)
+        self.mark_as_used()
         # return array if single var and single_var_as_array
         return self._single_var_as_array(ds, single_var_as_array, variables)
 
@@ -294,7 +308,6 @@ class DatasetAdapter(DataAdapter):
         variables: Optional[Variables] = None,
         time_tuple: Optional[TimeRange] = None,
         logger: Logger = logger,
-        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> Data:
         """Slice the dataset in space and time.
 

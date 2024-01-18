@@ -424,7 +424,7 @@ class DataAdapter(object, metaclass=ABCMeta):
     @staticmethod
     def _single_var_as_array(
         ds: Data, single_var_as_array: bool, variable_name: Optional[str] = None
-    ):
+    ) -> Data:
         # return data array if single variable dataset
         dvars = list(ds.data_vars.keys())
         if single_var_as_array and len(dvars) == 1:

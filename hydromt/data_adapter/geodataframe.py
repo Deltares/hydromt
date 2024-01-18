@@ -253,9 +253,9 @@ class GeoDataFrameAdapter(DataAdapter):
         geom: Optional[Geom] = None,
         buffer: GeomBuffer = 0,
         predicate: Predicate = "intersects",
-        logger: Logger = logger,
-        handle_nodata=NoDataStrategy.RAISE,
         variables: Optional[List[str]] = None,
+        handle_nodata=NoDataStrategy.RAISE,
+        logger: Logger = logger,
     ):
         """Return a clipped and unified GeoDataFrame (vector).
 
@@ -263,17 +263,32 @@ class GeoDataFrameAdapter(DataAdapter):
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
         # load
-        fns = self._resolve_paths(variables)
+        fns = self._resolve_paths(variables=variables)
         gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
-        self.mark_as_used()  # mark used
+        if len(gdf) == 0:
+            _exec_nodata_strat(
+                "No data was read from source",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return gdf
         # rename variables and parse crs & nodata
         gdf = self._rename_vars(gdf)
         gdf = self._set_crs(gdf, logger=logger)
         gdf = self._set_nodata(gdf)
         # slice
         gdf = GeoDataFrameAdapter._slice_data(
-            gdf, variables, geom, bbox, buffer, predicate, handle_nodata, logger=logger
+            gdf, variables, geom, bbox, buffer, predicate, logger=logger
         )
+        if len(gdf) == 0:
+            _exec_nodata_strat(
+                "No data was left after slicing",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return gdf
+
+        self.mark_as_used()  # mark used
         # uniformize
         gdf = self._apply_unit_conversions(gdf, logger=logger)
         gdf = self._set_metadata(gdf)
@@ -286,9 +301,8 @@ class GeoDataFrameAdapter(DataAdapter):
         geom: Optional[Geom],
         buffer: Optional[GeomBuffer],
         predicate: Optional[Predicate],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ):
+    ) -> gpd.GeoDataFrame:
         if len(fns) > 1:
             raise ValueError(
                 f"GeoDataFrame: Reading multiple {self.driver} files is not supported."
@@ -357,7 +371,6 @@ class GeoDataFrameAdapter(DataAdapter):
         bbox: Optional[Bbox] = None,
         buffer: Optional[int] = 0,
         predicate: Predicate = "intersects",
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ):
         """Return a clipped GeoDataFrame (vector).

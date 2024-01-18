@@ -301,16 +301,21 @@ class RasterDatasetAdapter(DataAdapter):
         """
         # load data
         fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
-        self.mark_as_used()  # mark used
         ds = self._read_data(
             fns,
             geom,
             bbox,
             cache_root,
-            handle_nodata=handle_nodata,
             zoom_level=zoom_level,
             logger=logger,
         )
+        if len(ds) == 0:
+            _exec_nodata_strat(
+                "No data was read from source",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return ds
         # rename variables and parse data and attrs
         ds = self._rename_vars(ds)
         ds = self._validate_spatial_dims(ds)
@@ -326,12 +331,19 @@ class RasterDatasetAdapter(DataAdapter):
             buffer,
             align,
             time_tuple,
-            handle_nodata=handle_nodata,
             logger=logger,
         )
+        if len(ds) == 0:
+            _exec_nodata_strat(
+                "No data was read from source",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return ds
         # uniformize data
         ds = self._apply_unit_conversions(ds, logger)
         ds = self._set_metadata(ds)
+        self.mark_as_used()  # mark used
         # return array if single var and single_var_as_array
         return self._single_var_as_array(ds, single_var_as_array, variables)
 
@@ -361,7 +373,6 @@ class RasterDatasetAdapter(DataAdapter):
         geom: Optional[Geom],
         bbox: Optional[Bbox],
         cache_root: Optional[StrPath],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         zoom_level: Optional[int] = None,
         logger: Logger = logger,
     ):
@@ -412,11 +423,6 @@ class RasterDatasetAdapter(DataAdapter):
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
 
-        if len(ds) == 0:
-            _exec_nodata_strat(
-                f"no data was found at {fns}.", strategy=handle_nodata, logger=logger
-            )
-
         return ds
 
     def _rename_vars(self, ds: Data) -> Data:
@@ -465,7 +471,6 @@ class RasterDatasetAdapter(DataAdapter):
         buffer: GeomBuffer = 0,
         align: Optional[bool] = None,
         time_tuple: Optional[TimeRange] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ):
         """Return a RasterDataset sliced in both spatial and temporal dimensions.
@@ -513,7 +518,6 @@ class RasterDatasetAdapter(DataAdapter):
             ds = RasterDatasetAdapter._slice_temporal_dimension(
                 ds,
                 time_tuple,
-                handle_nodata,
                 logger=logger,
             )
         if geom is not None or bbox is not None:
@@ -523,7 +527,6 @@ class RasterDatasetAdapter(DataAdapter):
                 bbox,
                 buffer,
                 align,
-                handle_nodata,
                 logger=logger,
             )
         return ds
@@ -546,7 +549,6 @@ class RasterDatasetAdapter(DataAdapter):
     def _slice_temporal_dimension(
         ds: Data,
         time_tuple: Optional[TimeRange],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ):
         if (
@@ -557,15 +559,6 @@ class RasterDatasetAdapter(DataAdapter):
             if time_tuple is not None:
                 logger.debug(f"Slicing time dim {time_tuple}")
                 ds = ds.sel({"time": slice(*time_tuple)})
-                if ds.time.size == 0:
-                    if handle_nodata == NoDataStrategy.RAISE:
-                        _exec_nodata_strat(
-                            "Time slice out of range.",
-                            handle_nodata,
-                            logger=logger,
-                        )
-                    elif handle_nodata == NoDataStrategy.IGNORE:
-                        logger.warning("Time slice out of range.")
         return ds
 
     @staticmethod
@@ -575,7 +568,6 @@ class RasterDatasetAdapter(DataAdapter):
         bbox: Optional[Bbox],
         buffer: GeomBuffer,
         align: Optional[bool],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ):
         # make sure bbox is in data crs
@@ -596,26 +588,13 @@ class RasterDatasetAdapter(DataAdapter):
             bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
             ds = ds.raster.clip_bbox(bbox, buffer=buffer, align=align)
-            if np.any(np.array(ds.raster.shape) < 2):
-                _exec_nodata_strat(
-                    "RasterDataset: No data within spatial domain",
-                    handle_nodata,
-                    logger,
-                )
+            # if np.any(np.array(ds.raster.shape) < 2):
             # check if bbox is fully covered
             w, s, e, n = ds.raster.bounds
             if not (w <= bbox[0] and s <= bbox[1] and e >= bbox[2] and n >= bbox[3]):
                 logger.warning(
                     f"Dataset does [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
                 )
-
-        if ds.raster.size == 0:
-            if handle_nodata == NoDataStrategy.RAISE:
-                _exec_nodata_strat(
-                    "No data within spatial domain.", handle_nodata, logger
-                )
-            elif handle_nodata == NoDataStrategy.IGNORE:
-                logger.warning("No data within spatial domain. Skipping...")
 
         return ds
 
@@ -660,7 +639,9 @@ class RasterDatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
-    def _get_zoom_levels_and_crs(self, fn=None, logger=logger):
+    def _get_zoom_levels_and_crs(
+        self, fn: Optional[StrPath] = None, logger=logger
+    ) -> Tuple[int, int]:
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         if self.zoom_levels is not None and self.crs is not None:
             return self.zoom_levels, self.crs
