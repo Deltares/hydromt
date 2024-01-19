@@ -1,6 +1,9 @@
 """Utility functions for hydromt that have no other home."""
 
 import numpy as np
+import pandas as pd
+import geopandas as gpd
+import xarray as xr
 
 
 class _classproperty(property):
@@ -65,3 +68,12 @@ def _dict_pprint(d):
     import json
 
     return json.dumps(d, indent=2)
+
+
+def has_no_data(data) -> bool:
+    if data is None:
+        return True
+    elif isinstance(data, xr.Dataset):
+        return all([v.size == 0 for v in data.data_vars.values()])
+    else:
+        return len(data) == 0

@@ -11,9 +11,10 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
+from hydromt.nodata import NoDataException, NoDataStrategy, _exec_nodata_strat
 from hydromt.typing import ErrorHandleMethod, StrPath, TimeRange, Variables
+from hydromt.utils import has_no_data
 
-from ..nodata import NoDataStrategy, _exec_nodata_strat
 from .data_adapter import DataAdapter
 
 logger = getLogger(__name__)
@@ -177,34 +178,37 @@ class DataFrameAdapter(DataAdapter):
 
 
         """
-        kwargs.pop("bbox", None)
-        obj = self.get_data(time_tuple=time_tuple, variables=variables, logger=logger)
-
-        if len(obj) == 0:
-            _exec_nodata_strat(
-                f"no data to export for {self.name}.",
-                strategy=handle_nodata,
-                logger=logger,
+        try:
+            kwargs.pop("bbox", None)
+            obj = self.get_data(
+                time_tuple=time_tuple, variables=variables, logger=logger
             )
-            return
 
-        read_kwargs = dict()
-        if driver is None or driver == "csv":
-            # always write as CSV
-            driver = "csv"
-            fn_out = join(data_root, f"{data_name}.csv")
-            obj.to_csv(fn_out, **kwargs)
-            read_kwargs["index_col"] = 0
-        elif driver == "parquet":
-            fn_out = join(data_root, f"{data_name}.parquet")
-            obj.to_parquet(fn_out, **kwargs)
-        elif driver == "excel":
-            fn_out = join(data_root, f"{data_name}.xlsx")
-            obj.to_excel(fn_out, **kwargs)
-        else:
-            raise ValueError(f"DataFrame: Driver {driver} is unknown.")
+            if len(obj) == 0:
+                raise NoDataException()
 
-        return fn_out, driver, read_kwargs
+            read_kwargs = dict()
+            if driver is None or driver == "csv":
+                # always write as CSV
+                driver = "csv"
+                fn_out = join(data_root, f"{data_name}.csv")
+                obj.to_csv(fn_out, **kwargs)
+                read_kwargs["index_col"] = 0
+            elif driver == "parquet":
+                fn_out = join(data_root, f"{data_name}.parquet")
+                obj.to_parquet(fn_out, **kwargs)
+            elif driver == "excel":
+                fn_out = join(data_root, f"{data_name}.xlsx")
+                obj.to_excel(fn_out, **kwargs)
+            else:
+                raise ValueError(f"DataFrame: Driver {driver} is unknown.")
+
+            return fn_out, driver, read_kwargs
+        except NoDataException:
+            _exec_nodata_strat(
+                "No data to export", strategy=handle_nodata, logger=logger
+            )
+            return None
 
     def get_data(
         self,
@@ -212,43 +216,48 @@ class DataFrameAdapter(DataAdapter):
         time_tuple: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> pd.DataFrame:
+    ) -> Optional[pd.DataFrame]:
         """Return a DataFrame.
 
         Returned data is optionally sliced by time and variables,
         based on the properties of this DataFrameAdapter. For a detailed
         description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
-        # load data
-        fns = self._resolve_paths(variables=variables)
-        df = self._read_data(fns, logger=logger)
-        if len(df) == 0:
-            _exec_nodata_strat(
-                "No data was read from source", strategy=handle_nodata, logger=logger
+        try:
+            # load data
+            fns = self._resolve_paths(variables=variables)
+            df = self._read_data(fns, handle_nodata=NoDataStrategy.RAISE, logger=logger)
+            if has_no_data(df):
+                raise NoDataException()
+            # rename variables and parse nodata
+            df = self._rename_vars(df)
+            df = self._set_nodata(df)
+            # slice data
+            df = DataFrameAdapter._slice_data(
+                df,
+                variables,
+                time_tuple,
+                handle_nodata=NoDataStrategy.RAISE,
+                logger=logger,
             )
+
+            # only if data is actually returned
+            self.mark_as_used()  # mark used
+
+            # uniformize data
+            df = self._apply_unit_conversion(df, logger=logger)
+            df = self._set_metadata(df)
             return df
-        # rename variables and parse nodata
-        df = self._rename_vars(df)
-        df = self._set_nodata(df)
-        # slice data
-        df = DataFrameAdapter._slice_data(df, variables, time_tuple, logger=logger)
-        if len(df) == 0:
+        except NoDataException:
             _exec_nodata_strat(
-                "No data was left after slicing", strategy=handle_nodata, logger=logger
+                "No data to export", strategy=handle_nodata, logger=logger
             )
-            return df
-
-        # only if data is actually returned
-        self.mark_as_used()  # mark used
-
-        # uniformize data
-        df = self._apply_unit_conversion(df, logger=logger)
-        df = self._set_metadata(df)
-        return df
+            return None
 
     def _read_data(
         self,
         fns: List[StrPath],
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ) -> pd.DataFrame:
         if len(fns) > 1:
@@ -298,6 +307,7 @@ class DataFrameAdapter(DataAdapter):
         df: pd.DataFrame,
         variables: Optional[Variables] = None,
         time_tuple: Optional[TimeRange] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ) -> pd.DataFrame:
         """Return a sliced DataFrame.

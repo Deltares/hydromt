@@ -34,9 +34,9 @@ from packaging.version import Version
 from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
+from hydromt.nodata import NoDataException, NoDataStrategy, _exec_nodata_strat
 from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
-from hydromt.utils import partition_dictionaries
-from hydromt.nodata import _exec_nodata_strat
+from hydromt.utils import has_no_data, partition_dictionaries
 
 from . import __version__
 from .data_adapter import (
@@ -48,8 +48,6 @@ from .data_adapter import (
     RasterDatasetAdapter,
 )
 from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
-from .exceptions import NoDataException
-from .nodata import NoDataStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -1137,6 +1135,7 @@ class DataCatalog(object):
         unit_conversion: bool = True,
         meta: Optional[Dict] = None,
         append: bool = False,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> None:
         """Export a data slice of each dataset and a data_catalog.yml file to disk.
 
@@ -1230,10 +1229,15 @@ class DataCatalog(object):
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
                                 time_tuple=time_tuple,
+                                handle_nodata=NoDataStrategy.RAISE,
                                 logger=self.logger,
                             )
                         except NoDataException as e:
-                            self.logger.warning(f"{key} file contains no data: {e}")
+                            _exec_nodata_strat(
+                                f"{key} file contains no data: {e}",
+                                handle_nodata,
+                                logger,
+                            )
                             continue
                         # update path & driver and remove kwargs
                         # and rename in output sources
@@ -1287,7 +1291,7 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
-    ) -> xr.Dataset:
+    ) -> Optional[xr.Dataset]:
         """Return a clipped, sliced and unified RasterDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
@@ -1343,71 +1347,67 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             RasterDataset
         """
-        if isinstance(data_like, dict):
-            data_like, provider, version = _parse_data_like_dict(
-                data_like, provider, version
-            )
+        try:
+            if isinstance(data_like, dict):
+                data_like, provider, version = _parse_data_like_dict(
+                    data_like, provider, version
+                )
 
-        if isinstance(data_like, (str, Path)):
-            if isinstance(data_like, str) and data_like in self.sources:
-                name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+            if isinstance(data_like, (str, Path)):
+                if isinstance(data_like, str) and data_like in self.sources:
+                    name = data_like
+                    source = self.get_source(name, provider=provider, version=version)
+                else:
+                    if "provider" not in kwargs:
+                        kwargs.update({"provider": "user"})
+                    source = RasterDatasetAdapter(path=str(data_like), **kwargs)
+                    name = basename(data_like)
+                    self.add_source(name, source)
+            elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
+                data_like = RasterDatasetAdapter._slice_data(
+                    data_like,
+                    variables,
+                    geom,
+                    bbox,
+                    buffer,
+                    align,
+                    time_tuple,
+                    logger=self.logger,
+                )
+                if has_no_data(data_like):
+                    raise NoDataException()
+                ds = RasterDatasetAdapter._single_var_as_array(
+                    data_like, single_var_as_array, variables
+                )
+                if has_no_data(data_like):
+                    raise NoDataException()
+                return ds
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
-                source = RasterDatasetAdapter(path=str(data_like), **kwargs)
-                name = basename(data_like)
-                self.add_source(name, source)
-        elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            data_like = RasterDatasetAdapter._slice_data(
-                data_like,
-                variables,
-                geom,
-                bbox,
-                buffer,
-                align,
-                time_tuple,
+                raise ValueError(
+                    f'Unknown raster data type "{type(data_like).__name__}"'
+                )
+
+            obj = source.get_data(
+                bbox=bbox,
+                geom=geom,
+                buffer=buffer,
+                zoom_level=zoom_level,
+                align=align,
+                variables=variables,
+                time_tuple=time_tuple,
+                single_var_as_array=single_var_as_array,
+                cache_root=self._cache_dir if self.cache else None,
+                handle_nodata=NoDataStrategy.RAISE,
                 logger=self.logger,
             )
-            if len(ds) == 0:
-                _exec_nodata_strat(
-                    "No data was read from source",
-                    strategy=handle_nodata,
-                    logger=logger,
-                )
-            ds = RasterDatasetAdapter._single_var_as_array(
-                data_like, single_var_as_array, variables
-            )
-            if len(ds) == 0:
-                _exec_nodata_strat(
-                    "No data was read from source",
-                    strategy=handle_nodata,
-                    logger=logger,
-                )
-            return ds
-        else:
-            raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
-
-        obj = source.get_data(
-            bbox=bbox,
-            geom=geom,
-            buffer=buffer,
-            handle_nodata=handle_nodata,
-            zoom_level=zoom_level,
-            align=align,
-            variables=variables,
-            time_tuple=time_tuple,
-            single_var_as_array=single_var_as_array,
-            cache_root=self._cache_dir if self.cache else None,
-            logger=self.logger,
-        )
-        if len(obj) == 0:
+            return obj
+        except NoDataException:
             _exec_nodata_strat(
                 "No data was read from source",
                 strategy=handle_nodata,
                 logger=logger,
             )
-        return obj
+            return None
 
     def get_geodataframe(
         self,
@@ -1594,6 +1594,7 @@ class DataCatalog(object):
                 buffer,
                 predicate,
                 time_tuple,
+                handle_nodata=handle_nodata,
                 logger=self.logger,
             )
             return GeoDatasetAdapter._single_var_as_array(

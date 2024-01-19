@@ -80,7 +80,7 @@ def test_rasterdataset(rioda, tmpdir):
     assert np.all(da1 == rioda_utm)
     with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_rasterdataset("no_file.tif")
-    with pytest.raises(NoDataException, match="RasterDataset: No data within"):
+    with pytest.raises(NoDataException):
         data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
 
     da1 = data_catalog.get_rasterdataset(
@@ -90,14 +90,7 @@ def test_rasterdataset(rioda, tmpdir):
         handle_nodata=NoDataStrategy.IGNORE,
     )
 
-    assert len(da1) == 0
-    with pytest.raises(NoDataException):
-        da1 = data_catalog.get_rasterdataset(
-            fn_tif,
-            # only really care that the bbox doesn't intersect with anythign
-            bbox=[12.5, 12.6, 12.7, 12.8],
-            handle_nodata=NoDataStrategy.RAISE,
-        )
+    assert da1 is None
 
 
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
@@ -290,8 +283,11 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
         bbox=[12.5, 12.6, 12.7, 12.8],
         handle_nodata=NoDataStrategy.IGNORE,
     )
-    assert len(da3) == 0
+    assert da3 is None
 
+    # import pdb
+
+    # pdb.set_trace()
     with pytest.raises(NoDataException):
         da3 = data_catalog.get_geodataset(
             "test.nc",

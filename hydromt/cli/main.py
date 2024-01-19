@@ -15,6 +15,7 @@ from geopandas import GeoDataFrame
 from pydantic import ValidationError
 
 from hydromt.data_catalog import DataCatalog
+from hydromt.nodata import NoDataStrategy
 from hydromt.validators.data_catalog import DataCatalogValidator
 from hydromt.validators.model_config import HydromtModelSetup
 from hydromt.validators.region import validate_region
@@ -117,6 +118,12 @@ overwrite_opt = click.option(
     is_flag=True,
     default=False,
     help="Flag: If provided overwrite existing model files",
+)
+ignore_empty_opt = click.option(
+    "--ignore-empty",
+    is_flag=True,
+    default=False,
+    help="Flag: Simply ignore empty data sets when exporting",
 )
 
 cache_opt = click.option(
@@ -444,6 +451,7 @@ def check(
 @data_opt
 @deltares_data_opt
 @overwrite_opt
+@ignore_empty_opt
 @quiet_opt
 @verbose_opt
 @click.pass_context
@@ -457,6 +465,7 @@ def export(
     data: Optional[List[Path]],
     dd: bool,
     fo: bool,
+    ignore_empty: bool,
     quiet: int,
     verbose: int,
 ):
@@ -480,6 +489,11 @@ def export(
         "export", join(export_dest_path, "hydromt.log"), log_level=log_level
     )
     logger.info(f"Output dir: {export_dest_path}")
+
+    if ignore_empty:
+        handle_nodata = NoDataStrategy.IGNORE
+    else:
+        handle_nodata = NoDataStrategy.RAISE
 
     if data:
         data_libs = list(data)  # add data catalogs from cli
@@ -557,6 +571,7 @@ def export(
             unit_conversion=unit_conversion,
             meta=meta,
             append=append,
+            handle_nodata=handle_nodata,
         )
 
     except Exception as e:
