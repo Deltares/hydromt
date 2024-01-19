@@ -73,7 +73,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
         if geom is not None or bbox is not None:
             # NOTE if we read with vector driver this is already done ..
-            geom = parse_geom_bbox_buffer(geom, bbox, buffer)
+            geom = parse_geom_bbox_buffer(geom, bbox, buffer, crs)
             bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
             epsg = geom.crs.to_epsg()
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")

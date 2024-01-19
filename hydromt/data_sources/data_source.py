@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 
-from hydromt.drivers.abstract_driver import AbstractDriver
+from hydromt.drivers.base_driver import BaseDriver
 
 
 class PlaceHolderURI:
@@ -124,7 +124,7 @@ class DataSource(BaseModel):
     name: str
     version: str
     provider: str  # ?
-    driver: AbstractDriver
+    driver: BaseDriver
     driver_kwargs: dict[str, Any]
     unit_add: dict[str, Any]
     unit_mult: dict[str, Any]
@@ -132,11 +132,3 @@ class DataSource(BaseModel):
     extent: dict[str, Any]  # ?
     meta: dict[str, Any]
     uri: str
-
-    def set_driver(self, **driver_kwargs):
-        """Set and init driver."""
-        pass
-
-    def set_adapters(self, attrs, rename, unit_add, unit_mult):
-        """Set possible adapters."""
-        pass

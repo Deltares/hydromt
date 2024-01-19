@@ -18,9 +18,11 @@ class PyogrioDriver(GeoDataFrameDriver):
 
     def read(
         self,
+        uri: str,
         bbox: list[int] | None = None,
         mask: gpd.GeoDataFrame | None = None,
         buffer: float = 0,
+        crs: CRS | None = None,
         predicate: str = "intersects",
         logger: Logger | None = None,
         # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -31,9 +33,9 @@ class PyogrioDriver(GeoDataFrameDriver):
         args:
         """
         if bbox:  # buffer bbox
-            bbox_gpd: GPD_TYPES = parse_geom_bbox_buffer(bbox, mask, buffer, self.crs)
-        bbox_reader = bbox_from_file_and_filters(self.uri, bbox_gpd, mask, self.crs)
-        return read_dataframe(self.uri, bbox=bbox_reader, mode="r")
+            bbox_gpd: GPD_TYPES = parse_geom_bbox_buffer(bbox, mask, buffer, crs)
+        bbox_reader = bbox_from_file_and_filters(uri, bbox_gpd, mask, crs)
+        return read_dataframe(uri, bbox=bbox_reader, mode="r")
 
 
 def bbox_from_file_and_filters(

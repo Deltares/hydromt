@@ -1,31 +1,21 @@
 """Driver for GeoDataFrames."""
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from logging import Logger
 
 import geopandas as gpd
 from pyproj import CRS
 
 # from hydromt.nodata import NoDataStrategy
-from .abstract_driver import AbstractDriver
+from .base_driver import BaseDriver
 
 
-class GeoDataFrameDriver(AbstractDriver):
+class GeoDataFrameDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
-
-    _crs: CRS
-
-    def __init__(self, uri: str, crs: CRS, **kwargs):
-        super.__init__(uri, **kwargs)
-        self._crs = crs
-
-    @property
-    def crs(self) -> CRS:
-        """Getter for CRS."""
-        return self._crs
 
     @abstractmethod
     def read(
         self,
+        uri: str,
         bbox: list[int] | None = None,
         mask: gpd.GeoDataFrame | None = None,
         buffer: float = 0.0,
