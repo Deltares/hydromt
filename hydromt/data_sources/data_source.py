@@ -132,3 +132,4 @@ class DataSource(BaseModel):
     extent: dict[str, Any]  # ?
     meta: dict[str, Any]
     uri: str
+    crs: int

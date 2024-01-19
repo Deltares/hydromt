@@ -4,7 +4,6 @@ from logging import Logger
 
 import geopandas as gpd
 from pydantic import field_validator
-from pyproj import CRS
 
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
@@ -40,22 +39,22 @@ class GeoDataFrameDataSource(DataSource):
 
     def read_data(
         self,
-        uri: str,
         bbox: list[float],
         mask: gpd.GeoDataFrame,
         buffer: float,
-        crs: CRS,
         variables: list[str],
         predicate: str,
         logger: Logger,
     ) -> gpd.GeoDataFrame:
         """Use initialize driver to read data."""
-        uris: list[str] = PlaceHolderURI(uri, variables=variables).expand(self)
+        uris: list[str] = PlaceHolderURI(self.uri, variables=variables).expand(self)
+        # TODO: instead of this PlaceHolderURI, get metadata from resolver type.
         if len(uris) > 1:
             raise ValueError("GeoDataFrames cannot have more than 1 source URI.")
         uri = uris[0]
-        # TODO: how to deal with multiple URIs here?
         gdf_driver: GeoDataFrameDriver = driver_from_str(
             self.driver, self.driver_kwargs
         )
-        return gdf_driver.read(uri, bbox, mask, buffer, crs, predicate, logger=logger)
+        return gdf_driver.read(
+            uri, bbox, mask, buffer, self.crs, predicate, logger=logger
+        )
