@@ -626,8 +626,10 @@ def open_vector(
             bbox_shapely = box(*bbox)
         else:
             bbox_shapely = None
-        bbox_reader = gis_utils.bbox_from_file_and_filters(fn, bbox_shapely, geom, crs)
-        gdf = gpd.read_file(fn, bbox=bbox_reader, mode=mode, **kwargs)
+        bbox_reader = gis_utils.bbox_from_file_and_filters(
+            str(fn), bbox_shapely, geom, crs
+        )
+        gdf = gpd.read_file(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:
