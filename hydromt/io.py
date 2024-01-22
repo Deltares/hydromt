@@ -2,20 +2,18 @@
 import glob
 import io as pyio
 import logging
-import warnings
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional, Union
 
 import dask
-import fsspec
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyproj
 import rioxarray
 import xarray as xr
-from shapely.geometry import box
+from shapely.geometry import Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 
 from . import gis_utils, merge, raster, vector
@@ -470,6 +468,8 @@ def open_geodataset(
     if filetype in ["csv", "parquet", "xls", "xlsx", "xy"]:
         kwargs.update(assert_gtype="Point")
     # read geometry file
+    if bbox:
+        bbox: Polygon = box(*bbox)
     gdf = open_vector(fn_locs, crs=crs, bbox=bbox, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
@@ -617,35 +617,17 @@ def open_vector(
     gdf : geopandas.GeoDataFrame
         Parsed geometry file
     """
-
-    def _read(f: pyio.IOBase) -> gpd.GeoDataFrame:
-        bbox_reader = gis_utils.bbox_from_file_and_filters(f, bbox, geom, crs)
-        f.seek(0)
-        return gpd.read_file(f, bbox=bbox_reader, mode=mode, **kwargs)
-
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     # drivers with multiple relevant files cannot be opened directly, we should pass the uri only
-    elif driver in ["shp"]:
-        gdf = gpd.read_file(
-            fn, mode=mode
-        )  # todo check old way of bbox/mask filter at read
     else:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            # check if filelike
-            if all(
-                map(
-                    lambda method: hasattr(fn, method),
-                    ("seek", "close", "read", "write"),
-                )
-            ):
-                with fn.open(mode="rb") as f:
-                    gdf = _read(f)
-            else:
-                with fsspec.open(fn, mode="rb") as f:  # lose storage options here
-                    gdf = _read(f)
+        if bbox:
+            bbox_shapely = box(*bbox)
+        else:
+            bbox_shapely = None
+        bbox_reader = gis_utils.bbox_from_file_and_filters(fn, bbox_shapely, geom, crs)
+        gdf = gpd.read_file(fn, bbox=bbox_reader, mode=mode, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:
