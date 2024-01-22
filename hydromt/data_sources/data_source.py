@@ -8,6 +8,7 @@ import pandas as pd
 from pydantic import BaseModel
 
 from hydromt.drivers.base_driver import BaseDriver
+from hydromt.metadata_resolvers import RESOLVERS
 
 
 class PlaceHolderURI:
@@ -121,10 +122,18 @@ class DataSource(BaseModel):
     this driver.
     """
 
+    # TODO: create metadata property
+
+    def _validate_metadata_resolver(cls, v: Any):
+        assert isinstance(v, str), "metadata_resolver should be string."
+        assert v in RESOLVERS, f"unknown MetaDataResolver: '{v}'."
+        RESOLVERS.get(v)
+
     name: str
     version: str
     provider: str  # ?
     driver: BaseDriver
+    metadata_resolver: str
     driver_kwargs: dict[str, Any]
     unit_add: dict[str, Any]
     unit_mult: dict[str, Any]
