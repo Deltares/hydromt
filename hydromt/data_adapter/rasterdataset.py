@@ -20,8 +20,8 @@ from pystac import Item as StacItem
 from pystac import MediaType
 from rasterio.errors import RasterioIOError
 
-from hydromt.nodata import NoDataStrategy, _exec_nodata_strat
 from hydromt.exceptions import NoDataException
+from hydromt.nodata import NoDataStrategy, _exec_nodata_strat
 from hydromt.typing import (
     Bbox,
     Data,

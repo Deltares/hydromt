@@ -1,8 +1,6 @@
 """Utility functions for hydromt that have no other home."""
 
 import numpy as np
-import pandas as pd
-import geopandas as gpd
 import xarray as xr
 
 
@@ -71,6 +69,7 @@ def _dict_pprint(d):
 
 
 def has_no_data(data) -> bool:
+    """Check whether various data containers are empty."""
     if data is None:
         return True
     elif isinstance(data, xr.Dataset):

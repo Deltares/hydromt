@@ -10,7 +10,6 @@ from click.testing import CliRunner
 from hydromt import __version__
 from hydromt.cli import api as hydromt_api
 from hydromt.cli.main import main as hydromt_cli
-from hydromt.exceptions import NoDataException
 
 DATADIR = join(dirname(abspath(__file__)), "data")
 
