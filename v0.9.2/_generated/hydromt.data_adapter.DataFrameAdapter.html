@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=bd9e20870c6007c4c509" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=bd9e20870c6007c4c509" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=bd9e20870c6007c4c509" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=bd9e20870c6007c4c509" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
@@ -33,9 +33,9 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=bd9e20870c6007c4c509" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=bd9e20870c6007c4c509" />
-  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=bd9e20870c6007c4c509"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
@@ -44,7 +44,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_generated/hydromt.data_adapter.DataFrameAdapter';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.15.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
@@ -66,7 +66,6 @@
   <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -106,10 +105,8 @@
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form></div>
   </div>
-
-  <header>
   
-    <div class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
 <div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
     <span class="fa-solid fa-bars"></span>
@@ -282,9 +279,8 @@ document.write(`
   
 </div>
 
-    </div>
+    </header>
   
-  </header>
 
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
@@ -938,9 +934,9 @@ In addition it keeps meta data to be able to reproduce which data is used.</p>
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – Path to data source. If the dataset consists of multiple files, the path may
 contain {variable}, {year}, {month} placeholders as well as path
 search pattern using a ‘*’ wildcard.</p></li>
-<li><p><strong>driver</strong> (<code class="docutils literal notranslate"><span class="pre">{'csv',</span> <span class="pre">'parquet',</span> <span class="pre">'xlsx',</span> <span class="pre">'xls',</span> <span class="pre">'fwf'}</span></code>, <em>optional</em>) – Driver to read files with, for ‘csv’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.1.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_csv()</span></code></a>,
-for ‘parquet’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.1.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_parquet()</span></code></a>, for {‘xlsx’, ‘xls’}
-<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.1.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_excel()</span></code></a>, and for ‘fwf’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.1.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_fwf()</span></code></a>.
+<li><p><strong>driver</strong> (<code class="docutils literal notranslate"><span class="pre">{'csv',</span> <span class="pre">'parquet',</span> <span class="pre">'xlsx',</span> <span class="pre">'xls',</span> <span class="pre">'fwf'}</span></code>, <em>optional</em>) – Driver to read files with, for ‘csv’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_csv()</span></code></a>,
+for ‘parquet’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_parquet()</span></code></a>, for {‘xlsx’, ‘xls’}
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_excel()</span></code></a>, and for ‘fwf’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_fwf()</span></code></a>.
 By default the driver is inferred from the file extension and falls back to
 ‘csv’ if unknown.</p></li>
 <li><p><strong>filesystem</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Filesystem where the data is stored (local, cloud, http etc.).
@@ -984,9 +980,9 @@ In addition it keeps meta data to be able to reproduce which data is used.</p>
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – Path to data source. If the dataset consists of multiple files, the path may
 contain {variable}, {year}, {month} placeholders as well as path
 search pattern using a ‘*’ wildcard.</p></li>
-<li><p><strong>driver</strong> (<code class="docutils literal notranslate"><span class="pre">{'csv',</span> <span class="pre">'parquet',</span> <span class="pre">'xlsx',</span> <span class="pre">'xls',</span> <span class="pre">'fwf'}</span></code>, <em>optional</em>) – Driver to read files with, for ‘csv’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.1.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_csv()</span></code></a>,
-for ‘parquet’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.1.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_parquet()</span></code></a>, for {‘xlsx’, ‘xls’}
-<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.1.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_excel()</span></code></a>, and for ‘fwf’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.1.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_fwf()</span></code></a>.
+<li><p><strong>driver</strong> (<code class="docutils literal notranslate"><span class="pre">{'csv',</span> <span class="pre">'parquet',</span> <span class="pre">'xlsx',</span> <span class="pre">'xls',</span> <span class="pre">'fwf'}</span></code>, <em>optional</em>) – Driver to read files with, for ‘csv’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_csv()</span></code></a>,
+for ‘parquet’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_parquet()</span></code></a>, for {‘xlsx’, ‘xls’}
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_excel()</span></code></a>, and for ‘fwf’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_fwf()</span></code></a>.
 By default the driver is inferred from the file extension and falls back to
 ‘csv’ if unknown.</p></li>
 <li><p><strong>filesystem</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Filesystem where the data is stored (local, cloud, http etc.).
@@ -1151,8 +1147,8 @@ or long name of the variable.</p></li>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=bd9e20870c6007c4c509"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=bd9e20870c6007c4c509"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1185,7 +1181,7 @@ or long name of the variable.</p></li>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
 </p></div>
       
     </div>
