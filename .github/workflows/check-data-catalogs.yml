@@ -1,0 +1,80 @@
+
+name: Validate Data Catalog
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - data/catalogs/*.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - data/catalogs/*.yml
+
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    env:
+      DOC_PYTHON_VERSION: '3.11'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: ${{ github.workflow }}-data-catalog-validation-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+
+      - uses: actions/checkout@v3
+      # we need environment.yml to see if we have a cache hit
+      - name: Generate env spec
+        run: pip install tomli && python make_env.py test,io,extra,doc -p ${{ env.DOC_PYTHON_VERSION }} -n hydromt
+
+      - name: load from cache
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            /usr/share/miniconda3
+            ~/pycache
+            ./docs/_build
+          # the below two settings mean we'll alway srestore the cache
+          # but the cache hit output can tell us if we have to update afterwards
+          key: docs-${{ hashFiles('environment.yml')  }}
+          restore-keys: |
+            docs
+          # we'll just use the cache of the docs, it's fine
+
+      - name: Fail on no cache restore
+        if: steps.cache.outputs.cache-matched-key == ''
+        run: |
+          echo "Failed to restore any cache. exiting..."
+          exit 1
+
+      # by avoiding the mamba setup stage by loading it from cache instead we save
+      # a lot of setup time, but we do have to do our own PATH management
+      # hence the exports
+      - name: Update environment
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          mamba env update -n hydromt -f environment.yml
+
+
+      - name: Conda info
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          conda info
+          conda list -n hydromt
+
+      - name: Validate the catalogs
+        run: |
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          export NUMBA_DISABLE_JIT=1
+          for d in $(ls data/catalogs/*.yml); do
+            echo "Checking $d"
+            PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt hydromt check -d $d
+          done
