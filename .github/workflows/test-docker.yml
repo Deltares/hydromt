@@ -41,11 +41,8 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          load: true
           target: full
           tags: hydromt
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Run Tests
         run: docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt pytest
