@@ -28,6 +28,7 @@ jobs:
       cancel-in-progress: true
     steps:
 
+      - uses: actions/checkout@v3
       # we need environment.yml to see if we have a cache hit
       - name: Generate env spec
         run: pip install tomli && python make_env.py test,io,extra,doc -p ${{ env.DOC_PYTHON_VERSION }} -n hydromt
