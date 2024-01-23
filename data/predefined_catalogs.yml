@@ -17,6 +17,8 @@ deltares_data:
   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/deltares_data.yml
   versions:
     v2024.1: main
+    v2023.12.21: 392206b21b26e62e00ae76db7ffc61a3b95e2175
+    v2023.12.19: bf25e79dcbda67612a75588cd782d57abe3881de
     v2023.2: 0bf8e2a1e716095dc6df54a5e9114ce88da0701b
     v2022.7: e082da339f22cb1fc3571eec5a901a21d1c8a7bd
     v2022.5: d88cc47bd4ecc83de38c00aa554a7d48ad23ec23
