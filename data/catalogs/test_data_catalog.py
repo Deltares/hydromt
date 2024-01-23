@@ -10,29 +10,16 @@ from hydromt.validators.data_catalog import DataCatalogValidator
 client = Client(processes=False)
 logger = setuplog()
 
-parser = argparse.ArgumentParser("Test predefined data catalog")
-parser.add_argument("data_catalog", help="The data catalog to test")
-parser.add_argument(
-    "-ds", "--dataset", help="The name of the dataset to test", required=False
-)
-parser.add_argument(
-    "-dsv",
-    "--dataset_version",
-    help="Optional version of the dataset to test for",
-    required=False,
-)
-parser.add_argument(
-    "-bbox",
-    "--boundingbox",
-    help="Bounding box for testing clipping spatial data",
-    required=False,
-)
 
-args = parser.parse_args()
-datacatalog = DataCatalog(data_libs=args.data_catalog)
 error_count = 0
 
-if args.dataset:
+
+def test_dataset(args, datacatalog):
+    """Tests a given dataset on opening the dataset and minimal processing.
+
+    Datasets containing geo data will be clipped to a small bounding box. This bounding box can
+    be given by a user with the -bbox flag.
+    """
     source = datacatalog.get_source(source=args.dataset, version=args.dataset_version)
     if args.boundingbox:
         bbox = args.boundingbox
@@ -56,15 +43,17 @@ if args.dataset:
         dataset = datacatalog.get_dataframe(args.dataset)
     elif source.data_type == "Dataset":
         dataset = datacatalog.get_dataset(args.dataset)
+    assert dataset is not None
 
-    pass
 
-else:
+def test_data_catalog(args, datacatalog):
+    """Tests the paths of the given data catalog."""
+    error_count = 0
     logger.info("Checking paths of data catalog sources")
     for source in datacatalog.get_source_names():
         try:
             logger.info(f"Checking paths of {source}")
-            paths = datacatalog.get_source(source)._resolve_paths()
+            datacatalog.get_source(source)._resolve_paths()
         except FileNotFoundError as e:
             logger.error(f"File not found for dataset source {source}: {e}")
 
@@ -77,6 +66,33 @@ else:
     logger.info(f"Encountered {error_count} errors")
 
 
-# Validate data catalog yaml
-logger.info("Validating data catalog")
-DataCatalogValidator().from_yml(args.data_catalog)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("Test predefined data catalog")
+    parser.add_argument("data_catalog", help="The data catalog to test")
+    parser.add_argument(
+        "-ds", "--dataset", help="The name of the dataset to test", required=False
+    )
+    parser.add_argument(
+        "-dsv",
+        "--dataset_version",
+        help="Optional version of the dataset to test for",
+        required=False,
+    )
+    parser.add_argument(
+        "-bbox",
+        "--boundingbox",
+        help="Bounding box for testing clipping spatial data. Bounding box must"
+        " be a list of xmin, ymin, xmax, ymax in WGS84 EPSG:4326 coordinates.",
+        required=False,
+    )
+
+    args = parser.parse_args()
+    datacatalog = DataCatalog(data_libs=args.data_catalog)
+    if args.dataset:
+        test_dataset(args, datacatalog)
+    else:
+        test_data_catalog(args, datacatalog)
+    # Validate data catalog yaml
+    logger.info("Validating data catalog")
+    DataCatalogValidator().from_yml(args.data_catalog)
+    logger.info("Data catalog is valid!")
