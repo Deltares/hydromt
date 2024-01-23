@@ -1379,6 +1379,7 @@ class DataCatalog(object):
             bbox=bbox,
             geom=geom,
             buffer=buffer,
+            handle_nodata=handle_nodata,
             zoom_level=zoom_level,
             align=align,
             variables=variables,
@@ -1480,6 +1481,7 @@ class DataCatalog(object):
         gdf = source.get_data(
             bbox=bbox,
             geom=geom,
+            handle_nodata=handle_nodata,
             buffer=buffer,
             predicate=predicate,
             variables=variables,
@@ -1587,6 +1589,7 @@ class DataCatalog(object):
             bbox=bbox,
             geom=geom,
             buffer=buffer,
+            handle_nodata=handle_nodata,
             predicate=predicate,
             variables=variables,
             time_tuple=time_tuple,

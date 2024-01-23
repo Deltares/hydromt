@@ -2,6 +2,7 @@
 import glob
 import io as pyio
 import logging
+import warnings
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional, Union
@@ -625,16 +626,26 @@ def open_vector(
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
+    # drivers with multiple relevant files cannot be opened directly, we should pass the uri only
+    elif driver in ["shp"]:
+        gdf = gpd.read_file(
+            fn, mode=mode
+        )  # todo check old way of bbox/mask filter at read
     else:
-        # check if pathlike
-        if all(
-            map(lambda method: hasattr(fn, method), ("seek", "close", "read", "write"))
-        ):
-            with fn.open(mode="rb") as f:
-                gdf = _read(f)
-        else:
-            with fsspec.open(fn, mode="rb") as f:  # lose storage options here
-                gdf = _read(f)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            # check if filelike
+            if all(
+                map(
+                    lambda method: hasattr(fn, method),
+                    ("seek", "close", "read", "write"),
+                )
+            ):
+                with fn.open(mode="rb") as f:
+                    gdf = _read(f)
+            else:
+                with fsspec.open(fn, mode="rb") as f:  # lose storage options here
+                    gdf = _read(f)
 
     # check geometry type
     if assert_gtype is not None:

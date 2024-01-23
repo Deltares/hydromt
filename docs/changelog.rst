@@ -19,6 +19,8 @@ Changed
 
 Fixed
 -----
+- Reading Vector formats that consist of more than one file via geopandas. (#691)
+- Handle NoDataStrategy consistently when reading data in adapters (#738)
 
 v0.9.2 (2024-01-09)
 ===================
