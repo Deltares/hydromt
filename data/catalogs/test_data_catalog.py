@@ -1,5 +1,25 @@
-"""Script for testing predefined data catalogs."""
+"""A command line script for testing predefined data catalogs.
+
+This script allows for testing separate data catalog items and the complete data catalog.
+When testing the data catalog all the paths of the data catalog sources are
+checked if they exist.
+Call for testing the data catalog:
+    'python test_data_catalog.py path/to/datacatalog.yml'
+
+Separate data catalog sources can be tested by giving the dataset source name as
+an extra argument. The argument should be preceded by -ds. It is also possible to specify
+the version of the dataset source by supplying the call with a -dsv flag and version
+number. The dataset is opened and if the dataset contains geo data the dataset is clipped
+to a small bounding box surrounding Deltares Delft office.
+Example dataset source test call:
+    'python test_data_catalog.py path/to/datacatalog.yml -ds chelsa -dsv 1.2
+    -r "{'bbox':[4.333409,51.962159,4.42835,52.006873]}"'
+
+In addition the passed data catalog yaml is checked if it is a valid data catalog yaml.
+
+"""
 import argparse
+import json
 
 from dask.distributed import Client
 
@@ -11,9 +31,6 @@ client = Client(processes=False)
 logger = setuplog()
 
 
-error_count = 0
-
-
 def test_dataset(args, datacatalog):
     """Tests a given dataset on opening the dataset and minimal processing.
 
@@ -21,8 +38,10 @@ def test_dataset(args, datacatalog):
     be given by a user with the -bbox flag.
     """
     source = datacatalog.get_source(source=args.dataset, version=args.dataset_version)
-    if args.boundingbox:
-        bbox = args.boundingbox
+    if args.region:
+        region_json = args.region.replace("'", '"')
+        bbox = json.loads(region_json)["bbox"]
+        print(bbox)
     else:
         bbox = [
             4.333409,
@@ -79,8 +98,8 @@ if __name__ == "__main__":
         required=False,
     )
     parser.add_argument(
-        "-bbox",
-        "--boundingbox",
+        "-r",
+        "--region",
         help="Bounding box for testing clipping spatial data. Bounding box must"
         " be a list of xmin, ymin, xmax, ymax in WGS84 EPSG:4326 coordinates.",
         required=False,
