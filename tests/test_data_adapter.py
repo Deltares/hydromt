@@ -503,7 +503,7 @@ def test_geodataframe(geodf, tmpdir):
         handle_nodata=NoDataStrategy.IGNORE,
     )
 
-    assert len(gdf1) == 0
+    assert gdf1 is None
 
     with pytest.raises(NoDataException):
         gdf1 = data_catalog.get_geodataframe(

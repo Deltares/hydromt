@@ -508,7 +508,7 @@ def test_get_geodataframe():
     assert isinstance(gdf, gpd.GeoDataFrame)
     with pytest.raises(ValueError, match='Unknown vector data type "list"'):
         data_catalog.get_geodataframe([])
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(NoDataException):
         data_catalog.get_geodataframe("test1.gpkg")
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataframe({"name": "test"})

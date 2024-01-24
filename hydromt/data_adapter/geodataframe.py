@@ -3,7 +3,7 @@ import warnings
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, join, splitext
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -267,6 +267,8 @@ class GeoDataFrameAdapter(DataAdapter):
             # load
             fns = self._resolve_paths(variables=variables)
             gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
+            if gdf is None:
+                raise NoDataException()
             # rename variables and parse crs & nodata
             gdf = self._rename_vars(gdf)
             gdf = self._set_crs(gdf, logger=logger)
@@ -275,13 +277,15 @@ class GeoDataFrameAdapter(DataAdapter):
             gdf = GeoDataFrameAdapter._slice_data(
                 gdf, variables, geom, bbox, buffer, predicate, logger=logger
             )
+            if gdf is None:
+                raise NoDataException()
 
             self.mark_as_used()  # mark used
             # uniformize
             gdf = self._apply_unit_conversions(gdf, logger=logger)
             gdf = self._set_metadata(gdf)
             return gdf
-        except NoDataException:
+        except (NoDataException, FileNotFoundError):
             _exec_nodata_strat(
                 f"No data was read from source: {self.name}",
                 strategy=handle_nodata,
@@ -297,7 +301,7 @@ class GeoDataFrameAdapter(DataAdapter):
         buffer: Optional[GeomBuffer],
         predicate: Optional[Predicate],
         logger: Logger = logger,
-    ) -> gpd.GeoDataFrame:
+    ) -> Optional[gpd.GeoDataFrame]:
         if len(fns) > 1:
             raise ValueError(
                 f"GeoDataFrame: Reading multiple {self.driver} files is not supported."
@@ -333,7 +337,12 @@ class GeoDataFrameAdapter(DataAdapter):
         else:
             raise ValueError(f"GeoDataFrame: driver {self.driver} unknown.")
 
-        return gdf
+        gdf = cast(gpd.GeoDataFrame, gdf)
+
+        if gdf is None or len(gdf) == 0:
+            return None
+        else:
+            return gdf
 
     def _rename_vars(self, gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # rename and select columns
