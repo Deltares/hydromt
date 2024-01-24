@@ -233,7 +233,7 @@ class RasterDatasetAdapter(DataAdapter):
             bbox=bbox,
             time_tuple=time_tuple,
             variables=variables,
-            handle_nodata=NoDataStrategy.RAISE,
+            handle_nodata=handle_nodata,
             logger=logger,
             single_var_as_array=variables is None,
         )
@@ -538,8 +538,6 @@ class RasterDatasetAdapter(DataAdapter):
         else:
             return ds
 
-        return ds
-
     def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
         dt = self.unit_add.get("time", 0)
         if (
@@ -616,8 +614,6 @@ class RasterDatasetAdapter(DataAdapter):
             return None
         else:
             return ds
-
-        return ds
 
     def _apply_unit_conversions(self, ds: Data, logger=logger):
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())

@@ -210,8 +210,8 @@ class DataFrameAdapter(DataAdapter):
         self,
         variables: Optional[Variables] = None,
         time_tuple: Optional[TimeRange] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[pd.DataFrame]:
         """Return a DataFrame.
 

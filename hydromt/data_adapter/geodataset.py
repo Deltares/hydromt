@@ -318,7 +318,6 @@ class GeoDatasetAdapter(DataAdapter):
     def _read_data(
         self,
         fns: List[StrPath],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ) -> Data:
         kwargs = self.driver_kwargs.copy()
@@ -491,7 +490,6 @@ class GeoDatasetAdapter(DataAdapter):
             return None
         else:
             return ds
-        return ds
 
     def _set_metadata(self, ds: Data) -> Data:
         if self.attrs:

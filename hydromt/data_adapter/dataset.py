@@ -345,7 +345,6 @@ class DatasetAdapter(DataAdapter):
             return None
         else:
             return ds
-        return ds
 
     @staticmethod
     def _slice_temporal_dimension(
