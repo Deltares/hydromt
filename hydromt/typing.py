@@ -13,7 +13,7 @@ from typing_extensions import Annotated
 from xarray import DataArray, Dataset
 
 
-def _time_tuple_from_str(t: tuple(str | datetime, str | datetime)):
+def _time_tuple_from_str(t: tuple[str | datetime, str | datetime]):
     if isinstance(t[0], str):
         t0 = parse(t[0])
     else:

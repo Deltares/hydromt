@@ -6,10 +6,9 @@ import geopandas as gpd
 from pyproj import CRS
 
 # from hydromt.nodata import NoDataStrategy
-from .base_driver import BaseDriver
 
 
-class GeoDataFrameDriver(BaseDriver, ABC):
+class GeoDataFrameDriver(ABC):
     """Abstract Driver to read GeoDataFrames."""
 
     @abstractmethod

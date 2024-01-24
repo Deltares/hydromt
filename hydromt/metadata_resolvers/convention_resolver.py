@@ -1,17 +1,19 @@
 """MetaDataResolver using HydroMT naming conventions."""
 from itertools import product
 from string import Formatter
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-from hydromt.data_sources.data_source import DataSource
 from hydromt.nodata import NoDataStrategy
 from hydromt.typing import Bbox, TimeRange
 
 from .metadata_resolver import MetaDataResolver
+
+if TYPE_CHECKING:
+    from hydromt.data_sources.data_source import DataSource
 
 
 class ConventionResolver(MetaDataResolver):
@@ -43,8 +45,9 @@ class ConventionResolver(MetaDataResolver):
                 else:
                     uri_expanded = uri_expanded + key_str
                     keys.append(key)
+            uri = uri_expanded
 
-        return (uri_expanded, keys)
+        return (uri, keys)
 
     def _get_dates(
         self,
@@ -59,16 +62,15 @@ class ConventionResolver(MetaDataResolver):
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates
 
-    def _get_variables(self, variables: list[str]) -> list[str]:
+    def _get_variables(self, variables: list[str], rename: dict[str, str]) -> list[str]:
         variables: list[str] = np.atleast_1d(variables).tolist()
-        mv_inv: dict[str, str] = {v: k for k, v in self.source.rename.items()}
+        mv_inv: dict[str, str] = {v: k for k, v in rename.items()}
         vrs: dict[str] = [mv_inv.get(var, var) for var in variables]
         return vrs
 
-    def resolve_uri(
+    def resolve(
         self,
-        uri: str,
-        source: DataSource,
+        source: "DataSource",
         *,
         timerange: TimeRange | None = None,
         bbox: Bbox | None = None,
@@ -82,23 +84,26 @@ class ConventionResolver(MetaDataResolver):
         **kwargs,
     ) -> list[str]:
         """Resolve the placeholders in the URI."""
-        uri_expanded, keys = self._expand_uri_placeholders(uri, timerange, variables)
+        uri_expanded, keys = self._expand_uri_placeholders(
+            source.uri, timerange, variables
+        )
         if timerange:
             dates = self._get_dates(keys, timerange)
         else:
-            dates = pd.PeriodIndex(data=np.zeros(1))
+            dates = pd.PeriodIndex(["2023-01-01"], freq="d")
         if variables:
-            variables = self._get_variables(variables)
-        vrs = self._get_variables(variables)
+            variables = self._get_variables(variables, source.rename)
+        else:
+            variables = [""]
         fmts: list[dict[str, Any]] = list(
             map(
-                lambda d, var: {
-                    "year": d.year,
-                    "month": d.month,
-                    "variable": var,
+                lambda t: {
+                    "year": t[0].year,
+                    "month": t[0].month,
+                    "variable": t[1],
                     "zoom_level": zoom_level,
                 },
-                product(dates, vrs),
+                product(dates, variables),
             )
         )
         return [uri_expanded.format(fmt) for fmt in fmts]
