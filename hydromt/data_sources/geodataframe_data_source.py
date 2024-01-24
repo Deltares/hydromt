@@ -8,8 +8,8 @@ from pydantic import field_validator
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolvers.resolver_plugin import RESOLVERS
+from hydromt.nodata import NoDataStrategy
 
-# from hydromt.nodata import NoDataStrategy
 from .data_source import DataSource
 
 _KNOWN_DRIVERS: dict[str, GeoDataFrameDriver] = {"pyogrio": PyogrioDriver}
@@ -45,6 +45,7 @@ class GeoDataFrameDataSource(DataSource):
         buffer: float = 0.0,
         variables: list[str] | None = None,
         predicate: str = "intersects",
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger | None = None,
     ) -> gpd.GeoDataFrame:
         """Use initialize driver to read data."""
@@ -55,6 +56,7 @@ class GeoDataFrameDataSource(DataSource):
             buffer=buffer,
             predicate=predicate,
             variables=variables,
+            handle_nodata=handle_nodata,
         )
         if len(uris) > 1:
             raise ValueError("GeoDataFrames cannot have more than 1 source URI.")

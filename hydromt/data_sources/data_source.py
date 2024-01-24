@@ -27,13 +27,17 @@ class DataSource(BaseModel):
         version: str | None = None,
     ) -> "DataSource":
         """Create Data source from DataCatalog."""
-        return cls.model_validate(catalog.get_source(key, provider, version))
+        return cls.model_validate(
+            catalog.get_source(key, provider, version).update("name", key)
+        )
 
     def _validate_metadata_resolver(cls, v: Any):
         assert isinstance(v, str), "metadata_resolver should be string."
         assert v in RESOLVERS, f"unknown MetaDataResolver: '{v}'."
         RESOLVERS.get(v)
 
+    name: str
+    attrs: dict[str, Any] = Field(default_factory=dict)
     version: str | None = Field(default=None)
     provider: str | None = Field(default=None)
     driver: str
@@ -42,6 +46,7 @@ class DataSource(BaseModel):
     unit_add: dict[str, Any] = Field(default_factory=dict)
     unit_mult: dict[str, Any] = Field(default_factory=dict)
     rename: dict[str, str] = Field(default_factory=dict)
+    nodata: float | int | dict[str, float | int] | None = Field(default=None)
     extent: dict[str, Any] = Field(default_factory=dict)  # ?
     meta: dict[str, Any] = Field(default_factory=dict)
     uri: str

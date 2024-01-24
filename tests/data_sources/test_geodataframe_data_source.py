@@ -12,7 +12,10 @@ def test_geodataframe(geodf: gpd.GeoDataFrame, tmpdir: Path):
     fn_gdf = str(tmpdir.join("test.geojson"))
     geodf.to_file(fn_gdf, driver="GeoJSON")
     gdf_source = GeoDataFrameDataSource(
-        driver="pyogrio", metadata_resolver="convention_resolver", uri=fn_gdf
+        name="geojsonfile",
+        driver="pyogrio",
+        metadata_resolver="convention_resolver",
+        uri=fn_gdf,
     )
     gdf1 = gdf_source.read_data(bbox=list(geodf.total_bounds))
     # gdf1 = data_catalog.get_geodataframe(fn_gdf, bbox=geodf.total_bounds)
