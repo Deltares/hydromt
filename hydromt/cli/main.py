@@ -119,11 +119,11 @@ overwrite_opt = click.option(
     default=False,
     help="Flag: If provided overwrite existing model files",
 )
-ignore_empty_opt = click.option(
-    "--ignore-empty",
+error_on_empty = click.option(
+    "--error-on-empty",
     is_flag=True,
     default=False,
-    help="Flag: Simply ignore empty data sets when exporting",
+    help="Flag: Raise an error when attempting to export empty dataset instead of continuing",
 )
 
 cache_opt = click.option(
@@ -451,7 +451,7 @@ def check(
 @data_opt
 @deltares_data_opt
 @overwrite_opt
-@ignore_empty_opt
+@error_on_empty
 @quiet_opt
 @verbose_opt
 @click.pass_context
@@ -465,7 +465,7 @@ def export(
     data: Optional[List[Path]],
     dd: bool,
     fo: bool,
-    ignore_empty: bool,
+    error_on_empty: bool,
     quiet: int,
     verbose: int,
 ):
@@ -490,10 +490,10 @@ def export(
     )
     logger.info(f"Output dir: {export_dest_path}")
 
-    if ignore_empty:
-        handle_nodata = NoDataStrategy.IGNORE
-    else:
+    if error_on_empty:
         handle_nodata = NoDataStrategy.RAISE
+    else:
+        handle_nodata = NoDataStrategy.IGNORE
 
     if data:
         data_libs = list(data)  # add data catalogs from cli
@@ -504,7 +504,6 @@ def export(
         data_libs = ["deltares_data"] + data_libs  # prepend!
 
     sources: List[str] = []
-
     if source:
         if isinstance(source, str):
             sources = [source]

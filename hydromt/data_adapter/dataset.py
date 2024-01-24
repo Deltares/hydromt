@@ -130,7 +130,7 @@ class DatasetAdapter(DataAdapter):
         time_tuple: Optional[TimeRange] = None,
         variables: Optional[List[str]] = None,
         driver: Optional[str] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
         **kwargs,
     ) -> Optional[Tuple[str, str]]:
         """Save a dataset slice to file. By default the data is saved as a NetCDF file.
@@ -161,37 +161,31 @@ class DatasetAdapter(DataAdapter):
             Name of driver to read data with, see
             :py:func:`~hydromt.data_catalog.DataCatalog.get_dataset`
         """
-        try:
-            obj = self.get_data(
-                time_tuple=time_tuple,
-                variables=variables,
-                single_var_as_array=variables is None,
-                handle_nodata=NoDataStrategy.RAISE,
-                logger=logger,
-            )
-            if has_no_data(obj):
-                raise NoDataException()
-
-            if driver is None or driver == "netcdf":
-                fn_out = netcdf_writer(
-                    obj=obj,
-                    data_root=data_root,
-                    data_name=data_name,
-                    variables=variables,
-                )
-            elif driver == "zarr":
-                fn_out = zarr_writer(
-                    obj=obj, data_root=data_root, data_name=data_name, **kwargs
-                )
-            else:
-                raise ValueError(f"Dataset: Driver {driver} unknown.")
-
-            return fn_out, driver
-        except NoDataException:
-            _exec_nodata_strat(
-                "No data to export", strategy=handle_nodata, logger=logger
-            )
+        obj = self.get_data(
+            time_tuple=time_tuple,
+            variables=variables,
+            single_var_as_array=variables is None,
+            handle_nodata=handle_nodata,
+            logger=logger,
+        )
+        if obj is None:
             return None
+
+        if driver is None or driver == "netcdf":
+            fn_out = netcdf_writer(
+                obj=obj,
+                data_root=data_root,
+                data_name=data_name,
+                variables=variables,
+            )
+        elif driver == "zarr":
+            fn_out = zarr_writer(
+                obj=obj, data_root=data_root, data_name=data_name, **kwargs
+            )
+        else:
+            raise ValueError(f"Dataset: Driver {driver} unknown.")
+
+        return fn_out, driver
 
     def get_data(
         self,
@@ -210,12 +204,16 @@ class DatasetAdapter(DataAdapter):
             # load data
             fns = self._resolve_paths(variables, time_tuple)
             ds = self._read_data(fns, logger=logger)
+            if ds is None:
+                raise NoDataException()
             # rename variables and parse data and attrs
             ds = self._rename_vars(ds)
             ds = self._set_nodata(ds)
             ds = self._shift_time(ds, logger=logger)
             # slice
             ds = DatasetAdapter._slice_data(ds, variables, time_tuple, logger=logger)
+            if ds is None:
+                raise NoDataException()
             # uniformize
             ds = self._apply_unit_conversion(ds, logger=logger)
             ds = self._set_metadata(ds)
@@ -231,9 +229,8 @@ class DatasetAdapter(DataAdapter):
     def _read_data(
         self,
         fns: List[StrPath],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> Data:
+    ) -> Optional[Data]:
         kwargs = self.driver_kwargs.copy()
         if len(fns) > 1 and self.driver in ["zarr"]:
             raise ValueError(
@@ -249,7 +246,10 @@ class DatasetAdapter(DataAdapter):
         else:
             raise ValueError(f"Dataset: Driver {self.driver} unknown")
 
-        return ds
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
@@ -308,9 +308,8 @@ class DatasetAdapter(DataAdapter):
         ds: Data,
         variables: Optional[Variables] = None,
         time_tuple: Optional[TimeRange] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> Data:
+    ) -> Optional[Data]:
         """Slice the dataset in space and time.
 
         Arguments
@@ -340,28 +339,20 @@ class DatasetAdapter(DataAdapter):
                     raise ValueError(f"Dataset: variables not found {mvars}")
                 ds = ds[variables]
         if time_tuple is not None:
-            # try:
             ds = DatasetAdapter._slice_temporal_dimension(ds, time_tuple, logger=logger)
-            # except IndexError as e:
-            #     if on_error == ErrorHandleMethod.SKIP:
-            #         logger.warning(
-            #             "Skipping slicing data on temporal dimension because time slice is out of range."
-            #         )
-            #         return ds
-            #     elif on_error == ErrorHandleMethod.COERCE:
-            #         return ds
-            #     else:
-            #         raise e
 
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
         return ds
 
     @staticmethod
     def _slice_temporal_dimension(
         ds: Data,
         time_tuple: TimeRange,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> Data:
+    ) -> Optional[Data]:
         if (
             "time" in ds.dims
             and ds["time"].size > 1
@@ -371,12 +362,14 @@ class DatasetAdapter(DataAdapter):
             ds = ds.sel(time=slice(*time_tuple))
             if ds.time.size == 0:
                 raise IndexError("Dataset: Time slice out of range.")
-        return ds
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
     def get_time_range(
         self,
         ds: Optional[Data] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> TimeRange:
         """Get the temporal range of a dataset.
 

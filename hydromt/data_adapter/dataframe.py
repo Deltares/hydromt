@@ -13,7 +13,6 @@ from pystac import Item as StacItem
 
 from hydromt.nodata import NoDataException, NoDataStrategy, _exec_nodata_strat
 from hydromt.typing import ErrorHandleMethod, StrPath, TimeRange, Variables
-from hydromt.utils import has_no_data
 
 from .data_adapter import DataAdapter
 
@@ -142,7 +141,7 @@ class DataFrameAdapter(DataAdapter):
         driver: Optional[str] = None,
         variables: Optional[Variables] = None,
         time_tuple: Optional[TimeRange] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
         logger: Logger = logger,
         **kwargs,
     ) -> Optional[Tuple[StrPath, str, Dict[str, Any]]]:
@@ -178,37 +177,34 @@ class DataFrameAdapter(DataAdapter):
 
 
         """
-        try:
-            kwargs.pop("bbox", None)
-            obj = self.get_data(
-                time_tuple=time_tuple, variables=variables, logger=logger
-            )
+        kwargs.pop("bbox", None)
+        obj = self.get_data(
+            time_tuple=time_tuple,
+            variables=variables,
+            handle_nodata=handle_nodata,
+            logger=logger,
+        )
 
-            if len(obj) == 0:
-                raise NoDataException()
-
-            read_kwargs = dict()
-            if driver is None or driver == "csv":
-                # always write as CSV
-                driver = "csv"
-                fn_out = join(data_root, f"{data_name}.csv")
-                obj.to_csv(fn_out, **kwargs)
-                read_kwargs["index_col"] = 0
-            elif driver == "parquet":
-                fn_out = join(data_root, f"{data_name}.parquet")
-                obj.to_parquet(fn_out, **kwargs)
-            elif driver == "excel":
-                fn_out = join(data_root, f"{data_name}.xlsx")
-                obj.to_excel(fn_out, **kwargs)
-            else:
-                raise ValueError(f"DataFrame: Driver {driver} is unknown.")
-
-            return fn_out, driver, read_kwargs
-        except NoDataException:
-            _exec_nodata_strat(
-                "No data to export", strategy=handle_nodata, logger=logger
-            )
+        if obj is None:
             return None
+
+        read_kwargs = dict()
+        if driver is None or driver == "csv":
+            # always write as CSV
+            driver = "csv"
+            fn_out = join(data_root, f"{data_name}.csv")
+            obj.to_csv(fn_out, **kwargs)
+            read_kwargs["index_col"] = 0
+        elif driver == "parquet":
+            fn_out = join(data_root, f"{data_name}.parquet")
+            obj.to_parquet(fn_out, **kwargs)
+        elif driver == "excel":
+            fn_out = join(data_root, f"{data_name}.xlsx")
+            obj.to_excel(fn_out, **kwargs)
+        else:
+            raise ValueError(f"DataFrame: Driver {driver} is unknown.")
+
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,
@@ -226,8 +222,9 @@ class DataFrameAdapter(DataAdapter):
         try:
             # load data
             fns = self._resolve_paths(variables=variables)
-            df = self._read_data(fns, handle_nodata=NoDataStrategy.RAISE, logger=logger)
-            if has_no_data(df):
+            df = self._read_data(fns, logger=logger)
+            # just raise an exxceptoin so we can handle the strategy in one place (the except)
+            if df is None:
                 raise NoDataException()
             # rename variables and parse nodata
             df = self._rename_vars(df)
@@ -237,9 +234,10 @@ class DataFrameAdapter(DataAdapter):
                 df,
                 variables,
                 time_tuple,
-                handle_nodata=NoDataStrategy.RAISE,
                 logger=logger,
             )
+            if df is None:
+                raise NoDataException()
 
             # only if data is actually returned
             self.mark_as_used()  # mark used
@@ -248,18 +246,19 @@ class DataFrameAdapter(DataAdapter):
             df = self._apply_unit_conversion(df, logger=logger)
             df = self._set_metadata(df)
             return df
-        except NoDataException:
+        except (NoDataException, FileNotFoundError):
             _exec_nodata_strat(
-                "No data to export", strategy=handle_nodata, logger=logger
+                f"No data was read from source: {self.name}",
+                strategy=handle_nodata,
+                logger=logger,
             )
             return None
 
     def _read_data(
         self,
         fns: List[StrPath],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> pd.DataFrame:
+    ) -> Optional[pd.DataFrame]:
         if len(fns) > 1:
             raise ValueError(
                 f"DataFrame: Reading multiple {self.driver} files is not supported."
@@ -279,7 +278,13 @@ class DataFrameAdapter(DataAdapter):
         else:
             raise IOError(f"DataFrame: driver {self.driver} unknown.")
 
-        return cast(pd.DataFrame, df)
+        # cast is just for the type checkers, it doesn't actually do anything
+        df = cast(pd.DataFrame, df)
+
+        if len(df) == 0:
+            return None
+        else:
+            return df
 
     def _rename_vars(self, df: pd.DataFrame) -> pd.DataFrame:
         if self.rename:
@@ -307,9 +312,8 @@ class DataFrameAdapter(DataAdapter):
         df: pd.DataFrame,
         variables: Optional[Variables] = None,
         time_tuple: Optional[TimeRange] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> pd.DataFrame:
+    ) -> Optional[pd.DataFrame]:
         """Return a sliced DataFrame.
 
         Parameters
@@ -340,10 +344,12 @@ class DataFrameAdapter(DataAdapter):
             try:
                 df = df[df.index.slice_indexer(*time_tuple)]
             except IndexError:
-                # if no data return empty df
                 df = pd.DataFrame()
 
-        return df
+        if len(df) == 0:
+            return None
+        else:
+            return df
 
     def _apply_unit_conversion(
         self, df: pd.DataFrame, logger: Logger = logger

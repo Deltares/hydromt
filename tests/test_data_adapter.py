@@ -244,7 +244,6 @@ def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
-# @pytest.mark.skip()
 def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))

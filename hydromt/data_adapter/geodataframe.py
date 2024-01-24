@@ -172,7 +172,7 @@ class GeoDataFrameAdapter(DataAdapter):
         bbox: Optional[Bbox] = None,
         driver: Optional[str] = None,
         variables: Optional[List[str]] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
         logger: Logger = logger,
         **kwargs,
     ) -> Optional[Tuple[str, str, Dict[Any, Any]]]:
@@ -203,55 +203,50 @@ class GeoDataFrameAdapter(DataAdapter):
             Name of driver to read data with, see
             :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
-        try:
-            kwargs.pop("time_tuple", None)
-            gdf = self.get_data(bbox=bbox, variables=variables, logger=logger)
-            if len(gdf) == 0:
-                _exec_nodata_strat(
-                    "No data to export", strategy=handle_nodata, logger=logger
-                )
-                # even if we ignore, we don't have to do anything else
-                return
-
-            read_kwargs = {}
-            if driver is None:
-                _lst = ["csv", "parquet", "xls", "xlsx", "xy", "vector_table"]
-                driver = "csv" if self.driver in _lst else "GPKG"
-            # always write netcdf
-            if driver == "csv":
-                fn_out = join(data_root, f"{data_name}.csv")
-                if not np.all(gdf.geometry.type == "Point"):
-                    raise ValueError(
-                        f"{data_name} contains other geometries than 'Point' "
-                        "which cannot be written to csv."
-                    )
-                gdf["x"], gdf["y"] = gdf.geometry.x, gdf.geometry.y
-                gdf.drop(columns="geometry").to_csv(fn_out, **kwargs)
-                read_kwargs["index_col"] = 0
-            elif driver == "parquet":
-                fn_out = join(data_root, f"{data_name}.parquet")
-                if not np.all(gdf.geometry.type == "Point"):
-                    raise ValueError(
-                        f"{data_name} contains other geometries than 'Point' "
-                        "which cannot be written to parquet."
-                    )
-                gdf["x"], gdf["y"] = gdf.geometry.x, gdf.geometry.y
-                gdf.drop(columns="geometry").to_parquet(fn_out, **kwargs)
-            else:
-                driver_extensions = {
-                    "ESRI Shapefile": ".shp",
-                }
-                ext = driver_extensions.get(driver, driver).lower()
-                fn_out = join(data_root, f"{data_name}.{ext}")
-                gdf.to_file(fn_out, driver=driver, **kwargs)
-                driver = "vector"
-
-            return fn_out, driver, read_kwargs
-        except NoDataException:
-            _exec_nodata_strat(
-                "No data to export", strategy=handle_nodata, logger=logger
-            )
+        kwargs.pop("time_tuple", None)
+        gdf = self.get_data(
+            bbox=bbox,
+            variables=variables,
+            handle_nodata=handle_nodata,
+            logger=logger,
+        )
+        if gdf is None:
             return None
+
+        read_kwargs = {}
+        if driver is None:
+            _lst = ["csv", "parquet", "xls", "xlsx", "xy", "vector_table"]
+            driver = "csv" if self.driver in _lst else "GPKG"
+        # always write netcdf
+        if driver == "csv":
+            fn_out = join(data_root, f"{data_name}.csv")
+            if not np.all(gdf.geometry.type == "Point"):
+                raise ValueError(
+                    f"{data_name} contains other geometries than 'Point' "
+                    "which cannot be written to csv."
+                )
+            gdf["x"], gdf["y"] = gdf.geometry.x, gdf.geometry.y
+            gdf.drop(columns="geometry").to_csv(fn_out, **kwargs)
+            read_kwargs["index_col"] = 0
+        elif driver == "parquet":
+            fn_out = join(data_root, f"{data_name}.parquet")
+            if not np.all(gdf.geometry.type == "Point"):
+                raise ValueError(
+                    f"{data_name} contains other geometries than 'Point' "
+                    "which cannot be written to parquet."
+                )
+            gdf["x"], gdf["y"] = gdf.geometry.x, gdf.geometry.y
+            gdf.drop(columns="geometry").to_parquet(fn_out, **kwargs)
+        else:
+            driver_extensions = {
+                "ESRI Shapefile": ".shp",
+            }
+            ext = driver_extensions.get(driver, driver).lower()
+            fn_out = join(data_root, f"{data_name}.{ext}")
+            gdf.to_file(fn_out, driver=driver, **kwargs)
+            driver = "vector"
+
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,
@@ -268,37 +263,31 @@ class GeoDataFrameAdapter(DataAdapter):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`
         """
-        # load
-        fns = self._resolve_paths(variables=variables)
-        gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
-        if len(gdf) == 0:
-            _exec_nodata_strat(
-                "No data was read from source",
-                strategy=handle_nodata,
-                logger=logger,
+        try:
+            # load
+            fns = self._resolve_paths(variables=variables)
+            gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
+            # rename variables and parse crs & nodata
+            gdf = self._rename_vars(gdf)
+            gdf = self._set_crs(gdf, logger=logger)
+            gdf = self._set_nodata(gdf)
+            # slice
+            gdf = GeoDataFrameAdapter._slice_data(
+                gdf, variables, geom, bbox, buffer, predicate, logger=logger
             )
-            return gdf
-        # rename variables and parse crs & nodata
-        gdf = self._rename_vars(gdf)
-        gdf = self._set_crs(gdf, logger=logger)
-        gdf = self._set_nodata(gdf)
-        # slice
-        gdf = GeoDataFrameAdapter._slice_data(
-            gdf, variables, geom, bbox, buffer, predicate, logger=logger
-        )
-        if len(gdf) == 0:
-            _exec_nodata_strat(
-                "No data was left after slicing",
-                strategy=handle_nodata,
-                logger=logger,
-            )
-            return gdf
 
-        self.mark_as_used()  # mark used
-        # uniformize
-        gdf = self._apply_unit_conversions(gdf, logger=logger)
-        gdf = self._set_metadata(gdf)
-        return gdf
+            self.mark_as_used()  # mark used
+            # uniformize
+            gdf = self._apply_unit_conversions(gdf, logger=logger)
+            gdf = self._set_metadata(gdf)
+            return gdf
+        except NoDataException:
+            _exec_nodata_strat(
+                f"No data was read from source: {self.name}",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return None
 
     def _read_data(
         self,
@@ -377,7 +366,6 @@ class GeoDataFrameAdapter(DataAdapter):
         bbox: Optional[Bbox] = None,
         buffer: Optional[int] = 0,
         predicate: Predicate = "intersects",
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ):
         """Return a clipped GeoDataFrame (vector).
@@ -419,10 +407,6 @@ class GeoDataFrameAdapter(DataAdapter):
             epsg = geom.crs.to_epsg()
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
             idxs = gis_utils.filter_gdf(gdf, geom=geom, predicate=predicate)
-            if idxs.size == 0:
-                _exec_nodata_strat(
-                    "No data within spatial domain.", handle_nodata, logger=logger
-                )
             gdf = gdf.iloc[idxs]
         return gdf
 

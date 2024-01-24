@@ -229,64 +229,56 @@ class RasterDatasetAdapter(DataAdapter):
         kwargs: dict
             the additional kwyeord arguments that were passed to `to_netcdf`
         """
-        try:
-            obj = self.get_data(
-                bbox=bbox,
-                time_tuple=time_tuple,
-                variables=variables,
-                handle_nodata=NoDataStrategy.RAISE,
-                logger=logger,
-                single_var_as_array=variables is None,
-            )
+        obj = self.get_data(
+            bbox=bbox,
+            time_tuple=time_tuple,
+            variables=variables,
+            handle_nodata=NoDataStrategy.RAISE,
+            logger=logger,
+            single_var_as_array=variables is None,
+        )
 
-            if has_no_data(obj):
-                raise NoDataException()
-
-            read_kwargs = {}
-            if driver is None:
-                # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
-                driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
-            # write using various writers
-            if driver == "netcdf":
-                dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
-                if variables is None:
-                    encoding = {k: {"zlib": True} for k in dvars}
-                    fn_out = join(data_root, f"{data_name}.nc")
-                    obj.to_netcdf(fn_out, encoding=encoding, **kwargs)
-                else:  # save per variable
-                    if not os.path.isdir(join(data_root, data_name)):
-                        os.makedirs(join(data_root, data_name))
-                    for var in dvars:
-                        fn_out = join(data_root, data_name, f"{var}.nc")
-                        obj[var].to_netcdf(
-                            fn_out, encoding={var: {"zlib": True}}, **kwargs
-                        )
-                    fn_out = join(data_root, data_name, "{variable}.nc")
-            elif driver == "zarr":
-                fn_out = join(data_root, f"{data_name}.zarr")
-                obj.to_zarr(fn_out, **kwargs)
-            elif driver not in gis_utils.GDAL_DRIVER_CODE_MAP.values():
-                raise ValueError(f"RasterDataset: Driver {driver} unknown.")
-            else:
-                ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
-                if driver == "GTiff" and "compress" not in kwargs:
-                    kwargs.update(compress="lzw")  # default lzw compression
-                if isinstance(obj, xr.DataArray):
-                    fn_out = join(data_root, f"{data_name}.{ext}")
-                    obj.raster.to_raster(fn_out, driver=driver, **kwargs)
-                else:
-                    fn_out = join(data_root, data_name, "{variable}" + f".{ext}")
-                    obj.raster.to_mapstack(
-                        join(data_root, data_name), driver=driver, **kwargs
-                    )
-                driver = "raster"
-
-            return fn_out, driver, read_kwargs
-        except NoDataException:
-            _exec_nodata_strat(
-                "No data to export", strategy=handle_nodata, logger=logger
-            )
+        if obj is None:
             return None
+
+        read_kwargs = {}
+        if driver is None:
+            # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
+            driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
+        # write using various writers
+        if driver == "netcdf":
+            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
+            if variables is None:
+                encoding = {k: {"zlib": True} for k in dvars}
+                fn_out = join(data_root, f"{data_name}.nc")
+                obj.to_netcdf(fn_out, encoding=encoding, **kwargs)
+            else:  # save per variable
+                if not os.path.isdir(join(data_root, data_name)):
+                    os.makedirs(join(data_root, data_name))
+                for var in dvars:
+                    fn_out = join(data_root, data_name, f"{var}.nc")
+                    obj[var].to_netcdf(fn_out, encoding={var: {"zlib": True}}, **kwargs)
+                fn_out = join(data_root, data_name, "{variable}.nc")
+        elif driver == "zarr":
+            fn_out = join(data_root, f"{data_name}.zarr")
+            obj.to_zarr(fn_out, **kwargs)
+        elif driver not in gis_utils.GDAL_DRIVER_CODE_MAP.values():
+            raise ValueError(f"RasterDataset: Driver {driver} unknown.")
+        else:
+            ext = gis_utils.GDAL_EXT_CODE_MAP.get(driver)
+            if driver == "GTiff" and "compress" not in kwargs:
+                kwargs.update(compress="lzw")  # default lzw compression
+            if isinstance(obj, xr.DataArray):
+                fn_out = join(data_root, f"{data_name}.{ext}")
+                obj.raster.to_raster(fn_out, driver=driver, **kwargs)
+            else:
+                fn_out = join(data_root, data_name, "{variable}" + f".{ext}")
+                obj.raster.to_mapstack(
+                    join(data_root, data_name), driver=driver, **kwargs
+                )
+            driver = "raster"
+
+        return fn_out, driver, read_kwargs
 
     def get_data(
         self,
@@ -318,7 +310,6 @@ class RasterDatasetAdapter(DataAdapter):
                 bbox,
                 cache_root,
                 zoom_level=zoom_level,
-                handle_nodata=NoDataStrategy.RAISE,
                 logger=logger,
             )
             if has_no_data(ds):
@@ -338,25 +329,22 @@ class RasterDatasetAdapter(DataAdapter):
                 buffer,
                 align,
                 time_tuple,
-                handle_nodata=NoDataStrategy.RAISE,
                 logger=logger,
             )
             if has_no_data(ds):
-                _exec_nodata_strat(
-                    "No data was read from source",
-                    strategy=handle_nodata,
-                    logger=logger,
-                )
-                return ds
+                raise NoDataException()
+
             # uniformize data
             ds = self._apply_unit_conversions(ds, logger)
             ds = self._set_metadata(ds)
             self.mark_as_used()  # mark used
             # return array if single var and single_var_as_array
             return self._single_var_as_array(ds, single_var_as_array, variables)
-        except NoDataException:
+        except (NoDataException, FileNotFoundError):
             _exec_nodata_strat(
-                "No data to export", strategy=handle_nodata, logger=logger
+                f"No data was read from source: {self.name}",
+                strategy=handle_nodata,
+                logger=logger,
             )
 
     def _resolve_paths(
@@ -386,7 +374,6 @@ class RasterDatasetAdapter(DataAdapter):
         bbox: Optional[Bbox],
         cache_root: Optional[StrPath],
         zoom_level: Optional[int] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ):
         kwargs = self.driver_kwargs.copy()
@@ -436,7 +423,10 @@ class RasterDatasetAdapter(DataAdapter):
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
 
-        return ds
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
@@ -484,7 +474,6 @@ class RasterDatasetAdapter(DataAdapter):
         buffer: GeomBuffer = 0,
         align: Optional[bool] = None,
         time_tuple: Optional[TimeRange] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ):
         """Return a RasterDataset sliced in both spatial and temporal dimensions.
@@ -543,6 +532,12 @@ class RasterDatasetAdapter(DataAdapter):
                 align,
                 logger=logger,
             )
+
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
+
         return ds
 
     def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
@@ -574,6 +569,11 @@ class RasterDatasetAdapter(DataAdapter):
             if time_tuple is not None:
                 logger.debug(f"Slicing time dim {time_tuple}")
                 ds = ds.sel({"time": slice(*time_tuple)})
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
+
         return ds
 
     @staticmethod
@@ -611,6 +611,11 @@ class RasterDatasetAdapter(DataAdapter):
                 logger.warning(
                     f"Dataset does [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
                 )
+
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
         return ds
 
@@ -772,7 +777,7 @@ class RasterDatasetAdapter(DataAdapter):
         logger.debug(f"Parsed zoom_level {zl} ({dst_res:.2f})")
         return zl
 
-    def get_bbox(self, handle_nodata=NoDataStrategy.RAISE, detect=True) -> TotalBounds:
+    def get_bbox(self, detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -802,7 +807,6 @@ class RasterDatasetAdapter(DataAdapter):
     def get_time_range(
         self,
         detect=True,
-        handle_nodata=NoDataStrategy.RAISE,
     ) -> TimeRange:
         """Detect the time range of the dataset.
 
@@ -832,7 +836,6 @@ class RasterDatasetAdapter(DataAdapter):
     def detect_bbox(
         self,
         ds=None,
-        handle_nodata=NoDataStrategy.RAISE,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
@@ -867,7 +870,6 @@ class RasterDatasetAdapter(DataAdapter):
     def detect_time_range(
         self,
         ds=None,
-        handle_nodata=NoDataStrategy.RAISE,
     ) -> TimeRange:
         """Detect the temporal range of the dataset.
 

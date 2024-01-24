@@ -10,6 +10,7 @@ from click.testing import CliRunner
 from hydromt import __version__
 from hydromt.cli import api as hydromt_api
 from hydromt.cli.main import main as hydromt_cli
+from hydromt.exceptions import NoDataException
 
 DATADIR = join(dirname(abspath(__file__)), "data")
 
@@ -135,23 +136,22 @@ def test_export_cli_deltares_data(tmpdir):
 
 
 def test_export_cli_no_data_ignore(tmpdir):
-    r = CliRunner().invoke(
-        hydromt_cli,
-        [
-            "export",
-            str(tmpdir),
-            "-s",
-            "hydro_lakes",
-            "-t",
-            "['1900-01-01','1900-12-31']",
-            "-d",
-            "tests/data/test_sources.yml",
-            "--ignore-empty",
-        ],
-        catch_exceptions=False,
-    )
-
-    assert r.exit_code == 0, r.output
+    with pytest.raises(NoDataException):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "export",
+                str(tmpdir),
+                "-s",
+                "hydro_lakes",
+                "-t",
+                "['1900-01-01','1900-12-31']",
+                "-d",
+                "tests/data/test_sources.yml",
+                "--error-on-empty",
+            ],
+            catch_exceptions=False,
+        )
 
 
 def test_export_cli_unsupported_region(tmpdir):
