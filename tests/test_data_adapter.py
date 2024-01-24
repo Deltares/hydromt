@@ -2,6 +2,7 @@
 """Tests for the hydromt.data_adapter submodule."""
 
 import glob
+import tempfile
 from datetime import datetime
 from os.path import abspath, basename, dirname, join
 from typing import cast
@@ -243,66 +244,63 @@ def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
-# def test_geodataset(geoda, geodf, ts, tmpdir):
-#     fn_nc = str(tmpdir.join("test.nc"))
-#     fn_gdf = str(tmpdir.join("test.geojson"))
-#     fn_csv = str(tmpdir.join("test.csv"))
-#     fn_csv_locs = str(tmpdir.join("test_locs.xy"))
-#     geoda.vector.to_netcdf(fn_nc)
-#     geodf.to_file(fn_gdf, driver="GeoJSON")
-#     ts.to_csv(fn_csv)
-#     hydromt.io.write_xy(fn_csv_locs, geodf)
-#     data_catalog = DataCatalog()
-#     # added fn_ts to test if it does not go into xr.open_dataset
-#     da1 = data_catalog.get_geodataset(
-#         fn_nc, variables=["test1"], bbox=geoda.vector.bounds
-#     ).sortby("index")
-#     assert np.allclose(da1, geoda)
-#     assert da1.name == "test1"
-#     ds1 = data_catalog.get_geodataset("test.nc", single_var_as_array=False)
-#     assert isinstance(ds1, xr.Dataset)
-#     assert "test" in ds1
-#     da2 = data_catalog.get_geodataset(
-#         fn_gdf, driver_kwargs=dict(fn_data=fn_csv)
-#     ).sortby("index")
-#     assert isinstance(da2, xr.DataArray), type(da2)
-#     assert np.allclose(da2, geoda)
-#     # test with xy locs
-#     da3 = data_catalog.get_geodataset(
-#         fn_csv_locs, driver_kwargs=dict(fn_data=fn_csv), crs=geodf.crs
-#     ).sortby("index")
-#     assert np.allclose(da3, geoda)
-#     assert da3.vector.crs.to_epsg() == 4326
-#     with pytest.raises(FileNotFoundError, match="No such file"):
-#         data_catalog.get_geodataset("no_file.geojson")
-#     da3 = data_catalog.get_geodataset(
-#         "test.nc",
-#         # only really care that the bbox doesn't intersect with anythign
-#         bbox=[12.5, 12.6, 12.7, 12.8],
-#         handle_nodata=NoDataStrategy.IGNORE,
-#     )
-#     assert da3 is None
+def test_geodataset(geoda, geodf, ts, tmpdir):
+    fn_nc = str(tmpdir.join("test.nc"))
+    fn_gdf = str(tmpdir.join("test.geojson"))
+    fn_csv = str(tmpdir.join("test.csv"))
+    fn_csv_locs = str(tmpdir.join("test_locs.xy"))
+    geoda.vector.to_netcdf(fn_nc)
+    geodf.to_file(fn_gdf, driver="GeoJSON")
+    ts.to_csv(fn_csv)
+    hydromt.io.write_xy(fn_csv_locs, geodf)
+    data_catalog = DataCatalog()
+    # added fn_ts to test if it does not go into xr.open_dataset
+    da1 = data_catalog.get_geodataset(
+        fn_nc, variables=["test1"], bbox=geoda.vector.bounds
+    ).sortby("index")
+    assert np.allclose(da1, geoda)
+    assert da1.name == "test1"
+    ds1 = data_catalog.get_geodataset("test.nc", single_var_as_array=False)
+    assert isinstance(ds1, xr.Dataset)
+    assert "test" in ds1
+    da2 = data_catalog.get_geodataset(
+        fn_gdf, driver_kwargs=dict(fn_data=fn_csv)
+    ).sortby("index")
+    assert isinstance(da2, xr.DataArray), type(da2)
+    assert np.allclose(da2, geoda)
+    # test with xy locs
+    da3 = data_catalog.get_geodataset(
+        fn_csv_locs, driver_kwargs=dict(fn_data=fn_csv), crs=geodf.crs
+    ).sortby("index")
+    assert np.allclose(da3, geoda)
+    assert da3.vector.crs.to_epsg() == 4326
+    with pytest.raises(FileNotFoundError, match="No such file"):
+        data_catalog.get_geodataset("no_file.geojson")
+    da3 = data_catalog.get_geodataset(
+        "test.nc",
+        # only really care that the bbox doesn't intersect with anythign
+        bbox=[12.5, 12.6, 12.7, 12.8],
+        handle_nodata=NoDataStrategy.IGNORE,
+    )
+    assert da3 is None
 
-#     # import pdb
+    with pytest.raises(NoDataException):
+        da3 = data_catalog.get_geodataset(
+            "test.nc",
+            # only really care that the bbox doesn't intersect with anythign
+            bbox=[12.5, 12.6, 12.7, 12.8],
+            handle_nodata=NoDataStrategy.RAISE,
+        )
 
-#     # pdb.set_trace()
-#     with pytest.raises(NoDataException):
-#         da3 = data_catalog.get_geodataset(
-#             "test.nc",
-#             # only really care that the bbox doesn't intersect with anythign
-#             bbox=[12.5, 12.6, 12.7, 12.8],
-#             handle_nodata=NoDataStrategy.RAISE,
-#         )
-
-#     with tempfile.TemporaryDirectory() as td:
-#         # Test nc file writing to file
-#         GeoDatasetAdapter(fn_nc).to_file(
-#             data_root=td, data_name="test", driver="netcdf"
-#         )
-#         GeoDatasetAdapter(fn_nc).to_file(
-#             data_root=tmpdir, data_name="test1", driver="netcdf", variables="test1"
-#         )
-#         GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
+    with tempfile.TemporaryDirectory() as td:
+        # Test nc file writing to file
+        GeoDatasetAdapter(fn_nc).to_file(
+            data_root=td, data_name="test", driver="netcdf"
+        )
+        GeoDatasetAdapter(fn_nc).to_file(
+            data_root=tmpdir, data_name="test1", driver="netcdf", variables="test1"
+        )
+        GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
 
 
 def test_geodataset_unit_attrs(artifact_data: DataCatalog):
