@@ -7,7 +7,7 @@ from pydantic import field_validator
 
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
-from hydromt.metadata_resolvers.resolver import RESOLVERS
+from hydromt.metadata_resolvers.resolver_plugin import RESOLVERS
 
 # from hydromt.nodata import NoDataStrategy
 from .data_source import DataSource
@@ -48,7 +48,6 @@ class GeoDataFrameDataSource(DataSource):
         logger: Logger | None = None,
     ) -> gpd.GeoDataFrame:
         """Use initialize driver to read data."""
-        # uris: list[str] = PlaceHolderURI(self.uri, variables=variables).expand(self)
         uris: list[str] = RESOLVERS[self.metadata_resolver].resolve(
             self,
             bbox=bbox,
