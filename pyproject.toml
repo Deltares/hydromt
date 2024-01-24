@@ -109,15 +109,18 @@ hydromt = "hydromt.cli.main:main"
 
 [tool.make_env]
 channels = ["conda-forge"]
-deps_not_in_conda = ["sphinx_autosummary_accessors", "sphinx_design"]
+deps_not_in_conda = [
+  "sphinx_autosummary_accessors",
+  "sphinx_design",
+]
 
 
 [tool.ruff]
 line-length = 88
 target-version = "py39"
 
-# enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B), logging-format (G)
-select = ["E", "F", "I", "PT", "D", "B", "G010"]
+# enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
+select = ["E", "F", "I", "PT", "D", "B"]
 ignore-init-module-imports = true
 ignore = ["D211", "D213", 'D206', 'E501', "E741", "D105", "E712", "B904"]
 exclude = ["docs"]
