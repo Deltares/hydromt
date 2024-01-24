@@ -647,7 +647,7 @@ should be created with model-specific data readers, writers and setup methods.</
 <li><p><a class="reference internal" href="../user_guide/model_overview.html#model-interface"><span class="std std-ref">Model data components</span></a> are data attributes which together define a model instance and
 are identical for all models. Each component represents a specific model component and is parsed to a specific
 Python data object that should adhere to certain specifications. For instance, the <code class="docutils literal notranslate"><span class="pre">grid</span></code> component represent
-all static regular grids of a model in a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.1.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> object.</p></li>
+all static regular grids of a model in a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.1.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> object.</p></li>
 <li><p>Most model components have an associated <cite>write_&lt;component&gt;</cite> and <cite>read_&lt;component&gt;</cite> method to read/write with model
 specific data formats and parse to / from the model component. These methods may have additional optional arguments
 (i.e. with default values), but no required arguments. The results component does not have write method.</p></li>
@@ -681,7 +681,7 @@ See e.g. the <a class="reference external" href="https://github.com/Deltares/hyd
 <li><p>Workflows define (partial) transformations of data from input data to model data. And should, if possible, be kept
 generic to be shared between model plugins.</p></li>
 <li><p>The input data is passed to the workflow by python data objects consistent with its associated data types
-(e.g. <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.1.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> for regular rasters) and not read by the workflow itself.</p></li>
+(e.g. <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.1.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> for regular rasters) and not read by the workflow itself.</p></li>
 <li><p>Unit tests should (see below) be written for workflows to ensure these (keep) work(ing) as intended.</p></li>
 </ul>
 </section>
