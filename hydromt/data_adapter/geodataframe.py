@@ -462,7 +462,6 @@ class GeoDataFrameAdapter(DataAdapter):
     def get_bbox(
         self,
         detect: bool = True,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
@@ -493,7 +492,6 @@ class GeoDataFrameAdapter(DataAdapter):
     def detect_bbox(
         self,
         gdf: Optional[gpd.GeoDataFrame] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 

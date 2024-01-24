@@ -572,8 +572,6 @@ class RasterDatasetAdapter(DataAdapter):
         else:
             return ds
 
-        return ds
-
     @staticmethod
     def _slice_spatial_dimensions(
         ds: Data,
