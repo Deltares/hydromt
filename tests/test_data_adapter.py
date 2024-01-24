@@ -78,7 +78,7 @@ def test_rasterdataset(rioda, tmpdir):
     geom = rioda.raster.box
     da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
     assert np.all(da1 == rioda_utm)
-    with pytest.raises(FileNotFoundError, match="No such file"):
+    with pytest.raises(NoDataException):
         data_catalog.get_rasterdataset("no_file.tif")
     with pytest.raises(NoDataException):
         data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
@@ -514,7 +514,7 @@ def test_geodataframe(geodf, tmpdir):
             handle_nodata=NoDataStrategy.RAISE,
         )
 
-    with pytest.raises(FileNotFoundError, match="No such file"):
+    with pytest.raises(NoDataException):
         data_catalog.get_geodataframe("no_file.geojson")
 
 
