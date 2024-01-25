@@ -408,8 +408,6 @@ class GeoDatasetAdapter(DataAdapter):
         predicate : str, optional
             Predicate used to filter the GeoDataFrame, see
             :py:func:`hydromt.gis_utils.filter_gdf` for details.
-        handle_nodata : NoDataStrategy, optional
-            How to handle no data values. By default NoDataStrategy.RAISE.
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.

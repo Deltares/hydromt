@@ -496,8 +496,6 @@ class RasterDatasetAdapter(DataAdapter):
         time_tuple : Tuple of datetime, optional
             A tuple consisting of the lower and upper bounds of time that the
             result should contain
-        handle_nodata: NoDataStrategy, optional
-            How to handle no data values, by default NoDataStrategy.RAISE
 
         Returns
         -------
@@ -556,7 +554,6 @@ class RasterDatasetAdapter(DataAdapter):
     def _slice_temporal_dimension(
         ds: Data,
         time_tuple: Optional[TimeRange],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ):
         if (
@@ -579,7 +576,6 @@ class RasterDatasetAdapter(DataAdapter):
         bbox: Optional[Bbox],
         buffer: GeomBuffer,
         align: Optional[bool],
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ):
         # make sure bbox is in data crs

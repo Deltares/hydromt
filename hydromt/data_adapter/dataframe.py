@@ -141,7 +141,7 @@ class DataFrameAdapter(DataAdapter):
         driver: Optional[str] = None,
         variables: Optional[Variables] = None,
         time_tuple: Optional[TimeRange] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
     ) -> Optional[Tuple[StrPath, str, Dict[str, Any]]]:
@@ -325,8 +325,6 @@ class DataFrameAdapter(DataAdapter):
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
-        handle_nodata : NoDataStrategy, optional
-            Strategy to handle no data values. Default is NoDataStrategy.RAISE.
 
         Returns
         -------
