@@ -10,9 +10,10 @@ Separate data catalog sources can be tested by giving the dataset source name as
 an extra argument. The argument should be preceded by -ds. It is also possible to specify
 the version of the dataset source by supplying the call with a -dsv flag and version
 number. The dataset is opened and if the dataset contains geo data the dataset is clipped
-to a small bounding box surrounding Deltares Delft office.
+to a small bounding box surrounding Deltares Delft office ( 4.333409, 51.962159,
+4.42835, 52.006873,).
 Example dataset source test call:
-    'python test_data_catalog.py path/to/datacatalog.yml -ds chelsa -dsv 1.2
+    'python test_data_catalog.py path/to/datacatalog.yml -d chelsa -v 1.2
     -r "{'bbox':[4.333409,51.962159,4.42835,52.006873]}"'
 
 In addition the passed data catalog yaml is checked if it is a valid data catalog yaml.
@@ -26,9 +27,6 @@ from dask.distributed import Client
 from hydromt import DataCatalog
 from hydromt.log import setuplog
 from hydromt.validators.data_catalog import DataCatalogValidator
-
-client = Client(processes=False)
-logger = setuplog()
 
 
 def test_dataset(args, datacatalog):
@@ -82,17 +80,20 @@ def test_data_catalog(args, datacatalog):
                 f"Something went wrong with creating path string for dataset source {source}: {e}"
             )
             error_count += 1
-    logger.info(f"Encountered {error_count} errors")
+    if error_count > 0:
+        logger.error(f"Encountered {error_count} errors")
 
 
 if __name__ == "__main__":
+    client = Client(processes=False)
+    logger = setuplog()
     parser = argparse.ArgumentParser("Test predefined data catalog")
     parser.add_argument("data_catalog", help="The data catalog to test")
     parser.add_argument(
-        "-ds", "--dataset", help="The name of the dataset to test", required=False
+        "-d", "--dataset", help="The name of the dataset to test", required=False
     )
     parser.add_argument(
-        "-dsv",
+        "-v",
         "--dataset_version",
         help="Optional version of the dataset to test for",
         required=False,
