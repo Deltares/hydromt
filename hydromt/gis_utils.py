@@ -22,6 +22,8 @@ from rasterio.transform import Affine
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
+from hydromt.typing import Bbox
+
 from . import _compat
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
@@ -208,7 +210,12 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
     return idx
 
 
-def parse_geom_bbox_buffer(geom=None, bbox=None, buffer=0, crs=None):
+def parse_geom_bbox_buffer(
+    geom: GPD_TYPES | None = None,
+    bbox: Bbox | None = None,
+    buffer: float = 0.0,
+    crs: CRS | None = None,
+):
     """Parse geom or bbox to a (buffered) geometry.
 
     Arguments
@@ -236,6 +243,8 @@ def parse_geom_bbox_buffer(geom=None, bbox=None, buffer=0, crs=None):
         geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=crs)
     elif geom is None:
         raise ValueError("No geom or bbox provided.")
+    elif geom.crs is None:
+        geom = geom.set_crs(crs)
 
     if buffer > 0:
         # make sure geom is projected > buffer in meters!

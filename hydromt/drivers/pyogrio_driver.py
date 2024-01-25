@@ -32,8 +32,10 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         args:
         """
-        if bbox:  # buffer bbox
+        if bbox is not None:  # buffer bbox
             bbox: GPD_TYPES = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
+        if mask is not None:  # buffer mask
+            mask: GPD_TYPES = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         bbox_reader = bbox_from_file_and_filters(uri, bbox, mask, crs)
         return read_dataframe(uri, bbox=bbox_reader, mode="r")
 
