@@ -23,6 +23,7 @@ import argparse
 import json
 
 from dask.distributed import Client
+from pydantic_core import ValidationError
 
 from hydromt import DataCatalog
 from hydromt.log import setuplog
@@ -114,5 +115,9 @@ if __name__ == "__main__":
         test_data_catalog(args, datacatalog)
     # Validate data catalog yaml
     logger.info("Validating data catalog")
-    DataCatalogValidator().from_yml(args.data_catalog)
-    logger.info("Data catalog is valid!")
+    try:
+        DataCatalogValidator().from_yml(args.data_catalog)
+        logger.info("Data catalog is valid!")
+    except ValidationError as e:
+        logger.error("Data catalog is not valid!")
+        logger.error(e)
