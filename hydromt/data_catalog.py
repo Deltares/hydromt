@@ -1283,7 +1283,7 @@ class DataCatalog(object):
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom_level: Optional[Union[int, tuple]] = None,
         buffer: Union[float, int] = 0,
-        handle_nodata=NoDataStrategy.RAISE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         align: Optional[bool] = None,
         variables: Optional[Union[List, str]] = None,
         time_tuple: Optional[Tuple] = None,
@@ -1323,6 +1323,8 @@ class DataCatalog(object):
             (<zoom_resolution>, <unit>), e.g., (1000, 'meter')
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
+        handle_nodata: NoDataStrategy, optional
+            What to do if no data can be found.
         align : float, optional
             Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
@@ -1345,7 +1347,9 @@ class DataCatalog(object):
         Returns
         -------
         obj: xarray.Dataset or xarray.DataArray
-            RasterDataset
+            RasterDataset. If no data is found and handle_nodata is set to IGNORE None
+            will be returned. if it is set to RAISE and exception will be raised in that
+            situation
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1407,7 +1411,7 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
-    ):
+    ) -> Optional[gpd.GeoDataFrame]:
         """Return a clipped and unified GeoDataFrame (vector).
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
@@ -1452,8 +1456,10 @@ class DataCatalog(object):
 
         Returns
         -------
-        gdf: geopandas.GeoDataFrame
-            GeoDataFrame
+        gdf: Optional[geopandas.GeoDataFrame]
+            GeoDataFrame. If no data is found and handle_nodata is set to IGNORE None
+            will be returned. if it is set to RAISE and exception will be raised in that
+            situation
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1534,6 +1540,8 @@ class DataCatalog(object):
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+        handle_nodata: NoDataStrategy Optional
+            what should happen if the requested data set is empty. RAISE by default
         predicate : optional
             If predicate is provided, the GeoDataFrame is filtered by testing
             the predicate function against each item. Requires bbox or mask.
@@ -1604,6 +1612,7 @@ class DataCatalog(object):
         self,
         data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
         variables: Optional[List] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
@@ -1674,6 +1683,7 @@ class DataCatalog(object):
             variables=variables,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
+            handle_nodata=handle_nodata,
         )
         return obj
 
@@ -1703,6 +1713,8 @@ class DataCatalog(object):
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
+        handle_nodata: NoDataStrategy Optional
+            what should happen if the requested data set is empty. RAISE by default
         **kwargs:
             Additional keyword arguments that are passed to the `DataframeAdapter`
             function. Only used if `data_like` is a path to a tabular data file.
@@ -1710,7 +1722,9 @@ class DataCatalog(object):
         Returns
         -------
         pd.DataFrame
-            Tabular data
+            Tabular data. If no data is found and handle_nodata is set to IGNORE None
+            will be returned. if it is set to RAISE and exception will be raised in that
+            situation
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1743,6 +1757,7 @@ class DataCatalog(object):
         obj = source.get_data(
             variables=variables,
             time_tuple=time_tuple,
+            handle_nodata=handle_nodata,
             logger=self.logger,
         )
         return obj
