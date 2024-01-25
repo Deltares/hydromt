@@ -13,6 +13,7 @@ Unreleased
 
 Added
 -----
+- Test script for testing predefined catalogs locally. (#735)
 
 Changed
 -------
