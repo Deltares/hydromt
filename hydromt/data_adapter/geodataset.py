@@ -275,6 +275,7 @@ class GeoDatasetAdapter(DataAdapter):
         try:
             # load data
             fns = self._resolve_paths(variables=variables, time_tuple=time_tuple)
+            self.mark_as_used()  # mark used
             ds = self._read_data(fns, logger=logger)
 
             if ds is None:
@@ -301,7 +302,6 @@ class GeoDatasetAdapter(DataAdapter):
             if ds is None:
                 raise NoDataException()
 
-            self.mark_as_used()  # mark used
             # uniformize
             ds = self._apply_unit_conversion(ds, logger=logger)
             ds = self._set_metadata(ds)

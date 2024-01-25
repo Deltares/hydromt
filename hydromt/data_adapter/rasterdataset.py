@@ -304,6 +304,7 @@ class RasterDatasetAdapter(DataAdapter):
             fns = self._resolve_paths(
                 time_tuple, variables, zoom_level, geom, bbox, logger
             )
+            self.mark_as_used()  # mark used
             ds = self._read_data(
                 fns,
                 geom,
@@ -337,7 +338,6 @@ class RasterDatasetAdapter(DataAdapter):
             # uniformize data
             ds = self._apply_unit_conversions(ds, logger)
             ds = self._set_metadata(ds)
-            self.mark_as_used()  # mark used
             # return array if single var and single_var_as_array
             return self._single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:

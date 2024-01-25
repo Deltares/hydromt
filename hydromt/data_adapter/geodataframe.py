@@ -266,6 +266,7 @@ class GeoDataFrameAdapter(DataAdapter):
         try:
             # load
             fns = self._resolve_paths(variables=variables)
+            self.mark_as_used()  # mark used
             gdf = self._read_data(fns, bbox, geom, buffer, predicate, logger=logger)
             if gdf is None:
                 raise NoDataException()
@@ -280,7 +281,6 @@ class GeoDataFrameAdapter(DataAdapter):
             if gdf is None:
                 raise NoDataException()
 
-            self.mark_as_used()  # mark used
             # uniformize
             gdf = self._apply_unit_conversions(gdf, logger=logger)
             gdf = self._set_metadata(gdf)

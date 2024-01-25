@@ -222,6 +222,7 @@ class DataFrameAdapter(DataAdapter):
         try:
             # load data
             fns = self._resolve_paths(variables=variables)
+            self.mark_as_used()  # mark used
             df = self._read_data(fns, logger=logger)
             # just raise an exxceptoin so we can handle the strategy in one place (the except)
             if df is None:
@@ -238,9 +239,6 @@ class DataFrameAdapter(DataAdapter):
             )
             if df is None:
                 raise NoDataException()
-
-            # only if data is actually returned
-            self.mark_as_used()  # mark used
 
             # uniformize data
             df = self._apply_unit_conversion(df, logger=logger)

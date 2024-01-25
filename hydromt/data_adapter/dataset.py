@@ -203,6 +203,7 @@ class DatasetAdapter(DataAdapter):
         try:
             # load data
             fns = self._resolve_paths(variables, time_tuple)
+            self.mark_as_used()
             ds = self._read_data(fns, logger=logger)
             if ds is None:
                 raise NoDataException()
@@ -217,7 +218,6 @@ class DatasetAdapter(DataAdapter):
             # uniformize
             ds = self._apply_unit_conversion(ds, logger=logger)
             ds = self._set_metadata(ds)
-            self.mark_as_used()
             # return array if single var and single_var_as_array
             return self._single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
