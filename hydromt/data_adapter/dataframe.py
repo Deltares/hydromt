@@ -246,7 +246,7 @@ class DataFrameAdapter(DataAdapter):
             df = self._apply_unit_conversion(df, logger=logger)
             df = self._set_metadata(df)
             return df
-        except (NoDataException, FileNotFoundError):
+        except NoDataException:
             _exec_nodata_strat(
                 f"No data was read from source: {self.name}",
                 strategy=handle_nodata,

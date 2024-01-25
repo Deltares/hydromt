@@ -23,7 +23,6 @@ from hydromt.data_catalog import (
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
-from hydromt.exceptions import NoDataException
 from hydromt.gis_utils import to_geographic_bbox
 from hydromt.nodata import NoDataStrategy
 
@@ -483,7 +482,7 @@ def test_get_rasterdataset():
     assert len(data_catalog) == n + 2
     with pytest.raises(ValueError, match='Unknown raster data type "list"'):
         data_catalog.get_rasterdataset([])
-    with pytest.raises(NoDataException):
+    with pytest.raises(FileNotFoundError):
         data_catalog.get_rasterdataset("test1.tif")
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_rasterdataset({"name": "test"})
@@ -508,7 +507,7 @@ def test_get_geodataframe():
     assert isinstance(gdf, gpd.GeoDataFrame)
     with pytest.raises(ValueError, match='Unknown vector data type "list"'):
         data_catalog.get_geodataframe([])
-    with pytest.raises(NoDataException):
+    with pytest.raises(FileNotFoundError):
         data_catalog.get_geodataframe("test1.gpkg")
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataframe({"name": "test"})
@@ -581,7 +580,7 @@ def test_get_dataframe(df, tmpdir):
     assert isinstance(gdf, pd.DataFrame)
     with pytest.raises(ValueError, match='Unknown tabular data type "list"'):
         data_catalog.get_dataframe([])
-    with pytest.raises(NoDataException):
+    with pytest.raises(FileNotFoundError):
         data_catalog.get_dataframe("test1.csv")
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_dataframe({"name": "test"})

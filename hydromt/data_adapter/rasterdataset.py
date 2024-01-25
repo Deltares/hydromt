@@ -340,7 +340,7 @@ class RasterDatasetAdapter(DataAdapter):
             self.mark_as_used()  # mark used
             # return array if single var and single_var_as_array
             return self._single_var_as_array(ds, single_var_as_array, variables)
-        except (NoDataException, FileNotFoundError):
+        except NoDataException:
             _exec_nodata_strat(
                 f"No data was read from source: {self.name}",
                 strategy=handle_nodata,

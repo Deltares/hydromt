@@ -178,7 +178,7 @@ class GeoDatasetAdapter(DataAdapter):
         time_tuple: Optional[TimeRange] = None,
         variables: Optional[List[str]] = None,
         driver: Optional[str] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
     ) -> Optional[Tuple[StrPath, Optional[str], Dict[str, Any]]]:

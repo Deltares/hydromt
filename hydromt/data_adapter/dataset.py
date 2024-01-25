@@ -130,7 +130,7 @@ class DatasetAdapter(DataAdapter):
         time_tuple: Optional[TimeRange] = None,
         variables: Optional[List[str]] = None,
         driver: Optional[str] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
     ) -> Optional[Tuple[str, str]]:
         """Save a dataset slice to file. By default the data is saved as a NetCDF file.

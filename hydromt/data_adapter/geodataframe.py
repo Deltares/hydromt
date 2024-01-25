@@ -172,7 +172,7 @@ class GeoDataFrameAdapter(DataAdapter):
         bbox: Optional[Bbox] = None,
         driver: Optional[str] = None,
         variables: Optional[List[str]] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
     ) -> Optional[Tuple[str, str, Dict[Any, Any]]]:
@@ -285,7 +285,7 @@ class GeoDataFrameAdapter(DataAdapter):
             gdf = self._apply_unit_conversions(gdf, logger=logger)
             gdf = self._set_metadata(gdf)
             return gdf
-        except (NoDataException, FileNotFoundError):
+        except NoDataException:
             _exec_nodata_strat(
                 f"No data was read from source: {self.name}",
                 strategy=handle_nodata,

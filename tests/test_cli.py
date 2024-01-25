@@ -146,8 +146,6 @@ def test_export_cli_no_data_ignore(tmpdir):
                 "hydro_lakes",
                 "-r",
                 "{'bbox': [12.05,12.06,12.07,12.08]}",
-                "-d",
-                "tests/data/test_sources.yml",
                 "--error-on-empty",
             ],
             catch_exceptions=False,
