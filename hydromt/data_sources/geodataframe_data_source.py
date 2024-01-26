@@ -38,7 +38,8 @@ class GeoDataFrameDataSource(DataSource):
     @classmethod
     def _check_geodataframe_drivers(cls, v: Any, info: ValidationInfo) -> str:
         if isinstance(v, str):
-            assert v in _KNOWN_DRIVERS, f"unknown driver '{v}'"
+            if v not in _KNOWN_DRIVERS:
+                raise ValueError(f"unknown driver '{v}'")
             return driver_from_str(v, **info.data.get("driver_kwargs"))
         elif isinstance(v, GeoDataFrameDriver):
             return v

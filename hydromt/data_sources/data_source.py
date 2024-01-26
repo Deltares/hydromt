@@ -35,7 +35,8 @@ class DataSource(BaseModel):
     @field_validator("metadata_resolver", mode="before")
     def _validate_metadata_resolver(cls, v: Any):
         if isinstance(v, str):
-            assert v in RESOLVERS, f"unknown MetaDataResolver: '{v}'."
+            if v not in RESOLVERS:
+                raise ValueError(f"unknown MetaDataResolver: '{v}'.")
             return RESOLVERS.get(v)()
         elif isinstance(v, MetaDataResolver):
             return v

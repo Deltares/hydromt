@@ -51,10 +51,10 @@ class TestGeoDataFrame:
 
         assert e_info.value.error_count() == 2
         error0 = e_info.value.errors()[0]
-        assert error0["type"] == "assertion_error"
+        assert error0["type"] == "value_error"
         assert error0["loc"][0] == "metadata_resolver"
         error1 = e_info.value.errors()[1]
-        assert error1["type"] == "assertion_error"
+        assert error1["type"] == "value_error"
         assert error1["loc"][0] == "driver"
 
     def test_read_data(
