@@ -1634,7 +1634,6 @@ class DataCatalog(object):
         variables: Optional[List] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1709,7 +1708,6 @@ class DataCatalog(object):
         obj = source.get_data(
             variables=variables,
             time_tuple=time_tuple,
-            handle_nodata=handle_nodata,
             single_var_as_array=single_var_as_array,
             handle_nodata=handle_nodata,
         )
