@@ -51,12 +51,11 @@ class ConventionResolver(MetaDataResolver):
 
     def _get_dates(
         self,
+        source: "DataSource",
         keys: list[str],
         timerange: TimeRange,
     ) -> pd.PeriodIndex:
-        dt: pd.Timedelta = pd.to_timedelta(
-            self.source.unit_add.get("time", 0), unit="s"
-        )
+        dt: pd.Timedelta = pd.to_timedelta(source.unit_add.get("time", 0), unit="s")
         t_range: pd.DatetimeIndex = pd.to_datetime(list(timerange)) - dt
         freq: str = "m" if "month" in keys else "a"
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
@@ -88,7 +87,7 @@ class ConventionResolver(MetaDataResolver):
             source.uri, timerange, variables
         )
         if timerange:
-            dates = self._get_dates(keys, timerange)
+            dates = self._get_dates(source, keys, timerange)
         else:
             dates = pd.PeriodIndex(["2023-01-01"], freq="d")
         if variables:
@@ -106,4 +105,4 @@ class ConventionResolver(MetaDataResolver):
                 product(dates, variables),
             )
         )
-        return [uri_expanded.format(fmt) for fmt in fmts]
+        return [uri_expanded.format(**fmt) for fmt in fmts]

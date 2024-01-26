@@ -3,12 +3,13 @@ from abc import ABC, abstractmethod
 from logging import Logger
 
 import geopandas as gpd
+from pydantic import BaseModel
 from pyproj import CRS
 
 # from hydromt.nodata import NoDataStrategy
 
 
-class GeoDataFrameDriver(ABC):
+class GeoDataFrameDriver(ABC, BaseModel):
     """Abstract Driver to read GeoDataFrames."""
 
     @abstractmethod

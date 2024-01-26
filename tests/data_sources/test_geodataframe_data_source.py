@@ -1,26 +1,61 @@
-from pathlib import Path
+from unittest.mock import MagicMock
 
 import geopandas as gpd
 import numpy as np
 import pytest
-from pyogrio.errors import DataSourceError
+from pydantic import ValidationError
 
 from hydromt.data_sources.geodataframe_data_source import GeoDataFrameDataSource
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.metadata_resolvers.metadata_resolver import MetaDataResolver
 
 
 class TestGeoDataFrame:
-    @pytest.fixture(scope="class")
+    @pytest.fixture()
+    def mock_driver(self, geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
+        driver = MagicMock(spec=GeoDataFrameDriver)
+        driver.read.return_value = geodf
+        return driver
+
+    @pytest.fixture()
+    def mock_resolver(self) -> MetaDataResolver:
+        resolver = MagicMock(spec=MetaDataResolver)
+
+        def fake_resolve(uri: str, **kwags) -> str:
+            return [uri]
+
+        resolver.resolve = fake_resolve
+        return resolver
+
+    @pytest.fixture()
     def example_source(
-        self, geodf: gpd.GeoDataFrame, tmp_dir: Path
+        self, mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     ) -> GeoDataFrameDataSource:
-        fn_gdf = str(tmp_dir / "test.geojson")
-        geodf.to_file(fn_gdf, driver="GeoJSON")
         return GeoDataFrameDataSource(
             name="geojsonfile",
-            driver="pyogrio",
-            metadata_resolver="convention_resolver",
-            uri=fn_gdf,
+            data_type="GeoDataFrame",
+            driver=mock_driver,
+            metadata_resolver=mock_resolver,
+            uri="testuri",
         )
+
+    def test_validators(self):
+        with pytest.raises(ValidationError) as e_info:
+            GeoDataFrameDataSource(
+                name="name",
+                data_type="GeoDataFrame",
+                uri="uri",
+                metadata_resolver="does not exist",
+                driver="does not exist",
+            )
+
+        assert e_info.value.error_count() == 2
+        error0 = e_info.value.errors()[0]
+        assert error0["type"] == "assertion_error"
+        assert error0["loc"][0] == "metadata_resolver"
+        error1 = e_info.value.errors()[1]
+        assert error1["type"] == "assertion_error"
+        assert error1["loc"][0] == "driver"
 
     def test_read_data(
         self, geodf: gpd.GeoDataFrame, example_source: GeoDataFrameDataSource
@@ -31,6 +66,3 @@ class TestGeoDataFrame:
         example_source.rename = {"test": "test1"}
         gdf1 = example_source.read_data(bbox=list(geodf.total_bounds), buffer=1000)
         assert np.all(gdf1 == geodf)
-        example_source.uri = "no_file.geojson"
-        with pytest.raises(DataSourceError, match="No such file"):
-            example_source.read_data()

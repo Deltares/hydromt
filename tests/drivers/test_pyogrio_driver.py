@@ -3,6 +3,7 @@ from pathlib import Path
 import geopandas as gpd
 import numpy as np
 import pytest
+from pyogrio.errors import DataSourceError
 from shapely import box
 
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
@@ -20,6 +21,11 @@ class TestPyogrioDriver:
         driver = PyogrioDriver()
         gdf: gpd.GeoDataFrame = driver.read(uri)
         assert np.all(gdf == geodf)
+
+    def test_read_nodata(self):
+        driver = PyogrioDriver()
+        with pytest.raises(DataSourceError):
+            driver.read("no_data.geojson")
 
     def test_read_with_filters(self, uri: str):
         driver = PyogrioDriver()

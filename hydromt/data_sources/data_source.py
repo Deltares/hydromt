@@ -1,9 +1,10 @@
 """Abstract DataSource class."""
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from hydromt import DataCatalog
+from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.metadata_resolvers.resolver_plugin import RESOLVERS
 
 
@@ -31,17 +32,22 @@ class DataSource(BaseModel):
             catalog.get_source(key, provider, version).update("name", key)
         )
 
+    @field_validator("metadata_resolver", mode="before")
     def _validate_metadata_resolver(cls, v: Any):
-        assert isinstance(v, str), "metadata_resolver should be string."
-        assert v in RESOLVERS, f"unknown MetaDataResolver: '{v}'."
-        RESOLVERS.get(v)
+        if isinstance(v, str):
+            assert v in RESOLVERS, f"unknown MetaDataResolver: '{v}'."
+            return RESOLVERS.get(v)()
+        elif isinstance(v, MetaDataResolver):
+            return v
+        else:
+            raise ValueError("metadata_resolver should be string or MetaDataResolver.")
 
     name: str
+    data_type: str
     attrs: dict[str, Any] = Field(default_factory=dict)
     version: str | None = Field(default=None)
     provider: str | None = Field(default=None)
-    driver: str
-    metadata_resolver: str
+    metadata_resolver: MetaDataResolver
     driver_kwargs: dict[str, Any] = Field(default_factory=dict)
     unit_add: dict[str, Any] = Field(default_factory=dict)
     unit_mult: dict[str, Any] = Field(default_factory=dict)
