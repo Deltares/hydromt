@@ -1377,6 +1377,12 @@ class DataCatalog(object):
                 time_tuple,
                 logger=self.logger,
             )
+            if data_like is None:
+                _exec_nodata_strat(
+                    "No data was left after slicing.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
             ds = RasterDatasetAdapter._single_var_as_array(
                 data_like, single_var_as_array, variables
             )
@@ -1476,7 +1482,7 @@ class DataCatalog(object):
                 name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
-            return GeoDataFrameAdapter._slice_data(
+            data_like = GeoDataFrameAdapter._slice_data(
                 data_like,
                 variables,
                 geom,
@@ -1485,6 +1491,14 @@ class DataCatalog(object):
                 predicate,
                 logger=self.logger,
             )
+            if data_like is None:
+                _exec_nodata_strat(
+                    "No data was left after slicing.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
+            return data_like
+
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
@@ -1590,6 +1604,12 @@ class DataCatalog(object):
                 time_tuple,
                 logger=self.logger,
             )
+            if data_like is None:
+                _exec_nodata_strat(
+                    "No data was left after slicing.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
             return GeoDatasetAdapter._single_var_as_array(
                 data_like, single_var_as_array, variables
             )
@@ -1614,6 +1634,7 @@ class DataCatalog(object):
         variables: Optional[List] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1673,6 +1694,12 @@ class DataCatalog(object):
                 time_tuple,
                 logger=self.logger,
             )
+            if data_like is None:
+                _exec_nodata_strat(
+                    "No data was left after slicing.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
             return DatasetAdapter._single_var_as_array(
                 data_like, single_var_as_array, variables
             )
@@ -1682,6 +1709,7 @@ class DataCatalog(object):
         obj = source.get_data(
             variables=variables,
             time_tuple=time_tuple,
+            handle_nodata=handle_nodata,
             single_var_as_array=single_var_as_array,
             handle_nodata=handle_nodata,
         )
@@ -1744,9 +1772,9 @@ class DataCatalog(object):
             df = DataFrameAdapter._slice_data(
                 data_like, variables, time_tuple, logger=self.logger
             )
-            if len(df) == 0:
+            if df is None:
                 _exec_nodata_strat(
-                    "No data was read from source",
+                    "No data was left after slicing.",
                     strategy=handle_nodata,
                     logger=logger,
                 )
