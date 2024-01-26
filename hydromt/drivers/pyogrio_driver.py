@@ -7,7 +7,7 @@ from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
 
 from hydromt.gis_utils import parse_geom_bbox_buffer
-from hydromt.typing import GEOM_TYPES, GPD_TYPES
+from hydromt.typing import GEOM_TYPES, GPD_TYPES, Bbox
 
 # from hydromt.nodata import NoDataStrategy
 from .geodataframe_driver import GeoDataFrameDriver
@@ -19,7 +19,7 @@ class PyogrioDriver(GeoDataFrameDriver):
     def read(
         self,
         uri: str,
-        bbox: list[int] | None = None,
+        bbox: Bbox | None = None,
         mask: gpd.GeoDataFrame | None = None,
         buffer: float = 0,
         crs: CRS | None = None,

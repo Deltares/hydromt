@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class ConventionResolver(MetaDataResolver):
     """MetaDataResolver using HydroMT naming conventions."""
 
-    _uri_placeholders = {"year", "month", "variable", "zoom_level"}
+    _uri_placeholders = frozenset({"year", "month", "variable", "zoom_level"})
 
     def _expand_uri_placeholders(
         self, uri: str, time_tuple: tuple[str, str] | None, variables: set[str] | None

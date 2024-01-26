@@ -12,6 +12,7 @@ from hydromt.nodata import NoDataStrategy
 
 from .data_source import DataSource
 
+# placeholder for proper plugin behaviour later on.
 _KNOWN_DRIVERS: dict[str, GeoDataFrameDriver] = {"pyogrio": PyogrioDriver}
 
 
