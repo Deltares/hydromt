@@ -191,10 +191,10 @@ def test_return_values(ts_extremes):
     with pytest.raises(ValueError, match="da_params should have a 'dparams' dimension"):
         extremes.get_return_value(da_params.rename({"dparams": "test"}), rps=rps)
     with pytest.raises(ValueError, match="da_params should have a 'distribution' "):
-        extremes.get_return_value(da_params.drop("distribution"), rps=rps)
+        extremes.get_return_value(da_params.drop_vars("distribution"), rps=rps)
     with pytest.raises(ValueError, match="extremes_rate should be a scalar or "):
         extremes.get_return_value(
-            da_params.drop("extremes_rate"), rps=rps, extremes_rate=np.array([1])
+            da_params.drop_vars("extremes_rate"), rps=rps, extremes_rate=np.array([1])
         )
     with pytest.raises(ValueError, match="distribution should be a string or list"):
         extremes.fit_extremes(pot_peaks, ev_type="POT", distribution=1)
@@ -229,7 +229,7 @@ def test_eva(ts_extremes):
     pot_peaks = extremes.get_peaks(ts_extremes, ev_type="POT", qthresh=0.996)
     da_params = extremes.fit_extremes(pot_peaks, ev_type="POT", distribution="gpd")
     da_rps = extremes.get_return_value(
-        da_params.drop("extremes_rate"), extremes_rate=pot_peaks.extremes_rate
+        da_params.drop_vars("extremes_rate"), extremes_rate=pot_peaks.extremes_rate
     )
     pot_test = xr.merge([pot_peaks, da_params, da_rps])
     xr.testing.assert_equal(pot_test, pot_eva)
@@ -275,7 +275,7 @@ def test_peaks_eva_3d_dask():
     # get return values using get_return_value method
     rps = np.array([1.5, 5, 10, 25, 50, 100, 250, 500])
     rvs = extremes.get_return_value(
-        params.drop("extremes_rate"), rps=rps, extremes_rate=1
+        params.drop_vars("extremes_rate"), rps=rps, extremes_rate=1
     )
     assert rvs.chunks is not None
 
