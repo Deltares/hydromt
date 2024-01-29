@@ -11,6 +11,8 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 # required for accessor style documentation
+import faulthandler
+
 from xarray import DataArray, Dataset
 
 # submodules
@@ -20,3 +22,5 @@ from .io import *
 
 # high-level methods
 from .models import *
+
+faulthandler.enable()

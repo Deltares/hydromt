@@ -24,7 +24,7 @@ from shapely.geometry import box
 
 from hydromt import __version__
 from hydromt._compat import Distribution
-from hydromt.typing import DeferedFileClose, XArrayDict
+from hydromt.typing import DeferedFileClose, StrPath, XArrayDict
 
 from .. import config, log, workflows
 from ..data_catalog import DataCatalog
@@ -251,7 +251,7 @@ class Model(object, metaclass=ABCMeta):
 
     def update(
         self,
-        model_out: Optional[Union[str, Path]] = None,
+        model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
         opt: Optional[Dict] = None,
         forceful_overwrite: bool = False,
@@ -580,8 +580,8 @@ class Model(object, metaclass=ABCMeta):
 
     def write_data_catalog(
         self,
-        root: Optional[Union[str, Path]] = None,
-        data_lib_fn: Union[str, Path] = "hydromt_data.yml",
+        root: Optional[StrPath] = None,
+        data_lib_fn: StrPath = "hydromt_data.yml",
         used_only: bool = True,
         append: bool = True,
     ):
@@ -1723,7 +1723,7 @@ class Model(object, metaclass=ABCMeta):
 
     def read_nc(
         self,
-        fn: Union[str, Path],
+        fn: StrPath,
         mask_and_scale: bool = False,
         single_var_as_array: bool = True,
         load: bool = False,
