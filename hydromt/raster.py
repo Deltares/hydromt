@@ -755,7 +755,7 @@ class XRasterBase(XGeoBase):
             )
         grid_map_attrs.update({"x_dim": x_dim, "y_dim": y_dim})
         # reset and write grid mapping attributes
-        obj_out.drop(GEO_MAP_COORD, errors="ignore")
+        obj_out.drop_vars(GEO_MAP_COORD, errors="ignore")
         obj_out.raster.set_attrs(**grid_map_attrs)
         # set grid mapping attribute for each data variable
         if hasattr(obj_out, "data_vars"):
