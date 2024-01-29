@@ -1,7 +1,7 @@
 """HydroMT: Automated and reproducible model building and analysis."""
 
 # version number without 'v' at start
-__version__ = "0.9.2.dev"
+__version__ = "0.9.2"
 
 # pkg_resource deprication warnings originate from dependencies
 # so silence them for now
@@ -11,6 +11,8 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 # required for accessor style documentation
+import faulthandler
+
 from xarray import DataArray, Dataset
 
 # submodules
@@ -20,3 +22,5 @@ from .io import *
 
 # high-level methods
 from .models import *
+
+faulthandler.enable()

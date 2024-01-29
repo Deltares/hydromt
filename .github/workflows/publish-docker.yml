@@ -63,7 +63,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          load: true
           target: ${{ matrix.flavour }} #
           push:  ${{ env.should_publish }}
           tags: deltares/hydromt:${{ env.version }}-${{ matrix.flavour }}
@@ -73,7 +72,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          load: true
           target: ${{ matrix.flavour }} #
           push:  ${{ env.should_publish }}
           tags: deltares/hydromt:${{ env.version }}, deltares/hydromt:latest

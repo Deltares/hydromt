@@ -306,22 +306,49 @@ def axes_attrs(crs):
 
 
 def meridian_offset(ds, bbox=None):
-    """re-arrange data along x dim."""
+    """Shift data along the x-axis of global datasets to avoid issues along the 180 meridian.
+
+    Without a bbox the data is shifted to span 180W to 180E.
+    With bbox the data is shifted to at least span the bbox west to east,
+    also if the bbox crosses the 180 meridian.
+
+    Note that this method is only applicable to data that spans 360 degrees longitude
+    and is set in a global geographic CRS (WGS84).
+
+    Parameters
+    ----------
+    ds: xarray.Dataset
+        input dataset
+    bbox: tuple of float
+        bounding box (west, south, east, north) in degrees
+
+    Returns
+    -------
+    ds: xarray.Dataset
+        dataset with x dim re-arranged if needed
+    """
     w, _, e, _ = ds.raster.bounds
     if (
         ds.raster.crs is None
         or ds.raster.crs.is_projected
-        or not np.isclose(e - w, 360)
+        or not np.isclose(e - w, 360)  # grid should span 360 degrees!
     ):
-        raise ValueError("The method is only applicable to global geographic CRS")
+        raise ValueError(
+            "This method is only applicable to data that spans 360 degrees "
+            "longitude and is set in a global geographic CRS"
+        )
     x_name = ds.raster.x_dim
     lons = np.copy(ds[x_name].values)
-    if bbox is not None and bbox[0] < w and bbox[0] < -180:  # 180W - 180E > 360W - 0W
-        lons = np.where(lons > 0, lons - 360, lons)
-    elif bbox is not None and bbox[2] > e and bbox[2] > 180:  # 180W - 180E > 0E-360E
-        lons = np.where(lons < 0, lons + 360, lons)
-    elif np.isclose(e, 360):  # 0W - 360E > 180W - 180E (allow for rounding errors)
-        lons = np.where(lons > 180, lons - 360, lons)
+    if bbox is not None:  # bbox west and east
+        bbox_w, bbox_e = bbox[0], bbox[2]
+    else:  # global west and east in case of no bbox
+        bbox_w, bbox_e = -180, 180
+    if bbox_w < w:  # shift lons east of x0 by 360 degrees west
+        x0 = 180 if bbox_w >= -180 else 0
+        lons = np.where(lons > max(bbox_e, x0), lons - 360, lons)
+    elif bbox_e > e:  # shift lons west of x0 by 360 degrees east
+        x0 = -180 if bbox_e <= 180 else 0
+        lons = np.where(lons < min(bbox_w, x0), lons + 360, lons)
     else:
         return ds
     ds = ds.copy(deep=False)  # make sure not to overwrite original ds
@@ -599,7 +626,12 @@ def bbox_from_file_and_filters(
         )
     if bbox is None and mask is None:
         return None
-    source_crs = CRS(read_info(fn).get("crs", "EPSG:4326"))  # assume WGS84
+    if source_crs_str := read_info(fn).get("crs"):
+        source_crs = CRS(source_crs_str)
+    elif crs:
+        source_crs = crs
+    else:  # assume WGS84
+        source_crs = CRS("EPSG:4326")
 
     if mask is not None:
         bbox = mask

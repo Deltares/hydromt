@@ -5,6 +5,19 @@ Change log predefined datasets
 deltares_data
 =============
 
+version: 2023.12
+-----------------
+
+changed
+^^^^^^^
+- Updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
+
+added
+^^^^^
+- Added waterdemand pcr_globwb dataset
+- Added GADM 4.1 as FlatGeoBuff files to deltares_data catalog (#686)
+
+
 version: 2023.2
 ----------------
 

@@ -16,6 +16,7 @@ import xarray as xr
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
+from shapely import box
 
 import hydromt
 from hydromt import _compat as compat
@@ -28,6 +29,7 @@ from hydromt.data_adapter import (
 from hydromt.data_catalog import DataCatalog
 from hydromt.exceptions import NoDataException
 from hydromt.gis_utils import to_geographic_bbox
+from hydromt.nodata import NoDataStrategy
 from hydromt.typing import ErrorHandleMethod
 
 TESTDATADIR = join(dirname(abspath(__file__)), "data")
@@ -76,10 +78,19 @@ def test_rasterdataset(rioda, tmpdir):
     geom = rioda.raster.box
     da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
     assert np.all(da1 == rioda_utm)
-    with pytest.raises(FileNotFoundError, match="No such file"):
+    with pytest.raises(FileNotFoundError):
         data_catalog.get_rasterdataset("no_file.tif")
-    with pytest.raises(NoDataException, match="RasterDataset: No data within"):
+    with pytest.raises(NoDataException):
         data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
+
+    da1 = data_catalog.get_rasterdataset(
+        fn_tif,
+        # only really care that the bbox doesn't intersect with anythign
+        bbox=[12.5, 12.6, 12.7, 12.8],
+        handle_nodata=NoDataStrategy.IGNORE,
+    )
+
+    assert da1 is None
 
 
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
@@ -233,7 +244,6 @@ def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
-# @pytest.mark.skip()
 def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
@@ -266,6 +276,22 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     assert da3.vector.crs.to_epsg() == 4326
     with pytest.raises(FileNotFoundError, match="No such file"):
         data_catalog.get_geodataset("no_file.geojson")
+    da3 = data_catalog.get_geodataset(
+        "test.nc",
+        # only really care that the bbox doesn't intersect with anythign
+        bbox=[12.5, 12.6, 12.7, 12.8],
+        handle_nodata=NoDataStrategy.IGNORE,
+    )
+    assert da3 is None
+
+    with pytest.raises(NoDataException):
+        da3 = data_catalog.get_geodataset(
+            "test.nc",
+            # only really care that the bbox doesn't intersect with anythign
+            bbox=[12.5, 12.6, 12.7, 12.8],
+            handle_nodata=NoDataStrategy.RAISE,
+        )
+
     with tempfile.TemporaryDirectory() as td:
         # Test nc file writing to file
         GeoDatasetAdapter(fn_nc).to_file(
@@ -439,16 +465,53 @@ def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
 
 def test_geodataframe(geodf, tmpdir):
     fn_gdf = str(tmpdir.join("test.geojson"))
+    fn_shp = str(tmpdir.join("test.shp"))
     geodf.to_file(fn_gdf, driver="GeoJSON")
+    geodf.to_file(fn_shp)
     data_catalog = DataCatalog()
+    # test read geojson using total bounds
     gdf1 = data_catalog.get_geodataframe(fn_gdf, bbox=geodf.total_bounds)
     assert isinstance(gdf1, gpd.GeoDataFrame)
     assert np.all(gdf1 == geodf)
+    # test read shapefile using total bounds
+    gdf1 = data_catalog.get_geodataframe(fn_shp, bbox=geodf.total_bounds)
+    assert isinstance(gdf1, gpd.GeoDataFrame)
+    assert np.all(gdf1 == geodf)
+    # testt read shapefile using mask
+    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]})
+    gdf1 = hydromt.open_vector(fn_shp, mask=mask)
+    assert np.all(gdf1 == geodf)
+    # test read with buffer
     gdf1 = data_catalog.get_geodataframe(
-        "test.geojson", bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
+        fn_gdf, bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
     )
     assert np.all(gdf1 == geodf)
-    with pytest.raises(FileNotFoundError, match="No such file"):
+    gdf1 = data_catalog.get_geodataframe(
+        fn_shp, bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
+    )
+    assert np.all(gdf1 == geodf)
+
+    # test nodata
+    gdf1 = data_catalog.get_geodataframe(
+        fn_gdf,
+        # only really care that the bbox doesn't intersect with anythign
+        bbox=[12.5, 12.6, 12.7, 12.8],
+        predicate="within",
+        handle_nodata=NoDataStrategy.IGNORE,
+    )
+
+    assert gdf1 is None
+
+    with pytest.raises(NoDataException):
+        gdf1 = data_catalog.get_geodataframe(
+            fn_gdf,
+            # only really care that the bbox doesn't intersect with anythign
+            bbox=[12.5, 12.6, 12.7, 12.8],
+            predicate="within",
+            handle_nodata=NoDataStrategy.RAISE,
+        )
+
+    with pytest.raises(FileNotFoundError):
         data_catalog.get_geodataframe("no_file.geojson")
 
 

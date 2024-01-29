@@ -1,20 +1,21 @@
 """Utility functions for data adapters."""
-import logging
 import os
+from logging import Logger
 from os.path import isdir, join
-from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
+from hydromt.typing import Data, StrPath, Variables
+
 
 def netcdf_writer(
-    obj: Union[xr.Dataset, xr.DataArray],
-    data_root: Union[str, Path],
+    obj: Data,
+    data_root: StrPath,
     data_name: str,
-    variables: Optional[List[str]] = None,
+    variables: Optional[Variables] = None,
     encoder: str = "zlib",
 ) -> str:
     """Utiliy function for writing a xarray dataset/data array to a netcdf file.
@@ -51,8 +52,8 @@ def netcdf_writer(
 
 
 def zarr_writer(
-    obj: Union[xr.Dataset, xr.DataArray],
-    data_root: Union[str, Path],
+    obj: Data,
+    data_root: StrPath,
     data_name: str,
     **kwargs,
 ) -> str:
@@ -80,7 +81,7 @@ def zarr_writer(
 
 
 def shift_dataset_time(
-    dt: int, ds: xr.Dataset, logger: logging.Logger, time_unit: str = "s"
+    dt: int, ds: Data, logger: Logger, time_unit: str = "s"
 ) -> xr.Dataset:
     """Shifts time of a xarray dataset.
 

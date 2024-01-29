@@ -1,14 +1,13 @@
 """Implementation for the RasterDatasetAdapter."""
 from __future__ import annotations
 
-import logging
 import os
 import warnings
 from datetime import datetime
+from logging import Logger, getLogger
 from os.path import basename, join, splitext
-from typing import Dict, Optional, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyproj
@@ -21,20 +20,28 @@ from pystac import Item as StacItem
 from pystac import MediaType
 from rasterio.errors import RasterioIOError
 
+from hydromt.exceptions import NoDataException
+from hydromt.nodata import NoDataStrategy, _exec_nodata_strat
 from hydromt.typing import (
+    Bbox,
+    Data,
     ErrorHandleMethod,
+    Geom,
+    GeomBuffer,
     RasterDatasetSource,
+    StrPath,
     TimeRange,
     TotalBounds,
+    Variables,
 )
+from hydromt.utils import has_no_data
 
 from .. import gis_utils, io
-from ..nodata import NoDataStrategy, _exec_nodata_strat
 from ..raster import GEO_MAP_COORD
 from .caching import cache_vrt_tiles
 from .data_adapter import PREPROCESSORS, DataAdapter
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
 
@@ -51,7 +58,7 @@ class RasterDatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path: str,
+        path: StrPath,
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         crs: Optional[Union[int, str, dict]] = None,
@@ -179,13 +186,14 @@ class RasterDatasetAdapter(DataAdapter):
 
     def to_file(
         self,
-        data_root,
-        data_name,
-        bbox=None,
-        time_tuple=None,
-        driver=None,
-        variables=None,
-        logger=logger,
+        data_root: StrPath,
+        data_name: str,
+        bbox: Optional[Bbox] = None,
+        time_tuple: Optional[TimeRange] = None,
+        driver: Optional[str] = None,
+        variables: Optional[Variables] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
         **kwargs,
     ):
         """Save a data slice to file.
@@ -225,9 +233,13 @@ class RasterDatasetAdapter(DataAdapter):
             bbox=bbox,
             time_tuple=time_tuple,
             variables=variables,
+            handle_nodata=handle_nodata,
             logger=logger,
             single_var_as_array=variables is None,
         )
+
+        if obj is None:
+            return None
 
         read_kwargs = {}
         if driver is None:
@@ -270,52 +282,81 @@ class RasterDatasetAdapter(DataAdapter):
 
     def get_data(
         self,
-        bbox=None,
-        geom=None,
-        buffer=0,
-        zoom_level=None,
-        align=None,
-        variables=None,
-        time_tuple=None,
-        single_var_as_array=True,
-        cache_root=None,
-        logger=logger,
+        bbox: Optional[Bbox] = None,
+        geom: Optional[Geom] = None,
+        buffer: GeomBuffer = 0,
+        zoom_level: Optional[int] = None,
+        align: Optional[bool] = None,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        single_var_as_array: bool = True,
+        cache_root: Optional[StrPath] = None,
+        logger: Logger = logger,
     ):
         """Return a clipped, sliced and unified RasterDataset.
 
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
-        # load data
-        fns = self._resolve_paths(time_tuple, variables, zoom_level, geom, bbox, logger)
-        self.mark_as_used()  # mark used
-        ds = self._read_data(fns, geom, bbox, cache_root, zoom_level, logger)
-        # rename variables and parse data and attrs
-        ds = self._rename_vars(ds)
-        ds = self._validate_spatial_dims(ds)
-        ds = self._set_crs(ds, logger)
-        ds = self._set_nodata(ds)
-        ds = self._shift_time(ds, logger)
-        # slice data
-        ds = RasterDatasetAdapter._slice_data(
-            ds, variables, geom, bbox, buffer, align, time_tuple, logger=logger
-        )
-        # uniformize data
-        ds = self._apply_unit_conversions(ds, logger)
-        ds = self._set_metadata(ds)
-        # return array if single var and single_var_as_array
-        return self._single_var_as_array(ds, single_var_as_array, variables)
+        try:
+            # load data
+            fns = self._resolve_paths(
+                time_tuple, variables, zoom_level, geom, bbox, logger
+            )
+            self.mark_as_used()  # mark used
+            ds = self._read_data(
+                fns,
+                geom,
+                bbox,
+                cache_root,
+                zoom_level=zoom_level,
+                logger=logger,
+            )
+            if has_no_data(ds):
+                raise NoDataException()
+            # rename variables and parse data and attrs
+            ds = self._rename_vars(ds)
+            ds = self._validate_spatial_dims(ds)
+            ds = self._set_crs(ds, logger)
+            ds = self._set_nodata(ds)
+            ds = self._shift_time(ds, logger)
+            # slice data
+            ds = RasterDatasetAdapter._slice_data(
+                ds,
+                variables,
+                geom,
+                bbox,
+                buffer,
+                align,
+                time_tuple,
+                logger=logger,
+            )
+            if has_no_data(ds):
+                raise NoDataException()
+
+            # uniformize data
+            ds = self._apply_unit_conversions(ds, logger)
+            ds = self._set_metadata(ds)
+            # return array if single var and single_var_as_array
+            return self._single_var_as_array(ds, single_var_as_array, variables)
+        except NoDataException:
+            _exec_nodata_strat(
+                f"No data was read from source: {self.name}",
+                strategy=handle_nodata,
+                logger=logger,
+            )
 
     def _resolve_paths(
         self,
-        time_tuple: Optional[tuple] = None,
-        variables: Optional[list] = None,
+        time_tuple: Optional[TimeRange] = None,
+        variables: Optional[Variables] = None,
         zoom_level: Optional[int] = 0,
-        geom: Optional[gpd.GeoSeries] = None,
-        bbox: Optional[list] = None,
-        logger=logger,
+        geom: Optional[Geom] = None,
+        bbox: Optional[Bbox] = None,
+        logger: Logger = logger,
     ):
-        if zoom_level is not None and "{zoom_level}" in self.path:
+        if zoom_level is not None and "{zoom_level}" in str(self.path):
             zoom_level = self._parse_zoom_level(zoom_level, geom, bbox, logger=logger)
 
         # resolve path based on time, zoom level and/or variables
@@ -326,7 +367,15 @@ class RasterDatasetAdapter(DataAdapter):
         )
         return fns
 
-    def _read_data(self, fns, geom, bbox, cache_root, zoom_level=None, logger=logger):
+    def _read_data(
+        self,
+        fns: List[StrPath],
+        geom: Optional[Geom],
+        bbox: Optional[Bbox],
+        cache_root: Optional[StrPath],
+        zoom_level: Optional[int] = None,
+        logger: Logger = logger,
+    ):
         kwargs = self.driver_kwargs.copy()
 
         # read using various readers
@@ -363,7 +412,7 @@ class RasterDatasetAdapter(DataAdapter):
                 fns = fns_cached
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
-            if zoom_level is not None and "{zoom_level}" not in self.path:
+            if zoom_level is not None and "{zoom_level}" not in str(self.path):
                 zls_dict, crs = self._get_zoom_levels_and_crs(fns[0], logger=logger)
                 zoom_level = self._parse_zoom_level(
                     zoom_level, geom, bbox, zls_dict, crs, logger=logger
@@ -374,14 +423,17 @@ class RasterDatasetAdapter(DataAdapter):
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
 
-        return ds
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
-    def _rename_vars(self, ds):
+    def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
         ds = ds.rename(rm)
         return ds
 
-    def _validate_spatial_dims(self, ds):
+    def _validate_spatial_dims(self, ds: Data) -> Data:
         if GEO_MAP_COORD in ds.data_vars:
             ds = ds.set_coords(GEO_MAP_COORD)
         try:
@@ -396,7 +448,7 @@ class RasterDatasetAdapter(DataAdapter):
             )
         return ds
 
-    def _set_crs(self, ds, logger=logger):
+    def _set_crs(self, ds: Data, logger: Logger = logger) -> Data:
         # set crs
         if ds.raster.crs is None and self.crs is not None:
             ds.raster.set_crs(self.crs)
@@ -415,15 +467,14 @@ class RasterDatasetAdapter(DataAdapter):
 
     @staticmethod
     def _slice_data(
-        ds,
-        variables=None,
-        geom=None,
-        bbox=None,
-        buffer=0,
-        align=None,
-        time_tuple=None,
-        handle_nodata=NoDataStrategy.RAISE,
-        logger=logger,
+        ds: Data,
+        variables: Optional[Variables] = None,
+        geom: Optional[Geom] = None,
+        bbox: Optional[Bbox] = None,
+        buffer: GeomBuffer = 0,
+        align: Optional[bool] = None,
+        time_tuple: Optional[TimeRange] = None,
+        logger: Logger = logger,
     ):
         """Return a RasterDataset sliced in both spatial and temporal dimensions.
 
@@ -445,8 +496,6 @@ class RasterDatasetAdapter(DataAdapter):
         time_tuple : Tuple of datetime, optional
             A tuple consisting of the lower and upper bounds of time that the
             result should contain
-        handle_nodata: NoDataStrategy, optional
-            How to handle no data values, by default NoDataStrategy.RAISE
 
         Returns
         -------
@@ -470,7 +519,6 @@ class RasterDatasetAdapter(DataAdapter):
             ds = RasterDatasetAdapter._slice_temporal_dimension(
                 ds,
                 time_tuple,
-                handle_nodata,
                 logger=logger,
             )
         if geom is not None or bbox is not None:
@@ -480,12 +528,15 @@ class RasterDatasetAdapter(DataAdapter):
                 bbox,
                 buffer,
                 align,
-                handle_nodata,
                 logger=logger,
             )
-        return ds
 
-    def _shift_time(self, ds, logger=logger):
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
+
+    def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
         dt = self.unit_add.get("time", 0)
         if (
             dt != 0
@@ -501,7 +552,9 @@ class RasterDatasetAdapter(DataAdapter):
 
     @staticmethod
     def _slice_temporal_dimension(
-        ds, time_tuple, handle_nodata=NoDataStrategy.RAISE, logger=logger
+        ds: Data,
+        time_tuple: Optional[TimeRange],
+        logger: Logger = logger,
     ):
         if (
             "time" in ds.dims
@@ -511,21 +564,19 @@ class RasterDatasetAdapter(DataAdapter):
             if time_tuple is not None:
                 logger.debug(f"Slicing time dim {time_tuple}")
                 ds = ds.sel({"time": slice(*time_tuple)})
-                if ds.time.size == 0:
-                    _exec_nodata_strat(
-                        "Time slice out of range.", handle_nodata, logger
-                    )
-        return ds
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
     @staticmethod
     def _slice_spatial_dimensions(
-        ds,
-        geom,
-        bbox,
-        buffer,
-        align,
-        handle_nodata=NoDataStrategy.RAISE,
-        logger=logger,
+        ds: Data,
+        geom: Optional[Geom],
+        bbox: Optional[Bbox],
+        buffer: GeomBuffer,
+        align: Optional[bool],
+        logger: Logger = logger,
     ):
         # make sure bbox is in data crs
         crs = ds.raster.crs
@@ -545,16 +596,20 @@ class RasterDatasetAdapter(DataAdapter):
             bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
             ds = ds.raster.clip_bbox(bbox, buffer=buffer, align=align)
-            if np.any(np.array(ds.raster.shape) < 2):
-                _exec_nodata_strat(
-                    "RasterDataset: No data within spatial domain",
-                    handle_nodata,
-                    logger,
+            # if np.any(np.array(ds.raster.shape) < 2):
+            # check if bbox is fully covered
+            w, s, e, n = ds.raster.bounds
+            if not (w <= bbox[0] and s <= bbox[1] and e >= bbox[2] and n >= bbox[3]):
+                logger.warning(
+                    f"Dataset does [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
                 )
 
-        return ds
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
-    def _apply_unit_conversions(self, ds, logger=logger):
+    def _apply_unit_conversions(self, ds: Data, logger=logger):
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
@@ -595,7 +650,9 @@ class RasterDatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
-    def _get_zoom_levels_and_crs(self, fn=None, logger=logger):
+    def _get_zoom_levels_and_crs(
+        self, fn: Optional[StrPath] = None, logger=logger
+    ) -> Tuple[int, int]:
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         if self.zoom_levels is not None and self.crs is not None:
             return self.zoom_levels, self.crs
@@ -625,10 +682,10 @@ class RasterDatasetAdapter(DataAdapter):
     def _parse_zoom_level(
         self,
         zoom_level: Union[int, Tuple[Union[int, float], str]],
-        geom: Optional[gpd.GeoSeries] = None,
-        bbox: Optional[list] = None,
+        geom: Optional[Geom] = None,
+        bbox: Optional[Bbox] = None,
         zls_dict: Optional[Dict[int, float]] = None,
-        dst_crs: pyproj.CRS = None,
+        dst_crs: Optional[pyproj.CRS] = None,
         logger=logger,
     ) -> Optional[int]:
         """Return overview level of data corresponding to zoom level.
@@ -737,7 +794,10 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bbox, crs
 
-    def get_time_range(self, detect=True) -> TimeRange:
+    def get_time_range(
+        self,
+        detect=True,
+    ) -> TimeRange:
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
@@ -797,7 +857,10 @@ class RasterDatasetAdapter(DataAdapter):
 
         return bounds, crs
 
-    def detect_time_range(self, ds=None) -> TimeRange:
+    def detect_time_range(
+        self,
+        ds=None,
+    ) -> TimeRange:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched accodring to the settings in the
