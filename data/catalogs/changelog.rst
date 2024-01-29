@@ -5,6 +5,14 @@ Change log predefined datasets
 deltares_data
 =============
 
+version: 2024.1.29
+------------------
+
+added
+^^^^^
+- GRDC dataset
+
+
 version: 2023.12
 -----------------
 
