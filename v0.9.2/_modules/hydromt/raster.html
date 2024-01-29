@@ -1211,7 +1211,7 @@ document.write(`
             <span class="p">)</span>
         <span class="n">grid_map_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;x_dim&quot;</span><span class="p">:</span> <span class="n">x_dim</span><span class="p">,</span> <span class="s2">&quot;y_dim&quot;</span><span class="p">:</span> <span class="n">y_dim</span><span class="p">})</span>
         <span class="c1"># reset and write grid mapping attributes</span>
-        <span class="n">obj_out</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">GEO_MAP_COORD</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="n">obj_out</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">GEO_MAP_COORD</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
         <span class="n">obj_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="o">**</span><span class="n">grid_map_attrs</span><span class="p">)</span>
         <span class="c1"># set grid mapping attribute for each data variable</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj_out</span><span class="p">,</span> <span class="s2">&quot;data_vars&quot;</span><span class="p">):</span>

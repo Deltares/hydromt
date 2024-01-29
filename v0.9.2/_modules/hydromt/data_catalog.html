@@ -481,6 +481,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pystac</span> <span class="kn">import</span> <span class="n">Catalog</span> <span class="k">as</span> <span class="n">StacCatalog</span>
 <span class="kn">from</span> <span class="nn">pystac</span> <span class="kn">import</span> <span class="n">CatalogType</span><span class="p">,</span> <span class="n">MediaType</span>
 
+<span class="kn">from</span> <span class="nn">hydromt.nodata</span> <span class="kn">import</span> <span class="n">NoDataException</span><span class="p">,</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">_exec_nodata_strat</span>
 <span class="kn">from</span> <span class="nn">hydromt.typing</span> <span class="kn">import</span> <span class="n">Bbox</span><span class="p">,</span> <span class="n">ErrorHandleMethod</span><span class="p">,</span> <span class="n">SourceSpecDict</span><span class="p">,</span> <span class="n">TimeRange</span>
 <span class="kn">from</span> <span class="nn">hydromt.utils</span> <span class="kn">import</span> <span class="n">partition_dictionaries</span>
 
@@ -494,8 +495,6 @@ document.write(`
     <span class="n">RasterDatasetAdapter</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.data_adapter.caching</span> <span class="kn">import</span> <span class="n">HYDROMT_DATADIR</span><span class="p">,</span> <span class="n">_copyfile</span><span class="p">,</span> <span class="n">_uri_validator</span>
-<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">NoDataException</span>
-<span class="kn">from</span> <span class="nn">.nodata</span> <span class="kn">import</span> <span class="n">NoDataStrategy</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -1632,6 +1631,7 @@ document.write(`
         <span class="n">unit_conversion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">meta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">append</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Export a data slice of each dataset and a data_catalog.yml file to disk.</span>
 
@@ -1725,10 +1725,15 @@ document.write(`
                                 <span class="n">variables</span><span class="o">=</span><span class="n">source_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                                 <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
                                 <span class="n">time_tuple</span><span class="o">=</span><span class="n">time_tuple</span><span class="p">,</span>
+                                <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
                                 <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
                             <span class="p">)</span>
                         <span class="k">except</span> <span class="n">NoDataException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> file contains no data: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">_exec_nodata_strat</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> file contains no data: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                <span class="n">handle_nodata</span><span class="p">,</span>
+                                <span class="n">logger</span><span class="p">,</span>
+                            <span class="p">)</span>
                             <span class="k">continue</span>
                         <span class="c1"># update path &amp; driver and remove kwargs</span>
                         <span class="c1"># and rename in output sources</span>
@@ -1777,7 +1782,7 @@ document.write(`
         <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">buffer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
         <span class="n">align</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1785,7 +1790,7 @@ document.write(`
         <span class="n">provider</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a clipped, sliced and unified RasterDataset.</span>
 
 <span class="sd">        To clip the data to the area of interest, provide a `bbox` or `geom`,</span>
@@ -1817,6 +1822,8 @@ document.write(`
 <span class="sd">            (&lt;zoom_resolution&gt;, &lt;unit&gt;), e.g., (1000, &#39;meter&#39;)</span>
 <span class="sd">        buffer : int, optional</span>
 <span class="sd">            Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.</span>
+<span class="sd">        handle_nodata: NoDataStrategy, optional</span>
+<span class="sd">            What to do if no data can be found.</span>
 <span class="sd">        align : float, optional</span>
 <span class="sd">            Resolution to align the bounding box, by default None</span>
 <span class="sd">        variables : str or list of str, optional.</span>
@@ -1839,7 +1846,9 @@ document.write(`
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        obj: xarray.Dataset or xarray.DataArray</span>
-<span class="sd">            RasterDataset</span>
+<span class="sd">            RasterDataset. If no data is found and handle_nodata is set to IGNORE None</span>
+<span class="sd">            will be returned. if it is set to RAISE and exception will be raised in that</span>
+<span class="sd">            situation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">data_like</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">_parse_data_like_dict</span><span class="p">(</span>
@@ -1865,12 +1874,18 @@ document.write(`
                 <span class="n">buffer</span><span class="p">,</span>
                 <span class="n">align</span><span class="p">,</span>
                 <span class="n">time_tuple</span><span class="p">,</span>
-                <span class="n">handle_nodata</span><span class="p">,</span>
                 <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">return</span> <span class="n">RasterDatasetAdapter</span><span class="o">.</span><span class="n">_single_var_as_array</span><span class="p">(</span>
+            <span class="k">if</span> <span class="n">data_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_exec_nodata_strat</span><span class="p">(</span>
+                    <span class="s2">&quot;No data was left after slicing.&quot;</span><span class="p">,</span>
+                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">RasterDatasetAdapter</span><span class="o">.</span><span class="n">_single_var_as_array</span><span class="p">(</span>
                 <span class="n">data_like</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variables</span>
             <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ds</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown raster data type &quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 
@@ -1878,13 +1893,13 @@ document.write(`
             <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
             <span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span>
             <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span>
-            <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="n">zoom_level</span><span class="o">=</span><span class="n">zoom_level</span><span class="p">,</span>
             <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
             <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
             <span class="n">time_tuple</span><span class="o">=</span><span class="n">time_tuple</span><span class="p">,</span>
             <span class="n">single_var_as_array</span><span class="o">=</span><span class="n">single_var_as_array</span><span class="p">,</span>
             <span class="n">cache_root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">obj</span></div>
@@ -1898,13 +1913,13 @@ document.write(`
         <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">buffer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
         <span class="n">provider</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a clipped and unified GeoDataFrame (vector).</span>
 
 <span class="sd">        To clip the data to the area of interest, provide a `bbox` or `geom`,</span>
@@ -1949,8 +1964,10 @@ document.write(`
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        gdf: geopandas.GeoDataFrame</span>
-<span class="sd">            GeoDataFrame</span>
+<span class="sd">        gdf: Optional[geopandas.GeoDataFrame]</span>
+<span class="sd">            GeoDataFrame. If no data is found and handle_nodata is set to IGNORE None</span>
+<span class="sd">            will be returned. if it is set to RAISE and exception will be raised in that</span>
+<span class="sd">            situation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">data_like</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">_parse_data_like_dict</span><span class="p">(</span>
@@ -1967,16 +1984,23 @@ document.write(`
                 <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">GeoDataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
+            <span class="n">data_like</span> <span class="o">=</span> <span class="n">GeoDataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
                 <span class="n">data_like</span><span class="p">,</span>
                 <span class="n">variables</span><span class="p">,</span>
                 <span class="n">geom</span><span class="p">,</span>
                 <span class="n">bbox</span><span class="p">,</span>
                 <span class="n">buffer</span><span class="p">,</span>
                 <span class="n">predicate</span><span class="p">,</span>
-                <span class="n">handle_nodata</span><span class="p">,</span>
                 <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_exec_nodata_strat</span><span class="p">(</span>
+                    <span class="s2">&quot;No data was left after slicing.&quot;</span><span class="p">,</span>
+                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">data_like</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown vector data type &quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 
@@ -2035,6 +2059,8 @@ document.write(`
 <span class="sd">            A geometry defining the area of interest.</span>
 <span class="sd">        buffer : float, optional</span>
 <span class="sd">            Buffer around the `bbox` or `geom` area of interest in meters. By default 0.</span>
+<span class="sd">        handle_nodata: NoDataStrategy Optional</span>
+<span class="sd">            what should happen if the requested data set is empty. RAISE by default</span>
 <span class="sd">        predicate : optional</span>
 <span class="sd">            If predicate is provided, the GeoDataFrame is filtered by testing</span>
 <span class="sd">            the predicate function against each item. Requires bbox or mask.</span>
@@ -2081,9 +2107,14 @@ document.write(`
                 <span class="n">buffer</span><span class="p">,</span>
                 <span class="n">predicate</span><span class="p">,</span>
                 <span class="n">time_tuple</span><span class="p">,</span>
-                <span class="n">handle_nodata</span><span class="p">,</span>
                 <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_exec_nodata_strat</span><span class="p">(</span>
+                    <span class="s2">&quot;No data was left after slicing.&quot;</span><span class="p">,</span>
+                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">return</span> <span class="n">GeoDatasetAdapter</span><span class="o">.</span><span class="n">_single_var_as_array</span><span class="p">(</span>
                 <span class="n">data_like</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variables</span>
             <span class="p">)</span>
@@ -2107,6 +2138,7 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_like</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SourceSpecDict</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
         <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">single_var_as_array</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">provider</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2167,6 +2199,12 @@ document.write(`
                 <span class="n">time_tuple</span><span class="p">,</span>
                 <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_exec_nodata_strat</span><span class="p">(</span>
+                    <span class="s2">&quot;No data was left after slicing.&quot;</span><span class="p">,</span>
+                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">return</span> <span class="n">DatasetAdapter</span><span class="o">.</span><span class="n">_single_var_as_array</span><span class="p">(</span>
                 <span class="n">data_like</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variables</span>
             <span class="p">)</span>
@@ -2177,6 +2215,7 @@ document.write(`
             <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
             <span class="n">time_tuple</span><span class="o">=</span><span class="n">time_tuple</span><span class="p">,</span>
             <span class="n">single_var_as_array</span><span class="o">=</span><span class="n">single_var_as_array</span><span class="p">,</span>
+            <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">obj</span>
 
@@ -2208,6 +2247,8 @@ document.write(`
 <span class="sd">        time_tuple : tuple of str, datetime, optional</span>
 <span class="sd">            Start and end date of period of interest. By default the entire time period</span>
 <span class="sd">            of the dataset is returned.</span>
+<span class="sd">        handle_nodata: NoDataStrategy Optional</span>
+<span class="sd">            what should happen if the requested data set is empty. RAISE by default</span>
 <span class="sd">        **kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the `DataframeAdapter`</span>
 <span class="sd">            function. Only used if `data_like` is a path to a tabular data file.</span>
@@ -2215,7 +2256,9 @@ document.write(`
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        pd.DataFrame</span>
-<span class="sd">            Tabular data</span>
+<span class="sd">            Tabular data. If no data is found and handle_nodata is set to IGNORE None</span>
+<span class="sd">            will be returned. if it is set to RAISE and exception will be raised in that</span>
+<span class="sd">            situation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">data_like</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">_parse_data_like_dict</span><span class="p">(</span>
@@ -2228,19 +2271,27 @@ document.write(`
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;provider&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                     <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">})</span>
-                <span class="n">source</span> <span class="o">=</span> <span class="n">DataFrameAdapter</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_like</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="n">DataFrameAdapter</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">data_like</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">DataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
-                <span class="n">data_like</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">time_tuple</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">DataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
+                <span class="n">data_like</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">time_tuple</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_exec_nodata_strat</span><span class="p">(</span>
+                    <span class="s2">&quot;No data was left after slicing.&quot;</span><span class="p">,</span>
+                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">df</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown tabular data type &quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 
         <span class="n">obj</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
             <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
             <span class="n">time_tuple</span><span class="o">=</span><span class="n">time_tuple</span><span class="p">,</span>
+            <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">obj</span></div>

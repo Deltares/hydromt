@@ -446,11 +446,11 @@ document.write(`
                   
   <h1>Source code for hydromt.data_adapter.geodataset</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Implementation for the geodataset DataAdapter.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">basename</span><span class="p">,</span> <span class="n">splitext</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -462,16 +462,28 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pystac</span> <span class="kn">import</span> <span class="n">Item</span> <span class="k">as</span> <span class="n">StacItem</span>
 <span class="kn">from</span> <span class="nn">pystac</span> <span class="kn">import</span> <span class="n">MediaType</span>
 
-<span class="kn">from</span> <span class="nn">hydromt.exceptions</span> <span class="kn">import</span> <span class="n">NoDataException</span>
-<span class="kn">from</span> <span class="nn">hydromt.typing</span> <span class="kn">import</span> <span class="n">ErrorHandleMethod</span><span class="p">,</span> <span class="n">GeoDatasetSource</span><span class="p">,</span> <span class="n">TimeRange</span><span class="p">,</span> <span class="n">TotalBounds</span>
+<span class="kn">from</span> <span class="nn">hydromt.nodata</span> <span class="kn">import</span> <span class="n">NoDataException</span><span class="p">,</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">_exec_nodata_strat</span>
+<span class="kn">from</span> <span class="nn">hydromt.typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Bbox</span><span class="p">,</span>
+    <span class="n">Data</span><span class="p">,</span>
+    <span class="n">ErrorHandleMethod</span><span class="p">,</span>
+    <span class="n">GeoDatasetSource</span><span class="p">,</span>
+    <span class="n">Geom</span><span class="p">,</span>
+    <span class="n">GeomBuffer</span><span class="p">,</span>
+    <span class="n">Predicate</span><span class="p">,</span>
+    <span class="n">StrPath</span><span class="p">,</span>
+    <span class="n">TimeRange</span><span class="p">,</span>
+    <span class="n">TotalBounds</span><span class="p">,</span>
+    <span class="n">Variables</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">hydromt.utils</span> <span class="kn">import</span> <span class="n">has_no_data</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">gis_utils</span><span class="p">,</span> <span class="n">io</span>
-<span class="kn">from</span> <span class="nn">..nodata</span> <span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">_exec_nodata_strat</span>
 <span class="kn">from</span> <span class="nn">..raster</span> <span class="kn">import</span> <span class="n">GEO_MAP_COORD</span>
 <span class="kn">from</span> <span class="nn">.data_adapter</span> <span class="kn">import</span> <span class="n">DataAdapter</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">netcdf_writer</span><span class="p">,</span> <span class="n">shift_dataset_time</span><span class="p">,</span> <span class="n">zarr_writer</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GeoDatasetAdapter&quot;</span><span class="p">,</span> <span class="s2">&quot;GeoDatasetSource&quot;</span><span class="p">]</span>
 
@@ -491,7 +503,7 @@ document.write(`
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDatasetAdapter.html#hydromt.data_adapter.GeoDatasetAdapter.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span>
         <span class="n">driver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">filesystem</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -614,16 +626,16 @@ document.write(`
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDatasetAdapter.to_file.html#hydromt.data_adapter.GeoDatasetAdapter.to_file">[docs]</a>
     <span class="k">def</span> <span class="nf">to_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">data_root</span><span class="p">,</span>
-        <span class="n">data_name</span><span class="p">,</span>
-        <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">time_tuple</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">data_root</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span>
+        <span class="n">data_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">driver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">StrPath</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save a data slice to file.</span>
 
 <span class="sd">        Parameters</span>
@@ -663,6 +675,10 @@ document.write(`
             <span class="n">single_var_as_array</span><span class="o">=</span><span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="c1"># we&#39;ll handle the correct strategy in the except clause</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
         <span class="n">read_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># much better for mem/storage/processing if dtypes are set correctly</span>
@@ -679,7 +695,10 @@ document.write(`
         <span class="k">if</span> <span class="n">driver</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">driver</span> <span class="o">==</span> <span class="s2">&quot;netcdf&quot;</span><span class="p">:</span>
             <span class="c1"># always write netcdf</span>
             <span class="n">fn_out</span> <span class="o">=</span> <span class="n">netcdf_writer</span><span class="p">(</span>
-                <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">data_root</span><span class="o">=</span><span class="n">data_root</span><span class="p">,</span> <span class="n">data_name</span><span class="o">=</span><span class="n">data_name</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="n">variables</span>
+                <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span>
+                <span class="n">data_root</span><span class="o">=</span><span class="n">data_root</span><span class="p">,</span>
+                <span class="n">data_name</span><span class="o">=</span><span class="n">data_name</span><span class="p">,</span>
+                <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">driver</span> <span class="o">==</span> <span class="s2">&quot;zarr&quot;</span><span class="p">:</span>
             <span class="n">fn_out</span> <span class="o">=</span> <span class="n">zarr_writer</span><span class="p">(</span>
@@ -695,53 +714,70 @@ document.write(`
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDatasetAdapter.get_data.html#hydromt.data_adapter.GeoDatasetAdapter.get_data">[docs]</a>
     <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">buffer</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">time_tuple</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">single_var_as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-    <span class="p">):</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GeomBuffer</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="p">:</span> <span class="n">Predicate</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Variables</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">single_var_as_array</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Data</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a clipped, sliced and unified GeoDataset.</span>
 
 <span class="sd">        For a detailed description see:</span>
 <span class="sd">        :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataset`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># load data</span>
-        <span class="n">fns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_paths</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">time_tuple</span><span class="p">)</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_data</span><span class="p">(</span><span class="n">fns</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mark_as_used</span><span class="p">()</span>  <span class="c1"># mark used</span>
-        <span class="c1"># rename variables and parse data and attrs</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_vars</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_spatial_coords</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_nodata</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shift_time</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-        <span class="c1"># slice</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">GeoDatasetAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
-            <span class="n">ds</span><span class="p">,</span>
-            <span class="n">variables</span><span class="p">,</span>
-            <span class="n">geom</span><span class="p">,</span>
-            <span class="n">bbox</span><span class="p">,</span>
-            <span class="n">buffer</span><span class="p">,</span>
-            <span class="n">predicate</span><span class="p">,</span>
-            <span class="n">time_tuple</span><span class="p">,</span>
-            <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
-            <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="c1"># uniformize</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_unit_conversion</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_metadata</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
-        <span class="c1"># return array if single var and single_var_as_array</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_var_as_array</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># load data</span>
+            <span class="n">fns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_paths</span><span class="p">(</span><span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span> <span class="n">time_tuple</span><span class="o">=</span><span class="n">time_tuple</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mark_as_used</span><span class="p">()</span>  <span class="c1"># mark used</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_data</span><span class="p">(</span><span class="n">fns</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">()</span>
+
+            <span class="c1"># rename variables and parse data and attrs</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_vars</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_spatial_coords</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_nodata</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shift_time</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+            <span class="c1"># slice</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">GeoDatasetAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
+                <span class="n">ds</span><span class="p">,</span>
+                <span class="n">variables</span><span class="p">,</span>
+                <span class="n">geom</span><span class="p">,</span>
+                <span class="n">bbox</span><span class="p">,</span>
+                <span class="n">buffer</span><span class="p">,</span>
+                <span class="n">predicate</span><span class="p">,</span>
+                <span class="n">time_tuple</span><span class="p">,</span>
+                <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">()</span>
+
+            <span class="c1"># uniformize</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_unit_conversion</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_metadata</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="c1"># return array if single var and single_var_as_array</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_var_as_array</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NoDataException</span><span class="p">:</span>
+            <span class="n">_exec_nodata_strat</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No data was read from source: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+                <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
 
 
     <span class="k">def</span> <span class="nf">_read_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">fns</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
-    <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">StrPath</span><span class="p">],</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver_kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;vector&quot;</span><span class="p">,</span> <span class="s2">&quot;zarr&quot;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -757,20 +793,17 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GeoDataset: Driver </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="si">}</span><span class="s2"> unknown&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">handle_nodata</span> <span class="o">==</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No data was read from files </span><span class="si">{</span><span class="n">fns</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">handle_nodata</span> <span class="o">==</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no data was found at </span><span class="si">{</span><span class="n">fns</span><span class="si">}</span><span class="s2">. skipping...&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">ds</span>
 
-    <span class="k">def</span> <span class="nf">_rename_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_rename_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
         <span class="n">rm</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">}</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">rm</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ds</span>
 
-    <span class="k">def</span> <span class="nf">_validate_spatial_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_validate_spatial_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">GEO_MAP_COORD</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">set_coords</span><span class="p">(</span><span class="n">GEO_MAP_COORD</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -787,7 +820,7 @@ document.write(`
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">ds</span>
 
-    <span class="k">def</span> <span class="nf">_set_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
         <span class="c1"># set crs</span>
         <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
@@ -806,16 +839,15 @@ document.write(`
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_slice_data</span><span class="p">(</span>
-        <span class="n">ds</span><span class="p">,</span>
-        <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">buffer</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
-        <span class="n">time_tuple</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-    <span class="p">):</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Variables</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GeomBuffer</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="p">:</span> <span class="n">Predicate</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Data</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Slice the dataset in space and time.</span>
 
 <span class="sd">        Arguments</span>
@@ -834,8 +866,6 @@ document.write(`
 <span class="sd">        predicate : str, optional</span>
 <span class="sd">            Predicate used to filter the GeoDataFrame, see</span>
 <span class="sd">            :py:func:`hydromt.gis_utils.filter_gdf` for details.</span>
-<span class="sd">        handle_nodata : NoDataStrategy, optional</span>
-<span class="sd">            How to handle no data values. By default NoDataStrategy.RAISE.</span>
 <span class="sd">        time_tuple : tuple of str, datetime, optional</span>
 <span class="sd">            Start and end date of period of interest. By default the entire time period</span>
 <span class="sd">            of the dataset is returned.</span>
@@ -860,40 +890,51 @@ document.write(`
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">variables</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">time_tuple</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">GeoDatasetAdapter</span><span class="o">.</span><span class="n">_slice_temporal_dimension</span><span class="p">(</span>
-                <span class="n">ds</span><span class="p">,</span> <span class="n">time_tuple</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
+                <span class="n">ds</span><span class="p">,</span> <span class="n">time_tuple</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">geom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">GeoDatasetAdapter</span><span class="o">.</span><span class="n">_slice_spatial_dimension</span><span class="p">(</span>
-                <span class="n">ds</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">predicate</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
+                <span class="n">ds</span><span class="p">,</span>
+                <span class="n">geom</span><span class="p">,</span>
+                <span class="n">bbox</span><span class="p">,</span>
+                <span class="n">buffer</span><span class="p">,</span>
+                <span class="n">predicate</span><span class="p">,</span>
+                <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">ds</span>
+        <span class="k">if</span> <span class="n">has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ds</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_slice_spatial_dimension</span><span class="p">(</span>
-        <span class="n">ds</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">predicate</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
-    <span class="p">):</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span>
+        <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">],</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">],</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GeomBuffer</span><span class="p">],</span>
+        <span class="n">predicate</span><span class="p">:</span> <span class="n">Predicate</span><span class="p">,</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Data</span><span class="p">]:</span>
         <span class="n">geom</span> <span class="o">=</span> <span class="n">gis_utils</span><span class="o">.</span><span class="n">parse_geom_bbox_buffer</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
         <span class="n">bbox_str</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">geom</span><span class="o">.</span><span class="n">total_bounds</span><span class="p">])</span>
         <span class="n">epsg</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Clip </span><span class="si">{</span><span class="n">predicate</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">bbox_str</span><span class="si">}</span><span class="s2">] (EPSG:</span><span class="si">{</span><span class="n">epsg</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">clip_geom</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">handle_nodata</span> <span class="o">==</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">:</span>
-                <span class="n">_exec_nodata_strat</span><span class="p">(</span>
-                    <span class="s2">&quot;No data within spatial domain.&quot;</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">,</span> <span class="n">logger</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">handle_nodata</span> <span class="o">==</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No data within spacial domain. skipping...&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ds</span>
+        <span class="k">if</span> <span class="n">has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ds</span>
 
-    <span class="k">def</span> <span class="nf">_shift_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_shift_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
         <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_add</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">shift_dataset_time</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_slice_temporal_dimension</span><span class="p">(</span>
-        <span class="n">ds</span><span class="p">,</span> <span class="n">time_tuple</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
-    <span class="p">):</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">],</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Data</span><span class="p">]:</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span>
             <span class="ow">and</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span>
@@ -901,18 +942,12 @@ document.write(`
         <span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Slicing time dim </span><span class="si">{</span><span class="n">time_tuple</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="o">*</span><span class="n">time_tuple</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">handle_nodata</span> <span class="o">==</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">:</span>
-                    <span class="n">_exec_nodata_strat</span><span class="p">(</span>
-                        <span class="s2">&quot;GeoDataset: Time slice out of range.&quot;</span><span class="p">,</span>
-                        <span class="n">handle_nodata</span><span class="p">,</span>
-                        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="k">elif</span> <span class="n">handle_nodata</span> <span class="o">==</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;GeoDataset: Time slice out of range.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ds</span>
+        <span class="k">if</span> <span class="n">has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ds</span>
 
-    <span class="k">def</span> <span class="nf">_set_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
                 <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
@@ -923,7 +958,7 @@ document.write(`
         <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ds</span>
 
-    <span class="k">def</span> <span class="nf">_set_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="n">nodata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
@@ -935,7 +970,7 @@ document.write(`
                     <span class="n">ds</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="n">mv</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ds</span>
 
-    <span class="k">def</span> <span class="nf">_apply_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_apply_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
         <span class="n">unit_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_mult</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_add</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">unit_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">unit_names</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unit_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -955,7 +990,10 @@ document.write(`
 
 <div class="viewcode-block" id="GeoDatasetAdapter.get_bbox">
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDatasetAdapter.get_bbox.html#hydromt.data_adapter.GeoDatasetAdapter.get_bbox">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TotalBounds</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_bbox</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">detect</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TotalBounds</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the bounding box and espg code of the dataset.</span>
 
 <span class="sd">        if the bounding box is not set and detect is True,</span>
@@ -986,7 +1024,10 @@ document.write(`
 
 <div class="viewcode-block" id="GeoDatasetAdapter.get_time_range">
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDatasetAdapter.get_time_range.html#hydromt.data_adapter.GeoDatasetAdapter.get_time_range">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_time_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TimeRange</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_time_range</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">detect</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect the time range of the dataset.</span>
 
 <span class="sd">        if the time range is not set and detect is True,</span>
@@ -1017,8 +1058,8 @@ document.write(`
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDatasetAdapter.detect_bbox.html#hydromt.data_adapter.GeoDatasetAdapter.detect_bbox">[docs]</a>
     <span class="k">def</span> <span class="nf">detect_bbox</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">ds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TotalBounds</span><span class="p">:</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Data</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TotalBounds</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect the bounding box and crs of the dataset.</span>
 
 <span class="sd">        If no dataset is provided, it will be fetched according to the settings in the</span>
@@ -1052,7 +1093,10 @@ document.write(`
 
 <div class="viewcode-block" id="GeoDatasetAdapter.detect_time_range">
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDatasetAdapter.detect_time_range.html#hydromt.data_adapter.GeoDatasetAdapter.detect_time_range">[docs]</a>
-    <span class="k">def</span> <span class="nf">detect_time_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TimeRange</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">detect_time_range</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Data</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect the temporal range of the dataset.</span>
 
 <span class="sd">        If no dataset is provided, it will be fetched according to the settings in the</span>
