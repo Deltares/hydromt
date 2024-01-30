@@ -171,3 +171,6 @@ class ModelRoot:
         forward_count, backward_count = self._count_slashes(path)
         # not great, but it's the best we have
         return forward_count > backward_count
+
+    def __repr__(self):
+        return f"ModelRoot(path={self._path}, mode={self.mode})"
