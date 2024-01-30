@@ -1,3 +1,4 @@
+from logging import WARNING
 from os import listdir
 from os.path import abspath, exists, join
 from pathlib import Path
@@ -166,3 +167,26 @@ def test_new_root_creates_dirs_and_log_files(tmpdir):
     assert exists(model_root_path)
     # two for the folders, one for the log file
     assert len(listdir(model_root_path)) == 3
+
+
+def test_non_forced_write_errors_on_existing_dir(tmpdir):
+    model_root_path = Path(join(tmpdir, "root_folder"))
+    _ = ModelRoot(model_root_path, "w", ["asdf", "qwery"], True)
+    tmp_file = Path(join(model_root_path, "asdf", "aaaaaaaaa.txt"))
+    tmp_file.touch()
+    with pytest.raises(IOError, match="Model dir already exists and cannot be "):
+        _ = ModelRoot(model_root_path, "w", ["asdf", "qwery"], True)
+    assert exists(tmp_file)
+
+
+def test_forced_write_warns_on_existing_dir(tmpdir, caplog):
+    model_root_path = Path(join(tmpdir, "root_folder"))
+    _ = ModelRoot(model_root_path, "w", ["asdf", "qwery"], True)
+    tmp_file = Path(join(model_root_path, "asdf", "aaaaaaaaa.txt"))
+    tmp_file.touch()
+
+    with caplog.at_level(WARNING):
+        _ = ModelRoot(model_root_path, "w+", ["asdf", "qwery"], True)
+
+    assert "Model dir already exists" in caplog.text
+    assert exists(tmp_file)

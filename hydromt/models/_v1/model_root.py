@@ -79,10 +79,10 @@ class ModelRoot:
             # check directory
             elif not isdir(self._path):
                 raise IOError(f'model root not found at "{self._path}"')
-            # remove old logging file handler and add new filehandler
-            # in root if it does not exist
 
     def _setup_log_file_hanglers(self) -> None:
+        # remove old logging file handler and add new filehandler
+        # in root if it does not exist
         has_log_file = False
         log_level = 20  # default, but overwritten by the level of active loggers
         for i, handeler in enumerate(self.logger.handlers):
