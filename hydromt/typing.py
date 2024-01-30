@@ -72,5 +72,9 @@ class ModelMode(Enum):
         """Asster whether mode is reading or not."""
         return self in [ModelMode.READ, ModelMode.APPEND]
 
+    def is_override(self):
+        """Asster whether mode is able to overwrite or not."""
+        return self in [ModelMode.FORCED_WRITE, ModelMode.APPEND]
+
 
 ModeLike = Union[ModelMode, str]
