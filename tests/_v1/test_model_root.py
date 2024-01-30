@@ -38,7 +38,7 @@ def case_name(case):
     ids=case_name,
 )
 def test_windows_paths_on_windows(test_case):
-    model_root = ModelRoot(test_case["path"], "r")
+    model_root = ModelRoot(test_case["path"], "w")
     assert model_root._describes_windows_path(test_case["path"])
     assert str(model_root._path) == test_case["abs_path"]
 
@@ -64,7 +64,7 @@ def test_windows_paths_on_windows(test_case):
     ids=case_name,
 )
 def test_windows_paths_on_linux(test_case):
-    model_root = ModelRoot(test_case["path"], "r")
+    model_root = ModelRoot(test_case["path"], "w")
     assert model_root._describes_windows_path(test_case["path"])
     assert str(model_root._path) == test_case["abs_path"]
 
@@ -89,7 +89,7 @@ def test_windows_paths_on_linux(test_case):
     ids=case_name,
 )
 def test_posix_paths_on_windows(test_case):
-    model_root = ModelRoot(test_case["path"], "r")
+    model_root = ModelRoot(test_case["path"], "w")
     assert model_root._describes_posix_path(test_case["path"])
     assert str(model_root._path) == test_case["abs_path"]
 
@@ -120,7 +120,7 @@ def test_posix_paths_on_windows(test_case):
     ids=case_name,
 )
 def test_posix_path_on_linux(test_case):
-    model_root = ModelRoot(test_case["path"], "r")
+    model_root = ModelRoot(test_case["path"], "w")
     assert model_root._describes_posix_path(test_case["path"])
     assert str(model_root._path) == test_case["abs_path"]
 
@@ -177,6 +177,12 @@ def test_non_forced_write_errors_on_existing_dir(tmpdir):
     with pytest.raises(IOError, match="Model dir already exists and cannot be "):
         _ = ModelRoot(model_root_path, "w", ["asdf", "qwery"], True)
     assert exists(tmp_file)
+
+
+def test_read_errors_on_non_existing_dir(tmpdir):
+    model_root_path = Path(join(tmpdir, "root_folder"))
+    with pytest.raises(IOError, match="model root not found "):
+        _ = ModelRoot(model_root_path, "r", ["asdf", "qwery"])
 
 
 def test_forced_write_warns_on_existing_dir(tmpdir, caplog):

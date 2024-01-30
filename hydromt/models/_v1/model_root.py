@@ -45,40 +45,43 @@ class ModelRoot:
         self.set_mode(mode)
         # set path is to take care of cross platform paths
         self._set_path(path)
-        if create_dirs:
-            self._setup_folder_structure()
-            self._setup_log_file_hanglers()
+        if self.is_writing_mode():
+            if create_dirs:
+                self._setup_folder_structure()
+                self._setup_log_file_hanglers()
+        if self.is_reading_mode():
+            self._check_root_exists()
+
+    def _check_root_exists(self):
+        # check directory
+        if not isdir(self._path):
+            raise IOError(f'model root not found at "{self._path}"')
 
     def _setup_folder_structure(self):
         ignore_ext = [".log", ".yml"]
-        if self._path is not None:
-            if self.is_writing_mode():
-                for name in self.folders:
-                    dir_path = join(self._path, name)
-                    if not isdir(dir_path):
-                        makedirs(dir_path)
-                        continue
-                    # path already exists, check files
-                    files = glob(join(dir_path, "*.*"))
-                    files = [Path(file).suffix for file in files]
-                    files = [ext for ext in files if ext not in ignore_ext]
-                    if len(files) != 0:
-                        if self.mode.is_override():
-                            self.logger.warning(
-                                "Model dir already exists and "
-                                f"files might be overwritten: {self._path}."
-                            )
-                        else:
-                            msg = (
-                                "Model dir already exists and cannot be "
-                                + f"overwritten: {self._path}. Use 'mode=w+' to force "
-                                + "overwrite existing files."
-                            )
-                            self.logger.error(msg)
-                            raise IOError(msg)
-            # check directory
-            elif not isdir(self._path):
-                raise IOError(f'model root not found at "{self._path}"')
+        for name in self.folders:
+            dir_path = join(self._path, name)
+            if not isdir(dir_path):
+                makedirs(dir_path)
+                continue
+            # path already exists, check files
+            files = glob(join(dir_path, "*.*"))
+            files = [Path(file).suffix for file in files]
+            files = [ext for ext in files if ext not in ignore_ext]
+            if len(files) != 0:
+                if self.mode.is_override():
+                    self.logger.warning(
+                        "Model dir already exists and "
+                        f"files might be overwritten: {self._path}."
+                    )
+                else:
+                    msg = (
+                        "Model dir already exists and cannot be "
+                        + f"overwritten: {self._path}. Use 'mode=w+' to force "
+                        + "overwrite existing files."
+                    )
+                    self.logger.error(msg)
+                    raise IOError(msg)
 
     def _setup_log_file_hanglers(self) -> None:
         # remove old logging file handler and add new filehandler
