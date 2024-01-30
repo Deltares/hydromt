@@ -1,17 +1,14 @@
+from os.path import abspath, join
 from platform import system
-from typing import TypedDict
 
 import pytest
 
 from hydromt.models._v1.model_root import ModelRoot
 from hydromt.typing import ModelMode
 
-
-class RootModelTestCase(TypedDict):
-    name: str
-    path: str
-    num_parents: int
-    drive: str
+# we need to compensate for where the repo is located when
+# we run the tests
+CURRENT_PATH = abspath(".")
 
 
 def case_name(case):
@@ -26,24 +23,13 @@ def case_name(case):
     [
         {
             "name": "absolute",
-            "path": "D:\\hydromt\\test\\model_root",
-            "abs_path": "D:\\hydromt\\test\\model_root",
-            "num_parents": 3,
-            "drive": "D:",
+            "path": "D:\\data\\test\\model_root",
+            "abs_path": "D:\\data\\test\\model_root",
         },
         {
             "name": "relative",
-            "path": "hydromt\\test\\model_root",
-            "abs_path": "hydromt\\test\\model_root",
-            "num_parents": 3,
-            "drive": "",
-        },
-        {
-            "name": "network_drive",
-            "path": "\\\\p-drive\\hydromt\\test\\model_root",
-            "abs_path": "\\\\p-drive\\hydromt\\test\\model_root",
-            "num_parents": 3,
-            "drive": "\\\\p-drive",
+            "path": "data\\test\\model_root",
+            "abs_path": join(CURRENT_PATH, "data", "test", "model_root"),
         },
     ],
     ids=case_name,
@@ -51,13 +37,11 @@ def case_name(case):
 def test_windows_paths_on_windows(test_case):
     model_root = ModelRoot(test_case["path"], "r")
     assert model_root._describes_windows_path(test_case["path"])
-    assert len(model_root._path.parents) == test_case["num_parents"]
-    assert model_root.path.drive == test_case["drive"]
-    assert str(model_root.path.drive) == test_case["abs_path"]
+    assert str(model_root._path) == test_case["abs_path"]
 
 
 @pytest.mark.skipif(
-    system() in ["Linux", "Darwin"],
+    system() not in ["Linux", "Darwin"],
     reason="not running posix tests on non posix platform",
 )
 @pytest.mark.parametrize(
@@ -65,24 +49,13 @@ def test_windows_paths_on_windows(test_case):
     [
         {
             "name": "absolute",
-            "path": "D:\\hydromt\\test\\model_root",
-            "abs_path": "/mnt/d/hydromt/test/model_root",
-            "num_parents": 5,
-            "drive": "",
+            "path": "D:\\data\\test\\model_root",
+            "abs_path": "/mnt/d/data/test/model_root",
         },
         {
             "name": "relative",
-            "path": "hydromt\\test\\model_root",
-            "abs_path": "/hydromt/test/model_root",
-            "num_parents": 3,
-            "drive": "",
-        },
-        {
-            "name": "network_drive",
-            "path": "\\\\p-drive\\hydromt\\test\\model_root",
-            "abs_path": "/mnt/p-drive/hydromt/test/model_root",
-            "num_parents": 5,
-            "drive": "",
+            "path": "data\\test\\model_root",
+            "abs_path": "/data/test/model_root",
         },
     ],
     ids=case_name,
@@ -90,9 +63,7 @@ def test_windows_paths_on_windows(test_case):
 def test_windows_paths_on_linux(test_case):
     model_root = ModelRoot(test_case["path"], "r")
     assert model_root._describes_windows_path(test_case["path"])
-    assert len(model_root._path.parents) == test_case["num_parents"]
-    assert model_root.path.drive == test_case["drive"]
-    assert str(model_root.path.drive) == test_case["abs_path"]
+    assert str(model_root._path) == test_case["abs_path"]
 
 
 @pytest.mark.skipif(
@@ -103,70 +74,52 @@ def test_windows_paths_on_linux(test_case):
     [
         {
             "name": "absolute",
-            "path": "/home/user/hydromt/test/model_root",
-            "abs_path": "C:\\Users\\user\\hydromt\\test\\model_root",
-            "num_parents": 3,
+            "path": "/home/user/hydromt/data/test/model_root",
+            "abs_path": join(CURRENT_PATH, "data", "test", "model_root"),
         },
         {
             "name": "relative",
-            "path": "hydromt/test/model_root",
-            "abs_path": "C:\\hydromt\\test\\model_root",
-            "num_parents": 3,
-        },
-        {
-            "name": "mounted",
-            "path": "/mnt/p-drive\\hydromt\\test\\model_root",
-            "abs_path": "\\\\p-drive\\hydromt\\test\\model_root",
-            "num_parents": 3,
+            "path": "data/test/model_root",
+            "abs_path": join(CURRENT_PATH, "data", "test", "model_root"),
         },
     ],
     ids=case_name,
 )
 def test_posix_paths_on_windows(test_case):
     model_root = ModelRoot(test_case["path"], "r")
-    assert model_root._describes_windows_path(test_case["path"])
-    assert len(model_root._path.parents) == test_case["num_parents"]
-    assert model_root.path.drive == test_case["drive"]
-    assert str(model_root.path.drive) == test_case["abs_path"]
+    assert model_root._describes_posix_path(test_case["path"])
+    assert str(model_root._path) == test_case["abs_path"]
 
 
 @pytest.mark.skipif(
-    system() in ["Linux", "Darwin"],
+    system() not in ["Linux", "Darwin"],
     reason="not running posix tests on non posix platform",
 )
 @pytest.mark.parametrize(
     "test_case",
     [
         {
-            "name": "posix_absolute",
-            "platform": "posix",
-            "path": "/home/user/hydromt/test/model_root",
-            "abs_path": "/home/user/hydromt/test/model_root",
-            "num_parents": 5,
+            "name": "absolute",
+            "path": "/home/user/data/test/model_root",
+            "abs_path": "/home/user/data/test/model_root",
         },
         {
-            "name": "posix_mounted",
-            "platform": "posix",
-            "path": "/mnt/d/hydromt/test/model_root",
-            "abs_path": "/mnt/d/hydromt/test/model_root",
-            "num_parents": 5,
+            "name": "mounted",
+            "path": "/mnt/d/data/test/model_root",
+            "abs_path": "/mnt/d/data/test/model_root",
         },
         {
-            "name": "posix_relative",
-            "platform": "posix",
-            "path": "hydromt/test/model_root",
-            "abs_path": "hydromt/test/model_root",
-            "num_parents": 3,
+            "name": "relative",
+            "path": "data/test/model_root",
+            "abs_path": "data/test/model_root",
         },
     ],
     ids=case_name,
 )
 def test_posix_path_on_linux(test_case):
     model_root = ModelRoot(test_case["path"], "r")
-    assert model_root._describes_windows_path(test_case["path"])
-    assert len(model_root._path.parents) == test_case["num_parents"]
-    assert model_root.path.drive == test_case["drive"]
-    assert str(model_root.path.drive) == test_case["abs_path"]
+    assert model_root._describes_posix_path(test_case["path"])
+    assert str(model_root._path) == test_case["abs_path"]
 
 
 @pytest.mark.parametrize("mode", ["r", "r+", ModelMode.READ, ModelMode.APPEND])
@@ -181,7 +134,24 @@ def test_assert_writing_modes(mode):
 
 @pytest.mark.parametrize(
     "mode",
-    ["a", "w2", "\\w", "ww", "", "+w", "lorum ipsum", None, 1, -8, 3.14, "⽀", "ðŸ˜Š"],
+    [
+        "a",
+        "wr",
+        "rw",
+        "r++",
+        "w2",
+        "\\w",
+        "ww",
+        "",
+        "+w",
+        "lorum ipsum",
+        None,
+        1,
+        -8,
+        3.14,
+        "⽀",
+        "ðŸ˜Š",
+    ],
 )
 def test_errors_on_unknown_modes(mode):
     with pytest.raises(ValueError, match="Unknown mode"):

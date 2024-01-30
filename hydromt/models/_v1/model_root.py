@@ -1,7 +1,7 @@
 """the new model root class."""
 
 from logging import Logger, getLogger
-from os import PathLike
+from os import PathLike, getlogin
 from os.path import abspath, join
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from platform import system
@@ -24,6 +24,7 @@ class ModelRoot:
         if self._describes_windows_path(path):
             pwp = PureWindowsPath(path)
             if system() in ["Linux", "Darwin"]:
+                # posix path on a windows system
                 drive = pwp.drive or "C"
                 relative_path_part = PureWindowsPath(str(pwp).removeprefix(drive))
                 abs_path = abspath(
@@ -31,14 +32,33 @@ class ModelRoot:
                 )
                 self._path: Path = Path(abs_path)
             else:
+                # windows path on a windows system
                 self._path: Path = Path(abspath(pwp))
 
         elif self._describes_posix_path(path):
             ppp = PurePosixPath(path)
             if system() == "Windows":
-                self._path: Path = Path(ppp)
+                # posix path on a windows system
+                parts = ppp.parts
+                if self._posix_is_mounted(ppp):
+                    # were mounted somewhere so map the second dir to a drive
+                    drive = parts[1]
+                    relative_path_part = parts[2:]
+                    abs_path = abspath(join(f"{drive.upper()}:", *relative_path_part))
+                else:
+                    abs_ppp = Path(abspath(ppp))
+                    # abspath will almost certainly look like /home/user/whatever
+                    relative_path_part = abs_ppp.parts[3:]
+                    # in windows user dirs are usually titleized
+                    abs_path = abspath(
+                        join(f"C:\\Users\\{getlogin().title()}", *relative_path_part)
+                    )
+
+                self._path: Path = Path(abs_path)
+
             else:
-                self._path: Path = Path(ppp)
+                # posix path on a posix system
+                self._path: Path = Path(abspath(ppp))
 
     def set_mode(self, mode: ModeLike) -> None:
         """Set the mode of the model."""
@@ -51,6 +71,11 @@ class ModelRoot:
     def assert_reading_mode(self) -> bool:
         """Test whether we are in reading mode or not."""
         return self.mode.is_reading_mode()
+
+    def _posix_is_mounted(self, path) -> bool:
+        # check if the first dir is one of the canonical
+        # places to mount in linux
+        return Path(path).parts[1] in ["mnt", "media"]
 
     def _count_slashes(self, path) -> Tuple[int, int]:
         """Return the number of each shales in the path as (forward,backward)."""
