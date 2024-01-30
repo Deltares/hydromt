@@ -14,6 +14,7 @@ Unreleased
 Added
 -----
 - Test script for testing predefined catalogs locally. (#735)
+- Option to write a data catalog to a csv file (#425)
 
 Changed
 -------
