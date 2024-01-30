@@ -1,4 +1,6 @@
-from os.path import abspath, join
+from os import listdir
+from os.path import abspath, exists, join
+from pathlib import Path
 from platform import system
 
 import pytest
@@ -156,3 +158,11 @@ def test_assert_writing_modes(mode):
 def test_errors_on_unknown_modes(mode):
     with pytest.raises(ValueError, match="Unknown mode"):
         _ = ModelMode.from_str_or_mode(mode)
+
+
+def test_new_root_creates_dirs_and_log_files(tmpdir):
+    model_root_path = Path(join(tmpdir, "root_folder"))
+    _ = ModelRoot(model_root_path, "w", ["asdf", "qwery"], True)
+    assert exists(model_root_path)
+    # two for the folders, one for the log file
+    assert len(listdir(model_root_path)) == 3

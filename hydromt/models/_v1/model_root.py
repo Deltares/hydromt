@@ -22,13 +22,14 @@ class ModelRoot:
         path: PathLike,
         mode: ModeLike = "w",
         folders: Optional[List[str]] = None,
+        create_dirs: bool = False,
         logger: Logger = logger,
     ):
         self.logger: Logger = logger
         self.folders = folders or ["."]
-        self.set_root(path, mode)
+        self.set_root(path, mode, create_dirs)
 
-    def set_root(self, path: PathLike, mode: ModeLike = "w"):
+    def set_root(self, path: PathLike, mode: ModeLike = "w", create_dirs: bool = False):
         """Initialize the model root.
 
         In read/append mode a check is done if the root exists.
@@ -44,6 +45,11 @@ class ModelRoot:
         self.set_mode(mode)
         # set path is to take care of cross platform paths
         self._set_path(path)
+        if create_dirs:
+            self._setup_folder_structure()
+            self._setup_log_file_hanglers()
+
+    def _setup_folder_structure(self):
         ignore_ext = [".log", ".yml"]
         if self._path is not None:
             if self.is_writing_mode():
@@ -52,7 +58,7 @@ class ModelRoot:
                     if not isdir(dir_path):
                         makedirs(dir_path)
                         continue
-                    # path already exists check files
+                    # path already exists, check files
                     files = glob(join(dir_path, "*.*"))
                     files = [Path(file).suffix for file in files]
                     files = [ext for ext in files if ext not in ignore_ext]
@@ -60,12 +66,12 @@ class ModelRoot:
                         if self.mode.is_override():
                             self.logger.warning(
                                 "Model dir already exists and "
-                                f"files might be overwritten: {path}."
+                                f"files might be overwritten: {self._path}."
                             )
                         else:
                             msg = (
                                 "Model dir already exists and cannot be "
-                                + f"overwritten: {path}. Use 'mode=w+' to force "
+                                + f"overwritten: {self._path}. Use 'mode=w+' to force "
                                 + "overwrite existing files."
                             )
                             self.logger.error(msg)
@@ -75,22 +81,24 @@ class ModelRoot:
                 raise IOError(f'model root not found at "{self._path}"')
             # remove old logging file handler and add new filehandler
             # in root if it does not exist
-            has_log_file = False
-            log_level = 20  # default, but overwritten by the level of active loggers
-            for i, handeler in enumerate(self.logger.handlers):
-                # make the type checkers a little happier
-                handeler = cast(FileHandler, handeler)
-                log_level = handeler.level
-                if hasattr(handeler, "baseFilename"):
-                    if dirname(handeler.baseFilename) != self._path:
-                        # remove handler and close file
-                        self.logger.handlers.pop(i).close()
-                    else:
-                        has_log_file = True
-                    break
-            if not has_log_file:
-                new_path = join(self._path, "hydromt.log")
-                add_filehandler(self.logger, new_path, log_level)
+
+    def _setup_log_file_hanglers(self) -> None:
+        has_log_file = False
+        log_level = 20  # default, but overwritten by the level of active loggers
+        for i, handeler in enumerate(self.logger.handlers):
+            # make the type checkers a little happier
+            handeler = cast(FileHandler, handeler)
+            log_level = handeler.level
+            if hasattr(handeler, "baseFilename"):
+                if dirname(handeler.baseFilename) != self._path:
+                    # remove handler and close file
+                    self.logger.handlers.pop(i).close()
+                else:
+                    has_log_file = True
+                break
+        if not has_log_file:
+            new_path = join(self._path, "hydromt.log")
+            add_filehandler(self.logger, new_path, log_level)
 
     def _set_path(self, path: PathLike) -> None:
         """Set the path of the root, adjusting for cross platform where necessary."""
