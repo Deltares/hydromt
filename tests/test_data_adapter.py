@@ -178,14 +178,12 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     cog_fn = str(tmpdir.join("test_cog.tif"))
     rioda_large.raster.to_raster(cog_fn, driver="COG", overviews="auto")
     # test COG zoom levels
+    # return native resolution
     res = np.asarray(rioda_large.raster.res)
-    da1 = data_catalog.get_rasterdataset(
-        cog_fn, zoom_level=0
-    )  # return native resolution
+    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=0)
     assert np.allclose(da1.raster.res, res)
-    da1 = data_catalog.get_rasterdataset(
-        cog_fn, zoom_level=(res[0] * 2, "degree")
-    )  # reurn zl 1
+    # reurn zoom level 1
+    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(res[0] * 2, "degree"))
     assert np.allclose(da1.raster.res, res * 2)
     # test if file hase no overviews
     tif_fn = str(tmpdir.join("test_tif_no_overviews.tif"))
