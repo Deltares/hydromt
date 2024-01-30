@@ -348,6 +348,7 @@ def test_reproject():
     assert np.all(np.isnan(da2_empty))
     assert da2_empty.raster.identical_grid(da2)
     assert da2_empty.name == da0.name
+    assert da2_empty.dtype == da0.dtype
     # flipud
     assert ds1.raster.flipud().raster.res[1] == -ds1.raster.res[1]
     # reproject nearest index
