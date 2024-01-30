@@ -55,7 +55,7 @@ def test_windows_paths_on_windows(test_case):
         {
             "name": "relative",
             "path": "data\\test\\model_root",
-            "abs_path": "/data/test/model_root",
+            "abs_path": join(CURRENT_PATH, "data", "test", "model_root"),
         },
     ],
     ids=case_name,
@@ -111,7 +111,7 @@ def test_posix_paths_on_windows(test_case):
         {
             "name": "relative",
             "path": "data/test/model_root",
-            "abs_path": "data/test/model_root",
+            "abs_path": join(CURRENT_PATH, "data", "test", "model_root"),
         },
     ],
     ids=case_name,

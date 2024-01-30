@@ -1,7 +1,7 @@
 """the new model root class."""
 
 from logging import Logger, getLogger
-from os import PathLike, getlogin
+from os import PathLike, getcwd, getlogin
 from os.path import abspath, join
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from platform import system
@@ -24,12 +24,16 @@ class ModelRoot:
         if self._describes_windows_path(path):
             pwp = PureWindowsPath(path)
             if system() in ["Linux", "Darwin"]:
-                # posix path on a windows system
-                drive = pwp.drive or "C"
-                relative_path_part = PureWindowsPath(str(pwp).removeprefix(drive))
-                abs_path = abspath(
-                    join("/mnt", drive.lower(), relative_path_part.as_posix())
-                )
+                if not pwp.is_absolute():
+                    # posix path on a windows system
+                    abs_path = abspath(join(getcwd(), pwp.as_posix()))
+                else:
+                    drive = pwp.drive
+                    relative_path_part = PureWindowsPath(str(pwp).removeprefix(drive))
+                    drive = drive.replace(":", "").lower()
+                    abs_path = abspath(
+                        join("/mnt", drive, *(relative_path_part.parts[1:]))
+                    )
                 self._path: Path = Path(abs_path)
             else:
                 # windows path on a windows system
