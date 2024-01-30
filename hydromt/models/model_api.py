@@ -600,6 +600,8 @@ class Model(object, metaclass=ABCMeta):
             If True, export only data entries kept in used_data list. By default True
         append: bool, optional
             If True, append to an existing
+        save_csv: bool, optional
+            If True, save the data catalog also as an csv table. By default False.
         """
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
