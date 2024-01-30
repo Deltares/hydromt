@@ -3,7 +3,7 @@ name: Tests
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, v1]
     paths:
       - tests/*
       - hydromt/*
@@ -11,7 +11,7 @@ on:
       - pyproject.toml
   pull_request:
     branches:
-      - main
+      - main, v1
     paths:
       - tests/*
       - hydromt/*
