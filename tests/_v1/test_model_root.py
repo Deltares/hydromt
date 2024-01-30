@@ -1,4 +1,4 @@
-from pathlib import PurePath
+from platform import system
 from typing import TypedDict
 
 import pytest
@@ -18,17 +18,122 @@ def case_name(case):
     return case["name"]
 
 
-# these tests below are all designed to have the same target folder and parents
-# (3 segments in total) but different "mount points". We all want these to be able
-# to point to essentially the same place
-def windows_absolute_root():
-    return PurePath()
+@pytest.mark.skipif(
+    system() != "Windows", reason="not running windows tests on non windows platform"
+)
+@pytest.mark.parametrize(
+    "test_case",
+    [
+        {
+            "name": "absolute",
+            "path": "D:\\hydromt\\test\\model_root",
+            "abs_path": "D:\\hydromt\\test\\model_root",
+            "num_parents": 3,
+            "drive": "D:",
+        },
+        {
+            "name": "relative",
+            "path": "hydromt\\test\\model_root",
+            "abs_path": "hydromt\\test\\model_root",
+            "num_parents": 3,
+            "drive": "",
+        },
+        {
+            "name": "network_drive",
+            "path": "\\\\p-drive\\hydromt\\test\\model_root",
+            "abs_path": "\\\\p-drive\\hydromt\\test\\model_root",
+            "num_parents": 3,
+            "drive": "\\\\p-drive",
+        },
+    ],
+    ids=case_name,
+)
+def test_windows_paths_on_windows(test_case):
+    model_root = ModelRoot(test_case["path"], "r")
+    assert model_root._describes_windows_path(test_case["path"])
+    assert len(model_root._path.parents) == test_case["num_parents"]
+    assert model_root.path.drive == test_case["drive"]
+    assert str(model_root.path.drive) == test_case["abs_path"]
 
 
-def windows_network_drive_root():
-    return PurePath()
+@pytest.mark.skipif(
+    system() in ["Linux", "Darwin"],
+    reason="not running posix tests on non posix platform",
+)
+@pytest.mark.parametrize(
+    "test_case",
+    [
+        {
+            "name": "absolute",
+            "path": "D:\\hydromt\\test\\model_root",
+            "abs_path": "/mnt/d/hydromt/test/model_root",
+            "num_parents": 5,
+            "drive": "",
+        },
+        {
+            "name": "relative",
+            "path": "hydromt\\test\\model_root",
+            "abs_path": "/hydromt/test/model_root",
+            "num_parents": 3,
+            "drive": "",
+        },
+        {
+            "name": "network_drive",
+            "path": "\\\\p-drive\\hydromt\\test\\model_root",
+            "abs_path": "/mnt/p-drive/hydromt/test/model_root",
+            "num_parents": 5,
+            "drive": "",
+        },
+    ],
+    ids=case_name,
+)
+def test_windows_paths_on_linux(test_case):
+    model_root = ModelRoot(test_case["path"], "r")
+    assert model_root._describes_windows_path(test_case["path"])
+    assert len(model_root._path.parents) == test_case["num_parents"]
+    assert model_root.path.drive == test_case["drive"]
+    assert str(model_root.path.drive) == test_case["abs_path"]
 
 
+@pytest.mark.skipif(
+    system() != "Windows", reason="not running windows tests on non windows platform"
+)
+@pytest.mark.parametrize(
+    "test_case",
+    [
+        {
+            "name": "absolute",
+            "path": "/home/user/hydromt/test/model_root",
+            "abs_path": "C:\\Users\\user\\hydromt\\test\\model_root",
+            "num_parents": 3,
+        },
+        {
+            "name": "relative",
+            "path": "hydromt/test/model_root",
+            "abs_path": "C:\\hydromt\\test\\model_root",
+            "num_parents": 3,
+        },
+        {
+            "name": "mounted",
+            "path": "/mnt/p-drive\\hydromt\\test\\model_root",
+            "abs_path": "\\\\p-drive\\hydromt\\test\\model_root",
+            "num_parents": 3,
+        },
+    ],
+    ids=case_name,
+)
+def test_posix_paths_on_windows(test_case):
+    model_root = ModelRoot(test_case["path"], "r")
+    assert model_root._describes_windows_path(test_case["path"])
+    assert len(model_root._path.parents) == test_case["num_parents"]
+    assert model_root.path.drive == test_case["drive"]
+    assert str(model_root.path.drive) == test_case["abs_path"]
+
+
+@pytest.mark.skipif(
+    system() in ["Linux", "Darwin"],
+    reason="not running posix tests on non posix platform",
+)
 @pytest.mark.parametrize(
     "test_case",
     [
@@ -36,56 +141,32 @@ def windows_network_drive_root():
             "name": "posix_absolute",
             "platform": "posix",
             "path": "/home/user/hydromt/test/model_root",
+            "abs_path": "/home/user/hydromt/test/model_root",
             "num_parents": 5,
-            "drive": "",
         },
         {
             "name": "posix_mounted",
             "platform": "posix",
             "path": "/mnt/d/hydromt/test/model_root",
+            "abs_path": "/mnt/d/hydromt/test/model_root",
             "num_parents": 5,
-            "drive": "",
         },
         {
             "name": "posix_relative",
             "platform": "posix",
             "path": "hydromt/test/model_root",
+            "abs_path": "hydromt/test/model_root",
             "num_parents": 3,
-            "drive": "",
-        },
-        {
-            "name": "windows_absolute",
-            "platform": "windows",
-            "path": "D:\\hydromt\\test\\model_root",
-            "num_parents": 3,
-            "drive": "D:",
-        },
-        {
-            "name": "windows_network_drive",
-            "platform": "windows",
-            "path": "\\\\hydromt\\test\\model_root",
-            "num_parents": 3,
-            "drive": "//",
-        },
-        {
-            "name": "windows_relative",
-            "platform": "windows",
-            "path": "hydromt\\test\\model_root",
-            "num_parents": 3,
-            "drive": "",
         },
     ],
     ids=case_name,
 )
-def test_cross_platform_paths(test_case):
+def test_posix_path_on_linux(test_case):
     model_root = ModelRoot(test_case["path"], "r")
-    if test_case["platform"] == "posix":
-        assert model_root.describes_posix_path(test_case["path"])
-    elif test_case["platform"] == "windows":
-        assert model_root.describes_windows_path(test_case["path"])
-
+    assert model_root._describes_windows_path(test_case["path"])
     assert len(model_root._path.parents) == test_case["num_parents"]
-    assert model_root._path.drive == test_case["drive"]
+    assert model_root.path.drive == test_case["drive"]
+    assert str(model_root.path.drive) == test_case["abs_path"]
 
 
 @pytest.mark.parametrize("mode", ["r", "r+", ModelMode.READ, ModelMode.APPEND])

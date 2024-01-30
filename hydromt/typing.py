@@ -40,7 +40,7 @@ class ErrorHandleMethod(Enum):
 
 
 class ModelMode(Enum):
-    """Modes that the model can be in"""
+    """Modes that the model can be in."""
 
     READ = "r"
     WRITE = "w"
@@ -49,6 +49,7 @@ class ModelMode(Enum):
 
     @staticmethod
     def from_str_or_mode(s: Union["ModelMode", str]) -> "ModelMode":
+        """Construct a model mode from either a string or return provided if it's already a mode."""
         if isinstance(s, ModelMode):
             return s
 
@@ -64,9 +65,11 @@ class ModelMode(Enum):
             raise ValueError(f"Unknown mode: {s}, options are: r, r+, w, w+")
 
     def is_writing_mode(self):
+        """Asster whether mode is writing or not."""
         return self in [ModelMode.WRITE, ModelMode.FORCED_WRITE]
 
     def is_reading_mode(self):
+        """Asster whether mode is reading or not."""
         return self in [ModelMode.READ, ModelMode.APPEND]
 
 

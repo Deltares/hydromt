@@ -1,8 +1,10 @@
-"""the new model root class"""
+"""the new model root class."""
 
 from logging import Logger, getLogger
 from os import PathLike
+from os.path import abspath, join
 from pathlib import Path, PurePosixPath, PureWindowsPath
+from platform import system
 from typing import Tuple
 
 from hydromt.typing import ModeLike, ModelMode
@@ -11,23 +13,43 @@ logger = getLogger(__name__)
 
 
 class ModelRoot:
+    """A class to handle model roots in a cross platform manner."""
+
     def __init__(self, path: PathLike, mode: ModeLike = "w"):
         self.set_path(path)
         self.set_mode(mode)
 
     def set_path(self, path: PathLike) -> None:
-        if self.describes_windows_path(path):
-            self._path: Path = Path(PureWindowsPath(path))
-        elif self.describes_posix_path(path):
-            self._path: Path = Path(PurePosixPath(path))
+        """Set the path of the root, adjusting for cross platform where necessary."""
+        if self._describes_windows_path(path):
+            pwp = PureWindowsPath(path)
+            if system() in ["Linux", "Darwin"]:
+                drive = pwp.drive or "C"
+                relative_path_part = PureWindowsPath(str(pwp).removeprefix(drive))
+                abs_path = abspath(
+                    join("/mnt", drive.lower(), relative_path_part.as_posix())
+                )
+                self._path: Path = Path(abs_path)
+            else:
+                self._path: Path = Path(abspath(pwp))
+
+        elif self._describes_posix_path(path):
+            ppp = PurePosixPath(path)
+            if system() == "Windows":
+                self._path: Path = Path(ppp)
+            else:
+                self._path: Path = Path(ppp)
 
     def set_mode(self, mode: ModeLike) -> None:
+        """Set the mode of the model."""
         self.mode: ModelMode = ModelMode.from_str_or_mode(mode)
 
     def assert_writing_mode(self) -> bool:
+        """Test whether we are in writing mode or not."""
         return self.mode.is_writing_mode()
 
     def assert_reading_mode(self) -> bool:
+        """Test whether we are in reading mode or not."""
         return self.mode.is_reading_mode()
 
     def _count_slashes(self, path) -> Tuple[int, int]:
@@ -38,12 +60,12 @@ class ModelRoot:
 
         return forward_count, backward_count
 
-    def describes_windows_path(self, path: PathLike, logger: Logger = logger) -> bool:
+    def _describes_windows_path(self, path: PathLike, logger: Logger = logger) -> bool:
         forward_count, backward_count = self._count_slashes(path)
         # not great, but it's the best we have
         return forward_count < backward_count
 
-    def describes_posix_path(self, path: PathLike, logger: Logger = logger) -> bool:
+    def _describes_posix_path(self, path: PathLike, logger: Logger = logger) -> bool:
         forward_count, backward_count = self._count_slashes(path)
         # not great, but it's the best we have
         return forward_count > backward_count
