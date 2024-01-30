@@ -5,12 +5,13 @@ Change log predefined datasets
 deltares_data
 =============
 
-version: 2024.1
+version: 2024.1.30
 ---------------
 
 added
 ^^^^^
 - HydroMT version to catalog
+
 
 version: 2023.12
 -----------------
@@ -75,7 +76,7 @@ fixed
 cmip6_data
 ==========
 
-version: 2024.1
+version: 2024.1.30
 ---------------
 
 added
@@ -92,7 +93,7 @@ added
 aws_data
 ========
 
-version: 2024.1
+version: 2024.1.30
 ---------------
 
 added
