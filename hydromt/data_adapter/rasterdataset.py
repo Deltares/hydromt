@@ -417,8 +417,9 @@ class RasterDatasetAdapter(DataAdapter):
                 zoom_level = self._parse_zoom_level(
                     zoom_level, geom, bbox, zls_dict, crs, logger=logger
                 )
-                if isinstance(zoom_level, int):
-                    kwargs.update(overview_level=zoom_level)
+                if isinstance(zoom_level, int) and zoom_level > 0:
+                    # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
+                    kwargs.update(overview_level=zoom_level - 1)
             ds = io.open_mfraster(fns, logger=logger, **kwargs)
         else:
             raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
@@ -712,8 +713,7 @@ class RasterDatasetAdapter(DataAdapter):
         elif isinstance(zoom_level, int):
             if zoom_level not in zls_dict:
                 raise ValueError(
-                    f"Zoom level {zoom_level} not defined."
-                    f"Select from {list(zls_dict.keys())}."
+                    f"Zoom level {zoom_level} not defined." f"Select from {zls_dict}."
                 )
             zl = zoom_level
             dst_res = zls_dict[zoom_level]
@@ -756,15 +756,15 @@ class RasterDatasetAdapter(DataAdapter):
                 fdst = conversions.get(dst_crs_unit, 1)
                 dst_res = src_res * fsrc / fdst
             # find nearest zoom level
-            eps = 1e-5  # allow for rounding errors
+            res = list(zls_dict.values())[0] / 2
             zls = list(zls_dict.keys())
-            smaller = [x < (dst_res + eps) for x in zls_dict.values()]
+            smaller = [x < (dst_res + res * 0.01) for x in zls_dict.values()]
             zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
         elif dst_crs is None:
             raise ValueError("No CRS defined, hence no zoom level can be determined.")
         else:
             raise TypeError(f"zoom_level not understood: {type(zoom_level)}")
-        logger.debug(f"Parsed zoom_level {zl} ({dst_res:.2f})")
+        logger.debug(f"Using zoom level {zl} ({dst_res:.2f})")
         return zl
 
     def get_bbox(self, detect=True) -> TotalBounds:

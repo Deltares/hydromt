@@ -11,6 +11,7 @@ version: 2024.1.30
 added
 ^^^^^
 - HydroMT version to catalog
+- GRDC dataset
 
 
 version: 2023.12

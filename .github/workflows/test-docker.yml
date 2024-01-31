@@ -43,6 +43,8 @@ jobs:
           context: .
           target: full
           tags: hydromt
+          load: true
+
 
       - name: Run Tests
         run: docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt pytest
