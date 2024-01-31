@@ -20,13 +20,12 @@ import pandas as pd
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
-from shapely.geometry import box
 
 from hydromt import __version__
 from hydromt._compat import Distribution
 from hydromt.typing import DeferedFileClose, XArrayDict
 
-from .. import config, log, workflows
+from .. import config, log
 from ..data_catalog import DataCatalog
 from ..raster import GEO_MAP_COORD
 from ..utils import _classproperty
@@ -47,9 +46,7 @@ class Model(object, metaclass=ABCMeta):
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
-    # tell hydroMT which methods should receive the res and region arguments
-    # TODO: change it back to setup_region and no res --> deprecation
-    _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
+    _CLI_ARGS = {"region": "setup_basemaps"}
     _TMP_DATA_DIR = None
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
@@ -62,7 +59,6 @@ class Model(object, metaclass=ABCMeta):
         "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
-        "region": gpd.GeoDataFrame,
         "results": XArrayDict,
         "states": XArrayDict,
     }
@@ -72,7 +68,7 @@ class Model(object, metaclass=ABCMeta):
         root: Optional[str] = None,
         mode: Optional[str] = "w",
         config_fn: Optional[str] = None,
-        data_libs: Union[List, str] = None,
+        data_libs: Optional[Union[List, str]] = None,
         logger=logger,
         **artifact_keys,
     ):
@@ -117,9 +113,9 @@ class Model(object, metaclass=ABCMeta):
 
         # placeholders
         # metadata maps that can be at different resolutions
-        self._config: Optional[Dict[str:Literal]] = None  # nested dictionary
+        self._config: Optional[Dict[str, Literal]] = None  # nested dictionary
         self._maps: Optional[XArrayDict] = None
-        self._tables: Dict[str, pd.DataFrame] = None
+        self._tables: Optional[Dict[str, pd.DataFrame]] = None
 
         self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
         self._forcing: Optional[XArrayDict] = None
@@ -231,12 +227,6 @@ class Model(object, metaclass=ABCMeta):
         opt = opt or {}
         opt = self._check_get_opt(opt)
 
-        # merge cli region and res arguments with opt
-        if region is not None:
-            if self._CLI_ARGS["region"] not in opt:
-                opt = {self._CLI_ARGS["region"]: {}, **opt}
-            opt[self._CLI_ARGS["region"]].update(region=region)
-
         # then loop over other methods
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write()
@@ -333,102 +323,6 @@ class Model(object, metaclass=ABCMeta):
             self.write()
 
         self._cleanup(forceful_overwrite=forceful_overwrite)
-
-    ## general setup methods
-
-    def setup_region(
-        self,
-        region: dict,
-        hydrography_fn: str = "merit_hydro",
-        basin_index_fn: str = "merit_hydro_index",
-    ) -> dict:
-        """Set the `region` of interest of the model.
-
-        Adds model layer:
-
-        * **region** geom: region boundary vector
-
-        Parameters
-        ----------
-        region : dict
-            Dictionary describing region of interest, e.g.:
-
-            * {'bbox': [xmin, ymin, xmax, ymax]}
-
-            * {'geom': 'path/to/polygon_geometry'}
-
-            * {'basin': [xmin, ymin, xmax, ymax]}
-
-            * {'subbasin': [x, y], '<variable>': threshold}
-
-            For a complete overview of all region options,
-            see :py:function:~hydromt.workflows.basin_mask.parse_region
-        hydrography_fn : str
-            Name of data source for hydrography data.
-            FIXME describe data requirements
-        basin_index_fn : str
-            Name of data source with basin (bounding box) geometries associated with
-            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
-            based on a (sub)(inter)basins without a 'bounds' argument.
-
-        Returns
-        -------
-        region: dict
-            Parsed region dictionary
-
-        See Also
-        --------
-        hydromt.workflows.basin_mask.parse_region
-        """
-        kind, region = workflows.parse_region(
-            region, data_catalog=self.data_catalog, logger=self.logger
-        )
-        # NOTE: kind=outlet is deprecated!
-        if kind in ["basin", "subbasin", "interbasin", "outlet"]:
-            if kind == "outlet":
-                warnings.warn(
-                    "Using outlet as kind in setup_region is deprecated",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-            # retrieve global hydrography data (lazy!)
-            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
-            if "bounds" not in region:
-                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
-            # get basin geometry
-            geom, xy = workflows.get_basin_geometry(
-                ds=ds_org,
-                kind=kind,
-                logger=self.logger,
-                **region,
-            )
-            region.update(xy=xy)
-        elif "bbox" in region:
-            bbox = region["bbox"]
-            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-        elif "geom" in region:
-            geom = region["geom"]
-            if geom.crs is None:
-                raise ValueError('Model region "geom" has no CRS')
-        elif "grid" in region:  # Grid specific - should be removed in the future
-            geom = region["grid"].raster.box
-        elif "model" in region:
-            geom = region["model"].region
-        else:
-            raise ValueError(f"model region argument not understood: {region}")
-
-        self.set_geoms(geom, name="region")
-
-        # This setup method returns region so that it can be wrapped for models which
-        # require more information, e.g. grid RasterDataArray or xy coordinates.
-        return region
-
-    # TODO remove placeholder to make make sure
-    # build with the current _CLI_ARGS does not raise an error
-    def setup_basemaps(self, *args, **kwargs):  # noqa: D102
-        warnings.warn(
-            "The setup_basemaps method is not implemented.", UserWarning, stacklevel=2
-        )
 
     ## file system
 
@@ -1785,117 +1679,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.crs
-        else:
-            return self.region.crs
-
-    def set_crs(self, crs) -> None:
-        """Set the coordinate reference system."""
-        warnings.warn(
-            '"set_crs" is deprecated. Please set the crs of all model'
-            " components instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.set_crs(crs)
-
-    @property
-    def dims(self) -> Tuple:
-        """Returns spatial dimension names of staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.dims
-
-    @property
-    def coords(self) -> Dict:
-        """Returns the coordinates of model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.coords
-
-    @property
-    def res(self) -> Tuple:
-        """Returns the resolution of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.res
-
-    @property
-    def transform(self):
-        """Returns the geospatial transform of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.transform
-
-    @property
-    def width(self):
-        """Returns the width of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.width
-
-    @property
-    def height(self):
-        """Returns the height of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.height
-
-    @property
-    def shape(self) -> Tuple:
-        """Returns the shape of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.shape
-
-    @property
-    def bounds(self) -> Tuple:
-        """Returns the bounding box of the model region.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.bounds
-        else:
-            return self.region.total_bounds
-
-    @property
-    def region(self) -> gpd.GeoDataFrame:
-        """Returns the geometry of the model area of interest."""
-        region = gpd.GeoDataFrame()
-        if "region" in self.geoms:
-            region = self.geoms["region"]
-        # TODO: For now stays here but move to grid in GridModel and delete
-        elif len(self.staticmaps) > 0:
-            warnings.warn(
-                'Defining "region" based on staticmaps will be deprecated. Either use'
-                " region from GridModel or define your own method.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            crs = self.staticmaps.raster.crs
-            if crs is None and hasattr(crs, "to_epsg"):
-                crs = crs.to_epsg()  # not all CRS have an EPSG code
-            region = gpd.GeoDataFrame(
-                geometry=[box(*self.staticmaps.raster.bounds)], crs=crs
-            )
-        return region
+        return self.region.crs()
 
     # test methods
     def test_model_api(self):
