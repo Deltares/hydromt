@@ -2111,7 +2111,7 @@ class RasterDataArray(XRasterBase):
                 # out of bounds -> return empty array
                 if isinstance(other, xr.Dataset):
                     other = other[list(other.data_vars.keys())[0]]
-                da = full_like(other, nodata=self.nodata)
+                da = full_like(other.astype(da_clip.dtype), nodata=self.nodata)
                 da.name = self._obj.name
             else:
                 da = da_clip.raster.reproject(
