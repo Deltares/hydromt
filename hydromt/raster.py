@@ -654,24 +654,42 @@ class XRasterBase(XGeoBase):
     def _check_dimensions(self) -> None:
         """Validate the number and order of dimensions."""
         dims = (self.y_dim, self.x_dim)
-        da = self._obj[self.vars[0]] if isinstance(self._obj, xr.Dataset) else self._obj
-        extra_dims = [dim for dim in da.dims if dim not in dims]
-        if len(extra_dims) == 1:
-            dims = tuple(extra_dims) + dims
-            self.set_attrs(dim0=extra_dims[0])
-        elif len(extra_dims) == 0:
-            self.attrs.pop("dim0", None)
-        elif len(extra_dims) > 1:
-            raise ValueError("Only 2D and 3D data arrays supported.")
-        if isinstance(self._obj, xr.Dataset):
-            check = np.all([self._obj[name].dims == dims for name in self.vars])
+
+        def _check_dims(da: xr.DataArray, dims=dims) -> bool:
+            extra_dims = [dim for dim in da.dims if dim not in dims]
+            if len(extra_dims) == 1:
+                dims = tuple(extra_dims) + dims
+            elif len(extra_dims) > 1:
+                raise ValueError("Only 2D and 3D data arrays supported.")
+            return da.dims == dims, extra_dims
+
+        extra_dims = []
+        if isinstance(self._obj, xr.DataArray):
+            check, dim0 = _check_dims(self._obj)
+            extra_dims.extend(dim0)
+            if not check:
+                raise ValueError(
+                    f"Invalid dimension order ({self._obj.dims}). "
+                    f"You can use `obj.transpose({dims}) to reorder your dimensions."
+                )
         else:
-            check = self._obj.dims == dims
-        if check == False:
-            raise ValueError(
-                f"Invalid dimension order ({da.dims}). "
-                f"You can use `obj.transpose({dims}) to reorder your dimensions."
-            )
+            for var in self._obj.data_vars:
+                if not all([dim in self._obj[var].dims for dim in dims]):
+                    continue  # only check data variables with x and y dims
+                check, dim0 = _check_dims(self._obj[var])
+                extra_dims.extend(dim0)
+                if not check:
+                    raise ValueError(
+                        f"Invalid dimension order ({self._obj[var].dims}). "
+                        f"You can use `obj.transpose({dims}) to reorder your dimensions."
+                    )
+
+        # check if all extra dims are the same
+        extra_dims = list(set(extra_dims))
+        if len(extra_dims) == 1:
+            self.set_attrs(dim0=extra_dims[0])
+        else:
+            self.attrs.pop("dim0", None)
 
     def identical_grid(self, other) -> bool:
         """Return True if other has an same grid as object (crs, transform, shape)."""
