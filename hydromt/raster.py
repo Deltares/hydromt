@@ -15,7 +15,7 @@ import os
 from itertools import product
 from os.path import join
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Tuple, Union
 
 import dask
 import geopandas as gpd
@@ -653,9 +653,11 @@ class XRasterBase(XGeoBase):
 
     def _check_dimensions(self) -> None:
         """Validate the number and order of dimensions."""
+        # get spatial dims, this also checks if these dims are present
         dims = (self.y_dim, self.x_dim)
 
-        def _check_dims(da: xr.DataArray, dims=dims) -> bool:
+        def _check_dim_order(da: xr.DataArray, dims: Tuple = dims) -> Tuple[bool, list]:
+            """Check if dimensions of a 2 or 3D array are in the right order."""
             extra_dims = [dim for dim in da.dims if dim not in dims]
             if len(extra_dims) == 1:
                 dims = tuple(extra_dims) + dims
@@ -665,8 +667,8 @@ class XRasterBase(XGeoBase):
 
         extra_dims = []
         if isinstance(self._obj, xr.DataArray):
-            check, dim0 = _check_dims(self._obj)
-            extra_dims.extend(dim0)
+            check, extra_dims0 = _check_dim_order(self._obj)
+            extra_dims.extend(extra_dims0)
             if not check:
                 raise ValueError(
                     f"Invalid dimension order ({self._obj.dims}). "
@@ -676,8 +678,8 @@ class XRasterBase(XGeoBase):
             for var in self._obj.data_vars:
                 if not all([dim in self._obj[var].dims for dim in dims]):
                     continue  # only check data variables with x and y dims
-                check, dim0 = _check_dims(self._obj[var])
-                extra_dims.extend(dim0)
+                check, extra_dims0 = _check_dim_order(self._obj[var])
+                extra_dims.extend(extra_dims0)
                 if not check:
                     raise ValueError(
                         f"Invalid dimension order ({self._obj[var].dims}). "
