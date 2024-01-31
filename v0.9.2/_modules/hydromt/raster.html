@@ -462,7 +462,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">dask</span>
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
@@ -1109,9 +1109,11 @@ document.write(`
 
     <span class="k">def</span> <span class="nf">_check_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the number and order of dimensions.&quot;&quot;&quot;</span>
+        <span class="c1"># get spatial dims, this also checks if these dims are present</span>
         <span class="n">dims</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">_check_dims</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">_check_dim_order</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">dims</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="n">dims</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Check if dimensions of a 2 or 3D array are in the right order.&quot;&quot;&quot;</span>
             <span class="n">extra_dims</span> <span class="o">=</span> <span class="p">[</span><span class="n">dim</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">dims</span> <span class="k">if</span> <span class="n">dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">extra_dims</span><span class="p">)</span> <span class="o">+</span> <span class="n">dims</span>
@@ -1121,8 +1123,8 @@ document.write(`
 
         <span class="n">extra_dims</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
-            <span class="n">check</span><span class="p">,</span> <span class="n">dim0</span> <span class="o">=</span> <span class="n">_check_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
-            <span class="n">extra_dims</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">dim0</span><span class="p">)</span>
+            <span class="n">check</span><span class="p">,</span> <span class="n">extra_dims0</span> <span class="o">=</span> <span class="n">_check_dim_order</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
+            <span class="n">extra_dims</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">extra_dims0</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Invalid dimension order (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="si">}</span><span class="s2">). &quot;</span>
@@ -1132,8 +1134,8 @@ document.write(`
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">]):</span>
                     <span class="k">continue</span>  <span class="c1"># only check data variables with x and y dims</span>
-                <span class="n">check</span><span class="p">,</span> <span class="n">dim0</span> <span class="o">=</span> <span class="n">_check_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>
-                <span class="n">extra_dims</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">dim0</span><span class="p">)</span>
+                <span class="n">check</span><span class="p">,</span> <span class="n">extra_dims0</span> <span class="o">=</span> <span class="n">_check_dim_order</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>
+                <span class="n">extra_dims</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">extra_dims0</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Invalid dimension order (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="si">}</span><span class="s2">). &quot;</span>
