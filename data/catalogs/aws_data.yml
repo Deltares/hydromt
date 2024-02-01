@@ -1,7 +1,8 @@
 ---
 meta:
-  version: 2024.1
-  hydromt_version: '>=0.9'
+  version: 2024.2
+  hydromt_version: '>=0.9, <1.0'
+
 
 esa_worldcover_2020_v100:
   crs: 4326

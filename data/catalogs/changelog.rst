@@ -5,17 +5,8 @@ Change log predefined datasets
 deltares_data
 =============
 
-version: 2024.1
-----------------
-
-changed
-^^^^^^^
-- updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
-- removed source_version from data source meta
-- kwargs to driver_kwargs
-- updated source_url if url was not working anymore
-- sorted datasets by alphabetical order
-- removed gtsm_codec_reanalysis dataset
+version: 2024.2
+---------------
 
 added
 ^^^^^
@@ -23,8 +14,35 @@ added
 - variants argument for data sources that are of the same dataset but different versions
 - processing_script / processing_notes arguments to data sources that have been (pre-) processed
 - temporal extent of datasets that have a temporal dimension.
-- hydromt_version to data catalog meta
 - spatial extents to datasets
+
+changed
+^^^^^^^
+- removed source_version from data source meta
+- kwargs to driver_kwargs
+- updated source_url if url was not working anymore
+- sorted datasets by alphabetical order
+
+
+version: 2024.1.30
+---------------
+
+added
+^^^^^
+- HydroMT version to catalog
+- GRDC dataset
+
+
+version: 2023.12
+-----------------
+
+changed
+^^^^^^^
+- updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
+- removed gtsm_codec_reanalysis dataset
+
+added
+^^^^^
 - Added waterdemand pcr_globwb dataset
 - Added GADM 4.1 as FlatGeoBuff files to deltares_data catalog (#686)
 
@@ -79,12 +97,21 @@ fixed
 cmip6_data
 ==========
 
+<<<<<<< HEAD
 version: 2024.1
 ----------------
 
 added
 ^^^^^
 - hydromt_version to data catalog meta
+=======
+version: 2024.1.30
+---------------
+
+added
+^^^^^
+- HydroMT version to catalog
+>>>>>>> main
 
 version: 2023.2
 ---------------
@@ -96,12 +123,21 @@ added
 aws_data
 ========
 
+<<<<<<< HEAD
 version: 2024.1
 ----------------
 
 added
 ^^^^^
 - hydromt_version to data catalog meta
+=======
+version: 2024.1.30
+---------------
+
+added
+^^^^^
+- HydroMT version to catalog
+>>>>>>> main
 
 version: 2023.2
 ---------------

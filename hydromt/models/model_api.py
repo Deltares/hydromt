@@ -584,6 +584,7 @@ class Model(object, metaclass=ABCMeta):
         data_lib_fn: StrPath = "hydromt_data.yml",
         used_only: bool = True,
         append: bool = True,
+        save_csv: bool = False,
     ):
         """Write the data catalog to data_lib_fn.
 
@@ -599,6 +600,8 @@ class Model(object, metaclass=ABCMeta):
             If True, export only data entries kept in used_data list. By default True
         append: bool, optional
             If True, append to an existing
+        save_csv: bool, optional
+            If True, save the data catalog also as an csv table. By default False.
         """
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
@@ -611,6 +614,12 @@ class Model(object, metaclass=ABCMeta):
         # write data catalog
         if cat.sources:
             self._assert_write_mode()
+            if save_csv:
+                csv_path = os.path.splitext(path)[0] + ".csv"
+                cat.to_dataframe().reset_index().to_csv(
+                    csv_path, sep=",", index=False, header=True
+                )
+
             cat.to_yml(path, root=root)
 
     # model configuration

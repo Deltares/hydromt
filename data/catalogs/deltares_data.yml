@@ -1,8 +1,9 @@
 ---
 meta:
   root: p:/wflow_global/hydromt
-  version: 2024.1
-  hydromt_version: '>=0.9'
+  version: 2024.2
+  hydromt_version: '>=0.9, <1.0'
+
 
 basin_atlas_level12_v10:
   crs: 4326
@@ -1066,23 +1067,19 @@ glw_sheeps:
   version: 3
   path: socio_economic/glw/5_Sh_2010_Da.tif
 
+
 grdc:
   crs: 4326
   data_type: GeoDataFrame
-  driver: xlsx
-  driver_kwargs:
+  driver: csv
+  kwargs:
     index_col: grdc_no
   meta:
     category: observed data
     notes: GRDC-Station Catalogue, last downloaded 2020-07-16
     source_license: https://www.bafg.de/GRDC/EN/02_srvcs/21_tmsrs/210_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
     source_url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
-    source_spatial_extent:
-      West: -179.25
-      South: -90.0
-      East: 180.0
-      North: 80.6
-  path: hydro/grdc/GRDC_Stations.xlsx
+  path: hydro/grdc/GRDC_Stations.csv
   rename:
     area: uparea
 
