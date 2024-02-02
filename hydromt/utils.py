@@ -1,6 +1,11 @@
 """Utility functions for hydromt that have no other home."""
 
+from typing import Optional, Union
+
+import geopandas as gpd
 import numpy as np
+import pandas as pd
+import xarray as xr
 
 
 class _classproperty(property):
@@ -65,3 +70,15 @@ def _dict_pprint(d):
     import json
 
     return json.dumps(d, indent=2)
+
+
+def has_no_data(
+    data: Optional[Union[pd.DataFrame, gpd.GeoDataFrame, xr.Dataset, xr.DataArray]],
+) -> bool:
+    """Check whether various data containers are empty."""
+    if data is None:
+        return True
+    elif isinstance(data, xr.Dataset):
+        return all([v.size == 0 for v in data.data_vars.values()])
+    else:
+        return len(data) == 0

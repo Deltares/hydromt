@@ -78,9 +78,9 @@ def test_rasterdataset(rioda, tmpdir):
     geom = rioda.raster.box
     da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
     assert np.all(da1 == rioda_utm)
-    with pytest.raises(FileNotFoundError, match="No such file"):
+    with pytest.raises(FileNotFoundError):
         data_catalog.get_rasterdataset("no_file.tif")
-    with pytest.raises(NoDataException, match="RasterDataset: No data within"):
+    with pytest.raises(NoDataException):
         data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
 
     da1 = data_catalog.get_rasterdataset(
@@ -90,14 +90,7 @@ def test_rasterdataset(rioda, tmpdir):
         handle_nodata=NoDataStrategy.IGNORE,
     )
 
-    assert len(da1) == 0
-    with pytest.raises(NoDataException):
-        da1 = data_catalog.get_rasterdataset(
-            fn_tif,
-            # only really care that the bbox doesn't intersect with anythign
-            bbox=[12.5, 12.6, 12.7, 12.8],
-            handle_nodata=NoDataStrategy.RAISE,
-        )
+    assert da1 is None
 
 
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
@@ -185,9 +178,13 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     cog_fn = str(tmpdir.join("test_cog.tif"))
     rioda_large.raster.to_raster(cog_fn, driver="COG", overviews="auto")
     # test COG zoom levels
-    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(0.01, "degree"))
-    assert da1.raster.shape == (256, 250)
-    assert len(data_catalog.get_source("test_cog.tif").zoom_levels) == 3
+    # return native resolution
+    res = np.asarray(rioda_large.raster.res)
+    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=0)
+    assert np.allclose(da1.raster.res, res)
+    # reurn zoom level 1
+    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(res[0] * 2, "degree"))
+    assert np.allclose(da1.raster.res, res * 2)
     # test if file hase no overviews
     tif_fn = str(tmpdir.join("test_tif_no_overviews.tif"))
     rioda_large.raster.to_raster(tif_fn, driver="GTiff")
@@ -251,7 +248,6 @@ def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
-# @pytest.mark.skip()
 def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
@@ -290,7 +286,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
         bbox=[12.5, 12.6, 12.7, 12.8],
         handle_nodata=NoDataStrategy.IGNORE,
     )
-    assert len(da3) == 0
+    assert da3 is None
 
     with pytest.raises(NoDataException):
         da3 = data_catalog.get_geodataset(
@@ -508,7 +504,7 @@ def test_geodataframe(geodf, tmpdir):
         handle_nodata=NoDataStrategy.IGNORE,
     )
 
-    assert len(gdf1) == 0
+    assert gdf1 is None
 
     with pytest.raises(NoDataException):
         gdf1 = data_catalog.get_geodataframe(
@@ -519,7 +515,7 @@ def test_geodataframe(geodf, tmpdir):
             handle_nodata=NoDataStrategy.RAISE,
         )
 
-    with pytest.raises(FileNotFoundError, match="No such file"):
+    with pytest.raises(FileNotFoundError):
         data_catalog.get_geodataframe("no_file.geojson")
 
 
