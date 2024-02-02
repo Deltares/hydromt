@@ -25,7 +25,7 @@ class ModelRegion:
     def __init__(
         self,
         region: Dict[str, Any],
-        data_catalog: Optional[DataCatalog],
+        data_catalog: Optional[DataCatalog] = None,
         basin_index: Optional[GeoDataFrame] = None,
         hydrography: Optional[GeoDataFrame] = None,
         logger: Logger = logger,
@@ -42,7 +42,7 @@ class ModelRegion:
     def set(
         self,
         region: Dict[str, Any],
-        data_catalog: Optional[DataCatalog],
+        data_catalog: Optional[DataCatalog] = None,
         basin_index: Optional[GeoDataFrame] = None,
         hydrography: Optional[GeoDataFrame] = None,
         crs: Optional[CRS] = None,
@@ -57,10 +57,10 @@ class ModelRegion:
             logger=logger,
         )
 
+    @staticmethod
     def _parse_region(
-        self,
         region: Dict[str, Any],
-        data_catalog: Optional[DataCatalog],
+        data_catalog: Optional[DataCatalog] = None,
         hydrography_source: str = "merit_hydro",
         basin_index_source: str = "merit_hydro_index",
         logger=logger,

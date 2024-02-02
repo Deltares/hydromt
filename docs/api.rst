@@ -409,7 +409,6 @@ Basin mask
    :toctree: _generated
 
    workflows.basin_mask.get_basin_geometry
-   workflows.basin_mask.parse_region
 
 River bathymetry
 ================

@@ -447,10 +447,10 @@ class GridModel(GridMixin, Model):
 
     def __init__(
         self,
-        root: str = None,
+        root: Optional[str] = None,
         mode: str = "w",
-        config_fn: str = None,
-        data_libs: List[str] = None,
+        config_fn: Optional[str] = None,
+        data_libs: Optional[List[str]] = None,
         logger=logger,
     ):
         """Initialize a GridModel for distributed models with a regular grid."""
@@ -467,7 +467,7 @@ class GridModel(GridMixin, Model):
         self,
         region: dict,
         res: Optional[float] = None,
-        crs: int = None,
+        crs: Optional[int] = None,
         rotated: bool = False,
         hydrography_fn: Optional[str] = None,
         basin_index_fn: Optional[str] = None,
