@@ -1,21 +1,30 @@
 """Pydantic models for the validation of region specifications."""
+from logging import Logger, getLogger
 from os import listdir
+from os.path import exists, isdir, isfile
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
-from typing_extensions import Annotated
-from os.path import exists, isdir
-from geopandas import GeoDataFrame
 
+from geopandas import GeoDataFrame
 from pydantic import BaseModel, Field, model_validator
 from pyproj import CRS
 from shapely import box
+from typing_extensions import Annotated
 from xarray import Dataset
+from xugrid import Ugrid1d, Ugrid2d, UgridDataArray, UgridDataset
+
+from hydromt._compat import HAS_XUGRID
 from hydromt.data_catalog import DataCatalog
+from hydromt.typing import Bbox
+from hydromt.workflows.basin_mask import get_basin_geometry
 
-from hydromt.models._v1.model_region import ModelRegion
+logger = getLogger(__name__)
 
+if HAS_XUGRID:
+    import xugrid as xu
 
 BasinIdType = str
+UgridData = Union[UgridDataArray, UgridDataset, Ugrid1d, Ugrid2d]
 
 
 class BboxRegionSpecifyer(BaseModel):
@@ -33,6 +42,10 @@ class BboxRegionSpecifyer(BaseModel):
             ],
             crs=self.crs,
         )
+
+    @property
+    def bounds(self) -> Bbox:
+        return (self.xmin, self.ymin, self.xmax, self.ymax)
 
     @model_validator(mode="after")
     def _check_bounds_ordering(self) -> "BboxRegionSpecifyer":
@@ -87,31 +100,27 @@ class GridRegionSpecifyer(BaseModel):
 
 class MeshRegionSpecifyer(BaseModel):
     kind: Literal["mesh"]
-    path: Path
+    source: Union[str, Path, UgridData]
 
-    def construct(self) -> GeoDataFrame:
-        if _compat.HAS_XUGRID:
-            if isinstance(value, (str, Path)) and isfile(value):
-                kwarg = dict(mesh=xu.open_dataset(value))
-            elif isinstance(value, (xu.UgridDataset, xu.UgridDataArray)):
-                kwarg = dict(mesh=value)
-            elif isinstance(value, (xu.Ugrid1d, xu.Ugrid2d)):
-                kwarg = dict(
-                    mesh=xu.UgridDataset(value.to_dataset(optional_attributes=True))
-                )
+    def construct(self) -> UgridData:
+        if HAS_XUGRID:
+            if isinstance(self.source, (str, Path)) and isfile(self.source):
+                data = xu.open_dataset(self.source)
+            elif isinstance(self.source, (xu.UgridDataset, xu.UgridDataArray)):
+                data = self.source
+            elif isinstance(self.source, (xu.Ugrid1d, xu.Ugrid2d)):
+                data = xu.UgridDataset(self.source.to_dataset(optional_attributes=True))
             else:
-                raise ValueError(
-                    f"Unrecognised type {type(value)}."
-                    "Should be a path, data catalog key or xugrid object."
-                )
-            kwargs.update(kwarg)
+                raise ValueError("This should never happen.")
         else:
             raise ImportError("xugrid is required to read mesh files.")
-        return GeoDataFrame.from_file(self.path)
+
+        return data
 
     @model_validator(mode="after")
     def _check_file_exists(self) -> "MeshRegionSpecifyer":
-        assert exists(self.path)
+        if isinstance(self.source, (str, Path)):
+            assert exists(self.source)
         return self
 
 
@@ -119,18 +128,44 @@ class BasinIdRegionSpecifyer(BaseModel):
     kind: Literal["basin"]
     sub_kind: Literal["id"]
     id: BasinIdType
+    data_catalog: DataCatalog
+    hydrography_source: str
+    basin_index_source: str
+    logger: Logger
 
-    def construct(self) -> GeoDataFrame:
-        return self.spec.construct()
+    def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
+        ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
+        basin_index = self.data_catalog.get_source(self.basin_index_source)
+        basin_geom, outlet_geom = get_basin_geometry(
+            ds=ds_org,
+            basid=self.id,
+            basin_index=basin_index,
+            kind="basin",
+            logger=self.logger,
+        )
+        return basin_geom, outlet_geom
 
 
 class BasinMultipleIdsRegionSpecifyer(BaseModel):
     kind: Literal["basin"]
     sub_kind: Literal["ids"]
     ids: List[BasinIdType]
+    data_catalog: DataCatalog
+    hydrography_source: str
+    basin_index_source: str
+    logger: Logger
 
-    def construct(self) -> GeoDataFrame:
-        return self.spec.construct()
+    def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
+        ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
+        basin_index = self.data_catalog.get_source(self.basin_index_source)
+        basin_geom, outlet_geom = get_basin_geometry(
+            ds=ds_org,
+            basid=self.ids,
+            basin_index=basin_index,
+            kind="basin",
+            logger=self.logger,
+        )
+        return basin_geom, outlet_geom
 
 
 class BasinPointRegionSpecifyer(BaseModel):
@@ -138,9 +173,22 @@ class BasinPointRegionSpecifyer(BaseModel):
     sub_kind: Literal["point"]
     x_coord: float
     y_coord: float
+    data_catalog: DataCatalog
+    hydrography_source: str
+    basin_index_source: str
+    logger: Logger
 
-    def construct(self) -> GeoDataFrame:
-        return self.spec.construct()
+    def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
+        ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
+        basin_index = self.data_catalog.get_source(self.basin_index_source)
+        basin_geom, outlet_geom = get_basin_geometry(
+            ds=ds_org,
+            xy=([self.x_coord], [self.y_coord]),
+            basin_index=basin_index,
+            kind="basin",
+            logger=self.logger,
+        )
+        return basin_geom, outlet_geom
 
 
 class BasinPointListRegionSpecifyer(BaseModel):
@@ -148,9 +196,23 @@ class BasinPointListRegionSpecifyer(BaseModel):
     sub_kind: Literal["points"]
     x_coords: List[float]
     y_coords: List[float]
+    data_catalog: DataCatalog
+    hydrography_source: str
+    basin_index_source: str
+    logger: Logger
 
-    def construct(self) -> GeoDataFrame:
-        return self.spec.construct()
+    def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
+        ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
+        basin_index = self.data_catalog.get_source(self.basin_index_source)
+        # get basin geometry
+        basin_geom, outlet_geom = get_basin_geometry(
+            ds=ds_org,
+            xy=(self.x_coords, self.y_coords),
+            basin_index=basin_index,
+            kind="basin",
+            logger=self.logger,
+        )
+        return basin_geom, outlet_geom
 
     @model_validator(mode="after")
     def _check_lengths(self) -> "BasinPointListRegionSpecifyer":
@@ -164,7 +226,7 @@ class BasinPointGeomRegionSpecifyer(BaseModel):
     path: Path
 
     def construct(self) -> GeoDataFrame:
-        return self.spec.construct()
+        return GeoDataFrame.from_file(self.path)
 
 
 class BasinPointBboxRegionSpecifyer(BaseModel):
@@ -173,9 +235,25 @@ class BasinPointBboxRegionSpecifyer(BaseModel):
     bbox: BboxRegionSpecifyer
     outlets: bool = False
     thresholds: Optional[Dict[str, float]]
+    data_catalog: DataCatalog
+    hydrography_source: str
+    basin_index_source: str
+    logger: Logger
 
-    def construct(self) -> GeoDataFrame:
-        return self.spec.construct()
+    def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
+        ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
+        basin_index = self.data_catalog.get_source(self.basin_index_source)
+        # get basin geometry
+        basin_geom, outlet_geom = get_basin_geometry(
+            ds=ds_org,
+            bbox=self.bbox.bounds,
+            basin_index=basin_index,
+            kind="basin",
+            outlets=self.outlets,
+            thresholds=self.thresholds,
+            logger=self.logger,
+        )
+        return basin_geom, outlet_geom
 
 
 BasinRegionSpecifyer = Annotated[
@@ -189,31 +267,6 @@ BasinRegionSpecifyer = Annotated[
     ],
     Field(discriminator="sub_kind"),
 ]
-"""            Dictionary describing region of interest.
-
-            Subbasins are defined by its outlet locations and include all area upstream
-            from these points. The outlet locations can be passed as xy coordinate pairs,
-            but also derived from the most downstream cell(s) within a area of interest
-            defined by a bounding box or geometry, optionally refined by stream threshold
-            arguments.
-
-            The method can be speed up by providing an additional ``bounds`` argument which
-            should contain all upstream cell. If cells upstream of the subbasin are not
-            within the provide bounds a warning will be raised. Common use-cases include:
-                * {'subbasin': [x, y], '<variable>': threshold}
-                * {
-                    'subbasin': [[x1, x2, ..], [y1, y2, ..]],
-                    '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
-                    }
-                * {'subbasin': /path/to/point_geometry, '<variable>': threshold}
-                * {'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-                * {'subbasin': /path/to/polygon_geometry, '<variable>': threshold}
-            Interbasins are similar to subbasins but are bounded by a bounding box or
-            geometry and do not include all upstream area. Common use-cases include:
-                * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-                * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
-                * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
-"""
 
 
 # TODO still add subbasins and interbasins
@@ -227,5 +280,9 @@ class RegionSpecifyer(BaseModel):
         BasinRegionSpecifyer,
     ] = Field(..., discriminator="kind")
 
-    def construct(self) -> Union[GeoDataFrame, Dataset]:
+    def construct(
+        self,
+    ) -> Union[
+        GeoDataFrame, Dataset, UgridData, Dataset, Tuple[GeoDataFrame, GeoDataFrame]
+    ]:
         return self.spec.construct()

@@ -1,24 +1,20 @@
 """A class to handle all functionalities to do with model regions."""
 
 from logging import Logger, getLogger
-from os.path import isdir, isfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import numpy as np
 from geopandas import GeoDataFrame
 from pyproj import CRS
-from xarray import DataArray
 
 from hydromt._compat import HAS_XUGRID
-from hydromt.typing import Bbox
-from hydromt.validators.region import BasinIdType, RegionSpecifyer
-from hydromt.workflows import get_basin_geometry
-from hydromt.models import MODELS
 from hydromt.data_catalog import DataCatalog
+from hydromt.models import MODELS
+from hydromt.validators.region import BasinIdType, RegionSpecifyer
 
 if HAS_XUGRID:
-    import xugrid as xu
+    pass
 
 logger = getLogger(__name__)
 
@@ -28,80 +24,46 @@ class ModelRegion:
 
     def __init__(
         self,
-        bbox: Optional[Bbox] = None,
-        geoms: Optional[GeoDataFrame] = None,
-        crs: Optional[CRS] = None,
+        region: Dict[str, Any],
+        data_catalog: Optional[DataCatalog],
+        basin_index: Optional[GeoDataFrame] = None,
+        hydrography: Optional[GeoDataFrame] = None,
         logger: Logger = logger,
     ):
         self.logger = logger
-        self.set(bbox=bbox, geoms=geoms, crs=crs)
+
+        self.set(
+            region=region,
+            data_catalog=data_catalog,
+            hydrography=hydrography,
+            basin_index=basin_index,
+        )
 
     def set(
         self,
-        bbox: Optional[Bbox] = None,
-        geoms: Optional[GeoDataFrame] = None,
+        region: Dict[str, Any],
+        data_catalog: Optional[DataCatalog],
         basin_index: Optional[GeoDataFrame] = None,
         hydrography: Optional[GeoDataFrame] = None,
         crs: Optional[CRS] = None,
     ):
         """Set the the model region."""
-        if bbox is not None and geoms is not None:
-            raise ValueError("Only supply one of bbox and geoms.")
-
-        self.bbox = bbox
-        self.geoms = geoms
         self.crs = crs
-
-    def read(self):
-        """Read the model geom from a file."""
-        pass
-
-    def write(self):
-        """Write the model geom to a file."""
-        pass
-
-    # def setup_region(
-    #     self,
-    ##     region: dict,
-    #     hydrography_fn: str = "merit_hydro",
-    #     basin_index_fn: str = "merit_hydro_index",
-    # ) -> dict:
-    #     hydrography_ds : str
-    #         Name of data source for hydrography data.
-    #     basin_index_fn : str
-    #         Name of data source with basin (bounding box) geometries associated with
-    #         the 'basins' layer of `hydrography_fn`. Only required if the `region` is
-    #         based on a (sub)(inter)basins without a 'bounds' argument.
-
-    #     kind, region = self._parse_region(region, logger=self.logger)
-    #     if kind in ["basin", "subbasin", "interbasin"]:
-    #         # retrieve global hydrography data (lazy!)
-    #         ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
-    #         if "bounds" not in region:
-    ##             region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
-    #         # get basin geometry
-    #         geom, xy = get_basin_geometry(
-    #             ds=ds_org,
-    #             kind=kind,
-    #             logger=self.logger,
-    #             **region,
-    #         )
-    ##         region.update(xy=xy)
-    #     elif "bbox" in region:
-    #         bbox = region["bbox"]
-    #     elif "geom" in region:
-    #         geom = region["geom"]
-    #         if geom.crs is None:
-    #             raise ValueError('Model region "geom" has no CRS')
-    #     elif "grid" in region:  # Grid specific - should be removed in the future
-    #         geom = region["grid"].raster.box
-    #     elif "model" in region:
-    #         geom = region["model"].region
-    #     else:
-    #         raise ValueError(f"model region argument not understood: {region}")
+        self.region_specifyer = self._parse_region(
+            region=region,
+            data_catalog=data_catalog,
+            hydrography_source=hydrography,
+            basin_index_source=basin_index,
+            logger=logger,
+        )
 
     def _parse_region(
-        self, region: Dict[str, Any], data_catalog: Optional[DataCatalog], logger=logger
+        self,
+        region: Dict[str, Any],
+        data_catalog: Optional[DataCatalog],
+        hydrography_source: str = "merit_hydro",
+        basin_index_source: str = "merit_hydro_index",
+        logger=logger,
     ) -> RegionSpecifyer:
         # popitem returns last inserted, we want first
         kind = next(iter(region.keys()))
@@ -202,11 +164,3 @@ class ModelRegion:
 
     * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
     """
-
-    #     if "geom" in kwarg and np.all(kwarg["geom"].geometry.type == "Point"):
-    #         xy = (
-    #             kwarg["geom"].geometry.x.values,
-    #             kwarg["geom"].geometry.y.values,
-    #         )
-    #         kwarg = dict(xy=xy)
-    #     return kwarg
