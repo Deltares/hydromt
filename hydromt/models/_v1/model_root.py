@@ -48,7 +48,7 @@ class ModelRoot:
         if self.is_writing_mode():
             if create_dirs:
                 self._setup_folder_structure()
-                self._setup_log_file_hanglers()
+                self._setup_log_file_handlers()
         if self.is_reading_mode():
             self._check_root_exists()
 
