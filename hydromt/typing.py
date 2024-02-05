@@ -66,7 +66,7 @@ class ModelMode(Enum):
 
     def is_writing_mode(self):
         """Asster whether mode is writing or not."""
-        return self in [ModelMode.WRITE, ModelMode.FORCED_WRITE]
+        return self in [ModelMode.WRITE, ModelMode.FORCED_WRITE, ModelMode.APPEND]
 
     def is_reading_mode(self):
         """Asster whether mode is reading or not."""

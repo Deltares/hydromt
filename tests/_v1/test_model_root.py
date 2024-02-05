@@ -130,7 +130,9 @@ def test_assert_reading_modes(mode):
     assert ModelMode.from_str_or_mode(mode).is_reading_mode()
 
 
-@pytest.mark.parametrize("mode", ["w", "w+", ModelMode.WRITE, ModelMode.FORCED_WRITE])
+@pytest.mark.parametrize(
+    "mode", ["w", "w+", "r+", ModelMode.APPEND, ModelMode.WRITE, ModelMode.FORCED_WRITE]
+)
 def test_assert_writing_modes(mode):
     assert ModelMode.from_str_or_mode(mode).is_writing_mode()
 
