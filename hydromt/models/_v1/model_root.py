@@ -83,7 +83,7 @@ class ModelRoot:
                     self.logger.error(msg)
                     raise IOError(msg)
 
-    def _setup_log_file_hanglers(self) -> None:
+    def _setup_log_file_handlers(self) -> None:
         # remove old logging file handler and add new filehandler
         # in root if it does not exist
         has_log_file = False
