@@ -3,7 +3,7 @@ name: Tests
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, v1]
     paths:
       - tests/*
       - hydromt/*
@@ -12,6 +12,7 @@ on:
   pull_request:
     branches:
       - main
+      - v1
     paths:
       - tests/*
       - hydromt/*
@@ -27,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest]
         python-version: ['3.9','3.10','3.11']
     name: py ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
