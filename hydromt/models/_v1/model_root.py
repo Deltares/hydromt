@@ -39,7 +39,7 @@ class ModelRoot:
         ----------
         root : str, optional
             path to model root
-        mode : {"r", "r+", "w"}, optional
+        mode : {"r", "r+", "w", "w+"}, optional
             read/append/write mode for model files
         """
         self.set_mode(mode)
@@ -88,12 +88,12 @@ class ModelRoot:
         # in root if it does not exist
         has_log_file = False
         log_level = 20  # default, but overwritten by the level of active loggers
-        for i, handeler in enumerate(self.logger.handlers):
+        for i, handler in enumerate(self.logger.handlers):
             # make the type checkers a little happier
-            handeler = cast(FileHandler, handeler)
-            log_level = handeler.level
-            if hasattr(handeler, "baseFilename"):
-                if dirname(handeler.baseFilename) != self._path:
+            handler = cast(FileHandler, handler)
+            log_level = handler.level
+            if hasattr(handler, "baseFilename"):
+                if dirname(handler.baseFilename) != self._path:
                     # remove handler and close file
                     self.logger.handlers.pop(i).close()
                 else:
