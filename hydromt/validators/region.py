@@ -6,8 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from geopandas import GeoDataFrame
-from pydantic import BaseModel, Field, model_validator
-from pyproj import CRS
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from shapely import box
 from typing_extensions import Annotated
 from xarray import Dataset
@@ -28,7 +27,6 @@ UgridData = Union[UgridDataArray, UgridDataset, Ugrid1d, Ugrid2d]
 
 
 class BboxRegionSpecifyer(BaseModel):
-    crs: CRS = CRS.from_epsg(4326)
     xmin: float
     ymin: float
     xmax: float
@@ -40,7 +38,6 @@ class BboxRegionSpecifyer(BaseModel):
             geometry=[
                 box(xmin=self.xmin, ymin=self.ymin, xmax=self.xmax, ymax=self.ymax)
             ],
-            crs=self.crs,
         )
 
     @property
@@ -92,6 +89,8 @@ class GridRegionSpecifyer(BaseModel):
     data_catalog: DataCatalog
     driver_kwargs: Optional[Dict[str, Any]]
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     def construct(self) -> Dataset:
         return self.data_catalog.get_rasterdataset(
             self.source, driver_kwargs=self.driver_kwargs
@@ -101,6 +100,7 @@ class GridRegionSpecifyer(BaseModel):
 class MeshRegionSpecifyer(BaseModel):
     kind: Literal["mesh"]
     source: Union[str, Path, UgridData]
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def construct(self) -> UgridData:
         if HAS_XUGRID:
@@ -132,6 +132,7 @@ class BasinIdRegionSpecifyer(BaseModel):
     hydrography_source: str
     basin_index_source: str
     logger: Logger
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
         ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
@@ -154,6 +155,7 @@ class BasinMultipleIdsRegionSpecifyer(BaseModel):
     hydrography_source: str
     basin_index_source: str
     logger: Logger
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
         ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
@@ -177,6 +179,7 @@ class BasinPointRegionSpecifyer(BaseModel):
     hydrography_source: str
     basin_index_source: str
     logger: Logger
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
         ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
@@ -200,6 +203,8 @@ class BasinPointListRegionSpecifyer(BaseModel):
     hydrography_source: str
     basin_index_source: str
     logger: Logger
+    # should be removed once we can makd eDataCatalog a fully validated model
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
         ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
@@ -224,6 +229,7 @@ class BasinPointGeomRegionSpecifyer(BaseModel):
     kind: Literal["basin"]
     sub_kind: Literal["point_geom"]
     path: Path
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def construct(self) -> GeoDataFrame:
         return GeoDataFrame.from_file(self.path)
@@ -239,6 +245,7 @@ class BasinPointBboxRegionSpecifyer(BaseModel):
     hydrography_source: str
     basin_index_source: str
     logger: Logger
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def construct(self) -> Tuple[GeoDataFrame, GeoDataFrame]:
         ds_org = self.data_catalog.get_rasterdataset(self.hydrography_source)
