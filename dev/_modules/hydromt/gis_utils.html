@@ -454,7 +454,6 @@ document.write(`
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">IOBase</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -655,7 +654,9 @@ document.write(`
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either geom or bbox is required.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
         <span class="c1"># reproject</span>
-        <span class="k">if</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
             <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
         <span class="c1"># convert geopandas to geometry</span>
         <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">unary_union</span>
@@ -1081,7 +1082,7 @@ document.write(`
 
 
 <span class="k">def</span> <span class="nf">bbox_from_file_and_filters</span><span class="p">(</span>
-    <span class="n">fn</span><span class="p">:</span> <span class="n">IOBase</span><span class="p">,</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bbox</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">GEOM_TYPES</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mask</span><span class="p">:</span> <span class="n">GEOM_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">crs</span><span class="p">:</span> <span class="n">CRS</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1096,8 +1097,8 @@ document.write(`
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    fn: IOBase,</span>
-<span class="sd">        opened file</span>
+<span class="sd">    fn: str,</span>
+<span class="sd">        uri to the filename.</span>
 <span class="sd">    bbox: GeoDataFrame | GeoSeries | BaseGeometry</span>
 <span class="sd">        bounding box to filter the data while reading</span>
 <span class="sd">    mask: GeoDataFrame | GeoSeries | BaseGeometry</span>
