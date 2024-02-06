@@ -3,7 +3,7 @@
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 
 import geopandas as gpd
 from dateutil.parser import parse
@@ -41,6 +41,9 @@ def _validate_bbox(
     ), f"bbox miny: '{bbox[1]}' should be less than maxy: '{bbox[3]}'."
 
 
+DataType = Literal[
+    "DataFrame", "DataSet", "GeoDataFrame", "GeoDataSet", "RasterDataSet"
+]
 GeoDataframeSource = Union[str, Path]
 GeoDatasetSource = Union[str, Path]
 RasterDatasetSource = Union[str, Path]

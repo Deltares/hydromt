@@ -32,6 +32,7 @@ class TestGeoDataFrame:
         self, mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     ) -> GeoDataFrameDataSource:
         return GeoDataFrameDataSource(
+            root=".",
             name="geojsonfile",
             data_type="GeoDataFrame",
             driver=mock_driver,
@@ -42,6 +43,7 @@ class TestGeoDataFrame:
     def test_validators(self):
         with pytest.raises(ValidationError) as e_info:
             GeoDataFrameDataSource(
+                root=".",
                 name="name",
                 data_type="GeoDataFrame",
                 uri="uri",
@@ -50,12 +52,39 @@ class TestGeoDataFrame:
             )
 
         assert e_info.value.error_count() == 2
-        error0 = e_info.value.errors()[0]
-        assert error0["type"] == "value_error"
-        assert error0["loc"][0] == "metadata_resolver"
-        error1 = e_info.value.errors()[1]
-        assert error1["type"] == "value_error"
-        assert error1["loc"][0] == "driver"
+        error_meta = next(
+            filter(lambda e: e["loc"] == ("metadata_resolver",), e_info.value.errors())
+        )
+        assert error_meta["type"] == "value_error"
+        error_driver = next(
+            filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
+        )
+        assert error_driver["type"] == "value_error"
+
+    def test_model_validate(
+        self, mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
+    ):
+        GeoDataFrameDataSource.model_validate(
+            {
+                "name": "geojsonfile",
+                "data_type": "GeoDataFrame",
+                "driver": mock_driver,
+                "metadata_resolver": mock_resolver,
+                "uri": "test_uri",
+            }
+        )
+        with pytest.raises(
+            ValidationError, match="'data_type' must be 'GeoDataFrame'."
+        ):
+            GeoDataFrameDataSource.model_validate(
+                {
+                    "name": "geojsonfile",
+                    "data_type": "DifferentDataType",
+                    "driver": mock_driver,
+                    "metadata_resolver": mock_resolver,
+                    "uri": "test_uri",
+                }
+            )
 
     def test_read_data(
         self, geodf: gpd.GeoDataFrame, example_source: GeoDataFrameDataSource

@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 HYDROMT_DATADIR = join(Path.home(), ".hydromt_data")
 
 
+# TODO: move this to an appropriate module (has nothing to do with caching)
 def _uri_validator(uri: Union[str, Path]) -> bool:
     """Check if uri is valid."""
     try:
