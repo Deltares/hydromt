@@ -5,7 +5,6 @@ from typing import Any, ClassVar, Union
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
-from hydromt import DataCatalog
 from hydromt.data_adapter.caching import _uri_validator
 from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.metadata_resolvers.resolver_plugin import RESOLVERS
@@ -48,19 +47,6 @@ class DataSource(BaseModel):
                 raise ValueError(f"Unknown 'data_type': '{data_type}'")
 
         raise ValueError("DataSource needs 'data_type'")
-
-    @classmethod
-    def from_catalog(
-        cls,
-        catalog: DataCatalog,
-        key: str,
-        provider: str | None = None,
-        version: str | None = None,
-    ) -> "DataSource":
-        """Create Data source from DataCatalog."""
-        return cls.model_validate(
-            catalog.get_source(key, provider, version).update("name", key)
-        )
 
     @field_validator("metadata_resolver", mode="before")
     @classmethod

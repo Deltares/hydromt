@@ -37,7 +37,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
         variables: list[str] | None = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger | None = None,
+        logger: Logger = logger,
     ) -> gpd.GeoDataFrame:
         """Read in data and transform them to HydroMT standards."""
         gdf: gpd.GeoDataFrame = self.source.read_data(
@@ -50,7 +50,15 @@ class GeoDataFrameAdapter(DataAdapterBase):
         gdf = self._set_nodata(gdf)
         # slice
         gdf = GeoDataFrameAdapter._slice_data(
-            gdf, variables, mask, bbox, buffer, predicate, handle_nodata, logger=logger
+            gdf,
+            variables,
+            mask,
+            bbox,
+            self.source.crs,
+            buffer,
+            predicate,
+            handle_nodata,
+            logger=logger,
         )
         # uniformize
         gdf = self._apply_unit_conversions(gdf, logger=logger)
@@ -71,7 +79,9 @@ class GeoDataFrameAdapter(DataAdapterBase):
             raise ValueError(
                 f"GeoDataFrame {self.source.name}: CRS not defined in data catalog or data."
             )
-        elif self.crs is not None and gdf.crs != pyproj.CRS.from_user_input(self.crs):
+        elif self.source.crs is not None and gdf.crs != pyproj.CRS.from_user_input(
+            self.source.crs
+        ):
             logger.warning(
                 f"GeoDataFrame {self.source.name}: CRS from data catalog does not match CRS of"
                 " data. The original CRS will be used. Please check your data catalog."
