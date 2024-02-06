@@ -1,6 +1,7 @@
 """Driver for GeoDataFrames."""
 from abc import ABC, abstractmethod
 from logging import Logger
+from typing import List, Optional
 
 import geopandas as gpd
 from pydantic import BaseModel
@@ -16,12 +17,12 @@ class GeoDataFrameDriver(ABC, BaseModel):
     def read(
         self,
         uri: str,
-        bbox: list[int] | None = None,
-        mask: gpd.GeoDataFrame | None = None,
+        bbox: Optional[List[int]] = None,
+        mask: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
-        crs: CRS | None = None,
+        crs: Optional[CRS] = None,
         predicate: str = "intersects",
-        logger: Logger | None = None,
+        logger: Optional[Logger] = None,
         # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """

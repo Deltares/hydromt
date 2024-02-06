@@ -2,6 +2,7 @@
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
+from typing import List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -31,10 +32,10 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
     def get_data(
         self,
-        bbox: list[float] | None = None,
-        mask: gpd.GeoDataFrame | None = None,
+        bbox: Optional[List[float]] = None,
+        mask: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
-        variables: list[str] | None = None,
+        variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
@@ -90,10 +91,10 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
     def _slice_data(
         gdf: gpd.GeoDataFrame,
-        variables: str | list[str] | None = None,
-        geom: GEOM_TYPES | None = None,
-        bbox: GEOM_TYPES | None = None,
-        crs: CRS | None = None,
+        variables: Optional[Union[str, List[str]]] = None,
+        geom: Optional[GEOM_TYPES] = None,
+        bbox: Optional[GEOM_TYPES] = None,
+        crs: Optional[CRS] = None,
         buffer: float = 0.0,
         predicate: str = "intersects",  # TODO: enum available predicates
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO: review NoDataStrategy + axes
@@ -193,7 +194,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
         return gdf
 
-    def get_bbox(self, detect=True) -> TotalBounds:
+    def get_bbox(self, detect: bool = True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -223,7 +224,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
     # TODO: this should be done by the driver
     def detect_bbox(
         self,
-        gdf: gpd.GeoDataFrame = None,
+        gdf: Optional[gpd.GeoDataFrame] = None,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
 
@@ -258,7 +259,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
     def to_stac_catalog(
         self,
         on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
-    ) -> StacCatalog | None:
+    ) -> Optional[StacCatalog]:
         """
         Convert a geodataframe into a STAC Catalog representation.
 

@@ -1,7 +1,7 @@
 """Abstract DataSource class."""
 from os.path import abspath, join
 from pathlib import Path
-from typing import Any, ClassVar, Union
+from typing import Any, ClassVar, Dict, Optional, Union
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
@@ -27,9 +27,9 @@ class DataSource(BaseModel):
         cls,
         obj: Any,
         *,
-        strict: bool | None = None,
-        from_attributes: bool | None = None,
-        context: dict[str, Any] | None = None,
+        strict: Optional[bool] = None,
+        from_attributes: Optional[bool] = None,
+        context: Optional[Dict[str, Any]] = None,
     ) -> "DataSource":
         """Validate the DataSource."""
         if data_type := obj.get("data_type"):
@@ -67,22 +67,22 @@ class DataSource(BaseModel):
             return _abs_path(info.data.get("root"), v)
 
     data_type: ClassVar[DataType]
-    root: str | None = Field(default=None)
+    root: Optional[str] = Field(default=None)
     name: str
     driver: Any
-    attrs: dict[str, Any] = Field(default_factory=dict)
-    version: str | None = Field(default=None)
-    provider: str | None = Field(default=None)
+    attrs: Dict[str, Any] = Field(default_factory=dict)
+    version: Optional[str] = Field(default=None)
+    provider: Optional[str] = Field(default=None)
     metadata_resolver: MetaDataResolver
-    driver_kwargs: dict[str, Any] = Field(default_factory=dict)
-    unit_add: dict[str, Any] = Field(default_factory=dict)
-    unit_mult: dict[str, Any] = Field(default_factory=dict)
-    rename: dict[str, str] = Field(default_factory=dict)
-    nodata: float | int | dict[str, float | int] | None = Field(default=None)
-    extent: dict[str, Any] = Field(default_factory=dict)  # ?
-    meta: dict[str, Any] = Field(default_factory=dict)
+    driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
+    unit_add: Dict[str, Any] = Field(default_factory=dict)
+    unit_mult: Dict[str, Any] = Field(default_factory=dict)
+    rename: Dict[str, str] = Field(default_factory=dict)
+    nodata: Union[float, int, Dict[str, Union[float, int]]] = Field(default=None)
+    extent: Dict[str, Any] = Field(default_factory=dict)  # ?
+    meta: Dict[str, Any] = Field(default_factory=dict)
     uri: str
-    crs: int | None = Field(default=None)
+    crs: Optional[int] = Field(default=None)
 
 
 def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:

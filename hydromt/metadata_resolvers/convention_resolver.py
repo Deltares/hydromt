@@ -1,7 +1,7 @@
 """MetaDataResolver using HydroMT naming conventions."""
 from itertools import product
 from string import Formatter
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -22,8 +22,11 @@ class ConventionResolver(MetaDataResolver):
     _uri_placeholders = frozenset({"year", "month", "variable", "zoom_level"})
 
     def _expand_uri_placeholders(
-        self, uri: str, time_tuple: tuple[str, str] | None, variables: set[str] | None
-    ) -> tuple[str, list[str]]:
+        self,
+        uri: str,
+        time_tuple: Optional[Tuple[str, str]] = None,
+        variables: Optional[Set[str]] = None,
+    ) -> Tuple[str, List[str]]:
         """Expand known placeholders in the URI."""
         keys: list[str] = []
 
@@ -52,7 +55,7 @@ class ConventionResolver(MetaDataResolver):
     def _get_dates(
         self,
         source: "DataSource",
-        keys: list[str],
+        keys: List[str],
         timerange: TimeRange,
     ) -> pd.PeriodIndex:
         dt: pd.Timedelta = pd.to_timedelta(source.unit_add.get("time", 0), unit="s")
@@ -61,7 +64,7 @@ class ConventionResolver(MetaDataResolver):
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates
 
-    def _get_variables(self, variables: list[str], rename: dict[str, str]) -> list[str]:
+    def _get_variables(self, variables: List[str], rename: Dict[str, str]) -> List[str]:
         variables: list[str] = np.atleast_1d(variables).tolist()
         mv_inv: dict[str, str] = {v: k for k, v in rename.items()}
         vrs: dict[str] = [mv_inv.get(var, var) for var in variables]
@@ -71,13 +74,13 @@ class ConventionResolver(MetaDataResolver):
         self,
         source: "DataSource",
         *,
-        timerange: TimeRange | None = None,
-        bbox: Bbox | None = None,
+        timerange: Optional[TimeRange] = None,
+        bbox: Optional[Bbox] = None,
         # TODO: align? -> from RasterDataSetAdapter
-        geom: gpd.GeoDataFrame | None = None,
+        geom: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
         predicate: str = "intersects",
-        variables: list[str] | None = None,
+        variables: Optional[List[str]] = None,
         zoom_level: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,

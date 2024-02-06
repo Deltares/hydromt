@@ -1,7 +1,7 @@
 """Generic DataSource for GeoDataFrames."""
 
 from logging import Logger
-from typing import Any
+from typing import Any, List, Optional
 
 import geopandas as gpd
 from pydantic import ValidationInfo, field_validator, model_validator
@@ -58,13 +58,13 @@ class GeoDataFrameDataSource(DataSource):
 
     def read_data(
         self,
-        bbox: list[float] | None = None,
-        mask: gpd.GeoDataFrame | None = None,
+        bbox: Optional[List[float]] = None,
+        mask: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
-        variables: list[str] | None = None,
+        variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger | None = None,
+        logger: Optional[Logger] = None,
     ) -> gpd.GeoDataFrame:
         """Use initialize driver to read data."""
         uris: list[str] = self.metadata_resolver.resolve(

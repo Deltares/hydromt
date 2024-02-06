@@ -1,6 +1,6 @@
 """Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 import geopandas as gpd
 from pydantic import BaseModel
@@ -20,15 +20,15 @@ class MetaDataResolver(BaseModel, ABC):
         self,
         source: "DataSource",
         *,
-        timerange: TimeRange | None = None,
-        bbox: Bbox | None = None,
-        geom: gpd.GeoDataFrame | None = None,
+        timerange: Optional[TimeRange] = None,
+        bbox: Optional[Bbox] = None,
+        geom: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
         predicate: str = "intersects",
-        variables: list[str] | None = None,
+        variables: Optional[List[str]] = None,
         zoom_level: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
-    ) -> list[str]:
+    ) -> List[str]:
         """Resolve metadata of data behind a single URI."""
         ...

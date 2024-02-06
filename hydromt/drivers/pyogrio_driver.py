@@ -1,5 +1,6 @@
 """Driver to read geodataframes using Pyogrio."""
 from logging import Logger
+from typing import Optional
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info
@@ -19,12 +20,12 @@ class PyogrioDriver(GeoDataFrameDriver):
     def read(
         self,
         uri: str,
-        bbox: Bbox | None = None,
-        mask: gpd.GeoDataFrame | None = None,
+        bbox: Optional[Bbox] = None,
+        mask: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0,
-        crs: CRS | None = None,
+        crs: Optional[CRS] = None,
         predicate: str = "intersects",
-        logger: Logger | None = None,
+        logger: Optional[Logger] = None,
         # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """
@@ -42,10 +43,10 @@ class PyogrioDriver(GeoDataFrameDriver):
 
 def bbox_from_file_and_filters(
     uri: str,
-    bbox: GEOM_TYPES | None = None,
-    mask: GEOM_TYPES | None = None,
-    crs: CRS | None = None,
-) -> tuple[float, float, float, float] | None:
+    bbox: Optional[GEOM_TYPES] = None,
+    mask: Optional[GEOM_TYPES] = None,
+    crs: Optional[CRS] = None,
+) -> Optional[Bbox]:
     """Create a bbox from the file metadata and filter options.
 
     Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.
