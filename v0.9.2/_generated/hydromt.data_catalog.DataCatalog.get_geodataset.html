@@ -943,7 +943,6 @@ to the catalog with its based on the file basename.</p></li>
 (in WGS84 coordinates).</p></li>
 <li><p><strong>geom</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame/Series,</span></code>) – A geometry defining the area of interest.</p></li>
 <li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – Buffer around the <cite>bbox</cite> or <cite>geom</cite> area of interest in meters. By default 0.</p></li>
-<li><p><strong>handle_nodata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">NoDataStrategy</span> <span class="pre">Optional</span></code>) – what should happen if the requested data set is empty. RAISE by default</p></li>
 <li><p><strong>predicate</strong> (<em>optional</em>) – If predicate is provided, the GeoDataFrame is filtered by testing
 the predicate function against each item. Requires bbox or mask.
 By default ‘intersects’ options are:

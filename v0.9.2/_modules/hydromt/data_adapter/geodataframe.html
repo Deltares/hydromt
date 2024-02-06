@@ -446,13 +446,12 @@ document.write(`
                   
   <h1>Source code for hydromt.data_adapter.geodataframe</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;The Geodataframe adapter implementation.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">basename</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">splitext</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pyproj</span>
 <span class="kn">from</span> <span class="nn">pyproj.exceptions</span> <span class="kn">import</span> <span class="n">CRSError</span>
@@ -461,22 +460,13 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pystac</span> <span class="kn">import</span> <span class="n">Item</span> <span class="k">as</span> <span class="n">StacItem</span>
 <span class="kn">from</span> <span class="nn">pystac</span> <span class="kn">import</span> <span class="n">MediaType</span>
 
-<span class="kn">from</span> <span class="nn">hydromt.nodata</span> <span class="kn">import</span> <span class="n">NoDataException</span><span class="p">,</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">_exec_nodata_strat</span>
-<span class="kn">from</span> <span class="nn">hydromt.typing</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Bbox</span><span class="p">,</span>
-    <span class="n">ErrorHandleMethod</span><span class="p">,</span>
-    <span class="n">GeoDataframeSource</span><span class="p">,</span>
-    <span class="n">Geom</span><span class="p">,</span>
-    <span class="n">GeomBuffer</span><span class="p">,</span>
-    <span class="n">Predicate</span><span class="p">,</span>
-    <span class="n">StrPath</span><span class="p">,</span>
-    <span class="n">TotalBounds</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">hydromt.typing</span> <span class="kn">import</span> <span class="n">ErrorHandleMethod</span><span class="p">,</span> <span class="n">GeoDataframeSource</span><span class="p">,</span> <span class="n">TotalBounds</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">gis_utils</span><span class="p">,</span> <span class="n">io</span>
+<span class="kn">from</span> <span class="nn">..nodata</span> <span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">_exec_nodata_strat</span>
 <span class="kn">from</span> <span class="nn">.data_adapter</span> <span class="kn">import</span> <span class="n">DataAdapter</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GeoDataFrameAdapter&quot;</span><span class="p">,</span> <span class="s2">&quot;GeoDataframeSource&quot;</span><span class="p">]</span>
 
@@ -500,7 +490,7 @@ document.write(`
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDataFrameAdapter.html#hydromt.data_adapter.GeoDataFrameAdapter.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">driver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">filesystem</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -515,8 +505,8 @@ document.write(`
         <span class="n">storage_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># optional for now</span>
         <span class="n">catalog_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># optional for now</span>
-        <span class="n">provider</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initiate data adapter for geospatial vector data.</span>
@@ -621,15 +611,14 @@ document.write(`
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDataFrameAdapter.to_file.html#hydromt.data_adapter.GeoDataFrameAdapter.to_file">[docs]</a>
     <span class="k">def</span> <span class="nf">to_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">data_root</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span>
-        <span class="n">data_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">driver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+        <span class="n">data_root</span><span class="p">,</span>
+        <span class="n">data_name</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]:</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save a data slice to file.</span>
 
 <span class="sd">        Parameters</span>
@@ -658,14 +647,7 @@ document.write(`
 <span class="sd">            :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;time_tuple&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
-            <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
-            <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
-            <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
-            <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">gdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
 
         <span class="n">read_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">driver</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -707,59 +689,38 @@ document.write(`
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDataFrameAdapter.get_data.html#hydromt.data_adapter.GeoDataFrameAdapter.get_data">[docs]</a>
     <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">buffer</span><span class="p">:</span> <span class="n">GeomBuffer</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">predicate</span><span class="p">:</span> <span class="n">Predicate</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
-        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
+        <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a clipped and unified GeoDataFrame (vector).</span>
 
 <span class="sd">        For a detailed description see:</span>
 <span class="sd">        :py:func:`~hydromt.data_catalog.DataCatalog.get_geodataframe`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># load</span>
-            <span class="n">fns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_paths</span><span class="p">(</span><span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mark_as_used</span><span class="p">()</span>  <span class="c1"># mark used</span>
-            <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_data</span><span class="p">(</span><span class="n">fns</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">predicate</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">gdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">()</span>
-            <span class="c1"># rename variables and parse crs &amp; nodata</span>
-            <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_vars</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
-            <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-            <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_nodata</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
-            <span class="c1"># slice</span>
-            <span class="n">gdf</span> <span class="o">=</span> <span class="n">GeoDataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
-                <span class="n">gdf</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">predicate</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">gdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">()</span>
-
-            <span class="c1"># uniformize</span>
-            <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_unit_conversions</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-            <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_metadata</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">gdf</span>
-        <span class="k">except</span> <span class="n">NoDataException</span><span class="p">:</span>
-            <span class="n">_exec_nodata_strat</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;No data was read from source: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
-                <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
+        <span class="c1"># load</span>
+        <span class="n">fns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_paths</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_data</span><span class="p">(</span><span class="n">fns</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">predicate</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mark_as_used</span><span class="p">()</span>  <span class="c1"># mark used</span>
+        <span class="c1"># rename variables and parse crs &amp; nodata</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_vars</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_nodata</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
+        <span class="c1"># slice</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">GeoDataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
+            <span class="n">gdf</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">predicate</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
+        <span class="p">)</span>
+        <span class="c1"># uniformize</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_unit_conversions</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_metadata</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gdf</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_read_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">fns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">],</span>
-        <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">],</span>
-        <span class="n">buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GeomBuffer</span><span class="p">],</span>
-        <span class="n">predicate</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Predicate</span><span class="p">],</span>
-        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fns</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">predicate</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;GeoDataFrame: Reading multiple </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="si">}</span><span class="s2"> files is not supported.&quot;</span>
@@ -795,23 +756,16 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GeoDataFrame: driver </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="si">}</span><span class="s2"> unknown.&quot;</span><span class="p">)</span>
 
-        <span class="n">gdf</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gdf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gdf</span>
 
-        <span class="k">if</span> <span class="n">gdf</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">gdf</span>
-
-    <span class="k">def</span> <span class="nf">_rename_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_rename_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">):</span>
         <span class="c1"># rename and select columns</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">:</span>
             <span class="n">rename</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span><span class="p">}</span>
             <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">gdf</span>
 
-    <span class="k">def</span> <span class="nf">_set_crs</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_set_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">gdf</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -827,13 +781,14 @@ document.write(`
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_slice_data</span><span class="p">(</span>
-        <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
-        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">predicate</span><span class="p">:</span> <span class="n">Predicate</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
-        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+        <span class="n">gdf</span><span class="p">,</span>
+        <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a clipped GeoDataFrame (vector).</span>
 
@@ -874,10 +829,14 @@ document.write(`
             <span class="n">epsg</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Clip </span><span class="si">{</span><span class="n">predicate</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">bbox_str</span><span class="si">}</span><span class="s2">] (EPSG:</span><span class="si">{</span><span class="n">epsg</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
             <span class="n">idxs</span> <span class="o">=</span> <span class="n">gis_utils</span><span class="o">.</span><span class="n">filter_gdf</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idxs</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">_exec_nodata_strat</span><span class="p">(</span>
+                    <span class="s2">&quot;No data within spatial domain.&quot;</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span>
+                <span class="p">)</span>
             <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idxs</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">gdf</span>
 
-    <span class="k">def</span> <span class="nf">_set_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_set_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">):</span>
         <span class="c1"># parse nodata values</span>
         <span class="n">cols</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -892,9 +851,7 @@ document.write(`
                     <span class="n">gdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_nodata</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">gdf</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">gdf</span>
 
-    <span class="k">def</span> <span class="nf">_apply_unit_conversions</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_apply_unit_conversions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">):</span>
         <span class="c1"># unit conversion</span>
         <span class="n">unit_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_mult</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_add</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">unit_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">unit_names</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
@@ -906,7 +863,7 @@ document.write(`
             <span class="n">gdf</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">*</span> <span class="n">m</span> <span class="o">+</span> <span class="n">a</span>
         <span class="k">return</span> <span class="n">gdf</span>
 
-    <span class="k">def</span> <span class="nf">_set_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_set_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">):</span>
         <span class="c1"># set meta data</span>
         <span class="n">gdf</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">)</span>
 
@@ -919,10 +876,7 @@ document.write(`
 
 <div class="viewcode-block" id="GeoDataFrameAdapter.get_bbox">
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDataFrameAdapter.get_bbox.html#hydromt.data_adapter.GeoDataFrameAdapter.get_bbox">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_bbox</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">detect</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TotalBounds</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TotalBounds</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the bounding box and espg code of the dataset.</span>
 
 <span class="sd">        if the bounding box is not set and detect is True,</span>
@@ -954,7 +908,7 @@ document.write(`
 <a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html#hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox">[docs]</a>
     <span class="k">def</span> <span class="nf">detect_bbox</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">gdf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">gdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TotalBounds</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect the bounding box and crs of the dataset.</span>
 

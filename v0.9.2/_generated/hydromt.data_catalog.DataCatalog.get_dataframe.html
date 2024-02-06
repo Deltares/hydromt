@@ -936,15 +936,12 @@ to the catalog with its based on the file basename.</p></li>
 are returned.</p></li>
 <li><p><strong>time_tuple</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <em>optional</em>) – Start and end date of period of interest. By default the entire time period
 of the dataset is returned.</p></li>
-<li><p><strong>handle_nodata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">NoDataStrategy</span> <span class="pre">Optional</span></code>) – what should happen if the requested data set is empty. RAISE by default</p></li>
 <li><p><strong>**kwargs</strong> – Additional keyword arguments that are passed to the <cite>DataframeAdapter</cite>
 function. Only used if <cite>data_like</cite> is a path to a tabular data file.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Tabular data. If no data is found and handle_nodata is set to IGNORE None
-will be returned. if it is set to RAISE and exception will be raised in that
-situation</p>
+<dd class="field-even"><p>Tabular data</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></p>
