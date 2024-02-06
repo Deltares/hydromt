@@ -137,13 +137,13 @@ cache_opt = click.option(
 
 
 @click.group()
-@click.version_option(__version__, message="hydroMT version: %(version)s")
+@click.version_option(__version__, message="HydroMT version: %(version)s")
 @click.option(
     "--models",
     default=False,
     is_flag=True,
     is_eager=True,
-    help="Print availabe model plugins and exit.",
+    help="Print available model plugins and exit.",
     callback=print_models,
 )
 @click.pass_context
@@ -608,7 +608,8 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
 
     If the existing model contains forcing, they will also be clipped to the new model.
 
-    For options to build wflow models see:
+    Example usage:
+    --------------
 
     Example usage to clip a wflow model for a subbasin derived from point coordinates
     snapped to cells with upstream area >= 50 km2
@@ -620,7 +621,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     Example usage basins whose outlets are inside a geometry
     hydromt clip wflow /path/to/model_root /path/to/model_destination "{'outlet': 'geometry.geojson'}"
 
-    All available option in the clip_staticmaps function help.
+    All available option in the clip_grid function help.
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -637,7 +638,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         logger.info("Reading model to clip")
         mod.read()
         mod.set_root(model_destination, mode="w")
-        logger.info("Clipping staticmaps")
+        logger.info("Clipping grid")
         mod.clip_grid(region)
         logger.info("Clipping forcing")
         mod.clip_forcing()

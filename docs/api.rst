@@ -6,6 +6,36 @@
 API reference
 #############
 
+======================
+Command Line Interface
+======================
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   api_cli/hydromt_cli.rst
+   api_cli/hydromt_build.rst
+   api_cli/hydromt_update.rst
+   api_cli/hydromt_clip.rst
+   api_cli/hydromt_export.rst
+   api_cli/hydromt_check.rst
+
+
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt <api_cli/hydromt_cli.rst>`_           | Main command line interface of HydroMT.                |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt build <api_cli/hydromt_build.rst>`_   | Build a model.                                         |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt update <api_cli/hydromt_update.rst>`_ | Update an existing model.                              |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt clip <api_cli/hydromt_clip.rst>`_     | Clip/Extract a submodel from an existing model.        |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt export <api_cli/hydromt_export.rst>`_ | Export data extract from a data catalog.               |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt check <api_cli/hydromt_check.rst>`_   | Check if data catalog or configuration file are valid. |
++------------------------------------------------+--------------------------------------------------------+
+
 ====
 Data
 ====
