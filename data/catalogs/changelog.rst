@@ -97,21 +97,13 @@ fixed
 cmip6_data
 ==========
 
-<<<<<<< HEAD
-version: 2024.1
+version: 2024.1.30
 ----------------
 
 added
 ^^^^^
 - hydromt_version to data catalog meta
-=======
-version: 2024.1.30
----------------
 
-added
-^^^^^
-- HydroMT version to catalog
->>>>>>> main
 
 version: 2023.2
 ---------------
@@ -123,21 +115,12 @@ added
 aws_data
 ========
 
-<<<<<<< HEAD
-version: 2024.1
-----------------
-
-added
-^^^^^
-- hydromt_version to data catalog meta
-=======
 version: 2024.1.30
 ---------------
 
 added
 ^^^^^
 - HydroMT version to catalog
->>>>>>> main
 
 version: 2023.2
 ---------------
