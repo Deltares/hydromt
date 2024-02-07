@@ -25,7 +25,7 @@ changed
 - Removed version from dataset names and prefixed 'hydro' where necessary, see table below for mapping of old and new names.
 
 .. list-table:: Dataset name changes:
-   :widths: 25 25 50
+   :widths: 25 25
    :header-rows: 1
 
 	* - Old name
