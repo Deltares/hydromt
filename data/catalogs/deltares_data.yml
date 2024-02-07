@@ -5,7 +5,7 @@ meta:
   hydromt_version: '>=0.9, <1.0'
 
 
-basin_atlas_level12_v10:
+hydro_basin_atlas_level12:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
@@ -750,7 +750,7 @@ ghs_pop:
   version: R2019A_v1.0
   path: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_4326_9ss_V1_0.tif
 
-ghs_pop_2015_54009_v2019a:
+ghs_pop_2015_54009:
   crs: ESRI:54009
   data_type: RasterDataset
   driver: raster
@@ -769,7 +769,7 @@ ghs_pop_2015_54009_v2019a:
       South: -9000000.0
       East: 18041000.0
       North: 9000000.0
-  version: R2019A_54009_250_v1.0
+  version: R2019A_v1.0
   path: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_54009_250_V1_0.tif
 
 ghs_smod:
@@ -824,7 +824,7 @@ globcover:
   version: 2.3
   path: landuse/globcover/GLOBCOVER_L4_200901_200912_V2.3.tif
 
-glofas_era5_v31:
+glofas_era5:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
@@ -1160,10 +1160,10 @@ gswo:
       East: 180.0
       North: 80.0
   nodata: 255
-  version: v1_1_2019
+  version: v1_1
   path: hydrography/gswo/occur.vrt
 
-guf_bld_2012:
+guf:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -1182,6 +1182,7 @@ guf_bld_2012:
       South: -65.0
       East: 180.0
       North: 85.0
+  version: 2
   path: infrastructure/guf/GUF04_DLR_v02.vrt
 
 hydro_lakes:
@@ -1268,7 +1269,7 @@ koppen_geiger:
   version: 2017
   path: meteo/climate_classification_v2017/Map_KG-Global.tif
 
-lake_atlas_pol_v10:
+hydro_lake_atlas_pol:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
@@ -1607,7 +1608,7 @@ rgi:
     ID: simple_id
     RGIID: RGI_id
 
-river_atlas_v10:
+hydro_river_atlas:
   crs: 4326
   data_type: GeoDataFrame
   driver: vector
@@ -1628,7 +1629,7 @@ river_atlas_v10:
   rename:
     dis_m3_pyr: Dis_avg
 
-rivers_lin2019_v1:
+hydro_rivers_lin2019:
   data_type: GeoDataFrame
   driver: vector
   meta:
@@ -1670,7 +1671,7 @@ simard:
   version: 2011
   path: landuse/simard/sdat_10023_canopy_height_simard.tif
 
-SM2RAIN_ASCAT_monthly_025_v1.4:
+SM2RAIN_ASCAT_monthly_025:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
@@ -1700,7 +1701,7 @@ SM2RAIN_ASCAT_monthly_025_v1.4:
   rename:
     rainfall: precip
 
-SM2RAIN_ASCAT_monthly_05_v1.4:
+SM2RAIN_ASCAT_monthly_05:
   crs: 4326
   data_type: RasterDataset
   driver: netcdf
@@ -1937,9 +1938,10 @@ vito:
       South: -60.0
       East: 180.0
       North: 80.0
+  version: 2.0.2
   path: landuse/vito/ProbaV_LC100_epoch2015_global_v2.0.2_discrete-classification_EPSG-4326.tif
 
-vito_2016_v3.0.1:
+vito_2016:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -1957,9 +1959,10 @@ vito_2016_v3.0.1:
       South: -60.0
       East: 180.0
       North: 80.0
+  version: 3.0.1
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2016-conso_Discrete-Classification-map_EPSG-4326.tif
 
-vito_2017_v3.0.1:
+vito_2017:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -1977,9 +1980,10 @@ vito_2017_v3.0.1:
       South: -60.0
       East: 180.0
       North: 80.0
+  version: 3.0.1
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2017-conso_Discrete-Classification-map_EPSG-4326.tif
 
-vito_2018_v3.0.1:
+vito_2018:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -1999,7 +2003,7 @@ vito_2018_v3.0.1:
       North: 80.0
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2018-conso_Discrete-Classification-map_EPSG-4326.tif
 
-vito_2019_v3.0.1:
+vito_2019:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -2017,6 +2021,7 @@ vito_2019_v3.0.1:
       South: -60.0
       East: 180.0
       North: 80.0
+  version: 3.0.1
   path: landuse/vito/ProbaV_LC100_global_v3.0.1_2019-nrt_discrete-classification-map_EPSG-4326.tif
 
 wb_countries:
