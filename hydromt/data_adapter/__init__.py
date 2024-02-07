@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-"""HydroMT data adapter."""
+"""Data Adapters are generic for its HydroMT type and perform transformations."""
 
+# TODO: correct imports after deprecation of old adapters
 from .data_adapter import DataAdapter
 from .dataframe import DataFrameAdapter
 from .dataset import DatasetAdapter

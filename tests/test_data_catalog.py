@@ -11,14 +11,13 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-import hydromt.data_catalog
 from hydromt.data_adapter import (
     DataAdapter,
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_catalog import (
+from hydromt.data_catalog_v1 import (
     DataCatalog,
     _denormalise_data_dict,
     _parse_data_source_dict,
@@ -232,6 +231,8 @@ def test_versioned_catalogs(tmpdir, monkeypatch):
         DataCatalog(data_libs=[v999_yml_fn])
 
     with monkeypatch.context() as m:
+        import hydromt
+
         m.setattr(hydromt.data_catalog, "__version__", "999.0.0")
         DataCatalog(v999_yml_fn)
 

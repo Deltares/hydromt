@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """DataCatalog module for HydroMT."""
 from __future__ import annotations
 
@@ -34,6 +31,7 @@ from packaging.version import Version
 from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
+from hydromt.data_sources.data_source import DataSource
 from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt.utils import partition_dictionaries
 
@@ -117,7 +115,7 @@ class DataCatalog(object):
         if cache_dir is not None:
             self._cache_dir = cache_dir
 
-        # legacy code. to be removed
+        # TODO: legacy code. to be removed
         for lib, version in artifact_keys.items():
             warnings.warn(
                 "Adding a predefined data catalog as key-word argument is deprecated, "
@@ -140,8 +138,8 @@ class DataCatalog(object):
                 self.from_predefined_catalogs(name_or_path)
 
     @property
-    def sources(self) -> Dict:
-        """Returns dictionary of DataAdapter sources."""
+    def sources(self) -> Dict[DataSource]:
+        """Returns dictionary of DataSources."""
         if len(self._sources) == 0 and self._fallback_lib is not None:
             # read artifacts by default if no catalogs are provided
             self.from_predefined_catalogs(self._fallback_lib)
@@ -353,7 +351,7 @@ class DataCatalog(object):
         source: str,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-    ) -> DataAdapter:
+    ) -> DataSource:
         """Return a data source.
 
         Parameters
@@ -369,8 +367,8 @@ class DataCatalog(object):
 
         Returns
         -------
-        DataAdapter
-            DataAdapter object.
+        DataSource
+            DataSource object.
         """
         source = str(source)
         if source not in self._sources:
@@ -874,7 +872,7 @@ class DataCatalog(object):
             if not self._is_compatible(__version__, requested_version, allow_dev):
                 raise RuntimeError(
                     f"Data catalog requires Hydromt Version {requested_version} which "
-                    f"is incompattible with current hydromt verison {__version__}."
+                    f"is incompattible with current hydromt version {__version__}."
                 )
         if catalog_name is None:
             catalog_name = cast(
@@ -969,13 +967,10 @@ class DataCatalog(object):
             root = meta.pop("root")
         if "category" in meta and category is None:
             category = meta.pop("category")
-        if "name" in meta and catalog_name is None:
-            catalog_name = meta.pop("name")
         for name, source_dict in _denormalise_data_dict(data_dict):
             adapter = _parse_data_source_dict(
                 name,
                 source_dict,
-                catalog_name=catalog_name,
                 root=root,
                 category=category,
             )
@@ -1755,58 +1750,36 @@ def _parse_data_like_dict(
 def _parse_data_source_dict(
     name: str,
     data_source_dict: Dict,
-    catalog_name: str = "",
     root: Optional[Union[Path, str]] = None,
     category: Optional[str] = None,
 ) -> Dict:
     """Parse data source dictionary."""
-    # link yml keys to adapter classes
-    ADAPTERS = {
-        "RasterDataset": RasterDatasetAdapter,
-        "GeoDataFrame": GeoDataFrameAdapter,
-        "GeoDataset": GeoDatasetAdapter,
-        "DataFrame": DataFrameAdapter,
-        "Dataset": DatasetAdapter,
-    }
     # parse data
     source = data_source_dict.copy()  # important as we modify with pop
 
-    # parse path
-    if "path" not in source:
-        raise ValueError(f"{name}: Missing required path argument.")
-    # if remote path, keep as is else call abs_path method to solve local files
-    path = source.pop("path")
-    if not _uri_validator(str(path)):
-        path = abs_path(root, path)
-    # parse data type > adapter
-    data_type = source.pop("data_type", None)
-    if data_type is None:
-        raise ValueError(f"{name}: Data type missing.")
-    elif data_type not in ADAPTERS:
-        raise ValueError(f"{name}: Data type {data_type} unknown")
-    adapter = ADAPTERS.get(data_type)
+    source["name"] = name
+
     # source meta data
     meta = source.pop("meta", {})
     if "category" not in meta and category is not None:
         meta.update(category=category)
 
+    source["meta"] = meta
+
     # driver arguments
     driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
+    # TODO: remove code under this depending on subclasses
+    #       The DataCatalog should now have specific implementations for different drivers
     for driver_kwarg in driver_kwargs:
         # required for geodataset where driver_kwargs can be a path
         if "fn" in driver_kwarg:
             driver_kwargs.update(
                 {driver_kwarg: abs_path(root, driver_kwargs[driver_kwarg])}
             )
+    source["driver_kwargs"] = driver_kwargs
 
-    return adapter(
-        path=path,
-        name=name,
-        catalog_name=catalog_name,
-        meta=meta,
-        driver_kwargs=driver_kwargs,
-        **source,
-    )
+    # TODO: return DataSource
+    return DataSource.submodel_validate(source)
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
