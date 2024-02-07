@@ -483,7 +483,7 @@ def test_geodataframe(geodf, tmpdir):
     assert np.all(gdf1 == geodf)
     # testt read shapefile using mask
     mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]})
-    gdf1 = hydromt.open_vector(fn_shp, mask=mask)
+    gdf1 = hydromt.open_vector(fn_shp, geom=mask)
     assert np.all(gdf1 == geodf)
     # test read with buffer
     gdf1 = data_catalog.get_geodataframe(
