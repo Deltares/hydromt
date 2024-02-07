@@ -6,6 +6,7 @@ from os.path import abspath, dirname, isfile, join
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import pytest
 import xarray as xr
 from shapely.geometry import box
@@ -163,6 +164,13 @@ def test_write_data_catalog(tmpdir):
     model1.data_catalog.get_source(sources[0]).mark_as_used()
     model1.write_data_catalog(append=True)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
+    # test writing table of datacatalog as csv
+    model.write_data_catalog(used_only=False, save_csv=True)
+    assert isfile(join(model.root, "hydromt_data.csv"))
+    data_catalog_df = pd.read_csv(join(model.root, "hydromt_data.csv"))
+    assert len(data_catalog_df) == len(sources)
+    assert data_catalog_df.iloc[0, 0] == sources[0]
+    assert data_catalog_df.iloc[-1, 0] == sources[-1]
 
 
 def test_model(model, tmpdir):

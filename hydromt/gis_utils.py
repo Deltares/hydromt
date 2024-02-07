@@ -7,7 +7,6 @@ from __future__ import annotations
 import glob
 import logging
 import os
-from io import IOBase
 from os.path import dirname
 from typing import Optional, Tuple, Union
 
@@ -202,7 +201,9 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
         raise ValueError("Either geom or bbox is required.")
     if not isinstance(geom, BaseGeometry):
         # reproject
-        if gdf.crs is not None and geom.crs != gdf.crs:
+        if geom.crs is None and gdf.crs is not None:
+            geom = geom.set_crs(gdf.crs)
+        elif gdf.crs is not None and geom.crs != gdf.crs:
             geom = geom.to_crs(gdf.crs)
         # convert geopandas to geometry
         geom = geom.unary_union
@@ -609,7 +610,7 @@ def to_geographic_bbox(bbox, source_crs):
 
 
 def bbox_from_file_and_filters(
-    fn: IOBase,
+    fn: str,
     bbox: Union[GEOM_TYPES, None] = None,
     mask: GEOM_TYPES | None = None,
     crs: CRS | None = None,
@@ -640,7 +641,12 @@ def bbox_from_file_and_filters(
         )
     if bbox is None and mask is None:
         return None
-    source_crs = CRS(read_info(fn).get("crs", "EPSG:4326"))  # assume WGS84
+    if source_crs_str := read_info(fn).get("crs"):
+        source_crs = CRS(source_crs_str)
+    elif crs:
+        source_crs = crs
+    else:  # assume WGS84
+        source_crs = CRS("EPSG:4326")
 
     if mask is not None:
         bbox = mask

@@ -144,6 +144,27 @@ def test_attrs_errors(rioda):
         rioda.expand_dims(("t", "t1")).raster._check_dimensions()
 
 
+def test_check_dimensions(rioda):
+    # test with 2D data
+    rioda.raster._check_dimensions()
+    assert "dim0" not in rioda.raster.attrs.keys()
+    # test with 3D data
+    rioda_3d = rioda.expand_dims("t")
+    rioda_3d.name = "test_3d"
+    rioda_3d.raster._check_dimensions()
+    assert rioda_3d.raster.attrs["dim0"] == "t"
+    # test with dataset of 2D and 3D data
+    ds = xr.merge([rioda, rioda_3d])
+    ds.raster._check_dimensions()
+    assert ds.raster.attrs["dim0"] == "t"
+    # add 3D data with a different dimension name
+    rioda_3d_t1 = rioda.expand_dims("t1")
+    rioda_3d_t1.name = "test_3d_t1"
+    ds = xr.merge([ds, rioda_3d, rioda_3d_t1])
+    ds.raster._check_dimensions()
+    assert "dim0" not in ds.raster.attrs.keys()
+
+
 def test_from_numpy_full_like():
     # test full with rotated grid
     da_rot = raster.full_from_transform(*testdata[-1], nodata=-1, name="test")
@@ -348,6 +369,7 @@ def test_reproject():
     assert np.all(np.isnan(da2_empty))
     assert da2_empty.raster.identical_grid(da2)
     assert da2_empty.name == da0.name
+    assert da2_empty.dtype == da0.dtype
     # flipud
     assert ds1.raster.flipud().raster.res[1] == -ds1.raster.res[1]
     # reproject nearest index

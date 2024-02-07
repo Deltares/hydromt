@@ -48,6 +48,14 @@ GeoDataframeSource = Union[str, Path]
 GeoDatasetSource = Union[str, Path]
 RasterDatasetSource = Union[str, Path]
 Bbox = Annotated[Tuple[float, float, float, float], _validate_bbox]
+
+StrPath = Union[str, Path]
+GeoDataframeSource = StrPath
+GeoDatasetSource = StrPath
+RasterDatasetSource = StrPath
+DatasetSource = StrPath
+
+Bbox = Tuple[float, float, float, float]
 Crs = int
 TotalBounds = Tuple[Bbox, Crs]
 TimeRange = Annotated[
@@ -72,6 +80,18 @@ ExportConfigDict = TypedDict(
 )
 GPD_TYPES = gpd.GeoDataFrame | gpd.GeoSeries
 GEOM_TYPES = GPD_TYPES | BaseGeometry
+
+Predicate = Literal[
+    "intersects", "within", "contains", "overlaps", "crosses", "touches"
+]
+
+Geom = Union[gpd.GeoDataFrame, gpd.GeoSeries]
+
+Data = Union[Dataset, DataArray]
+
+Variables = Union[str, List[str]]
+
+GeomBuffer = int
 
 
 class ErrorHandleMethod(Enum):
