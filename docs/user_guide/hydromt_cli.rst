@@ -15,11 +15,11 @@ want to run. The following commands are available:
 - **hydromt \-\-help**: Print help on HydroMT and the different commands.
 - **hydromt \-\-version**: Print the version of HydroMT.
 - **hydromt \-\-models**: Print the available model from HydroMT and the installed plugins.
-- **hydromt check**: Validate config / data catalog / region.
 - **hydromt build**: Build models.
 - **hydromt update**: Update models.
 - **hydromt clip**: Clip models.
 - **hydromt export**: Export data.
+- **hydromt check**: Validate config / data catalog / region.
 
 Example for printing the help of HydroMT (do not forget to activate the python environment
 where HydroMT is installed):
@@ -52,9 +52,9 @@ help, installed version and available models.
 Help command
 ^^^^^^^^^^^^
 
-The `hydromt --help` command prints the help of HydroMT and the different commands,
+The `hydromt \-\-help` command prints the help of HydroMT and the different commands,
 such as build. For the general help, you can see the example above. To get help for
-a specific command, you can type `hydromt <command> --help`. For example, to get help
+a specific command, you can type `hydromt <command> \-\-help`. For example, to get help
 for the build command, you can type:
 
 .. code-block:: console
@@ -97,7 +97,7 @@ for the build command, you can type:
 
 Version command
 ^^^^^^^^^^^^^^^
-The `hydromt --version` command prints the version of HydroMT. For example:
+The `hydromt \-\-version` command prints the version of HydroMT. For example:
 
 .. code-block:: console
 
@@ -107,7 +107,7 @@ The `hydromt --version` command prints the version of HydroMT. For example:
 
 Models command
 ^^^^^^^^^^^^^^
-The `hydromt --models` command prints the available generic models from HydroMT core and
+The `hydromt \-\-models` command prints the available generic models from HydroMT core and
 the installed plugins together with their versions. For example:
 
 .. code-block:: console
@@ -203,7 +203,7 @@ Export command
 --------------
 The **hydromt export** command is used to export sample data from a data catalog for
 example to export global data for a specific region and time extent. It is based
-on the `hydromt.DataCatalog.export_data <../_generated/hydromt.data_catalog.DataCatalog.export_data.rst>`_ function.
+on the `hydromt.DataCatalog.export_data` function.
 It has one mandatory argument:
 
 - `EXPORT_DEST_PATH`: Absolute or relative path to the output folder of the exported data.
@@ -255,7 +255,7 @@ An example of the export file is:
         meta:
             version: 0.1
 
-You can find detailed document on the function in `hydromt.DataCatalog.export_data <../_generated/hydromt.data_catalog.DataCatalog.export_dat.rst>`_.
+You can find detailed document on the function in `hydromt.DataCatalog.export_data <../_generated/hydromt.data_catalog.DataCatalog.export_data.rst>`_.
 For the region, only the `bbox` and `geom` types are supported, see the :ref:` region <region>` section for more information.
 
 Finally you can check the :ref:`hydromt export API <export_api>` for all the available options for the export command.

@@ -90,10 +90,23 @@ Get data
    data_catalog.DataCatalog.get_geodataset
    data_catalog.DataCatalog.get_geodataframe
    data_catalog.DataCatalog.get_dataframe
+   data_catalog.DataCatalog.get_dataset
 
+DataAdapter
+===========
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_adapter.DataAdapter
+   data_adapter.DataAdapter.summary
+   data_adapter.DataAdapter.to_dict
 
 RasterDataset
-=============
+-------------
 
 .. autosummary::
    :toctree: _generated
@@ -107,9 +120,10 @@ RasterDataset
    data_adapter.RasterDatasetAdapter.get_time_range
    data_adapter.RasterDatasetAdapter.detect_bbox
    data_adapter.RasterDatasetAdapter.detect_time_range
+   data_adapter.RasterDatasetAdapter.to_stac_catalog
 
 GeoDataset
-==========
+----------
 
 .. autosummary::
    :toctree: _generated
@@ -123,9 +137,10 @@ GeoDataset
    data_adapter.GeoDatasetAdapter.get_time_range
    data_adapter.GeoDatasetAdapter.detect_bbox
    data_adapter.GeoDatasetAdapter.detect_time_range
+   data_adapter.GeoDatasetAdapter.to_stac_catalog
 
 GeoDataFrame
-============
+------------
 
 .. autosummary::
    :toctree: _generated
@@ -137,9 +152,10 @@ GeoDataFrame
    data_adapter.GeoDataFrameAdapter.to_file
    data_adapter.GeoDataFrameAdapter.get_bbox
    data_adapter.GeoDataFrameAdapter.detect_bbox
+   data_adapter.GeoDataFrameAdapter.to_stac_catalog
 
 DataFrame
-=========
+---------
 
 .. autosummary::
    :toctree: _generated
@@ -149,6 +165,20 @@ DataFrame
    data_adapter.DataFrameAdapter.get_data
    data_adapter.DataFrameAdapter.to_dict
    data_adapter.DataFrameAdapter.to_file
+   data_adapter.DataFrameAdapter.to_stac_catalog
+
+Dataset
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_adapter.DatasetAdapter
+   data_adapter.DatasetAdapter.summary
+   data_adapter.DatasetAdapter.get_data
+   data_adapter.DatasetAdapter.to_dict
+   data_adapter.DatasetAdapter.to_file
+   data_adapter.DatasetAdapter.to_stac_catalog
 
 
 ======
@@ -410,6 +440,8 @@ Setup methods
 Workflows
 =========
 
+.. _workflows_grid_api:
+
 Grid
 ====
 
@@ -421,6 +453,8 @@ Grid
    workflows.grid.grid_from_raster_reclass
    workflows.grid.grid_from_geodataframe
 
+.. _workflows_mesh_api:
+
 Mesh
 ====
 
@@ -431,6 +465,7 @@ Mesh
    workflows.mesh.mesh2d_from_rasterdataset
    workflows.mesh.mesh2d_from_raster_reclass
 
+.. _workflows_basin_api:
 
 Basin mask
 ==========
@@ -441,6 +476,8 @@ Basin mask
    workflows.basin_mask.get_basin_geometry
    workflows.basin_mask.parse_region
 
+.. _workflows_rivers_api:
+
 River bathymetry
 ================
 
@@ -450,6 +487,7 @@ River bathymetry
    workflows.rivers.river_width
    workflows.rivers.river_depth
 
+.. _workflows_forcing_api:
 
 Forcing
 =======
@@ -786,6 +824,8 @@ Reproject
    DataArray.vector.to_crs
    Dataset.vector.to_crs
 
+.. _flw_api:
+
 ======================
 Flow direction methods
 ======================
@@ -807,6 +847,7 @@ visit the `pyflwdir docs. <https://deltares.github.io/pyflwdir/latest/>`_
    flw.clip_basins
    flw.dem_adjust
 
+.. _gis_utils_api:
 
 ===================
 General GIS methods
