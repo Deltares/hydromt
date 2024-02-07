@@ -27,6 +27,7 @@ changed
 .. list-table:: Dataset name changes:
    :widths: 25 25 50
    :header-rows: 1
+
 	* - Old name
 	  - New name
 	* - basin_atlas_level12_v10
