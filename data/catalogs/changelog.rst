@@ -32,9 +32,9 @@ changed
 	  - New name
 	* - basin_atlas_level12_v10
 	  - hydro_basin_atlas_level12
-	* - eobs_v*
+	* - eobs_v..
 	  - eobs
-	* - eobs_orography_v*
+	* - eobs_orography_v..
 	  - eobs_orography
 	* - lake_atlas_pol_v10
 	  - hydro_lake_atlas
