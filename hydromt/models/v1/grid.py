@@ -8,17 +8,18 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
+from affine import Affine
+from model_component import ModelComponent
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt import gis_utils, raster, workflows
 from hydromt.data_catalog import DataCatalog
-
-from .. import workflows
 
 logger = logging.getLogger(__name__)
 
 
-class GridModelComponent:
+class GridModelComponent(ModelComponent):
     """GridModelComponent class."""
 
     def __init__(self, model, logger):
@@ -72,9 +73,47 @@ class GridModelComponent:
                         self.logger.warning(f"Replacing grid map: {dvar}")
                 self._data[dvar] = data[dvar]
 
-    def write(self):
-        """Write grid."""
-        pass
+    def write(
+        self,
+        fn: str = "grid/grid.nc",
+        gdal_compliant: bool = False,
+        rename_dims: bool = False,
+        force_sn: bool = False,
+        **kwargs,
+    ) -> None:
+        """Write model grid data to netcdf file at <root>/<fn>.
+
+        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
+
+        Parameters
+        ----------
+        fn : str, optional
+            filename relative to model root, by default 'grid/grid.nc'
+        **kwargs : dict
+            Additional keyword arguments to be passed to the `write_nc` method.
+        gdal_compliant : bool, optional
+            If True, write grid data in a way that is compatible with GDAL,
+            by default False
+        rename_dims: bool, optional
+            If True and gdal_compliant, rename x_dim and y_dim to standard names
+            depending on the CRS (x/y for projected and lat/lon for geographic).
+        force_sn: bool, optional
+            If True and gdal_compliant, forces the dataset to have
+            South -> North orientation.
+        """
+        if len(self._data) == 0:
+            self.logger.debug("No grid data found, skip writing.")
+        else:
+            self._assert_write_mode()  # Model class method
+            # write_nc requires dict - use dummy 'grid' key
+            self.write_nc(
+                {"grid": self._data},
+                fn,
+                gdal_compliant=gdal_compliant,
+                rename_dims=rename_dims,
+                force_sn=force_sn,
+                **kwargs,
+            )
 
     def read(
         self, fn: str = "grid/grid.nc", read: bool = True, write: bool = False, **kwargs
@@ -90,7 +129,7 @@ class GridModelComponent:
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self._assert_read_mode()
+        self._assert_read_mode()  # TODO Model class method, could be refactored to a model_utils function
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
@@ -104,12 +143,12 @@ class GridModelComponent:
 
     def create(self):
         """Create grid."""
-        pass
+        raise NotImplementedError
 
     @property
     def model(self):
         """Returns model reference."""
-        # Access the Model instance through the weak reference
+        # Access the Model instance through the weak reference TODO: discuss if this is needed
         return self._model_ref()
 
     @property
@@ -456,3 +495,228 @@ class GridModelComponent:
         self.set(ds)
 
         return list(ds.data_vars.keys())
+
+    def setup_grid(
+        self,
+        region: dict,
+        data_catalog: DataCatalog,
+        res: Optional[float] = None,
+        crs: int = None,
+        rotated: bool = False,
+        hydrography_fn: Optional[str] = None,
+        basin_index_fn: Optional[str] = None,
+        add_mask: bool = True,
+        align: bool = True,
+        dec_origin: int = 0,
+        dec_rotation: int = 3,
+    ) -> xr.DataArray:
+        """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
+
+        A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
+        existing grid is given, then no new grid will be generated.
+
+        Adds/Updates model layers (if add_mask):
+        * **mask** grid mask: add grid mask to grid object
+
+        Parameters
+        ----------
+        region : dict
+            Dictionary describing region of interest, e.g.:
+            * {'bbox': [xmin, ymin, xmax, ymax]}
+            * {'geom': 'path/to/polygon_geometry'}
+            * {'grid': 'path/to/grid_file'}
+            * {'basin': [x, y]}
+
+            Region must be of kind [grid, bbox, geom, basin, subbasin, interbasin].
+        res: float
+            Resolution used to generate 2D grid [unit of the CRS], required if region
+            is not based on 'grid'.
+        crs : EPSG code, int, str optional
+            EPSG code of the model or "utm" to let hydromt find the closest projected
+        rotated : bool, optional
+            if True, a minimum rotated rectangular grid is fitted around the region,
+            by default False. Only  applies if region is of kind 'bbox', 'geom'
+        hydrography_fn : str
+            Name of data source for hydrography data. Required if region is of kind
+                'basin', 'subbasin' or 'interbasin'.
+
+            * Required variables: ['flwdir'] and any other 'snapping' variable required
+                to define the region.
+
+            * Optional variables: ['basins'] if the `region` is based on a
+                (sub)(inter)basins without a 'bounds' argument.
+
+        basin_index_fn : str
+            Name of data source with basin (bounding box) geometries associated with
+            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
+            based on a (sub)(inter)basins without a 'bounds' argument.
+        add_mask : bool, optional
+            Add mask variable to grid object, by default True.
+        align : bool, optional
+            If True (default), align target transform to resolution.
+        dec_origin : int, optional
+            number of decimals to round the origin coordinates, by default 0
+        dec_rotation : int, optional
+            number of decimals to round the rotation angle, by default 3
+
+        Returns
+        -------
+        grid : xr.DataArray
+            Generated grid mask.
+        """
+        self.logger.info("Preparing 2D grid.")
+
+        kind = next(iter(region))  # first key of region
+        if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
+            # Do not parse_region for grid as we want to allow for more (file) formats
+            kind, region = workflows.parse_region(
+                region, data_catalog=data_catalog, logger=self.logger
+            )
+        elif kind != "grid":
+            raise ValueError(
+                f"Region for grid must be of kind [grid, bbox, geom, basin, subbasin,"
+                f" interbasin], kind {kind} not understood."
+            )
+
+        # Derive xcoords, ycoords and geom for the different kind options
+        if kind in ["bbox", "geom"]:
+            if not isinstance(res, (int, float)):
+                raise ValueError("res argument required for kind 'bbox', 'geom'")
+            if kind == "bbox":
+                bbox = region["bbox"]
+                geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+            elif kind == "geom":
+                geom = region["geom"]
+                if geom.crs is None:
+                    raise ValueError('Model region "geom" has no CRS')
+            if crs is not None:
+                crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+                geom = geom.to_crs(crs)
+            # Generate grid based on res for region bbox
+            # TODO add warning on res value if crs is projected or not?
+            if not rotated:
+                xmin, ymin, xmax, ymax = geom.total_bounds
+                res = abs(res)
+                if align:
+                    xmin = round(xmin / res) * res
+                    ymin = round(ymin / res) * res
+                    xmax = round(xmax / res) * res
+                    ymax = round(ymax / res) * res
+                xcoords = np.linspace(
+                    xmin + res / 2,
+                    xmax - res / 2,
+                    num=round((xmax - xmin) / res),
+                    endpoint=True,
+                )
+                ycoords = np.flip(
+                    np.linspace(
+                        ymin + res / 2,
+                        ymax - res / 2,
+                        num=round((ymax - ymin) / res),
+                        endpoint=True,
+                    )
+                )
+            else:  # rotated
+                geomu = geom.unary_union
+                x0, y0, mmax, nmax, rot = workflows.grid.rotated_grid(
+                    geomu, res, dec_origin=dec_origin, dec_rotation=dec_rotation
+                )
+                transform = (
+                    Affine.translation(x0, y0)
+                    * Affine.rotation(rot)
+                    * Affine.scale(res, res)
+                )
+
+        elif kind in ["basin", "subbasin", "interbasin"]:
+            # retrieve global hydrography data (lazy!)
+            ds_hyd = data_catalog.get_rasterdataset(hydrography_fn)
+            if "bounds" not in region:
+                region.update(basin_index=data_catalog.get_source(basin_index_fn))
+            # get basin geometry
+            geom, xy = workflows.get_basin_geometry(
+                ds=ds_hyd,
+                kind=kind,
+                logger=self.logger,
+                **region,
+            )
+            # get ds_hyd again but clipped to geom, one variable is enough
+            da_hyd = data_catalog.get_rasterdataset(
+                hydrography_fn, geom=geom, variables=["flwdir"]
+            )
+            if not isinstance(res, (int, float)):
+                self.logger.info(
+                    "res argument not defined, using resolution of "
+                    f"hydrography_fn {da_hyd.raster.res}"
+                )
+                res = da_hyd.raster.res
+            # Reproject da_hyd based on crs and grid and align, method is not important
+            # only coords will be used
+            # TODO add warning on res value if crs is projected or not?
+            if res != da_hyd.raster.res and crs != da_hyd.raster.crs:
+                da_hyd = da_hyd.raster.reproject(
+                    dst_crs=crs,
+                    dst_res=res,
+                    align=align,
+                )
+            # Get xycoords, geom
+            xcoords = da_hyd.raster.xcoords.values
+            ycoords = da_hyd.raster.ycoords.values
+            if geom.crs != da_hyd.raster.crs:
+                crs = da_hyd.raster.crs
+                geom = geom.to_crs(crs)
+        elif kind == "grid":
+            # Support more formats for grid input (netcdf, zarr, io.open_raster)
+            fn = region[kind]
+            if isinstance(fn, (xr.DataArray, xr.Dataset)):
+                da_like = fn
+            else:
+                da_like = data_catalog.get_rasterdataset(fn)
+            # Get xycoords, geom
+            xcoords = da_like.raster.xcoords.values
+            ycoords = da_like.raster.ycoords.values
+            geom = da_like.raster.box
+            if crs is not None or res is not None:
+                self.logger.warning(
+                    "For region kind 'grid', the gris crs/res are used and not"
+                    f" user-defined crs {crs} or res {res}"
+                )
+            crs = da_like.raster.crs
+
+        # Instantiate grid object
+        # Generate grid using hydromt full method
+        if not rotated:
+            coords = {"y": ycoords, "x": xcoords}
+            grid = raster.full(
+                coords=coords,
+                nodata=1,
+                dtype=np.uint8,
+                name="mask",
+                attrs={},
+                crs=geom.crs,
+                lazy=False,
+            )
+        else:
+            grid = raster.full_from_transform(
+                transform,
+                shape=(mmax, nmax),
+                nodata=1,
+                dtype=np.uint8,
+                name="mask",
+                attrs={},
+                crs=geom.crs,
+                lazy=False,
+            )
+        # Create geometry_mask with geom
+        if add_mask:
+            grid = grid.raster.geometry_mask(geom, all_touched=True)
+            grid.name = "mask"
+        # Remove mask variable mask from grid if not add_mask
+        else:
+            grid = grid.to_dataset()
+            grid = grid.drop_vars("mask")
+
+        # Add region and grid to model
+        self.set_geoms(geom, "region")
+        self.set(grid)
+
+        return grid
