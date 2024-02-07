@@ -88,10 +88,8 @@ meta:
 	source_author: (if different from paper_ref)
 	source_license:
 	source_url:
-	source_version:
 	source_spatial_extent:
 	source_temporal_extent:
-	unit:
 	processing_script:
 	processing_notes:
 
