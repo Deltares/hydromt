@@ -11,7 +11,7 @@ import xarray as xr
 from shapely.geometry import box
 
 import hydromt._compat
-import hydromt.models.model_plugins
+import hydromt.models.plugins
 from hydromt._compat import EntryPoint, EntryPoints
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import (
@@ -20,12 +20,12 @@ from hydromt.models import (
     Model,
     ModelCatalog,
     VectorModel,
-    model_plugins,
+    plugins,
 )
-from hydromt.models.model_api import _check_data
-from hydromt.models.model_grid import GridMixin
+from hydromt.models.api import _check_data
+from hydromt.models.components.grid import GridMixin
 
-DATADIR = join(dirname(abspath(__file__)), "data")
+DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 
 class _DummyModel(GridModel, GridMixin):
@@ -54,22 +54,22 @@ def test_plugins(mocker):
             )
         ]
     )
-    mocker.patch("hydromt.models.model_plugins._discover", return_value=ep_lst)
-    eps = model_plugins.get_plugin_eps()
+    mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
+    eps = plugins.get_plugin_eps()
     assert "test_model" in eps
     assert isinstance(eps["test_model"], EntryPoint)
 
 
 def test_plugin_duplicates(mocker):
-    ep_lst = model_plugins.get_general_eps().values()
-    mocker.patch("hydromt.models.model_plugins._discover", return_value=ep_lst)
-    eps = model_plugins.get_plugin_eps()
+    ep_lst = plugins.get_general_eps().values()
+    mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
+    eps = plugins.get_plugin_eps()
     assert len(eps) == 0
 
 
 def test_load():
     with pytest.raises(ValueError, match="Model plugin type not recognized"):
-        model_plugins.load(
+        plugins.load(
             EntryPoint(
                 name="error",
                 value="hydromt.data_catalog:DataCatalog",
@@ -77,7 +77,7 @@ def test_load():
             )
         )
     with pytest.raises(ImportError, match="Error while loading model plugin"):
-        model_plugins.load(
+        plugins.load(
             EntryPoint(
                 name="error", value="hydromt.models:DataCatalog", group="hydromt.models"
             )
@@ -89,7 +89,7 @@ def test_load():
 def test_global_models(mocker, has_xugrid):
     _MODELS = ModelCatalog()
     mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
-    keys = list(model_plugins.LOCAL_EPS.keys())
+    keys = list(plugins.LOCAL_EPS.keys())
     if not hydromt._compat.HAS_XUGRID:
         keys.remove("mesh_model")
     # set first local model as plugin for testing

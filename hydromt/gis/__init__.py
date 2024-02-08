@@ -25,6 +25,7 @@ from .utils import (
     parse_geom_bbox_buffer,
     read_info,
     reggrid_area,
+    spread2d,
     to_geographic_bbox,
     utm_crs,
 )
@@ -57,4 +58,5 @@ __all__ = [
     "XRasterBase",
     "GeoBase",
     "merge",
+    "spread2d",
 ]

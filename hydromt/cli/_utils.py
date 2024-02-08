@@ -12,8 +12,8 @@ from warnings import warn
 import click
 import yaml
 
-from hydromt import config
 from hydromt._typing.error import DeprecatedError
+from hydromt.io import configread
 
 logger = logging.getLogger(__name__)
 
@@ -99,9 +99,7 @@ def parse_config(
                 PendingDeprecationWarning,
                 stacklevel=2,
             )
-        opt = config.configread(
-            path, abs_path=True, skip_abspath_sections=["setup_config"]
-        )
+        opt = configread(path, abs_path=True, skip_abspath_sections=["setup_config"])
     elif path is not None:
         raise IOError(f"Config not found at {path}")
     if opt_cli is not None:

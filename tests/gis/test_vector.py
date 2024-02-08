@@ -8,7 +8,7 @@ from geopandas import GeoDataFrame
 from pyproj import CRS
 from shapely.geometry import MultiPolygon, Polygon
 
-from hydromt.vector import GeoDataArray, GeoDataset
+from hydromt.gis.vector import GeoDataArray, GeoDataset
 
 
 @pytest.fixture()

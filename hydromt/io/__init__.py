@@ -1,9 +1,10 @@
 """The module of HydroMT handeling file and path interactions."""
 
-from .io import (
+from .path import (
+    make_path_abs_and_cross_platform,
+)
+from .readers import (
     configread,
-    configwrite,
-    netcdf_writer,
     open_geodataset,
     open_mfcsv,
     open_mfraster,
@@ -13,12 +14,14 @@ from .io import (
     open_vector,
     open_vector_from_table,
     read_ini_config,
+)
+from .writers import (
+    ConfigParser,
+    configwrite,
+    netcdf_writer,
     write_ini_config,
     write_xy,
     zarr_writer,
-)
-from .path import (
-    make_path_abs_and_cross_platform,
 )
 
 __all__ = [
@@ -32,10 +35,11 @@ __all__ = [
     "open_vector",
     "open_vector_from_table",
     "write_xy",
-    "configread",
-    "configwrite",
     "write_ini_config",
+    "configwrite",
+    "configread",
     "read_ini_config",
-    "zarr_writer",
+    "ConfigParser",
     "netcdf_writer",
+    "zarr_writer",
 ]

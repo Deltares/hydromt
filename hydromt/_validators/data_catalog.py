@@ -8,8 +8,8 @@ from pydantic_core import Url
 from pyproj import CRS
 from pyproj.exceptions import CRSError
 
+from hydromt._typing import Bbox, Number, TimeRange
 from hydromt.data_catalog import _yml_from_uri_or_path
-from hydromt.typing import Bbox, Number, TimeRange
 
 
 class SourceSpecDict(BaseModel):

@@ -23,7 +23,7 @@ from hydromt.data_catalog import (
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
-from hydromt.gis_utils import to_geographic_bbox
+from hydromt.gis.utils import to_geographic_bbox
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")

@@ -15,7 +15,7 @@ from shapely.geometry import box
 
 from hydromt import workflows
 from hydromt.gis import raster, utils
-from hydromt.models.api import Model
+from hydromt.models.api import Model, parse_region
 
 __all__ = ["GridModel"]
 logger = logging.getLogger(__name__)
@@ -536,7 +536,7 @@ class GridModel(GridMixin, Model):
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             # Do not parse_region for grid as we want to allow for more (file) formats
-            kind, region = workflows.parse_region(
+            kind, region = parse_region(
                 region, data_catalog=self.data_catalog, logger=self.logger
             )
         elif kind != "grid":

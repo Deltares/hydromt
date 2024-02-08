@@ -1,5 +1,5 @@
 """Testing for the internal hydromt utility functions."""
-from hydromt.utils import partition_dictionaries
+from hydromt._utils import partition_dictionaries
 
 
 def test_flat_dict_partition():

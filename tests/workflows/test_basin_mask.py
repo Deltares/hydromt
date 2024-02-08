@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.workflows.basin_mask."""
-
 import logging
 import os
 

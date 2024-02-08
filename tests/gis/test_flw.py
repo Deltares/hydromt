@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from hydromt import flw
+from hydromt.gis import flw
 
 
 def test_from_da(flwda):

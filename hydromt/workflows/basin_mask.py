@@ -18,8 +18,6 @@ from hydromt import _compat
 from hydromt.data_adapter import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.flw import basin_map, flwdir_from_da, outlet_map, stream_map
-
-# local
 from hydromt.models import MODELS
 
 if _compat.HAS_XUGRID:

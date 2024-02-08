@@ -6,7 +6,7 @@ import xarray as xr
 
 import hydromt._compat as compat
 from hydromt.data_catalog import DataCatalog
-from hydromt.raster import full_from_transform
+from hydromt.gis.raster import full_from_transform
 from hydromt.workflows.forcing import pet, precip
 
 

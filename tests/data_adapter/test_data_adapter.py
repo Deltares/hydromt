@@ -17,8 +17,9 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-import hydromt
 from hydromt import _compat as compat
+from hydromt._typing import ErrorHandleMethod
+from hydromt._typing.error import NoDataException
 from hydromt.data_adapter import (
     DatasetAdapter,
     GeoDataFrameAdapter,
@@ -26,12 +27,11 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
-from hydromt.exceptions import NoDataException
-from hydromt.gis_utils import to_geographic_bbox
-from hydromt.typing import ErrorHandleMethod
+from hydromt.gis.utils import to_geographic_bbox
+from hydromt.io.writers import write_xy
 
-TESTDATADIR = join(dirname(abspath(__file__)), "data")
-CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
+TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
+CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
 
 
 def test_resolve_path(tmpdir):
@@ -242,7 +242,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     geoda.vector.to_netcdf(fn_nc)
     geodf.to_file(fn_gdf, driver="GeoJSON")
     ts.to_csv(fn_csv)
-    hydromt.io.write_xy(fn_csv_locs, geodf)
+    write_xy(fn_csv_locs, geodf)
     data_catalog = DataCatalog()
     # added fn_ts to test if it does not go into xr.open_dataset
     da1 = data_catalog.get_geodataset(

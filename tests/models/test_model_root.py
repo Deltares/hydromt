@@ -1,13 +1,16 @@
-from logging import WARNING
-from os import listdir
-from os.path import abspath, exists, join
-from pathlib import Path
+from os.path import abspath, join
 from platform import system
 
 import pytest
 
-from hydromt.models._v1.model_root import ModelRoot
-from hydromt.typing import ModelMode
+from hydromt._typing import ModelMode
+
+# most of us are going to move soon
+from hydromt.io.path import (
+    _describes_posix_path,
+    _describes_windows_path,
+)
+from hydromt.models.root import ModelRoot
 
 # we need to compensate for where the repo is located when
 # we run the tests
@@ -39,8 +42,8 @@ def case_name(case):
 )
 def test_windows_paths_on_windows(test_case):
     model_root = ModelRoot(test_case["path"], "w")
-    assert model_root._describes_windows_path(test_case["path"])
-    assert str(model_root._path) == test_case["abs_path"]
+    assert _describes_windows_path(test_case["path"])
+    assert str(model_root.path) == test_case["abs_path"]
 
 
 @pytest.mark.skipif(
@@ -65,8 +68,8 @@ def test_windows_paths_on_windows(test_case):
 )
 def test_windows_paths_on_linux(test_case):
     model_root = ModelRoot(test_case["path"], "w")
-    assert model_root._describes_windows_path(test_case["path"])
-    assert str(model_root._path) == test_case["abs_path"]
+    assert _describes_windows_path(test_case["path"])
+    assert str(model_root.path) == test_case["abs_path"]
 
 
 @pytest.mark.skipif(
@@ -90,8 +93,8 @@ def test_windows_paths_on_linux(test_case):
 )
 def test_posix_paths_on_windows(test_case):
     model_root = ModelRoot(test_case["path"], "w")
-    assert model_root._describes_posix_path(test_case["path"])
-    assert str(model_root._path) == test_case["abs_path"]
+    assert _describes_posix_path(test_case["path"])
+    assert str(model_root.path) == test_case["abs_path"]
 
 
 @pytest.mark.skipif(
@@ -121,8 +124,8 @@ def test_posix_paths_on_windows(test_case):
 )
 def test_posix_path_on_linux(test_case):
     model_root = ModelRoot(test_case["path"], "w")
-    assert model_root._describes_posix_path(test_case["path"])
-    assert str(model_root._path) == test_case["abs_path"]
+    assert _describes_posix_path(test_case["path"])
+    assert str(model_root.path) == test_case["abs_path"]
 
 
 @pytest.mark.parametrize("mode", ["r", "r+", ModelMode.READ, ModelMode.APPEND])
@@ -161,40 +164,3 @@ def test_assert_writing_modes(mode):
 def test_errors_on_unknown_modes(mode):
     with pytest.raises(ValueError, match="Unknown mode"):
         _ = ModelMode.from_str_or_mode(mode)
-
-
-def test_new_root_creates_dirs_and_log_files(tmpdir):
-    model_root_path = Path(join(tmpdir, "root_folder"))
-    _ = ModelRoot(model_root_path, "w", ["asdf", "qwery"], True)
-    assert exists(model_root_path)
-    # two for the folders, one for the log file
-    assert len(listdir(model_root_path)) == 3
-
-
-def test_non_forced_write_errors_on_existing_dir(tmpdir):
-    model_root_path = Path(join(tmpdir, "root_folder"))
-    _ = ModelRoot(model_root_path, "w", ["asdf", "qwery"], True)
-    tmp_file = Path(join(model_root_path, "asdf", "aaaaaaaaa.txt"))
-    tmp_file.touch()
-    with pytest.raises(IOError, match="Model dir already exists and cannot be "):
-        _ = ModelRoot(model_root_path, "w", ["asdf", "qwery"], True)
-    assert exists(tmp_file)
-
-
-def test_read_errors_on_non_existing_dir(tmpdir):
-    model_root_path = Path(join(tmpdir, "root_folder"))
-    with pytest.raises(IOError, match="model root not found "):
-        _ = ModelRoot(model_root_path, "r", ["asdf", "qwery"])
-
-
-def test_forced_write_warns_on_existing_dir(tmpdir, caplog):
-    model_root_path = Path(join(tmpdir, "root_folder"))
-    _ = ModelRoot(model_root_path, "w", ["asdf", "qwery"], True)
-    tmp_file = Path(join(model_root_path, "asdf", "aaaaaaaaa.txt"))
-    tmp_file.touch()
-
-    with caplog.at_level(WARNING):
-        _ = ModelRoot(model_root_path, "w+", ["asdf", "qwery"], True)
-
-    assert "Model dir already exists" in caplog.text
-    assert exists(tmp_file)

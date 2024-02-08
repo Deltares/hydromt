@@ -5,8 +5,8 @@ from os import PathLike
 from os.path import isdir
 from pathlib import Path
 
+from hydromt._typing import ModeLike, ModelMode
 from hydromt.io.path import make_path_abs_and_cross_platform
-from hydromt.typing import ModeLike, ModelMode
 
 logger = getLogger(__name__)
 

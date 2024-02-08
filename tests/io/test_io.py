@@ -13,8 +13,17 @@ import pytest
 import rasterio
 import xarray as xr
 
-import hydromt
 from hydromt import _compat, raster
+from hydromt.io.readers import (
+    open_geodataset,
+    open_mfcsv,
+    open_mfraster,
+    open_raster,
+    open_timeseries_from_table,
+    open_vector,
+    open_vector_from_table,
+)
+from hydromt.io.writers import write_xy
 
 
 @pytest.mark.parametrize("engine", ["fiona", "pyogrio"])
@@ -30,54 +39,54 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
     if _compat.HAS_OPENPYXL:
         df.to_excel(fn_xls)
     geodf.to_file(fn_geojson, driver="GeoJSON")
-    hydromt.write_xy(fn_xy, geodf)
+    write_xy(fn_xy, geodf)
     # read csv
-    gdf1 = hydromt.open_vector(fn_csv, assert_gtype="Point", crs=4326)
+    gdf1 = open_vector(fn_csv, assert_gtype="Point", crs=4326)
     assert gdf1.crs == geodf.crs
     assert np.all(gdf1 == geodf)
     # no data in domain
-    gdf1 = hydromt.open_vector(fn_csv, crs=4326, bbox=[200, 300, 200, 300])
+    gdf1 = open_vector(fn_csv, crs=4326, bbox=[200, 300, 200, 300])
     assert gdf1.index.size == 0
     if _compat.HAS_OPENPYXL:
         # read xls
-        gdf1 = hydromt.open_vector(fn_xls, assert_gtype="Point", crs=4326)
+        gdf1 = open_vector(fn_xls, assert_gtype="Point", crs=4326)
         assert np.all(gdf1 == geodf)
 
     # read xy
-    gdf1 = hydromt.open_vector(fn_xy, crs=4326)
+    gdf1 = open_vector(fn_xy, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
     # read parquet
-    gdf1 = hydromt.open_vector(fn_parquet, crs=4326)
+    gdf1 = open_vector(fn_parquet, crs=4326)
     assert np.all(gdf1 == geodf)
     # filter
     country = "Chile"
     geom = world[world["name"] == country]
-    gdf1 = hydromt.open_vector(
+    gdf1 = open_vector(
         fn_csv, crs=4326, geom=geom.to_crs(3857)
     )  # crs should default to 4326
     assert np.all(gdf1["country"] == country)
-    gdf2 = hydromt.open_vector(fn_geojson, geom=geom)
+    gdf2 = open_vector(fn_geojson, geom=geom)
     # NOTE labels are different
     assert np.all(gdf1.geometry.values == gdf2.geometry.values)
-    gdf2 = hydromt.open_vector(fn_csv, crs=4326, bbox=geom.total_bounds)
+    gdf2 = open_vector(fn_csv, crs=4326, bbox=geom.total_bounds)
     assert np.all(gdf1.geometry.values == gdf2.geometry.values)
     # error
     with pytest.raises(ValueError, match="other geometries"):
-        hydromt.open_vector(fn_csv, assert_gtype="Polygon")
+        open_vector(fn_csv, assert_gtype="Polygon")
     with pytest.raises(ValueError, match="unknown"):
-        hydromt.open_vector(fn_csv, assert_gtype="PolygonPoints")
+        open_vector(fn_csv, assert_gtype="PolygonPoints")
     with pytest.raises(ValueError, match="The GeoDataFrame has no CRS"):
-        hydromt.open_vector(fn_csv)
+        open_vector(fn_csv)
     with pytest.raises(ValueError, match="Unknown geometry mask type"):
-        hydromt.open_vector(fn_csv, crs=4326, geom=geom.total_bounds)
+        open_vector(fn_csv, crs=4326, geom=geom.total_bounds)
     with pytest.raises(ValueError, match="x dimension"):
-        hydromt.open_vector(fn_csv, x_dim="x")
+        open_vector(fn_csv, x_dim="x")
     with pytest.raises(ValueError, match="y dimension"):
-        hydromt.open_vector(fn_csv, y_dim="y")
+        open_vector(fn_csv, y_dim="y")
     with pytest.raises(IOError, match="No such file"):
-        hydromt.open_vector("fail.csv")
+        open_vector("fail.csv")
     with pytest.raises(IOError, match="Driver fail unknown"):
-        hydromt.open_vector_from_table("test.fail")
+        open_vector_from_table("test.fail")
 
 
 def test_open_geodataset(tmpdir, geodf):
@@ -98,50 +107,50 @@ def test_open_geodataset(tmpdir, geodf):
     fn_ts = str(tmpdir.join(f"{name}.csv"))
     ts.to_csv(fn_ts)
     # returns dataset with coordinates, but no variable
-    ds = hydromt.open_geodataset(fn_gdf)
+    ds = open_geodataset(fn_gdf)
     assert isinstance(ds, xr.Dataset)
     assert len(ds.data_vars) == 0
     geodf1 = ds.vector.to_gdf()
     assert np.all(geodf == geodf1[geodf.columns])
     # add timeseries
-    ds = hydromt.open_geodataset(fn_gdf, fn_ts)
+    ds = open_geodataset(fn_gdf, fn_ts)
     assert name in ds.data_vars
     assert np.all(ds[name].values == 0)
     # test for polygon geometry
-    ds = hydromt.open_geodataset(fn_gdf_poly, fn_ts)
+    ds = open_geodataset(fn_gdf_poly, fn_ts)
     assert name in ds.data_vars
     assert ds.vector.geom_type == "Polygon"
     with pytest.raises(IOError, match="GeoDataset point location file not found"):
-        hydromt.open_geodataset("missing_file.csv")
+        open_geodataset("missing_file.csv")
     with pytest.raises(IOError, match="GeoDataset data file not found"):
-        hydromt.open_geodataset(fn_gdf, fn_data="missing_file.csv")
+        open_geodataset(fn_gdf, fn_data="missing_file.csv")
 
 
 def test_timeseries_io(tmpdir, ts):
     fn_ts = str(tmpdir.join("test1.csv"))
     # dattime in columns
     ts.to_csv(fn_ts)
-    da = hydromt.open_timeseries_from_table(fn_ts)
+    da = open_timeseries_from_table(fn_ts)
     assert isinstance(da, xr.DataArray)
     assert da.time.dtype.type.__name__ == "datetime64"
     # transposed df > datetime in row index
     fn_ts2 = str(tmpdir.join("test2.csv"))
     ts = ts.T
     ts.to_csv(fn_ts2)
-    da2 = hydromt.open_timeseries_from_table(fn_ts2)
+    da2 = open_timeseries_from_table(fn_ts2)
     assert da.time.dtype.type.__name__ == "datetime64"
     assert np.all(da == da2)
     # no time index
     fn_ts3 = str(tmpdir.join("test3.csv"))
     pd.DataFrame(ts.values).to_csv(fn_ts3)
     with pytest.raises(ValueError, match="No time index found"):
-        hydromt.open_timeseries_from_table(fn_ts3)
+        open_timeseries_from_table(fn_ts3)
     # parse str index to numeric index
     cols = [f"a_{i}" for i in ts.columns]
     ts.columns = cols
     fn_ts4 = str(tmpdir.join("test4.csv"))
     ts.to_csv(fn_ts4)
-    da4 = hydromt.open_timeseries_from_table(fn_ts4)
+    da4 = open_timeseries_from_table(fn_ts4)
     assert np.all(da == da4)
     assert np.all(da.index == da4.index)
     # no numeric index
@@ -150,7 +159,7 @@ def test_timeseries_io(tmpdir, ts):
     fn_ts5 = str(tmpdir.join("test5.csv"))
     ts.to_csv(fn_ts5)
     with pytest.raises(ValueError, match="No numeric index"):
-        hydromt.open_timeseries_from_table(fn_ts5)
+        open_timeseries_from_table(fn_ts5)
 
 
 def test_raster_io(tmpdir, rioda):
@@ -159,22 +168,22 @@ def test_raster_io(tmpdir, rioda):
     # to_raster / open_raster
     da.raster.to_raster(fn_tif, crs=3857, tags={"name": "test"})
     assert os.path.isfile(fn_tif)
-    assert np.all(hydromt.open_raster(fn_tif).values == da.values)
+    assert np.all(open_raster(fn_tif).values == da.values)
     with rasterio.open(fn_tif, "r") as src:
         assert src.tags()["name"] == "test"
         assert src.crs.to_epsg() == 3857
-    da1 = hydromt.open_raster(fn_tif, mask_nodata=True)
+    da1 = open_raster(fn_tif, mask_nodata=True)
     assert np.any(np.isnan(da1.values))
     # TODO window needs checking & better testing
     fn_tif = str(tmpdir.join("test1.tif"))
     da1.raster.to_raster(fn_tif, nodata=-9999, windowed=True)
-    da2 = hydromt.open_raster(fn_tif)
+    da2 = open_raster(fn_tif)
     assert not np.any(np.isnan(da2.values))
     fn_tif = str(tmpdir.join("test_2.tif"))
     da1.fillna(da1.attrs["_FillValue"]).expand_dims("t").round(0).astype(
         np.int32
     ).raster.to_raster(fn_tif, dtype=np.int32)
-    da3 = hydromt.open_raster(fn_tif)
+    da3 = open_raster(fn_tif)
     assert da3.dtype == np.int32
     # to_mapstack / open_mfraster
     ds = da.to_dataset()
@@ -183,18 +192,18 @@ def test_raster_io(tmpdir, rioda):
     ds.raster.to_mapstack(root, prefix=prefix, mask=True, driver="GTiff")
     for name in ds.raster.vars:
         assert os.path.isfile(join(root, f"{prefix}{name}.tif"))
-    ds_in = hydromt.open_mfraster(join(root, f"{prefix}*.tif"), mask_nodata=True)
+    ds_in = open_mfraster(join(root, f"{prefix}*.tif"), mask_nodata=True)
     dvars = ds_in.raster.vars
     assert np.all([n in dvars for n in ds.raster.vars])
     assert np.all([np.isnan(ds_in[n].raster.nodata) for n in dvars])
     # concat
     fn_tif = str(tmpdir.join("test_3.tif"))
     da.raster.to_raster(fn_tif, crs=3857)
-    ds_in = hydromt.open_mfraster(join(root, "test_*.tif"), concat=True)
+    ds_in = open_mfraster(join(root, "test_*.tif"), concat=True)
     assert ds_in[ds_in.raster.vars[0]].ndim == 3
     # with reading with pathlib
     paths = [Path(p) for p in glob.glob(join(root, f"{prefix}*.tif"))]
-    dvars2 = hydromt.open_mfraster(paths, mask_nodata=True).raster.vars
+    dvars2 = open_mfraster(paths, mask_nodata=True).raster.vars
     assert np.all([f"{prefix}{n}" in dvars2 for n in ds.raster.vars])
     # test writing to subdir
     ds.rename({"test": "test/test"}).raster.to_mapstack(root, driver="GTiff")
@@ -210,7 +219,7 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
     for i in range(len(df_fns)):
         dfs_segmented_by_points[i].to_csv(df_fns[i])
 
-    ds = hydromt.io.open_mfcsv(df_fns, "id")
+    ds = open_mfcsv(df_fns, "id")
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
     assert sorted(list(ds.dims)) == ["id", "time"], ds
@@ -229,7 +238,7 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
         dfs_segmented_by_points[i].rename_axis(None, axis=0, inplace=True)
         dfs_segmented_by_points[i].to_csv(df_fns[i])
 
-    ds = hydromt.io.open_mfcsv(df_fns, "id")
+    ds = open_mfcsv(df_fns, "id")
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
     assert sorted(list(ds.dims)) == ["id", "index"], ds
@@ -252,7 +261,7 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
         df.to_csv(fn)
         fns[var] = fn
 
-    ds = hydromt.io.open_mfcsv(fns, "id", segmented_by="var")
+    ds = open_mfcsv(fns, "id", segmented_by="var")
 
     assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
     ids = ds.id.values
@@ -265,7 +274,7 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
 
 def test_rasterio_errors(tmpdir, rioda):
     with pytest.raises(OSError, match="no files to open"):
-        hydromt.open_mfraster(str(tmpdir.join("test*.tiffff")))
+        open_mfraster(str(tmpdir.join("test*.tiffff")))
     da0 = raster.full_from_transform(
         [0.5, 0.0, 3.0, 0.0, -0.5, -9.0], (4, 6), nodata=-1, name="test"
     )
@@ -275,7 +284,7 @@ def test_rasterio_errors(tmpdir, rioda):
     da0.raster.to_raster(str(tmpdir.join("test0.tif")))
     da1.raster.to_raster(str(tmpdir.join("test1.tif")))
     with pytest.raises(xr.MergeError, match="Geotransform and/or shape do not match"):
-        hydromt.open_mfraster(str(tmpdir.join("test*.tif")))
+        open_mfraster(str(tmpdir.join("test*.tif")))
     with pytest.raises(ValueError, match="will be set based on the DataArray"):
         da0.raster.to_raster(str(tmpdir.join("test2.tif")), count=3)
     with pytest.raises(ValueError, match="Extension unknown for driver"):

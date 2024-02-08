@@ -1,7 +1,7 @@
 """HydroMT workflows."""
 from hydromt import _compat
 
-from .basin_mask import get_basin_geometry, parse_region
+from .basin_mask import get_basin_geometry
 from .forcing import (
     da_to_timedelta,
     delta_freq,
@@ -28,6 +28,7 @@ from .grid import (
 )
 from .rivers import river_depth, river_width
 
+__all__ = []
 if _compat.HAS_XUGRID:
     from .mesh import (
         create_mesh2d,
@@ -45,7 +46,6 @@ if _compat.HAS_XUGRID:
         "grid_from_geodataframe",
         "grid_from_raster_reclass",
         "grid_from_rasterdataset",
-        "parse_region",
         "pet",
         "pet_debruin",
         "pet_makkink",
@@ -76,7 +76,6 @@ else:
         "grid_from_geodataframe",
         "grid_from_raster_reclass",
         "grid_from_rasterdataset",
-        "parse_region",
         "pet",
         "pet_debruin",
         "pet_makkink",

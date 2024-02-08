@@ -125,7 +125,7 @@ ignore = ["D211", "D213", 'D206', 'E501', "E741", "D105", "E712", "B904"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D100", "D101", "D102", "D103", "D104"]
-"hydromt/__init__.py" = ["E402"]
+"hydromt/__init__.py" = ["E402", "F401", "F403"]
 "hydromt/models/__init__.py" = ["F401"]
 "hydromt/_compat.py" = ["F401"]
 "tests/conftest.py" = ["E402"]

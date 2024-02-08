@@ -1,6 +1,5 @@
 """Tests for the cli submodule."""
 
-
 from os.path import abspath, dirname, join
 
 import numpy as np
@@ -11,7 +10,7 @@ from hydromt import __version__
 from hydromt.cli import api as hydromt_api
 from hydromt.cli.main import main as hydromt_cli
 
-DATADIR = join(dirname(abspath(__file__)), "data")
+DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 
 def test_cli_verison(tmpdir):
