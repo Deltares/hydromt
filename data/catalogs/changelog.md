@@ -37,6 +37,17 @@
 | vito_2018_v3.0.1               | vito_2018                 |
 | vito_2019_v3.0.1               | vito_2019                 |
 
+- Some datasets have multiple versions, for these datasets the default can be changed if you do not supply a version in your config file. See the table below for which dataset the default version has changed.
+
+| Dataset name   | Default version |
+|----------------|-----------------|
+| eobs           | 25.0e           |
+| eobs_orography | 25.0e           |
+| ghs_mod        | R2019A_v2.0     |
+| pcr_globwb     | 2005            |
+| soilgrids      | 2.0             |
+
+
 
 ### version 2024.1.30
 
