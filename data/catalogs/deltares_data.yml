@@ -594,6 +594,7 @@ gadm_level0:
       South: -90.0
       East: 180.0
       North: 83.658
+  version: 4.1
   path: geography/gadm/version4_1/gadm_level0.fgb
 
 gadm_level1:
@@ -613,6 +614,7 @@ gadm_level1:
       South: -90.0
       East: 180.0
       North: 83.658
+  version: 4.1
   path: geography/gadm/version4_1/gadm_level1.fgb
 
 gadm_level2:
@@ -632,6 +634,7 @@ gadm_level2:
       South: -90.0
       East: 180.0
       North: 83.658
+  version: 4.1
   path: geography/gadm/version4_1/gadm_level2.fgb
 
 gadm_level3:
@@ -651,6 +654,7 @@ gadm_level3:
       South: -90.0
       East: 180.0
       North: 83.658
+  version: 4.1
   path: geography/gadm/version4_1/gadm_level3.fgb
 
 gcn250:
@@ -1419,6 +1423,7 @@ merit_hydro_ihu_index:
       South: -59.467
       East: 190.35
       North: 83.683
+  version: 1.0
   path: topography/merit_hydro_ihu/30sec/basins.gpkg
 
 merit_hydro_index:
@@ -1747,7 +1752,7 @@ soilgrids:
       East: 19861750.0
       North: 8361000.0
   variants:
-  - version: 2017
+  - version: 1.0
     path: soil/soilgrids_v1.0/*_250m_ll.tif
     meta:
       notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
@@ -1828,7 +1833,7 @@ soilgrids:
       ph_sl5: 0.1
       ph_sl6: 0.1
       ph_sl7: 0.1
-  - version: 2020
+  - version: 2.0
     path: soil/soilgrids_v2.0/*/*_mean.vrt
     meta:
       paper_doi: https://doi.org/10.5194/soil-2020-65
@@ -2001,6 +2006,7 @@ vito_2018:
       South: -60.0
       East: 180.0
       North: 80.0
+  version: 3.0.1
   path: landuse/vito/PROBAV_LC100_global_v3.0.1_2018-conso_Discrete-Classification-map_EPSG-4326.tif
 
 vito_2019:
