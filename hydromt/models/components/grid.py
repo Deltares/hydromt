@@ -13,8 +13,9 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
-from .. import gis_utils, raster, workflows
-from .model_api import Model
+from hydromt import workflows
+from hydromt.gis import raster, utils
+from hydromt.models.api import Model
 
 __all__ = ["GridModel"]
 logger = logging.getLogger(__name__)
@@ -556,7 +557,7 @@ class GridModel(GridMixin, Model):
                 if geom.crs is None:
                     raise ValueError('Model region "geom" has no CRS')
             if crs is not None:
-                crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+                crs = utils.parse_crs(crs, bbox=geom.total_bounds)
                 geom = geom.to_crs(crs)
             # Generate grid based on res for region bbox
             # TODO add warning on res value if crs is projected or not?

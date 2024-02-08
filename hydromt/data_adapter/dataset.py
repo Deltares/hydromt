@@ -13,10 +13,10 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.typing import ErrorHandleMethod, TimeRange
-
-from .data_adapter import DataAdapter
-from .utils import netcdf_writer, shift_dataset_time, zarr_writer
+from hydromt._typing import ErrorHandleMethod, TimeRange
+from hydromt.data_adapter import DataAdapter
+from hydromt.data_adapter.utils import shift_dataset_time
+from hydromt.io import netcdf_writer, zarr_writer
 
 logger = logging.getLogger(__name__)
 

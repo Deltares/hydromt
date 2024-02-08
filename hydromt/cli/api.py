@@ -5,11 +5,10 @@ import logging
 import typing
 from typing import Dict, List, Optional, Union
 
-from hydromt.gis_utils import utm_crs
-
-from .. import workflows
-from ..data_catalog import DataCatalog
-from ..models import MODELS
+from hydromt import workflows
+from hydromt.data_catalog import DataCatalog
+from hydromt.gis import utm_crs
+from hydromt.models import MODELS
 
 logger = logging.getLogger(__name__)
 

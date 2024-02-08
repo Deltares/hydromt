@@ -2,10 +2,9 @@
 import logging
 from typing import Dict, Iterator, List
 
+from hydromt import __version__, _compat
 from hydromt._compat import Distribution, EntryPoint, EntryPoints, entry_points
-
-from .. import __version__, _compat
-from .model_api import Model
+from hydromt.models.api import Model
 
 logger = logging.getLogger(__name__)
 
@@ -13,10 +12,10 @@ __all__ = ["ModelCatalog"]
 
 # local generic models
 LOCAL_EPS = {
-    "grid_model": "hydromt.models.model_grid:GridModel",
-    "vector_model": "hydromt.models.model_vector:VectorModel",
-    "mesh_model": "hydromt.models.model_mesh:MeshModel",
-    "network_model": "hydromt.models.model_network:NetworkModel",
+    "grid_model": "hydromt.models.components.model_grid:GridModel",
+    "vector_model": "hydromt.models.components.model_vector:VectorModel",
+    "mesh_model": "hydromt.models.components.model_mesh:MeshModel",
+    "network_model": "hydromt.models.components.model_network:NetworkModel",
 }
 
 

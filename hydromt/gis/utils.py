@@ -22,7 +22,7 @@ from rasterio.transform import Affine
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
-from . import _compat
+from hydromt import _compat
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 

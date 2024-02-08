@@ -11,12 +11,24 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 # required for accessor style documentation
-from xarray import DataArray, Dataset
+from xarray import DataArray, Dataset  # noqa: F401
 
 # submodules
-from . import cli, flw, raster, stats, vector, workflows
-from .data_catalog import *
-from .io import *
+from hydromt import cli, gis, io, models, stats, workflows
 
 # high-level methods
-from .models import *
+from hydromt.models import GridModel, Model, ModelCatalog, NetworkModel, VectorModel
+
+__all__ = [
+    "cli",
+    "gis",
+    "io",
+    "stats",
+    "workflows",
+    "models",
+    "GridModel",
+    "Model",
+    "ModelCatalog",
+    "NetworkModel",
+    "VectorModel",
+]

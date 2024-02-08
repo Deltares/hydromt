@@ -13,7 +13,7 @@ from geopandas import GeoDataFrame, GeoSeries
 from rasterio import gdal_version
 from shapely.geometry.base import BaseGeometry
 
-from hydromt import gis_utils, raster
+from hydromt.gis import raster, utils
 
 logger = logging.getLogger(__name__)
 GDAL_VERSION = gdal_version()
@@ -514,7 +514,7 @@ class GeoBase(raster.XGeoBase):
         da: xarray.DataArray
             Clipped DataArray
         """
-        idx = gis_utils.filter_gdf(self.geometry, geom=geom, predicate=predicate)
+        idx = utils.filter_gdf(self.geometry, geom=geom, predicate=predicate)
         return self._obj.isel({self.index_dim: idx})
 
     def clip_bbox(self, bbox, crs=None, buffer=None):
@@ -538,7 +538,7 @@ class GeoBase(raster.XGeoBase):
             bbox = np.atleast_1d(bbox)
             bbox[:2] -= buffer
             bbox[2:] += buffer
-        idx = gis_utils.filter_gdf(
+        idx = utils.filter_gdf(
             self.geometry, bbox=bbox, crs=crs, predicate="intersects"
         )
         return self._obj.isel({self.index_dim: idx})

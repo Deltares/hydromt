@@ -15,13 +15,20 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.typing import ErrorHandleMethod, GeoDatasetSource, TimeRange, TotalBounds
-
-from .. import gis_utils, io
-from ..nodata import NoDataStrategy, _exec_nodata_strat
-from ..raster import GEO_MAP_COORD
-from .data_adapter import DataAdapter
-from .utils import netcdf_writer, shift_dataset_time, zarr_writer
+from hydromt import io
+from hydromt._typing import (
+    ErrorHandleMethod,
+    GeoDatasetSource,
+    NoDataStrategy,
+    TimeRange,
+    TotalBounds,
+    _exec_nodata_strat,
+)
+from hydromt.data_adapter import DataAdapter
+from hydromt.data_adapter.utils import shift_dataset_time
+from hydromt.gis import utils
+from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.io import netcdf_writer, zarr_writer
 
 logger = logging.getLogger(__name__)
 
@@ -355,7 +362,7 @@ class GeoDatasetAdapter(DataAdapter):
             Buffer distance [m] applied to the geometry or bbox. By default 0 m.
         predicate : str, optional
             Predicate used to filter the GeoDataFrame, see
-            :py:func:`hydromt.gis_utils.filter_gdf` for details.
+            :py:func:`hydromt.gis.utils.filter_gdf` for details.
         handle_nodata : NoDataStrategy, optional
             How to handle no data values. By default NoDataStrategy.RAISE.
         time_tuple : tuple of str, datetime, optional
@@ -394,7 +401,7 @@ class GeoDatasetAdapter(DataAdapter):
     def _slice_spatial_dimension(
         ds, geom, bbox, buffer, predicate, handle_nodata, logger=logger
     ):
-        geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
+        geom = utils.parse_geom_bbox_buffer(geom, bbox, buffer)
         bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
         epsg = geom.crs.to_epsg()
         logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")

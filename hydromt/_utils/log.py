@@ -6,7 +6,7 @@ import os
 import sys
 from functools import wraps
 
-from . import __version__
+from hydromt import __version__
 
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 

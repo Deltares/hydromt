@@ -11,10 +11,8 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt.typing import ErrorHandleMethod
-
-from ..nodata import NoDataStrategy, _exec_nodata_strat
-from .data_adapter import DataAdapter
+from hydromt._typing import ErrorHandleMethod, NoDataStrategy, _exec_nodata_strat
+from hydromt.data_adapter import DataAdapter
 
 logger = logging.getLogger(__name__)
 

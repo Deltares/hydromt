@@ -12,8 +12,8 @@ from warnings import warn
 import click
 import yaml
 
-from .. import config
-from ..error import DeprecatedError
+from hydromt import config
+from hydromt._typing.error import DeprecatedError
 
 logger = logging.getLogger(__name__)
 

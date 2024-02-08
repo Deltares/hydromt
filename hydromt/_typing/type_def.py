@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Tuple, TypedDict, Union
 
 from xarray import DataArray, Dataset
 
-from hydromt.typing.model_mode import ModelMode
+from hydromt._typing.model_mode import ModelMode
 
 GeoDataframeSource = Union[str, Path]
 GeoDatasetSource = Union[str, Path]

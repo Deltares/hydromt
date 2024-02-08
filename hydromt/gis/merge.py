@@ -3,7 +3,7 @@ import numpy as np
 import rasterio
 from pyproj import CRS
 
-from .raster import full_from_transform
+from hydromt.gis.raster import full_from_transform
 
 
 def merge(

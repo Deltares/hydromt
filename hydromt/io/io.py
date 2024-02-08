@@ -1,10 +1,15 @@
 """Implementations for all of pythe necessary IO for HydroMT."""
+import abc
+import codecs
 import glob
 import io as pyio
 import logging
-from os.path import abspath, basename, dirname, isfile, join, splitext
+import os
+from ast import literal_eval
+from configparser import ConfigParser
+from os.path import abspath, basename, dirname, isdir, isfile, join, splitext
 from pathlib import Path
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import dask
 import fsspec
@@ -14,10 +19,14 @@ import pandas as pd
 import pyproj
 import rioxarray
 import xarray as xr
+import yaml
 from shapely.geometry import box
 from shapely.geometry.base import GEOMETRY_TYPES
+from tomli import load as load_toml
+from tomli_w import dump as dump_toml
 
-from . import gis_utils, merge, raster, vector
+from hydromt.gis import merge, raster, utils, vector
+from hydromt.io.path import parse_abspath, parse_relpath
 
 logger = logging.getLogger(__name__)
 
@@ -618,7 +627,7 @@ def open_vector(
     """
 
     def _read(f: pyio.IOBase) -> gpd.GeoDataFrame:
-        bbox_reader = gis_utils.bbox_from_file_and_filters(f, bbox, geom, crs)
+        bbox_reader = utils.bbox_from_file_and_filters(f, bbox, geom, crs)
         f.seek(0)
         return gpd.read_file(f, bbox=bbox_reader, mode=mode, **kwargs)
 
@@ -656,7 +665,7 @@ def open_vector(
         gdf = gdf.to_crs(dst_crs)
     # filter points
     if gdf.index.size > 0 and (geom is not None or bbox is not None):
-        idx = gis_utils.filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
+        idx = utils.filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
         gdf = gdf.iloc[idx, :]
     return gdf
 
@@ -751,3 +760,320 @@ def write_xy(fn, gdf, fmt="%.4f"):
     xy = np.stack((gdf.geometry.x.values, gdf.geometry.y.values)).T
     with open(fn, "w") as f:
         np.savetxt(f, xy, fmt=fmt)
+
+
+def netcdf_writer(
+    obj: Union[xr.Dataset, xr.DataArray],
+    data_root: Union[str, Path],
+    data_name: str,
+    variables: Optional[List[str]] = None,
+    encoder: str = "zlib",
+) -> str:
+    """Utiliy function for writing a xarray dataset/data array to a netcdf file.
+
+    Parameters
+    ----------
+    obj : xr.Dataset | xr.DataArray
+        Dataset.
+    data_root : str | Path
+        root to write the data to.
+    data_name : str
+        filename to write to.
+    variables : Optional[List[str]]
+        list of dataset variables to write, by default None
+
+    Returns
+    -------
+    fn_out: str
+        Absolute path to output file
+    """
+    dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.data_vars
+    if variables is None:
+        encoding = {k: {encoder: True} for k in dvars}
+        fn_out = join(data_root, f"{data_name}.nc")
+        obj.to_netcdf(fn_out, encoding=encoding)
+    else:  # save per variable
+        if not isdir(join(data_root, data_name)):
+            os.makedirs(join(data_root, data_name))
+        for var in dvars:
+            fn_out = join(data_root, data_name, f"{var}.nc")
+            obj[var].to_netcdf(fn_out, encoding={var: {encoder: True}})
+        fn_out = join(data_root, data_name, "{variable}.nc")
+    return fn_out
+
+
+def zarr_writer(
+    obj: Union[xr.Dataset, xr.DataArray],
+    data_root: Union[str, Path],
+    data_name: str,
+    **kwargs,
+) -> str:
+    """Utiliy function for writing a xarray dataset/data array to a netcdf file.
+
+    Parameters
+    ----------
+    obj : xr.Dataset | xr.DataArray
+        Dataset.
+    data_root : str | Path
+        root to write the data to.
+    data_name : str
+        filename to write to.
+
+    Returns
+    -------
+    fn_out: str
+        Absolute path to output file
+    """
+    fn_out = join(data_root, f"{data_name}.zarr")
+    if isinstance(obj, xr.DataArray):
+        obj = obj.to_dataset()
+    obj.to_zarr(fn_out, **kwargs)
+    return fn_out
+
+
+def _process_config_out(d):
+    ret = {}
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if v is None:
+                ret[k] = "NONE"
+            else:
+                ret[k] = _process_config_out(v)
+    else:
+        ret = d
+
+    return ret
+
+
+def _process_config_in(d):
+    ret = {}
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if v == "NONE":
+                ret[k] = None
+            else:
+                ret[k] = _process_config_in(v)
+    else:
+        ret = d
+
+    return ret
+
+
+def configread(
+    config_fn: Union[Path, str],
+    defaults: Optional[Dict] = None,
+    abs_path: bool = False,
+    skip_abspath_sections: Optional[List] = None,
+    **kwargs,
+) -> Dict:
+    """Read configuration/workflow file and parse to (nested) dictionary.
+
+    Parameters
+    ----------
+    config_fn : Union[Path, str]
+        Path to configuration file
+    defaults : dict, optional
+        Nested dictionary with default options, by default dict()
+    abs_path : bool, optional
+        If True, parse string values to an absolute path if the a file or folder
+        with that name (string value) relative to the config file exist,
+        by default False
+    skip_abspath_sections: list, optional
+        These sections are not evaluated for absolute paths if abs_path=True,
+        by default ['update_config']
+    **kwargs
+        Additional keyword arguments that are passed to the read_ini`
+        function.
+
+    Returns
+    -------
+    cfdict : dict
+        Configuration dictionary.
+    """
+    defaults = defaults or {}
+    skip_abspath_sections = skip_abspath_sections or ["setup_config"]
+    # read
+    ext = splitext(config_fn)[-1].strip()
+    if ext in [".yaml", ".yml"]:
+        with open(config_fn, "rb") as f:
+            cfdict = yaml.safe_load(f)
+        cfdict = _process_config_in(cfdict)
+    elif ext == ".toml":  # user defined
+        with open(config_fn, "rb") as f:
+            cfdict = load_toml(f)
+        cfdict = _process_config_in(cfdict)
+    else:
+        cfdict = read_ini_config(config_fn, **kwargs)
+    # parse absolute paths
+    if abs_path:
+        root = Path(dirname(config_fn))
+        cfdict = parse_abspath(cfdict, root, skip_abspath_sections)
+
+    # update defaults
+    if defaults:
+        _cfdict = defaults.copy()
+        _cfdict.update(cfdict)
+        cfdict = _cfdict
+    return cfdict
+
+
+def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
+    """Write configuration/workflow dictionary to file.
+
+    Parameters
+    ----------
+    config_fn : Union[Path, str]
+        Path to configuration file
+    cfdict : dict
+        Configuration dictionary. If the configuration contains headers,
+        the first level keys are the section headers, the second level
+        option-value pairs.
+    encoding : str, optional
+        File encoding, by default "utf-8"
+    cf : ConfigParser, optional
+        Alternative configuration parser, by default None
+    noheader : bool, optional
+        Set true for a single-level configuration dictionary with no headers,
+        by default False
+    **kwargs
+        Additional keyword arguments that are passed to the `write_ini_config`
+        function.
+    """
+    root = Path(dirname(config_fn))
+    _cfdict = parse_relpath(cfdict.copy(), root)
+    ext = splitext(config_fn)[-1].strip()
+    if ext in [".yaml", ".yml"]:
+        _cfdict = _process_config_out(_cfdict)  # should not be done for ini
+        with open(config_fn, "w") as f:
+            yaml.dump(_cfdict, f, sort_keys=False)
+    elif ext == ".toml":  # user defined
+        _cfdict = _process_config_out(_cfdict)
+        with open(config_fn, "wb") as f:
+            dump_toml(_cfdict, f)
+    else:
+        write_ini_config(config_fn, _cfdict, **kwargs)
+
+
+def read_ini_config(
+    config_fn: Union[Path, str],
+    encoding: str = "utf-8",
+    cf: ConfigParser = None,
+    skip_eval: bool = False,
+    skip_eval_sections: Optional[list] = None,
+    noheader: bool = False,
+) -> dict:
+    """Read configuration ini file and parse to (nested) dictionary.
+
+    Parameters
+    ----------
+    config_fn : Union[Path, str]
+        Path to configuration file
+    encoding : str, optional
+        File encoding, by default "utf-8"
+    cf : ConfigParser, optional
+        Alternative configuration parser, by default None
+    skip_eval : bool, optional
+        If True, do not evaluate string values, by default False
+    skip_eval_sections : list, optional
+        These sections are not evaluated for string values
+        if skip_eval=True, by default []
+    noheader : bool, optional
+        Set true for a single-level configuration file with no headers, by default False
+
+    Returns
+    -------
+    cfdict : dict
+        Configuration dictionary.
+    """
+    skip_eval_sections = skip_eval_sections or []
+    if cf is None:
+        cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
+    elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
+        cf = cf()
+    cf.optionxform = str  # preserve capital letter
+    with codecs.open(config_fn, "r", encoding=encoding) as fp:
+        cf.read_file(fp)
+        cfdict = cf._sections
+    # parse values
+    cfdict = parse_values(cfdict, skip_eval, skip_eval_sections)
+    # add dummy header
+    if noheader and "dummy" in cfdict:
+        cfdict = cfdict["dummy"]
+    return cfdict
+
+
+def write_ini_config(
+    config_fn: Union[Path, str],
+    cfdict: dict,
+    encoding: str = "utf-8",
+    cf: ConfigParser = None,
+    noheader: bool = False,
+) -> None:
+    """Write configuration dictionary to ini file.
+
+    Parameters
+    ----------
+    config_fn : Union[Path, str]
+        Path to configuration file
+    cfdict : dict
+        Configuration dictionary.
+    encoding : str, optional
+        File encoding, by default "utf-8"
+    cf : ConfigParser, optional
+        Alternative configuration parser, by default None
+    noheader : bool, optional
+        Set true for a single-level configuration dictionary with no headers,
+        by default False
+    """
+    if cf is None:
+        cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
+    elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
+        cf = cf()
+    cf.optionxform = str  # preserve capital letter
+    if noheader:  # add dummy header
+        cfdict = {"dummy": cfdict}
+    cf.read_dict(cfdict)
+    with codecs.open(config_fn, "w", encoding=encoding) as fp:
+        cf.write(fp)
+
+
+def parse_values(
+    cfdict: dict,
+    skip_eval: bool = False,
+    skip_eval_sections: Optional[List] = None,
+):
+    """Parse string values to python default objects.
+
+    Parameters
+    ----------
+    cfdict : dict
+        Configuration dictionary.
+    skip_eval : bool, optional
+        Set true to skip evaluation, by default False
+    skip_eval_sections : List, optional
+        List of sections to skip evaluation, by default []
+
+    Returns
+    -------
+    cfdict : dict
+        Configuration dictionary with evaluated values.
+    """
+    skip_eval_sections = skip_eval_sections or []
+    # loop through two-level dict: section, key-value pairs
+    for section in cfdict:
+        # evaluate ini items to parse to python default objects:
+        if skip_eval or section in skip_eval_sections:
+            cfdict[section].update(
+                {key: str(var) for key, var in cfdict[section].items()}
+            )  # cast None type values to str
+            continue  # do not evaluate
+        # numbers, tuples, lists, dicts, sets, booleans, and None
+        for key, value in cfdict[section].items():
+            try:
+                value = literal_eval(value)
+            except Exception:
+                pass
+            if isinstance(value, str) and len(value) == 0:
+                value = None
+            cfdict[section].update({key: value})
+    return cfdict

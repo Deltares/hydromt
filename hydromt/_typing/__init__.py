@@ -1,6 +1,11 @@
 """A module for all of the type definitions used in HydroMT."""
 
-from .error import ErrorHandleMethod
+from .error import (
+    ErrorHandleMethod,
+    NoDataException,
+    NoDataStrategy,
+    _exec_nodata_strat,
+)
 from .model_mode import ModelMode
 from .type_def import (
     Bbox,
@@ -34,4 +39,7 @@ __all__ = [
     "XArrayDict",
     "ModelMode",
     "ErrorHandleMethod",
+    "NoDataStrategy",
+    "NoDataException",
+    "_exec_nodata_strat",
 ]

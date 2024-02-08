@@ -11,8 +11,8 @@ import numpy as np
 import xarray as xr
 from shapely.geometry import box
 
-from ..vector import GeoDataset
-from .model_api import Model, _check_equal
+from hydromt.gis.vector import GeoDataset
+from hydromt.models.api import Model, _check_equal
 
 __all__ = ["VectorModel"]
 logger = logging.getLogger(__name__)

@@ -12,9 +12,9 @@ import xugrid as xu
 from pyproj import CRS
 from shapely.geometry import box
 
-from .. import workflows
-from ..raster import GEO_MAP_COORD
-from .model_api import Model
+from hydromt import workflows
+from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.models.api import Model
 
 __all__ = ["MeshModel"]
 logger = logging.getLogger(__name__)

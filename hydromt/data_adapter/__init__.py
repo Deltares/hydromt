@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """HydroMT data adapter."""
 
-from .data_adapter import DataAdapter
+from .caching import cache_vrt_tiles
+from .data_adapter import PREPROCESSORS, DataAdapter
 from .dataframe import DataFrameAdapter
 from .dataset import DatasetAdapter
 from .geodataframe import GeoDataFrameAdapter
@@ -15,4 +16,6 @@ __all__ = [
     "GeoDatasetAdapter",
     "RasterDatasetAdapter",
     "DatasetAdapter",
+    "cache_vrt_tiles",
+    "PREPROCESSORS",
 ]

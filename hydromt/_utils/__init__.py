@@ -2,6 +2,17 @@
 
 import numpy as np
 
+from .log import add_filehandler, logged, setuplog
+
+__all__ = [
+    "setuplog",
+    "add_filehandler",
+    "logged",
+    "partition_dictionaries",
+    "elevation2rgba",
+    "rgba2elevation",
+]
+
 
 class _classproperty(property):
     def __get__(self, owner_self, owner_cls):
@@ -59,9 +70,3 @@ def rgba2elevation(rgba: np.ndarray, nodata=np.nan, dtype=np.float32):
     r, g, b, a = np.split(rgba, 4, axis=2)
     val = (r * 256 + g + b / 256) - 32768
     return np.where(a == 0, nodata, val).squeeze().astype(dtype)
-
-
-def _dict_pprint(d):
-    import json
-
-    return json.dumps(d, indent=2)

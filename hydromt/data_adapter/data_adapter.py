@@ -21,7 +21,7 @@ import yaml
 from pystac import Catalog as StacCatalog
 from upath import UPath
 
-from hydromt.typing import ErrorHandleMethod
+from hydromt._typing import ErrorHandleMethod
 
 logger = logging.getLogger(__name__)
 

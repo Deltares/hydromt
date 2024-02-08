@@ -11,9 +11,9 @@ from pyproj import CRS
 from shapely.geometry import box
 from xugrid.ugrid import conventions
 
-from .. import gis_utils
-from ..raster import GEO_MAP_COORD
-from .basin_mask import parse_region
+from hydromt.accessors.raster import GEO_MAP_COORD
+from hydromt.utils import gis
+from hydromt.workflows.basin_mask import parse_region
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ def create_mesh2d(
             )
         # Parse crs and reproject geom if needed
         if crs is not None:
-            crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+            crs = gis.parse_crs(crs, bbox=geom.total_bounds)
             geom = geom.to_crs(crs)
         # Generate grid based on res for region bbox
         xmin, ymin, xmax, ymax = geom.total_bounds
@@ -163,7 +163,7 @@ def create_mesh2d(
             if grid_crs is not None:
                 if grid_crs.to_epsg() == 4326:
                     bbox = mesh2d.ugrid.grid.bounds
-            crs = gis_utils.parse_crs(crs, bbox=bbox)
+            crs = gis.parse_crs(crs, bbox=bbox)
         else:
             crs = CRS.from_user_input(4326)
         if grid_crs is not None:  # parse crs

@@ -6,7 +6,7 @@ from typing import List
 
 import xarray as xr
 
-from .model_api import Model
+from hydromt.models.api import Model
 
 __all__ = ["NetworkModel"]
 logger = logging.getLogger(__name__)

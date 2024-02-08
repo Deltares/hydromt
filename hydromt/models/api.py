@@ -22,14 +22,14 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt import __version__
+from hydromt import __version__, workflows
 from hydromt._compat import Distribution
+from hydromt.accessors.raster import GEO_MAP_COORD
+from hydromt.data_catalog import DataCatalog
+from hydromt.io.readers import configread
+from hydromt.io.writers import configwrite
 from hydromt.typing import DeferedFileClose, XArrayDict
-
-from .. import config, log, workflows
-from ..data_catalog import DataCatalog
-from ..raster import GEO_MAP_COORD
-from ..utils import _classproperty
+from hydromt.utils import _classproperty, log
 
 __all__ = ["Model"]
 
@@ -211,7 +211,7 @@ class Model(object, metaclass=ABCMeta):
             Write complete model after executing all methods in opt, by default True.
         opt: dict, optional
             Model build configuration. The configuration can be parsed from a
-            .ini file using :py:meth:`~hydromt.config.configread`.
+            .ini file using :py:meth:`~hydromt.io.readers.configread`.
             This is a nested dictionary where the first-level keys are the names
             of model specific methods and the second-level contain
             argument-value pairs of the method.
@@ -275,7 +275,7 @@ class Model(object, metaclass=ABCMeta):
             Write the updated model schematization to disk. By default True.
         opt: dict, optional
             Model build configuration. The configuration can be parsed from a
-            .ini file using :py:meth:`~hydromt.config.configread`.
+            .ini file using :py:meth:`~hydromt.io.readers.configread`.
             This is a nested dictionary where the first-level keys
             are the names of model specific methods and
             the second-level contain argument-value pairs of the method.
@@ -716,10 +716,10 @@ class Model(object, metaclass=ABCMeta):
         self._configwrite(fn)
 
     def _configread(self, fn: str):
-        return config.configread(fn, abs_path=False)
+        return configread(fn, abs_path=False)
 
     def _configwrite(self, fn: str):
-        return config.configwrite(fn, self.config)
+        return configwrite(fn, self.config)
 
     def setup_config(self, **cfdict):
         """Update config with a dictionary."""

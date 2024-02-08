@@ -34,11 +34,11 @@ from packaging.version import Version
 from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
-from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
-from hydromt.utils import partition_dictionaries
-
-from . import __version__
-from .data_adapter import (
+from hydromt import __version__
+from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
+from hydromt._typing.error import NoDataException, NoDataStrategy
+from hydromt._utils import partition_dictionaries
+from hydromt.data_adapter import (
     DataAdapter,
     DataFrameAdapter,
     DatasetAdapter,
@@ -46,9 +46,7 @@ from .data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
-from .exceptions import NoDataException
-from .nodata import NoDataStrategy
+from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
 
 logger = logging.getLogger(__name__)
 
