@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock
-
 import geopandas as gpd
 import numpy as np
 import pytest
@@ -11,22 +9,6 @@ from hydromt.metadata_resolvers.metadata_resolver import MetaDataResolver
 
 
 class TestGeoDataFrame:
-    @pytest.fixture()
-    def mock_driver(self, geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
-        driver = MagicMock(spec=GeoDataFrameDriver)
-        driver.read.return_value = geodf
-        return driver
-
-    @pytest.fixture()
-    def mock_resolver(self) -> MetaDataResolver:
-        resolver = MagicMock(spec=MetaDataResolver)
-
-        def fake_resolve(uri: str, **kwags) -> str:
-            return [uri]
-
-        resolver.resolve = fake_resolve
-        return resolver
-
     @pytest.fixture()
     def example_source(
         self, mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver

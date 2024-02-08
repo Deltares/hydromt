@@ -29,6 +29,8 @@ from hydromt import (
     vector,
 )
 from hydromt.data_catalog import DataCatalog
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.metadata_resolvers import MetaDataResolver
 
 dask_config.set(scheduler="single-threaded")
 
@@ -349,6 +351,26 @@ def mesh_model(griduda):
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(griduda, "elevtn")
     return mod
+
+
+@pytest.fixture()
+def mock_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
+    class MockGeoDataFrameDriver(GeoDataFrameDriver):
+        def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
+            return geodf
+
+    driver = MockGeoDataFrameDriver.model_validate({})
+    return driver
+
+
+@pytest.fixture()
+def mock_resolver() -> MetaDataResolver:
+    class MockMetaDataResolver(MetaDataResolver):
+        def resolve(self, uri, *args, **kwargs):
+            return [uri]
+
+    resolver = MockMetaDataResolver.model_validate({})
+    return resolver
 
 
 @pytest.fixture()

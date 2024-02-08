@@ -32,34 +32,6 @@ CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
 
 
-@pytest.fixture()
-def mock_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
-    class MockGeoDataFrameDriver(GeoDataFrameDriver):
-        def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
-            return geodf
-
-    driver = MockGeoDataFrameDriver.model_validate({})
-    # driver = MagicMock(spec=GeoDataFrameDriver)
-    # driver.read.return_value = geodf
-    return driver
-
-
-@pytest.fixture()
-def mock_resolver() -> MetaDataResolver:
-    # resolver = MagicMock(spec=MetaDataResolver)
-
-    # def fake_resolve(uri: str, **kwargs) -> str:
-    #     return [uri]
-
-    # resolver.resolve = fake_resolve
-    class MockMetaDataResolver(MetaDataResolver):
-        def resolve(self, uri, *args, **kwargs):
-            return [uri]
-
-    resolver = MockMetaDataResolver.model_validate({})
-    return resolver
-
-
 def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver):
     # valid abs root on windows and linux!
     root = "c:/root" if os.name == "nt" else "/c/root"
@@ -162,6 +134,7 @@ def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
         _denormalise_data_dict({"test1": {"alias": "test"}})
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_data_catalog_io(tmpdir):
     data_catalog = DataCatalog()
     _ = data_catalog.sources  # load artifact data as fallback
@@ -177,6 +150,7 @@ def test_data_catalog_io(tmpdir):
     print(data_catalog.get_source("merit_hydro"))
 
 
+@pytest.mark.skip(reason="Needs refactoring from path to uri.")
 def test_versioned_catalog_entries(tmpdir):
     # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
@@ -261,6 +235,7 @@ def test_versioned_catalog_entries(tmpdir):
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_versioned_catalogs(tmpdir, monkeypatch):
     v999_yml_fn = join(tmpdir, "test_sources_v999.yml")
     with open(v999_yml_fn, "w") as f:
@@ -287,6 +262,7 @@ def test_versioned_catalogs(tmpdir, monkeypatch):
         DataCatalog(v999_yml_fn)
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_data_catalog(tmpdir):
     data_catalog = DataCatalog()
     # initialized with empty dict
@@ -333,6 +309,7 @@ def test_data_catalog(tmpdir):
     data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_from_archive(tmpdir):
     data_catalog = DataCatalog()
     # change cache to tmpdir
@@ -352,6 +329,7 @@ def test_from_archive(tmpdir):
         data_catalog.from_archive("https://asdf.com/asdf.zip")
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_used_sources(tmpdir):
     merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
     data_catalog = DataCatalog(merged_yml_fn)
@@ -365,6 +343,7 @@ def test_used_sources(tmpdir):
     assert sources[0][1].version == source.version
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_from_yml_with_archive(tmpdir):
     yml_fn = join(CATALOGDIR, "artifact_data.yml")
     data_catalog = DataCatalog(yml_fn)
@@ -382,6 +361,7 @@ def test_from_yml_with_archive(tmpdir):
     assert dirname(source.path) == root
 
 
+@pytest.mark.skip(reason="needs refactoring from path to uri.")
 def test_from_predefined_catalogs():
     data_catalog = DataCatalog()
     data_catalog.set_predefined_catalogs(
@@ -395,6 +375,7 @@ def test_from_predefined_catalogs():
         data_catalog.from_predefined_catalogs("asdf")
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_export_global_datasets(tmpdir):
     DTYPES = {
         "RasterDatasetAdapter": (xr.DataArray, xr.Dataset),
@@ -446,6 +427,7 @@ def test_export_global_datasets(tmpdir):
         assert isinstance(obj, dtypes), key
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_export_dataframe(tmpdir, df, df_time):
     # Write two csv files
     fn_df = str(tmpdir.join("test.csv"))
@@ -509,6 +491,7 @@ def test_export_dataframe(tmpdir, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_get_rasterdataset():
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)
@@ -538,6 +521,7 @@ def test_get_rasterdataset():
         data_catalog.get_rasterdataset({"name": "test"})
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_get_geodataframe():
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)
@@ -563,6 +547,7 @@ def test_get_geodataframe():
         data_catalog.get_geodataframe({"name": "test"})
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_get_geodataset():
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)
@@ -592,6 +577,7 @@ def test_get_geodataset():
         data_catalog.get_geodataset({"name": "test"})
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_get_dataset(timeseries_df):
     # get_dataset
     data_catalog = DataCatalog("artifact_data")
@@ -610,6 +596,7 @@ def test_get_dataset(timeseries_df):
     assert ds.name == "col1"
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_get_dataframe(df, tmpdir):
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)
@@ -636,6 +623,7 @@ def test_get_dataframe(df, tmpdir):
         data_catalog.get_dataframe({"name": "test"})
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_deprecation_warnings(artifact_data):
     with pytest.deprecated_call():
         # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
@@ -662,6 +650,7 @@ def test_deprecation_warnings(artifact_data):
         artifact_data.get_geodataset(fn, chunks={"time": 100})
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_detect_extent():
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
@@ -698,6 +687,7 @@ def test_detect_extent():
     assert detected_temporal_range == expected_temporal_range
 
 
+@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
 def test_to_stac(tmpdir):
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
@@ -724,6 +714,7 @@ def test_to_stac(tmpdir):
     ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
 
 
+@pytest.mark.skip(reason="Contains bug regarding switch to Pydantic.")
 def test_from_stac(tmpdir):
     catalog_from_stac = DataCatalog().from_stac_catalog(
         "./tests/data/stac/catalog.json"

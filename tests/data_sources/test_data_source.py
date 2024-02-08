@@ -1,6 +1,3 @@
-from unittest.mock import MagicMock
-
-import geopandas as gpd
 import pytest
 
 from hydromt.data_sources import DataSource, GeoDataFrameDataSource
@@ -9,23 +6,9 @@ from hydromt.metadata_resolvers import MetaDataResolver
 
 
 class TestDataSource:
-    @pytest.fixture()
-    def mock_driver(self, geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
-        driver = MagicMock(spec=GeoDataFrameDriver)
-        driver.read.return_value = geodf
-        return driver
-
-    @pytest.fixture()
-    def mock_resolver(self) -> MetaDataResolver:
-        resolver = MagicMock(spec=MetaDataResolver)
-
-        def fake_resolve(uri: str, **kwags) -> str:
-            return [uri]
-
-        resolver.resolve = fake_resolve
-        return resolver
-
-    def test_submodel_validate(self, mock_driver, mock_resolver):
+    def test_submodel_validate(
+        self, mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
+    ):
         submodel: DataSource = DataSource.submodel_validate(
             {
                 "name": "geojsonfile",

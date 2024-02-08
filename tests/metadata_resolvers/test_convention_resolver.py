@@ -9,7 +9,7 @@ from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
 class DataSourceFactory(ModelFactory[DataSource]):
     name = "test"
     data_type = "RasterDataset"
-    uri = "{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc"
+    uri = "/{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc"
     metadata_resolver = ConventionResolver()
 
 
@@ -20,14 +20,14 @@ class TestConventionResolver:
         # test
         uris = resolver.resolve(mock_source)
         assert len(uris) == 1
-        assert uris[0] == "{unknown_key}_0_*_*_*.nc"
+        assert uris[0] == "/{unknown_key}_0_*_*_*.nc"
 
         uris = resolver.resolve(mock_source, variables=["precip"])
         assert len(uris) == 1
-        assert uris[0] == "{unknown_key}_0_precip_*_*.nc"
+        assert uris[0] == "/{unknown_key}_0_precip_*_*.nc"
 
         uris = resolver.resolve(
             mock_source, timerange=("2021-03-01", "2021-05-01"), variables=["precip"]
         )
         assert len(uris) == 3
-        assert uris[0] == "{unknown_key}_0_precip_2021_03.nc"
+        assert uris[0] == "/{unknown_key}_0_precip_2021_03.nc"
