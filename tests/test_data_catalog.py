@@ -17,48 +17,86 @@ from hydromt.data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_catalog_v1 import (
+from hydromt.data_catalog import (
     DataCatalog,
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
+from hydromt.data_sources import GeoDataFrameDataSource
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis_utils import to_geographic_bbox
+from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.nodata import NoDataStrategy
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
 
 
-def test_parser():
+@pytest.fixture()
+def mock_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
+    class MockGeoDataFrameDriver(GeoDataFrameDriver):
+        def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
+            return geodf
+
+    driver = MockGeoDataFrameDriver.model_validate({})
+    # driver = MagicMock(spec=GeoDataFrameDriver)
+    # driver.read.return_value = geodf
+    return driver
+
+
+@pytest.fixture()
+def mock_resolver() -> MetaDataResolver:
+    # resolver = MagicMock(spec=MetaDataResolver)
+
+    # def fake_resolve(uri: str, **kwargs) -> str:
+    #     return [uri]
+
+    # resolver.resolve = fake_resolve
+    class MockMetaDataResolver(MetaDataResolver):
+        def resolve(self, uri, *args, **kwargs):
+            return [uri]
+
+    resolver = MockMetaDataResolver.model_validate({})
+    return resolver
+
+
+def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver):
     # valid abs root on windows and linux!
     root = "c:/root" if os.name == "nt" else "/c/root"
     # simple; abs path
     source = {
-        "data_type": "RasterDataset",
-        "path": f"{root}/to/data.tif",
+        "metadata_resolver": mock_resolver,
+        "driver": mock_driver,
+        "data_type": "GeoDataFrame",
+        "uri": f"{root}/to/data.gpkg",
     }
-    adapter = _parse_data_source_dict("test", source, root=root)
-    assert isinstance(adapter, RasterDatasetAdapter)
-    assert adapter.path == abspath(source["path"])
-    # test with Path object
-    source.update(path=Path(source["path"]))
-    adapter = _parse_data_source_dict("test", source, root=root)
-    assert adapter.path == abspath(source["path"])
+    datasource = _parse_data_source_dict("test", source, root=root)
+    assert isinstance(datasource, GeoDataFrameDataSource)
+    assert datasource.uri == abspath(source["uri"])
+    # TODO: do we want to allow Path objects?
+    # # test with Path object
+    # source.update(uri=Path(source["uri"]))
+    # datasource = _parse_data_source_dict("test", source, root=root)
+    # assert datasource.uri == abspath(source["uri"])
     # rel path
     source = {
-        "data_type": "RasterDataset",
-        "path": "path/to/data.tif",
+        "metadata_resolver": mock_resolver,
+        "driver": mock_driver,
+        "data_type": "GeoDataFrame",
+        "uri": "path/to/data.gpkg",
         "kwargs": {"fn": "test"},
     }
-    adapter = _parse_data_source_dict("test", source, root=root)
-    assert adapter.path == abspath(join(root, source["path"]))
+    datasource = _parse_data_source_dict("test", source, root=root)
+    assert datasource.uri == abspath(join(root, source["uri"]))
     # check if path in kwargs is also absolute
-    assert adapter.driver_kwargs["fn"] == abspath(join(root, "test"))
+    assert datasource.driver_kwargs["fn"] == abspath(join(root, "test"))
     # alias
     dd = {
         "test": {
-            "data_type": "RasterDataset",
-            "path": "path/to/data.tif",
+            "metadata_resolver": mock_resolver,
+            "driver": mock_driver,
+            "data_type": "GeoDataFrame",
+            "uri": "path/to/data.gpkg",
         },
         "test1": {"alias": "test"},
     }
@@ -66,14 +104,19 @@ def test_parser():
         sources = _denormalise_data_dict(dd)
     assert len(sources) == 2
     for name, source in sources:
-        adapter = _parse_data_source_dict(name, source, root=root, catalog_name="tmp")
-        assert adapter.path == abspath(join(root, dd["test"]["path"]))
-        assert adapter.catalog_name == "tmp"
+        datasource = _parse_data_source_dict(
+            name,
+            source,
+            root=root,  # TODO: do we need catalog_name="tmp"
+        )
+        assert datasource.uri == abspath(join(root, dd["test"]["uri"]))
     # placeholder
     dd = {
         "test_{p1}_{p2}": {
-            "data_type": "RasterDataset",
-            "path": "data_{p2}.tif",
+            "metadata_resolver": mock_resolver,
+            "driver": mock_driver,
+            "data_type": "GeoDataFrame",
+            "uri": "data_{p2}.gpkg",
             "placeholders": {"p1": ["a", "b"], "p2": ["1", "2", "3"]},
         },
     }
@@ -81,15 +124,17 @@ def test_parser():
     assert len(sources) == 6
     for name, source in sources:
         assert "placeholders" not in source
-        adapter = _parse_data_source_dict(name, source, root=root)
-        assert adapter.path == abspath(join(root, f"data_{name[-1]}.tif"))
+        datasource = _parse_data_source_dict(name, source, root=root)
+        assert datasource.uri == abspath(join(root, f"data_{name[-1]}.gpkg"))
     # variants
     dd = {
         "test": {
-            "data_type": "RasterDataset",
+            "metadata_resolver": mock_resolver,
+            "driver": mock_driver,
+            "data_type": "GeoDataFrame",
             "variants": [
-                {"path": "path/to/data1.tif", "version": "1"},
-                {"path": "path/to/data2.tif", "provider": "local"},
+                {"uri": "path/to/data1.gpkg", "version": "1"},
+                {"uri": "path/to/data2.gpkg", "provider": "local"},
             ],
         },
     }
@@ -97,15 +142,19 @@ def test_parser():
     assert len(sources) == 2
     for i, (name, source) in enumerate(sources):
         assert "variants" not in source
-        adapter = _parse_data_source_dict(name, source, root=root, catalog_name="tmp")
-        assert adapter.version == dd["test"]["variants"][i].get("version", None)
-        assert adapter.provider == dd["test"]["variants"][i].get("provider", None)
-        assert adapter.catalog_name == "tmp"
+        datasource = _parse_data_source_dict(
+            name,
+            source,
+            root=root,  # TODO: do we need catalog_name="tmp"
+        )
+        assert datasource.version == dd["test"]["variants"][i].get("version", None)
+        assert datasource.provider == dd["test"]["variants"][i].get("provider", None)
+        # assert adapter.catalog_name == "tmp"
 
     # errors
-    with pytest.raises(ValueError, match="Missing required path argument"):
+    with pytest.raises(ValueError, match="DataSource needs 'data_type'"):
         _parse_data_source_dict("test", {})
-    with pytest.raises(ValueError, match="Data type error unknown"):
+    with pytest.raises(ValueError, match="Unknown 'data_type'"):
         _parse_data_source_dict("test", {"path": "", "data_type": "error"})
     with pytest.raises(
         ValueError, match="alias test not found in data_dict"

@@ -51,7 +51,7 @@ class GeoDataFrameDataSource(DataSource):
             if v not in _KNOWN_DRIVERS:
                 raise ValueError(f"unknown driver '{v}'")
             return driver_from_str(v, **info.data.get("driver_kwargs"))
-        elif isinstance(v, GeoDataFrameDriver):
+        elif hasattr(v, "read"):  # driver duck-typing
             return v
         else:
             raise ValueError(f"unknown driver type: {str(v)}")

@@ -55,7 +55,7 @@ class DataSource(BaseModel):
             if v not in RESOLVERS:
                 raise ValueError(f"unknown MetaDataResolver: '{v}'.")
             return RESOLVERS.get(v)()
-        elif isinstance(v, MetaDataResolver):
+        elif hasattr(v, "resolve"):  # MetaDataResolver duck-typing
             return v
         else:
             raise ValueError("metadata_resolver should be string or MetaDataResolver.")

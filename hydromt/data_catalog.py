@@ -1813,6 +1813,10 @@ def _parse_data_source_dict(
 
     source["name"] = name
 
+    # add root
+    if root:
+        source.update({"root": str(root)})
+
     # source meta data
     meta = source.pop("meta", {})
     if "category" not in meta and category is not None:
@@ -1895,7 +1899,8 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                 name_copy = name
                 for k, v in zip(options.keys(), combination):
                     name_copy = name_copy.replace("{" + k + "}", v)
-                    source_copy["path"] = source_copy["path"].replace("{" + k + "}", v)
+                    # TODO: seems like the job for a MetaDataResolver?
+                    source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:
             data_list.append((name, source))

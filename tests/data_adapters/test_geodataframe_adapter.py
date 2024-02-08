@@ -11,8 +11,8 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt.data_adapter_v1.geodataframe_adapter import GeoDataFrameAdapter
-from hydromt.data_catalog_v1 import DataCatalog
+from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
+from hydromt.data_catalog import DataCatalog
 from hydromt.data_sources.geodataframe_data_source import GeoDataFrameDataSource
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
