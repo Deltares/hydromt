@@ -2,20 +2,22 @@
 import os
 from logging import Logger
 from os.path import isdir, join
-from typing import Optional
+from pathlib import Path
+from typing import List, Optional, Union
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
 
-from hydromt.typing import Data, StrPath, Variables
+from hydromt._typing import Data
 
 
 def netcdf_writer(
-    obj: Data,
-    data_root: StrPath,
+    obj: Union[xr.Dataset, xr.DataArray],
+    data_root: Union[str, Path],
     data_name: str,
-    variables: Optional[Variables] = None,
+    variables: Optional[List[str]] = None,
     encoder: str = "zlib",
 ) -> str:
     """Utiliy function for writing a xarray dataset/data array to a netcdf file.
@@ -52,8 +54,8 @@ def netcdf_writer(
 
 
 def zarr_writer(
-    obj: Data,
-    data_root: StrPath,
+    obj: Union[xr.Dataset, xr.DataArray],
+    data_root: Union[str, Path],
     data_name: str,
     **kwargs,
 ) -> str:
@@ -110,3 +112,15 @@ def shift_dataset_time(
     elif dt != 0:
         logger.warning("Time shift not applied, time dimension not found.")
     return ds
+
+
+def has_no_data(
+    data: Optional[Union[pd.DataFrame, gpd.GeoDataFrame, xr.Dataset, xr.DataArray]],
+) -> bool:
+    """Check whether various data containers are empty."""
+    if data is None:
+        return True
+    elif isinstance(data, xr.Dataset):
+        return all([v.size == 0 for v in data.data_vars.values()])
+    else:
+        return len(data) == 0

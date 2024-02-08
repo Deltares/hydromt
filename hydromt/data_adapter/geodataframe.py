@@ -14,20 +14,22 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.nodata import NoDataException, NoDataStrategy, _exec_nodata_strat
-from hydromt.typing import (
+from hydromt import io
+from hydromt._typing import (
     Bbox,
     ErrorHandleMethod,
     GeoDataframeSource,
     Geom,
     GeomBuffer,
+    NoDataException,
+    NoDataStrategy,
     Predicate,
     StrPath,
     TotalBounds,
+    _exec_nodata_strat,
 )
-
-from .. import gis_utils, io
-from .data_adapter import DataAdapter
+from hydromt.data_adapter import DataAdapter
+from hydromt.gis import utils
 
 logger = getLogger(__name__)
 
@@ -329,7 +331,7 @@ class GeoDataFrameAdapter(DataAdapter):
                 kwargs.update(driver=self.driver)
             # parse bbox and geom to (buffere) geom
             if bbox is not None or geom is not None:
-                geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
+                geom = utils.parse_geom_bbox_buffer(geom, bbox, buffer)
             # Check if file-object is required because of additional options
             gdf = io.open_vector(
                 path, crs=self.crs, geom=geom, predicate=predicate, **kwargs
@@ -394,7 +396,7 @@ class GeoDataFrameAdapter(DataAdapter):
             Strategy to handle no data values. By default NoDataStrategy.RAISE.
         predicate : str, optional
             Predicate used to filter the GeoDataFrame, see
-            :py:func:`hydromt.gis_utils.filter_gdf` for details.
+            :py:func:`hydromt.gis.utils.filter_gdf` for details.
 
         Returns
         -------
@@ -411,11 +413,11 @@ class GeoDataFrameAdapter(DataAdapter):
 
         if geom is not None or bbox is not None:
             # NOTE if we read with vector driver this is already done ..
-            geom = gis_utils.parse_geom_bbox_buffer(geom, bbox, buffer)
+            geom = utils.parse_geom_bbox_buffer(geom, bbox, buffer)
             bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
             epsg = geom.crs.to_epsg()
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
-            idxs = gis_utils.filter_gdf(gdf, geom=geom, predicate=predicate)
+            idxs = utils.filter_gdf(gdf, geom=geom, predicate=predicate)
             gdf = gdf.iloc[idxs]
         return gdf
 

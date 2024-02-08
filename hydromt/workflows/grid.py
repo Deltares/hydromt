@@ -8,7 +8,7 @@ import pandas as pd
 import xarray as xr
 from shapely.geometry import Polygon
 
-from ..raster import full
+from hydromt.gis.raster import full
 
 logger = logging.getLogger(__name__)
 
