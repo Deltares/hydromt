@@ -8,16 +8,14 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 
 
 
-Unreleased
-==========
+v0.9.3 (2024-02-08)
+===================
+This release fixes several bugs. Most notably the `NoDataSrategy` is available in much more data reading methods so plugins can use it more directly. Additionally there are some bug fixes relating to reading shapefiles and reading COGs.
 
 Added
 -----
 - Test script for testing predefined catalogs locally. (#735)
 - Option to write a data catalog to a csv file (#425)
-
-Changed
--------
 
 Fixed
 -----
