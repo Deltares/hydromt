@@ -9,12 +9,22 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from affine import Affine
-from model_component import ModelComponent
+from model_component import ModelComponent  # TODO change import when moving this file
+from model_utils import (
+    _assert_read_mode,
+    _assert_write_mode,
+    read_nc,
+    write_nc,
+)
+
+# TODO change import when moving this file
 from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt import gis_utils, raster, workflows
 from hydromt.data_catalog import DataCatalog
+from hydromt.nodata import NoDataStrategy, _exec_nodata_strat
+from hydromt.typing import DeferedFileClose
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +67,8 @@ class GridModelComponent(ModelComponent):
             if data.shape != self._data.raster.shape:
                 raise ValueError("Shape of data and grid maps do not match")
             data = xr.DataArray(dims=self._data.raster.dims, data=data, name=name)
-        if isinstance(data, xr.DataArray):
-            if name is not None:  # rename
-                data.name = name
+        elif isinstance(data, xr.DataArray) and name_required:
+            data.name = name
             data = data.to_dataset()
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
@@ -79,8 +88,9 @@ class GridModelComponent(ModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
+        write: bool = False,
         **kwargs,
-    ) -> None:
+    ) -> DeferedFileClose | None:
         """Write model grid data to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
@@ -102,12 +112,16 @@ class GridModelComponent(ModelComponent):
             South -> North orientation.
         """
         if len(self._data) == 0:
-            self.logger.debug("No grid data found, skip writing.")
+            _exec_nodata_strat(
+                msg="No grid data found, skip writing.",
+                strategy=NoDataStrategy.IGNORE,
+                logger=logger,
+            )
         else:
-            self._assert_write_mode()  # Model class method
+            _assert_write_mode(write)
             # write_nc requires dict - use dummy 'grid' key
-            self.write_nc(
-                {"grid": self._data},
+            return write_nc(
+                {"grid": self._data},  # TODO: use a name argument or fn as key
                 fn,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
@@ -116,7 +130,12 @@ class GridModelComponent(ModelComponent):
             )
 
     def read(
-        self, fn: str = "grid/grid.nc", read: bool = True, write: bool = False, **kwargs
+        self,
+        root,
+        fn: str = "grid/grid.nc",
+        read: bool = True,
+        write: bool = False,
+        **kwargs,
     ) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
 
@@ -129,14 +148,14 @@ class GridModelComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self._assert_read_mode()  # TODO Model class method, could be refactored to a model_utils function
+        _assert_read_mode(read)
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
         if read and write:
             kwargs["load"] = True
-        loaded_nc_files = self.read_nc(
-            fn, single_var_as_array=False, **kwargs
+        loaded_nc_files = read_nc(
+            fn, root, logger=logger, single_var_as_array=False, **kwargs
         )  # TODO: decide where read_nc should be placed
         for ds in loaded_nc_files.values():
             self.set(ds)
@@ -146,53 +165,61 @@ class GridModelComponent(ModelComponent):
         raise NotImplementedError
 
     @property
-    def model(self):
-        """Returns model reference."""
-        # Access the Model instance through the weak reference TODO: discuss if this is needed
-        return self._model_ref()
-
-    @property
-    def data(self):
-        """Returns data."""
-        return self._data
-
-    @property
-    def res(self) -> Tuple[float, float]:
+    def res(self) -> Tuple[float, float] | None:
         """Returns the resolution of the model grid."""
         if len(self._data) > 0:
             return self._data.raster.res
+        _exec_nodata_strat(
+            msg="No grid data found for deriving resolution",
+            strategy=NoDataStrategy.IGNORE,
+            logger=logger,
+        )
 
     @property
-    def transform(self):
+    def transform(self) -> Affine | None:
         """Returns spatial transform of the model grid."""
         if len(self._data) > 0:
             return self._data.raster.transform
+        _exec_nodata_strat(
+            msg="No grid data found for deriving transform",
+            strategy=NoDataStrategy.IGNORE,
+            logger=logger,
+        )
 
     @property
-    def crs(self) -> Union[CRS, None]:
+    def crs(self) -> CRS | None:
         """Returns coordinate reference system embedded in the model grid."""
         if self._data.raster.crs is not None:
             return CRS(self._data.raster.crs)
+        logger.warn("Grid data has no crs")
 
     @property
-    def bounds(self) -> List[float]:
+    def bounds(self) -> List[float] | None:
         """Returns the bounding box of the model grid."""
         if len(self._data) > 0:
             return self._data.raster.bounds
+        _exec_nodata_strat(
+            msg="No grid data found for deriving bounds",
+            strategy=NoDataStrategy.IGNORE,
+            logger=logger,
+        )
 
     @property
-    def region(self) -> gpd.GeoDataFrame:
+    def region(self) -> gpd.GeoDataFrame | None:
         """Returns the geometry of the model area of interest."""
-        region = gpd.GeoDataFrame()
         if len(self._data) > 0:
             crs = self.crs
             if crs is not None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
-            region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
-        return region
+            return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
+        _exec_nodata_strat(
+            msg="No grid data found for deriving region",
+            strategy=NoDataStrategy.IGNORE,
+            logger=logger,
+        )
 
     @property
-    def grid(self):
+    def grid(self) -> xr.Dataset:
         """Model static gridded data as xarray.Dataset."""
         if self._data is None:
             self._initialize_grid()
@@ -214,13 +241,13 @@ class GridModelComponent(ModelComponent):
         self,
         constant: Union[int, float],
         name: str,
-        dtype: Optional[str] = "float32",
+        dtype: Optional[str] = "float32",  # TODO: change dtype to np.dtype
         nodata: Optional[Union[int, float]] = None,
         mask_name: Optional[str] = "mask",
     ) -> List[str]:
         """HYDROMT CORE METHOD: Adds a grid based on a constant value.
 
-        Parameters
+        Parametersfr
         ----------
         constant: int, float
             Constant value to fill grid with.
