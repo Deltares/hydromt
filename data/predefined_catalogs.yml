@@ -9,14 +9,16 @@
 #
 # Notes:
 # if new versions of the data_catalogs are created to table below should be updated by:
-#  - adding the new version with a reference to main, e.g., v2023.2: main
+#  - adding the new version with a rgit meference to main, e.g., v2023.2: main
 #  - updating the git hash or git tag of the previous version, e.g., v2023.1: 0bf8e2a1e716095dc6df54a5e9114ce88da0701b
 #    the git hash of the previous version can be found by browsing to the catalog file in the github main branch and then clicking on the history button
 
 deltares_data:
   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/deltares_data.yml
   versions:
-    v2023.12: main
+    v2024.1.30: main
+    v2023.12.21: 392206b21b26e62e00ae76db7ffc61a3b95e2175
+    v2023.12.19: bf25e79dcbda67612a75588cd782d57abe3881de
     v2023.2: 0bf8e2a1e716095dc6df54a5e9114ce88da0701b
     v2022.7: e082da339f22cb1fc3571eec5a901a21d1c8a7bd
     v2022.5: d88cc47bd4ecc83de38c00aa554a7d48ad23ec23
@@ -24,12 +26,14 @@ deltares_data:
 gcs_cmip6_data:
   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/gcs_cmip6_data.yml
   versions:
-    v2023.2: main
+    v2024.1.30: main
+    v2023.2: 0144d5dadfb76a9f2bdb22226b484e83c9751c34
   notes: This data uses CMIP6 data stored in Google Cloud Service.
 aws_data:
   urlpath: https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/aws_data.yml
   versions:
-    v2023.2: main
+    v2024.1.30: main
+    v2023.2: 897e5c5272875f1c066f393798b7ae59721c9e9d
   notes: This data are stored in public Amazon Web Services.
 artifact_data:
   urlpath: https://github.com/DirkEilander/hydromt-artifacts/releases/download/{version}/data.tar.gz

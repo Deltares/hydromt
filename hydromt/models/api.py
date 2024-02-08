@@ -24,11 +24,11 @@ from shapely.geometry import box
 
 from hydromt import __version__, workflows
 from hydromt._compat import HAS_XUGRID, Distribution
-from hydromt._typing import DeferedFileClose, XArrayDict
+from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty, log
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.io.readers import configread
+from hydromt.io import configread
 from hydromt.io.writers import configwrite
 
 if HAS_XUGRID:
@@ -254,7 +254,7 @@ class Model(object, metaclass=ABCMeta):
 
     def update(
         self,
-        model_out: Optional[Union[str, Path]] = None,
+        model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
         opt: Optional[Dict] = None,
         forceful_overwrite: bool = False,
@@ -583,10 +583,11 @@ class Model(object, metaclass=ABCMeta):
 
     def write_data_catalog(
         self,
-        root: Optional[Union[str, Path]] = None,
-        data_lib_fn: Union[str, Path] = "hydromt_data.yml",
+        root: Optional[StrPath] = None,
+        data_lib_fn: StrPath = "hydromt_data.yml",
         used_only: bool = True,
         append: bool = True,
+        save_csv: bool = False,
     ):
         """Write the data catalog to data_lib_fn.
 
@@ -602,6 +603,8 @@ class Model(object, metaclass=ABCMeta):
             If True, export only data entries kept in used_data list. By default True
         append: bool, optional
             If True, append to an existing
+        save_csv: bool, optional
+            If True, save the data catalog also as an csv table. By default False.
         """
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
@@ -614,6 +617,12 @@ class Model(object, metaclass=ABCMeta):
         # write data catalog
         if cat.sources:
             self._assert_write_mode()
+            if save_csv:
+                csv_path = os.path.splitext(path)[0] + ".csv"
+                cat.to_dataframe().reset_index().to_csv(
+                    csv_path, sep=",", index=False, header=True
+                )
+
             cat.to_yml(path, root=root)
 
     # model configuration
@@ -1726,7 +1735,7 @@ class Model(object, metaclass=ABCMeta):
 
     def read_nc(
         self,
-        fn: Union[str, Path],
+        fn: StrPath,
         mask_and_scale: bool = False,
         single_var_as_array: bool = True,
         load: bool = False,

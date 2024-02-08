@@ -86,7 +86,7 @@ test = [
 doc = [
   "hydromt[examples,extra]",      # examples are included in the docs
   "nbsphinx",                     # build notebooks in docs
-  "pydata-sphinx-theme",          # theme
+  "pydata-sphinx-theme>=0.15.2",  # theme
   "sphinx_autosummary_accessors", # doc layout
   "sphinx",                       # build docks
   "sphinx_design",                # doc layout

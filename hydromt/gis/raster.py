@@ -15,7 +15,7 @@ import os
 from itertools import product
 from os.path import join
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Tuple, Union
 
 import dask
 import geopandas as gpd
@@ -654,25 +654,45 @@ class XRasterBase(XGeoBase):
 
     def _check_dimensions(self) -> None:
         """Validate the number and order of dimensions."""
+        # get spatial dims, this also checks if these dims are present
         dims = (self.y_dim, self.x_dim)
-        da = self._obj[self.vars[0]] if isinstance(self._obj, xr.Dataset) else self._obj
-        extra_dims = [dim for dim in da.dims if dim not in dims]
-        if len(extra_dims) == 1:
-            dims = tuple(extra_dims) + dims
-            self.set_attrs(dim0=extra_dims[0])
-        elif len(extra_dims) == 0:
-            self.attrs.pop("dim0", None)
-        elif len(extra_dims) > 1:
-            raise ValueError("Only 2D and 3D data arrays supported.")
-        if isinstance(self._obj, xr.Dataset):
-            check = np.all([self._obj[name].dims == dims for name in self.vars])
+
+        def _check_dim_order(da: xr.DataArray, dims: Tuple = dims) -> Tuple[bool, list]:
+            """Check if dimensions of a 2 or 3D array are in the right order."""
+            extra_dims = [dim for dim in da.dims if dim not in dims]
+            if len(extra_dims) == 1:
+                dims = tuple(extra_dims) + dims
+            elif len(extra_dims) > 1:
+                raise ValueError("Only 2D and 3D data arrays supported.")
+            return da.dims == dims, extra_dims
+
+        extra_dims = []
+        if isinstance(self._obj, xr.DataArray):
+            check, extra_dims0 = _check_dim_order(self._obj)
+            extra_dims.extend(extra_dims0)
+            if not check:
+                raise ValueError(
+                    f"Invalid dimension order ({self._obj.dims}). "
+                    f"You can use `obj.transpose({dims}) to reorder your dimensions."
+                )
         else:
-            check = self._obj.dims == dims
-        if check == False:
-            raise ValueError(
-                f"Invalid dimension order ({da.dims}). "
-                f"You can use `obj.transpose({dims}) to reorder your dimensions."
-            )
+            for var in self._obj.data_vars:
+                if not all([dim in self._obj[var].dims for dim in dims]):
+                    continue  # only check data variables with x and y dims
+                check, extra_dims0 = _check_dim_order(self._obj[var])
+                extra_dims.extend(extra_dims0)
+                if not check:
+                    raise ValueError(
+                        f"Invalid dimension order ({self._obj[var].dims}). "
+                        f"You can use `obj.transpose({dims}) to reorder your dimensions."
+                    )
+
+        # check if all extra dims are the same
+        extra_dims = list(set(extra_dims))
+        if len(extra_dims) == 1:
+            self.set_attrs(dim0=extra_dims[0])
+        else:
+            self.attrs.pop("dim0", None)
 
     def identical_grid(self, other) -> bool:
         """Return True if other has an same grid as object (crs, transform, shape)."""
@@ -756,7 +776,7 @@ class XRasterBase(XGeoBase):
             )
         grid_map_attrs.update({"x_dim": x_dim, "y_dim": y_dim})
         # reset and write grid mapping attributes
-        obj_out.drop(GEO_MAP_COORD, errors="ignore")
+        obj_out.drop_vars(GEO_MAP_COORD, errors="ignore")
         obj_out.raster.set_attrs(**grid_map_attrs)
         # set grid mapping attribute for each data variable
         if hasattr(obj_out, "data_vars"):
@@ -2110,7 +2130,7 @@ class RasterDataArray(XRasterBase):
                 # out of bounds -> return empty array
                 if isinstance(other, xr.Dataset):
                     other = other[list(other.data_vars.keys())[0]]
-                da = full_like(other, nodata=self.nodata)
+                da = full_like(other.astype(da_clip.dtype), nodata=self.nodata)
                 da.name = self._obj.name
             else:
                 da = da_clip.raster.reproject(

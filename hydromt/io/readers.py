@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import dask
-import fsspec
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -19,7 +18,8 @@ import pyproj
 import rioxarray
 import xarray as xr
 import yaml
-from shapely.geometry import box
+from pyogrio import read_dataframe
+from shapely.geometry import Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 from tomli import load as load_toml
 
@@ -476,6 +476,8 @@ def open_geodataset(
     if filetype in ["csv", "parquet", "xls", "xlsx", "xy"]:
         kwargs.update(assert_gtype="Point")
     # read geometry file
+    if bbox:
+        bbox: Polygon = box(*bbox)
     gdf = open_vector(fn_locs, crs=crs, bbox=bbox, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
@@ -632,16 +634,19 @@ def open_vector(
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
+    # drivers with multiple relevant files cannot be opened directly, we should pass the uri only
     else:
-        # check if pathlike
-        if all(
-            map(lambda method: hasattr(fn, method), ("seek", "close", "read", "write"))
-        ):
-            with fn.open(mode="rb") as f:
-                gdf = _read(f)
+        if driver == "pyogrio":
+            if bbox:
+                bbox_shapely = box(*bbox)
+            else:
+                bbox_shapely = None
+            bbox_reader = gis.bbox_from_file_and_filters(
+                str(fn), bbox_shapely, geom, crs
+            )
+            gdf = read_dataframe(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
         else:
-            with fsspec.open(fn, mode="rb") as f:  # lose storage options here
-                gdf = _read(f)
+            gdf = gpd.read_file(str(fn), bbox=bbox, mode=mode, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:

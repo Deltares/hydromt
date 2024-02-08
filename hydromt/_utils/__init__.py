@@ -1,6 +1,11 @@
 """Utility functions for hydromt that have no other home."""
 
+from typing import Optional, Union
+
+import geopandas as gpd
 import numpy as np
+import pandas as pd
+import xarray as xr
 
 from .log import add_filehandler, logged, setuplog
 
@@ -70,3 +75,15 @@ def rgba2elevation(rgba: np.ndarray, nodata=np.nan, dtype=np.float32):
     r, g, b, a = np.split(rgba, 4, axis=2)
     val = (r * 256 + g + b / 256) - 32768
     return np.where(a == 0, nodata, val).squeeze().astype(dtype)
+
+
+def has_no_data(
+    data: Optional[Union[pd.DataFrame, gpd.GeoDataFrame, xr.Dataset, xr.DataArray]],
+) -> bool:
+    """Check whether various data containers are empty."""
+    if data is None:
+        return True
+    elif isinstance(data, xr.Dataset):
+        return all([v.size == 0 for v in data.data_vars.values()])
+    else:
+        return len(data) == 0

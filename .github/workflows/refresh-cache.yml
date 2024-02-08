@@ -19,7 +19,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ['3.9','3.10','3.11']
-    name: py ${{ matrix.python-version }}
+    name: py ${{ matrix.python-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     # note absence of cucurrency, this one should only be run one at a time
     steps:
@@ -52,7 +52,7 @@ jobs:
           path: |
             /usr/share/miniconda3
             ~/pycache
-          key: test-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
+          key: test-py${{ matrix.python-version }}-${{ matrix.os }}-${{ hashFiles('environment.yml')  }}
         id: test-cache
 
   rebuild-docs-cache:

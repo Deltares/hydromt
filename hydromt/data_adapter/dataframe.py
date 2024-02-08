@@ -1,9 +1,9 @@
 """Implementation for the Pandas Dataframe adapter."""
-import logging
 import warnings
 from datetime import datetime
+from logging import Logger, getLogger
 from os.path import join
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -11,10 +11,18 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt._typing import ErrorHandleMethod, NoDataStrategy, _exec_nodata_strat
+from hydromt._typing import (
+    ErrorHandleMethod,
+    NoDataException,
+    NoDataStrategy,
+    StrPath,
+    TimeRange,
+    Variables,
+    _exec_nodata_strat,
+)
 from hydromt.data_adapter import DataAdapter
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 __all__ = [
     "DataFrameAdapter",
@@ -30,7 +38,7 @@ class DataFrameAdapter(DataAdapter):
 
     def __init__(
         self,
-        path: str,
+        path: StrPath,
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
@@ -134,14 +142,15 @@ class DataFrameAdapter(DataAdapter):
 
     def to_file(
         self,
-        data_root,
-        data_name,
-        driver=None,
-        variables=None,
-        time_tuple=None,
-        logger=logger,
+        data_root: StrPath,
+        data_name: str,
+        driver: Optional[str] = None,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
         **kwargs,
-    ):
+    ) -> Optional[Tuple[StrPath, str, Dict[str, Any]]]:
         """Save a dataframe slice to a file.
 
         Parameters
@@ -175,7 +184,15 @@ class DataFrameAdapter(DataAdapter):
 
         """
         kwargs.pop("bbox", None)
-        obj = self.get_data(time_tuple=time_tuple, variables=variables, logger=logger)
+        obj = self.get_data(
+            time_tuple=time_tuple,
+            variables=variables,
+            handle_nodata=handle_nodata,
+            logger=logger,
+        )
+
+        if obj is None:
+            return None
 
         read_kwargs = dict()
         if driver is None or driver == "csv":
@@ -197,31 +214,55 @@ class DataFrameAdapter(DataAdapter):
 
     def get_data(
         self,
-        variables=None,
-        time_tuple=None,
-        logger=logger,
-    ):
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        logger: Logger = logger,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+    ) -> Optional[pd.DataFrame]:
         """Return a DataFrame.
 
         Returned data is optionally sliced by time and variables,
         based on the properties of this DataFrameAdapter. For a detailed
         description see: :py:func:`~hydromt.data_catalog.DataCatalog.get_dataframe`
         """
-        # load data
-        fns = self._resolve_paths(variables)
-        df = self._read_data(fns, logger=logger)
-        self.mark_as_used()  # mark used
-        # rename variables and parse nodata
-        df = self._rename_vars(df)
-        df = self._set_nodata(df)
-        # slice data
-        df = DataFrameAdapter._slice_data(df, variables, time_tuple, logger=logger)
-        # uniformize data
-        df = self._apply_unit_conversion(df, logger=logger)
-        df = self._set_metadata(df)
-        return df
+        try:
+            # load data
+            fns = self._resolve_paths(variables=variables)
+            self.mark_as_used()  # mark used
+            df = self._read_data(fns, logger=logger)
+            # just raise an exxceptoin so we can handle the strategy in one place (the except)
+            if df is None:
+                raise NoDataException()
+            # rename variables and parse nodata
+            df = self._rename_vars(df)
+            df = self._set_nodata(df)
+            # slice data
+            df = DataFrameAdapter._slice_data(
+                df,
+                variables,
+                time_tuple,
+                logger=logger,
+            )
+            if df is None:
+                raise NoDataException()
 
-    def _read_data(self, fns, logger=logger):
+            # uniformize data
+            df = self._apply_unit_conversion(df, logger=logger)
+            df = self._set_metadata(df)
+            return df
+        except NoDataException:
+            _exec_nodata_strat(
+                f"No data was read from source: {self.name}",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return None
+
+    def _read_data(
+        self,
+        fns: List[StrPath],
+        logger: Logger = logger,
+    ) -> Optional[pd.DataFrame]:
         if len(fns) > 1:
             raise ValueError(
                 f"DataFrame: Reading multiple {self.driver} files is not supported."
@@ -241,15 +282,21 @@ class DataFrameAdapter(DataAdapter):
         else:
             raise IOError(f"DataFrame: driver {self.driver} unknown.")
 
-        return df
+        # cast is just for the type checkers, it doesn't actually do anything
+        df = cast(pd.DataFrame, df)
 
-    def _rename_vars(self, df):
+        if len(df) == 0:
+            return None
+        else:
+            return df
+
+    def _rename_vars(self, df: pd.DataFrame) -> pd.DataFrame:
         if self.rename:
             rename = {k: v for k, v in self.rename.items() if k in df.columns}
             df = df.rename(columns=rename)
         return df
 
-    def _set_nodata(self, df):
+    def _set_nodata(self, df: pd.DataFrame) -> pd.DataFrame:
         # parse nodata values
         cols = df.select_dtypes([np.number]).columns
         if self.nodata is not None and len(cols) > 0:
@@ -266,12 +313,11 @@ class DataFrameAdapter(DataAdapter):
 
     @staticmethod
     def _slice_data(
-        df,
-        variables=None,
-        time_tuple=None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger=logger,
-    ):
+        df: pd.DataFrame,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        logger: Logger = logger,
+    ) -> Optional[pd.DataFrame]:
         """Return a sliced DataFrame.
 
         Parameters
@@ -283,8 +329,6 @@ class DataFrameAdapter(DataAdapter):
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
-        handle_nodata : NoDataStrategy, optional
-            Strategy to handle no data values. Default is NoDataStrategy.RAISE.
 
         Returns
         -------
@@ -299,15 +343,19 @@ class DataFrameAdapter(DataAdapter):
 
         if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
             logger.debug(f"Slicing time dime {time_tuple}")
-            df = df[df.index.slice_indexer(*time_tuple)]
-            if df.size == 0:
-                _exec_nodata_strat(
-                    "DataFrame: Time slice out of range.", handle_nodata, logger=logger
-                )
+            try:
+                df = df[df.index.slice_indexer(*time_tuple)]
+            except IndexError:
+                df = pd.DataFrame()
 
-        return df
+        if len(df) == 0:
+            return None
+        else:
+            return df
 
-    def _apply_unit_conversion(self, df, logger=logger):
+    def _apply_unit_conversion(
+        self, df: pd.DataFrame, logger: Logger = logger
+    ) -> pd.DataFrame:
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in df.columns]
         if len(unit_names) > 0:
@@ -318,7 +366,7 @@ class DataFrameAdapter(DataAdapter):
             df[name] = df[name] * m + a
         return df
 
-    def _set_metadata(self, df):
+    def _set_metadata(self, df: pd.DataFrame) -> pd.DataFrame:
         df.attrs.update(self.meta)
 
         # set column attributes
