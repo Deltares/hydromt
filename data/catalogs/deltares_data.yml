@@ -346,7 +346,6 @@ era5:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    source_version: ERA5 daily data on pressure levels
     source_temporal_extent:
       start: '1950-01-02'
       end: '2023-11-30'
@@ -422,7 +421,6 @@ era5_hourly:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.adbb2d47
-    source_version: ERA5 hourly data on single levels from 1940 to present
     source_temporal_extent:
       start: '1950-01-01'
       end: '2023-03-01'
@@ -587,7 +585,6 @@ gadm_level0:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 4.1
     processing_script: geography/gadm/version4_1/run_dissolve_level_0.sh
     source_spatial_extent:
       West: -180.0
@@ -607,7 +604,6 @@ gadm_level1:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 4.1
     processing_script: geography/gadm/version4_1/run_dissolve_level_1.sh
     source_spatial_extent:
       West: -180.0
@@ -627,7 +623,6 @@ gadm_level2:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 4.1
     processing_script: geography/gadm/version4_1/run_dissolve_level_2.sh
     source_spatial_extent:
       West: -180.0
@@ -647,7 +642,6 @@ gadm_level3:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 4.1
     processing_script: geography/gadm/version4_1/run_dissolve_level_3.sh
     source_spatial_extent:
       West: -180.0
@@ -1164,7 +1158,7 @@ gswo:
       East: 180.0
       North: 80.0
   nodata: 255
-  version: v1_1
+  version: 1.1
   path: hydrography/gswo/occur.vrt
 
 guf:
@@ -1557,7 +1551,6 @@ pcr_globwb:
     paper_doi: 10.5281/zenodo.1045339
     paper_ref: Sutanudjaja, E. H., et al (2017)
     source_url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
-    source_version: 2017.11b1
     processing_script: hydro/pcr_globwb/prep_glob.py
     source_spatial_extent:
       West: -180.0
