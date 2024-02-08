@@ -1,6 +1,5 @@
 """Grid ModelComponent."""
 import logging
-import weakref
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -9,13 +8,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from affine import Affine
-from model_component import ModelComponent  # TODO change import when moving this file
-from model_utils import (
-    _assert_read_mode,
-    _assert_write_mode,
-    read_nc,
-    write_nc,
-)
 
 # TODO change import when moving this file
 from pyproj import CRS
@@ -26,16 +18,25 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.nodata import NoDataStrategy, _exec_nodata_strat
 from hydromt.typing import DeferedFileClose
 
+from .model_component import ModelComponent  # TODO change import when moving this file
+from .model_utils import (
+    _assert_read_mode,
+    _assert_write_mode,
+    read_nc,
+    write_nc,
+)
+
 logger = logging.getLogger(__name__)
 
 
 class GridModelComponent(ModelComponent):
     """GridModelComponent class."""
 
-    def __init__(self, model, logger):
-        self._model_ref = weakref.ref(model)
+    def __init__(self, root, logger=logger):
+        # self._model_ref = weakref.ref(model) TODO: discuss if this is necessary
         self._data = None
         self.logger = logger
+        self.root = root
 
     def set(
         self,
@@ -131,7 +132,6 @@ class GridModelComponent(ModelComponent):
 
     def read(
         self,
-        root,
         fn: str = "grid/grid.nc",
         read: bool = True,
         write: bool = False,
@@ -155,7 +155,7 @@ class GridModelComponent(ModelComponent):
         if read and write:
             kwargs["load"] = True
         loaded_nc_files = read_nc(
-            fn, root, logger=logger, single_var_as_array=False, **kwargs
+            fn, self.root, logger=logger, single_var_as_array=False, **kwargs
         )  # TODO: decide where read_nc should be placed
         for ds in loaded_nc_files.values():
             self.set(ds)
