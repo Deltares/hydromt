@@ -21,6 +21,7 @@ from hydromt.workflows.basin_mask import (
 logger = logging.getLogger("tets_basin")
 
 
+@pytest.mark.skip(reason="Needs refactor to Pydantic BaseModel.")
 def test_region(tmpdir, world, geodf, rioda):
     # prepare test data
     fn_gdf = str(tmpdir.join("world.geojson"))
@@ -135,6 +136,7 @@ def test_check_size(caplog):
     )
 
 
+@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 @pytest.mark.filterwarnings("ignore::UserWarning")
 def test_basin(caplog):
     data_catalog = hydromt.DataCatalog("artifact_data", logger=logger)

@@ -19,7 +19,9 @@ if HAS_XUGRID:
     import xugrid as xu
 
 from hydromt.data_catalog import DataCatalog
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import raster, utils, vector
+from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.models import MODELS
 from hydromt.models.api import Model
 from hydromt.models.components.grid import GridModel
@@ -345,6 +347,26 @@ def mesh_model(griduda):
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(griduda, "elevtn")
     return mod
+
+
+@pytest.fixture()
+def mock_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
+    class MockGeoDataFrameDriver(GeoDataFrameDriver):
+        def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
+            return geodf
+
+    driver = MockGeoDataFrameDriver.model_validate({})
+    return driver
+
+
+@pytest.fixture()
+def mock_resolver() -> MetaDataResolver:
+    class MockMetaDataResolver(MetaDataResolver):
+        def resolve(self, uri, *args, **kwargs):
+            return [uri]
+
+    resolver = MockMetaDataResolver.model_validate({})
+    return resolver
 
 
 @pytest.fixture()
