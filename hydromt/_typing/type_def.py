@@ -6,7 +6,14 @@ from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 from geopandas import GeoDataFrame, GeoSeries
 from xarray import DataArray, Dataset
 
+from hydromt._compat import HAS_XUGRID
 from hydromt._typing.model_mode import ModelMode
+
+if HAS_XUGRID:
+    from xugrid import Ugrid1d, Ugrid2d, UgridDataArray, UgridDataset
+
+    BasinIdType = str
+    UgridData = Union[UgridDataArray, UgridDataset, Ugrid1d, Ugrid2d]
 
 StrPath = Union[str, Path]
 GeoDataframeSource = StrPath

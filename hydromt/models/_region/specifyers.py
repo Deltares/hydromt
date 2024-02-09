@@ -10,20 +10,16 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from shapely import box
 from typing_extensions import Annotated
 from xarray import Dataset
-from xugrid import Ugrid1d, Ugrid2d, UgridDataArray, UgridDataset
 
 from hydromt._compat import HAS_XUGRID
+from hydromt._typing import Bbox
 from hydromt.data_catalog import DataCatalog
-from hydromt.typing import Bbox
 from hydromt.workflows.basin_mask import get_basin_geometry
 
 logger = getLogger(__name__)
 
 if HAS_XUGRID:
     import xugrid as xu
-
-BasinIdType = str
-UgridData = Union[UgridDataArray, UgridDataset, Ugrid1d, Ugrid2d]
 
 
 class BboxRegionSpecifyer(BaseModel):

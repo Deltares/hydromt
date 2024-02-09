@@ -10,8 +10,8 @@ from pyproj import CRS
 
 from hydromt._compat import HAS_XUGRID
 from hydromt.data_catalog import DataCatalog
+from hydromt.model.region import BasinIdType, RegionSpecifyer
 from hydromt.models import MODELS
-from hydromt.validators.region import BasinIdType, RegionSpecifyer
 
 if HAS_XUGRID:
     pass
