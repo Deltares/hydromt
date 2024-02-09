@@ -6,20 +6,20 @@ from pathlib import Path
 import pytest
 from pydantic_core import ValidationError
 
-from hydromt.validators.region import (
-    RegionSpecifyer,
-    BboxRegionSpecifyer,
-    GeomRegionSpecifyer,
-    MeshRegionSpecifyer,
+from hydromt._validators.region import (
     BasinIdRegionSpecifyer,
     BasinMultipleIdsRegionSpecifyer,
-    DerivedRegionSpecifyer,
-    GridRegionSpecifyer,
-    BasinPointRegionSpecifyer,
-    BasinPointListRegionSpecifyer,
     BasinPointBboxRegionSpecifyer,
     BasinPointGeomRegionSpecifyer,
+    BasinPointListRegionSpecifyer,
+    BasinPointRegionSpecifyer,
     BasinRegionSpecifyer,
+    BboxRegionSpecifyer,
+    DerivedRegionSpecifyer,
+    GeomRegionSpecifyer,
+    GridRegionSpecifyer,
+    MeshRegionSpecifyer,
+    RegionSpecifyer,
 )
 
 

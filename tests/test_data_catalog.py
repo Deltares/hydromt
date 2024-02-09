@@ -12,6 +12,7 @@ import pytest
 import xarray as xr
 
 import hydromt.data_catalog
+from hydromt._typing import NoDataStrategy
 from hydromt.data_adapter import (
     DataAdapter,
     GeoDataFrameAdapter,
@@ -23,7 +24,7 @@ from hydromt.data_catalog import (
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
-from hydromt.gis_utils import to_geographic_bbox
+from hydromt.gis.utils import to_geographic_bbox
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -368,6 +369,7 @@ def test_export_global_datasets(tmpdir):
         time_tuple=time_tuple,
         source_names=source_names,
         meta={"version": 1},
+        handle_nodata=NoDataStrategy.IGNORE,
     )
     # test append and overwrite source
     data_catalog.export_data(
@@ -376,6 +378,7 @@ def test_export_global_datasets(tmpdir):
         source_names=["corine"],
         append=True,
         meta={"version": 2},
+        handle_nodata=NoDataStrategy.IGNORE,
     )
     data_lib_fn = join(tmpdir, "data_catalog.yml")
     # check if meta is written
@@ -442,6 +445,7 @@ def test_export_dataframe(tmpdir, df, df_time):
         str(tmpdir),
         time_tuple=("2010-02-01", "2010-02-14"),
         bbox=[11.70, 45.35, 12.95, 46.70],
+        handle_nodata=NoDataStrategy.IGNORE,
     )
     data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
     assert len(data_catalog1.iter_sources()) == 2

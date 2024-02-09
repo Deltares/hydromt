@@ -7,7 +7,6 @@ import pathlib
 import warnings
 from abc import ABCMeta, abstractmethod
 from itertools import product
-from pathlib import Path
 from string import Formatter
 from typing import Optional, Union
 
@@ -21,7 +20,17 @@ import yaml
 from pystac import Catalog as StacCatalog
 from upath import UPath
 
-from hydromt.typing import ErrorHandleMethod
+from hydromt._typing import (
+    Bbox,
+    Data,
+    ErrorHandleMethod,
+    Geom,
+    GeomBuffer,
+    NoDataStrategy,
+    StrPath,
+    TimeRange,
+    Variables,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +115,7 @@ class DataAdapter(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        path: Union[str, Path],
+        path: StrPath,
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
@@ -287,8 +296,8 @@ class DataAdapter(object, metaclass=ABCMeta):
 
     def _resolve_paths(
         self,
-        time_tuple: Optional[tuple] = None,
-        variables: Optional[list] = None,
+        time_tuple: Optional[TimeRange] = None,
+        variables: Optional[Variables] = None,
         zoom_level: Optional[int] = 0,
     ):
         """Resolve {year}, {month} and {variable} keywords in self.path.
@@ -317,9 +326,9 @@ class DataAdapter(object, metaclass=ABCMeta):
         fns = []
         keys = []
         # rebuild path based on arguments and escape unknown keys
-        if "{" in self.path:
+        if "{" in str(self.path):
             path = ""
-            for literal_text, key, fmt, _ in Formatter().parse(self.path):
+            for literal_text, key, fmt, _ in Formatter().parse(str(self.path)):
                 path += literal_text
                 if key is None:
                     continue
@@ -366,11 +375,11 @@ class DataAdapter(object, metaclass=ABCMeta):
                     fmt.update(year=date.year, month=date.month)
                 if var is not None:
                     fmt.update(variable=var)
-                fns.append(path.format(**fmt))
+                fns.append(str(path).format(**fmt))
         else:
             fns.append(path)
 
-        protocol = str(path).split("://")[0] if "://" in path else ""
+        protocol = str(path).split("://")[0] if "://" in str(path) else ""
         if protocol and self.filesystem is None:
             self.filesystem = protocol
         # For s3, anonymous connection still requires --no-sign-request profile to
@@ -400,14 +409,22 @@ class DataAdapter(object, metaclass=ABCMeta):
         return fns_out
 
     @abstractmethod
-    def get_data(self, bbox, geom, buffer):
+    def get_data(
+        self,
+        bbox: Optional[Bbox],
+        geom: Optional[Geom],
+        buffer: Optional[GeomBuffer],
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+    ):
         """Return a view (lazy if possible) of the data with standardized field names.
 
         If bbox of mask are given, clip data to that extent.
         """
 
     @staticmethod
-    def _single_var_as_array(ds, single_var_as_array, variable_name=None):
+    def _single_var_as_array(
+        ds: Data, single_var_as_array: bool, variable_name: Optional[str] = None
+    ) -> Data:
         # return data array if single variable dataset
         dvars = list(ds.data_vars.keys())
         if single_var_as_array and len(dvars) == 1:

@@ -14,13 +14,16 @@ import numpy as np
 from geopandas import GeoDataFrame
 from pydantic import ValidationError
 
-from hydromt.data_catalog import DataCatalog
-from hydromt.validators.data_catalog import DataCatalogValidator
-from hydromt.validators.model_config import HydromtModelSetup
+from hydromt import __version__
+from hydromt._typing.error import NoDataStrategy
+from hydromt._utils import log
+from hydromt._validators.data_catalog import DataCatalogValidator
+from hydromt._validators.model_config import HydromtModelSetup
 
-from .. import __version__, log
-from ..models import MODELS
-from . import cli_utils
+# from hydromt._validators.region import validate_region
+from hydromt.cli import _utils
+from hydromt.data_catalog import DataCatalog
+from hydromt.models import MODELS
 
 BUILDING_EXE = False
 if BUILDING_EXE:
@@ -78,7 +81,7 @@ region_opt = click.option(
     "--region",
     type=str,
     default="{}",
-    callback=cli_utils.parse_json,
+    callback=_utils.parse_json,
     help="Set the region for which to build the model,"
     " e.g. {'subbasin': [-7.24, 62.09]}",
 )
@@ -90,7 +93,7 @@ quiet_opt = click.option("--quiet", "-q", count=True, help="Decrease verbosity."
 opt_cli = click.option(
     "--opt",
     multiple=True,
-    callback=cli_utils.parse_opt,
+    callback=_utils.parse_opt,
     help="Method specific keyword arguments, see the method documentation "
     "of the specific model for more information about the arguments.",
 )
@@ -116,6 +119,12 @@ overwrite_opt = click.option(
     is_flag=True,
     default=False,
     help="Flag: If provided overwrite existing model files",
+)
+error_on_empty = click.option(
+    "--error-on-empty",
+    is_flag=True,
+    default=False,
+    help="Flag: Raise an error when attempting to export empty dataset instead of continuing",
 )
 
 cache_opt = click.option(
@@ -195,7 +204,7 @@ def build(
     )
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
-    opt = cli_utils.parse_config(config, opt_cli=opt)
+    opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # Set region to None if empty string json
     if len(region) == 0:
@@ -299,7 +308,7 @@ def update(
     if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
         opt = {components[0]: opt}
     logger.info("User settings:")
-    opt = cli_utils.parse_config(config, opt_cli=opt)
+    opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
@@ -402,7 +411,7 @@ def check(
             mod = MODELS.load(model)
             logger.info(f"Validating for model {model} of type {type(mod).__name__}")
             try:
-                config_dict = cli_utils.parse_config(config)
+                config_dict = _utils.parse_config(config)
                 logger.info(f"Validating config at {config}")
 
                 HydromtModelSetup.from_dict(config_dict, model=mod)
@@ -443,6 +452,7 @@ def check(
 @data_opt
 @deltares_data_opt
 @overwrite_opt
+@error_on_empty
 @quiet_opt
 @verbose_opt
 @click.pass_context
@@ -456,6 +466,7 @@ def export(
     data: Optional[List[Path]],
     dd: bool,
     fo: bool,
+    error_on_empty: bool,
     quiet: int,
     verbose: int,
 ):
@@ -480,6 +491,11 @@ def export(
     )
     logger.info(f"Output dir: {export_dest_path}")
 
+    if error_on_empty:
+        handle_nodata = NoDataStrategy.RAISE
+    else:
+        handle_nodata = NoDataStrategy.IGNORE
+
     if data:
         data_libs = list(data)  # add data catalogs from cli
     else:
@@ -489,7 +505,6 @@ def export(
         data_libs = ["deltares_data"] + data_libs  # prepend!
 
     sources: List[str] = []
-
     if source:
         if isinstance(source, str):
             sources = [source]
@@ -502,7 +517,7 @@ def export(
     append = False
 
     if config:
-        config_dict = cli_utils.parse_config(config)["export_data"]
+        config_dict = _utils.parse_config(config)["export_data"]
         if "data_libs" in config_dict.keys():
             data_libs = data_libs + config_dict.pop("data_libs")
         time_tuple = config_dict.pop("time_tuple", None)
@@ -556,6 +571,7 @@ def export(
             unit_conversion=unit_conversion,
             meta=meta,
             append=append,
+            handle_nodata=handle_nodata,
         )
 
     except Exception as e:
@@ -583,7 +599,7 @@ def export(
 @click.argument(
     "REGION",
     type=str,
-    callback=cli_utils.parse_json,
+    callback=_utils.parse_json,
 )
 @quiet_opt
 @verbose_opt

@@ -1,9 +1,8 @@
 """Implementation for the dataset DataAdapter."""
-import logging
 from datetime import datetime
+from logging import Logger, getLogger
 from os.path import basename, splitext
-from pathlib import Path
-from typing import List, NewType, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -13,14 +12,21 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.typing import ErrorHandleMethod, TimeRange
+from hydromt._typing import (
+    Data,
+    ErrorHandleMethod,
+    NoDataException,
+    NoDataStrategy,
+    StrPath,
+    TimeRange,
+    Variables,
+    _exec_nodata_strat,
+)
+from hydromt.data_adapter import DataAdapter
+from hydromt.data_adapter.utils import has_no_data, shift_dataset_time
+from hydromt.io import netcdf_writer, zarr_writer
 
-from .data_adapter import DataAdapter
-from .utils import netcdf_writer, shift_dataset_time, zarr_writer
-
-logger = logging.getLogger(__name__)
-
-DatasetSource = NewType("DatasetSource", Union[str, Path])
+logger = getLogger(__name__)
 
 
 class DatasetAdapter(DataAdapter):
@@ -33,7 +39,7 @@ class DatasetAdapter(DataAdapter):
 
     def __init__(
         self,
-        path: Union[str, Path],
+        path: StrPath,
         driver: Optional[str] = None,
         filesystem: Optional[str] = None,
         nodata: Optional[Union[dict, float, int]] = None,
@@ -44,8 +50,8 @@ class DatasetAdapter(DataAdapter):
         attrs: Optional[dict] = None,
         driver_kwargs: Optional[dict] = None,
         storage_options: Optional[dict] = None,
-        name: Optional[str] = "",
-        catalog_name: Optional[str] = "",
+        name: str = "",
+        catalog_name: str = "",
         provider: Optional[str] = None,
         version: Optional[str] = None,
     ):
@@ -125,13 +131,14 @@ class DatasetAdapter(DataAdapter):
 
     def to_file(
         self,
-        data_root: Union[str, Path],
+        data_root: StrPath,
         data_name: str,
-        time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        time_tuple: Optional[TimeRange] = None,
         variables: Optional[List[str]] = None,
         driver: Optional[str] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
-    ) -> Tuple[str, str]:
+    ) -> Optional[Tuple[str, str]]:
         """Save a dataset slice to file. By default the data is saved as a NetCDF file.
 
         Parameters
@@ -163,12 +170,19 @@ class DatasetAdapter(DataAdapter):
         obj = self.get_data(
             time_tuple=time_tuple,
             variables=variables,
-            logger=logger,
             single_var_as_array=variables is None,
+            handle_nodata=handle_nodata,
+            logger=logger,
         )
+        if obj is None:
+            return None
+
         if driver is None or driver == "netcdf":
             fn_out = netcdf_writer(
-                obj=obj, data_root=data_root, data_name=data_name, variables=variables
+                obj=obj,
+                data_root=data_root,
+                data_name=data_name,
+                variables=variables,
             )
         elif driver == "zarr":
             fn_out = zarr_writer(
@@ -181,33 +195,48 @@ class DatasetAdapter(DataAdapter):
 
     def get_data(
         self,
-        variables: Optional[List[str]] = None,
-        time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
         single_var_as_array: Optional[bool] = True,
-        logger: Optional[logging.Logger] = logger,
-    ) -> xr.Dataset:
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
+    ):
         """Return a clipped, sliced and unified Dataset.
 
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_dataset`
         """
-        # load data
-        fns = self._resolve_paths(variables, time_tuple)
-        ds = self._read_data(fns, logger=logger)
-        self.mark_as_used()  # mark used
-        # rename variables and parse data and attrs
-        ds = self._rename_vars(ds)
-        ds = self._set_nodata(ds)
-        ds = self._shift_time(ds, logger=logger)
-        # slice
-        ds = DatasetAdapter._slice_data(ds, variables, time_tuple, logger=logger)
-        # uniformize
-        ds = self._apply_unit_conversion(ds, logger=logger)
-        ds = self._set_metadata(ds)
-        # return array if single var and single_var_as_array
-        return self._single_var_as_array(ds, single_var_as_array, variables)
+        try:
+            # load data
+            fns = self._resolve_paths(variables, time_tuple)
+            self.mark_as_used()
+            ds = self._read_data(fns, logger=logger)
+            if ds is None:
+                raise NoDataException()
+            # rename variables and parse data and attrs
+            ds = self._rename_vars(ds)
+            ds = self._set_nodata(ds)
+            ds = self._shift_time(ds, logger=logger)
+            # slice
+            ds = DatasetAdapter._slice_data(ds, variables, time_tuple, logger=logger)
+            if ds is None:
+                raise NoDataException()
+            # uniformize
+            ds = self._apply_unit_conversion(ds, logger=logger)
+            ds = self._set_metadata(ds)
+            # return array if single var and single_var_as_array
+            return self._single_var_as_array(ds, single_var_as_array, variables)
+        except NoDataException:
+            _exec_nodata_strat(
+                "No data to export", strategy=handle_nodata, logger=logger
+            )
+            return None
 
-    def _read_data(self, fns, logger=logger):
+    def _read_data(
+        self,
+        fns: List[StrPath],
+        logger: Logger = logger,
+    ) -> Optional[Data]:
         kwargs = self.driver_kwargs.copy()
         if len(fns) > 1 and self.driver in ["zarr"]:
             raise ValueError(
@@ -223,16 +252,17 @@ class DatasetAdapter(DataAdapter):
         else:
             raise ValueError(f"Dataset: Driver {self.driver} unknown")
 
-        return ds
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
-    def _rename_vars(self, ds: xr.Dataset) -> xr.Dataset:
+    def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
         ds = ds.rename(rm)
         return ds
 
-    def _set_metadata(
-        self, ds: Union[xr.DataArray, xr.Dataset]
-    ) -> Union[xr.Dataset, xr.DataArray]:
+    def _set_metadata(self, ds: Data) -> Data:
         if self.attrs:
             if isinstance(ds, xr.DataArray):
                 ds.attrs.update(self.attrs[ds.name])
@@ -243,7 +273,7 @@ class DatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
-    def _set_nodata(self, ds: xr.Dataset) -> xr.Dataset:
+    def _set_nodata(self, ds: Data) -> Data:
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
                 nodata = {k: self.nodata for k in ds.data_vars.keys()}
@@ -255,9 +285,7 @@ class DatasetAdapter(DataAdapter):
                     ds[k].attrs["_FillValue"] = mv
         return ds
 
-    def _apply_unit_conversion(
-        self, ds: xr.Dataset, logger: logging.Logger = logger
-    ) -> xr.Dataset:
+    def _apply_unit_conversion(self, ds: Data, logger: Logger = logger) -> Data:
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
@@ -277,20 +305,17 @@ class DatasetAdapter(DataAdapter):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def _shift_time(
-        self, ds: xr.Dataset, logger: logging.Logger = logger
-    ) -> xr.Dataset:
+    def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
         dt = self.unit_add.get("time", 0)
         return shift_dataset_time(dt=dt, ds=ds, logger=logger)
 
     @staticmethod
     def _slice_data(
-        ds: xr.Dataset,
-        variables: Optional[Union[str, List[str]]] = None,
-        time_tuple=Optional[Union[Tuple[str], Tuple[datetime]]],
-        logger: logging.Logger = logger,
-        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
-    ) -> xr.Dataset:
+        ds: Data,
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        logger: Logger = logger,
+    ) -> Optional[Data]:
         """Slice the dataset in space and time.
 
         Arguments
@@ -320,27 +345,19 @@ class DatasetAdapter(DataAdapter):
                     raise ValueError(f"Dataset: variables not found {mvars}")
                 ds = ds[variables]
         if time_tuple is not None:
-            try:
-                ds = DatasetAdapter._slice_temporal_dimension(
-                    ds, time_tuple, logger=logger
-                )
-            except IndexError as e:
-                if on_error == ErrorHandleMethod.SKIP:
-                    logger.warning(
-                        "Skipping slicing data on temporal dimension because time slice is out of range."
-                    )
-                    return ds
-                elif on_error == ErrorHandleMethod.COERCE:
-                    return ds
-                else:
-                    raise e
+            ds = DatasetAdapter._slice_temporal_dimension(ds, time_tuple, logger=logger)
 
-        return ds
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
     @staticmethod
     def _slice_temporal_dimension(
-        ds: xr.Dataset, time_tuple: tuple, logger: logging.Logger = logger
-    ) -> xr.Dataset:
+        ds: Data,
+        time_tuple: TimeRange,
+        logger: Logger = logger,
+    ) -> Optional[Data]:
         if (
             "time" in ds.dims
             and ds["time"].size > 1
@@ -350,10 +367,14 @@ class DatasetAdapter(DataAdapter):
             ds = ds.sel(time=slice(*time_tuple))
             if ds.time.size == 0:
                 raise IndexError("Dataset: Time slice out of range.")
-        return ds
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
 
     def get_time_range(
-        self, ds: Optional[Union[xr.DataArray, xr.Dataset]] = None
+        self,
+        ds: Optional[Data] = None,
     ) -> TimeRange:
         """Get the temporal range of a dataset.
 

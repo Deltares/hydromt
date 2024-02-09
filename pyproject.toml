@@ -86,7 +86,7 @@ test = [
 doc = [
   "hydromt[examples,extra]",      # examples are included in the docs
   "nbsphinx",                     # build notebooks in docs
-  "pydata-sphinx-theme",          # theme
+  "pydata-sphinx-theme>=0.15.2",  # theme
   "sphinx_autosummary_accessors", # doc layout
   "sphinx",                       # build docks
   "sphinx_design",                # doc layout
@@ -109,32 +109,28 @@ hydromt = "hydromt.cli.main:main"
 
 [tool.make_env]
 channels = ["conda-forge"]
-deps_not_in_conda = [
-  "sphinx_autosummary_accessors",
-  "sphinx_design",
-]
+deps_not_in_conda = ["sphinx_autosummary_accessors", "sphinx_design"]
 
 
 [tool.ruff]
 line-length = 88
 target-version = "py39"
-
-# enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
-select = ["E", "F", "I", "PT", "D", "B"]
-ignore-init-module-imports = true
-ignore = ["D211", "D213", 'D206', 'E501', "E741", "D105", "E712", "B904"]
 exclude = ["docs"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint]
+# enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
+select = ["E", "F", "I", "PT", "D", "B", "ICN", "TID"]
+ignore-init-module-imports = true
+ignore = ["D211", "D213", 'D206', 'E501', "E741", "D105", "E712", "B904"]
+
+[tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D100", "D101", "D102", "D103", "D104"]
 "hydromt/__init__.py" = ["E402", "F401", "F403"]
-"hydromt/workflows/__init__.py" = ["F403"]
-"hydromt/stats/__init__.py" = ["F403"]
-"hydromt/models/__init__.py" = ["F403", "F401", "F405"]
+"hydromt/models/__init__.py" = ["F401"]
 "hydromt/_compat.py" = ["F401"]
 "tests/conftest.py" = ["E402"]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
 [tool.flit.sdist]

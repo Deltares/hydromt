@@ -1,13 +1,16 @@
 """Utility functions for data adapters."""
-import logging
 import os
+from logging import Logger
 from os.path import isdir, join
 from pathlib import Path
 from typing import List, Optional, Union
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
+
+from hydromt._typing import Data
 
 
 def netcdf_writer(
@@ -80,7 +83,7 @@ def zarr_writer(
 
 
 def shift_dataset_time(
-    dt: int, ds: xr.Dataset, logger: logging.Logger, time_unit: str = "s"
+    dt: int, ds: Data, logger: Logger, time_unit: str = "s"
 ) -> xr.Dataset:
     """Shifts time of a xarray dataset.
 
@@ -109,3 +112,15 @@ def shift_dataset_time(
     elif dt != 0:
         logger.warning("Time shift not applied, time dimension not found.")
     return ds
+
+
+def has_no_data(
+    data: Optional[Union[pd.DataFrame, gpd.GeoDataFrame, xr.Dataset, xr.DataArray]],
+) -> bool:
+    """Check whether various data containers are empty."""
+    if data is None:
+        return True
+    elif isinstance(data, xr.Dataset):
+        return all([v.size == 0 for v in data.data_vars.values()])
+    else:
+        return len(data) == 0
