@@ -458,7 +458,6 @@ class GeoDatasetAdapter(DataAdapter):
         geom: Optional[Geom],
         bbox: Optional[Bbox],
         buffer: Optional[GeomBuffer],
-        handle_nodata: NoDataStrategy,
         predicate: Predicate,
         logger: Logger = logger,
     ) -> Optional[Data]:
