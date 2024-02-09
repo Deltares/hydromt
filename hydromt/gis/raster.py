@@ -226,7 +226,7 @@ class XGeoBase(object):
 
     """Base class for the GIS extensions for xarray."""
 
-    def __init__(self, xarray_obj: xr.DataArray | xr.Dataset) -> None:
+    def __init__(self, xarray_obj: Union[xr.DataArray, xr.Dataset]) -> None:
         """Initialize new object based on the xarray object provided."""
         self._obj = xarray_obj
         self._crs = None
@@ -729,7 +729,7 @@ class XRasterBase(XGeoBase):
 
     def gdal_compliant(
         self, rename_dims=True, force_sn=False
-    ) -> xr.DataArray | xr.Dataset:
+    ) -> Union[xr.DataArray, xr.Dataset]:
         """Update attributes to get GDAL compliant NetCDF files.
 
         Arguments
@@ -788,7 +788,7 @@ class XRasterBase(XGeoBase):
         return obj_out
 
     def transform_bounds(
-        self, dst_crs: CRS | int | str | dict, densify_pts: int = 21
+        self, dst_crs: Union[CRS, int, str, dict], densify_pts: int = 21
     ) -> tuple[float, float, float, float]:
         """Transform bounds from object to destination CRS.
 
@@ -820,7 +820,7 @@ class XRasterBase(XGeoBase):
             bounds = self.bounds
         return bounds
 
-    def flipud(self) -> xr.DataArray | xr.Dataset:
+    def flipud(self) -> Union[xr.DataArray, xr.Dataset]:
         """Return raster flipped along y dimension."""
         y_dim = self.y_dim
         # NOTE don't use ycoords to work for rotated grids
@@ -877,7 +877,7 @@ class XRasterBase(XGeoBase):
         c: np.ndarray[int],
         mask: np.ndarray[bool] = None,
         mask_outside: bool = False,
-        nodata: float | int = np.nan,
+        nodata: Union[float, int] = np.nan,
     ) -> tuple[np.ndarray[float], np.ndarray[float]]:
         """Return x,y coordinates at cell center of row, col indices.
 
@@ -2437,12 +2437,12 @@ class RasterDataArray(XRasterBase):
 
     def to_slippy_tiles(
         self,
-        root: Path | str,
+        root: Union[Path, str],
         reproj_method: str = "bilinear",
         min_lvl: int = None,
         max_lvl: int = None,
         driver="png",
-        cmap: str | object = None,
+        cmap: Union[str, object] = None,
         norm: object = None,
         write_vrt: bool = False,
         **kwargs,

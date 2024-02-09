@@ -2,6 +2,12 @@ name: Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
   push:
     branches: [main, v1]
     paths:
@@ -30,7 +36,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ['3.9','3.10','3.11']
-    name: py ${{ matrix.python-version }}
+    name: py ${{ matrix.python-version }} (${{ matrix.os}})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     concurrency:
@@ -53,9 +59,16 @@ jobs:
             ~/pycache
           # the below two settings mean we'll alway srestore the cache
           # but the cache hit output can tell us if we have to update afterwards
-          key: test-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
+          key: test-${{ matrix.os }}-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
           restore-keys: |
-            test-py${{ matrix.python-version }}
+            test-${{ matrix.os }}-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
+            test-${{ matrix.os }}-py${{ matrix.python-version }}
+            test-${{ matrix.os }}
+
+      # Enable tmate debugging of manually-triggered workflows if the input option was provided
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
 
       - name: Fail on no cache restore
         if: steps.cache.outputs.cache-matched-key == ''

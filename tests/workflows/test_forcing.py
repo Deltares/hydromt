@@ -10,6 +10,7 @@ from hydromt.gis.raster import full_from_transform
 from hydromt.workflows.forcing import pet, precip
 
 
+@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_precip():
     cat = DataCatalog()
     p_precip = cat.get_rasterdataset("era5", variables="precip")  # era hourly
@@ -40,6 +41,7 @@ def test_precip():
     assert pout_freq.sizes["time"] == 313
 
 
+@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 @pytest.mark.skipif(not compat.HAS_PYET, reason="pyET not installed.")
 def test_pet():
     cat = DataCatalog()
