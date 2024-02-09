@@ -5,9 +5,10 @@ import pytest
 import xarray as xr
 
 from hydromt import DataCatalog
+from hydromt._validators.region import BboxRegionSpecifyer
 from hydromt.models import MODELS
 from hydromt.models._v1.model_region import ModelRegion
-from hydromt.validators.region import BboxRegionSpecifyer
+from hydromt.models.api import parse_region
 
 
 def test_bbox_region():
