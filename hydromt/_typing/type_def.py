@@ -12,7 +12,9 @@ from xarray import DataArray, Dataset
 from hydromt._typing.model_mode import ModelMode
 
 
-def _time_tuple_from_str(t: tuple[str | datetime, str | datetime]):
+def _time_tuple_from_str(
+    t: Tuple[Union[str, datetime], Union[str, datetime]],
+) -> "TimeRange":
     if isinstance(t[0], str):
         t0 = parse(t[0])
     else:
@@ -89,6 +91,5 @@ Data = Union[Dataset, DataArray]
 Variables = Union[str, List[str]]
 
 GeomBuffer = int
-
 
 ModeLike = Union[ModelMode, str]

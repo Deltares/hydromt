@@ -22,7 +22,7 @@ from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
 from hydromt import _compat
-from hydromt._typing import Bbox
+from hydromt._typing import Bbox, Geom
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 
@@ -69,8 +69,7 @@ GDAL_DRIVER_CODE_MAP = {
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
 
-GPD_TYPES = Union[gpd.GeoDataFrame, gpd.GeoSeries]
-GEOM_TYPES = Union[GPD_TYPES, BaseGeometry]
+GEOM_TYPES = Union[Geom, BaseGeometry]
 
 ## GEOM functions
 
@@ -211,10 +210,10 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
 
 
 def parse_geom_bbox_buffer(
-    geom: GPD_TYPES | None = None,
-    bbox: Bbox | None = None,
+    geom: Optional[Geom] = None,
+    bbox: Optional[Bbox] = None,
     buffer: float = 0.0,
-    crs: CRS | None = None,
+    crs: Optional[CRS] = None,
 ):
     """Parse geom or bbox to a (buffered) geometry.
 
@@ -610,10 +609,10 @@ def to_geographic_bbox(bbox, source_crs):
 
 def bbox_from_file_and_filters(
     fn: str,
-    bbox: Union[GEOM_TYPES, None] = None,
-    mask: GEOM_TYPES | None = None,
-    crs: CRS | None = None,
-) -> Tuple[float, float, float, float] | None:
+    bbox: Optional[GEOM_TYPES] = None,
+    mask: Optional[GEOM_TYPES] = None,
+    crs: Optional[CRS] = None,
+) -> Optional[Bbox]:
     """Create a bbox from the file metadata and filter options.
 
     Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.
