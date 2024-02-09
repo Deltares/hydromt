@@ -14,10 +14,16 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt.data_sources.geodataframe_data_source import GeoDataFrameDataSource
-from hydromt.gis_utils import filter_gdf, parse_geom_bbox_buffer
-from hydromt.nodata import NoDataStrategy, _exec_nodata_strat
-from hydromt.typing import GEOM_TYPES, ErrorHandleMethod, TotalBounds
+from hydromt._typing import (
+    ErrorHandleMethod,
+    Geom,
+    NoDataException,
+    NoDataStrategy,
+    TotalBounds,
+    _exec_nodata_strat,
+)
+from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
+from hydromt.gis import parse_geom_bbox_buffer, utils
 
 from .data_adapter_base import DataAdapterBase
 
@@ -39,12 +45,21 @@ class GeoDataFrameAdapter(DataAdapterBase):
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> gpd.GeoDataFrame:
+    ) -> Optional[gpd.GeoDataFrame]:
         """Read in data and transform them to HydroMT standards."""
-        gdf: gpd.GeoDataFrame = self.source.read_data(
-            bbox, mask, buffer, variables, predicate, handle_nodata, logger=logger
-        )
         self.used = True  # mark used
+        try:
+            gdf: gpd.GeoDataFrame = self.source.read_data(
+                bbox, mask, buffer, variables, predicate, handle_nodata, logger=logger
+            )
+        except NoDataException:
+            _exec_nodata_strat(
+                f"No data was read from source: {self.name}",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return None
+
         # rename variables and parse crs & nodata
         gdf = self._rename_vars(gdf)
         gdf = self._set_crs(gdf, logger=logger)
@@ -92,8 +107,8 @@ class GeoDataFrameAdapter(DataAdapterBase):
     def _slice_data(
         gdf: gpd.GeoDataFrame,
         variables: Optional[Union[str, List[str]]] = None,
-        geom: Optional[GEOM_TYPES] = None,
-        bbox: Optional[GEOM_TYPES] = None,
+        geom: Optional[Geom] = None,
+        bbox: Optional[Geom] = None,
         crs: Optional[CRS] = None,
         buffer: float = 0.0,
         predicate: str = "intersects",  # TODO: enum available predicates
@@ -146,11 +161,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
             bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
             epsg = geom.crs.to_epsg()
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
-            idxs = filter_gdf(gdf, geom=geom, predicate=predicate)
-            if idxs.size == 0:
-                _exec_nodata_strat(
-                    "No data within spatial domain.", handle_nodata, logger=logger
-                )
+            idxs = utils.filter_gdf(gdf, geom=geom, predicate=predicate)
             gdf = gdf.iloc[idxs]
         return gdf
 

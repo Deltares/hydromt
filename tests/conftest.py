@@ -13,24 +13,20 @@ from shapely.geometry import box
 
 dask_config.set(scheduler="single-threaded")
 
-import hydromt._compat as compat
+from hydromt._compat import HAS_XUGRID
 
-if compat.HAS_XUGRID:
+if HAS_XUGRID:
     import xugrid as xu
 
-from hydromt import (
-    MODELS,
-    GridModel,
-    Model,
-    NetworkModel,
-    VectorModel,
-    gis_utils,
-    raster,
-    vector,
-)
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
+from hydromt.models import MODELS
+from hydromt.models.api import Model
+from hydromt.models.components.grid import GridModel
+from hydromt.models.components.network import NetworkModel
+from hydromt.models.components.vector import VectorModel
 
 dask_config.set(scheduler="single-threaded")
 
@@ -221,7 +217,7 @@ def flwda(flwdir):
         name="flwdir",
         data=flwdir.to_array("d8"),
         dims=("y", "x"),
-        coords=gis_utils.affine_to_coords(flwdir.transform, flwdir.shape),
+        coords=utils.affine_to_coords(flwdir.transform, flwdir.shape),
         attrs=dict(_FillValue=247),
     )
     # NOTE epsg 3785 is deprecated https://epsg.io/3785

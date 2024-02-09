@@ -7,8 +7,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-from hydromt.nodata import NoDataStrategy
-from hydromt.typing import Bbox, TimeRange
+from hydromt._typing import Bbox, NoDataStrategy, TimeRange
 
 from .metadata_resolver import MetaDataResolver
 

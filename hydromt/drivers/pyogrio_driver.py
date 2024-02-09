@@ -1,17 +1,18 @@
 """Driver to read geodataframes using Pyogrio."""
 from logging import Logger
-from typing import Optional
+from typing import Optional, Union
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info
 from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
 
-from hydromt.gis_utils import parse_geom_bbox_buffer
-from hydromt.typing import GEOM_TYPES, GPD_TYPES, Bbox
+from hydromt._typing import Bbox, Geom
+from hydromt.gis import parse_geom_bbox_buffer
 
-# from hydromt.nodata import NoDataStrategy
 from .geodataframe_driver import GeoDataFrameDriver
+
+GEOM_TYPES = Union[Geom, BaseGeometry]
 
 
 class PyogrioDriver(GeoDataFrameDriver):
@@ -34,9 +35,9 @@ class PyogrioDriver(GeoDataFrameDriver):
         args:
         """
         if bbox is not None:  # buffer bbox
-            bbox: GPD_TYPES = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
+            bbox: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         if mask is not None:  # buffer mask
-            mask: GPD_TYPES = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
+            mask: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         bbox_reader = bbox_from_file_and_filters(uri, bbox, mask, crs)
         return read_dataframe(uri, bbox=bbox_reader, mode="r")
 

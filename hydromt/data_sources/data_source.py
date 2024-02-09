@@ -5,10 +5,10 @@ from typing import Any, ClassVar, Dict, Optional, Union
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
+from hydromt._typing import DataType
 from hydromt.data_adapter.caching import _uri_validator
 from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.metadata_resolvers.resolver_plugin import RESOLVERS
-from hydromt.typing import DataType
 
 
 class DataSource(BaseModel):

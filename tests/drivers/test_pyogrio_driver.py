@@ -6,8 +6,8 @@ import pytest
 from pyogrio.errors import DataSourceError
 from shapely import box
 
+from hydromt._typing import Bbox
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
-from hydromt.typing import Bbox
 
 
 class TestPyogrioDriver:

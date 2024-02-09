@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from pydantic import ValidationError
 
-from hydromt.data_sources.geodataframe_data_source import GeoDataFrameDataSource
+from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.metadata_resolvers.metadata_resolver import MetaDataResolver
 

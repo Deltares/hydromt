@@ -7,12 +7,12 @@ import pytest
 from pydantic import ValidationError
 from pydantic_core import Url
 
-from hydromt.data_catalog import _yml_from_uri_or_path
-from hydromt.validators.data_catalog import (
+from hydromt._validators.data_catalog import (
     DataCatalogItem,
     DataCatalogMetaData,
     DataCatalogValidator,
 )
+from hydromt.data_catalog import _yml_from_uri_or_path
 
 
 def test_deltares_data_catalog():

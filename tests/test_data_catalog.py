@@ -11,6 +11,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 
+from hydromt._typing import NoDataStrategy
 from hydromt.data_adapter import (
     DataAdapter,
     GeoDataFrameAdapter,
@@ -24,9 +25,8 @@ from hydromt.data_catalog import (
 )
 from hydromt.data_sources import GeoDataFrameDataSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
-from hydromt.gis_utils import to_geographic_bbox
+from hydromt.gis.utils import to_geographic_bbox
 from hydromt.metadata_resolvers import MetaDataResolver
-from hydromt.nodata import NoDataStrategy
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")

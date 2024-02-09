@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, List, Optional
 import geopandas as gpd
 from pydantic import BaseModel
 
-from hydromt.nodata import NoDataStrategy
-from hydromt.typing import Bbox, TimeRange
+from hydromt._typing import Bbox, NoDataStrategy, TimeRange
 
 if TYPE_CHECKING:
     from hydromt.data_sources.data_source import DataSource
