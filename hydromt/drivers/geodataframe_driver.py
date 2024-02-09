@@ -23,7 +23,6 @@ class GeoDataFrameDriver(ABC, BaseModel):
         crs: Optional[CRS] = None,
         predicate: str = "intersects",
         logger: Optional[Logger] = None,
-        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """
         Read in any compatible data source to a geopandas `GeoDataFrame`.

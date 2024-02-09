@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 import geopandas as gpd
 from dateutil.parser import parse
 from pydantic.functional_validators import AfterValidator, BeforeValidator
+from shapely.geometry.base import BaseGeometry
 from typing_extensions import Annotated
 from xarray import DataArray, Dataset
 
@@ -85,6 +86,7 @@ Predicate = Literal[
 ]
 
 Geom = Union[gpd.GeoDataFrame, gpd.GeoSeries]
+GpdShapeGeom = Union[Geom, BaseGeometry]
 
 Data = Union[Dataset, DataArray]
 

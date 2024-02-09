@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List, Optional
 import geopandas as gpd
 from pydantic import BaseModel
 
-from hydromt._typing import Bbox, NoDataStrategy, TimeRange
+from hydromt._typing import Bbox, NoDataStrategy, Predicate, TimeRange
 
 if TYPE_CHECKING:
     from hydromt.data_sources.data_source import DataSource
@@ -23,7 +23,7 @@ class MetaDataResolver(BaseModel, ABC):
         bbox: Optional[Bbox] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
-        predicate: str = "intersects",
+        predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
         zoom_level: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,

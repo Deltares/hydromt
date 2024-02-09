@@ -7,7 +7,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-from hydromt._typing import Bbox, NoDataStrategy, TimeRange
+from hydromt._typing import Bbox, NoDataStrategy, Predicate, TimeRange
 
 from .metadata_resolver import MetaDataResolver
 
@@ -78,7 +78,7 @@ class ConventionResolver(MetaDataResolver):
         # TODO: align? -> from RasterDataSetAdapter
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
-        predicate: str = "intersects",
+        predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
         zoom_level: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,

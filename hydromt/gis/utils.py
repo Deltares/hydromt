@@ -8,7 +8,7 @@ import glob
 import logging
 import os
 from os.path import dirname
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -22,7 +22,7 @@ from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
 from hydromt import _compat
-from hydromt._typing import Bbox, Geom
+from hydromt._typing import Bbox, Geom, GpdShapeGeom
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 
@@ -69,7 +69,6 @@ GDAL_DRIVER_CODE_MAP = {
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
 
-GEOM_TYPES = Union[Geom, BaseGeometry]
 
 ## GEOM functions
 
@@ -609,8 +608,8 @@ def to_geographic_bbox(bbox, source_crs):
 
 def bbox_from_file_and_filters(
     fn: str,
-    bbox: Optional[GEOM_TYPES] = None,
-    mask: Optional[GEOM_TYPES] = None,
+    bbox: Optional[GpdShapeGeom] = None,
+    mask: Optional[GpdShapeGeom] = None,
     crs: Optional[CRS] = None,
 ) -> Optional[Bbox]:
     """Create a bbox from the file metadata and filter options.
