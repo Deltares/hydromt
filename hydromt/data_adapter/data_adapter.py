@@ -20,13 +20,13 @@ import yaml
 from pystac import Catalog as StacCatalog
 from upath import UPath
 
-from hydromt.nodata import NoDataStrategy
-from hydromt.typing import (
+from hydromt._typing import (
     Bbox,
     Data,
     ErrorHandleMethod,
     Geom,
     GeomBuffer,
+    NoDataStrategy,
     StrPath,
     TimeRange,
     Variables,

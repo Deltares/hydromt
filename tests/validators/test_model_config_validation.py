@@ -3,8 +3,8 @@
 
 import pytest
 
+from hydromt._validators.model_config import HydromtModelSetup, HydromtModelStep
 from hydromt.models import GridModel, Model
-from hydromt.validators.model_config import HydromtModelSetup, HydromtModelStep
 
 
 def test_base_model_build():

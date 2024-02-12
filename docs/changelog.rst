@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+V1
+==
+
+Added
+-----
+- Added Driver class for customizable io
+- Added MetaDataResolver class for customizable metadata discovery
+- Added DataSource class to represent and validate DataCatalog entries.
 
 
 Unreleased
