@@ -99,13 +99,13 @@ jobs:
 
       # run tests first so that we can also cache all of the artefacts
       - name: Generate docs
-        run: mamba run -n hydromt sphinx-build docs/source docs/_build
+        run: mamba run -n hydromt sphinx-build -M html ./docs/source ./docs/_build
 
       - name: Upload cache
         uses: actions/cache/save@v4
         with:
           path: |
             ~/miniconda3
-            ~/docs/_build
+            ./docs/_build
           key: docs-${{ hashFiles('environment.yml')  }}
         id: docs-cache
