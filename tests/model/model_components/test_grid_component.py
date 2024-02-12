@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from hydromt.models.v1.grid import GridComponent
+from hydromt.models.components.grid import GridComponent
 
 
 def test_set_GridComponent(hydds, tmp_dir, rioda):

@@ -8,18 +8,8 @@ from typing import Dict
 
 import xarray as xr
 
-from hydromt.raster import GEO_MAP_COORD
-from hydromt.typing import DeferedFileClose, StrPath, XArrayDict
-
-
-def _assert_write_mode(write: bool):
-    if not write:
-        raise IOError("Model opened in read-only mode")
-
-
-def _assert_read_mode(read: bool):
-    if not read:
-        raise IOError("Model opened in write-only mode")
+from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
+from hydromt.gis.raster import GEO_MAP_COORD
 
 
 def read_nc(
