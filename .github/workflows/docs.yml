@@ -48,7 +48,9 @@ jobs:
             ~/docs/_build
           # the below two settings mean we'll alway srestore the cache
           # but the cache hit output can tell us if we have to update afterwards
-          key: docs-${{ hashFiles('environment.yml')  }}
+          key: |
+            docs-${{ hashFiles('environment.yml')  }}
+            docs
           restore-keys: |
             docs
 
