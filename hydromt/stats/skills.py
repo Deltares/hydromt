@@ -1,20 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""Implementation of necessary statistical methods."""
 
-import xarray as xr
-import numpy as np
-import pandas as pd
-import calendar
-from datetime import timedelta, datetime
-import bottleneck
 import warnings
+
+import bottleneck
+import numpy as np
+import xarray as xr
 
 warnings.filterwarnings("ignore")
 
 
 # PERFORMANCE METRICS
 def bias(sim, obs, dim="time"):
-    """Returns the bias between two time series.
+    r"""Return the bias between two time series.
 
         .. math::
          Bias=\\frac{1}{N}\\sum_{i=1}^{N}(obs_{i}-sim_{i})
@@ -43,7 +40,7 @@ def bias(sim, obs, dim="time"):
 
 
 def percentual_bias(sim, obs, dim="time"):
-    """Returns the percentual bias between two time series.
+    r"""Return the percentual bias between two time series.
 
         .. math::
          PBias= 100 * \\frac{\\sum_{i=1}^{N}(sim_{i}-obs_{i})}{\\sum_{i=1}^{N}(obs_{i})}
@@ -71,12 +68,43 @@ def percentual_bias(sim, obs, dim="time"):
     return pbias
 
 
-def nashsutcliffe(sim, obs, dim="time"):
-    """Returns the Nash-Sutcliffe model efficiency based on a simulated
-    and observed time series.
+def volumetric_error(sim, obs, dim="time"):
+    r"""Return the volumetric error between two time series.
 
         .. math::
-         NSE = 1-\\frac{\\sum_{i=1}^{N}(sim_{i}-obs_{i})^2}{\\sum_{i=1}^{N}(obs_{i}-\\bar{obs})^2}
+         VE= 1 - \\frac{\\sum_{i=1}^{N}(|sim_{i}-obs_{i}|)}{\\sum_{i=1}^{N}(obs_{i})}
+
+    Parameters
+    ----------
+    sim : xarray DataArray
+        simulations time series
+    obs : xarray DataArray
+        observations time series
+    dim : str, optional
+        name of time dimension in sim and obs (the default is 'time')
+
+    Returns
+    -------
+    xarray DataArray
+        volumetric error
+    """
+    # wrap numpy function
+    kwargs = dict(
+        input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
+    )
+    ve = xr.apply_ufunc(_ve, sim, obs, **kwargs)
+    ve.name = "ve"
+    return ve
+
+
+def nashsutcliffe(sim, obs, dim="time"):
+    r"""Return the Nash-Sutcliffe model efficiency.
+
+    Efficiency is based on a simulated and observed time series.
+
+        .. math::
+         NSE = 1-\\frac{\\sum_{i=1}^{N}(sim_{i}-obs_{i})^2}
+         {\\sum_{i=1}^{N}(obs_{i}-\\bar{obs})^2}
 
     Parameters
     ----------
@@ -102,11 +130,13 @@ def nashsutcliffe(sim, obs, dim="time"):
 
 
 def lognashsutcliffe(sim, obs, epsilon=1e-6, dim="time"):
-    """Returns the log Nash-Sutcliffe model efficiency based on simulated
-    and observed time series.
+    r"""Return the log Nash-Sutcliffe model efficiency.
+
+    Efficiency calculation is based on simulated and observed time series.
 
         .. math::
-         NSE = 1-\\frac{\\sum_{i=1}^{N}(log(sim_{i})-log(obs_{i}))^2}{\\sum_{i=1}^{N}(log(sim_{i})-log(\\bar{obs})^2}-1)*-1
+         NSE = 1-\\frac{\\sum_{i=1}^{N}(log(sim_{i})-log(obs_{i}))^2}
+         {\\sum_{i=1}^{N}(log(sim_{i})-log(\\bar{obs})^2}-1)*-1
 
     Parameters
     ----------
@@ -136,7 +166,7 @@ def lognashsutcliffe(sim, obs, epsilon=1e-6, dim="time"):
 
 
 def pearson_correlation(sim, obs, dim="time"):
-    """Returns the Pearson correlation coefficient of two time series.
+    """Return the Pearson correlation coefficient of two time series.
 
     Parameters
     ----------
@@ -162,8 +192,7 @@ def pearson_correlation(sim, obs, dim="time"):
 
 
 def spearman_rank_correlation(sim, obs, dim="time"):
-    """Returns the spearman rank correlation coefficient of
-    two time series.
+    """Return the spearman rank correlation coefficient of two time series.
 
     Parameters
     ----------
@@ -189,12 +218,15 @@ def spearman_rank_correlation(sim, obs, dim="time"):
 
 
 def kge_non_parametric(sim, obs, dim="time"):
-    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series with decomposed scores
+    """Return the Non Parametric Kling-Gupta Efficiency (KGE, 2018).
+
+    Calculation is based on the two time series with decomposed scores.
 
     .. ref:
 
         Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
-        a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
+        a non-parametric variant of the Kling-Gupta efficiency,
+        Hydrological Sciences Journal.
 
     Parameters
     ----------
@@ -226,12 +258,15 @@ def kge_non_parametric(sim, obs, dim="time"):
 
 
 def kge_non_parametric_flood(sim, obs, dim="time"):
-    """Returns the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series optimized for flood peaks using Pearson (see Pool et al., 2018)
+    """Return the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series.
+
+    this KGE is optimized for flood peaks using Pearson (see Pool et al., 2018).
 
     .. ref:
 
         Pool, Vis, and Seibert, 2018 Evaluating model performance: towards
-        a non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences Journal.
+        a non-parametric variant of the Kling-Gupta efficiency,
+        Hydrological Sciences Journal.
 
     Parameters
     ----------
@@ -248,7 +283,6 @@ def kge_non_parametric_flood(sim, obs, dim="time"):
         Non Parametric Kling-Gupta Efficiency (2018) optimize for flood peaks
         using pearson (see Pool et al., 2018) and with decomposed score
     """
-    # cc = spearman_rank_correlation(sim, obs)
     cc = pearson_correlation(sim, obs, dim=dim)
     cc.name = "kge_np_flood_pearson_coef"
     kwargs = dict(
@@ -265,10 +299,12 @@ def kge_non_parametric_flood(sim, obs, dim="time"):
 
 
 def rsquared(sim, obs, dim="time"):
-    """Returns the coefficient of determination of two time series.
+    r"""Return the coefficient of determination of two time series.
 
         .. math::
-         r^2=(\\frac{\\sum ^n _{i=1}(e_i - \\bar{e})(s_i - \\bar{s})}{\\sqrt{\\sum ^n _{i=1}(e_i - \\bar{e})^2} \\sqrt{\\sum ^n _{i=1}(s_i - \\bar{s})^2}})^2
+         r^2=(\\frac{\\sum ^n _{i=1}(e_i - \\bar{e})(s_i - \\bar{s})}
+         {\\sqrt{\\sum ^n _{i=1}(e_i - \\bar{e})^2}
+         \\sqrt{\\sum ^n _{i=1}(s_i - \\bar{s})^2}})^2
 
     Parameters
     ----------
@@ -291,7 +327,7 @@ def rsquared(sim, obs, dim="time"):
 
 
 def mse(sim, obs, dim="time"):
-    """Returns the mean squared error (MSE) between two time series.
+    r"""Return the mean squared error (MSE) between two time series.
 
         .. math::
          MSE=\\frac{1}{N}\\sum_{i=1}^{N}(e_{i}-s_{i})^2
@@ -320,7 +356,7 @@ def mse(sim, obs, dim="time"):
 
 
 def rmse(sim, obs, dim="time"):
-    """Returns the root mean squared error between two time series.
+    r"""Return the root mean squared error between two time series.
 
         .. math::
          RMSE=\\sqrt{\\frac{1}{N}\\sum_{i=1}^{N}(e_{i}-s_{i})^2}
@@ -344,8 +380,35 @@ def rmse(sim, obs, dim="time"):
     return rmse
 
 
+def rsr(sim, obs, dim="time"):
+    r"""Return the RMSE-observations standard deviation (RSR) between two time series.
+
+        .. math::
+         RSR=\\frac{RMSE}{STDEVobs}
+
+    Parameters
+    ----------
+    sim : xarray DataArray
+        simulations time series
+    obs : xarray DataArray
+        observations time series
+
+    Returns
+    -------
+    xarray DataArray
+        the root squared error
+    """
+    # wrap numpy function
+    kwargs = dict(
+        input_core_dims=[[dim], [dim]], dask="parallelized", output_dtypes=[float]
+    )
+    rsr = xr.apply_ufunc(_rsr, sim, obs, **kwargs)
+    rsr.name = "rsr"
+    return rsr
+
+
 def kge(sim, obs, dim="time"):
-    """Returns the Kling-Gupta Efficiency (KGE) of two time series
+    r"""Return the Kling-Gupta Efficiency (KGE) of two time series.
 
     .. ref:
 
@@ -380,7 +443,7 @@ def kge(sim, obs, dim="time"):
 
 
 def kge_2012(sim, obs, dim="time"):
-    """Returns the Kling-Gupta Efficiency (KGE, 2012) of two time series
+    r"""Return the Kling-Gupta Efficiency (KGE, 2012) of two time series.
 
     .. ref:
 
@@ -445,23 +508,41 @@ def _fdc_alpha(sim, obs, axis=-1):
 
 
 def _bias(sim, obs, axis=-1):
-    """bias"""
+    """Bias."""
     return np.nansum(sim - obs, axis=axis) / np.nansum(np.isfinite(obs), axis=axis)
 
 
 def _pbias(sim, obs, axis=-1):
-    """percentual bias"""
-    return np.nansum(sim - obs, axis=axis) / np.nansum(obs, axis=axis)
+    """Percentual bias."""
+    return 100 * np.nansum(sim - obs, axis=axis) / np.nansum(obs, axis=axis)
+
+
+def _ve(sim, obs, axis=-1):
+    """Volumetric Error."""
+    ve = 1 - np.nansum(np.absolute(sim - obs), axis=axis) / np.nansum(obs, axis=axis)
+    return ve
 
 
 def _mse(sim, obs, axis=-1):
-    """mean squared error"""
-    mse = np.nansum((obs - sim) ** 2, axis=axis)
+    """Mean squared error."""
+    mse = np.nansum((obs - sim) ** 2, axis=axis) / np.nansum(
+        np.isfinite(obs), axis=axis
+    )
     return mse
 
 
+def _rsr(sim, obs, axis=-1):
+    """RMSE-observations standard deviation."""
+    rmse = np.sqrt(_mse(sim, obs, axis=axis))
+    stdev = np.sqrt(
+        np.nansum((obs - np.nanmean(obs, axis=axis)) ** 2, axis=axis)
+        / np.nansum(np.isfinite(obs), axis=axis)
+    )
+    return rmse / stdev
+
+
 def _nse(sim, obs, axis=-1):
-    """nash-sutcliffe efficiency"""
+    """nash-sutcliffe efficiency."""
     obs_mean = np.nanmean(obs, axis=axis)
     a = np.nansum((sim - obs) ** 2, axis=axis)
     b = np.nansum((obs - obs_mean[..., None]) ** 2, axis=axis)

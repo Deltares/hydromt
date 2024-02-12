@@ -1,0 +1,22 @@
+name: cleanup all caches
+on:
+  workflow_dispatch:
+  workflow_call:
+
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Cleanup caches
+        run: |
+          if gh cache list | grep -vq "No cache"; then
+            gh cache delete -a
+          else
+            echo "No caches found. skipping..."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

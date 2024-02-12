@@ -1,0 +1,59 @@
+name: Tests with pip install
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
+      - pyproject.toml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - tests/*
+      - hydromt/*
+      - data/*
+      - pyproject.toml
+
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # concurrency:
+    #   group: ${{ github.workflow }}-${{ matrix.python-version }}-${{ github.ref }}
+    #   cancel-in-progress: true
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        id: py310
+        with:
+          python-version: '3.10'
+          # caching, see https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
+
+      # true if cache-hit occurred on the primary key
+      - name: Cache hit
+        run: echo '${{ steps.py310.outputs.cache-hit }}'
+
+      # build environment with pip
+      - name: Install hydromt
+        run: |
+          pip install --upgrade pip
+          pip install .[test,io,extra]
+
+      # run test
+      - name: Test
+        run: |
+          export NUMBA_DISABLE_JIT=1
+          python -m pytest --verbose

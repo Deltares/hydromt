@@ -1,6 +1,6 @@
 {
-    "title": "HydroMT",
-    "description": "Automated and reproducible model building and analysis",
+    "title": "HydroMT: Automated and reproducible model building and analysis",
+    "description": "HydroMT (Hydro Model Tools) is an open-source Python package that facilitates the process of building and analyzing spatial geoscientific models with a focus on water system models. It does so by automating the workflow to go from raw data to a complete model instance which is ready to run and to analyse model results once the simulation has finished.",
     "upload_type": "software",
     "creators": [
         {
@@ -14,7 +14,7 @@
         },
         {
             "affiliation": "Deltares",
-            "name": "Bouaziz, Laurene J. E.",
+            "name": "Bouaziz, Laurène J. E.",
             "orcid": "0000-0003-0597-8051"
         },
         {
@@ -32,7 +32,11 @@
         },
         {
             "affiliation": "Deltares",
-            "name": "De Jong, Tjalling"
+            "name": "Hegnauer, Mark"
+        },
+        {
+            "affiliation": "Deltares",
+            "name": "de Jong, Tjalling"
         },
         {
             "affiliation": "Deltares",
@@ -41,6 +45,11 @@
         {
             "affiliation": "Deltares",
             "name": "Marth, Indra"
+        },
+        {
+            "affiliation": "Deltares",
+            "name": "van Verseveld, Willem",
+            "orcid": "0000-0003-3311-738X"
         }
     ],
     "access_right": "open",

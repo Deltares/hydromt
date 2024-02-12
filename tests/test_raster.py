@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.raster submodule."""
 
-import pytest
-import numpy as np
-import geopandas as gpd
-import xarray as xr
-from shapely.geometry import box, Point, LineString
-import dask
-from osgeo import gdal
-from affine import Affine
 import os
+from os.path import isfile, join
 
-from hydromt import open_raster, gis_utils
-from hydromt import raster
+import dask
+import geopandas as gpd
+import numpy as np
+import pytest
+import rasterio
+import xarray as xr
+from affine import Affine
+from shapely.geometry import LineString, Point, box
+
+from hydromt import gis_utils, open_raster, raster
 
 # origin, rotation, res, shape, internal_bounds
 # NOTE a rotated grid with a negative dx is not supported
@@ -41,7 +42,7 @@ def get_transform(
 testdata = [(get_transform(*d[:3]), d[-2]) for d in tests[:4]]
 
 
-@pytest.mark.parametrize("origin, rotation, res, shape, bounds", tests)
+@pytest.mark.parametrize(("origin", "rotation", "res", "shape", "bounds"), tests)
 def test_raster_properties(origin, rotation, res, shape, bounds):
     transform = get_transform(origin, rotation, res)
     da = raster.full_from_transform(transform, shape, name="test", crs=4326)
@@ -51,9 +52,13 @@ def test_raster_properties(origin, rotation, res, shape, bounds):
     assert np.allclose(transform, da.raster.transform)
     assert np.allclose(da.raster.box.total_bounds, da.raster.bounds)
     assert np.allclose(bounds, da.raster.internal_bounds)
+    assert da.raster.box.crs == da.raster.crs
+    # attributes do not persist after slicing
+    assert da[:2, :2].raster._transform is None
+    assert da[:2, :2].raster._crs is None
 
 
-@pytest.mark.parametrize("transform, shape", testdata)
+@pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_attrs(transform, shape):
     # checks on raster spatial attributes
     da = raster.full_from_transform(transform, shape, name="test")
@@ -62,7 +67,7 @@ def test_attrs(transform, shape):
     assert raster.GEO_MAP_COORD in da.coords
     assert da.raster.dims == ("y", "x")
     assert "x_dim" in da.raster.attrs
-    assert da.raster.dim0 == None if len(shape) == 2 else "dim0"
+    assert da.raster.dim0 is None if len(shape) == 2 else "dim0"
     assert da.raster.width == da["x"].size
     assert da.raster.height == da["y"].size
     assert da.raster.size == da["x"].size * da["y"].size
@@ -86,6 +91,10 @@ def test_crs():
     da[raster.GEO_MAP_COORD].attrs = dict()
     da.raster.set_crs("epsg:4326")
     assert da.raster.crs.to_epsg() == 4326
+    # compound crs
+    da[raster.GEO_MAP_COORD].attrs = dict()
+    da.raster.set_crs(9518)  # WGS 84 + EGM2008 height
+    assert da.raster.crs.to_epsg() == 9518  # return horizontal crs
 
 
 def test_gdal(tmpdir):
@@ -96,38 +105,64 @@ def test_gdal(tmpdir):
     # Update gdal compliant attrs
     da1 = da.raster.gdal_compliant(rename_dims=True, force_sn=True)
     assert raster.GEO_MAP_COORD in da1.coords
-    assert da1.raster.dims == ("lat", "lon")
+    assert da1.raster.dims == ("latitude", "longitude")
     assert da1.raster.res[1] > 0
-    # Update without rename and SN orientation
-    da = da.raster.gdal_compliant(rename_dims=False, force_sn=False)
-    assert da.raster.dims == ("y", "x")
-    assert da.raster.res[1] < 0
     # Write to netcdf and reopen with gdal
     fn_nc = str(tmpdir.join("gdal_test.nc"))
-    da.to_netcdf(fn_nc)
-    info = gdal.Info(fn_nc)
-    ds = gdal.Open(fn_nc)
-    assert da[raster.GEO_MAP_COORD].attrs["crs_wkt"] == ds.GetProjection()
+    da1.to_netcdf(fn_nc)
+    with rasterio.open(fn_nc) as src:
+        src.read()
+        assert da.raster.crs == src.crs
+    # # test with web mercator dataset
+    da2 = da.raster.reproject(dst_crs=3857)
+    ds2 = da2.to_dataset().raster.gdal_compliant(rename_dims=True, force_sn=True)
+    fn_nc = str(tmpdir.join("gdal_test_epsg3857.nc"))
+    ds2.to_netcdf(fn_nc)
+    with rasterio.open(fn_nc) as src:
+        src.read()
+        assert ds2.raster.crs == src.crs
 
 
 def test_attrs_errors(rioda):
-    rioda = rioda.rename({"x": "xxxx"})
+    rioda = rioda.rename({"x": "X"})
+    rioda.raster.set_spatial_dims()
+    assert rioda.raster.x_dim == "X"
+    rioda = rioda.rename({"X": "xxxx"})
     with pytest.raises(ValueError, match="dimension not found"):
         rioda.raster.set_spatial_dims()
     rioda = rioda.rename({"xxxx": "x", "y": "yyyy"})
     with pytest.raises(ValueError, match="dimension not found"):
         rioda.raster.set_spatial_dims()
     rioda = rioda.rename({"yyyy": "y"})
-    rioda["x"] = np.random.rand(rioda["x"].size)
-    with pytest.raises(ValueError, match="only applies to regular grids"):
-        rioda.raster.set_spatial_dims()
     with pytest.raises(ValueError, match="Invalid dimension order."):
         rioda.transpose("x", "y").raster._check_dimensions()
+
+    da1 = rioda.expand_dims("t").transpose("y", "x", "t", transpose_coords=True)
     with pytest.raises(ValueError, match="Invalid dimension order."):
-        da1 = rioda.expand_dims("t").transpose("y", "x", "t", transpose_coords=True)
         da1.raster._check_dimensions()
     with pytest.raises(ValueError, match="Only 2D and 3D data"):
         rioda.expand_dims(("t", "t1")).raster._check_dimensions()
+
+
+def test_check_dimensions(rioda):
+    # test with 2D data
+    rioda.raster._check_dimensions()
+    assert "dim0" not in rioda.raster.attrs.keys()
+    # test with 3D data
+    rioda_3d = rioda.expand_dims("t")
+    rioda_3d.name = "test_3d"
+    rioda_3d.raster._check_dimensions()
+    assert rioda_3d.raster.attrs["dim0"] == "t"
+    # test with dataset of 2D and 3D data
+    ds = xr.merge([rioda, rioda_3d])
+    ds.raster._check_dimensions()
+    assert ds.raster.attrs["dim0"] == "t"
+    # add 3D data with a different dimension name
+    rioda_3d_t1 = rioda.expand_dims("t1")
+    rioda_3d_t1.name = "test_3d_t1"
+    ds = xr.merge([ds, rioda_3d, rioda_3d_t1])
+    ds.raster._check_dimensions()
+    assert "dim0" not in ds.raster.attrs.keys()
 
 
 def test_from_numpy_full_like():
@@ -171,7 +206,7 @@ def test_from_numpy_full_like():
         raster.full_like(da.to_dataset())
 
 
-@pytest.mark.parametrize("transform, shape", testdata)
+@pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_idx(transform, shape):
     da = raster.full_from_transform(transform, shape, name="test")
     size = np.multiply(*da.raster.shape)
@@ -203,6 +238,35 @@ def test_rasterize(rioda):
         )
 
 
+def test_rasterize_geometry(rioda):
+    xmin, ymin, xmax, ymax = rioda.raster.bounds
+    resx, resy = rioda.raster.res
+    box1 = box(xmin, ymin, xmin + resx, ymin - resy)
+    box2 = box(xmax - resx, ymax + resy, xmax, ymax)
+    x1 = rioda.raster.xcoords.values[2]
+    y1 = rioda.raster.ycoords.values[2]
+    box3 = box(x1, y1, x1 + resx, y1 - resy)
+    gdf = gpd.GeoDataFrame(geometry=[box1, box2, box3], crs=rioda.raster.crs)
+
+    da = rioda.raster.rasterize_geometry(
+        gdf, method="fraction", name="frac", nodata=0, keep_geom_type=False
+    )
+    assert da.name == "frac"
+    assert da.raster.nodata == 0
+    assert np.round(da.values.max(), 4) <= 1.0
+    # Count unique values in da
+    assert np.unique(np.round(da.values, 2)).size == 3
+    assert 0.25 in np.unique(np.round(da.values, 2))
+
+    da2 = rioda.raster.rasterize_geometry(gdf, method="area")
+    assert da2.name == "area"
+    assert da2.raster.nodata == -1.0
+    rioda_grid = rioda.raster.vector_grid()
+    crs_utm = gis_utils.parse_crs("utm", rioda_grid.total_bounds)
+    rioda_grid = rioda_grid.to_crs(crs_utm)
+    assert da2.values.max() == rioda_grid.area.max()
+
+
 def test_vectorize():
     da = raster.full_from_transform(*testdata[0], nodata=1, name="test")
     da.raster.set_crs(4326)
@@ -215,13 +279,25 @@ def test_vectorize():
     assert np.all(gdf["value"].values == 1)
     assert da.raster.crs.to_epsg() == gdf.crs.to_epsg()
     assert np.all(da == da.raster.geometry_mask(gdf).astype(da.dtype))
+    # test with compound crs
+    da.raster.set_crs(9518)  # WGS 84 + EGM2008 height
+    gdf = da.raster.vectorize()
+    assert gdf.crs.to_epsg() == 9518
 
 
-@pytest.mark.parametrize("transform, shape", testdata)
+@pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_clip(transform, shape):
     # create rasterdataarray with crs
     da = raster.full_from_transform(transform, shape, nodata=1, name="test", crs=4326)
     da.raster.set_nodata(0)
+    # attributes do not persist with xarray slicing
+    da1 = da[:2, :2]
+    assert da1.raster._transform is None
+    assert da1.raster._crs is None
+    # attributes do persisit when slicing using clip_bbox
+    raster1d = da.raster.clip(slice(1, 2), slice(0, 2))
+    assert raster1d.raster._crs is not None
+    assert raster1d.raster.transform is not None
     # create gdf covering approx half raster
     w, s, _, n = da.raster.bounds
     e, _ = da.raster.transform * (shape[1] // 2, shape[0] // 2)
@@ -234,43 +310,66 @@ def test_clip(transform, shape):
     # test geom
     da_clip1 = da.raster.clip_geom(gdf)
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
+    assert "mask" not in da_clip1.coords  # this changed in v0.7.2
     # test mask
-    da_clip1 = da.raster.clip_mask(da.raster.geometry_mask(gdf))
+    da_mask = da.raster.geometry_mask(gdf)
+    da_clip1 = da.raster.clip_mask(da_mask=da_mask)
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
-    # test geom - different crs
-    da_clip1 = da.raster.clip_geom(gdf.to_crs(3857))
+    assert "mask" not in da_clip1.coords  # this changed in v0.7.2
+    da_clip1 = da.raster.clip_mask(da_mask=da_mask, mask=True)
+    assert "mask" in da_clip1.coords
+
+    # test geom - different crs & mask=True (changed in v0.7.2)
+    da_clip1 = da.raster.clip_geom(gdf.to_crs(3857), mask=True)
     assert np.all(np.isclose(da_clip1.raster.bounds, da_clip0.raster.bounds))
+    assert "mask" in da_clip1.coords
 
     # these test are for non-rotated only
     if da.raster.rotation != 0:
         return
     assert np.all(np.isclose(da_clip0.raster.bounds, gdf.total_bounds))
-    # test bbox - align
-    align = np.round(abs(da.raster.res[0] * 2), 2)
-    da_clip = da.raster.clip_bbox(gdf.total_bounds, align=align)
-    dalign = np.round(da_clip.raster.bounds[2], 2) % align
-    assert np.isclose(dalign, 0) or np.isclose(dalign, align)
+
+
+def test_clip_align(rioda):
+    # test align
+    bbox = (3.5, -10.5, 5.5, -9.5)
+    da_clip = rioda.raster.clip_bbox(bbox)
+    assert np.all(np.isclose(da_clip.raster.bounds, bbox))
+    da_clip = rioda.raster.clip_bbox(bbox, align=1)
+    assert da_clip.raster.bounds == (3, -11, 6, -9)
 
 
 def test_clip_errors(rioda):
     with pytest.raises(ValueError, match="Mask should be xarray.DataArray type."):
         rioda.raster.clip_mask(rioda.values)
-    with pytest.raises(ValueError, match="Mask shape invalid."):
+    with pytest.raises(ValueError, match="Mask grid invalid"):
         rioda.raster.clip_mask(rioda.isel({"x": slice(1, -1)}))
-    with pytest.raises(ValueError, match="Invalid mask."):
+    with pytest.raises(ValueError, match="No valid values found in mask"):
         rioda.raster.clip_mask(xr.zeros_like(rioda))
     with pytest.raises(ValueError, match="should be geopandas"):
         rioda.raster.clip_geom(rioda.raster.bounds)
 
 
 def test_reproject():
+    # create data
     kwargs = dict(name="test", crs=4326)
     transform, shape = testdata[1][0], (9, 5, 5)
     da0 = raster.full_from_transform(transform, shape, **kwargs)
     da0.data = np.random.random(da0.shape)
     ds0 = da0.to_dataset()
     ds1 = raster.full_from_transform(*testdata[1], **kwargs).to_dataset()
+    da2 = raster.full_from_transform(*testdata[3], **kwargs).to_dataset()
     assert np.all(ds1.raster.bounds == ds1.raster.transform_bounds(ds1.raster.crs))
+    # test out of bounds -> return empty grid
+    ds2_empty = ds0.raster.reproject_like(da2)
+    assert ds2_empty.raster.identical_grid(da2)
+    assert np.all(np.isnan(ds2_empty))
+    assert ds2_empty.data_vars.keys() == ds0.data_vars.keys()
+    da2_empty = da0.raster.reproject_like(da2)
+    assert np.all(np.isnan(da2_empty))
+    assert da2_empty.raster.identical_grid(da2)
+    assert da2_empty.name == da0.name
+    assert da2_empty.dtype == da0.dtype
     # flipud
     assert ds1.raster.flipud().raster.res[1] == -ds1.raster.res[1]
     # reproject nearest index
@@ -300,6 +399,8 @@ def test_reproject():
     )
     assert isinstance(da2_lazy.data, dask.array.core.Array)
     assert np.all(ds2_index["test"] == da2_lazy.compute())
+    # make sure spatial ref is not lazy
+    assert not isinstance(da2_lazy.spatial_ref.data, dask.array.Array)
     # check error messages
     with pytest.raises(ValueError, match="Resampling method unknown"):
         ds1.raster.reproject(dst_crs=3857, method="unknown")
@@ -324,28 +425,51 @@ def test_area_grid(rioda):
 
 
 def test_interpolate_na():
-    # mv > nan
-    da0 = raster.full_from_transform(*testdata[0], nodata=-1)
-    da0.values.flat[np.array([0, 3, -3, -1])] = np.array([1, 1, 2, 2])
-    da1 = da0.raster.mask_nodata().raster.interpolate_na()  # nearest
-    assert np.all(np.isnan(da1) == False)
+    # nodata is nan
+    da0 = raster.full_from_transform(*testdata[0], nodata=np.nan)
+    da0.values.flat[np.array([0, 3, -6])] = np.array([1, 1, 2])
+    # default nearest interpolation
+    da1 = da0.raster.interpolate_na()
+    assert np.all(~np.isnan(da1))
     assert np.all(np.isin(da1, [1, 2]))
-    assert np.all(np.isnan(da1.raster.interpolate_na()) == False)
-    assert np.all(
-        da0.raster.interpolate_na(method="rio_idw", max_search_distance=3)
-        != da0.raster.nodata
-    )
+    # extra keyword argument to rasterio.fill.fillnodata
+    da1 = da0.raster.interpolate_na(method="rio_idw", max_search_distance=5)
+    assert np.all(~np.isnan(da1))
+    # linear interpolation -> still nans
+    da1 = da0.raster.interpolate_na(method="linear", extrapolate=False)
+    assert np.isnan(da1).sum() == 14
+    # extrapolate
+    da1 = da0.raster.interpolate_na(method="linear", extrapolate=True)
+    assert np.all(~np.isnan(da1))
+    # with extra dimension
     da2 = da0.copy()  # adding extra dims to spatial_ref is done inplace
-    assert np.all(da2.expand_dims("t").raster.interpolate_na() != da0.raster.nodata)
-    da3 = da0.astype(np.int32)  # this removes the nodata value ...
+    da1 = da2.expand_dims("t").raster.interpolate_na()
+    assert np.all(~np.isnan(da1))
+    # test with other nodata value
+    da3 = da0.fillna(-9999).astype(np.int32)
     da3.raster.set_nodata(-9999)
     assert da3.raster.interpolate_na().dtype == np.int32
+    with pytest.raises(ValueError, match="Nodata value nan of type float"):
+        da3.raster.set_nodata(np.nan)
 
 
 def test_vector_grid(rioda):
+    # polygon
     gdf = rioda.raster.vector_grid()
-    assert isinstance(gdf, gpd.GeoDataFrame)
     assert rioda.raster.size == gdf.index.size
+    assert np.all(gdf.geometry.type == "Polygon")
+    assert np.all(gdf.total_bounds == rioda.raster.bounds)
+    # line
+    gdf = rioda.raster.vector_grid(geom_type="line")
+    nrow, ncol = rioda.raster.shape
+    assert gdf.index.size == (nrow + 1 + ncol + 1)
+    assert np.all(gdf.geometry.type == "LineString")
+    assert np.all(gdf.total_bounds == rioda.raster.bounds)
+    # point
+    gdf = rioda.raster.vector_grid(geom_type="point")
+    assert np.all(gdf.geometry.type == "Point")
+    assert rioda.raster.size == gdf.index.size
+    assert np.all(gdf.intersects(rioda.raster.box.geometry[0]))
 
 
 def test_sample():
@@ -382,7 +506,8 @@ def test_zonal_stats():
     gdf = gpd.GeoDataFrame(geometry=geoms, crs=da.raster.crs)
 
     ds0 = da.raster.zonal_stats(gdf, "count")
-    assert "test_count" in ds0.data_vars and "index" in ds0.dims
+    assert "test_count" in ds0.data_vars
+    assert "index" in ds0.dims
     assert np.all(ds0["index"] == np.array([0, 2, 3]))
     assert np.all(ds0["test_count"] == np.array([40, 1, 10]))
 
@@ -398,7 +523,7 @@ def test_zonal_stats():
         da.raster.zonal_stats(gdf.iloc[1:2], "mean")
 
 
-@pytest.mark.parametrize("transform, shape", testdata[-2:])
+@pytest.mark.parametrize(("transform", "shape"), testdata[-2:])
 def test_rotated(transform, shape, tmpdir):
     da = raster.full_from_transform(transform, shape, nodata=-1, name="test")
     da.raster.set_crs(4326)
@@ -416,7 +541,7 @@ def test_rotated(transform, shape, tmpdir):
     gdf2 = da2.raster.vectorize().sort_values("value")
     gdf2.index = gdf2.index.astype(int)
     gpd.testing.assert_geodataframe_equal(
-        gdf, gdf2, check_less_precise=True, check_dtype=False
+        gdf, gdf2, check_less_precise=True, check_dtype=False, check_index_type=False
     )
     # test sample
     idxs = np.array([2, 7])
@@ -432,25 +557,94 @@ def test_rotated(transform, shape, tmpdir):
 
 
 def test_to_xyz_tiles(tmpdir, rioda_large):
-    # NOTE: this method does not work in debug mode because of os.subprocess
     path = str(tmpdir)
     rioda_large.raster.to_xyz_tiles(
-        os.path.join(path, "dummy_xyz"),
+        join(path, "dummy_xyz"),
         tile_size=256,
         zoom_levels=[0, 2],
     )
-    with open(os.path.join(path, "dummy_xyz", "0", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 16
-    with open(os.path.join(path, "dummy_xyz", "2", "filelist.txt"), "r") as f:
-        assert len(f.readlines()) == 1
+    with rasterio.open(join(path, "dummy_xyz", "dummy_xyz_zl0.vrt"), "r") as src:
+        assert src.shape == (1024, 1024)
+    with rasterio.open(join(path, "dummy_xyz", "dummy_xyz_zl2.vrt"), "r") as src:
+        assert src.shape == (256, 256)
+
+    test_bounds = [2.13, -2.13, 3.2, -1.07]
+    _test_r = open_raster(join(path, "dummy_xyz", "0", "2", "1.tif"))
+    assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
 
 
-# def test_to_osm(tmpdir, dummy):
-#     path = str(tmpdir)
-#     dummy.raster.to_osm(
-#         f"{path}\\dummy_osm",
-#         zl=4,
-#         bbox=(0, -45, 45, 0),
-#     )
-#     f = open(f"{path}\\dummy_osm\\3\\filelist.txt", "r")
-#     assert len(f.readlines()) == 4
+def test_to_slippy_tiles(tmpdir, rioda_large):
+    from PIL import Image
+
+    # for tile at zl 7, x 64, y 64
+    test_bounds = [0.0, -313086.07, 313086.07, -0.0]
+    # populate with random data
+    np.random.seed(0)
+    rioda_large[:] = np.random.random(rioda_large.shape).astype(np.float32)
+
+    # png
+    png_dir = join(tmpdir, "tiles_png")
+    rioda_large.raster.to_slippy_tiles(png_dir)
+    _zl = os.listdir(png_dir)
+    _zl = [int(_n) for _n in _zl]
+    assert len(_zl) == 4
+    assert min(_zl) == 6
+    assert max(_zl) == 9
+    fn = join(png_dir, "7", "64", "64.png")
+    im = np.array(Image.open(fn))
+    assert im.shape == (256, 256, 4)
+    assert all(im[0, 0, :] == [128, 0, 132, 255])
+
+    # test with cmap
+    png_dir = join(tmpdir, "tiles_png_cmap")
+    rioda_large.raster.to_slippy_tiles(png_dir, cmap="viridis", min_lvl=6, max_lvl=7)
+    fn = join(png_dir, "7", "64", "64.png")
+    im = np.array(Image.open(fn))
+    assert im.shape == (256, 256, 4)
+    assert all(im[0, 0, :] == [32, 143, 140, 255])
+
+    # gtiff
+    tif_dir = join(tmpdir, "tiles_tif")
+    rioda_large.raster.to_slippy_tiles(
+        tif_dir,
+        driver="GTiff",
+        min_lvl=5,
+        max_lvl=8,
+        write_vrt=True,
+    )
+    with rasterio.open(join(tif_dir, "lvl5.vrt"), "r") as src:
+        assert src.shape == (256, 256)
+    with rasterio.open(join(tif_dir, "lvl8.vrt"), "r") as src:
+        assert src.shape == (1024, 768)
+    _test_r = open_raster(join(tif_dir, "7", "64", "64.tif"))
+    assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
+    assert all([isfile(join(tif_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
+    _test_vrt = open_raster(join(tif_dir, "lvl7.vrt"))
+    assert isinstance(_test_vrt, xr.DataArray)
+
+    # nc
+    nc_dir = join(tmpdir, "tiles_nc")
+    rioda_large.raster.to_slippy_tiles(
+        nc_dir,
+        driver="netcdf4",
+        min_lvl=5,
+        max_lvl=8,
+        write_vrt=True,
+    )
+    with rasterio.open(join(nc_dir, "lvl5.vrt"), "r") as src:
+        assert src.shape == (256, 256)
+    with rasterio.open(join(nc_dir, "lvl8.vrt"), "r") as src:
+        assert src.shape == (1024, 768)
+    _test_r = open_raster(join(nc_dir, "7", "64", "64.nc"))
+    assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
+    assert all([isfile(join(nc_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
+    _test_vrt = open_raster(join(nc_dir, "lvl7.vrt"))
+    assert isinstance(_test_vrt, xr.DataArray)
+
+    # test all errors in to_slippy_tiles
+    with pytest.raises(ValueError, match="Unkown file driver"):
+        rioda_large.raster.to_slippy_tiles(str(tmpdir), driver="unsupported")
+    with pytest.raises(ValueError, match="Only 2d DataArrays"):
+        rioda_large.expand_dims("t").raster.to_slippy_tiles(str(tmpdir))
+    with pytest.raises(ValueError, match="Colormap is only supported for png"):
+        rioda_large.raster.to_slippy_tiles(str(tmpdir), cmap="viridis", driver="GTiff")

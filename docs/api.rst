@@ -22,6 +22,8 @@ General
    :toctree: _generated
 
    data_catalog.DataCatalog
+   data_catalog.DataCatalog.get_source
+   data_catalog.DataCatalog.iter_sources
    data_catalog.DataCatalog.sources
    data_catalog.DataCatalog.keys
    data_catalog.DataCatalog.predefined_catalogs
@@ -29,6 +31,8 @@ General
    data_catalog.DataCatalog.to_dataframe
    data_catalog.DataCatalog.to_yml
    data_catalog.DataCatalog.export_data
+   data_catalog.DataCatalog.get_source_bbox
+   data_catalog.DataCatalog.get_source_time_range
 
 Add data sources
 ----------------
@@ -36,12 +40,13 @@ Add data sources
 .. autosummary::
    :toctree: _generated
 
-   data_catalog.DataCatalog.set_predefined_catalogs
+   data_catalog.DataCatalog.add_source
+   data_catalog.DataCatalog.update
    data_catalog.DataCatalog.from_predefined_catalogs
    data_catalog.DataCatalog.from_archive
    data_catalog.DataCatalog.from_yml
    data_catalog.DataCatalog.from_dict
-   data_catalog.DataCatalog.update
+   data_catalog.DataCatalog.set_predefined_catalogs
 
 .. _api_data_catalog_get:
 
@@ -54,7 +59,7 @@ Get data
    data_catalog.DataCatalog.get_rasterdataset
    data_catalog.DataCatalog.get_geodataset
    data_catalog.DataCatalog.get_geodataframe
-
+   data_catalog.DataCatalog.get_dataframe
 
 
 RasterDataset
@@ -68,6 +73,10 @@ RasterDataset
    data_adapter.RasterDatasetAdapter.get_data
    data_adapter.RasterDatasetAdapter.to_dict
    data_adapter.RasterDatasetAdapter.to_file
+   data_adapter.RasterDatasetAdapter.get_bbox
+   data_adapter.RasterDatasetAdapter.get_time_range
+   data_adapter.RasterDatasetAdapter.detect_bbox
+   data_adapter.RasterDatasetAdapter.detect_time_range
 
 GeoDataset
 ==========
@@ -80,6 +89,10 @@ GeoDataset
    data_adapter.GeoDatasetAdapter.get_data
    data_adapter.GeoDatasetAdapter.to_dict
    data_adapter.GeoDatasetAdapter.to_file
+   data_adapter.GeoDatasetAdapter.get_bbox
+   data_adapter.GeoDatasetAdapter.get_time_range
+   data_adapter.GeoDatasetAdapter.detect_bbox
+   data_adapter.GeoDatasetAdapter.detect_time_range
 
 GeoDataFrame
 ============
@@ -92,6 +105,8 @@ GeoDataFrame
    data_adapter.GeoDataFrameAdapter.get_data
    data_adapter.GeoDataFrameAdapter.to_dict
    data_adapter.GeoDataFrameAdapter.to_file
+   data_adapter.GeoDataFrameAdapter.get_bbox
+   data_adapter.GeoDataFrameAdapter.detect_bbox
 
 DataFrame
 =========
@@ -131,7 +146,7 @@ Note that the base Model attributes and methods are available to all models.
 
    Model
 
-High level methods 
+High level methods
 ------------------
 
 .. autosummary::
@@ -152,8 +167,8 @@ Model attributes
 
    Model.crs
    Model.region
+   Model.root
    Model.api
-
 
 Model components and attributes
 -------------------------------
@@ -198,6 +213,9 @@ General methods
    Model.set_results
    Model.read_results
 
+   Model.read_nc
+   Model.write_nc
+
 .. _setup_methods:
 
 Setup methods
@@ -208,7 +226,7 @@ Setup methods
 
    Model.setup_config
    Model.setup_region
-   Model.setup_maps_from_raster
+   Model.setup_maps_from_rasterdataset
    Model.setup_maps_from_raster_reclass
 
 
@@ -252,19 +270,24 @@ Setup methods
 
    GridModel.setup_config
    GridModel.setup_region
-   GridModel.setup_maps_from_raster
+   GridModel.setup_maps_from_rasterdataset
    GridModel.setup_maps_from_raster_reclass
+   GridModel.setup_grid
+   GridModel.setup_grid_from_constant
+   GridModel.setup_grid_from_rasterdataset
+   GridModel.setup_grid_from_raster_reclass
+   GridModel.setup_grid_from_geodataframe
 
 
-.. _lumped_model_api:
+.. _vector_model_api:
 
-LumpedModel
+VectorModel
 ===========
 
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel
+   VectorModel
 
 
 Components and attributes
@@ -273,9 +296,9 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel.response_units
-   LumpedModel.crs
-   LumpedModel.region
+   VectorModel.vector
+   VectorModel.crs
+   VectorModel.region
 
 General methods
 ---------------
@@ -283,9 +306,9 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel.set_response_units
-   LumpedModel.read_response_units
-   LumpedModel.write_response_units
+   VectorModel.set_vector
+   VectorModel.read_vector
+   VectorModel.write_vector
 
 Setup methods
 -------------
@@ -293,10 +316,10 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   LumpedModel.setup_config
-   LumpedModel.setup_region
-   LumpedModel.setup_maps_from_raster
-   LumpedModel.setup_maps_from_raster_reclass
+   VectorModel.setup_config
+   VectorModel.setup_region
+   VectorModel.setup_maps_from_rasterdataset
+   VectorModel.setup_maps_from_raster_reclass
 
 
 .. _mesh_model_api:
@@ -317,8 +340,13 @@ Components and attributes
    :toctree: _generated
 
    MeshModel.mesh
+   MeshModel.mesh_names
+   MeshModel.mesh_grids
+   MeshModel.mesh_datasets
+   MeshModel.mesh_gdf
    MeshModel.crs
    MeshModel.region
+   MeshModel.bounds
 
 General methods
 ---------------
@@ -327,6 +355,7 @@ General methods
    :toctree: _generated
 
    MeshModel.set_mesh
+   MeshModel.get_mesh
    MeshModel.read_mesh
    MeshModel.write_mesh
 
@@ -339,14 +368,38 @@ Setup methods
 
    MeshModel.setup_config
    MeshModel.setup_region
-   MeshModel.setup_maps_from_raster
+   MeshModel.setup_mesh2d
+   MeshModel.setup_mesh2d_from_rasterdataset
+   MeshModel.setup_mesh2d_from_raster_reclass
+   MeshModel.setup_maps_from_rasterdataset
    MeshModel.setup_maps_from_raster_reclass
 
-
+.. _workflows_api:
 
 =========
 Workflows
 =========
+
+Grid
+====
+
+.. autosummary::
+   :toctree: _generated
+
+   workflows.grid.grid_from_constant
+   workflows.grid.grid_from_rasterdataset
+   workflows.grid.grid_from_raster_reclass
+   workflows.grid.grid_from_geodataframe
+
+Mesh
+====
+
+.. autosummary::
+   :toctree: _generated
+
+   workflows.mesh.create_mesh2d
+   workflows.mesh.mesh2d_from_rasterdataset
+   workflows.mesh.mesh2d_from_raster_reclass
 
 
 Basin mask
@@ -442,9 +495,11 @@ Raster writing methods
    :toctree: _generated
 
    DataArray.raster.to_xyz_tiles
+   DataArray.raster.to_slippy_tiles
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
 
+.. _raster_api:
 
 ==============
 Raster methods
@@ -464,7 +519,7 @@ High level methods
 .. autosummary::
    :toctree: _generated
    :template: autosummary/accessor_method.rst
-   
+
    DataArray.raster.from_numpy
    Dataset.raster.from_numpy
 
@@ -540,6 +595,7 @@ Clip
    :template: autosummary/accessor_method.rst
    :toctree: _generated
 
+   DataArray.raster.clip
    DataArray.raster.clip_bbox
    DataArray.raster.clip_mask
    DataArray.raster.clip_geom
@@ -565,6 +621,7 @@ Transform
    :toctree: _generated
 
    DataArray.raster.rasterize
+   DataArray.raster.rasterize_geometry
    DataArray.raster.geometry_mask
    DataArray.raster.vectorize
    DataArray.raster.vector_grid
@@ -588,6 +645,8 @@ Low level methods
 
    gis_utils.axes_attrs
    gis_utils.meridian_offset
+
+.. _geodataset_api:
 
 ==================
 GeoDataset methods
@@ -650,7 +709,7 @@ Conversion
 
 .. autosummary::
    :template: autosummary/accessor_method.rst
-   :toctree: _generated  
+   :toctree: _generated
 
    DataArray.vector.ogr_compliant
    DataArray.vector.update_geometry
@@ -734,13 +793,13 @@ Raster
    gis_utils.reggrid_area
    gis_utils.cellarea
    gis_utils.cellres
-   
+
 CRS and transform
 =================
 
 .. autosummary::
    :toctree: _generated
-   
+
    gis_utils.parse_crs
    gis_utils.utm_crs
    gis_utils.affine_to_coords
@@ -755,31 +814,22 @@ Vector
    gis_utils.nearest
    gis_utils.nearest_merge
 
-   
-PCRaster I/O
-============
-
-.. autosummary::
-   :toctree: _generated
-
-   gis_utils.write_map 
-   gis_utils.write_clone
-
 
 .. _statistics:
 
-==========
-Statistics
-==========
+=====================================
+Statistics and Extreme Value Analysis
+=====================================
 
 Statistics and performance metrics
 ==================================
 
 .. autosummary::
    :toctree: _generated
-   
+
    stats.skills.bias
    stats.skills.percentual_bias
+   stats.skills.volumetric_error
    stats.skills.nashsutcliffe
    stats.skills.lognashsutcliffe
    stats.skills.pearson_correlation
@@ -791,6 +841,26 @@ Statistics and performance metrics
    stats.skills.rsquared
    stats.skills.mse
    stats.skills.rmse
+   stats.skills.rsr
+
+Extreme Value Analysis
+=======================
+.. autosummary::
+   :toctree: _generated
+
+   stats.extremes.get_peaks
+   stats.extremes.fit_extremes
+   stats.extremes.get_return_value
+   stats.extremes.eva
+
+=============
+Design Events
+=============
+.. autosummary::
+   :toctree: _generated
+
+   stats.design_events.get_peak_hydrographs
+
 
 =========
 Utilities
@@ -801,7 +871,7 @@ Configuration files
 
 .. autosummary::
    :toctree: _generated
-   
+
    config.configread
    config.configwrite
 
@@ -810,5 +880,5 @@ Logging
 
 .. autosummary::
    :toctree: _generated
-   
+
    log.setuplog

@@ -1,3 +1,4 @@
+---
 example_csv_data:
   path: example_csv_data.csv
   data_type: DataFrame

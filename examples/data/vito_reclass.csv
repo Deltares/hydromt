@@ -1,24 +1,25 @@
-vito,description,manning
-20,Shrubs,0.5
-30,Herbaceous vegetation,0.15
-40,Cultivated and managed vegetation/agriculture (cropland),0.2
-50,Urban / built up,0.011
-60,Bare / sparse vegetation,0.02
-70,Snow and Ice,0.01
-80,Permanent water bodies,0.01
-90,Herbaceous wetland,0.15
-100,Moss and lichen,0.085
-111,Closed forest evergreen needle leaf,0.4
-112,Closed forest evergreen broad leaf,0.6
-113,Closed forest deciduous needle leaf,0.4
-114,Closed forest deciduous broad leaf,0.6
-115,Closed forest mixed,0.5
-116,Closed forest unknown,0.5
-121,Open forest evergreen needle leaf,0.45
-122,Open forest evergreen broad leaf,0.55
-123,Open forest deciduous needle leaf,0.45
-124,Open forest deciduous broad leaf,0.55
-125,Open forest mixed,0.5
-126,Open forest unknown,0.5
-200,Open sea,0.01
-0,No data,-999
+vito,description,landuse,manning
+0,Unknown,0,-999.
+20,Shrubs,20,0.5
+30,Herbaceous vegetation,30,0.15
+40,Cultivated and managed vegetation/agriculture (cropland),40,0.2
+50,Urban / built up,50,0.011
+60,Bare / sparse vegetation,60,0.02
+70,Snow and Ice,70,0.01
+80,Permanent water bodies,80,0.01
+90,Herbaceous wetland,90,0.15
+100,Moss and lichen,100,0.085
+111,Closed forest evergreen needle leaf,111,0.4
+112,Closed forest evergreen broad leaf,112,0.6
+113,Closed forest deciduous needle leaf,113,0.4
+114,Closed forest deciduous broad leaf,114,0.6
+115,Closed forest mixed,115,0.5
+116,Closed forest unknown,116,0.5
+121,Open forest evergreen needle leaf,121,0.45
+122,Open forest evergreen broad leaf,122,0.55
+123,Open forest deciduous needle leaf,123,0.45
+124,Open forest deciduous broad leaf,124,0.55
+125,Open forest mixed,125,0.5
+126,Open forest unknown,126,0.5
+200,Open sea,200,0.01
+255,No data,255,-999.

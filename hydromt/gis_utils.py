@@ -1,61 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""gis related convience functions. More in pyflwdir.gis_utils"""
-from os.path import dirname, join, isfile
-import os
+"""GIS related convenience functions."""
+from __future__ import annotations
+
 import glob
-import sys
-import subprocess
+import logging
+import os
+from os.path import dirname
+from typing import Optional, Tuple, Union
+
+import geopandas as gpd
 import numpy as np
 import xarray as xr
-import rasterio
-from pyproj import CRS
-from rasterio.transform import Affine
-import geopandas as gpd
-from shapely.geometry.base import BaseGeometry
-from shapely.geometry import box
-import logging
-from pyflwdir import core_conversion, core_d8, core_ldd
 from pyflwdir import gis_utils as gis
-from typing import Optional, Tuple
-from . import _compat
+from pyogrio import read_info
+from pyproj import CRS
+from pyproj.transformer import Transformer
+from rasterio.transform import Affine
+from shapely.geometry import box
+from shapely.geometry.base import BaseGeometry
 
+from . import _compat
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 
 logger = logging.getLogger(__name__)
 
 _R = 6371e3  # Radius of earth in m. Use 3956e3 for miles
-XATTRS = {
-    "geographic": {
-        "standard_name": "longitude",
-        "long_name": "longitude coordinate",
-        "short_name": "lon",
-        "units": "degrees_east",
-    },
-    "projected": {
-        "standard_name": "projection_x_coordinate",
-        "long_name": "x coordinate of projection",
-        "short_name": "x",
-        "units": "m",
-    },
-}
-YATTRS = {
-    "geographic": {
-        "standard_name": "latitude",
-        "long_name": "latitude coordinate",
-        "short_name": "lat",
-        "units": "degrees_north",
-    },
-    "projected": {
-        "standard_name": "projection_y_coordinate",
-        "long_name": "y coordinate of projection",
-        "short_name": "y",
-        "units": "m",
-    },
-}
-PCR_VS_MAP = {"ldd": "ldd"}
 GDAL_DRIVER_CODE_MAP = {
     "asc": "AAIGrid",
     "blx": "BLX",
@@ -76,7 +48,6 @@ GDAL_DRIVER_CODE_MAP = {
     "jpg": "JPEG",
     "kro": "KRO",
     "lcp": "LCP",
-    "map": "PCRaster",
     "mbtiles": "MBTiles",
     "mpr/mpl": "ILWIS",
     "ntf": "NITF",
@@ -97,6 +68,9 @@ GDAL_DRIVER_CODE_MAP = {
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
 
+GPD_TYPES = Union[gpd.GeoDataFrame, gpd.GeoSeries]
+GEOM_TYPES = Union[GPD_TYPES, BaseGeometry]
+
 ## GEOM functions
 
 
@@ -109,8 +83,10 @@ def nearest_merge(
     inplace: bool = False,
     logger=logger,
 ) -> gpd.GeoDataFrame:
-    """Merge attributes of gdf2 with the nearest feature of gdf1, optionally bounded by
-    a maximumum distance `max_dist`. Unless `overwrite = True`, gdf2 values are only
+    """Merge attributes of gdf2 with the nearest feature of gdf1.
+
+    Output is optionally bounded by a maximumum distance `max_dist`.
+    Unless `overwrite = True`, gdf2 values are only
     merged where gdf1 has missing values.
 
     Parameters
@@ -124,6 +100,10 @@ def nearest_merge(
     overwrite : bool, optional
         If False (default) gdf2 values are only merged where gdf1 has missing values,
         i.e. NaN values for existing columns or missing columns.
+    inplace : bool,
+        If True, apply the merge to gdf1, otherwise return a new object.
+    logger:
+        The logger to use.
 
     Returns
     -------
@@ -156,10 +136,11 @@ def nearest_merge(
 def nearest(
     gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Return the index of and distance [m] to the nearest geometry
-    in `gdf2` for each geometry of `gdf1`. For Line geometries in `gdf1` the nearest
-    geometry is based line center point and for polygons on its representative point.
-    Mixed geometry types are not yet supported.
+    """Return the index of and distance [m] to the nearest geometry.
+
+    For Line geometries in `gdf1` the nearest geometry is based line center point
+    and for polygons on its representative point. Mixed geometry types are not
+    yet supported.
 
     Note: Since geopandas v0.10.0 it contains a sjoin_nearest method which is very
     similar and should.
@@ -218,17 +199,51 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
         raise ValueError("Either geom or bbox is required.")
     if not isinstance(geom, BaseGeometry):
         # reproject
-        if gdf.crs is not None and geom.crs != gdf.crs:
+        if geom.crs is None and gdf.crs is not None:
+            geom = geom.set_crs(gdf.crs)
+        elif gdf.crs is not None and geom.crs != gdf.crs:
             geom = geom.to_crs(gdf.crs)
         # convert geopandas to geometry
         geom = geom.unary_union
-    idx = gdf.sindex.query(geom, predicate=predicate)
+    idx = np.sort(gdf.sindex.query(geom, predicate=predicate))
     return idx
+
+
+def parse_geom_bbox_buffer(geom=None, bbox=None, buffer=0):
+    """Parse geom or bbox to a (buffered) geometry.
+
+    Arguments
+    ---------
+    geom : geopandas.GeoDataFrame/Series, optional
+        A geometry defining the area of interest.
+    bbox : array-like of floats, optional
+        (xmin, ymin, xmax, ymax) bounding box of area of interest
+        (in WGS84 coordinates).
+    buffer : float, optional
+        Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+
+    Returns
+    -------
+    geom: geometry
+        the actual geometry
+    """
+    if geom is None and bbox is not None:
+        # convert bbox to geom with crs EPGS:4326 to apply buffer later
+        geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+    elif geom is None:
+        raise ValueError("No geom or bbox provided.")
+
+    if buffer > 0:
+        # make sure geom is projected > buffer in meters!
+        if geom.crs.is_geographic:
+            geom = geom.to_crs(3857)
+        geom = geom.buffer(buffer)
+    return geom
 
 
 # REPROJ
 def utm_crs(bbox):
-    """Returns wkt string of nearest UTM projects
+    """Return wkt string of nearest UTM projects.
 
     Parameters
     ----------
@@ -264,8 +279,7 @@ def parse_crs(crs, bbox=None):
 
 
 def axes_attrs(crs):
-    """
-    Provide CF-compliant variable names and metadata for axes
+    """Provide CF-compliant variable names and metadata for axes.
 
     Parameters
     ----------
@@ -279,27 +293,63 @@ def axes_attrs(crs):
     x_attr: dict - attributes of variable x
     y_attr: dict - attributes of variable y
     """
-    # check for type of crs
-    crs_type = "geographic" if crs.is_geographic else "projected"
-    y_dim = YATTRS[crs_type]["short_name"]
-    x_dim = XATTRS[crs_type]["short_name"]
-    y_attrs = YATTRS[crs_type]
-    x_attrs = XATTRS[crs_type]
+    # # check for type of crs
+    if not isinstance(crs, CRS):
+        crs = CRS.from_user_input(crs)
+    if crs.is_geographic:
+        x_dim, y_dim = "longitude", "latitude"
+    else:
+        x_dim, y_dim = "x", "y"
+    cf_coords = crs.cs_to_cf()
+    x_attrs = [c for c in cf_coords if c["axis"] == "X"][0]
+    y_attrs = [c for c in cf_coords if c["axis"] == "Y"][0]
     return x_dim, y_dim, x_attrs, y_attrs
 
 
-def meridian_offset(ds, x_name="x", bbox=None):
-    """re-arange data along x dim"""
-    if ds.raster.crs is None or ds.raster.crs.is_projected:
-        raise ValueError("The method is only applicable to geographic CRS")
+def meridian_offset(ds, bbox=None):
+    """Shift data along the x-axis of global datasets to avoid issues along the 180 meridian.
+
+    Without a bbox the data is shifted to span 180W to 180E.
+    With bbox the data is shifted to at least span the bbox west to east,
+    also if the bbox crosses the 180 meridian.
+
+    Note that this method is only applicable to data that spans 360 degrees longitude
+    and is set in a global geographic CRS (WGS84).
+
+    Parameters
+    ----------
+    ds: xarray.Dataset
+        input dataset
+    bbox: tuple of float
+        bounding box (west, south, east, north) in degrees
+
+    Returns
+    -------
+    ds: xarray.Dataset
+        dataset with x dim re-arranged if needed
+    """
+    w, _, e, _ = ds.raster.bounds
+    if (
+        ds.raster.crs is None
+        or ds.raster.crs.is_projected
+        or not np.isclose(e - w, 360)  # grid should span 360 degrees!
+    ):
+        raise ValueError(
+            "This method is only applicable to data that spans 360 degrees "
+            "longitude and is set in a global geographic CRS"
+        )
+    x_name = ds.raster.x_dim
     lons = np.copy(ds[x_name].values)
-    w, e = lons.min(), lons.max()
-    if bbox is not None and bbox[0] < w and bbox[0] < -180:  # 180W - 180E > 360W - 0W
-        lons = np.where(lons > 0, lons - 360, lons)
-    elif bbox is not None and bbox[2] > e and bbox[2] > 180:  # 180W - 180E > 0E-360E
-        lons = np.where(lons < 0, lons + 360, lons)
-    elif e > 180:  # 0E-360E > 180W - 180E
-        lons = np.where(lons > 180, lons - 360, lons)
+    if bbox is not None:  # bbox west and east
+        bbox_w, bbox_e = bbox[0], bbox[2]
+    else:  # global west and east in case of no bbox
+        bbox_w, bbox_e = -180, 180
+    if bbox_w < w:  # shift lons east of x0 by 360 degrees west
+        x0 = 180 if bbox_w >= -180 else 0
+        lons = np.where(lons > max(bbox_e, x0), lons - 360, lons)
+    elif bbox_e > e:  # shift lons west of x0 by 360 degrees east
+        x0 = -180 if bbox_e <= 180 else 0
+        lons = np.where(lons < min(bbox_w, x0), lons + 360, lons)
     else:
         return ds
     ds = ds.copy(deep=False)  # make sure not to overwrite original ds
@@ -311,7 +361,7 @@ def meridian_offset(ds, x_name="x", bbox=None):
 
 
 def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
-    """Returns a raster axis with pixel center coordinates based on the transform.
+    """Return a raster axis with pixel center coordinates based on the transform.
 
     Parameters
     ----------
@@ -329,7 +379,7 @@ def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
     if not isinstance(transform, Affine):
         transform = Affine(*transform)
     height, width = shape
-    if transform.b == 0:
+    if np.isclose(transform.b, 0) and np.isclose(transform.d, 0):
         x_coords, _ = transform * (np.arange(width) + 0.5, np.zeros(width) + 0.5)
         _, y_coords = transform * (np.zeros(height) + 0.5, np.arange(height) + 0.5)
         coords = {
@@ -350,7 +400,7 @@ def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
 
 
 def affine_to_meshgrid(transform, shape):
-    """Returns a mesgrid of pixel center coordinates based on the transform.
+    """Return a meshgrid of pixel center coordinates based on the transform.
 
     Parameters
     ----------
@@ -377,8 +427,7 @@ def affine_to_meshgrid(transform, shape):
 
 ## CELLAREAS
 def reggrid_area(lats, lons):
-    """Returns the cell area [m2] for a regular grid based on its cell centres
-    lat, lon coordinates."""
+    """Return the cell area [m2] for a regular grid based on its cell centres lat, lon."""  # noqa: E501
     xres = np.abs(np.mean(np.diff(lons)))
     yres = np.abs(np.mean(np.diff(lats)))
     area = np.ones((lats.size, lons.size), dtype=lats.dtype)
@@ -386,8 +435,10 @@ def reggrid_area(lats, lons):
 
 
 def cellarea(lat, xres=1.0, yres=1.0):
-    """Return the area [m2] of cell based on the cell center latitude and its resolution
-    in measured in degrees."""
+    """Return the area [m2] of cell based on its center latitude and resolution in degrees.
+
+    Resolution is in measured degrees.
+    """  # noqa: E501
     l1 = np.radians(lat - np.abs(yres) / 2.0)
     l2 = np.radians(lat + np.abs(yres) / 2.0)
     dx = np.radians(np.abs(xres))
@@ -395,8 +446,10 @@ def cellarea(lat, xres=1.0, yres=1.0):
 
 
 def cellres(lat, xres=1.0, yres=1.0):
-    """Return the cell (x, y) resolution [m] based on cell center latitude and its
-    resolution measured in degrees."""
+    """Return the cell (x, y) resolution [m].
+
+    Based on cell center latitude and its resolution measured in degrees.
+    """
     m1 = 111132.92  # latitude calculation term 1
     m2 = -559.82  # latitude calculation term 2
     m3 = 1.175  # latitude calculation term 3
@@ -431,8 +484,9 @@ def spread2d(
     da_friction: Optional[xr.DataArray] = None,
     nodata: Optional[float] = None,
 ) -> xr.Dataset:
-    """Returns values of `da_obs` spreaded to cells with `nodata` value within `da_mask`,
-    powered by :py:meth:`pyflwdir.gis_utils.spread2d`
+    """Return values of `da_obs` spreaded to cells with `nodata` value within `da_mask`.
+
+    powered by :py:meth:`pyflwdir.gis_utils.spread2d`.
 
     Parameters
     ----------
@@ -451,8 +505,8 @@ def spread2d(
     Returns
     -------
     ds_out: xarray.Dataset
-        Dataset with spreaded source values, linear index of the source cell "source_idx"
-        and friction distance to the source cell "source_dst".
+        Dataset with spreaded source values, linear index of the source cell
+        "source_idx" and friction distance to the source cell "source_dst".
     """
     nodata = da_obs.raster.nodata if nodata is None else nodata
     if nodata is None or np.isnan(nodata):
@@ -468,7 +522,7 @@ def spread2d(
         obs=da_obs.values,
         msk=msk,
         frc=frc,
-        nodata=da_obs.raster.nodata if nodata is None else nodata,
+        nodata=nodata,
         latlon=da_obs.raster.crs.is_geographic,
         transform=da_obs.raster.transform,
     )
@@ -488,163 +542,104 @@ def spread2d(
     return ds_out
 
 
-## PCRASTER
-
-
-def write_clone(tmpdir, gdal_transform, wkt_projection, shape):
-    """write pcraster clone file to a tmpdir using gdal"""
-    from osgeo import gdal
-
-    gdal.AllRegister()
-    driver1 = gdal.GetDriverByName("GTiff")
-    driver2 = gdal.GetDriverByName("PCRaster")
-    fn = join(tmpdir, "clone.map")
-    # create temp tif file
-    fn_temp = join(tmpdir, "clone.tif")
-    TempDataset = driver1.Create(fn_temp, shape[1], shape[0], 1, gdal.GDT_Float32)
-    TempDataset.SetGeoTransform(gdal_transform)
-    if wkt_projection is not None:
-        TempDataset.SetProjection(wkt_projection)
-    # TODO set csr
-    # copy to pcraster format
-    outDataset = driver2.CreateCopy(fn, TempDataset, 0)
-    # close and cleanup
-    TempDataset = None
-    outDataset = None
-    return fn
-
-
-def write_map(
-    data,
-    raster_path,
-    nodata,
-    transform,
-    crs=None,
-    clone_path=None,
-    pcr_vs="scalar",
-    **kwargs,
-):
-    """Write pcraster map files using pcr.report functionality.
-
-    A PCRaster clone map is written to a temporary directory if not provided.
-    For PCRaster types see https://www.gdal.org/frmt_various.html#PCRaster
-
-    Parameters
-    ----------
-    data : ndarray
-        Raster data
-    raster_path : str
-        Path to output map
-    nodata : int, float
-        no data value
-    transform : affine transform
-        Two dimensional affine transform for 2D linear mapping
-    clone_path : str, optional
-        Path to PCRaster clone map, by default None
-    pcr_vs : str, optional
-        pcraster type, by default "scalar"
-
-    Raises
-    ------
-    ImportError
-        pcraster package is required
-    ValueError
-        if invalid ldd
-    """
-    if not _compat.HAS_PCRASTER:
-        raise ImportError("The pcraster package is required to write map files")
-    import tempfile
-    import pcraster as pcr
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # deal with pcr clone map
-        if clone_path is None:
-            clone_path = write_clone(
-                tmpdir,
-                gdal_transform=transform.to_gdal(),
-                wkt_projection=None if crs is None else CRS.from_user_input(crs).wkt,
-                shape=data.shape,
-            )
-        elif not isfile(clone_path):
-            raise IOError(f'clone_path: "{clone_path}" does not exist')
-        pcr.setclone(clone_path)
-        if nodata is None and pcr_vs != "ldd":
-            raise ValueError("nodata value required to write PCR map")
-        # write to pcrmap
-        if pcr_vs == "ldd":
-            # if d8 convert to ldd
-            data = data.astype(np.uint8)  # force dtype
-            if core_d8.isvalid(data):
-                data = core_conversion.d8_to_ldd(data)
-            elif not core_ldd.isvalid(data):
-                raise ValueError("LDD data not understood")
-            mv = int(core_ldd._mv)
-            ldd = pcr.numpy2pcr(pcr.Ldd, data.astype(int), mv)
-            # make sure it is pcr sound
-            # NOTE this should not be necessary
-            pcrmap = pcr.lddrepair(ldd)
-        elif pcr_vs == "bool":
-            pcrmap = pcr.numpy2pcr(pcr.Boolean, data.astype(np.bool), np.bool(nodata))
-        elif pcr_vs == "scalar":
-            pcrmap = pcr.numpy2pcr(pcr.Scalar, data.astype(float), float(nodata))
-        elif pcr_vs == "ordinal":
-            pcrmap = pcr.numpy2pcr(pcr.Ordinal, data.astype(int), int(nodata))
-        elif pcr_vs == "nominal":
-            pcrmap = pcr.numpy2pcr(pcr.Nominal, data.astype(int), int(nodata))
-        pcr.report(pcrmap, raster_path)
-        # set crs (pcrmap ignores this info from clone ??)
-        if crs is not None:
-            with rasterio.open(raster_path, "r+") as dst:
-                dst.crs = crs
-
-
 def create_vrt(
     vrt_path: str,
-    file_list_path: str = None,
+    files: list = None,
     files_path: str = None,
 ):
-    """Creates a .vrt file from a list op raster datasets by either
-    passing the list directly (file_list_path) or by inferring it by passing
-    a path containing wildcards (files_path) of the location(s) of the
-    raster datasets
+    r"""Create a .vrt file from a list op raster datasets.
+
+    Either a list of files (`files`) or a path containing wildcards
+    (`files_path`) to infer the list of files is required.
 
     Parameters
     ----------
     vrt_path : str
         Path of the output vrt
-    file_list_path : str, optional
-        Path to the text file containing the paths to the raster files
+    files : list, optional
+        List of raster datasets filenames, by default None
     files_path : str, optional
         Unix style path containing a pattern using wildcards (*)
         n.b. this is without an extension
         e.g. c:\\temp\\*\\*.tif for all tif files in subfolders of 'c:\temp'
-
-    Raises
-    ------
-    ValueError
-        A Path is needed, either file_list_path or files_path
     """
+    if files is None and files_path is None:
+        raise ValueError("Either 'files' or 'files_path' is required")
 
-    if file_list_path is None and files_path is None:
-        raise ValueError(
-            "Either 'file_list_path' or 'files_path' is required -> None was given"
+    if not _compat.HAS_RIO_VRT:
+        raise ImportError(
+            "rio-vrt is required for execution, install with 'pip install rio-vrt'"
         )
+    import rio_vrt
+
+    if files is None and files_path is not None:
+        files = glob.glob(files_path)
+        if len(files) == 0:
+            raise IOError(f"No files found at {files_path}")
 
     outdir = dirname(vrt_path)
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
 
-    if file_list_path is None:
-        files = glob.glob(files_path)
-        if len(files) == 0:
-            raise IOError(f"No files found at {files_path}")
-        file_list_path = join(outdir, "filelist.txt")
-        with open(file_list_path, "w") as w:
-            for line in files:
-                w.write(f"{line}\n")
-
-    # TODO ability to pass more options
-    # TODO find method to pass dir of gdalbuiltvrt on different OS
-    cmd = ["gdalbuildvrt", "-input_file_list", file_list_path, vrt_path]
-    subprocess.run(cmd)
+    rio_vrt.build_vrt(vrt_path, files=files, relative=True)
     return None
+
+
+def to_geographic_bbox(bbox, source_crs):
+    target_crs = CRS.from_user_input(4326)
+    if source_crs is None:
+        logger.warning("No CRS was set. Skipping CRS conversion")
+    elif source_crs != target_crs:
+        bbox = Transformer.from_crs(source_crs, target_crs).transform_bounds(*bbox)
+
+    return bbox
+
+
+def bbox_from_file_and_filters(
+    fn: str,
+    bbox: Union[GEOM_TYPES, None] = None,
+    mask: GEOM_TYPES | None = None,
+    crs: CRS | None = None,
+) -> Tuple[float, float, float, float] | None:
+    """Create a bbox from the file metadata and filter options.
+
+    Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.
+    This function takes the possible bbox filter, mask filter and crs of the input data
+    and returns a bbox in the same crs as the data based on the input filters.
+    As pyogrio currently does not support filtering using a mask, the mask is converted
+    to a bbox and the bbox is returned so that the data has some geospatial filtering.
+
+    Parameters
+    ----------
+    fn: str,
+        uri to the filename.
+    bbox: GeoDataFrame | GeoSeries | BaseGeometry
+        bounding box to filter the data while reading
+    mask: GeoDataFrame | GeoSeries | BaseGeometry
+        mask to filter the data while reading
+    crs: pyproj.CRS
+        coordinate reference system of the bounding box or geometry. If already set,
+        this argument is ignored.
+    """
+    if bbox is not None and mask is not None:
+        raise ValueError(
+            "Both 'bbox' and 'mask' are provided. Please provide only one."
+        )
+    if bbox is None and mask is None:
+        return None
+    if source_crs_str := read_info(fn).get("crs"):
+        source_crs = CRS(source_crs_str)
+    elif crs:
+        source_crs = crs
+    else:  # assume WGS84
+        source_crs = CRS("EPSG:4326")
+
+    if mask is not None:
+        bbox = mask
+
+    # convert bbox to geom with input crs (assume WGS84 if not provided)
+    crs = crs if crs is not None else CRS.from_user_input(4326)
+    if issubclass(type(bbox), BaseGeometry):
+        bbox = gpd.GeoSeries(bbox, crs=crs)
+    bbox = bbox if bbox.crs is not None else bbox.set_crs(crs)
+    return tuple(bbox.to_crs(source_crs).total_bounds)

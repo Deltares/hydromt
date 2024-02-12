@@ -1,16 +1,47 @@
+from os.path import abspath, dirname, join
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyflwdir
 import pytest
-import geopandas as gpd
 import xarray as xr
+from dask import config as dask_config
+from shapely.geometry import box
 
-from hydromt import Model, GridModel, LumpedModel, NetworkModel, MODELS
+dask_config.set(scheduler="single-threaded")
+
+import hydromt._compat as compat
+
+if compat.HAS_XUGRID:
+    import xugrid as xu
+
+from hydromt import (
+    MODELS,
+    GridModel,
+    Model,
+    NetworkModel,
+    VectorModel,
+    gis_utils,
+    raster,
+    vector,
+)
 from hydromt.data_catalog import DataCatalog
-from hydromt import raster, vector, gis_utils
+
+dask_config.set(scheduler="single-threaded")
+
+DATADIR = join(dirname(abspath(__file__)), "data")
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
+def tmp_dir() -> Path:
+    with TemporaryDirectory() as tempdirname:
+        yield Path(tempdirname)
+
+
+@pytest.fixture()
 def rioda():
     return raster.full_from_transform(
         transform=[0.5, 0.0, 3.0, 0.0, -0.5, -9.0],
@@ -21,7 +52,7 @@ def rioda():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def rioda_large():
     da = raster.full_from_transform(
         transform=[0.004166666666666666, 0.0, 0.0, 0.0, -0.004166666666666667, 0.0],
@@ -33,20 +64,83 @@ def rioda_large():
     return da
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def df():
-    df = pd.DataFrame(
-        {
-            "city": ["Buenos Aires", "Brasilia", "Santiago", "Bogota", "Caracas"],
-            "country": ["Argentina", "Brazil", "Chile", "Colombia", "Venezuela"],
-            "latitude": [-34.58, -15.78, -33.45, 4.60, 10.48],
-            "longitude": [-58.66, -47.91, -70.66, -74.08, -66.86],
-        }
+    df = (
+        pd.DataFrame(
+            {
+                "city": ["Buenos Aires", "Brasilia", "Santiago", "Bogota", "Caracas"],
+                "country": ["Argentina", "Brazil", "Chile", "Colombia", "Venezuela"],
+                "latitude": [-34.58, -15.78, -33.45, 4.60, 10.48],
+                "longitude": [-58.66, -47.91, -70.66, -74.08, -66.86],
+            }
+        )
+        .reset_index(drop=False)
+        .rename({"index": "id"}, axis=1)
     )
     return df
 
 
-@pytest.fixture
+@pytest.fixture()
+def timeseries_df():
+    # Create a date range from 2020-01-01 to 2020-12-31
+    dates = pd.date_range(start="2020-01-01", end="2020-12-31", freq="D")
+
+    # Generate random values for three columns
+    np.random.seed(42)  # for reproducibility
+    col1 = np.random.randint(0, 100, len(dates))  # integers from 0 to 99
+    col2 = np.random.normal(
+        50, 10, len(dates)
+    )  # normal distribution with mean 50 and standard deviation 10
+    col3 = np.random.choice(
+        ["A", "B", "C"], len(dates)
+    )  # categorical values from A, B, or C
+
+    # Create a dataframe with the dates as index and the columns as values
+    df = pd.DataFrame({"col1": col1, "col2": col2, "col3": col3}, index=dates)
+    df.index.rename("time", inplace=True)
+    return df
+
+
+@pytest.fixture()
+def timeseries_ds(timeseries_df):
+    return timeseries_df[["col1", "col2"]].to_xarray()
+
+
+@pytest.fixture()
+def dfs_segmented_by_points(df):
+    return {
+        id: pd.DataFrame(
+            {
+                "time": pd.date_range("2023-08-22", periods=len(df), freq="1D"),
+                "test1": np.arange(len(df)) * id,
+                "test2": np.arange(len(df)) ** id,
+            }
+        ).set_index("time")
+        for id in range(len(df))
+    }
+
+
+@pytest.fixture()
+def dfs_segmented_by_vars(dfs_segmented_by_points):
+    data_vars = [
+        v
+        for v in pd.concat(dfs_segmented_by_points.values()).columns
+        if v not in ["id", "time"]
+    ]
+
+    tmp = dfs_segmented_by_points.copy()
+    for i, df in tmp.items():
+        df.insert(0, "id", i)
+        df.reset_index(inplace=True)
+
+    return {
+        v: pd.concat(tmp.values()).pivot(index="time", columns="id", values=v)
+        for v in data_vars
+    }
+
+
+@pytest.fixture()
 def df_time():
     df_time = pd.DataFrame(
         {
@@ -59,7 +153,7 @@ def df_time():
     return df_time
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def geodf(df):
     gdf = gpd.GeoDataFrame(
         data=df.copy().drop(columns=["longitude", "latitude"]),
@@ -69,13 +163,13 @@ def geodf(df):
     return gdf
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def world():
-    world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+    world = gpd.read_file(join(DATADIR, "naturalearth_lowres.geojson"))
     return world
 
 
-@pytest.fixture
+@pytest.fixture()
 def ts(geodf):
     dates = pd.date_range("01-01-2000", "12-31-2000", name="time")
     ts = pd.DataFrame(
@@ -86,13 +180,14 @@ def ts(geodf):
     return ts
 
 
-@pytest.fixture
+@pytest.fixture()
 def geoda(geodf, ts):
     da = vector.GeoDataArray.from_gdf(geodf, ts, name="test", dims=("index", "time"))
+    da.vector.set_nodata(np.nan)
     return da
 
 
-@pytest.fixture
+@pytest.fixture()
 def demda():
     np.random.seed(11)
     da = xr.DataArray(
@@ -101,11 +196,12 @@ def demda():
         coords={"y": -np.arange(0, 1500, 100), "x": np.arange(0, 1000, 100)},
         attrs=dict(_FillValue=-9999),
     )
-    da.raster.set_crs(3785)
+    # NOTE epsg 3785 is deprecated https://epsg.io/3785
+    da.raster.set_crs(3857)
     return da
 
 
-@pytest.fixture
+@pytest.fixture()
 def flwdir(demda):
     # NOTE: single basin!
     return pyflwdir.from_dem(
@@ -117,7 +213,7 @@ def flwdir(demda):
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def flwda(flwdir):
     da = xr.DataArray(
         name="flwdir",
@@ -126,11 +222,12 @@ def flwda(flwdir):
         coords=gis_utils.affine_to_coords(flwdir.transform, flwdir.shape),
         attrs=dict(_FillValue=247),
     )
-    da.raster.set_crs(3785)
+    # NOTE epsg 3785 is deprecated https://epsg.io/3785
+    da.raster.set_crs(3875)
     return da
 
 
-@pytest.fixture
+@pytest.fixture()
 def hydds(flwda, flwdir):
     ds = flwda.copy().to_dataset()
     ds["uparea"] = xr.DataArray(
@@ -142,7 +239,7 @@ def hydds(flwda, flwdir):
     return ds
 
 
-@pytest.fixture
+@pytest.fixture()
 def obsda():
     rng = np.random.default_rng(12345)
     da = xr.DataArray(
@@ -155,20 +252,31 @@ def obsda():
     return da
 
 
-@pytest.fixture
-def demuda():
-    import xugrid as xu
+@pytest.fixture()
+def ts_extremes():
+    rng = np.random.default_rng(12345)
+    normal = pd.DataFrame(
+        rng.random(size=(365 * 100, 2)) * 100,
+        index=pd.date_range(start="2020-01-01", periods=365 * 100, freq="1D"),
+    )
+    ext = rng.gumbel(loc=100, scale=25, size=(200, 2))  # Create extremes
+    for i in range(2):
+        normal.loc[normal.nlargest(200, i).index, i] = ext[:, i].reshape(-1)
+    da = xr.DataArray(
+        data=normal.values,
+        dims=("time", "stations"),
+        coords={
+            "time": pd.date_range(start="1950-01-01", periods=365 * 100, freq="D"),
+            "stations": [1, 2],
+        },
+        attrs=dict(_FillValue=-9999),
+    )
+    da.raster.set_crs(4326)
+    return da
 
-    uds = xu.data.adh_san_diego()
-    uda = uds["elevation"]
-    uda.ugrid.grid.set_crs(epsg=2230)
-    return uda
 
-
-@pytest.fixture
+@pytest.fixture()
 def griduda():
-    import xugrid as xu
-
     bbox = [12.09, 46.49, 12.10, 46.50]  # Piava river
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     da = data_catalog.get_rasterdataset("merit_hydro", bbox=bbox, variables="elevtn")
@@ -178,16 +286,18 @@ def griduda():
     uda = xu.UgridDataset.from_geodataframe(gdf_da)
     uda = uda["value"]
     uda = uda.rename("elevtn")
+    uda.ugrid.grid.set_crs(epsg=gdf_da.crs.to_epsg())
 
     return uda
 
 
-@pytest.fixture
+@pytest.fixture()
 def model(demda, world, obsda):
-    mod = Model()
+    mod = Model(data_libs=["artifact_data"])
     mod.setup_region({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_staticmaps(demda, "elevtn")  # will be deprecated
+    with pytest.deprecated_call():
+        mod.set_staticmaps(demda, "elevtn")
     mod.set_geoms(world, "world")
     mod.set_maps(demda, "elevtn")
     mod.set_forcing(obsda, "waterlevel")
@@ -196,7 +306,7 @@ def model(demda, world, obsda):
     return mod
 
 
-@pytest.fixture
+@pytest.fixture()
 def grid_model(demda, flwda):
     mod = GridModel()
     mod.setup_region({"geom": demda.raster.box})
@@ -206,10 +316,9 @@ def grid_model(demda, flwda):
     return mod
 
 
-@pytest.fixture
-def lumped_model(ts, geodf):
-    mod = LumpedModel()
-    # mod.setup_region({"bbox": geodf.total_bounds})
+@pytest.fixture()
+def vector_model(ts, geodf):
+    mod = VectorModel()
     mod.setup_config(**{"header": {"setting": "value"}})
     da = xr.DataArray(
         ts,
@@ -219,24 +328,31 @@ def lumped_model(ts, geodf):
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
     da.vector.set_crs(geodf.crs)
-    mod.set_response_units(da)
+    mod.set_vector(da)
     return mod
 
 
-@pytest.fixture
+@pytest.fixture()
 def network_model():
     mod = NetworkModel()
     # TODO set data and attributes of mod
     return mod
 
 
-@pytest.fixture
-def mesh_model(demuda):
+@pytest.fixture()
+def mesh_model(griduda):
     mod = MODELS.load("mesh_model")()
-    # region = gpd.GeoDataFrame(
-    #     geometry=[box(*demuda.ugrid.grid.bounds)], crs=demuda.ugrid.grid.crs
-    # )
-    # mod.setup_region({"geom": region})
+    region = gpd.GeoDataFrame(
+        geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
+    )
+    mod.setup_region({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_mesh(demuda, "elevtn")
+    mod.set_mesh(griduda, "elevtn")
     return mod
+
+
+@pytest.fixture()
+def artifact_data():
+    datacatalog = DataCatalog()
+    datacatalog.from_predefined_catalogs("artifact_data")
+    return datacatalog

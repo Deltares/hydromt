@@ -1,0 +1,23 @@
+{
+  "type": "Catalog",
+  "id": "chirps_global",
+  "stac_version": "1.0.0",
+  "description": "chirps_global",
+  "links": [
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./chirps_global/chirps_global.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json"
+    }
+  ]
+}

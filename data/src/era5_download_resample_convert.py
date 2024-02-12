@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
-from os.path import join, isfile, basename
+"""Implementaions for downloading and resampling ERA5 data."""
+import glob
 import os
-import pdb
+import shutil
+import time
+from os.path import basename, isfile, join
+
 import dask
+import numpy as np
+import pandas as pd
 import xarray as xr
 from dask.diagnostics import ProgressBar
-import shutil
-import pandas as pd
-import numpy as np
-import glob
-import time
 
 # global vars
 dt_era5t = pd.to_timedelta(95, unit="d")
@@ -77,18 +77,23 @@ daily_attrs = {
 }
 
 
-# donwload single year!
 def download_era5_year(
     fn_out: str, variable: str, year: int, months: list = None, days: list = None
 ) -> None:
-    """Download single ERA5 variable for single year from CDS.
+    """Download a ERA5 variable for a single year from Copernicus Climate Data Store.
 
-    Parameters
-    ----------
-    fn_out : str
-        output path
-    variable : str
-        CDS variable name
+    Arguments
+    ---------
+    fn_out: (str)
+        The output path to save the downloaded file.
+    variable: (str)
+        The CDS variable name to download.
+    year: (int)
+        The year to download the data for.
+    months: (list)
+        List of months to download data for. Use None to download data for all months.
+    days: (list)
+        List of days to download data for. Use None to downloads data for all days.
     """
     import cdsapi
 
@@ -105,7 +110,6 @@ def download_era5_year(
 
         dataset = "reanalysis-era5-single-levels"
         if int(year) < 1979:
-            # raise ValueError("Years before 1979 not supported, please start download at 1979")
             dataset = f"{dataset}-complete-preliminary-back-extension"
 
         # Download ERA5 data
@@ -128,10 +132,12 @@ def download_era5_year(
 def flatten_era5_temp(
     fn,
     nodata=-9999,
-    chunks={"time": 30, "latitude": 250, "longitude": 480},
-    dask_kwargs={},
+    chunks=None,
+    dask_kwargs=None,
 ) -> None:
     """Flatten ERA5 output to remove expver dimension with ERA5T data."""
+    chunks = chunks or {"time": 30, "latitude": 250, "longitude": 480}
+    dask_kwargs = dask_kwargs or {}
     with xr.open_dataset(fn, chunks=chunks) as ds:
         era5t = "expver" in ds.coords
 
@@ -168,10 +174,11 @@ def resample_year(
     var: str,
     decimals: int = None,
     nodata=-9999,
-    chunks: dict = {"time": 30, "latitude": 250, "longitude": 480},
-    dask_kwargs: dict = {},
+    chunks: dict = None,
+    dask_kwargs: dict = None,
 ) -> None:
     """Resample hourly variables to daily timestep.
+
     The data is saved with the time labels at the end of the timestep.
     By default the data is aggregated using the mean.
 
@@ -184,7 +191,8 @@ def resample_year(
     year : int
         year
     ddir : str
-        Root of hourly nc files with path format {ddir}/{var}/era5_{var}_{year}_hourly.nc
+        Root of hourly nc files with path format
+        {ddir}/{var}/era5_{var}_{year}_hourly.nc
     outdir : str
         Temporary output folder
     var : str
@@ -198,6 +206,8 @@ def resample_year(
     dask_kwargs : dict, optional
         _description_, by default {}
     """
+    chunks = chunks or {"time": 30, "latitude": 250, "longitude": 480}
+    dask_kwargs = dask_kwargs or {}
 
     # nc out settings
     chunksizes = tuple([s for s in chunks.values()])
@@ -210,7 +220,7 @@ def resample_year(
 
     fns = []
     # read hourly data for year and year-1!
-    for year in [year - 1, year]:
+    for _year in [year - 1, year]:
         fn = join(ddir, var, f"era5_{var:s}_{year:d}_hourly.nc")
         if isfile(fn):
             fns.append(fn)
@@ -250,7 +260,6 @@ def resample_year(
     ds_out = xr.merge(dvars.values()).chunk(chunks).fillna(nodata)
     if decimals:
         ds_out = ds_out.round(decimals=decimals)
-    # assert np.all(ds_out['time'].dt.year == year)
 
     # write
     fns = []
@@ -270,7 +279,7 @@ def resample_year(
 
 
 def move_replace(src: str, dst: str, timeout: int = 300) -> None:
-    """try replacing old file which might be locked"""
+    """Try replacing old file which might be locked."""
     if not isfile(src):
         return
     if not os.path.isdir(os.path.dirname(dst)):
@@ -278,15 +287,32 @@ def move_replace(src: str, dst: str, timeout: int = 300) -> None:
     while isfile(dst):
         try:
             os.unlink(dst)
-        except:
+        except PermissionError:
             print(f"FAILED deleting {dst} (retry in {timeout} sec)")
             time.sleep(timeout)
     os.rename(src, dst)
 
 
 def get_last_timestep_nc(fns: list) -> pd.Timedelta:
+    """Get the last timestep from a list of NetCDF files.
+
+    Parameters
+    ----------
+    fns : list
+        List of file paths or a glob pattern to match the files.
+
+    Returns
+    -------
+    pd.Timedelta
+        The time duration from the reference time to the last timestep.
+
+    Raises
+    ------
+    ValueError
+        If no files are found matching the provided file paths or glob pattern.
+    """
     if len(glob.glob(fns)) == 0:
-        raise ValueError(f"Files not found {fns}")
+        raise ValueError(f"Files not found: {fns}")
     with xr.open_mfdataset(fns, chunks="auto") as ds:
         t0 = pd.to_datetime(ds["time"][-1].values)
     return t0
@@ -385,7 +411,7 @@ def append_zarr(
     ds0 = xr.open_zarr(store, consolidated=False)
     for v in ds.data_vars:
         ds[v] = ds[v].transpose(*ds0[v].dims)
-        for idim, dim in enumerate(ds.dims):
+        for _idim, dim in enumerate(ds.dims):
             if dim == append_dim:
                 continue
             assert ds[v][dim].shape == ds0[v][dim].shape
@@ -417,27 +443,32 @@ def update_hourly_nc(
     end_year: int = None,
     dt_era5t: pd.Timedelta = dt_era5t,
     move_to_ddir: bool = False,
-    dask_kwargs: dict = {},
+    dask_kwargs: dict = None,
 ) -> None:
-    """Update the hourly by downloading the latest data from the CDS
+    """Update the hourly by downloading the latest data from the CDS.
 
     Parameters
     ----------
     outdir : str
         temporary output folder
     ddir : str
-        Root of hourly nc files with path format {ddir}/{var}/era5_{var}_{year}_hourly.nc
+        Root of hourly nc files with path format
+        {ddir}/{var}/era5_{var}_{year}_hourly.nc
     variables : list
         list of variable names to update
     start_year : int, optional
-        start year, by default None and read from last timestep of hourly nc files minus dt_era5t
+        start year, by default None and read from last timestep of hourly nc files
+        minus dt_era5t
     end_year : int, optional
         end year, by default None and based on todays' date
     dt_era5t : pd.Timedelta, optional
         time period of ERA5T data which is overwritten by new data, by default dt_era5t
     move_to_ddir : bool, optional
         Move files to root of hourly nc, by default False
+    dask_kwargs
+            Additional key-word arguments are passed to dask
     """
+    dask_kwargs = dask_kwargs or {}
     t1 = pd.to_datetime("today").to_numpy()
     if end_year:
         t1 = pd.to_datetime(f"{end_year}0101")
@@ -488,29 +519,34 @@ def update_daily_nc(
     end_year: int = None,
     dt_era5t: pd.Timedelta = dt_era5t,
     move_to_ddir: bool = False,
-    dask_kwargs: dict = {},
+    dask_kwargs: dict = None,
 ) -> None:
-    """Update the daily nc files based on hourly files
+    """Update the daily nc files based on hourly files.
 
     Parameters
     ----------
     outdir : str
         temporary output folder
     ddir_hour : str
-        Root of hourly nc files with path format {ddir}/{var}/era5_{var}_{year}_hourly.nc
+        Root of hourly nc files with path format
+        {ddir}/{var}/era5_{var}_{year}_hourly.nc
     ddir_day : str
         Root of daily nc files with path format {ddir}/{var}/era5_{var}_{year}_daily.nc
     variables : list
         list of variable names to update
     start_year : int, optional
-        start year, by default None and read from last timestep of daily nc files minus dt_era5t
+        start year, by default None and read from last timestep of daily nc
+        files minus dt_era5t
     end_year : int, optional
         end year, by default None and read from last timestep of hourly nc files
     dt_era5t : pd.Timedelta, optional
         time period of ERA5T data which is overwritten by new data, by default dt_era5t
     move_to_ddir : bool, optional
         Move files to root of daily nc, by default False
+    dask_kwargs
+            Additional key-word arguments are passed to dask
     """
+    dask_kwargs = dask_kwargs or {}
     if end_year:
         t1 = pd.to_datetime(f"{end_year}0101")
     if start_year:
@@ -567,13 +603,18 @@ def update_zarr(
     variables : list
         list of variable names to update
     start_date : str, optional
-        start date in YYYYMMDD format, by default None and read from last timestep of zarr files minus dt_era5t
+        start date in YYYYMMDD format, by default None and read from last timestep of
+        zarr files minus dt_era5t
     end_date : str, optional
-        end date in YYYYMMDD format, by default None and read from last timestep of the nc files
+        end date in YYYYMMDD format, by default None and read from last timestep of
+        the nc files
+    chunks: tuple of int
+        size of the chunks to store to disk in.
+    **kwargs:
+        Key-word arguments passed to the zarr driver.
     dt_era5t : pd.Timedelta, optional
         time period of ERA5T data which is overwritten by new data, by default dt_era5t
     """
-
     print(f"writing to {fn_zarr}")
     for var in variables:
         # get start & end dates from files
@@ -591,7 +632,8 @@ def update_zarr(
                 with xr.open_zarr(fn_zarr, consolidated=False) as ds_zarr:
                     if var in ds_zarr:
                         # check last date with valid values at single location
-                        # TODO: this takes long, find alternative way with zarr library to find last date
+                        # TODO: this takes long, find alternative way with zarr library
+                        # to find last date
                         da_zarr = (
                             ds_zarr[var].isel(latitude=0, longitude=0).dropna("time")
                         )
@@ -664,14 +706,14 @@ if __name__ == "__main__":
         "tcc",
         "cape",
     ]
-    # NOTE: CAPE excluded from daily values, not sure how it is used and thus how to aggregate
+    # NOTE: CAPE excluded from daily values, not sure how it is used and
+    # thus how to aggregate
     variables_day = variables_hour[:-1] + ["tmin", "tmax"]
 
     # hydro / ocean
     # NOTE these are kept in different ddir
-    # variables_hour, ddir_hour = ["shww"], r"p:\wflow_global\hydromt\ocean\era5"
 
-    print(f"downloading ..")
+    print("downloading ..")
     update_hourly_nc(
         outdir,
         ddir=ddir_hour,

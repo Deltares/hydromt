@@ -17,19 +17,17 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import sys
 import shutil
+from distutils.dir_util import copy_tree
+
 import numpy as np
 import sphinx_autosummary_accessors
 from click.testing import CliRunner
-from distutils.dir_util import copy_tree
-
-# here = os.path.dirname(__file__)
-# sys.path.insert(0, os.path.abspath(os.path.join(here, "..")))
 
 import hydromt
-from hydromt import DataCatalog
 from hydromt.cli.main import main as hydromt_cli
+
+os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
 
 def cli2rst(output, fn):
@@ -56,7 +54,8 @@ def write_panel(f, name, content="", level=0, item="dropdown"):
     if content:
         pad = "".ljust((level + 1) * 3)
         for line in content.split("\n"):
-            f.write(f"{pad}{line}\n")
+            line_clean = line.replace("*", "\\*")
+            f.write(f"{pad}{line_clean}\n")
         f.write("\n")
 
 
@@ -74,14 +73,29 @@ def write_nested_dropdown(name, data_cat, note="", categories=[]):
                 write_panel(f, category, level=2, item="tab-item")
             for source in sources:
                 items = data_cat[source].summary().items()
-                summary = "\n".join([f":{k}: {v}" for k, v in items if k != "category"])
+                summary = "\n".join(
+                    [f":{k}: {clean_str(v)}" for k, v in items if k != "category"]
+                )
                 write_panel(f, source, summary, level=3)
 
         write_panel(f, "all", level=2, item="tab-item")
         for source in df.index.values:
-            items = data_cat[source].summary().items()
+            items = data_cat[source].summary()
+            items = {k: clean_str(v) for (k, v) in items.items()}.items()
             summary = "\n".join([f":{k}: {v}" for k, v in items])
             write_panel(f, source, summary, level=3)
+
+
+def clean_str(s):
+    if not isinstance(s, str):
+        return s
+    clean = s.replace("*", "\\*")
+    clean = clean.replace("_", "\\_")
+    idx = clean.find("p:/")
+    if idx > -1:
+        clean = clean[idx:]
+
+    return clean
 
 
 # NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
@@ -89,7 +103,7 @@ def write_nested_dropdown(name, data_cat, note="", categories=[]):
 
 project = "HydroMT"
 copyright = "Deltares"
-author = "Dirk Eilander"
+author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 
 # The short version which is displayed
 version = hydromt.__version__
@@ -198,7 +212,10 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-
+# Napoleon settings
+napoleon_numpy_docstring = True
+napoleon_google_docstring = False
+napoleon_preprocess_types = True
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -206,6 +223,7 @@ todo_include_todos = False
 #
 html_theme = "pydata_sphinx_theme"
 html_logo = "_static/hydromt-icon.svg"
+html_favicon = "_static/hydromt-icon.svg"
 autodoc_member_order = "bysource"  # overwrite default alphabetical sort
 autoclass_content = "both"
 
@@ -217,6 +235,8 @@ autoclass_content = "both"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+bare_version = hydromt.__version__
+doc_version = bare_version[: bare_version.find("dev") - 1]
 html_static_path = ["_static"]
 html_css_files = ["theme-deltares.css"]
 html_theme_options = {
@@ -240,14 +260,18 @@ html_theme_options = {
     "logo": {
         "text": "HydroMT Core",
     },
-    "navbar_end": ["navbar-icon-links"],  # remove dark mode switch
+    "navbar_end": ["navbar-icon-links", "version-switcher"],  # remove dark mode switch
+    "switcher": {
+        "json_url": "https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json",
+        "version_match": doc_version,
+    },
 }
 
 html_context = {
     "github_url": "https://github.com",  # or your GitHub Enterprise interprise
     "github_user": "Deltares",
     "github_repo": "hydromt",
-    "github_version": "main",  # FIXME
+    "github_version": "main",
     "doc_path": "docs",
     "default_mode": "light",
 }
@@ -354,7 +378,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     # "numpy": ("https://numpy.org/doc/stable", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy", None),
+    # "scipy": ("https://docs.scipy.org/doc/scipy", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
     # "matplotlib": ("https://matplotlib.org/stable/", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
@@ -374,7 +398,7 @@ nbsphinx_prolog = r"""
     .. raw:: html
 
         <div>
-            For an interactive online version click here: 
+            For an interactive online version click here:
             <a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/{{ docname|e }}" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
         </div>
 """

@@ -1,15 +1,18 @@
-from affine import Affine
-from ast import literal_eval
-import geopandas as gpd
-from pathlib import Path
-from pyproj import CRS
-import numpy as np
-import os
-from os.path import isfile, dirname, isdir, join, basename
-import requests
-import shutil
-from urllib.parse import urlparse
+"""Caching mechanisms used in HydroMT."""
 import logging
+import os
+import shutil
+from ast import literal_eval
+from os.path import basename, dirname, isdir, isfile, join
+from pathlib import Path
+from typing import Union
+from urllib.parse import urlparse
+
+import geopandas as gpd
+import numpy as np
+import requests
+from affine import Affine
+from pyproj import CRS
 
 logger = logging.getLogger(__name__)
 
@@ -17,16 +20,16 @@ logger = logging.getLogger(__name__)
 HYDROMT_DATADIR = join(Path.home(), ".hydromt_data")
 
 
-def _uri_validator(uri: str) -> bool:
-    """Check if uri is valid"""
+def _uri_validator(uri: Union[str, Path]) -> bool:
+    """Check if uri is valid."""
     try:
-        result = urlparse(uri)
+        result = urlparse(str(uri))
         return all([result.scheme, result.netloc])
-    except:
+    except (ValueError, AttributeError):
         return False
 
 
-def _copyfile(src, dst):
+def _copyfile(src, dst, chunk_size=1024):
     """Copy src file to dst. This method supports both online and local files."""
     if not isdir(dirname(dst)):
         os.makedirs(dirname(dst))
@@ -37,7 +40,8 @@ def _copyfile(src, dst):
                     f"Data download failed with status code {r.status_code}"
                 )
             with open(dst, "wb") as f:
-                shutil.copyfileobj(r.raw, f)
+                for chunk in r.iter_content(chunk_size=chunk_size):
+                    f.write(chunk)
     else:
         shutil.copyfile(src, dst)
 
@@ -60,6 +64,8 @@ def cache_vrt_tiles(
         geometry to intersect tiles with
     cache_dir: str, Path
         path of the root folder where
+    logger: Logger
+        Logger to write logs to
 
     Returns
     -------
@@ -79,7 +85,7 @@ def cache_vrt_tiles(
         ds = xd.parse(f.read())["VRTDataset"]
 
     def intersects(source: dict, affine, bbox):
-        """Check whether source interesects with bbox"""
+        """Check whether source interesects with bbox."""
         names = ["@xOff", "@yOff", "@xSize", "@ySize"]
         x0, y0, dx, dy = [float(source["DstRect"][k]) for k in names]
         xs, ys = affine * (np.array([x0, x0 + dx]), np.array([y0, y0 + dy]))

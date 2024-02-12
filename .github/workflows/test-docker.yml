@@ -1,0 +1,54 @@
+---
+name: Test Docker images and Binder integration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .binder/*
+      - Dockerfile
+      - pyproject.toml
+  pull_request:
+    branches: [main]
+    paths:
+      - .binder/*
+      - Dockerfile
+      - pyproject.toml
+
+jobs:
+  test-docker-image:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: test-docker-${{ github.ref }}
+      cancel-in-progress: true
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: generate envs
+        run: |
+          pip install tomli
+          python make_env.py -p "3.11" -o full-environment.yml full
+
+      - name: Build and test
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          target: full
+          tags: hydromt
+          load: true
+
+
+      - name: Run Tests
+        run: docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt pytest
+      - name: Test Binder integration with repo2docker
+        run: |
+          pip install jupyter-repo2docker
+          repo2docker . echo 'success!'

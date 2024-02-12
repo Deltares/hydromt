@@ -2,8 +2,30 @@
 Change log predefined datasets
 ==============================
 
-deltares_data 
+deltares_data
 =============
+
+version: 2024.1.30
+---------------
+
+added
+^^^^^
+- HydroMT version to catalog
+- GRDC dataset
+
+
+version: 2023.12
+-----------------
+
+changed
+^^^^^^^
+- Updated GADM dataset and converted the GeoPackage layers to FlatGeoBuf files
+
+added
+^^^^^
+- Added waterdemand pcr_globwb dataset
+- Added GADM 4.1 as FlatGeoBuff files to deltares_data catalog (#686)
+
 
 version: 2023.2
 ----------------
@@ -43,10 +65,10 @@ added
 
 changed
 ^^^^^^^
-- Apply convention specified in the README 
+- Apply convention specified in the README
 	- check reasonable alphabetical order in data sets and components
 	- implement right versioning convention _v where possible
-	- apply consistent meta information 
+	- apply consistent meta information
 
 fixed
 ^^^^^
@@ -54,6 +76,13 @@ fixed
 
 cmip6_data
 ==========
+
+version: 2024.1.30
+---------------
+
+added
+^^^^^
+- HydroMT version to catalog
 
 version: 2023.2
 ---------------
@@ -64,6 +93,13 @@ added
 
 aws_data
 ========
+
+version: 2024.1.30
+---------------
+
+added
+^^^^^
+- HydroMT version to catalog
 
 version: 2023.2
 ---------------

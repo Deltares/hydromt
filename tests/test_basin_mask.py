@@ -1,28 +1,49 @@
 # -*- coding: utf-8 -*-
-"""Tests for the hydromt.workflows.basin_mask"""
+"""Tests for the hydromt.workflows.basin_mask."""
 
-import pytest
-import os
-import numpy as np
-import geopandas as gpd
-import xarray as xr
-import hydromt
-from hydromt.models import MODELS
 import logging
-import warnings
+import os
 
+import geopandas as gpd
+import numpy as np
+import pytest
+import xarray as xr
+
+import hydromt
+from hydromt import DataCatalog, raster
+from hydromt.models import MODELS
 from hydromt.workflows.basin_mask import (
+    _check_size,
+    _parse_region_value,
     get_basin_geometry,
     parse_region,
-    _parse_region_value,
-    _check_size,
 )
-from hydromt import raster
 
 logger = logging.getLogger("tets_basin")
 
 
 def test_region(tmpdir, world, geodf, rioda):
+    # prepare test data
+    fn_gdf = str(tmpdir.join("world.geojson"))
+    world.to_file(fn_gdf, driver="GeoJSON")
+    fn_grid = str(tmpdir.join("grid.tif"))
+    rioda.raster.to_raster(fn_grid)
+    cat = DataCatalog()
+    cat.from_dict(
+        {
+            "world": {
+                "path": fn_gdf,
+                "data_type": "GeoDataFrame",
+                "driver": "vector",
+            },
+            "grid": {
+                "path": fn_grid,
+                "data_type": "RasterDataset",
+                "driver": "raster",
+            },
+        }
+    )
+
     # model
     region = {"region": [0.0, -1.0]}
     with pytest.raises(ValueError, match=r"Region key .* not understood.*"):
@@ -37,15 +58,11 @@ def test_region(tmpdir, world, geodf, rioda):
     assert kind == "model"
 
     # geom
-    region = {"geom": world}
-    kind, region = parse_region(region)
-    assert kind == "geom"
+    kind, region = parse_region({"geom": world})
     assert isinstance(region["geom"], gpd.GeoDataFrame)
-    fn_gdf = str(tmpdir.join("world.geojson"))
-    world.to_file(fn_gdf, driver="GeoJSON")
-    region = {"geom": fn_gdf}
-    kind, region = parse_region(region)
-    assert kind == "geom"
+    kind, region = parse_region({"geom": fn_gdf})
+    assert isinstance(region["geom"], gpd.GeoDataFrame)
+    kind, region = parse_region({"geom": "world"}, data_catalog=cat)
     assert isinstance(region["geom"], gpd.GeoDataFrame)
     # geom:  points should fail
     region = {"geom": geodf}
@@ -53,14 +70,11 @@ def test_region(tmpdir, world, geodf, rioda):
         kind, region = parse_region(region)
 
     # grid
-    region = {"grid": rioda}
-    kind, region = parse_region(region)
-    assert kind == "grid"
+    kind, region = parse_region({"grid": rioda})
     assert isinstance(region["grid"], xr.DataArray)
-    fn_grid = str(tmpdir.join("grid.tif"))
-    rioda.raster.to_raster(fn_grid)
-    region = {"grid": fn_grid}
-    kind, region = parse_region(region)
+    kind, region = parse_region({"grid": fn_grid})
+    assert isinstance(region["grid"], xr.DataArray)
+    kind, region = parse_region({"grid": "grid"}, data_catalog=cat)
     assert isinstance(region["grid"], xr.DataArray)
 
     # basid
@@ -94,14 +108,15 @@ def test_region(tmpdir, world, geodf, rioda):
 
 
 def test_region_value():
+    data_catalog = DataCatalog()
     array = np.array([1001, 1002, 1003, 1004, 1005])
-    kwarg = _parse_region_value(array)
+    kwarg = _parse_region_value(array, data_catalog=data_catalog)
     assert kwarg.get("basid") == array.tolist()
     xy = (1.0, -1.0)
-    kwarg = _parse_region_value(xy)
+    kwarg = _parse_region_value(xy, data_catalog=data_catalog)
     assert kwarg.get("xy") == xy
     root = "./"
-    kwarg = _parse_region_value(root)
+    kwarg = _parse_region_value(root, data_catalog=data_catalog)
     assert kwarg.get("root") == root
 
 
@@ -115,15 +130,18 @@ def test_check_size(caplog):
         lazy=True,  # create lazy dask array instead of numpy array
     )
     _check_size(test_raster)
-    assert "Loading very large spatial domain to derive a subbasin. "
-    "Provide initial 'bounds' if this takes too long." in caplog.text
+    assert (
+        "Loading very large spatial domain to derive a subbasin. "
+        "Provide initial 'bounds' if this takes too long." in caplog.text
+    )
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_basin(caplog):
-    data_catalog = hydromt.DataCatalog(logger=logger)
-    ds = data_catalog.get_rasterdataset("merit_hydro")
+    data_catalog = hydromt.DataCatalog("artifact_data", logger=logger)
+    ds = data_catalog.get_rasterdataset("merit_hydro_1k")
     gdf_bas_index = data_catalog.get_geodataframe("merit_hydro_index")
-    bas_index = data_catalog["merit_hydro_index"]
+    bas_index = data_catalog.get_source("merit_hydro_index")
 
     with pytest.raises(ValueError, match=r"No basins found"):
         gdf_bas, gdf_out = get_basin_geometry(
@@ -140,15 +158,15 @@ def test_basin(caplog):
     )
     assert gdf_out is None
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 9346337868.28675)
+    assert np.isclose(gdf_bas.area.sum(), 0.16847222)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds, kind="subbasin", basin_index=bas_index, xy=[12.2051, 45.8331], strord=4
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 8.277817e09)
-    assert np.isclose(gdf_out.geometry.x, 12.205417)
-    assert np.isclose(gdf_out.geometry.y, 45.83375)
+    assert np.isclose(gdf_bas.area.sum(), 0.001875)
+    assert np.isclose(gdf_out.geometry.x, 12.17916667)
+    assert np.isclose(gdf_out.geometry.y, 45.8041666)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -158,9 +176,9 @@ def test_basin(caplog):
         strord=5,
     )
     assert gdf_bas.index.size == 2
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 8.446160e09)
-    assert np.isclose(gdf_out.geometry.x[1], 12.97292)
-    assert np.isclose(gdf_out.geometry.y[1], 45.69958)
+    assert np.isclose(gdf_bas.area.sum(), 0.021389)
+    assert np.isclose(gdf_out.geometry.x[1], 12.970833333333266)
+    assert np.isclose(gdf_out.geometry.y[1], 45.69583333333334)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -170,9 +188,9 @@ def test_basin(caplog):
         bounds=gdf_bas.total_bounds,
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 8.277817e09)
-    assert np.isclose(gdf_out.geometry.x, 12.205417)
-    assert np.isclose(gdf_out.geometry.y, 45.83375)
+    assert np.isclose(gdf_bas.area.sum(), 0.001875)
+    assert np.isclose(gdf_out.geometry.x, 12.179167)
+    assert np.isclose(gdf_out.geometry.y, 45.804167)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -181,8 +199,8 @@ def test_basin(caplog):
         bbox=[12.6, 45.5, 12.9, 45.7],
         buffer=1,
     )
-    assert gdf_bas.index.size == 470
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 18433536552.16195)
+    assert gdf_bas.index.size == 30
+    assert np.isclose(gdf_bas.area.sum(), 1.033125)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -192,30 +210,30 @@ def test_basin(caplog):
         buffer=1,
         strord=4,
     )
-    assert gdf_bas.index.size == 6
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 18407888488.828384)
+    assert gdf_bas.index.size == 4
+    assert np.isclose(gdf_bas.area.sum(), 1.03104167)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="subbasin",
         basin_index=gdf_bas_index,
         bbox=[12.2, 46.2, 12.4, 46.3],
-        strord=8,
+        strord=6,
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 3569393882.735242)
-    assert np.isclose(gdf_out.geometry.x, 12.300417)
+    assert np.isclose(gdf_bas.area.sum(), 0.198055)
+    assert np.isclose(gdf_out.geometry.x, 12.295833)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
         kind="interbasin",
         basin_index=gdf_bas_index,
         bbox=[12.2, 46.2, 12.4, 46.3],
-        strord=8,
+        strord=6,
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.to_crs(3857).area.sum(), 307314959.5972775)
-    assert np.isclose(gdf_out.geometry.x, 12.300417)
+    assert np.isclose(gdf_bas.area.sum(), 0.0172222)
+    assert np.isclose(gdf_out.geometry.x, 12.295833)
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -224,7 +242,7 @@ def test_basin(caplog):
         bbox=[12.8, 45.55, 12.9, 45.65],
         outlets=True,
     )
-    assert gdf_bas.index.size == 180
+    assert gdf_bas.index.size == 13
 
     gdf_bas, gdf_out = get_basin_geometry(
         ds,
@@ -233,20 +251,25 @@ def test_basin(caplog):
         bbox=[12.8, 45.55, 12.9, 45.65],
         outlets=True,
     )
-    assert gdf_bas.index.size == 180
+    assert gdf_bas.index.size == 13
 
-    msg = 'kind="outlets" has been deprecated, use outlets=True in combination with kind="basin" or kind="interbasin" instead.'
-    with pytest.warns(DeprecationWarning, match=msg) as record:
+    msg = (
+        'kind="outlets" has been deprecated, use outlets=True in combination with'
+        + ' kind="basin" or kind="interbasin" instead.'
+    )
+    with pytest.warns(DeprecationWarning, match=msg):
         gdf_bas, gdf_out = get_basin_geometry(ds, kind="outlet")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Unknown kind: watershed,"):
         gdf_bas, gdf_out = get_basin_geometry(ds, kind="watershed")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Dataset variable stream_kwargs not in ds"):
         gdf_bas, gdf_out = get_basin_geometry(
             ds, kind="basin", stream_kwargs={"within": True}
         )
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match='"kind=interbasin" requires either "bbox" or "geom"'
+    ):
         gdf_bas, gdf_out = get_basin_geometry(
             ds,
             kind="interbasin",

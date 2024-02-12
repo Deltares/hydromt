@@ -1,13 +1,16 @@
+---
 meta:
-  version: 2023.2
+  version: 2024.1.30
+  hydromt_version: '>=0.9, <1.0'
+
+
 esa_worldcover_2020_v100:
   crs: 4326
   data_type: RasterDataset
   driver: raster
   filesystem: s3
-  kwargs:
-    storage_options:
-      anon: True
+  storage_options:
+    anon: true
   meta:
     category: landuse
     source_license: CC BY 4.0

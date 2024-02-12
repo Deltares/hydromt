@@ -7,78 +7,253 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
 
-unreleased
-==========
+
+v0.9.3 (2024-02-08)
+===================
+This release fixes several bugs. Most notably the `NoDataSrategy` is available in much more data reading methods so plugins can use it more directly. Additionally there are some bug fixes relating to reading shapefiles and reading COGs.
+
+Added
+-----
+- Test script for testing predefined catalogs locally. (#735)
+- Option to write a data catalog to a csv file (#425)
+
+Fixed
+-----
+- Reading Vector formats that consist of more than one file via geopandas. (#691)
+- Handle NoDataStrategy consistently when reading data in adapters (#738)
+- add option to ignore empty data sets when exporting data (#743)
+- Fix bug in `raster._check_dimensions` for datasets with multiple variables with varying dimension size (#761)
+- Fix bug when reading COGs at requested zoom level (#758)
+
+v0.9.2 (2024-01-09)
+===================
+This release adds additional bug fixes for the meridian offset functinality, and improvements to the new CLI commands.
+
+Added
+-----
+- Export CLI now also accepts time tuples (#660)
+- New stats.skills VE and RSR (#666)
+- Check CLI command can now validate bbox and geom regions (#664)
 
 Changed
 -------
+- Export CLI now uses '-s' for source, '-t' for time and '-i' for config. (#660)
+
+Fixed
+-----
+- Double reading of model components when in appending mode. (#695)
+- Removed deprecated entrypoints library. (#676)
+- Bug in `raster.set_crs` if input_crs is of type CRS. (#659)
+- Export CLI now actually parses provided geoms. (#660)
+- Bug in stats.skills for computation of pbias and MSE / RMSE. (#666)
+- `Model.write_geoms` ow has an option to write GeoJSON coordinates in WGS84 if specified (#510)
+- Fix bug with lazy spatial_ref coordinate (#682)
+- Bug in gis_utils.meridian_offset. (#692)
+
+
+v0.9.1 (2023-11-16)
+===================
+This release contains several bugfixes to 0.9.0 as well two new CLI methods and support for STAC.
+
+Added
+-----
+- Support for exporting data catalogs to STAC catalog formats. (#617)
+- Support for reading data catalogs from STAC catalog formats. (#625)
+- Pixi is now available as an additional task runner. (#634)
+- Support exporting data from catalogs from the CLI. (#627)
+- Support for validating data catalogs from the CLI. (#632)
+- Support for validating model configurations from the CLI. (#643)
+
+
+Changed
+-------
+- `DataAdapter._slice_data` and `DataCatalog.get_<data type>` now have a `handle_nodata` argument.
+
+Fixed
+-----
+- Bug in zoom level detection in `RasterDatasetAdapter` for Tifs without overviews and paths with placeholders. (#642)
+- Bug in gis_utils.meridian_offset for grids with rounding errors. (#649)
+
+v0.9.0 (2023-10-19)
+===================
+This release contains several new features, here we highlight a few:
+- Support in the DataCatalog for data sources from different providers or versions with better support for cloud and http data.
+- Developers documentation to start your own plugin and accompanying template.
+- Support multigrids in meshmodel (with example) and improved implementation VectorModel (was LumpedModel)
+- Support for reading overviews (zoom levels) of Cloud Optimized GeoTIFFs (COGs).
 
 Added
 -----
 
+Documentation
+^^^^^^^^^^^^^
+- docs now include a dropdown for selecting older versions of the docs. (PR #457)
+- docs include a new example for MeshModel. (PR #595)
+- Added documentation for how to start your own plugin (PR #446)
+
+Data
+^^^^
+- Support for loading the same data source but from different providers (e.g., local & aws) and versions  (PR #438)
+- Add support for reading and writing tabular data in ``parquet`` format. (PR #445)
+- Add support for reading model configs in ``TOML`` format. (PR #444)
+- add ``open_mfcsv`` function in ``io`` module for combining multiple CSV files into one dataset. (PR #486)
+- Adapters can now clip data that is passed through a python object the same way as through the data catalog. (PR #481)
+- Relevant data adapters now have functionality for reporting and detecting the spatial and temporal extent they cover (PR #503)
+- Data catalogs have a ``hydromt_version`` meta key that is used to determine compatibility between the catalog and the installed hydromt version. (PR #506)
+- Allow the root of a data catalog to point to an archive, this will be extracted to the ~/.hydromt_data folder. (PR #512)
+- Support for reading overviews from (Cloud Optimized) GeoTIFFs using the zoom_level argument of ``DataCatalog.get_rasterdataset``. (PR #514)
+- Support for http and other *filesystems* in path of data source (PR #515).
+
+Model
+^^^^^
+- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
+- Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
+- ``set_forcing`` can now add pandas.DataFrame object to forcing. (PR #534)
+
+Raster
+^^^^^^
+- Model class now has methods for getting, setting, reading and writing arbitrary tabular data. (PR #502)
+- Support for writing overviews to (Cloud Optimized) GeoTIFFs in the ``raster.to_raster`` method. (PR #514)
+- New raster method ``to_slippy_tiles``: tiling of a raster dataset according to the slippy tile structure for e.g., webviewers (PR #440).
+
+Changed
+-------
+
+Model
+^^^^^
+- Updated ``MeshModel`` and related methods to support multigrids instead of one single 2D grid. (PR #412)
+- Renamed ``LumpedModel.response_units`` to ``VectorModel.vector`` and updated the base set, read, write methods. (#531)
+- possibility to ``load`` the data in the model read\_ functions for netcdf files (default for read_grid in r+ mode). (PR #460)
+- Internal model components (e.g. `Models._maps`, `GridModel._grid``) are now initialized with None and should not be accessed directly,
+  call the corresponding model property  (e.g. `Model.maps`, `GridModel.grid`) instead. (PR #473)
+- ``setup_mesh2d_from_rasterdataset`` and ``setup_mesh2d_from_raster_reclass`` now use xugrid Regridder methods. (PR #535)
+- Use the Model.data_catalog to read the model region if defined by a geom or grid. (PR #479)
+
+Vector
+^^^^^^
+- ``vector.GeoDataset.from_gdf`` can use the gdf columns as data_vars instead of external xarray. (PR #412)
+- ``io.open_vector`` now can use `pyogrio` if reading from a non-tabular dataset (PR #583)
+
 Fixed
 -----
+- when a model component (eg maps, forcing, grid) is updated using the set\_ methods, it will first be read to avoid loosing data. (PR #460)
+- open_geodataset with driver vector also works for other geometry type than points. (PR #509)
+- overwrite model in update mode. (PR #534)
+- fix stats.extremes methods for (dask) 3D arrays. (PR #505)
+- raster gives better error on incompatible nodata (PR #544)
+
+Deprecated
+----------
+- the dependencies ``pcraster`` and ``pygeos`` are no longer used and were removed. (PR #467)
 
 
-v0.7.0
-======
+v0.8.0 (2023-07-18)
+===================
+This release contains several new features, including extreme value analysis, new generic methods for the ``GridModel`` class, setting variable attributes like units through the data catalog, and the ability to detect compatability issues between Datacatalog and HydroMT versions. It also includes a minor breaking change since now geometry masks are only set if the `mask` in `raster.clip_geom` is set to `True` to improve memory usage.
+
+
+Added
+-----
+- Support for unit attributes for all data types in the DataCatalog. PR #334
+- Data catalog can now handle specification of HydroMT version
+- New generic methods for ``GridModel``: ``setup_grid``, ``setup_grid_from_constant``, ``setup_grid_from_rasterdataset``, ``setup_grid_from_raster_reclass``, ``setup_grid_from_geodataframe``. PR #333
+- New ``grid`` workflow methods to support the setup methods in ``GridModel``: ``grid_from_constant``, ``grid_from_rasterdataset``, ``grid_from_raster_reclass``, ``grid_from_geodataframe``. PR #333
+- New raster method ``rasterize_geometry``.
+- New extreme valua analysis and design event (creation hydrographs) methods in stats submodule.
+  Note that these methods are experimental and may be moved elsewhere / change in signature. PR #85
+
+Changed
+-------
+- Arguments to drivers in data catalog files and the `DataCatalog.get_` methods should now explicitly be called driver_kwargs instead of kwargs. PR #334
+- New geom_type argument in `RasterDataArray.vector_grid` to specify the geometry type {'polygon', 'line', 'points'} of the vector grid. PR #351
+- Added extrapolate option to `raster.interpolate_na` method. PR #348
+- Name of methods ``setup_maps_from_raster`` and ``setup_mesh_from_raster`` to ``setup_maps_from_rasterdataset`` and ``setup_mesh_from_rasterdataset``. PR #333
+- Add rename argument to ``setup_*_from_rasterdataset``, ``setup_*_from_raster_reclass`` to maps and mesh for consistency with grid. PR #333
+- Introduced different merge options in `GeoDataset.from_gdf` and `GeoDataFrame.from_gdf`. PR #441
+- ``DataCatalog.get_rasterdataset`` always uses bbox to clip raster data. PR #434
+- ``raster.clip_geom`` only set a geometry mask if the mask argument is true to avoid memory issues. PR #434
+- ``raster.clip_mask`` interface and behavior changed to be consistent with ``raster.clip_geom``. PR #318
+
+Fixed
+-----
+- Order of renaming variables in ``DataCatalog.get_rasterdataset`` for x,y dimensions. PR #324
+- fix bug in ``get_basin_geometry`` for region kind 'subbasin' if no stream or outlet option is specified.
+- fix use of Path objects in ``DataCatalog.from_dict``. PR #429
+- ``raster.reproject_like`` first clips the data to the target extent before reprojecting. PR #434
+
+
+v0.7.1 (14 April 2023)
+======================
+
+This release contains several small updates of the code.
+Most prominently is the support for yml configuration files.
+
+Added
+-----
+- Support for in-memory data like objects instead of source name or path in DataCatalog().get* methods. PR #313
+- Support for yaml configuration files. The support for ini files will be deprecated in the future. PR #292
+- Option to export individual variables from a data source and append to an existing data catalog in DataCatalog.export_data. PR #302
+
+
+v0.7.0 (22 February 2023)
+=========================
 
 This release contains several major updates of the code. These following updates might require small changes to your code:
- 
+
 - Most noticeable is the change in the ``hydromt build`` CLI, where made the region argument optional and deprecated the resolution option. Futhermore, the user has to force existing folders to be overwritten when building new models.
-- We also did a major overhaul of the ``GeoDataset`` and the associated ``.vector`` assessor to support any type of vector geometries (before only points). 
+- We also did a major overhaul of the ``GeoDataset`` and the associated ``.vector`` assessor to support any type of vector geometries (before only points).
 
 More new features, including support for rotated grids, new cloud data catalogs and (caching of) tiled raster datasets and more details are listed below.
 
 
 Changed
 -------
-- Removed resolution ('-r', '--res') from the hydromt build cli, made region (now '-r') an optional argument. PR #278 
+- Removed resolution ('-r', '--res') from the hydromt build cli, made region (now '-r') an optional argument. PR #278
 - If the model root already contains files when setting root, this will cause an error unless force overwrite (mode='w+' or --fo/--force-overwrite from command line). PR #278
-- Revamped the GeoDataset (vector.py) to now work with geometry objects and wkt strings besides xy coordinates. PR #276 
-- GeoDataset can write to .nc that is compliant with ogr. PR #208 
-- Support for rotated grids in RasterDataset/Array, with new rotation and origin properties. PR #272 
-- Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 PR #258 
-- Changed shapely to require version '2.0.0' or later. PR #228 
+- Revamped the GeoDataset (vector.py) to now work with geometry objects and wkt strings besides xy coordinates. PR #276
+- GeoDataset can write to .nc that is compliant with ogr. PR #208
+- Support for rotated grids in RasterDataset/Array, with new rotation and origin properties. PR #272
+- Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 PR #258
+- Changed shapely to require version '2.0.0' or later. PR #228
 - strict and consistent read/write mode policy PR #238
 - do not automatically read hydromt_data.yml file in model root. PR #238
-- RasterDataset zarr driver: possibility to read from several zarr stores. The datasets are then merged and ``preprocess`` can 
-  be applied similar to netcdf driver. PR #249 
+- RasterDataset zarr driver: possibility to read from several zarr stores. The datasets are then merged and ``preprocess`` can
+  be applied similar to netcdf driver. PR #249
 
 Added
 -----
 - New methods to compute PET in workflows.forcing.pet using Penman Monteith FAO-56 based on the `pyet` module. Available arguments are now method = ['debruin', 'makkink', 'penman-monteith_rh_simple', 'penman-monteith_tdew'] PR #266
-- New get_region method in cli/api.py that returns a geojson representation of the parsed region. PR #209 
-- write raster (DataArray) to tiles in xyz structure with the RasterDataArray.to_xyz_tiles method. PR #262 
-- add zoom_level to DataCatalog.get_rasterdataset method. PR #262 
-- new write_vrt function in gis_utils to write '.vrt' using GDAL. PR #262 
-- new predefined catalog for cmip6 data stored on Google Cloud Storage ``cmip6_data``. Requires dependency gcsfs. PR #250 
+- New get_region method in cli/api.py that returns a geojson representation of the parsed region. PR #209
+- write raster (DataArray) to tiles in xyz structure with the RasterDataArray.to_xyz_tiles method. PR #262
+- add zoom_level to DataCatalog.get_rasterdataset method. PR #262
+- new write_vrt function in gis_utils to write '.vrt' using GDAL. PR #262
+- new predefined catalog for cmip6 data stored on Google Cloud Storage ``cmip6_data``. Requires dependency gcsfs. PR #250
 - new predefined catalog for public data stored on Amazon Web Services ``aws_data``. Requires dependency s3fs. PR #250
-- new DataCatalog preprocess function ``harmonise_dims`` for manipulation and harmonization of array dimensions. PR #250 
+- new DataCatalog preprocess function ``harmonise_dims`` for manipulation and harmonization of array dimensions. PR #250
 - experimental: support for remote data with a new yml data source ``filesystem`` attribute. Supported filesystems are [local, gcs, s3].
-  Profile information can be passed in the data catalog ``kwargs`` under **storage_options**. PR #250 
-- experimental: new caching option for tiled rasterdatasets ('--cache' from command line). PR #286 
+  Profile information can be passed in the data catalog ``kwargs`` under **storage_options**. PR #250
+- experimental: new caching option for tiled rasterdatasets ('--cache' from command line). PR #286
 
 Fixed
 -----
-- bug related to opening named raster files. PR #262 
+- bug related to opening named raster files. PR #262
 - All CRS objects are from pyproj library (instead of rasterio.crs submodule). PR #230
 - fix reading lists and none with config. PR #246
-- fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section. PR #238 
+- fix `DataCatalog.to_yml` and `DataCatalog.export()` with relative path and add meta section. PR #238
 
 Deprecated
 ----------
-- `x_dim`, `y_dim`, and `total_bounds` attributes of GeoDataset/GeoDataArray are renamed to `x_name`, `y_name` and `bounds`. PR #276 
-- Move pygeos to optional dependencies in favor of shapely 2.0. PR #228 
-- Resolution option in hydromt build cli. PR #278 
+- `x_dim`, `y_dim`, and `total_bounds` attributes of GeoDataset/GeoDataArray are renamed to `x_name`, `y_name` and `bounds`. PR #276
+- Move pygeos to optional dependencies in favor of shapely 2.0. PR #228
+- Resolution option in hydromt build cli. PR #278
 
 Documentation
 -------------
-- Added **Working with GeoDatasets** python notebook. PR #276 
+- Added **Working with GeoDatasets** python notebook. PR #276
 - added **working_with_models** example notebook. PR #229
 - added **export_data** example notebook. PR #222
 - added **reading_point_data** example notebook. PR #216
-- added **working_with_flow_directions** example notebook. PR #231 
+- added **working_with_flow_directions** example notebook. PR #231
 - added **prep_data_catalog** example notebook. PR #232
 - added **reading_tabular_data** example notebook. PR #216
 
@@ -86,9 +261,9 @@ Documentation
 v0.6.0 (24 October 2022)
 ========================
 
-In this release, we updated the ``Model API``  by renaming staticgeoms to geoms, adding a new maps object and removing abstract methods. 
-We also added new general subclasses to Model: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``. 
-These new subclasses have their own objects (e.g. grid for GridModel representing regular grids which replaces the old staticmaps object). 
+In this release, we updated the ``Model API``  by renaming staticgeoms to geoms, adding a new maps object and removing abstract methods.
+We also added new general subclasses to Model: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``.
+These new subclasses have their own objects (e.g. grid for GridModel representing regular grids which replaces the old staticmaps object).
 More details in the list below:
 
 Added
@@ -96,7 +271,7 @@ Added
 - ModelCatalog to discover generic and plugin model classes. `PR #202 <https://github.com/Deltares/hydromt/pull/202>`_
 - Support for 2-dimensional tabular data through the new DataFrameAdapter. `PR #153 <https://github.com/Deltares/hydromt/pull/153>`_
 - API calls to get info about model components and dataset for the dashboard. `PR #118 <https://github.com/Deltares/hydromt/pull/118>`_
-- New submodelclasses in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``
+- New submodel classes in hydromt: ``GridModel``, ``LumpedModel``, ``MeshModel``, ``NetworkModel``
 - Added entrypoints for lumped_model, mesh_model, grid_model
 - New mixin classes created for model specific object: ``GridMixin`` for self.grid, ``LumpedMixin`` for self.response_units, ``MeshMixin`` for self.mesh,
   ``MapsMixin`` for self.maps
@@ -175,7 +350,7 @@ Changed
 - improved interbasin regions in workflows.get_basin_geometry
 - drop non-serializable entries from yml file when writing data catalog to avoid it getting corrupt
 - data catalog yml entries get priority over local files or folders with the same name in the data_adapter.get_* methods
-  multi-file rasterdatasets are only supported through the data catalog yml file 
+  multi-file rasterdatasets are only supported through the data catalog yml file
 
 Fixed
 -----
@@ -198,15 +373,15 @@ Added
 - raster.density_grid to convert the values to [unit/m2]
 - gis_utils.spread2d method (wrapping its pyflwdir equivalent) to spread values on a raster
 - gis_utils.nearest and gis_utils.nearest_merge methods to merge GeoDataFrame based on proximity
-- river_width to estimate a segment average river width based on a river mask raster 
+- river_width to estimate a segment average river width based on a river mask raster
 - river_depth to get segment average river depth estimates based bankfull discharge (requires pyflwdir v0.5.2)
 
 Changed
 -------
 - bumped hydromt-artifacts version to v0.0.6
-- In model API build and update functions, if any write* are called in the ini file (opt), 
-  the final self.write() call is skipped. This enables passing custom arguments to the write* 
-  functions without double writing files or customizing the order in which write* functions 
+- In model API build and update functions, if any write* are called in the ini file (opt),
+  the final self.write() call is skipped. This enables passing custom arguments to the write*
+  functions without double writing files or customizing the order in which write* functions
   are called. If any write* function is called we assume the user manages the writing and
   a the global write method is skipped.
 - default GTiff lwz compression with DataCatalog.export_data method
@@ -215,7 +390,7 @@ Changed
 
 Fixed
 -----
-- DataCatalog.to_yml Path objects written as normal strings 
+- DataCatalog.to_yml Path objects written as normal strings
 - Bugfix in basin_mask.get_basin_geometry when using bbox or geom arguments
 - Bugfix DataAdapter.__init__ setting None value in meta data
 - Bugfix DataAdapter.resolve_paths with argument in root
@@ -232,7 +407,7 @@ Added
 -----
 - log hydromt_data.yml with write_data_catalog (needs to be implemented in various plugins)
 - add alias option in data catalog yml files
-- use mamba for github actions 
+- use mamba for github actions
 
 Changed
 -------
@@ -273,7 +448,7 @@ Changed
 Deprecated
 ----------
 
-- Importing model plugins via "hydromt import xxxModel" or "import hydromt.xxxModel" will be deprecated. Instead use "from hydromt.models import xxxModel" 
+- Importing model plugins via "hydromt import xxxModel" or "import hydromt.xxxModel" will be deprecated. Instead use "from hydromt.models import xxxModel"
   or "from hydromt_xxx import xxxModel".
 
 Fixed
@@ -317,7 +492,7 @@ Documentation
 
 v0.4.0 (23 April 2021)
 ======================
-This is the first stable release of hydroMT. Noticeable changes are the addition of the ``deltares-data`` flag, improvements with basin masking functionnalities, and the creation of examples notebooks available 
+This is the first stable release of hydroMT. Noticeable changes are the addition of the ``deltares-data`` flag, improvements with basin masking functionnalities, and the creation of examples notebooks available
 in the documentation and in Binder.
 
 Added

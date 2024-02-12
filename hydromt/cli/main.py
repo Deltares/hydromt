@@ -1,29 +1,54 @@
 # -*- coding: utf-8 -*-
-"""command line interface for hydromt models"""
+"""command line interface for hydromt models."""
+
+import logging
+from ast import literal_eval
+from datetime import datetime
+from json import loads as json_decode
+from os.path import join
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import click
-from os.path import join
-import logging
-import warnings
 import numpy as np
+from geopandas import GeoDataFrame
+from pydantic import ValidationError
 
-### Uncomment the following lines for building exe
-# import sys
-# exepath = sys.prefix
-# import pyproj
-# pyproj_datadir = join(exepath, "proj-data")
-# pyproj.datadir.set_data_dir(pyproj_datadir)
-###
+from hydromt.data_catalog import DataCatalog
+from hydromt.nodata import NoDataStrategy
+from hydromt.validators.data_catalog import DataCatalogValidator
+from hydromt.validators.model_config import HydromtModelSetup
+from hydromt.validators.region import validate_region
 
-from . import cli_utils
-from .. import log
+from .. import __version__, log
 from ..models import MODELS
-from .. import __version__
+from . import cli_utils
+
+BUILDING_EXE = False
+if BUILDING_EXE:
+    import sys
+
+    exepath = sys.prefix
+    import pyproj
+
+    pyproj_datadir = join(exepath, "proj-data")
+    pyproj.datadir.set_data_dir(pyproj_datadir)
 
 logger = logging.getLogger(__name__)
 
 
 def print_models(ctx, param, value):
+    """Print the available models and exit.
+
+    Parameters
+    ----------
+    ctx : click.Context
+        The Click context object.
+    param : click.Parameter
+        The Click parameter object.
+    value : bool
+        The value of the parameter.
+    """
     if not value:
         return {}
     click.echo(f"{MODELS}")
@@ -36,6 +61,10 @@ opt_config = click.option(
     "--config",
     type=click.Path(resolve_path=True),
     help="Path to hydroMT configuration file, for the model specific implementation.",
+)
+export_dest_path = click.argument(
+    "export_dest_path",
+    type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
 )
 arg_root = click.argument(
     "MODEL_ROOT",
@@ -90,6 +119,12 @@ overwrite_opt = click.option(
     default=False,
     help="Flag: If provided overwrite existing model files",
 )
+error_on_empty = click.option(
+    "--error-on-empty",
+    is_flag=True,
+    default=False,
+    help="Flag: Raise an error when attempting to export empty dataset instead of continuing",
+)
 
 cache_opt = click.option(
     "--cache",
@@ -117,13 +152,8 @@ def main(ctx, models):  # , quiet, verbose):
     if ctx.obj is None:
         ctx.obj = {}
 
-    # ctx.obj["log_level"] = max(10, 30 - 10 * (verbose - quiet))
-    # logging.basicConfig(stream=sys.stderr, level=ctx.obj["log_level"])
-
 
 ## BUILD
-
-
 @main.command(short_help="Build models")
 @click.argument(
     "MODEL",
@@ -156,25 +186,23 @@ def build(
 ):
     """Build models from scratch.
 
-    \b
     Example usage:
     --------------
 
-    \b
-    To build a wflow model for a subbasin using and point coordinates snapped to cells with stream order >= 4
-    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini -r "{'subbasin': [-7.24, 62.09], 'strord': 4}" -d deltares_data -d /path/to/data_catalog.yml -v
+    To build a wflow model for a subbasin using a point coordinates snapped to cells
+    with upstream area >= 50 km2
+    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini  -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -d deltares_data -d /path/to/data_catalog.yml -v
 
-    \b
     To build a sfincs model based on a bbox
-    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -d /path/to/data_catalog.yml -v
+    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini  -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
 
-    """
+    """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
     logger = log.setuplog(
         "build", join(model_root, "hydromt.log"), log_level=log_level, append=False
     )
     logger.info(f"Building instance of {model} model at {model_root}.")
-    logger.info(f"User settings:")
+    logger.info("User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # Set region to None if empty string json
@@ -234,6 +262,7 @@ def build(
 @opt_cli
 @data_opt
 @deltares_data_opt
+@overwrite_opt
 @cache_opt
 @quiet_opt
 @verbose_opt
@@ -248,26 +277,26 @@ def update(
     opt,
     data,
     dd,
+    fo,
     cache,
     verbose,
     quiet,
 ):
     """Update a specific component of a model.
+
     Set an output directory to copy the edited model to a new folder, otherwise maps
     are overwritten.
 
-    \b
     Example usage:
     --------------
 
-    \b
-    Update (overwrite!) landuse-landcover based maps in a Wflow model
+    Update (overwrite!) landuse-landcover based maps in a Wflow model:
     hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
 
-    \b
-    Update Wflow model components outlined in an .ini configuration file and write the model to a directory
-    hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.ini -d /path/to/data_catalog.yml -v
-    """
+    Update Wflow model components outlined in an .ini configuration file and
+    write the model to a directory:
+    hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.ini  -d /path/to/data_catalog.yml -v
+    """  # noqa: E501
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -277,7 +306,7 @@ def update(
     # parse settings
     if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
         opt = {components[0]: opt}
-    logger.info(f"User settings:")
+    logger.info("User settings:")
     opt = cli_utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # parse data catalog options from global section in config and cli options
@@ -300,7 +329,250 @@ def update(
             opt0 = opt.get("setup_config", {})
             opt = {c: opt.get(c, {}) for c in components}
             opt.update({"setup_config": opt0})
-        mod.update(model_out=model_out, opt=opt)
+        mod.update(model_out=model_out, opt=opt, forceful_overwrite=fo)
+    except Exception as e:
+        logger.exception(e)  # catch and log errors
+        raise
+    finally:
+        for handler in logger.handlers[:]:
+            handler.close()
+            logger.removeHandler(handler)
+
+
+@main.command(
+    short_help="Validate config / data catalog / region",
+)
+@click.option(
+    "-m",
+    "--model",
+    type=str,
+    default=None,
+    help="Model name, e.g. wflow, sfincs, etc. to validate config file.",
+)
+@opt_config
+@data_opt
+@quiet_opt
+@verbose_opt
+@region_opt
+@click.pass_context
+def check(
+    ctx,
+    model,
+    config,
+    data,
+    region: Optional[Dict[Any, Any]],
+    quiet: int,
+    verbose: int,
+):
+    """
+    Verify that provided data catalog and config files are in the correct format.
+
+    Additionnaly region bbox and geom can also be validated.
+
+    Example usage:
+    --------------
+
+    Check data catalog file:
+    hydromt check -d /path/to/data_catalog.yml -v
+
+    Check data catalog and grid_model config file:
+    hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -v
+
+    With region:
+    hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r '{'bbox': [-1,-1,1,1]}' -v
+
+    """  # noqa: E501
+    # logger
+    log_level = max(10, 30 - 10 * (verbose - quiet))
+    logger = log.setuplog("check", join(".", "hydromt.log"), log_level=log_level)
+    try:
+        all_exceptions = []
+        for cat_path in data:
+            logger.info(f"Validating catalog at {cat_path}")
+            try:
+                DataCatalogValidator.from_yml(cat_path)
+                logger.info("Catalog is valid!")
+            except ValidationError as e:
+                all_exceptions.append(e)
+                logger.info("Catalog has errors")
+
+        if region:
+            logger.info(f"Validating region {region}")
+            try:
+                validate_region(region)
+                logger.info("Region is valid!")
+
+            except (ValidationError, ValueError, NotImplementedError) as e:
+                logger.info("region has errors")
+                all_exceptions.append(e)
+
+        if config:
+            mod = MODELS.load(model)
+            logger.info(f"Validating for model {model} of type {type(mod).__name__}")
+            try:
+                config_dict = cli_utils.parse_config(config)
+                logger.info(f"Validating config at {config}")
+
+                HydromtModelSetup.from_dict(config_dict, model=mod)
+                logger.info("Model config valid!")
+
+            except (ValidationError, ValueError) as e:
+                logger.info("Model has errors")
+                all_exceptions.append(e)
+
+        if len(all_exceptions) > 0:
+            raise ValueError(all_exceptions)
+
+    except Exception as e:
+        logger.exception(e)  # catch and log errors
+        raise e
+    finally:
+        for handler in logger.handlers[:]:
+            handler.close()
+            logger.removeHandler(handler)
+
+
+## Export
+@main.command(
+    short_help="Export data",
+)
+@click.option(
+    "-s",
+    "--source",
+    multiple=True,
+)
+@click.option(
+    "-t",
+    "--time-tuple",
+)
+@region_opt
+@export_dest_path
+@opt_config
+@data_opt
+@deltares_data_opt
+@overwrite_opt
+@error_on_empty
+@quiet_opt
+@verbose_opt
+@click.pass_context
+def export(
+    ctx: click.Context,
+    export_dest_path: Path,
+    source: Optional[str],
+    time_tuple: Optional[str],
+    config: Optional[Path],
+    region: Optional[Dict[Any, Any]],
+    data: Optional[List[Path]],
+    dd: bool,
+    fo: bool,
+    error_on_empty: bool,
+    quiet: int,
+    verbose: int,
+):
+    """Export the data from a catalog.
+
+    Example usage:
+    --------------
+
+    export the data of a single data source, in a particular region, for a particular time range
+    hydromt export -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}" -s era5_hourly -d ../hydromt/data/catalogs/artifact_data.yml -t '["2010-01-01", "2022-12-31"]' path/to/output_dir
+
+    export a single data source from the deltares data catalog without time/space slicing
+    hydromt export -d deltares_data -s era5_hourly path/to/output_dir
+
+    export data as detailed in an export config yaml file
+    hydromt export -i /path/to/export_config.yaml path/to/output_dir
+    """  # noqa: E501
+    # logger
+    log_level = max(10, 30 - 10 * (verbose - quiet))
+    logger = log.setuplog(
+        "export", join(export_dest_path, "hydromt.log"), log_level=log_level
+    )
+    logger.info(f"Output dir: {export_dest_path}")
+
+    if error_on_empty:
+        handle_nodata = NoDataStrategy.RAISE
+    else:
+        handle_nodata = NoDataStrategy.IGNORE
+
+    if data:
+        data_libs = list(data)  # add data catalogs from cli
+    else:
+        data_libs = []
+
+    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+        data_libs = ["deltares_data"] + data_libs  # prepend!
+
+    sources: List[str] = []
+    if source:
+        if isinstance(source, str):
+            sources = [source]
+        else:
+            sources = list(source)
+
+    # these need to be defined even if config does not exist
+    unit_conversion = True
+    meta = {}
+    append = False
+
+    if config:
+        config_dict = cli_utils.parse_config(config)["export_data"]
+        if "data_libs" in config_dict.keys():
+            data_libs = data_libs + config_dict.pop("data_libs")
+        time_tuple = config_dict.pop("time_tuple", None)
+        region = region or config_dict.pop("region", None)
+        if isinstance(region, str):
+            region = json_decode(region)
+
+        sources = sources + config_dict["sources"]
+
+        unit_conversion = config_dict.pop("unit_conversion", True)
+        meta = config_dict.pop("meta", {})
+        append = config_dict.pop("append", False)
+
+    data_catalog = DataCatalog(data_libs=data_libs)
+    _ = data_catalog.sources  # initialise lazy loading
+
+    if region:
+        if "bbox" in region:
+            bbox = region["bbox"]
+        elif "geom" in region:
+            bbox = GeoDataFrame.from_file(region["geom"]).total_bounds
+        else:
+            raise NotImplementedError(
+                f"Only bbox and geom are supported for export. recieved {region}"
+            )
+
+        if not set(region.keys()).issubset({"bbox", "geom"}):
+            logger.warning(
+                "Found unsupported arguments for region in addition to bbox or geom. these will be ignored"
+            )
+    else:
+        bbox = None
+
+    if time_tuple:
+        if isinstance(time_tuple, str):
+            tup = literal_eval(time_tuple)
+        else:
+            tup = time_tuple
+        time_start = datetime.strptime(tup[0], "%Y-%m-%d")
+        time_end = datetime.strptime(tup[1], "%Y-%m-%d")
+        time_tup = (time_start, time_end)
+    else:
+        time_tup = None
+
+    try:
+        data_catalog.export_data(
+            export_dest_path,
+            source_names=sources,
+            bbox=bbox,
+            time_tuple=time_tup,
+            unit_conversion=unit_conversion,
+            meta=meta,
+            append=append,
+            handle_nodata=handle_nodata,
+        )
+
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
@@ -333,26 +605,24 @@ def update(
 @click.pass_context
 def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     """Create a new model based on clipped region of an existing model.
+
     If the existing model contains forcing, they will also be clipped to the new model.
 
     For options to build wflow models see:
 
-    \b
     Example usage to clip a wflow model for a subbasin derived from point coordinates
-    snapped to cells with stream order >= 4
-    hydromt clip wflow /path/to/model_root /path/to/model_destination "{'subbasin': [-7.24, 62.09], 'wflow_streamorder': 4}"
+    snapped to cells with upstream area >= 50 km2
+    hydromt clip wflow /path/to/model_root /path/to/model_destination "{'subbasin': [-7.24, 62.09], 'wflow_uparea': 50}"
 
-    \b
     Example usage basin based on ID from model_root basins map
     hydromt clip wflow /path/to/model_root /path/to/model_destination "{'basin': 1}"
 
-    \b
     Example usage basins whose outlets are inside a geometry
     hydromt clip wflow /path/to/model_root /path/to/model_destination "{'outlet': 'geometry.geojson'}"
 
     All available option in the clip_staticmaps function help.
 
-    """
+    """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
     logger = log.setuplog(
         "clip", join(model_destination, "hydromt-clip.log"), log_level=log_level
@@ -368,7 +638,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         mod.read()
         mod.set_root(model_destination, mode="w")
         logger.info("Clipping staticmaps")
-        mod.clip_staticmaps(region)
+        mod.clip_grid(region)
         logger.info("Clipping forcing")
         mod.clip_forcing()
         logger.info("Writting clipped model")

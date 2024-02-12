@@ -9,7 +9,7 @@ static geometries and forcing data.
 **Steps in brief:**
 
 1) You have an **existing model** schematization ready
-2) Define your **model subregion**, see the overview of :ref:`region options <region>`. 
+2) Define your **model subregion**, see the overview of :ref:`region options <region>`.
 3) **Clip** your model using the CLI or Python interface
 
 .. NOTE::
@@ -25,15 +25,15 @@ From CLI
 
 **Example usage**
 
-The ``hydromt clip`` command line intrefce (CLI) method can be run from the command line after the right conda environment is activated. 
+The ``hydromt clip`` command line interface (CLI) method can be run from the command line after the right conda environment is activated.
 
-The following example clips a ``subbasin`` region (based on its outflow location) from an existing Wflow model 
+The following example clips a ``subbasin`` region (based on its outflow location) from an existing Wflow model
 at `/path/to/model_root` and saves the output to `/path/to/model_destination`. The subbasin is defined based
 on an outflow location snapped to a stream order 4 river which is based on a map called wflow_streamorder
-of the Wflow model. 
+of the Wflow model.
 
 .. code-block:: console
-   
+
     hydromt clip wflow /path/to/model_root /path/to/model_destination "{'subbasin': [-7.24, 62.09], 'wflow_streamorder': 4}"
 
 
@@ -53,7 +53,7 @@ To check all options do:
 From Python
 -----------
 
-.. NOTE:: 
+.. NOTE::
 
     A general clip method for the model class is currently not yet available and its signature might change in the future.
 

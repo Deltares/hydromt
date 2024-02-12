@@ -1,8 +1,15 @@
-import pytest
 import json
-import numpy as np
 
-from hydromt.cli.api import *
+import numpy as np
+import pytest
+
+import hydromt._compat as compat
+from hydromt.cli.api import (
+    get_datasets,
+    get_model_components,
+    get_predifined_catalogs,
+    get_region,
+)
 
 
 def test_get_region():
@@ -11,8 +18,9 @@ def test_get_region():
     assert isinstance(region_geom, str)
     try:
         region_json = json.loads(region_geom)
-    except:
+    except ValueError:
         raise ValueError("Returned region is not in valid json")
+
     assert region_json["type"] == "FeatureCollection"
     assert len(region_json["features"]) == 1
     assert region_json["features"][0]["properties"]["area"] != 0
@@ -34,10 +42,11 @@ def test_api_datasets():
 
 def test_api_model_components():
     # models
-    components = get_model_components("lumped_model", component_types=["write"])
-    name = "write_response_units"
+    components = get_model_components("vector_model", component_types=["write"])
+    name = "write_vector"
     assert name in components
     assert np.all([k.startswith("write") for k in components])
     keys = ["doc", "required", "optional", "kwargs"]
     assert np.all([k in components[name] for k in keys])
-    components = get_model_components("mesh_model")
+    if compat.HAS_XUGRID:
+        components = get_model_components("mesh_model")

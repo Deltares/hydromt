@@ -1,15 +1,20 @@
-"""Test for hydromt.gu submodule"""
+"""Test for hydromt.gu submodule."""
 
-import pytest
-import numpy as np
 import os
-from rasterio.transform import from_origin
-from affine import Affine
+from pathlib import Path
+
+import geopandas as gpd
+import numpy as np
+import pytest
 import xarray as xr
+from affine import Affine
+from pyproj import CRS
+from rasterio.transform import from_origin
+from shapely import Polygon, box
 
 from hydromt import gis_utils as gu
-from hydromt.raster import full_from_transform, RasterDataArray
 from hydromt.io import open_raster
+from hydromt.raster import RasterDataArray, full_from_transform
 
 
 def test_crs():
@@ -22,26 +27,48 @@ def test_crs():
     assert xattrs["units"] == "degrees_east"
     assert yattrs["units"] == "degrees_north"
     _, _, xattrs, yattrs = gu.axes_attrs(gu.utm_crs(bbox1))
-    assert xattrs["units"] == yattrs["units"] == "m"
+    assert xattrs["units"] == yattrs["units"] == "metre"
 
 
-def test_transform():
-    transform = from_origin(0, 90, 1, 1)
+def test_affine_to_coords():
+    # create grid with x from 0-360E
+    transform = from_origin(0, 90, 1, 1)  # upper left corner
     shape = (180, 360)
     coords = gu.affine_to_coords(transform, shape)
     xs, ys = coords["x"][1], coords["y"][1]
     assert np.all(ys == 90 - np.arange(0.5, shape[0]))
     assert np.all(xs == np.arange(0.5, shape[1]))
 
-    # offset for geographic crs
-    da = full_from_transform(transform, shape, crs=4326)
-    assert np.allclose(da.raster.origin, np.array([0, 90]))
-    da1 = gu.meridian_offset(da, x_name="x")
-    assert da1.raster.bounds[0] == -180
-    da2 = gu.meridian_offset(da1, x_name="x", bbox=[170, 0, 190, 10])
-    assert da2.raster.bounds[0] == 0
-    da3 = gu.meridian_offset(da1, x_name="x", bbox=[-190, 0, -170, 10])
-    assert da3.raster.bounds[2] == 0
+
+def test_meridian_offset():
+    # test global grids with different west origins
+    for x0 in [-180, 0, -360, 1]:
+        da = full_from_transform(
+            transform=Affine(1.0, 0.0, x0, 0.0, -1.0, 90.0),
+            shape=(180, 360),
+            crs="epsg:4326",
+        )
+        # return W180-E180 grid if no bbox is provided
+        da1 = gu.meridian_offset(da)
+        assert da1.raster.bounds == (-180, -90, 180, 90)
+        # make sure bbox is respected
+        for bbox in [
+            [-2, -2, 2, 2],  # bbox crossing 0
+            [178, -2, 182, 2],  # bbox crossing 180
+            [-10, -2, 190, 2],  # bbox crossing 0 and 180
+            [-190, -2, -170, 2],  # bbox crossing -180
+        ]:
+            da2 = gu.meridian_offset(da, bbox=bbox)
+            assert (
+                da2.raster.bounds[0] <= bbox[0]
+            ), f"{da2.raster.bounds[0]} <= {bbox[0]}"
+            assert (
+                da2.raster.bounds[2] >= bbox[2]
+            ), f"{da2.raster.bounds[2]} >= {bbox[2]}"
+
+    # test error
+    with pytest.raises(ValueError, match="This method is only applicable to data"):
+        gu.meridian_offset(da.raster.clip_bbox([0, 0, 10, 10]))
 
 
 def test_transform_rotation():
@@ -50,7 +77,8 @@ def test_transform_rotation():
     shape = (10, 5)
     coords = gu.affine_to_coords(transform, shape)
     xs, ys = coords["xc"][1], coords["yc"][1]
-    assert xs.ndim == 2 and ys.ndim == 2
+    assert xs.ndim == 2
+    assert ys.ndim == 2
     da = full_from_transform(transform, shape, crs=4326)
     assert da.raster.x_dim == "x"
     assert da.raster.xcoords.ndim == 2
@@ -121,9 +149,90 @@ def test_create_vrt(tmpdir, rioda_large):
     gu.create_vrt(vrt_fn, files_path=files_path)
     assert os.path.isfile(vrt_fn)
     assert isinstance(open_raster(vrt_fn).load(), xr.DataArray)  # try reading
-    with pytest.raises(
-        ValueError, match="Either 'file_list_path' or 'files_path' is required"
-    ):
+    with pytest.raises(ValueError, match="Either 'files' or 'files_path' is required"):
         gu.create_vrt(vrt_fn)
     with pytest.raises(IOError, match="No files found at "):
         gu.create_vrt(vrt_fn, files_path=os.path.join(path, "dummy_xyz", "*.abc"))
+
+
+class TestBBoxFromFileAndFilters:
+    @pytest.fixture(scope="class")
+    def vector_data_with_crs(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> Path:
+        example_data = geodf.set_crs(crs=CRS.from_user_input(4326))
+        example_data.to_crs(crs=CRS.from_user_input(3857), inplace=True)
+        path = tmp_dir / "test.fgb"
+        example_data.to_file(path, engine="pyogrio")
+        return path
+
+    @pytest.fixture(scope="class")
+    def vector_data_without_crs(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> Path:
+        path = tmp_dir / "test.geojson"
+        geodf.to_file(path, engine="pyogrio")
+        return path
+
+    @pytest.fixture(scope="class")
+    def gdf_mask_without_crs(self, world: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+        return world[world["name"] == "Chile"]
+
+    @pytest.fixture(scope="class")
+    def gdf_bbox_with_crs(
+        self, gdf_mask_without_crs: gpd.GeoDataFrame
+    ) -> gpd.GeoDataFrame:
+        return gdf_mask_without_crs.set_crs(CRS.from_user_input(4326))
+
+    @pytest.fixture(scope="class")
+    def shapely_bbox(self, gdf_mask_without_crs: gpd.GeoDataFrame) -> Polygon:
+        return box(*list(gdf_mask_without_crs.total_bounds))
+
+    def test_gdf_bbox_crs_source_crs(
+        self, gdf_bbox_with_crs: gpd.GeoDataFrame, vector_data_with_crs: Path
+    ):
+        bbox = gu.bbox_from_file_and_filters(
+            vector_data_with_crs, bbox=gdf_bbox_with_crs
+        )
+        # assert converted to CRS of source data EPSG:3857
+        assert all(map(lambda x: abs(x) > 180, bbox))
+
+    def test_gdf_mask_no_crs_source_crs(
+        self, gdf_mask_without_crs: gpd.GeoDataFrame, vector_data_with_crs: Path
+    ):
+        bbox = gu.bbox_from_file_and_filters(
+            vector_data_with_crs, bbox=gdf_mask_without_crs
+        )
+        # assert converted to CRS of source data EPSG:3857
+        assert all(map(lambda x: abs(x) > 180, bbox))
+
+    def test_gdf_mask_crs_source_no_crs(
+        self, gdf_mask_without_crs: gpd.GeoDataFrame, vector_data_without_crs: Path
+    ):
+        bbox = gu.bbox_from_file_and_filters(
+            vector_data_without_crs, bbox=gdf_mask_without_crs
+        )
+        assert all(map(lambda x: abs(x) < 180, bbox))
+
+    def test_gdf_mask_no_crs_source_no_crs(
+        self, gdf_mask_without_crs: gpd.GeoDataFrame, vector_data_without_crs: Path
+    ):
+        bbox = gu.bbox_from_file_and_filters(
+            vector_data_without_crs, bbox=gdf_mask_without_crs, crs=4326
+        )
+        assert all(map(lambda x: abs(x) < 180, bbox))
+
+    def test_shapely_input(self, shapely_bbox: Polygon, vector_data_with_crs: Path):
+        bbox = gu.bbox_from_file_and_filters(vector_data_with_crs, bbox=shapely_bbox)
+        assert all(map(lambda x: abs(x) > 180, bbox))
+
+    def test_does_not_filter(self, vector_data_with_crs: Path):
+        bbox = gu.bbox_from_file_and_filters(vector_data_with_crs)
+        assert bbox is None
+
+    def test_raises_valueerror(
+        self, vector_data_with_crs: Path, gdf_bbox_with_crs: gpd.GeoDataFrame
+    ):
+        with pytest.raises(
+            ValueError,
+            match="Both 'bbox' and 'mask' are provided. Please provide only one.",
+        ):
+            gu.bbox_from_file_and_filters(
+                vector_data_with_crs, bbox=gdf_bbox_with_crs, mask=gdf_bbox_with_crs
+            )

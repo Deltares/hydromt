@@ -1,29 +1,41 @@
 # -*- coding: utf-8 -*-
 """Tests for the io submodule."""
 
-import pytest
-import numpy as np
-import pandas as pd
-import xarray as xr
-import rasterio
-import rioxarray
-import hydromt
-import os
 import glob
+import os
 from os.path import join
 from pathlib import Path
-from hydromt import raster, _compat
+
+import geopandas as gpd
+import numpy as np
+import pandas as pd
+import pytest
+import rasterio
+import xarray as xr
+from shapely.geometry import box
+
+import hydromt
+from hydromt import _compat, raster
 
 
-def test_open_vector(tmpdir, df, geodf, world):
+@pytest.mark.parametrize("engine", ["fiona", "pyogrio"])
+def test_open_vector(engine, tmpdir, df, geodf, world):
+    gpd.io_engine = engine
     fn_csv = str(tmpdir.join("test.csv"))
+    fn_parquet = str(tmpdir.join("test.parquet"))
     fn_xy = str(tmpdir.join("test.xy"))
     fn_xls = str(tmpdir.join("test.xlsx"))
     fn_geojson = str(tmpdir.join("test.geojson"))
+    fn_shp = str(tmpdir.join("test.shp"))
+    fn_gpkg = str(tmpdir.join("test.gpkg"))
     df.to_csv(fn_csv)
-    df.to_excel(fn_xls)
+    df.to_parquet(fn_parquet)
+    if _compat.HAS_OPENPYXL:
+        df.to_excel(fn_xls)
     geodf.to_file(fn_geojson, driver="GeoJSON")
     hydromt.write_xy(fn_xy, geodf)
+    geodf.to_file(fn_shp)
+    geodf.to_file(fn_gpkg, driver="GPKG")
     # read csv
     gdf1 = hydromt.open_vector(fn_csv, assert_gtype="Point", crs=4326)
     assert gdf1.crs == geodf.crs
@@ -31,12 +43,26 @@ def test_open_vector(tmpdir, df, geodf, world):
     # no data in domain
     gdf1 = hydromt.open_vector(fn_csv, crs=4326, bbox=[200, 300, 200, 300])
     assert gdf1.index.size == 0
-    # read xls
-    gdf1 = hydromt.open_vector(fn_xls, assert_gtype="Point", crs=4326)
-    assert np.all(gdf1 == geodf)
+    if _compat.HAS_OPENPYXL:
+        # read xls
+        gdf1 = hydromt.open_vector(fn_xls, assert_gtype="Point", crs=4326)
+        assert np.all(gdf1 == geodf)
+
     # read xy
     gdf1 = hydromt.open_vector(fn_xy, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
+    # read shapefile
+    gdf1 = hydromt.open_vector(fn_shp, bbox=list(geodf.total_bounds))
+    assert np.all(gdf1 == geodf)
+    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]})
+    gdf1 = hydromt.open_vector(fn_shp, geom=mask)
+    assert np.all(gdf1 == geodf)
+    # read geopackage
+    gdf1 = hydromt.open_vector(fn_gpkg)
+    assert np.all(gdf1 == geodf)
+    # read parquet
+    gdf1 = hydromt.open_vector(fn_parquet, crs=4326)
+    assert np.all(gdf1 == geodf)
     # filter
     country = "Chile"
     geom = world[world["name"] == country]
@@ -71,6 +97,11 @@ def test_open_vector(tmpdir, df, geodf, world):
 def test_open_geodataset(tmpdir, geodf):
     fn_gdf = str(tmpdir.join("points.geojson"))
     geodf.to_file(fn_gdf, driver="GeoJSON")
+    # create equivalent polygon file
+    fn_gdf_poly = str(tmpdir.join("polygons.geojson"))
+    geodf_poly = geodf.copy()
+    geodf_poly["geometry"] = geodf_poly.buffer(0.1)
+    geodf_poly.to_file(fn_gdf_poly, driver="GeoJSON")
     # create zeros timeseries
     ts = pd.DataFrame(
         index=pd.DatetimeIndex(["01-01-2000", "01-01-2001"]),
@@ -90,6 +121,10 @@ def test_open_geodataset(tmpdir, geodf):
     ds = hydromt.open_geodataset(fn_gdf, fn_ts)
     assert name in ds.data_vars
     assert np.all(ds[name].values == 0)
+    # test for polygon geometry
+    ds = hydromt.open_geodataset(fn_gdf_poly, fn_ts)
+    assert name in ds.data_vars
+    assert ds.vector.geom_type == "Polygon"
     with pytest.raises(IOError, match="GeoDataset point location file not found"):
         hydromt.open_geodataset("missing_file.csv")
     with pytest.raises(IOError, match="GeoDataset data file not found"):
@@ -97,29 +132,28 @@ def test_open_geodataset(tmpdir, geodf):
 
 
 def test_timeseries_io(tmpdir, ts):
-    name = "waterlevel"
-    fn_ts = str(tmpdir.join(f"test1.csv"))
+    fn_ts = str(tmpdir.join("test1.csv"))
     # dattime in columns
     ts.to_csv(fn_ts)
     da = hydromt.open_timeseries_from_table(fn_ts)
     assert isinstance(da, xr.DataArray)
     assert da.time.dtype.type.__name__ == "datetime64"
     # transposed df > datetime in row index
-    fn_ts2 = str(tmpdir.join(f"test2.csv"))
+    fn_ts2 = str(tmpdir.join("test2.csv"))
     ts = ts.T
     ts.to_csv(fn_ts2)
     da2 = hydromt.open_timeseries_from_table(fn_ts2)
     assert da.time.dtype.type.__name__ == "datetime64"
     assert np.all(da == da2)
     # no time index
-    fn_ts3 = str(tmpdir.join(f"test3.csv"))
+    fn_ts3 = str(tmpdir.join("test3.csv"))
     pd.DataFrame(ts.values).to_csv(fn_ts3)
     with pytest.raises(ValueError, match="No time index found"):
         hydromt.open_timeseries_from_table(fn_ts3)
     # parse str index to numeric index
     cols = [f"a_{i}" for i in ts.columns]
     ts.columns = cols
-    fn_ts4 = str(tmpdir.join(f"test4.csv"))
+    fn_ts4 = str(tmpdir.join("test4.csv"))
     ts.to_csv(fn_ts4)
     da4 = hydromt.open_timeseries_from_table(fn_ts4)
     assert np.all(da == da4)
@@ -127,7 +161,7 @@ def test_timeseries_io(tmpdir, ts):
     # no numeric index
     cols[0] = "a"
     ts.columns = cols
-    fn_ts5 = str(tmpdir.join(f"test5.csv"))
+    fn_ts5 = str(tmpdir.join("test5.csv"))
     ts.to_csv(fn_ts5)
     with pytest.raises(ValueError, match="No numeric index"):
         hydromt.open_timeseries_from_table(fn_ts5)
@@ -151,9 +185,9 @@ def test_raster_io(tmpdir, rioda):
     da2 = hydromt.open_raster(fn_tif)
     assert not np.any(np.isnan(da2.values))
     fn_tif = str(tmpdir.join("test_2.tif"))
-    da1.expand_dims("t").round(0).astype(np.int32).raster.to_raster(
-        fn_tif, dtype=np.int32
-    )
+    da1.fillna(da1.attrs["_FillValue"]).expand_dims("t").round(0).astype(
+        np.int32
+    ).raster.to_raster(fn_tif, dtype=np.int32)
     da3 = hydromt.open_raster(fn_tif)
     assert da3.dtype == np.int32
     # to_mapstack / open_mfraster
@@ -170,7 +204,7 @@ def test_raster_io(tmpdir, rioda):
     # concat
     fn_tif = str(tmpdir.join("test_3.tif"))
     da.raster.to_raster(fn_tif, crs=3857)
-    ds_in = hydromt.open_mfraster(join(root, f"test_*.tif"), concat=True)
+    ds_in = hydromt.open_mfraster(join(root, "test_*.tif"), concat=True)
     assert ds_in[ds_in.raster.vars[0]].ndim == 3
     # with reading with pathlib
     paths = [Path(p) for p in glob.glob(join(root, f"{prefix}*.tif"))]
@@ -179,6 +213,68 @@ def test_raster_io(tmpdir, rioda):
     # test writing to subdir
     ds.rename({"test": "test/test"}).raster.to_mapstack(root, driver="GTiff")
     assert os.path.isfile(join(root, "test", "test.tif"))
+
+
+def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
+    df_fns = {
+        i: str(tmpdir.join("data", f"{i}.csv"))
+        for i in range(len(dfs_segmented_by_points))
+    }
+    os.mkdir(tmpdir.join("data"))
+    for i in range(len(df_fns)):
+        dfs_segmented_by_points[i].to_csv(df_fns[i])
+
+    ds = hydromt.io.open_mfcsv(df_fns, "id")
+
+    assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
+    assert sorted(list(ds.dims)) == ["id", "time"], ds
+    for i in range(len(dfs_segmented_by_points)):
+        test1 = ds.sel(id=i)["test1"]
+        test2 = ds.sel(id=i)["test2"]
+        assert np.all(
+            np.equal(test1, np.arange(len(dfs_segmented_by_points)) * i)
+        ), test1
+        assert np.all(
+            np.equal(test2, np.arange(len(dfs_segmented_by_points)) ** i)
+        ), test2
+
+    # again but with a nameless csv index
+    for i in range(len(df_fns)):
+        dfs_segmented_by_points[i].rename_axis(None, axis=0, inplace=True)
+        dfs_segmented_by_points[i].to_csv(df_fns[i])
+
+    ds = hydromt.io.open_mfcsv(df_fns, "id")
+
+    assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
+    assert sorted(list(ds.dims)) == ["id", "index"], ds
+    for i in range(len(dfs_segmented_by_points)):
+        test1 = ds.sel(id=i)["test1"]
+        test2 = ds.sel(id=i)["test2"]
+        assert np.all(
+            np.equal(test1, np.arange(len(dfs_segmented_by_points)) * i)
+        ), test1
+        assert np.all(
+            np.equal(test2, np.arange(len(dfs_segmented_by_points)) ** i)
+        ), test2
+
+
+def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
+    os.mkdir(tmpdir.join("data"))
+    fns = {}
+    for var, df in dfs_segmented_by_vars.items():
+        fn = tmpdir.join("data", f"{var}.csv")
+        df.to_csv(fn)
+        fns[var] = fn
+
+    ds = hydromt.io.open_mfcsv(fns, "id", segmented_by="var")
+
+    assert sorted(list(ds.data_vars.keys())) == ["test1", "test2"], ds
+    ids = ds.id.values
+    for i in ids:
+        test1 = ds.sel(id=i)["test1"]
+        test2 = ds.sel(id=i)["test2"]
+        assert np.all(np.equal(test1, np.arange(len(ids)) * int(i))), test1
+        assert np.all(np.equal(test2, np.arange(len(ids)) ** int(i))), test2
 
 
 def test_rasterio_errors(tmpdir, rioda):
@@ -198,30 +294,3 @@ def test_rasterio_errors(tmpdir, rioda):
         da0.raster.to_raster(str(tmpdir.join("test2.tif")), count=3)
     with pytest.raises(ValueError, match="Extension unknown for driver"):
         da0.to_dataset().raster.to_mapstack(root=str(tmpdir), driver="unknown")
-
-
-@pytest.mark.skipif(not _compat.HAS_PCRASTER, reason="PCRaster not installed.")
-def test_io_pcr(tmpdir):
-    # test write ldd with clone
-    da = raster.full_from_transform(
-        [0.5, 0.0, 3.0, 0.0, -0.5, -9.0], (4, 6), nodata=247, dtype=np.uint8, name="ldd"
-    )
-    fn_ldd = str(tmpdir.join("test_ldd.map"))
-    da.raster.to_raster(fn_ldd, driver="PCRaster", pcr_vs="ldd")
-    assert os.path.isfile(fn_ldd)
-    # test ordinal
-    da.raster.to_raster(fn_ldd, driver="PCRaster", pcr_vs="ordinal", clone_path=fn_ldd)
-    assert os.path.isfile(fn_ldd)
-    da.expand_dims("time").raster.to_raster(
-        tmpdir.join("testldd.map"), driver="PCRaster"
-    )
-    assert os.path.isfile(tmpdir.join("testldd0.001"))
-    ds_in = hydromt.open_mfraster(
-        str(tmpdir.join("testldd*")), concat=True, mask_nodata=True
-    )
-    assert "dim0" in ds_in.coords
-    # mapstack
-    prefix = "test_"
-    root = str(tmpdir)
-    assert np.all([np.isnan(ds_in[n].raster.nodata) for n in ds_in.raster.vars])
-    ds_in.raster.to_mapstack(join(root, "pcr"), prefix=prefix, driver="PCRaster")
