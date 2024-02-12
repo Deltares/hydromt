@@ -126,7 +126,9 @@ def test_aws_worldcover():
     assert da.name == "landuse"
 
 
-@pytest.mark.skipif(system() == "Windows", reason="Temprorarily disable failing test")
+@pytest.mark.skipif(
+    system() == "Windows", reason="fails due to expired certificate at dest"
+)
 def test_http_data():
     dc = DataCatalog().from_dict(
         {
