@@ -44,7 +44,6 @@ jobs:
         with:
           path: |
             ~/miniconda3
-            ~/pycache
             ./docs/_build
           # the below two settings mean we'll alway srestore the cache
           # but the cache hit output can tell us if we have to update afterwards
@@ -71,13 +70,15 @@ jobs:
       - name: Generate dummy docs
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-           ~/miniconda3/condabin/mamba run -n hydromt sphinx-build ./docs/source ./docs/_build -b dummy
+          export PATH=/usr/share/miniconda3/bin:$PATH
+           ~/miniconda3/condabin/mamba run -n hydromt sphinx-build ./docs ./docs/_build -b dummy -W
 
       - name: Generate docs
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
         run: |
-          ~/miniconda3/condabin/mamba run -n hydromt sphinx-build docs/source docs/_build
-          echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
+          export PATH=/usr/share/miniconda3/bin:$PATH
+          PYTHONPYCACHEPREFIX=~/pycache ~/miniconda3/condabin/mamba run -n hydromt sphinx-build -M html ./docs ./docs/_build -W
+          echo "DOC_VERSION=$(~/miniconda3/condabin/mamba run -n hydromt python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
