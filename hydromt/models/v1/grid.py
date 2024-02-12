@@ -1,4 +1,4 @@
-"""Grid ModelComponent."""
+"""Grid Component."""
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
@@ -29,8 +29,8 @@ from .model_utils import (
 logger = logging.getLogger(__name__)
 
 
-class GridModelComponent(ModelComponent):
-    """GridModelComponent class."""
+class GridComponent(ModelComponent):
+    """GridComponent class."""
 
     def __init__(self, root, logger=logger):
         # self._model_ref = weakref.ref(model) TODO: discuss if this is necessary
@@ -121,8 +121,8 @@ class GridModelComponent(ModelComponent):
         else:
             _assert_write_mode(write)
             # write_nc requires dict - use dummy 'grid' key
-            return write_nc(
-                {"grid": self._data},  # TODO: use a name argument or fn as key
+            write_nc(
+                {"grid": self._data},
                 fn,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
@@ -160,370 +160,7 @@ class GridModelComponent(ModelComponent):
         for ds in loaded_nc_files.values():
             self.set(ds)
 
-    def create(self):
-        """Create grid."""
-        raise NotImplementedError
-
-    @property
-    def res(self) -> Tuple[float, float] | None:
-        """Returns the resolution of the model grid."""
-        if len(self._data) > 0:
-            return self._data.raster.res
-        _exec_nodata_strat(
-            msg="No grid data found for deriving resolution",
-            strategy=NoDataStrategy.IGNORE,
-            logger=logger,
-        )
-
-    @property
-    def transform(self) -> Affine | None:
-        """Returns spatial transform of the model grid."""
-        if len(self._data) > 0:
-            return self._data.raster.transform
-        _exec_nodata_strat(
-            msg="No grid data found for deriving transform",
-            strategy=NoDataStrategy.IGNORE,
-            logger=logger,
-        )
-
-    @property
-    def crs(self) -> CRS | None:
-        """Returns coordinate reference system embedded in the model grid."""
-        if self._data.raster.crs is not None:
-            return CRS(self._data.raster.crs)
-        logger.warn("Grid data has no crs")
-
-    @property
-    def bounds(self) -> List[float] | None:
-        """Returns the bounding box of the model grid."""
-        if len(self._data) > 0:
-            return self._data.raster.bounds
-        _exec_nodata_strat(
-            msg="No grid data found for deriving bounds",
-            strategy=NoDataStrategy.IGNORE,
-            logger=logger,
-        )
-
-    @property
-    def region(self) -> gpd.GeoDataFrame | None:
-        """Returns the geometry of the model area of interest."""
-        if len(self._data) > 0:
-            crs = self.crs
-            if crs is not None and hasattr(crs, "to_epsg"):
-                crs = crs.to_epsg()  # not all CRS have an EPSG code
-            return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
-        _exec_nodata_strat(
-            msg="No grid data found for deriving region",
-            strategy=NoDataStrategy.IGNORE,
-            logger=logger,
-        )
-
-    @property
-    def grid(self) -> xr.Dataset:
-        """Model static gridded data as xarray.Dataset."""
-        if self._data is None:
-            self._initialize_grid()
-        return self._data
-
-    def _initialize_grid(self, skip_read: bool = False, read: bool = True) -> None:
-        """Initialize grid object."""
-        if self._data is None:
-            self._data = xr.Dataset()
-            if read and not skip_read:
-                self.read()
-
-    def set_crs(self, crs: CRS) -> None:
-        """Set coordinate reference system of the model grid."""
-        if len(self._data) > 0:
-            self._data.raster.set_crs(crs)
-
-    def setup_grid_from_constant(
-        self,
-        constant: Union[int, float],
-        name: str,
-        dtype: Optional[str] = "float32",  # TODO: change dtype to np.dtype
-        nodata: Optional[Union[int, float]] = None,
-        mask_name: Optional[str] = "mask",
-    ) -> List[str]:
-        """HYDROMT CORE METHOD: Adds a grid based on a constant value.
-
-        Parametersfr
-        ----------
-        constant: int, float
-            Constant value to fill grid with.
-        name: str
-            Name of grid.
-        dtype: str, optional
-            Data type of grid. By default 'float32'.
-        nodata: int, float, optional
-            Nodata value. By default infered from dtype.
-        mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
-            Use None to disable masking.
-
-        Returns
-        -------
-        list
-            Names of added model grid layer.
-        """
-        da = workflows.grid.grid_from_constant(
-            grid_like=self._data,
-            constant=constant,
-            name=name,
-            dtype=dtype,
-            nodata=nodata,
-            mask_name=mask_name,
-        )
-        # Add to grid
-        self.set(da)
-
-        return [name]
-
-    def setup_grid_from_rasterdataset(
-        self,
-        raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
-        data_catalog: DataCatalog,
-        variables: Optional[List] = None,
-        fill_method: Optional[str] = None,
-        reproject_method: Optional[Union[List, str]] = "nearest",
-        mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = None,
-    ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
-
-        If raster is a dataset, all variables will be added unless ``variables`` list
-        is specified.
-
-        Adds model layers:
-
-        * **raster.name** grid: data from raster_fn
-
-        Parameters
-        ----------
-        raster_fn: str, Path, xr.DataArray, xr.Dataset
-            Data catalog key, path to raster file or raster xarray data object.
-            If a path to a raster file is provided it will be added
-            to the data_catalog with its name based on the file basename without
-            extension.
-        variables: list, optional
-            List of variables to add to grid from raster_fn. By default all.
-        fill_method : str, optional
-            If specified, fills nodata values using fill_nodata method.
-            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
-        reproject_method: list, str, optional
-            See rasterio.warp.reproject for existing methods, by default 'nearest'.
-            Can provide a list corresponding to ``variables``.
-        mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
-            Use None to disable masking.
-        rename: dict, optional
-            Dictionary to rename variable names in raster_fn before adding to grid
-            {'name_in_raster_fn': 'name_in_grid'}. By default empty.
-
-        Returns
-        -------
-        list
-            Names of added model map layers
-        """
-        rename = rename or {}
-        self.logger.info(f"Preparing grid data from raster source {raster_fn}")
-        # Read raster data and select variables
-        ds = data_catalog.get_rasterdataset(
-            raster_fn,
-            geom=self.region,
-            buffer=2,
-            variables=variables,
-            single_var_as_array=False,
-        )
-        # Data resampling
-        ds_out = workflows.grid.grid_from_rasterdataset(
-            grid_like=self._data,
-            ds=ds,
-            variables=variables,
-            fill_method=fill_method,
-            reproject_method=reproject_method,
-            mask_name=mask_name,
-            rename=rename,
-        )
-        # Add to grid
-        self.set(ds_out)
-
-        return list(ds_out.data_vars.keys())
-
-    def setup_grid_from_raster_reclass(
-        self,
-        data_catalog: DataCatalog,
-        raster_fn: Union[str, Path, xr.DataArray],
-        reclass_table_fn: Union[str, Path, pd.DataFrame],
-        reclass_variables: List,
-        variable: Optional[str] = None,
-        fill_method: Optional[str] = None,
-        reproject_method: Optional[Union[List, str]] = "nearest",
-        mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = None,
-        **kwargs,
-    ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
-
-        Adds model layers:
-
-        * **reclass_variables** grid: reclassified raster data
-
-        Parameters
-        ----------
-        raster_fn: str, Path, xr.DataArray
-            Data catalog key, path to raster file or raster xarray data object.
-            Should be a DataArray. Else use `variable` argument for selection.
-        reclass_table_fn: str, Path, pd.DataFrame
-            Data catalog key, path to tabular data file or tabular pandas dataframe
-            object for the reclassification table of `raster_fn`.
-        reclass_variables: list
-            List of reclass_variables from reclass_table_fn table to add to maps.
-            Index column should match values in `raster_fn`.
-        variable: str, optional
-            Name of raster_fn dataset variable to use. This is only required when
-            reading datasets with multiple variables.
-            By default None.
-        fill_method : str, optional
-            If specified, fills nodata values in `raster_fn` using fill_nodata method
-            before reclassifying. Available methods are
-            {'linear', 'nearest', 'cubic', 'rio_idw'}.
-        reproject_method: str, optional
-            See rasterio.warp.reproject for existing methods, by default "nearest".
-            Can provide a list corresponding to ``reclass_variables``.
-        mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
-            Use None to disable masking.
-        rename: dict, optional
-            Dictionary to rename variable names in reclass_variables before adding to
-            grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
-
-        **kwargs : dict
-            Additional keyword arguments to be passed to `get_rasterdataset`
-
-        Returns
-        -------
-        list
-            Names of added model grid layers
-        """  # noqa: E501
-        rename = rename or dict()
-        self.logger.info(
-            f"Preparing grid data by reclassifying the data in {raster_fn} based "
-            f"on {reclass_table_fn}"
-        )
-        # Read raster data and remapping table
-        da = data_catalog.get_rasterdataset(
-            raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
-        )
-        if not isinstance(da, xr.DataArray):
-            raise ValueError(
-                f"raster_fn {raster_fn} should be a single variable. "
-                "Please select one using the 'variable' argument"
-            )
-        df_vars = data_catalog.get_dataframe(
-            reclass_table_fn, variables=reclass_variables
-        )
-        # Data resampling
-        ds_vars = workflows.grid.grid_from_raster_reclass(
-            grid_like=self._data,
-            da=da,
-            reclass_table=df_vars,
-            reclass_variables=reclass_variables,
-            fill_method=fill_method,
-            reproject_method=reproject_method,
-            mask_name=mask_name,
-            rename=rename,
-        )
-        # Add to maps
-        self.set(ds_vars)
-
-        return list(ds_vars.data_vars.keys())
-
-    def setup_grid_from_geodataframe(
-        self,
-        data_catalog: DataCatalog,
-        vector_fn: Union[str, Path, gpd.GeoDataFrame],
-        variables: Optional[Union[List, str]] = None,
-        nodata: Optional[Union[List, int, float]] = -1,
-        rasterize_method: Optional[str] = "value",
-        mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = None,
-        all_touched: Optional[bool] = True,
-    ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
-
-        Several type of rasterization are possible:
-            * "fraction": the fraction of the grid cell covered by the vector
-                shape is returned.
-            * "area": the area of the grid cell covered by the vector shape is returned.
-            * "value": the value from the variables columns of vector_fn are used.
-                If this is used, variables must be specified.
-
-        Parameters
-        ----------
-        vector_fn : str, Path, gpd.GeoDataFrame
-            Data catalog key, path to vector file or a vector geopandas object.
-        variables : List, str, optional
-            List of variables to add to grid from vector_fn. Required if
-            rasterize_method is "value", by default None.
-        nodata : List, int, float, optional
-            No data value to use for rasterization, by default -1. If a list is
-            provided, it should have the same length has variables.
-        rasterize_method : str, optional
-            Method to rasterize the vector data. Either {"value", "fraction", "area"}.
-            If "value", the value from the variables columns in vector_fn are used
-            directly in the raster. If "fraction", the fraction of the grid
-            cell covered by the vector file is returned. If "area", the area of the
-            grid cell covered by the vector file is returned.
-        mask_name: str, optional
-            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
-            Use None to disable masking.
-        rename: dict, optional
-            Dictionary to rename variable names in variables before adding to grid
-            {'name_in_variables': 'name_in_grid'}. To rename with method fraction or
-            area use {'vector_fn': 'name_in_grid'}. By default empty.
-        all_touched : bool, optional
-            If True (default), all pixels touched by geometries will be burned in.
-            If false, only pixels whose center is within the polygon or that are
-            selected by Bresenham's line algorithm will be burned in.
-
-        Returns
-        -------
-        list
-            Names of added model grid layers
-        """  # noqa: E501
-        rename = rename or dict()
-        self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
-        gdf = data_catalog.get_geodataframe(
-            vector_fn, geom=self.region, dst_crs=self.crs
-        )
-        if gdf.empty:
-            self.logger.warning(
-                f"No shapes of {vector_fn} found within region,"
-                " skipping setup_grid_from_vector."
-            )
-            return
-        # Data resampling
-        if vector_fn in rename.keys():
-            # In case of choosing a new name with area or fraction method pass
-            # the name directly
-            rename = rename[vector_fn]
-        ds = workflows.grid.grid_from_geodataframe(
-            grid_like=self._data,
-            gdf=gdf,
-            variables=variables,
-            nodata=nodata,
-            rasterize_method=rasterize_method,
-            mask_name=mask_name,
-            rename=rename,
-            all_touched=all_touched,
-        )
-        # Add to grid
-        self.set(ds)
-
-        return list(ds.data_vars.keys())
-
-    def setup_grid(
+    def create(
         self,
         region: dict,
         data_catalog: DataCatalog,
@@ -747,3 +384,362 @@ class GridModelComponent(ModelComponent):
         self.set(grid)
 
         return grid
+
+    @property
+    def res(self) -> Tuple[float, float] | None:
+        """Returns the resolution of the model grid."""
+        if len(self._data) > 0:
+            return self._data.raster.res
+        _exec_nodata_strat(
+            msg="No grid data found for deriving resolution",
+            strategy=NoDataStrategy.IGNORE,
+            logger=logger,
+        )
+
+    @property
+    def transform(self) -> Affine | None:
+        """Returns spatial transform of the model grid."""
+        if len(self._data) > 0:
+            return self._data.raster.transform
+        _exec_nodata_strat(
+            msg="No grid data found for deriving transform",
+            strategy=NoDataStrategy.IGNORE,
+            logger=logger,
+        )
+
+    @property
+    def crs(self) -> CRS | None:
+        """Returns coordinate reference system embedded in the model grid."""
+        if self._data.raster.crs is not None:
+            return CRS(self._data.raster.crs)
+        logger.warn("Grid data has no crs")
+
+    @property
+    def bounds(self) -> List[float] | None:
+        """Returns the bounding box of the model grid."""
+        if len(self._data) > 0:
+            return self._data.raster.bounds
+        _exec_nodata_strat(
+            msg="No grid data found for deriving bounds",
+            strategy=NoDataStrategy.IGNORE,
+            logger=logger,
+        )
+
+    @property
+    def region(self) -> gpd.GeoDataFrame | None:
+        """Returns the geometry of the model area of interest."""
+        if len(self._data) > 0:
+            crs = self.crs
+            if crs is not None and hasattr(crs, "to_epsg"):
+                crs = crs.to_epsg()  # not all CRS have an EPSG code
+            return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
+        _exec_nodata_strat(
+            msg="No grid data found for deriving region",
+            strategy=NoDataStrategy.IGNORE,
+            logger=logger,
+        )
+
+    @property
+    def grid(self) -> xr.Dataset:
+        """Model static gridded data as xarray.Dataset."""
+        if self._data is None:
+            self._initialize_grid()
+        return self._data
+
+    def _initialize_grid(self, skip_read: bool = False, read: bool = True) -> None:
+        """Initialize grid object."""
+        if self._data is None:
+            self._data = xr.Dataset()
+            if read and not skip_read:
+                self.read()
+
+    def set_crs(self, crs: CRS) -> None:
+        """Set coordinate reference system of the model grid."""
+        if len(self._data) > 0:
+            self._data.raster.set_crs(crs)
+
+    def add_data_from_constant(
+        self,
+        constant: Union[int, float],
+        name: str,
+        dtype: Optional[str] = "float32",  # TODO: change dtype to np.dtype
+        nodata: Optional[Union[int, float]] = None,
+        mask_name: Optional[str] = "mask",
+    ) -> List[str]:
+        """HYDROMT CORE METHOD: Adds a grid based on a constant value.
+
+        Parametersfr
+        ----------
+        constant: int, float
+            Constant value to fill grid with.
+        name: str
+            Name of grid.
+        dtype: str, optional
+            Data type of grid. By default 'float32'.
+        nodata: int, float, optional
+            Nodata value. By default infered from dtype.
+        mask_name: str, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+            Use None to disable masking.
+
+        Returns
+        -------
+        list
+            Names of added model grid layer.
+        """
+        da = workflows.grid.grid_from_constant(
+            grid_like=self._data,
+            constant=constant,
+            name=name,
+            dtype=dtype,
+            nodata=nodata,
+            mask_name=mask_name,
+        )
+        # Add to grid
+        self.set(da)
+
+        return [name]
+
+    def add_data_from_rasterdataset(
+        self,
+        raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
+        data_catalog: DataCatalog,
+        variables: Optional[List] = None,
+        fill_method: Optional[str] = None,
+        reproject_method: Optional[Union[List, str]] = "nearest",
+        mask_name: Optional[str] = "mask",
+        rename: Optional[Dict] = None,
+    ) -> List[str]:
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
+
+        If raster is a dataset, all variables will be added unless ``variables`` list
+        is specified.
+
+        Adds model layers:
+
+        * **raster.name** grid: data from raster_fn
+
+        Parameters
+        ----------
+        raster_fn: str, Path, xr.DataArray, xr.Dataset
+            Data catalog key, path to raster file or raster xarray data object.
+            If a path to a raster file is provided it will be added
+            to the data_catalog with its name based on the file basename without
+            extension.
+        variables: list, optional
+            List of variables to add to grid from raster_fn. By default all.
+        fill_method : str, optional
+            If specified, fills nodata values using fill_nodata method.
+            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        reproject_method: list, str, optional
+            See rasterio.warp.reproject for existing methods, by default 'nearest'.
+            Can provide a list corresponding to ``variables``.
+        mask_name: str, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+            Use None to disable masking.
+        rename: dict, optional
+            Dictionary to rename variable names in raster_fn before adding to grid
+            {'name_in_raster_fn': 'name_in_grid'}. By default empty.
+
+        Returns
+        -------
+        list
+            Names of added model map layers
+        """
+        rename = rename or {}
+        self.logger.info(f"Preparing grid data from raster source {raster_fn}")
+        # Read raster data and select variables
+        ds = data_catalog.get_rasterdataset(
+            raster_fn,
+            geom=self.region,
+            buffer=2,
+            variables=variables,
+            single_var_as_array=False,
+        )
+        # Data resampling
+        ds_out = workflows.grid.grid_from_rasterdataset(
+            grid_like=self._data,
+            ds=ds,
+            variables=variables,
+            fill_method=fill_method,
+            reproject_method=reproject_method,
+            mask_name=mask_name,
+            rename=rename,
+        )
+        # Add to grid
+        self.set(ds_out)
+
+        return list(ds_out.data_vars.keys())
+
+    def add_data_from_raster_reclass(
+        self,
+        data_catalog: DataCatalog,
+        raster_fn: Union[str, Path, xr.DataArray],
+        reclass_table_fn: Union[str, Path, pd.DataFrame],
+        reclass_variables: List,
+        variable: Optional[str] = None,
+        fill_method: Optional[str] = None,
+        reproject_method: Optional[Union[List, str]] = "nearest",
+        mask_name: Optional[str] = "mask",
+        rename: Optional[Dict] = None,
+        **kwargs,
+    ) -> List[str]:
+        """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+
+        Adds model layers:
+
+        * **reclass_variables** grid: reclassified raster data
+
+        Parameters
+        ----------
+        raster_fn: str, Path, xr.DataArray
+            Data catalog key, path to raster file or raster xarray data object.
+            Should be a DataArray. Else use `variable` argument for selection.
+        reclass_table_fn: str, Path, pd.DataFrame
+            Data catalog key, path to tabular data file or tabular pandas dataframe
+            object for the reclassification table of `raster_fn`.
+        reclass_variables: list
+            List of reclass_variables from reclass_table_fn table to add to maps.
+            Index column should match values in `raster_fn`.
+        variable: str, optional
+            Name of raster_fn dataset variable to use. This is only required when
+            reading datasets with multiple variables.
+            By default None.
+        fill_method : str, optional
+            If specified, fills nodata values in `raster_fn` using fill_nodata method
+            before reclassifying. Available methods are
+            {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        reproject_method: str, optional
+            See rasterio.warp.reproject for existing methods, by default "nearest".
+            Can provide a list corresponding to ``reclass_variables``.
+        mask_name: str, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+            Use None to disable masking.
+        rename: dict, optional
+            Dictionary to rename variable names in reclass_variables before adding to
+            grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+
+        **kwargs : dict
+            Additional keyword arguments to be passed to `get_rasterdataset`
+
+        Returns
+        -------
+        list
+            Names of added model grid layers
+        """  # noqa: E501
+        rename = rename or dict()
+        self.logger.info(
+            f"Preparing grid data by reclassifying the data in {raster_fn} based "
+            f"on {reclass_table_fn}"
+        )
+        # Read raster data and remapping table
+        da = data_catalog.get_rasterdataset(
+            raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
+        )
+        if not isinstance(da, xr.DataArray):
+            raise ValueError(
+                f"raster_fn {raster_fn} should be a single variable. "
+                "Please select one using the 'variable' argument"
+            )
+        df_vars = data_catalog.get_dataframe(
+            reclass_table_fn, variables=reclass_variables
+        )
+        # Data resampling
+        ds_vars = workflows.grid.grid_from_raster_reclass(
+            grid_like=self._data,
+            da=da,
+            reclass_table=df_vars,
+            reclass_variables=reclass_variables,
+            fill_method=fill_method,
+            reproject_method=reproject_method,
+            mask_name=mask_name,
+            rename=rename,
+        )
+        # Add to maps
+        self.set(ds_vars)
+
+        return list(ds_vars.data_vars.keys())
+
+    def add_data_from_geodataframe(
+        self,
+        data_catalog: DataCatalog,
+        vector_fn: Union[str, Path, gpd.GeoDataFrame],
+        variables: Optional[Union[List, str]] = None,
+        nodata: Optional[Union[List, int, float]] = -1,
+        rasterize_method: Optional[str] = "value",
+        mask_name: Optional[str] = "mask",
+        rename: Optional[Dict] = None,
+        all_touched: Optional[bool] = True,
+    ) -> List[str]:
+        """HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
+
+        Several type of rasterization are possible:
+            * "fraction": the fraction of the grid cell covered by the vector
+                shape is returned.
+            * "area": the area of the grid cell covered by the vector shape is returned.
+            * "value": the value from the variables columns of vector_fn are used.
+                If this is used, variables must be specified.
+
+        Parameters
+        ----------
+        vector_fn : str, Path, gpd.GeoDataFrame
+            Data catalog key, path to vector file or a vector geopandas object.
+        variables : List, str, optional
+            List of variables to add to grid from vector_fn. Required if
+            rasterize_method is "value", by default None.
+        nodata : List, int, float, optional
+            No data value to use for rasterization, by default -1. If a list is
+            provided, it should have the same length has variables.
+        rasterize_method : str, optional
+            Method to rasterize the vector data. Either {"value", "fraction", "area"}.
+            If "value", the value from the variables columns in vector_fn are used
+            directly in the raster. If "fraction", the fraction of the grid
+            cell covered by the vector file is returned. If "area", the area of the
+            grid cell covered by the vector file is returned.
+        mask_name: str, optional
+            Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+            Use None to disable masking.
+        rename: dict, optional
+            Dictionary to rename variable names in variables before adding to grid
+            {'name_in_variables': 'name_in_grid'}. To rename with method fraction or
+            area use {'vector_fn': 'name_in_grid'}. By default empty.
+        all_touched : bool, optional
+            If True (default), all pixels touched by geometries will be burned in.
+            If false, only pixels whose center is within the polygon or that are
+            selected by Bresenham's line algorithm will be burned in.
+
+        Returns
+        -------
+        list
+            Names of added model grid layers
+        """  # noqa: E501
+        rename = rename or dict()
+        self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
+        gdf = data_catalog.get_geodataframe(
+            vector_fn, geom=self.region, dst_crs=self.crs
+        )
+        if gdf.empty:
+            self.logger.warning(
+                f"No shapes of {vector_fn} found within region,"
+                " skipping setup_grid_from_vector."
+            )
+            return
+        # Data resampling
+        if vector_fn in rename.keys():
+            # In case of choosing a new name with area or fraction method pass
+            # the name directly
+            rename = rename[vector_fn]
+        ds = workflows.grid.grid_from_geodataframe(
+            grid_like=self._data,
+            gdf=gdf,
+            variables=variables,
+            nodata=nodata,
+            rasterize_method=rasterize_method,
+            mask_name=mask_name,
+            rename=rename,
+            all_touched=all_touched,
+        )
+        # Add to grid
+        self.set(ds)
+
+        return list(ds.data_vars.keys())
