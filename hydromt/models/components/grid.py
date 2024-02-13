@@ -8,15 +8,13 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from affine import Affine
-
-# TODO change import when moving this file
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt import raster, workflows
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt.data_catalog import DataCatalog
+from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.models.components.model_component import ModelComponent
 from hydromt.models.model_utils import (
@@ -24,12 +22,22 @@ from hydromt.models.model_utils import (
     write_nc,
 )
 from hydromt.models.root import ModelRoot
+from hydromt.workflows.basin_mask import get_basin_geometry, parse_region
+from hydromt.workflows.grid import (
+    grid_from_constant,
+    grid_from_geodataframe,
+    grid_from_raster_reclass,
+    grid_from_rasterdataset,
+    rotated_grid,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class GridComponent(ModelComponent):
     """GridComponent class."""
+
+    _data = []
 
     def __init__(
         self,
@@ -39,7 +47,6 @@ class GridComponent(ModelComponent):
         logger=logger,
     ):
         # self._model_ref = weakref.ref(model) TODO: discuss if this is necessary
-        self._data = None
         self.logger = logger
         self.root = root
         self.data_catalog = data_catalog
@@ -128,7 +135,7 @@ class GridComponent(ModelComponent):
             if not self.root.is_writing_mode():
                 raise IOError("Model opened in read-only mode")
             # write_nc requires dict - use dummy 'grid' key
-            write_nc(
+            return write_nc(  # Can return DeferedFileClose object
                 {"grid": self._data},
                 fn,
                 gdal_compliant=gdal_compliant,
@@ -162,7 +169,7 @@ class GridComponent(ModelComponent):
             kwargs["load"] = True
         loaded_nc_files = read_nc(
             fn, self.root, logger=logger, single_var_as_array=False, **kwargs
-        )  # TODO: decide where read_nc should be placed
+        )
         for ds in loaded_nc_files.values():
             self.set(ds)
 
@@ -238,7 +245,7 @@ class GridComponent(ModelComponent):
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             # Do not parse_region for grid as we want to allow for more (file) formats
-            kind, region = workflows.parse_region(
+            kind, region = parse_region(
                 region, data_catalog=self.data_catalog, logger=self.logger
             )
         elif kind != "grid":
@@ -287,7 +294,7 @@ class GridComponent(ModelComponent):
                 )
             else:  # rotated
                 geomu = geom.unary_union
-                x0, y0, mmax, nmax, rot = workflows.grid.rotated_grid(
+                x0, y0, mmax, nmax, rot = rotated_grid(
                     geomu, res, dec_origin=dec_origin, dec_rotation=dec_rotation
                 )
                 transform = (
@@ -302,7 +309,7 @@ class GridComponent(ModelComponent):
             if "bounds" not in region:
                 region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
             # get basin geometry
-            geom, xy = workflows.get_basin_geometry(
+            geom, xy = get_basin_geometry(
                 ds=ds_hyd,
                 kind=kind,
                 logger=self.logger,
@@ -451,11 +458,11 @@ class GridComponent(ModelComponent):
             self._initialize_grid()
         return self._data
 
-    def _initialize_grid(self, skip_read: bool = False, read: bool = True) -> None:
+    def _initialize_grid(self, skip_read: bool = False) -> None:
         """Initialize grid object."""
         if self._data is None:
             self._data = xr.Dataset()
-            if read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
     def set_crs(self, crs: CRS) -> None:
@@ -492,7 +499,7 @@ class GridComponent(ModelComponent):
         list
             Names of added model grid layer.
         """
-        da = workflows.grid.grid_from_constant(
+        da = grid_from_constant(
             grid_like=self._data,
             constant=constant,
             name=name,
@@ -561,7 +568,7 @@ class GridComponent(ModelComponent):
             single_var_as_array=False,
         )
         # Data resampling
-        ds_out = workflows.grid.grid_from_rasterdataset(
+        ds_out = grid_from_rasterdataset(
             grid_like=self._data,
             ds=ds,
             variables=variables,
@@ -648,7 +655,7 @@ class GridComponent(ModelComponent):
             reclass_table_fn, variables=reclass_variables
         )
         # Data resampling
-        ds_vars = workflows.grid.grid_from_raster_reclass(
+        ds_vars = grid_from_raster_reclass(
             grid_like=self._data,
             da=da,
             reclass_table=df_vars,
@@ -731,7 +738,7 @@ class GridComponent(ModelComponent):
             # In case of choosing a new name with area or fraction method pass
             # the name directly
             rename = rename[vector_fn]
-        ds = workflows.grid.grid_from_geodataframe(
+        ds = grid_from_geodataframe(
             grid_like=self._data,
             gdf=gdf,
             variables=variables,
