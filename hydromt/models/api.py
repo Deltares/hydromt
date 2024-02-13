@@ -101,7 +101,7 @@ class Model(object, metaclass=ABCMeta):
         dist_name, version = "unknown", "NA"
         if self._NAME in MODELS:
             ep = MODELS[self._NAME]
-            dist: Distribution | None = ep.dist
+            dist: Optional[Distribution] = ep.dist
             if dist:
                 dist_name = dist.name
                 version = dist.version

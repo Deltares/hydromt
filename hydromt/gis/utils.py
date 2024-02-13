@@ -8,7 +8,7 @@ import glob
 import logging
 import os
 from os.path import dirname
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -22,6 +22,7 @@ from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
 from hydromt import _compat
+from hydromt._typing import Bbox, Geom, GpdShapeGeom
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 
@@ -68,8 +69,6 @@ GDAL_DRIVER_CODE_MAP = {
 }
 GDAL_EXT_CODE_MAP = {v: k for k, v in GDAL_DRIVER_CODE_MAP.items()}
 
-GPD_TYPES = Union[gpd.GeoDataFrame, gpd.GeoSeries]
-GEOM_TYPES = Union[GPD_TYPES, BaseGeometry]
 
 ## GEOM functions
 
@@ -209,7 +208,12 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
     return idx
 
 
-def parse_geom_bbox_buffer(geom=None, bbox=None, buffer=0):
+def parse_geom_bbox_buffer(
+    geom: Optional[Geom] = None,
+    bbox: Optional[Bbox] = None,
+    buffer: float = 0.0,
+    crs: Optional[CRS] = None,
+):
     """Parse geom or bbox to a (buffered) geometry.
 
     Arguments
@@ -221,17 +225,24 @@ def parse_geom_bbox_buffer(geom=None, bbox=None, buffer=0):
         (in WGS84 coordinates).
     buffer : float, optional
         Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+    crs: pyproj.CRS, optional
+        projection of the bbox or geometry. If the geometry already has a crs, this
+        argument is ignored. Defaults to EPSG:4236.
 
     Returns
     -------
     geom: geometry
         the actual geometry
     """
+    if crs is None:
+        crs = CRS("EPSG:4326")
     if geom is None and bbox is not None:
         # convert bbox to geom with crs EPGS:4326 to apply buffer later
-        geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+        geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=crs)
     elif geom is None:
         raise ValueError("No geom or bbox provided.")
+    elif geom.crs is None:
+        geom = geom.set_crs(crs)
 
     if buffer > 0:
         # make sure geom is projected > buffer in meters!
@@ -597,10 +608,10 @@ def to_geographic_bbox(bbox, source_crs):
 
 def bbox_from_file_and_filters(
     fn: str,
-    bbox: Union[GEOM_TYPES, None] = None,
-    mask: GEOM_TYPES | None = None,
-    crs: CRS | None = None,
-) -> Tuple[float, float, float, float] | None:
+    bbox: Optional[GpdShapeGeom] = None,
+    mask: Optional[GpdShapeGeom] = None,
+    crs: Optional[CRS] = None,
+) -> Optional[Bbox]:
     """Create a bbox from the file metadata and filter options.
 
     Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.
@@ -611,12 +622,12 @@ def bbox_from_file_and_filters(
 
     Parameters
     ----------
-    fn: str,
-        uri to the filename.
+    fn: IOBase,
+        opened file.
     bbox: GeoDataFrame | GeoSeries | BaseGeometry
-        bounding box to filter the data while reading
+        bounding box to filter the data while reading.
     mask: GeoDataFrame | GeoSeries | BaseGeometry
-        mask to filter the data while reading
+        mask to filter the data while reading.
     crs: pyproj.CRS
         coordinate reference system of the bounding box or geometry. If already set,
         this argument is ignored.
