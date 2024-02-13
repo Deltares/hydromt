@@ -54,7 +54,7 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
     # read shapefile
     gdf1 = hydromt.open_vector(fn_shp, bbox=list(geodf.total_bounds))
     assert np.all(gdf1 == geodf)
-    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]})
+    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
     gdf1 = hydromt.open_vector(fn_shp, geom=mask)
     assert np.all(gdf1 == geodf)
     # read geopackage

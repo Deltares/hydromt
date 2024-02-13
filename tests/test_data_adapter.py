@@ -486,7 +486,7 @@ def test_geodataframe(geodf, tmpdir):
     assert isinstance(gdf1, gpd.GeoDataFrame)
     assert np.all(gdf1 == geodf)
     # testt read shapefile using mask
-    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]})
+    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
     gdf1 = hydromt.open_vector(fn_shp, geom=mask)
     assert np.all(gdf1 == geodf)
     # test read with buffer

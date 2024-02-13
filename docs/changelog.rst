@@ -8,6 +8,17 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 
 
 
+Unreleased
+==========
+These additions/ fixes have not been released yet.
+
+Added
+-----
+
+Fixed
+-----
+- Added back geometry mask when reading vector files with `fiona` as engine/ driver
+
 v0.9.3 (2024-02-08)
 ===================
 This release fixes several bugs. Most notably the `NoDataSrategy` is available in much more data reading methods so plugins can use it more directly. Additionally there are some bug fixes relating to reading shapefiles and reading COGs.
