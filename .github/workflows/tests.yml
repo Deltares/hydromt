@@ -7,18 +7,18 @@ on:
       - main
       - v1
     paths:
-      - tests/*
-      - hydromt/*
-      - data/*
+      - tests/**
+      - hydromt/**
+      - data/**
       - pyproject.toml
   pull_request:
     branches:
       - main
       - v1
     paths:
-      - tests/*
-      - hydromt/*
-      - data/*
+      - tests/**
+      - hydromt/**
+      - data/**
       - pyproject.toml
 
 
