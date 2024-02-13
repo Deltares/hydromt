@@ -75,6 +75,7 @@ class DataSource(BaseModel):
     provider: Optional[str] = Field(default=None)
     metadata_resolver: MetaDataResolver
     driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
+    resolver_kwargs: Dict[str, Any] = Field(default_factory=dict)
     unit_add: Dict[str, Any] = Field(default_factory=dict)
     unit_mult: Dict[str, Any] = Field(default_factory=dict)
     rename: Dict[str, str] = Field(default_factory=dict)

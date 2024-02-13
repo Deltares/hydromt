@@ -31,6 +31,7 @@ class TestRasterDataSource:
             RasterDataSource(
                 root=".",
                 name="name",
+                data_type="RasterDataSet",
                 uri="uri",
                 metadata_resolver="does not exist",
                 driver="does not exist",
@@ -72,4 +73,4 @@ class TestRasterDataSource:
             )
 
     def test_read_data(self, example_source: RasterDataSource, rasterds: xr.Dataset):
-        assert rasterds == example_source.read_data()
+        assert rasterds == example_source.read_data()[0]
