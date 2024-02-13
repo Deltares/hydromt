@@ -20,12 +20,13 @@ class PyogrioDriver(GeoDataFrameDriver):
         self,
         uri: str,
         bbox: Optional[Bbox] = None,
-        mask: Optional[gpd.GeoDataFrame] = None,
+        mask: Optional[Geom] = None,
         buffer: float = 0,
         crs: Optional[CRS] = None,
         predicate: str = "intersects",
         logger: Optional[Logger] = None,
-        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO
+        **kwargs,
     ) -> gpd.GeoDataFrame:
         """
         Read data using pyogrio.
