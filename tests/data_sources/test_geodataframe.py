@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from pydantic import ValidationError
 
-from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
+from hydromt.data_sources.geodataframe import GeoDataSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.metadata_resolvers.metadata_resolver import MetaDataResolver
 
@@ -11,20 +11,20 @@ from hydromt.metadata_resolvers.metadata_resolver import MetaDataResolver
 class TestGeoDataFrame:
     @pytest.fixture()
     def example_source(
-        self, mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
-    ) -> GeoDataFrameDataSource:
-        return GeoDataFrameDataSource(
+        self, mock_geodf_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
+    ) -> GeoDataSource:
+        return GeoDataSource(
             root=".",
             name="geojsonfile",
             data_type="GeoDataFrame",
-            driver=mock_driver,
+            driver=mock_geodf_driver,
             metadata_resolver=mock_resolver,
             uri="testuri",
         )
 
     def test_validators(self):
         with pytest.raises(ValidationError) as e_info:
-            GeoDataFrameDataSource(
+            GeoDataSource(
                 root=".",
                 name="name",
                 data_type="GeoDataFrame",
@@ -44,13 +44,13 @@ class TestGeoDataFrame:
         assert error_driver["type"] == "value_error"
 
     def test_model_validate(
-        self, mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
+        self, mock_geodf_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     ):
-        GeoDataFrameDataSource.model_validate(
+        GeoDataSource.model_validate(
             {
                 "name": "geojsonfile",
                 "data_type": "GeoDataFrame",
-                "driver": mock_driver,
+                "driver": mock_geodf_driver,
                 "metadata_resolver": mock_resolver,
                 "uri": "test_uri",
             }
@@ -58,19 +58,17 @@ class TestGeoDataFrame:
         with pytest.raises(
             ValidationError, match="'data_type' must be 'GeoDataFrame'."
         ):
-            GeoDataFrameDataSource.model_validate(
+            GeoDataSource.model_validate(
                 {
                     "name": "geojsonfile",
                     "data_type": "DifferentDataType",
-                    "driver": mock_driver,
+                    "driver": mock_geodf_driver,
                     "metadata_resolver": mock_resolver,
                     "uri": "test_uri",
                 }
             )
 
-    def test_read_data(
-        self, geodf: gpd.GeoDataFrame, example_source: GeoDataFrameDataSource
-    ):
+    def test_read_data(self, geodf: gpd.GeoDataFrame, example_source: GeoDataSource):
         gdf1 = example_source.read_data(bbox=list(geodf.total_bounds))
         assert isinstance(gdf1, gpd.GeoDataFrame)
         assert np.all(gdf1 == geodf)

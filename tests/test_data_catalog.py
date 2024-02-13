@@ -23,7 +23,7 @@ from hydromt.data_catalog import (
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
-from hydromt.data_sources import GeoDataFrameDataSource
+from hydromt.data_sources import GeoDataSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis.utils import to_geographic_bbox
 from hydromt.metadata_resolvers import MetaDataResolver
@@ -32,18 +32,18 @@ CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
 
 
-def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver):
+def test_parser(mock_geodf_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver):
     # valid abs root on windows and linux!
     root = "c:/root" if os.name == "nt" else "/c/root"
     # simple; abs path
     source = {
         "metadata_resolver": mock_resolver,
-        "driver": mock_driver,
+        "driver": mock_geodf_driver,
         "data_type": "GeoDataFrame",
         "uri": f"{root}/to/data.gpkg",
     }
     datasource = _parse_data_source_dict("test", source, root=root)
-    assert isinstance(datasource, GeoDataFrameDataSource)
+    assert isinstance(datasource, GeoDataSource)
     assert datasource.uri == abspath(source["uri"])
     # TODO: do we want to allow Path objects?
     # # test with Path object
@@ -53,7 +53,7 @@ def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     # rel path
     source = {
         "metadata_resolver": mock_resolver,
-        "driver": mock_driver,
+        "driver": mock_geodf_driver,
         "data_type": "GeoDataFrame",
         "uri": "path/to/data.gpkg",
         "kwargs": {"fn": "test"},
@@ -66,7 +66,7 @@ def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     dd = {
         "test": {
             "metadata_resolver": mock_resolver,
-            "driver": mock_driver,
+            "driver": mock_geodf_driver,
             "data_type": "GeoDataFrame",
             "uri": "path/to/data.gpkg",
         },
@@ -86,7 +86,7 @@ def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     dd = {
         "test_{p1}_{p2}": {
             "metadata_resolver": mock_resolver,
-            "driver": mock_driver,
+            "driver": mock_geodf_driver,
             "data_type": "GeoDataFrame",
             "uri": "data_{p2}.gpkg",
             "placeholders": {"p1": ["a", "b"], "p2": ["1", "2", "3"]},
@@ -102,7 +102,7 @@ def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     dd = {
         "test": {
             "metadata_resolver": mock_resolver,
-            "driver": mock_driver,
+            "driver": mock_geodf_driver,
             "data_type": "GeoDataFrame",
             "variants": [
                 {"uri": "path/to/data1.gpkg", "version": "1"},

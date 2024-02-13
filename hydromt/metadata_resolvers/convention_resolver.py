@@ -1,5 +1,6 @@
 """MetaDataResolver using HydroMT naming conventions."""
 from itertools import product
+from logging import Logger, getLogger
 from string import Formatter
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
@@ -13,6 +14,8 @@ from .metadata_resolver import MetaDataResolver
 
 if TYPE_CHECKING:
     from hydromt.data_sources.data_source import DataSource
+
+logger: Logger = getLogger(__name__)
 
 
 class ConventionResolver(MetaDataResolver):
@@ -82,6 +85,7 @@ class ConventionResolver(MetaDataResolver):
         variables: Optional[List[str]] = None,
         zoom_level: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
         **kwargs,
     ) -> list[str]:
         """Resolve the placeholders in the URI."""

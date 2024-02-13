@@ -22,7 +22,7 @@ from hydromt._typing import (
     TotalBounds,
     _exec_nodata_strat,
 )
-from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
+from hydromt.data_sources.geodataframe import GeoDataSource
 from hydromt.gis import parse_geom_bbox_buffer, utils
 
 from .data_adapter_base import DataAdapterBase
@@ -33,7 +33,7 @@ logger: Logger = getLogger(__name__)
 class GeoDataFrameAdapter(DataAdapterBase):
     """The GeoDataFrameAdapter performs transformations on GeoDataFrames."""
 
-    source: GeoDataFrameDataSource
+    source: GeoDataSource
     used: bool = False
 
     def get_data(

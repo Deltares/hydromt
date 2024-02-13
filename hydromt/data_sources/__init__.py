@@ -1,6 +1,7 @@
 """DataSources responsible for validating the DataCatalog."""
 
 from .data_source import DataSource
-from .geodataframe import GeoDataFrameDataSource
+from .geodataframe import GeoDataSource
+from .rasterdataset import RasterDataSource
 
-__all__ = ["DataSource", "GeoDataFrameDataSource"]
+__all__ = ["DataSource", "GeoDataSource", "RasterDataSource"]

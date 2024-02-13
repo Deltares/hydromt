@@ -20,6 +20,7 @@ if HAS_XUGRID:
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers.rasterdataset_driver import RasterDataSetDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.models import MODELS
@@ -251,6 +252,26 @@ def obsda():
 
 
 @pytest.fixture()
+def rasterds():
+    temp = 15 + 8 * np.random.randn(2, 2, 3)
+    precip = 10 * np.random.rand(2, 2, 3)
+    lon = [[-99.83, -99.32], [-99.79, -99.23]]
+    lat = [[42.25, 42.21], [42.63, 42.59]]
+    return xr.Dataset(
+        {
+            "temperature": (["x", "y", "time"], temp),
+            "precipitation": (["x", "y", "time"], precip),
+        },
+        coords={
+            "lon": (["x", "y"], lon),
+            "lat": (["x", "y"], lat),
+            "time": pd.date_range("2014-09-06", periods=3),
+            "reference_time": pd.Timestamp("2014-09-05"),
+        },
+    )
+
+
+@pytest.fixture()
 def ts_extremes():
     rng = np.random.default_rng(12345)
     normal = pd.DataFrame(
@@ -350,13 +371,21 @@ def mesh_model(griduda):
 
 
 @pytest.fixture()
-def mock_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
+def mock_geodf_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
     class MockGeoDataFrameDriver(GeoDataFrameDriver):
         def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
             return geodf
 
-    driver = MockGeoDataFrameDriver.model_validate({})
-    return driver
+    return MockGeoDataFrameDriver.model_validate({})
+
+
+@pytest.fixture()
+def mock_rasterds_driver(rasterds: xr.Dataset) -> RasterDataSetDriver:
+    class MockRasterDataSetDriver(RasterDataSetDriver):
+        def read(self, *args, **kwargs) -> xr.Dataset:
+            return rasterds
+
+    return MockRasterDataSetDriver.model_validate({})
 
 
 @pytest.fixture()

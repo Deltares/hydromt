@@ -1,19 +1,19 @@
 """Generic DataSource for GeoDataFrames."""
 
 from logging import Logger
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 import geopandas as gpd
 from pydantic import ValidationInfo, field_validator, model_validator
 
-from hydromt._typing import NoDataStrategy
+from hydromt._typing import Bbox, Geom, NoDataStrategy
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
 
 from .data_source import DataSource
 
 # placeholder for proper plugin behaviour later on.
-_KNOWN_DRIVERS: dict[str, GeoDataFrameDriver] = {"pyogrio": PyogrioDriver}
+_KNOWN_DRIVERS: Dict[str, GeoDataFrameDriver] = {"pyogrio": PyogrioDriver}
 
 
 def driver_from_str(driver_str: str, **driver_kwargs) -> GeoDataFrameDriver:
@@ -26,7 +26,7 @@ def driver_from_str(driver_str: str, **driver_kwargs) -> GeoDataFrameDriver:
     return _KNOWN_DRIVERS[driver_str](**driver_kwargs)
 
 
-class GeoDataFrameDataSource(DataSource):
+class GeoDataSource(DataSource):
     """
     DataSource for GeoDataFrames.
 
@@ -58,8 +58,8 @@ class GeoDataFrameDataSource(DataSource):
 
     def read_data(
         self,
-        bbox: Optional[List[float]] = None,
-        mask: Optional[gpd.GeoDataFrame] = None,
+        bbox: Optional[Bbox] = None,
+        mask: Optional[Geom] = None,
         buffer: float = 0.0,
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
@@ -75,6 +75,7 @@ class GeoDataFrameDataSource(DataSource):
             predicate=predicate,
             variables=variables,
             handle_nodata=handle_nodata,
+            **self.driver_kwargs,
         )
         if len(uris) > 1:
             raise ValueError("GeoDataFrames cannot have more than 1 source URI.")

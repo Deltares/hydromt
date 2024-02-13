@@ -14,7 +14,7 @@ from pystac import Item as StacItem
 from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
+from hydromt.data_sources.geodataframe import GeoDataSource
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
 
@@ -33,8 +33,8 @@ class TestGeoDataFrameAdapter:
         return uri
 
     @pytest.fixture()
-    def example_source(self, example_geojson: str) -> GeoDataFrameDataSource:
-        return GeoDataFrameDataSource(
+    def example_source(self, example_geojson: str) -> GeoDataSource:
+        return GeoDataSource(
             name="test",
             data_type="GeoDataFrame",
             uri=example_geojson,
@@ -43,9 +43,7 @@ class TestGeoDataFrameAdapter:
         )
 
     @pytest.mark.integration()
-    def test_get_data(
-        self, geodf: gpd.GeoDataFrame, example_source: GeoDataFrameDataSource
-    ):
+    def test_get_data(self, geodf: gpd.GeoDataFrame, example_source: GeoDataSource):
         adapter = GeoDataFrameAdapter(source=example_source)
         gdf = adapter.get_data(list(geodf.total_bounds))
         assert isinstance(gdf, gpd.GeoDataFrame)
