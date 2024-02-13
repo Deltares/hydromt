@@ -24,7 +24,8 @@ from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.models import MODELS
 from hydromt.models.api import Model
-from hydromt.models.components.grid import GridModel
+
+# from hydromt.models.components.grid import GridModel
 from hydromt.models.components.network import NetworkModel
 from hydromt.models.components.vector import VectorModel
 
@@ -304,14 +305,14 @@ def model(demda, world, obsda):
     return mod
 
 
-@pytest.fixture()
-def grid_model(demda, flwda):
-    mod = GridModel()
-    mod.setup_region({"geom": demda.raster.box})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_grid(demda, "elevtn")
-    mod.set_grid(flwda, "flwdir")
-    return mod
+# @pytest.fixture()
+# def grid_model(demda, flwda):
+#     mod = GridModel()
+#     mod.setup_region({"geom": demda.raster.box})
+#     mod.setup_config(**{"header": {"setting": "value"}})
+#     mod.set_grid(demda, "elevtn")
+#     mod.set_grid(flwda, "flwdir")
+#     return mod
 
 
 @pytest.fixture()
