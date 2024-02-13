@@ -6,6 +6,11 @@ on:
     - cron: 0 0 * * Sun # run on main every sunday at 00:00
   workflow_dispatch:
 
+# only one of this flow should run at the same time.
+concurrency:
+  group: refresh-ci-cache
+  cancel-in-progress: true
+
 jobs:
   clear-cache:
     uses: ./.github/workflows/purge_all_caches.yml
@@ -19,13 +24,19 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ['3.9','3.10','3.11']
+        include:
+          - os: windows-latest
+            miniconda-path: C:\Users\runneradmin\miniconda3
+            pycache-path: C:\Users\runneradmin\pycache
+          - os: ubuntu-latest
+            miniconda-path: ~/miniconda3
+            pycache-path: ~/pycache
     name: py ${{ matrix.python-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    # note absence of cucurrency, this one should only be run one at a time
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
             python-version: ${{ matrix.python-version }}
             miniforge-variant: Mambaforge
@@ -36,22 +47,23 @@ jobs:
         run: |
           pip install tomli
           python make_env.py test,io,extra -p ${{ matrix.python-version}} -n hydromt
+          # here we used the conda-incubator action so we cna just use mamba normally
           mamba env create -f environment.yml
           mamba run -n hydromt pip install -e .
 
       # run tests first so that we can also cache all of the artefacts
+      # here we used the original mamba action so mamba is in our path
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt python -m pytest --verbose --cov=hydromt --cov-report xml
+          PYTHONPYCACHEPREFIX=${{ matrix.pycache-path }} mamba run -n hydromt python -m pytest --verbose --cov=hydromt --cov-report xml
 
       - name: Upload cache
-        uses: actions/cache/save@v3
-        if: always()
+        uses: actions/cache/save@v4
         with:
           path: |
-            /usr/share/miniconda3
-            ~/pycache
+            ${{ matrix.miniconda-path }}
+            ${{ matrix.pycache-path }}
           key: test-${{ matrix.os }}-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
         id: test-cache
 
@@ -61,14 +73,16 @@ jobs:
       run:
         shell: bash -l {0}
     runs-on: ubuntu-latest
+    # for docs platform doesn't matter (yet) so we just run that on ubuntu
+    # as it's much much faster than windows
     env:
       DOC_PYTHON_VERSION: '3.11'
     steps:
       - name: checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
             python-version: ${{ env.DOC_PYTHON_VERSION }}
             miniforge-variant: Mambaforge
@@ -79,21 +93,19 @@ jobs:
       - name: Setup env
         run: |
           pip install tomli
-          python make_env.py test,io,extra,doc -p $DOC_PYTHON_VERSION -n hydromt
+          python make_env.py test,io,extra,doc -p ${{ env.DOC_PYTHON_VERSION }} -n hydromt
           mamba env create -f environment.yml
           mamba run -n hydromt pip install -e .
 
       # run tests first so that we can also cache all of the artefacts
       - name: Generate docs
-        run: PYTHONPYCACHEPREFIX=~/pycache mamba run -n hydromt sphinx-build -M html ./docs ./docs/_build
+        run: mamba run -n hydromt sphinx-build ./docs ./docs/_build
 
       - name: Upload cache
-        uses: actions/cache/save@v3
-        if: always()
+        uses: actions/cache/save@v4
         with:
           path: |
-            /usr/share/miniconda3
-            ~/pycache
+            ~/miniconda3
             ./docs/_build
           key: docs-${{ hashFiles('environment.yml')  }}
         id: docs-cache
