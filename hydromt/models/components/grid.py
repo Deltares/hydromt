@@ -18,13 +18,12 @@ from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import utils as gis_utils
+from hydromt.models.components.model_component import ModelComponent
 from hydromt.models.model_utils import (
     read_nc,
     write_nc,
 )
 from hydromt.models.root import ModelRoot
-
-from .model_component import ModelComponent  # TODO change import when moving this file
 
 logger = logging.getLogger(__name__)
 
@@ -32,11 +31,19 @@ logger = logging.getLogger(__name__)
 class GridComponent(ModelComponent):
     """GridComponent class."""
 
-    def __init__(self, root: ModelRoot, logger=logger):
+    def __init__(
+        self,
+        root: ModelRoot,
+        data_catalog: DataCatalog,
+        model_region=None,
+        logger=logger,
+    ):
         # self._model_ref = weakref.ref(model) TODO: discuss if this is necessary
         self._data = None
         self.logger = logger
         self.root = root
+        self.data_catalog = data_catalog
+        self.model_region = model_region
 
     def set(
         self,
@@ -89,7 +96,6 @@ class GridComponent(ModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
-        write: bool = False,
         **kwargs,
     ) -> DeferedFileClose | None:
         """Write model grid data to netcdf file at <root>/<fn>.
@@ -134,8 +140,6 @@ class GridComponent(ModelComponent):
     def read(
         self,
         fn: str = "grid/grid.nc",
-        read: bool = True,
-        write: bool = False,
         **kwargs,
     ) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
@@ -154,7 +158,7 @@ class GridComponent(ModelComponent):
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
-        if read and write:
+        if self.root.is_reading_mode() and self.root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
             fn, self.root, logger=logger, single_var_as_array=False, **kwargs
@@ -165,7 +169,6 @@ class GridComponent(ModelComponent):
     def create(
         self,
         region: dict,
-        data_catalog: DataCatalog,
         res: Optional[float] = None,
         crs: int = None,
         rotated: bool = False,
@@ -236,7 +239,7 @@ class GridComponent(ModelComponent):
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             # Do not parse_region for grid as we want to allow for more (file) formats
             kind, region = workflows.parse_region(
-                region, data_catalog=data_catalog, logger=self.logger
+                region, data_catalog=self.data_catalog, logger=self.logger
             )
         elif kind != "grid":
             raise ValueError(
@@ -295,9 +298,9 @@ class GridComponent(ModelComponent):
 
         elif kind in ["basin", "subbasin", "interbasin"]:
             # retrieve global hydrography data (lazy!)
-            ds_hyd = data_catalog.get_rasterdataset(hydrography_fn)
+            ds_hyd = self.data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=data_catalog.get_source(basin_index_fn))
+                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = workflows.get_basin_geometry(
                 ds=ds_hyd,
@@ -306,7 +309,7 @@ class GridComponent(ModelComponent):
                 **region,
             )
             # get ds_hyd again but clipped to geom, one variable is enough
-            da_hyd = data_catalog.get_rasterdataset(
+            da_hyd = self.data_catalog.get_rasterdataset(
                 hydrography_fn, geom=geom, variables=["flwdir"]
             )
             if not isinstance(res, (int, float)):
@@ -336,7 +339,7 @@ class GridComponent(ModelComponent):
             if isinstance(fn, (xr.DataArray, xr.Dataset)):
                 da_like = fn
             else:
-                da_like = data_catalog.get_rasterdataset(fn)
+                da_like = self.data_catalog.get_rasterdataset(fn)
             # Get xycoords, geom
             xcoords = da_like.raster.xcoords.values
             ycoords = da_like.raster.ycoords.values
@@ -505,7 +508,6 @@ class GridComponent(ModelComponent):
     def add_data_from_rasterdataset(
         self,
         raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
-        data_catalog: DataCatalog,
         variables: Optional[List] = None,
         fill_method: Optional[str] = None,
         reproject_method: Optional[Union[List, str]] = "nearest",
@@ -551,7 +553,7 @@ class GridComponent(ModelComponent):
         rename = rename or {}
         self.logger.info(f"Preparing grid data from raster source {raster_fn}")
         # Read raster data and select variables
-        ds = data_catalog.get_rasterdataset(
+        ds = self.data_catalog.get_rasterdataset(
             raster_fn,
             geom=self.region,
             buffer=2,
@@ -575,7 +577,6 @@ class GridComponent(ModelComponent):
 
     def add_data_from_raster_reclass(
         self,
-        data_catalog: DataCatalog,
         raster_fn: Union[str, Path, xr.DataArray],
         reclass_table_fn: Union[str, Path, pd.DataFrame],
         reclass_variables: List,
@@ -635,7 +636,7 @@ class GridComponent(ModelComponent):
             f"on {reclass_table_fn}"
         )
         # Read raster data and remapping table
-        da = data_catalog.get_rasterdataset(
+        da = self.data_catalog.get_rasterdataset(
             raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
         )
         if not isinstance(da, xr.DataArray):
@@ -643,7 +644,7 @@ class GridComponent(ModelComponent):
                 f"raster_fn {raster_fn} should be a single variable. "
                 "Please select one using the 'variable' argument"
             )
-        df_vars = data_catalog.get_dataframe(
+        df_vars = self.data_catalog.get_dataframe(
             reclass_table_fn, variables=reclass_variables
         )
         # Data resampling
@@ -664,7 +665,6 @@ class GridComponent(ModelComponent):
 
     def add_data_from_geodataframe(
         self,
-        data_catalog: DataCatalog,
         vector_fn: Union[str, Path, gpd.GeoDataFrame],
         variables: Optional[Union[List, str]] = None,
         nodata: Optional[Union[List, int, float]] = -1,
@@ -717,7 +717,7 @@ class GridComponent(ModelComponent):
         """  # noqa: E501
         rename = rename or dict()
         self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
-        gdf = data_catalog.get_geodataframe(
+        gdf = self.data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs
         )
         if gdf.empty:
