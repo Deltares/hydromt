@@ -90,7 +90,7 @@ jobs:
       - name: Update environment
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          ${{ matrix.miniconda-path }} env update -n hydromt -f environment.yml
+          ${{ matrix.mamba-path }} env update -n hydromt -f environment.yml
 
       - name: Conda info
         run: |
