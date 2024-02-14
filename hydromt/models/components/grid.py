@@ -37,8 +37,6 @@ logger = logging.getLogger(__name__)
 class GridComponent(ModelComponent):
     """GridComponent class."""
 
-    _data = []
-
     def __init__(
         self,
         root: ModelRoot,
@@ -51,6 +49,7 @@ class GridComponent(ModelComponent):
         self.root = root
         self.data_catalog = data_catalog
         self.model_region = model_region
+        self._data = None
 
     def set(
         self,
@@ -82,8 +81,9 @@ class GridComponent(ModelComponent):
             if data.shape != self._data.raster.shape:
                 raise ValueError("Shape of data and grid maps do not match")
             data = xr.DataArray(dims=self._data.raster.dims, data=data, name=name)
-        elif isinstance(data, xr.DataArray) and name_required:
-            data.name = name
+        elif isinstance(data, xr.DataArray):
+            if name is not None:
+                data.name = name
             data = data.to_dataset()
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
@@ -125,7 +125,7 @@ class GridComponent(ModelComponent):
             If True and gdal_compliant, forces the dataset to have
             South -> North orientation.
         """
-        if len(self._data) == 0:
+        if len(self.data) == 0:
             _exec_nodata_strat(
                 msg="No grid data found, skip writing.",
                 strategy=NoDataStrategy.IGNORE,
@@ -400,8 +400,8 @@ class GridComponent(ModelComponent):
     @property
     def res(self) -> Tuple[float, float] | None:
         """Returns the resolution of the model grid."""
-        if len(self._data) > 0:
-            return self._data.raster.res
+        if len(self.data) > 0:
+            return self.data.raster.res
         _exec_nodata_strat(
             msg="No grid data found for deriving resolution",
             strategy=NoDataStrategy.IGNORE,
@@ -411,8 +411,8 @@ class GridComponent(ModelComponent):
     @property
     def transform(self) -> Affine | None:
         """Returns spatial transform of the model grid."""
-        if len(self._data) > 0:
-            return self._data.raster.transform
+        if len(self.data) > 0:
+            return self.data.raster.transform
         _exec_nodata_strat(
             msg="No grid data found for deriving transform",
             strategy=NoDataStrategy.IGNORE,
@@ -422,15 +422,15 @@ class GridComponent(ModelComponent):
     @property
     def crs(self) -> CRS | None:
         """Returns coordinate reference system embedded in the model grid."""
-        if self._data.raster.crs is not None:
-            return CRS(self._data.raster.crs)
+        if self.data.raster.crs is not None:
+            return CRS(self.data.raster.crs)
         logger.warn("Grid data has no crs")
 
     @property
     def bounds(self) -> List[float] | None:
         """Returns the bounding box of the model grid."""
-        if len(self._data) > 0:
-            return self._data.raster.bounds
+        if len(self.data) > 0:
+            return self.data.raster.bounds
         _exec_nodata_strat(
             msg="No grid data found for deriving bounds",
             strategy=NoDataStrategy.IGNORE,
@@ -440,7 +440,7 @@ class GridComponent(ModelComponent):
     @property
     def region(self) -> gpd.GeoDataFrame | None:
         """Returns the geometry of the model area of interest."""
-        if len(self._data) > 0:
+        if len(self.data) > 0:
             crs = self.crs
             if crs is not None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
@@ -452,7 +452,7 @@ class GridComponent(ModelComponent):
         )
 
     @property
-    def grid(self) -> xr.Dataset:
+    def data(self) -> xr.Dataset:
         """Model static gridded data as xarray.Dataset."""
         if self._data is None:
             self._initialize_grid()
@@ -467,8 +467,8 @@ class GridComponent(ModelComponent):
 
     def set_crs(self, crs: CRS) -> None:
         """Set coordinate reference system of the model grid."""
-        if len(self._data) > 0:
-            self._data.raster.set_crs(crs)
+        if len(self.data) > 0:
+            self.data.raster.set_crs(crs)
 
     def add_data_from_constant(
         self,
@@ -500,7 +500,7 @@ class GridComponent(ModelComponent):
             Names of added model grid layer.
         """
         da = grid_from_constant(
-            grid_like=self._data,
+            grid_like=self.data,
             constant=constant,
             name=name,
             dtype=dtype,
@@ -569,7 +569,7 @@ class GridComponent(ModelComponent):
         )
         # Data resampling
         ds_out = grid_from_rasterdataset(
-            grid_like=self._data,
+            grid_like=self.data,
             ds=ds,
             variables=variables,
             fill_method=fill_method,
