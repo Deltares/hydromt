@@ -50,17 +50,26 @@ class BboxRegionSpecifyer(BaseModel):
         return self
 
 
-class GeomRegionSpecifyer(BaseModel):
-    kind: Literal["geom"]
+class GeomFileRegionSpecifyer(BaseModel):
+    kind: Literal["geom_file"]
     path: Path
 
     def construct(self) -> GeoDataFrame:
         return GeoDataFrame.from_file(self.path)
 
     @model_validator(mode="after")
-    def _check_file_exists(self) -> "GeomRegionSpecifyer":
+    def _check_file_exists(self) -> "GeomFileRegionSpecifyer":
         assert exists(self.path)
         return self
+
+
+class GeomRegionSpecifyer(BaseModel):
+    geom: GeoDataFrame
+    kind: Literal["geom"]
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    def construct(self) -> GeoDataFrame:
+        return self.geom
 
 
 class DerivedRegionSpecifyer(BaseModel):

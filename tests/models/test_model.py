@@ -23,6 +23,7 @@ from hydromt.models import (
     VectorModel,
     plugins,
 )
+from hydromt.models._region.region import Region
 from hydromt.models.api import _check_data
 from hydromt.models.components.grid import GridMixin
 
@@ -129,14 +130,19 @@ def test_model_api(grid_model):
     assert non_compliant == ["geoms.wrong_geom", "forcing.test"]
 
 
-def test_run_log_method():
+def test_run_log_setup_region_args():
     model = Model()
     region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
     model._run_log_method("setup_region", region)  # args
-    assert "region" in model._geoms
+    assert isinstance(model.region, Region)
+
+
+def test_run_log_setup_region_kwargs():
+    model = Model()
+    region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
     model._geoms = {}
     model._run_log_method("setup_region", region=region)  # kwargs
-    assert "region" in model._geoms
+    assert isinstance(model.region, Region)
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")

@@ -141,9 +141,7 @@ exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 [tool.pytest.ini_options]
 addopts = "--ff "
 testpaths = ["tests"]
-markers = [
-  "integration: marks tests as being integration tests"
-]
+markers = ["integration: marks tests as being integration tests"]
 
 filterwarnings = [
   "ignore:distutils Version classes are deprecated:DeprecationWarning",

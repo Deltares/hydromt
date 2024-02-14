@@ -18,7 +18,7 @@ def test_bbox_region():
 
 def test_region_unknown_key_errors():
     region = {"region": [0.0, -1.0]}
-    with pytest.raises(ValueError, match=r".* validation error for RegionSpecifyer.*"):
+    with pytest.raises(ValueError, match=r"Unknown region kind.*"):
         _ = Region(region, data_catalog=None)
 
 

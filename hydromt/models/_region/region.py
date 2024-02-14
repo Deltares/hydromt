@@ -2,10 +2,10 @@
 
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, GeoSeries
 from pyproj import CRS
 
 from hydromt._compat import HAS_XUGRID
@@ -26,8 +26,8 @@ class Region:
         self,
         region: Dict[str, Any],
         data_catalog: Optional[DataCatalog] = None,
-        basin_index: Optional[GeoDataFrame] = None,
-        hydrography: Optional[GeoDataFrame] = None,
+        basin_index: Optional[Union[str, GeoDataFrame]] = None,
+        hydrography: Optional[Union[str, GeoDataFrame]] = None,
         crs: Optional[CRS] = None,
         logger: Logger = logger,
     ):
@@ -44,8 +44,8 @@ class Region:
         self,
         region: Dict[str, Any],
         data_catalog: Optional[DataCatalog] = None,
-        basin_index: Optional[GeoDataFrame] = None,
-        hydrography: Optional[GeoDataFrame] = None,
+        basin_index: Optional[Union[str, GeoDataFrame]] = None,
+        hydrography: Optional[Union[str, GeoDataFrame]] = None,
         crs: Optional[CRS] = None,
     ):
         """Set the the model region."""
@@ -53,8 +53,8 @@ class Region:
         self.region_specifyer = self._parse_region(
             region=region,
             data_catalog=data_catalog,
-            hydrography_source=hydrography,
-            basin_index_source=basin_index,
+            hydrography=hydrography,
+            basin_index=basin_index,
             logger=logger,
         )
 
@@ -62,8 +62,8 @@ class Region:
     def _parse_region(
         region: Dict[str, Any],
         data_catalog: Optional[DataCatalog] = None,
-        basin_index_source: Optional[GeoDataFrame] = None,
-        hydrography_source: Optional[GeoDataFrame] = None,
+        basin_index: Optional[Union[str, GeoDataFrame]] = None,
+        hydrography: Optional[Union[str, GeoDataFrame]] = None,
         logger=logger,
     ) -> RegionSpecifyer:
         # popitem returns last inserted, we want first
@@ -84,8 +84,13 @@ class Region:
         #         "kind": kind,
         #         "mod": model_class.__init__(root=value, mode="r", logger=logger),
         #     }
+        elif isinstance(value, (GeoDataFrame, GeoSeries)):
+            flat_region_dict = {"kind": kind, "geom": value}
         elif isinstance(value, (Path, str)):
-            flat_region_dict = {"kind": kind, "path": Path(value)}
+            if kind == "geom":
+                flat_region_dict = {"kind": "geom_file", "path": Path(value)}
+            else:
+                flat_region_dict = {"kind": kind, "path": Path(value)}
             if kind == "basin":
                 flat_region_dict["sub_kind"] = "point_geom"
         elif kind == "basin":
@@ -127,42 +132,6 @@ class Region:
 
             flat_region_dict = {**flat_region_dict, **region}
         else:
-            flat_region_dict = region
+            raise ValueError(f"Unknown region kind: {kind}")
 
         return RegionSpecifyer(spec=flat_region_dict)  # type: ignore
-
-    """
-    * {'basin': [xmin, ymin, xmax, ymax]}
-
-    * {'basin': [xmin, ymin, xmax, ymax], 'outlets': true}
-
-    * {'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-
-    Subbasins are defined by its outlet locations and include all area upstream
-    from these points. The outlet locations can be passed as xy coordinate pairs,
-    but also derived from the most downstream cell(s) within a area of interest
-    defined by a bounding box or geometry, optionally refined by stream threshold
-    arguments.
-
-    The method can be speed up by providing an additional ``bounds`` argument which
-    should contain all upstream cell. If cells upstream of the subbasin are not
-    within the provide bounds a warning will be raised. Common use-cases include:
-
-    * {'subbasin': [x, y], '<variable>': threshold}
-
-    * {
-        'subbasin': [[x1, x2, ..], [y1, y2, ..]],
-        '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
-        }
-
-
-    * {'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-
-
-    Interbasins are similar to subbasins but are bounded by a bounding box or
-    geometry and do not include all upstream area. Common use-cases include:
-
-    * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-
-    * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
-    """

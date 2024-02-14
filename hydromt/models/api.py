@@ -18,11 +18,11 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
+from geopandas import GeoDataFrame
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
-from shapely.geometry import box
 
-from hydromt import __version__, workflows
+from hydromt import __version__
 from hydromt._compat import HAS_XUGRID, Distribution
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty, log
@@ -53,6 +53,7 @@ class Model(object, metaclass=ABCMeta):
     _FOLDERS = [""]
     _CLI_ARGS = {"region": "setup_basemaps"}
     _TMP_DATA_DIR = None
+
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
     _MODEL_VERSION = None
@@ -337,7 +338,7 @@ class Model(object, metaclass=ABCMeta):
         region: dict,
         hydrography_fn: str = "merit_hydro",
         basin_index_fn: str = "merit_hydro_index",
-    ) -> dict:
+    ) -> Region:
         """Set the `region` of interest of the model.
 
         Adds model layer:
@@ -376,54 +377,8 @@ class Model(object, metaclass=ABCMeta):
         --------
         hydromt.workflows.basin_mask.parse_region
         """
-        kind, region = parse_region(
-            region, data_catalog=self.data_catalog, logger=self.logger
-        )
-        # NOTE: kind=outlet is deprecated!
-        if kind in ["basin", "subbasin", "interbasin", "outlet"]:
-            if kind == "outlet":
-                warnings.warn(
-                    "Using outlet as kind in setup_region is deprecated",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-            # retrieve global hydrography data (lazy!)
-            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
-            if "bounds" not in region:
-                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
-            # get basin geometry
-            geom, xy = workflows.get_basin_geometry(
-                ds=ds_org,
-                kind=kind,
-                logger=self.logger,
-                **region,
-            )
-            region.update(xy=xy)
-        elif "bbox" in region:
-            bbox = region["bbox"]
-            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-        elif "geom" in region:
-            geom = region["geom"]
-            if geom.crs is None:
-                raise ValueError('Model region "geom" has no CRS')
-        elif "grid" in region:  # Grid specific - should be removed in the future
-            geom = region["grid"].raster.box
-        elif "model" in region:
-            geom = region["model"].region
-        else:
-            raise ValueError(f"model region argument not understood: {region}")
-
-        self.set_geoms(geom, name="region")
-
-        # This setup method returns region so that it can be wrapped for models which
-        # require more information, e.g. grid RasterDataArray or xy coordinates.
-        return region
-
-    # TODO remove placeholder to make make sure
-    # build with the current _CLI_ARGS does not raise an error
-    def setup_basemaps(self, *args, **kwargs):  # noqa: D102
-        warnings.warn(
-            "The setup_basemaps method is not implemented.", UserWarning, stacklevel=2
+        return self.set_region(
+            region=region, hydrography=hydrography_fn, basin_index=basin_index_fn
         )
 
     ## file system
@@ -439,7 +394,23 @@ class Model(object, metaclass=ABCMeta):
     def region(self):
         """Path to model folder."""
         if self._region is None:
-            raise ValueError("Root unknown, use set_root method")
+            raise ValueError("Region unknown, use set_region method")
+        return self._region
+
+    def set_region(
+        self,
+        region: Dict[str, Any],
+        hydrography: Optional[Union[str, GeoDataFrame]] = None,
+        basin_index: Optional[Union[str, GeoDataFrame]] = None,
+    ) -> Region:
+        """Path to model folder."""
+        r: Region = Region(
+            region=region,
+            data_catalog=self.data_catalog,
+            hydrography=hydrography,
+            basin_index=basin_index,
+        )
+        self._region = r
         return self._region
 
     def _assert_write_mode(self):
