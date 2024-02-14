@@ -11,6 +11,7 @@ from .type_def import (
     Bbox,
     Crs,
     Data,
+    DataLike,
     DataType,
     DeferedFileClose,
     ExportConfigDict,
@@ -58,4 +59,5 @@ __all__ = [
     "DataType",
     "GeomBuffer",
     "Predicate",
+    "DataLike",
 ]

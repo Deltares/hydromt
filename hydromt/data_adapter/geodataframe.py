@@ -7,7 +7,6 @@ from typing import List, Optional, Union
 import geopandas as gpd
 import numpy as np
 import pyproj
-from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
@@ -16,14 +15,15 @@ from pystac import MediaType
 
 from hydromt._typing import (
     ErrorHandleMethod,
-    Geom,
     NoDataException,
     NoDataStrategy,
     TotalBounds,
     _exec_nodata_strat,
 )
+from hydromt._typing.type_def import Predicate
 from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
-from hydromt.gis import parse_geom_bbox_buffer, utils
+from hydromt.gis.utils import filter_gdf
+from hydromt.models._region.region import Region
 
 from .data_adapter_base import DataAdapterBase
 
@@ -38,11 +38,9 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
     def get_data(
         self,
-        bbox: Optional[List[float]] = None,
-        mask: Optional[gpd.GeoDataFrame] = None,
-        buffer: float = 0.0,
+        region: Optional[Region] = None,
         variables: Optional[List[str]] = None,
-        predicate: str = "intersects",
+        predicate: Predicate = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
@@ -50,7 +48,11 @@ class GeoDataFrameAdapter(DataAdapterBase):
         self.used = True  # mark used
         try:
             gdf: gpd.GeoDataFrame = self.source.read_data(
-                bbox, mask, buffer, variables, predicate, handle_nodata, logger=logger
+                region=region,
+                variables=variables,
+                predicate=predicate,
+                handle_nodata=handle_nodata,
+                logger=logger,
             )
         except NoDataException:
             _exec_nodata_strat(
@@ -66,14 +68,11 @@ class GeoDataFrameAdapter(DataAdapterBase):
         gdf = self._set_nodata(gdf)
         # slice
         gdf = GeoDataFrameAdapter._slice_data(
-            gdf,
-            variables,
-            mask,
-            bbox,
-            self.source.crs,
-            buffer,
-            predicate,
-            handle_nodata,
+            gdf=gdf,
+            variables=variables,
+            region=region,
+            predicate=predicate,
+            handle_nodata=handle_nodata,
             logger=logger,
         )
         # uniformize
@@ -104,14 +103,12 @@ class GeoDataFrameAdapter(DataAdapterBase):
             )
         return gdf
 
+    @staticmethod
     def _slice_data(
         gdf: gpd.GeoDataFrame,
+        region: Optional[Region] = None,
         variables: Optional[Union[str, List[str]]] = None,
-        geom: Optional[Geom] = None,
-        bbox: Optional[Geom] = None,
-        crs: Optional[CRS] = None,
-        buffer: float = 0.0,
-        predicate: str = "intersects",  # TODO: enum available predicates
+        predicate: Predicate = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO: review NoDataStrategy + axes
         logger: Logger = logger,
     ) -> gpd.GeoDataFrame:
@@ -155,14 +152,15 @@ class GeoDataFrameAdapter(DataAdapterBase):
                 variables = variables + ["geometry"]
             gdf = gdf.loc[:, variables]
 
-        if geom is not None or bbox is not None:
-            # NOTE if we read with vector driver this is already done ..
-            geom = parse_geom_bbox_buffer(geom, bbox, buffer, crs)
+        if region is not None:
+            geom = region.get_geom()
+            # parse_geom_bbox_buffer(geom, bbox, buffer, crs)
             bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
             epsg = geom.crs.to_epsg()
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
-            idxs = utils.filter_gdf(gdf, geom=geom, predicate=predicate)
+            idxs = filter_gdf(gdf, geom=geom, predicate=predicate)
             gdf = gdf.iloc[idxs]
+
         return gdf
 
     def _set_nodata(self, gdf: gpd.GeoDataFrame):

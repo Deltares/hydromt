@@ -1,11 +1,13 @@
 """Driver for GeoDataFrames."""
 from abc import ABC, abstractmethod
 from logging import Logger
-from typing import List, Optional
+from typing import Optional
 
 import geopandas as gpd
 from pydantic import BaseModel
-from pyproj import CRS
+
+from hydromt._typing.type_def import Predicate
+from hydromt.models._region.region import Region
 
 # from hydromt.nodata import NoDataStrategy
 
@@ -17,11 +19,8 @@ class GeoDataFrameDriver(ABC, BaseModel):
     def read(
         self,
         uri: str,
-        bbox: Optional[List[int]] = None,
-        mask: Optional[gpd.GeoDataFrame] = None,
-        buffer: float = 0.0,
-        crs: Optional[CRS] = None,
-        predicate: str = "intersects",
+        region: Optional[Region] = None,
+        predicate: Predicate = "intersects",
         logger: Optional[Logger] = None,
     ) -> gpd.GeoDataFrame:
         """

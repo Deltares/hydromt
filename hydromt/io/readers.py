@@ -24,7 +24,8 @@ from shapely.geometry.base import GEOMETRY_TYPES
 from tomli import load as load_toml
 
 from hydromt import gis
-from hydromt.gis import merge, raster, vector
+
+# from hydromt.gis import merge, raster, vector
 from hydromt.io.path import parse_abspath
 
 logger = logging.getLogger(__name__)

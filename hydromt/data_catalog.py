@@ -34,6 +34,7 @@ from pystac import CatalogType, MediaType
 from hydromt import __version__
 from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, _exec_nodata_strat
+from hydromt._typing.type_def import DataLike, Predicate
 from hydromt._utils import partition_dictionaries
 from hydromt.data_adapter import (
     DataAdapter,
@@ -45,6 +46,7 @@ from hydromt.data_adapter import (
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
 from hydromt.data_sources import DataSource
+from hydromt.models._region.region import Region
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +138,7 @@ class DataCatalog(object):
                 self.from_predefined_catalogs(name_or_path)
 
     @property
-    def sources(self) -> Dict[DataSource]:
+    def sources(self) -> Dict[str, DataSource]:
         """Returns dictionary of DataSources."""
         if len(self._sources) == 0 and self._fallback_lib is not None:
             # read artifacts by default if no catalogs are provided
@@ -1401,13 +1403,11 @@ class DataCatalog(object):
 
     def get_geodataframe(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
-        bbox: Optional[List] = None,
-        geom: Optional[gpd.GeoDataFrame] = None,
-        buffer: Union[float, int] = 0,
+        data_like: DataLike,
+        region: Optional[Region] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
-        predicate: str = "intersects",
+        predicate: Predicate = "intersects",
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
@@ -1477,12 +1477,10 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             data_like = GeoDataFrameAdapter._slice_data(
-                data_like,
-                variables,
-                geom,
-                bbox,
-                buffer,
-                predicate,
+                gdf=data_like,
+                variables=variables,
+                region=region,
+                predicate=predicate,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1497,10 +1495,8 @@ class DataCatalog(object):
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
         gdf = source.get_data(
-            bbox=bbox,
-            geom=geom,
             handle_nodata=handle_nodata,
-            buffer=buffer,
+            region=region,
             predicate=predicate,
             variables=variables,
             logger=self.logger,

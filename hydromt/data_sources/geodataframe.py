@@ -7,8 +7,10 @@ import geopandas as gpd
 from pydantic import ValidationInfo, field_validator, model_validator
 
 from hydromt._typing import NoDataStrategy
+from hydromt._typing.type_def import Predicate
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
+from hydromt.models._region.region import Region
 
 from .data_source import DataSource
 
@@ -58,20 +60,16 @@ class GeoDataFrameDataSource(DataSource):
 
     def read_data(
         self,
-        bbox: Optional[List[float]] = None,
-        mask: Optional[gpd.GeoDataFrame] = None,
-        buffer: float = 0.0,
+        region: Optional[Region] = None,
         variables: Optional[List[str]] = None,
-        predicate: str = "intersects",
+        predicate: Predicate = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Optional[Logger] = None,
     ) -> gpd.GeoDataFrame:
         """Use initialize driver to read data."""
         uris: list[str] = self.metadata_resolver.resolve(
             self,
-            bbox=bbox,
-            geom=mask,
-            buffer=buffer,
+            region=region,
             predicate=predicate,
             variables=variables,
             handle_nodata=handle_nodata,
@@ -79,6 +77,4 @@ class GeoDataFrameDataSource(DataSource):
         if len(uris) > 1:
             raise ValueError("GeoDataFrames cannot have more than 1 source URI.")
         uri = uris[0]
-        return self.driver.read(
-            uri, bbox, mask, buffer, self.crs, predicate, logger=logger
-        )
+        return self.driver.read(uri, region=region, predicate=predicate, logger=logger)
