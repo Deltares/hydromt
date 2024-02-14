@@ -28,8 +28,7 @@ class Region:
         data_catalog: Optional[DataCatalog] = None,
         basin_index: Optional[GeoDataFrame] = None,
         hydrography: Optional[GeoDataFrame] = None,
-        source_crs: Optional[CRS] = None,
-        target_crs: Optional[CRS] = None,
+        crs: Optional[CRS] = None,
         logger: Logger = logger,
     ):
         self.logger = logger
@@ -47,13 +46,10 @@ class Region:
         data_catalog: Optional[DataCatalog] = None,
         basin_index: Optional[GeoDataFrame] = None,
         hydrography: Optional[GeoDataFrame] = None,
-        source_crs: Optional[CRS] = None,
-        target_crs: Optional[CRS] = None,
         crs: Optional[CRS] = None,
     ):
         """Set the the model region."""
-        self.source_crs = source_crs
-        self.target_crs = target_crs
+        self.crs = crs
         self.region_specifyer = self._parse_region(
             region=region,
             data_catalog=data_catalog,

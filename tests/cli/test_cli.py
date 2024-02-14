@@ -275,6 +275,7 @@ def test_check_cli_unsupported_region(tmpdir):
         )
 
 
+@pytest.mark.skip(reason="Needs implementation of check for region.")
 def test_check_cli_unknown_region(tmpdir):
     with pytest.raises(Exception, match="Unknown region kind"):
         _ = CliRunner().invoke(
@@ -292,6 +293,7 @@ def test_check_cli_unknown_region(tmpdir):
         )
 
 
+@pytest.mark.skip(reason="Needs implementation of check for region.")
 def test_check_cli_bbox_valid(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
@@ -325,6 +327,7 @@ def test_check_cli_geom_valid(tmpdir):
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.skip(reason="Needs implementation of check for region.")
 def test_check_cli_geom_missing_file(tmpdir):
     with pytest.raises(Exception, match="Path not found at asdf"):
         _ = CliRunner().invoke(

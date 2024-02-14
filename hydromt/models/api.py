@@ -51,6 +51,7 @@ class Model(object, metaclass=ABCMeta):
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
+    _CLI_ARGS = {"region": "setup_basemaps"}
     _TMP_DATA_DIR = None
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
@@ -1227,7 +1228,7 @@ class Model(object, metaclass=ABCMeta):
         """Model geometries.
 
         Return dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
-        ..NOTE: previously call staticgeoms.
+        ..NOTE: previously called staticgeoms.
         """
         if self._geoms is None:
             self._initialize_geoms()
@@ -1794,9 +1795,12 @@ class Model(object, metaclass=ABCMeta):
 
     ## properties / methods below can be used directly in actual class
     @property
-    def crs(self) -> CRS:
+    def crs(self) -> Optional[CRS]:
         """Returns coordinate reference system embedded in region."""
-        return self.region.crs
+        if self.region is not None:
+            return self.region.crs
+        else:
+            return None
 
     # test methods
     def test_model_api(self):
