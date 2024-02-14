@@ -30,6 +30,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
+from hydromt.models._region.region import Region
 
 if HAS_XUGRID:
     import xugrid as xu
@@ -50,7 +51,6 @@ class Model(object, metaclass=ABCMeta):
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
-    _CLI_ARGS = {"region": "setup_basemaps"}
     _TMP_DATA_DIR = None
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
@@ -125,6 +125,7 @@ class Model(object, metaclass=ABCMeta):
         self._forcing: Optional[XArrayDict] = None
         self._states: Optional[XArrayDict] = None
         self._results: Optional[XArrayDict] = None
+        self._region: Optional[Region] = None
         # To be deprecated in future versions!
         self._staticmaps = None
         self._staticgeoms = None
@@ -432,6 +433,13 @@ class Model(object, metaclass=ABCMeta):
         if self._root is None:
             raise ValueError("Root unknown, use set_root method")
         return self._root
+
+    @property
+    def region(self):
+        """Path to model folder."""
+        if self._region is None:
+            raise ValueError("Root unknown, use set_root method")
+        return self._region
 
     def _assert_write_mode(self):
         if not self._write:
@@ -1788,7 +1796,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
-        return self.region.crs()
+        return self.region.crs
 
     # test methods
     def test_model_api(self):
@@ -1922,7 +1930,11 @@ def _check_equal(a, b, name="") -> Dict[str, str]:
     return errors
 
 
-def parse_region(region, logger=logger, data_catalog=None):
+def parse_region(
+    region, logger=logger, data_catalog=None
+) -> Tuple[
+    Literal["basin", "subbasin", "interbasin", "geom", "bbox", "grid"], Dict[str, Any]
+]:
     """Check and return parsed region arguments.
 
     Parameters

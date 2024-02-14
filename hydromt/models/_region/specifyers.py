@@ -21,6 +21,8 @@ logger = getLogger(__name__)
 if HAS_XUGRID:
     import xugrid as xu
 
+    from hydromt._typing.type_def import BasinIdType, UgridData
+
 
 class BboxRegionSpecifyer(BaseModel):
     xmin: float

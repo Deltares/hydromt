@@ -9,9 +9,9 @@ from geopandas import GeoDataFrame
 from pyproj import CRS
 
 from hydromt._compat import HAS_XUGRID
+from hydromt._typing.type_def import BasinIdType
 from hydromt.data_catalog import DataCatalog
-from hydromt.model.region import BasinIdType, RegionSpecifyer
-from hydromt.models import MODELS
+from hydromt.models._region.specifyers import RegionSpecifyer
 
 if HAS_XUGRID:
     pass
@@ -19,7 +19,7 @@ if HAS_XUGRID:
 logger = getLogger(__name__)
 
 
-class ModelRegion:
+class Region:
     """A class to handle all operations to do with the model region."""
 
     def __init__(
@@ -28,6 +28,8 @@ class ModelRegion:
         data_catalog: Optional[DataCatalog] = None,
         basin_index: Optional[GeoDataFrame] = None,
         hydrography: Optional[GeoDataFrame] = None,
+        source_crs: Optional[CRS] = None,
+        target_crs: Optional[CRS] = None,
         logger: Logger = logger,
     ):
         self.logger = logger
@@ -45,10 +47,13 @@ class ModelRegion:
         data_catalog: Optional[DataCatalog] = None,
         basin_index: Optional[GeoDataFrame] = None,
         hydrography: Optional[GeoDataFrame] = None,
+        source_crs: Optional[CRS] = None,
+        target_crs: Optional[CRS] = None,
         crs: Optional[CRS] = None,
     ):
         """Set the the model region."""
-        self.crs = crs
+        self.source_crs = source_crs
+        self.target_crs = target_crs
         self.region_specifyer = self._parse_region(
             region=region,
             data_catalog=data_catalog,
@@ -61,8 +66,8 @@ class ModelRegion:
     def _parse_region(
         region: Dict[str, Any],
         data_catalog: Optional[DataCatalog] = None,
-        hydrography_source: str = "merit_hydro",
-        basin_index_source: str = "merit_hydro_index",
+        basin_index_source: Optional[GeoDataFrame] = None,
+        hydrography_source: Optional[GeoDataFrame] = None,
         logger=logger,
     ) -> RegionSpecifyer:
         # popitem returns last inserted, we want first
@@ -76,12 +81,13 @@ class ModelRegion:
                 "kind": "bbox",
                 **dict(zip(["xmin", "ymin", "xmax", "ymax"], value)),
             }
-        elif kind in MODELS:
-            model_class = MODELS.load(kind)
-            flat_region_dict = {
-                "kind": kind,
-                "mod": model_class.__init__(root=value, mode="r", logger=logger),
-            }
+        # TODO: fimplement this in a way that does not result in circular imports
+        # elif kind in MODELS:
+        #     model_class = MODELS.load(kind)
+        #     flat_region_dict = {
+        #         "kind": kind,
+        #         "mod": model_class.__init__(root=value, mode="r", logger=logger),
+        #     }
         elif isinstance(value, (Path, str)):
             flat_region_dict = {"kind": kind, "path": Path(value)}
             if kind == "basin":

@@ -2286,7 +2286,7 @@ class RasterDataArray(XRasterBase):
         kwargs.update(dict(method=method, extrapolate=extrapolate))
         if dim0:
             interp_data = np.empty(self._obj.shape, dtype=self._obj.dtype)
-            for i, (_, sub_xds) in enumerate(self._obj.groupby(dim0)):
+            for i, (_, sub_xds) in enumerate(self._obj.groupby(dim0, squeeze=True)):
                 interp_data[i, ...] = self._interpolate_na(
                     sub_xds.load().data, **kwargs
                 )

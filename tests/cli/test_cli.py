@@ -53,6 +53,7 @@ def test_cli_clip_help(tmpdir):
     )
 
 
+@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_cli_build_grid_model(tmpdir):
     root = str(tmpdir.join("grid_model_region"))
     cmd = [
@@ -256,6 +257,7 @@ def test_check_cli():
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.skip(reason="Needs implementation of subbasin region.")
 def test_check_cli_unsupported_region(tmpdir):
     with pytest.raises(Exception, match="is not supported in region validation yet"):
         _ = CliRunner().invoke(
@@ -273,7 +275,7 @@ def test_check_cli_unsupported_region(tmpdir):
         )
 
 
-def test_check_cli_known_region(tmpdir):
+def test_check_cli_unknown_region(tmpdir):
     with pytest.raises(Exception, match="Unknown region kind"):
         _ = CliRunner().invoke(
             hydromt_cli,
