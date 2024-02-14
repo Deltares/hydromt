@@ -339,50 +339,12 @@ class Model(object, metaclass=ABCMeta):
         hydrography_fn: str = "merit_hydro",
         basin_index_fn: str = "merit_hydro_index",
     ) -> Region:
-        """Set the `region` of interest of the model.
-
-        Adds model layer:
-
-        * **region** geom: region boundary vector
-
-        Parameters
-        ----------
-        region : dict
-            Dictionary describing region of interest, e.g.:
-
-            * {'bbox': [xmin, ymin, xmax, ymax]}
-
-            * {'geom': 'path/to/polygon_geometry'}
-
-            * {'basin': [xmin, ymin, xmax, ymax]}
-
-            * {'subbasin': [x, y], '<variable>': threshold}
-
-            For a complete overview of all region options,
-            see :py:function:~hydromt.workflows.basin_mask.parse_region
-        hydrography_fn : str
-            Name of data source for hydrography data.
-            FIXME describe data requirements
-        basin_index_fn : str
-            Name of data source with basin (bounding box) geometries associated with
-            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
-            based on a (sub)(inter)basins without a 'bounds' argument.
-
-        Returns
-        -------
-        region: dict
-            Parsed region dictionary
-
-        See Also
-        --------
-        hydromt.workflows.basin_mask.parse_region
-        """
+        """Alias for set_region."""
         return self.set_region(
             region=region, hydrography=hydrography_fn, basin_index=basin_index_fn
         )
 
     ## file system
-
     @property
     def root(self):
         """Path to model folder."""
