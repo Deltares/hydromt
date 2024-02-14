@@ -51,7 +51,7 @@ class Model(object, metaclass=ABCMeta):
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
-    _CLI_ARGS = {"region": "setup_basemaps"}
+    _CLI_ARGS = {"region": "setup_region"}
     _TMP_DATA_DIR = None
 
     # supported model version should be filled by the plugins
@@ -233,6 +233,8 @@ class Model(object, metaclass=ABCMeta):
         """
         opt = opt or {}
         opt = self._check_get_opt(opt)
+        if region is not None:
+            self.setup_region(region)
 
         # then loop over other methods
         for method in opt:
@@ -1193,10 +1195,10 @@ class Model(object, metaclass=ABCMeta):
             )
         if name in self._geoms:
             self.logger.warning(f"Replacing geom: {name}")
-        if hasattr(self, "crs"):
-            # Verify if a geom is set to model crs and if not sets geom to model crs
-            if self.crs and self.crs != geom.crs:
-                geom.to_crs(self.crs.to_epsg(), inplace=True)
+        # if hasattr(self, "crs"):
+        #     # Verify if a geom is set to model crs and if not sets geom to model crs
+        #     if self.crs and self.crs != geom.crs:
+        #         geom.to_crs(self.crs.to_epsg(), inplace=True)
         self._geoms[name] = geom
 
     def read_geoms(self, fn: str = "geoms/*.geojson", **kwargs) -> None:

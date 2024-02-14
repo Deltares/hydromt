@@ -288,6 +288,7 @@ class RegionSpecifyer(BaseModel):
     spec: Union[
         BboxRegionSpecifyer,
         GeomRegionSpecifyer,
+        GeomFileRegionSpecifyer,
         DerivedRegionSpecifyer,
         GridRegionSpecifyer,
         MeshRegionSpecifyer,

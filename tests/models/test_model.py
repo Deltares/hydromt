@@ -273,17 +273,14 @@ def test_model_append(demda, df, tmpdir):
     assert "df" in mod1.tables
 
 
-@pytest.mark.skip(reason="need to implement region first")
 def test_model_build_update(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     # build model
     model = Model(root=str(tmpdir), mode="w")
-    # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
-    model._CLI_ARGS.update({"region": "setup_region"})
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
-        opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
+        opt={"write_geoms": {}, "write_config": {}},
     )
     assert isfile(join(model.root, "model.ini"))
     assert isfile(join(model.root, "hydromt.log"))
@@ -291,7 +288,6 @@ def test_model_build_update(tmpdir, demda, obsda):
     model.update(
         opt={
             "setup_region": {},  # should be removed with warning
-            "setup_basemaps": {},
             "write_geoms": {"fn": "geoms/{name}.gpkg", "driver": "GPKG"},
         }
     )
@@ -315,7 +311,6 @@ def test_model_build_update(tmpdir, demda, obsda):
         model = Model(root=str(tmpdir), mode="w")
     # Build model with some data
     model = Model(root=str(tmpdir), mode="w+")
-    # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
     model._CLI_ARGS.update({"region": "setup_region"})
     model._NAME = "testmodel"
     model.build(
@@ -385,7 +380,7 @@ def test_setup_region(model, demda, tmpdir):
     assert np.all(model.region["value"] == 210000039)  # basin id
 
 
-@pytest.mark.skip(reason="Needs integration of new model region.")
+@pytest.mark.skip(reason="Needs decision on how geoms work independant of region.")
 def test_model_write_geoms(tmpdir):
     model = Model(root=str(tmpdir), mode="w")
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
@@ -397,7 +392,7 @@ def test_model_write_geoms(tmpdir):
     assert region_geom.crs.to_epsg() == 4326
 
 
-@pytest.mark.skip(reason="Needs integration of new model region.")
+@pytest.mark.skip(reason="Needs decision on how geoms work independant of region.")
 def test_model_set_geoms(tmpdir):
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)

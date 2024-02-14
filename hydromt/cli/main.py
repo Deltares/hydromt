@@ -24,6 +24,7 @@ from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import MODELS
+from hydromt.models._region.region import Region
 
 BUILDING_EXE = False
 if BUILDING_EXE:
@@ -397,15 +398,15 @@ def check(
                 all_exceptions.append(e)
                 logger.info("Catalog has errors")
 
-        # if region:
-        #     logger.info(f"Validating region {region}")
-        #     try:
-        #         validate_region(region)
-        #         logger.info("Region is valid!")
+        if region:
+            logger.info(f"Validating region {region}")
+            try:
+                Region(region)
+                logger.info("Region is valid!")
 
-        #     except (ValidationError, ValueError, NotImplementedError) as e:
-        #         logger.info("region has errors")
-        #         all_exceptions.append(e)
+            except (ValidationError, ValueError, NotImplementedError) as e:
+                logger.info("region has errors")
+                all_exceptions.append(e)
 
         if config:
             mod = MODELS.load(model)
