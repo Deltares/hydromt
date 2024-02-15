@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-"""HydroMT data adapter."""
+"""Data Adapters are generic for its HydroMT type and perform transformations."""
 
-from .data_adapter import DataAdapter
+# TODO: correct imports after deprecation of old adapters
+from .caching import cache_vrt_tiles
+from .data_adapter import PREPROCESSORS, DataAdapter
 from .dataframe import DataFrameAdapter
 from .dataset import DatasetAdapter
 from .geodataframe import GeoDataFrameAdapter
@@ -15,4 +16,6 @@ __all__ = [
     "GeoDatasetAdapter",
     "RasterDatasetAdapter",
     "DatasetAdapter",
+    "cache_vrt_tiles",
+    "PREPROCESSORS",
 ]

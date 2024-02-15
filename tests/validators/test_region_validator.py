@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from pydantic_core import ValidationError
 
-from hydromt.validators.region import (
+from hydromt._validators.region import (
     BoundingBoxRegion,
     PathRegion,
     validate_region,

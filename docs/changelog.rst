@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+V1
+==
+
+Added
+-----
+- Added Driver class for customizable io
+- Added MetaDataResolver class for customizable metadata discovery
+- Added DataSource class to represent and validate DataCatalog entries.
 
 
 Unreleased
@@ -13,12 +21,19 @@ Unreleased
 
 Added
 -----
+- Test script for testing predefined catalogs locally. (#735)
+- Option to write a data catalog to a csv file (#425)
 
 Changed
 -------
 
 Fixed
 -----
+- Reading Vector formats that consist of more than one file via geopandas. (#691)
+- Handle NoDataStrategy consistently when reading data in adapters (#738)
+- add option to ignore empty data sets when exporting data (#743)
+- Fix bug in `raster._check_dimensions` for datasets with multiple variables with varying dimension size (#761)
+- Fix bug when reading COGs at requested zoom level (#758)
 
 v0.9.2 (2024-01-09)
 ===================

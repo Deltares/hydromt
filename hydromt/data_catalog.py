@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """DataCatalog module for HydroMT."""
 from __future__ import annotations
 
@@ -34,11 +31,11 @@ from packaging.version import Version
 from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
-from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
-from hydromt.utils import partition_dictionaries
-
-from . import __version__
-from .data_adapter import (
+from hydromt import __version__
+from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
+from hydromt._typing.error import NoDataException, NoDataStrategy, _exec_nodata_strat
+from hydromt._utils import partition_dictionaries
+from hydromt.data_adapter import (
     DataAdapter,
     DataFrameAdapter,
     DatasetAdapter,
@@ -46,9 +43,8 @@ from .data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from .data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
-from .exceptions import NoDataException
-from .nodata import NoDataStrategy
+from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
+from hydromt.data_sources import DataSource
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +113,7 @@ class DataCatalog(object):
         if cache_dir is not None:
             self._cache_dir = cache_dir
 
-        # legacy code. to be removed
+        # TODO: legacy code. to be removed
         for lib, version in artifact_keys.items():
             warnings.warn(
                 "Adding a predefined data catalog as key-word argument is deprecated, "
@@ -140,8 +136,8 @@ class DataCatalog(object):
                 self.from_predefined_catalogs(name_or_path)
 
     @property
-    def sources(self) -> Dict:
-        """Returns dictionary of DataAdapter sources."""
+    def sources(self) -> Dict[DataSource]:
+        """Returns dictionary of DataSources."""
         if len(self._sources) == 0 and self._fallback_lib is not None:
             # read artifacts by default if no catalogs are provided
             self.from_predefined_catalogs(self._fallback_lib)
@@ -353,7 +349,7 @@ class DataCatalog(object):
         source: str,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-    ) -> DataAdapter:
+    ) -> DataSource:
         """Return a data source.
 
         Parameters
@@ -369,8 +365,8 @@ class DataCatalog(object):
 
         Returns
         -------
-        DataAdapter
-            DataAdapter object.
+        DataSource
+            DataSource object.
         """
         source = str(source)
         if source not in self._sources:
@@ -874,7 +870,7 @@ class DataCatalog(object):
             if not self._is_compatible(__version__, requested_version, allow_dev):
                 raise RuntimeError(
                     f"Data catalog requires Hydromt Version {requested_version} which "
-                    f"is incompattible with current hydromt verison {__version__}."
+                    f"is incompattible with current hydromt version {__version__}."
                 )
         if catalog_name is None:
             catalog_name = cast(
@@ -969,13 +965,10 @@ class DataCatalog(object):
             root = meta.pop("root")
         if "category" in meta and category is None:
             category = meta.pop("category")
-        if "name" in meta and catalog_name is None:
-            catalog_name = meta.pop("name")
         for name, source_dict in _denormalise_data_dict(data_dict):
             adapter = _parse_data_source_dict(
                 name,
                 source_dict,
-                catalog_name=catalog_name,
                 root=root,
                 category=category,
             )
@@ -1136,6 +1129,7 @@ class DataCatalog(object):
         unit_conversion: bool = True,
         meta: Optional[Dict] = None,
         append: bool = False,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
     ) -> None:
         """Export a data slice of each dataset and a data_catalog.yml file to disk.
 
@@ -1229,10 +1223,15 @@ class DataCatalog(object):
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
                                 time_tuple=time_tuple,
+                                handle_nodata=NoDataStrategy.RAISE,
                                 logger=self.logger,
                             )
                         except NoDataException as e:
-                            self.logger.warning(f"{key} file contains no data: {e}")
+                            _exec_nodata_strat(
+                                f"{key} file contains no data: {e}",
+                                handle_nodata,
+                                logger,
+                            )
                             continue
                         # update path & driver and remove kwargs
                         # and rename in output sources
@@ -1278,7 +1277,7 @@ class DataCatalog(object):
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom_level: Optional[Union[int, tuple]] = None,
         buffer: Union[float, int] = 0,
-        handle_nodata=NoDataStrategy.RAISE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         align: Optional[bool] = None,
         variables: Optional[Union[List, str]] = None,
         time_tuple: Optional[Tuple] = None,
@@ -1286,7 +1285,7 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
-    ) -> xr.Dataset:
+    ) -> Optional[xr.Dataset]:
         """Return a clipped, sliced and unified RasterDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
@@ -1318,6 +1317,8 @@ class DataCatalog(object):
             (<zoom_resolution>, <unit>), e.g., (1000, 'meter')
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
+        handle_nodata: NoDataStrategy, optional
+            What to do if no data can be found.
         align : float, optional
             Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
@@ -1340,7 +1341,9 @@ class DataCatalog(object):
         Returns
         -------
         obj: xarray.Dataset or xarray.DataArray
-            RasterDataset
+            RasterDataset. If no data is found and handle_nodata is set to IGNORE None
+            will be returned. if it is set to RAISE and exception will be raised in that
+            situation
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1366,12 +1369,18 @@ class DataCatalog(object):
                 buffer,
                 align,
                 time_tuple,
-                handle_nodata,
                 logger=self.logger,
             )
-            return RasterDatasetAdapter._single_var_as_array(
+            if data_like is None:
+                _exec_nodata_strat(
+                    "No data was left after slicing.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
+            ds = RasterDatasetAdapter._single_var_as_array(
                 data_like, single_var_as_array, variables
             )
+            return ds
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
@@ -1385,6 +1394,7 @@ class DataCatalog(object):
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
             cache_root=self._cache_dir if self.cache else None,
+            handle_nodata=handle_nodata,
             logger=self.logger,
         )
         return obj
@@ -1395,13 +1405,13 @@ class DataCatalog(object):
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
-        handle_nodata=NoDataStrategy.RAISE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
         predicate: str = "intersects",
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
-    ):
+    ) -> Optional[gpd.GeoDataFrame]:
         """Return a clipped and unified GeoDataFrame (vector).
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
@@ -1446,8 +1456,10 @@ class DataCatalog(object):
 
         Returns
         -------
-        gdf: geopandas.GeoDataFrame
-            GeoDataFrame
+        gdf: Optional[geopandas.GeoDataFrame]
+            GeoDataFrame. If no data is found and handle_nodata is set to IGNORE None
+            will be returned. if it is set to RAISE and exception will be raised in that
+            situation
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1464,22 +1476,30 @@ class DataCatalog(object):
                 name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
-            return GeoDataFrameAdapter._slice_data(
+            data_like = GeoDataFrameAdapter._slice_data(
                 data_like,
                 variables,
                 geom,
                 bbox,
                 buffer,
                 predicate,
-                handle_nodata,
                 logger=self.logger,
             )
+            if data_like is None:
+                _exec_nodata_strat(
+                    "No data was left after slicing.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
+            return data_like
+
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
         gdf = source.get_data(
             bbox=bbox,
             geom=geom,
+            handle_nodata=handle_nodata,
             buffer=buffer,
             predicate=predicate,
             variables=variables,
@@ -1528,6 +1548,8 @@ class DataCatalog(object):
             A geometry defining the area of interest.
         buffer : float, optional
             Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+        handle_nodata: NoDataStrategy Optional
+            what should happen if the requested data set is empty. RAISE by default
         predicate : optional
             If predicate is provided, the GeoDataFrame is filtered by testing
             the predicate function against each item. Requires bbox or mask.
@@ -1574,9 +1596,14 @@ class DataCatalog(object):
                 buffer,
                 predicate,
                 time_tuple,
-                handle_nodata,
                 logger=self.logger,
             )
+            if data_like is None:
+                _exec_nodata_strat(
+                    "No data was left after slicing.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
             return GeoDatasetAdapter._single_var_as_array(
                 data_like, single_var_as_array, variables
             )
@@ -1587,6 +1614,7 @@ class DataCatalog(object):
             bbox=bbox,
             geom=geom,
             buffer=buffer,
+            handle_nodata=handle_nodata,
             predicate=predicate,
             variables=variables,
             time_tuple=time_tuple,
@@ -1598,6 +1626,7 @@ class DataCatalog(object):
         self,
         data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
         variables: Optional[List] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
@@ -1658,6 +1687,12 @@ class DataCatalog(object):
                 time_tuple,
                 logger=self.logger,
             )
+            if data_like is None:
+                _exec_nodata_strat(
+                    "No data was left after slicing.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
             return DatasetAdapter._single_var_as_array(
                 data_like, single_var_as_array, variables
             )
@@ -1668,6 +1703,7 @@ class DataCatalog(object):
             variables=variables,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
+            handle_nodata=handle_nodata,
         )
         return obj
 
@@ -1697,6 +1733,8 @@ class DataCatalog(object):
         time_tuple : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
+        handle_nodata: NoDataStrategy Optional
+            what should happen if the requested data set is empty. RAISE by default
         **kwargs:
             Additional keyword arguments that are passed to the `DataframeAdapter`
             function. Only used if `data_like` is a path to a tabular data file.
@@ -1704,7 +1742,9 @@ class DataCatalog(object):
         Returns
         -------
         pd.DataFrame
-            Tabular data
+            Tabular data. If no data is found and handle_nodata is set to IGNORE None
+            will be returned. if it is set to RAISE and exception will be raised in that
+            situation
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1717,19 +1757,27 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = DataFrameAdapter(path=str(data_like), **kwargs)
+                source = DataFrameAdapter(path=data_like, **kwargs)
                 name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
-            return DataFrameAdapter._slice_data(
-                data_like, variables, time_tuple, handle_nodata, logger=self.logger
+            df = DataFrameAdapter._slice_data(
+                data_like, variables, time_tuple, logger=self.logger
             )
+            if df is None:
+                _exec_nodata_strat(
+                    "No data was left after slicing.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
+            return df
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
         obj = source.get_data(
             variables=variables,
             time_tuple=time_tuple,
+            handle_nodata=handle_nodata,
             logger=self.logger,
         )
         return obj
@@ -1755,58 +1803,40 @@ def _parse_data_like_dict(
 def _parse_data_source_dict(
     name: str,
     data_source_dict: Dict,
-    catalog_name: str = "",
     root: Optional[Union[Path, str]] = None,
     category: Optional[str] = None,
 ) -> Dict:
     """Parse data source dictionary."""
-    # link yml keys to adapter classes
-    ADAPTERS = {
-        "RasterDataset": RasterDatasetAdapter,
-        "GeoDataFrame": GeoDataFrameAdapter,
-        "GeoDataset": GeoDatasetAdapter,
-        "DataFrame": DataFrameAdapter,
-        "Dataset": DatasetAdapter,
-    }
     # parse data
     source = data_source_dict.copy()  # important as we modify with pop
 
-    # parse path
-    if "path" not in source:
-        raise ValueError(f"{name}: Missing required path argument.")
-    # if remote path, keep as is else call abs_path method to solve local files
-    path = source.pop("path")
-    if not _uri_validator(str(path)):
-        path = abs_path(root, path)
-    # parse data type > adapter
-    data_type = source.pop("data_type", None)
-    if data_type is None:
-        raise ValueError(f"{name}: Data type missing.")
-    elif data_type not in ADAPTERS:
-        raise ValueError(f"{name}: Data type {data_type} unknown")
-    adapter = ADAPTERS.get(data_type)
+    source["name"] = name
+
+    # add root
+    if root:
+        source.update({"root": str(root)})
+
     # source meta data
     meta = source.pop("meta", {})
     if "category" not in meta and category is not None:
         meta.update(category=category)
 
+    source["meta"] = meta
+
     # driver arguments
     driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
+    # TODO: remove code under this depending on subclasses
+    #       The DataCatalog should now have specific implementations for different drivers
     for driver_kwarg in driver_kwargs:
         # required for geodataset where driver_kwargs can be a path
         if "fn" in driver_kwarg:
             driver_kwargs.update(
                 {driver_kwarg: abs_path(root, driver_kwargs[driver_kwarg])}
             )
+    source["driver_kwargs"] = driver_kwargs
 
-    return adapter(
-        path=path,
-        name=name,
-        catalog_name=catalog_name,
-        meta=meta,
-        driver_kwargs=driver_kwargs,
-        **source,
-    )
+    # TODO: return DataSource
+    return DataSource.submodel_validate(source)
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
@@ -1868,7 +1898,8 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                 name_copy = name
                 for k, v in zip(options.keys(), combination):
                     name_copy = name_copy.replace("{" + k + "}", v)
-                    source_copy["path"] = source_copy["path"].replace("{" + k + "}", v)
+                    # TODO: seems like the job for a MetaDataResolver?
+                    source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:
             data_list.append((name, source))

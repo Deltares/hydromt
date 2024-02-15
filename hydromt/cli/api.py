@@ -5,11 +5,11 @@ import logging
 import typing
 from typing import Dict, List, Optional, Union
 
-from hydromt.gis_utils import utm_crs
-
-from .. import workflows
-from ..data_catalog import DataCatalog
-from ..models import MODELS
+from hydromt import workflows
+from hydromt.data_catalog import DataCatalog
+from hydromt.gis import utm_crs
+from hydromt.models import MODELS
+from hydromt.models.api import parse_region
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +159,7 @@ def get_region(
         data_catalog = DataCatalog(data_libs, logger=logger)
     else:
         data_catalog = DataCatalog(logger=logger)
-    kind, region = workflows.parse_region(region, logger=logger)
+    kind, region = parse_region(region, logger=logger)
     # NOTE: kind=outlet is deprecated!
     if kind in ["basin", "subbasin", "interbasin", "outlet"]:
         # retrieve global hydrography data (lazy!)

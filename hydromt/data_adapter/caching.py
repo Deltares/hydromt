@@ -5,7 +5,7 @@ import shutil
 from ast import literal_eval
 from os.path import basename, dirname, isdir, isfile, join
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 from urllib.parse import urlparse
 
 import geopandas as gpd
@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 HYDROMT_DATADIR = join(Path.home(), ".hydromt_data")
 
 
+# TODO: move this to an appropriate module (has nothing to do with caching)
 def _uri_validator(uri: Union[str, Path]) -> bool:
     """Check if uri is valid."""
     try:
@@ -48,7 +49,7 @@ def _copyfile(src, dst, chunk_size=1024):
 
 def cache_vrt_tiles(
     vrt_fn: str,
-    geom: gpd.GeoSeries = None,
+    geom: Optional[gpd.GeoSeries] = None,
     cache_dir: str = HYDROMT_DATADIR,
     logger=logger,
 ) -> str:
