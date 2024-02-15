@@ -1,9 +1,10 @@
 import logging
 from os.path import join
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, create_autospec, patch
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import pytest
 import xarray as xr
 
@@ -230,15 +231,60 @@ def test_add_data_from_rasterdataset(
         assert all([x in result for x in demda.data_vars.keys()])
 
 
-def test_add_data_from_raster_reclass(grid_component):
-    pass
-    grid_component.add_data_from_raster_reclass(
-        raster_fn="vito",
-        fill_method="nearest",
-        reclass_table_fn="vito_mapping",
-        reclass_variables=["roughness_manning"],
-        reproject_method=["average"],
+def test_add_data_from_raster_reclass(caplog, tmp_dir, demda):
+    caplog.set_level(logging.INFO)
+
+    grid_component = GridComponent(
+        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
     )
+
+    raster_fn = "vito"
+    reclass_table_fn = "vito_mapping"
+
+    demda.name = "name"
+    grid_component.data_catalog.get_rasterdataset = create_autospec(
+        grid_component.data_catalog.get_rasterdataset, return_value=demda
+    )
+    grid_component.data_catalog.get_dataframe = create_autospec(
+        grid_component.data_catalog.get_dataframe, return_value=pd.DataFrame()
+    )
+
+    with patch(
+        "hydromt.models.components.grid.grid_from_raster_reclass"
+    ) as mock_grid_from_raster_reclass:
+        mock_grid_from_raster_reclass.return_value = demda.to_dataset()
+
+        result = grid_component.add_data_from_raster_reclass(
+            raster_fn=raster_fn,
+            fill_method="nearest",
+            reclass_table_fn=reclass_table_fn,
+            reclass_variables=["roughness_manning"],
+            reproject_method=["average"],
+        )
+        # Test logging
+        assert (
+            f"Preparing grid data by reclassifying the data in {raster_fn} based "
+            f"on {reclass_table_fn}"
+        ) in caplog.text
+        mock_grid_from_raster_reclass.assert_called_once()
+        assert grid_component.data == demda
+        # Test returned result from add_data_from_rasterdataset
+        assert all([x in result for x in demda.to_dataset().data_vars.keys()])
+
+        grid_component.data_catalog.get_rasterdataset.return_value = demda.to_dataset()
+
+        with pytest.raises(
+            ValueError,
+            match=f"raster_fn {raster_fn} should be a single variable. "
+            "Please select one using the 'variable' argument",
+        ):
+            result = grid_component.add_data_from_raster_reclass(
+                raster_fn=raster_fn,
+                fill_method="nearest",
+                reclass_table_fn=reclass_table_fn,
+                reclass_variables=["roughness_manning"],
+                reproject_method=["average"],
+            )
 
 
 def test_add_data_from_geodataframe(grid_component):

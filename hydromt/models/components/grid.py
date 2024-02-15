@@ -656,7 +656,7 @@ class GridComponent(ModelComponent):
         )
         # Data resampling
         ds_vars = grid_from_raster_reclass(
-            grid_like=self._data,
+            grid_like=self.data,
             da=da,
             reclass_table=df_vars,
             reclass_variables=reclass_variables,
