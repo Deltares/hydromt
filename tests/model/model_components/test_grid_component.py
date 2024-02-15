@@ -145,7 +145,6 @@ def test_create(tmp_dir, demda):
 
 def test_properties(caplog, tmp_dir, demda, grid_component):
     # Test properties on empty grid
-
     caplog.set_level(logging.WARNING)
     res = grid_component.res
     assert "No grid data found for deriving resolution" in caplog.text
@@ -190,16 +189,45 @@ def test_set_crs(grid_component, demda):
 
 def test_add_data_from_constant(grid_component, demda):
     demda.name = "demda"
-    # demda = demda.to_dataset()
     with patch("hydromt.models.components.grid.grid_from_constant", return_value=demda):
         name = grid_component.add_data_from_constant(constant=0.01, name="demda")
         assert name == ["demda"]
         assert grid_component.data == demda
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_add_data_from_rasterdataset(grid_component):
-    pass
+@patch("hydromt.models.components.grid.grid_from_rasterdataset")
+def test_add_data_from_rasterdataset(
+    mock_grid_from_rasterdataset, demda, tmp_dir, caplog
+):
+    grid_component = GridComponent(
+        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
+    )
+    caplog.set_level(logging.INFO)
+    demda.name = "demda"
+    demda = demda.to_dataset()
+    mock_grid_from_rasterdataset.return_value = demda
+    with patch.object(
+        grid_component.data_catalog, "get_rasterdataset"
+    ) as mock_get_rasterdataset:
+        mock_get_rasterdataset.return_value = demda
+        raster_fn = "your_raster_file.tif"
+        result = grid_component.add_data_from_rasterdataset(
+            raster_fn=raster_fn,
+            variables=["variable1", "variable2"],
+            fill_method="mean",
+            reproject_method="nearest",
+            mask_name="mask",
+            rename={"old_var": "new_var"},
+        )
+        # Test logging
+        assert f"Preparing grid data from raster source {raster_fn}" in caplog.text
+        # Test whether get_rasterdataset and grid_from_rasterdataset are called
+        mock_get_rasterdataset.assert_called_once()
+        mock_grid_from_rasterdataset.assert_called_once()
+        # Test if grid_component.set() succeeded
+        assert grid_component.data == demda
+        # Test returned result from add_data_from_rasterdataset
+        assert all([x in result for x in demda.data_vars.keys()])
 
 
 def test_add_data_from_raster_reclass(grid_component):
