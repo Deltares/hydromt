@@ -18,6 +18,7 @@ Added
 Fixed
 -----
 - Added back geometry mask when reading vector files with `fiona` as engine/ driver
+- Relaxed empty data checking on `RasterDatasetAdapter`
 
 v0.9.3 (2024-02-08)
 ===================
