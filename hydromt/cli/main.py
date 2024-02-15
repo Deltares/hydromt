@@ -401,7 +401,7 @@ def check(
         if region:
             logger.info(f"Validating region {region}")
             try:
-                Region(region)
+                Region(region).construct()
                 logger.info("Region is valid!")
 
             except (ValidationError, ValueError, NotImplementedError) as e:
