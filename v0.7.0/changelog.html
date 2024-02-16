@@ -1,0 +1,1157 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>What’s new &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/theme-deltares.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'changelog';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Roadmap" href="dev/roadmap.html" />
+    <link rel="prev" title="Developments" href="dev/intro.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image">
+    <img src="_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image">
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="dev/intro.html">
+                        Developments
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="dev/intro.html">
+                        Developments
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/contributing.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/dev_install.html">Developer’s environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/team.html">Contributors</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="what-s-new">
+<h1>What’s new<a class="headerlink" href="#what-s-new" title="Permalink to this heading">#</a></h1>
+<p>All notable changes to this project will be documented in this page.</p>
+<p>The format is based on <a class="reference external" href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>, and this project adheres to
+<a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<section id="v0-7-0">
+<h2>v0.7.0<a class="headerlink" href="#v0-7-0" title="Permalink to this heading">#</a></h2>
+<p>This release contains several major updates of the code.
+Most noticable is the chagne in the <code class="docutils literal notranslate"><span class="pre">hydromt</span> <span class="pre">build</span></code> CLI, where made the region argument optional and deprecated the resolution option.
+We also did a major overhaul of the <code class="docutils literal notranslate"><span class="pre">GeoDataset`</span></code> and the associated <code class="docutils literal notranslate"><span class="pre">.vector</span></code> asseccor to support any type of vector geometries (before only points).
+These two changes might require small changes to your code. More new features and details are listed below.</p>
+<section id="added">
+<h3>Added<a class="headerlink" href="#added" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>New methods to compute PET in workflows.forcing.pet using Penman Monteith FAO-56 based on the <cite>pyet</cite> module. Available arguments are now
+method = [‘debruin’, ‘makkink’, ‘penman-monteith_rh_simple’, ‘penman-monteith_tdew’] <a class="reference external" href="https://github.com/Deltares/hydromt/pull/266">PR #266</a></p></li>
+<li><p>New get_region method in cli/api.py that returns a geojson representation of the parsed region <a class="reference external" href="https://github.com/Deltares/hydromt/pull/209">PR #209</a></p></li>
+<li><p>write raster (DataArray) to tiles in xyz stucture with the RasterDataArray.to_xyz_tiles method</p></li>
+<li><p>add zoom_level to DataCatalog.get_rasterdataset method</p></li>
+<li><p>new write_vrt function in gis_utils to write ‘.vrt’ using GDAL</p></li>
+<li><p>new predefined catalog for cmip6 data stored on Google Cloud Storage <code class="docutils literal notranslate"><span class="pre">cmip6_data</span></code>. Requires dependency gcsfs.</p></li>
+<li><p>new predefined catalog for public data stored on Amazon Web Services <code class="docutils literal notranslate"><span class="pre">aws_data</span></code>. Requires dependency s3fs.</p></li>
+<li><p>support for CMIP6 dataset.</p></li>
+<li><p>new DataCatalog preprocess function <code class="docutils literal notranslate"><span class="pre">harmonise_dims</span></code> for manipulation and harmonisation of array dimensions.</p></li>
+<li><p>experimental: support for remote data with a new yml data source <code class="docutils literal notranslate"><span class="pre">filesystem</span></code> attribute. Supported filesystems are [local, gcs, s3].
+Profile information can be passed in the data catalog <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> under <strong>storage_options</strong>.</p></li>
+<li><p>experimental: new caching option for tiled rasterdatasets (’–cache’ from command line)</p></li>
+</ul>
+</section>
+<section id="changed">
+<h3>Changed<a class="headerlink" href="#changed" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Revamped the GeoDataset (vector.py) to now work with geometry objects and wkt strings besides xy coordinates <a class="reference external" href="https://github.com/Deltares/hydromt/pull/276">PR #276</a></p></li>
+<li><p>GeoDataset can write to .nc that is compliant with ogr</p></li>
+<li><p>Support for rotated grids in RasterDataset/Array, with new rotation and origin properties <a class="reference external" href="https://github.com/Deltares/hydromt/pull/272">PR #272</a></p></li>
+<li><p>If the model root already contains files when setting root, this will cause an error unless force overwrite (mode=’w+’ or –fo/–force-overwrite from command line) <a class="reference external" href="https://github.com/Deltares/hydromt/pull/278">PR #278</a></p></li>
+<li><p>Removed resolution (‘-r’, ‘–res’) from the hydromt build cli, made region (now ‘-r’) an optional argument <a class="reference external" href="https://github.com/Deltares/hydromt/pull/278">PR #278</a></p></li>
+<li><p>Removed pygeos as an optional dependency, hydromt now relies entirely on shapely 2.0 <a class="reference external" href="https://github.com/Deltares/hydromt/pull/258">PR #258</a></p></li>
+<li><p>Changed shapely to require version ‘2.0.0’ or later</p></li>
+<li><p>strict and consistent read/write mode policy <a class="reference external" href="https://github.com/Deltares/hydromt/pull/238">PR #238</a></p></li>
+<li><p>do not automatically read hydromt_data.yml file in model root <a class="reference external" href="https://github.com/Deltares/hydromt/pull/238">PR #238</a></p></li>
+<li><p>RasterDataset zarr driver: possiblility to read from several zarr stores. The datasets are then merged and <code class="docutils literal notranslate"><span class="pre">preprocess</span></code> can
+be applied similar to netcdf driver.</p></li>
+</ul>
+</section>
+<section id="fixed">
+<h3>Fixed<a class="headerlink" href="#fixed" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>bug related to opening named raster files <a class="reference external" href="https://github.com/Deltares/hydromt/issues/200">#200</a></p></li>
+<li><p>All CRS objects are from pyproj library (instead of rasterio.crs submodule) <a class="reference external" href="https://github.com/Deltares/hydromt/pull/230">PR #230</a></p></li>
+<li><p>fix reading lists and none with config <a class="reference external" href="https://github.com/Deltares/hydromt/pull/246">PR #246</a></p></li>
+<li><p>fix <cite>DataCatalog.to_yml</cite> and <cite>DataCatalog.export()</cite> with relative path and add meta section <a class="reference external" href="https://github.com/Deltares/hydromt/pull/238">PR #238</a></p></li>
+<li><p>fixed <cite>pet</cite> (workflows.forcing), variables are now defined correctly</p></li>
+</ul>
+</section>
+<section id="deprecated">
+<h3>Deprecated<a class="headerlink" href="#deprecated" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><cite>x_dim</cite>, <cite>y_dim</cite>, and <cite>total_bounds</cite> attributes of GeoDataset/GeoDataArray are renamed to <cite>x_name</cite>, <cite>y_name</cite> and <cite>bounds</cite></p></li>
+<li><p>Move pygeos to optional dependencies in favor of shapely 2.0.</p></li>
+<li><p>Resolution option in hydromt build cli</p></li>
+</ul>
+</section>
+<section id="documentation">
+<h3>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Added <strong>Working with GeoDatasets</strong> python notebook</p></li>
+<li><p>added <strong>working_with_models</strong> example notebook <a class="reference external" href="https://github.com/Deltares/hydromt/pull/229">PR #229</a></p></li>
+<li><p>added <strong>export_data</strong> example notebook <a class="reference external" href="https://github.com/Deltares/hydromt/pull/222">PR #222</a></p></li>
+<li><p>added <strong>reading_point_data</strong> example notebook <a class="reference external" href="https://github.com/Deltares/hydromt/pull/216">PR #216</a></p></li>
+<li><p>added <strong>working_with_flow_directions</strong> example notebook <a class="reference external" href="https://github.com/Deltares/hydromt/pull/231">PR #231</a></p></li>
+<li><p>added <strong>prep_data_catalog</strong> example notebook <a class="reference external" href="https://github.com/Deltares/hydromt/pull/232">PR #232</a></p></li>
+<li><p>added <strong>reading_tabular_data</strong> example notebook <a class="reference external" href="https://github.com/Deltares/hydromt/pull/217">PR #216</a></p></li>
+</ul>
+</section>
+</section>
+<section id="v0-6-0-24-october-2022">
+<h2>v0.6.0 (24 October 2022)<a class="headerlink" href="#v0-6-0-24-october-2022" title="Permalink to this heading">#</a></h2>
+<p>In this release, we updated the <code class="docutils literal notranslate"><span class="pre">Model</span> <span class="pre">API</span></code>  by renaming staticgeoms to geoms, adding a new maps object and removing abstract methods.
+We also added new general subclasses to Model: <code class="docutils literal notranslate"><span class="pre">GridModel</span></code>, <code class="docutils literal notranslate"><span class="pre">LumpedModel</span></code>, <code class="docutils literal notranslate"><span class="pre">MeshModel</span></code>, <code class="docutils literal notranslate"><span class="pre">NetworkModel</span></code>.
+These new subclasses have their own objects (e.g. grid for GridModel representing regular grids which replaces the old staticmaps object).
+More details in the list below:</p>
+<section id="id6">
+<h3>Added<a class="headerlink" href="#id6" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>ModelCatalog to discover generic and plugin model classes. <a class="reference external" href="https://github.com/Deltares/hydromt/pull/202">PR #202</a></p></li>
+<li><p>Support for 2-dimensional tabular data through the new DataFrameAdapter. <a class="reference external" href="https://github.com/Deltares/hydromt/pull/153">PR #153</a></p></li>
+<li><p>API calls to get info about model components and dataset for the dashboard. <a class="reference external" href="https://github.com/Deltares/hydromt/pull/118">PR #118</a></p></li>
+<li><p>New submodelclasses in hydromt: <code class="docutils literal notranslate"><span class="pre">GridModel</span></code>, <code class="docutils literal notranslate"><span class="pre">LumpedModel</span></code>, <code class="docutils literal notranslate"><span class="pre">MeshModel</span></code>, <code class="docutils literal notranslate"><span class="pre">NetworkModel</span></code></p></li>
+<li><p>Added entrypoints for lumped_model, mesh_model, grid_model</p></li>
+<li><p>New mixin classes created for model specific object: <code class="docutils literal notranslate"><span class="pre">GridMixin</span></code> for self.grid, <code class="docutils literal notranslate"><span class="pre">LumpedMixin</span></code> for self.response_units, <code class="docutils literal notranslate"><span class="pre">MeshMixin</span></code> for self.mesh,
+<code class="docutils literal notranslate"><span class="pre">MapsMixin</span></code> for self.maps</p></li>
+<li><p>New high-level object: self.maps for storing regular rasters data (which can have resolution and / or projection).</p></li>
+<li><p>Maps generic setup methods: <code class="docutils literal notranslate"><span class="pre">MapsMixin.setup_maps_from_raster</span></code> and <code class="docutils literal notranslate"><span class="pre">MapsMixin.setup_maps_from_rastermapping</span></code></p></li>
+<li><p>Mesh generic setup methods: <code class="docutils literal notranslate"><span class="pre">MeshModel.setup_mesh</span></code>, <code class="docutils literal notranslate"><span class="pre">MeshMixin.setup_maps_from_raster</span></code> and <code class="docutils literal notranslate"><span class="pre">MeshMixin.setup_maps_from_rastermapping</span></code></p></li>
+</ul>
+</section>
+<section id="id7">
+<h3>Changed<a class="headerlink" href="#id7" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>self.staticgeoms object and methods renamed to self.geoms</p></li>
+<li><p>self.staticmaps object and methods renamed to self.grid and moved into GridModel and GridMixin</p></li>
+</ul>
+</section>
+<section id="id8">
+<h3>Fixed<a class="headerlink" href="#id8" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Bug in backward compatibility of staticgeoms (not read automatically). <a class="reference external" href="https://github.com/Deltares/hydromt/issues/190">Issue #190</a></p></li>
+<li><p>Direct import of xarray.core.resample. <a class="reference external" href="https://github.com/Deltares/hydromt/issues/189">Issue #189</a></p></li>
+<li><p>Bug in dim0 attribute of raster, removed instead of set to None if no dim0 <a class="reference external" href="https://github.com/Deltares/hydromt/issues/210">Issue #210</a></p></li>
+</ul>
+</section>
+<section id="id9">
+<h3>Deprecated<a class="headerlink" href="#id9" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>self.staticgeoms and self.staticmaps are deprecated.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-5-0-4-august-2022">
+<h2>v0.5.0 (4 August 2022)<a class="headerlink" href="#v0-5-0-4-august-2022" title="Permalink to this heading">#</a></h2>
+<section id="id10">
+<h3>Added<a class="headerlink" href="#id10" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>New raster method for adding gdal_compliant() attributes to xarray object.</p></li>
+<li><p>Function <code class="docutils literal notranslate"><span class="pre">to_datetimeindex</span></code> in available preprocess functions for xr.open_dataset in the data adapter.</p></li>
+<li><p>Function <code class="docutils literal notranslate"><span class="pre">remove_duplicates</span></code> in available preprocess functions for xr.open_dataset in the data adapter.</p></li>
+<li><p>New <code class="docutils literal notranslate"><span class="pre">DataCatalog.from_predefined_catalogs</span></code> and <code class="docutils literal notranslate"><span class="pre">DataCatalog.from_archive</span></code> to support predefined data catalogs and archive
+in a generic way through the data/predefined_catalogs.yml file.</p></li>
+<li><p>Optional formatting for year and month variables in path of data sources.</p></li>
+</ul>
+</section>
+<section id="id11">
+<h3>Changed<a class="headerlink" href="#id11" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>splitted data_adapter.py into a  data_catalog and data_adapter submodule with py scripts per adapter</p></li>
+<li><p>Add rioxarray dependency to read raster data</p></li>
+<li><p>In build or update methods, the setup_config component is not forced to run first anymore but according to order of the components in the ini config (opt dict).</p></li>
+<li><p>In DataCatalog.get_RasterDataset &amp; DataCatalog.get_GeoDataset methods, variables can now also be a str as well as a list of strings.</p></li>
+<li><p>In DataCatalog.get_RasterDataset &amp; DataCatalog.get_GeoDataset methods, automatic renaming of single variable datasets based on the variables argument will be deprecated</p></li>
+<li><p>Interpolate missing values based on D4 neighbors of missing value cells only. This largely improves the performance without loosing accuracy.
+Changes have been observed when <cite>nearest</cite> method is used but this should not impact quality of the interpolation.</p></li>
+<li><p>New source_names argument to DataCatalog.to_yml</p></li>
+</ul>
+</section>
+<section id="id12">
+<h3>Fixed<a class="headerlink" href="#id12" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Fixed DataAdapter.resolve_paths with unknown keys #121</p></li>
+<li><p>Fixed the WGS84 datum in the gis_utils.utm_crs method.</p></li>
+<li><p>In merge.merge the grid is now aligned with input dataset with the largest overlap if no dst_bounds &amp; dst_res are given.</p></li>
+<li><p>Fixed the predicate not being passed in get_geodataframe method.</p></li>
+<li><p>Removed deprecated xr.ufuncs calls.</p></li>
+</ul>
+</section>
+<section id="id13">
+<h3>Deprecated<a class="headerlink" href="#id13" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Automatic renaming of single var dataset if variables is provided in get_rasterdataset. Data catalog should be used instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataCatalog.from_artifacts</span></code>. Use <code class="docutils literal notranslate"><span class="pre">DataCatalog.from_predefined_catalogs</span></code> instead.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-4-5-16-february-2022">
+<h2>v0.4.5 (16 February 2022)<a class="headerlink" href="#v0-4-5-16-february-2022" title="Permalink to this heading">#</a></h2>
+<section id="id14">
+<h3>Added<a class="headerlink" href="#id14" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>New skill scores: KGE 2012, KGE non-parametric (2018), KGE non-parametric flood (2018).</p></li>
+<li><p>new rasterio inverse distance weighting method (“rio_idw”) in raster.interpolate_na</p></li>
+<li><p>Add option to add placeholders in yml file to explode a single yml entry to multiple yml entries (useful for e.g. climate datasets).</p></li>
+<li><p>general Model.setup_region method</p></li>
+</ul>
+</section>
+<section id="id15">
+<h3>Changed<a class="headerlink" href="#id15" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>stats.py is now in stats/skills.py in order to include more and different type of new statistics later.</p></li>
+<li><p>improved flw.reproject_hydrography_like and flw.dem_adjust methods</p></li>
+<li><p>file handlers of loggers are replaced in Model.set_root</p></li>
+<li><p>log.setuplog replaces old handlers if these exist to avoid duplicates.</p></li>
+<li><p>setup_basemaps method no longer required for build method</p></li>
+<li><p>improved interbasin regions in workflows.get_basin_geometry</p></li>
+<li><p>drop non-serializable entries from yml file when writing data catalog to avoid it getting corrupt</p></li>
+<li><p>data catalog yml entries get priority over local files or folders with the same name in the data_adapter.get_* methods
+multi-file rasterdatasets are only supported through the data catalog yml file</p></li>
+</ul>
+</section>
+<section id="id16">
+<h3>Fixed<a class="headerlink" href="#id16" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>fix incorrect nodata values at valid cells from scipy.griddata method in raster.interpolate_na</p></li>
+</ul>
+</section>
+<section id="id17">
+<h3>Deprecated<a class="headerlink" href="#id17" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>workflows.basemaps methods (hydrography and topography) moved to hydromt_wflow</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-4-4-19-november-2021">
+<h2>v0.4.4 (19 November 2021)<a class="headerlink" href="#v0-4-4-19-november-2021" title="Permalink to this heading">#</a></h2>
+<section id="id18">
+<h3>Added<a class="headerlink" href="#id18" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>flw.d8_from_dem to derive a flow direction raster from a DEM</p></li>
+<li><p>flw.reproject_hydrography_like to reproject flow direction raster data</p></li>
+<li><p>flw.floodplain_elevation method which returns floodplain classification and hydrologically adjusted elevation</p></li>
+<li><p>raster.flipud method to flip data along y-axis</p></li>
+<li><p>raster.area_grid to get the raster cell areas [m2]</p></li>
+<li><p>raster.density_grid to convert the values to [unit/m2]</p></li>
+<li><p>gis_utils.spread2d method (wrapping its pyflwdir equivalent) to spread values on a raster</p></li>
+<li><p>gis_utils.nearest and gis_utils.nearest_merge methods to merge GeoDataFrame based on proximity</p></li>
+<li><p>river_width to estimate a segment average river width based on a river mask raster</p></li>
+<li><p>river_depth to get segment average river depth estimates based bankfull discharge (requires pyflwdir v0.5.2)</p></li>
+</ul>
+</section>
+<section id="id19">
+<h3>Changed<a class="headerlink" href="#id19" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>bumped hydromt-artifacts version to v0.0.6</p></li>
+<li><p>In model API build and update functions, if any write* are called in the ini file (opt),
+the final self.write() call is skipped. This enables passing custom arguments to the write*
+functions without double writing files or customizing the order in which write* functions
+are called. If any write* function is called we assume the user manages the writing and
+a the global write method is skipped.</p></li>
+<li><p>default GTiff lwz compression with DataCatalog.export_data method</p></li>
+<li><p>rename DataAdapter.export_data to DataAdapter.to_file to avoid confusion with DataCatalog.export_data method</p></li>
+<li><p>allow “alias” with attributes in DataCatalog yml files / dictionaries</p></li>
+</ul>
+</section>
+<section id="id20">
+<h3>Fixed<a class="headerlink" href="#id20" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>DataCatalog.to_yml Path objects written as normal strings</p></li>
+<li><p>Bugfix in basin_mask.get_basin_geometry when using bbox or geom arguments</p></li>
+<li><p>Bugfix DataAdapter.__init__ setting None value in meta data</p></li>
+<li><p>Bugfix DataAdapter.resolve_paths with argument in root</p></li>
+</ul>
+</section>
+<section id="id21">
+<h3>Deprecated<a class="headerlink" href="#id21" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>flw.gaugemap is replaced by flw.gauge_map for a more consistent interface of flw.*map methods</p></li>
+<li><p>flw.basin_shape is redundant</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-4-3-3-october-2021">
+<h2>v0.4.3 (3 October 2021)<a class="headerlink" href="#v0-4-3-3-october-2021" title="Permalink to this heading">#</a></h2>
+<section id="id22">
+<h3>Added<a class="headerlink" href="#id22" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>log hydromt_data.yml with write_data_catalog (needs to be implemented in various plugins)</p></li>
+<li><p>add alias option in data catalog yml files</p></li>
+<li><p>use mamba for github actions</p></li>
+</ul>
+</section>
+<section id="id23">
+<h3>Changed<a class="headerlink" href="#id23" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>generalize DataCatalog artifact kwargs to allow for multiple yml files from artifacts</p></li>
+<li><p>keep geom attributes with &lt;Dataset/DataArray&gt;.vector.to_gdf method</p></li>
+</ul>
+</section>
+<section id="id24">
+<h3>Fixed<a class="headerlink" href="#id24" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Fix bug in io.open_vector and io.open_vector_from_table with WindowsPath fn</p></li>
+<li><p>Fix data_libs usage from [global] section of config in cli/main.py</p></li>
+<li><p>Bugfix sampling for rasters with ‘mask’ coordinate</p></li>
+<li><p>Bugfix logical operator in merge method</p></li>
+</ul>
+</section>
+<section id="id25">
+<h3>Deprecated<a class="headerlink" href="#id25" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>data_adapter.parse_data_sources method deprecated</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-4-2-28-july-2021">
+<h2>v0.4.2 (28 July 2021)<a class="headerlink" href="#v0-4-2-28-july-2021" title="Permalink to this heading">#</a></h2>
+<p>Noticeable changes include new import of model plugins and improvements of reading methods for tile index and geodataset.</p>
+<section id="id26">
+<h3>Added<a class="headerlink" href="#id26" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Small patch for geoms/bbox regions when upscaling flow dir.</p></li>
+<li><p>Mask option in merge.merge method for improved open_raster_from_tindex.</p></li>
+</ul>
+</section>
+<section id="id27">
+<h3>Changed<a class="headerlink" href="#id27" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>New import of model plugins. Before plugins were only loaded when import MODELS or xxxModel from hydromt.models and not when importing hydromt as before.</p></li>
+<li><p>Dropped dask version pins</p></li>
+<li><p>read-only check in write_config; dropped write_results</p></li>
+<li><p>results objects of Model API can also contain xarray.Dataset. To split a Dataset into DataArrays use the split_dataset option of set_results.</p></li>
+</ul>
+</section>
+<section id="id28">
+<h3>Deprecated<a class="headerlink" href="#id28" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Importing model plugins via “hydromt import xxxModel” or “import hydromt.xxxModel” will be deprecated. Instead use “from hydromt.models import xxxModel”
+or “from hydromt_xxx import xxxModel”.</p></li>
+</ul>
+</section>
+<section id="id29">
+<h3>Fixed<a class="headerlink" href="#id29" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Fix error when deriving basin mask for subbasin with multiple xy.</p></li>
+<li><p>Fix passing timeseries and crs for get_geodataset with vector driver</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-4-1-18-may-2021">
+<h2>v0.4.1 (18 May 2021)<a class="headerlink" href="#v0-4-1-18-may-2021" title="Permalink to this heading">#</a></h2>
+<p>Noticeable changes are a new CLI region option based on <code class="docutils literal notranslate"><span class="pre">grid</span></code>.</p>
+<section id="id30">
+<h3>Added<a class="headerlink" href="#id30" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>New REGION option of the <strong>build</strong> CLI methods for model region based on a <code class="docutils literal notranslate"><span class="pre">grid</span></code>.</p></li>
+<li><p>Keep track of the hydroMT plugin versions in the logging and <code class="docutils literal notranslate"><span class="pre">==models</span></code> CLI flag.</p></li>
+<li><p>deltares_data and artifact_data options in DataCatalog class and Model API</p></li>
+</ul>
+</section>
+<section id="id31">
+<h3>Changed<a class="headerlink" href="#id31" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Changed the <strong>data-artifacts</strong> version to <strong>v0.0.4</strong>. This includes renaming from hydrom_merit to merit_hydro.</p></li>
+<li><p>moved binder to seperate folder with postBuild script</p></li>
+<li><p>Bump Black version (formatting).</p></li>
+</ul>
+</section>
+<section id="id32">
+<h3>Fixed<a class="headerlink" href="#id32" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Multiple <code class="docutils literal notranslate"><span class="pre">==opt</span></code> arguments from CLI are now taken into account (instead of only the first).</p></li>
+<li><p>Bugfix for crs without an EPSG code.</p></li>
+<li><p>Bugfix for Path type path in DataCatalog</p></li>
+<li><p>Bugfix missing rasterio in gis_utils.write_map() method</p></li>
+<li><p>Bugfix handling of fn_ts in DataCatalog.get_geodataset() method</p></li>
+</ul>
+</section>
+<section id="id33">
+<h3>Documentation<a class="headerlink" href="#id33" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Now <strong>latest</strong> and <strong>stable</strong> versions.</p></li>
+<li><p>Added <strong>read_raster_data</strong> notebooks to the examples.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-4-0-23-april-2021">
+<h2>v0.4.0 (23 April 2021)<a class="headerlink" href="#v0-4-0-23-april-2021" title="Permalink to this heading">#</a></h2>
+<p>This is the first stable release of hydroMT. Noticeable changes are the addition of the <code class="docutils literal notranslate"><span class="pre">deltares-data</span></code> flag, improvements with basin masking functionnalities, and the creation of examples notebooks available
+in the documentation and in Binder.</p>
+<section id="id34">
+<h3>Added<a class="headerlink" href="#id34" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Support the use of data stored at <a class="reference external" href="https://www.deltares.nl/en/">Deltares</a> by introducing the <code class="docutils literal notranslate"><span class="pre">==deltares-data</span></code> flag to the CLI and according property to the <code class="docutils literal notranslate"><span class="pre">DataCatalog</span></code> and <code class="docutils literal notranslate"><span class="pre">Model</span> <span class="pre">API</span></code>.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">outlet_map</span></code> and <code class="docutils literal notranslate"><span class="pre">stream_map</span></code> functions in flw.py.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">mask</span></code> function to raster.py for <code class="docutils literal notranslate"><span class="pre">RasterDataArray</span></code> and <code class="docutils literal notranslate"><span class="pre">RasterDataset</span></code> class.</p></li>
+<li><p>Binder environment to run examples notebooks.</p></li>
+</ul>
+</section>
+<section id="id35">
+<h3>Changed<a class="headerlink" href="#id35" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Bump pyflwdir version and dependencies to dask, gdal, numba and netcdf.</p></li>
+<li><p>Basin mask functions have been moved from <strong>models/region.py</strong> to <strong>workflows/basin_mask.py</strong>.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">flwdir_from_da</span></code> (flw.py), the <strong>mask</strong> argument can now be a xr.DataArray and not just a boolean. The default behavior has been changed from True to None. This impacts previous use of the function.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">get_basin_geometry</span></code> (workflows/basin_mask.py), basins geometry data are passed via <strong>basin_index</strong> argument instead of <strong>gdf_bas</strong>. GeoDataFrameAdapter are supported as well as geopandas.GeoDataFrame.</p></li>
+</ul>
+</section>
+<section id="id36">
+<h3>Deprecated<a class="headerlink" href="#id36" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">build-base</span></code> CLI flag is deprecated since the ini file is now fully in control of each model compoenents to run.</p></li>
+</ul>
+</section>
+<section id="id37">
+<h3>Fixed<a class="headerlink" href="#id37" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>CLI method <code class="docutils literal notranslate"><span class="pre">clip</span></code>.</p></li>
+<li><p>Basin delineation using basin ID (basid).</p></li>
+<li><p>Fixed the <code class="docutils literal notranslate"><span class="pre">set_config</span></code> and <code class="docutils literal notranslate"><span class="pre">get_config</span></code> methods of the model API in order to always try first to read available config file before editing.</p></li>
+</ul>
+</section>
+<section id="id38">
+<h3>Documentation<a class="headerlink" href="#id38" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Documentation moved to GitHub Pages.</p></li>
+<li><p>Notebooks examples are added in the documentation.</p></li>
+<li><p>Added <strong>delineate_basin</strong> notebooks to the examples.</p></li>
+<li><p>Workflows documented in the API docs.</p></li>
+<li><p>Update installation instructions.</p></li>
+</ul>
+</section>
+<section id="tests">
+<h3>Tests<a class="headerlink" href="#tests" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Added unit tests for <strong>workflows/basin_mask.py</strong>.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-3-9-16-april-2021">
+<h2>v0.3.9 (16 April 2021)<a class="headerlink" href="#v0-3-9-16-april-2021" title="Permalink to this heading">#</a></h2>
+<p>Initial open source pre-release of hydroMT.</p>
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="dev/intro.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Developments</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="dev/roadmap.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Roadmap</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-7-0">
+   v0.7.0
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#added">
+     Added
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#changed">
+     Changed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#fixed">
+     Fixed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#deprecated">
+     Deprecated
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#documentation">
+     Documentation
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-6-0-24-october-2022">
+   v0.6.0 (24 October 2022)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id6">
+     Added
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id7">
+     Changed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id8">
+     Fixed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id9">
+     Deprecated
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-5-0-4-august-2022">
+   v0.5.0 (4 August 2022)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id10">
+     Added
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id11">
+     Changed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id12">
+     Fixed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id13">
+     Deprecated
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-4-5-16-february-2022">
+   v0.4.5 (16 February 2022)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id14">
+     Added
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id15">
+     Changed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id16">
+     Fixed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id17">
+     Deprecated
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-4-4-19-november-2021">
+   v0.4.4 (19 November 2021)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id18">
+     Added
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id19">
+     Changed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id20">
+     Fixed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id21">
+     Deprecated
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-4-3-3-october-2021">
+   v0.4.3 (3 October 2021)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id22">
+     Added
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id23">
+     Changed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id24">
+     Fixed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id25">
+     Deprecated
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-4-2-28-july-2021">
+   v0.4.2 (28 July 2021)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id26">
+     Added
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id27">
+     Changed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id28">
+     Deprecated
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id29">
+     Fixed
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-4-1-18-may-2021">
+   v0.4.1 (18 May 2021)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id30">
+     Added
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id31">
+     Changed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id32">
+     Fixed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id33">
+     Documentation
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-4-0-23-april-2021">
+   v0.4.0 (23 April 2021)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id34">
+     Added
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id35">
+     Changed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id36">
+     Deprecated
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id37">
+     Fixed
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id38">
+     Documentation
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#tests">
+     Tests
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#v0-3-9-16-april-2021">
+   v0.3.9 (16 April 2021)
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/changelog.rst">
+        <i class="fa-solid fa-pencil"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="_sources/changelog.rst.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright Deltares.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

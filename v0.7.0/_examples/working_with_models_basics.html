@@ -1,0 +1,1271 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Example: Working with models from CLI &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_examples/working_with_models_basics';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Example: Working with models in Python" href="working_with_models.html" />
+    <link rel="prev" title="Defining a model region" href="../user_guide/model_region.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image">
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dev/intro.html">
+                        Developments
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dev/intro.html">
+                        Developments
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_overview.html">Overview data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_prepare_cat.html">Preparing a Data Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_types.html">Supported data types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_existing_cat.html">Pre-defined data catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_conventions.html">Data conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prep_data_catalog.html">Example: Preparing a data catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_data.html">Example: Exporting data from a data catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reading_raster_data.html">Example: Reading raster data</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="reading_vector_data.html">Example: Reading vector data</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="reading_point_data.html">Example: Reading geospatial point time-series</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with models in HydroMT</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_overview.html">Overview models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_build.html">Building a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_update.html">Updating a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_clip.html">Clipping a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_config.html">Preparing a model configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_region.html">Defining a model region</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Example: Working with models from CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="delineate_basin.html">Example: Define hydrological model regions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Methods and workflows</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/methods_main.html">Overview methods and workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/methods_stats.html">Statistical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_raster.html">Example: Working with raster data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_geodatasets.html">Example: Working with geodatasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<div>
+    For an interactive online version click here:
+    <a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/working_with_models_basics.ipynb" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
+</div></div>
+<section id="Example:-Working-with-models-from-CLI">
+<h1>Example: Working with models from CLI<a class="headerlink" href="#Example:-Working-with-models-from-CLI" title="Permalink to this heading">#</a></h1>
+<p>HydroMT has the following high-level functionality from the Command Line Interface (CLI) for setting up models from raw data or adjusting models:</p>
+<ul class="simple">
+<li><p><strong>building</strong> a model: building a model from scratch.</p></li>
+<li><p><strong>updating</strong> a model: adding or changing model components of an existing model.</p></li>
+<li><p><strong>clipping</strong> a model: changing the spatial domain of an existing model (e.g. select subbasins from a larger model).</p></li>
+</ul>
+<p>Here we show how to build and update a hypothetical distributed model from the command line interface (CLI) based on the generic HydroMT <strong>grid_model</strong>.</p>
+<p>Lets first check which models are available in our environment:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>--models
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+model plugins:
+generic models (hydromt 0.7.0):
+ - grid_model
+ - lumped_model
+ - mesh_model
+ - network_model
+
+
+</pre></div></div>
+</div>
+<section id="Build-a-model-from-CLI">
+<h2>Build a model from CLI<a class="headerlink" href="#Build-a-model-from-CLI" title="Permalink to this heading">#</a></h2>
+<p>To build a model you always follow the next four steps.</p>
+<ol class="arabic simple">
+<li><p>Prepare or use a pre-defined data catalog with all the required data sources</p></li>
+<li><p>Define your model region, see the overview of <a class="reference external" href="https://deltares.github.io/hydromt/latest/user_guide/model_region.html">model region options</a>.</p></li>
+<li><p>Prepare a model configuration which describes the complete pipeline to build your model, see <a class="reference external" href="https://deltares.github.io/hydromt/latest/user_guide/model_config.html">preparing a model configuration</a>.</p></li>
+<li><p>Build you model using the CLI or Python interface</p></li>
+</ol>
+<p>Here we focus steps 2-4 and use data from the <a class="reference external" href="https://deltares.github.io/hydromt/latest/user_guide/data_existing_cat.html">predefined aritifact_data data catalog</a></p>
+<p>Using the <strong>hydromt build</strong> method we can setup a complete model from scratch. Let’s get an overview of the method and its arguments.</p>
+<p>Note the required <code class="docutils literal notranslate"><span class="pre">MODEL</span></code> (i.e. name of the model), <code class="docutils literal notranslate"><span class="pre">MODEL_ROOT</span></code> (i.e. folder where to save the model) arguments. As of version v0.7.0 the <code class="docutils literal notranslate"><span class="pre">REGION</span></code> (i.e. area of interest) argument is optional. This argument can be used by adding -r or –region flag.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>build<span class="w"> </span>--help
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Usage: hydromt build [OPTIONS] MODEL MODEL_ROOT
+
+  Build models from scratch.
+
+  Example usage:
+  --------------
+
+  To build a wflow model for a subbasin using and point coordinates snapped to cells with stream order &gt;= 4
+  hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini -r &#34;{&#39;subbasin&#39;: [-7.24, 62.09], &#39;strord&#39;: 4}&#34; -d deltares_data -d /path/to/data_catalog.yml -v
+
+  To build a sfincs model based on a bbox
+  hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini -r &#34;{&#39;bbox&#39;: [4.6891,52.9750,4.9576,53.1994]}&#34; -d /path/to/data_catalog.yml -v
+
+Options:
+  --opt TEXT               Method specific keyword arguments, see the method
+                           documentation of the specific model for more
+                           information about the arguments.
+  -i, --config PATH        Path to hydroMT configuration file, for the model
+                           specific implementation.
+  -r, --region TEXT        Set the region for which to build the model, e.g.
+                           {&#39;subbasin&#39;: [-7.24, 62.09]}
+  -d, --data TEXT          Path to local yaml data catalog file OR name of
+                           predefined data catalog.
+  --dd, --deltares-data    Flag: Shortcut to add the &#34;deltares_data&#34; catalog
+  --fo, --force-overwrite  Flag: If provided overwrite existing model files
+  --cache                  Flag: If provided cache tiled rasterdatasets
+  -v, --verbose            Increase verbosity.
+  -q, --quiet              Decrease verbosity.
+  --help                   Show this message and exit.
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>build<span class="w"> </span>grid_model<span class="w"> </span>./tmp_grid_model<span class="w"> </span>--region<span class="w"> </span><span class="s2">&quot;{&#39;bbox&#39;: [11.70, 45.35, 12.95, 46.70]}&quot;</span><span class="w"> </span>-vv
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:35,300 - build - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model/hydromt.log.
+2023-02-22 04:42:35,300 - build - log - INFO - HydroMT version: 0.7.0
+2023-02-22 04:42:35,300 - build - main - INFO - Building instance of grid_model model at /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model.
+2023-02-22 04:42:35,300 - build - main - INFO - User settings:
+2023-02-22 04:42:35,313 - build - model_api - INFO - Initializing grid_model model from hydromt (v0.7.0).
+2023-02-22 04:42:35,313 - build - model_api - INFO - setup_region.region: {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2023-02-22 04:42:35,313 - build - model_api - INFO - setup_region.hydrography_fn: merit_hydro
+2023-02-22 04:42:35,313 - build - model_api - INFO - setup_region.basin_index_fn: merit_hydro_index
+2023-02-22 04:42:35,313 - build - basin_mask - DEBUG - Parsed region (kind=bbox): {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2023-02-22 04:42:35,317 - build - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model
+2023-02-22 04:42:35,317 - build - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model/model.ini
+2023-02-22 04:42:35,317 - build - model_grid - DEBUG - No grid data found, skip writing.
+2023-02-22 04:42:35,317 - build - model_api - DEBUG - Writing file geoms/region.geojson
+2023-02-22 04:42:35,348 - build - model_api - DEBUG - No forcing data found, skip writing.
+2023-02-22 04:42:35,348 - build - model_api - DEBUG - No states data found, skip writing.
+
+</pre></div></div>
+</div>
+<p>The example above means the following: run <strong>hydromt build</strong> with:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">grid_model</span></code>: i.e. build a generic GridModel instance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">./tmp_grid_model</span></code>: output model folder</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--region</span> <span class="pre">&quot;{'bbox':</span> <span class="pre">[11.70,</span> <span class="pre">45.35,</span> <span class="pre">12.95,</span> <span class="pre">46.70]}&quot;</span></code>: set the region of interest using a bounding box defined by its [xmin, ymin, xmax, ymax] coordinates (in WGS84)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-vv</span></code> : give some extra verbosity (2 * v) to display feedback on screen. Now debug messages are provided.</p></li>
+</ul>
+<p>As we did not specify a hydromt configuration, besides the hydromt.log file, an empty model simulation configuration file, only the model region (area of interest) has been defined and is saved in the geoms folder. To build a complete model we need the use a hydromt configuration ini-file.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># print MODEL_ROOT folder</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<span class="k">def</span> <span class="nf">print_dir</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.xml&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="n">print_dir</span><span class="p">(</span><span class="s2">&quot;tmp_grid_model&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tmp_grid_model
+ - hydromt.log
+ - model.ini
+tmp_grid_model/geoms
+ - region.geojson
+</pre></div></div>
+</div>
+<p>The <strong>configuration file</strong> exists of available <strong>setup_methods</strong> for your model, listed in the order of execution. Most methods start with reading input data using the DataAdapter, transforming the data using workflows (e.g. reprojection, reclassification, aggregation, etc…) and adding the new model data to the right model component. An overview of the available methods can be found in the online API reference for the <a class="reference external" href="https://deltares.github.io/hydromt/latest/api.html#gridmodel">GridModel</a>,
+<a class="reference external" href="https://deltares.github.io/hydromt/latest/api.html#lumpedmodel">LumpedModel</a>, and <a class="reference external" href="https://deltares.github.io/hydromt/latest/api.html#meshmodel">MeshModel</a></p>
+<p>Note that these methods for the generic model classes are still quite limited. To get an idea of potential setup_ methods, checkout the <a class="reference external" href="https://deltares.github.io/hydromt/latest/plugins.html">model plugins</a></p>
+<p>The configuration ini file can be passed to the hydromt build method using the <code class="docutils literal notranslate"><span class="pre">-i</span></code> flag.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># check the content of the ini file (for sake of the example only)</span>
+<span class="n">fn_ini</span> <span class="o">=</span> <span class="s2">&quot;grid_model_build.ini&quot;</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn_ini</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[setup_config]
+header.settings = value
+timers.start = &#34;2010-02-05&#34;
+timers.end = &#34;2010-02-15&#34;
+
+[setup_region]
+# Note: the &#34;region&#34; argument can be passed directly to the build method
+hydrography_fn = merit_hydro
+basin_index_fn = merit_hydro_index
+
+[setup_maps_from_raster]
+raster_fn = merit_hydro_1k
+variables = elevtn
+fill_method = None
+reproject_method=None
+
+[setup_maps_from_raster_reclass]
+raster_fn = vito
+reclass_table_fn = vito_reclass  # Note: from data/vito_reclass.yml data catalog
+reclass_variables= [&#39;manning&#39;]
+
+[write]
+components = [&#39;config&#39;, &#39;geoms&#39;, &#39;maps&#39;]
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>build<span class="w"> </span>grid_model<span class="w"> </span>./tmp_grid_model1<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;{&#39;bbox&#39;: [11.70, 45.35, 12.95, 46.70]}&quot;</span><span class="w"> </span>-i<span class="w"> </span>grid_model_build.ini<span class="w"> </span>-d<span class="w"> </span>artifact_data<span class="w"> </span>-d<span class="w"> </span>data/vito_reclass.yml<span class="w"> </span>-vv
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:37,347 - build - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/hydromt.log.
+2023-02-22 04:42:37,347 - build - log - INFO - HydroMT version: 0.7.0
+2023-02-22 04:42:37,347 - build - main - INFO - Building instance of grid_model model at /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1.
+2023-02-22 04:42:37,347 - build - main - INFO - User settings:
+2023-02-22 04:42:37,414 - build - data_catalog - INFO - Reading data catalog artifact_data v0.0.8 from archive
+2023-02-22 04:42:37,415 - build - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-02-22 04:42:37,486 - build - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2023-02-22 04:42:37,487 - build - model_api - INFO - Initializing grid_model model from hydromt (v0.7.0).
+2023-02-22 04:42:37,487 - build - model_api - DEBUG - Setting model config options.
+2023-02-22 04:42:37,487 - build - model_api - INFO - setup_region.region: {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2023-02-22 04:42:37,487 - build - model_api - INFO - setup_region.hydrography_fn: merit_hydro
+2023-02-22 04:42:37,488 - build - model_api - INFO - setup_region.basin_index_fn: merit_hydro_index
+2023-02-22 04:42:37,488 - build - basin_mask - DEBUG - Parsed region (kind=bbox): {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2023-02-22 04:42:37,491 - build - model_api - INFO - setup_maps_from_raster.raster_fn: merit_hydro_1k
+2023-02-22 04:42:37,491 - build - model_api - INFO - setup_maps_from_raster.variables: elevtn
+2023-02-22 04:42:37,491 - build - model_api - INFO - setup_maps_from_raster.fill_method: None
+2023-02-22 04:42:37,491 - build - model_api - INFO - setup_maps_from_raster.name: None
+2023-02-22 04:42:37,491 - build - model_api - INFO - setup_maps_from_raster.reproject_method: None
+2023-02-22 04:42:37,491 - build - model_api - INFO - setup_maps_from_raster.split_dataset: True
+2023-02-22 04:42:37,491 - build - model_api - INFO - Preparing maps data from raster source merit_hydro_1k
+2023-02-22 04:42:37,492 - build - data_catalog - INFO - DataCatalog: Getting merit_hydro_1k RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
+2023-02-22 04:42:37,522 - build - rasterdataset - DEBUG - RasterDataset: Clip with geom - [11.700, 45.350, 12.950, 46.700]
+2023-02-22 04:42:37,534 - build - model_api - INFO - setup_maps_from_raster_reclass.raster_fn: vito
+2023-02-22 04:42:37,534 - build - model_api - INFO - setup_maps_from_raster_reclass.reclass_table_fn: vito_reclass
+2023-02-22 04:42:37,534 - build - model_api - INFO - setup_maps_from_raster_reclass.reclass_variables: [&#39;manning&#39;]
+2023-02-22 04:42:37,534 - build - model_api - INFO - setup_maps_from_raster_reclass.variable: None
+2023-02-22 04:42:37,534 - build - model_api - INFO - setup_maps_from_raster_reclass.fill_method: None
+2023-02-22 04:42:37,534 - build - model_api - INFO - setup_maps_from_raster_reclass.reproject_method: None
+2023-02-22 04:42:37,534 - build - model_api - INFO - setup_maps_from_raster_reclass.name: None
+2023-02-22 04:42:37,534 - build - model_api - INFO - setup_maps_from_raster_reclass.split_dataset: True
+2023-02-22 04:42:37,534 - build - model_api - INFO - Preparing map data by reclassifying the data in vito based on vito_reclass
+2023-02-22 04:42:37,534 - build - data_catalog - INFO - DataCatalog: Getting vito RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
+2023-02-22 04:42:37,551 - build - rasterdataset - DEBUG - RasterDataset: Clip with geom - [11.700, 45.350, 12.950, 46.700]
+2023-02-22 04:42:37,566 - build - data_catalog - INFO - DataCatalog: Getting vito_reclass DataFrame csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2023-02-22 04:42:37,566 - build - dataframe - INFO - DataFrame: Read csv data.
+2023-02-22 04:42:37,577 - build - model_api - INFO - write.components: [&#39;config&#39;, &#39;geoms&#39;, &#39;maps&#39;]
+2023-02-22 04:42:37,577 - build - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1
+2023-02-22 04:42:37,577 - build - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/model.ini
+2023-02-22 04:42:37,577 - build - model_api - DEBUG - Writing file geoms/region.geojson
+2023-02-22 04:42:37,608 - build - model_api - DEBUG - Writing file maps/elevtn.nc
+2023-02-22 04:42:37,808 - build - model_api - DEBUG - Writing file maps/manning.nc
+2023-02-22 04:42:38,000 - build - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1
+2023-02-22 04:42:38,000 - build - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/model.ini
+2023-02-22 04:42:38,000 - build - model_grid - DEBUG - No grid data found, skip writing.
+2023-02-22 04:42:38,000 - build - model_api - DEBUG - Writing file geoms/region.geojson
+2023-02-22 04:42:38,006 - build - model_api - DEBUG - No forcing data found, skip writing.
+2023-02-22 04:42:38,006 - build - model_api - DEBUG - No states data found, skip writing.
+
+</pre></div></div>
+</div>
+<p>The example above means the following: run <strong>hydromt build</strong> with:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">grid_model</span></code>: i.e. build a generic GridModel instance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">./tmp_grid_model1</span></code>: output model folder</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-r</span> <span class="pre">&quot;{'bbox':</span> <span class="pre">[11.70,</span> <span class="pre">45.35,</span> <span class="pre">12.95,</span> <span class="pre">46.70]}&quot;</span></code>: set the region of interest using a bounding box defined by its [xmin, ymin, xmax, ymax] coordinates (in WGS84)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">grid_model_build.ini</span></code>: use this ini file to configure the model build</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-d</span> <span class="pre">artifact_data</span> <span class="pre">-d</span> <span class="pre">data/vito_reclass.yml</span></code>: parse the pre-defined artifact_data and the local vito_reclass data catalogs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-vv</span></code> : give some extra verbosity (2 * v) to display feedback on screen. Now debug messages are provided.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">print_dir</span><span class="p">(</span><span class="s2">&quot;tmp_grid_model1&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tmp_grid_model1
+ - hydromt.log
+ - model.ini
+tmp_grid_model1/maps
+ - manning.nc
+ - elevtn.nc
+tmp_grid_model1/geoms
+ - region.geojson
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># checkout the content of the hypothetical model simulation configuration</span>
+<span class="n">fn_ini</span> <span class="o">=</span> <span class="s2">&quot;tmp_grid_model1/model.ini&quot;</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn_ini</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[header]
+settings = value
+
+[timers]
+start = 2010-02-05
+end = 2010-02-15
+
+
+</pre></div></div>
+</div>
+</section>
+<section id="Update-a-model-from-CLI">
+<h2>Update a model from CLI<a class="headerlink" href="#Update-a-model-from-CLI" title="Permalink to this heading">#</a></h2>
+<p>Using the <strong>hydromt update</strong> method we can update an existing model with new components or modify existing components. Let’s get an overview of the method and its arguments.</p>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">MODEL</span></code> (i.e. name of the model), and <code class="docutils literal notranslate"><span class="pre">MODEL_ROOT</span></code> (i.e. folder of existing model) are still required. There is an optional <code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">--model-out</span></code> option to save the updated model in a different directory.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>update<span class="w"> </span>--help
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Usage: hydromt update [OPTIONS] MODEL MODEL_ROOT
+
+  Update a specific component of a model. Set an output directory to copy the
+  edited model to a new folder, otherwise maps are overwritten.
+
+  Example usage:
+  --------------
+
+  Update (overwrite!) landuse-landcover based maps in a Wflow model
+  hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
+
+  Update Wflow model components outlined in an .ini configuration file and write the model to a directory
+  hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.ini -d /path/to/data_catalog.yml -v
+
+Options:
+  -o, --model-out DIRECTORY  Output model folder. Maps in MODEL_ROOT are
+                             overwritten if left empty.
+  -i, --config PATH          Path to hydroMT configuration file, for the model
+                             specific implementation.
+  -c, --components TEXT      Model methods from ini file to run
+  --opt TEXT                 Method specific keyword arguments, see the method
+                             documentation of the specific model for more
+                             information about the arguments.
+  -d, --data TEXT            Path to local yaml data catalog file OR name of
+                             predefined data catalog.
+  --dd, --deltares-data      Flag: Shortcut to add the &#34;deltares_data&#34; catalog
+  --cache                    Flag: If provided cache tiled rasterdatasets
+  -q, --quiet                Decrease verbosity.
+  -v, --verbose              Increase verbosity.
+  --help                     Show this message and exit.
+
+</pre></div></div>
+</div>
+<p>In this basic example we use the <strong>hydromt update</strong> method to update the GridModel instance with an upstream area raster map. Then we write only the updated model map component to file.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">%%writefile</span></code> magic saves the content below to a file. The content of the ini file start from the second line.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%writefile</span> ./tmp_grid_model1/grid_model_update.ini
+<span class="p">[</span><span class="n">setup_maps_from_raster</span><span class="p">]</span>
+<span class="n">raster_fn</span> <span class="o">=</span> <span class="n">merit_hydro_1k</span>
+<span class="n">variables</span> <span class="o">=</span> <span class="n">uparea</span>
+
+<span class="p">[</span><span class="n">write_maps</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Writing ./tmp_grid_model1/grid_model_update.ini
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>update<span class="w"> </span>grid_model<span class="w"> </span>./tmp_grid_model1<span class="w"> </span>-i<span class="w"> </span>./tmp_grid_model1/grid_model_update.ini<span class="w"> </span>-vv
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:42,073 - update - log - DEBUG - Appending log messages to file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/hydromt.log.
+2023-02-22 04:42:42,073 - update - log - INFO - HydroMT version: 0.7.0
+2023-02-22 04:42:42,073 - update - main - INFO - Updating grid_model model at /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1 (r+).
+2023-02-22 04:42:42,073 - update - main - INFO - Output dir: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1
+2023-02-22 04:42:42,073 - update - main - INFO - User settings:
+2023-02-22 04:42:42,086 - update - model_api - WARNING - Model dir already exists and files might be overwritten: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/.
+2023-02-22 04:42:42,086 - update - model_api - INFO - Initializing grid_model model from hydromt (v0.7.0).
+2023-02-22 04:42:42,088 - update - model_api - DEBUG - Reading model file region.
+2023-02-22 04:42:42,110 - update - model_api - INFO - setup_maps_from_raster.raster_fn: merit_hydro_1k
+2023-02-22 04:42:42,110 - update - model_api - INFO - setup_maps_from_raster.variables: uparea
+2023-02-22 04:42:42,110 - update - model_api - INFO - setup_maps_from_raster.fill_method: None
+2023-02-22 04:42:42,110 - update - model_api - INFO - setup_maps_from_raster.name: None
+2023-02-22 04:42:42,110 - update - model_api - INFO - setup_maps_from_raster.reproject_method: None
+2023-02-22 04:42:42,111 - update - model_api - INFO - setup_maps_from_raster.split_dataset: True
+2023-02-22 04:42:42,111 - update - model_api - INFO - Preparing maps data from raster source merit_hydro_1k
+2023-02-22 04:42:42,167 - update - data_catalog - INFO - Reading data catalog artifact_data v0.0.8 from archive
+2023-02-22 04:42:42,167 - update - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-02-22 04:42:42,237 - update - data_catalog - INFO - DataCatalog: Getting merit_hydro_1k RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
+2023-02-22 04:42:42,267 - update - rasterdataset - DEBUG - RasterDataset: Clip with geom - [11.700, 45.350, 12.950, 46.700]
+2023-02-22 04:42:42,279 - update - model_api - INFO - write_maps.fn: maps/{name}.nc
+2023-02-22 04:42:42,279 - update - model_api - DEBUG - Writing file maps/uparea.nc
+
+</pre></div></div>
+</div>
+<p>The example above means the following: run <strong>hydromt update</strong> with:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">grid_model</span></code>: i.e. update a generic GridModel instance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">./tmp_model1</span></code>: the folder of the to-be updated model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">./tmp_grid_model1/grid_model_update.ini</span></code>: the hydromt configuration listing the methods to be executed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-vv</span></code> : give some extra verbosity (2 * v) to display feedback on screen. Now debug messages are provided.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># note the difference with the original model</span>
+<span class="n">print_dir</span><span class="p">(</span><span class="s2">&quot;tmp_grid_model1&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tmp_grid_model1
+ - hydromt.log
+ - grid_model_update.ini
+ - model.ini
+tmp_grid_model1/maps
+ - manning.nc
+ - uparea.nc
+ - elevtn.nc
+tmp_grid_model1/geoms
+ - region.geojson
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="../user_guide/model_region.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Defining a model region</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="working_with_models.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Example: Working with models in Python</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Build-a-model-from-CLI">
+   Build a model from CLI
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Update-a-model-from-CLI">
+   Update a model from CLI
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/_examples/working_with_models_basics.ipynb">
+        <i class="fa-solid fa-pencil"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../_sources/_examples/working_with_models_basics.ipynb.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright Deltares.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

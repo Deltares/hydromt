@@ -1,0 +1,2300 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Example: Working with models in Python &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_examples/working_with_models';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Example: Define hydrological model regions" href="delineate_basin.html" />
+    <link rel="prev" title="Example: Working with models from CLI" href="working_with_models_basics.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt="Logo image">
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dev/intro.html">
+                        Developments
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dev/intro.html">
+                        Developments
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_overview.html">Overview data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_prepare_cat.html">Preparing a Data Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_types.html">Supported data types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_existing_cat.html">Pre-defined data catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/data_conventions.html">Data conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prep_data_catalog.html">Example: Preparing a data catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_data.html">Example: Exporting data from a data catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reading_raster_data.html">Example: Reading raster data</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="reading_vector_data.html">Example: Reading vector data</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="reading_point_data.html">Example: Reading geospatial point time-series</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with models in HydroMT</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_overview.html">Overview models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_build.html">Building a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_update.html">Updating a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_clip.html">Clipping a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_config.html">Preparing a model configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/model_region.html">Defining a model region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_models_basics.html">Example: Working with models from CLI</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Example: Working with models in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="delineate_basin.html">Example: Define hydrological model regions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Methods and workflows</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/methods_main.html">Overview methods and workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/methods_stats.html">Statistical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_raster.html">Example: Working with raster data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_geodatasets.html">Example: Working with geodatasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<div>
+    For an interactive online version click here:
+    <a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/working_with_models.ipynb" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
+</div></div>
+<section id="Example:-Working-with-models-in-Python">
+<h1>Example: Working with models in Python<a class="headerlink" href="#Example:-Working-with-models-in-Python" title="Permalink to this heading">#</a></h1>
+<p>The main feature of HydroMT is to facilitate the process of building and analyzing spatial geoscientific models with a focus on water system models. It does so by automating the workflow to go from raw data to a complete model instance which is ready to run and to analyse model results once the simulation has finished.</p>
+<p>This notebook will explore how to work with HydroMT models in Python.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># import hydromt and setup logging</span>
+<span class="kn">import</span> <span class="nn">hydromt</span>
+<span class="kn">from</span> <span class="nn">hydromt.log</span> <span class="kn">import</span> <span class="n">setuplog</span>
+
+<span class="c1"># other imports</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">setuplog</span><span class="p">(</span><span class="s2">&quot;working with models&quot;</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:17,133 - working with models - log - INFO - HydroMT version: 0.7.0
+</pre></div></div>
+</div>
+<section id="Available-models-in-HydroMT">
+<h2>Available models in HydroMT<a class="headerlink" href="#Available-models-in-HydroMT" title="Permalink to this heading">#</a></h2>
+<p>To know which models are available within your active environment, you can use global <code class="docutils literal notranslate"><span class="pre">MODELS</span></code> variable in hydromt</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># generic model classes</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generic model classes: </span><span class="si">{</span><span class="n">hydromt</span><span class="o">.</span><span class="n">MODELS</span><span class="o">.</span><span class="n">generic</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="c1"># model classes from external plugin</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model classes from plugins: </span><span class="si">{</span><span class="n">hydromt</span><span class="o">.</span><span class="n">MODELS</span><span class="o">.</span><span class="n">plugins</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Generic model classes: [&#39;grid_model&#39;, &#39;lumped_model&#39;, &#39;mesh_model&#39;, &#39;network_model&#39;]
+Model classes from plugins: []
+</pre></div></div>
+</div>
+<p>Here you may only see the generic models <code class="docutils literal notranslate"><span class="pre">grid_model</span></code>, <code class="docutils literal notranslate"><span class="pre">lumped_model</span></code> and <code class="docutils literal notranslate"><span class="pre">network_model</span></code>. There is one more generic model within HydroMT <code class="docutils literal notranslate"><span class="pre">mesh_model</span></code> which is only available if the additional python mesh dependency <em>xugrid</em> is available in the activated environment.</p>
+</section>
+<section id="Model-components">
+<h2>Model components<a class="headerlink" href="#Model-components" title="Permalink to this heading">#</a></h2>
+<p>HydroMT defines any model through the model-agnostic Model API based on several <em>general</em> model components and <em>computational unit</em> components, see <a class="reference external" href="https://deltares.github.io/hydromt/latest/user_guide/model_overview.html#model-api">Model API</a>. Below is a scheme representing the Model API and general model classes available in HydroMT (without any plugin):</p>
+<img alt="hydromt-models.jpg" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAlgCWAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAD3A6ADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKwPFHjbT/AAk9ut8JiZwSvlJu6Yznn3oA36KoaJrVt4g0yG+tCxglBxuGCMHBBFX6ACiuVj+JGkTa8NITz2uTKYQwj+TcPfPTiuqoAKKKKACiiq+oX0em2M93Nu8qFDI20ZOAM8UAWKKzfD+v23iXTUvrQSCFmKjzFweDjpWlQAUUVm+INetvDemvfXYkMKkKfLXJ59qANKiq2m38WqWFvdw7vKmQSLuGDgjPNWaACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK8u+L0CXWueHYJPuSybG+hdQf516jXmPxW/5GTwx/13H/AKMSgCx8J7l9OuNY0Cc/vLSYug9icH9QD+Ndn4m1YaHoN9fE4MMRK/7x4H6kVw/iAf8ACL/E/TNSHy22oL5Mp6DPC/8AxJq58UJm1S40fw9C3z304aXHZB/kn8KAOA8O6bJp3jDw28xJlugty2f9otj9AK9y1XVrTRbJ7u8mWGBOrN39h6mvNfE0K2/xX0CJBtRI41UDsBuqf4lZ1jxloGjSMRaOQ7qD1yxB/QfrQBfb4xWG4vHpt9JbA/68Jx9a63QfEVh4ks/tNhN5qZwynhlPoRVyGxt7e2W3jgjSBV2iMKMYrzPRYV8M/Fy50+0+S0uoyxiHQZXcPyOfzoA7TxR4103wmiC7dnnkGUgjGWPv7CuX1H4l2GsaNqNnNbXGnTy20nlfaEwHO08A+tVPCsEfiT4ma3e3SiYWZKxK/IHzFVOPYKfzrsfHOh2+seGb9JIlMkUTSxtjlWUZ4/LFAGX8If8AkS4P+usn/oRqx4g+JOl6DeGzVZb68Xhobdd232J9ax/Ad8+m/C64uo/9ZEszL9cnFcv8P/F2j+G7e4nvre4uNRnkJaZYt+F7AH86AO+0H4maZrF8tlLHNp903Cx3K7Q3tn1qP4uf8iXcf9dE/nXFeP8Axho3inTY/strcxahC4aOZodvHcZ/z0roPGd9JqXwntrqbPmypCzZ9aAOu8Gf8ippP/Xsn8hW1WL4M/5FTSf+vZP5CtqgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACvMfit/yMnhj/AK7j/wBGJXptfL8nxD+K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" />
+<p>Let’s discover how models are constructed within HydroMT and take the example of <code class="docutils literal notranslate"><span class="pre">grid_model</span></code>. We will first instantiate a <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> object called <code class="docutils literal notranslate"><span class="pre">mod</span></code>. The <code class="docutils literal notranslate"><span class="pre">api</span></code> property helps us discover the available components and their type. You can do the same with any other HydroMT Model class or plugin (give it a try!).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mod</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">GridModel</span><span class="p">()</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">api</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;grid&#39;: xarray.core.dataset.Dataset,
+ &#39;crs&#39;: pyproj.crs.crs.CRS,
+ &#39;config&#39;: typing.Dict[str, typing.Any],
+ &#39;geoms&#39;: typing.Dict[str, geopandas.geodataframe.GeoDataFrame],
+ &#39;maps&#39;: typing.Dict[str, typing.Union[xarray.core.dataarray.DataArray, xarray.core.dataset.Dataset]],
+ &#39;forcing&#39;: typing.Dict[str, typing.Union[xarray.core.dataarray.DataArray, xarray.core.dataset.Dataset]],
+ &#39;region&#39;: geopandas.geodataframe.GeoDataFrame,
+ &#39;results&#39;: typing.Dict[str, typing.Union[xarray.core.dataarray.DataArray, xarray.core.dataset.Dataset]],
+ &#39;states&#39;: typing.Dict[str, typing.Union[xarray.core.dataarray.DataArray, xarray.core.dataset.Dataset]]}
+</pre></div></div>
+</div>
+<p>Here you see all the general components from the <code class="docutils literal notranslate"><span class="pre">Model</span></code> class like config, geoms, forcing etc. as well as the <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> specific computational unit <code class="docutils literal notranslate"><span class="pre">grid</span></code>. You can see that most components are dictionaries of either xarray DataArray or Datasets or of geopandas GeoDataFrame. For now we are starting from an empty model so all these components will be empty but here is how you can access them:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">mod</span><span class="o">.</span><span class="n">grid</span><span class="p">))</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">grid</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;class &#39;xarray.core.dataset.Dataset&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt;
+Dimensions:  ()
+Data variables:
+    *empty*</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-f696b60b-4127-417a-b7ab-71389cdb57b2' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-f696b60b-4127-417a-b7ab-71389cdb57b2' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-8c2a790b-8347-40a3-824e-1e272e9f8494' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-8c2a790b-8347-40a3-824e-1e272e9f8494' class='xr-section-summary'  title='Expand/collapse section'>Coordinates: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-0309aa86-7eec-4456-b336-53e67b62f041' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-0309aa86-7eec-4456-b336-53e67b62f041' class='xr-section-summary'  title='Expand/collapse section'>Data variables: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-28d0f78d-05ea-456f-b6ae-ffa50f046060' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-28d0f78d-05ea-456f-b6ae-ffa50f046060' class='xr-section-summary'  title='Expand/collapse section'>Indexes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-dad52dd0-b873-409f-b692-a5bf19a01d3e' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-dad52dd0-b873-409f-b692-a5bf19a01d3e' class='xr-section-summary'  title='Expand/collapse section'>Attributes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'></dl></div></li></ul></div></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mod</span><span class="o">.</span><span class="n">geoms</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{}
+</pre></div></div>
+</div>
+</section>
+<section id="Model-setup*-methods">
+<h2>Model <a href="#id1"><span class="problematic" id="id2">setup_</span></a>* methods<a class="headerlink" href="#Model-setup*-methods" title="Permalink to this heading">#</a></h2>
+<p>To fill in our model components with data, HydroMT uses <strong>setup_ methods</strong>. These methods go from reading input data using the DataAdapter, transforming the data using workflows (e.g. reprojection, deriving model parameters, etc…) and adding the new model data to the right model component. An overview of available setup methods can be found in the API reference for the <a class="reference external" href="https://deltares.github.io/hydromt/latest/api.html#gridmodel">GridModel</a>,
+<a class="reference external" href="https://deltares.github.io/hydromt/latest/api.html#lumpedmodel">LumpedModel</a>, and <a class="reference external" href="https://deltares.github.io/hydromt/latest/api.html#meshmodel">MeshModel</a></p>
+<p>Note that these methods for the generic model classes are still quite limited. To get an idea of potential setup_ methods, checkout the <a class="reference external" href="https://deltares.github.io/hydromt/latest/plugins.html">model plugins</a></p>
+<p>Let’s have a look at some examples of the <em>setup_</em> functions to start populating our model like <code class="docutils literal notranslate"><span class="pre">setup_region</span></code>. This method parses the <a class="reference external" href="https://deltares.github.io/hydromt/latest/user_guide/model_region.html">HydroMT region option</a> to define the geographic region of interest of the model to build and once done adds <strong>region</strong> into the <code class="docutils literal notranslate"><span class="pre">geoms</span></code> component. You can check the required arguments in the
+<a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.Model.setup_region.html">docs</a>.</p>
+<p>Let’s now setup a region for our model using for example a subbasin for any point in the Piave basin. We first initialize a <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> instance in writing mode at a model root folder. Data is sourced from the <em>artifact_data</em> catalog.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">root</span> <span class="o">=</span> <span class="s2">&quot;tmp_grid_model_py&quot;</span>
+<span class="n">mod</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">GridModel</span><span class="p">(</span>
+    <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
+    <span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;artifact_data&quot;</span><span class="p">,</span> <span class="s2">&quot;data/vito_reclass.yml&quot;</span><span class="p">],</span>
+    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:17,241 - working with models - data_catalog - INFO - Reading data catalog artifact_data v0.0.8 from archive
+2023-02-22 04:42:17,242 - working with models - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-02-22 04:42:17,314 - working with models - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2023-02-22 04:42:17,317 - working with models - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py/hydromt.log.
+2023-02-22 04:42:17,317 - working with models - model_api - INFO - Initializing grid_model model from hydromt (v0.7.0).
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xy</span> <span class="o">=</span> <span class="p">[</span><span class="mf">12.2051</span><span class="p">,</span> <span class="mf">45.8331</span><span class="p">]</span>
+<span class="n">region</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;subbasin&quot;</span><span class="p">:</span> <span class="n">xy</span><span class="p">,</span> <span class="s2">&quot;strord&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">}</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">setup_region</span><span class="p">(</span>
+    <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span>
+    <span class="n">hydrography_fn</span><span class="o">=</span><span class="s2">&quot;merit_hydro&quot;</span><span class="p">,</span>
+    <span class="n">basin_index_fn</span><span class="o">=</span><span class="s2">&quot;merit_hydro_index&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">geoms</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:17,324 - working with models - basin_mask - DEBUG - Parsed region (kind=subbasin): {&#39;strord&#39;: 7, &#39;xy&#39;: [12.2051, 45.8331]}
+2023-02-22 04:42:17,326 - working with models - data_catalog - INFO - DataCatalog: Getting merit_hydro RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+2023-02-22 04:42:17,491 - working with models - basin_mask - DEBUG - Getting basin IDs at point locations.
+2023-02-22 04:42:21,436 - working with models - basin_mask - INFO - subbasin bbox: [11.7750, 45.8042, 12.7450, 46.6900]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>geometry</th>
+      <th>value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>POLYGON ((12.44500 46.69000, 12.45500 46.69000...</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">()</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">gdf_xy</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">gpd</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]]),</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+<span class="n">gdf_xy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: &gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_working_with_models_21_1.png" src="../_images/_examples_working_with_models_21_1.png" />
+</div>
+</div>
+<p>Similarly, we can also populate the <strong>config</strong> component using the <code class="docutils literal notranslate"><span class="pre">setup_config</span></code> method. For HydroMT <strong>config</strong> represents the configuration of the model kernel, e.g. the file that would fix your model kernel run settings or list of outputs etc. For most models, this is usually a text file (for example .ini, .toml, .inp formats) that can be ordered in sections. Within HydroMT we then use the dictionary object to represent each header/setting/value.</p>
+<p>Let’s populate our config with some simple settings:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;header&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;setting&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timers&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;2010-02-05&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="s2">&quot;2010-02-15&quot;</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">mod</span><span class="o">.</span><span class="n">setup_config</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">config</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:21,678 - working with models - model_api - DEBUG - Setting model config options.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;header&#39;: {&#39;setting&#39;: &#39;value&#39;},
+ &#39;timers&#39;: {&#39;start&#39;: &#39;2010-02-05&#39;, &#39;end&#39;: &#39;2010-02-15&#39;}}
+</pre></div></div>
+</div>
+<p>We can setup map data using the <code class="docutils literal notranslate"><span class="pre">setup_maps_from_raster</span></code> and <code class="docutils literal notranslate"><span class="pre">setup_maps_from_raster_reclass</span></code> methods. Both methods add data to the <strong>maps</strong> component based on input raster data (RasterDataset type), but the second method additionally reclassifies the input data based on a reclassification table. The <strong>maps</strong> component gathers any raster input data without any requirements for a specific grid (CRS and resolution). It can contain, for example, direct model input data for models like
+Delft3D-FM that will interpolate input data on the fly to the model mesh, or auxiliary data that are not used by the model kernel but can be used by HydroMT to build the model (e.g. a gridded DEM), etc.</p>
+<p>For models that require all their input data to be resampled to the exact computation grid (all raster at the same resolution and projection), then the input data would go into the <strong>grid</strong> component. The corresponding <em>setup_</em> functions for the <strong>grid</strong> components are under development.</p>
+<p>But back to our example, let’s add both a DEM map from the data source <em>merit_hydro_1k</em> and a manning roughness map based on reclassified landuse data from the <em>vito</em> dataset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mod</span><span class="o">.</span><span class="n">setup_maps_from_raster</span><span class="p">(</span>
+    <span class="n">raster_fn</span><span class="o">=</span><span class="s2">&quot;merit_hydro_1k&quot;</span><span class="p">,</span>
+    <span class="n">variables</span><span class="o">=</span><span class="s2">&quot;elevtn&quot;</span><span class="p">,</span>
+    <span class="n">fill_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reproject_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">setup_maps_from_raster_reclass</span><span class="p">(</span>
+    <span class="n">raster_fn</span><span class="o">=</span><span class="s2">&quot;vito&quot;</span><span class="p">,</span>
+    <span class="n">reclass_table_fn</span><span class="o">=</span><span class="s2">&quot;vito_reclass&quot;</span><span class="p">,</span>  <span class="c1"># Note: from local data catalog</span>
+    <span class="n">reclass_variables</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;manning&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:21,686 - working with models - model_api - INFO - Preparing maps data from raster source merit_hydro_1k
+2023-02-22 04:42:21,687 - working with models - data_catalog - INFO - DataCatalog: Getting merit_hydro_1k RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
+2023-02-22 04:42:21,709 - working with models - rasterdataset - DEBUG - RasterDataset: Clip with geom - [11.775, 45.804, 12.745, 46.690]
+2023-02-22 04:42:21,726 - working with models - model_api - INFO - Preparing map data by reclassifying the data in vito based on vito_reclass
+2023-02-22 04:42:21,727 - working with models - data_catalog - INFO - DataCatalog: Getting vito RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
+2023-02-22 04:42:21,747 - working with models - rasterdataset - DEBUG - RasterDataset: Clip with geom - [11.775, 45.804, 12.745, 46.690]
+2023-02-22 04:42:21,770 - working with models - data_catalog - INFO - DataCatalog: Getting vito_reclass DataFrame csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2023-02-22 04:42:21,771 - working with models - dataframe - INFO - DataFrame: Read csv data.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># check which maps are read</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;model maps: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">mod</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">mod</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s2">&quot;manning&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+model maps: [&#39;elevtn&#39;, &#39;manning&#39;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;manning&#x27; (y: 897, x: 981)&gt;
+dask.array&lt;transpose, shape=(897, 981), dtype=float32, chunksize=(897, 981), chunktype=numpy.ndarray&gt;
+Coordinates:
+  * x            (x) float64 11.77 11.77 11.78 11.78 ... 12.74 12.74 12.75 12.75
+  * y            (y) float64 46.69 46.69 46.69 46.69 ... 45.81 45.8 45.8 45.8
+    spatial_ref  int64 0
+    mask         (y, x) bool False False False False ... False False False False
+Attributes:
+    _FillValue:  nan</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'manning'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>y</span>: 897</li><li><span class='xr-has-index'>x</span>: 981</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-44196666-c6d5-4c7b-a823-308373a9fd48' class='xr-array-in' type='checkbox' checked><label for='section-44196666-c6d5-4c7b-a823-308373a9fd48' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(897, 981), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 3.36 MiB </td>
+                        <td> 3.36 MiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (897, 981) </td>
+                        <td> (897, 981) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="170" height="159" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="0" y1="0" x2="120" y2="0" style="stroke-width:2" />
+  <line x1="0" y1="109" x2="120" y2="109" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="0" y1="0" x2="0" y2="109" style="stroke-width:2" />
+  <line x1="120" y1="0" x2="120" y2="109" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="0.0,0.0 120.0,0.0 120.0,109.72477064220185 0.0,109.72477064220185" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="60.000000" y="129.724771" font-size="1.0rem" font-weight="100" text-anchor="middle" >981</text>
+  <text x="140.000000" y="54.862385" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,140.000000,54.862385)">897</text>
+</svg>
+        </td>
+    </tr>
+</table></div></div></li><li class='xr-section-item'><input id='section-77cb2b48-2c72-42e2-be19-2b95931ce731' class='xr-section-summary-in' type='checkbox'  checked><label for='section-77cb2b48-2c72-42e2-be19-2b95931ce731' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>11.77 11.77 11.78 ... 12.75 12.75</div><input id='attrs-14737b2b-ac41-43ab-9f09-1d836ab46424' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-14737b2b-ac41-43ab-9f09-1d836ab46424' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-cb331ae4-e7c4-4488-a326-fde6f696158e' class='xr-var-data-in' type='checkbox'><label for='data-cb331ae4-e7c4-4488-a326-fde6f696158e' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.77381 , 11.774802, 11.775794, ..., 12.744048, 12.74504 , 12.746032])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>46.69 46.69 46.69 ... 45.8 45.8</div><input id='attrs-8e274b10-7066-4b92-9b37-d0208562fb88' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-8e274b10-7066-4b92-9b37-d0208562fb88' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a214435e-e65f-493b-b0b3-3c0c9bc750f9' class='xr-var-data-in' type='checkbox'><label for='data-a214435e-e65f-493b-b0b3-3c0c9bc750f9' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.691468, 46.690476, 46.689484, ..., 45.804563, 45.803571, 45.802579])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-f101501f-6f99-4934-8fa8-87385c7ba727' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f101501f-6f99-4934-8fa8-87385c7ba727' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-de69fa26-d9ee-45ad-9519-4b11bfa3f951' class='xr-var-data-in' type='checkbox'><label for='data-de69fa26-d9ee-45ad-9519-4b11bfa3f951' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],PRIMEM[&quot;Greenwich&quot;,0,AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],UNIT[&quot;degree&quot;,0.0174532925199433,AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],AXIS[&quot;Latitude&quot;,NORTH],AXIS[&quot;Longitude&quot;,EAST],AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],PRIMEM[&quot;Greenwich&quot;,0,AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],UNIT[&quot;degree&quot;,0.0174532925199433,AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],AXIS[&quot;Latitude&quot;,NORTH],AXIS[&quot;Longitude&quot;,EAST],AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]</dd><dt><span>GeoTransform :</span></dt><dd>11.599702380951747 0.000992063492063498 0.0 46.80009920634932 0.0 -0.0009920634920634868</dd><dt><span>x_dim :</span></dt><dd>x</dd><dt><span>y_dim :</span></dt><dd>y</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mask</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>bool</div><div class='xr-var-preview xr-preview'>False False False ... False False</div><input id='attrs-d5f58d86-a5e7-4912-9c3d-f19686ba3a23' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-d5f58d86-a5e7-4912-9c3d-f19686ba3a23' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b2971633-a42f-41b3-a8d6-e6a75ee89aaa' class='xr-var-data-in' type='checkbox'><label for='data-b2971633-a42f-41b3-a8d6-e6a75ee89aaa' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([[False, False, False, ..., False, False, False],
+       [False, False, False, ..., False, False, False],
+       [False, False, False, ..., False, False, False],
+       ...,
+       [False, False, False, ..., False, False, False],
+       [False, False, False, ..., False, False, False],
+       [False, False, False, ..., False, False, False]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-2b166ba1-5bfc-4f63-a052-78162a895c94' class='xr-section-summary-in' type='checkbox'  ><label for='section-2b166ba1-5bfc-4f63-a052-78162a895c94' class='xr-section-summary' >Indexes: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-a5742e7e-b3ae-44ab-8283-62c97351508e' class='xr-index-data-in' type='checkbox'/><label for='index-a5742e7e-b3ae-44ab-8283-62c97351508e' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([11.773809523808891, 11.774801587300955, 11.775793650793018,
+              11.776785714285081, 11.777777777777144, 11.778769841269208,
+              11.779761904761273, 11.780753968253336,   11.7817460317454,
+              11.782738095237463,
+              ...
+              12.737103174602547, 12.738095238094612, 12.739087301586675,
+              12.740079365078739, 12.741071428570802, 12.742063492062865,
+              12.743055555554928, 12.744047619046992, 12.745039682539055,
+               12.74603174603112],
+             dtype=&#x27;float64&#x27;, name=&#x27;x&#x27;, length=981))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-7b38e408-4fc8-419d-afb6-4654aa3ef5ed' class='xr-index-data-in' type='checkbox'/><label for='index-7b38e408-4fc8-419d-afb6-4654aa3ef5ed' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([46.691468253968374,  46.69047619047631,  46.68948412698425,
+              46.688492063492184, 46.687500000000114,  46.68650793650805,
+               46.68551587301599, 46.684523809523924,  46.68353174603186,
+                46.6825396825398,
+              ...
+               45.81150793650806, 45.810515873015994,  45.80952380952393,
+               45.80853174603187, 45.807539682539804,  45.80654761904774,
+               45.80555555555568, 45.804563492063615,  45.80357142857155,
+               45.80257936507949],
+             dtype=&#x27;float64&#x27;, name=&#x27;y&#x27;, length=897))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-35b8acb0-4730-4bef-b9aa-de2aee1a042b' class='xr-section-summary-in' type='checkbox'  checked><label for='section-35b8acb0-4730-4bef-b9aa-de2aee1a042b' class='xr-section-summary' >Attributes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div></li></ul></div></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s2">&quot;elevtn&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;terrain&quot;</span><span class="p">)</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">gdf_xy</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">gpd</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]]),</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+<span class="n">gdf_xy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Elevation&quot;</span><span class="p">)</span>
+
+<span class="n">mod</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s2">&quot;manning&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">gdf_xy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Manning roughness&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0.5, 1.0, &#39;Manning roughness&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_working_with_models_27_1.png" src="../_images/_examples_working_with_models_27_1.png" />
+</div>
+</div>
+</section>
+<section id="Model-read-&amp;-write-methods">
+<h2>Model read &amp; write methods<a class="headerlink" href="#Model-read-&-write-methods" title="Permalink to this heading">#</a></h2>
+<p>Once our model is filled up with data, we can then write it down using either the general <code class="docutils literal notranslate"><span class="pre">write</span></code> method or component specific <em>write_</em> methods. Similarly, our model can be read back with the general <code class="docutils literal notranslate"><span class="pre">read</span></code> method or component specific ones.</p>
+<p>Let’s now write our model into a model root folder.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mod</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;maps&quot;</span><span class="p">,</span> <span class="s2">&quot;geoms&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:24,006 - working with models - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py
+2023-02-22 04:42:24,007 - working with models - model_api - DEBUG - Writing file maps/elevtn.nc
+2023-02-22 04:42:24,018 - working with models - model_api - DEBUG - Writing file maps/manning.nc
+2023-02-22 04:42:24,105 - working with models - model_api - DEBUG - Writing file geoms/region.geojson
+2023-02-22 04:42:24,153 - working with models - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py/model.ini
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># print MODEL_ROOT folder</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<span class="k">def</span> <span class="nf">print_dir</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.xml&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="n">print_dir</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tmp_grid_model_py
+ - hydromt.log
+ - model.ini
+tmp_grid_model_py/maps
+ - manning.nc
+ - elevtn.nc
+tmp_grid_model_py/geoms
+ - region.geojson
+</pre></div></div>
+</div>
+<p>And now let’s read it back in a new <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> instance:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mod2</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">GridModel</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+<span class="n">mod2</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;geoms&quot;</span><span class="p">,</span> <span class="s2">&quot;maps&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:24,167 - working with models - model_api - INFO - Initializing grid_model model from hydromt (v0.7.0).
+2023-02-22 04:42:24,168 - working with models - model_api - INFO - Reading model data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py
+2023-02-22 04:42:24,169 - working with models - model_api - DEBUG - Model config read from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py/model.ini
+2023-02-22 04:42:24,170 - working with models - model_api - DEBUG - Reading model file region.
+2023-02-22 04:42:24,189 - working with models - model_api - DEBUG - Reading model file manning.
+2023-02-22 04:42:24,195 - working with models - model_api - DEBUG - Reading model file elevtn.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># check which maps are read</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;model maps: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">mod2</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+model maps: [&#39;manning&#39;, &#39;elevtn&#39;]
+</pre></div></div>
+</div>
+</section>
+<section id="Building-/-updating-a-model-with-python">
+<h2>Building / updating a model with python<a class="headerlink" href="#Building-/-updating-a-model-with-python" title="Permalink to this heading">#</a></h2>
+<p>Using the same functionalities, it is also possible to build or update a model within python instead of using the command line, using the <code class="docutils literal notranslate"><span class="pre">build</span></code> and <code class="docutils literal notranslate"><span class="pre">update</span></code> methods. Let’s see how we could rebuild our previous <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> with the <code class="docutils literal notranslate"><span class="pre">build</span></code> method.</p>
+<p>First let’s start with writing a HydroMT build configuration (ini-file) with the GridModel (setup) methods we want to use.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hydromt.config</span> <span class="kn">import</span> <span class="n">configread</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="c1"># Read the build configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">configread</span><span class="p">(</span><span class="s2">&quot;grid_model_build.ini&quot;</span><span class="p">)</span>
+<span class="n">pprint</span><span class="p">(</span>
+    <span class="n">config</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;setup_config&#39;: {&#39;header.settings&#39;: &#39;value&#39;,
+                  &#39;timers.end&#39;: &#39;2010-02-15&#39;,
+                  &#39;timers.start&#39;: &#39;2010-02-05&#39;},
+ &#39;setup_maps_from_raster&#39;: {&#39;fill_method&#39;: None,
+                            &#39;raster_fn&#39;: &#39;merit_hydro_1k&#39;,
+                            &#39;reproject_method&#39;: None,
+                            &#39;variables&#39;: &#39;elevtn&#39;},
+ &#39;setup_maps_from_raster_reclass&#39;: {&#39;raster_fn&#39;: &#39;vito&#39;,
+                                    &#39;reclass_table_fn&#39;: &#39;vito_reclass&#39;,
+                                    &#39;reclass_variables&#39;: [&#39;manning&#39;]},
+ &#39;setup_region&#39;: {&#39;basin_index_fn&#39;: &#39;merit_hydro_index&#39;,
+                  &#39;hydrography_fn&#39;: &#39;merit_hydro&#39;},
+ &#39;write&#39;: {&#39;components&#39;: [&#39;config&#39;, &#39;geoms&#39;, &#39;maps&#39;]}}
+</pre></div></div>
+</div>
+<p>And now let’s build our model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># First we instantiate GridModel with the output folder and use the write mode (build from scratch)</span>
+<span class="n">root3</span> <span class="o">=</span> <span class="s2">&quot;tmp_grid_model_py1&quot;</span>
+<span class="n">mod3</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">GridModel</span><span class="p">(</span>
+    <span class="n">root</span><span class="o">=</span><span class="n">root3</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
+    <span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;artifact_data&quot;</span><span class="p">,</span> <span class="s2">&quot;data/vito_reclass.yml&quot;</span><span class="p">],</span>
+    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Now let&#39;s build it with the config file</span>
+<span class="n">mod3</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2023-02-22 04:42:24,273 - working with models - data_catalog - INFO - Reading data catalog artifact_data v0.0.8 from archive
+2023-02-22 04:42:24,275 - working with models - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2023-02-22 04:42:24,344 - working with models - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2023-02-22 04:42:24,347 - working with models - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1/hydromt.log.
+2023-02-22 04:42:24,348 - working with models - model_api - INFO - Initializing grid_model model from hydromt (v0.7.0).
+2023-02-22 04:42:24,349 - working with models - model_api - DEBUG - Setting model config options.
+2023-02-22 04:42:24,350 - working with models - model_api - INFO - setup_region.region: {&#39;subbasin&#39;: [12.2051, 45.8331], &#39;strord&#39;: 7}
+2023-02-22 04:42:24,351 - working with models - model_api - INFO - setup_region.hydrography_fn: merit_hydro
+2023-02-22 04:42:24,352 - working with models - model_api - INFO - setup_region.basin_index_fn: merit_hydro_index
+2023-02-22 04:42:24,353 - working with models - basin_mask - DEBUG - Parsed region (kind=subbasin): {&#39;strord&#39;: 7, &#39;xy&#39;: [12.2051, 45.8331]}
+2023-02-22 04:42:24,354 - working with models - data_catalog - INFO - DataCatalog: Getting merit_hydro RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+2023-02-22 04:42:24,487 - working with models - basin_mask - DEBUG - Getting basin IDs at point locations.
+2023-02-22 04:42:24,874 - working with models - basin_mask - INFO - subbasin bbox: [11.7750, 45.8042, 12.7450, 46.6900]
+2023-02-22 04:42:24,915 - working with models - model_api - INFO - setup_maps_from_raster.raster_fn: merit_hydro_1k
+2023-02-22 04:42:24,916 - working with models - model_api - INFO - setup_maps_from_raster.variables: elevtn
+2023-02-22 04:42:24,917 - working with models - model_api - INFO - setup_maps_from_raster.fill_method: None
+2023-02-22 04:42:24,918 - working with models - model_api - INFO - setup_maps_from_raster.name: None
+2023-02-22 04:42:24,918 - working with models - model_api - INFO - setup_maps_from_raster.reproject_method: None
+2023-02-22 04:42:24,919 - working with models - model_api - INFO - setup_maps_from_raster.split_dataset: True
+2023-02-22 04:42:24,919 - working with models - model_api - INFO - Preparing maps data from raster source merit_hydro_1k
+2023-02-22 04:42:24,920 - working with models - data_catalog - INFO - DataCatalog: Getting merit_hydro_1k RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
+2023-02-22 04:42:24,940 - working with models - rasterdataset - DEBUG - RasterDataset: Clip with geom - [11.775, 45.804, 12.745, 46.690]
+2023-02-22 04:42:24,956 - working with models - model_api - INFO - setup_maps_from_raster_reclass.raster_fn: vito
+2023-02-22 04:42:24,956 - working with models - model_api - INFO - setup_maps_from_raster_reclass.reclass_table_fn: vito_reclass
+2023-02-22 04:42:24,957 - working with models - model_api - INFO - setup_maps_from_raster_reclass.reclass_variables: [&#39;manning&#39;]
+2023-02-22 04:42:24,957 - working with models - model_api - INFO - setup_maps_from_raster_reclass.variable: None
+2023-02-22 04:42:24,958 - working with models - model_api - INFO - setup_maps_from_raster_reclass.fill_method: None
+2023-02-22 04:42:24,958 - working with models - model_api - INFO - setup_maps_from_raster_reclass.reproject_method: None
+2023-02-22 04:42:24,959 - working with models - model_api - INFO - setup_maps_from_raster_reclass.name: None
+2023-02-22 04:42:24,959 - working with models - model_api - INFO - setup_maps_from_raster_reclass.split_dataset: True
+2023-02-22 04:42:24,962 - working with models - model_api - INFO - Preparing map data by reclassifying the data in vito based on vito_reclass
+2023-02-22 04:42:24,962 - working with models - data_catalog - INFO - DataCatalog: Getting vito RasterDataset raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
+2023-02-22 04:42:24,982 - working with models - rasterdataset - DEBUG - RasterDataset: Clip with geom - [11.775, 45.804, 12.745, 46.690]
+2023-02-22 04:42:25,006 - working with models - data_catalog - INFO - DataCatalog: Getting vito_reclass DataFrame csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2023-02-22 04:42:25,006 - working with models - dataframe - INFO - DataFrame: Read csv data.
+2023-02-22 04:42:25,015 - working with models - model_api - INFO - write.components: [&#39;config&#39;, &#39;geoms&#39;, &#39;maps&#39;]
+2023-02-22 04:42:25,015 - working with models - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1
+2023-02-22 04:42:25,016 - working with models - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1/model.ini
+2023-02-22 04:42:25,017 - working with models - model_api - DEBUG - Writing file geoms/region.geojson
+2023-02-22 04:42:25,054 - working with models - model_api - DEBUG - Writing file maps/elevtn.nc
+2023-02-22 04:42:25,062 - working with models - model_api - DEBUG - Writing file maps/manning.nc
+2023-02-22 04:42:25,158 - working with models - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1
+2023-02-22 04:42:25,158 - working with models - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model_py1/model.ini
+2023-02-22 04:42:25,160 - working with models - model_grid - DEBUG - No grid data found, skip writing.
+2023-02-22 04:42:25,161 - working with models - model_api - DEBUG - Writing file geoms/region.geojson
+2023-02-22 04:42:25,201 - working with models - model_api - DEBUG - No forcing data found, skip writing.
+2023-02-22 04:42:25,201 - working with models - model_api - DEBUG - No states data found, skip writing.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">print_dir</span><span class="p">(</span><span class="n">root3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tmp_grid_model_py1
+ - hydromt.log
+ - model.ini
+tmp_grid_model_py1/maps
+ - manning.nc
+ - elevtn.nc
+tmp_grid_model_py1/geoms
+ - region.geojson
+</pre></div></div>
+</div>
+<p>And check that the results are similar to our one-by-one setup earlier:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mod3</span><span class="o">.</span><span class="n">config</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;header&#39;: {&#39;settings&#39;: &#39;value&#39;},
+ &#39;timers&#39;: {&#39;start&#39;: &#39;2010-02-05&#39;, &#39;end&#39;: &#39;2010-02-15&#39;}}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">mod3</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s2">&quot;elevtn&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;terrain&quot;</span><span class="p">)</span>
+<span class="n">mod3</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Elevation&quot;</span><span class="p">)</span>
+
+<span class="n">mod3</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="s2">&quot;manning&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">mod3</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Manning roughness&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0.5, 1.0, &#39;Manning roughness&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_working_with_models_44_1.png" src="../_images/_examples_working_with_models_44_1.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="working_with_models_basics.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Example: Working with models from CLI</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="delineate_basin.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Example: Define hydrological model regions</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Available-models-in-HydroMT">
+   Available models in HydroMT
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Model-components">
+   Model components
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Model-setup*-methods">
+   Model setup_* methods
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Model-read-&amp;-write-methods">
+   Model read &amp; write methods
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Building-/-updating-a-model-with-python">
+   Building / updating a model with python
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/_examples/working_with_models.ipynb">
+        <i class="fa-solid fa-pencil"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../_sources/_examples/working_with_models.ipynb.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright Deltares.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

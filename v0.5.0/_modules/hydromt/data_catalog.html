@@ -1,0 +1,1028 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hydromt.data_catalog &#8212; HydroMT  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    <img src="../../_static/hydromt-logo.jpg" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/hydromt-logo.jpg" class="logo__image only-dark" alt="Logo image">
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../getting_started/intro.html">
+  Getting started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../user_guide/intro.html">
+  User guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../api.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../dev/intro.html">
+  Developments
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../plugins.html">
+  Plugins
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/Deltares/hydromt" rel="noopener" target="_blank" title="GitHub"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://www.deltares.nl/en/" rel="noopener" target="_blank" title="Deltares"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for hydromt.data_catalog</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;DataCatalog module for HydroMT&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isdir</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">exists</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">packaging.version</span> <span class="kn">import</span> <span class="n">Version</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">from</span> <span class="nn">.data_adapter</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DataAdapter</span><span class="p">,</span>
+    <span class="n">RasterDatasetAdapter</span><span class="p">,</span>
+    <span class="n">GeoDatasetAdapter</span><span class="p">,</span>
+    <span class="n">GeoDataFrameAdapter</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;DataCatalog&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="DataCatalog"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.html#hydromt.data_catalog.DataCatalog">[docs]</a><span class="k">class</span> <span class="nc">DataCatalog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c1"># root URL with data_catalog file</span>
+    <span class="n">_url</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;https://raw.githubusercontent.com/Deltares/hydromt/main/data/predefined_catalogs.yml&quot;</span>
+    <span class="n">_cache_dir</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">(),</span> <span class="s2">&quot;.hydromt_data&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataCatalog.__init__"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.html#hydromt.data_catalog.DataCatalog.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data_libs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="o">**</span><span class="n">artifact_keys</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Catalog of DataAdapter sources to easily read from different files</span>
+<span class="sd">        and keep track of files which have been accessed.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        data_libs: (list of) str, Path, optional</span>
+<span class="sd">            One or more paths to data catalog yaml files or names of predefined data catalogs.</span>
+<span class="sd">            By default the data catalog is initiated without data entries.</span>
+<span class="sd">            See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for accepted yaml format.</span>
+<span class="sd">        artifact_keys:</span>
+<span class="sd">            Deprecated from version v0.5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data_libs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># legacy code. to be removed</span>
+            <span class="n">data_libs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_libs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>  <span class="c1"># make sure data_libs is a list</span>
+            <span class="n">data_libs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">data_libs</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sources</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary of DataAdapter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary of predefined Catalogs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_used_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+
+        <span class="c1"># legacy code. to be removed</span>
+        <span class="k">for</span> <span class="n">lib</span><span class="p">,</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">artifact_keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lib</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> as key-word argument is deprecated, add the predefined data catalog as string to the data_libs argument instead&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">version</span><span class="p">:</span>  <span class="c1"># False or None</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">lib</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;=</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">data_libs</span> <span class="o">=</span> <span class="p">[</span><span class="n">lib</span><span class="p">]</span> <span class="o">+</span> <span class="n">data_libs</span>
+
+        <span class="c1"># parse data catalogs; both user and pre-defined</span>
+        <span class="k">for</span> <span class="n">name_or_path</span> <span class="ow">in</span> <span class="n">data_libs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">name_or_path</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;yml&quot;</span><span class="p">,</span> <span class="s2">&quot;yaml&quot;</span><span class="p">]:</span>  <span class="c1"># user defined</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">from_yml</span><span class="p">(</span><span class="n">name_or_path</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># predefined</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">from_predefined_catalogs</span><span class="p">(</span><span class="n">name_or_path</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sources</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns dictionary of DataAdapter sources.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sources</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># read artifacts by default if no catalogs are provided</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_predefined_catalogs</span><span class="p">(</span><span class="s2">&quot;artifact_data&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sources</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns list of data source names.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">predefined_catalogs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_predefined_catalogs</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataAdapter</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DataAdapter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">DataAdapter</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value must be DataAdapter, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sources</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overwriting data source </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sources</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DataCatalog.update"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.update.html#hydromt.data_catalog.DataCatalog.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Add data sources to library.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span></div>
+
+<div class="viewcode-block" id="DataCatalog.set_predefined_catalogs"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.set_predefined_catalogs">[docs]</a>    <span class="k">def</span> <span class="nf">set_predefined_catalogs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urlpath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># get predefined_catalogs</span>
+        <span class="n">urlpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_url</span> <span class="k">if</span> <span class="n">urlpath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">urlpath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span> <span class="o">=</span> <span class="n">_yml_from_uri_or_path</span><span class="p">(</span><span class="n">urlpath</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span></div>
+
+    <span class="k">def</span> <span class="nf">from_artifacts</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;artifact_data&quot;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Deprecated method. Use :py:func:`hydromt.data_catalog.DataCatalog.from_predefined_catalogs` instead</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str, optional</span>
+<span class="sd">            Catalog name. If None (default) sample data is downloaded.</span>
+<span class="sd">        version : str, optional</span>
+<span class="sd">            Release version. By default it takes the latest known release.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;&quot;from_artifacts&quot; is deprecated. Use &quot;from_predefined_catalogs instead&quot;.&#39;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_predefined_catalogs</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataCatalog.from_predefined_catalogs"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.from_predefined_catalogs">[docs]</a>    <span class="k">def</span> <span class="nf">from_predefined_catalogs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">predefined_catalogs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Catalog with name &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; not found in predefined catalogs&#39;</span>
+            <span class="p">)</span>
+        <span class="n">urlpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predefined_catalogs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;urlpath&quot;</span><span class="p">)</span>
+        <span class="n">versions_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predefined_catalogs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;versions&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;latest&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">versions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">versions_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">versions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">version</span> <span class="o">=</span> <span class="n">versions</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">([</span><span class="n">Version</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">])]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">version</span> <span class="o">=</span> <span class="n">versions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">urlpath</span> <span class="o">=</span> <span class="n">urlpath</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="n">versions_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">version</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">urlpath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;gz&quot;</span><span class="p">,</span> <span class="s2">&quot;zip&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data catalog </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> from archive&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_archive</span><span class="p">(</span><span class="n">urlpath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data catalog </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_yml</span><span class="p">(</span><span class="n">urlpath</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataCatalog.from_archive"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.from_archive.html#hydromt.data_catalog.DataCatalog.from_archive">[docs]</a>    <span class="k">def</span> <span class="nf">from_archive</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">urlpath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read a data archive including a data_catalog.yml file&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">urlpath</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+        <span class="n">archive_fn</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">basename</span><span class="p">(</span><span class="n">urlpath</span><span class="p">))</span>
+        <span class="n">yml_fn</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s2">&quot;data_catalog.yml&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="c1"># download data if url</span>
+        <span class="k">if</span> <span class="n">_uri_validator</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">urlpath</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">archive_fn</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">urlpath</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">r</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data archive not found at </span><span class="si">{</span><span class="n">urlpath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloading data archive file to </span><span class="si">{</span><span class="n">archive_fn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">archive_fn</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">raw</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="c1"># unpack data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">yml_fn</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unpacking data from </span><span class="si">{</span><span class="n">archive_fn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span><span class="n">archive_fn</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+        <span class="c1"># parse catalog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_yml</span><span class="p">(</span><span class="n">yml_fn</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataCatalog.from_yml"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.from_yml.html#hydromt.data_catalog.DataCatalog.from_yml">[docs]</a>    <span class="k">def</span> <span class="nf">from_yml</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">urlpath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">mark_used</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Add data sources based on yaml file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        urlpath: str, Path</span>
+<span class="sd">            Path or url to data source yaml files.</span>
+<span class="sd">        root: str, Path, optional</span>
+<span class="sd">            Global root for all relative paths in yaml file(s).</span>
+<span class="sd">        mark_used: bool</span>
+<span class="sd">            If True, append to used_data list.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        A yaml data entry is provided below, where all the text between &lt;&gt;</span>
+<span class="sd">        should be filled by the user. Multiple data sources of the same</span>
+<span class="sd">        data type should be grouped.  Currently the following data types are supported:</span>
+<span class="sd">        {&#39;RasterDataset&#39;, &#39;GeoDataset&#39;, &#39;GeoDataFrame&#39;}. See the specific data adapters</span>
+<span class="sd">        for more information about the required and optional arguments.</span>
+
+<span class="sd">        .. code-block:: console</span>
+
+<span class="sd">            root: &lt;path&gt;</span>
+<span class="sd">            category: &lt;category&gt;</span>
+<span class="sd">            &lt;name&gt;:</span>
+<span class="sd">              path: &lt;path&gt;</span>
+<span class="sd">              data_type: &lt;data_type&gt;</span>
+<span class="sd">              driver: &lt;driver&gt;</span>
+<span class="sd">              kwargs:</span>
+<span class="sd">                &lt;key&gt;: &lt;value&gt;</span>
+<span class="sd">              crs: &lt;crs&gt;</span>
+<span class="sd">              nodata:</span>
+<span class="sd">                &lt;hydromt_variable_name1&gt;: &lt;nodata&gt;</span>
+<span class="sd">              rename:</span>
+<span class="sd">                &lt;native_variable_name1&gt;: &lt;hydromt_variable_name1&gt;</span>
+<span class="sd">                &lt;native_variable_name2&gt;: &lt;hydromt_variable_name2&gt;</span>
+<span class="sd">              unit_add:</span>
+<span class="sd">                &lt;hydromt_variable_name1&gt;: &lt;float/int&gt;</span>
+<span class="sd">              unit_mult:</span>
+<span class="sd">                &lt;hydromt_variable_name1&gt;: &lt;float/int&gt;</span>
+<span class="sd">              meta:</span>
+<span class="sd">                source_url: &lt;source_url&gt;</span>
+<span class="sd">                source_version: &lt;source_version&gt;</span>
+<span class="sd">                source_licence: &lt;source_licence&gt;</span>
+<span class="sd">                paper_ref: &lt;paper_ref&gt;</span>
+<span class="sd">                paper_doi: &lt;paper_doi&gt;</span>
+<span class="sd">              placeholders:</span>
+<span class="sd">                &lt;placeholder_name_1&gt;: &lt;list of names&gt;</span>
+<span class="sd">                &lt;placeholder_name_2&gt;: &lt;list of names&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsing data catalog from </span><span class="si">{</span><span class="n">urlpath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">yml</span> <span class="o">=</span> <span class="n">_yml_from_uri_or_path</span><span class="p">(</span><span class="n">urlpath</span><span class="p">)</span>
+        <span class="c1"># parse metadata</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="c1"># legacy code with root/category at highest yml level</span>
+        <span class="k">if</span> <span class="s2">&quot;root&quot;</span> <span class="ow">in</span> <span class="n">yml</span><span class="p">:</span>
+            <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">yml</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s2">&quot;category&quot;</span> <span class="ow">in</span> <span class="n">yml</span><span class="p">:</span>
+            <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">yml</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">))</span>
+        <span class="c1"># read meta data</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">yml</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;meta&quot;</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+        <span class="c1"># TODO keep meta data!! Note only possible if yml files are not merged</span>
+        <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="n">dirname</span><span class="p">(</span><span class="n">urlpath</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+            <span class="n">yml</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">mark_used</span><span class="o">=</span><span class="n">mark_used</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataCatalog.from_dict"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.from_dict.html#hydromt.data_catalog.DataCatalog.from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+        <span class="n">root</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mark_used</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Add data sources based on dictionary.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_dict: dict</span>
+<span class="sd">            Dictionary of data_sources.</span>
+<span class="sd">        root: str, Path, optional</span>
+<span class="sd">            Global root for all relative paths in `data_dict`.</span>
+<span class="sd">        category: str, optional</span>
+<span class="sd">            Global category for all sources in `data_dict`.</span>
+<span class="sd">        mark_used: bool</span>
+<span class="sd">            If True, append to used_data list.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        A data dictionary with two entries is provided below, where all the text between &lt;&gt;</span>
+<span class="sd">        should be filled by the user. See the specific data adapters</span>
+<span class="sd">        for more information about the required and optional arguments.</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            {</span>
+<span class="sd">                &lt;name1&gt;: {</span>
+<span class="sd">                    &quot;path&quot;: &lt;path&gt;,</span>
+<span class="sd">                    &quot;data_type&quot;: &lt;data_type&gt;,</span>
+<span class="sd">                    &quot;driver&quot;: &lt;driver&gt;,</span>
+<span class="sd">                    &quot;kwargs&quot;: {&lt;key&gt;: &lt;value&gt;},</span>
+<span class="sd">                    &quot;crs&quot;: &lt;crs&gt;,</span>
+<span class="sd">                    &quot;nodata&quot;: &lt;nodata&gt;,</span>
+<span class="sd">                    &quot;rename&quot;: {&lt;native_variable_name1&gt;: &lt;hydromt_variable_name1&gt;},</span>
+<span class="sd">                    &quot;unit_add&quot;: {&lt;hydromt_variable_name1&gt;: &lt;float/int&gt;},</span>
+<span class="sd">                    &quot;unit_mult&quot;: {&lt;hydromt_variable_name1&gt;: &lt;float/int&gt;},</span>
+<span class="sd">                    &quot;meta&quot;: {...},</span>
+<span class="sd">                    &quot;placeholders&quot;: {&lt;placeholder_name_1&gt;: &lt;list of names&gt;},</span>
+<span class="sd">                }</span>
+<span class="sd">                &lt;name2&gt;: {</span>
+<span class="sd">                    ...</span>
+<span class="sd">                }</span>
+<span class="sd">            }</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="n">_parse_data_dict</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">data_dict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mark_used</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_used_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span></div>
+
+<div class="viewcode-block" id="DataCatalog.to_yml"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.to_yml.html#hydromt.data_catalog.DataCatalog.to_yml">[docs]</a>    <span class="k">def</span> <span class="nf">to_yml</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">source_names</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[],</span>
+        <span class="n">used_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write data catalog to yaml format.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path: str, Path</span>
+<span class="sd">            yaml output path.</span>
+<span class="sd">        root: str, Path, optional</span>
+<span class="sd">            Global root for all relative paths in yaml file.</span>
+<span class="sd">            If &quot;auto&quot; the data source paths are relative to the yaml output ``path``.</span>
+<span class="sd">        source_names: list, optional</span>
+<span class="sd">            List of source names to export; ignored if `used_only=True`</span>
+<span class="sd">        used_only: bool</span>
+<span class="sd">            If True, export only data entries kept in used_data list, by default False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">source_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_data</span> <span class="k">if</span> <span class="n">used_only</span> <span class="k">else</span> <span class="n">source_names</span>
+        <span class="n">yml_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">root</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">yml_dir</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">source_names</span><span class="o">=</span><span class="n">source_names</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="o">==</span> <span class="n">yml_dir</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># remove root if it equals the yml_dir</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataCatalog.to_dict"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.to_dict.html#hydromt.data_catalog.DataCatalog.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_names</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">root</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Export the data catalog to a dictionary.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source_names : list, optional</span>
+<span class="sd">            List of source names to export</span>
+<span class="sd">        root : str, Path, optional</span>
+<span class="sd">            Global root for all relative paths in yml file.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            data catalog dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sources_out</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+            <span class="n">sources_out</span><span class="p">[</span><span class="s2">&quot;root&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">root</span>
+            <span class="n">root_drive</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitdrive</span><span class="p">(</span><span class="n">root</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">source_names</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">source_dict</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">source_dict</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span>  <span class="c1"># is abspath</span>
+                <span class="n">source_drive</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitdrive</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">root_drive</span> <span class="o">==</span> <span class="n">source_drive</span>
+                    <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonpath</span><span class="p">([</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">])</span> <span class="o">==</span> <span class="n">root</span>
+                <span class="p">):</span>
+                    <span class="n">source_dict</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span>
+                        <span class="n">source_dict</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span> <span class="n">root</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>
+            <span class="c1"># remove non serializable entries to prevent errors</span>
+            <span class="n">source_dict</span> <span class="o">=</span> <span class="n">_process_dict</span><span class="p">(</span><span class="n">source_dict</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>  <span class="c1"># TODO TEST</span>
+            <span class="n">sources_out</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">source_dict</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">sources_out</span></div>
+
+<div class="viewcode-block" id="DataCatalog.to_dataframe"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.to_dataframe.html#hydromt.data_catalog.DataCatalog.to_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_names</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return data catalog summary as DataFrame&quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">source_names</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">export_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_root</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">,</span>
+        <span class="n">source_names</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[],</span>
+        <span class="n">unit_conversion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Export a data slice of each dataset and a data_catalog.yml file to disk.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_root : str, Path</span>
+<span class="sd">            Path to output folder</span>
+<span class="sd">        bbox : array-like of floats</span>
+<span class="sd">            (xmin, ymin, xmax, ymax) bounding box of area of interest.</span>
+<span class="sd">        time_tuple : tuple of str, datetime, optional</span>
+<span class="sd">            Start and end date of period of interest. By default the entire time period</span>
+<span class="sd">            of the dataset is returned.</span>
+<span class="sd">        source_names: list, optional</span>
+<span class="sd">            List of source names to export</span>
+<span class="sd">        unit_conversion: boolean, optional</span>
+<span class="sd">            If False skip unit conversion when parsing data from file, by default True.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">data_root</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">data_root</span><span class="p">)</span>
+
+        <span class="c1"># create copy of data with selected source names</span>
+        <span class="n">sources</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sources</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">sources</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">source_names</span><span class="p">}</span>
+
+        <span class="c1"># export data and update sources</span>
+        <span class="n">sources_out</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># read slice of source and write to file</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exporting </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">unit_conversion</span><span class="p">:</span>
+                    <span class="n">unit_mult</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">unit_mult</span>
+                    <span class="n">unit_add</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">unit_add</span>
+                    <span class="n">source</span><span class="o">.</span><span class="n">unit_mult</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">source</span><span class="o">.</span><span class="n">unit_add</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">fn_out</span><span class="p">,</span> <span class="n">driver</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
+                    <span class="n">data_root</span><span class="o">=</span><span class="n">data_root</span><span class="p">,</span>
+                    <span class="n">data_name</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+                    <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
+                    <span class="n">time_tuple</span><span class="o">=</span><span class="n">time_tuple</span><span class="p">,</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">fn_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> file contains no data within domain&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="c1"># update path &amp; driver and remove kwargs and rename in output sources</span>
+                <span class="k">if</span> <span class="n">unit_conversion</span><span class="p">:</span>
+                    <span class="n">source</span><span class="o">.</span><span class="n">unit_mult</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">source</span><span class="o">.</span><span class="n">unit_add</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">source</span><span class="o">.</span><span class="n">unit_mult</span> <span class="o">=</span> <span class="n">unit_mult</span>
+                    <span class="n">source</span><span class="o">.</span><span class="n">unit_add</span> <span class="o">=</span> <span class="n">unit_add</span>
+                <span class="n">source</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">fn_out</span>
+                <span class="n">source</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">driver</span>
+                <span class="n">source</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">source</span><span class="o">.</span><span class="n">rename</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">sources_out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> file not found at </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># write data catalog to yml</span>
+        <span class="n">data_catalog_out</span> <span class="o">=</span> <span class="n">DataCatalog</span><span class="p">()</span>
+        <span class="n">data_catalog_out</span><span class="o">.</span><span class="n">_sources</span> <span class="o">=</span> <span class="n">sources_out</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">data_root</span><span class="p">,</span> <span class="s2">&quot;data_catalog.yml&quot;</span><span class="p">)</span>
+        <span class="n">data_catalog_out</span><span class="o">.</span><span class="n">to_yml</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataCatalog.get_rasterdataset"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html#hydromt.data_catalog.DataCatalog.get_rasterdataset">[docs]</a>    <span class="k">def</span> <span class="nf">get_rasterdataset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path_or_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">align</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">single_var_as_array</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns a clipped, sliced and unified RasterDataset from the data catalog.</span>
+
+<span class="sd">        To clip the data to the area of interest, provide a `bbox` or `geom`,</span>
+<span class="sd">        with optional additional `buffer` and `align` arguments.</span>
+<span class="sd">        To slice the data to the time period of interest, provide the `time_tuple` argument.</span>
+<span class="sd">        To return only the dataset variables of interest and check their presence,</span>
+<span class="sd">        provide the `variables` argument.</span>
+
+<span class="sd">        NOTE: Unless `single_var_as_array` is set to False a single-variable data source</span>
+<span class="sd">        will be returned as :py:class:`xarray.DataArray` rather than :py:class:`xarray.Dataset`.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        path_or_key: str</span>
+<span class="sd">            Data catalog key. If a path to a raster file is provided it will be added</span>
+<span class="sd">            to the data_catalog with its based on the file basename without extension.</span>
+<span class="sd">        bbox : array-like of floats</span>
+<span class="sd">            (xmin, ymin, xmax, ymax) bounding box of area of interest.</span>
+<span class="sd">        geom : geopandas.GeoDataFrame/Series,</span>
+<span class="sd">            A geometry defining the area of interest.</span>
+<span class="sd">        buffer : int, optional</span>
+<span class="sd">            Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.</span>
+<span class="sd">        align : float, optional</span>
+<span class="sd">            Resolution to align the bounding box, by default None</span>
+<span class="sd">        variables : str or list of str, optional.</span>
+<span class="sd">            Names of RasterDataset variables to return. By default all dataset variables</span>
+<span class="sd">            are returned.</span>
+<span class="sd">        time_tuple : tuple of str, datetime, optional</span>
+<span class="sd">            Start and end date of period of interest. By default the entire time period</span>
+<span class="sd">            of the dataset is returned.</span>
+<span class="sd">        single_var_as_array: bool, optional</span>
+<span class="sd">            If True, return a DataArray if the dataset consists of a single variable.</span>
+<span class="sd">            If False, always return a Dataset. By default True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        obj: xarray.Dataset or xarray.DataArray</span>
+<span class="sd">            RasterDataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">path_or_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="ow">and</span> <span class="n">exists</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">path_or_key</span><span class="p">)):</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">path_or_key</span><span class="p">))</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">path_or_key</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">RasterDatasetAdapter</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)})</span>
+        <span class="k">elif</span> <span class="n">path_or_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">path_or_key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No such file or catalog key: </span><span class="si">{</span><span class="n">path_or_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_used_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;DataCatalog: Getting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> RasterDataset </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">driver</span><span class="si">}</span><span class="s2"> data from </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
+            <span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span>
+            <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span>
+            <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
+            <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
+            <span class="n">time_tuple</span><span class="o">=</span><span class="n">time_tuple</span><span class="p">,</span>
+            <span class="n">single_var_as_array</span><span class="o">=</span><span class="n">single_var_as_array</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+<div class="viewcode-block" id="DataCatalog.get_geodataframe"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.get_geodataframe.html#hydromt.data_catalog.DataCatalog.get_geodataframe">[docs]</a>    <span class="k">def</span> <span class="nf">get_geodataframe</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path_or_key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a clipped and unified GeoDataFrame (vector) from the data catalog.</span>
+
+<span class="sd">        To clip the data to the area of interest, provide a `bbox` or `geom`,</span>
+<span class="sd">        with optional additional `buffer` and `align` arguments.</span>
+<span class="sd">        To return only the dataframe columns of interest and check their presence,</span>
+<span class="sd">        provide the `variables` argument.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        path_or_key: str</span>
+<span class="sd">            Data catalog key. If a path to a vector file is provided it will be added</span>
+<span class="sd">            to the data_catalog with its based on the file basename without extension.</span>
+<span class="sd">        bbox : array-like of floats</span>
+<span class="sd">            (xmin, ymin, xmax, ymax) bounding box of area of interest.</span>
+<span class="sd">        geom : geopandas.GeoDataFrame/Series,</span>
+<span class="sd">            A geometry defining the area of interest.</span>
+<span class="sd">        buffer : float, optional</span>
+<span class="sd">            Buffer around the `bbox` or `geom` area of interest in meters. By default 0.</span>
+<span class="sd">        predicate : {&#39;intersects&#39;, &#39;within&#39;, &#39;contains&#39;, &#39;overlaps&#39;, &#39;crosses&#39;, &#39;touches&#39;}, optional</span>
+<span class="sd">            If predicate is provided, the GeoDataFrame is filtered by testing</span>
+<span class="sd">            the predicate function against each item. Requires bbox or mask.</span>
+<span class="sd">            By default &#39;intersects&#39;</span>
+<span class="sd">        align : float, optional</span>
+<span class="sd">            Resolution to align the bounding box, by default None</span>
+<span class="sd">        variables : str or list of str, optional.</span>
+<span class="sd">            Names of GeoDataFrame columns to return. By default all columns are returned.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        gdf: geopandas.GeoDataFrame</span>
+<span class="sd">            GeoDataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">path_or_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="ow">and</span> <span class="n">exists</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">path_or_key</span><span class="p">)):</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">path_or_key</span><span class="p">))</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">path_or_key</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">GeoDataFrameAdapter</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)})</span>
+        <span class="k">elif</span> <span class="n">path_or_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">path_or_key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No such file or catalog key: </span><span class="si">{</span><span class="n">path_or_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_used_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;DataCatalog: Getting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> GeoDataFrame </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">driver</span><span class="si">}</span><span class="s2"> data from </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
+            <span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span>
+            <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span>
+            <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">,</span>
+            <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">gdf</span></div>
+
+<div class="viewcode-block" id="DataCatalog.get_geodataset"><a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.get_geodataset.html#hydromt.data_catalog.DataCatalog.get_geodataset">[docs]</a>    <span class="k">def</span> <span class="nf">get_geodataset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path_or_key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">single_var_as_array</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns a clipped, sliced and unified GeoDataset from the data catalog.</span>
+
+<span class="sd">        To clip the data to the area of interest, provide a `bbox` or `geom`,</span>
+<span class="sd">        with optional additional `buffer` and `align` arguments.</span>
+<span class="sd">        To slice the data to the time period of interest, provide the `time_tuple` argument.</span>
+<span class="sd">        To return only the dataset variables of interest and check their presence,</span>
+<span class="sd">        provide the `variables` argument.</span>
+
+<span class="sd">        NOTE: Unless `single_var_as_array` is set to False a single-variable data source</span>
+<span class="sd">        will be returned as xarray.DataArray rather than Dataset.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        path_or_key: str</span>
+<span class="sd">            Data catalog key. If a path to a file is provided it will be added</span>
+<span class="sd">            to the data_catalog with its based on the file basename without extension.</span>
+<span class="sd">        bbox : array-like of floats</span>
+<span class="sd">            (xmin, ymin, xmax, ymax) bounding box of area of interest.</span>
+<span class="sd">        geom : geopandas.GeoDataFrame/Series,</span>
+<span class="sd">            A geometry defining the area of interest.</span>
+<span class="sd">        buffer : float, optional</span>
+<span class="sd">            Buffer around the `bbox` or `geom` area of interest in meters. By default 0.</span>
+<span class="sd">        align : float, optional</span>
+<span class="sd">            Resolution to align the bounding box, by default None</span>
+<span class="sd">        variables : str or list of str, optional.</span>
+<span class="sd">            Names of GeoDataset variables to return. By default all dataset variables</span>
+<span class="sd">            are returned.</span>
+<span class="sd">        time_tuple : tuple of str, datetime, optional</span>
+<span class="sd">            Start and end date of period of interest. By default the entire time period</span>
+<span class="sd">            of the dataset is returned.</span>
+<span class="sd">        single_var_as_array: bool, optional</span>
+<span class="sd">            If True, return a DataArray if the dataset consists of a single variable.</span>
+<span class="sd">            If False, always return a Dataset. By default True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        obj: xarray.Dataset or xarray.DataArray</span>
+<span class="sd">            GeoDataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">path_or_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="ow">and</span> <span class="n">exists</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">path_or_key</span><span class="p">)):</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">path_or_key</span><span class="p">))</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">path_or_key</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">GeoDatasetAdapter</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)})</span>
+        <span class="k">elif</span> <span class="n">path_or_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">path_or_key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No such file or catalog key: </span><span class="si">{</span><span class="n">path_or_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_used_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;DataCatalog: Getting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> GeoDataset </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">driver</span><span class="si">}</span><span class="s2"> data from </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
+            <span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span>
+            <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span>
+            <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
+            <span class="n">time_tuple</span><span class="o">=</span><span class="n">time_tuple</span><span class="p">,</span>
+            <span class="n">single_var_as_array</span><span class="o">=</span><span class="n">single_var_as_array</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+    <span class="k">def</span> <span class="nf">get_dataframe</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path_or_key</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_tuple</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">single_var_as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span></div>
+
+
+<span class="k">def</span> <span class="nf">_parse_data_dict</span><span class="p">(</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Parse data source dictionary.&quot;&quot;&quot;</span>
+    <span class="c1"># link yml keys to adapter classes</span>
+    <span class="n">ADAPTERS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;RasterDataset&quot;</span><span class="p">:</span> <span class="n">RasterDatasetAdapter</span><span class="p">,</span>
+        <span class="s2">&quot;GeoDataFrame&quot;</span><span class="p">:</span> <span class="n">GeoDataFrameAdapter</span><span class="p">,</span>
+        <span class="s2">&quot;GeoDataset&quot;</span><span class="p">:</span> <span class="n">GeoDatasetAdapter</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="c1"># NOTE: shouldn&#39;t the kwarg overwrite the dict/yml ?</span>
+    <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># parse data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># important as we modify with pop</span>
+        <span class="k">if</span> <span class="s2">&quot;alias&quot;</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+            <span class="n">alias</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;alias&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">alias</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alias </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2"> not found in data_dict.&quot;</span><span class="p">)</span>
+            <span class="c1"># use alias source but overwrite any attributes with original source</span>
+            <span class="n">source_org</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">source</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">source_org</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;path&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Missing required path argument.&quot;</span><span class="p">)</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Data type missing.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ADAPTERS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Data type </span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> unknown&quot;</span><span class="p">)</span>
+        <span class="n">adapter</span> <span class="o">=</span> <span class="n">ADAPTERS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">abs_path</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">))</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;meta&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="s2">&quot;category&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">meta</span> <span class="ow">and</span> <span class="n">category</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span>
+        <span class="c1"># lower kwargs for backwards compatability</span>
+        <span class="c1"># FIXME this could be problamatic if driver kwargs conflict DataAdapter arguments</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">source</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+        <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;fn&quot;</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">:</span>  <span class="c1"># get absolute paths for file names</span>
+                <span class="n">source</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">opt</span><span class="p">:</span> <span class="n">abs_path</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">source</span><span class="p">[</span><span class="n">opt</span><span class="p">])})</span>
+        <span class="k">if</span> <span class="s2">&quot;placeholders&quot;</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">source</span><span class="p">[</span><span class="s2">&quot;placeholders&quot;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">combination</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">options</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+                <span class="n">path_n</span> <span class="o">=</span> <span class="n">path</span>
+                <span class="n">name_n</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">combination</span><span class="p">):</span>
+                    <span class="n">path_n</span> <span class="o">=</span> <span class="n">path_n</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                    <span class="n">name_n</span> <span class="o">=</span> <span class="n">name_n</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">name_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">adapter</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path_n</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span> <span class="o">**</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">adapter</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span> <span class="o">**</span><span class="n">source</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">_uri_validator</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">([</span><span class="n">result</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">netloc</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">_yml_from_uri_or_path</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">_uri_validator</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">r</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">uri_or_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">yml</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">yml</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">yml</span>
+
+
+<span class="k">def</span> <span class="nf">_process_dict</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Recursively change dict values to keep only python literal structures.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">_check_key</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_check_key</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">_process_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_check_key</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>  <span class="c1"># path to string</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">_check_key</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)):</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>  <span class="c1"># remove this entry</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Removing non-serializable entry &quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d</span>
+
+
+<span class="k">def</span> <span class="nf">abs_path</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">rel_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rel_path</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">rel_path</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">rel_path</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright Deltares.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>
