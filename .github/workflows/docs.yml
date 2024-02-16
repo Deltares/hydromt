@@ -26,8 +26,6 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
-    env:
-      DOC_PYTHON_VERSION: '311'
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
@@ -36,23 +34,22 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.5.1
         with:
           pixi-version: "latest"
-          environments: "default-py${{ env.DOC_PYTHON_VERSION }}"
+          environments: default
       - name: Prepare pixi
         run: |
-          pixi run -e default-py${{ env.DOC_PYTHON_VERSION }} install-hydromt
+          pixi run install-hydromt
 
       # if we're not publishing we don't have to write them, so we might as well
       # save ourself a bunch of IO time
       - name: Generate dummy docs
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          export PATH=/usr/share/miniconda3/bin:$PATH
-           ~/miniconda3/condabin/mamba run -n hydromt sphinx-build ./docs ./docs/_build -b dummy -W
+          pixi run sphinx-build ./docs ./docs/_build -b dummy -W
 
       - name: Generate docs
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
         run: |
-          echo "DOC_VERSION=$(pixi run -e default-${{ env.DOC_PYTHON_VERSION }} python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
+          echo "DOC_VERSION=$(pixi run python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
