@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """GIS related convenience functions."""
 from __future__ import annotations
 
@@ -13,19 +10,15 @@ from typing import Optional, Tuple
 import geopandas as gpd
 import numpy as np
 import xarray as xr
-from geopandas import GeoDataFrame
 from pyflwdir import gis_utils as gis
 from pyogrio import read_info
 from pyproj import CRS
 from pyproj.transformer import Transformer
 from rasterio.transform import Affine
-from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
 from hydromt import _compat
-from hydromt._typing import Bbox, Geom, GpdShapeGeom
-from hydromt._typing.type_def import Predicate
-from hydromt.models._region.region import Region
+from hydromt._typing import Bbox, GpdShapeGeom
 
 __all__ = ["spread2d", "nearest", "nearest_merge"]
 

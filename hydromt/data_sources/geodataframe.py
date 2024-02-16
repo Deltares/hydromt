@@ -10,7 +10,7 @@ from hydromt._typing import NoDataStrategy
 from hydromt._typing.type_def import Predicate
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
-from hydromt.models._region.region import Region
+from hydromt.region import Region
 
 from .data_source import DataSource
 

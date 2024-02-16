@@ -19,12 +19,10 @@ from hydromt._typing.error import NoDataStrategy
 from hydromt._utils import log
 from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt._validators.model_config import HydromtModelSetup
-
-# from hydromt._validators.region import validate_region
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import MODELS
-from hydromt.models._region.region import Region
+from hydromt.region import Region
 
 BUILDING_EXE = False
 if BUILDING_EXE:

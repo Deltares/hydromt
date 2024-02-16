@@ -30,7 +30,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
-from hydromt.models._region.region import Region
+from hydromt.region import Region
 
 if HAS_XUGRID:
     import xugrid as xu

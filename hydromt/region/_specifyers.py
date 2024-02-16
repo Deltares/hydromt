@@ -105,6 +105,7 @@ class GridRegionSpecifyer(BaseModel):
     kind: Literal["grid"]
     source: str
     buffer: float = 0.0
+    data_catalog: DataCatalog
     driver_kwargs: Optional[Dict[str, Any]]
 
     crs: CRS = Field(default=WGS84)
