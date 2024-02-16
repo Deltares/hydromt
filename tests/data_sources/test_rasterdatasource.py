@@ -73,4 +73,4 @@ class TestRasterDataSource:
             )
 
     def test_read_data(self, example_source: RasterDataSource, rasterds: xr.Dataset):
-        assert rasterds == example_source.read_data()[0]
+        assert rasterds == example_source.read_data()

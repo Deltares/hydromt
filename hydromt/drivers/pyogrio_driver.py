@@ -1,6 +1,6 @@
 """Driver to read geodataframes using Pyogrio."""
 from logging import Logger
-from typing import Optional
+from typing import List, Optional
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info
@@ -18,7 +18,7 @@ class PyogrioDriver(GeoDataFrameDriver):
 
     def read(
         self,
-        uri: str,
+        uris: List[str],
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0,
@@ -33,6 +33,9 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         args:
         """
+        if len(uris) != 1:
+            raise ValueError("Length of uris for Pyogrio Driver must be 1.")
+        uri = uris[0]
         if bbox is not None:  # buffer bbox
             bbox: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         if mask is not None:  # buffer mask

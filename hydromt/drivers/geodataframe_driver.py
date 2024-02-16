@@ -1,7 +1,7 @@
 """Driver for GeoDataFrames."""
 from abc import ABC, abstractmethod
 from logging import Logger
-from typing import Optional
+from typing import List, Optional
 
 import geopandas as gpd
 from pydantic import BaseModel
@@ -16,7 +16,7 @@ class GeoDataFrameDriver(ABC, BaseModel):
     @abstractmethod
     def read(
         self,
-        uri: str,
+        uris: List[str],
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0.0,

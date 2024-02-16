@@ -61,7 +61,7 @@ class RasterDataSource(DataSource):
         timerange: Optional[TimeRange] = None,
         zoom_level: int = 0,
         logger: Optional[Logger] = None,
-    ) -> List[xr.Dataset]:
+    ) -> xr.Dataset:
         """
         Read data from this source.
 
@@ -81,21 +81,14 @@ class RasterDataSource(DataSource):
             logger=logger,
             **self.resolver_kwargs,
         )
-        # TODO: think about our raster processing: this (and previous) behavior keeps
-        # all in memory. This should be a Generator. To be discussed.
-        datasets: List[xr.Dataset] = []
-        for uri in uris:
-            datasets.append(
-                self.driver.read(
-                    uri=uri,
-                    bbox=bbox,
-                    mask=mask,
-                    buffer=buffer,
-                    crs=self.crs,
-                    predicate=predicate,
-                    timerange=timerange,
-                    zoom_level=zoom_level,
-                    **self.driver_kwargs,
-                )
-            )
-        return datasets
+        return self.driver.read(
+            uris=uris,
+            bbox=bbox,
+            mask=mask,
+            buffer=buffer,
+            crs=self.crs,
+            predicate=predicate,
+            timerange=timerange,
+            zoom_level=zoom_level,
+            **self.driver_kwargs,
+        )

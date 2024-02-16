@@ -38,4 +38,4 @@ class TestZarrDriver:
         return (root, tmp_path)
 
     def test_zarr_read(self, example_zarr_file: zarr.Array):
-        assert ZarrDriver().read(example_zarr_file[1]) == example_zarr_file[0]
+        assert ZarrDriver().read([example_zarr_file[1]]) == example_zarr_file[0]

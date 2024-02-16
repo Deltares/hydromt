@@ -79,7 +79,6 @@ class GeoDataSource(DataSource):
         )
         if len(uris) > 1:
             raise ValueError("GeoDataFrames cannot have more than 1 source URI.")
-        uri = uris[0]
         return self.driver.read(
-            uri, bbox, mask, buffer, self.crs, predicate, logger=logger
+            uris, bbox, mask, buffer, self.crs, predicate, logger=logger
         )

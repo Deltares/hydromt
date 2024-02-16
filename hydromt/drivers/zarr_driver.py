@@ -1,6 +1,6 @@
 """RasterDataSetDriver for zarr data."""
 from logging import Logger
-from typing import Optional
+from typing import List, Optional
 
 import xarray as xr
 from pyproj import CRS
@@ -14,7 +14,7 @@ class ZarrDriver(RasterDataSetDriver):
 
     def read(
         self,
-        uri: str,
+        uris: List[str],
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0,
@@ -29,4 +29,4 @@ class ZarrDriver(RasterDataSetDriver):
 
         Args:
         """
-        return xr.open_zarr(uri, **kwargs)
+        return xr.merge([xr.open_zarr(uri, **kwargs) for uri in uris])
