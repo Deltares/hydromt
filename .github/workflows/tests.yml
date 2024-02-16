@@ -32,75 +32,29 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ['3.9','3.10','3.11']
-        include:
-          - os: windows-latest
-            # this mamba path will be interpreted by bash instead of the file system
-            # hence the double \\ are necessary
-            mamba-path: C:\\Users\\runneradmin\\miniconda3\\condabin\\mamba
-            miniconda-path: C:\Users\runneradmin\miniconda3
-            pycache-path: C:\Users\runneradmin\pycache
-          - os: ubuntu-latest
-            miniconda-path: ~/miniconda3
-            mamba-path: ~/miniconda3/condabin/mamba
-            pycache-path: ~/pycache
 
-    name: py ${{ matrix.python-version }} (${{ matrix.os}})
+    name: py ${{ matrix.python-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     concurrency:
-      group: ${{ github.workflow }}-${{ matrix.os}}-${{ matrix.python-version }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
 
       - uses: actions/checkout@v4
-
-      # we need environment.yml to see if we have a cache hit
-      - name: Generate env spec
-        run: pip install tomli && python make_env.py test,io,extra -p ${{ matrix.python-version}} -n hydromt
-
-
-      - name: load from cache
-        id: cache
-        uses: actions/cache/restore@v4
+      - uses: prefix-dev/setup-pixi@v0.5.1
         with:
-          path: |
-            ${{ matrix.miniconda-path }}
-            ${{ matrix.pycache-path }}
-          # the below two settings mean we'll always restore the cache
-          # but the cache hit output can tell us if we have to update afterwards
-          key: test-${{ matrix.os }}-py${{ matrix.python-version }}-${{ hashFiles('environment.yml')  }}
-          restore-keys: |
-            test-${{ matrix.os }}-py${{ matrix.python-version }}
-            test-${{ matrix.os }}
+          pixi-version: "latest"
 
       # Enable tmate debugging of manually-triggered workflows if the input option was provided
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
 
-      - name: Fail on no cache restore
-        if: steps.cache.outputs.cache-matched-key == ''
-        run: |
-          echo "Failed to restore any cache. exiting..."
-          exit 1
-
-      # by avoiding the mamba setup stage by loading it from cache instead we save
-      # a lot of setup time, but we do have to do our own PATH management
-      # hence the matrix variable
-      - name: Update environment
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          ${{ matrix.miniconda-path }} env update -n hydromt -f environment.yml
-
-      - name: Conda info
-        run: |
-          ${{ matrix.mamba-path }} info
-          ${{ matrix.mamba-path }} list -n hydromt
-
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          ${{ matrix.mamba-path }} run -n hydromt python -m pytest --verbose --cov=hydromt --cov-report xml
+          pixi run test-cov
 
       # enable for CI debugging
       # - name: Setup tmate session

@@ -124,6 +124,7 @@ clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 test = { cmd = ["pytest"] }
 test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
+test-cov = { cmd = ["pytest", "--verbose", "--cov=hydromt", "--cov-report", "xml"] }
 
 [dependencies]
 affine = "*"
