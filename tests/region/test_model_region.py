@@ -7,8 +7,12 @@ import xarray as xr
 from hydromt import DataCatalog
 from hydromt.models import MODELS
 from hydromt.models.api import parse_region
+from hydromt.region._specifyers import (
+    BboxRegionSpecifyer,
+    GeomFileRegionSpecifyer,
+    GeomRegionSpecifyer,
+)
 from hydromt.region.region import Region
-from hydromt.region.specifyers import BboxRegionSpecifyer
 
 
 def test_bbox_region():
@@ -17,10 +21,27 @@ def test_bbox_region():
     assert isinstance(spec, BboxRegionSpecifyer), type(spec)
 
 
+def test_region_from_geom_file(tmpdir, world):
+    geom_path = str(tmpdir.join("world.geojson"))
+    world.to_file(geom_path, driver="GeoJSON")
+    r = Region({"geom": geom_path})
+    assert isinstance(r._spec, GeomFileRegionSpecifyer), type(r._spec)
+
+
 def test_region_unknown_key_errors():
     region = {"region": [0.0, -1.0]}
     with pytest.raises(ValueError, match=r"Unknown region kind.*"):
         _ = Region(region)
+
+
+def test_region_from_geom(world):
+    r = Region({"geom": world})
+    assert isinstance(r._spec, GeomRegionSpecifyer)
+
+
+def test_region_from_geom_points_fails(geodf):
+    with pytest.raises(ValueError, match=r"Region value.*"):
+        _ = Region({"geom": geodf})
 
 
 @pytest.mark.skip(reason="model region spec not yet implemented")
@@ -38,25 +59,6 @@ def test_region_from_model(tmpdir):
 def test_region_from_catalog(test_cat):
     kind, region = parse_region({"geom": "world"}, data_catalog=test_cat)
     assert isinstance(region["geom"], gpd.GeoDataFrame)
-
-
-@pytest.mark.skip(reason="Needs RasterDataset implementation")
-def test_region_from_geom_file(tmpdir, world):
-    fn_gdf = str(tmpdir.join("world.geojson"))
-    world.to_file(fn_gdf, driver="GeoJSON")
-    kind, region = parse_region({"geom": fn_gdf})
-    assert isinstance(region["geom"], gpd.GeoDataFrame)
-
-
-def test_region_from_geom(world):
-    kind, region = parse_region({"geom": world})
-    assert isinstance(region["geom"], gpd.GeoDataFrame)
-
-
-def test_region_from_geom_points_fails(geodf):
-    region = {"geom": geodf}
-    with pytest.raises(ValueError, match=r"Region value.*"):
-        kind, region = parse_region(region)
 
 
 @pytest.mark.skip(reason="Needs RasterDataset implementation")
@@ -81,6 +83,7 @@ def test_region_from_grid_catalog(test_cat):
     assert isinstance(region["grid"], xr.DataArray)
 
 
+@pytest.mark.skip(reason="Needs implementation of subbasin region.")
 def test_region_from_basin_ids():
     region = {"basin": [1001, 1002, 1003, 1004, 1005]}
     kind, region = parse_region(region)
@@ -88,6 +91,7 @@ def test_region_from_basin_ids():
     assert region.get("basid") == [1001, 1002, 1003, 1004, 1005]
 
 
+@pytest.mark.skip(reason="Needs implementation of subbasin region.")
 def test_region_from_basin_id():
     region = {"basin": 101}
     kind, region = parse_region(region)
@@ -95,6 +99,7 @@ def test_region_from_basin_id():
     assert region.get("basid") == 101
 
 
+@pytest.mark.skip(reason="Needs implementation of subbasin region.")
 def test_region_from_subbasin(geodf):
     # xy
     region = {"subbasin": [1.0, -1.0], "uparea": 5.0, "bounds": [0.0, -5.0, 3.0, 0.0]}

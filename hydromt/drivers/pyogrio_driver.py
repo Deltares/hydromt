@@ -8,7 +8,7 @@ from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom
-from hydromt.gis import parse_geom_bbox_buffer
+from hydromt.region import parse_geom_bbox_buffer
 
 from .geodataframe_driver import GeoDataFrameDriver
 

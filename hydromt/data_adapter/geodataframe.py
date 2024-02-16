@@ -22,8 +22,7 @@ from hydromt._typing import (
 )
 from hydromt._typing.type_def import Predicate
 from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
-from hydromt.gis.utils import filter_gdf
-from hydromt.models._region.region import Region
+from hydromt.region import Region, filter_gdf
 
 from .data_adapter_base import DataAdapterBase
 

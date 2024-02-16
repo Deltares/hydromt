@@ -7,7 +7,7 @@ import geopandas as gpd
 from pydantic import BaseModel
 
 from hydromt._typing.type_def import Predicate
-from hydromt.models._region.region import Region
+from hydromt.region import Region
 
 # from hydromt.nodata import NoDataStrategy
 

@@ -46,7 +46,7 @@ from hydromt.data_adapter import (
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
 from hydromt.data_sources import DataSource
-from hydromt.models._region.region import Region
+from hydromt.region import Region
 
 logger = logging.getLogger(__name__)
 

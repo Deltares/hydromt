@@ -13,7 +13,8 @@ import xarray as xr
 from shapely.geometry import box
 
 from hydromt import _compat
-from hydromt.data_adapter import GeoDataFrameAdapter
+
+# from hydromt.data_adapter import GeoDataFrameAdapter
 from hydromt.gis.flw import basin_map, flwdir_from_da, outlet_map, stream_map
 
 if _compat.HAS_XUGRID:
@@ -143,30 +144,30 @@ def get_basin_geometry(
 
     # check basin index
     gdf_bas = None
-    if basin_index is not None:
-        if isinstance(basin_index, GeoDataFrameAdapter):
-            kwargs = dict(variables=["basid"])
-            if geom is not None:
-                kwargs.update(geom=geom)
-            elif xy is not None:
-                xy0 = np.atleast_1d(xy[0])
-                xy1 = np.atleast_1d(xy[1])
-                kwargs.update(
-                    bbox=[
-                        min(xy0) - 0.1,
-                        min(xy1) - 0.1,
-                        max(xy0) + 0.1,
-                        max(xy1) + 0.1,
-                    ]
-                )
-            gdf_bas = basin_index.get_data(**kwargs)
-        elif isinstance(basin_index, gpd.GeoDataFrame):
-            gdf_bas = basin_index
-            if "basid" not in gdf_bas.columns:
-                raise ValueError("Basin geometries does not have 'basid' column.")
-        if gdf_bas.crs != ds.raster.crs:
-            logger.warning("Basin geometries CRS does not match the input raster CRS.")
-            gdf_bas = gdf_bas.to_crs(ds.raster.crs)
+    # if basin_index is not None:
+    #     if isinstance(basin_index, GeoDataFrameAdapter):
+    #         kwargs = dict(variables=["basid"])
+    #         if geom is not None:
+    #             kwargs.update(geom=geom)
+    #         elif xy is not None:
+    #             xy0 = np.atleast_1d(xy[0])
+    #             xy1 = np.atleast_1d(xy[1])
+    #             kwargs.update(
+    #                 bbox=[
+    #                     min(xy0) - 0.1,
+    #                     min(xy1) - 0.1,
+    #                     max(xy0) + 0.1,
+    #                     max(xy1) + 0.1,
+    #                 ]
+    #             )
+    #         gdf_bas = basin_index.get_data(**kwargs)
+    #     elif isinstance(basin_index, gpd.GeoDataFrame):
+    #         gdf_bas = basin_index
+    #         if "basid" not in gdf_bas.columns:
+    #             raise ValueError("Basin geometries does not have 'basid' column.")
+    #     if gdf_bas.crs != ds.raster.crs:
+    #         logger.warning("Basin geometries CRS does not match the input raster CRS.")
+    #         gdf_bas = gdf_bas.to_crs(ds.raster.crs)
 
     ## BASINS
     if kind == "basin" or bounds is None:
