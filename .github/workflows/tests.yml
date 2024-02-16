@@ -31,7 +31,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ['3.9','3.10','3.11']
+        python-version: ['39','310','311']
 
     name: py ${{ matrix.python-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -47,7 +47,7 @@ jobs:
           pixi-version: "latest"
       - name: Prepare pixi
         run: |
-          pixi run install-hydromt
+          pixi run -e default-py${{ matrix.python-version }} install-hydromt
 
       # Enable tmate debugging of manually-triggered workflows if the input option was provided
       - name: Setup tmate session
@@ -57,7 +57,7 @@ jobs:
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          pixi run test-cov
+          pixi run -e default-py${{ matrix.python-version }} test-cov
 
       # enable for CI debugging
       # - name: Setup tmate session
