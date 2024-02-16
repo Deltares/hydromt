@@ -338,13 +338,9 @@ class Model(object, metaclass=ABCMeta):
     def setup_region(
         self,
         region: dict,
-        hydrography_fn: str = "merit_hydro",
-        basin_index_fn: str = "merit_hydro_index",
     ) -> Region:
         """Alias for set_region."""
-        return self.set_region(
-            region=region, hydrography=hydrography_fn, basin_index=basin_index_fn
-        )
+        return self.set_region(region=region)
 
     ## file system
     @property
@@ -368,12 +364,7 @@ class Model(object, metaclass=ABCMeta):
         basin_index: Optional[Union[str, GeoDataFrame]] = None,
     ) -> Region:
         """Path to model folder."""
-        r: Region = Region(
-            region=region,
-            data_catalog=self.data_catalog,
-            hydrography=hydrography,
-            basin_index=basin_index,
-        )
+        r: Region = Region(region)
         self._region = r
         return self._region
 
@@ -2027,41 +2018,6 @@ def parse_region(
         kwargs_str.update({k: v})
     logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
     return kind, kwargs
-
-
-def _parse_region_value(value, data_catalog):
-    kwarg = {}
-    if isinstance(value, np.ndarray):
-        value = value.tolist()  # array to list
-
-    if isinstance(value, list):
-        if np.all([isinstance(p0, int) and abs(p0) > 180 for p0 in value]):  # all int
-            kwarg = dict(basid=value)
-        elif len(value) == 4:  # 4 floats
-            kwarg = dict(bbox=value)
-        elif len(value) == 2:  # 2 floats
-            kwarg = dict(xy=value)
-    elif isinstance(value, tuple) and len(value) == 2:  # tuple of x and y coords
-        kwarg = dict(xy=value)
-    elif isinstance(value, int):  # single int
-        kwarg = dict(basid=value)
-    elif isinstance(value, (str, Path)) and isdir(value):
-        kwarg = dict(root=value)
-    elif isinstance(value, (str, Path)):
-        geom = data_catalog.get_geodataframe(value)
-        kwarg = dict(geom=geom)
-    elif isinstance(value, gpd.GeoDataFrame):  # geometry
-        kwarg = dict(geom=value)
-    else:
-        raise ValueError(f"Region value {value} not understood.")
-
-    if "geom" in kwarg and np.all(kwarg["geom"].geometry.type == "Point"):
-        xy = (
-            kwarg["geom"].geometry.x.values,
-            kwarg["geom"].geometry.y.values,
-        )
-        kwarg = dict(xy=xy)
-    return kwarg
 
 
 def _check_size(ds, logger=logger, threshold=12e3**2):

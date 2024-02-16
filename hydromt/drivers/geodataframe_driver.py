@@ -7,9 +7,6 @@ import geopandas as gpd
 from pydantic import BaseModel
 
 from hydromt._typing.type_def import Predicate
-from hydromt.region import Region
-
-# from hydromt.nodata import NoDataStrategy
 
 
 class GeoDataFrameDriver(ABC, BaseModel):
@@ -19,7 +16,7 @@ class GeoDataFrameDriver(ABC, BaseModel):
     def read(
         self,
         uri: str,
-        region: Optional[Region] = None,
+        region: Optional[gpd.GeoDataFrame] = None,
         predicate: Predicate = "intersects",
         logger: Optional[Logger] = None,
     ) -> gpd.GeoDataFrame:

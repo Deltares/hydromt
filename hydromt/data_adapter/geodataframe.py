@@ -7,6 +7,7 @@ from typing import List, Optional, Union
 import geopandas as gpd
 import numpy as np
 import pyproj
+from geopandas import GeoDataFrame
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
@@ -22,7 +23,8 @@ from hydromt._typing import (
 )
 from hydromt._typing.type_def import Predicate
 from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
-from hydromt.region import Region, filter_gdf
+from hydromt.gis import filter_gdf
+from hydromt.region import Region
 
 from .data_adapter_base import DataAdapterBase
 
@@ -37,7 +39,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
     def get_data(
         self,
-        region: Optional[Region] = None,
+        region: Optional[GeoDataFrame] = None,
         variables: Optional[List[str]] = None,
         predicate: Predicate = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -105,7 +107,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
     @staticmethod
     def _slice_data(
         gdf: gpd.GeoDataFrame,
-        region: Optional[Region] = None,
+        region: Optional[GeoDataFrame] = None,
         variables: Optional[Union[str, List[str]]] = None,
         predicate: Predicate = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO: review NoDataStrategy + axes
@@ -152,12 +154,10 @@ class GeoDataFrameAdapter(DataAdapterBase):
             gdf = gdf.loc[:, variables]
 
         if region is not None:
-            geom = region.get_geom()
-            # parse_geom_bbox_buffer(geom, bbox, buffer, crs)
-            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            epsg = geom.crs.to_epsg()
+            bbox_str = ", ".join([f"{c:.3f}" for c in region.total_bounds])
+            epsg = region.crs.to_epsg()
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
-            idxs = filter_gdf(gdf, geom=geom, predicate=predicate)
+            idxs = filter_gdf(gdf, geom=region, predicate=predicate)
             gdf = gdf.iloc[idxs]
 
         return gdf

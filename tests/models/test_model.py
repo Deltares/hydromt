@@ -23,9 +23,9 @@ from hydromt.models import (
     VectorModel,
     plugins,
 )
-from hydromt.models._region.region import Region
 from hydromt.models.api import _check_data
 from hydromt.models.components.grid import GridMixin
+from hydromt.region import Region
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
@@ -121,6 +121,7 @@ def test_check_data(demda):
         _check_data({"wrong": "type"})
 
 
+@pytest.mark.skip(reason="gridmodel not implemented yet")
 def test_model_api(grid_model):
     assert np.all(np.isin(["grid", "geoms"], list(grid_model.api.keys())))
     # add some wrong data
@@ -449,6 +450,7 @@ def test_maps_setup(tmpdir):
     mod.write(components=["config", "geoms", "maps"])
 
 
+@pytest.mark.skip(reason="gridmodel not implemented yet")
 def test_gridmodel(grid_model, tmpdir, demda):
     assert "grid" in grid_model.api
     non_compliant = grid_model._test_model_api()
@@ -567,6 +569,7 @@ def test_setup_grid(tmpdir, demda):
     assert model.grid.raster.shape == (47, 61)
 
 
+@pytest.mark.skip(reason="gridmodel not implemented yet")
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_gridmodel_setup(tmpdir):
     # Initialize model

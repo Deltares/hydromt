@@ -2,7 +2,6 @@ from os.path import abspath, join
 from platform import system
 
 import pytest
-from conftest import case_name
 
 from hydromt._typing import ModelMode
 
@@ -16,6 +15,10 @@ from hydromt.models.root import ModelRoot
 # we need to compensate for where the repo is located when
 # we run the tests
 CURRENT_PATH = abspath(".")
+
+
+def case_name(case):
+    return case["name"]
 
 
 @pytest.mark.skipif(

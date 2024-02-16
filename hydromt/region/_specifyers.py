@@ -32,18 +32,27 @@ class BboxRegionSpecifyer(BaseModel):
             geometry=[
                 box(xmin=self.xmin, ymin=self.ymin, xmax=self.xmax, ymax=self.ymax)
             ],
+            crs=self.crs,
         )
+
         if self.buffer > 0:
             if geom.crs.is_geographic:
                 geom = cast(GeoDataFrame, geom.to_crs(3857))
             geom = geom.buffer(self.buffer)
+
         return geom
 
     @model_validator(mode="after")
     def _check_bounds_ordering(self) -> "BboxRegionSpecifyer":
         # pydantic will turn these asserion errors into validation errors for us
-        assert self.xmin < self.xmax
-        assert self.ymin < self.ymax
+        if self.xmin >= self.xmax:
+            raise ValueError(
+                f"xmin ({self.xmin}) should be strictly less than xmax ({self.xmax})"
+            )
+        if self.ymin >= self.ymax:
+            raise ValueError(
+                f"ymin ({self.ymin}) should be strictly less than ymax ({self.ymax}) "
+            )
         return self
 
 
@@ -52,7 +61,7 @@ class GeomFileRegionSpecifyer(BaseModel):
 
     kind: Literal["geom_file"]
     path: Path
-    buffer: float = 0.0
+    buffer: float = Field(0.0, ge=0)
     crs: CRS = Field(default=WGS84)
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -63,11 +72,15 @@ class GeomFileRegionSpecifyer(BaseModel):
             if geom.crs.is_geographic:
                 geom = cast(GeoDataFrame, geom.to_crs(3857))
             geom = geom.buffer(self.buffer)
+        if geom.crs is None:
+            geom.set_crs(self.crs)
         return geom
 
     @model_validator(mode="after")
     def _check_file_exists(self) -> "GeomFileRegionSpecifyer":
-        assert exists(self.path)
+        if not exists(self.path):
+            raise ValueError(f"Provided path does not exist: {self.path}")
+
         return self
 
 
@@ -77,7 +90,7 @@ class GeomRegionSpecifyer(BaseModel):
     geom: GeoDataFrame
     kind: Literal["geom"]
     crs: CRS = Field(default=WGS84)
-    buffer: float = 0.0
+    buffer: float = Field(0.0, ge=0)
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def construct(self) -> GeoDataFrame:
@@ -87,19 +100,28 @@ class GeomRegionSpecifyer(BaseModel):
             if geom.crs.is_geographic:
                 geom = cast(GeoDataFrame, geom.to_crs(3857))
             geom = geom.buffer(self.buffer)
+
+        if geom.crs is None:
+            geom.set_crs(self.crs)
         return geom
 
     @model_validator(mode="after")
     def _check_crs_consistent(self) -> "GeomRegionSpecifyer":
-        assert self.geom.crs == self.crs
+        if self.geom.crs != self.crs:
+            raise ValueError("geom crs and provided crs do not correspond")
         return self
 
     @model_validator(mode="after")
     def _check_valid_geom(self) -> "GeomRegionSpecifyer":
-        assert not any(self.geom.geometry.type == "Point")
+        # if we have a buffer points will be turned in polygons
+        if any(self.geom.geometry.type == "Point") and self.buffer <= 0:
+            raise ValueError(
+                "Region based on points are not supported. Provide a geom with polygons, or specify a buffer greater than 0"
+            )
         return self
 
 
+# TODO: add back in after raster dataset is implemented
 # class GridRegionSpecifyer(BaseModel):
 #     """A region specified by a Rasterdataset."""
 

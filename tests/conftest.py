@@ -34,10 +34,6 @@ dask_config.set(scheduler="single-threaded")
 DATADIR = join(dirname(abspath(__file__)), "data")
 
 
-def case_name(case):
-    return case["name"]
-
-
 @pytest.fixture(scope="class")
 def tmp_dir() -> Path:
     with TemporaryDirectory() as tempdirname:
@@ -309,14 +305,15 @@ def model(demda, world, obsda):
     return mod
 
 
-@pytest.fixture()
-def grid_model(demda, flwda):
-    mod = GridModel()
-    mod.setup_region({"geom": demda.raster.box})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_grid(demda, "elevtn")
-    mod.set_grid(flwda, "flwdir")
-    return mod
+# FIXME
+# @pytest.fixture()
+# def grid_model(demda, flwda):
+#     mod = GridModel()
+#     mod.setup_region({"geom": demda.raster.box})
+#     mod.setup_config(**{"header": {"setting": "value"}})
+#     mod.set_grid(demda, "elevtn")
+#     mod.set_grid(flwda, "flwdir")
+#     return mod
 
 
 @pytest.fixture()

@@ -21,6 +21,14 @@ def test_bbox_region():
     assert isinstance(r._spec.spec, BboxRegionSpecifyer)
 
 
+def test_invalid_bbox_region():
+    region = {"bbox": [0.0, -5.0, -1.0, -10.0]}
+    with pytest.raises(
+        ValueError, match=r".*Value error, xmin.* should be strictly less than.*"
+    ):
+        _ = Region(region)
+
+
 def test_region_from_geom_file(tmpdir, world):
     geom_path = str(tmpdir.join("world.geojson"))
     world.to_file(geom_path, driver="GeoJSON")

@@ -17,6 +17,7 @@ from .utils import (
     cellarea,
     cellres,
     create_vrt,
+    filter_gdf,
     meridian_offset,
     nearest,
     nearest_merge,
@@ -31,6 +32,7 @@ from .vector import GeoBase
 
 __all__ = [
     "nearest_merge",
+    "filter_gdf",
     "nearest",
     "bbox_from_file_and_filters",
     "parse_crs",

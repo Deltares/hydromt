@@ -60,7 +60,7 @@ class GeoDataFrameDataSource(DataSource):
 
     def read_data(
         self,
-        region: Optional[Region] = None,
+        region: Optional[gpd.GeoDataFrame] = None,
         variables: Optional[List[str]] = None,
         predicate: Predicate = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,

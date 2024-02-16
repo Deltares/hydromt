@@ -15,12 +15,13 @@ from pyogrio import read_info
 from pyproj import CRS
 from pyproj.transformer import Transformer
 from rasterio.transform import Affine
+from shapely import box
 from shapely.geometry.base import BaseGeometry
 
 from hydromt import _compat
 from hydromt._typing import Bbox, GpdShapeGeom
 
-__all__ = ["spread2d", "nearest", "nearest_merge"]
+__all__ = ["spread2d", "nearest", "nearest_merge", "filter_gdf"]
 
 logger = logging.getLogger(__name__)
 
@@ -580,3 +581,29 @@ def bbox_from_file_and_filters(
         bbox = gpd.GeoSeries(bbox, crs=crs)
     bbox = bbox if bbox.crs is not None else bbox.set_crs(crs)
     return tuple(bbox.to_crs(source_crs).total_bounds)
+
+
+def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
+    """Filter GeoDataFrame geometries based on geometry mask or bounding box."""
+    gtypes = (gpd.GeoDataFrame, gpd.GeoSeries, BaseGeometry)
+    if bbox is not None and geom is None:
+        if crs is None:
+            crs = gdf.crs
+        geom = gpd.GeoSeries([box(*bbox)], crs=crs)
+    elif geom is not None and not isinstance(geom, gtypes):
+        raise ValueError(
+            f"Unknown geometry mask type {type(geom).__name__}. "
+            "Provide geopandas GeoDataFrame, GeoSeries or shapely geometry."
+        )
+    elif bbox is None and geom is None:
+        raise ValueError("Either geom or bbox is required.")
+    if not isinstance(geom, BaseGeometry):
+        # reproject
+        if geom.crs is None and gdf.crs is not None:
+            geom = geom.set_crs(gdf.crs)
+        elif gdf.crs is not None and geom.crs != gdf.crs:
+            geom = geom.to_crs(gdf.crs)
+        # convert geopandas to geometry
+        geom = geom.unary_union
+    idx = np.sort(gdf.sindex.query(geom, predicate=predicate))
+    return idx
