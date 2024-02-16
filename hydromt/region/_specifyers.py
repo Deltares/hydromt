@@ -2,15 +2,12 @@
 from logging import getLogger
 from os.path import exists
 from pathlib import Path
-from typing import Any, Dict, Literal, Optional, Union, cast
+from typing import Literal, Union, cast
 
-import numpy as np
-import pandas as pd
 from geopandas import GeoDataFrame
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pyproj import CRS
 from shapely import box
-from hydromt._typing import Predicate
 
 logger = getLogger(__name__)
 
@@ -95,6 +92,11 @@ class GeomRegionSpecifyer(BaseModel):
     @model_validator(mode="after")
     def _check_crs_consistent(self) -> "GeomRegionSpecifyer":
         assert self.geom.crs == self.crs
+        return self
+
+    @model_validator(mode="after")
+    def _check_valid_geom(self) -> "GeomRegionSpecifyer":
+        assert not any(self.geom.geometry.type == "Point")
         return self
 
 

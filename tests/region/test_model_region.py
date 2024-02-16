@@ -17,15 +17,15 @@ from hydromt.region.region import Region
 
 def test_bbox_region():
     region = {"bbox": [0.0, -5.0, 3.0, 0.0]}
-    spec = Region._parse_region(region).spec
-    assert isinstance(spec, BboxRegionSpecifyer), type(spec)
+    r = Region(region)
+    assert isinstance(r._spec.spec, BboxRegionSpecifyer)
 
 
 def test_region_from_geom_file(tmpdir, world):
     geom_path = str(tmpdir.join("world.geojson"))
     world.to_file(geom_path, driver="GeoJSON")
     r = Region({"geom": geom_path})
-    assert isinstance(r._spec, GeomFileRegionSpecifyer), type(r._spec)
+    assert isinstance(r._spec.spec, GeomFileRegionSpecifyer)
 
 
 def test_region_unknown_key_errors():
@@ -36,11 +36,11 @@ def test_region_unknown_key_errors():
 
 def test_region_from_geom(world):
     r = Region({"geom": world})
-    assert isinstance(r._spec, GeomRegionSpecifyer)
+    assert isinstance(r._spec.spec, GeomRegionSpecifyer)
 
 
 def test_region_from_geom_points_fails(geodf):
-    with pytest.raises(ValueError, match=r"Region value.*"):
+    with pytest.raises(ValueError, match=r".*validation error for RegionSpecifyer.*"):
         _ = Region({"geom": geodf})
 
 
