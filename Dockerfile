@@ -9,7 +9,9 @@ COPY data/ ./data
 COPY examples/ ./examples
 COPY hydromt/ ./hydromt
 RUN pixi run -e ${PIXIENV} install-hydromt
-ENTRYPOINT [ "pixi", "run" ]
+ENV RUNENV="${PIXIENV}"
+RUN echo "pixi run -e ${RUNENV} \$@" > /run_pixi.sh
+ENTRYPOINT ["sh", "/run_pixi.sh"]
 CMD ["hydromt","--models"]
 
 FROM base as min
