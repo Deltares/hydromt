@@ -21,7 +21,7 @@ docker-build-min = { cmd = [
   "deltares/hydromt:min",
   "--target=min",
   "--build-arg",
-  "PIXIENV=minimal",
+  "PIXIENV=minimal-py311",
   ".",
 ] }
 docker-build-full = { cmd = [
@@ -31,7 +31,7 @@ docker-build-full = { cmd = [
   "deltares/hydromt:full",
   "--target=full",
   "--build-arg",
-  "PIXIENV=default",
+  "PIXIENV=full-py311",
   ".",
 ] }
 docker-build-slim = { cmd = [
@@ -41,7 +41,7 @@ docker-build-slim = { cmd = [
   "deltares/hydromt:slim",
   "--target=slim",
   "--build-arg",
-  "PIXIENV=slim",
+  "PIXIENV=slim-py311",
   ".",
 ] }
 docker-build-latest = { cmd = [
@@ -51,7 +51,7 @@ docker-build-latest = { cmd = [
   "deltares/hydromt:latest",
   "--target=slim",
   "--build-arg",
-  "PIXIENV=slim",
+  "PIXIENV=slim-py311",
   ".",
 ] }
 
@@ -212,9 +212,9 @@ notebook = "*"
 
 [environments]
 default = ["py311", "io", "extra", "dev", "test", "doc", "examples"]
-default-py39 = ["py39", "io", "extra", "dev", "test", "doc", "examples"]
-default-py310 = ["py310", "io", "extra", "dev", "test", "doc", "examples"]
-default-py311 = ["py311", "io", "extra", "dev", "test", "doc", "examples"]
+full-py39 = ["py39", "io", "extra", "dev", "test", "doc", "examples"]
+full-py310 = ["py310", "io", "extra", "dev", "test", "doc", "examples"]
+full-py311 = ["py311", "io", "extra", "dev", "test", "doc", "examples"]
 slim-py39 = ["py39", "io", "extra", "examples"]
 slim-py310 = ["py310", "io", "extra", "examples"]
 slim-py311 = ["py311", "io", "extra", "examples"]

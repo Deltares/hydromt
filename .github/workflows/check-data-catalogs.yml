@@ -35,11 +35,11 @@ jobs:
           environments: default
       - name: Prepare pixi
         run: |
-          pixi run -e default install-hydromt
+          pixi run install-hydromt
       - name: Validate the catalogs
         run: |
           export NUMBA_DISABLE_JIT=1
           for d in $(ls data/catalogs/*.yml); do
             echo "Checking $d"
-            PYTHONPYCACHEPREFIX=~/pycache pixi run -e default hydromt check -d $d
+            PYTHONPYCACHEPREFIX=~/pycache pixi run hydromt check -d $d
           done

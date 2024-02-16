@@ -26,7 +26,7 @@ Once pixi is installed you can create a developer installation by running the fo
 
 .. code-block:: console
 
-    $ pixi run install
+    $ pixi run -e default install
 
 This will automatically install all dependencies needed to develop HydroMT, and it install HydroMT within the current environment in editable mode.
 You can use `open-vscode.bat` to open the current folder in VSCode with the correct environment activated.
