@@ -1,15 +1,15 @@
 """A class to handle all functionalities to do with model regions."""
 
 from logging import Logger, getLogger
+from os.path import exists
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 import numpy as np
 from geopandas import GeoDataFrame, GeoSeries
-from pyproj import CRS
-from shapely import box
 
-from hydromt._typing import Bbox, Geom, Predicate
+from hydromt._typing.model_mode import ModelMode
+from hydromt._typing.type_def import StrPath
 from hydromt.region._specifyers import RegionSpecifyer
 
 logger = getLogger(__name__)
@@ -28,8 +28,18 @@ class Region:
         self._spec = self._parse_region(region_dict, logger=logger)
         self.logger = logger
 
-    def write(self, path):
+    def write(self, path: StrPath, mode: ModelMode = ModelMode.WRITE):
         """Write the geometry to a file."""
+        if not mode.is_writing_mode():
+            raise ValueError("Cannot write region when not in writing mode.")
+
+        # intentionally not using .is_override() because it makes no sense to append multiple regions
+        # as they might be in different CRSs for example
+        if exists(path) and mode != ModelMode.FORCED_WRITE:
+            raise ValueError(
+                f"Attempted to write geom at {path}, but the file already exist and mode was not in forced override mode"
+            )
+
         if self._data is None:
             raise ValueError(
                 "Region is not yet initialised. use the construct() method."

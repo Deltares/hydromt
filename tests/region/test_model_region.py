@@ -1,10 +1,12 @@
 import os
+from os.path import join
 
 import geopandas as gpd
 import pytest
 import xarray as xr
 
 from hydromt import DataCatalog
+from hydromt._typing.model_mode import ModelMode
 from hydromt.models import MODELS
 from hydromt.models.api import parse_region
 from hydromt.region._specifyers import (
@@ -15,9 +17,46 @@ from hydromt.region._specifyers import (
 from hydromt.region.region import Region
 
 
+def test_write_region_read_mode(tmpdir):
+    path = join(tmpdir, "region.geojson")
+    region = {"bbox": [0.0, -5.0, 3.0, 0.0]}
+    r = Region(region)
+    r.construct()
+    with pytest.raises(
+        ValueError, match="Cannot write region when not in writing mode"
+    ):
+        r.write(path, ModelMode.READ)
+
+
+def test_write_region_forced_write_mode(tmpdir):
+    path = join(tmpdir, "region.geojson")
+    region1 = {"bbox": [0.0, -5.0, 3.0, 0.0]}
+    region2 = {"bbox": [0.0, 0.0, 24.0, 42.0]}
+    r1 = Region(region1)
+    r1.construct()
+    r2 = Region(region2)
+    r2.construct()
+    r1.write(path, ModelMode.WRITE)
+    r1_geom = gpd.GeoDataFrame.from_file(path)
+    r2.write(path, ModelMode.FORCED_WRITE)
+    r2_geom = gpd.GeoDataFrame.from_file(path)
+    assert all(r1_geom.ne(r2_geom))
+
+
+def test_write_region_append_mode(tmpdir):
+    path = join(tmpdir, "region.geojson")
+    region = {"bbox": [0.0, -5.0, 3.0, 0.0]}
+    r = Region(region)
+    r.construct()
+    r.write(path, ModelMode.WRITE)
+    with pytest.raises(ValueError, match="mode was not in forced override mode"):
+        r.write(path, ModelMode.APPEND)
+
+
 def test_bbox_region():
     region = {"bbox": [0.0, -5.0, 3.0, 0.0]}
     r = Region(region)
+    r.construct()
     assert isinstance(r._spec.spec, BboxRegionSpecifyer)
 
 
@@ -33,6 +72,7 @@ def test_region_from_geom_file(tmpdir, world):
     geom_path = str(tmpdir.join("world.geojson"))
     world.to_file(geom_path, driver="GeoJSON")
     r = Region({"geom": geom_path})
+    r.construct()
     assert isinstance(r._spec.spec, GeomFileRegionSpecifyer)
 
 
