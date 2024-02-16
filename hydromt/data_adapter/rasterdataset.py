@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, join, splitext
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, Optional, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -34,7 +34,6 @@ from hydromt._typing import (
     Variables,
     _exec_nodata_strat,
 )
-from hydromt.data_adapter import PREPROCESSORS
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import has_no_data
 from hydromt.data_sources import RasterDataSource
@@ -339,7 +338,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             return self._single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
             _exec_nodata_strat(
-                f"No data was read from source: {self.name}",
+                f"No data was read from source: {self.source.name}",
                 strategy=handle_nodata,
                 logger=logger,
             )
@@ -352,27 +351,12 @@ class RasterDatasetAdapter(DataAdapterBase):
         zoom_level: Optional[int] = None,
         logger: Logger = logger,
     ):
-        kwargs = self.source.driver_kwargs.copy()
-
-        # read using various readers
         logger.info(
             f"Reading {self.source.name} {self.source.driver} data from {self.source.uri}"
         )
-        ds_list: List[xr.Dataset] = self.source.read_data(
+        ds: xr.Dataset = self.source.read_data(
             mask=geom, bbox=bbox, zoom_level=zoom_level, **self.source.driver_kwargs
         )
-        # TODO: this "preprocessing" is not great. It needs to be inserted in the
-        # driver depending on which driver is specified and is completely ignored for
-        # the raster_tindex driver Can we not detect whether this is needed?
-        ds_preprocessed: List[xr.Dataset] = []
-        preprocess = None
-        if "preprocess" in kwargs:  # for zarr preprocess is done after reading
-            preprocess = PREPROCESSORS.get(kwargs.pop("preprocess"), None)
-        for ds in ds_list:
-            if preprocess:
-                ds = preprocess(ds)  # type: ignore
-            ds_preprocessed.append(ds)
-        ds = xr.merge(ds_preprocessed)
 
         # if self.driver == "netcdf":
         #     if "preprocess" in kwargs:
@@ -445,14 +429,15 @@ class RasterDatasetAdapter(DataAdapterBase):
 
     def _set_crs(self, ds: Data, logger: Logger = logger) -> Data:
         # set crs
-        if ds.raster.crs is None and self.crs is not None:
-            ds.raster.set_crs(self.crs)
+        if ds.raster.crs is None and self.source.crs is not None:
+            ds.raster.set_crs(self.source.crs)
         elif ds.raster.crs is None:
             raise ValueError(
                 f"RasterDataset {self.source.name}: CRS not defined in data catalog or data."
             )
-        elif self.crs is not None and ds.raster.crs != pyproj.CRS.from_user_input(
-            self.crs
+        elif (
+            self.source.crs is not None
+            and ds.raster.crs != pyproj.CRS.from_user_input(self.source.crs)
         ):
             logger.warning(
                 f"RasterDataset {self.source.name}: CRS from data catalog does not match CRS "
@@ -673,8 +658,8 @@ class RasterDatasetAdapter(DataAdapterBase):
         except RasterioIOError as e:
             logger.warning(f"IO error while detecting zoom levels: {e}")
         self.zoom_levels = zoom_levels
-        if self.crs is None:
-            self.crs = crs
+        if self.source.crs is None:
+            self.source.crs = crs
         return zoom_levels, crs
 
     def _parse_zoom_level(
@@ -704,7 +689,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         """
         # check zoom level
         zls_dict = self.zoom_levels if zls_dict is None else zls_dict
-        dst_crs = self.crs if dst_crs is None else dst_crs
+        dst_crs = self.source.crs if dst_crs is None else dst_crs
         if zls_dict is None or len(zls_dict) == 0 or zoom_level is None:
             return None
         elif isinstance(zoom_level, int):
@@ -801,7 +786,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             The ESPG code of the CRS of the coordinates returned in bbox
         """
         bbox = self.source.extent.get("bbox", None)
-        crs = cast(int, self.crs)
+        crs = cast(int, self.source.crs)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
 

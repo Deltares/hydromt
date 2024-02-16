@@ -136,7 +136,7 @@ def test_check_size(caplog):
     )
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
 @pytest.mark.filterwarnings("ignore::UserWarning")
 def test_basin(caplog):
     data_catalog = hydromt.DataCatalog("artifact_data", logger=logger)

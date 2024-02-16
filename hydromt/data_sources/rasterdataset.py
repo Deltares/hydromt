@@ -1,42 +1,33 @@
-"""DataSource class for the RasterDataSet type."""
+"""DataSource class for the RasterDataset type."""
 from logging import Logger
-from typing import Any, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import xarray as xr
-from pydantic import ValidationInfo, field_validator, model_validator
+from pydantic import ValidationInfo, field_validator
 
 from hydromt._typing import Bbox, Geom, TimeRange
 from hydromt.data_sources.data_source import DataSource
-from hydromt.drivers.rasterdataset_driver import RasterDataSetDriver
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 from hydromt.drivers.zarr_driver import ZarrDriver
 
-_KNOWN_DRIVERS: Dict[str, RasterDataSetDriver] = {"zarr": ZarrDriver}
+_KNOWN_DRIVERS: Dict[str, RasterDatasetDriver] = {"zarr": ZarrDriver}
 
 
-def driver_from_str(driver_str: str, **kwargs) -> RasterDataSetDriver:
-    """Construct RasterDataSetDriver."""
+def driver_from_str(driver_str: str, **kwargs) -> RasterDatasetDriver:
+    """Construct RasterDatasetDriver."""
     if driver_str not in _KNOWN_DRIVERS.keys():
         raise ValueError(
-            f"driver {driver_str} not in known RasterDataSetDrivers: {_KNOWN_DRIVERS.keys()}"
+            f"driver {driver_str} not in known RasterDatasetDrivers: {_KNOWN_DRIVERS.keys()}"
         )
 
     return _KNOWN_DRIVERS[driver_str](**kwargs)
 
 
 class RasterDataSource(DataSource):
-    """DataSource class for the RasterDataSet type."""
+    """DataSource class for the RasterDataset type."""
 
-    data_type = "RasterDataSet"
-
-    @model_validator(mode="before")
-    @classmethod
-    def _validate_data_type(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            if data.get("data_type", "") != "RasterDataSet":
-                raise ValueError("'data_type' must be 'RasterDataSet'.")
-        return data
-
-    driver: RasterDataSetDriver
+    data_type: ClassVar[Literal["RasterDataset"]] = "RasterDataset"
+    driver: RasterDatasetDriver
 
     @field_validator("driver", mode="before")
     @classmethod

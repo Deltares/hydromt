@@ -5,7 +5,7 @@ import xarray as xr
 from pydantic import ValidationError
 
 from hydromt.data_sources import RasterDataSource
-from hydromt.drivers.rasterdataset_driver import RasterDataSetDriver
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 from hydromt.metadata_resolvers import MetaDataResolver
 
 
@@ -13,14 +13,13 @@ class TestRasterDataSource:
     @pytest.fixture()
     def example_source(
         self,
-        mock_rasterds_driver: RasterDataSetDriver,
+        mock_rasterds_driver: RasterDatasetDriver,
         mock_resolver: MetaDataResolver,
         tmp_dir: Path,
     ):
         return RasterDataSource(
             root=".",
             name="example_rasterds",
-            data_type="RasterDataSet",
             driver=mock_rasterds_driver,
             metadata_resolver=mock_resolver,
             uri=str(tmp_dir / "rasterds.zarr"),
@@ -31,7 +30,6 @@ class TestRasterDataSource:
             RasterDataSource(
                 root=".",
                 name="name",
-                data_type="RasterDataSet",
                 uri="uri",
                 metadata_resolver="does not exist",
                 driver="does not exist",
@@ -48,19 +46,18 @@ class TestRasterDataSource:
         assert error_driver["type"] == "value_error"
 
     def test_model_validate(
-        self, mock_rasterds_driver: RasterDataSetDriver, mock_resolver: MetaDataResolver
+        self, mock_rasterds_driver: RasterDatasetDriver, mock_resolver: MetaDataResolver
     ):
         RasterDataSource.model_validate(
             {
                 "name": "zarrfile",
-                "data_type": "RasterDataSet",
                 "driver": mock_rasterds_driver,
                 "metadata_resolver": mock_resolver,
                 "uri": "test_uri",
             }
         )
         with pytest.raises(
-            ValidationError, match="'data_type' must be 'RasterDataSet'."
+            ValidationError, match="'data_type' must be 'RasterDataset'."
         ):
             RasterDataSource.model_validate(
                 {

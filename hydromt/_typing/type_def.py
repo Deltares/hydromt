@@ -44,7 +44,7 @@ def _validate_bbox(
 
 
 DataType = Literal[
-    "DataFrame", "DataSet", "GeoDataFrame", "GeoDataSet", "RasterDataSet"
+    "DataFrame", "DataSet", "GeoDataFrame", "GeoDataSet", "RasterDataset"
 ]
 GeoDataframeSource = Union[str, Path]
 GeoDatasetSource = Union[str, Path]

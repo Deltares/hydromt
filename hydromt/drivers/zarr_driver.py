@@ -1,16 +1,18 @@
-"""RasterDataSetDriver for zarr data."""
+"""RasterDatasetDriver for zarr data."""
+from functools import partial
 from logging import Logger
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 import xarray as xr
 from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom
-from hydromt.drivers.rasterdataset_driver import RasterDataSetDriver
+from hydromt.drivers.preprocessing import PREPROCESSORS
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
 
-class ZarrDriver(RasterDataSetDriver):
-    """RasterDataSetDriver for zarr data."""
+class ZarrDriver(RasterDatasetDriver):
+    """RasterDatasetDriver for zarr data."""
 
     def read(
         self,
@@ -29,4 +31,11 @@ class ZarrDriver(RasterDataSetDriver):
 
         Args:
         """
-        return xr.merge([xr.open_zarr(uri, **kwargs) for uri in uris])
+        preprocess: str = kwargs.get("preprocess")
+        if preprocess:
+            preprocess: Callable = PREPROCESSORS.get(preprocess)
+
+        opn: Callable = partial(xr.open_zarr, **kwargs)
+        return xr.merge(
+            [preprocess(opn(uri)) if preprocess else opn(uri) for uri in uris]
+        )

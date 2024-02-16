@@ -1,10 +1,10 @@
 """Generic DataSource for GeoDataFrames."""
 
 from logging import Logger
-from typing import Any, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import geopandas as gpd
-from pydantic import ValidationInfo, field_validator, model_validator
+from pydantic import ValidationInfo, field_validator
 
 from hydromt._typing import Bbox, Geom, NoDataStrategy
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
@@ -33,16 +33,8 @@ class GeoDataSource(DataSource):
     Reads and validates DataCatalog entries.
     """
 
-    data_type = "GeoDataFrame"
+    data_type: ClassVar[Literal["GeoDataFrame"]] = "GeoDataFrame"
     driver: GeoDataFrameDriver
-
-    @model_validator(mode="before")
-    @classmethod
-    def _validate_data_type(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            if data.get("data_type", "") != "GeoDataFrame":
-                raise ValueError("'data_type' must be 'GeoDataFrame'.")
-        return data
 
     @field_validator("driver", mode="before")
     @classmethod

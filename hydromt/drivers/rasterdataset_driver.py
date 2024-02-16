@@ -1,4 +1,4 @@
-"""Driver for RasterDataSets."""
+"""Driver for RasterDatasets."""
 from abc import ABC, abstractmethod
 from logging import Logger
 from typing import List, Optional
@@ -10,7 +10,7 @@ from pyproj import CRS
 from hydromt._typing import Bbox, Geom
 
 
-class RasterDataSetDriver(ABC, BaseModel):
+class RasterDatasetDriver(ABC, BaseModel):
     """Abstract Driver to read GeoDataFrames."""
 
     @abstractmethod

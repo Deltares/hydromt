@@ -3,7 +3,7 @@ from os.path import abspath, join
 from pathlib import Path
 from typing import Any, ClassVar, Dict, Optional, Union
 
-from pydantic import BaseModel, Field, ValidationInfo, field_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
 from hydromt._typing import DataType
 from hydromt.data_adapter.caching import _uri_validator
@@ -59,6 +59,14 @@ class DataSource(BaseModel):
             return v
         else:
             raise ValueError("metadata_resolver should be string or MetaDataResolver.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_data_type(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if data.get("data_type") and data.get("data_type") != cls.data_type:
+                raise ValueError(f"'data_type' must be '{cls.data_type}'.")
+        return data
 
     @field_validator("uri", mode="after")
     @classmethod

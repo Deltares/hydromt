@@ -20,7 +20,7 @@ if HAS_XUGRID:
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
-from hydromt.drivers.rasterdataset_driver import RasterDataSetDriver
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.models import MODELS
@@ -380,12 +380,12 @@ def mock_geodf_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
 
 
 @pytest.fixture()
-def mock_rasterds_driver(rasterds: xr.Dataset) -> RasterDataSetDriver:
-    class MockRasterDataSetDriver(RasterDataSetDriver):
+def mock_rasterds_driver(rasterds: xr.Dataset) -> RasterDatasetDriver:
+    class MockRasterDatasetDriver(RasterDatasetDriver):
         def read(self, *args, **kwargs) -> xr.Dataset:
             return rasterds
 
-    return MockRasterDataSetDriver.model_validate({})
+    return MockRasterDatasetDriver.model_validate({})
 
 
 @pytest.fixture()

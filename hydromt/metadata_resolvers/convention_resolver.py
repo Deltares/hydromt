@@ -78,7 +78,7 @@ class ConventionResolver(MetaDataResolver):
         *,
         timerange: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,
-        # TODO: align? -> from RasterDataSetAdapter
+        # TODO: align? -> from RasterDatasetAdapter
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
         predicate: Predicate = "intersects",

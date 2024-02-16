@@ -36,7 +36,6 @@ class TestGeoDataFrameAdapter:
     def example_source(self, example_geojson: str) -> GeoDataSource:
         return GeoDataSource(
             name="test",
-            data_type="GeoDataFrame",
             uri=example_geojson,
             metadata_resolver=ConventionResolver(),
             driver=PyogrioDriver(),
@@ -60,11 +59,11 @@ class TestGeoDataFrameAdapter:
         with pytest.raises(DataSourceError):
             adapter.get_data()
 
-    @pytest.mark.skip()  # FIXME
+    @pytest.mark.skip("Missing driver: 'raster'")
     def test_geodataframe_unit_attrs(self, artifact_data: DataCatalog):
         source = artifact_data.get_source(
             "gadm_level1"
-        )  # TODO: fails because we have not implemented RasterDataSet
+        )  # TODO: fails because we have not implemented RasterDataset
         source.attrs = {"NAME_0": {"long_name": "Country names"}}
         gdf = GeoDataFrameAdapter(source=source).get_data("gadm_level1")
         assert gdf["NAME_0"].attrs["long_name"] == "Country names"
@@ -76,7 +75,7 @@ class TestGeoDataFrameAdapter:
         # gadm_level1_gdf = artifact_data.get_geodataframe("gadm_level1")
         # assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
 
-    @pytest.mark.skip()  # FIXME
+    @pytest.mark.skip("Missing 'raster' driver implementation.")
     def test_to_stac_geodataframe(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
         fn_gdf = str(tmp_dir / "test.geojson")
         geodf.to_file(fn_gdf, driver="GeoJSON")
@@ -87,7 +86,7 @@ class TestGeoDataFrameAdapter:
         name = "gadm_level1"
         adapter = cast(
             GeoDataFrameAdapter, data_catalog.get_source(name)
-        )  # TODO: Fails because we have not implemented RasterDataSet
+        )  # TODO: Fails because we have not implemented RasterDataset
         bbox, _ = adapter.get_bbox()
         gdf_stac_catalog = StacCatalog(id=name, description=name)
         gds_stac_item = StacItem(
