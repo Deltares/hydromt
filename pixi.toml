@@ -8,27 +8,11 @@ platforms = ["linux-64", "win-64"]
 
 [tasks]
 
-install-without-pre-commit = { depends_on = ["install-hydromt"] }
 install = { depends_on = ["install-hydromt", "install-pre-commit"] }
 install-hydromt = "pip install --no-deps --editable ."
 install-pre-commit = "pre-commit install"
 
 lint = { cmd = ["pre-commit", "run", "--all"] }
-env-slim = { cmd = [
-  "python",
-  "make_env.py",
-  "slim",
-  "-o",
-  "slim-environment.yml",
-] }
-env-full = { cmd = [
-  "python",
-  "make_env.py",
-  "full",
-  "-o",
-  "full-environment.yml",
-] }
-env-min = { cmd = ["python", "make_env.py", "-o", "min-environment.yml"] }
 
 docker-build-min = { cmd = [
   "docker",
@@ -36,32 +20,40 @@ docker-build-min = { cmd = [
   "-t",
   "deltares/hydromt:min",
   "--target=min",
+  "--build-arg",
+  "PIXIENV=minimal",
   ".",
-], depends_on = "env-min" }
+] }
 docker-build-full = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:full",
   "--target=full",
+  "--build-arg",
+  "PIXIENV=default",
   ".",
-], depends_on = "env-full" }
+] }
 docker-build-slim = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:slim",
   "--target=slim",
+  "--build-arg",
+  "PIXIENV=slim",
   ".",
-], depends_on = "env-slim" }
+] }
 docker-build-latest = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:latest",
   "--target=slim",
+  "--build-arg",
+  "PIXIENV=slim",
   ".",
-], depends_on = "env-slim" }
+] }
 
 docker-publish-min = { cmd = [
   "docker",
