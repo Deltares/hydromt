@@ -609,7 +609,7 @@ class RasterDatasetAdapter(DataAdapter):
             ):
                 # if not (w <= bbox[0] and s <= bbox[1] and e >= bbox[2] and n >= bbox[3]):
                 logger.warning(
-                    f"Dataset does [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
+                    f"Dataset [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
                 )
 
         if has_no_data(ds):
