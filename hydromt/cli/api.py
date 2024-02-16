@@ -9,7 +9,6 @@ from hydromt import workflows
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import utm_crs
 from hydromt.models import MODELS
-from hydromt.models.api import parse_region
 
 logger = logging.getLogger(__name__)
 

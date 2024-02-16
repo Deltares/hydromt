@@ -1,5 +1,4 @@
 from os.path import abspath, dirname, join
-
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -25,7 +24,6 @@ from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.models import MODELS
 from hydromt.models.api import Model
-from hydromt.models.components.grid import GridModel
 from hydromt.models.components.network import NetworkModel
 from hydromt.models.components.vector import VectorModel
 

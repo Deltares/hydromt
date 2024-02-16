@@ -33,7 +33,7 @@ from hydromt.io.writers import configwrite
 from hydromt.region import Region
 
 if HAS_XUGRID:
-    import xugrid as xu
+    pass
 
 __all__ = ["Model"]
 
@@ -1860,164 +1860,164 @@ def _check_equal(a, b, name="") -> Dict[str, str]:
     return errors
 
 
-def parse_region(
-    region, logger=logger, data_catalog=None
-) -> Tuple[
-    Literal["basin", "subbasin", "interbasin", "geom", "bbox", "grid"], Dict[str, Any]
-]:
-    """Check and return parsed region arguments.
+# def parse_region(
+#     region, logger=logger, data_catalog=None
+# ) -> Tuple[
+#     Literal["basin", "subbasin", "interbasin", "geom", "bbox", "grid"], Dict[str, Any]
+# ]:
+#     """Check and return parsed region arguments.
 
-    Parameters
-    ----------
-    region : dict
-        Dictionary describing region of interest.
+#     Parameters
+#     ----------
+#     region : dict
+#         Dictionary describing region of interest.
 
-        For an exact clip of the region:
+#         For an exact clip of the region:
 
-        * {'bbox': [xmin, ymin, xmax, ymax]}
+#         * {'bbox': [xmin, ymin, xmax, ymax]}
 
-        * {'geom': /path/to/polygon_geometry}
+#         * {'geom': /path/to/polygon_geometry}
 
-        For a region based of another models grid:
+#         For a region based of another models grid:
 
-        * {'<model_name>': root}
+#         * {'<model_name>': root}
 
-        For a region based of the grid of a raster file:
+#         For a region based of the grid of a raster file:
 
-        * {'grid': /path/to/raster}
+#         * {'grid': /path/to/raster}
 
-        For a region based on a mesh grid of a mesh file:
+#         For a region based on a mesh grid of a mesh file:
 
-        * {'mesh': /path/to/mesh}
+#         * {'mesh': /path/to/mesh}
 
-        Entire basin can be defined based on an ID, one or multiple point location
-        (x, y), or a region of interest (bounding box or geometry) for which the
-        basin IDs are looked up. The basins withint the area of interest can be further
-        filtered to only include basins with their outlet within the area of interest
-        ('outlets': true) of stream threshold arguments (e.g.: 'uparea': 1000).
+#         Entire basin can be defined based on an ID, one or multiple point location
+#         (x, y), or a region of interest (bounding box or geometry) for which the
+#         basin IDs are looked up. The basins withint the area of interest can be further
+#         filtered to only include basins with their outlet within the area of interest
+#         ('outlets': true) of stream threshold arguments (e.g.: 'uparea': 1000).
 
-        Common use-cases include:
+#         Common use-cases include:
 
-        * {'basin': ID}
+#         * {'basin': ID}
 
-        * {'basin': [ID1, ID2, ..]}
+#         * {'basin': [ID1, ID2, ..]}
 
-        * {'basin': [x, y]}
+#         * {'basin': [x, y]}
 
-        * {'basin': [[x1, x2, ..], [y1, y2, ..]]}
+#         * {'basin': [[x1, x2, ..], [y1, y2, ..]]}
 
-        * {'basin': /path/to/point_geometry}
+#         * {'basin': /path/to/point_geometry}
 
-        * {'basin': [xmin, ymin, xmax, ymax]}
+#         * {'basin': [xmin, ymin, xmax, ymax]}
 
-        * {'basin': [xmin, ymin, xmax, ymax], 'outlets': true}
+#         * {'basin': [xmin, ymin, xmax, ymax], 'outlets': true}
 
-        * {'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
+#         * {'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
 
-        Subbasins are defined by its outlet locations and include all area upstream
-        from these points. The outlet locations can be passed as xy coordinate pairs,
-        but also derived from the most downstream cell(s) within a area of interest
-        defined by a bounding box or geometry, optionally refined by stream threshold
-        arguments.
+#         Subbasins are defined by its outlet locations and include all area upstream
+#         from these points. The outlet locations can be passed as xy coordinate pairs,
+#         but also derived from the most downstream cell(s) within a area of interest
+#         defined by a bounding box or geometry, optionally refined by stream threshold
+#         arguments.
 
-        The method can be speed up by providing an additional ``bounds`` argument which
-        should contain all upstream cell. If cells upstream of the subbasin are not
-        within the provide bounds a warning will be raised. Common use-cases include:
+#         The method can be speed up by providing an additional ``bounds`` argument which
+#         should contain all upstream cell. If cells upstream of the subbasin are not
+#         within the provide bounds a warning will be raised. Common use-cases include:
 
-        * {'subbasin': [x, y], '<variable>': threshold}
+#         * {'subbasin': [x, y], '<variable>': threshold}
 
-        * {
-            'subbasin': [[x1, x2, ..], [y1, y2, ..]],
-            '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
-            }
+#         * {
+#             'subbasin': [[x1, x2, ..], [y1, y2, ..]],
+#             '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
+#             }
 
-        * {'subbasin': /path/to/point_geometry, '<variable>': threshold}
+#         * {'subbasin': /path/to/point_geometry, '<variable>': threshold}
 
-        * {'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
+#         * {'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
 
-        * {'subbasin': /path/to/polygon_geometry, '<variable>': threshold}
+#         * {'subbasin': /path/to/polygon_geometry, '<variable>': threshold}
 
-        Interbasins are similar to subbasins but are bounded by a bounding box or
-        geometry and do not include all upstream area. Common use-cases include:
+#         Interbasins are similar to subbasins but are bounded by a bounding box or
+#         geometry and do not include all upstream area. Common use-cases include:
 
-        * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
+#         * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
 
-        * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
+#         * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
 
-        * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
-    logger:
-        The logger to use.
+#         * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
+#     logger:
+#         The logger to use.
 
-    Returns
-    -------
-    kind : {'basin', 'subbasin', 'interbasin', 'geom', 'bbox', 'grid'}
-        region kind
-    kwargs : dict
-        parsed region json
-    """
-    from hydromt.models import MODELS
+#     Returns
+#     -------
+#     kind : {'basin', 'subbasin', 'interbasin', 'geom', 'bbox', 'grid'}
+#         region kind
+#     kwargs : dict
+#         parsed region json
+#     """
+#     from hydromt.models import MODELS
 
-    if data_catalog is None:
-        data_catalog = DataCatalog()
-    kwargs = region.copy()
-    # NOTE: the order is important to prioritize the arguments
-    options = {
-        "basin": ["basid", "geom", "bbox", "xy"],
-        "subbasin": ["geom", "bbox", "xy"],
-        "interbasin": ["geom", "bbox", "xy"],  # FIXME remove interbasin & xy combi?
-        "outlet": ["geom", "bbox"],  # deprecated!
-        "geom": ["geom"],
-        "bbox": ["bbox"],
-        "grid": ["RasterDataArray"],
-        "mesh": ["UgridDataArray"],
-    }
-    kind = next(iter(kwargs))  # first key of region
-    value0 = kwargs.pop(kind)
-    if kind in MODELS:
-        model_class = MODELS.load(kind)
-        kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
-        kind = "model"
-    elif kind == "grid":
-        kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
-    elif kind == "mesh":
-        if HAS_XUGRID:
-            if isinstance(value0, (str, Path)) and isfile(value0):
-                kwarg = dict(mesh=xu.open_dataset(value0))
-            elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
-                kwarg = dict(mesh=value0)
-            elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
-                kwarg = dict(
-                    mesh=xu.UgridDataset(value0.to_dataset(optional_attributes=True))
-                )
-            else:
-                raise ValueError(
-                    f"Unrecognised type {type(value0)}."
-                    "Should be a path, data catalog key or xugrid object."
-                )
-            kwargs.update(kwarg)
-        else:
-            raise ImportError("xugrid is required to read mesh files.")
-    elif kind not in options:
-        k_lst = '", "'.join(list(options.keys()) + list(MODELS))
-        raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
-    else:
-        kwarg = _parse_region_value(value0, data_catalog=data_catalog)
-        if len(kwarg) == 0 or next(iter(kwarg)) not in options[kind]:
-            v_lst = '", "'.join(list(options[kind]))
-            raise ValueError(
-                f'Region value "{value0}" for kind={kind} not understood, '
-                f'provide one of "{v_lst}"'
-            )
-        kwargs.update(kwarg)
-    kwargs_str = dict()
-    for k, v in kwargs.items():
-        if isinstance(v, gpd.GeoDataFrame):
-            v = f"GeoDataFrame {v.total_bounds} (crs = {v.crs})"
-        elif isinstance(v, xr.DataArray):
-            v = f"DataArray {v.raster.bounds} (crs = {v.raster.crs})"
-        kwargs_str.update({k: v})
-    logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
-    return kind, kwargs
+#     if data_catalog is None:
+#         data_catalog = DataCatalog()
+#     kwargs = region.copy()
+#     # NOTE: the order is important to prioritize the arguments
+#     options = {
+#         "basin": ["basid", "geom", "bbox", "xy"],
+#         "subbasin": ["geom", "bbox", "xy"],
+#         "interbasin": ["geom", "bbox", "xy"],  # FIXME remove interbasin & xy combi?
+#         "outlet": ["geom", "bbox"],  # deprecated!
+#         "geom": ["geom"],
+#         "bbox": ["bbox"],
+#         "grid": ["RasterDataArray"],
+#         "mesh": ["UgridDataArray"],
+#     }
+#     kind = next(iter(kwargs))  # first key of region
+#     value0 = kwargs.pop(kind)
+#     if kind in MODELS:
+#         model_class = MODELS.load(kind)
+#         kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
+#         kind = "model"
+#     elif kind == "grid":
+#         kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
+#     elif kind == "mesh":
+#         if HAS_XUGRID:
+#             if isinstance(value0, (str, Path)) and isfile(value0):
+#                 kwarg = dict(mesh=xu.open_dataset(value0))
+#             elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
+#                 kwarg = dict(mesh=value0)
+#             elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
+#                 kwarg = dict(
+#                     mesh=xu.UgridDataset(value0.to_dataset(optional_attributes=True))
+#                 )
+#             else:
+#                 raise ValueError(
+#                     f"Unrecognised type {type(value0)}."
+#                     "Should be a path, data catalog key or xugrid object."
+#                 )
+#             kwargs.update(kwarg)
+#         else:
+#             raise ImportError("xugrid is required to read mesh files.")
+#     elif kind not in options:
+#         k_lst = '", "'.join(list(options.keys()) + list(MODELS))
+#         raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
+#     else:
+#         kwarg = _parse_region_value(value0, data_catalog=data_catalog)
+#         if len(kwarg) == 0 or next(iter(kwarg)) not in options[kind]:
+#             v_lst = '", "'.join(list(options[kind]))
+#             raise ValueError(
+#                 f'Region value "{value0}" for kind={kind} not understood, '
+#                 f'provide one of "{v_lst}"'
+#             )
+#         kwargs.update(kwarg)
+#     kwargs_str = dict()
+#     for k, v in kwargs.items():
+#         if isinstance(v, gpd.GeoDataFrame):
+#             v = f"GeoDataFrame {v.total_bounds} (crs = {v.crs})"
+#         elif isinstance(v, xr.DataArray):
+#             v = f"DataArray {v.raster.bounds} (crs = {v.raster.crs})"
+#         kwargs_str.update({k: v})
+#     logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
+#     return kind, kwargs
 
 
 def _check_size(ds, logger=logger, threshold=12e3**2):

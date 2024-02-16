@@ -13,7 +13,6 @@ from xugrid.ugrid import conventions
 
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.models.api import parse_region
 
 logger = logging.getLogger(__name__)
 

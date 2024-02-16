@@ -8,7 +8,6 @@ import xarray as xr
 from hydromt import DataCatalog
 from hydromt._typing.model_mode import ModelMode
 from hydromt.models import MODELS
-from hydromt.models.api import parse_region
 from hydromt.region._specifyers import (
     BboxRegionSpecifyer,
     GeomFileRegionSpecifyer,

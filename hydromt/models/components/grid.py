@@ -15,7 +15,7 @@ from shapely.geometry import box
 
 from hydromt import workflows
 from hydromt.gis import raster, utils
-from hydromt.models.api import Model, parse_region
+from hydromt.models.api import Model
 
 __all__ = ["GridModel"]
 logger = logging.getLogger(__name__)
