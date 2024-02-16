@@ -36,6 +36,7 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.5.1
         with:
           pixi-version: "latest"
+          environments: "default-py${{ env.DOC_PYTHON_VERSION }}"
       - name: Prepare pixi
         run: |
           pixi run -e default-py${{ env.DOC_PYTHON_VERSION }} install-hydromt
