@@ -741,7 +741,7 @@ class DataCatalog(object):
     def from_yml(
         self,
         urlpath: Union[Path, str],
-        roots: Optional[str] = None,
+        root: Optional[StrPath] = None,
         catalog_name: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
@@ -804,13 +804,14 @@ class DataCatalog(object):
         self.logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
         if catalog_name is None:
-            catalog_name = cast(
-                str,
-                yml.get("meta", {}).get(
-                    "name", "".join(basename(urlpath).split(".")[:-1])
-                ),
-            )
-        self.from_dict(yml, root=urlpath, mark_used=mark_used)
+            if "meta" in yml and "name" in yml["meta"]:
+                catalog_name = cast(str, yml["meta"]["name"])
+            else:
+                catalog_name = cast(str, "".join(splitext(basename(urlpath))[:-1]))
+
+        if root is None:
+            root = urlpath
+        self.from_dict(yml, root=root, catalog_name=catalog_name, mark_used=mark_used)
         return self
 
     def _is_compatible(
