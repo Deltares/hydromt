@@ -615,33 +615,6 @@ class DataCatalog(object):
             )
         return self._predefined_catalogs
 
-    def from_artifacts(
-        self, name: str = "artifact_data", version: str = "latest"
-    ) -> DataCatalog:
-        """Parse artifacts.
-
-        Deprecated method. Use
-        :py:func:`hydromt.data_catalog.DataCatalog.from_predefined_catalogs` instead.
-
-        Parameters
-        ----------
-        name : str, optional
-            Catalog name. If None (default) sample data is downloaded.
-        version : str, optional
-            Release version. By default it takes the latest known release.
-
-        Returns
-        -------
-        DataCatalog
-            DataCatalog object with parsed artifact data.
-        """
-        warnings.warn(
-            '"from_artifacts" is deprecated. Use "from_predefined_catalogs instead".',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.from_predefined_catalogs(name, version)
-
     def from_predefined_catalogs(
         self, name: str, version: str = "latest"
     ) -> DataCatalog:
@@ -830,66 +803,15 @@ class DataCatalog(object):
         """
         self.logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
-        # parse metadata
-        meta = yml.pop("meta", {})
-
-        # check version required hydromt version
-        requested_version = meta.get("hydromt_version", None)
-        if requested_version is not None:
-            allow_dev = meta.get("allow_dev_version", True)
-            if not self._is_compatible(__version__, requested_version, allow_dev):
-                raise RuntimeError(
-                    f"Data catalog requires Hydromt Version {requested_version} which "
-                    f"is incompattible with current hydromt version {__version__}."
-                )
         if catalog_name is None:
             catalog_name = cast(
-                str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
+                str,
+                yml.get("meta", {}).get(
+                    "name", "".join(basename(urlpath).split(".")[:-1])
+                ),
             )
-        version = meta.get("version", None)
-
-        self.root = self._determine_root(meta, urlpath=urlpath)
-        self.logger.info(f"Data Catalog is using root: {self.root}")
-
-        if splitext(self.root)[-1] in ["gz", "zip"]:
-            # if root is an archive, unpack it at the cache dir
-            self.root = self._cache_archive(
-                self.root, name=catalog_name, version=version
-            )
-            # save catalog to cache
-            with open(join(self.root, f"{catalog_name}.yml"), "w") as f:
-                data_dict = {"meta": {k: v for k, v in meta.items() if k != "root"}}
-                data_dict.update(yml)
-                yaml.dump(data_dict, f, default_flow_style=False, sort_keys=False)
-        self.from_dict(
-            yml,
-            catalog_name=catalog_name,
-            root=self.root,
-            category=meta.get("category", None),
-            mark_used=mark_used,
-        )
+        self.from_dict(yml, root=urlpath, mark_used=mark_used)
         return self
-
-    def _determine_root(
-        self, meta: Dict[str, Any], urlpath: Optional[StrPath] = None
-    ) -> Path:
-        root = None
-        if self.root is not None:
-            return Path(self.root)
-        elif "roots" in meta:
-            for r in meta["roots"]:
-                if exists(r):
-                    root = r
-                    break
-        elif urlpath is not None:
-            root = os.path.dirname(urlpath)
-        else:
-            root = realpath(".")
-
-        if root is None:
-            raise ValueError("None of the specified roots were found")
-        else:
-            return Path(root)
 
     def _is_compatible(
         self, hydromt_version: str, requested_range: str, allow_prerelease=True
@@ -903,6 +825,25 @@ class DataCatalog(object):
             return version in requested or Version(version.base_version) in requested
         else:
             return version in requested
+
+    def _determine_catalog_root(
+        self, meta: Dict[str, Any], urlpath: Optional[StrPath] = None
+    ) -> Path:
+        root = None
+        if self.root is not None:
+            return Path(self.root)
+        elif "roots" in meta:
+            for r in meta["roots"]:
+                if exists(r):
+                    root = r
+                    break
+        else:
+            root = realpath(".")
+
+        if root is None:
+            raise ValueError("None of the specified roots were found")
+        else:
+            return Path(root)
 
     def from_dict(
         self,
@@ -956,9 +897,40 @@ class DataCatalog(object):
 
         """
         meta = data_dict.pop("meta", {})
+        # check version required hydromt version
+        requested_version = meta.get("hydromt_version", None)
+        if requested_version is not None:
+            allow_dev = meta.get("allow_dev_version", True)
+            if not self._is_compatible(__version__, requested_version, allow_dev):
+                raise RuntimeError(
+                    f"Data catalog requires Hydromt Version {requested_version} which "
+                    f"is incompattible with current hydromt version {__version__}."
+                )
+
         if "category" in meta and category is None:
             category = meta.pop("category")
-        self.root = self._determine_root(meta)
+        version = meta.get("version", None)
+
+        if "roots" not in meta:
+            if root is not None:
+                meta["roots"] = [root]
+            else:
+                meta["roots"] = [realpath(".")]
+        self.root = self._determine_catalog_root(meta)
+        self.logger.info(f"Data Catalog is using root: {self.root}")
+
+        if splitext(self.root)[-1] in ["gz", "zip"]:
+            # if root is an archive, unpack it at the cache dir
+            self.root = self._cache_archive(
+                self.root, name=catalog_name, version=version
+            )
+
+            # save catalog to cache
+            with open(join(self.root, f"{catalog_name}.yml"), "w") as f:
+                d = {"meta": {k: v for k, v in meta.items() if k != "roots"}}
+                d.update(data_dict)
+                yaml.dump(d, f, default_flow_style=False, sort_keys=False)
+
         for name, source_dict in _denormalise_data_dict(data_dict):
             adapter = _parse_data_source_dict(
                 name,

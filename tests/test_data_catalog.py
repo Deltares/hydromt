@@ -33,7 +33,7 @@ CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
 
 
-def test_errors_on_no_root(tmpdir):
+def test_errors_on_no_root_found(tmpdir):
     d = {
         "meta": {
             "hydromt_version": "<1",
