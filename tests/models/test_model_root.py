@@ -1,5 +1,6 @@
 from logging import getLogger
 from os.path import abspath, exists, join
+from hydromt._utils.log import add_filehandler
 
 import pytest
 
@@ -67,7 +68,7 @@ def test_new_root_copies_old_file(tmpdir, caplog):
     assert not exists(first_path)
 
     r = ModelRoot(first_path, "w", logger=test_logger)
-    test_logger.info("hey!, this is a secret you should really remember")
+    r.logger.info("hey!, this is a secret you should really remember")
 
     with open(join(first_path, "hydromt.log"), "r") as file:
         first_log_str = file.read()
@@ -101,7 +102,7 @@ def test_root_overwrite_deletes_old_log(tmpdir, caplog):
     path = join(tmpdir, "one")
     assert not exists(path)
     root = ModelRoot(path, "w", logger=test_logger)
-    test_logger.info("hey!, this is a secret you should really remember")
+    root.logger.info("hey!, this is a secret you should really remember")
 
     with open(join(root._path, "hydromt.log"), "r") as file:
         first_log_str = file.read()

@@ -52,6 +52,7 @@ class ModelRoot:
         if self.is_writing_mode():
             self._create_loggers(old_path, self.mode.is_override())
 
+        add_filehandler(self.logger, join(path, "hydromt.log"))
         return self._path
 
     @property
@@ -94,9 +95,9 @@ class ModelRoot:
                 else:
                     has_log_file = True
                 break
-        if not has_log_file:
-            new_path = join(self._path, "hydromt.log")
-            add_filehandler(self.logger, new_path, log_level)
+        # if not has_log_file:
+        new_path = join(self._path, "hydromt.log")
+        add_filehandler(self.logger, new_path, log_level)
 
     def __repr__(self):
         return f"ModelRoot(path={self._path}, mode={self._mode})"
