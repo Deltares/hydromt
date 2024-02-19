@@ -1,11 +1,10 @@
 """the new model root class."""
 
-from logging import Logger, getLogger
-from os import PathLike, mkdir, remove, rename
+from logging import FileHandler, Logger, getLogger
+from os import mkdir, remove, rename
 from os.path import dirname, exists, isdir, join
 from pathlib import Path
 from typing import Optional
-from data.src.era5_download_resample_convert import move_replace
 
 from hydromt._typing import ModeLike, ModelMode
 from hydromt._typing.type_def import StrPath
@@ -87,16 +86,13 @@ class ModelRoot:
         if not exists(self._path):
             mkdir(self._path)
 
-        has_log_file = False
         log_level = 20  # default, but overwritten by the level of active loggers
         for i, h in enumerate(self.logger.handlers):
             log_level = h.level
-            if hasattr(h, "baseFilename"):
+            if isinstance(h, FileHandler):
                 if dirname(h.baseFilename) != self._path:
                     # remove handler and close file S
                     self.logger.handlers.pop(i).close()
-                else:
-                    has_log_file = True
                 break
 
         # if not has_log_file:
@@ -104,9 +100,10 @@ class ModelRoot:
         if overwrite and exists(new_path):
             remove(new_path)
 
-        # if old_path is not None:
-        #     old_log_path = join(old_path, "hydromt.log")
-        #     rename(old_log_path, new_path)
+        if old_path is not None and exists(old_path):
+            old_log_path = join(old_path, "hydromt.log")
+            if exists(old_log_path):
+                rename(old_log_path, new_path)
 
         add_filehandler(self.logger, new_path, log_level)
 

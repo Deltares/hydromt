@@ -1,11 +1,10 @@
-from logging import WARNING, FileHandler, getLogger
+from logging import FileHandler
 from os.path import abspath, exists, join
 
 import pytest
 
 from hydromt._typing import ModelMode
 from hydromt.models.root import ModelRoot
-from logging import INFO, WARNING
 
 # we need to compensate for where the repo is located when
 # we run the tests
@@ -67,25 +66,26 @@ def test_new_root_copies_old_file(tmpdir, caplog):
     assert not exists(first_path)
 
     r = ModelRoot(first_path, "w")
+    r.logger.warning("hey! this is a secret you should really remember")
     r._close_logs()
     assert exists(first_path)
 
     with open(join(first_path, "hydromt.log"), "r") as file:
         first_log_str = file.read()
-    assert "one" in first_log_str, first_log_str
+    assert "hey!" in first_log_str, first_log_str
 
     second_path = join(tmpdir, "two")
     assert not exists(second_path)
 
     r.set(second_path)
 
-    assert not exists(second_path)
-    assert not exists(join(second_path, "hydromt.log"))
+    assert exists(second_path)
+    assert exists(join(second_path, "hydromt.log"))
 
     r._close_logs()
     with open(join(second_path, "hydromt.log"), "r") as file:
         second_log_str = file.read()
-    assert "one" in second_log_str, second_log_str
+    assert "hey!" in second_log_str, second_log_str
 
 
 def test_new_root_closes_old_log(tmpdir, caplog):
