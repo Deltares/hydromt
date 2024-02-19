@@ -92,7 +92,7 @@ Predicate = Literal[
 
 Geom = Union[gpd.GeoDataFrame, gpd.GeoSeries]
 GpdShapeGeom = Union[Geom, BaseGeometry]
-DataLike = Union[str, SourceSpecDict, Path, Dataset, DataArray]
+DataLike = Union[str, SourceSpecDict, Path, Dataset, DataArray, UgridData]
 
 Data = Union[Dataset, DataArray]
 
