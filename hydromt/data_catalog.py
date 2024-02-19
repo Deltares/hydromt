@@ -8,7 +8,7 @@ import os
 import shutil
 import warnings
 from datetime import datetime
-from os.path import abspath, basename, exists, isdir, isfile, join, realpath, splitext
+from os.path import abspath, basename, exists, isdir, isfile, join, splitext
 from pathlib import Path
 from typing import (
     Any,
@@ -103,6 +103,8 @@ class DataCatalog(object):
         elif not isinstance(data_libs, list):  # make sure data_libs is a list
             data_libs = np.atleast_1d(data_libs).tolist()
 
+        data_libs = cast(list, data_libs)
+
         self._sources = {}  # dictionary of DataAdapter
         self._predefined_catalogs = {}  # dictionary of predefined Catalogs
         self.root = None
@@ -114,13 +116,11 @@ class DataCatalog(object):
         if cache_dir is not None:
             self._cache_dir = cache_dir
 
-        # parse data catalogs; both user and pre-defined
-        if data_libs is not None:
-            for name_or_path in data_libs:
-                if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
-                    self.from_yml(name_or_path)
-                else:  # predefined
-                    self.from_predefined_catalogs(name_or_path)
+        for name_or_path in data_libs:
+            if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
+                self.from_yml(name_or_path)
+            else:  # predefined
+                self.from_predefined_catalogs(name_or_path)
 
     @property
     def sources(self) -> Dict[DataSource]:
@@ -803,14 +803,17 @@ class DataCatalog(object):
         """
         self.logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
+        meta = yml.pop("meta", {})
         if catalog_name is None:
-            if "meta" in yml and "name" in yml["meta"]:
-                catalog_name = cast(str, yml["meta"]["name"])
+            if "name" in meta:
+                catalog_name = cast(str, meta["name"])
             else:
                 catalog_name = cast(str, "".join(splitext(basename(urlpath))[:-1]))
 
-        if root is None:
-            root = urlpath
+            if "roots" not in meta:
+                meta["roots"] = [urlpath]
+
+        yml["meta"] = meta
         self.from_dict(yml, root=root, catalog_name=catalog_name, mark_used=mark_used)
         return self
 
@@ -830,16 +833,12 @@ class DataCatalog(object):
     def _determine_catalog_root(
         self, meta: Dict[str, Any], urlpath: Optional[StrPath] = None
     ) -> Path:
+        """Determine which of the roots provided in meta exists and should be used."""
         root = None
-        if self.root is not None:
-            return Path(self.root)
-        elif "roots" in meta:
-            for r in meta["roots"]:
-                if exists(r):
-                    root = r
-                    break
-        else:
-            root = realpath(".")
+        for r in meta["roots"]:
+            if exists(r):
+                root = r
+                break
 
         if root is None:
             raise ValueError("None of the specified roots were found")
@@ -912,12 +911,13 @@ class DataCatalog(object):
             category = meta.pop("category")
         version = meta.get("version", None)
 
-        if "roots" not in meta:
-            if root is not None:
-                meta["roots"] = [root]
-            else:
-                meta["roots"] = [realpath(".")]
-        self.root = self._determine_catalog_root(meta)
+        if root is not None:
+            self.root = root
+        elif "roots" in meta:
+            self.root = self._determine_catalog_root(meta)
+        else:
+            raise ValueError("Could not determine catalog root")
+
         self.logger.info(f"Data Catalog is using root: {self.root}")
 
         if splitext(self.root)[-1] in ["gz", "zip"]:

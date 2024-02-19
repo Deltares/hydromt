@@ -2,7 +2,7 @@
 
 import os
 from os import mkdir
-from os.path import abspath, dirname, isfile, join, realpath
+from os.path import abspath, dirname, isfile, join
 from pathlib import Path
 from typing import cast
 
@@ -44,16 +44,6 @@ def test_errors_on_no_root_found(tmpdir):
     }
     with pytest.raises(ValueError, match="None of the specified roots were found"):
         _ = DataCatalog().from_dict(d)
-
-
-def test_uses_current_dir_if_no_root_specified(tmpdir):
-    d = {
-        "meta": {
-            "hydromt_version": "<1",
-        },
-    }
-    r = DataCatalog().from_dict(d)
-    assert r.root == Path(realpath("."))
 
 
 def test_finds_later_roots(tmpdir):
