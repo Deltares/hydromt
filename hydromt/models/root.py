@@ -1,10 +1,11 @@
 """the new model root class."""
 
 from logging import Logger, getLogger
-from os import PathLike, mkdir
+from os import PathLike, mkdir, remove, rename
 from os.path import dirname, exists, isdir, join
 from pathlib import Path
 from typing import Optional
+from data.src.era5_download_resample_convert import move_replace
 
 from hydromt._typing import ModeLike, ModelMode
 from hydromt._typing.type_def import StrPath
@@ -22,6 +23,7 @@ class ModelRoot:
         mode: ModeLike = "w",
         logger: Logger = logger,
     ):
+        self.logger = logger
         self.set(path, mode, logger)
 
     @property
@@ -30,7 +32,10 @@ class ModelRoot:
         return self._path
 
     def set(
-        self, path: StrPath, mode: Optional[ModeLike] = None, logger: Logger = logger
+        self,
+        path: StrPath,
+        mode: Optional[ModeLike] = None,
+        logger: Logger = logger,
     ) -> Path:
         """Set the path of the root, and create the necessary loggers."""
         if hasattr(self, "_path"):
@@ -38,8 +43,8 @@ class ModelRoot:
         else:
             old_path = None
 
-        if logger:
-            self.logger = logger
+        self.logger = logger
+        self.logger.info(f"setting path to {path}")
 
         self._path = Path(path)
 
@@ -49,11 +54,14 @@ class ModelRoot:
         if self.is_reading_mode():
             self._check_root_exists()
 
-        if self.is_writing_mode():
-            self._create_loggers(old_path, self.mode.is_override())
-
-        add_filehandler(self.logger, join(path, "hydromt.log"))
+        self._create_loggers(old_path, self.mode.is_override())
         return self._path
+
+    def _close_logs(self):
+        for _ in range(len(self.logger.handlers)):
+            l = self.logger.handlers.pop()  # remove and close existing handlers
+            l.flush()
+            l.close()
 
     @property
     def mode(self) -> ModelMode:
@@ -79,11 +87,6 @@ class ModelRoot:
         if not exists(self._path):
             mkdir(self._path)
 
-        if old_path is not None:
-            old_log_path = join(old_path, "hydromt.log")
-        else:
-            old_log_path = None
-
         has_log_file = False
         log_level = 20  # default, but overwritten by the level of active loggers
         for i, h in enumerate(self.logger.handlers):
@@ -95,8 +98,16 @@ class ModelRoot:
                 else:
                     has_log_file = True
                 break
+
         # if not has_log_file:
         new_path = join(self._path, "hydromt.log")
+        if overwrite and exists(new_path):
+            remove(new_path)
+
+        # if old_path is not None:
+        #     old_log_path = join(old_path, "hydromt.log")
+        #     rename(old_log_path, new_path)
+
         add_filehandler(self.logger, new_path, log_level)
 
     def __repr__(self):
