@@ -12,7 +12,7 @@ from hydromt.cli.api import (
 )
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_get_region():
     region = {"basin": [12.111195, 46.088866]}  # Piave basin
     region_geom = get_region(region=region)
@@ -33,7 +33,7 @@ def test_get_region():
         get_region(region={"bbox": [4.416504, 51.597548, 6.256714, 52.281602]})
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_api_datasets():
     # datasets
     assert "artifact_data" in get_predifined_catalogs()

@@ -141,7 +141,7 @@ def test_run_log_method():
     assert "region" in model._geoms
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_write_data_catalog(tmpdir):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
     sources = list(model.data_catalog.sources.keys())
@@ -174,7 +174,7 @@ def test_write_data_catalog(tmpdir):
     assert data_catalog_df.iloc[-1, 0] == sources[-1]
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_model(model, tmpdir):
     # Staticmaps -> moved from _test_model_api as it is deprecated
     model._API.update({"staticmaps": xr.Dataset})
@@ -203,7 +203,7 @@ def test_model(model, tmpdir):
         assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_model_tables(model, df, tmpdir):
     # make a couple copies of the dfs for testing
     dfs = {str(i): df.copy() for i in range(5)}
@@ -347,7 +347,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     assert "temp" in model.forcing
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_setup_region(model, demda, tmpdir):
     # bbox
     model.setup_region({"bbox": [12.05, 45.30, 12.85, 45.65]})
@@ -403,7 +403,7 @@ def test_model_set_geoms(tmpdir):
     assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_config(model, tmpdir):
     # config
     model.set_root(str(tmpdir))
@@ -418,7 +418,7 @@ def test_config(model, tmpdir):
     assert str(model.get_config("global.file", abs_path=True)) == fn
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_maps_setup(tmpdir):
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = Model(data_libs=["artifact_data", dc_param_fn], mode="w")
@@ -482,7 +482,7 @@ def test_gridmodel(grid_model, tmpdir, demda):
     assert "elevtn" in model1.grid
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_setup_grid(tmpdir, demda):
     # Initialize model
     model = GridModel(
@@ -567,7 +567,7 @@ def test_setup_grid(tmpdir, demda):
     assert model.grid.raster.shape == (47, 61)
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_gridmodel_setup(tmpdir):
     # Initialize model
     dc_param_fn = join(DATADIR, "parameters_data.yml")
@@ -739,7 +739,7 @@ def test_networkmodel(network_model, tmpdir):
         _ = network_model.network
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_meshmodel(mesh_model, tmpdir):
     MeshModel = MODELS.load("mesh_model")
     assert "mesh" in mesh_model.api
@@ -756,7 +756,7 @@ def test_meshmodel(mesh_model, tmpdir):
     assert equal, errors
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_setup_mesh(tmpdir, griduda):
     MeshModel = MODELS.load("mesh_model")
     # Initialize model
@@ -827,7 +827,7 @@ def test_setup_mesh(tmpdir, griduda):
     assert np.all(np.round(model.region.total_bounds, 3) == bounds)
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_meshmodel_setup(griduda, world):
     MeshModel = MODELS.load("mesh_model")
     dc_param_fn = join(DATADIR, "parameters_data.yml")

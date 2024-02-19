@@ -37,63 +37,63 @@ TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
-def test_resolve_path(tmpdir):
-    # create dummy files
-    for variable in ["precip", "temp"]:
-        for year in [2020, 2021]:
-            for month in range(1, 13):
-                fn = join(tmpdir, f"{{unknown_key}}_0_{variable}_{year}_{month:02d}.nc")
-                with open(fn, "w") as f:
-                    f.write("")
-    # create data catalog for these files
-    dd = {
-        "test": {
-            "data_type": "RasterDataset",
-            "driver": "netcdf",
-            "path": join(
-                tmpdir, "{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc"
-            ),
-        }
-    }
-    cat = DataCatalog()
-    cat.from_dict(dd)
-    source = cat.get_source("test")
-    # test
-    fns = source._resolve_paths()
-    assert len(fns) == 48
-    fns = source._resolve_paths(variables=["precip"])
-    assert len(fns) == 24
-    fns = source._resolve_paths(("2021-03-01", "2021-05-01"), ["precip"])
-    assert len(fns) == 3
-    with pytest.raises(FileNotFoundError, match="No such file found:"):
-        source._resolve_paths(variables=["waves"])
+# implemented in NamingConventionResolver
+# def test_resolve_path(tmpdir):
+#     # create dummy files
+#     for variable in ["precip", "temp"]:
+#         for year in [2020, 2021]:
+#             for month in range(1, 13):
+#                 fn = join(tmpdir, f"{{unknown_key}}_0_{variable}_{year}_{month:02d}.nc")
+#                 with open(fn, "w") as f:
+#                     f.write("")
+#     # create data catalog for these files
+#     dd = {
+#         "test": {
+#             "data_type": "RasterDataset",
+#             "driver": "netcdf",
+#             "path": join(
+#                 tmpdir, "{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc"
+#             ),
+#         }
+#     }
+#     cat = DataCatalog()
+#     cat.from_dict(dd)
+#     source = cat.get_source("test")
+#     # test
+#     fns = source._resolve_paths()
+#     assert len(fns) == 48
+#     fns = source._resolve_paths(variables=["precip"])
+#     assert len(fns) == 24
+#     fns = source._resolve_paths(("2021-03-01", "2021-05-01"), ["precip"])
+#     assert len(fns) == 3
+#     with pytest.raises(FileNotFoundError, match="No such file found:"):
+#         source._resolve_paths(variables=["waves"])
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
-def test_rasterdataset(rioda, tmpdir):
-    fn_tif = str(tmpdir.join("test.tif"))
-    rioda_utm = rioda.raster.reproject(dst_crs="utm")
-    rioda_utm.raster.to_raster(fn_tif)
-    data_catalog = DataCatalog()
-    da1 = data_catalog.get_rasterdataset(fn_tif, bbox=rioda.raster.bounds)
-    assert np.all(da1 == rioda_utm)
-    geom = rioda.raster.box
-    da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
-    assert np.all(da1 == rioda_utm)
-    with pytest.raises(FileNotFoundError):
-        data_catalog.get_rasterdataset("no_file.tif")
-    with pytest.raises(NoDataException):
-        data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
+# Implemented
+# def test_rasterdataset(rioda, tmpdir):
+#     fn_tif = str(tmpdir.join("test.tif"))
+#     rioda_utm = rioda.raster.reproject(dst_crs="utm")
+#     rioda_utm.raster.to_raster(fn_tif)
+#     data_catalog = DataCatalog()
+#     da1 = data_catalog.get_rasterdataset(fn_tif, bbox=rioda.raster.bounds)
+#     assert np.all(da1 == rioda_utm)
+#     geom = rioda.raster.box
+#     da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
+#     assert np.all(da1 == rioda_utm)
+#     with pytest.raises(FileNotFoundError):
+#         data_catalog.get_rasterdataset("no_file.tif")
+#     with pytest.raises(NoDataException):
+#         data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
 
-    da1 = data_catalog.get_rasterdataset(
-        fn_tif,
-        # only really care that the bbox doesn't intersect with anythign
-        bbox=[12.5, 12.6, 12.7, 12.8],
-        handle_nodata=NoDataStrategy.IGNORE,
-    )
+#     da1 = data_catalog.get_rasterdataset(
+#         fn_tif,
+#         # only really care that the bbox doesn't intersect with anythign
+#         bbox=[12.5, 12.6, 12.7, 12.8],
+#         handle_nodata=NoDataStrategy.IGNORE,
+#     )
 
-    assert da1 is None
+#     assert da1 is None
 
 
 @pytest.mark.skip(reason="Needs refactor from path to uri.")
@@ -118,7 +118,7 @@ def test_gcs_cmip6(tmpdir):
     # assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all Drivers.")
 @pytest.mark.skipif(not compat.HAS_S3FS, reason="S3FS not installed.")
 def test_aws_worldcover():
     catalog_fn = join(CATALOGDIR, "aws_data.yml")
@@ -130,7 +130,7 @@ def test_aws_worldcover():
     assert da.name == "landuse"
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 @pytest.mark.skipif(system() == "Windows", reason="Temprorarily disable failing test")
 def test_http_data():
     dc = DataCatalog().from_dict(
@@ -151,7 +151,7 @@ def test_http_data():
     assert da.raster.shape == (4000, 4000)
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     # write tif with zoom level 1 in name
     # NOTE zl 0 not written to check correct functioning
@@ -204,7 +204,7 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
     assert isinstance(da1, xr.Dataset)
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
     era5 = artifact_data.get_rasterdataset("era5")
     fp1 = join(tmpdir, "era5.zarr")
@@ -243,7 +243,7 @@ def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
     datacatalog.get_source("era5_zarr").to_file(tmpdir, "era5_zarr", driver="zarr")
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
     era5_dict = {"era5": artifact_data.get_source("era5").to_dict()}
     attrs = {
@@ -258,7 +258,7 @@ def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_geodataset(geoda, geodf, ts, tmpdir):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
@@ -318,7 +318,7 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
         GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_geodataset_unit_attrs(artifact_data: DataCatalog):
     gtsm_dict = {"gtsmv3_eu_era5": artifact_data.get_source("gtsmv3_eu_era5").to_dict()}
     attrs = {
@@ -334,7 +334,7 @@ def test_geodataset_unit_attrs(artifact_data: DataCatalog):
     assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_geodataset_unit_conversion(artifact_data: DataCatalog):
     gtsm_geodataarray = artifact_data.get_geodataset("gtsmv3_eu_era5")
     gtsm_dict = {"gtsmv3_eu_era5": artifact_data.get_source("gtsmv3_eu_era5").to_dict()}
@@ -345,7 +345,7 @@ def test_geodataset_unit_conversion(artifact_data: DataCatalog):
     assert gtsm_geodataarray1000.equals(gtsm_geodataarray * 1000)
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_geodataset_set_nodata(artifact_data: DataCatalog):
     gtsm_dict = {"gtsmv3_eu_era5": artifact_data.get_source("gtsmv3_eu_era5").to_dict()}
     gtsm_dict["gtsmv3_eu_era5"].update(dict(nodata=-99))
@@ -481,7 +481,7 @@ def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
     assert list(stac_item.assets.keys())[0] == "test.nc"
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_geodataframe(geodf, tmpdir):
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_shp = str(tmpdir.join("test.shp"))
@@ -534,7 +534,7 @@ def test_geodataframe(geodf, tmpdir):
         data_catalog.get_geodataframe("no_file.geojson")
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_geodataframe_unit_attrs(artifact_data: DataCatalog):
     gadm_level1 = {"gadm_level1": artifact_data.get_source("gadm_level1").to_dict()}
     attrs = {"NAME_0": {"long_name": "Country names"}}
@@ -544,7 +544,7 @@ def test_geodataframe_unit_attrs(artifact_data: DataCatalog):
     assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_dataframe(df, tmpdir):
     # Test reading csv
     fn_df = str(tmpdir.join("test.csv"))
@@ -579,7 +579,7 @@ def test_dataframe(df, tmpdir):
         assert np.all(df3 == df)
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_dataframe_unit_attrs(df: pd.DataFrame, tmpdir):
     df_path = join(tmpdir, "cities.csv")
     df["test_na"] = -9999
@@ -604,7 +604,7 @@ def test_dataframe_unit_attrs(df: pd.DataFrame, tmpdir):
     assert np.all(cities_df["test_na"].isna())
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_dataframe_time(df_time, tmpdir):
     # Test time df
     fn_df_ts = str(tmpdir.join("test_ts.csv"))
@@ -666,7 +666,7 @@ def test_dataframe_time(df_time, tmpdir):
     assert np.all(dfts5.columns == vars_slice)
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_cache_vrt(tmpdir, rioda_large):
     # write vrt data
     name = "tiled"
@@ -702,7 +702,7 @@ def test_detect_extent(geodf, geoda, rioda, ts):
     assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_to_stac_geodataframe(geodf, tmpdir):
     fn_gdf = str(tmpdir.join("test.geojson"))
     geodf.to_file(fn_gdf, driver="GeoJSON")
@@ -734,7 +734,7 @@ def test_to_stac_geodataframe(geodf, tmpdir):
     assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_to_stac_raster():
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
@@ -771,7 +771,7 @@ def test_to_stac_raster():
     assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_to_stac_geodataset(geoda, tmpdir):
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
@@ -807,7 +807,7 @@ def test_to_stac_geodataset(geoda, tmpdir):
     assert adapter.to_stac_catalog(ErrorHandleMethod.SKIP) is None
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataset.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_to_stac_dataframe(df, tmpdir):
     fn_df = str(tmpdir.join("test.csv"))
     name = "test_dataframe"
