@@ -8,9 +8,10 @@ import os
 import shutil
 import warnings
 from datetime import datetime
-from os.path import abspath, basename, isdir, isfile, join
+from os.path import abspath, basename, exists, isdir, isfile, join, realpath, splitext
 from pathlib import Path
 from typing import (
+    Any,
     Dict,
     Iterator,
     List,
@@ -34,6 +35,7 @@ from pystac import CatalogType, MediaType
 from hydromt import __version__
 from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, _exec_nodata_strat
+from hydromt._typing.type_def import StrPath
 from hydromt._utils import partition_dictionaries
 from hydromt.data_adapter import (
     DataAdapter,
@@ -52,8 +54,6 @@ __all__ = [
     "DataCatalog",
 ]
 
-# just for typehints
-
 
 class DataCatalog(object):
 
@@ -70,7 +70,6 @@ class DataCatalog(object):
         logger=logger,
         cache: Optional[bool] = False,
         cache_dir: Optional[str] = None,
-        **artifact_keys,
     ) -> None:
         """Catalog of DataAdapter sources.
 
@@ -103,8 +102,10 @@ class DataCatalog(object):
             data_libs = []
         elif not isinstance(data_libs, list):  # make sure data_libs is a list
             data_libs = np.atleast_1d(data_libs).tolist()
+
         self._sources = {}  # dictionary of DataAdapter
-        self._catalogs = {}  # dictionary of predefined Catalogs
+        self._predefined_catalogs = {}  # dictionary of predefined Catalogs
+        self.root = None
         self._fallback_lib = fallback_lib
         self.logger = logger
 
@@ -113,27 +114,13 @@ class DataCatalog(object):
         if cache_dir is not None:
             self._cache_dir = cache_dir
 
-        # TODO: legacy code. to be removed
-        for lib, version in artifact_keys.items():
-            warnings.warn(
-                "Adding a predefined data catalog as key-word argument is deprecated, "
-                f"add the catalog as '{lib}={version}'"
-                " to the data_libs list instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            if not version:  # False or None
-                continue
-            elif isinstance(version, str):
-                lib += f"={version}"
-            data_libs = [lib] + data_libs
-
         # parse data catalogs; both user and pre-defined
-        for name_or_path in data_libs:
-            if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
-                self.from_yml(name_or_path)
-            else:  # predefined
-                self.from_predefined_catalogs(name_or_path)
+        if data_libs is not None:
+            for name_or_path in data_libs:
+                if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
+                    self.from_yml(name_or_path)
+                else:  # predefined
+                    self.from_predefined_catalogs(name_or_path)
 
     @property
     def sources(self) -> Dict[DataSource]:
@@ -250,9 +237,9 @@ class DataCatalog(object):
     @property
     def predefined_catalogs(self) -> Dict:
         """Return all predefined catalogs."""
-        if not self._catalogs:
+        if not self._predefined_catalogs:
             self.set_predefined_catalogs()
-        return self._catalogs
+        return self._predefined_catalogs
 
     def get_source_bbox(
         self,
@@ -621,12 +608,12 @@ class DataCatalog(object):
             )
             pass
         if isfile(cache_path):
-            self._catalogs = _yml_from_uri_or_path(cache_path)
-        if self._catalogs is None:
+            self._predefined_catalogs = _yml_from_uri_or_path(cache_path)
+        if self._predefined_catalogs is None:
             raise ConnectionError(
                 "Predefined catalogs not found; check your internet connection."
             )
-        return self._catalogs
+        return self._predefined_catalogs
 
     def from_artifacts(
         self, name: str = "artifact_data", version: str = "latest"
@@ -744,7 +731,7 @@ class DataCatalog(object):
         archive_fn: Union[Path, str],
         version: Optional[str] = None,
         name: Optional[str] = None,
-    ) -> DataCatalog:
+    ) -> StrPath:
         """Cache a data archive.
 
         Parameters
@@ -781,7 +768,7 @@ class DataCatalog(object):
     def from_yml(
         self,
         urlpath: Union[Path, str],
-        root: Optional[str] = None,
+        roots: Optional[str] = None,
         catalog_name: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
@@ -844,25 +831,8 @@ class DataCatalog(object):
         self.logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
         # parse metadata
-        meta = dict()
-        # legacy code with root/category at highest yml level
-        if "root" in yml:
-            warnings.warn(
-                "The 'root' key is deprecated, use 'meta: root' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            meta.update(root=yml.pop("root"))
-        if "category" in yml:
-            warnings.warn(
-                "The 'category' key is deprecated, use 'meta: category' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            meta.update(category=yml.pop("category"))
+        meta = yml.pop("meta", {})
 
-        # read meta data
-        meta = yml.pop("meta", meta)
         # check version required hydromt version
         requested_version = meta.get("hydromt_version", None)
         if requested_version is not None:
@@ -877,24 +847,49 @@ class DataCatalog(object):
                 str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
             )
         version = meta.get("version", None)
-        if root is None:
-            root = meta.get("root", os.path.dirname(urlpath))
-        if root.split(".")[-1] in ["gz", "zip"]:
+
+        self.root = self._determine_root(meta, urlpath=urlpath)
+        self.logger.info(f"Data Catalog is using root: {self.root}")
+
+        if splitext(self.root)[-1] in ["gz", "zip"]:
             # if root is an archive, unpack it at the cache dir
-            root = self._cache_archive(root, name=catalog_name, version=version)
+            self.root = self._cache_archive(
+                self.root, name=catalog_name, version=version
+            )
             # save catalog to cache
-            with open(join(root, f"{catalog_name}.yml"), "w") as f:
+            with open(join(self.root, f"{catalog_name}.yml"), "w") as f:
                 data_dict = {"meta": {k: v for k, v in meta.items() if k != "root"}}
                 data_dict.update(yml)
                 yaml.dump(data_dict, f, default_flow_style=False, sort_keys=False)
         self.from_dict(
             yml,
             catalog_name=catalog_name,
-            root=root,
+            root=self.root,
             category=meta.get("category", None),
             mark_used=mark_used,
         )
         return self
+
+    def _determine_root(
+        self, meta: Dict[str, Any], urlpath: Optional[StrPath] = None
+    ) -> Path:
+        root = None
+        if self.root is not None:
+            return Path(self.root)
+        elif "roots" in meta:
+            for r in meta["roots"]:
+                if exists(r):
+                    root = r
+                    break
+        elif urlpath is not None:
+            root = os.path.dirname(urlpath)
+        else:
+            root = realpath(".")
+
+        if root is None:
+            raise ValueError("None of the specified roots were found")
+        else:
+            return Path(root)
 
     def _is_compatible(
         self, hydromt_version: str, requested_range: str, allow_prerelease=True
@@ -913,7 +908,7 @@ class DataCatalog(object):
         self,
         data_dict: Dict,
         catalog_name: str = "",
-        root: Optional[Union[str, Path]] = None,
+        root: Optional[StrPath] = None,
         category: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
@@ -961,10 +956,9 @@ class DataCatalog(object):
 
         """
         meta = data_dict.pop("meta", {})
-        if "root" in meta and root is None:
-            root = meta.pop("root")
         if "category" in meta and category is None:
             category = meta.pop("category")
+        self.root = self._determine_root(meta)
         for name, source_dict in _denormalise_data_dict(data_dict):
             adapter = _parse_data_source_dict(
                 name,

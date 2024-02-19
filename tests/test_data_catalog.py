@@ -1,7 +1,8 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
-from os.path import abspath, dirname, isfile, join
+from os import mkdir
+from os.path import abspath, dirname, isfile, join, realpath
 from pathlib import Path
 from typing import cast
 
@@ -30,6 +31,55 @@ from hydromt.metadata_resolvers import MetaDataResolver
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+def test_errors_on_no_root(tmpdir):
+    d = {
+        "meta": {
+            "hydromt_version": "<1",
+            "roots": list(
+                map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4", "⽀"])
+            ),
+        },
+    }
+    with pytest.raises(ValueError, match="None of the specified roots were found"):
+        _ = DataCatalog().from_dict(d)
+
+
+def test_uses_current_dir_if_no_root_specified(tmpdir):
+    d = {
+        "meta": {
+            "hydromt_version": "<1",
+        },
+    }
+    r = DataCatalog().from_dict(d)
+    assert r.root == Path(realpath("."))
+
+
+def test_finds_later_roots(tmpdir):
+    mkdir(join(tmpdir, "asasdfasdf"))
+    d = {
+        "meta": {
+            "hydromt_version": "<1",
+            "roots": list(
+                map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4", "asasdfasdf"])
+            ),
+        },
+    }
+    cat = DataCatalog().from_dict(d)
+    assert cat.root == Path(join(tmpdir, "asasdfasdf"))
+
+
+def test_finds_roots_in_correct_order(tmpdir):
+    paths = list(map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4"]))
+    for p in paths:
+        mkdir(p)
+
+    d = {
+        "meta": {"hydromt_version": "<1", "roots": paths},
+    }
+    cat = DataCatalog().from_dict(d)
+    assert cat.root == Path(join(tmpdir, "a"))
 
 
 def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver):
