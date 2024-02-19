@@ -3,10 +3,13 @@
 from logging import Logger, getLogger
 from os.path import exists
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 import numpy as np
 from geopandas import GeoDataFrame, GeoSeries
+from numpy._typing import NDArray
+from pandas.io.gbq import google
+from pyproj import CRS
 
 from hydromt._typing.model_mode import ModelMode
 from hydromt._typing.type_def import StrPath
@@ -28,7 +31,36 @@ class Region:
         self._spec = self._parse_region(region_dict, logger=logger)
         self.logger = logger
 
-    def write(self, path: StrPath, mode: ModelMode = ModelMode.WRITE):
+    @property
+    def data(self) -> GeoDataFrame:
+        """Initialise the data of the region if it isn't already and then return it."""
+        if self._data is None:
+            self.construct()
+
+        return cast(GeoDataFrame, self._data)
+
+    @property
+    def bounds(self) -> NDArray[Any]:
+        """A shortcut to the bounds of the region."""
+        if self._data is None:
+            self.construct()
+
+        return cast(GeoDataFrame, self._data).total_bounds
+
+    @property
+    def crs(self) -> CRS:
+        """A shortcut to the CRS of the region."""
+        if self._data is None:
+            self.construct()
+
+        return cast(GeoDataFrame, self._data).crs
+
+    def write(
+        self,
+        path: StrPath,
+        mode: ModelMode = ModelMode.WRITE,
+        geopandas_kwargs: Optional[Dict[str, Any]] = None,
+    ):
         """Write the geometry to a file."""
         if not mode.is_writing_mode():
             raise ValueError("Cannot write region when not in writing mode.")
@@ -45,7 +77,11 @@ class Region:
                 "Region is not yet initialised. use the construct() method."
             )
         else:
-            self._data.to_file(path)
+            if geopandas_kwargs is not None:
+                kwargs = geopandas_kwargs
+            else:
+                kwargs = {}
+            self._data.to_file(path, **kwargs)
 
     def construct(self) -> GeoDataFrame:
         """Calculate the actual geometry based on the specification."""

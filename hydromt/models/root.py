@@ -1,4 +1,4 @@
-"." "the new model root class." ""
+"""The new model root class."""
 
 from logging import Logger, getLogger
 from os import PathLike
