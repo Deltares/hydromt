@@ -9,15 +9,12 @@ from pydantic.functional_validators import AfterValidator, BeforeValidator
 from shapely.geometry.base import BaseGeometry
 from typing_extensions import Annotated
 from xarray import DataArray, Dataset
+from xugrid import Ugrid1d, Ugrid2d, UgridDataArray, UgridDataset
 
-from hydromt._compat import HAS_XUGRID
 from hydromt._typing.model_mode import ModelMode
 
-if HAS_XUGRID:
-    from xugrid import Ugrid1d, Ugrid2d, UgridDataArray, UgridDataset
-
-    BasinIdType = str
-    UgridData = Union[UgridDataArray, UgridDataset, Ugrid1d, Ugrid2d]
+BasinIdType = str
+UgridData = Union[UgridDataArray, UgridDataset, Ugrid1d, Ugrid2d]
 
 
 def _time_tuple_from_str(

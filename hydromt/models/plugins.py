@@ -2,7 +2,7 @@
 import logging
 from typing import Dict, Iterator, List
 
-from hydromt import __version__, _compat
+from hydromt import __version__
 from hydromt._compat import Distribution, EntryPoint, EntryPoints, entry_points
 from hydromt.models.api import Model
 
@@ -30,8 +30,6 @@ def get_general_eps() -> Dict:
     eps = {}
     dist = Distribution.from_name("hydromt")
     for name, epstr in LOCAL_EPS.items():
-        if name == "mesh_model" and not _compat.HAS_XUGRID:
-            continue
         eps[name] = EntryPoint(name=name, value=epstr, group="hydromt.models")
         eps[name]._for(dist)  # add distribution info
 

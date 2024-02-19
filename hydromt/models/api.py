@@ -23,7 +23,7 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 
 from hydromt import __version__
-from hydromt._compat import HAS_XUGRID, Distribution
+from hydromt._compat import Distribution
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty, log
 from hydromt.data_catalog import DataCatalog
@@ -31,9 +31,6 @@ from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
 from hydromt.region import Region
-
-if HAS_XUGRID:
-    pass
 
 __all__ = ["Model"]
 

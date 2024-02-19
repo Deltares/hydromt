@@ -39,6 +39,7 @@ dependencies = [
   "universal_pathlib<0.2", # provides path compatability between different filesystems
   "xarray",                # ndim data arrays
   "xmltodict",             # xml parser also used to read VRT
+  "xugrid>=0.6.5",         # xarray wrapper for mesh processing
   "zarr",                  # zarr
 ]
 
@@ -64,9 +65,8 @@ io = [
   "s3fs",             # S3 file system
 ]
 extra = [
-  "matplotlib",    # plotting; required for slippy tiles
-  "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
-  "xugrid>=0.6.5", # xarray wrapper for mesh processing
+  "matplotlib", # plotting; required for slippy tiles
+  "pyet",       # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
   "black",       # linting

@@ -12,13 +12,8 @@ import numpy as np
 import xarray as xr
 from shapely.geometry import box
 
-from hydromt import _compat
-
 # from hydromt.data_adapter import GeoDataFrameAdapter
 from hydromt.gis.flw import basin_map, flwdir_from_da, outlet_map, stream_map
-
-if _compat.HAS_XUGRID:
-    pass
 
 logger = logging.getLogger(__name__)
 

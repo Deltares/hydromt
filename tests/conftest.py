@@ -13,10 +13,7 @@ from shapely.geometry import box
 
 dask_config.set(scheduler="single-threaded")
 
-from hydromt._compat import HAS_XUGRID
-
-if HAS_XUGRID:
-    import xugrid as xu
+import xugrid as xu
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
