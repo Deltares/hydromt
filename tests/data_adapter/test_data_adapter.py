@@ -37,65 +37,6 @@ TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
 
 
-# implemented in NamingConventionResolver
-# def test_resolve_path(tmpdir):
-#     # create dummy files
-#     for variable in ["precip", "temp"]:
-#         for year in [2020, 2021]:
-#             for month in range(1, 13):
-#                 fn = join(tmpdir, f"{{unknown_key}}_0_{variable}_{year}_{month:02d}.nc")
-#                 with open(fn, "w") as f:
-#                     f.write("")
-#     # create data catalog for these files
-#     dd = {
-#         "test": {
-#             "data_type": "RasterDataset",
-#             "driver": "netcdf",
-#             "path": join(
-#                 tmpdir, "{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc"
-#             ),
-#         }
-#     }
-#     cat = DataCatalog()
-#     cat.from_dict(dd)
-#     source = cat.get_source("test")
-#     # test
-#     fns = source._resolve_paths()
-#     assert len(fns) == 48
-#     fns = source._resolve_paths(variables=["precip"])
-#     assert len(fns) == 24
-#     fns = source._resolve_paths(("2021-03-01", "2021-05-01"), ["precip"])
-#     assert len(fns) == 3
-#     with pytest.raises(FileNotFoundError, match="No such file found:"):
-#         source._resolve_paths(variables=["waves"])
-
-
-# Implemented
-# def test_rasterdataset(rioda, tmpdir):
-#     fn_tif = str(tmpdir.join("test.tif"))
-#     rioda_utm = rioda.raster.reproject(dst_crs="utm")
-#     rioda_utm.raster.to_raster(fn_tif)
-#     data_catalog = DataCatalog()
-#     da1 = data_catalog.get_rasterdataset(fn_tif, bbox=rioda.raster.bounds)
-#     assert np.all(da1 == rioda_utm)
-#     geom = rioda.raster.box
-#     da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
-#     assert np.all(da1 == rioda_utm)
-#     with pytest.raises(FileNotFoundError):
-#         data_catalog.get_rasterdataset("no_file.tif")
-#     with pytest.raises(NoDataException):
-#         data_catalog.get_rasterdataset("test.tif", bbox=[40, 50, 41, 51])
-
-#     da1 = data_catalog.get_rasterdataset(
-#         fn_tif,
-#         # only really care that the bbox doesn't intersect with anythign
-#         bbox=[12.5, 12.6, 12.7, 12.8],
-#         handle_nodata=NoDataStrategy.IGNORE,
-#     )
-
-#     assert da1 is None
-
-
 @pytest.mark.skip(reason="Needs refactor from path to uri.")
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
 def test_gcs_cmip6(tmpdir):
