@@ -152,11 +152,14 @@ def test_valid_alias_catalog_entry():
 def test_catalog_metadata_validation():
     d = {
         "hydromt_version": "<1",
-        "roots": ["p:/wflow_global/hydromt"],
+        "roots": ["p:/wflow_global/hydromt", "/mnt/p/wflow_global/hydromt"],
         "version": "2023.3",
     }
     catalog_metadata = DataCatalogMetaData.from_dict(d)
-    assert catalog_metadata.roots == [Path("p:/wflow_global/hydromt")]
+    assert catalog_metadata.roots == [
+        Path("p:/wflow_global/hydromt"),
+        Path("/mnt/p/wflow_global/hydromt"),
+    ]
     assert catalog_metadata.version == "2023.3"
 
 
