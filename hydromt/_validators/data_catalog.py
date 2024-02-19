@@ -2,12 +2,15 @@
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
 
+from packaging.specifiers import SpecifierSet
+from packaging.version import Version
 from pydantic import AnyUrl, BaseModel, ConfigDict, model_validator
 from pydantic.fields import Field
 from pydantic_core import Url
 from pyproj import CRS
 from pyproj.exceptions import CRSError
 
+from hydromt import __version__ as HYDROMT_VERSION
 from hydromt._typing import Bbox, Number, TimeRange
 from hydromt.data_catalog import _yml_from_uri_or_path
 
@@ -46,21 +49,31 @@ class Extent(BaseModel):
 class DataCatalogMetaData(BaseModel):
     """The metadata section of a Hydromt data catalog."""
 
-    root: Optional[Path] = None
+    roots: List[Path]
     version: Optional[Union[str, Number]] = None
+    hydromt_version: str
     name: Optional[str] = None
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
         extra="allow",
     )
 
-    @staticmethod
-    def from_dict(input_dict: Optional[Dict]) -> "DataCatalogMetaData":
-        """Convert a dictionary into a validated data catalog metadata item."""
-        if input_dict is None:
-            return DataCatalogMetaData()
+    @model_validator(mode="after")
+    def _check_version_compatible(self) -> "DataCatalogMetaData":
+        requested = SpecifierSet(self.hydromt_version, prereleases=True)
+        version = Version(HYDROMT_VERSION)
+
+        if version in requested:
+            return self
         else:
-            return DataCatalogMetaData(**input_dict)
+            raise ValueError(
+                f"Current hydromt version {HYDROMT_VERSION} is not compatible with version specified in catalog {self.hydromt_version}"
+            )
+
+    @staticmethod
+    def from_dict(input_dict: Dict) -> "DataCatalogMetaData":
+        """Convert a dictionary into a validated data catalog metadata item."""
+        return DataCatalogMetaData(**input_dict)
 
 
 class DataCatalogItemMetadata(BaseModel):

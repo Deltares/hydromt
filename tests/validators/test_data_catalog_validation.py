@@ -58,6 +58,7 @@ def test_geodataframe_entry_validation():
 
 def test_valid_catalog_with_alias():
     d = {
+        "meta": {"hydromt_version": "<1", "roots": [""]},
         "chelsa": {"alias": "chelsa_v1.2"},
         "chelsa_v1.2": {
             "crs": 4326,
@@ -85,6 +86,7 @@ def test_valid_catalog_with_alias():
 
 def test_valid_catalog_variants():
     d = {
+        "meta": {"hydromt_version": "<1", "roots": [""]},
         "esa_worldcover": {
             "crs": 4326,
             "data_type": "RasterDataset",
@@ -116,13 +118,14 @@ def test_valid_catalog_variants():
                     "storage_options": {"anon": True},
                 },
             ],
-        }
+        },
     }
     _ = DataCatalogValidator.from_dict(d)
 
 
 def test_dangling_alias_catalog_entry():
     d = {
+        "meta": {"hydromt_version": "<1", "roots": [""]},
         "chelsa": {"alias": "chelsa_v1.2"},
     }
 
@@ -132,6 +135,7 @@ def test_dangling_alias_catalog_entry():
 
 def test_valid_alias_catalog_entry():
     d = {
+        "meta": {"hydromt_version": "<1", "roots": [""]},
         "chelsa": {"alias": "chelsa_v1.2"},
         "chelsa_v1.2": {
             "crs": 4326,
@@ -147,11 +151,12 @@ def test_valid_alias_catalog_entry():
 
 def test_catalog_metadata_validation():
     d = {
-        "root": "p:/wflow_global/hydromt",
+        "hydromt_version": "<1",
+        "roots": ["p:/wflow_global/hydromt"],
         "version": "2023.3",
     }
     catalog_metadata = DataCatalogMetaData.from_dict(d)
-    assert catalog_metadata.root == Path("p:/wflow_global/hydromt")
+    assert catalog_metadata.roots == [Path("p:/wflow_global/hydromt")]
     assert catalog_metadata.version == "2023.3"
 
 
