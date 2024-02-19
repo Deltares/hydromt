@@ -6,7 +6,6 @@ from os.path import isdir
 from pathlib import Path
 
 from hydromt._typing import ModeLike, ModelMode
-from hydromt.io.path import make_path_abs_and_cross_platform
 
 logger = getLogger(__name__)
 
@@ -32,7 +31,7 @@ class ModelRoot:
     @path.setter
     def path(self, path: PathLike) -> Path:
         """Set the path of the root, adjusting for cross platform where necessary. Returns the path that was set."""
-        self._path = make_path_abs_and_cross_platform(path)
+        self._path = Path(path)
 
         if self.is_reading_mode():
             self._check_root_exists()
