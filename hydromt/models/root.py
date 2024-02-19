@@ -1,11 +1,14 @@
 """the new model root class."""
 
 from logging import Logger, getLogger
-from os import PathLike
-from os.path import isdir
+from os import PathLike, mkdir
+from os.path import dirname, exists, isdir, join
 from pathlib import Path
+from typing import Optional
 
 from hydromt._typing import ModeLike, ModelMode
+from hydromt._typing.type_def import StrPath
+from hydromt._utils.log import add_filehandler
 
 logger = getLogger(__name__)
 
@@ -15,26 +18,39 @@ class ModelRoot:
 
     def __init__(
         self,
-        path: PathLike,
+        path: StrPath,
         mode: ModeLike = "w",
         logger: Logger = logger,
     ):
-        self.mode = mode
-        self.path = path
-        self.logger: Logger = logger
+        self.set(path, mode, logger)
 
     @property
     def path(self) -> Path:
         """The path to the model root in question."""
         return self._path
 
-    @path.setter
-    def path(self, path: PathLike) -> Path:
-        """Set the path of the root, adjusting for cross platform where necessary. Returns the path that was set."""
+    def set(
+        self, path: StrPath, mode: Optional[ModeLike] = None, logger: Logger = logger
+    ) -> Path:
+        """Set the path of the root, and create the necessary loggers."""
+        if hasattr(self, "_path"):
+            old_path = self._path
+        else:
+            old_path = None
+
+        if logger:
+            self.logger = logger
+
         self._path = Path(path)
+
+        if mode:
+            self._mode = ModelMode.from_str_or_mode(mode)
 
         if self.is_reading_mode():
             self._check_root_exists()
+
+        if self.is_writing_mode():
+            self._create_loggers(old_path, self.mode.is_override())
 
         return self._path
 
@@ -56,6 +72,31 @@ class ModelRoot:
     def is_reading_mode(self) -> bool:
         """Test whether we are in reading mode or not."""
         return self._mode.is_reading_mode()
+
+    # old_root is so we can copy over the old log file if needed.
+    def _create_loggers(self, old_path: Optional[Path] = None, overwrite: bool = False):
+        if not exists(self._path):
+            mkdir(self._path)
+
+        if old_path is not None:
+            old_log_path = join(old_path, "hydromt.log")
+        else:
+            old_log_path = None
+
+        has_log_file = False
+        log_level = 20  # default, but overwritten by the level of active loggers
+        for i, h in enumerate(self.logger.handlers):
+            log_level = h.level
+            if hasattr(h, "baseFilename"):
+                if dirname(h.baseFilename) != self._path:
+                    # remove handler and close file S
+                    self.logger.handlers.pop(i).close()
+                else:
+                    has_log_file = True
+                break
+        if not has_log_file:
+            new_path = join(self._path, "hydromt.log")
+            add_filehandler(self.logger, new_path, log_level)
 
     def __repr__(self):
         return f"ModelRoot(path={self._path}, mode={self._mode})"
