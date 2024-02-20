@@ -1183,10 +1183,10 @@ class Model(object, metaclass=ABCMeta):
             )
         if name in self._geoms:
             self.logger.warning(f"Replacing geom: {name}")
-        # if hasattr(self, "crs"):
-        #     # Verify if a geom is set to model crs and if not sets geom to model crs
-        #     if self.crs and self.crs != geom.crs:
-        #         geom.to_crs(self.crs.to_epsg(), inplace=True)
+        if hasattr(self, "crs"):
+            # Verify if a geom is set to model crs and if not sets geom to model crs
+            if self.crs and self.crs != geom.crs:
+                geom.to_crs(self.crs.to_epsg(), inplace=True)
         self._geoms[name] = geom
 
     def read_geoms(self, fn: str = "geoms/*.geojson", **kwargs) -> None:
