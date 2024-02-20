@@ -32,14 +32,14 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.5.1
         with:
           pixi-version: "latest"
-          environments: default
+          environments: min-py311
       - name: Prepare pixi
         run: |
-          pixi run install-hydromt
+          pixi run -e min-py311 install-hydromt
       - name: Validate the catalogs
         run: |
           export NUMBA_DISABLE_JIT=1
           for d in $(ls data/catalogs/*.yml); do
             echo "Checking $d"
-            PYTHONPYCACHEPREFIX=~/pycache pixi run hydromt check -d $d
+            PYTHONPYCACHEPREFIX=~/pycache pixi run -e min-py311 hydromt check -d $d
           done

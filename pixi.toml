@@ -21,7 +21,7 @@ docker-build-min = { cmd = [
   "deltares/hydromt:min",
   "--target=min",
   "--build-arg",
-  "PIXIENV=minimal-py311",
+  "PIXIENV=min-py311",
   ".",
 ] }
 docker-build-full = { cmd = [
@@ -211,13 +211,12 @@ jupyterlab = "*"
 notebook = "*"
 
 [environments]
-default = ["py311", "io", "extra", "dev", "test", "doc", "examples"]
 full-py39 = ["py39", "io", "extra", "dev", "test", "doc", "examples"]
 full-py310 = ["py310", "io", "extra", "dev", "test", "doc", "examples"]
 full-py311 = ["py311", "io", "extra", "dev", "test", "doc", "examples"]
 slim-py39 = ["py39", "io", "extra", "examples"]
 slim-py310 = ["py310", "io", "extra", "examples"]
 slim-py311 = ["py311", "io", "extra", "examples"]
-minimal-py39 = ["py39"]
-minimal-py310 = ["py310"]
-minimal-py311 = ["py311"]
+min-py39 = ["py39"]
+min-py310 = ["py310"]
+min-py311 = ["py311"]

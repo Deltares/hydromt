@@ -26,12 +26,14 @@ Once pixi is installed you can create a developer installation by running the fo
 
 .. code-block:: console
 
-    $ pixi run -e default install
+    $ pixi run -e <ENVIRONMENT> install
 
 This will automatically install all dependencies needed to develop HydroMT, and it install HydroMT within the current environment in editable mode.
 You can use `open-vscode.bat` to open the current folder in VSCode with the correct environment activated.
-This bat-file simply runs `pixi run code .` to set up the pixi environment before starting VSCode.
+This bat-file simply runs `pixi run -e <ENVIRONMENT> code .` to set up the pixi environment before starting VSCode.
 The python installation can be found in the `.pixi` folder. No need to switch interpreters.
+The `ENVIRONMENT` to specify is of your preference, based on what you are going to do.
+The most complete environment would be `full-py311`.
 
 
 Fine tuned installation
