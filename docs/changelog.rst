@@ -14,7 +14,7 @@ Added
 - Added Driver class for customizable io
 - Added MetaDataResolver class for customizable metadata discovery
 - Added DataSource class to represent and validate DataCatalog entries.
-- Data catalogs can now list multiple roots which will be searched for files. (#786)
+- Data catalogs can now list multiple version of the roots which will be searched for files depending on the system used (linux, windows etc). (#786)
 
 Changed
 -------

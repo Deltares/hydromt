@@ -30,7 +30,7 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
 
     meta:
       roots:
-        - /linxu/path/to/data_root/
+        - /linux/path/to/data_root/
         - C:\Windows\path\to\data_root
       version: version
       name: data_catalog_name
@@ -70,7 +70,7 @@ The yaml file has an *optional* global **meta** data section:
   If not provided the folder of where the yaml file is located will be used as root.
   This is used in combination with each data source **path** argument to avoid repetition.
   The roots listed will be checked in the order they are provided. The first one to be found to exist will be used as the actual root.
-  This can be used for corss platform and corss machiene compatability as can be seen above.
+  This can be used for cross platform and cross machine compatibility as can be seen above.
 - **version** (recommended): data catalog version; we recommend `calendar versioning <https://calver.org/>`_
 - **hydromt_version**: range of hydromt version that can read this catalog. Format should be acording to `PEP 440 <https://peps.python.org/pep-0440/#version-specifiers>`_.
 - **category** (optional): used if all data source in catalog belong to the same category. Usual categories within HydroMT are
