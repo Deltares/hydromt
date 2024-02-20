@@ -88,6 +88,10 @@ class ModelRoot:
 
     # old_root is so we can copy over the old log file if needed.
     def _create_loggers(self, old_path: Optional[Path] = None, overwrite: bool = False):
+        new_path = join(self._path, "hydromt.log")
+        if old_path == new_path:
+            return
+
         if not exists(self._path):
             mkdir(self._path)
 
@@ -99,7 +103,6 @@ class ModelRoot:
                     self.logger.handlers.pop(i).close()
                 break
 
-        new_path = join(self._path, "hydromt.log")
         if overwrite and exists(new_path):
             remove(new_path)
 
