@@ -66,21 +66,21 @@ class Region:
 
         # intentionally not using .is_override() because it makes no sense to append multiple regions
         # as they might be in different CRSs for example
-        if exists(path) and mode != ModelMode.FORCED_WRITE:
+        if exists(path) and not mode.is_writing_mode():
             raise ValueError(
-                f"Attempted to write geom at {path}, but the file already exist and mode was not in forced override mode"
+                "not in write mode, therefore cannot write region to file."
             )
 
         if self._data is None:
-            raise ValueError(
-                "Region is not yet initialised. use the construct() method."
-            )
+            self.construct()
+            self._data = cast(GeoDataFrame, self._data)
+
+        if geopandas_kwargs is not None:
+            kwargs = geopandas_kwargs
         else:
-            if geopandas_kwargs is not None:
-                kwargs = geopandas_kwargs
-            else:
-                kwargs = {}
-            self._data.to_file(path, **kwargs)
+            kwargs = {}
+
+        self._data.to_file(path, **kwargs)
 
     def construct(self) -> GeoDataFrame:
         """Calculate the actual geometry based on the specification."""

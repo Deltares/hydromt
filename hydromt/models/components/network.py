@@ -17,6 +17,7 @@ class NetworkModel(Model):
     """Implementation for the network models."""
 
     _NAME = "network_model"
+    _CLI_ARGS = {"region": "setup_region"}
 
     def __init__(
         self,
