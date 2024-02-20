@@ -1,9 +1,10 @@
 """the new model root class."""
 
 from logging import FileHandler, Logger, getLogger
-from os import mkdir, remove, rename
+from os import mkdir, remove
 from os.path import dirname, exists, isdir, join
 from pathlib import Path
+from shutil import copyfile
 from typing import Optional
 
 from hydromt._typing import ModeLike, ModelMode
@@ -22,7 +23,6 @@ class ModelRoot:
         mode: ModeLike = "w",
         logger: Logger = logger,
     ):
-        self.logger = logger
         self.set(path, mode, logger)
 
     @property
@@ -43,7 +43,7 @@ class ModelRoot:
             old_path = None
 
         self.logger = logger
-        self.logger.info(f"setting path to {path}")
+        self.logger.info(f"setting root to {path}")
 
         self._path = Path(path)
 
@@ -53,12 +53,17 @@ class ModelRoot:
         if self.is_reading_mode():
             self._check_root_exists()
 
-        self._create_loggers(old_path, self.mode.is_override())
+        if self.mode is not None:
+            is_override = self.mode.is_override()
+        else:
+            is_override = False
+
+        self._create_loggers(old_path, is_override)
         return self._path
 
     def _close_logs(self):
         for _ in range(len(self.logger.handlers)):
-            l = self.logger.handlers.pop()  # remove and close existing handlers
+            l = self.logger.handlers.pop()
             l.flush()
             l.close()
 
@@ -91,11 +96,9 @@ class ModelRoot:
             log_level = h.level
             if isinstance(h, FileHandler):
                 if dirname(h.baseFilename) != self._path:
-                    # remove handler and close file S
                     self.logger.handlers.pop(i).close()
                 break
 
-        # if not has_log_file:
         new_path = join(self._path, "hydromt.log")
         if overwrite and exists(new_path):
             remove(new_path)
@@ -103,7 +106,7 @@ class ModelRoot:
         if old_path is not None and exists(old_path):
             old_log_path = join(old_path, "hydromt.log")
             if exists(old_log_path):
-                rename(old_log_path, new_path)
+                copyfile(old_log_path, new_path)
 
         add_filehandler(self.logger, new_path, log_level)
 
