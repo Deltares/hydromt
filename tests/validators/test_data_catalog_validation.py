@@ -154,6 +154,15 @@ def test_dangling_alias_catalog_entry():
         _ = DataCatalogValidator.from_dict(d)
 
 
+def test_no_hydrmt_version_loggs_warning(caplog):
+    d = {
+        "meta": {"roots": [""]},
+    }
+
+    _ = DataCatalogValidator.from_dict(d)
+    assert "No hydromt version" in caplog.text
+
+
 def test_valid_alias_catalog_entry():
     d = {
         "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},

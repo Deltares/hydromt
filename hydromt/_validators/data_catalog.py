@@ -1,4 +1,5 @@
 """Pydantic models for the validation of Data catalogs."""
+from logging import warning
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
 
@@ -51,7 +52,7 @@ class DataCatalogMetaData(BaseModel):
 
     roots: Optional[List[Path]] = None
     version: Optional[Union[str, Number]] = None
-    hydromt_version: str
+    hydromt_version: Optional[str] = None
     name: Optional[str] = None
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
@@ -60,6 +61,11 @@ class DataCatalogMetaData(BaseModel):
 
     @model_validator(mode="after")
     def _check_version_compatible(self) -> "DataCatalogMetaData":
+        if self.hydromt_version is None:
+            warning(
+                f"No hydromt version was specified for the data catalog, thus compatability between used hydromt version ({HYDROMT_VERSION}) and the catalog could not be determined."
+            )
+            return self
         requested = SpecifierSet(self.hydromt_version, prereleases=True)
         version = Version(HYDROMT_VERSION)
 
