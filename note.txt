@@ -1,8 +1,0 @@
-- [ ] what is the distinction between `model.region.read` and `region({'geom':path/to/file'}).construct()`?
-
-region is like a model component
-region.read should check read permissions etc. 
-
-in build mode you build a region from dict in update you build it from model 
-
-more setup_region to model.region.set and move functionality to model_region class.  
