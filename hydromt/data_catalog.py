@@ -915,12 +915,10 @@ class DataCatalog(object):
             self.root = root
         elif "roots" in meta:
             self.root = self._determine_catalog_root(meta)
-        else:
-            raise ValueError("Could not determine catalog root")
 
         self.logger.info(f"Data Catalog is using root: {self.root}")
 
-        if splitext(self.root)[-1] in ["gz", "zip"]:
+        if self.root is not None and splitext(self.root)[-1] in ["gz", "zip"]:
             # if root is an archive, unpack it at the cache dir
             self.root = self._cache_archive(
                 self.root, name=catalog_name, version=version
