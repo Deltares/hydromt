@@ -17,7 +17,6 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
-from hydromt.region.region import Region
 
 
 class TestGeoDataFrameAdapter:
@@ -48,14 +47,16 @@ class TestGeoDataFrameAdapter:
         self, geodf: gpd.GeoDataFrame, example_source: GeoDataFrameDataSource
     ):
         adapter = GeoDataFrameAdapter(source=example_source)
-        gdf = adapter.get_data(geodf)
+        gdf = adapter.get_data(list(geodf.total_bounds))
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert np.all(gdf == geodf)
 
         example_source.rename = {"test": "test1"}
 
-        region = Region({"geom": geodf, "buffer": 1000}).construct()
-        gdf = adapter.get_data(region=region)
+        gdf = adapter.get_data(
+            bbox=list(geodf.total_bounds),
+            buffer=1000,
+        )
         example_source.uri = "no_file.geojson"
         adapter = GeoDataFrameAdapter(source=example_source)
         with pytest.raises(DataSourceError):

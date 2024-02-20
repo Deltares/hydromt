@@ -8,7 +8,6 @@ from typing import Any, Dict, Optional, cast
 import numpy as np
 from geopandas import GeoDataFrame, GeoSeries
 from numpy._typing import NDArray
-from pandas.io.gbq import google
 from pyproj import CRS
 
 from hydromt._typing.model_mode import ModelMode

@@ -6,7 +6,6 @@ from pydantic import ValidationError
 from hydromt.data_sources.geodataframe import GeoDataFrameDataSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.metadata_resolvers.metadata_resolver import MetaDataResolver
-from hydromt.region.region import Region
 
 
 class TestGeoDataFrame:
@@ -72,10 +71,9 @@ class TestGeoDataFrame:
     def test_read_data(
         self, geodf: gpd.GeoDataFrame, example_source: GeoDataFrameDataSource
     ):
-        gdf1 = example_source.read_data(region=geodf)
+        gdf1 = example_source.read_data(bbox=list(geodf.total_bounds))
         assert isinstance(gdf1, gpd.GeoDataFrame)
         assert np.all(gdf1 == geodf)
         example_source.rename = {"test": "test1"}
-        region = Region({"geom": geodf, "buffer": 1000}).construct()
-        gdf1 = example_source.read_data(region=region)
+        gdf1 = example_source.read_data(bbox=list(geodf.total_bounds), buffer=1000)
         assert np.all(gdf1 == geodf)

@@ -22,6 +22,7 @@ from .utils import (
     nearest,
     nearest_merge,
     parse_crs,
+    parse_geom_bbox_buffer,
     read_info,
     reggrid_area,
     spread2d,
@@ -32,9 +33,10 @@ from .vector import GeoBase
 
 __all__ = [
     "nearest_merge",
-    "filter_gdf",
     "nearest",
+    "filter_gdf",
     "bbox_from_file_and_filters",
+    "parse_geom_bbox_buffer",
     "parse_crs",
     "to_geographic_bbox",
     "utm_crs",
