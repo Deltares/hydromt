@@ -58,7 +58,7 @@ def test_geodataframe_entry_validation():
 
 def test_valid_catalog_with_alias():
     d = {
-        "meta": {"hydromt_version": "<1", "roots": [""]},
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "chelsa": {"alias": "chelsa_v1.2"},
         "chelsa_v1.2": {
             "crs": 4326,
@@ -86,7 +86,7 @@ def test_valid_catalog_with_alias():
 
 def test_valid_catalog_variants():
     d = {
-        "meta": {"hydromt_version": "<1", "roots": [""]},
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "esa_worldcover": {
             "crs": 4326,
             "data_type": "RasterDataset",
@@ -125,7 +125,7 @@ def test_valid_catalog_variants():
 
 def test_dangling_alias_catalog_entry():
     d = {
-        "meta": {"hydromt_version": "<1", "roots": [""]},
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "chelsa": {"alias": "chelsa_v1.2"},
     }
 
@@ -135,7 +135,7 @@ def test_dangling_alias_catalog_entry():
 
 def test_valid_alias_catalog_entry():
     d = {
-        "meta": {"hydromt_version": "<1", "roots": [""]},
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "chelsa": {"alias": "chelsa_v1.2"},
         "chelsa_v1.2": {
             "crs": 4326,
@@ -151,7 +151,7 @@ def test_valid_alias_catalog_entry():
 
 def test_catalog_metadata_validation():
     d = {
-        "hydromt_version": "<1",
+        "hydromt_version": ">=1.0a,<2",
         "roots": ["p:/wflow_global/hydromt", "/mnt/p/wflow_global/hydromt"],
         "version": "2023.3",
     }

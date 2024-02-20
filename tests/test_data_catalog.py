@@ -37,7 +37,7 @@ DATADIR = join(dirname(abspath(__file__)), "data")
 def test_errors_on_no_root_found(tmpdir):
     d = {
         "meta": {
-            "hydromt_version": "<1",
+            "hydromt_version": ">=1.0a,<2",
             "roots": list(
                 map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4", "⽀"])
             ),
@@ -51,7 +51,7 @@ def test_finds_later_roots(tmpdir):
     mkdir(join(tmpdir, "asasdfasdf"))
     d = {
         "meta": {
-            "hydromt_version": "<1",
+            "hydromt_version": ">=1.0a,<2",
             "roots": list(
                 map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4", "asasdfasdf"])
             ),
@@ -67,7 +67,7 @@ def test_finds_roots_in_correct_order(tmpdir):
         mkdir(p)
 
     d = {
-        "meta": {"hydromt_version": "<1", "roots": paths},
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": paths},
     }
     cat = DataCatalog().from_dict(d)
     assert cat.root == Path(join(tmpdir, "a"))
@@ -75,7 +75,7 @@ def test_finds_roots_in_correct_order(tmpdir):
 
 def test_from_yml_no_root(tmpdir):
     d = {
-        "meta": {"hydromt_version": "<1"},
+        "meta": {"hydromt_version": ">=1.0a,<2"},
     }
 
     cat_file = join(tmpdir, "cat.yml")

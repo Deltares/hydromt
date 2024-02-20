@@ -4,7 +4,7 @@ meta:
     - p:/wflow_global/hydromt
     - /mnt/p/wflow_global/hydromt
   version: 2024.1.30
-  hydromt_version: '>=1.0, <2.0'
+  hydromt_version: '>=1.0a, <2.0'
 
 
 basin_atlas_level12_v10:
