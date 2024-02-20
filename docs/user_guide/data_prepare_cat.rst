@@ -73,7 +73,7 @@ The yaml file has an *optional* global **meta** data section:
   This should be used for cross platform and cross machine compatibility only, as can be seen above. Note that in the end
   only one of the roots will be used, so all data should still be located in the same folder tree.
 - **version** (recommended): data catalog version; we recommend `calendar versioning <https://calver.org/>`_
-- **hydromt_version**: range of hydromt version that can read this catalog. Format should be acording to `PEP 440 <https://peps.python.org/pep-0440/#version-specifiers>`_.
+- **hydromt_version** (recommended): range of hydromt version that can read this catalog. Format should be acording to `PEP 440 <https://peps.python.org/pep-0440/#version-specifiers>`_.
 - **category** (optional): used if all data source in catalog belong to the same category. Usual categories within HydroMT are
   *geography*, *topography*, *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data*
   but the user is free to define its own categories.
