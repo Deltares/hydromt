@@ -35,11 +35,11 @@ jobs:
           environments: min-py311
       - name: Prepare pixi
         run: |
-          pixi run -e min-py311 install-hydromt
+          pixi run --locked -e min-py311 install-hydromt
       - name: Validate the catalogs
         run: |
           export NUMBA_DISABLE_JIT=1
           for d in $(ls data/catalogs/*.yml); do
             echo "Checking $d"
-            PYTHONPYCACHEPREFIX=~/pycache pixi run -e min-py311 hydromt check -d $d
+            PYTHONPYCACHEPREFIX=~/pycache pixi run --locked -e min-py311 hydromt check -d $d
           done

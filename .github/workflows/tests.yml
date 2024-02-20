@@ -48,7 +48,7 @@ jobs:
           environments: full-py${{ matrix.python-version }}
       - name: Prepare pixi
         run: |
-          pixi run -e full-py${{ matrix.python-version }} install-hydromt
+          pixi run --locked -e full-py${{ matrix.python-version }} install-hydromt
 
       # Enable tmate debugging of manually-triggered workflows if the input option was provided
       - name: Setup tmate session
@@ -58,7 +58,7 @@ jobs:
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          pixi run -e full-py${{ matrix.python-version }} test-cov
+          pixi run --locked -e full-py${{ matrix.python-version }} test-cov
 
       # enable for CI debugging
       # - name: Setup tmate session

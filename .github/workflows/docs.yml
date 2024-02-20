@@ -37,19 +37,19 @@ jobs:
           environments: full-py311
       - name: Prepare pixi
         run: |
-          pixi run -e full-py311 install-hydromt
+          pixi run --locked -e full-py311 install-hydromt
 
       # if we're not publishing we don't have to write them, so we might as well
       # save ourself a bunch of IO time
       - name: Generate dummy docs
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          pixi run -e full-py311 sphinx-build ./docs ./docs/_build -b dummy -W
+          pixi run --locked -e full-py311 sphinx-build ./docs ./docs/_build -b dummy -W
 
       - name: Generate docs
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}
         run: |
-          echo "DOC_VERSION=$(pixi run -e full-py311 python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
+          echo "DOC_VERSION=$(pixi run --locked -e full-py311 python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
         if: ${{ github.event_name != 'pull_request' && !github.event.act }}

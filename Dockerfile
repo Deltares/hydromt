@@ -8,9 +8,12 @@ COPY pixi.toml pixi.lock pyproject.toml README.rst ./
 COPY data/ ./data
 COPY examples/ ./examples
 COPY hydromt/ ./hydromt
-RUN pixi run -e ${PIXIENV} install-hydromt
+RUN pixi run --locked -e ${PIXIENV} install-hydromt \
+  && rm -rf /root/.cache
 ENV RUNENV="${PIXIENV}"
-RUN echo "pixi run -e ${RUNENV} \$@" > /run_pixi.sh
+# Workaround: write a file that runs pixi with correct environment.
+# This is needed because the argument is not passed to the entrypoint.
+RUN echo "pixi run --locked -e ${RUNENV} \$@" > /run_pixi.sh
 ENTRYPOINT ["sh", "/run_pixi.sh"]
 CMD ["hydromt","--models"]
 
