@@ -14,6 +14,12 @@ Added
 - Added Driver class for customizable io
 - Added MetaDataResolver class for customizable metadata discovery
 - Added DataSource class to represent and validate DataCatalog entries.
+- Data catalogs can now list multiple roots which will be searched for files. (#786)
+
+Changed
+-------
+- The `root` meta key of data catalogs has become `roots` (#786)
+- support for `artifact_keys` has now been removed. (#786)
 
 
 Unreleased
