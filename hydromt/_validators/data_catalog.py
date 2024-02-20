@@ -63,7 +63,7 @@ class DataCatalogMetaData(BaseModel):
     def _check_version_compatible(self) -> "DataCatalogMetaData":
         if self.hydromt_version is None:
             warning(
-                f"No hydromt version was specified for the data catalog, thus compatability between used hydromt version ({HYDROMT_VERSION}) and the catalog could not be determined."
+                f"No hydromt version was specified for the data catalog, thus compatibility between used hydromt version ({HYDROMT_VERSION}) and the catalog could not be determined."
             )
             return self
         requested = SpecifierSet(self.hydromt_version, prereleases=True)
