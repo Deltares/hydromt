@@ -19,8 +19,11 @@ Added
 Changed
 -------
 - The `root` meta key of data catalogs has become `roots` (#786)
-- support for `artifact_keys` has now been removed. (#786)
 
+
+Removed
+-------
+- support for `artifact_keys` has now been removed. (#786)
 
 Unreleased
 ==========
