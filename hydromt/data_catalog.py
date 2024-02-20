@@ -130,17 +130,6 @@ class DataCatalog(object):
             self.from_predefined_catalogs(self._fallback_lib)
         return self._sources
 
-    @property
-    def keys(self) -> List[str]:
-        """Returns list of data source names."""
-        warnings.warn(
-            "Using iterating over the DataCatalog directly is deprecated."
-            "Please use cat.get_source()",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return list(self._sources.keys())
-
     def get_source_names(self) -> List[str]:
         """Return a list of all available data source names."""
         return list(self._sources.keys())
@@ -456,26 +445,6 @@ class DataCatalog(object):
 
         self._sources[source][provider] = versions
 
-    def __getitem__(self, key: str) -> DataAdapter:
-        """Get the source."""
-        warnings.warn(
-            'Using iterating over the DataCatalog directly is deprecated."\
-            " Please use cat.get_source("name")',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.get_source(key)
-
-    def __setitem__(self, key: str, value: DataAdapter) -> None:
-        """Set or update adaptors."""
-        warnings.warn(
-            "Using DataCatalog as a dictionary directly is deprecated."
-            " Please use cat.add_source(adapter)",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.add_source(key, value)
-
     def iter_sources(self, used_only=False) -> List[Tuple[str, DataAdapter]]:
         """Return a flat list of all available data sources.
 
@@ -497,17 +466,6 @@ class DataCatalog(object):
     def __iter__(self) -> Iterator[Tuple[str, DataAdapter]]:
         """Iterate over sources."""
         return iter(self.iter_sources())
-
-    def __contains__(self, key: str) -> bool:
-        """Check if source is in catalog."""
-        warnings.warn(
-            "Directly checking for containement is deprecated. "
-            " Use 'contains_source' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        return self.contains_source(key)
 
     def contains_source(
         self,
