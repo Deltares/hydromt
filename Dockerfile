@@ -10,7 +10,7 @@ ENV PATH=/root/.pixi/bin:$PATH
 COPY pixi.toml pixi.lock pyproject.toml README.rst ./
 COPY hydromt/ ./hydromt
 RUN pixi run --locked -e ${PIXIENV} install-hydromt \
-  && find . -follow -delete -type f -name *.pyc
+  && find . -follow -delete -type f -name "*.pyc"
 
 # Stage 2: copy hydromt and dependencies to final image.
 # Prevents copying of caches and other temporary files.
