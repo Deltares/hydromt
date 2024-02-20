@@ -62,6 +62,7 @@ class Model(object, metaclass=ABCMeta):
         "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
+        "region": Region,
         "results": XArrayDict,
         "states": XArrayDict,
     }
