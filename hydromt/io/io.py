@@ -22,9 +22,6 @@ import xarray as xr
 import yaml
 from shapely.geometry import box
 from shapely.geometry.base import GEOMETRY_TYPES
-from tomli import load as load_toml
-from tomli_w import dump as dump_toml
-
 from hydromt.gis import merge, raster, utils, vector
 from hydromt.io.path import parse_abspath, parse_relpath
 
@@ -898,12 +895,7 @@ def configread(
         with open(config_fn, "rb") as f:
             cfdict = yaml.safe_load(f)
         cfdict = _process_config_in(cfdict)
-    elif ext == ".toml":  # user defined
-        with open(config_fn, "rb") as f:
-            cfdict = load_toml(f)
-        cfdict = _process_config_in(cfdict)
-    else:
-        cfdict = read_ini_config(config_fn, **kwargs)
+
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_fn))
@@ -936,105 +928,21 @@ def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
         Set true for a single-level configuration dictionary with no headers,
         by default False
     **kwargs
-        Additional keyword arguments that are passed to the `write_ini_config`
+        Additional keyword arguments that are passed to the `write_yaml_config`
         function.
     """
     root = Path(dirname(config_fn))
     _cfdict = parse_relpath(cfdict.copy(), root)
     ext = splitext(config_fn)[-1].strip()
     if ext in [".yaml", ".yml"]:
-        _cfdict = _process_config_out(_cfdict)  # should not be done for ini
+        _cfdict = _process_config_out(_cfdict)
         with open(config_fn, "w") as f:
             yaml.dump(_cfdict, f, sort_keys=False)
-    elif ext == ".toml":  # user defined
-        _cfdict = _process_config_out(_cfdict)
-        with open(config_fn, "wb") as f:
-            dump_toml(_cfdict, f)
+
     else:
-        write_ini_config(config_fn, _cfdict, **kwargs)
-
-
-def read_ini_config(
-    config_fn: Union[Path, str],
-    encoding: str = "utf-8",
-    cf: ConfigParser = None,
-    skip_eval: bool = False,
-    skip_eval_sections: Optional[list] = None,
-    noheader: bool = False,
-) -> dict:
-    """Read configuration ini file and parse to (nested) dictionary.
-
-    Parameters
-    ----------
-    config_fn : Union[Path, str]
-        Path to configuration file
-    encoding : str, optional
-        File encoding, by default "utf-8"
-    cf : ConfigParser, optional
-        Alternative configuration parser, by default None
-    skip_eval : bool, optional
-        If True, do not evaluate string values, by default False
-    skip_eval_sections : list, optional
-        These sections are not evaluated for string values
-        if skip_eval=True, by default []
-    noheader : bool, optional
-        Set true for a single-level configuration file with no headers, by default False
-
-    Returns
-    -------
-    cfdict : dict
-        Configuration dictionary.
-    """
-    skip_eval_sections = skip_eval_sections or []
-    if cf is None:
-        cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
-    elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
-        cf = cf()
-    cf.optionxform = str  # preserve capital letter
-    with codecs.open(config_fn, "r", encoding=encoding) as fp:
-        cf.read_file(fp)
-        cfdict = cf._sections
-    # parse values
-    cfdict = parse_values(cfdict, skip_eval, skip_eval_sections)
-    # add dummy header
-    if noheader and "dummy" in cfdict:
-        cfdict = cfdict["dummy"]
-    return cfdict
-
-
-def write_ini_config(
-    config_fn: Union[Path, str],
-    cfdict: dict,
-    encoding: str = "utf-8",
-    cf: ConfigParser = None,
-    noheader: bool = False,
-) -> None:
-    """Write configuration dictionary to ini file.
-
-    Parameters
-    ----------
-    config_fn : Union[Path, str]
-        Path to configuration file
-    cfdict : dict
-        Configuration dictionary.
-    encoding : str, optional
-        File encoding, by default "utf-8"
-    cf : ConfigParser, optional
-        Alternative configuration parser, by default None
-    noheader : bool, optional
-        Set true for a single-level configuration dictionary with no headers,
-        by default False
-    """
-    if cf is None:
-        cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
-    elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
-        cf = cf()
-    cf.optionxform = str  # preserve capital letter
-    if noheader:  # add dummy header
-        cfdict = {"dummy": cfdict}
-    cf.read_dict(cfdict)
-    with codecs.open(config_fn, "w", encoding=encoding) as fp:
-        cf.write(fp)
+        raise ValueError(
+            f"Unsupported file extention: {ext} hydromt only supports yaml"
+        )
 
 
 def parse_values(
@@ -1061,7 +969,7 @@ def parse_values(
     skip_eval_sections = skip_eval_sections or []
     # loop through two-level dict: section, key-value pairs
     for section in cfdict:
-        # evaluate ini items to parse to python default objects:
+        # evaluate yaml items to parse to python default objects:
         if skip_eval or section in skip_eval_sections:
             cfdict[section].update(
                 {key: str(var) for key, var in cfdict[section].items()}

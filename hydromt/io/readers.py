@@ -21,7 +21,6 @@ import yaml
 from pyogrio import read_dataframe
 from shapely.geometry import Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
-from tomli import load as load_toml
 
 from hydromt import gis
 from hydromt.gis import merge, raster, vector
@@ -754,7 +753,7 @@ def read_ini_config(
     skip_eval_sections: Optional[list] = None,
     noheader: bool = False,
 ) -> dict:
-    """Read configuration ini file and parse to (nested) dictionary.
+    """Read configuration yaml file and parse to (nested) dictionary.
 
     Parameters
     ----------
@@ -833,12 +832,7 @@ def configread(
         with open(config_fn, "rb") as f:
             cfdict = yaml.safe_load(f)
         cfdict = _process_config_in(cfdict)
-    elif ext == ".toml":  # user defined
-        with open(config_fn, "rb") as f:
-            cfdict = load_toml(f)
-        cfdict = _process_config_in(cfdict)
-    else:
-        cfdict = read_ini_config(config_fn, **kwargs)
+
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_fn))
@@ -876,7 +870,7 @@ def parse_values(
     skip_eval_sections = skip_eval_sections or []
     # loop through two-level dict: section, key-value pairs
     for section in cfdict:
-        # evaluate ini items to parse to python default objects:
+        # evaluate yaml items to parse to python default objects:
         if skip_eval or section in skip_eval_sections:
             cfdict[section].update(
                 {key: str(var) for key, var in cfdict[section].items()}

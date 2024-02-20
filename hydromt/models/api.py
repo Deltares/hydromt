@@ -45,7 +45,7 @@ class Model(object, metaclass=ABCMeta):
 
     _DATADIR = ""  # path to the model data folder
     _NAME = "modelname"
-    _CONF = "model.ini"
+    _CONF = "model.yaml"
     _CF = dict()  # configreader kwargs
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
@@ -199,10 +199,10 @@ class Model(object, metaclass=ABCMeta):
         r"""Single method to build a model from scratch based on settings in `opt`.
 
         Methods will be run one by one based on the order of appearance in `opt`
-        (.ini configuration file). All model methods are supported including
+        (.yaml configuration file). All model methods are supported including
         setup\_\*, read\_\* and write\_\* methods.
 
-        If a write\_\* option is listed in `opt` (ini file) the full writing of the
+        If a write\_\* option is listed in `opt` (yaml file) the full writing of the
         model at the end of the update process is skipped.
 
         Parameters
@@ -214,7 +214,7 @@ class Model(object, metaclass=ABCMeta):
             Write complete model after executing all methods in opt, by default True.
         opt: dict, optional
             Model build configuration. The configuration can be parsed from a
-            .ini file using :py:meth:`~hydromt.io.readers.configread`.
+            .yaml file using :py:meth:`~hydromt.io.readers.configread`.
             This is a nested dictionary where the first-level keys are the names
             of model specific methods and the second-level contain
             argument-value pairs of the method.
@@ -262,10 +262,10 @@ class Model(object, metaclass=ABCMeta):
         r"""Single method to update a model based the settings in `opt`.
 
         Methods will be run one by one based on the order of appearance in `opt`
-        (ini configuration file).
+        (yaml configuration file).
 
         All model methods are supported including setup\_\*, read\_\* and write\_\* methods.
-        If a write\_\* option is listed in `opt` (ini file) the full writing of the model
+        If a write\_\* option is listed in `opt` (yaml file) the full writing of the model
         at the end of the update process is skipped.
 
         Parameters
@@ -278,7 +278,7 @@ class Model(object, metaclass=ABCMeta):
             Write the updated model schematization to disk. By default True.
         opt: dict, optional
             Model build configuration. The configuration can be parsed from a
-            .ini file using :py:meth:`~hydromt.io.readers.configread`.
+            .yaml file using :py:meth:`~hydromt.io.readers.configread`.
             This is a nested dictionary where the first-level keys
             are the names of model specific methods and
             the second-level contain argument-value pairs of the method.
@@ -323,7 +323,7 @@ class Model(object, metaclass=ABCMeta):
             opt.pop(method)  # remove from opt
             self.logger.warning(f'"{method}" can only be called when building a model.')
 
-        # loop over other methods from ini file
+        # loop over other methods from yaml file
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write()
             if method.startswith("write_"):

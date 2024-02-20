@@ -41,7 +41,7 @@ def write_ini_config(
     cf: ConfigParser = None,
     noheader: bool = False,
 ) -> None:
-    """Write configuration dictionary to ini file.
+    """Write configuration dictionary to yaml file.
 
     Parameters
     ----------
@@ -95,15 +95,9 @@ def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
     _cfdict = parse_relpath(cfdict.copy(), root)
     ext = splitext(config_fn)[-1].strip()
     if ext in [".yaml", ".yml"]:
-        _cfdict = _process_config_out(_cfdict)  # should not be done for ini
+        _cfdict = _process_config_out(_cfdict)  # should not be done for
         with open(config_fn, "w") as f:
             yaml.dump(_cfdict, f, sort_keys=False)
-    elif ext == ".toml":  # user defined
-        _cfdict = _process_config_out(_cfdict)
-        with open(config_fn, "wb") as f:
-            dump_toml(_cfdict, f)
-    else:
-        write_ini_config(config_fn, _cfdict, **kwargs)
 
 
 def _process_config_out(d):
