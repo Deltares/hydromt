@@ -29,7 +29,10 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
 .. code-block:: yaml
 
     meta:
-      root: /path/to/data_root/
+      roots:
+        - /first/path/to/data_root/
+        - /second/path/to/data_root/
+        - C:\Windows\path\to\data_root
       version: version
       name: data_catalog_name
     my_dataset:
@@ -64,7 +67,7 @@ The ``rename``, ``nodata``, ``unit_add`` and ``unit_mult`` options are set per v
 
 The yaml file has an *optional* global **meta** data section:
 
-- **root** (optional): root folder for all the data sources in the yaml file.
+- **roots**: root folder for all the data sources in the yaml file.
   If not provided the folder of where the yaml file is located will be used as root.
   This is used in combination with each data source **path** argument to avoid repetition.
 - **version** (recommended): data catalog version; we recommend `calendar versioning <https://calver.org/>`_

@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from yaml import dump
 
 from hydromt._typing import NoDataStrategy
 from hydromt.data_adapter import (
@@ -70,6 +71,19 @@ def test_finds_roots_in_correct_order(tmpdir):
     }
     cat = DataCatalog().from_dict(d)
     assert cat.root == Path(join(tmpdir, "a"))
+
+
+def test_from_yml_no_root(tmpdir):
+    d = {
+        "meta": {"hydromt_version": "<1"},
+    }
+
+    cat_file = join(tmpdir, "cat.yml")
+    with open(cat_file, "w") as f:
+        dump(d, f)
+
+    cat = DataCatalog().from_yml(cat_file)
+    assert cat.root == Path(tmpdir)
 
 
 def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver):

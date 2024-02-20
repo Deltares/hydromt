@@ -8,7 +8,7 @@ import os
 import shutil
 import warnings
 from datetime import datetime
-from os.path import abspath, basename, exists, isdir, isfile, join, splitext
+from os.path import abspath, basename, dirname, exists, isdir, isfile, join, splitext
 from pathlib import Path
 from typing import (
     Any,
@@ -808,10 +808,10 @@ class DataCatalog(object):
             if "name" in meta:
                 catalog_name = cast(str, meta["name"])
             else:
-                catalog_name = cast(str, "".join(splitext(basename(urlpath))[:-1]))
+                catalog_name = cast(str, "".join(splitext(dirname(urlpath))[:-1]))
 
             if "roots" not in meta:
-                meta["roots"] = [urlpath]
+                meta["roots"] = [dirname(urlpath)]
 
         yml["meta"] = meta
         self.from_dict(yml, root=root, catalog_name=catalog_name, mark_used=mark_used)
