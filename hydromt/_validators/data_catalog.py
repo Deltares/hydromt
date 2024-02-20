@@ -49,7 +49,7 @@ class Extent(BaseModel):
 class DataCatalogMetaData(BaseModel):
     """The metadata section of a Hydromt data catalog."""
 
-    roots: List[Path]
+    roots: Optional[List[Path]] = None
     version: Optional[Union[str, Number]] = None
     hydromt_version: str
     name: Optional[str] = None

@@ -22,6 +22,27 @@ def test_deltares_data_catalog():
     _ = DataCatalogValidator.from_dict(yml_dict)
 
 
+def test_artifact_data_catalog():
+    p = "data/catalogs/artifact_data.yml"
+    yml_dict = _yml_from_uri_or_path(p)
+    # whould raise error if something goes wrong
+    _ = DataCatalogValidator.from_dict(yml_dict)
+
+
+def test_aws_data_catalog():
+    p = "data/catalogs/aws_data.yml"
+    yml_dict = _yml_from_uri_or_path(p)
+    # whould raise error if something goes wrong
+    _ = DataCatalogValidator.from_dict(yml_dict)
+
+
+def test_gcs_cmip6_data_catalog():
+    p = "data/catalogs/gcs_cmip6_data.yml"
+    yml_dict = _yml_from_uri_or_path(p)
+    # whould raise error if something goes wrong
+    _ = DataCatalogValidator.from_dict(yml_dict)
+
+
 def test_geodataframe_entry_validation():
     d = {
         "crs": 4326,
