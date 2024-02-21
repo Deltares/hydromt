@@ -22,5 +22,6 @@ COPY examples/ ./examples
 COPY tests/ ./tests
 
 FROM base as slim
+COPY examples/ ./examples
 
 FROM base as min
