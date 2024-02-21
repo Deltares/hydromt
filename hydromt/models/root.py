@@ -92,8 +92,7 @@ class ModelRoot:
         if old_path == new_path:
             return
 
-        if not exists(self._path):
-            mkdir(self._path)
+        os.makedirs(self._path, exist_ok=True)
 
         log_level = 20  # default, but overwritten by the level of active loggers
         for i, h in enumerate(self.logger.handlers):
