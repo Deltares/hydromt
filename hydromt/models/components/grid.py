@@ -1,5 +1,5 @@
 """Grid Component."""
-import logging
+from logging import Logger, getLogger
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -31,19 +31,32 @@ from hydromt.workflows.grid import (
     rotated_grid,
 )
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class GridComponent(ModelComponent):
-    """GridComponent class."""
+    """ModelComponent class for grid components."""
 
     def __init__(
         self,
         root: ModelRoot,
         data_catalog: DataCatalog,
         model_region=None,
-        logger=logger,
+        logger: Logger = logger,
     ):
+        """Initialize a GridComponent.
+
+        Parameters
+        ----------
+        root : ModelRoot
+            model root object containing path to model root
+        data_catalog : DataCatalog
+            data catalog object
+        model_region : _type_, optional
+            model region object, by default None
+        logger : Logger, optional
+            logger object, by default logger
+        """
         # self._model_ref = weakref.ref(model) TODO: discuss if this is necessary
         self.logger = logger
         self.root = root
