@@ -14,7 +14,6 @@ logger = getLogger(__name__)
 
 class SubBasinXYSpecifyer(BaseModel):
     kind: Literal["subbasin_xy"]
-    # sub_kind: Literal["xy"]
     x: float
     y: float
     variables: Dict[str, float] = Field(default_factory=dict)
@@ -27,7 +26,6 @@ class SubBasinXYSpecifyer(BaseModel):
 
 class SubBasinXYsSpecifyer(BaseModel):
     kind: Literal["subbasin_xys"]
-    # sub_kind: Literal["xys"]
     variables: Dict[str, float] = Field(default_factory=dict)
     xs: List[float]
     ys: List[float]
@@ -50,7 +48,6 @@ class SubBasinXYsSpecifyer(BaseModel):
 
 class SubBasinGeomFileSpecifyer(BaseModel):
     kind: Literal["subbasin_file"]
-    # sub_kind: Literal["file"]
     path: Path
     variables: Dict[str, float] = Field(default_factory=dict)
     crs: CRS = Field(default=WGS84)
@@ -68,7 +65,6 @@ class SubBasinGeomFileSpecifyer(BaseModel):
 
 class SubBasinBboxSpecifyer(BaseModel):
     kind: Literal["subbasin_bbox"]
-    # sub_kind: Literal["bbox"]
     xmin: float
     ymin: float
     xmax: float

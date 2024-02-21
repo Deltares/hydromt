@@ -73,7 +73,7 @@ def create_mesh2d(
     -------
     mesh2d : xu.UgridDataset
         Generated mesh2d.
-    """  # noqa: E501
+    """
     kind, region = parse_region(region, logger=logger)
     if kind != "mesh":
         if not isinstance(res, (int, float)):

@@ -16,7 +16,6 @@ logger = getLogger(__name__)
 
 class BasinIDSpecifyer(BaseModel):
     kind: Literal["basin_id"]
-    # sub_kind: Literal["id"]
     id: BasinIdType
     crs: CRS = Field(default=WGS84)
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -27,7 +26,6 @@ class BasinIDSpecifyer(BaseModel):
 
 class BasinIDsSpecifyer(BaseModel):
     kind: Literal["basin_ids"]
-    # sub_kind: Literal["ids"]
     ids: List[BasinIdType]
     crs: CRS = Field(default=WGS84)
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -38,7 +36,6 @@ class BasinIDsSpecifyer(BaseModel):
 
 class BasinXYSpecifyer(BaseModel):
     kind: Literal["basin_xy"]
-    # sub_kind: Literal["xy"]
     x: float
     y: float
     crs: CRS = Field(default=WGS84)
@@ -50,7 +47,6 @@ class BasinXYSpecifyer(BaseModel):
 
 class BasinXYsSpecifyer(BaseModel):
     kind: Literal["basin_xys"]
-    # sub_kind: Literal["xys"]
     xs: List[float]
     ys: List[float]
     crs: CRS = Field(default=WGS84)
@@ -68,7 +64,6 @@ class BasinXYsSpecifyer(BaseModel):
 
 class BasinGeomFileSpecifyer(BaseModel):
     kind: Literal["basin_file"]
-    # sub_kind: Literal["file"]
     path: Path
     crs: CRS = Field(default=WGS84)
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -85,7 +80,6 @@ class BasinGeomFileSpecifyer(BaseModel):
 
 class BasinBboxSpecifyer(BaseModel):
     kind: Literal["basin_bbox"]
-    # sub_kind: Literal["bbox"]
     xmin: float
     ymin: float
     xmax: float
@@ -110,22 +104,3 @@ class BasinBboxSpecifyer(BaseModel):
                 f"ymin ({self.ymin}) should be strictly less than ymax ({self.ymax}) "
             )
         return self
-
-
-# class BasinRegionSpecifyer(BaseModel):
-#     """A region specified by another geometry."""
-
-#     spec: Union[
-#         BasinIDSpecifyer,
-#         BasinIDSpecifyer,
-#         BasinXYSpecifyer,
-#         BasinXYsSpecifyer,
-#         BasinGeomFileSpecifyer,
-#         BasinBboxSpecifyer,
-#     ] = Field(..., discriminator="sub_kind")
-#     kind: Literal["basin"]
-#     crs: CRS = Field(default=WGS84)
-#     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-#     def construct(self) -> GeoDataFrame:
-#         raise NotImplementedError("not yet implemented")

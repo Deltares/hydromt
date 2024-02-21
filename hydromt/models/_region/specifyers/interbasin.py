@@ -14,7 +14,6 @@ logger = getLogger(__name__)
 
 class InterBasinGeomFileSpecifyer(BaseModel):
     kind: Literal["interbasin_file"]
-    # sub_kind: Literal["file"]
     path: Path
     variables: Dict[str, float] = Field(default_factory=dict)
     crs: CRS = Field(default=WGS84)
@@ -32,7 +31,6 @@ class InterBasinGeomFileSpecifyer(BaseModel):
 
 class InterBasinGeomSpecifyer(BaseModel):
     kind: Literal["interbasin_geom"]
-    # sub_kind: Literal["geom"]
     data: GeoDataFrame
     variables: Dict[str, float] = Field(default_factory=dict)
     crs: CRS = Field(default=WGS84)
@@ -44,7 +42,6 @@ class InterBasinGeomSpecifyer(BaseModel):
 
 class InterBasinBboxVarSpecifyer(BaseModel):
     kind: Literal["interbasin_bbox_var"]
-    # sub_kind: Literal["bbox_var"]
     xmin: float
     ymin: float
     xmax: float

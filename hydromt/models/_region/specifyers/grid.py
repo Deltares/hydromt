@@ -11,7 +11,6 @@ class GridDataRegionSpecifyer(BaseModel):
     pass
 
     kind: Literal["grid_data"]
-    # sub_kind: Literal["data"]
     data: Data
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -23,7 +22,6 @@ class GridPathRegionSpecifyer(BaseModel):
     pass
 
     kind: Literal["grid_path"]
-    # sub_kind: Literal["path"]
     path: Path
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
