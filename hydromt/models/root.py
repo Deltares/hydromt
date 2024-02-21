@@ -58,7 +58,7 @@ class ModelRoot:
         else:
             is_override = False
 
-        self._create_loggers(old_path, is_override)
+        self._update_logger_filehandler(old_path, is_override)
         return self._path
 
     def _close_logs(self):
@@ -86,8 +86,10 @@ class ModelRoot:
         """Test whether we are in reading mode or not."""
         return self._mode.is_reading_mode()
 
-    # old_root is so we can copy over the old log file if needed.
-    def _create_loggers(self, old_path: Optional[Path] = None, overwrite: bool = False):
+    def _update_logger_filehandler(
+        self, old_path: Optional[Path] = None, overwrite: bool = False
+    ):
+        """Update the file handler to save logs in self.path/hydromt.log. If a log file at old_path exists copy it to self.path and append."""
         new_path = join(self._path, "hydromt.log")
         if old_path == new_path:
             return
