@@ -7,7 +7,6 @@ from ast import literal_eval
 from os.path import isfile
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
-from warnings import warn
 
 import click
 import yaml
@@ -19,9 +18,8 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["parse_json", "parse_config", "parse_opt"]
 
+
 ### CLI callback methods ###
-
-
 def parse_opt(ctx, param, value):
     """Parse extra cli options.
 
@@ -85,8 +83,6 @@ def parse_json(ctx, param, value: str) -> Dict[str, Any]:
 
 
 ### general parsing methods ##
-
-
 def parse_config(
     path: Optional[Union[Path, str]] = None, opt_cli: Optional[Dict] = None
 ) -> Dict:
@@ -115,7 +111,7 @@ def parse_config(
     return opt
 
 
-def parse_export_config_yaml(ctx, param, value) -> Dict:
+def parse_export_config_yaml(ctx, param, value) -> Dict[str, Any]:
     if value:
         with open(value, "r") as stream:
             yml = yaml.load(stream, Loader=yaml.FullLoader)

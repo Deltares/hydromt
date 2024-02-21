@@ -1,11 +1,8 @@
 """Implementations for all of the necessary IO reading for HydroMT."""
-import abc
-import codecs
 import glob
 import io as pyio
 import logging
 from ast import literal_eval
-from configparser import ConfigParser
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
@@ -24,7 +21,7 @@ from shapely.geometry.base import GEOMETRY_TYPES
 
 from hydromt import gis
 from hydromt.gis import merge, raster, vector
-from hydromt.io.path import parse_abspath
+from hydromt.io.path import make_config_paths_abs
 
 logger = logging.getLogger(__name__)
 
@@ -745,54 +742,6 @@ def open_vector_from_table(
     return gdf
 
 
-def read_ini_config(
-    config_fn: Union[Path, str],
-    encoding: str = "utf-8",
-    cf: ConfigParser = None,
-    skip_eval: bool = False,
-    skip_eval_sections: Optional[list] = None,
-    noheader: bool = False,
-) -> dict:
-    """Read configuration yaml file and parse to (nested) dictionary.
-
-    Parameters
-    ----------
-    config_fn : Union[Path, str]
-        Path to configuration file
-    encoding : str, optional
-        File encoding, by default "utf-8"
-    cf : ConfigParser, optional
-        Alternative configuration parser, by default None
-    skip_eval : bool, optional
-        If True, do not evaluate string values, by default False
-    skip_eval_sections : list, optional
-        These sections are not evaluated for string values
-        if skip_eval=True, by default []
-    noheader : bool, optional
-        Set true for a single-level configuration file with no headers, by default False
-
-    Returns
-    -------
-    cfdict : dict
-        Configuration dictionary.
-    """
-    skip_eval_sections = skip_eval_sections or []
-    if cf is None:
-        cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
-    elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
-        cf = cf()
-    cf.optionxform = str  # preserve capital letter
-    with codecs.open(config_fn, "r", encoding=encoding) as fp:
-        cf.read_file(fp)
-        cfdict = cf._sections
-    # parse values
-    cfdict = parse_values(cfdict, skip_eval, skip_eval_sections)
-    # add dummy header
-    if noheader and "dummy" in cfdict:
-        cfdict = cfdict["dummy"]
-    return cfdict
-
-
 def configread(
     config_fn: Union[Path, str],
     defaults: Optional[Dict] = None,
@@ -831,12 +780,13 @@ def configread(
     if ext in [".yaml", ".yml"]:
         with open(config_fn, "rb") as f:
             cfdict = yaml.safe_load(f)
-        cfdict = _process_config_in(cfdict)
+    else:
+        raise ValueError(f"Unknown extention: {ext} Hydromt only supports yaml")
 
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_fn))
-        cfdict = parse_abspath(cfdict, root, skip_abspath_sections)
+        cfdict = make_config_paths_abs(cfdict, root, skip_abspath_sections)
 
     # update defaults
     if defaults:
@@ -886,17 +836,3 @@ def parse_values(
                 value = None
             cfdict[section].update({key: value})
     return cfdict
-
-
-def _process_config_in(d):
-    ret = {}
-    if isinstance(d, dict):
-        for k, v in d.items():
-            if v == "NONE":
-                ret[k] = None
-            else:
-                ret[k] = _process_config_in(v)
-    else:
-        ret = d
-
-    return ret

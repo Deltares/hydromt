@@ -13,13 +13,11 @@ from .readers import (
     open_timeseries_from_table,
     open_vector,
     open_vector_from_table,
-    read_ini_config,
 )
 from .writers import (
     ConfigParser,
     configwrite,
     netcdf_writer,
-    write_ini_config,
     write_xy,
     zarr_writer,
 )
@@ -35,10 +33,8 @@ __all__ = [
     "open_vector",
     "open_vector_from_table",
     "write_xy",
-    "write_ini_config",
     "configwrite",
     "configread",
-    "read_ini_config",
     "ConfigParser",
     "netcdf_writer",
     "zarr_writer",

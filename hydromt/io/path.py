@@ -101,7 +101,7 @@ def make_path_abs_and_cross_platform(path: PathLike) -> Path:
         raise ValueError(f"Could not dermine what kind of paths is described by {path}")
 
 
-def parse_relpath(cfdict: dict, root: Path) -> dict:
+def make_config_paths_relative(cfdict: dict, root: Path) -> dict:
     """Parse string/path value to relative path if possible."""
 
     def _relpath(value, root):
@@ -118,13 +118,13 @@ def parse_relpath(cfdict: dict, root: Path) -> dict:
     # loop through n-level of dict
     for key, val in cfdict.items():
         if isinstance(val, dict):
-            cfdict[key] = parse_relpath(val, root)
+            cfdict[key] = make_config_paths_relative(val, root)
         else:
             cfdict[key] = _relpath(val, root)
     return cfdict
 
 
-def parse_abspath(
+def make_config_paths_abs(
     cfdict: dict, root: Path, skip_abspath_sections: Optional[List] = None
 ) -> dict:
     """Parse string value to absolute path from config file."""
@@ -139,7 +139,7 @@ def parse_abspath(
     for key, val in cfdict.items():
         if isinstance(val, dict):
             if key not in skip_abspath_sections:
-                cfdict[key] = parse_abspath(val, root)
+                cfdict[key] = make_config_paths_abs(val, root)
         elif isinstance(val, list) and all([isinstance(v, str) for v in val]):
             cfdict[key] = [_abspath(v, root) for v in val]
         elif isinstance(val, str):
