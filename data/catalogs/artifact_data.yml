@@ -1,7 +1,8 @@
 meta:
   version: v0.0.8
-  hydromt_version: '>=0.9, <1.0'
-  root: https://github.com/DirkEilander/hydromt-artifacts/releases/download/0.0.8/data.tar.gz
+  hydromt_version: '>=1.0a, <2.0'
+  roots:
+    - https://github.com/DirkEilander/hydromt-artifacts/releases/download/0.0.8/data.tar.gz
 
 chelsa:
   crs: 4326
@@ -265,7 +266,7 @@ gebco:
     unit: m+MSL
   path: gebco.tif
 ghs-smod_2015_v2:
-  crs: 54009
+  crs: ESRI:54009
   data_type: RasterDataset
   driver: raster
   meta:
@@ -291,7 +292,7 @@ ghs_pop_2015:
     source_version: R2019A_v1.0
   path: ghs_pop_2015.tif
 ghs_pop_2015_54009:
-  crs: 54009
+  crs: ESRI:54009
   data_type: RasterDataset
   driver: raster
   meta:
@@ -302,7 +303,7 @@ ghs_pop_2015_54009:
     source_url: https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
   path: ghs_pop_2015_54009.tif
 ghs_smod_2015:
-  crs: 54009
+  crs: ESRI:54009
   data_type: RasterDataset
   driver: raster
   meta:
