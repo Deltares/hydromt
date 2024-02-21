@@ -1,8 +1,5 @@
 """The module of HydroMT handeling file and path interactions."""
 
-from .path import (
-    make_path_abs_and_cross_platform,
-)
 from .readers import (
     configread,
     open_geodataset,
@@ -22,7 +19,6 @@ from .writers import (
 )
 
 __all__ = [
-    "make_path_abs_and_cross_platform",
     "open_raster",
     "open_mfraster",
     "open_mfcsv",
