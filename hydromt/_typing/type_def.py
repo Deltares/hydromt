@@ -13,7 +13,7 @@ from xugrid import Ugrid1d, Ugrid2d, UgridDataArray, UgridDataset
 
 from hydromt._typing.model_mode import ModelMode
 
-BasinIdType = str
+BasinIdType = int
 UgridData = Union[UgridDataArray, UgridDataset, Ugrid1d, Ugrid2d]
 
 

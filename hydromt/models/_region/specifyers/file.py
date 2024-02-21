@@ -7,7 +7,7 @@ from geopandas import GeoDataFrame
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pyproj import CRS
 
-from hydromt.models._region.specifyers import WGS84
+WGS84 = CRS.from_epsg(4326)
 
 logger = getLogger(__name__)
 

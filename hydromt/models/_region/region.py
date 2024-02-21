@@ -6,12 +6,13 @@ from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
 import numpy as np
+import xarray as xr
 from geopandas import GeoDataFrame, GeoSeries
 from numpy._typing import NDArray
 from pyproj import CRS
 
 from hydromt._typing.model_mode import ModelMode
-from hydromt._typing.type_def import StrPath
+from hydromt._typing.type_def import BasinIdType, StrPath
 from hydromt.models._region.specifyers import RegionSpecifyer
 
 logger = getLogger(__name__)
@@ -92,6 +93,7 @@ class Region:
         region: Dict[str, Any],
         logger=logger,
     ) -> RegionSpecifyer:
+        """Parse the user provided dictionary to one pydantic can parse. Note that the kind MUST be the first key."""
         # popitem returns last inserted, we want first
         kind = next(iter(region.keys()))
         value = region.pop(kind)
@@ -104,17 +106,132 @@ class Region:
                 "kind": "bbox",
                 **dict(zip(["xmin", "ymin", "xmax", "ymax"], value)),
             }
-        elif isinstance(value, (GeoDataFrame, GeoSeries)):
-            flat_region_dict = {"kind": kind, "geom": value}
-        elif isinstance(value, (Path, str)):
-            if kind == "geom":
+        elif kind == "geom":
+            if isinstance(value, (GeoDataFrame, GeoSeries)):
+                flat_region_dict = {"kind": "geom_data", "geom": value}
+            elif isinstance(value, Path):
                 flat_region_dict = {"kind": "geom_file", "path": Path(value)}
+            elif isinstance(value, str):
+                flat_region_dict = {"kind": "geom_catalog", "source": value}
+        elif kind == "grid":
+            if isinstance(value, Path):
+                flat_region_dict = {
+                    "kind": "grid_path",
+                    "path": Path(value),
+                }
+            if isinstance(value, str):
+                flat_region_dict = {
+                    "kind": "grid_catalog",
+                    "source": value,
+                }
+            elif isinstance(value, (xr.Dataset, xr.DataArray)):
+                flat_region_dict = {"kind": "grid_data", "data": value}
+
+        elif kind == "mesh":
+            flat_region_dict = {"kind": "mesh", "path": Path(value)}
+        elif kind == "model":
+            flat_region_dict = {"kind": "model", "path": Path(value)}
+        elif kind == "basin":
+            if isinstance(value, BasinIdType):
+                flat_region_dict = {"kind": "basin_id", "id": value}
+            elif isinstance(value, list):
+                if isinstance(value[0], BasinIdType):
+                    flat_region_dict = {
+                        "kind": "basin_ids",
+                        "ids": value,
+                    }
+                elif isinstance(value[0], float) and len(value) == 2:
+                    flat_region_dict = {
+                        "kind": "basin_xy",
+                        "x": value[0],
+                        "y": value[1],
+                    }
+                elif isinstance(value[0], float) and len(value) == 4:
+                    flat_region_dict = {
+                        "kind": "basin_bbox",
+                        "xmin": value[0],
+                        "ymin": value[1],
+                        "xmax": value[2],
+                        "ymax": value[3],
+                        **region,  # add variables and outlets if they exist
+                    }
+                elif isinstance(value[0], list) and len(value) == 2:
+                    flat_region_dict = {
+                        "kind": "basin_xys",
+                        "xs": value[0],
+                        "ys": value[1],
+                    }
+                else:
+                    raise RuntimeError(
+                        f"unreachable basin spec while parsing: {region}"
+                    )
+
+        elif kind == "subbasin":
+            if isinstance(value, Path):
+                flat_region_dict = {
+                    "kind": "subbasin_geom",
+                    "path": value,
+                    **region,  # add variables and outlets if they exist
+                }
+            elif isinstance(value[0], float) and len(value) == 2:
+                flat_region_dict = {
+                    "kind": "subbasin_xy",
+                    "x": value[0],
+                    "y": value[1],
+                }
+            elif isinstance(value[0], float) and len(value) == 4:
+                flat_region_dict = {
+                    "kind": "subbasin_bbox",
+                    "xmin": value[0],
+                    "ymin": value[1],
+                    "xmax": value[2],
+                    "ymax": value[3],
+                    **region,  # add variables and outlets if they exist
+                }
+            elif isinstance(value[0], list) and len(value) == 2:
+                flat_region_dict = {
+                    "kind": "subbasin_xys",
+                    "xs": value[0],
+                    "ys": value[1],
+                    **region,
+                }
             else:
-                flat_region_dict = {"kind": kind, "path": Path(value)}
+                raise ValueError(
+                    "could not understand subbasin specification: {kind:value, **region}"
+                )
+        elif kind == "interbasin":
+            if isinstance(value, Path):
+                flat_region_dict = {
+                    "kind": "interbasin_geom",
+                    "path": value,
+                    **region,  # add variables and outlets if they exist
+                }
+            elif isinstance(value, list):
+                if "xy" in region:
+                    flat_region_dict = {
+                        "kind": "interbasin_bbox_xy",
+                        "xmin": value[0],
+                        "ymin": value[1],
+                        "xmax": value[2],
+                        "ymax": value[3],
+                        **region,  # add variables and outlets if they exist
+                    }
+                else:
+                    flat_region_dict = {
+                        "kind": "interbasin_bbox_var",
+                        "xmin": value[0],
+                        "ymin": value[1],
+                        "xmax": value[2],
+                        "ymax": value[3],
+                        **region,  # add variables and outlets if they exist
+                    }
+            elif isinstance(value, GeoDataFrame):
+                flat_region_dict = {
+                    "kind": "interbasin_geom",
+                    "data": value,
+                    **region,  # add variables and outlets if they exist
+                }
         else:
             raise ValueError(f"Unknown region kind: {kind}")
-
-        if "buffer" in region:
-            flat_region_dict["buffer"] = region["buffer"]
 
         return RegionSpecifyer(spec=flat_region_dict)  # type: ignore

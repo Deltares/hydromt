@@ -5,7 +5,7 @@ from geopandas import GeoDataFrame
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pyproj import CRS
 
-from hydromt.models._region.specifyers import WGS84
+WGS84 = CRS.from_epsg(4326)
 
 logger = getLogger(__name__)
 
@@ -14,7 +14,7 @@ class GeomRegionSpecifyer(BaseModel):
     """A region specified by another geometry."""
 
     geom: GeoDataFrame
-    kind: Literal["geom"]
+    kind: Literal["geom_data"]
     crs: CRS = Field(default=WGS84)
     buffer: float = Field(0.0, ge=0)
     model_config = ConfigDict(arbitrary_types_allowed=True)

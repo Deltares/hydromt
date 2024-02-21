@@ -1,5 +1,36 @@
-# TODO: add back in after raster dataset is implemented
-# class GridRegionSpecifyer(BaseModel):
+from pathlib import Path
+from typing import Literal
+
+from geopandas import GeoDataFrame
+from pydantic import BaseModel, ConfigDict
+
+from hydromt._typing.type_def import Data
+
+
+class GridDataRegionSpecifyer(BaseModel):
+    pass
+
+    kind: Literal["grid_data"]
+    # sub_kind: Literal["data"]
+    data: Data
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    def construct(self) -> GeoDataFrame:
+        raise NotImplementedError("todo")
+
+
+class GridPathRegionSpecifyer(BaseModel):
+    pass
+
+    kind: Literal["grid_path"]
+    # sub_kind: Literal["path"]
+    path: Path
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    def construct(self) -> GeoDataFrame:
+        raise NotImplementedError("todo")
+
+
 #     """A region specified by a Rasterdataset."""
 
 #     kind: Literal["grid"]

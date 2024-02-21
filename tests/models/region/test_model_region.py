@@ -1,9 +1,9 @@
 import os
 from os.path import join
+from pathlib import Path
 
 import geopandas as gpd
 import pytest
-import xarray as xr
 
 from hydromt import DataCatalog
 from hydromt._typing.model_mode import ModelMode
@@ -12,6 +12,26 @@ from hydromt.models._region.specifyers import (
     BboxRegionSpecifyer,
     GeomFileRegionSpecifyer,
     GeomRegionSpecifyer,
+)
+from hydromt.models._region.specifyers.basin import (
+    BasinIDSpecifyer,
+    BasinIDsSpecifyer,
+    BasinXYsSpecifyer,
+)
+from hydromt.models._region.specifyers.catalog import (
+    GeomCatalogRegionSpecifyer,
+    GridCatalogRegionSpecifyer,
+)
+from hydromt.models._region.specifyers.grid import (
+    GridDataRegionSpecifyer,
+    GridPathRegionSpecifyer,
+)
+from hydromt.models._region.specifyers.interbasin import (
+    InterBasinGeomSpecifyer,
+)
+from hydromt.models._region.specifyers.model import ModelRegionSpecifyer
+from hydromt.models._region.specifyers.subbasin import (
+    SubBasinXYSpecifyer,
 )
 
 
@@ -59,8 +79,8 @@ def test_invalid_bbox_region():
 def test_region_from_geom_file(tmpdir, world):
     geom_path = str(tmpdir.join("world.geojson"))
     world.to_file(geom_path, driver="GeoJSON")
-    r = Region({"geom": geom_path})
-    r.construct()
+    r = Region({"geom": Path(geom_path)})
+    # r.construct()
     assert isinstance(r._spec.spec, GeomFileRegionSpecifyer)
 
 
@@ -80,75 +100,78 @@ def test_region_from_geom_points_fails(geodf):
         _ = Region({"geom": geodf})
 
 
-@pytest.mark.skip(reason="model region spec not yet implemented")
 def test_region_from_model(tmpdir):
     model = MODELS.generic[0]
     root = str(tmpdir.join(model)) + "_test_region"
     if not os.path.isdir(root):
         os.mkdir(root)
-    region = {model: root}
-    kind, region = parse_region(region)
-    assert kind == "model"
+    region_dict = {"model": root}
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, ModelRegionSpecifyer)
 
 
-@pytest.mark.skip(reason="Needs implementation of subbasin region.")
-def test_region_from_catalog(test_cat):
-    kind, region = parse_region({"geom": "world"}, data_catalog=test_cat)
-    assert isinstance(region["geom"], gpd.GeoDataFrame)
+def test_region_from_catalog():
+    region_dict = {"geom": "world"}
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, GeomCatalogRegionSpecifyer)
 
 
-@pytest.mark.skip(reason="Needs RasterDataset implementation")
 def test_region_from_grid_data(rioda, tmpdir):
     fn_grid = str(tmpdir.join("grid.tif"))
     rioda.raster.to_raster(fn_grid)
-    kind, region = parse_region({"grid": rioda})
-    assert isinstance(region["grid"], xr.DataArray)
+    region_dict = {"grid": rioda}
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, GridDataRegionSpecifyer)
 
 
-@pytest.mark.skip(reason="Needs RasterDataset implementation")
 def test_region_from_grid_file(rioda, tmpdir):
-    fn_grid = str(tmpdir.join("grid.tif"))
+    fn_grid = Path(tmpdir.join("grid.tif"))
     rioda.raster.to_raster(fn_grid)
-    kind, region = parse_region({"grid": fn_grid})
-    assert isinstance(region["grid"], xr.DataArray)
+    region_dict = {"grid": fn_grid}
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, GridPathRegionSpecifyer)
 
 
-@pytest.mark.skip(reason="Needs RasterDataset implementation")
-def test_region_from_grid_catalog(test_cat):
-    kind, region = parse_region({"grid": "grid"}, data_catalog=test_cat)
-    assert isinstance(region["grid"], xr.DataArray)
+def test_region_from_grid_catalog():
+    region_dict = {"grid": "grid"}
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, GridCatalogRegionSpecifyer)
 
 
-@pytest.mark.skip(reason="Needs implementation of subbasin region.")
 def test_region_from_basin_ids():
-    region = {"basin": [1001, 1002, 1003, 1004, 1005]}
-    kind, region = parse_region(region)
-    assert kind == "basin"
-    assert region.get("basid") == [1001, 1002, 1003, 1004, 1005]
+    region_dict = {"basin": [1001, 1002, 1003, 1004, 1005]}
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, BasinIDsSpecifyer)
+    assert region._spec.spec.ids == [1001, 1002, 1003, 1004, 1005]  # type: ignore
 
 
-@pytest.mark.skip(reason="Needs implementation of subbasin region.")
 def test_region_from_basin_id():
-    region = {"basin": 101}
-    kind, region = parse_region(region)
-    assert kind == "basin"
-    assert region.get("basid") == 101
+    region_dict = {"basin": 1001}
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, BasinIDSpecifyer)
+    assert region._spec.spec.id == 1001  # type: ignore
 
 
-@pytest.mark.skip(reason="Needs implementation of subbasin region.")
-def test_region_from_subbasin(geodf):
-    # xy
-    region = {"subbasin": [1.0, -1.0], "uparea": 5.0, "bounds": [0.0, -5.0, 3.0, 0.0]}
-    kind, region = parse_region(region)
-    assert kind == "subbasin"
-    assert "xy" in region
-    assert "bounds" in region
-    region = {"basin": [[1.0, 1.5], [0.0, -1.0]]}
-    kind, region = parse_region(region)
-    assert "xy" in region
-    region = {"interbasin": geodf}
-    kind, region = parse_region(region)
-    assert "xy" in region
+def test_region_from_subbasin():
+    region_dict = {
+        "subbasin": [1.0, -1.0],
+        "uparea": 5.0,
+        "bounds": [0.0, -5.0, 3.0, 0.0],
+    }
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, SubBasinXYSpecifyer)
+
+
+def test_region_from_basin_xys():
+    region_dict = {"basin": [[1.0, 1.5], [0.0, -1.0]]}
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, BasinXYsSpecifyer)
+
+
+def test_region_from_interbasin(geodf):
+    region_dict = {"interbasin": geodf}
+    region = Region(region_dict)
+    assert isinstance(region._spec.spec, InterBasinGeomSpecifyer)
 
 
 @pytest.fixture()
