@@ -1,6 +1,7 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
+from os import mkdir
 from os.path import abspath, dirname, isfile, join
 from pathlib import Path
 from typing import cast
@@ -10,6 +11,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from yaml import dump
 
 from hydromt._typing import NoDataStrategy
 from hydromt.data_adapter import (
@@ -30,6 +32,58 @@ from hydromt.metadata_resolvers import MetaDataResolver
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+def test_errors_on_no_root_found(tmpdir):
+    d = {
+        "meta": {
+            "hydromt_version": ">=1.0a,<2",
+            "roots": list(
+                map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4", "⽀"])
+            ),
+        },
+    }
+    with pytest.raises(ValueError, match="None of the specified roots were found"):
+        _ = DataCatalog().from_dict(d)
+
+
+def test_finds_later_roots(tmpdir):
+    mkdir(join(tmpdir, "asasdfasdf"))
+    d = {
+        "meta": {
+            "hydromt_version": ">=1.0a,<2",
+            "roots": list(
+                map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4", "asasdfasdf"])
+            ),
+        },
+    }
+    cat = DataCatalog().from_dict(d)
+    assert cat.root == Path(join(tmpdir, "asasdfasdf"))
+
+
+def test_finds_roots_in_correct_order(tmpdir):
+    paths = list(map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4"]))
+    for p in paths:
+        mkdir(p)
+
+    d = {
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": paths},
+    }
+    cat = DataCatalog().from_dict(d)
+    assert cat.root == Path(join(tmpdir, "a"))
+
+
+def test_from_yml_no_root(tmpdir):
+    d = {
+        "meta": {"hydromt_version": ">=1.0a,<2"},
+    }
+
+    cat_file = join(tmpdir, "cat.yml")
+    with open(cat_file, "w") as f:
+        dump(d, f)
+
+    cat = DataCatalog().from_yml(cat_file)
+    assert cat.root == Path(tmpdir)
 
 
 def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver):

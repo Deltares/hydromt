@@ -14,7 +14,16 @@ Added
 - Added Driver class for customizable io
 - Added MetaDataResolver class for customizable metadata discovery
 - Added DataSource class to represent and validate DataCatalog entries.
+- Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)
 
+Changed
+-------
+- The `root` meta key of data catalogs yaml files has become `roots` (#786)
+
+
+Removed
+-------
+- support for `**artifact_keys` when initializing the DataCatalog has been removed. (#786)
 
 Removed
 -------
