@@ -16,6 +16,11 @@ Added
 - Added DataSource class to represent and validate DataCatalog entries.
 
 
+Removed
+-------
+- Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
+
+
 Unreleased
 ==========
 
