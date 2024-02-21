@@ -15,7 +15,6 @@ from .readers import (
     open_vector_from_table,
 )
 from .writers import (
-    ConfigParser,
     configwrite,
     netcdf_writer,
     write_xy,
@@ -35,7 +34,6 @@ __all__ = [
     "write_xy",
     "configwrite",
     "configread",
-    "ConfigParser",
     "netcdf_writer",
     "zarr_writer",
 ]
