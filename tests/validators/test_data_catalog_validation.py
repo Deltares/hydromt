@@ -15,8 +15,30 @@ from hydromt._validators.data_catalog import (
 from hydromt.data_catalog import _yml_from_uri_or_path
 
 
-def test_deltares_data_catalog():
-    p = "data/catalogs/deltares_data.yml"
+@pytest.mark.parametrize(
+    "test_case",
+    [
+        {
+            "name": "deltares_data",
+            "path": "data/catalogs/deltares_data.yml",
+        },
+        {
+            "name": "artifact_data",
+            "path": "data/catalogs/artifact_data.yml",
+        },
+        {
+            "name": "aws_data",
+            "path": "data/catalogs/aws_data.yml",
+        },
+        {
+            "name": "gcs_cmip6_data",
+            "path": "data/catalogs/gcs_cmip6_data.yml",
+        },
+    ],
+    ids=lambda x: x["name"],
+)
+def test_deltares_data_catalog(test_case):
+    p = test_case["path"]
     yml_dict = _yml_from_uri_or_path(p)
     # whould raise error if something goes wrong
     _ = DataCatalogValidator.from_dict(yml_dict)
@@ -58,6 +80,7 @@ def test_geodataframe_entry_validation():
 
 def test_valid_catalog_with_alias():
     d = {
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "chelsa": {"alias": "chelsa_v1.2"},
         "chelsa_v1.2": {
             "crs": 4326,
@@ -85,6 +108,7 @@ def test_valid_catalog_with_alias():
 
 def test_valid_catalog_variants():
     d = {
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "esa_worldcover": {
             "crs": 4326,
             "data_type": "RasterDataset",
@@ -116,13 +140,14 @@ def test_valid_catalog_variants():
                     "storage_options": {"anon": True},
                 },
             ],
-        }
+        },
     }
     _ = DataCatalogValidator.from_dict(d)
 
 
 def test_dangling_alias_catalog_entry():
     d = {
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "chelsa": {"alias": "chelsa_v1.2"},
     }
 
@@ -130,8 +155,18 @@ def test_dangling_alias_catalog_entry():
         _ = DataCatalogValidator.from_dict(d)
 
 
+def test_no_hydrmt_version_loggs_warning(caplog):
+    d = {
+        "meta": {"roots": [""]},
+    }
+
+    _ = DataCatalogValidator.from_dict(d)
+    assert "No hydromt version" in caplog.text
+
+
 def test_valid_alias_catalog_entry():
     d = {
+        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "chelsa": {"alias": "chelsa_v1.2"},
         "chelsa_v1.2": {
             "crs": 4326,
@@ -147,11 +182,15 @@ def test_valid_alias_catalog_entry():
 
 def test_catalog_metadata_validation():
     d = {
-        "root": "p:/wflow_global/hydromt",
+        "hydromt_version": ">=1.0a,<2",
+        "roots": ["p:/wflow_global/hydromt", "/mnt/p/wflow_global/hydromt"],
         "version": "2023.3",
     }
     catalog_metadata = DataCatalogMetaData.from_dict(d)
-    assert catalog_metadata.root == Path("p:/wflow_global/hydromt")
+    assert catalog_metadata.roots == [
+        Path("p:/wflow_global/hydromt"),
+        Path("/mnt/p/wflow_global/hydromt"),
+    ]
     assert catalog_metadata.version == "2023.3"
 
 
