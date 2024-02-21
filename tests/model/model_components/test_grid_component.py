@@ -233,11 +233,9 @@ def test_add_data_from_rasterdataset(
 
 def test_add_data_from_raster_reclass(caplog, tmp_dir, demda):
     caplog.set_level(logging.INFO)
-
     grid_component = GridComponent(
         root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
     )
-
     raster_fn = "vito"
     reclass_table_fn = "vito_mapping"
 
@@ -287,17 +285,50 @@ def test_add_data_from_raster_reclass(caplog, tmp_dir, demda):
             )
 
 
-def test_add_data_from_geodataframe(grid_component):
-    pass
-    grid_component.add_data_from_geodataframe(
-        vector_fn="hydro_lakes",
-        variables=["waterbody_id", "Depth_avg"],
-        nodata=[-1, -999.0],
-        rasterize_method="value",
-        rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
+def test_add_data_from_geodataframe(caplog, tmp_dir, geodf, demda):
+    caplog.set_level(logging.INFO)
+    demda.name = "name"
+    grid_component = GridComponent(
+        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
     )
-    grid_component.add_data_from_geodataframe(
-        vector_fn="hydro_lakes",
-        rasterize_method="fraction",
-        rename={"hydro_lakes": "water_frac"},
+    grid_component.data_catalog.get_geodataframe = create_autospec(
+        grid_component.data_catalog.get_geodataframe, return_value=geodf
     )
+    with patch(
+        "hydromt.models.components.grid.grid_from_geodataframe"
+    ) as mock_grid_from_geodataframe:
+        mock_grid_from_geodataframe.return_value = demda.to_dataset()
+        vector_fn = "hydro_lakes"
+        result = grid_component.add_data_from_geodataframe(
+            vector_fn=vector_fn,
+            variables=["waterbody_id", "Depth_avg"],
+            nodata=[-1, -999.0],
+            rasterize_method="value",
+            rename={
+                "waterbody_id": "lake_id",
+                "Depth_avg": "lake_depth",
+                vector_fn: "hydrolakes",
+            },
+        )
+        assert f"Preparing grid data from vector '{vector_fn}'." in caplog.text
+        mock_grid_from_geodataframe.assert_called_once()
+        assert grid_component.data == demda
+        assert all([x in result for x in demda.to_dataset().data_vars.keys()])
+        grid_component.data_catalog.get_geodataframe.return_value = gpd.GeoDataFrame()
+        caplog.set_level(logging.WARNING)
+        result = grid_component.add_data_from_geodataframe(
+            vector_fn=vector_fn,
+            variables=["waterbody_id", "Depth_avg"],
+            nodata=[-1, -999.0],
+            rasterize_method="value",
+            rename={
+                "waterbody_id": "lake_id",
+                "Depth_avg": "lake_depth",
+                vector_fn: "hydrolakes",
+            },
+        )
+        assert (
+            f"No shapes of {vector_fn} found within region,"
+            " skipping setup_grid_from_vector."
+        ) in caplog.text
+        assert result is None
