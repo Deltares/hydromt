@@ -35,7 +35,12 @@ logger = getLogger(__name__)
 
 
 class GridComponent(ModelComponent):
-    """ModelComponent class for grid components."""
+    """ModelComponent class for grid components.
+
+    This class is used for setting, creating, writing, and reading grids for a
+    HydroMT model. The grid data in the data property of this class is of the
+    hydromt.gis.raster.RasterDataset type.
+    """
 
     def __init__(
         self,
