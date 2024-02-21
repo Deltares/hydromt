@@ -12,7 +12,7 @@ from pyproj import CRS
 
 from hydromt._typing.model_mode import ModelMode
 from hydromt._typing.type_def import StrPath
-from hydromt.region._specifyers import RegionSpecifyer
+from hydromt.models._region.specifyers import RegionSpecifyer
 
 logger = getLogger(__name__)
 

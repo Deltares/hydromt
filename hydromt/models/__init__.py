@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """HydroMT models API."""
+from hydromt.models._region import Region
 from hydromt.models.api import Model
 from hydromt.models.components.grid import GridModel
 from hydromt.models.components.mesh import MeshModel

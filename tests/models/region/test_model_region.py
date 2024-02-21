@@ -7,13 +7,12 @@ import xarray as xr
 
 from hydromt import DataCatalog
 from hydromt._typing.model_mode import ModelMode
-from hydromt.models import MODELS
-from hydromt.region._specifyers import (
+from hydromt.models import MODELS, Region
+from hydromt.models._region.specifyers import (
     BboxRegionSpecifyer,
     GeomFileRegionSpecifyer,
     GeomRegionSpecifyer,
 )
-from hydromt.region.region import Region
 
 
 def test_write_region_read_mode(tmpdir):

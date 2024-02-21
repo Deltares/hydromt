@@ -18,12 +18,12 @@ from hydromt.models import (
     GridModel,
     Model,
     ModelCatalog,
+    Region,
     VectorModel,
     plugins,
 )
 from hydromt.models.api import _check_data
 from hydromt.models.components.grid import GridMixin
-from hydromt.region import Region
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 

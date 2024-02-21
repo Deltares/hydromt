@@ -21,8 +21,7 @@ from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import MODELS
-from hydromt.region import Region
+from hydromt.models import MODELS, Region
 
 BUILDING_EXE = False
 if BUILDING_EXE:
