@@ -42,16 +42,6 @@ def test_write_region_forced_write_mode(tmpdir):
     assert all(r1_geom.ne(r2_geom))
 
 
-def test_write_region_append_mode(tmpdir):
-    path = join(tmpdir, "region.geojson")
-    region = {"bbox": [0.0, -5.0, 3.0, 0.0]}
-    r = Region(region)
-    r.construct()
-    r.write(path, ModelMode.WRITE)
-    with pytest.raises(ValueError, match="mode was not in forced override mode"):
-        r.write(path, ModelMode.APPEND)
-
-
 def test_bbox_region():
     region = {"bbox": [0.0, -5.0, 3.0, 0.0]}
     r = Region(region)

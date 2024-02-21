@@ -25,6 +25,7 @@ from pyproj import CRS
 from hydromt import __version__
 from hydromt._compat import Distribution
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
+from hydromt._typing.model_mode import ModelMode
 from hydromt._utils import _classproperty, log
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -70,7 +71,7 @@ class Model(object, metaclass=ABCMeta):
     def __init__(
         self,
         root: Optional[str] = None,
-        mode: Optional[str] = "w",
+        mode: str = "w",
         config_fn: Optional[str] = None,
         data_libs: Optional[Union[List, str]] = None,
         logger=logger,
@@ -132,6 +133,7 @@ class Model(object, metaclass=ABCMeta):
 
         # file system
         self._root = ""
+        self.mode = ModelMode.from_str_or_mode(mode)
         self._read = True
         self._write = False
         self._defered_file_closes = []
@@ -232,7 +234,9 @@ class Model(object, metaclass=ABCMeta):
         opt = opt or {}
         opt = self._check_get_opt(opt)
         if region is not None:
-            self.setup_region(region)
+            if self._CLI_ARGS["region"] not in opt:
+                opt = {self._CLI_ARGS["region"]: {}, **opt}
+                opt[self._CLI_ARGS["region"]].update(region=region)
 
         # then loop over other methods
         for method in opt:
