@@ -197,7 +197,7 @@ class Region:
                 }
             else:
                 raise ValueError(
-                    "could not understand subbasin specification: {kind:value, **region}"
+                    f"could not understand subbasin specification: {kind:value, **region}"
                 )
         elif kind == "interbasin":
             if isinstance(value, Path):
