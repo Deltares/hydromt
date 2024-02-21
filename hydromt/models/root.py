@@ -1,7 +1,7 @@
 """the new model root class."""
 
 from logging import FileHandler, Logger, getLogger
-from os import mkdir, remove
+from os import makedirs, remove
 from os.path import dirname, exists, isdir, join
 from pathlib import Path
 from shutil import copyfile
@@ -94,7 +94,7 @@ class ModelRoot:
         if old_path == new_path:
             return
 
-        os.makedirs(self._path, exist_ok=True)
+        makedirs(self._path, exist_ok=True)
 
         log_level = 20  # default, but overwritten by the level of active loggers
         for i, h in enumerate(self.logger.handlers):
