@@ -8,8 +8,8 @@ from hydromt.models.components.network import NetworkModel
 from hydromt.models.components.vector import VectorModel
 from hydromt.models.plugins import ModelCatalog
 
-if HAS_XUGRID:
-    from hydromt.models.components.mesh import MeshModel
+# if HAS_XUGRID:
+#     from hydromt.models.components.mesh import MeshModel
 
 # expose global MODELS object which discovers and loads
 # any local generalized or plugin model class on-the-fly
