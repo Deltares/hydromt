@@ -1,5 +1,8 @@
 """Driver to read geodataframes using Pyogrio."""
-from logging import Logger
+from enum import Enum
+from functools import singledispatch
+from logging import Logger, getLogger
+from pathlib import Path
 from typing import Optional
 
 import geopandas as gpd
@@ -11,6 +14,50 @@ from hydromt._typing import Bbox, Geom, GpdShapeGeom
 from hydromt.gis import parse_geom_bbox_buffer
 
 from .geodataframe_driver import GeoDataFrameDriver
+
+logger: Logger = getLogger(__name__)
+
+
+class PyogrioExtension(Enum):
+    """All compatible extensions for Pyogrio."""
+
+    shapefile = ".shp"
+    geopackage = ".gpkg"
+    geojson = ".geojson"
+    flatgeobuf = ".fgb"
+
+
+@singledispatch
+def _read_df(
+    extension: PyogrioExtension,
+    uri: str,
+    bbox: Optional[Bbox],
+    mode: str,
+    logger: Logger = logger,
+) -> gpd.GeoDataFrame:
+    """`read_dataframe` for different gdal drivers.
+
+    Warnings are thrown for invalid kwargs for different drivers, so this makes pyogrio explicit.
+    """
+    logger.debug(
+        f"Reading datafrom from uri: '{uri}' with gdal driver: '{extension.name}'"
+    )
+    return read_dataframe(uri, bbox=bbox, mode=mode)
+
+
+@_read_df.register(PyogrioExtension)
+def _(
+    extension: PyogrioExtension.geojson,
+    uri: str,
+    bbox: Optional[Bbox],
+    mode: str,
+    logger: Logger = logger,
+) -> gpd.GeoDataFrame:
+    """Geojson does not accept mode."""
+    logger.debug(
+        f"Reading datafrom from uri: '{uri}' with gdal driver: '{extension.name}'"
+    )
+    return read_dataframe(uri, bbox=bbox)
 
 
 class PyogrioDriver(GeoDataFrameDriver):
@@ -32,12 +79,13 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         args:
         """
+        extension = PyogrioExtension(Path(uri).suffix)
         if bbox is not None:  # buffer bbox
             bbox: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         if mask is not None:  # buffer mask
             mask: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         bbox_reader = bbox_from_file_and_filters(uri, bbox, mask, crs)
-        return read_dataframe(uri, bbox=bbox_reader, mode="r")
+        return _read_df(extension, uri, bbox=bbox_reader, mode="r")
 
 
 def bbox_from_file_and_filters(
