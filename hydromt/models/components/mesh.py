@@ -37,14 +37,13 @@ class MeshComponent(ModelComponent):
         model_region=None,
         logger: Logger = logger,
     ):
-        super.__init__(
+        super().__init__(
             root=root,
             data_catalog=data_catalog,
             model_region=model_region,
             logger=logger,
         )
         self._data = None
-        pass
 
     def set(
         self,
@@ -72,19 +71,7 @@ class MeshComponent(ModelComponent):
             If True, overwrite the grid with the same name as the grid in self.mesh.
         """
         # Checks on data
-        if not isinstance(data, (xu.UgridDataArray, xu.UgridDataset)):
-            raise ValueError(
-                "New mesh data in set_mesh should be of type xu.UgridDataArray"
-                " or xu.UgridDataset"
-            )
-        if isinstance(data, xu.UgridDataArray):
-            if name is not None:
-                data = data.rename(name)
-            elif data.name is None:
-                raise ValueError(
-                    f"Cannot set mesh from {str(type(data).__name__)} without a name."
-                )
-            data = data.to_dataset()
+        data = _check_UGrid(data, name)
 
         # Checks on grid topology
         # TODO: check if we support setting multiple grids at once. For now just one
@@ -97,76 +84,16 @@ class MeshComponent(ModelComponent):
         elif grid_name != data.ugrid.grid.name:
             data = rename_mesh(data, name=grid_name)
 
-        # Check if new grid_name
-        if grid_name not in self.mesh_names:
-            new_grid = True
-        else:
-            new_grid = False
+        new_grid = grid_name not in self.mesh_names
+        crs = self._add_mesh(
+            data=data, grid_name=grid_name, overwrite_grid=overwrite_grid
+        )
 
-        # Adding to mesh
-        if self.data is None:  # NOTE: mesh is initialized with None
-            # Check on crs
-            if not data.ugrid.grid.crs:
-                raise ValueError("Data should have CRS.")
-            self._data = data
-        else:
-            # Check on crs
-            if not data.ugrid.grid.crs == self.crs:
-                raise ValueError("Data and self.data should have the same CRS.")
-            # Save crs as it will be lost when converting to xarray
-            crs = self.crs
-            # Check on new grid topology
-            if grid_name in self.mesh_names:
-                # check if the two grids are the same
-                if (
-                    not self.mesh_grids[grid_name]
-                    .to_dataset()
-                    .equals(data.ugrid.grid.to_dataset())
-                ):
-                    if not overwrite_grid:
-                        raise ValueError(
-                            f"Grid {grid_name} already exists in mesh"
-                            " and has a different topology. "
-                            "Use overwrite_grid=True to overwrite the grid"
-                            " topology and related data."
-                        )
-                    else:
-                        # Remove grid and all corresponding data variables from mesh
-                        self.logger.warning(
-                            f"Overwriting grid {grid_name} and the corresponding"
-                            " data variables in mesh."
-                        )
-                        grids = [
-                            self.mesh_datasets[g].ugrid.to_dataset(
-                                optional_attributes=True
-                            )
-                            for g in self.mesh_names
-                            if g != grid_name
-                        ]
-                        # Re-define _data
-                        grids = xr.merge(grids)
-                        self._data = xu.UgridDataset(grids)
-            # Check again mesh_names, could have changed if overwrite_grid=True
-            if grid_name in self.mesh_names:
-                for dvar in data.data_vars:
-                    if dvar in self._data:
-                        self.logger.warning(f"Replacing mesh parameter: {dvar}")
-                    self._data[dvar] = data[dvar]
-            else:
-                # We are potentially adding a new grid without any data variables
-                self._data = xu.UgridDataset(
-                    xr.merge(
-                        [
-                            self.data.ugrid.to_dataset(optional_attributes=True),
-                            data.ugrid.to_dataset(optional_attributes=True),
-                        ]
-                    )
-                )
-            # Restore crs
+        if crs:  # Restore crs
             for grid in self._data.ugrid.grids:
                 grid.set_crs(crs)
 
-        # update related geoms if necessary: region
+        # update related geoms if necessary: region TODO: Check if is still needed
         if overwrite_grid or new_grid:
             # add / updates region
             if "region" in self.geoms:
@@ -640,3 +567,83 @@ class MeshComponent(ModelComponent):
         self.set(uds_sample, grid_name=grid_name, overwrite_grid=False)
 
         return list(uds_sample.data_vars.keys())
+
+    def _add_mesh(
+        self, data: xu.UgridDataset, grid_name: str, overwrite_grid: bool
+    ) -> Optional[CRS]:
+        if self.data is None:  # NOTE: mesh is initialized with None
+            # Check on crs
+            if not data.ugrid.grid.crs:
+                raise ValueError("Data should have CRS.")
+            self._data = data
+        else:
+            # Check on crs
+            if not data.ugrid.grid.crs == self.crs:
+                raise ValueError("Data and self.data should have the same CRS.")
+            # Save crs as it will be lost when converting to xarray
+            crs = self.crs
+            # Check on new grid topology
+            if grid_name in self.mesh_names:
+                # check if the two grids are the same
+                if not self._grid_is_equal(grid_name, data):
+                    if not overwrite_grid:  # TODO: add is_overwrite_mode
+                        raise ValueError(
+                            f"Grid {grid_name} already exists in mesh"
+                            " and has a different topology. "
+                            "Use overwrite_grid=True to overwrite the grid"
+                            " topology and related data."
+                        )
+                    else:
+                        # Remove grid and all corresponding data variables from mesh
+                        self.logger.warning(
+                            f"Overwriting grid {grid_name} and the corresponding"
+                            " data variables in mesh."
+                        )
+                        grids = [
+                            self.mesh_datasets[g].ugrid.to_dataset(
+                                optional_attributes=True
+                            )
+                            for g in self.mesh_names
+                            if g != grid_name
+                        ]
+                        # Re-define _data
+                        grids = xr.merge(grids)
+                        self._data = xu.UgridDataset(grids)
+            # Check again mesh_names, could have changed if overwrite_grid=True
+            if grid_name in self.mesh_names:
+                for dvar in data.data_vars:
+                    if dvar in self._data:
+                        self.logger.warning(f"Replacing mesh parameter: {dvar}")
+                    self._data[dvar] = data[dvar]
+            else:
+                # We are potentially adding a new grid without any data variables
+                self._data = xu.UgridDataset(
+                    xr.merge(
+                        [
+                            self.data.ugrid.to_dataset(optional_attributes=True),
+                            data.ugrid.to_dataset(optional_attributes=True),
+                        ]
+                    )
+                )
+            return crs
+
+    def _grid_is_equal(self, grid_name: str, data: xu.UgridDataset) -> bool:
+        return self.mesh_names[grid_name].to_dataset().equals(data.grid.to_dataset())
+
+
+def _check_UGrid(
+    data: Union[xu.UgridDataArray, xu.UgridDataset], name: str
+) -> xu.UgridDataset:
+    if not isinstance(data, (xu.UgridDataArray, xu.UgridDataset)):
+        raise ValueError(
+            "New mesh data in set_mesh should be of type xu.UgridDataArray"
+            " or xu.UgridDataset"
+        )
+    if isinstance(data, xu.UgridDataArray):
+        if name is not None:
+            data = data.rename(name)
+        elif data.name is None:
+            raise ValueError(
+                f"Cannot set mesh from {str(type(data).__name__)} without a name."
+            )
+        return data.to_dataset()
