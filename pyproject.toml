@@ -81,7 +81,6 @@ test = [
   "pytest>=2.7.3",       # testing framework
   "pytest-cov",          # test coverage
   "pytest-mock",         # mocking
-  "pytest-lazy-fixture", # better fixtures
   "pytest-timeout",      # darn hanging tests
   "xugrid",
 ]

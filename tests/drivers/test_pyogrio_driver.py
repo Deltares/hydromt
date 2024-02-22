@@ -6,7 +6,6 @@ import geopandas as gpd
 import numpy as np
 import pytest
 from pyogrio.errors import DataSourceError
-from pytest_lazyfixture import lazy_fixture
 from shapely import box
 
 from hydromt._typing import Bbox
@@ -29,6 +28,13 @@ class TestPyogrioDriver:
         geodf.to_file(uri, "ESRI Shapefile")
         return uri
 
+    # lazy-fixtures not maintained:
+    # https://github.com/TvoroG/pytest-lazy-fixture/issues/65#issuecomment-1914527162
+    fixture_uris = pytest.mark.parametrize(
+        "uri",
+        [("uri_gjson"), ("uri_shp")],
+    )
+
     @pytest.fixture(scope="class")
     def _raise_gdal_warnings(self):
         with warnings.catch_warnings():
@@ -36,11 +42,11 @@ class TestPyogrioDriver:
             yield
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
-    @pytest.mark.parametrize(
-        "uri",
-        [lazy_fixture("uri_gjson"), lazy_fixture("uri_shp")],
-    )
-    def test_read(self, uri: str, geodf: gpd.GeoDataFrame):
+    @fixture_uris
+    def test_read(
+        self, uri: str, request: pytest.FixtureRequest, geodf: gpd.GeoDataFrame
+    ):
+        uri = request.getfixturevalue(uri)
         driver = PyogrioDriver()
         gdf: gpd.GeoDataFrame = driver.read(uri)
         assert np.all(gdf == geodf)
@@ -52,11 +58,9 @@ class TestPyogrioDriver:
             driver.read("no_data.geojson")
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
-    @pytest.mark.parametrize(
-        "uri",
-        [lazy_fixture("uri_gjson"), lazy_fixture("uri_shp")],
-    )
-    def test_read_with_filters(self, uri: str):
+    @fixture_uris
+    def test_read_with_filters(self, uri: str, request: pytest.FixtureRequest):
+        uri = request.getfixturevalue(uri)
         driver = PyogrioDriver()
         bbox: Bbox = (-60, -34.5600, -55, -30)
         gdf: gpd.GeoDataFrame = driver.read(
