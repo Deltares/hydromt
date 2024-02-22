@@ -1,9 +1,10 @@
 """Driver to read geodataframes using Pyogrio."""
 from enum import Enum
-from functools import singledispatch
+from functools import wraps
+from inspect import signature
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info
@@ -11,9 +12,8 @@ from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import parse_geom_bbox_buffer
-
-from .geodataframe_driver import GeoDataFrameDriver
 
 logger: Logger = getLogger(__name__)
 
@@ -27,8 +27,7 @@ class PyogrioExtension(Enum):
     flatgeobuf = ".fgb"
 
 
-@singledispatch
-def _read_df(
+def _read_df_default(
     extension: PyogrioExtension,
     uri: str,
     bbox: Optional[Bbox],
@@ -38,26 +37,39 @@ def _read_df(
     """`read_dataframe` for different gdal drivers.
 
     Warnings are thrown for invalid kwargs for different drivers, so this makes pyogrio explicit.
+    So far only geobuf accepts the mode argument.
     """
-    logger.debug(
-        f"Reading datafrom from uri: '{uri}' with gdal driver: '{extension.name}'"
-    )
-    return read_dataframe(uri, bbox=bbox, mode=mode)
-
-
-@_read_df.register(PyogrioExtension)
-def _(
-    extension: PyogrioExtension.geojson,
-    uri: str,
-    bbox: Optional[Bbox],
-    mode: str,
-    logger: Logger = logger,
-) -> gpd.GeoDataFrame:
-    """Geojson does not accept mode."""
-    logger.debug(
-        f"Reading datafrom from uri: '{uri}' with gdal driver: '{extension.name}'"
-    )
     return read_dataframe(uri, bbox=bbox)
+
+
+class _EnumDispatchRegistry:
+    def __init__(self, enum: Enum):
+        self._enum = enum
+        self._impls = {}
+
+    def register(self, func: Callable) -> Callable:
+        try:
+            annotation = signature(func).parameters.get("extension")._annotation
+            if isinstance(annotation, Enum):
+                self._impls[annotation.name] = func
+            else:
+                raise ValueError(
+                    f"First argument of function {func} must be PyogrioExtension."
+                )
+        except AttributeError:
+            raise ValueError(f"Registered function {func} needs annotations.")
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    def _read_df(self, ext: PyogrioExtension, *args, **kwargs):
+        return self._impls.get(ext.name, _read_df_default)(ext, *args, **kwargs)
+
+
+_read_df_registry = _EnumDispatchRegistry(PyogrioExtension)
 
 
 class PyogrioDriver(GeoDataFrameDriver):
@@ -71,7 +83,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         buffer: float = 0,
         crs: Optional[CRS] = None,
         predicate: str = "intersects",
-        logger: Optional[Logger] = None,
+        logger: Logger = logger,
         # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """
@@ -85,7 +97,10 @@ class PyogrioDriver(GeoDataFrameDriver):
         if mask is not None:  # buffer mask
             mask: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         bbox_reader = bbox_from_file_and_filters(uri, bbox, mask, crs)
-        return _read_df(extension, uri, bbox=bbox_reader, mode="r")
+        logger.debug(
+            f"Reading datafrom from uri: '{uri}' with extension: '{extension.name}'"
+        )
+        return _read_df_registry._read_df(extension, uri, bbox=bbox_reader, mode="r")
 
 
 def bbox_from_file_and_filters(

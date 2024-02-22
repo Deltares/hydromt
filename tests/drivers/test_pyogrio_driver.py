@@ -28,11 +28,23 @@ class TestPyogrioDriver:
         geodf.to_file(uri, "ESRI Shapefile")
         return uri
 
+    @pytest.fixture(scope="class")
+    def uri_gpkg(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
+        uri = str(tmp_dir / "test.gpkg")
+        geodf.to_file(uri, driver="GPKG")
+        return uri
+
+    @pytest.fixture(scope="class")
+    def uri_fgb(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
+        uri = str(tmp_dir / "test.fgb")
+        geodf.to_file(uri, driver="FlatGeobuf")
+        return uri
+
     # lazy-fixtures not maintained:
     # https://github.com/TvoroG/pytest-lazy-fixture/issues/65#issuecomment-1914527162
     fixture_uris = pytest.mark.parametrize(
         "uri",
-        [("uri_gjson"), ("uri_shp")],
+        ["uri_gjson", "uri_shp", "uri_fgb", "uri_gpkg"],
     )
 
     @pytest.fixture(scope="class")
@@ -48,8 +60,8 @@ class TestPyogrioDriver:
     ):
         uri = request.getfixturevalue(uri)
         driver = PyogrioDriver()
-        gdf: gpd.GeoDataFrame = driver.read(uri)
-        assert np.all(gdf == geodf)
+        gdf: gpd.GeoDataFrame = driver.read(uri).sort_values("id")
+        assert np.all(gdf.reset_index(drop=True) == geodf)  # fgb scrambles order
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
     def test_read_nodata(self):
