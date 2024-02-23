@@ -8,9 +8,9 @@ WORKDIR /home/deltares
 
 RUN curl -fsSL https://pixi.sh/install.sh | bash
 ENV PATH=/home/deltares/.pixi/bin:$PATH
-COPY --chown=deltares:deltares pixi.toml pixi.lock pyproject.toml README.rst ./
-COPY --chown=deltares:deltares data/ ./data
-COPY --chown=deltares:deltares hydromt/ ./hydromt
+COPY --chown=deltares:deltares --chmod=744 pixi.toml pixi.lock pyproject.toml README.rst ./
+COPY --chown=deltares:deltares --chmod=744 data/ ./data
+COPY --chown=deltares:deltares --chmod=744 hydromt/ ./hydromt
 RUN pixi run --locked -e ${PIXIENV} install-hydromt \
   && rm -rf .cache \
   && find . -type f -name "*.pyc" -delete
@@ -24,10 +24,13 @@ ENTRYPOINT ["sh", "run_pixi.sh"]
 CMD ["hydromt","--models"]
 
 FROM base as full
-COPY --chown=deltares:deltares examples/ ./examples
-COPY --chown=deltares:deltares tests/ ./tests
+USER deltares
+COPY --chown=deltares:deltares --chmod=744 examples/ ./examples
+COPY --chown=deltares:deltares --chmod=744 tests/ ./tests
 
 FROM base as slim
-COPY --chown=deltares:deltares examples/ ./examples
+USER deltares
+COPY --chown=deltares:deltares --chmod=744 examples/ ./examples
 
 FROM base as min
+USER deltares
