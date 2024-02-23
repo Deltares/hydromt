@@ -192,9 +192,7 @@ Let's say you just created the plugin called `hydromt_mymodel` before you can st
 	$ cd hydromt_mymodel
 	$ git init
 
-If your project has dependencies, you can add them in the pyproject.toml under the `dependencies` array. If you have `tomli` installed, you can
-use the `make_env.py` script to generate a conda environment specification see :ref:`The developer installation page <dev_install>` for
-more information on how to use this script.
+If your project has dependencies, you can add them in the pyproject.toml under the `dependencies` array.
 
 Now, assuming that you've made a repository in your personal GitHub repository (eg user savente93) you just need to add it as a remote in the
 repository and push it (for an organisation, you will need specific rights to do this).
