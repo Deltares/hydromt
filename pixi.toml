@@ -211,12 +211,13 @@ jupyterlab = "*"
 notebook = "*"
 
 [environments]
-full-py39 = ["py39", "io", "extra", "dev", "test", "doc", "examples"]
-full-py310 = ["py310", "io", "extra", "dev", "test", "doc", "examples"]
-full-py311 = ["py311", "io", "extra", "dev", "test", "doc", "examples"]
-slim-py39 = ["py39", "io", "extra", "examples"]
-slim-py310 = ["py310", "io", "extra", "examples"]
-slim-py311 = ["py311", "io", "extra", "examples"]
-min-py39 = ["py39"]
-min-py310 = ["py310"]
-min-py311 = ["py311"]
+default = { features = ["py311", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py311" }
+full-py311 = { features = ["py311", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py311" }
+slim-py311 = { features = ["py311", "io", "extra", "examples"], solve-group = "py311" }
+min-py311 = { features = ["py311"], solve-group = "py311" }
+full-py310 = { features = ["py310", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py310" }
+slim-py310 = { features = ["py310", "io", "extra", "examples"], solve-group = "py310" }
+min-py310 = { features = ["py310"], solve-group = "py310" }
+full-py39 = { features = ["py39", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py39" }
+slim-py39 = { features = ["py39", "io", "extra", "examples"], solve-group = "py39" }
+min-py39 = { features = ["py39"], solve-group = "py39" }
