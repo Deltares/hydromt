@@ -194,10 +194,19 @@ pyet = "*"
 [feature.dev.dependencies]
 black = "*"
 flit = "*"
+mypy = "*"
+pandas-stubs = "*"
 pip = ">=23.1.2"
 pre-commit = "*"
 ruff = "*"
 twine = "*"
+types-openpyxl = "*"
+types-PyYAML = "*"
+types-Pillow = "*"
+types-requests = "*"
+
+[feature.dev.pypi-dependencies]
+types-xmltodict = "*"
 
 [feature.test.dependencies]
 pytest = ">=8"

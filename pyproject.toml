@@ -170,4 +170,5 @@ filterwarnings = [
 ]
 
 [tool.mypy]
+exclude = ["docs/.*"]
 ignore_missing_imports = true
