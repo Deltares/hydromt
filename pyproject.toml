@@ -77,11 +77,11 @@ dev = [
   "twine",       # needed to publish to pypi
 ]
 test = [
-  "polyfactory>=2", # factory for pydantic models
-  "pytest>=2.7.3",  # testing framework
-  "pytest-cov",     # test coverage
-  "pytest-mock",    # mocking
-  "pytest-timeout", # darn hanging tests
+  "polyfactory>=2",      # factory for pydantic models
+  "pytest>=2.7.3",       # testing framework
+  "pytest-cov",          # test coverage
+  "pytest-mock",         # mocking
+  "pytest-timeout",      # darn hanging tests
   "xugrid",
 ]
 doc = [
