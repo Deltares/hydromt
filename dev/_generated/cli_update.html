@@ -459,9 +459,9 @@ document.write(`
 <span class="go">  update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d</span>
 <span class="go">  /path/to/data_catalog.yml -v</span>
 
-<span class="go">  Update Wflow model components outlined in an .ini configuration file and write</span>
+<span class="go">  Update Wflow model components outlined in an .yml configuration file and write</span>
 <span class="go">  the model to a directory: hydromt update wflow /path/to/model_root  -o</span>
-<span class="go">  /path/to/model_out  -i /path/to/wflow_config.ini  -d /path/to/data_catalog.yml</span>
+<span class="go">  /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml</span>
 <span class="go">  -v</span>
 
 <span class="go">Options:</span>
@@ -469,7 +469,7 @@ document.write(`
 <span class="go">                             overwritten if left empty.</span>
 <span class="go">  -i, --config PATH          Path to hydroMT configuration file, for the model</span>
 <span class="go">                             specific implementation.</span>
-<span class="go">  -c, --components TEXT      Model methods from ini file to run</span>
+<span class="go">  -c, --components TEXT      Model methods from configuration file to run</span>
 <span class="go">  --opt TEXT                 Method specific keyword arguments, see the method</span>
 <span class="go">                             documentation of the specific model for more</span>
 <span class="go">                             information about the arguments.</span>

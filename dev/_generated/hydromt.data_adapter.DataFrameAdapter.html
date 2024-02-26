@@ -53,7 +53,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="hydromt.data_adapter.DataFrameAdapter.summary" href="hydromt.data_adapter.DataFrameAdapter.summary.html" />
-    <link rel="prev" title="hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox" href="hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html" />
+    <link rel="prev" title="hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog" href="hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -403,6 +403,14 @@ document.write(`
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_cli.html">hydromt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_build.html">hydromt build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_update.html">hydromt update</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_clip.html">hydromt clip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_export.html">hydromt export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_check.html">hydromt check</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.html">hydromt.data_catalog.DataCatalog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source.html">hydromt.data_catalog.DataCatalog.get_source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.iter_sources.html">hydromt.data_catalog.DataCatalog.iter_sources</a></li>
@@ -430,6 +438,12 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataset.html">hydromt.data_catalog.DataCatalog.get_geodataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataframe.html">hydromt.data_catalog.DataCatalog.get_dataframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataset.html">hydromt.data_catalog.DataCatalog.get_dataset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataAdapter.html">hydromt.data_adapter.DataAdapter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataAdapter.summary.html">hydromt.data_adapter.DataAdapter.summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataAdapter.to_dict.html">hydromt.data_adapter.DataAdapter.to_dict</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.html">hydromt.data_adapter.RasterDatasetAdapter</a></li>
@@ -441,6 +455,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.get_time_range.html">hydromt.data_adapter.RasterDatasetAdapter.get_time_range</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.detect_bbox.html">hydromt.data_adapter.RasterDatasetAdapter.detect_bbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.detect_time_range.html">hydromt.data_adapter.RasterDatasetAdapter.detect_time_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog.html">hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.html">hydromt.data_adapter.GeoDatasetAdapter</a></li>
@@ -452,6 +467,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.get_time_range.html">hydromt.data_adapter.GeoDatasetAdapter.get_time_range</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.detect_bbox.html">hydromt.data_adapter.GeoDatasetAdapter.detect_bbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.detect_time_range.html">hydromt.data_adapter.GeoDatasetAdapter.detect_time_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.to_stac_catalog.html">hydromt.data_adapter.GeoDatasetAdapter.to_stac_catalog</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.html">hydromt.data_adapter.GeoDataFrameAdapter</a></li>
@@ -461,6 +477,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.to_file.html">hydromt.data_adapter.GeoDataFrameAdapter.to_file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.get_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.get_bbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog.html">hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">hydromt.data_adapter.DataFrameAdapter</a></li>
@@ -468,6 +485,15 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.get_data.html">hydromt.data_adapter.DataFrameAdapter.get_data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_dict.html">hydromt.data_adapter.DataFrameAdapter.to_dict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_file.html">hydromt.data_adapter.DataFrameAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_stac_catalog.html">hydromt.data_adapter.DataFrameAdapter.to_stac_catalog</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.html">hydromt.data_adapter.DatasetAdapter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.summary.html">hydromt.data_adapter.DatasetAdapter.summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.get_data.html">hydromt.data_adapter.DatasetAdapter.get_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.to_dict.html">hydromt.data_adapter.DatasetAdapter.to_dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.to_file.html">hydromt.data_adapter.DatasetAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.to_stac_catalog.html">hydromt.data_adapter.DatasetAdapter.to_stac_catalog</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.ModelCatalog.html">hydromt.ModelCatalog</a></li>
@@ -934,9 +960,9 @@ In addition it keeps meta data to be able to reproduce which data is used.</p>
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – Path to data source. If the dataset consists of multiple files, the path may
 contain {variable}, {year}, {month} placeholders as well as path
 search pattern using a ‘*’ wildcard.</p></li>
-<li><p><strong>driver</strong> (<code class="docutils literal notranslate"><span class="pre">{'csv',</span> <span class="pre">'parquet',</span> <span class="pre">'xlsx',</span> <span class="pre">'xls',</span> <span class="pre">'fwf'}</span></code>, <em>optional</em>) – Driver to read files with, for ‘csv’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_csv()</span></code></a>,
-for ‘parquet’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_parquet()</span></code></a>, for {‘xlsx’, ‘xls’}
-<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_excel()</span></code></a>, and for ‘fwf’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_fwf()</span></code></a>.
+<li><p><strong>driver</strong> (<code class="docutils literal notranslate"><span class="pre">{'csv',</span> <span class="pre">'parquet',</span> <span class="pre">'xlsx',</span> <span class="pre">'xls',</span> <span class="pre">'fwf'}</span></code>, <em>optional</em>) – Driver to read files with, for ‘csv’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.2.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_csv()</span></code></a>,
+for ‘parquet’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.2.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_parquet()</span></code></a>, for {‘xlsx’, ‘xls’}
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.2.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_excel()</span></code></a>, and for ‘fwf’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.2.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_fwf()</span></code></a>.
 By default the driver is inferred from the file extension and falls back to
 ‘csv’ if unknown.</p></li>
 <li><p><strong>filesystem</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Filesystem where the data is stored (local, cloud, http etc.).
@@ -980,9 +1006,9 @@ In addition it keeps meta data to be able to reproduce which data is used.</p>
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – Path to data source. If the dataset consists of multiple files, the path may
 contain {variable}, {year}, {month} placeholders as well as path
 search pattern using a ‘*’ wildcard.</p></li>
-<li><p><strong>driver</strong> (<code class="docutils literal notranslate"><span class="pre">{'csv',</span> <span class="pre">'parquet',</span> <span class="pre">'xlsx',</span> <span class="pre">'xls',</span> <span class="pre">'fwf'}</span></code>, <em>optional</em>) – Driver to read files with, for ‘csv’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_csv()</span></code></a>,
-for ‘parquet’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_parquet()</span></code></a>, for {‘xlsx’, ‘xls’}
-<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_excel()</span></code></a>, and for ‘fwf’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_fwf()</span></code></a>.
+<li><p><strong>driver</strong> (<code class="docutils literal notranslate"><span class="pre">{'csv',</span> <span class="pre">'parquet',</span> <span class="pre">'xlsx',</span> <span class="pre">'xls',</span> <span class="pre">'fwf'}</span></code>, <em>optional</em>) – Driver to read files with, for ‘csv’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v2.2.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_csv()</span></code></a>,
+for ‘parquet’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html#pandas.read_parquet" title="(in pandas v2.2.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_parquet()</span></code></a>, for {‘xlsx’, ‘xls’}
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v2.2.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_excel()</span></code></a>, and for ‘fwf’ <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_fwf.html#pandas.read_fwf" title="(in pandas v2.2.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_fwf()</span></code></a>.
 By default the driver is inferred from the file extension and falls back to
 ‘csv’ if unknown.</p></li>
 <li><p><strong>filesystem</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Filesystem where the data is stored (local, cloud, http etc.).
@@ -1036,7 +1062,7 @@ or long name of the variable.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_file.html#hydromt.data_adapter.DataFrameAdapter.to_file" title="hydromt.data_adapter.DataFrameAdapter.to_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_file</span></code></a>(data_root, data_name[, driver, ...])</p></td>
 <td><p>Save a dataframe slice to a file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_stac_catalog</span></code>([on_error])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_stac_catalog.html#hydromt.data_adapter.DataFrameAdapter.to_stac_catalog" title="hydromt.data_adapter.DataFrameAdapter.to_stac_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_stac_catalog</span></code></a>([on_error])</p></td>
 <td><p>Convert a dataframe into a STAC Catalog representation.</p></td>
 </tr>
 </tbody>
@@ -1067,12 +1093,12 @@ or long name of the variable.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html"
+       href="hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox</p>
+        <p class="prev-next-title">hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog</p>
       </div>
     </a>
     <a class="right-next"

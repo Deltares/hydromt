@@ -492,7 +492,7 @@ interface, but with model-specific file readers, writers and workflows.</p>
 </ol>
 </div></blockquote>
 <p>And depending on the answers, you can decide to start your own plugin yes or no. Answering <em>yes</em> to any of the previous
-questions could be a protential reason for starting your own plugin. Below are a couple of advantages and drawbacks of making your own plugin:</p>
+questions could be a potential reason for starting your own plugin. Below are a couple of advantages and drawbacks of making your own plugin:</p>
 <p><em>Advantages</em></p>
 <ul class="simple">
 <li><p>HydroMT outputs are in the correct file format so my freshly built model is ready to run.</p></li>
@@ -676,13 +676,21 @@ model data catalog to read the corresponding files.</p></li>
 </section>
 <section id="model-class-and-components">
 <h2>Model class and components<a class="headerlink" href="#model-class-and-components" title="Link to this heading">#</a></h2>
-<p>In this section, we will detail the bottom part of the schematic ie how to initialise your HydroMT Model class for your plugin, the main properties and how to
-work with its model components.</p>
+<p>The main goal of your plugin is to be able to build and update model instances for your own
+software. As a reminder, the figure below illustrates the process of model building in HydroMT:</p>
+<figure class="align-center" id="id1">
+<img alt="../_images/model_building_process.png" src="../_images/model_building_process.png" />
+<figcaption>
+<p><span class="caption-text">Model building process in HydroMT.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>In this section, we will detail the bottom part of the schematic above ie how to initialise your HydroMT Model class for your plugin, the main properties
+and setup methods and how to work with its model components. The top part of the schematic (data preparation) is taken care of by the core of HydroMT.</p>
 <section id="initialisation">
 <h3>Initialisation<a class="headerlink" href="#initialisation" title="Link to this heading">#</a></h3>
 <p>In the <a class="reference internal" href="#plugin-create"><span class="std std-ref">create plugin section</span></a>, we already saw which HydroMT <code class="docutils literal notranslate"><span class="pre">Model</span></code> class to choose for your plugin. Here we will focus on additional
-properties and the initiliasation of your new Model subclass.</p>
-<p>To fully initiliase your new subclass (eg <em>MyModelModel</em>), you need to initialise a couple of high level properties and in some cases, you may wish to modify
+properties and the initialisation of your new Model subclass.</p>
+<p>To fully initialise your new subclass (eg <em>MyModelModel</em>), you need to initialise a couple of high level properties and in some cases, you may wish to modify
 the default initialisation function of you parent class (the HydroMT core class you choose, <code class="docutils literal notranslate"><span class="pre">Model</span></code> or <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> etc.).</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -768,7 +776,7 @@ and, if in appending mode, existing layers of the model component are read first
 <p class="admonition-title">Note</p>
 <p>In the background, the actual data is stored not directly in the &lt;component&gt; attribute itself but in a private
 attribute (eg <code class="docutils literal notranslate"><span class="pre">_maps</span></code> for <code class="docutils literal notranslate"><span class="pre">maps</span></code>). The public component, (eg <code class="docutils literal notranslate"><span class="pre">maps</span></code>), actually just fetched the data
-from the private attriute <code class="docutils literal notranslate"><span class="pre">_maps</span></code>, but makes sure that in read mode it reads existing layers of the component first.
+from the private attribute <code class="docutils literal notranslate"><span class="pre">_maps</span></code>, but makes sure that in read mode it reads existing layers of the component first.
 It is highly recommended, in your plugin to always use the public model component (eg <code class="docutils literal notranslate"><span class="pre">maps</span></code>).</p>
 </div>
 </section>

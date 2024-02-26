@@ -405,7 +405,15 @@ document.write(`
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hydromt_intro.html">Introduction to HydroMT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quick_overview.html">Quick overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hydromt_cli.html">HydroMT Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hydromt_python.html">Using HydroMT in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/terminology.html">Terminology</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/data_overview.html">Overview data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/data_prepare_cat.html">Preparing a Data Catalog</a></li>
@@ -568,7 +576,7 @@ generic models (hydromt 0.9.4.dev0):
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -581,11 +589,11 @@ Usage: hydromt build [OPTIONS] MODEL MODEL_ROOT
 
   To build a wflow model for a subbasin using a point coordinates snapped to
   cells with upstream area &gt;= 50 km2 hydromt build wflow /path/to/model_root
-  -i /path/to/wflow_config.ini  -r &#34;{&#39;subbasin&#39;: [-7.24, 62.09], &#39;uparea&#39;:
+  -i /path/to/wflow_config.yml  -r &#34;{&#39;subbasin&#39;: [-7.24, 62.09], &#39;uparea&#39;:
   50}&#34; -d deltares_data -d /path/to/data_catalog.yml -v
 
   To build a sfincs model based on a bbox hydromt build sfincs
-  /path/to/model_root  -i /path/to/sfincs_config.ini  -r &#34;{&#39;bbox&#39;:
+  /path/to/model_root  -i /path/to/sfincs_config.yml  -r &#34;{&#39;bbox&#39;:
   [4.6891,52.9750,4.9576,53.1994]}&#34;  -d /path/to/data_catalog.yml -v
 
 Options:
@@ -604,6 +612,13 @@ Options:
   -v, --verbose            Increase verbosity.
   -q, --quiet              Decrease verbosity.
   --help                   Show this message and exit.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 
 </pre></div></div>
 </div>
@@ -620,28 +635,43 @@ Options:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:09,831 - build - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model/hydromt.log.
-2024-02-19 08:53:09,831 - build - log - INFO - HydroMT version: 0.9.4.dev0
-2024-02-19 08:53:09,831 - build - main - INFO - Building instance of grid_model model at /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model.
-2024-02-19 08:53:09,831 - build - main - INFO - User settings:
-2024-02-19 08:53:09,844 - build - model_api - INFO - Initializing grid_model model from hydromt (v0.9.4.dev0).
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.region: {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.res: 0.05
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.crs: None
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.rotated: False
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.hydrography_fn: None
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.basin_index_fn: None
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.add_mask: True
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.align: True
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.dec_origin: 0
-2024-02-19 08:53:09,844 - build - model_api - INFO - setup_grid.dec_rotation: 3
-2024-02-19 08:53:09,844 - build - model_grid - INFO - Preparing 2D grid.
-2024-02-19 08:53:09,844 - build - basin_mask - DEBUG - Parsed region (kind=bbox): {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
-2024-02-19 08:53:09,855 - build - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model
-2024-02-19 08:53:09,856 - build - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model/model.ini
-2024-02-19 08:53:09,856 - build - model_api - ERROR - Default config file not found at grid_model/model.ini
-2024-02-19 08:53:09,856 - build - model_api - DEBUG - No maps data found, skip writing.
-2024-02-19 08:53:09,856 - build - model_api - DEBUG - Writing file grid/grid.nc
+2024-02-26 04:16:13,537 - build - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model/hydromt.log.
+2024-02-26 04:16:13,537 - build - log - INFO - HydroMT version: 0.9.4.dev0
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2024-02-26 04:16:13,537 - build - main - INFO - Building instance of grid_model model at /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model.
+2024-02-26 04:16:13,537 - build - main - INFO - User settings:
+2024-02-26 04:16:13,551 - build - model_api - INFO - Initializing grid_model model from hydromt (v0.9.4.dev0).
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.region: {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.res: 0.05
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.crs: None
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.rotated: False
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.hydrography_fn: None
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.basin_index_fn: None
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.add_mask: True
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.align: True
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.dec_origin: 0
+2024-02-26 04:16:13,551 - build - model_api - INFO - setup_grid.dec_rotation: 3
+2024-02-26 04:16:13,551 - build - model_grid - INFO - Preparing 2D grid.
+2024-02-26 04:16:13,551 - build - basin_mask - DEBUG - Parsed region (kind=bbox): {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2024-02-26 04:16:13,562 - build - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model
+2024-02-26 04:16:13,562 - build - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model/model.ini
+2024-02-26 04:16:13,562 - build - model_api - ERROR - Default config file not found at grid_model/model.ini
+2024-02-26 04:16:13,562 - build - model_api - DEBUG - No maps data found, skip writing.
+2024-02-26 04:16:13,563 - build - model_api - DEBUG - Writing file grid/grid.nc
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2024-02-26 04:16:13,674 - build - model_api - DEBUG - Writing file geoms/region.geojson
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -649,10 +679,9 @@ Options:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:09,975 - build - model_api - DEBUG - Writing file geoms/region.geojson
-2024-02-19 08:53:10,009 - build - model_api - DEBUG - No tables found, skip writing.
-2024-02-19 08:53:10,009 - build - model_api - DEBUG - No forcing data found, skip writing.
-2024-02-19 08:53:10,009 - build - model_api - DEBUG - No states data found, skip writing.
+2024-02-26 04:16:13,706 - build - model_api - DEBUG - No tables found, skip writing.
+2024-02-26 04:16:13,706 - build - model_api - DEBUG - No forcing data found, skip writing.
+2024-02-26 04:16:13,706 - build - model_api - DEBUG - No states data found, skip writing.
 
 </pre></div></div>
 </div>
@@ -810,10 +839,10 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:12,887 - build - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/hydromt.log.
-2024-02-19 08:53:12,887 - build - log - INFO - HydroMT version: 0.9.4.dev0
-2024-02-19 08:53:12,887 - build - main - INFO - Building instance of grid_model model at /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1.
-2024-02-19 08:53:12,887 - build - main - INFO - User settings:
+2024-02-26 04:16:16,313 - build - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/hydromt.log.
+2024-02-26 04:16:16,313 - build - log - INFO - HydroMT version: 0.9.4.dev0
+2024-02-26 04:16:16,313 - build - main - INFO - Building instance of grid_model model at /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1.
+2024-02-26 04:16:16,313 - build - main - INFO - User settings:
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -821,8 +850,8 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:12,936 - build - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
-2024-02-19 08:53:12,936 - build - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2024-02-26 04:16:16,351 - build - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
+2024-02-26 04:16:16,351 - build - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -830,35 +859,35 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:12,981 - build - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
-2024-02-19 08:53:12,982 - build - model_api - INFO - Initializing grid_model model from hydromt (v0.9.4.dev0).
-2024-02-19 08:53:12,983 - build - model_api - DEBUG - Setting model config options.
-2024-02-19 08:53:12,983 - build - model_api - ERROR - Default config file not found at grid_model/model.ini
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.region: {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.res: 0.05
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.crs: 4326
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.rotated: False
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.hydrography_fn: merit_hydro
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.basin_index_fn: merit_hydro_index
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.add_mask: True
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.align: True
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.dec_origin: 0
-2024-02-19 08:53:12,983 - build - model_api - INFO - setup_grid.dec_rotation: 3
-2024-02-19 08:53:12,983 - build - model_grid - INFO - Preparing 2D grid.
-2024-02-19 08:53:12,984 - build - basin_mask - DEBUG - Parsed region (kind=bbox): {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
-2024-02-19 08:53:12,996 - build - model_api - INFO - setup_grid_from_constant.constant: 0.01
-2024-02-19 08:53:12,996 - build - model_api - INFO - setup_grid_from_constant.name: c1
-2024-02-19 08:53:12,996 - build - model_api - INFO - setup_grid_from_constant.dtype: float32
-2024-02-19 08:53:12,996 - build - model_api - INFO - setup_grid_from_constant.nodata: -99.0
-2024-02-19 08:53:12,996 - build - model_api - INFO - setup_grid_from_constant.mask_name: mask
-2024-02-19 08:53:13,001 - build - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: merit_hydro_1k
-2024-02-19 08:53:13,001 - build - model_api - INFO - setup_grid_from_rasterdataset.variables: [&#39;elevtn&#39;, &#39;basins&#39;]
-2024-02-19 08:53:13,001 - build - model_api - INFO - setup_grid_from_rasterdataset.fill_method: None
-2024-02-19 08:53:13,001 - build - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: [&#39;average&#39;, &#39;mode&#39;]
-2024-02-19 08:53:13,001 - build - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
-2024-02-19 08:53:13,001 - build - model_api - INFO - setup_grid_from_rasterdataset.rename: None
-2024-02-19 08:53:13,001 - build - model_grid - INFO - Preparing grid data from raster source merit_hydro_1k
-2024-02-19 08:53:13,002 - build - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
+2024-02-26 04:16:16,396 - build - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2024-02-26 04:16:16,397 - build - model_api - INFO - Initializing grid_model model from hydromt (v0.9.4.dev0).
+2024-02-26 04:16:16,397 - build - model_api - DEBUG - Setting model config options.
+2024-02-26 04:16:16,397 - build - model_api - ERROR - Default config file not found at grid_model/model.ini
+2024-02-26 04:16:16,397 - build - model_api - INFO - setup_grid.region: {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2024-02-26 04:16:16,397 - build - model_api - INFO - setup_grid.res: 0.05
+2024-02-26 04:16:16,397 - build - model_api - INFO - setup_grid.crs: 4326
+2024-02-26 04:16:16,397 - build - model_api - INFO - setup_grid.rotated: False
+2024-02-26 04:16:16,397 - build - model_api - INFO - setup_grid.hydrography_fn: merit_hydro
+2024-02-26 04:16:16,397 - build - model_api - INFO - setup_grid.basin_index_fn: merit_hydro_index
+2024-02-26 04:16:16,397 - build - model_api - INFO - setup_grid.add_mask: True
+2024-02-26 04:16:16,398 - build - model_api - INFO - setup_grid.align: True
+2024-02-26 04:16:16,398 - build - model_api - INFO - setup_grid.dec_origin: 0
+2024-02-26 04:16:16,398 - build - model_api - INFO - setup_grid.dec_rotation: 3
+2024-02-26 04:16:16,398 - build - model_grid - INFO - Preparing 2D grid.
+2024-02-26 04:16:16,398 - build - basin_mask - DEBUG - Parsed region (kind=bbox): {&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2024-02-26 04:16:16,409 - build - model_api - INFO - setup_grid_from_constant.constant: 0.01
+2024-02-26 04:16:16,409 - build - model_api - INFO - setup_grid_from_constant.name: c1
+2024-02-26 04:16:16,410 - build - model_api - INFO - setup_grid_from_constant.dtype: float32
+2024-02-26 04:16:16,410 - build - model_api - INFO - setup_grid_from_constant.nodata: -99.0
+2024-02-26 04:16:16,410 - build - model_api - INFO - setup_grid_from_constant.mask_name: mask
+2024-02-26 04:16:16,415 - build - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: merit_hydro_1k
+2024-02-26 04:16:16,415 - build - model_api - INFO - setup_grid_from_rasterdataset.variables: [&#39;elevtn&#39;, &#39;basins&#39;]
+2024-02-26 04:16:16,415 - build - model_api - INFO - setup_grid_from_rasterdataset.fill_method: None
+2024-02-26 04:16:16,415 - build - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: [&#39;average&#39;, &#39;mode&#39;]
+2024-02-26 04:16:16,415 - build - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
+2024-02-26 04:16:16,415 - build - model_api - INFO - setup_grid_from_rasterdataset.rename: None
+2024-02-26 04:16:16,415 - build - model_grid - INFO - Preparing grid data from raster source merit_hydro_1k
+2024-02-26 04:16:16,417 - build - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -866,7 +895,7 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:13,052 - build - rasterdataset - DEBUG - Clip to [11.700, 45.350, 12.950, 46.700] (epsg:4326))
+2024-02-26 04:16:16,465 - build - rasterdataset - DEBUG - Clip to [11.700, 45.350, 12.950, 46.700] (epsg:4326))
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -874,15 +903,14 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:13,237 - build - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: vito
-2024-02-19 08:53:13,237 - build - model_api - INFO - setup_grid_from_rasterdataset.variables: None
-2024-02-19 08:53:13,238 - build - model_api - INFO - setup_grid_from_rasterdataset.fill_method: nearest
-2024-02-19 08:53:13,238 - build - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: mode
-2024-02-19 08:53:13,238 - build - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
-2024-02-19 08:53:13,238 - build - model_api - INFO - setup_grid_from_rasterdataset.rename: {&#39;vito&#39;: &#39;landuse&#39;}
-2024-02-19 08:53:13,238 - build - model_grid - INFO - Preparing grid data from raster source vito
-2024-02-19 08:53:13,238 - build - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
-2024-02-19 08:53:13,252 - build - rasterdataset - DEBUG - Clip to [11.700, 45.350, 12.950, 46.700] (epsg:4326))
+2024-02-26 04:16:16,636 - build - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: vito
+2024-02-26 04:16:16,637 - build - model_api - INFO - setup_grid_from_rasterdataset.variables: None
+2024-02-26 04:16:16,637 - build - model_api - INFO - setup_grid_from_rasterdataset.fill_method: nearest
+2024-02-26 04:16:16,637 - build - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: mode
+2024-02-26 04:16:16,637 - build - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
+2024-02-26 04:16:16,637 - build - model_api - INFO - setup_grid_from_rasterdataset.rename: {&#39;vito&#39;: &#39;landuse&#39;}
+2024-02-26 04:16:16,637 - build - model_grid - INFO - Preparing grid data from raster source vito
+2024-02-26 04:16:16,637 - build - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -890,18 +918,7 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:13,293 - build - model_api - INFO - setup_grid_from_raster_reclass.raster_fn: vito
-2024-02-19 08:53:13,293 - build - model_api - INFO - setup_grid_from_raster_reclass.reclass_table_fn: vito_reclass
-2024-02-19 08:53:13,293 - build - model_api - INFO - setup_grid_from_raster_reclass.reclass_variables: [&#39;manning&#39;]
-2024-02-19 08:53:13,293 - build - model_api - INFO - setup_grid_from_raster_reclass.variable: None
-2024-02-19 08:53:13,293 - build - model_api - INFO - setup_grid_from_raster_reclass.fill_method: None
-2024-02-19 08:53:13,293 - build - model_api - INFO - setup_grid_from_raster_reclass.reproject_method: [&#39;average&#39;]
-2024-02-19 08:53:13,293 - build - model_api - INFO - setup_grid_from_raster_reclass.mask_name: mask
-2024-02-19 08:53:13,293 - build - model_api - INFO - setup_grid_from_raster_reclass.rename: None
-2024-02-19 08:53:13,293 - build - model_grid - INFO - Preparing grid data by reclassifying the data in vito based on vito_reclass
-2024-02-19 08:53:13,294 - build - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
-2024-02-19 08:53:13,307 - build - rasterdataset - DEBUG - Clip to [11.700, 45.350, 12.950, 46.700] (epsg:4326))
-2024-02-19 08:53:13,308 - build - dataframe - INFO - Reading vito_reclass csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2024-02-26 04:16:16,651 - build - rasterdataset - DEBUG - Clip to [11.700, 45.350, 12.950, 46.700] (epsg:4326))
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -909,15 +926,18 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:13,506 - build - model_api - INFO - setup_grid_from_geodataframe.vector_fn: hydro_lakes
-2024-02-19 08:53:13,506 - build - model_api - INFO - setup_grid_from_geodataframe.variables: [&#39;waterbody_id&#39;, &#39;Depth_avg&#39;]
-2024-02-19 08:53:13,506 - build - model_api - INFO - setup_grid_from_geodataframe.nodata: [-1, -999.0]
-2024-02-19 08:53:13,506 - build - model_api - INFO - setup_grid_from_geodataframe.rasterize_method: value
-2024-02-19 08:53:13,506 - build - model_api - INFO - setup_grid_from_geodataframe.mask_name: mask
-2024-02-19 08:53:13,506 - build - model_api - INFO - setup_grid_from_geodataframe.rename: {&#39;waterbody_id&#39;: &#39;lake_id&#39;, &#39;Detph_avg&#39;: &#39;lake_depth&#39;}
-2024-02-19 08:53:13,506 - build - model_api - INFO - setup_grid_from_geodataframe.all_touched: True
-2024-02-19 08:53:13,506 - build - model_grid - INFO - Preparing grid data from vector &#39;hydro_lakes&#39;.
-2024-02-19 08:53:13,508 - build - geodataframe - INFO - Reading hydro_lakes vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/hydro_lakes.gpkg
+2024-02-26 04:16:16,698 - build - model_api - INFO - setup_grid_from_raster_reclass.raster_fn: vito
+2024-02-26 04:16:16,699 - build - model_api - INFO - setup_grid_from_raster_reclass.reclass_table_fn: vito_reclass
+2024-02-26 04:16:16,699 - build - model_api - INFO - setup_grid_from_raster_reclass.reclass_variables: [&#39;manning&#39;]
+2024-02-26 04:16:16,699 - build - model_api - INFO - setup_grid_from_raster_reclass.variable: None
+2024-02-26 04:16:16,699 - build - model_api - INFO - setup_grid_from_raster_reclass.fill_method: None
+2024-02-26 04:16:16,699 - build - model_api - INFO - setup_grid_from_raster_reclass.reproject_method: [&#39;average&#39;]
+2024-02-26 04:16:16,699 - build - model_api - INFO - setup_grid_from_raster_reclass.mask_name: mask
+2024-02-26 04:16:16,699 - build - model_api - INFO - setup_grid_from_raster_reclass.rename: None
+2024-02-26 04:16:16,699 - build - model_grid - INFO - Preparing grid data by reclassifying the data in vito based on vito_reclass
+2024-02-26 04:16:16,699 - build - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
+2024-02-26 04:16:16,713 - build - rasterdataset - DEBUG - Clip to [11.700, 45.350, 12.950, 46.700] (epsg:4326))
+2024-02-26 04:16:16,714 - build - dataframe - INFO - Reading vito_reclass csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -925,17 +945,15 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:13,553 - build - geodataframe - DEBUG - Clip intersects [11.700, 45.350, 12.950, 46.700] (EPSG:4326)
-2024-02-19 08:53:13,554 - build - geodataframe - DEBUG - Convert units for 1 columns.
-2024-02-19 08:53:13,572 - build - model_api - INFO - setup_grid_from_geodataframe.vector_fn: hydro_lakes
-2024-02-19 08:53:13,572 - build - model_api - INFO - setup_grid_from_geodataframe.variables: None
-2024-02-19 08:53:13,572 - build - model_api - INFO - setup_grid_from_geodataframe.nodata: -1
-2024-02-19 08:53:13,572 - build - model_api - INFO - setup_grid_from_geodataframe.rasterize_method: fraction
-2024-02-19 08:53:13,572 - build - model_api - INFO - setup_grid_from_geodataframe.mask_name: mask
-2024-02-19 08:53:13,572 - build - model_api - INFO - setup_grid_from_geodataframe.rename: {&#39;hydro_lakes&#39;: &#39;water_frac&#39;}
-2024-02-19 08:53:13,572 - build - model_api - INFO - setup_grid_from_geodataframe.all_touched: True
-2024-02-19 08:53:13,572 - build - model_grid - INFO - Preparing grid data from vector &#39;hydro_lakes&#39;.
-2024-02-19 08:53:13,574 - build - geodataframe - INFO - Reading hydro_lakes vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/hydro_lakes.gpkg
+2024-02-26 04:16:16,897 - build - model_api - INFO - setup_grid_from_geodataframe.vector_fn: hydro_lakes
+2024-02-26 04:16:16,897 - build - model_api - INFO - setup_grid_from_geodataframe.variables: [&#39;waterbody_id&#39;, &#39;Depth_avg&#39;]
+2024-02-26 04:16:16,897 - build - model_api - INFO - setup_grid_from_geodataframe.nodata: [-1, -999.0]
+2024-02-26 04:16:16,897 - build - model_api - INFO - setup_grid_from_geodataframe.rasterize_method: value
+2024-02-26 04:16:16,897 - build - model_api - INFO - setup_grid_from_geodataframe.mask_name: mask
+2024-02-26 04:16:16,897 - build - model_api - INFO - setup_grid_from_geodataframe.rename: {&#39;waterbody_id&#39;: &#39;lake_id&#39;, &#39;Detph_avg&#39;: &#39;lake_depth&#39;}
+2024-02-26 04:16:16,897 - build - model_api - INFO - setup_grid_from_geodataframe.all_touched: True
+2024-02-26 04:16:16,897 - build - model_grid - INFO - Preparing grid data from vector &#39;hydro_lakes&#39;.
+2024-02-26 04:16:16,899 - build - geodataframe - INFO - Reading hydro_lakes vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/hydro_lakes.gpkg
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -943,8 +961,19 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:13,598 - build - geodataframe - DEBUG - Clip intersects [11.700, 45.350, 12.950, 46.700] (EPSG:4326)
-2024-02-19 08:53:13,599 - build - geodataframe - DEBUG - Convert units for 1 columns.
+2024-02-26 04:16:16,943 - build - geodataframe - DEBUG - Clip intersects [11.700, 45.350, 12.950, 46.700] (EPSG:4326)
+2024-02-26 04:16:16,944 - build - geodataframe - DEBUG - Convert units for 1 columns.
+2024-02-26 04:16:16,962 - build - model_api - INFO - setup_grid_from_geodataframe.vector_fn: hydro_lakes
+2024-02-26 04:16:16,962 - build - model_api - INFO - setup_grid_from_geodataframe.variables: None
+2024-02-26 04:16:16,962 - build - model_api - INFO - setup_grid_from_geodataframe.nodata: -1
+2024-02-26 04:16:16,962 - build - model_api - INFO - setup_grid_from_geodataframe.rasterize_method: fraction
+2024-02-26 04:16:16,962 - build - model_api - INFO - setup_grid_from_geodataframe.mask_name: mask
+2024-02-26 04:16:16,962 - build - model_api - INFO - setup_grid_from_geodataframe.rename: {&#39;hydro_lakes&#39;: &#39;water_frac&#39;}
+2024-02-26 04:16:16,962 - build - model_api - INFO - setup_grid_from_geodataframe.all_touched: True
+2024-02-26 04:16:16,962 - build - model_grid - INFO - Preparing grid data from vector &#39;hydro_lakes&#39;.
+2024-02-26 04:16:16,964 - build - geodataframe - INFO - Reading hydro_lakes vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/hydro_lakes.gpkg
+2024-02-26 04:16:16,987 - build - geodataframe - DEBUG - Clip intersects [11.700, 45.350, 12.950, 46.700] (EPSG:4326)
+2024-02-26 04:16:16,988 - build - geodataframe - DEBUG - Convert units for 1 columns.
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -952,11 +981,11 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:13,639 - build - model_api - INFO - write.components: [&#39;config&#39;, &#39;geoms&#39;, &#39;grid&#39;]
-2024-02-19 08:53:13,639 - build - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1
-2024-02-19 08:53:13,639 - build - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/model.ini
-2024-02-19 08:53:13,640 - build - model_api - DEBUG - Writing file geoms/region.geojson
-2024-02-19 08:53:13,643 - build - model_api - DEBUG - Writing file grid/grid.nc
+2024-02-26 04:16:17,029 - build - model_api - INFO - write.components: [&#39;config&#39;, &#39;geoms&#39;, &#39;grid&#39;]
+2024-02-26 04:16:17,029 - build - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1
+2024-02-26 04:16:17,029 - build - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/model.ini
+2024-02-26 04:16:17,029 - build - model_api - DEBUG - Writing file geoms/region.geojson
+2024-02-26 04:16:17,033 - build - model_api - DEBUG - Writing file grid/grid.nc
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -964,10 +993,10 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:13,840 - build - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1
-2024-02-19 08:53:13,840 - build - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/model.ini
-2024-02-19 08:53:13,840 - build - model_api - DEBUG - No maps data found, skip writing.
-2024-02-19 08:53:13,840 - build - model_api - DEBUG - Writing file grid/grid.nc
+2024-02-26 04:16:17,247 - build - model_api - INFO - Writing model data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1
+2024-02-26 04:16:17,247 - build - model_api - INFO - Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/model.ini
+2024-02-26 04:16:17,247 - build - model_api - DEBUG - No maps data found, skip writing.
+2024-02-26 04:16:17,247 - build - model_api - DEBUG - Writing file grid/grid.nc
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -975,10 +1004,10 @@ write:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:14,027 - build - model_api - DEBUG - Writing file geoms/region.geojson
-2024-02-19 08:53:14,031 - build - model_api - DEBUG - No tables found, skip writing.
-2024-02-19 08:53:14,031 - build - model_api - DEBUG - No forcing data found, skip writing.
-2024-02-19 08:53:14,031 - build - model_api - DEBUG - No states data found, skip writing.
+2024-02-26 04:16:17,424 - build - model_api - DEBUG - Writing file geoms/region.geojson
+2024-02-26 04:16:17,428 - build - model_api - DEBUG - No tables found, skip writing.
+2024-02-26 04:16:17,428 - build - model_api - DEBUG - No forcing data found, skip writing.
+2024-02-26 04:16:17,428 - build - model_api - DEBUG - No states data found, skip writing.
 
 </pre></div></div>
 </div>
@@ -1078,7 +1107,7 @@ Variables available in grid.nc: [&#39;mask&#39;, &#39;c1&#39;, &#39;elevtn&#39;,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7ff35bee5bd0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7fae23a33fd0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1119,9 +1148,9 @@ Usage: hydromt update [OPTIONS] MODEL MODEL_ROOT
   update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d
   /path/to/data_catalog.yml -v
 
-  Update Wflow model components outlined in an .ini configuration file and
+  Update Wflow model components outlined in an .yml configuration file and
   write the model to a directory: hydromt update wflow /path/to/model_root  -o
-  /path/to/model_out  -i /path/to/wflow_config.ini  -d
+  /path/to/model_out  -i /path/to/wflow_config.yml  -d
   /path/to/data_catalog.yml -v
 
 Options:
@@ -1129,7 +1158,7 @@ Options:
                              overwritten if left empty.
   -i, --config PATH          Path to hydroMT configuration file, for the model
                              specific implementation.
-  -c, --components TEXT      Model methods from ini file to run
+  -c, --components TEXT      Model methods from configuration file to run
   --opt TEXT                 Method specific keyword arguments, see the method
                              documentation of the specific model for more
                              information about the arguments.
@@ -1181,13 +1210,11 @@ Writing ./tmp_grid_model1/grid_model_update.yaml
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:20,517 - update - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1_update/hydromt.log.
-2024-02-19 08:53:20,517 - update - log - INFO - HydroMT version: 0.9.4.dev0
-2024-02-19 08:53:20,517 - update - main - INFO - Updating grid_model model at /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1 (r).
-2024-02-19 08:53:20,517 - update - main - INFO - Output dir: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1_update
-2024-02-19 08:53:20,517 - update - main - INFO - User settings:
-2024-02-19 08:53:20,550 - update - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
-2024-02-19 08:53:20,550 - update - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2024-02-26 04:16:23,629 - update - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1_update/hydromt.log.
+2024-02-26 04:16:23,629 - update - log - INFO - HydroMT version: 0.9.4.dev0
+2024-02-26 04:16:23,629 - update - main - INFO - Updating grid_model model at /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1 (r).
+2024-02-26 04:16:23,629 - update - main - INFO - Output dir: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1_update
+2024-02-26 04:16:23,630 - update - main - INFO - User settings:
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1195,11 +1222,8 @@ Writing ./tmp_grid_model1/grid_model_update.yaml
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:20,595 - update - log - DEBUG - Appending log messages to file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/hydromt.log.
-2024-02-19 08:53:20,596 - update - model_api - INFO - Initializing grid_model model from hydromt (v0.9.4.dev0).
-2024-02-19 08:53:20,596 - update - model_api - INFO - Reading model data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1
-2024-02-19 08:53:20,596 - update - model_api - DEBUG - Model config read from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/model.ini
-2024-02-19 08:53:20,596 - update - model_api - DEBUG - Reading model file grid.
+2024-02-26 04:16:23,665 - update - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
+2024-02-26 04:16:23,665 - update - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1207,7 +1231,11 @@ Writing ./tmp_grid_model1/grid_model_update.yaml
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:20,637 - update - model_api - DEBUG - Reading model file region.
+2024-02-26 04:16:23,710 - update - log - DEBUG - Appending log messages to file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/hydromt.log.
+2024-02-26 04:16:23,710 - update - model_api - INFO - Initializing grid_model model from hydromt (v0.9.4.dev0).
+2024-02-26 04:16:23,710 - update - model_api - INFO - Reading model data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1
+2024-02-26 04:16:23,711 - update - model_api - DEBUG - Model config read from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1/model.ini
+2024-02-26 04:16:23,711 - update - model_api - DEBUG - Reading model file grid.
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1215,17 +1243,17 @@ Writing ./tmp_grid_model1/grid_model_update.yaml
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:20,667 - update - model_api - INFO - Reading model table files.
-2024-02-19 08:53:20,667 - update - log - DEBUG - Appending log messages to file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1_update/hydromt.log.
-2024-02-19 08:53:20,668 - update - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: merit_hydro_1k
-2024-02-19 08:53:20,668 - update - model_api - INFO - setup_grid_from_rasterdataset.variables: uparea
-2024-02-19 08:53:20,668 - update - model_api - INFO - setup_grid_from_rasterdataset.fill_method: None
-2024-02-19 08:53:20,668 - update - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: max
-2024-02-19 08:53:20,668 - update - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
-2024-02-19 08:53:20,668 - update - model_api - INFO - setup_grid_from_rasterdataset.rename: None
-2024-02-19 08:53:20,668 - update - model_grid - INFO - Preparing grid data from raster source merit_hydro_1k
-2024-02-19 08:53:20,670 - update - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
-2024-02-19 08:53:20,687 - update - rasterdataset - DEBUG - Clip to [11.700, 45.350, 12.950, 46.700] (epsg:4326))
+2024-02-26 04:16:23,752 - update - model_api - DEBUG - Reading model file region.
+2024-02-26 04:16:23,781 - update - model_api - INFO - Reading model table files.
+2024-02-26 04:16:23,782 - update - log - DEBUG - Appending log messages to file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_grid_model1_update/hydromt.log.
+2024-02-26 04:16:23,782 - update - model_api - INFO - setup_grid_from_rasterdataset.raster_fn: merit_hydro_1k
+2024-02-26 04:16:23,782 - update - model_api - INFO - setup_grid_from_rasterdataset.variables: uparea
+2024-02-26 04:16:23,782 - update - model_api - INFO - setup_grid_from_rasterdataset.fill_method: None
+2024-02-26 04:16:23,782 - update - model_api - INFO - setup_grid_from_rasterdataset.reproject_method: max
+2024-02-26 04:16:23,782 - update - model_api - INFO - setup_grid_from_rasterdataset.mask_name: mask
+2024-02-26 04:16:23,783 - update - model_api - INFO - setup_grid_from_rasterdataset.rename: None
+2024-02-26 04:16:23,783 - update - model_grid - INFO - Preparing grid data from raster source merit_hydro_1k
+2024-02-26 04:16:23,784 - update - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1233,11 +1261,19 @@ Writing ./tmp_grid_model1/grid_model_update.yaml
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:53:20,847 - update - model_api - INFO - write_grid.fn: grid/grid.nc
-2024-02-19 08:53:20,847 - update - model_api - INFO - write_grid.gdal_compliant: False
-2024-02-19 08:53:20,848 - update - model_api - INFO - write_grid.rename_dims: False
-2024-02-19 08:53:20,848 - update - model_api - INFO - write_grid.force_sn: False
-2024-02-19 08:53:20,848 - update - model_api - DEBUG - Writing file grid/grid.nc
+2024-02-26 04:16:23,801 - update - rasterdataset - DEBUG - Clip to [11.700, 45.350, 12.950, 46.700] (epsg:4326))
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2024-02-26 04:16:23,961 - update - model_api - INFO - write_grid.fn: grid/grid.nc
+2024-02-26 04:16:23,961 - update - model_api - INFO - write_grid.gdal_compliant: False
+2024-02-26 04:16:23,961 - update - model_api - INFO - write_grid.rename_dims: False
+2024-02-26 04:16:23,961 - update - model_api - INFO - write_grid.force_sn: False
+2024-02-26 04:16:23,961 - update - model_api - DEBUG - Writing file grid/grid.nc
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

@@ -402,7 +402,15 @@ document.write(`
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt_intro.html">Introduction to HydroMT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quick_overview.html">Quick overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt_cli.html">HydroMT Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt_python.html">Using HydroMT in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="data_overview.html">Overview data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_prepare_cat.html">Preparing a Data Catalog</a></li>
@@ -544,7 +552,7 @@ of the Wflow model.</p>
 <span class="go">  If the existing model contains forcing, they will also be clipped to the new</span>
 <span class="go">  model.</span>
 
-<span class="go">  For options to build wflow models see:</span>
+<span class="go">  Example usage: --------------</span>
 
 <span class="go">  Example usage to clip a wflow model for a subbasin derived from point</span>
 <span class="go">  coordinates snapped to cells with upstream area &gt;= 50 km2 hydromt clip wflow</span>
@@ -558,7 +566,7 @@ of the Wflow model.</p>
 <span class="go">  /path/to/model_root /path/to/model_destination &quot;{&#39;outlet&#39;:</span>
 <span class="go">  &#39;geometry.geojson&#39;}&quot;</span>
 
-<span class="go">  All available option in the clip_staticmaps function help.</span>
+<span class="go">  All available option in the clip_grid function help.</span>
 
 <span class="go">Options:</span>
 <span class="go">  -q, --quiet    Decrease verbosity.</span>

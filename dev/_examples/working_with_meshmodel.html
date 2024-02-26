@@ -405,7 +405,15 @@ document.write(`
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hydromt_intro.html">Introduction to HydroMT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quick_overview.html">Quick overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hydromt_cli.html">HydroMT Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hydromt_python.html">Using HydroMT in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/terminology.html">Terminology</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/data_overview.html">Overview data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/data_prepare_cat.html">Preparing a Data Catalog</a></li>
@@ -540,7 +548,7 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:35,629 - working with mesh models - log - INFO - HydroMT version: 0.9.4.dev0
+2024-02-26 04:15:41,004 - working with mesh models - log - INFO - HydroMT version: 0.9.4.dev0
 </pre></div></div>
 </div>
 <section id="Check-if-mesh_model-is-available">
@@ -596,14 +604,6 @@ Model classes from plugins: []
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 &lt;class &#39;xugrid.core.wrap.UgridDataset&#39;&gt;
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -974,41 +974,41 @@ dl.xr-attrs {
   stroke: currentColor;
   fill: currentColor;
 }
-</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt;
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt; Size: 351kB
 Dimensions:                     (mesh2d_nNodes: 81, mesh2d_nFaces: 64,
                                  mesh2d_nEdges: 144, network1d_nNodes: 1014,
                                  network1d_nEdges: 1007,
                                  network1d_nGeometryNodes: 2290)
 Coordinates: (12/13)
-    mesh2d_node_x               (mesh2d_nNodes) float64 dask.array&lt;chunksize=(81,), meta=np.ndarray&gt;
-    mesh2d_node_y               (mesh2d_nNodes) float64 dask.array&lt;chunksize=(81,), meta=np.ndarray&gt;
-    mesh2d_face_x               (mesh2d_nFaces) float64 dask.array&lt;chunksize=(64,), meta=np.ndarray&gt;
-    mesh2d_face_y               (mesh2d_nFaces) float64 dask.array&lt;chunksize=(64,), meta=np.ndarray&gt;
-    mesh2d_edge_x               (mesh2d_nEdges) float64 dask.array&lt;chunksize=(144,), meta=np.ndarray&gt;
-    mesh2d_edge_y               (mesh2d_nEdges) float64 dask.array&lt;chunksize=(144,), meta=np.ndarray&gt;
+    mesh2d_node_x               (mesh2d_nNodes) float64 648B dask.array&lt;chunksize=(81,), meta=np.ndarray&gt;
+    mesh2d_node_y               (mesh2d_nNodes) float64 648B dask.array&lt;chunksize=(81,), meta=np.ndarray&gt;
+    mesh2d_face_x               (mesh2d_nFaces) float64 512B dask.array&lt;chunksize=(64,), meta=np.ndarray&gt;
+    mesh2d_face_y               (mesh2d_nFaces) float64 512B dask.array&lt;chunksize=(64,), meta=np.ndarray&gt;
+    mesh2d_edge_x               (mesh2d_nEdges) float64 1kB dask.array&lt;chunksize=(144,), meta=np.ndarray&gt;
+    mesh2d_edge_y               (mesh2d_nEdges) float64 1kB dask.array&lt;chunksize=(144,), meta=np.ndarray&gt;
     ...                          ...
-    network1d_edge_y            (network1d_nEdges) float64 dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
-  * mesh2d_nNodes               (mesh2d_nNodes) int64 0 1 2 3 4 ... 77 78 79 80
-  * network1d_nEdges            (network1d_nEdges) int64 0 1 2 ... 1005 1006
-  * mesh2d_nEdges               (mesh2d_nEdges) int64 0 1 2 3 ... 141 142 143
-  * mesh2d_nFaces               (mesh2d_nFaces) int64 0 1 2 3 4 ... 60 61 62 63
-  * network1d_nNodes            (network1d_nNodes) int64 0 1 2 ... 1012 1013
+    network1d_edge_y            (network1d_nEdges) float64 8kB dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
+  * mesh2d_nFaces               (mesh2d_nFaces) int64 512B 0 1 2 3 ... 61 62 63
+  * network1d_nEdges            (network1d_nEdges) int64 8kB 0 1 2 ... 1005 1006
+  * mesh2d_nNodes               (mesh2d_nNodes) int64 648B 0 1 2 3 ... 78 79 80
+  * mesh2d_nEdges               (mesh2d_nEdges) int64 1kB 0 1 2 ... 141 142 143
+  * network1d_nNodes            (network1d_nNodes) int64 8kB 0 1 2 ... 1012 1013
 Dimensions without coordinates: network1d_nGeometryNodes
 Data variables:
-    network1d_node_x            (network1d_nNodes) float64 dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;
-    network1d_node_y            (network1d_nNodes) float64 dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;
-    network1d_node_id           (network1d_nNodes) |S40 dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;
-    network1d_node_long_name    (network1d_nNodes) |S80 dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;
-    network1d_branch_id         (network1d_nEdges) |S40 dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
-    network1d_branch_long_name  (network1d_nEdges) |S80 dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
-    network1d_edge_length       (network1d_nEdges) float64 dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
-    network1d_branch_order      (network1d_nEdges) int32 dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
-    network1d_geometry          int32 ...
-    network1d_geom_node_count   (network1d_nEdges) int32 dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
-    network1d_geom_x            (network1d_nGeometryNodes) float64 dask.array&lt;chunksize=(2290,), meta=np.ndarray&gt;
-    network1d_geom_y            (network1d_nGeometryNodes) float64 dask.array&lt;chunksize=(2290,), meta=np.ndarray&gt;
+    network1d_node_x            (network1d_nNodes) float64 8kB dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;
+    network1d_node_y            (network1d_nNodes) float64 8kB dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;
+    network1d_node_id           (network1d_nNodes) |S40 41kB dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;
+    network1d_node_long_name    (network1d_nNodes) |S80 81kB dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;
+    network1d_branch_id         (network1d_nEdges) |S40 40kB dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
+    network1d_branch_long_name  (network1d_nEdges) |S80 81kB dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
+    network1d_edge_length       (network1d_nEdges) float64 8kB dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
+    network1d_branch_order      (network1d_nEdges) int32 4kB dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
+    network1d_geometry          int32 4B ...
+    network1d_geom_node_count   (network1d_nEdges) int32 4kB dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;
+    network1d_geom_x            (network1d_nGeometryNodes) float64 18kB dask.array&lt;chunksize=(2290,), meta=np.ndarray&gt;
+    network1d_geom_y            (network1d_nGeometryNodes) float64 18kB dask.array&lt;chunksize=(2290,), meta=np.ndarray&gt;
 Attributes:
-    Conventions:  CF-1.8 UGRID-1.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-ee7a9747-386c-49d8-9db6-cc79bac26c81' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-ee7a9747-386c-49d8-9db6-cc79bac26c81' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>mesh2d_nNodes</span>: 81</li><li><span class='xr-has-index'>mesh2d_nFaces</span>: 64</li><li><span class='xr-has-index'>mesh2d_nEdges</span>: 144</li><li><span class='xr-has-index'>network1d_nNodes</span>: 1014</li><li><span class='xr-has-index'>network1d_nEdges</span>: 1007</li><li><span>network1d_nGeometryNodes</span>: 2290</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-48600ca7-87f1-4188-b233-d6d887c70965' class='xr-section-summary-in' type='checkbox'  checked><label for='section-48600ca7-87f1-4188-b233-d6d887c70965' class='xr-section-summary' >Coordinates: <span>(13)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_node_x</span></div><div class='xr-var-dims'>(mesh2d_nNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(81,), meta=np.ndarray&gt;</div><input id='attrs-09d88e31-6024-4eab-82af-1929bf303cd0' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-09d88e31-6024-4eab-82af-1929bf303cd0' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c5b0367b-edf5-46b1-9b34-3c8dd14f4e4b' class='xr-var-data-in' type='checkbox'><label for='data-c5b0367b-edf5-46b1-9b34-3c8dd14f4e4b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>longitude</dd></dl></div><div class='xr-var-data'><table>
+    Conventions:  CF-1.8 UGRID-1.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-133cd204-f6ea-4c41-a975-1189cca6ca50' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-133cd204-f6ea-4c41-a975-1189cca6ca50' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>mesh2d_nNodes</span>: 81</li><li><span class='xr-has-index'>mesh2d_nFaces</span>: 64</li><li><span class='xr-has-index'>mesh2d_nEdges</span>: 144</li><li><span class='xr-has-index'>network1d_nNodes</span>: 1014</li><li><span class='xr-has-index'>network1d_nEdges</span>: 1007</li><li><span>network1d_nGeometryNodes</span>: 2290</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-bf66f45b-b124-4f3f-9071-c8ccad02c592' class='xr-section-summary-in' type='checkbox'  checked><label for='section-bf66f45b-b124-4f3f-9071-c8ccad02c592' class='xr-section-summary' >Coordinates: <span>(13)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_node_x</span></div><div class='xr-var-dims'>(mesh2d_nNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(81,), meta=np.ndarray&gt;</div><input id='attrs-fd00efed-8a91-4933-844e-1adf3c6059fa' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-fd00efed-8a91-4933-844e-1adf3c6059fa' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-48359d6c-1153-4254-9d95-56358a9cbc25' class='xr-var-data-in' type='checkbox'><label for='data-48359d6c-1153-4254-9d95-56358a9cbc25' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>longitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1063,7 +1063,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_node_y</span></div><div class='xr-var-dims'>(mesh2d_nNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(81,), meta=np.ndarray&gt;</div><input id='attrs-d2e6bc9c-184a-4a5f-b792-941204a7bca6' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d2e6bc9c-184a-4a5f-b792-941204a7bca6' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-179cfd8e-718e-4672-9b88-3ed41b5b2690' class='xr-var-data-in' type='checkbox'><label for='data-179cfd8e-718e-4672-9b88-3ed41b5b2690' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_node_y</span></div><div class='xr-var-dims'>(mesh2d_nNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(81,), meta=np.ndarray&gt;</div><input id='attrs-ea7bd6b4-4abb-4e74-8e7f-0aa47e4d2605' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ea7bd6b4-4abb-4e74-8e7f-0aa47e4d2605' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b2372e88-cf0e-4821-9deb-228016b903b7' class='xr-var-data-in' type='checkbox'><label for='data-b2372e88-cf0e-4821-9deb-228016b903b7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1118,7 +1118,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_face_x</span></div><div class='xr-var-dims'>(mesh2d_nFaces)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(64,), meta=np.ndarray&gt;</div><input id='attrs-4e0d21c5-98c9-471c-96f2-8cd59b635b5f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4e0d21c5-98c9-471c-96f2-8cd59b635b5f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3ab1b8b4-fe1c-4679-9bfe-f9ffa825f36f' class='xr-var-data-in' type='checkbox'><label for='data-3ab1b8b4-fe1c-4679-9bfe-f9ffa825f36f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>longitude</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_face_x</span></div><div class='xr-var-dims'>(mesh2d_nFaces)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(64,), meta=np.ndarray&gt;</div><input id='attrs-585c9306-4e86-41b0-b0c3-ff1576be6653' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-585c9306-4e86-41b0-b0c3-ff1576be6653' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f0ba9d4d-a863-49f6-81c1-cb0203e59124' class='xr-var-data-in' type='checkbox'><label for='data-f0ba9d4d-a863-49f6-81c1-cb0203e59124' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>longitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1173,7 +1173,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_face_y</span></div><div class='xr-var-dims'>(mesh2d_nFaces)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(64,), meta=np.ndarray&gt;</div><input id='attrs-7e7d7cf1-66d1-4105-8221-3c140aabca0b' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-7e7d7cf1-66d1-4105-8221-3c140aabca0b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-98c8439e-1d5c-4bc4-84ca-411c9a2b7513' class='xr-var-data-in' type='checkbox'><label for='data-98c8439e-1d5c-4bc4-84ca-411c9a2b7513' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_face_y</span></div><div class='xr-var-dims'>(mesh2d_nFaces)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(64,), meta=np.ndarray&gt;</div><input id='attrs-be703345-a112-4d33-9f63-64c636e78ca3' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-be703345-a112-4d33-9f63-64c636e78ca3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c64468a0-c83a-4026-9ce6-6231dc2e75b4' class='xr-var-data-in' type='checkbox'><label for='data-c64468a0-c83a-4026-9ce6-6231dc2e75b4' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1228,7 +1228,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_edge_x</span></div><div class='xr-var-dims'>(mesh2d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(144,), meta=np.ndarray&gt;</div><input id='attrs-4a170f2d-755d-474f-af33-3f148a5bcb94' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4a170f2d-755d-474f-af33-3f148a5bcb94' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-9947fd0b-7d9e-4a45-bd23-8b9cc7bd28a0' class='xr-var-data-in' type='checkbox'><label for='data-9947fd0b-7d9e-4a45-bd23-8b9cc7bd28a0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>longitude</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_edge_x</span></div><div class='xr-var-dims'>(mesh2d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(144,), meta=np.ndarray&gt;</div><input id='attrs-a12f149c-0c06-44f9-8d53-1e068d628927' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a12f149c-0c06-44f9-8d53-1e068d628927' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-11770e36-2fe3-44b6-8107-945462ac055c' class='xr-var-data-in' type='checkbox'><label for='data-11770e36-2fe3-44b6-8107-945462ac055c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>longitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1283,7 +1283,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_edge_y</span></div><div class='xr-var-dims'>(mesh2d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(144,), meta=np.ndarray&gt;</div><input id='attrs-0faf9e7c-d7f5-4bdf-b3c1-38c27d053b4e' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-0faf9e7c-d7f5-4bdf-b3c1-38c27d053b4e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2ea6c7d8-5478-47b6-b26c-abd641c2673b' class='xr-var-data-in' type='checkbox'><label for='data-2ea6c7d8-5478-47b6-b26c-abd641c2673b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mesh2d_edge_y</span></div><div class='xr-var-dims'>(mesh2d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(144,), meta=np.ndarray&gt;</div><input id='attrs-5cfe1837-bcb2-4278-995e-e30f8a4eb276' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-5cfe1837-bcb2-4278-995e-e30f8a4eb276' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4c29a961-2698-42dc-98cc-e7c17a941f4a' class='xr-var-data-in' type='checkbox'><label for='data-4c29a961-2698-42dc-98cc-e7c17a941f4a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1338,7 +1338,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_edge_x</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-9ee27775-ae85-4c23-ada2-78f52867859f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-9ee27775-ae85-4c23-ada2-78f52867859f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4eb029e8-079a-44af-b6c1-3e46ad81ab9c' class='xr-var-data-in' type='checkbox'><label for='data-4eb029e8-079a-44af-b6c1-3e46ad81ab9c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>longitude</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_edge_x</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-eedc5714-00f0-4ebb-a286-acd6c8ccca69' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-eedc5714-00f0-4ebb-a286-acd6c8ccca69' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-9678a8d3-9ec9-4f8c-a076-088b3d2b1272' class='xr-var-data-in' type='checkbox'><label for='data-9678a8d3-9ec9-4f8c-a076-088b3d2b1272' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>longitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1393,7 +1393,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_edge_y</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-06d8b325-e417-458e-bcd7-c48f74cc1835' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-06d8b325-e417-458e-bcd7-c48f74cc1835' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-263b6652-c9ea-48bb-87de-d81f86112cd8' class='xr-var-data-in' type='checkbox'><label for='data-263b6652-c9ea-48bb-87de-d81f86112cd8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_edge_y</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-178e0f50-bb58-4e10-9c36-50e0211f9d67' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-178e0f50-bb58-4e10-9c36-50e0211f9d67' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7d03a533-4d4c-4f04-95b9-45fe612f9618' class='xr-var-data-in' type='checkbox'><label for='data-7d03a533-4d4c-4f04-95b9-45fe612f9618' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1448,11 +1448,14 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>mesh2d_nNodes</span></div><div class='xr-var-dims'>(mesh2d_nNodes)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 5 6 ... 75 76 77 78 79 80</div><input id='attrs-18f1f5bc-c768-44b6-9e94-146d6b13e26b' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-18f1f5bc-c768-44b6-9e94-146d6b13e26b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1b2a633f-e0c0-4f53-adbb-e1cd939d3810' class='xr-var-data-in' type='checkbox'><label for='data-1b2a633f-e0c0-4f53-adbb-e1cd939d3810' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17,
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>mesh2d_nFaces</span></div><div class='xr-var-dims'>(mesh2d_nFaces)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 5 6 ... 58 59 60 61 62 63</div><input id='attrs-6d1787fe-5c60-4c9d-a83c-c8c26207fc68' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-6d1787fe-5c60-4c9d-a83c-c8c26207fc68' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-58f01f24-bcea-4b69-94ac-97a94ac2709f' class='xr-var-data-in' type='checkbox'><label for='data-58f01f24-bcea-4b69-94ac-97a94ac2709f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17,
+       18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+       36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
+       54, 55, 56, 57, 58, 59, 60, 61, 62, 63])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>network1d_nEdges</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1003 1004 1005 1006</div><input id='attrs-c642fe12-c4a7-4090-8e50-9d3fc8e58600' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c642fe12-c4a7-4090-8e50-9d3fc8e58600' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6df6a75f-6479-41a6-b31f-316c594045d0' class='xr-var-data-in' type='checkbox'><label for='data-6df6a75f-6479-41a6-b31f-316c594045d0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1004, 1005, 1006])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>mesh2d_nNodes</span></div><div class='xr-var-dims'>(mesh2d_nNodes)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 5 6 ... 75 76 77 78 79 80</div><input id='attrs-02336404-4974-459e-8e57-6fea10486f8d' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-02336404-4974-459e-8e57-6fea10486f8d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ec7b15e9-7cd5-421c-9bc8-0ed2e408478a' class='xr-var-data-in' type='checkbox'><label for='data-ec7b15e9-7cd5-421c-9bc8-0ed2e408478a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17,
        18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
        36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
        54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
-       72, 73, 74, 75, 76, 77, 78, 79, 80])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>network1d_nEdges</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1003 1004 1005 1006</div><input id='attrs-c7684a84-8298-4da9-8cde-fe542d14cc6c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c7684a84-8298-4da9-8cde-fe542d14cc6c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-74ad6c74-3142-4502-ae6c-329a1405729a' class='xr-var-data-in' type='checkbox'><label for='data-74ad6c74-3142-4502-ae6c-329a1405729a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1004, 1005, 1006])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>mesh2d_nEdges</span></div><div class='xr-var-dims'>(mesh2d_nEdges)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 5 ... 139 140 141 142 143</div><input id='attrs-c35b67c1-5e80-4589-86c5-60568aa59dee' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c35b67c1-5e80-4589-86c5-60568aa59dee' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-bc6c7ea0-b0ff-4c2c-802c-fbc530b29c9e' class='xr-var-data-in' type='checkbox'><label for='data-bc6c7ea0-b0ff-4c2c-802c-fbc530b29c9e' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,
+       72, 73, 74, 75, 76, 77, 78, 79, 80])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>mesh2d_nEdges</span></div><div class='xr-var-dims'>(mesh2d_nEdges)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 5 ... 139 140 141 142 143</div><input id='attrs-00d832a8-0731-4fde-b94b-3201a4d3a466' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-00d832a8-0731-4fde-b94b-3201a4d3a466' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b0744ddf-31c8-49bb-a2ab-caa9f3238fbf' class='xr-var-data-in' type='checkbox'><label for='data-b0744ddf-31c8-49bb-a2ab-caa9f3238fbf' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,
         14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,
         28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,
         42,  43,  44,  45,  46,  47,  48,  49,  50,  51,  52,  53,  54,  55,
@@ -1462,10 +1465,7 @@ Attributes:
         98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
        112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125,
        126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
-       140, 141, 142, 143])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>mesh2d_nFaces</span></div><div class='xr-var-dims'>(mesh2d_nFaces)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 5 6 ... 58 59 60 61 62 63</div><input id='attrs-a7144f60-1452-4f8f-b3b7-2e907b2f052a' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a7144f60-1452-4f8f-b3b7-2e907b2f052a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b0814993-dfb6-44a1-ad79-e5e8aa671d7c' class='xr-var-data-in' type='checkbox'><label for='data-b0814993-dfb6-44a1-ad79-e5e8aa671d7c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17,
-       18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-       36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
-       54, 55, 56, 57, 58, 59, 60, 61, 62, 63])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>network1d_nNodes</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1010 1011 1012 1013</div><input id='attrs-6f545fc3-c6b3-484f-9b62-284d8cd208ec' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-6f545fc3-c6b3-484f-9b62-284d8cd208ec' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0aa4ac7f-a4de-48bb-86c8-d6f49f965267' class='xr-var-data-in' type='checkbox'><label for='data-0aa4ac7f-a4de-48bb-86c8-d6f49f965267' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1011, 1012, 1013])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-f757071a-7123-43ec-a427-b84c656d474f' class='xr-section-summary-in' type='checkbox'  checked><label for='section-f757071a-7123-43ec-a427-b84c656d474f' class='xr-section-summary' >Data variables: <span>(12)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>network1d_node_x</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;</div><input id='attrs-b07b3765-c315-4d77-8890-3c9cbf5b775c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b07b3765-c315-4d77-8890-3c9cbf5b775c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a10c9d2b-1687-49c6-b3dc-c0edf141ab5d' class='xr-var-data-in' type='checkbox'><label for='data-a10c9d2b-1687-49c6-b3dc-c0edf141ab5d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>projection_x_coordinate</dd><dt><span>long_name :</span></dt><dd>x coordinates of network nodes</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
+       140, 141, 142, 143])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>network1d_nNodes</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1010 1011 1012 1013</div><input id='attrs-abf85356-73d7-49a3-b364-d8031274c5e7' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-abf85356-73d7-49a3-b364-d8031274c5e7' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-011508ac-231f-40b2-b1c5-56572e3d650f' class='xr-var-data-in' type='checkbox'><label for='data-011508ac-231f-40b2-b1c5-56572e3d650f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1011, 1012, 1013])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-9c1e8b4d-b138-4aba-b22b-7bde4b2f5e0b' class='xr-section-summary-in' type='checkbox'  checked><label for='section-9c1e8b4d-b138-4aba-b22b-7bde4b2f5e0b' class='xr-section-summary' >Data variables: <span>(12)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>network1d_node_x</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;</div><input id='attrs-842393ae-1bf6-4fb9-aa7a-1e6b8cbf7ce7' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-842393ae-1bf6-4fb9-aa7a-1e6b8cbf7ce7' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b877a125-6348-4122-ba53-c0b40d5353fd' class='xr-var-data-in' type='checkbox'><label for='data-b877a125-6348-4122-ba53-c0b40d5353fd' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>projection_x_coordinate</dd><dt><span>long_name :</span></dt><dd>x coordinates of network nodes</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1520,7 +1520,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_node_y</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;</div><input id='attrs-24be4708-b6c1-46a7-8c23-e0d1561ab2a8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-24be4708-b6c1-46a7-8c23-e0d1561ab2a8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d59ac869-6992-4e7f-b68b-e48db745797b' class='xr-var-data-in' type='checkbox'><label for='data-d59ac869-6992-4e7f-b68b-e48db745797b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>projection_y_coordinate</dd><dt><span>long_name :</span></dt><dd>y coordinates of network nodes</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_node_y</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;</div><input id='attrs-218e7815-db00-4363-8f3c-342e37052e22' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-218e7815-db00-4363-8f3c-342e37052e22' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f7f313fe-99f0-4ea5-862e-2ce466305fd3' class='xr-var-data-in' type='checkbox'><label for='data-f7f313fe-99f0-4ea5-862e-2ce466305fd3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>projection_y_coordinate</dd><dt><span>long_name :</span></dt><dd>y coordinates of network nodes</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1575,7 +1575,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_node_id</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>|S40</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;</div><input id='attrs-d9a39447-cdb5-476c-b219-022721b3d7b0' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d9a39447-cdb5-476c-b219-022721b3d7b0' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2aae92fd-603c-42a8-8f72-7c802a0e2ed1' class='xr-var-data-in' type='checkbox'><label for='data-2aae92fd-603c-42a8-8f72-7c802a0e2ed1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>ID of network nodes</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_node_id</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>|S40</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;</div><input id='attrs-97342fed-4e14-4236-8e08-6f2ae842f3c9' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-97342fed-4e14-4236-8e08-6f2ae842f3c9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-77e2f8d7-8587-405a-a9f5-e8dd124e56d2' class='xr-var-data-in' type='checkbox'><label for='data-77e2f8d7-8587-405a-a9f5-e8dd124e56d2' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>ID of network nodes</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1630,7 +1630,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_node_long_name</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>|S80</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;</div><input id='attrs-1ddb797e-a128-4770-8066-39439069dc8d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-1ddb797e-a128-4770-8066-39439069dc8d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a2ec3631-2d20-4946-a7f4-16b5aa02934f' class='xr-var-data-in' type='checkbox'><label for='data-a2ec3631-2d20-4946-a7f4-16b5aa02934f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>Long name of network nodes</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_node_long_name</span></div><div class='xr-var-dims'>(network1d_nNodes)</div><div class='xr-var-dtype'>|S80</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1014,), meta=np.ndarray&gt;</div><input id='attrs-dc726e3b-a2a8-4670-906b-41c3ef96c080' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-dc726e3b-a2a8-4670-906b-41c3ef96c080' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-667861b4-43b0-4724-851a-9276de8b61e4' class='xr-var-data-in' type='checkbox'><label for='data-667861b4-43b0-4724-851a-9276de8b61e4' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>Long name of network nodes</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1685,7 +1685,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_branch_id</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>|S40</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-79466d94-e27d-4752-84ba-a33cee06d683' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-79466d94-e27d-4752-84ba-a33cee06d683' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6ba2ba24-3b19-469b-ba2a-b49dad2f922f' class='xr-var-data-in' type='checkbox'><label for='data-6ba2ba24-3b19-469b-ba2a-b49dad2f922f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>ID of branch geometries</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_branch_id</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>|S40</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-b73dcd75-4f3f-4b44-b079-ec1ff2b91379' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b73dcd75-4f3f-4b44-b079-ec1ff2b91379' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-02aade5d-183a-47b1-ad8a-2bb2458aaeea' class='xr-var-data-in' type='checkbox'><label for='data-02aade5d-183a-47b1-ad8a-2bb2458aaeea' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>ID of branch geometries</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1740,7 +1740,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_branch_long_name</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>|S80</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-e49e35e1-b2f7-4762-a474-78e25d2bdf06' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e49e35e1-b2f7-4762-a474-78e25d2bdf06' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d2b98fde-5c88-4647-af37-6c81cd476689' class='xr-var-data-in' type='checkbox'><label for='data-d2b98fde-5c88-4647-af37-6c81cd476689' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>Long name of branch geometries</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_branch_long_name</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>|S80</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-fb108106-da6e-4a3d-8e56-cd03aae02c7f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-fb108106-da6e-4a3d-8e56-cd03aae02c7f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-23be8f4a-6caa-43d3-a1e5-7dcff95b73e4' class='xr-var-data-in' type='checkbox'><label for='data-23be8f4a-6caa-43d3-a1e5-7dcff95b73e4' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>Long name of branch geometries</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1795,7 +1795,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_edge_length</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-67bee3ca-de22-4c6b-8966-adade98993de' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-67bee3ca-de22-4c6b-8966-adade98993de' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f1ba5ffb-816f-4821-99c3-2ef75d756358' class='xr-var-data-in' type='checkbox'><label for='data-f1ba5ffb-816f-4821-99c3-2ef75d756358' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>long_name :</span></dt><dd>Real length of branch geometries</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_edge_length</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-b47b569a-27b5-4996-a648-bbcbee7183a8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b47b569a-27b5-4996-a648-bbcbee7183a8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-abed51e6-a2be-4241-8000-883c7eeb8844' class='xr-var-data-in' type='checkbox'><label for='data-abed51e6-a2be-4241-8000-883c7eeb8844' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>long_name :</span></dt><dd>Real length of branch geometries</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1850,7 +1850,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_branch_order</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-3869d5fa-727a-47da-a663-87bbffac401c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3869d5fa-727a-47da-a663-87bbffac401c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-aa1df5a8-2050-4714-8486-98c22dfa7dbe' class='xr-var-data-in' type='checkbox'><label for='data-aa1df5a8-2050-4714-8486-98c22dfa7dbe' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>Order of branches for interpolation</dd><dt><span>mesh :</span></dt><dd>network1d</dd><dt><span>location :</span></dt><dd>edge</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_branch_order</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-88e5d758-5c00-47eb-9245-dfb265572ed8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-88e5d758-5c00-47eb-9245-dfb265572ed8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c3607d43-c9ee-4d6d-8495-1275c621298a' class='xr-var-data-in' type='checkbox'><label for='data-c3607d43-c9ee-4d6d-8495-1275c621298a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>Order of branches for interpolation</dd><dt><span>mesh :</span></dt><dd>network1d</dd><dt><span>location :</span></dt><dd>edge</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1905,7 +1905,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_geometry</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-c17711c6-fe14-4059-91a8-80dc4f4f5c52' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c17711c6-fe14-4059-91a8-80dc4f4f5c52' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-20145b07-3f4a-4b0f-8ac1-c5612c1e74a1' class='xr-var-data-in' type='checkbox'><label for='data-20145b07-3f4a-4b0f-8ac1-c5612c1e74a1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>geometry_type :</span></dt><dd>line</dd><dt><span>long_name :</span></dt><dd>1D Geometry</dd><dt><span>node_count :</span></dt><dd>network1d_geom_node_count</dd><dt><span>node_coordinates :</span></dt><dd>network1d_geom_x network1d_geom_y</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_geom_node_count</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-69378ed0-6f93-4f3a-9eaa-41c9f5c24bf2' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-69378ed0-6f93-4f3a-9eaa-41c9f5c24bf2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-27ec675e-65ad-438f-a799-2462c7002afa' class='xr-var-data-in' type='checkbox'><label for='data-27ec675e-65ad-438f-a799-2462c7002afa' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>Number of geometry nodes per branch</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_geometry</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-6ad05cc9-a433-4ea5-8668-a182efa38ccd' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-6ad05cc9-a433-4ea5-8668-a182efa38ccd' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-339c118c-3fbc-499e-a628-fc1fbcc80ce9' class='xr-var-data-in' type='checkbox'><label for='data-339c118c-3fbc-499e-a628-fc1fbcc80ce9' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>geometry_type :</span></dt><dd>line</dd><dt><span>long_name :</span></dt><dd>1D Geometry</dd><dt><span>node_count :</span></dt><dd>network1d_geom_node_count</dd><dt><span>node_coordinates :</span></dt><dd>network1d_geom_x network1d_geom_y</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_geom_node_count</span></div><div class='xr-var-dims'>(network1d_nEdges)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1007,), meta=np.ndarray&gt;</div><input id='attrs-6368eb72-ef02-4a88-a6ec-b5b409c8dedf' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-6368eb72-ef02-4a88-a6ec-b5b409c8dedf' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6d5b196f-9f35-4c4c-bcaf-02f3962fae74' class='xr-var-data-in' type='checkbox'><label for='data-6d5b196f-9f35-4c4c-bcaf-02f3962fae74' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>Number of geometry nodes per branch</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1960,7 +1960,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_geom_x</span></div><div class='xr-var-dims'>(network1d_nGeometryNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2290,), meta=np.ndarray&gt;</div><input id='attrs-66a81d2d-5ea7-4884-826b-7b7e5df83025' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-66a81d2d-5ea7-4884-826b-7b7e5df83025' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3af80707-0be9-4867-8fb7-e79300acff72' class='xr-var-data-in' type='checkbox'><label for='data-3af80707-0be9-4867-8fb7-e79300acff72' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>projection_x_coordinate</dd><dt><span>long_name :</span></dt><dd>x-coordinate of branch geometry nodes</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_geom_x</span></div><div class='xr-var-dims'>(network1d_nGeometryNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2290,), meta=np.ndarray&gt;</div><input id='attrs-239256ab-9207-4abd-9636-21702006fcc3' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-239256ab-9207-4abd-9636-21702006fcc3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-58792cd7-5b4a-4b70-839c-54be743df7cf' class='xr-var-data-in' type='checkbox'><label for='data-58792cd7-5b4a-4b70-839c-54be743df7cf' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>projection_x_coordinate</dd><dt><span>long_name :</span></dt><dd>x-coordinate of branch geometry nodes</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -2015,7 +2015,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_geom_y</span></div><div class='xr-var-dims'>(network1d_nGeometryNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2290,), meta=np.ndarray&gt;</div><input id='attrs-a2a650f7-ce3b-4e12-a510-247a33eb7c7b' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a2a650f7-ce3b-4e12-a510-247a33eb7c7b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ab28650c-863d-4530-a2c2-e43dee91b61f' class='xr-var-data-in' type='checkbox'><label for='data-ab28650c-863d-4530-a2c2-e43dee91b61f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>projection_y_coordinate</dd><dt><span>long_name :</span></dt><dd>y-coordinate of branch geometry nodes</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>network1d_geom_y</span></div><div class='xr-var-dims'>(network1d_nGeometryNodes)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2290,), meta=np.ndarray&gt;</div><input id='attrs-71809b36-1d71-4925-b6b5-cac9999dfc48' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-71809b36-1d71-4925-b6b5-cac9999dfc48' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a1750ec7-2686-43a1-ad71-edf170b20871' class='xr-var-data-in' type='checkbox'><label for='data-a1750ec7-2686-43a1-ad71-edf170b20871' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd><dt><span>standard_name :</span></dt><dd>projection_y_coordinate</dd><dt><span>long_name :</span></dt><dd>y-coordinate of branch geometry nodes</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -2070,7 +2070,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-0fb267d0-b223-476e-821b-7141d65bd093' class='xr-section-summary-in' type='checkbox'  ><label for='section-0fb267d0-b223-476e-821b-7141d65bd093' class='xr-section-summary' >Indexes: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>mesh2d_nNodes</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-37634cc4-a2f5-4ac0-9ad8-10a2a4bdaf30' class='xr-index-data-in' type='checkbox'/><label for='index-37634cc4-a2f5-4ac0-9ad8-10a2a4bdaf30' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=81, step=1, name=&#x27;mesh2d_nNodes&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>network1d_nEdges</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-1da039ca-0649-4e36-aa84-eba5e7192fce' class='xr-index-data-in' type='checkbox'/><label for='index-1da039ca-0649-4e36-aa84-eba5e7192fce' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=1007, step=1, name=&#x27;network1d_nEdges&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>mesh2d_nEdges</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-b44aef45-4bac-40e5-b3bc-40725175c5d5' class='xr-index-data-in' type='checkbox'/><label for='index-b44aef45-4bac-40e5-b3bc-40725175c5d5' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=144, step=1, name=&#x27;mesh2d_nEdges&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>mesh2d_nFaces</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-a22e76c4-25cb-42ba-bc40-2da9a5bfc415' class='xr-index-data-in' type='checkbox'/><label for='index-a22e76c4-25cb-42ba-bc40-2da9a5bfc415' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=64, step=1, name=&#x27;mesh2d_nFaces&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>network1d_nNodes</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-897ed0b2-a3e1-4b75-be71-4560579906a8' class='xr-index-data-in' type='checkbox'/><label for='index-897ed0b2-a3e1-4b75-be71-4560579906a8' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=1014, step=1, name=&#x27;network1d_nNodes&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-c49931c9-c521-4fd9-9bc5-25cbec90c558' class='xr-section-summary-in' type='checkbox'  checked><label for='section-c49931c9-c521-4fd9-9bc5-25cbec90c558' class='xr-section-summary' >Attributes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8 UGRID-1.0</dd></dl></div></li></ul></div></div></div>
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-30431067-dcaf-42dc-9008-fc9dda7ae3d9' class='xr-section-summary-in' type='checkbox'  ><label for='section-30431067-dcaf-42dc-9008-fc9dda7ae3d9' class='xr-section-summary' >Indexes: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>mesh2d_nFaces</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-892083f0-8786-4a96-a434-b2fccc731e19' class='xr-index-data-in' type='checkbox'/><label for='index-892083f0-8786-4a96-a434-b2fccc731e19' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=64, step=1, name=&#x27;mesh2d_nFaces&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>network1d_nEdges</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-d5991df2-ace1-493c-9688-a77ceb343934' class='xr-index-data-in' type='checkbox'/><label for='index-d5991df2-ace1-493c-9688-a77ceb343934' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=1007, step=1, name=&#x27;network1d_nEdges&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>mesh2d_nNodes</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-35c351b8-c751-4d61-9e95-c93e64937120' class='xr-index-data-in' type='checkbox'/><label for='index-35c351b8-c751-4d61-9e95-c93e64937120' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=81, step=1, name=&#x27;mesh2d_nNodes&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>mesh2d_nEdges</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-85abf9cf-b79e-49a5-b426-4b25d6cd4ef9' class='xr-index-data-in' type='checkbox'/><label for='index-85abf9cf-b79e-49a5-b426-4b25d6cd4ef9' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=144, step=1, name=&#x27;mesh2d_nEdges&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>network1d_nNodes</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-03230765-ac03-4921-a44a-acbd13833071' class='xr-index-data-in' type='checkbox'/><label for='index-03230765-ac03-4921-a44a-acbd13833071' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(RangeIndex(start=0, stop=1014, step=1, name=&#x27;network1d_nNodes&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-4cd49013-46e2-455e-83a1-0976ba6d8ee3' class='xr-section-summary-in' type='checkbox'  checked><label for='section-4cd49013-46e2-455e-83a1-0976ba6d8ee3' class='xr-section-summary' >Attributes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8 UGRID-1.0</dd></dl></div></li></ul></div></div></div>
 </div>
 <p>In HydroMT, you have a couple of <a class="reference external" href="https://deltares.github.io/hydromt/latest/api.html#id8">properties</a> that allow you to get the names of the different grids in mesh <em>mesh_names</em>, extract a specific grid from the mesh with <em>mesh_datasets</em> or without data <em>mesh_grids</em> or convert the grids to geopandas.GeoDataFrame <em>mesh_gdf</em>.</p>
 <p>Let’s check the available grids in our mesh and plot them:</p>
@@ -2149,7 +2149,7 @@ Text(0, 0.5, &#39;y&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,089 - working with mesh models - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
+2024-02-26 04:15:41,467 - working with mesh models - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2157,7 +2157,7 @@ Text(0, 0.5, &#39;y&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,090 - working with mesh models - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2024-02-26 04:15:41,468 - working with mesh models - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2165,7 +2165,7 @@ Text(0, 0.5, &#39;y&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,135 - working with mesh models - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2024-02-26 04:15:41,513 - working with mesh models - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2173,7 +2173,7 @@ Text(0, 0.5, &#39;y&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,137 - working with mesh models - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_mesh_model/hydromt.log.
+2024-02-26 04:15:41,515 - working with mesh models - log - DEBUG - Writing log messages to new file /home/runner/work/hydromt/hydromt/docs/_examples/tmp_mesh_model/hydromt.log.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -2181,7 +2181,7 @@ Text(0, 0.5, &#39;y&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,137 - working with mesh models - model_api - INFO - Initializing mesh_model model from hydromt (v0.9.4.dev0).
+2024-02-26 04:15:41,515 - working with mesh models - model_api - INFO - Initializing mesh_model model from hydromt (v0.9.4.dev0).
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -2218,7 +2218,7 @@ Text(0, 0.5, &#39;y&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,143 - working with mesh models - model_mesh - INFO - Preparing 2D mesh.
+2024-02-26 04:15:41,521 - working with mesh models - model_mesh - INFO - Preparing 2D mesh.
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2226,39 +2226,39 @@ Text(0, 0.5, &#39;y&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,164 - working with mesh models - basin_mask - DEBUG - Parsed region (kind=mesh): {&#39;grid_name&#39;: &#39;mesh2d&#39;, &#39;mesh&#39;: &lt;xarray.Dataset&gt;
+2024-02-26 04:15:41,542 - working with mesh models - basin_mask - DEBUG - Parsed region (kind=mesh): {&#39;grid_name&#39;: &#39;mesh2d&#39;, &#39;mesh&#39;: &lt;xarray.Dataset&gt; Size: 351kB
 Dimensions:                     (mesh2d_nNodes: 81, mesh2d_nFaces: 64,
                                  mesh2d_nEdges: 144, network1d_nNodes: 1014,
                                  network1d_nEdges: 1007,
                                  network1d_nGeometryNodes: 2290)
 Coordinates: (12/14)
-    mesh2d_node_x               (mesh2d_nNodes) float64 ...
-    mesh2d_node_y               (mesh2d_nNodes) float64 ...
-    mesh2d_face_x               (mesh2d_nFaces) float64 ...
-    mesh2d_face_y               (mesh2d_nFaces) float64 ...
-    mesh2d_edge_x               (mesh2d_nEdges) float64 ...
-    mesh2d_edge_y               (mesh2d_nEdges) float64 ...
+    mesh2d_node_x               (mesh2d_nNodes) float64 648B ...
+    mesh2d_node_y               (mesh2d_nNodes) float64 648B ...
+    mesh2d_face_x               (mesh2d_nFaces) float64 512B ...
+    mesh2d_face_y               (mesh2d_nFaces) float64 512B ...
+    mesh2d_edge_x               (mesh2d_nEdges) float64 1kB ...
+    mesh2d_edge_y               (mesh2d_nEdges) float64 1kB ...
     ...                          ...
-    spatial_ref                 int32 ...
-  * mesh2d_nNodes               (mesh2d_nNodes) int64 0 1 2 3 4 ... 77 78 79 80
-  * network1d_nEdges            (network1d_nEdges) int64 0 1 2 ... 1005 1006
-  * mesh2d_nEdges               (mesh2d_nEdges) int64 0 1 2 3 ... 141 142 143
-  * mesh2d_nFaces               (mesh2d_nFaces) int64 0 1 2 3 4 ... 60 61 62 63
-  * network1d_nNodes            (network1d_nNodes) int64 0 1 2 ... 1012 1013
+    spatial_ref                 int32 4B ...
+  * mesh2d_nFaces               (mesh2d_nFaces) int64 512B 0 1 2 3 ... 61 62 63
+  * network1d_nEdges            (network1d_nEdges) int64 8kB 0 1 2 ... 1005 1006
+  * mesh2d_nNodes               (mesh2d_nNodes) int64 648B 0 1 2 3 ... 78 79 80
+  * mesh2d_nEdges               (mesh2d_nEdges) int64 1kB 0 1 2 ... 141 142 143
+  * network1d_nNodes            (network1d_nNodes) int64 8kB 0 1 2 ... 1012 1013
 Dimensions without coordinates: network1d_nGeometryNodes
 Data variables:
-    network1d_node_x            (network1d_nNodes) float64 ...
-    network1d_node_y            (network1d_nNodes) float64 ...
-    network1d_node_id           (network1d_nNodes) |S40 ...
-    network1d_node_long_name    (network1d_nNodes) |S80 ...
-    network1d_branch_id         (network1d_nEdges) |S40 ...
-    network1d_branch_long_name  (network1d_nEdges) |S80 ...
-    network1d_edge_length       (network1d_nEdges) float64 ...
-    network1d_branch_order      (network1d_nEdges) int32 ...
-    network1d_geometry          int32 ...
-    network1d_geom_node_count   (network1d_nEdges) int32 ...
-    network1d_geom_x            (network1d_nGeometryNodes) float64 ...
-    network1d_geom_y            (network1d_nGeometryNodes) float64 ...
+    network1d_node_x            (network1d_nNodes) float64 8kB ...
+    network1d_node_y            (network1d_nNodes) float64 8kB ...
+    network1d_node_id           (network1d_nNodes) |S40 41kB ...
+    network1d_node_long_name    (network1d_nNodes) |S80 81kB ...
+    network1d_branch_id         (network1d_nEdges) |S40 40kB ...
+    network1d_branch_long_name  (network1d_nEdges) |S80 81kB ...
+    network1d_edge_length       (network1d_nEdges) float64 8kB ...
+    network1d_branch_order      (network1d_nEdges) int32 4kB ...
+    network1d_geometry          int32 4B ...
+    network1d_geom_node_count   (network1d_nEdges) int32 4kB ...
+    network1d_geom_x            (network1d_nGeometryNodes) float64 18kB ...
+    network1d_geom_y            (network1d_nGeometryNodes) float64 18kB ...
 Attributes:
     Conventions:  CF-1.8 UGRID-1.0}
 </pre></div></div>
@@ -2268,7 +2268,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,171 - working with mesh models - mesh - WARNING - Mesh data from mesh file doesn&#39;t have a CRS. Assuming crs option EPSG:3857
+2024-02-26 04:15:41,549 - working with mesh models - mesh - WARNING - Mesh data from mesh file doesn&#39;t have a CRS. Assuming crs option EPSG:3857
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2276,7 +2276,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,178 - working with mesh models - model_mesh - INFO - Preparing 2D mesh.
+2024-02-26 04:15:41,555 - working with mesh models - model_mesh - INFO - Preparing 2D mesh.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -2284,7 +2284,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,178 - working with mesh models - basin_mask - DEBUG - Parsed region (kind=bbox): {&#39;bbox&#39;: [12.09, 46.45, 12.2, 46.5]}
+2024-02-26 04:15:41,556 - working with mesh models - basin_mask - DEBUG - Parsed region (kind=bbox): {&#39;bbox&#39;: [12.09, 46.45, 12.2, 46.5]}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -2355,7 +2355,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,336 - working with mesh models - model_mesh - INFO - Preparing mesh data from raster source merit_hydro_1k
+2024-02-26 04:15:41,704 - working with mesh models - model_mesh - INFO - Preparing mesh data from raster source merit_hydro_1k
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2363,7 +2363,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,343 - working with mesh models - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
+2024-02-26 04:15:41,711 - working with mesh models - rasterdataset - INFO - Reading merit_hydro_1k raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_1k/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2371,7 +2371,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,358 - working with mesh models - rasterdataset - DEBUG - Clip to [12.091, 46.452, 12.199, 46.501] (epsg:4326))
+2024-02-26 04:15:41,727 - working with mesh models - rasterdataset - DEBUG - Clip to [12.091, 46.452, 12.199, 46.501] (epsg:4326))
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2379,7 +2379,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,365 - working with mesh models - mesh - INFO - Preparing regridder for centroid method
+2024-02-26 04:15:41,734 - working with mesh models - mesh - INFO - Preparing regridder for centroid method
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2387,7 +2387,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,389 - working with mesh models - mesh - INFO - Resampling elevtn to mesh2d using centroid method
+2024-02-26 04:15:41,755 - working with mesh models - mesh - INFO - Resampling elevtn to mesh2d using centroid method
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2395,7 +2395,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,402 - working with mesh models - model_mesh - INFO - Preparing mesh data by reclassifying the data in vito based on vito_reclass.
+2024-02-26 04:15:41,767 - working with mesh models - model_mesh - INFO - Preparing mesh data by reclassifying the data in vito based on vito_reclass.
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2403,7 +2403,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,407 - working with mesh models - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
+2024-02-26 04:15:41,772 - working with mesh models - rasterdataset - INFO - Reading vito raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/vito.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2411,7 +2411,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,421 - working with mesh models - rasterdataset - DEBUG - Clip to [12.091, 46.452, 12.199, 46.501] (epsg:4326))
+2024-02-26 04:15:41,786 - working with mesh models - rasterdataset - DEBUG - Clip to [12.091, 46.452, 12.199, 46.501] (epsg:4326))
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2419,7 +2419,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,422 - working with mesh models - dataframe - INFO - Reading vito_reclass csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2024-02-26 04:15:41,787 - working with mesh models - dataframe - INFO - Reading vito_reclass csv data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2427,7 +2427,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,455 - working with mesh models - mesh - INFO - Preparing regridder for mean method
+2024-02-26 04:15:41,818 - working with mesh models - mesh - INFO - Preparing regridder for mean method
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2435,7 +2435,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,485 - working with mesh models - mesh - INFO - Preparing regridder for mode method
+2024-02-26 04:15:41,845 - working with mesh models - mesh - INFO - Preparing regridder for mode method
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2443,7 +2443,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:36,488 - working with mesh models - mesh - INFO - Resampling landuse to mesh2d using mode method
+2024-02-26 04:15:41,848 - working with mesh models - mesh - INFO - Resampling landuse to mesh2d using mode method
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2451,7 +2451,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-02-19 08:52:37,749 - working with mesh models - mesh - INFO - Resampling manning to mesh2d using mean method
+2024-02-26 04:15:43,064 - working with mesh models - mesh - INFO - Resampling manning to mesh2d using mean method
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
