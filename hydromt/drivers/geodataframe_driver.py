@@ -1,6 +1,6 @@
 """Driver for GeoDataFrames."""
 from abc import ABC, abstractmethod
-from logging import Logger
+from logging import Logger, getLogger
 from typing import List, Optional
 
 import geopandas as gpd
@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom
+
+logger: Logger = getLogger(__name__)
 
 
 class GeoDataFrameDriver(ABC, BaseModel):
@@ -22,7 +24,7 @@ class GeoDataFrameDriver(ABC, BaseModel):
         buffer: float = 0.0,
         crs: Optional[CRS] = None,
         predicate: str = "intersects",
-        logger: Optional[Logger] = None,
+        logger: Logger = logger,
         # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO
         **kwargs,
     ) -> gpd.GeoDataFrame:
