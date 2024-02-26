@@ -8,7 +8,7 @@ HydroMT and this documentation use a specific terminology to describe specific o
 ==============================  ======================================================================================
 Term                            Explanation
 ==============================  ======================================================================================
-Command Line Interface (CLI)    high-level interface to HydroMT *build*, *update* and *clip* methods.
+Command Line Interface (CLI)    high-level interface to HydroMT *build*, *update*, *clip*, *check* and *export* methods.
 Configuration (HydroMT)         (.yaml) file describing the complete pipeline with all methods and their arguments to
                                 *build* or *update* a model.
 Data catalog                    A set of data sources available for HydroMT. It is build up from *yaml* files containing
@@ -28,8 +28,10 @@ Model attributes                Direct properties of a model, such as the model 
 Model component                 A model is described by HydroMT with the following components: maps,
                                 geoms (vector data), forcing, results, states, config, grid (for a grid model), vector
                                 (for a vector model), mesh (for a mesh model).
-Model plugin                    Model software for which HydroMT can build and update models and analyze its simulation results.
-                                For example *Wflow*, *SFINCS* etc.
+Model plugin                    (Plugin) Package that links the HydroMT Model class to a specific model software so that HydroMT can build
+                                and update models and analyze its simulation results. For example *HydroMT-Wflow*, *HydroMT-SFINCS* etc.
+                                Plugins are installed separately from HydroMT and are not part of the HydroMT core package.
+                                Plugins are the most common way of using HydroMT to build and update specific models.
 Model kernel                    The model software to execute a model simulation. This is *not* part of any HydroMT plugin.
 Region                          Argument of the *build* and *clip* CLI methods that specifies the region of interest where
                                 the model should be prepared / which spatial subregion should be clipped.

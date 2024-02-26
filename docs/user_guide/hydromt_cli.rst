@@ -217,7 +217,7 @@ If you are using the command line, the main options are:
 
 - `-d, \-\-data`: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog. The data catalog is a yaml file that contains the paths to the data that will be used to export the data. In order to use several catalogs, you can use the `-d` option several times.
 - `s, --source`: The data source to export. Only one can be specified from the command line.
-- `-r, \-\-region`: Set the region for which to export the data. The region is specified as a dictionary with the region type (here only `bbox` or `geom`) and the region coordinates.
+- `-r, \-\-region`: Set the region for which to export the data. The region is specified as a dictionary with the region type (here only `bbox` or `geom`) and the region coordinates. Please note that the `bbox` coordinates should be in `EPSG:4326`.
 - `-t, \-\-time`: Set the time extent for which to export the data. The time extent is specified as a list with the start and end date.
 
 Here is an example of how to use the command:
@@ -263,13 +263,16 @@ Finally you can check the :ref:`hydromt export API <export_api>` for all the ava
 Check command
 -------------
 The **hydromt check** command is used to validate the configuration file, the data catalog, and the region.
-It can be useful to validate files before running other command lines to avoid errors.
-It does not have any required arguments but several options that you can choose:
+It can be useful to validate files before running other command lines to avoid errors. Please note that it
+will only check the syntax of the files provided. The actual data or calculations referenced will not be checked,
+loaded or performed.
+
+The command does not have any required arguments but several options that you can choose from:
 
 - `-m, \-\-model`: The name of the model to validate. The available models can be printed using the `hydromt \-\-models` command.
 - `-i, \-\-config`: Relative or absolute path to the HydroMT configuration file to validate.
 - `-d, \-\-data`: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog to validate.
-- `-r, \-\-region`: Set the region to validate (only `bbox` and `geom` types supported). The region is specified as a dictionary with the region type and the region coordinates.
+- `-r, \-\-region`: Set the region to validate (only `bbox` and `geom` types supported). The region is specified as a dictionary with the region type and the region coordinates. Please note that the `bbox` coordinates should be in `EPSG:4326`.
 
 If you only wish to validate a region or a data catalog files, they can be run separately.
 Because configuration files are dependant on the model to build/update, to check a configuration file, you need to specify the model.

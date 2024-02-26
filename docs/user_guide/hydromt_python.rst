@@ -7,7 +7,7 @@ As HydroMT's architecture is very modular, it is possible to use HydroMT in Pyth
 without using the command line interface (CLI). With Python, you actually have access to
 a lot of internal functionalities. This can be useful if you want to for example:
 
-- build / update / clip models in Python instead of the CLI
+- build / update / clip models, check configurations or export data in Python instead of the CLI
 - analyse model inputs or results
 - analyse and compare input data without connecting to a specific model
 - process input data for another reason than building a model
