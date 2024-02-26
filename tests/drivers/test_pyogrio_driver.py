@@ -1,5 +1,4 @@
 import warnings
-from itertools import repeat
 from pathlib import Path
 
 import geopandas as gpd
@@ -9,10 +8,7 @@ from pyogrio.errors import DataSourceError
 from shapely import box
 
 from hydromt._typing import Bbox
-from hydromt.drivers.pyogrio_driver import (
-    PyogrioDriver,
-    PyogrioExtension,
-)
+from hydromt.drivers.pyogrio_driver import PyogrioDriver
 
 
 class TestPyogrioDriver:
@@ -83,14 +79,3 @@ class TestPyogrioDriver:
         assert gdf.shape == (1, 4)
         with pytest.raises(ValueError, match="Both 'bbox' and 'mask' are provided."):
             driver.read(uri, bbox=bbox, mask=gpd.GeoSeries(box(*bbox)), buffer=10000)
-
-
-@pytest.mark.parametrize(
-    ("uri", "expected"),
-    zip(
-        ("/posix/path.geojson", "C:\windows\path.geojson", "s3://s3/path.geojson"),
-        repeat(".geojson"),
-    ),
-)
-def test_pyogrio_extension(uri: str, expected: str):
-    assert PyogrioExtension(Path(uri).suffix).value == expected
