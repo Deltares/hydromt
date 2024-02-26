@@ -60,7 +60,7 @@ More concretely HydroMT is organized in the following way:
 - **Methods and workflow**
 
   Most of the heavy work in HydroMT is done by :ref:`Methods and workflows <methods_workflows>`,
-  indicated by the gear wheels in the image :ref:`arch` below. ``Methods`` provide the low-level functionality
+  indicated by the gear wheels in the image :ref:`arch_hydromt` below. ``Methods`` provide the low-level functionality
   such as GIS rasterization, reprojection, or zonal statistics. ``Workflows`` combine several methods to
   transform data to a model layer or post-process model results. Examples of workflows include the
   delineation of hydrological basins (watersheds), conversion of landuse-landcover data to model
@@ -80,7 +80,7 @@ Finally user can interact with HydroMT through the following interfaces:
   It allows you to e.g. interact directly with a model component :ref:`Model API <model_interface>` and apply the many
   methods and workflows available. Please find all available functions :ref:`API reference <api_reference>`
 
-.. _arch:
+.. _arch_hydromt:
 
 .. figure:: ../_static/Architecture_model_data_input.png
 
