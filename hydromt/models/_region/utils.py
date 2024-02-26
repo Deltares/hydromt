@@ -10,7 +10,8 @@ import xugrid as xu
 
 from hydromt import _compat
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import MODELS
+
+# from hydromt.models import MODELS
 
 logger = logging.getLogger(__name__)
 
@@ -124,11 +125,13 @@ def _parse_region(
     }
     kind = next(iter(kwargs))  # first key of region
     value0 = kwargs.pop(kind)
-    if kind in MODELS:
-        model_class = MODELS.load(kind)
-        kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
-        kind = "model"
-    elif kind == "grid":
+    # TODO: fix MODELS circulair Imports
+    # if kind in MODELS:
+    #     model_class = MODELS.load(kind)
+    #     kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
+    #     kind = "model"
+
+    if kind == "grid":
         kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
     elif kind == "mesh":
         if _compat.HAS_XUGRID:
@@ -149,7 +152,8 @@ def _parse_region(
         else:
             raise ImportError("xugrid is required to read mesh files.")
     elif kind not in options:
-        k_lst = '", "'.join(list(options.keys()) + list(MODELS))
+        # k_lst = '", "'.join(list(options.keys()) + list(MODELS))
+        k_lst = '", "'.join(list(options.keys()))
         raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
     else:
         kwarg = _parse_region_value(value0, data_catalog=data_catalog)

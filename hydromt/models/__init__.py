@@ -10,6 +10,7 @@ from hydromt.models.plugins import ModelCatalog
 if HAS_XUGRID:
     from hydromt.models.components.mesh import MeshModel
 
+from hydromt.models._region import ModelRegion
 from hydromt.models.root import ModeLike, ModelMode
 
 # expose global MODELS object which discovers and loads

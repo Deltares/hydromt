@@ -14,6 +14,7 @@ from shapely.geometry import box
 
 from hydromt.data_adapter import GeoDataFrameAdapter
 from hydromt.gis.flw import basin_map, flwdir_from_da, outlet_map, stream_map
+from hydromt.models._region.utils import _check_size
 
 logger = logging.getLogger(__name__)
 
@@ -89,16 +90,7 @@ def get_basin_geometry(
         geometry the outlet point location
     """
     kind_lst = ["basin", "subbasin", "interbasin"]
-    if kind == "outlet":
-        outlets = True
-        kind = "basin"
-        warnings.warn(
-            'kind="outlets" has been deprecated, use outlets=True in combination with '
-            'kind="basin" or kind="interbasin" instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-    elif kind not in kind_lst:
+    if kind not in kind_lst:
         msg = f"Unknown kind: {kind}, select from {kind_lst}."
         raise ValueError(msg)
     if bool(stream_kwargs.pop("within", False)):

@@ -13,7 +13,7 @@ from xugrid.ugrid import conventions
 
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.workflows.basin_mask import parse_region
+from hydromt.models import ModelRegion
 
 logger = logging.getLogger(__name__)
 
@@ -75,21 +75,21 @@ def create_mesh2d(
     mesh2d : xu.UgridDataset
         Generated mesh2d.
     """  # noqa: E501
-    kind, region = parse_region(region, logger=logger)
-    if kind != "mesh":
+    model_region = ModelRegion(region)
+    if model_region._kind != "mesh":
         if not isinstance(res, (int, float)):
             raise ValueError("res argument required for kind 'bbox', 'geom'")
-        if kind == "bbox":
+        if model_region._kind == "bbox":
             bbox = region["bbox"]
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-        elif kind == "geom":
+        elif model_region._kind == "geom":
             geom = region["geom"]
             if geom.crs is None:
                 raise ValueError('Model region "geom" has no CRS')
         else:
             raise ValueError(
                 "Region for mesh must be of kind [bbox, geom, mesh], "
-                f"kind {kind} not understood."
+                f"kind {model_region._kind} not understood."
             )
         # Parse crs and reproject geom if needed
         if crs is not None:
@@ -116,7 +116,7 @@ def create_mesh2d(
                 faces.append(box(left, bottom, right, top))
         grid = gpd.GeoDataFrame(geometry=faces, crs=geom.crs)
         # If needed clip to geom
-        if kind != "bbox":
+        if model_region._kind != "bbox":
             grid = grid.loc[
                 gpd.sjoin(
                     grid, geom, how="left", predicate="intersects"
