@@ -52,7 +52,7 @@
     <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hydromt.data_adapter.GeoDatasetAdapter" href="hydromt.data_adapter.GeoDatasetAdapter.html" />
+    <link rel="next" title="hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog" href="hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog.html" />
     <link rel="prev" title="hydromt.data_adapter.RasterDatasetAdapter.detect_bbox" href="hydromt.data_adapter.RasterDatasetAdapter.detect_bbox.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -403,6 +403,14 @@ document.write(`
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_cli.html">hydromt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_build.html">hydromt build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_update.html">hydromt update</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_clip.html">hydromt clip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_export.html">hydromt export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_cli/hydromt_check.html">hydromt check</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.html">hydromt.data_catalog.DataCatalog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source.html">hydromt.data_catalog.DataCatalog.get_source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.iter_sources.html">hydromt.data_catalog.DataCatalog.iter_sources</a></li>
@@ -430,6 +438,12 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataset.html">hydromt.data_catalog.DataCatalog.get_geodataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataframe.html">hydromt.data_catalog.DataCatalog.get_dataframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataset.html">hydromt.data_catalog.DataCatalog.get_dataset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataAdapter.html">hydromt.data_adapter.DataAdapter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataAdapter.summary.html">hydromt.data_adapter.DataAdapter.summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataAdapter.to_dict.html">hydromt.data_adapter.DataAdapter.to_dict</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.html">hydromt.data_adapter.RasterDatasetAdapter</a></li>
@@ -441,6 +455,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.get_time_range.html">hydromt.data_adapter.RasterDatasetAdapter.get_time_range</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.detect_bbox.html">hydromt.data_adapter.RasterDatasetAdapter.detect_bbox</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">hydromt.data_adapter.RasterDatasetAdapter.detect_time_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog.html">hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.html">hydromt.data_adapter.GeoDatasetAdapter</a></li>
@@ -452,6 +467,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.get_time_range.html">hydromt.data_adapter.GeoDatasetAdapter.get_time_range</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.detect_bbox.html">hydromt.data_adapter.GeoDatasetAdapter.detect_bbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.detect_time_range.html">hydromt.data_adapter.GeoDatasetAdapter.detect_time_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDatasetAdapter.to_stac_catalog.html">hydromt.data_adapter.GeoDatasetAdapter.to_stac_catalog</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.html">hydromt.data_adapter.GeoDataFrameAdapter</a></li>
@@ -461,6 +477,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.to_file.html">hydromt.data_adapter.GeoDataFrameAdapter.to_file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.get_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.get_bbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html">hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog.html">hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.html">hydromt.data_adapter.DataFrameAdapter</a></li>
@@ -468,6 +485,15 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.get_data.html">hydromt.data_adapter.DataFrameAdapter.get_data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_dict.html">hydromt.data_adapter.DataFrameAdapter.to_dict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_file.html">hydromt.data_adapter.DataFrameAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataFrameAdapter.to_stac_catalog.html">hydromt.data_adapter.DataFrameAdapter.to_stac_catalog</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.html">hydromt.data_adapter.DatasetAdapter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.summary.html">hydromt.data_adapter.DatasetAdapter.summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.get_data.html">hydromt.data_adapter.DatasetAdapter.get_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.to_dict.html">hydromt.data_adapter.DatasetAdapter.to_dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.to_file.html">hydromt.data_adapter.DatasetAdapter.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DatasetAdapter.to_stac_catalog.html">hydromt.data_adapter.DatasetAdapter.to_stac_catalog</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.ModelCatalog.html">hydromt.ModelCatalog</a></li>
@@ -964,11 +990,11 @@ inclusive on both sides.</p>
       </div>
     </a>
     <a class="right-next"
-       href="hydromt.data_adapter.GeoDatasetAdapter.html"
+       href="hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">hydromt.data_adapter.GeoDatasetAdapter</p>
+        <p class="prev-next-title">hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

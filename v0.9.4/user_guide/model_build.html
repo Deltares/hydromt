@@ -402,7 +402,15 @@ document.write(`
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt_intro.html">Introduction to HydroMT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quick_overview.html">Quick overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt_cli.html">HydroMT Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt_python.html">Using HydroMT in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="data_overview.html">Overview data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_prepare_cat.html">Preparing a Data Catalog</a></li>
@@ -561,11 +569,11 @@ in the <code class="docutils literal notranslate"><span class="pre">grid_model_c
 
 <span class="go">  To build a wflow model for a subbasin using a point coordinates snapped to</span>
 <span class="go">  cells with upstream area &gt;= 50 km2 hydromt build wflow /path/to/model_root -i</span>
-<span class="go">  /path/to/wflow_config.ini  -r &quot;{&#39;subbasin&#39;: [-7.24, 62.09], &#39;uparea&#39;: 50}&quot; -d</span>
+<span class="go">  /path/to/wflow_config.yml  -r &quot;{&#39;subbasin&#39;: [-7.24, 62.09], &#39;uparea&#39;: 50}&quot; -d</span>
 <span class="go">  deltares_data -d /path/to/data_catalog.yml -v</span>
 
 <span class="go">  To build a sfincs model based on a bbox hydromt build sfincs</span>
-<span class="go">  /path/to/model_root  -i /path/to/sfincs_config.ini  -r &quot;{&#39;bbox&#39;:</span>
+<span class="go">  /path/to/model_root  -i /path/to/sfincs_config.yml  -r &quot;{&#39;bbox&#39;:</span>
 <span class="go">  [4.6891,52.9750,4.9576,53.1994]}&quot;  -d /path/to/data_catalog.yml -v</span>
 
 <span class="go">Options:</span>

@@ -1052,16 +1052,23 @@ document.write(`
 
         <span class="c1"># clip with bbox</span>
         <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># check if bbox is fully covered</span>
             <span class="n">bbox_str</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">bbox</span><span class="p">])</span>
+
+            <span class="k">def</span> <span class="nf">_lt_or_close</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">or</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span>
+
+            <span class="n">w</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span><span class="n">_lt_or_close</span><span class="p">,</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="p">(</span><span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">e</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+            <span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Dataset [</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">] does not fully cover bbox [</span><span class="si">{</span><span class="n">bbox_str</span><span class="si">}</span><span class="s2">]&quot;</span>
+                <span class="p">)</span>
+
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Clip to [</span><span class="si">{</span><span class="n">bbox_str</span><span class="si">}</span><span class="s2">] (epsg:</span><span class="si">{</span><span class="n">epsg</span><span class="si">}</span><span class="s2">))&quot;</span><span class="p">)</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">clip_bbox</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">)</span>
-            <span class="c1"># if np.any(np.array(ds.raster.shape) &lt; 2):</span>
-            <span class="c1"># check if bbox is fully covered</span>
-            <span class="n">w</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">w</span> <span class="o">&lt;=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">s</span> <span class="o">&lt;=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">e</span> <span class="o">&gt;=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">3</span><span class="p">]):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Dataset does [</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">] does not fully cover bbox [</span><span class="si">{</span><span class="n">bbox_str</span><span class="si">}</span><span class="s2">]&quot;</span>
-                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -1356,6 +1363,8 @@ document.write(`
         <span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="RasterDatasetAdapter.to_stac_catalog">
+<a class="viewcode-back" href="../../../_generated/hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog.html#hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog">[docs]</a>
     <span class="k">def</span> <span class="nf">to_stac_catalog</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">on_error</span><span class="p">:</span> <span class="n">ErrorHandleMethod</span> <span class="o">=</span> <span class="n">ErrorHandleMethod</span><span class="o">.</span><span class="n">COERCE</span><span class="p">,</span>
@@ -1434,6 +1443,7 @@ document.write(`
 
             <span class="n">stac_catalog</span><span class="o">.</span><span class="n">add_item</span><span class="p">(</span><span class="n">stac_item</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">stac_catalog</span></div>
+</div>
 
 </pre></div>
 
