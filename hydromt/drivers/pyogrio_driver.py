@@ -1,10 +1,6 @@
 """Driver to read geodataframes using Pyogrio."""
-from enum import Enum
-from functools import wraps
-from inspect import signature
 from logging import Logger, getLogger
-from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info
@@ -16,60 +12,6 @@ from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
-
-
-class PyogrioExtension(Enum):
-    """All compatible extensions for Pyogrio."""
-
-    shapefile = ".shp"
-    geopackage = ".gpkg"
-    geojson = ".geojson"
-    flatgeobuf = ".fgb"
-
-
-def _read_df_default(
-    extension: PyogrioExtension,
-    uri: str,
-    bbox: Optional[Bbox],
-    mode: str,
-    logger: Logger = logger,
-) -> gpd.GeoDataFrame:
-    """`read_dataframe` for different gdal drivers.
-
-    Warnings are thrown for invalid kwargs for different drivers, so this makes pyogrio explicit.
-    So far only geobuf accepts the mode argument.
-    """
-    return read_dataframe(uri, bbox=bbox)
-
-
-class _EnumDispatchRegistry:
-    def __init__(self, enum: Enum):
-        self._enum = enum
-        self._impls = {}
-
-    def register(self, func: Callable) -> Callable:
-        try:
-            annotation = signature(func).parameters.get("extension")._annotation
-            if isinstance(annotation, Enum):
-                self._impls[annotation.name] = func
-            else:
-                raise ValueError(
-                    f"First argument of function {func} must be PyogrioExtension."
-                )
-        except AttributeError:
-            raise ValueError(f"Registered function {func} needs annotations.")
-
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    def _read_df(self, ext: PyogrioExtension, *args, **kwargs):
-        return self._impls.get(ext.name, _read_df_default)(ext, *args, **kwargs)
-
-
-_read_df_registry = _EnumDispatchRegistry(PyogrioExtension)
 
 
 class PyogrioDriver(GeoDataFrameDriver):
@@ -91,16 +33,12 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         args:
         """
-        extension = PyogrioExtension(Path(uri).suffix)
         if bbox is not None:  # buffer bbox
             bbox: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         if mask is not None:  # buffer mask
             mask: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         bbox_reader = bbox_from_file_and_filters(uri, bbox, mask, crs)
-        logger.debug(
-            f"Reading datafrom from uri: '{uri}' with extension: '{extension.name}'"
-        )
-        return _read_df_registry._read_df(extension, uri, bbox=bbox_reader, mode="r")
+        return read_dataframe(uri, bbox=bbox_reader)
 
 
 def bbox_from_file_and_filters(
