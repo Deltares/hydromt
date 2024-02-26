@@ -172,3 +172,12 @@ filterwarnings = [
 [tool.mypy]
 exclude = ["docs/.*"]
 ignore_missing_imports = true
+plugins = ["pydantic.mypy", "numpy.typing.mypy_plugin"]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_equality = true
+strict_concatenate = true
+disallow_subclassing_any = true
+disallow_untyped_decorators = true
+disallow_any_generics = true
