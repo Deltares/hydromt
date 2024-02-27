@@ -1,6 +1,6 @@
 """Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
 from abc import ABC, abstractmethod
-from logging import Logger
+from logging import Logger, getLogger
 from typing import TYPE_CHECKING, List, Optional
 
 import geopandas as gpd
@@ -10,6 +10,9 @@ from hydromt._typing import Bbox, NoDataStrategy, Predicate, TimeRange
 
 if TYPE_CHECKING:
     from hydromt.data_sources.data_source import DataSource
+
+
+logger: Logger = getLogger(__name__)
 
 
 class MetaDataResolver(BaseModel, ABC):
@@ -28,7 +31,7 @@ class MetaDataResolver(BaseModel, ABC):
         variables: Optional[List[str]] = None,
         zoom_level: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Optional[Logger] = None,
+        logger: Optional[Logger] = logger,
         **kwargs,
     ) -> List[str]:
         """Resolve metadata of data behind a single URI."""

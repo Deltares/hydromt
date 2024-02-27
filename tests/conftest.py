@@ -394,7 +394,7 @@ def mock_resolver() -> MetaDataResolver:
         def resolve(self, uri, *args, **kwargs):
             return [uri]
 
-    resolver = MockMetaDataResolver.model_validate({})
+    resolver = MockMetaDataResolver()
     return resolver
 
 

@@ -17,6 +17,7 @@ class ZarrDriver(RasterDatasetDriver):
     def read(
         self,
         uris: List[str],
+        *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0,

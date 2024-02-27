@@ -17,6 +17,7 @@ class RasterDatasetDriver(ABC, BaseModel):
     def read(
         self,
         uris: List[str],
+        *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0.0,

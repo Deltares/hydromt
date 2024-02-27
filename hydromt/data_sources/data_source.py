@@ -3,7 +3,7 @@ from os.path import abspath, join
 from pathlib import Path
 from typing import Any, ClassVar, Dict, Optional, Union
 
-from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from hydromt._typing import DataType
 from hydromt.data_adapter.caching import _uri_validator
@@ -68,20 +68,21 @@ class DataSource(BaseModel):
                 raise ValueError(f"'data_type' must be '{cls.data_type}'.")
         return data
 
-    @field_validator("uri", mode="after")
-    @classmethod
-    def _validate_uri(cls, v: str, info: ValidationInfo) -> str:
-        if not _uri_validator(v):
-            return _abs_path(info.data.get("root"), v)
+    @model_validator(mode="after")
+    def _validate_uri(self) -> str:
+        if not _uri_validator(self.uri):
+            self.uri = _abs_path(self.root, self.uri)
+        return self
 
-    data_type: ClassVar[DataType]
-    root: Optional[str] = Field(default=None)
     name: str
+    uri: str
+    data_type: ClassVar[DataType]
     driver: Any
+    metadata_resolver: MetaDataResolver
+    root: Optional[str] = Field(default=None)
     attrs: Dict[str, Any] = Field(default_factory=dict)
     version: Optional[str] = Field(default=None)
     provider: Optional[str] = Field(default=None)
-    metadata_resolver: MetaDataResolver
     driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
     resolver_kwargs: Dict[str, Any] = Field(default_factory=dict)
     unit_add: Dict[str, Any] = Field(default_factory=dict)
@@ -90,7 +91,6 @@ class DataSource(BaseModel):
     nodata: Union[float, int, Dict[str, Union[float, int]]] = Field(default=None)
     extent: Dict[str, Any] = Field(default_factory=dict)  # ?
     meta: Dict[str, Any] = Field(default_factory=dict)
-    uri: str
     crs: Optional[int] = Field(default=None)
 
 
