@@ -9,7 +9,7 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 
 
 v0.9.4 (2024-02-26)
-==========
+===================
 This release fixes a performance regression when reading geometry masks, relaxed warnings for empty raster datasets and updated the documention of the new hydromt commands.
 
 Fixed
