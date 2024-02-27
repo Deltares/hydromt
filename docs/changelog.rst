@@ -8,16 +8,15 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 
 
 
-Unreleased
+v0.9.4 (2024-02-26)
 ==========
-These additions/ fixes have not been released yet.
-
-Added
------
+This release fixes a performance regression when reading geometry masks, relaxed warnings for empty raster datasets and updated the documention of the new hydromt commands.
 
 Fixed
 -----
-- Added back geometry mask when reading vector files with `fiona` as engine/ driver
+- Added back geometry mask when reading vector files with `fiona` as engine/ driver. (#777)
+- Relaxed empty data checking on `RasterDatasetAdapter`. (#782)
+- Add documentation for `hydromt check` and `hydromt export` commands. (#767)
 
 v0.9.3 (2024-02-08)
 ===================
