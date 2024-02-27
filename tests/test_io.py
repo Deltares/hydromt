@@ -5,6 +5,7 @@ import glob
 import os
 from os.path import join
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import geopandas as gpd
 import numpy as np
@@ -13,6 +14,7 @@ import pytest
 import rasterio
 import xarray as xr
 from shapely.geometry import box
+from upath import UPath
 
 import hydromt
 from hydromt import _compat, raster
@@ -92,6 +94,15 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
         hydromt.open_vector("fail.csv")
     with pytest.raises(IOError, match="Driver fail unknown"):
         hydromt.open_vector_from_table("test.fail")
+
+
+@pytest.mark.skipif(not _compat.HAS_S3FS, reason="S3FS not installed.")
+def test_open_vector_s3(geodf: gpd.GeoDataFrame):
+    m = MagicMock()
+    m.return_value = geodf
+    with patch("geopandas.io.file._read_file_fiona", m):
+        df = hydromt.open_vector(UPath("s3://fake_url/file.geojson"))
+    assert np.all(geodf == df)
 
 
 def test_open_geodataset(tmpdir, geodf):
