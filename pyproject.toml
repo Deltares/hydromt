@@ -10,36 +10,36 @@ authors = [
   { name = "Sam Vente", email = "sam.vente@deltares.nl" },
 ]
 dependencies = [
-  "affine",                # Spatial rasterers affine transformations (bbox pixel coalision)
-  "bottleneck",            # Spearmen rank computation
-  "click",                 # CLI configuration
-  "dask",                  # lazy computing
-  "fsspec",                # general file systems utilities
-  "geopandas>=0.10",       # pandas but geo, wraps fiona and shapely
-  "importlib_metadata",    # entrypoints backport
-  "mercantile",            # tile handling
-  "netcdf4",               # netcfd IO
-  "numba",                 # speed up computations (used in e.g. stats)
-  "numpy>=1.23",           # pin necessary to ensure compatability with C headers
-  "packaging",             # compare versions of hydromt
-  "pandas",                # Dataframes
-  "pydantic~=2.4",         # Validation
-  "pyflwdir>=0.5.4",       # Hight models and derivatives
-  "pyogrio>=0.6",          # io for geopandas dataframes
-  "pyproj",                # projections for Coordinate reference systems
-  "pystac",                # STAC integration
-  "pyyaml",                # yaml interface
-  "rasterio",              # raster wrapper around gdal
-  "requests",              # donwload stuff
-  "rioxarray",             # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
-  "scipy",                 # scientific utilities
-  "shapely>=2.0.0",        # geometry transforms
-  "tomli",                 # parsing toml files
-  "tomli-w",               # writing toml files
-  "universal_pathlib<0.2", # provides path compatability between different filesystems
-  "xarray",                # ndim data arrays
-  "xmltodict",             # xml parser also used to read VRT
-  "zarr",                  # zarr
+  "affine",                 # Spatial rasterers affine transformations (bbox pixel coalision)
+  "bottleneck",             # Spearmen rank computation
+  "click",                  # CLI configuration
+  "dask",                   # lazy computing
+  "fsspec",                 # general file systems utilities
+  "geopandas>=0.10",        # pandas but geo, wraps fiona and shapely
+  "importlib_metadata",     # entrypoints backport
+  "mercantile",             # tile handling
+  "netcdf4",                # netcfd IO
+  "numba",                  # speed up computations (used in e.g. stats)
+  "numpy>=1.23",            # pin necessary to ensure compatability with C headers
+  "packaging",              # compare versions of hydromt
+  "pandas",                 # Dataframes
+  "pydantic~=2.4",          # Validation
+  "pyflwdir>=0.5.4",        # Hight models and derivatives
+  "pyogrio>=0.6",           # io for geopandas dataframes
+  "pyproj",                 # projections for Coordinate reference systems
+  "pystac",                 # STAC integration
+  "pyyaml",                 # yaml interface
+  "rasterio",               # raster wrapper around gdal
+  "requests",               # donwload stuff
+  "rioxarray",              # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
+  "scipy",                  # scientific utilities
+  "shapely>=2.0.0",         # geometry transforms
+  "tomli",                  # parsing toml files
+  "tomli-w",                # writing toml files
+  "universal_pathlib>=0.2", # provides path compatability between different filesystems
+  "xarray",                 # ndim data arrays
+  "xmltodict",              # xml parser also used to read VRT
+  "zarr",                   # zarr
 ]
 
 requires-python = ">=3.9"
@@ -90,6 +90,7 @@ doc = [
   "sphinx_autosummary_accessors", # doc layout
   "sphinx",                       # build docks
   "sphinx_design",                # doc layout
+  "sphinx-click",                 # click integration
 ]
 examples = [
   "cartopy",    # plotting examples

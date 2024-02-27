@@ -24,7 +24,7 @@ Before getting started **you should ask yourself these questions**:
   3. Will there be a lot of users for my model?
 
 And depending on the answers, you can decide to start your own plugin yes or no. Answering *yes* to any of the previous
-questions could be a protential reason for starting your own plugin. Below are a couple of advantages and drawbacks of making your own plugin:
+questions could be a potential reason for starting your own plugin. Below are a couple of advantages and drawbacks of making your own plugin:
 
 *Advantages*
 
@@ -231,15 +231,23 @@ But if you choose to, a classic folder structure and files for a HydroMT plugin 
 
 Model class and components
 --------------------------
-In this section, we will detail the bottom part of the schematic ie how to initialise your HydroMT Model class for your plugin, the main properties and how to
-work with its model components.
+The main goal of your plugin is to be able to build and update model instances for your own
+software. As a reminder, the figure below illustrates the process of model building in HydroMT:
+
+.. figure:: ../_static/model_building_process.png
+   :align: center
+
+   Model building process in HydroMT.
+
+In this section, we will detail the bottom part of the schematic above ie how to initialise your HydroMT Model class for your plugin, the main properties
+and setup methods and how to work with its model components. The top part of the schematic (data preparation) is taken care of by the core of HydroMT.
 
 Initialisation
 ^^^^^^^^^^^^^^
 In the :ref:`create plugin section <plugin_create>`, we already saw which HydroMT ``Model`` class to choose for your plugin. Here we will focus on additional
-properties and the initiliasation of your new Model subclass.
+properties and the initialisation of your new Model subclass.
 
-To fully initiliase your new subclass (eg *MyModelModel*), you need to initialise a couple of high level properties and in some cases, you may wish to modify
+To fully initialise your new subclass (eg *MyModelModel*), you need to initialise a couple of high level properties and in some cases, you may wish to modify
 the default initialisation function of you parent class (the HydroMT core class you choose, ``Model`` or ``GridModel`` etc.).
 
 .. TIP::
@@ -330,7 +338,7 @@ and, if in appending mode, existing layers of the model component are read first
 
   In the background, the actual data is stored not directly in the <component> attribute itself but in a private
   attribute (eg ``_maps`` for ``maps``). The public component, (eg ``maps``), actually just fetched the data
-  from the private attriute ``_maps``, but makes sure that in read mode it reads existing layers of the component first.
+  from the private attribute ``_maps``, but makes sure that in read mode it reads existing layers of the component first.
   It is highly recommended, in your plugin to always use the public model component (eg ``maps``).
 
 Additional Model properties

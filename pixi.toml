@@ -154,7 +154,7 @@ scipy = "*"
 shapely = ">=2.0.0"
 tomli = "*"
 tomli-w = "*"
-universal_pathlib = "<0.2"
+universal_pathlib = ">=0.2"
 xarray = "*"
 xmltodict = "*"
 zarr = "*"
@@ -204,6 +204,7 @@ sphinx = "*"
 [feature.doc.pypi-dependencies]
 sphinx_autosummary_accessors = "*"
 sphinx_design = "*"
+"sphinx-click" = "*"
 
 [feature.examples.dependencies]
 cartopy = "*"
