@@ -1242,11 +1242,22 @@ class XRasterBase(XGeoBase):
             if not np.all(gdf_bbox.is_empty):
                 xs, ys = zip(*gdf_bbox.dissolve().boundary[0].coords[:])
         cs, rs = ~self.transform * (np.array(xs), np.array(ys))
-        # use round to get integer slices
-        c0 = max(int(round(cs.min() - buffer)), 0)
-        r0 = max(int(round(rs.min() - buffer)), 0)
-        c1 = int(round(cs.max() + buffer))
-        r1 = int(round(rs.max() + buffer))
+        if isinstance(cs, dask.array.Array):
+            # Compute min and max if cs or rs are Dask arrays
+            cs_min = cs.min().compute()
+            cs_max = cs.max().compute()
+            rs_min = rs.min().compute()
+            rs_max = rs.max().compute()
+        else:
+            # Otherwise, if they are numpy arrays, simply extract min and max
+            cs_min = cs.min()
+            cs_max = cs.max()
+            rs_min = rs.min()
+            rs_max = rs.max()
+        c0 = max(int(round(cs_min - buffer)), 0)
+        r0 = max(int(round(rs_min - buffer)), 0)
+        c1 = int(round(cs_max + buffer))
+        r1 = int(round(rs_max + buffer))
         return self.clip(slice(c0, c1), slice(r0, r1))
 
     def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
