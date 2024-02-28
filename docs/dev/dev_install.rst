@@ -65,3 +65,13 @@ We also have 3 pre-defined environments. These are more or less just collections
 3. ``full`` absolutely everything, useful for developing.
 
 We also have docker images for each of the flavours available on the deltares dockerhub page.
+
+Adding a dependency
+-------------------
+
+In order to add a dependency you need to:
+
+1. Add it to the ``pyproject.toml`` file in the ``[project.dependencies]`` section.
+2. And you need to add it to the ``pixi.toml`` file in the ``[dependencies]`` section.
+3. Then you will need to run ``pixi run -e <ENVIRONMENT> install`` to install the new dependency. It will update the ``pixi.lock`` file.
+4. Commit the changes to the ``pyproject.toml``, ``pixi.toml``, and ``pixi.lock`` files.
