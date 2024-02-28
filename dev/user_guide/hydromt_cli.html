@@ -1,0 +1,925 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>HydroMT Command Line Interface &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/hydromt_cli';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.5';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Using HydroMT in Python" href="hydromt_python.html" />
+    <link rel="prev" title="Introduction to HydroMT" href="hydromt_intro.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with HydroMT</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt_intro.html">Introduction to HydroMT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quick_overview.html">Quick overview</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">HydroMT Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt_python.html">Using HydroMT in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="data_overview.html">Overview data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_prepare_cat.html">Preparing a Data Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_types.html">Supported data types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_existing_cat.html">Pre-defined data catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_conventions.html">Data conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/prep_data_catalog.html">Example: Preparing a data catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/export_data.html">Example: Exporting data from a data catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_raster_data.html">Example: Reading raster data</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_vector_data.html">Example: Reading vector data</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_point_data.html">Example: Reading geospatial point time-series</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with models in HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="model_overview.html">Overview models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_build.html">Building a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_update.html">Updating a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_clip.html">Clipping a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_config.html">Preparing a model configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_region.html">Defining a model region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_models_basics.html">Example: Working with models from CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_meshmodel.html">Example: Working with mesh models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/delineate_basin.html">Example: Define hydrological model regions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Methods and workflows</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="methods_main.html">Overview methods and workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods_stats.html">Statistical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_raster.html">Example: Working with raster data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_geodatasets.html">Example: Working with geodatasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
+
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="intro.html" class="nav-link">User guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">HydroMT...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="hydromt-command-line-interface">
+<span id="hydromt-cli"></span><h1>HydroMT Command Line Interface<a class="headerlink" href="#hydromt-command-line-interface" title="Link to this heading">#</a></h1>
+<p>The HydroMT command line interface (CLI) is a command line tool that allows you to run
+HydroMT commands from the terminal. It is installed as part of the HydroMT package. To
+use the CLI, you need to have HydroMT installed in your Python environment. If you have
+not installed HydroMT yet, please refer to the
+<a class="reference internal" href="../getting_started/installation.html#installation-guide"><span class="std std-ref">Installation</span></a> section.</p>
+<p>To use the HydroMT CLI, open a terminal and type <cite>hydromt</cite> followed by the command you
+want to run. The following commands are available:</p>
+<ul class="simple">
+<li><p><strong>hydromt --help</strong>: Print help on HydroMT and the different commands.</p></li>
+<li><p><strong>hydromt --version</strong>: Print the version of HydroMT.</p></li>
+<li><p><strong>hydromt --models</strong>: Print the available model from HydroMT and the installed plugins.</p></li>
+<li><p><strong>hydromt build</strong>: Build models.</p></li>
+<li><p><strong>hydromt update</strong>: Update models.</p></li>
+<li><p><strong>hydromt clip</strong>: Clip models.</p></li>
+<li><p><strong>hydromt export</strong>: Export data.</p></li>
+<li><p><strong>hydromt check</strong>: Validate config / data catalog / region.</p></li>
+</ul>
+<p>Example for printing the help of HydroMT (do not forget to activate the python environment
+where HydroMT is installed):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt --help</span>
+
+<span class="go">usage: hydromt [OPTIONS] COMMAND [ARGS]...</span>
+
+<span class="go">Command line interface for hydromt models.</span>
+
+<span class="go">Options:</span>
+<span class="go">--version  Show the version and exit.</span>
+<span class="go">--models   Print available model plugins and exit.</span>
+<span class="go">--help     Show this message and exit.</span>
+
+<span class="go">Commands:</span>
+<span class="go">build   Build models</span>
+<span class="go">check   Validate config / data catalog / region</span>
+<span class="go">clip    Clip models.</span>
+<span class="go">export  Export data</span>
+<span class="go">update  Update models</span>
+</pre></div>
+</div>
+<section id="base-commands">
+<h2>Base commands<a class="headerlink" href="#base-commands" title="Link to this heading">#</a></h2>
+<p>The base commands or options are here to get some information about HydroMT like the
+help, installed version and available models.</p>
+<section id="help-command">
+<h3>Help command<a class="headerlink" href="#help-command" title="Link to this heading">#</a></h3>
+<p>The <cite>hydromt --help</cite> command prints the help of HydroMT and the different commands,
+such as build. For the general help, you can see the example above. To get help for
+a specific command, you can type <cite>hydromt &lt;command&gt; --help</cite>. For example, to get help
+for the build command, you can type:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt build --help</span>
+
+<span class="go">Usage: hydromt build [OPTIONS] MODEL MODEL_ROOT</span>
+
+<span class="go">Build models from scratch.</span>
+
+<span class="go">Example usage:</span>
+<span class="go">--------------</span>
+
+<span class="go">To build a wflow model for a subbasin using a point coordinates snapped to</span>
+<span class="go">cells with upstream area &gt;= 50 km2 hydromt build wflow /path/to/model_root</span>
+<span class="go">-i /path/to/wflow_config.ini  -r &quot;{&#39;subbasin&#39;: [-7.24, 62.09], &#39;uparea&#39;:</span>
+<span class="go">50}&quot; -d deltares_data -d /path/to/data_catalog.yml -v</span>
+
+<span class="go">To build a sfincs model based on a bbox hydromt build sfincs</span>
+<span class="go">/path/to/model_root  -i /path/to/sfincs_config.ini  -r &quot;{&#39;bbox&#39;:</span>
+<span class="go">[4.6891,52.9750,4.9576,53.1994]}&quot;  -d /path/to/data_catalog.yml -v</span>
+
+<span class="go">Options:</span>
+<span class="go">--opt TEXT               Method specific keyword arguments, see the method</span>
+<span class="go">                        documentation of the specific model for more</span>
+<span class="go">                        information about the arguments.</span>
+<span class="go">-i, --config PATH        Path to hydroMT configuration file, for the model</span>
+<span class="go">                        specific implementation.</span>
+<span class="go">-r, --region TEXT        Set the region for which to build the model, e.g.</span>
+<span class="go">                        {&#39;subbasin&#39;: [-7.24, 62.09]}</span>
+<span class="go">-d, --data TEXT          Path to local yaml data catalog file OR name of</span>
+<span class="go">                        predefined data catalog.</span>
+<span class="go">--dd, --deltares-data    Flag: Shortcut to add the &quot;deltares_data&quot; catalog</span>
+<span class="go">--fo, --force-overwrite  Flag: If provided overwrite existing model files</span>
+<span class="go">--cache                  Flag: If provided cache tiled rasterdatasets</span>
+<span class="go">-v, --verbose            Increase verbosity.</span>
+<span class="go">-q, --quiet              Decrease verbosity.</span>
+<span class="go">--help                   Show this message and exit.</span>
+</pre></div>
+</div>
+</section>
+<section id="version-command">
+<h3>Version command<a class="headerlink" href="#version-command" title="Link to this heading">#</a></h3>
+<p>The <cite>hydromt --version</cite> command prints the version of HydroMT. For example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt --version</span>
+
+<span class="go">HydroMT version 0.9.2</span>
+</pre></div>
+</div>
+</section>
+<section id="models-command">
+<h3>Models command<a class="headerlink" href="#models-command" title="Link to this heading">#</a></h3>
+<p>The <cite>hydromt --models</cite> command prints the available generic models from HydroMT core and
+the installed plugins together with their versions. For example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt --models</span>
+
+<span class="go">model plugins:</span>
+<span class="go">- wflow (hydromt_wflow 0.4.1)</span>
+<span class="go">- wflow_sediment (hydromt_wflow 0.4.1)</span>
+<span class="go">generic models (hydromt 0.9.2):</span>
+<span class="go">- grid_model</span>
+<span class="go">- vector_model</span>
+<span class="go">- network_model</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="build-command">
+<h2>Build command<a class="headerlink" href="#build-command" title="Link to this heading">#</a></h2>
+<p>The <strong>hydromt build</strong> command is used to build models from scratch. It has two mandatory
+arguments:</p>
+<ul class="simple">
+<li><p><cite>MODEL</cite>: The name of the model to build. The available models can be printed using the <cite>hydromt --models</cite> command.</p></li>
+<li><p><cite>MODEL_ROOT</cite>: Absolute or relative path to the output folder of the model to build.</p></li>
+</ul>
+<p>The <strong>hydromt build</strong> command has several options to specify the configuration file, the
+region, the data catalog, and other options. The most important ones are:</p>
+<ul class="simple">
+<li><p><cite>-i, --config</cite>: Relative or absolute path to the HydroMT configuration file so that HydroMT knows what to prepare for our model (data to use, processing options etc.).</p></li>
+<li><p><cite>-d, --data</cite>: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog. The data catalog is a yaml file that contains the paths to the data that will be used to build the model. In order to use several catalogs, you can use the <cite>-d</cite> option several times.</p></li>
+<li><p><cite>-r, --region</cite>: Set the region for which to build the model. The region is specified as a dictionary with the region type and the region coordinates.</p></li>
+</ul>
+<p>Here is an example of how to use the command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt build wflow /path/to/model_root -i /path/to/wflow_build_config.yml -r &quot;{&#39;subbasin&#39;: [-7.24, 62.09], &#39;uparea&#39;: 50}&quot; -d deltares_data -d /path/to/data_catalog.yml -v</span>
+</pre></div>
+</div>
+<p>You can find more information on the steps to build a model in the <a class="reference internal" href="model_build.html#model-build"><span class="std std-ref">Building a model</span></a> section.
+In this section, you will also find how to <a class="reference internal" href="model_config.html#model-config"><span class="std std-ref">prepare a configuration file</span></a> and a
+<a class="reference internal" href="model_region.html#region"><span class="std std-ref">region</span></a>. To know more about the data catalog, you can refer to the
+<a class="reference internal" href="data_overview.html#get-data"><span class="std std-ref">Working with data in HydroMT</span></a> section.</p>
+<p>Finally you can check the <a class="reference internal" href="../api_cli/hydromt_build.html#build-api"><span class="std std-ref">hydromt build API</span></a> for all the available options for the build command.</p>
+</section>
+<section id="update-command">
+<h2>Update command<a class="headerlink" href="#update-command" title="Link to this heading">#</a></h2>
+<p>The <strong>hydromt update</strong> command is used to update an existing model. It is quite similar to the
+build command and has two mandatory arguments:</p>
+<ul class="simple">
+<li><p><cite>MODEL</cite>: The name of the model to update. The available models can be printed using the <cite>hydromt --models</cite> command.</p></li>
+<li><p><cite>MODEL_ROOT</cite>: Absolute or relative path to the model to update.</p></li>
+</ul>
+<p>The <strong>hydromt update</strong> command has several options to specify the configuration file, the
+the data catalog, and other options. The most important ones are:</p>
+<ul class="simple">
+<li><p><cite>-i, --config</cite>: Relative or absolute path to the HydroMT configuration file so that HydroMT knows what to update for our model (data to use, processing options etc.).</p></li>
+<li><p><cite>-d, --data</cite>: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog. The data catalog is a yaml file that contains the paths to the data that will be used to update the model. In order to use several catalogs, you can use the <cite>-d</cite> option several times.</p></li>
+<li><p><cite>-o, --model-out</cite>: Relative or absolute path to the output folder of the updated model. If not provided, the current model will be overwritten.</p></li>
+</ul>
+<p>Here is an example of how to use the command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt update wflow /path/to/model_to_update -o /path/to/updated_model -i /path/to/wflow_update_config.yml -d /path/to/data_catalog.yml -v</span>
+</pre></div>
+</div>
+<p>You can find more information on the steps to update a model in the <a class="reference internal" href="model_update.html#model-update"><span class="std std-ref">Updating a model</span></a> section.
+In this section, you will also find how to <a class="reference internal" href="model_config.html#model-config"><span class="std std-ref">prepare a configuration file</span></a>. To know more about the data catalog,
+you can refer to the <a class="reference internal" href="data_overview.html#get-data"><span class="std std-ref">Working with data in HydroMT</span></a> section.</p>
+<p>Finally you can check the <a class="reference internal" href="../api_cli/hydromt_update.html#update-api"><span class="std std-ref">hydromt update API</span></a> for all the available options for the update command.</p>
+</section>
+<section id="clip-command">
+<h2>Clip command<a class="headerlink" href="#clip-command" title="Link to this heading">#</a></h2>
+<p>The <strong>hydromt clip</strong> command is used to clip an existing model. It has four mandatory arguments:</p>
+<ul class="simple">
+<li><p><cite>MODEL</cite>: The name of the model to clip. The available models can be printed using the <cite>hydromt --models</cite> command.</p></li>
+<li><p><cite>MODEL_ROOT</cite>: Absolute or relative path to the model to clip.</p></li>
+<li><p><cite>MODEL_DESTINATION</cite>: Absolute or relative path to the output folder of the clipped model.</p></li>
+<li><p><cite>REGION</cite>: Set the region for which to clip the model. The region is specified as a dictionary with the region type and the region coordinates.</p></li>
+</ul>
+<p>Here is an example of how to use the command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt clip wflow /path/to/model_to_clip /path/to/clipped_model &quot;{&#39;subbasin&#39;: [4.68,53.19], &#39;wflow_uparea&#39;: 50}&quot; -v</span>
+</pre></div>
+</div>
+<p>You can find more information on the steps to clip a model in the <a class="reference internal" href="model_clip.html#model-clip"><span class="std std-ref">Clipping a model</span></a> section.
+In this section, you will also find how to <a class="reference internal" href="model_region.html#region"><span class="std std-ref">prepare a region</span></a>.</p>
+<p>Finally you can check the <a class="reference internal" href="../api_cli/hydromt_clip.html#clip-api"><span class="std std-ref">hydromt clip API</span></a> for all the available options for the build command.</p>
+<p>Note that this function is not available for all models and you should check the plugin documentation for more information.</p>
+</section>
+<section id="export-command">
+<h2>Export command<a class="headerlink" href="#export-command" title="Link to this heading">#</a></h2>
+<p>The <strong>hydromt export</strong> command is used to export sample data from a data catalog for
+example to export global data for a specific region and time extent. It is based
+on the <cite>hydromt.DataCatalog.export_data</cite> function.
+It has one mandatory argument:</p>
+<ul class="simple">
+<li><p><cite>EXPORT_DEST_PATH</cite>: Absolute or relative path to the output folder of the exported data.</p></li>
+</ul>
+<p>The input data catalogs are specified using the <cite>-d, --data</cite> option as in the <cite>build</cite> or <cite>update</cite> commands.
+You are also free to specify several catalogs.</p>
+<p>There are two ways to specify the sources/extent of the data to export: either fully from the command line or by using a configuration file.</p>
+<p>If you are using the command line, the main options are:</p>
+<ul class="simple">
+<li><p><cite>-d, --data</cite>: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog. The data catalog is a yaml file that contains the paths to the data that will be used to export the data. In order to use several catalogs, you can use the <cite>-d</cite> option several times.</p></li>
+<li><p><cite>s, –source</cite>: The data source to export. Only one can be specified from the command line.</p></li>
+<li><p><cite>-r, --region</cite>: Set the region for which to export the data. The region is specified as a dictionary with the region type (here only <cite>bbox</cite> or <cite>geom</cite>) and the region coordinates. Please note that the <cite>bbox</cite> coordinates should be in <cite>EPSG:4326</cite>.</p></li>
+<li><p><cite>-t, --time</cite>: Set the time extent for which to export the data. The time extent is specified as a list with the start and end date.</p></li>
+</ul>
+<p>Here is an example of how to use the command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt export /path/to/exported_data -d /path/to/data_catalog.yml -s &quot;era5&quot; -r &quot;{&#39;bbox&#39;: [4.68,53.19,4.69,53.20]}&quot; -t &quot;[&#39;2010-01-01&#39;, &#39;2010-01-31&#39;]&quot; -v</span>
+</pre></div>
+</div>
+<p>If you want to export several sources or for more options, you can also use a configuration file instead.
+In that case, the main options are:</p>
+<ul class="simple">
+<li><p><cite>-i, --config</cite>: Relative or absolute path to the export configuration file. The export configuration file is a yaml file that contains the sources, region, and time extent to export.</p></li>
+</ul>
+<p>And the command line would look like:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt export /path/to/exported_data -i /path/to/export_config.yml -v</span>
+</pre></div>
+</div>
+<p>An example of the export file is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">export_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">data_libs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/data_catalog.yml</span>
+<span class="w">    </span><span class="nt">region</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">bbox</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">4.68</span><span class="p p-Indicator">,</span><span class="nv">53.19</span><span class="p p-Indicator">,</span><span class="nv">4.69</span><span class="p p-Indicator">,</span><span class="nv">53.20</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">time_tuple</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;2010-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2020-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">sources</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hydro_lakes</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">era5</span>
+<span class="w">    </span><span class="nt">unit_conversion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">append</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">meta</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+</pre></div>
+</div>
+<p>You can find detailed document on the function in <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.export_data.html"><span class="doc">hydromt.DataCatalog.export_data</span></a>.
+For the region, only the <cite>bbox</cite> and <cite>geom</cite> types are supported, see the :ref:` region &lt;region&gt;` section for more information.</p>
+<p>Finally you can check the <a class="reference internal" href="../api_cli/hydromt_export.html#export-api"><span class="std std-ref">hydromt export API</span></a> for all the available options for the export command.</p>
+</section>
+<section id="check-command">
+<h2>Check command<a class="headerlink" href="#check-command" title="Link to this heading">#</a></h2>
+<p>The <strong>hydromt check</strong> command is used to validate the configuration file, the data catalog, and the region.
+It can be useful to validate files before running other command lines to avoid errors. Please note that it
+will only check the syntax of the files provided. The actual data or calculations referenced will not be checked,
+loaded or performed.</p>
+<p>The command does not have any required arguments but several options that you can choose from:</p>
+<ul class="simple">
+<li><p><cite>-m, --model</cite>: The name of the model to validate. The available models can be printed using the <cite>hydromt --models</cite> command.</p></li>
+<li><p><cite>-i, --config</cite>: Relative or absolute path to the HydroMT configuration file to validate.</p></li>
+<li><p><cite>-d, --data</cite>: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog to validate.</p></li>
+<li><p><cite>-r, --region</cite>: Set the region to validate (only <cite>bbox</cite> and <cite>geom</cite> types supported). The region is specified as a dictionary with the region type and the region coordinates. Please note that the <cite>bbox</cite> coordinates should be in <cite>EPSG:4326</cite>.</p></li>
+</ul>
+<p>If you only wish to validate a region or a data catalog files, they can be run separately.
+Because configuration files are dependant on the model to build/update, to check a configuration file, you need to specify the model.</p>
+<p>Here are some examples of how to use the command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt check -m wflow -i /path/to/wflow_config.yml -d /path/to/data_catalog.yml -r &quot;{&#39;bbox&#39;: [4.68,53.19,4.69,53.20]}&quot; -v</span>
+
+<span class="go">&gt; hydromt check -d /path/to/data_catalog.yml -v</span>
+
+<span class="go">&gt; hydromt check -m wflow -i /path/to/wflow_config.yml -v</span>
+
+<span class="go">&gt; hydromt check -r &quot;{&#39;bbox&#39;: [4.68,53.19,4.69,53.20]}&quot; -v</span>
+</pre></div>
+</div>
+<p>The validation is so far limited:</p>
+<ul class="simple">
+<li><p>region: full validation is only supported for the <cite>bbox</cite> and <cite>geom</cite> types. For other type, it will only check if the type is supported but will not validate the region itself.</p></li>
+<li><p>data catalog: only the format and options are validated but it does not try to load any of the data.</p></li>
+<li><p>configuration file: it will check if the methods exists and if the correct arguments are called. No validation is done on the content and type of the arguments themselves.</p></li>
+</ul>
+<p>Finally you can check the <a class="reference internal" href="../api_cli/hydromt_check.html#check-api"><span class="std std-ref">hydromt check API</span></a> for all the available options for the check command.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="hydromt_intro.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Introduction to HydroMT</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="hydromt_python.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Using HydroMT in Python</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#base-commands">Base commands</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#help-command">Help command</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#version-command">Version command</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#models-command">Models command</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-command">Build command</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#update-command">Update command</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clip-command">Clip command</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#export-command">Export command</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#check-command">Check command</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/user_guide/hydromt_cli.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user_guide/hydromt_cli.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

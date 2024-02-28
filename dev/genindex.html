@@ -1,0 +1,2064 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.5';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article"></div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#Symbols"><strong>Symbols</strong></a>
+ | <a href="#_"><strong>_</strong></a>
+ | <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ | <a href="#X"><strong>X</strong></a>
+ | <a href="#Y"><strong>Y</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
+ 
+</div>
+<h2 id="Symbols">Symbols</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    --cache
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-cache">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-cache">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --components
+
+      <ul>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-c">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --config
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-i">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-i">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-i">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-i">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --data
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-d">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-d">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-d">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-d">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --dd
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-dd">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-dd">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-dd">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --deltares-data
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-dd">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-dd">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-dd">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --error-on-empty
+
+      <ul>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-error-on-empty">hydromt-export command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --fo
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-fo">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-fo">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-fo">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --force-overwrite
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-fo">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-fo">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-fo">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --model
+
+      <ul>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-m">hydromt-check command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --model-out
+
+      <ul>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-o">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --models
+
+      <ul>
+        <li><a href="api_cli/hydromt_cli.html#cmdoption-hydromt-models">hydromt command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --opt
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-opt">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-opt">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --quiet
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-q">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-q">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-q">hydromt-clip command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-q">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-q">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --region
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-r">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-r">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-r">hydromt-export command line option</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    --source
+
+      <ul>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-s">hydromt-export command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --time-tuple
+
+      <ul>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-t">hydromt-export command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --verbose
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-v">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-v">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-v">hydromt-clip command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-v">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-v">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --version
+
+      <ul>
+        <li><a href="api_cli/hydromt_cli.html#cmdoption-hydromt-version">hydromt command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -c
+
+      <ul>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-c">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -d
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-d">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-d">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-d">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-d">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -i
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-i">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-i">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-i">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-i">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -m
+
+      <ul>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-m">hydromt-check command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -o
+
+      <ul>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-o">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -q
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-q">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-q">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-q">hydromt-clip command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-q">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-q">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -r
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-r">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-r">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-r">hydromt-export command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -s
+
+      <ul>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-s">hydromt-export command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -t
+
+      <ul>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-t">hydromt-export command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -v
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-v">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-v">hydromt-check command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-v">hydromt-clip command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-v">hydromt-export command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-v">hydromt-update command line option</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="_">_</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.data_adapter.DataAdapter.html#hydromt.data_adapter.DataAdapter.__init__">__init__() (hydromt.data_adapter.DataAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.DataFrameAdapter.html#hydromt.data_adapter.DataFrameAdapter.__init__">(hydromt.data_adapter.DataFrameAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.DatasetAdapter.html#hydromt.data_adapter.DatasetAdapter.__init__">(hydromt.data_adapter.DatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.html#hydromt.data_adapter.GeoDataFrameAdapter.__init__">(hydromt.data_adapter.GeoDataFrameAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.html#hydromt.data_adapter.GeoDatasetAdapter.__init__">(hydromt.data_adapter.GeoDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.html#hydromt.data_adapter.RasterDatasetAdapter.__init__">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_catalog.DataCatalog.html#hydromt.data_catalog.DataCatalog.__init__">(hydromt.data_catalog.DataCatalog method)</a>
+</li>
+        <li><a href="_generated/hydromt.GridModel.html#hydromt.GridModel.__init__">(hydromt.GridModel method)</a>
+</li>
+        <li><a href="_generated/hydromt.MeshModel.html#hydromt.MeshModel.__init__">(hydromt.MeshModel method)</a>
+</li>
+        <li><a href="_generated/hydromt.Model.html#hydromt.Model.__init__">(hydromt.Model method)</a>
+</li>
+        <li><a href="_generated/hydromt.ModelCatalog.html#hydromt.ModelCatalog.__init__">(hydromt.ModelCatalog method)</a>
+</li>
+        <li><a href="_generated/hydromt.VectorModel.html#hydromt.VectorModel.__init__">(hydromt.VectorModel method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.add_source.html#hydromt.data_catalog.DataCatalog.add_source">add_source() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.gis_utils.affine_to_coords.html#hydromt.gis_utils.affine_to_coords">affine_to_coords() (in module hydromt.gis_utils)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.aligned_grid.html#hydromt.DataArray.raster.aligned_grid">aligned_grid() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.api.html#hydromt.Model.api">api (hydromt.Model attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.area_grid.html#hydromt.DataArray.raster.area_grid">area_grid() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.attrs.html#hydromt.DataArray.raster.attrs">attrs (hydromt.DataArray.raster attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.DataArray.vector.attrs.html#hydromt.DataArray.vector.attrs">(hydromt.DataArray.vector attribute)</a>
+</li>
+        <li><a href="_generated/hydromt.Dataset.vector.attrs.html#hydromt.Dataset.vector.attrs">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.gis_utils.axes_attrs.html#hydromt.gis_utils.axes_attrs">axes_attrs() (in module hydromt.gis_utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.flw.basin_map.html#hydromt.flw.basin_map">basin_map() (in module hydromt.flw)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.bias.html#hydromt.stats.skills.bias">bias() (in module hydromt.stats.skills)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.bounds.html#hydromt.DataArray.raster.bounds">bounds (hydromt.DataArray.raster attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.DataArray.vector.bounds.html#hydromt.DataArray.vector.bounds">(hydromt.DataArray.vector attribute)</a>
+</li>
+        <li><a href="_generated/hydromt.Dataset.vector.bounds.html#hydromt.Dataset.vector.bounds">(hydromt.Dataset.vector attribute)</a>
+</li>
+        <li><a href="_generated/hydromt.MeshModel.bounds.html#hydromt.MeshModel.bounds">(hydromt.MeshModel property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.box.html#hydromt.DataArray.raster.box">box (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.build.html#hydromt.Model.build">build() (hydromt.Model method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.gis_utils.cellarea.html#hydromt.gis_utils.cellarea">cellarea() (in module hydromt.gis_utils)</a>
+</li>
+      <li><a href="_generated/hydromt.gis_utils.cellres.html#hydromt.gis_utils.cellres">cellres() (in module hydromt.gis_utils)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.clip.html#hydromt.DataArray.raster.clip">clip() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.flw.clip_basins.html#hydromt.flw.clip_basins">clip_basins() (in module hydromt.flw)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.clip_bbox.html#hydromt.DataArray.raster.clip_bbox">clip_bbox() (hydromt.DataArray.raster method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.DataArray.vector.clip_bbox.html#hydromt.DataArray.vector.clip_bbox">(hydromt.DataArray.vector method)</a>
+</li>
+        <li><a href="_generated/hydromt.Dataset.vector.clip_bbox.html#hydromt.Dataset.vector.clip_bbox">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.raster.clip_geom.html#hydromt.DataArray.raster.clip_geom">clip_geom() (hydromt.DataArray.raster method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.DataArray.vector.clip_geom.html#hydromt.DataArray.vector.clip_geom">(hydromt.DataArray.vector method)</a>
+</li>
+        <li><a href="_generated/hydromt.Dataset.vector.clip_geom.html#hydromt.Dataset.vector.clip_geom">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.raster.clip_mask.html#hydromt.DataArray.raster.clip_mask">clip_mask() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.config.html#hydromt.Model.config">config (hydromt.Model property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.config.configread.html#hydromt.config.configread">configread() (in module hydromt.config)</a>
+</li>
+      <li><a href="_generated/hydromt.config.configwrite.html#hydromt.config.configwrite">configwrite() (in module hydromt.config)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.coords.html#hydromt.DataArray.raster.coords">coords (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.mesh.create_mesh2d.html#hydromt.workflows.mesh.create_mesh2d">create_mesh2d() (in module hydromt.workflows.mesh)</a>
+</li>
+      <li><a href="_generated/hydromt.gis_utils.create_vrt.html#hydromt.gis_utils.create_vrt">create_vrt() (in module hydromt.gis_utils)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.crs.html#hydromt.DataArray.raster.crs">crs (hydromt.DataArray.raster attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.DataArray.vector.crs.html#hydromt.DataArray.vector.crs">(hydromt.DataArray.vector attribute)</a>
+</li>
+        <li><a href="_generated/hydromt.Dataset.vector.crs.html#hydromt.Dataset.vector.crs">(hydromt.Dataset.vector attribute)</a>
+</li>
+        <li><a href="_generated/hydromt.GridModel.crs.html#hydromt.GridModel.crs">(hydromt.GridModel property)</a>
+</li>
+        <li><a href="_generated/hydromt.MeshModel.crs.html#hydromt.MeshModel.crs">(hydromt.MeshModel property)</a>
+</li>
+        <li><a href="_generated/hydromt.Model.crs.html#hydromt.Model.crs">(hydromt.Model property)</a>
+</li>
+        <li><a href="_generated/hydromt.VectorModel.crs.html#hydromt.VectorModel.crs">(hydromt.VectorModel property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.flw.d8_from_dem.html#hydromt.flw.d8_from_dem">d8_from_dem() (in module hydromt.flw)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.DataAdapter.html#hydromt.data_adapter.DataAdapter">DataAdapter (class in hydromt.data_adapter)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.html#hydromt.data_catalog.DataCatalog">DataCatalog (class in hydromt.data_catalog)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.DataFrameAdapter.html#hydromt.data_adapter.DataFrameAdapter">DataFrameAdapter (class in hydromt.data_adapter)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.DatasetAdapter.html#hydromt.data_adapter.DatasetAdapter">DatasetAdapter (class in hydromt.data_adapter)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.delta_freq.html#hydromt.workflows.forcing.delta_freq">delta_freq() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.flw.dem_adjust.html#hydromt.flw.dem_adjust">dem_adjust() (in module hydromt.flw)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.density_grid.html#hydromt.DataArray.raster.density_grid">density_grid() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox.html#hydromt.data_adapter.GeoDataFrameAdapter.detect_bbox">detect_bbox() (hydromt.data_adapter.GeoDataFrameAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.detect_bbox.html#hydromt.data_adapter.GeoDatasetAdapter.detect_bbox">(hydromt.data_adapter.GeoDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.detect_bbox.html#hydromt.data_adapter.RasterDatasetAdapter.detect_bbox">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.detect_time_range.html#hydromt.data_adapter.GeoDatasetAdapter.detect_time_range">detect_time_range() (hydromt.data_adapter.GeoDatasetAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.detect_time_range.html#hydromt.data_adapter.RasterDatasetAdapter.detect_time_range">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.raster.dim0.html#hydromt.DataArray.raster.dim0">dim0 (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.dims.html#hydromt.DataArray.raster.dims">dims (hydromt.DataArray.raster attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.stats.extremes.eva.html#hydromt.stats.extremes.eva">eva() (in module hydromt.stats.extremes)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.export_data.html#hydromt.data_catalog.DataCatalog.export_data">export_data() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    EXPORT_DEST_PATH
+
+      <ul>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-arg-EXPORT_DEST_PATH">hydromt-export command line option</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.gis_utils.filter_gdf.html#hydromt.gis_utils.filter_gdf">filter_gdf() (in module hydromt.gis_utils)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.extremes.fit_extremes.html#hydromt.stats.extremes.fit_extremes">fit_extremes() (in module hydromt.stats.extremes)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.flipud.html#hydromt.DataArray.raster.flipud">flipud() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.flw.flwdir_from_da.html#hydromt.flw.flwdir_from_da">flwdir_from_da() (in module hydromt.flw)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.forcing.html#hydromt.Model.forcing">forcing (hydromt.Model property)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.from_archive.html#hydromt.data_catalog.DataCatalog.from_archive">from_archive() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.from_dict.html#hydromt.data_catalog.DataCatalog.from_dict">from_dict() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.vector.from_gdf.html#hydromt.DataArray.vector.from_gdf">from_gdf() (hydromt.DataArray.vector static method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.from_gdf.html#hydromt.Dataset.vector.from_gdf">(hydromt.Dataset.vector static method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.vector.from_netcdf.html#hydromt.DataArray.vector.from_netcdf">from_netcdf() (hydromt.DataArray.vector static method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.from_netcdf.html#hydromt.Dataset.vector.from_netcdf">(hydromt.Dataset.vector static method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.raster.from_numpy.html#hydromt.DataArray.raster.from_numpy">from_numpy() (hydromt.DataArray.raster static method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.raster.from_numpy.html#hydromt.Dataset.raster.from_numpy">(hydromt.Dataset.raster static method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.from_predefined_catalogs">from_predefined_catalogs() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.from_yml.html#hydromt.data_catalog.DataCatalog.from_yml">from_yml() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.raster.full.html#hydromt.raster.full">full() (in module hydromt.raster)</a>
+</li>
+      <li><a href="_generated/hydromt.raster.full_from_transform.html#hydromt.raster.full_from_transform">full_from_transform() (in module hydromt.raster)</a>
+</li>
+      <li><a href="_generated/hydromt.raster.full_like.html#hydromt.raster.full_like">full_like() (in module hydromt.raster)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.flw.gauge_map.html#hydromt.flw.gauge_map">gauge_map() (in module hydromt.flw)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.gdal_compliant.html#hydromt.DataArray.raster.gdal_compliant">gdal_compliant() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.html#hydromt.data_adapter.GeoDataFrameAdapter">GeoDataFrameAdapter (class in hydromt.data_adapter)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.html#hydromt.data_adapter.GeoDatasetAdapter">GeoDatasetAdapter (class in hydromt.data_adapter)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.vector.geom_format.html#hydromt.DataArray.vector.geom_format">geom_format (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.geom_format.html#hydromt.Dataset.vector.geom_format">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.vector.geom_name.html#hydromt.DataArray.vector.geom_name">geom_name (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.geom_name.html#hydromt.Dataset.vector.geom_name">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.vector.geom_type.html#hydromt.DataArray.vector.geom_type">geom_type (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.geom_type.html#hydromt.Dataset.vector.geom_type">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.vector.geometry.html#hydromt.DataArray.vector.geometry">geometry (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.geometry.html#hydromt.Dataset.vector.geometry">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.raster.geometry_mask.html#hydromt.DataArray.raster.geometry_mask">geometry_mask() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.geoms.html#hydromt.Model.geoms">geoms (hydromt.Model property)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.basin_mask.get_basin_geometry.html#hydromt.workflows.basin_mask.get_basin_geometry">get_basin_geometry() (in module hydromt.workflows.basin_mask)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.get_bbox.html#hydromt.data_adapter.GeoDataFrameAdapter.get_bbox">get_bbox() (hydromt.data_adapter.GeoDataFrameAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.get_bbox.html#hydromt.data_adapter.GeoDatasetAdapter.get_bbox">(hydromt.data_adapter.GeoDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.get_bbox.html#hydromt.data_adapter.RasterDatasetAdapter.get_bbox">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.Model.get_config.html#hydromt.Model.get_config">get_config() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.DataFrameAdapter.get_data.html#hydromt.data_adapter.DataFrameAdapter.get_data">get_data() (hydromt.data_adapter.DataFrameAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.DatasetAdapter.get_data.html#hydromt.data_adapter.DatasetAdapter.get_data">(hydromt.data_adapter.DatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.get_data.html#hydromt.data_adapter.GeoDataFrameAdapter.get_data">(hydromt.data_adapter.GeoDataFrameAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.get_data.html#hydromt.data_adapter.GeoDatasetAdapter.get_data">(hydromt.data_adapter.GeoDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.get_data.html#hydromt.data_adapter.RasterDatasetAdapter.get_data">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.get_dataframe.html#hydromt.data_catalog.DataCatalog.get_dataframe">get_dataframe() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.get_dataset.html#hydromt.data_catalog.DataCatalog.get_dataset">get_dataset() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.get_geodataframe.html#hydromt.data_catalog.DataCatalog.get_geodataframe">get_geodataframe() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.get_geodataset.html#hydromt.data_catalog.DataCatalog.get_geodataset">get_geodataset() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.get_mesh.html#hydromt.MeshModel.get_mesh">get_mesh() (hydromt.MeshModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.design_events.get_peak_hydrographs.html#hydromt.stats.design_events.get_peak_hydrographs">get_peak_hydrographs() (in module hydromt.stats.design_events)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.extremes.get_peaks.html#hydromt.stats.extremes.get_peaks">get_peaks() (in module hydromt.stats.extremes)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html#hydromt.data_catalog.DataCatalog.get_rasterdataset">get_rasterdataset() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.extremes.get_return_value.html#hydromt.stats.extremes.get_return_value">get_return_value() (in module hydromt.stats.extremes)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.get_source.html#hydromt.data_catalog.DataCatalog.get_source">get_source() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.get_source_bbox.html#hydromt.data_catalog.DataCatalog.get_source_bbox">get_source_bbox() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.get_source_time_range.html#hydromt.data_catalog.DataCatalog.get_source_time_range">get_source_time_range() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.get_time_range.html#hydromt.data_adapter.GeoDatasetAdapter.get_time_range">get_time_range() (hydromt.data_adapter.GeoDatasetAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.get_time_range.html#hydromt.data_adapter.RasterDatasetAdapter.get_time_range">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.GridModel.grid.html#hydromt.GridModel.grid">grid (hydromt.GridModel property)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.grid.grid_from_constant.html#hydromt.workflows.grid.grid_from_constant">grid_from_constant() (in module hydromt.workflows.grid)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.grid.grid_from_geodataframe.html#hydromt.workflows.grid.grid_from_geodataframe">grid_from_geodataframe() (in module hydromt.workflows.grid)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.grid.grid_from_raster_reclass.html#hydromt.workflows.grid.grid_from_raster_reclass">grid_from_raster_reclass() (in module hydromt.workflows.grid)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.grid.grid_from_rasterdataset.html#hydromt.workflows.grid.grid_from_rasterdataset">grid_from_rasterdataset() (in module hydromt.workflows.grid)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.html#hydromt.GridModel">GridModel (class in hydromt)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.height.html#hydromt.DataArray.raster.height">height (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li>
+    hydromt command line option
+
+      <ul>
+        <li><a href="api_cli/hydromt_cli.html#cmdoption-hydromt-models">--models</a>
+</li>
+        <li><a href="api_cli/hydromt_cli.html#cmdoption-hydromt-version">--version</a>
+</li>
+      </ul></li>
+      <li>
+    hydromt-build command line option
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-cache">--cache</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-i">--config</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-d">--data</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-dd">--dd</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-dd">--deltares-data</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-fo">--fo</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-fo">--force-overwrite</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-opt">--opt</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-q">--quiet</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-r">--region</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-v">--verbose</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-d">-d</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-i">-i</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-q">-q</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-r">-r</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-v">-v</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-arg-MODEL">MODEL</a>
+</li>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-arg-MODEL_ROOT">MODEL_ROOT</a>
+</li>
+      </ul></li>
+      <li>
+    hydromt-check command line option
+
+      <ul>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-i">--config</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-d">--data</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-m">--model</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-q">--quiet</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-r">--region</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-v">--verbose</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-d">-d</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-i">-i</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-m">-m</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-q">-q</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-r">-r</a>
+</li>
+        <li><a href="api_cli/hydromt_check.html#cmdoption-hydromt-check-v">-v</a>
+</li>
+      </ul></li>
+      <li>
+    hydromt-clip command line option
+
+      <ul>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-q">--quiet</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-v">--verbose</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-q">-q</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-v">-v</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-arg-MODEL">MODEL</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-arg-MODEL_DESTINATION">MODEL_DESTINATION</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-arg-MODEL_ROOT">MODEL_ROOT</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-arg-REGION">REGION</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    hydromt-export command line option
+
+      <ul>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-i">--config</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-d">--data</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-dd">--dd</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-dd">--deltares-data</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-error-on-empty">--error-on-empty</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-fo">--fo</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-fo">--force-overwrite</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-q">--quiet</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-r">--region</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-s">--source</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-t">--time-tuple</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-v">--verbose</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-d">-d</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-i">-i</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-q">-q</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-r">-r</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-s">-s</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-t">-t</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-v">-v</a>
+</li>
+        <li><a href="api_cli/hydromt_export.html#cmdoption-hydromt-export-arg-EXPORT_DEST_PATH">EXPORT_DEST_PATH</a>
+</li>
+      </ul></li>
+      <li>
+    hydromt-update command line option
+
+      <ul>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-cache">--cache</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-c">--components</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-i">--config</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-d">--data</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-dd">--dd</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-dd">--deltares-data</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-fo">--fo</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-fo">--force-overwrite</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-o">--model-out</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-opt">--opt</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-q">--quiet</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-v">--verbose</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-c">-c</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-d">-d</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-i">-i</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-o">-o</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-q">-q</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-v">-v</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-arg-MODEL">MODEL</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-arg-MODEL_ROOT">MODEL_ROOT</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.identical_grid.html#hydromt.DataArray.raster.identical_grid">identical_grid() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.idx_to_xy.html#hydromt.DataArray.raster.idx_to_xy">idx_to_xy() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.vector.index.html#hydromt.DataArray.vector.index">index (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.index.html#hydromt.Dataset.vector.index">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.vector.index_dim.html#hydromt.DataArray.vector.index_dim">index_dim (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.index_dim.html#hydromt.Dataset.vector.index_dim">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.raster.internal_bounds.html#hydromt.DataArray.raster.internal_bounds">internal_bounds (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.interpolate_na.html#hydromt.DataArray.raster.interpolate_na">interpolate_na() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.iter_sources.html#hydromt.data_catalog.DataCatalog.iter_sources">iter_sources() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.keys.html#hydromt.data_catalog.DataCatalog.keys">keys (hydromt.data_catalog.DataCatalog property)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.kge.html#hydromt.stats.skills.kge">kge() (in module hydromt.stats.skills)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.stats.skills.kge_2012.html#hydromt.stats.skills.kge_2012">kge_2012() (in module hydromt.stats.skills)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.kge_non_parametric.html#hydromt.stats.skills.kge_non_parametric">kge_non_parametric() (in module hydromt.stats.skills)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.kge_non_parametric_flood.html#hydromt.stats.skills.kge_non_parametric_flood">kge_non_parametric_flood() (in module hydromt.stats.skills)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.stats.skills.lognashsutcliffe.html#hydromt.stats.skills.lognashsutcliffe">lognashsutcliffe() (in module hydromt.stats.skills)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.Model.maps.html#hydromt.Model.maps">maps (hydromt.Model property)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.mask_nodata.html#hydromt.DataArray.raster.mask_nodata">mask_nodata() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.merge.merge.html#hydromt.merge.merge">merge() (in module hydromt.merge)</a>
+</li>
+      <li><a href="_generated/hydromt.gis_utils.meridian_offset.html#hydromt.gis_utils.meridian_offset">meridian_offset() (in module hydromt.gis_utils)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.mesh.html#hydromt.MeshModel.mesh">mesh (hydromt.MeshModel property)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.mesh.mesh2d_from_raster_reclass.html#hydromt.workflows.mesh.mesh2d_from_raster_reclass">mesh2d_from_raster_reclass() (in module hydromt.workflows.mesh)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.mesh.mesh2d_from_rasterdataset.html#hydromt.workflows.mesh.mesh2d_from_rasterdataset">mesh2d_from_rasterdataset() (in module hydromt.workflows.mesh)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.mesh_datasets.html#hydromt.MeshModel.mesh_datasets">mesh_datasets (hydromt.MeshModel property)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.mesh_gdf.html#hydromt.MeshModel.mesh_gdf">mesh_gdf (hydromt.MeshModel property)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.mesh_grids.html#hydromt.MeshModel.mesh_grids">mesh_grids (hydromt.MeshModel property)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.mesh_names.html#hydromt.MeshModel.mesh_names">mesh_names (hydromt.MeshModel property)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.html#hydromt.MeshModel">MeshModel (class in hydromt)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    MODEL
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-arg-MODEL">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-arg-MODEL">hydromt-clip command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-arg-MODEL">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.Model.html#hydromt.Model">Model (class in hydromt)</a>
+</li>
+      <li>
+    MODEL_DESTINATION
+
+      <ul>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-arg-MODEL_DESTINATION">hydromt-clip command line option</a>
+</li>
+      </ul></li>
+      <li>
+    MODEL_ROOT
+
+      <ul>
+        <li><a href="api_cli/hydromt_build.html#cmdoption-hydromt-build-arg-MODEL_ROOT">hydromt-build command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-arg-MODEL_ROOT">hydromt-clip command line option</a>
+</li>
+        <li><a href="api_cli/hydromt_update.html#cmdoption-hydromt-update-arg-MODEL_ROOT">hydromt-update command line option</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.ModelCatalog.html#hydromt.ModelCatalog">ModelCatalog (class in hydromt)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.mse.html#hydromt.stats.skills.mse">mse() (in module hydromt.stats.skills)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.stats.skills.nashsutcliffe.html#hydromt.stats.skills.nashsutcliffe">nashsutcliffe() (in module hydromt.stats.skills)</a>
+</li>
+      <li><a href="_generated/hydromt.gis_utils.nearest.html#hydromt.gis_utils.nearest">nearest() (in module hydromt.gis_utils)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.nearest_index.html#hydromt.DataArray.raster.nearest_index">nearest_index() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.gis_utils.nearest_merge.html#hydromt.gis_utils.nearest_merge">nearest_merge() (in module hydromt.gis_utils)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.nodata.html#hydromt.DataArray.raster.nodata">nodata (hydromt.DataArray.raster attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.vector.ogr_compliant.html#hydromt.DataArray.vector.ogr_compliant">ogr_compliant() (hydromt.DataArray.vector method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.ogr_compliant.html#hydromt.Dataset.vector.ogr_compliant">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.io.open_geodataset.html#hydromt.io.open_geodataset">open_geodataset() (in module hydromt.io)</a>
+</li>
+      <li><a href="_generated/hydromt.io.open_mfraster.html#hydromt.io.open_mfraster">open_mfraster() (in module hydromt.io)</a>
+</li>
+      <li><a href="_generated/hydromt.io.open_raster.html#hydromt.io.open_raster">open_raster() (in module hydromt.io)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.io.open_raster_from_tindex.html#hydromt.io.open_raster_from_tindex">open_raster_from_tindex() (in module hydromt.io)</a>
+</li>
+      <li><a href="_generated/hydromt.io.open_timeseries_from_table.html#hydromt.io.open_timeseries_from_table">open_timeseries_from_table() (in module hydromt.io)</a>
+</li>
+      <li><a href="_generated/hydromt.io.open_vector.html#hydromt.io.open_vector">open_vector() (in module hydromt.io)</a>
+</li>
+      <li><a href="_generated/hydromt.io.open_vector_from_table.html#hydromt.io.open_vector_from_table">open_vector_from_table() (in module hydromt.io)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.origin.html#hydromt.DataArray.raster.origin">origin (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.flw.outlet_map.html#hydromt.flw.outlet_map">outlet_map() (in module hydromt.flw)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.gis_utils.parse_crs.html#hydromt.gis_utils.parse_crs">parse_crs() (in module hydromt.gis_utils)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.basin_mask.parse_region.html#hydromt.workflows.basin_mask.parse_region">parse_region() (in module hydromt.workflows.basin_mask)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.pearson_correlation.html#hydromt.stats.skills.pearson_correlation">pearson_correlation() (in module hydromt.stats.skills)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.percentual_bias.html#hydromt.stats.skills.percentual_bias">percentual_bias() (in module hydromt.stats.skills)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.pet.html#hydromt.workflows.forcing.pet">pet() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.pet_debruin.html#hydromt.workflows.forcing.pet_debruin">pet_debruin() (in module hydromt.workflows.forcing)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.workflows.forcing.pet_makkink.html#hydromt.workflows.forcing.pet_makkink">pet_makkink() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.pm_fao56.html#hydromt.workflows.forcing.pm_fao56">pm_fao56() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.precip.html#hydromt.workflows.forcing.precip">precip() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.predefined_catalogs.html#hydromt.data_catalog.DataCatalog.predefined_catalogs">predefined_catalogs (hydromt.data_catalog.DataCatalog property)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.press.html#hydromt.workflows.forcing.press">press() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.press_correction.html#hydromt.workflows.forcing.press_correction">press_correction() (in module hydromt.workflows.forcing)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.html#hydromt.data_adapter.RasterDatasetAdapter">RasterDatasetAdapter (class in hydromt.data_adapter)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.rasterize.html#hydromt.DataArray.raster.rasterize">rasterize() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.rasterize_geometry.html#hydromt.DataArray.raster.rasterize_geometry">rasterize_geometry() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.read.html#hydromt.Model.read">read() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.read_config.html#hydromt.Model.read_config">read_config() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.read_forcing.html#hydromt.Model.read_forcing">read_forcing() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.read_geoms.html#hydromt.Model.read_geoms">read_geoms() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.read_grid.html#hydromt.GridModel.read_grid">read_grid() (hydromt.GridModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.read_maps.html#hydromt.Model.read_maps">read_maps() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.read_mesh.html#hydromt.MeshModel.read_mesh">read_mesh() (hydromt.MeshModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.read_nc.html#hydromt.Model.read_nc">read_nc() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.read_results.html#hydromt.Model.read_results">read_results() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.read_states.html#hydromt.Model.read_states">read_states() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.VectorModel.read_vector.html#hydromt.VectorModel.read_vector">read_vector() (hydromt.VectorModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.reclassify.html#hydromt.DataArray.raster.reclassify">reclassify() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.gis_utils.reggrid_area.html#hydromt.gis_utils.reggrid_area">reggrid_area() (in module hydromt.gis_utils)</a>
+</li>
+      <li>
+    REGION
+
+      <ul>
+        <li><a href="api_cli/hydromt_clip.html#cmdoption-hydromt-clip-arg-REGION">hydromt-clip command line option</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.GridModel.region.html#hydromt.GridModel.region">region (hydromt.GridModel property)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.MeshModel.region.html#hydromt.MeshModel.region">(hydromt.MeshModel property)</a>
+</li>
+        <li><a href="_generated/hydromt.Model.region.html#hydromt.Model.region">(hydromt.Model property)</a>
+</li>
+        <li><a href="_generated/hydromt.VectorModel.region.html#hydromt.VectorModel.region">(hydromt.VectorModel property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.reindex2d.html#hydromt.DataArray.raster.reindex2d">reindex2d() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.reproject.html#hydromt.DataArray.raster.reproject">reproject() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.flw.reproject_hydrography_like.html#hydromt.flw.reproject_hydrography_like">reproject_hydrography_like() (in module hydromt.flw)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.reproject_like.html#hydromt.DataArray.raster.reproject_like">reproject_like() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.res.html#hydromt.DataArray.raster.res">res (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.resample_time.html#hydromt.workflows.forcing.resample_time">resample_time() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.reset_spatial_dims_attrs.html#hydromt.DataArray.raster.reset_spatial_dims_attrs">reset_spatial_dims_attrs() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.results.html#hydromt.Model.results">results (hydromt.Model property)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.rivers.river_depth.html#hydromt.workflows.rivers.river_depth">river_depth() (in module hydromt.workflows.rivers)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.rivers.river_width.html#hydromt.workflows.rivers.river_width">river_width() (in module hydromt.workflows.rivers)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.rmse.html#hydromt.stats.skills.rmse">rmse() (in module hydromt.stats.skills)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.root.html#hydromt.Model.root">root (hydromt.Model property)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.rotation.html#hydromt.DataArray.raster.rotation">rotation (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.rowcol.html#hydromt.DataArray.raster.rowcol">rowcol() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.rsquared.html#hydromt.stats.skills.rsquared">rsquared() (in module hydromt.stats.skills)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.rsr.html#hydromt.stats.skills.rsr">rsr() (in module hydromt.stats.skills)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.sample.html#hydromt.DataArray.raster.sample">sample() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.set_config.html#hydromt.Model.set_config">set_config() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.set_crs.html#hydromt.DataArray.raster.set_crs">set_crs() (hydromt.DataArray.raster method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.DataArray.vector.set_crs.html#hydromt.DataArray.vector.set_crs">(hydromt.DataArray.vector method)</a>
+</li>
+        <li><a href="_generated/hydromt.Dataset.vector.set_crs.html#hydromt.Dataset.vector.set_crs">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.Model.set_forcing.html#hydromt.Model.set_forcing">set_forcing() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.set_geoms.html#hydromt.Model.set_geoms">set_geoms() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.set_grid.html#hydromt.GridModel.set_grid">set_grid() (hydromt.GridModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.set_maps.html#hydromt.Model.set_maps">set_maps() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.set_mesh.html#hydromt.MeshModel.set_mesh">set_mesh() (hydromt.MeshModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.set_nodata.html#hydromt.DataArray.raster.set_nodata">set_nodata() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.set_predefined_catalogs">set_predefined_catalogs() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.set_results.html#hydromt.Model.set_results">set_results() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.set_root.html#hydromt.Model.set_root">set_root() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.set_spatial_dims.html#hydromt.DataArray.raster.set_spatial_dims">set_spatial_dims() (hydromt.DataArray.raster method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.DataArray.vector.set_spatial_dims.html#hydromt.DataArray.vector.set_spatial_dims">(hydromt.DataArray.vector method)</a>
+</li>
+        <li><a href="_generated/hydromt.Dataset.vector.set_spatial_dims.html#hydromt.Dataset.vector.set_spatial_dims">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.Model.set_states.html#hydromt.Model.set_states">set_states() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.VectorModel.set_vector.html#hydromt.VectorModel.set_vector">set_vector() (hydromt.VectorModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.setup_config.html#hydromt.GridModel.setup_config">setup_config() (hydromt.GridModel method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.MeshModel.setup_config.html#hydromt.MeshModel.setup_config">(hydromt.MeshModel method)</a>
+</li>
+        <li><a href="_generated/hydromt.Model.setup_config.html#hydromt.Model.setup_config">(hydromt.Model method)</a>
+</li>
+        <li><a href="_generated/hydromt.VectorModel.setup_config.html#hydromt.VectorModel.setup_config">(hydromt.VectorModel method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.GridModel.setup_grid.html#hydromt.GridModel.setup_grid">setup_grid() (hydromt.GridModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.setup_grid_from_constant.html#hydromt.GridModel.setup_grid_from_constant">setup_grid_from_constant() (hydromt.GridModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.setup_grid_from_geodataframe.html#hydromt.GridModel.setup_grid_from_geodataframe">setup_grid_from_geodataframe() (hydromt.GridModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.setup_grid_from_raster_reclass.html#hydromt.GridModel.setup_grid_from_raster_reclass">setup_grid_from_raster_reclass() (hydromt.GridModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.setup_grid_from_rasterdataset.html#hydromt.GridModel.setup_grid_from_rasterdataset">setup_grid_from_rasterdataset() (hydromt.GridModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.setup_maps_from_raster_reclass.html#hydromt.GridModel.setup_maps_from_raster_reclass">setup_maps_from_raster_reclass() (hydromt.GridModel method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.MeshModel.setup_maps_from_raster_reclass.html#hydromt.MeshModel.setup_maps_from_raster_reclass">(hydromt.MeshModel method)</a>
+</li>
+        <li><a href="_generated/hydromt.Model.setup_maps_from_raster_reclass.html#hydromt.Model.setup_maps_from_raster_reclass">(hydromt.Model method)</a>
+</li>
+        <li><a href="_generated/hydromt.VectorModel.setup_maps_from_raster_reclass.html#hydromt.VectorModel.setup_maps_from_raster_reclass">(hydromt.VectorModel method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.GridModel.setup_maps_from_rasterdataset.html#hydromt.GridModel.setup_maps_from_rasterdataset">setup_maps_from_rasterdataset() (hydromt.GridModel method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.MeshModel.setup_maps_from_rasterdataset.html#hydromt.MeshModel.setup_maps_from_rasterdataset">(hydromt.MeshModel method)</a>
+</li>
+        <li><a href="_generated/hydromt.Model.setup_maps_from_rasterdataset.html#hydromt.Model.setup_maps_from_rasterdataset">(hydromt.Model method)</a>
+</li>
+        <li><a href="_generated/hydromt.VectorModel.setup_maps_from_rasterdataset.html#hydromt.VectorModel.setup_maps_from_rasterdataset">(hydromt.VectorModel method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.MeshModel.setup_mesh2d.html#hydromt.MeshModel.setup_mesh2d">setup_mesh2d() (hydromt.MeshModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.setup_mesh2d_from_raster_reclass.html#hydromt.MeshModel.setup_mesh2d_from_raster_reclass">setup_mesh2d_from_raster_reclass() (hydromt.MeshModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.setup_mesh2d_from_rasterdataset.html#hydromt.MeshModel.setup_mesh2d_from_rasterdataset">setup_mesh2d_from_rasterdataset() (hydromt.MeshModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.setup_region.html#hydromt.GridModel.setup_region">setup_region() (hydromt.GridModel method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.MeshModel.setup_region.html#hydromt.MeshModel.setup_region">(hydromt.MeshModel method)</a>
+</li>
+        <li><a href="_generated/hydromt.Model.setup_region.html#hydromt.Model.setup_region">(hydromt.Model method)</a>
+</li>
+        <li><a href="_generated/hydromt.VectorModel.setup_region.html#hydromt.VectorModel.setup_region">(hydromt.VectorModel method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.log.setuplog.html#hydromt.log.setuplog">setuplog() (in module hydromt.log)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.shape.html#hydromt.DataArray.raster.shape">shape (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.vector.sindex.html#hydromt.DataArray.vector.sindex">sindex (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.sindex.html#hydromt.Dataset.vector.sindex">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.raster.size.html#hydromt.DataArray.raster.size">size (hydromt.DataArray.raster attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.DataArray.vector.size.html#hydromt.DataArray.vector.size">(hydromt.DataArray.vector attribute)</a>
+</li>
+        <li><a href="_generated/hydromt.Dataset.vector.size.html#hydromt.Dataset.vector.size">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.sources.html#hydromt.data_catalog.DataCatalog.sources">sources (hydromt.data_catalog.DataCatalog property)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.spearman_rank_correlation.html#hydromt.stats.skills.spearman_rank_correlation">spearman_rank_correlation() (in module hydromt.stats.skills)</a>
+</li>
+      <li><a href="_generated/hydromt.gis_utils.spread2d.html#hydromt.gis_utils.spread2d">spread2d() (in module hydromt.gis_utils)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.states.html#hydromt.Model.states">states (hydromt.Model property)</a>
+</li>
+      <li><a href="_generated/hydromt.flw.stream_map.html#hydromt.flw.stream_map">stream_map() (in module hydromt.flw)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.DataAdapter.summary.html#hydromt.data_adapter.DataAdapter.summary">summary() (hydromt.data_adapter.DataAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.DataFrameAdapter.summary.html#hydromt.data_adapter.DataFrameAdapter.summary">(hydromt.data_adapter.DataFrameAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.DatasetAdapter.summary.html#hydromt.data_adapter.DatasetAdapter.summary">(hydromt.data_adapter.DatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.summary.html#hydromt.data_adapter.GeoDataFrameAdapter.summary">(hydromt.data_adapter.GeoDataFrameAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.summary.html#hydromt.data_adapter.GeoDatasetAdapter.summary">(hydromt.data_adapter.GeoDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.summary.html#hydromt.data_adapter.RasterDatasetAdapter.summary">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.workflows.forcing.temp.html#hydromt.workflows.forcing.temp">temp() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.temp_correction.html#hydromt.workflows.forcing.temp_correction">temp_correction() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.vector.time_dim.html#hydromt.DataArray.vector.time_dim">time_dim (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.time_dim.html#hydromt.Dataset.vector.time_dim">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.vector.to_crs.html#hydromt.DataArray.vector.to_crs">to_crs() (hydromt.DataArray.vector method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.to_crs.html#hydromt.Dataset.vector.to_crs">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.to_dataframe.html#hydromt.data_catalog.DataCatalog.to_dataframe">to_dataframe() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.DataAdapter.to_dict.html#hydromt.data_adapter.DataAdapter.to_dict">to_dict() (hydromt.data_adapter.DataAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.DataFrameAdapter.to_dict.html#hydromt.data_adapter.DataFrameAdapter.to_dict">(hydromt.data_adapter.DataFrameAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.DatasetAdapter.to_dict.html#hydromt.data_adapter.DatasetAdapter.to_dict">(hydromt.data_adapter.DatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.to_dict.html#hydromt.data_adapter.GeoDataFrameAdapter.to_dict">(hydromt.data_adapter.GeoDataFrameAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.to_dict.html#hydromt.data_adapter.GeoDatasetAdapter.to_dict">(hydromt.data_adapter.GeoDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.to_dict.html#hydromt.data_adapter.RasterDatasetAdapter.to_dict">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_catalog.DataCatalog.to_dict.html#hydromt.data_catalog.DataCatalog.to_dict">(hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.data_adapter.DataFrameAdapter.to_file.html#hydromt.data_adapter.DataFrameAdapter.to_file">to_file() (hydromt.data_adapter.DataFrameAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.DatasetAdapter.to_file.html#hydromt.data_adapter.DatasetAdapter.to_file">(hydromt.data_adapter.DatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.to_file.html#hydromt.data_adapter.GeoDataFrameAdapter.to_file">(hydromt.data_adapter.GeoDataFrameAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.to_file.html#hydromt.data_adapter.GeoDatasetAdapter.to_file">(hydromt.data_adapter.GeoDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.to_file.html#hydromt.data_adapter.RasterDatasetAdapter.to_file">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.vector.to_gdf.html#hydromt.DataArray.vector.to_gdf">to_gdf() (hydromt.DataArray.vector method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.to_gdf.html#hydromt.Dataset.vector.to_gdf">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.vector.to_geom.html#hydromt.DataArray.vector.to_geom">to_geom() (hydromt.DataArray.vector method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.to_geom.html#hydromt.Dataset.vector.to_geom">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.Dataset.raster.to_mapstack.html#hydromt.Dataset.raster.to_mapstack">to_mapstack() (hydromt.Dataset.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.vector.to_netcdf.html#hydromt.DataArray.vector.to_netcdf">to_netcdf() (hydromt.DataArray.vector method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.to_netcdf.html#hydromt.Dataset.vector.to_netcdf">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.raster.to_raster.html#hydromt.DataArray.raster.to_raster">to_raster() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.to_slippy_tiles.html#hydromt.DataArray.raster.to_slippy_tiles">to_slippy_tiles() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_adapter.DataFrameAdapter.to_stac_catalog.html#hydromt.data_adapter.DataFrameAdapter.to_stac_catalog">to_stac_catalog() (hydromt.data_adapter.DataFrameAdapter method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.data_adapter.DatasetAdapter.to_stac_catalog.html#hydromt.data_adapter.DatasetAdapter.to_stac_catalog">(hydromt.data_adapter.DatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog.html#hydromt.data_adapter.GeoDataFrameAdapter.to_stac_catalog">(hydromt.data_adapter.GeoDataFrameAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.GeoDatasetAdapter.to_stac_catalog.html#hydromt.data_adapter.GeoDatasetAdapter.to_stac_catalog">(hydromt.data_adapter.GeoDatasetAdapter method)</a>
+</li>
+        <li><a href="_generated/hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog.html#hydromt.data_adapter.RasterDatasetAdapter.to_stac_catalog">(hydromt.data_adapter.RasterDatasetAdapter method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.vector.to_wkt.html#hydromt.DataArray.vector.to_wkt">to_wkt() (hydromt.DataArray.vector method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.to_wkt.html#hydromt.Dataset.vector.to_wkt">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.vector.to_xy.html#hydromt.DataArray.vector.to_xy">to_xy() (hydromt.DataArray.vector method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.to_xy.html#hydromt.Dataset.vector.to_xy">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.raster.to_xyz_tiles.html#hydromt.DataArray.raster.to_xyz_tiles">to_xyz_tiles() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.to_yml.html#hydromt.data_catalog.DataCatalog.to_yml">to_yml() (hydromt.data_catalog.DataCatalog method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.transform.html#hydromt.DataArray.raster.transform">transform (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.transform_bounds.html#hydromt.DataArray.raster.transform_bounds">transform_bounds() (hydromt.DataArray.raster method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.data_catalog.DataCatalog.update.html#hydromt.data_catalog.DataCatalog.update">update() (hydromt.data_catalog.DataCatalog method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Model.update.html#hydromt.Model.update">(hydromt.Model method)</a>
+</li>
+      </ul></li>
+      <li><a href="_generated/hydromt.DataArray.vector.update_geometry.html#hydromt.DataArray.vector.update_geometry">update_geometry() (hydromt.DataArray.vector method)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.update_geometry.html#hydromt.Dataset.vector.update_geometry">(hydromt.Dataset.vector method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.flw.upscale_flwdir.html#hydromt.flw.upscale_flwdir">upscale_flwdir() (in module hydromt.flw)</a>
+</li>
+      <li><a href="_generated/hydromt.gis_utils.utm_crs.html#hydromt.gis_utils.utm_crs">utm_crs() (in module hydromt.gis_utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.VectorModel.vector.html#hydromt.VectorModel.vector">vector (hydromt.VectorModel property)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.vector_grid.html#hydromt.DataArray.raster.vector_grid">vector_grid() (hydromt.DataArray.raster method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.vectorize.html#hydromt.DataArray.raster.vectorize">vectorize() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.VectorModel.html#hydromt.VectorModel">VectorModel (class in hydromt)</a>
+</li>
+      <li><a href="_generated/hydromt.stats.skills.volumetric_error.html#hydromt.stats.skills.volumetric_error">volumetric_error() (in module hydromt.stats.skills)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.width.html#hydromt.DataArray.raster.width">width (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.workflows.forcing.wind.html#hydromt.workflows.forcing.wind">wind() (in module hydromt.workflows.forcing)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.write.html#hydromt.Model.write">write() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.write_config.html#hydromt.Model.write_config">write_config() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.write_data_catalog.html#hydromt.Model.write_data_catalog">write_data_catalog() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.write_forcing.html#hydromt.Model.write_forcing">write_forcing() (hydromt.Model method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.Model.write_geoms.html#hydromt.Model.write_geoms">write_geoms() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.GridModel.write_grid.html#hydromt.GridModel.write_grid">write_grid() (hydromt.GridModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.write_maps.html#hydromt.Model.write_maps">write_maps() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.MeshModel.write_mesh.html#hydromt.MeshModel.write_mesh">write_mesh() (hydromt.MeshModel method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.write_nc.html#hydromt.Model.write_nc">write_nc() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.Model.write_states.html#hydromt.Model.write_states">write_states() (hydromt.Model method)</a>
+</li>
+      <li><a href="_generated/hydromt.VectorModel.write_vector.html#hydromt.VectorModel.write_vector">write_vector() (hydromt.VectorModel method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="X">X</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.x_dim.html#hydromt.DataArray.raster.x_dim">x_dim (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.vector.x_name.html#hydromt.DataArray.vector.x_name">x_name (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.x_name.html#hydromt.Dataset.vector.x_name">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.xcoords.html#hydromt.DataArray.raster.xcoords">xcoords (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.xy.html#hydromt.DataArray.raster.xy">xy() (hydromt.DataArray.raster method)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.raster.xy_to_idx.html#hydromt.DataArray.raster.xy_to_idx">xy_to_idx() (hydromt.DataArray.raster method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Y">Y</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.y_dim.html#hydromt.DataArray.raster.y_dim">y_dim (hydromt.DataArray.raster attribute)</a>
+</li>
+      <li><a href="_generated/hydromt.DataArray.vector.y_name.html#hydromt.DataArray.vector.y_name">y_name (hydromt.DataArray.vector attribute)</a>
+
+      <ul>
+        <li><a href="_generated/hydromt.Dataset.vector.y_name.html#hydromt.Dataset.vector.y_name">(hydromt.Dataset.vector attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.ycoords.html#hydromt.DataArray.raster.ycoords">ycoords (hydromt.DataArray.raster attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_generated/hydromt.DataArray.raster.zonal_stats.html#hydromt.DataArray.raster.zonal_stats">zonal_stats() (hydromt.DataArray.raster method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
