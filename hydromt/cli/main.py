@@ -191,10 +191,10 @@ def build(
 
     To build a wflow model for a subbasin using a point coordinates snapped to cells
     with upstream area >= 50 km2
-    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini  -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -d deltares_data -d /path/to/data_catalog.yml -v
+    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -d deltares_data -d /path/to/data_catalog.yml -v
 
     To build a sfincs model based on a bbox
-    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini  -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
+    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml  -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -257,7 +257,7 @@ def build(
     "-c",
     "--components",
     multiple=True,
-    help="Model methods from ini file to run",
+    help="Model methods from yml file to run",
 )
 @opt_cli
 @data_opt
@@ -293,9 +293,9 @@ def update(
     Update (overwrite!) landuse-landcover based maps in a Wflow model:
     hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
 
-    Update Wflow model components outlined in an .ini configuration file and
+    Update Wflow model components outlined in an .yml configuration file and
     write the model to a directory:
-    hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.ini  -d /path/to/data_catalog.yml -v
+    hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     # logger
     mode = "r+" if model_root == model_out else "r"

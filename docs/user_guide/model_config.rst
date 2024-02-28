@@ -15,7 +15,7 @@ in the configuration `.yaml file <https://en.wikipedia.org/wiki/YAML>`_
 
 .. NOTE::
 
-    The HydroMT configuration file used to be in ini format, this will be deprecated in the future.
+    The HydroMT configuration file used to be in ini format, this has been deprecated and can no longer be used.
     The new format (supported from version 0.7.1) is a yaml file, which is more flexible and easier to read and write.
 
 .. NOTE::

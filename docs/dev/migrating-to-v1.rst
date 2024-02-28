@@ -1,4 +1,5 @@
-.. _migrating:
+
+.. _migration:
 
 Migrating to v1
 ---------------
@@ -36,3 +37,15 @@ Dictionary like features such as `catalog['source']`, `catalog['source'] = data`
 +--------------------------+--------------------------------------+
 | catalog['name'] = data   | catalog.set_source('name',data)      |
 +--------------------------+--------------------------------------+
+
+Removing support for `ini` and `toml` model configuration files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Rationale
+=========
+To keep a consistent experience for our users we beleive it is best to offer a single format for configuring HydroMT, as well as reducing the maintenence burden on our side. We have decided that YAML suits this use case the best. Therefore we have decided to deprecate other config formats for configuring HydroMT. Writing simulation config files to other formats will still be supported, but HydroMT won't be able to read them subsequently. From this point on YAML is the only supported format to configure HydroMT
+
+Changes required
+================
+
+Convert any model config files that are still in `ini` or `toml` format to their equivalent YAML files. This can be done with any converter, or by reading and writing it through the standard Python interfaces.
