@@ -11,6 +11,7 @@ on:
       - docs/*
       - examples/*
       - pyproject.toml
+      - .github/workflows/docs.yml
   pull_request:
     branches: [main]
     paths:
@@ -20,6 +21,7 @@ on:
       - docs/*
       - examples/*
       - pyproject.toml
+      - .github/workflows/docs.yml
 
 jobs:
   test-docs:
