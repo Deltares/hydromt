@@ -262,10 +262,10 @@ class Model(object, metaclass=ABCMeta):
         r"""Single method to update a model based the settings in `opt`.
 
         Methods will be run one by one based on the order of appearance in `opt`
-        (yaml configuration file).
+        (configuration file).
 
         All model methods are supported including setup\_\*, read\_\* and write\_\* methods.
-        If a write\_\* option is listed in `opt` (yaml file) the full writing of the model
+        If a write\_\* option is listed in `opt` (configuration file) the full writing of the model
         at the end of the update process is skipped.
 
         Parameters
@@ -278,7 +278,7 @@ class Model(object, metaclass=ABCMeta):
             Write the updated model schematization to disk. By default True.
         opt: dict, optional
             Model build configuration. The configuration can be parsed from a
-            .yaml file using :py:meth:`~hydromt.io.readers.configread`.
+            configuration file using :py:meth:`~hydromt.io.readers.configread`.
             This is a nested dictionary where the first-level keys
             are the names of model specific methods and
             the second-level contain argument-value pairs of the method.
