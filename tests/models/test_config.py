@@ -25,7 +25,6 @@ def test_config_dict():
         "section2": {
             "path": "config.yml",  # path exists -> Path
             "path1": "config1.yml",  # path does not exist -> str
-            "path2": join(ABS_PATH, "config.yml"),
         },
         # evaluation skipped by default for setup_config
         "setup_config": {
@@ -58,21 +57,27 @@ def test_rejects_non_yaml_format(tmpdir):
         _ = configread(config_file, abs_path=True)
 
 
-def test_make_config_abs(test_config_dict):
+def test_make_config_abs(tmpdir, test_config_dict):
+    p = join(tmpdir, "config.yml")
     # create file so it will get parsed correctly
-    with open("config.yml", "w"):
+    with open(p, "w"):
         pass
-    parsed_config = make_config_paths_abs(test_config_dict, ABS_PATH)
+    test_config_dict["section2"]["path"] = p
+    test_config_dict["section2"]["path2"] = abspath(p)
+    parsed_config = make_config_paths_abs(test_config_dict, tmpdir)
     assert all(
         [isabs(p) for p in parsed_config["section2"].values() if isinstance(p, Path)]
     ), parsed_config["section2"]
 
 
-def test_make_rel_abs(test_config_dict):
+def test_make_rel_abs(tmpdir, test_config_dict):
+    p = join(tmpdir, "config.yml")
     # create file so it will get parsed correctly
-    with open("config.yml", "w"):
+    with open(p, "w"):
         pass
-    parsed_config = make_config_paths_relative(test_config_dict, ABS_PATH)
+    test_config_dict["section2"]["path"] = p
+    test_config_dict["section2"]["path2"] = abspath(p)
+    parsed_config = make_config_paths_relative(test_config_dict, tmpdir)
     assert all(
         [
             not isabs(p)
