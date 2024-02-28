@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from hydromt.io.readers import configread
 from hydromt.io.writers import configwrite
 
@@ -35,3 +37,13 @@ def test_config(tmpdir):
     # by default paths in setup_config are not evaluated
     assert isinstance(cfdict1["setup_config"]["path"], str)
     assert isinstance(cfdict1["setup_config"]["float"], float)
+
+
+def test_rejects_non_yaml_format(tmpdir):
+    config_file = tmpdir.join("config.toml")
+    # hydromt just cheks the extention, so an empty file is ok
+    with open(config_file, "w"):
+        pass
+
+    with pytest.raises(ValueError, match="Unknown extention"):
+        _ = configread(config_file, abs_path=True)

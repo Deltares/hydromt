@@ -89,10 +89,6 @@ def parse_config(
     """Parse config from `path` and combine with command line options `opt_cli`."""
     opt = {}
     if path is not None and isfile(path):
-        if str(path).endswith(".ini"):
-            raise ValueError(
-                "Support for ini config files has been removed. Please convert to yaml."
-            )
         opt = configread(path, abs_path=True, skip_abspath_sections=["setup_config"])
     elif path is not None:
         raise IOError(f"Config not found at {path}")
