@@ -85,3 +85,5 @@ Since it freezes the dependencies, we will need to schedule regular updates.
 
 1. Remove the ``pixi.lock`` file.
 2. Run ``pixi run -e <ENVIRONMENT> install`` to update the dependencies.
+
+There is a Github action workflow that does this on a monthly basis. It will create a pull request with the updated ``pixi.lock`` file.
