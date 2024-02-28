@@ -26,7 +26,8 @@ class PyogrioDriver(GeoDataFrameDriver):
         buffer: float = 0,
         crs: Optional[CRS] = None,
         predicate: str = "intersects",
-        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO
+        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        # TODO: https://github.com/Deltares/hydromt/issues/802
         logger: Logger = logger,
         **kwargs,
     ) -> gpd.GeoDataFrame:

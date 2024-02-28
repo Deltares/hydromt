@@ -25,7 +25,8 @@ class RasterDatasetDriver(ABC, BaseModel):
         predicate: str = "intersects",
         zoom_level: int = 0,
         logger: Optional[Logger] = None,
-        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO:
+        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        # TODO: https://github.com/Deltares/hydromt/issues/802
         **kwargs,
     ) -> xr.Dataset:
         """

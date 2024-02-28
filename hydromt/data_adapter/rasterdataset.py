@@ -12,6 +12,7 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
+from pydantic import PrivateAttr
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
@@ -49,7 +50,7 @@ class RasterDatasetAdapter(DataAdapterBase):
     """Implementation for the RasterDatasetAdapter."""
 
     source: RasterDataSource
-    _used: bool = False
+    _used: bool = PrivateAttr(False)
 
     def to_file(
         self,

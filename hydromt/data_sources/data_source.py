@@ -63,9 +63,12 @@ class DataSource(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def _validate_data_type(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            if data.get("data_type") and data.get("data_type") != cls.data_type:
-                raise ValueError(f"'data_type' must be '{cls.data_type}'.")
+        if (
+            isinstance(data, dict)
+            and data.get("data_type")
+            and data.get("data_type") != cls.data_type
+        ):
+            raise ValueError(f"'data_type' must be '{cls.data_type}'.")
         return data
 
     @model_validator(mode="after")

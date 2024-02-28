@@ -26,7 +26,8 @@ class GeoDataFrameDriver(ABC, BaseModel):
         crs: Optional[CRS] = None,
         predicate: str = "intersects",
         logger: Logger = logger,
-        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO
+        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        # TODO: https://github.com/Deltares/hydromt/issues/802
         **kwargs,
     ) -> gpd.GeoDataFrame:
         """

@@ -7,6 +7,7 @@ from typing import List, Optional, Union
 import geopandas as gpd
 import numpy as np
 import pyproj
+from pydantic import PrivateAttr
 from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
@@ -34,7 +35,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
     """The GeoDataFrameAdapter performs transformations on GeoDataFrames."""
 
     source: GeoDataSource
-    used: bool = False
+    _used: bool = PrivateAttr(False)
 
     def get_data(
         self,
@@ -47,7 +48,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
         logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
         """Read in data and transform them to HydroMT standards."""
-        self.used = True  # mark used
+        self._used = True  # mark used
         try:
             gdf: gpd.GeoDataFrame = self.source.read_data(
                 bbox, mask, buffer, variables, predicate, handle_nodata, logger=logger
