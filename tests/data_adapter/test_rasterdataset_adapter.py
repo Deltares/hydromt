@@ -9,7 +9,7 @@ from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 from hydromt.metadata_resolvers.metadata_resolver import MetaDataResolver
 
 
-class TestRasterDatsetAdapter:
+class TestRasterDatasetAdapter:
     @pytest.fixture()
     def example_source(
         self,
