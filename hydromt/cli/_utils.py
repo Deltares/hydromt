@@ -86,7 +86,7 @@ def parse_json(ctx, param, value: str) -> Dict[str, Any]:
 def parse_config(
     path: Optional[Union[Path, str]] = None, opt_cli: Optional[Dict] = None
 ) -> Dict:
-    """Parse config from yaml `path` and combine with command line options `opt_cli`."""
+    """Parse config from `path` and combine with command line options `opt_cli`."""
     opt = {}
     if path is not None and isfile(path):
         if str(path).endswith(".ini"):

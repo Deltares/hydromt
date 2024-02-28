@@ -86,7 +86,7 @@ def precip(
     return p_out
 
 
-# use dem_model (from staticmaps) and dem_forcing (meteo) in yml file
+# use dem_model (from staticmaps) and dem_forcing (meteo) in config file
 def temp(
     temp,
     dem_model,
