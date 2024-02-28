@@ -75,3 +75,13 @@ In order to add a dependency you need to:
 2. And you need to add it to the ``pixi.toml`` file in the ``[dependencies]`` section.
 3. Then you will need to run ``pixi run -e <ENVIRONMENT> install`` to install the new dependency. It will update the ``pixi.lock`` file.
 4. Commit the changes to the ``pyproject.toml``, ``pixi.toml``, and ``pixi.lock`` files.
+
+Updating dependencies
+---------------------
+
+The dependencies in pixi are managed via the ``pixi.toml`` and ``pixi.lock`` file.
+We commit the ``pixi.lock`` file to the repository to ensure that everyone has the same versions of the dependencies installed.
+Since it freezes the dependencies, we will need to schedule regular updates.
+
+1. Remove the ``pixi.lock`` file.
+2. Run ``pixi run -e <ENVIRONMENT> install`` to update the dependencies.
