@@ -60,7 +60,7 @@ def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
             yaml.dump(_cfdict, f, sort_keys=False)
     else:
         raise ValueError(
-            f"Could not write to unknown extention: {ext} hydromt only supports yaml"
+            f"Could not write to unknown extension: {ext} hydromt only supports yaml"
         )
 
 
