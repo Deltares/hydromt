@@ -24,6 +24,7 @@ Changed
 Removed
 -------
 - support for `**artifact_keys` when initializing the DataCatalog has been removed. (#786)
+- support for dictionary like features on the DataCatalog have been removed. (#790)
 
 Removed
 -------

@@ -1,5 +1,5 @@
 """Driver to read geodataframes using Pyogrio."""
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Optional
 
 import geopandas as gpd
@@ -8,9 +8,10 @@ from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import parse_geom_bbox_buffer
 
-from .geodataframe_driver import GeoDataFrameDriver
+logger: Logger = getLogger(__name__)
 
 
 class PyogrioDriver(GeoDataFrameDriver):
@@ -24,7 +25,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         buffer: float = 0,
         crs: Optional[CRS] = None,
         predicate: str = "intersects",
-        logger: Optional[Logger] = None,
+        logger: Logger = logger,
         # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """
@@ -37,7 +38,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         if mask is not None:  # buffer mask
             mask: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         bbox_reader = bbox_from_file_and_filters(uri, bbox, mask, crs)
-        return read_dataframe(uri, bbox=bbox_reader, mode="r")
+        return read_dataframe(uri, bbox=bbox_reader)
 
 
 def bbox_from_file_and_filters(
