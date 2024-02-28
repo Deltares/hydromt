@@ -1,0 +1,1206 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hydromt.gis_utils &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/gis_utils';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.5';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">hydromt.gis_utils</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for hydromt.gis_utils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;GIS related convenience functions.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">from</span> <span class="nn">pyflwdir</span> <span class="kn">import</span> <span class="n">gis_utils</span> <span class="k">as</span> <span class="n">gis</span>
+<span class="kn">from</span> <span class="nn">pyogrio</span> <span class="kn">import</span> <span class="n">read_info</span>
+<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span> <span class="nn">pyproj.transformer</span> <span class="kn">import</span> <span class="n">Transformer</span>
+<span class="kn">from</span> <span class="nn">rasterio.transform</span> <span class="kn">import</span> <span class="n">Affine</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">box</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry.base</span> <span class="kn">import</span> <span class="n">BaseGeometry</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_compat</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;spread2d&quot;</span><span class="p">,</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="s2">&quot;nearest_merge&quot;</span><span class="p">]</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">_R</span> <span class="o">=</span> <span class="mf">6371e3</span>  <span class="c1"># Radius of earth in m. Use 3956e3 for miles</span>
+<span class="n">GDAL_DRIVER_CODE_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;asc&quot;</span><span class="p">:</span> <span class="s2">&quot;AAIGrid&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;blx&quot;</span><span class="p">:</span> <span class="s2">&quot;BLX&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;bmp&quot;</span><span class="p">:</span> <span class="s2">&quot;BMP&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;bt&quot;</span><span class="p">:</span> <span class="s2">&quot;BT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dat&quot;</span><span class="p">:</span> <span class="s2">&quot;ZMap&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dem&quot;</span><span class="p">:</span> <span class="s2">&quot;USGSDEM&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gen&quot;</span><span class="p">:</span> <span class="s2">&quot;ADRG&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gif&quot;</span><span class="p">:</span> <span class="s2">&quot;GIF&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gpkg&quot;</span><span class="p">:</span> <span class="s2">&quot;GPKG&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grd&quot;</span><span class="p">:</span> <span class="s2">&quot;NWT_GRD&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gsb&quot;</span><span class="p">:</span> <span class="s2">&quot;NTv2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gtx&quot;</span><span class="p">:</span> <span class="s2">&quot;GTX&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hdr&quot;</span><span class="p">:</span> <span class="s2">&quot;MFF&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hf2&quot;</span><span class="p">:</span> <span class="s2">&quot;HF2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hgt&quot;</span><span class="p">:</span> <span class="s2">&quot;SRTMHGT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;img&quot;</span><span class="p">:</span> <span class="s2">&quot;HFA&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;jpg&quot;</span><span class="p">:</span> <span class="s2">&quot;JPEG&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;kro&quot;</span><span class="p">:</span> <span class="s2">&quot;KRO&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lcp&quot;</span><span class="p">:</span> <span class="s2">&quot;LCP&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mbtiles&quot;</span><span class="p">:</span> <span class="s2">&quot;MBTiles&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mpr/mpl&quot;</span><span class="p">:</span> <span class="s2">&quot;ILWIS&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ntf&quot;</span><span class="p">:</span> <span class="s2">&quot;NITF&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pix&quot;</span><span class="p">:</span> <span class="s2">&quot;PCIDSK&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;png&quot;</span><span class="p">:</span> <span class="s2">&quot;PNG&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pnm&quot;</span><span class="p">:</span> <span class="s2">&quot;PNM&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rda&quot;</span><span class="p">:</span> <span class="s2">&quot;R&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rgb&quot;</span><span class="p">:</span> <span class="s2">&quot;SGI&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rst&quot;</span><span class="p">:</span> <span class="s2">&quot;RST&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rsw&quot;</span><span class="p">:</span> <span class="s2">&quot;RMF&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sdat&quot;</span><span class="p">:</span> <span class="s2">&quot;SAGA&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sqlite&quot;</span><span class="p">:</span> <span class="s2">&quot;Rasterlite&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ter&quot;</span><span class="p">:</span> <span class="s2">&quot;Terragen&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;tif&quot;</span><span class="p">:</span> <span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;vrt&quot;</span><span class="p">:</span> <span class="s2">&quot;VRT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;xpm&quot;</span><span class="p">:</span> <span class="s2">&quot;XPM&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;xyz&quot;</span><span class="p">:</span> <span class="s2">&quot;XYZ&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">GDAL_EXT_CODE_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">GDAL_DRIVER_CODE_MAP</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+<span class="n">GPD_TYPES</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">]</span>
+<span class="n">GEOM_TYPES</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">GPD_TYPES</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">]</span>
+
+<span class="c1">## GEOM functions</span>
+
+
+<div class="viewcode-block" id="nearest_merge">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.nearest_merge.html#hydromt.gis_utils.nearest_merge">[docs]</a>
+<span class="k">def</span> <span class="nf">nearest_merge</span><span class="p">(</span>
+    <span class="n">gdf1</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">gdf2</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_dist</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge attributes of gdf2 with the nearest feature of gdf1.</span>
+
+<span class="sd">    Output is optionally bounded by a maximumum distance `max_dist`.</span>
+<span class="sd">    Unless `overwrite = True`, gdf2 values are only</span>
+<span class="sd">    merged where gdf1 has missing values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf1, gdf2: geopandas.GeoDataFrame</span>
+<span class="sd">        Source `gdf1` and destination `gdf2` geometries.</span>
+<span class="sd">    columns : list of str, optional</span>
+<span class="sd">        Names of columns in `gdf2` to merge, by default None</span>
+<span class="sd">    max_dist : float, optional</span>
+<span class="sd">        Maximum distance threshold for merge, by default None, i.e.: no threshold.</span>
+<span class="sd">    overwrite : bool, optional</span>
+<span class="sd">        If False (default) gdf2 values are only merged where gdf1 has missing values,</span>
+<span class="sd">        i.e. NaN values for existing columns or missing columns.</span>
+<span class="sd">    inplace : bool,</span>
+<span class="sd">        If True, apply the merge to gdf1, otherwise return a new object.</span>
+<span class="sd">    logger:</span>
+<span class="sd">        The logger to use.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        Merged GeoDataFrames</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">idx_nn</span><span class="p">,</span> <span class="n">dst</span> <span class="o">=</span> <span class="n">nearest</span><span class="p">(</span><span class="n">gdf1</span><span class="p">,</span> <span class="n">gdf2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
+        <span class="n">gdf1</span> <span class="o">=</span> <span class="n">gdf1</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="n">dst</span> <span class="o">&lt;</span> <span class="n">max_dist</span> <span class="k">if</span> <span class="n">max_dist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">idx_nn</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">gdf2</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">columns</span>
+    <span class="n">gdf1</span><span class="p">[</span><span class="s2">&quot;distance_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dst</span>
+    <span class="n">gdf1</span><span class="p">[</span><span class="s2">&quot;index_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">gdf1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid</span><span class="p">,</span> <span class="s2">&quot;index_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx_nn</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
+    <span class="n">skip</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">skip</span> <span class="ow">or</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf2</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> not found in gdf2 and skipped.&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">new_vals</span> <span class="o">=</span> <span class="n">gdf2</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx_nn</span><span class="p">[</span><span class="n">valid</span><span class="p">],</span> <span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">gdf1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+            <span class="n">old_vals</span> <span class="o">=</span> <span class="n">gdf1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span>
+            <span class="n">replace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">old_vals</span><span class="o">.</span><span class="n">isnull</span><span class="p">(),</span> <span class="n">old_vals</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+            <span class="n">new_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">replace</span><span class="p">,</span> <span class="n">new_vals</span><span class="p">,</span> <span class="n">old_vals</span><span class="p">)</span>
+        <span class="n">gdf1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_vals</span>
+    <span class="k">return</span> <span class="n">gdf1</span></div>
+
+
+
+<div class="viewcode-block" id="nearest">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.nearest.html#hydromt.gis_utils.nearest">[docs]</a>
+<span class="k">def</span> <span class="nf">nearest</span><span class="p">(</span>
+    <span class="n">gdf1</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gdf2</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of and distance [m] to the nearest geometry.</span>
+
+<span class="sd">    For Line geometries in `gdf1` the nearest geometry is based line center point</span>
+<span class="sd">    and for polygons on its representative point. Mixed geometry types are not</span>
+<span class="sd">    yet supported.</span>
+
+<span class="sd">    Note: Since geopandas v0.10.0 it contains a sjoin_nearest method which is very</span>
+<span class="sd">    similar and should.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf1, gdf2: geopandas.GeoDataFrame</span>
+<span class="sd">        Source `gdf1` and destination `gdf2` geometries.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    index: ndarray</span>
+<span class="sd">        index of nearest `gdf2` geometry</span>
+<span class="sd">    dst: ndarray of float</span>
+<span class="sd">        distance to the nearest `gdf2` geometry</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">gdf1</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;Point&quot;</span><span class="p">):</span>
+        <span class="n">pnts</span> <span class="o">=</span> <span class="n">gdf1</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">gdf1</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;LineString&quot;</span><span class="p">,</span> <span class="s2">&quot;MultiLineString&quot;</span><span class="p">])):</span>
+        <span class="n">pnts</span> <span class="o">=</span> <span class="n">gdf1</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># mid point</span>
+    <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">gdf1</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span> <span class="s2">&quot;MultiPolygon&quot;</span><span class="p">])):</span>
+        <span class="n">pnts</span> <span class="o">=</span> <span class="n">gdf1</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">representative_point</span><span class="p">()</span>  <span class="c1"># inside polygon</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Mixed geometry dataframes are not yet supported.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gdf1</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">gdf2</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+        <span class="n">pnts</span> <span class="o">=</span> <span class="n">pnts</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gdf2</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+    <span class="c1"># find nearest</span>
+    <span class="c1"># NOTE: requires shapely v2.0; changed in v0.6.1</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_compat</span><span class="o">.</span><span class="n">HAS_SHAPELY20</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Shapely &gt;= 2.0.0 is required for execution&quot;</span><span class="p">)</span>
+    <span class="n">other</span> <span class="o">=</span> <span class="n">pnts</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">gdf2</span><span class="o">.</span><span class="n">sindex</span><span class="o">.</span><span class="n">nearest</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">return_all</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># get distance in meters</span>
+    <span class="n">gdf2_nearest</span> <span class="o">=</span> <span class="n">gdf2</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">gdf2_nearest</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+        <span class="n">pnts</span> <span class="o">=</span> <span class="n">pnts</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">3857</span><span class="p">)</span>  <span class="c1"># web mercator</span>
+        <span class="n">gdf2_nearest</span> <span class="o">=</span> <span class="n">gdf2_nearest</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">3857</span><span class="p">)</span>
+    <span class="n">dst</span> <span class="o">=</span> <span class="n">gdf2_nearest</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pnts</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">return</span> <span class="n">gdf2</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">dst</span></div>
+
+
+
+<div class="viewcode-block" id="filter_gdf">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.filter_gdf.html#hydromt.gis_utils.filter_gdf">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_gdf</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter GeoDataFrame geometries based on geometry mask or bounding box.&quot;&quot;&quot;</span>
+    <span class="n">gtypes</span> <span class="o">=</span> <span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">([</span><span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">geom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">gtypes</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unknown geometry mask type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="s2">&quot;Provide geopandas GeoDataFrame, GeoSeries or shapely geometry.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either geom or bbox is required.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+        <span class="c1"># reproject</span>
+        <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="c1"># convert geopandas to geometry</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">unary_union</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">sindex</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">idx</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">parse_geom_bbox_buffer</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse geom or bbox to a (buffered) geometry.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    geom : geopandas.GeoDataFrame/Series, optional</span>
+<span class="sd">        A geometry defining the area of interest.</span>
+<span class="sd">    bbox : array-like of floats, optional</span>
+<span class="sd">        (xmin, ymin, xmax, ymax) bounding box of area of interest</span>
+<span class="sd">        (in WGS84 coordinates).</span>
+<span class="sd">    buffer : float, optional</span>
+<span class="sd">        Buffer around the `bbox` or `geom` area of interest in meters. By default 0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    geom: geometry</span>
+<span class="sd">        the actual geometry</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># convert bbox to geom with crs EPGS:4326 to apply buffer later</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No geom or bbox provided.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">buffer</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># make sure geom is projected &gt; buffer in meters!</span>
+        <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">3857</span><span class="p">)</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">geom</span>
+
+
+<span class="c1"># REPROJ</span>
+<div class="viewcode-block" id="utm_crs">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.utm_crs.html#hydromt.gis_utils.utm_crs">[docs]</a>
+<span class="k">def</span> <span class="nf">utm_crs</span><span class="p">(</span><span class="n">bbox</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return wkt string of nearest UTM projects.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bbox : array-like of floats</span>
+<span class="sd">        (xmin, ymin, xmax, ymax) bounding box in latlon WGS84 (EPSG:4326) coordinates</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    crs: pyproj.CRS</span>
+<span class="sd">        CRS of UTM projection</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">bbox</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span> <span class="o">+</span> <span class="n">bottom</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">zone</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="mi">180</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span><span class="p">)))</span>
+    <span class="c1"># BUGFIX hydroMT v0.3.5: south=False doesn&#39;t work only add south=True if y&lt;0</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">south</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># BUGFIX hydroMT v0.4.6: add datum</span>
+    <span class="n">epsg</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">proj</span><span class="o">=</span><span class="s2">&quot;utm&quot;</span><span class="p">,</span> <span class="n">datum</span><span class="o">=</span><span class="s2">&quot;WGS84&quot;</span><span class="p">,</span> <span class="n">ellps</span><span class="o">=</span><span class="s2">&quot;WGS84&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="parse_crs">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.parse_crs.html#hydromt.gis_utils.parse_crs">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">crs</span> <span class="o">==</span> <span class="s2">&quot;utm&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="n">utm_crs</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;CRS &quot;utm&quot; requires bbox&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">crs</span></div>
+
+
+
+<div class="viewcode-block" id="axes_attrs">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.axes_attrs.html#hydromt.gis_utils.axes_attrs">[docs]</a>
+<span class="k">def</span> <span class="nf">axes_attrs</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide CF-compliant variable names and metadata for axes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    crs: pyproj.CRS</span>
+<span class="sd">        coordinate reference system</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x_dim: str - variable name of x dimension (e.g. &#39;x&#39;)</span>
+<span class="sd">    y_dim: str - variable name of y dimension (e.g. &#39;lat&#39;)</span>
+<span class="sd">    x_attr: dict - attributes of variable x</span>
+<span class="sd">    y_attr: dict - attributes of variable y</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># # check for type of crs</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">CRS</span><span class="p">):</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+        <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span>
+    <span class="n">cf_coords</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">cs_to_cf</span><span class="p">()</span>
+    <span class="n">x_attrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cf_coords</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s2">&quot;axis&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">y_attrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cf_coords</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s2">&quot;axis&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="p">,</span> <span class="n">x_attrs</span><span class="p">,</span> <span class="n">y_attrs</span></div>
+
+
+
+<div class="viewcode-block" id="meridian_offset">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.meridian_offset.html#hydromt.gis_utils.meridian_offset">[docs]</a>
+<span class="k">def</span> <span class="nf">meridian_offset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Shift data along the x-axis of global datasets to avoid issues along the 180 meridian.</span>
+
+<span class="sd">    Without a bbox the data is shifted to span 180W to 180E.</span>
+<span class="sd">    With bbox the data is shifted to at least span the bbox west to east,</span>
+<span class="sd">    also if the bbox crosses the 180 meridian.</span>
+
+<span class="sd">    Note that this method is only applicable to data that spans 360 degrees longitude</span>
+<span class="sd">    and is set in a global geographic CRS (WGS84).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ds: xarray.Dataset</span>
+<span class="sd">        input dataset</span>
+<span class="sd">    bbox: tuple of float</span>
+<span class="sd">        bounding box (west, south, east, north) in degrees</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ds: xarray.Dataset</span>
+<span class="sd">        dataset with x dim re-arranged if needed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="ow">or</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_projected</span>
+        <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">e</span> <span class="o">-</span> <span class="n">w</span><span class="p">,</span> <span class="mi">360</span><span class="p">)</span>  <span class="c1"># grid should span 360 degrees!</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;This method is only applicable to data that spans 360 degrees &quot;</span>
+            <span class="s2">&quot;longitude and is set in a global geographic CRS&quot;</span>
+        <span class="p">)</span>
+    <span class="n">x_name</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span>
+    <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="n">x_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># bbox west and east</span>
+        <span class="n">bbox_w</span><span class="p">,</span> <span class="n">bbox_e</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># global west and east in case of no bbox</span>
+        <span class="n">bbox_w</span><span class="p">,</span> <span class="n">bbox_e</span> <span class="o">=</span> <span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span>
+    <span class="k">if</span> <span class="n">bbox_w</span> <span class="o">&lt;</span> <span class="n">w</span><span class="p">:</span>  <span class="c1"># shift lons east of x0 by 360 degrees west</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="mi">180</span> <span class="k">if</span> <span class="n">bbox_w</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">180</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">bbox_e</span><span class="p">,</span> <span class="n">x0</span><span class="p">),</span> <span class="n">lons</span> <span class="o">-</span> <span class="mi">360</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">bbox_e</span> <span class="o">&gt;</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># shift lons west of x0 by 360 degrees east</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">180</span> <span class="k">if</span> <span class="n">bbox_e</span> <span class="o">&lt;=</span> <span class="mi">180</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">bbox_w</span><span class="p">,</span> <span class="n">x0</span><span class="p">),</span> <span class="n">lons</span> <span class="o">+</span> <span class="mi">360</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ds</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># make sure not to overwrite original ds</span>
+    <span class="n">ds</span><span class="p">[</span><span class="n">x_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="n">x_name</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ds</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">x_name</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># TRANSFORM</span>
+
+
+<div class="viewcode-block" id="affine_to_coords">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.affine_to_coords.html#hydromt.gis_utils.affine_to_coords">[docs]</a>
+<span class="k">def</span> <span class="nf">affine_to_coords</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">x_dim</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">y_dim</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a raster axis with pixel center coordinates based on the transform.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    transform : affine transform</span>
+<span class="sd">        Two dimensional affine transform for 2D linear mapping</span>
+<span class="sd">    shape : tuple of int</span>
+<span class="sd">        The height, width  of the raster.</span>
+<span class="sd">    x_dim, y_dim: str</span>
+<span class="sd">        The name of the x and y dimensions</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x, y coordinate arrays : dict of tuple with dims and coords</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">Affine</span><span class="p">):</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">Affine</span><span class="p">(</span><span class="o">*</span><span class="n">transform</span><span class="p">)</span>
+    <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="n">shape</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">transform</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">transform</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">x_coords</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">y_dim</span><span class="p">:</span> <span class="p">(</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">y_coords</span><span class="p">),</span>
+            <span class="n">x_dim</span><span class="p">:</span> <span class="p">(</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">x_coords</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">transform</span>
+            <span class="o">*</span> <span class="n">transform</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;yc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">),</span> <span class="n">y_coords</span><span class="p">),</span>
+            <span class="s2">&quot;xc&quot;</span><span class="p">:</span> <span class="p">((</span><span class="n">y_dim</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">),</span> <span class="n">x_coords</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="k">return</span> <span class="n">coords</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">affine_to_meshgrid</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a meshgrid of pixel center coordinates based on the transform.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    transform : affine transform</span>
+<span class="sd">        Two dimensional affine transform for 2D linear mapping</span>
+<span class="sd">    shape : tuple of int</span>
+<span class="sd">        The height, width  of the raster.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x_coords, y_coords: ndarray</span>
+<span class="sd">        2D arrays of x and y coordinates</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">Affine</span><span class="p">):</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">Affine</span><span class="p">(</span><span class="o">*</span><span class="n">transform</span><span class="p">)</span>
+    <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="n">shape</span>
+    <span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">transform</span>
+        <span class="o">*</span> <span class="n">transform</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span>
+
+
+<span class="c1">## CELLAREAS</span>
+<div class="viewcode-block" id="reggrid_area">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.reggrid_area.html#hydromt.gis_utils.reggrid_area">[docs]</a>
+<span class="k">def</span> <span class="nf">reggrid_area</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the cell area [m2] for a regular grid based on its cell centres lat, lon.&quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+    <span class="n">xres</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">lons</span><span class="p">)))</span>
+    <span class="n">yres</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">lats</span><span class="p">)))</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">lats</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">lons</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">lats</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cellarea</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span> <span class="n">xres</span><span class="p">,</span> <span class="n">yres</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">area</span></div>
+
+
+
+<div class="viewcode-block" id="cellarea">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.cellarea.html#hydromt.gis_utils.cellarea">[docs]</a>
+<span class="k">def</span> <span class="nf">cellarea</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">xres</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">yres</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the area [m2] of cell based on its center latitude and resolution in degrees.</span>
+
+<span class="sd">    Resolution is in measured degrees.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+    <span class="n">l1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">yres</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">l2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">yres</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xres</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_R</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">l1</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="cellres">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.cellres.html#hydromt.gis_utils.cellres">[docs]</a>
+<span class="k">def</span> <span class="nf">cellres</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">xres</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">yres</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the cell (x, y) resolution [m].</span>
+
+<span class="sd">    Based on cell center latitude and its resolution measured in degrees.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m1</span> <span class="o">=</span> <span class="mf">111132.92</span>  <span class="c1"># latitude calculation term 1</span>
+    <span class="n">m2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">559.82</span>  <span class="c1"># latitude calculation term 2</span>
+    <span class="n">m3</span> <span class="o">=</span> <span class="mf">1.175</span>  <span class="c1"># latitude calculation term 3</span>
+    <span class="n">m4</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0023</span>  <span class="c1"># latitude calculation term 4</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="mf">111412.84</span>  <span class="c1"># longitude calculation term 1</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">93.5</span>  <span class="c1"># longitude calculation term 2</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="mf">0.118</span>  <span class="c1"># longitude calculation term 3</span>
+
+    <span class="n">radlat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>  <span class="c1"># numpy cos work in radians!</span>
+    <span class="c1"># Calculate the length of a degree of latitude and longitude in meters</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">m1</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">m2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">radlat</span><span class="p">))</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">m3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">radlat</span><span class="p">))</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">m4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">6.0</span> <span class="o">*</span> <span class="n">radlat</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">p1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">radlat</span><span class="p">))</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">p2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">radlat</span><span class="p">))</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">p3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">5.0</span> <span class="o">*</span> <span class="n">radlat</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dx</span> <span class="o">*</span> <span class="n">xres</span><span class="p">,</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">yres</span></div>
+
+
+
+<span class="c1">## SPREAD</span>
+
+
+<div class="viewcode-block" id="spread2d">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.spread2d.html#hydromt.gis_utils.spread2d">[docs]</a>
+<span class="k">def</span> <span class="nf">spread2d</span><span class="p">(</span>
+    <span class="n">da_obs</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">da_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">da_friction</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return values of `da_obs` spreaded to cells with `nodata` value within `da_mask`.</span>
+
+<span class="sd">    powered by :py:meth:`pyflwdir.gis_utils.spread2d`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    da_obs : xarray.DataArray</span>
+<span class="sd">        Input raster with observation values and background/nodata values which are</span>
+<span class="sd">        filled by the spreading algorithm.</span>
+<span class="sd">    da_mask :  xarray.DataArray, optional</span>
+<span class="sd">        Mask of cells to fill with the spreading algorithm, by default None</span>
+<span class="sd">    da_friction :  xarray.DataArray, optional</span>
+<span class="sd">        Friction values used by the spreading algorithm to calcuate the friction</span>
+<span class="sd">        distance, by default None</span>
+<span class="sd">    nodata : float, optional</span>
+<span class="sd">        Nodata or background value. Must be finite numeric value. If not given the</span>
+<span class="sd">        raster nodata value is used.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ds_out: xarray.Dataset</span>
+<span class="sd">        Dataset with spreaded source values, linear index of the source cell</span>
+<span class="sd">        &quot;source_idx&quot; and friction distance to the source cell &quot;source_dst&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nodata</span> <span class="o">=</span> <span class="n">da_obs</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span> <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nodata</span>
+    <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodata</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&quot;nodata&quot; must be a finite value, not </span><span class="si">{</span><span class="n">nodata</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">msk</span><span class="p">,</span> <span class="n">frc</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">da_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">da_obs</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">identical_grid</span><span class="p">(</span><span class="n">da_mask</span><span class="p">)</span>
+        <span class="n">msk</span> <span class="o">=</span> <span class="n">da_mask</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">if</span> <span class="n">da_friction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">da_obs</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">identical_grid</span><span class="p">(</span><span class="n">da_friction</span><span class="p">)</span>
+        <span class="n">frc</span> <span class="o">=</span> <span class="n">da_friction</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">out</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span> <span class="o">=</span> <span class="n">gis</span><span class="o">.</span><span class="n">spread2d</span><span class="p">(</span>
+        <span class="n">obs</span><span class="o">=</span><span class="n">da_obs</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="n">msk</span><span class="o">=</span><span class="n">msk</span><span class="p">,</span>
+        <span class="n">frc</span><span class="o">=</span><span class="n">frc</span><span class="p">,</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+        <span class="n">latlon</span><span class="o">=</span><span class="n">da_obs</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">da_obs</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># combine outputs and return as dataset</span>
+    <span class="n">dims</span> <span class="o">=</span> <span class="n">da_obs</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">da_obs</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">coords</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">da_obs</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">da_obs</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;source_value&quot;</span>
+    <span class="n">da_out</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">da_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">da_obs</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>  <span class="c1"># keep attrs incl nodata and unit</span>
+    <span class="n">da_src</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;source_idx&quot;</span><span class="p">)</span>
+    <span class="n">da_src</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">da_dst</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;source_dst&quot;</span><span class="p">)</span>
+    <span class="n">da_dst</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">da_dst</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+    <span class="n">ds_out</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">da_out</span><span class="p">,</span> <span class="n">da_src</span><span class="p">,</span> <span class="n">da_dst</span><span class="p">])</span>
+    <span class="n">ds_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">da_obs</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ds_out</span></div>
+
+
+
+<div class="viewcode-block" id="create_vrt">
+<a class="viewcode-back" href="../../_generated/hydromt.gis_utils.create_vrt.html#hydromt.gis_utils.create_vrt">[docs]</a>
+<span class="k">def</span> <span class="nf">create_vrt</span><span class="p">(</span>
+    <span class="n">vrt_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">files</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">files_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a .vrt file from a list op raster datasets.</span>
+
+<span class="sd">    Either a list of files (`files`) or a path containing wildcards</span>
+<span class="sd">    (`files_path`) to infer the list of files is required.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vrt_path : str</span>
+<span class="sd">        Path of the output vrt</span>
+<span class="sd">    files : list, optional</span>
+<span class="sd">        List of raster datasets filenames, by default None</span>
+<span class="sd">    files_path : str, optional</span>
+<span class="sd">        Unix style path containing a pattern using wildcards (*)</span>
+<span class="sd">        n.b. this is without an extension</span>
+<span class="sd">        e.g. c:\\temp\\*\\*.tif for all tif files in subfolders of &#39;c:\temp&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">files</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">files_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either &#39;files&#39; or &#39;files_path&#39; is required&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_compat</span><span class="o">.</span><span class="n">HAS_RIO_VRT</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;rio-vrt is required for execution, install with &#39;pip install rio-vrt&#39;&quot;</span>
+        <span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">rio_vrt</span>
+
+    <span class="k">if</span> <span class="n">files</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">files_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">files_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No files found at </span><span class="si">{</span><span class="n">files_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">outdir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">vrt_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">outdir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outdir</span><span class="p">)</span>
+
+    <span class="n">rio_vrt</span><span class="o">.</span><span class="n">build_vrt</span><span class="p">(</span><span class="n">vrt_path</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">relative</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">to_geographic_bbox</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">source_crs</span><span class="p">):</span>
+    <span class="n">target_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">source_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No CRS was set. Skipping CRS conversion&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">source_crs</span> <span class="o">!=</span> <span class="n">target_crs</span><span class="p">:</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="n">source_crs</span><span class="p">,</span> <span class="n">target_crs</span><span class="p">)</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bbox</span>
+
+
+<span class="k">def</span> <span class="nf">bbox_from_file_and_filters</span><span class="p">(</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">bbox</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">GEOM_TYPES</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">GEOM_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="n">CRS</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a bbox from the file metadata and filter options.</span>
+
+<span class="sd">    Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.</span>
+<span class="sd">    This function takes the possible bbox filter, mask filter and crs of the input data</span>
+<span class="sd">    and returns a bbox in the same crs as the data based on the input filters.</span>
+<span class="sd">    As pyogrio currently does not support filtering using a mask, the mask is converted</span>
+<span class="sd">    to a bbox and the bbox is returned so that the data has some geospatial filtering.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fn: str,</span>
+<span class="sd">        uri to the filename.</span>
+<span class="sd">    bbox: GeoDataFrame | GeoSeries | BaseGeometry</span>
+<span class="sd">        bounding box to filter the data while reading</span>
+<span class="sd">    mask: GeoDataFrame | GeoSeries | BaseGeometry</span>
+<span class="sd">        mask to filter the data while reading</span>
+<span class="sd">    crs: pyproj.CRS</span>
+<span class="sd">        coordinate reference system of the bounding box or geometry. If already set,</span>
+<span class="sd">        this argument is ignored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Both &#39;bbox&#39; and &#39;mask&#39; are provided. Please provide only one.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">source_crs_str</span> <span class="o">:=</span> <span class="n">read_info</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">):</span>
+        <span class="n">source_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">source_crs_str</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">crs</span><span class="p">:</span>
+        <span class="n">source_crs</span> <span class="o">=</span> <span class="n">crs</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># assume WGS84</span>
+        <span class="n">source_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">mask</span>
+
+    <span class="c1"># convert bbox to geom with input crs (assume WGS84 if not provided)</span>
+    <span class="n">crs</span> <span class="o">=</span> <span class="n">crs</span> <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bbox</span><span class="p">),</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span> <span class="k">if</span> <span class="n">bbox</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bbox</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">source_crs</span><span class="p">)</span><span class="o">.</span><span class="n">total_bounds</span><span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

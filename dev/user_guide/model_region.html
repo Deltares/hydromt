@@ -1,0 +1,743 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Defining a model region &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/model_region';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.5';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Example: Working with models from CLI" href="../_examples/working_with_models_basics.html" />
+    <link rel="prev" title="Preparing a model configuration" href="model_config.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt_intro.html">Introduction to HydroMT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quick_overview.html">Quick overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt_cli.html">HydroMT Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt_python.html">Using HydroMT in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with data in HydroMT</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="data_overview.html">Overview data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_prepare_cat.html">Preparing a Data Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_types.html">Supported data types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_existing_cat.html">Pre-defined data catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_conventions.html">Data conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/prep_data_catalog.html">Example: Preparing a data catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/export_data.html">Example: Exporting data from a data catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_raster_data.html">Example: Reading raster data</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_vector_data.html">Example: Reading vector data</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_point_data.html">Example: Reading geospatial point time-series</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with models in HydroMT</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="model_overview.html">Overview models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_build.html">Building a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_update.html">Updating a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_clip.html">Clipping a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_config.html">Preparing a model configuration</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Defining a model region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_models_basics.html">Example: Working with models from CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_meshmodel.html">Example: Working with mesh models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/delineate_basin.html">Example: Define hydrological model regions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Methods and workflows</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="methods_main.html">Overview methods and workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods_stats.html">Statistical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_raster.html">Example: Working with raster data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_geodatasets.html">Example: Working with geodatasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
+
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="intro.html" class="nav-link">User guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Defining a...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="defining-a-model-region">
+<span id="region"></span><h1>Defining a model region<a class="headerlink" href="#defining-a-model-region" title="Link to this heading">#</a></h1>
+<p>To setup a model for a specific region, you can use several geospatial or hydrographic region definitions which are explained in this chapter.
+The syntax is interpreted using the <a class="reference internal" href="../_generated/hydromt.workflows.basin_mask.parse_region.html#hydromt.workflows.basin_mask.parse_region" title="hydromt.workflows.basin_mask.parse_region"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parse_region()</span></code></a> method.
+For hydrographic regions see also the <a class="reference internal" href="../_examples/delineate_basin.html"><span class="doc">delineate basins</span></a> example and <a class="reference internal" href="../_generated/hydromt.workflows.basin_mask.get_basin_geometry.html#hydromt.workflows.basin_mask.get_basin_geometry" title="hydromt.workflows.basin_mask.get_basin_geometry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_basin_geometry()</span></code></a> method.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All x and y coordinates in the <em>point</em> and <em>bbox</em> are in the EPSG:4326 (WGS84) coordinate reference system.</p>
+</div>
+<section id="geospatial-region">
+<h2>Geospatial region<a class="headerlink" href="#geospatial-region" title="Link to this heading">#</a></h2>
+<blockquote>
+<div><p>Bounding box (bbox): <code class="docutils literal notranslate"><span class="pre">{'bbox':</span> <span class="pre">[xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax]}</span></code></p>
+<p>Geometry file (geom): <code class="docutils literal notranslate"><span class="pre">{'geom':</span> <span class="pre">'/path/to/geometry_file'}</span></code></p>
+<p>Based on another model: <code class="docutils literal notranslate"><span class="pre">{'&lt;model_name&gt;':</span> <span class="pre">'/path/to/model_root'}</span></code></p>
+<p>Based on a raster file: <code class="docutils literal notranslate"><span class="pre">{'grid':</span> <span class="pre">'/path/to/raster_file'}</span></code></p>
+<p>Based on a mesh file: <code class="docutils literal notranslate"><span class="pre">{'mesh':</span> <span class="pre">'/path/to/mesh_file'}</span></code></p>
+</div></blockquote>
+</section>
+<section id="hydrographic-region">
+<h2>Hydrographic region<a class="headerlink" href="#hydrographic-region" title="Link to this heading">#</a></h2>
+<p>The following hydrographic regions are supported:</p>
+<ul class="simple">
+<li><p>basin</p></li>
+<li><p>subbasin</p></li>
+<li><p>interbasin</p></li>
+</ul>
+<p><strong>Basin</strong>: is defined by the entire area which drains to the sea or an inland depression.
+To delineate the basin(s) touching a region or point location, users can supply the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>One point location: <code class="docutils literal notranslate"><span class="pre">{'basin':</span> <span class="pre">[x,</span> <span class="pre">y]}</span></code></p></li>
+<li><p>More point locations: <code class="docutils literal notranslate"><span class="pre">{'basin':</span> <span class="pre">[[x1,</span> <span class="pre">x2,</span> <span class="pre">..],</span> <span class="pre">[y1,</span> <span class="pre">y2,</span> <span class="pre">..]]}</span></code></p></li>
+<li><p>Bounding box: <code class="docutils literal notranslate"><span class="pre">{'basin':</span> <span class="pre">[xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax]}</span></code></p></li>
+<li><p>Geometry file: <code class="docutils literal notranslate"><span class="pre">{'basin':</span> <span class="pre">'/path/to/geometry_file'}</span></code></p></li>
+<li><p>Single unique basin ID: <code class="docutils literal notranslate"><span class="pre">{'basin':</span> <span class="pre">[ID1]}</span></code></p></li>
+<li><p>Several unique basin ID: <code class="docutils literal notranslate"><span class="pre">{'basin':</span> <span class="pre">[ID1,</span> <span class="pre">ID2,</span> <span class="pre">..]}</span></code></p></li>
+</ul>
+<p>To filter basins, variable-threshold pairs to define streams can be used in combination with
+a bounding box or geometry file, e.g.: <code class="docutils literal notranslate"><span class="pre">'uparea':30</span></code> to filter based on streams with
+a minimum drainage area of 30 km2 or <code class="docutils literal notranslate"><span class="pre">'strord':8</span></code> to filter basins based on streams
+with a minimal stream order of 8. The variables should be available in the dataset on which
+the delineation is based, e.g. Hydro MERIT.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">{'basin':</span> <span class="pre">[xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax],</span> <span class="pre">'&lt;variable&gt;':</span> <span class="pre">threshold}</span></code></p></li>
+</ul>
+<p>To only select basins with their outlet location use <code class="docutils literal notranslate"><span class="pre">'outlets':</span> <span class="pre">true</span></code> in combination with
+a bounding box or geometry file</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">{'basin':</span> <span class="pre">[xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax],</span> <span class="pre">'outlets':</span> <span class="pre">true}</span></code></p></li>
+</ul>
+</div></blockquote>
+<p><strong>Subbasin</strong>: is defined by the area that drains into an outlet, stream or region.
+Users can supply the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>One point location: <code class="docutils literal notranslate"><span class="pre">{'subbasin':</span> <span class="pre">[x,</span> <span class="pre">y]}</span></code></p></li>
+<li><p>More point locations: <code class="docutils literal notranslate"><span class="pre">{'subbasin':</span> <span class="pre">[[x1,</span> <span class="pre">x2,</span> <span class="pre">..],</span> <span class="pre">[y1,</span> <span class="pre">y2,</span> <span class="pre">..]]}</span></code></p></li>
+<li><p>Bounding box: <code class="docutils literal notranslate"><span class="pre">{'subbasin':</span> <span class="pre">[xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax]}</span></code></p></li>
+<li><p>Geometry file: <code class="docutils literal notranslate"><span class="pre">{'subbasin':</span> <span class="pre">'/path/to/geometry_file'}</span></code></p></li>
+</ul>
+<p>To speed up the delineation process users can supply an estimated initial
+bounding box in combination with all the options mentioned above.
+A warning will be raised if the bounding box does not contain all upstream area.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">{'subbasin':</span> <span class="pre">[x,</span> <span class="pre">y],</span> <span class="pre">'bounds':</span> <span class="pre">[xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax]}</span></code></p></li>
+</ul>
+<p>The subbasins can further be refined based on one (or more) variable-threshold pair(s)
+to define streams, as described above for basins. If used in combination with point outlet locations,
+these are snapped to the nearest stream which meets the threshold criteria.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">{'subbasin':</span> <span class="pre">[x,</span> <span class="pre">y],</span> <span class="pre">'&lt;variable&gt;':</span> <span class="pre">threshold}</span></code></p></li>
+</ul>
+</div></blockquote>
+<p><strong>Interbasin</strong>: is defined by the area that drains into an outlet or stream and
+bounded by a region and therefore does not necessarily including all upstream area.
+Users should supply a bounding region in combination with stream and/or outlet arguments.
+The bounding region is defined by a bounding box or a geometry file; streams by a
+(or more) variable-threshold pair(s) and outlet by point location coordinates.
+Similar to subbasins, point locations are snapped to nearest downstream stream if
+combined with stream arguments.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">{'interbasin':</span> <span class="pre">[xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax],</span> <span class="pre">'&lt;variable&gt;':</span> <span class="pre">threshold}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{'interbasin':</span> <span class="pre">/path/to/geometry_file,</span> <span class="pre">'&lt;variable&gt;':</span> <span class="pre">threshold}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{'interbasin':</span> <span class="pre">[xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax],</span> <span class="pre">'&lt;variable&gt;':</span> <span class="pre">threshold,</span> <span class="pre">'xy':</span> <span class="pre">[x,</span> <span class="pre">y]}</span></code></p></li>
+</ul>
+<p>To only select interbasins based on the outlet location of the entire basins use <code class="docutils literal notranslate"><span class="pre">'outlets':</span> <span class="pre">true</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">{'interbasin':</span> <span class="pre">[xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax],</span> <span class="pre">'outlets':</span> <span class="pre">true}</span></code></p>
+</div></blockquote>
+<img alt="../_images/region.png" src="../_images/region.png" />
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="model_config.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Preparing a model configuration</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../_examples/working_with_models_basics.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Example: Working with models from CLI</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geospatial-region">Geospatial region</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hydrographic-region">Hydrographic region</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/user_guide/model_region.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user_guide/model_region.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

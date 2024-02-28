@@ -1,0 +1,693 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hydromt.workflows.rivers &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/workflows/rivers';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.5';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../../../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../../../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">hydromt.work...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for hydromt.workflows.rivers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Implementations for river workflows.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">from</span> <span class="nn">pyflwdir</span> <span class="kn">import</span> <span class="n">Flwdir</span><span class="p">,</span> <span class="n">FlwdirRaster</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span>
+
+<span class="kn">from</span> <span class="nn">..gis_utils</span> <span class="kn">import</span> <span class="n">spread2d</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;river_width&quot;</span><span class="p">,</span> <span class="s2">&quot;river_depth&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="river_width">
+<a class="viewcode-back" href="../../../_generated/hydromt.workflows.rivers.river_width.html#hydromt.workflows.rivers.river_width">[docs]</a>
+<span class="k">def</span> <span class="nf">river_width</span><span class="p">(</span>
+    <span class="n">gdf_stream</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">da_rivmask</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">nmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return average river width along a segment based on a river mask raster.</span>
+
+<span class="sd">    For each segment in gdf_stream the associated area is calculated from stream mask</span>
+<span class="sd">    and divided by the segment length to obtain the average width.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf_stream : gpd.GeoDataFrame</span>
+<span class="sd">        River segments</span>
+<span class="sd">    da_rivmask : xr.DataArray</span>
+<span class="sd">        Boolean river mask in projected grid.</span>
+<span class="sd">    nmin : int, optional</span>
+<span class="sd">        Minimum number of cells in rivmask to calculate the width, by default 5</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    rivwth : np.ndarray</span>
+<span class="sd">        Average width per segment in gdf_stream</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">da_rivmask</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_projected</span>
+    <span class="n">gdf_stream</span> <span class="o">=</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># get/check river length</span>
+    <span class="k">if</span> <span class="s2">&quot;rivlen&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">gdf_stream</span><span class="p">[</span><span class="s2">&quot;rivlen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">da_rivmask</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">length</span>
+    <span class="c1"># rasterize streams</span>
+    <span class="n">gdf_stream</span><span class="p">[</span><span class="s2">&quot;segid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">segid</span> <span class="o">=</span> <span class="n">da_rivmask</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">gdf_stream</span><span class="p">,</span> <span class="s2">&quot;segid&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">segid</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">segid</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;segid&quot;</span>
+    <span class="c1"># remove islands to get total width of braided rivers</span>
+    <span class="n">da_mask</span> <span class="o">=</span> <span class="n">da_rivmask</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">da_mask</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">binary_fill_holes</span><span class="p">(</span><span class="n">da_mask</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="c1"># find nearest stream segment for all river cells</span>
+    <span class="n">segid_spread</span> <span class="o">=</span> <span class="n">spread2d</span><span class="p">(</span><span class="n">segid</span><span class="p">,</span> <span class="n">da_mask</span><span class="p">)</span>
+    <span class="c1"># get average width based on da_rivmask area and segment length</span>
+    <span class="n">cellarea</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="o">*</span><span class="n">da_rivmask</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">))</span>
+    <span class="n">seg_count</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+        <span class="n">da_rivmask</span><span class="p">,</span> <span class="n">segid_spread</span><span class="p">[</span><span class="s2">&quot;segid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">gdf_stream</span><span class="p">[</span><span class="s2">&quot;segid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="p">)</span>
+    <span class="n">rivwth</span> <span class="o">=</span> <span class="n">seg_count</span> <span class="o">*</span> <span class="n">cellarea</span> <span class="o">/</span> <span class="n">gdf_stream</span><span class="p">[</span><span class="s2">&quot;rivlen&quot;</span><span class="p">]</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">gdf_stream</span><span class="p">[</span><span class="s2">&quot;rivlen&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">seg_count</span> <span class="o">&gt;</span> <span class="n">nmin</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">valid</span><span class="p">,</span> <span class="n">rivwth</span><span class="p">,</span> <span class="o">-</span><span class="mi">9999</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="river_depth">
+<a class="viewcode-back" href="../../../_generated/hydromt.workflows.rivers.river_depth.html#hydromt.workflows.rivers.river_depth">[docs]</a>
+<span class="k">def</span> <span class="nf">river_depth</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">],</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">flwdir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Flwdir</span><span class="p">,</span> <span class="n">FlwdirRaster</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_rivdph</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">manning</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.03</span><span class="p">,</span>
+    <span class="n">qbankfull_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;qbankfull&quot;</span><span class="p">,</span>
+    <span class="n">rivwth_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rivwth&quot;</span><span class="p">,</span>
+    <span class="n">rivzs_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rivzs&quot;</span><span class="p">,</span>
+    <span class="n">rivdst_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rivdst&quot;</span><span class="p">,</span>
+    <span class="n">rivslp_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rivslp&quot;</span><span class="p">,</span>
+    <span class="n">rivman_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rivman&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive river depth estimates based bankfull discharge.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : xr.Dataset, pd.DataFrame, gpd.GeoDataFrame</span>
+<span class="sd">        Dataset/DataFrame containing required variables</span>
+<span class="sd">    method : {&#39;powlaw&#39;, &#39;manning&#39;, &#39;gvf&#39;}</span>
+<span class="sd">        Method to estimate the river depth:</span>
+
+<span class="sd">        * powlaw [1]_ [2]_: power-law hc*Qbf**hp, requires bankfull discharge (Qbf).</span>
+<span class="sd">          Optionally, `hc` (default = 0.27) and `hp` (default = 0.30) set in `kwargs`.</span>
+<span class="sd">        * manning [3]_: river depth for kinematic conditions,</span>
+<span class="sd">          requires bankfull discharge, river width, river slope in `data`;</span>
+<span class="sd">          the river manning roughness either in data or as constant and</span>
+<span class="sd">          optionally `min_rivslp` (default = 1e-5) set in `kwargs`.</span>
+<span class="sd">        * gvf [4]_: gradually varying flow, requires bankfull discharge,</span>
+<span class="sd">          river width, river surface elevation in `data`;</span>
+<span class="sd">          the river manning roughness either in data</span>
+<span class="sd">          or as constant and optionally `min_rivslp` (default = 1e-5) set in `kwargs`.</span>
+<span class="sd">    flwdir : Flwdir, FlwdirRaster, optional</span>
+<span class="sd">        Flow directions, required if method is not powlaw</span>
+<span class="sd">    min_rivdph : float, optional</span>
+<span class="sd">        Minimum river depth [m], by default 1.0</span>
+<span class="sd">    manning : float, optional</span>
+<span class="sd">        Constant manning roughness [s/m^{1/3}] used if `rivman_name` not in data,</span>
+<span class="sd">        by default 0.03</span>
+<span class="sd">    qbankfull_name, rivwth_name, rivzs_name, rivdst_name, rivslp_name, rivman_name:</span>
+<span class="sd">        Name for variables in data: bankfull discharge [m3/s], river width [m],</span>
+<span class="sd">        bankfull water surface elevation profile [m+REF], distance to river outlet [m],</span>
+<span class="sd">        river slope [m/m] and river manning roughness [s/m^{1/3}]</span>
+<span class="sd">    kwargs:</span>
+<span class="sd">        additional arguments to be passed down</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    rivdph: xr.DataArray, np.ndarray</span>
+<span class="sd">        River depth [m]. A DataArray is returned if the input data is a Dataset,</span>
+<span class="sd">        otherwise a array with the shape of one input data variable is returned.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Leopold &amp; Maddock (1953). The hydraulic geometry of stream channels and some</span>
+<span class="sd">            physiographic implications (No. 252; Professional Paper).</span>
+<span class="sd">            U.S. Government Printing Office. https://doi.org/10.3133/pp252</span>
+<span class="sd">    .. [2] Andreadis et al. (2013). A simple global river bankfull width and depth</span>
+<span class="sd">            database. Water Resources Research, 49(10), 7164-7168. https://doi.org/10.1002/wrcr.20440</span>
+<span class="sd">    .. [3] Sampson et al. (2015). A high-resolution global flood hazard model.</span>
+<span class="sd">            Water Resources Research, 51(9), 7358-7381. https://doi.org/10.1002/2015WR016954</span>
+<span class="sd">    .. [4] Neal et al. (2021). Estimating river channel bathymetry in large scale</span>
+<span class="sd">            flood inundation models. Water Resources Research, 57(5). https://doi.org/10.1029/2020wr028301</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    pyflwdir.FlwdirRaster.river_depth</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;powlaw&quot;</span><span class="p">,</span> <span class="s2">&quot;manning&quot;</span><span class="p">,</span> <span class="s2">&quot;gvf&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;powlaw&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">rivdph_powlaw</span><span class="p">(</span><span class="n">qbankfull</span><span class="p">,</span> <span class="n">hc</span><span class="o">=</span><span class="mf">0.27</span><span class="p">,</span> <span class="n">hp</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span> <span class="n">min_rivdph</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">hc</span> <span class="o">*</span> <span class="n">qbankfull</span><span class="o">**</span><span class="n">hp</span><span class="p">,</span> <span class="n">min_rivdph</span><span class="p">)</span>
+
+        <span class="n">rivdph</span> <span class="o">=</span> <span class="n">rivdph_powlaw</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">qbankfull_name</span><span class="p">],</span> <span class="n">min_rivdph</span><span class="o">=</span><span class="n">min_rivdph</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;manning&quot;</span><span class="p">,</span> <span class="s2">&quot;gvf&quot;</span><span class="p">]:</span>
+        <span class="k">assert</span> <span class="n">flwdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">rivdph</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">river_depth</span><span class="p">(</span>
+            <span class="n">qbankfull</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">qbankfull_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">rivwth</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">rivwth_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">zs</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">rivzs_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">rivzs_name</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">rivdst</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">rivdst_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">rivdst_name</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">rivslp</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">rivslp_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">rivslp_name</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">manning</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">rivman_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">rivman_name</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">else</span> <span class="n">manning</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">min_rivdph</span><span class="o">=</span><span class="n">min_rivdph</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Method unknown </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">, select from </span><span class="si">{</span><span class="n">methods</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+        <span class="n">rivdph</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+            <span class="n">dims</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">rivdph</span>
+        <span class="p">)</span>
+        <span class="n">rivdph</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="o">-</span><span class="mf">9999.0</span><span class="p">)</span>
+        <span class="n">rivdph</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rivdph</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
