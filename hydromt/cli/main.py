@@ -203,7 +203,7 @@ def build(
     )
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
-    opt = _utils.parse_config(config, opt_cli=opt)
+    opt = _utils._parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # Set region to None if empty string json
     if len(region) == 0:
@@ -307,7 +307,7 @@ def update(
     if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
         opt = {components[0]: opt}
     logger.info("User settings:")
-    opt = _utils.parse_config(config, opt_cli=opt)
+    opt = _utils._parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
@@ -410,7 +410,7 @@ def check(
             mod = MODELS.load(model)
             logger.info(f"Validating for model {model} of type {type(mod).__name__}")
             try:
-                config_dict = _utils.parse_config(config)
+                config_dict = _utils._parse_config(config)
                 logger.info(f"Validating config at {config}")
 
                 HydromtModelSetup.from_dict(config_dict, model=mod)
@@ -516,7 +516,7 @@ def export(
     append = False
 
     if config:
-        config_dict = _utils.parse_config(config)["export_data"]
+        config_dict = _utils._parse_config(config)["export_data"]
         if "data_libs" in config_dict.keys():
             data_libs = data_libs + config_dict.pop("data_libs")
         time_tuple = config_dict.pop("time_tuple", None)

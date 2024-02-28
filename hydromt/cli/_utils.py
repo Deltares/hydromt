@@ -16,7 +16,7 @@ from hydromt.io import configread
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["parse_json", "parse_config", "parse_opt"]
+__all__ = ["parse_json", "_parse_config", "parse_opt"]
 
 
 ### CLI callback methods ###
@@ -83,7 +83,7 @@ def parse_json(ctx, param, value: str) -> Dict[str, Any]:
 
 
 ### general parsing methods ##
-def parse_config(
+def _parse_config(
     path: Optional[Union[Path, str]] = None, opt_cli: Optional[Dict] = None
 ) -> Dict:
     """Parse config from `path` and combine with command line options `opt_cli`."""
