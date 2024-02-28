@@ -13,12 +13,12 @@ class TestRasterDatsetAdapter:
     @pytest.fixture()
     def example_source(
         self,
-        mock_rasterds_driver: RasterDatasetDriver,
+        mock_raster_ds_driver: RasterDatasetDriver,
         mock_resolver: MetaDataResolver,
     ):
         return RasterDataSource(
             name="example_source",
-            driver=mock_rasterds_driver,
+            driver=mock_raster_ds_driver,
             metadata_resolver=mock_resolver,
             uri="my_uri.zarr",
             crs=4326,

@@ -13,14 +13,14 @@ class TestRasterDataSource:
     @pytest.fixture()
     def example_source(
         self,
-        mock_rasterds_driver: RasterDatasetDriver,
+        mock_raster_ds_driver: RasterDatasetDriver,
         mock_resolver: MetaDataResolver,
         tmp_dir: Path,
     ):
         return RasterDataSource(
             root=".",
             name="example_rasterds",
-            driver=mock_rasterds_driver,
+            driver=mock_raster_ds_driver,
             metadata_resolver=mock_resolver,
             uri=str(tmp_dir / "rasterds.zarr"),
         )
@@ -46,12 +46,14 @@ class TestRasterDataSource:
         assert error_driver["type"] == "value_error"
 
     def test_model_validate(
-        self, mock_rasterds_driver: RasterDatasetDriver, mock_resolver: MetaDataResolver
+        self,
+        mock_raster_ds_driver: RasterDatasetDriver,
+        mock_resolver: MetaDataResolver,
     ):
         RasterDataSource.model_validate(
             {
                 "name": "zarrfile",
-                "driver": mock_rasterds_driver,
+                "driver": mock_raster_ds_driver,
                 "metadata_resolver": mock_resolver,
                 "uri": "test_uri",
             }
@@ -63,7 +65,7 @@ class TestRasterDataSource:
                 {
                     "name": "geojsonfile",
                     "data_type": "DifferentDataType",
-                    "driver": mock_rasterds_driver,
+                    "driver": mock_raster_ds_driver,
                     "metadata_resolver": mock_resolver,
                     "uri": "test_uri",
                 }

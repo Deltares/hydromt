@@ -380,7 +380,7 @@ def mock_geodf_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
 
 
 @pytest.fixture()
-def mock_rasterds_driver(rasterds: xr.Dataset) -> RasterDatasetDriver:
+def mock_raster_ds_driver(rasterds: xr.Dataset) -> RasterDatasetDriver:
     class MockRasterDatasetDriver(RasterDatasetDriver):
         def read(self, *args, **kwargs) -> xr.Dataset:
             return rasterds
