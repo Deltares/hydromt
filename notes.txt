@@ -1,0 +1,6 @@
+rivier inbranden:
+- correctie van hooges van rivieren in een DEM -> naar hoogte van bodem.
+
+python interface kinda breaks reproduciblity
+
+hydromt could do better on sensitivy analisis.
