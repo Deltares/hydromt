@@ -1246,10 +1246,11 @@ class XRasterBase(XGeoBase):
             if not np.all(gdf_bbox.is_empty):
                 xs, ys = zip(*gdf_bbox.dissolve().boundary[0].coords[:])
         cs, rs = ~self.transform * (np.array(xs), np.array(ys))
-        c0 = max(int(round(cs.min() - buffer)), 0)
-        r0 = max(int(round(rs.min() - buffer)), 0)
-        c1 = int(round(cs.max() + buffer))
-        r1 = int(round(rs.max() + buffer))
+        # use round to get integer slices
+        c0 = np.max(int(np.round(cs.min() - buffer)), 0)
+        r0 = np.max(int(np.round(rs.min() - buffer)), 0)
+        c1 = int(np.round(cs.max() + buffer))
+        r1 = int(np.round(rs.max() + buffer))
         return self.clip(slice(c0, c1), slice(r0, r1))
 
     def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
