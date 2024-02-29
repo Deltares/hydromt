@@ -124,7 +124,13 @@ clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 test = { cmd = ["pytest"] }
 test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
-test-cov = { cmd = ["pytest", "--verbose", "--cov=hydromt", "--cov-report", "xml"] }
+test-cov = { cmd = [
+  "pytest",
+  "--verbose",
+  "--cov=hydromt",
+  "--cov-report",
+  "xml",
+] }
 
 [dependencies]
 affine = "*"
@@ -194,6 +200,7 @@ pytest = ">=2.7.3"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-timeout = "*"
+polyfactory = ">=2"  # factory for pydantic models
 xugrid = "*"
 
 [feature.doc.dependencies]
@@ -212,13 +219,60 @@ jupyterlab = "*"
 notebook = "*"
 
 [environments]
-default = { features = ["py311", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py311" }
-full-py311 = { features = ["py311", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py311" }
-slim-py311 = { features = ["py311", "io", "extra", "examples"], solve-group = "py311" }
+default = { features = [
+  "py311",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py311" }
+full-py311 = { features = [
+  "py311",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py311" }
+slim-py311 = { features = [
+  "py311",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py311" }
 min-py311 = { features = ["py311"], solve-group = "py311" }
-full-py310 = { features = ["py310", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py310" }
-slim-py310 = { features = ["py310", "io", "extra", "examples"], solve-group = "py310" }
+full-py310 = { features = [
+  "py310",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py310" }
+slim-py310 = { features = [
+  "py310",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py310" }
 min-py310 = { features = ["py310"], solve-group = "py310" }
-full-py39 = { features = ["py39", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py39" }
-slim-py39 = { features = ["py39", "io", "extra", "examples"], solve-group = "py39" }
+full-py39 = { features = [
+  "py39",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py39" }
+slim-py39 = { features = [
+  "py39",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py39" }
 min-py39 = { features = ["py39"], solve-group = "py39" }
