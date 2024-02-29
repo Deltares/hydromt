@@ -16,7 +16,7 @@ on:
       version:
         description: 'The version to publish'
         required: true
-        type: text
+        type: string
 
 
 jobs:
@@ -54,11 +54,6 @@ jobs:
           username: ${{ secrets.TEST_DOCKERHUB_USERNAME }}
           password: ${{ secrets.TEST_DOCKERHUB_TOKEN }}
 
-      - name: generate envs
-        run: |
-          pip install tomli
-          python make_env.py -p '3.11' -o ${{ matrix.flavour }}-environment.yml ${{ matrix.flavour }}
-
       - name: Build and push ${{ matrix.flavour }} image
         uses: docker/build-push-action@v4
         with:
@@ -66,6 +61,8 @@ jobs:
           target: ${{ matrix.flavour }} #
           push:  ${{ env.should_publish }}
           tags: deltares/hydromt:${{ env.version }}-${{ matrix.flavour }}
+          build-args: |
+            PIXIENV=${{ matrix.flavour }}-py311
 
       - name: Build and push latest image
         if: matrix.flavour == 'slim'
@@ -75,3 +72,5 @@ jobs:
           target: ${{ matrix.flavour }} #
           push:  ${{ env.should_publish }}
           tags: deltares/hydromt:${{ env.version }}, deltares/hydromt:latest
+          build-args: |
+            PIXIENV=${{ matrix.flavour }}-py311

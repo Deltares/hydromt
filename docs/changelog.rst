@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+Unreleased
+==========
+
+Changed
+-------
+- Development environment is now set up via pixi instead of mamba / conda. See the documentation for more information on how to install.
+
 
 
 v0.9.4 (2024-02-26)
