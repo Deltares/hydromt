@@ -38,7 +38,7 @@ For more information about the installation, please refer to the :ref:`installat
 
 .. code-block:: console
 
-    $ conda create -n hydromt -c conda-forge python=3.9 hydromt hydromt_wflow
+    $ conda create -n hydromt -c conda-forge hydromt hydromt_wflow
     $ conda activate hydromt
 
 Next, check if the installation was successful by running the command below.
@@ -69,6 +69,7 @@ in the `wflow_test` folder. This Wflow model instance is ready to be `run with W
 .. code-block:: console
 
     $ hydromt build wflow ./wflow_test -r "{'subbasin': [12.2051, 45.8331], 'strord': 4}" -vv -i build_wflow.yaml
+    $ hydromt build wflow ./wflow_test -r "{'subbasin': [12.2051, 45.8331], 'strord': 4}" -i build_wflow.yml -d artifact_data -vv
 
 .. _Wflow: https://deltares.github.io/Wflow.jl/dev
 .. _HydroMT-Wflow plugin: https://deltares.github.io/hydromt_wflow/

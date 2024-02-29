@@ -1,70 +1,37 @@
-FROM  mambaorg/micromamba:1.4-alpine AS min
-ENV HOME=/home/mambauser
-WORKDIR ${HOME}
-USER mambauser
-COPY min-environment.yml pyproject.toml README.rst ${HOME}/
-RUN micromamba create -f min-environment.yml -y --no-pyc \
- && micromamba clean -ayf \
- && rm -rf ${HOME}/.cache \
- && find /opt/conda/ -follow -type f -name '*.a' -delete \
- && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
- && find /opt/conda/ -follow -type f -name '*.js.map' -delete  \
- && rm min-environment.yml
-COPY data/ ${HOME}/data
-COPY examples/ ${HOME}/examples
-COPY tests/ ${HOME}/tests
-COPY hydromt/ ${HOME}/hydromt
-RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disable-pip-version-check --no-deps\
- && micromamba clean -ayf \
- && find /opt/conda/ -follow -type f -name '*.a' -delete \
- && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
- && find /opt/conda/ -follow -type f -name '*.js.map' -delete
- ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
- CMD ["hydromt","--models"]
+FROM debian:bookworm-slim as base
+ARG PIXIENV
+RUN apt-get update && apt-get install -y curl
 
-FROM  mambaorg/micromamba:1.4-alpine AS full
-ENV HOME=/home/mambauser
-WORKDIR ${HOME}
-USER mambauser
-COPY full-environment.yml pyproject.toml README.rst ${HOME}/
-RUN micromamba create -f full-environment.yml -y --no-pyc \
- && micromamba clean -ayf \
- && rm -rf ${HOME}/.cache \
- && find /opt/conda/ -follow -type f -name '*.a' -delete \
- && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
- && find /opt/conda/ -follow -type f -name '*.js.map' -delete  \
- && rm full-environment.yml
-COPY data/ ${HOME}/data
-COPY examples/ ${HOME}/examples
-COPY tests/ ${HOME}/tests
-COPY hydromt/ ${HOME}/hydromt
-RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disable-pip-version-check --no-deps\
- && micromamba clean -ayf \
- && find /opt/conda/ -follow -type f -name '*.a' -delete \
- && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
- && find /opt/conda/ -follow -type f -name '*.js.map' -delete
- ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
- CMD ["hydromt","--models"]
+RUN useradd deltares
+USER deltares
+WORKDIR /home/deltares
 
-FROM  mambaorg/micromamba:1.4-alpine AS slim
-ENV HOME=/home/mambauser
-WORKDIR ${HOME}
-USER mambauser
-COPY slim-environment.yml pyproject.toml README.rst ${HOME}/
-RUN micromamba create -f slim-environment.yml -y --no-pyc \
- && rm -rf ${HOME}/.cache \
- && micromamba clean -ayf \
- && find /opt/conda/ -follow -type f -name '*.a' -delete \
- && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
- && find /opt/conda/ -follow -type f -name '*.js.map' -delete  \
- && rm slim-environment.yml
-COPY data/ ${HOME}/data
-COPY examples/ ${HOME}/examples
-COPY hydromt/ ${HOME}/hydromt
-RUN micromamba run -n hydromt pip install . --no-cache-dir --no-compile --disable-pip-version-check --no-deps\
- && micromamba clean -ayf \
- && find /opt/conda/ -follow -type f -name '*.a' -delete \
- && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
- && find /opt/conda/ -follow -type f -name '*.js.map' -delete
- ENTRYPOINT [ "micromamba", "run", "-n", "hydromt" ]
- CMD ["hydromt","--models"]
+RUN curl -fsSL https://pixi.sh/install.sh | bash
+ENV PATH=/home/deltares/.pixi/bin:$PATH
+COPY pixi.toml pixi.lock pyproject.toml README.rst ./
+COPY data/ ./data
+COPY hydromt/ ./hydromt
+RUN pixi run --locked -e ${PIXIENV} install-hydromt \
+  && rm -rf .cache \
+  && find .pixi -type f -name "*.pyc" -delete
+
+# Workaround: write a file that runs pixi with correct environment.
+# This is needed because the argument is not passed to the entrypoint.
+ENV RUNENV="${PIXIENV}"
+RUN echo "pixi run --locked -e ${RUNENV} \$@" > run_pixi.sh \
+  && chown deltares:deltares run_pixi.sh \
+  && chmod u+x run_pixi.sh
+ENTRYPOINT ["sh", "run_pixi.sh"]
+CMD ["hydromt","--models"]
+
+FROM base as full
+USER deltares
+COPY examples/ ./examples
+COPY tests/ ./tests
+
+FROM base as slim
+USER deltares
+COPY examples/ ./examples
+
+FROM base as min
+USER deltares

@@ -642,7 +642,7 @@ def open_vector(
             )
             gdf = read_dataframe(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
         else:
-            gdf = gpd.read_file(str(fn), bbox=bbox, mode=mode, **kwargs)
+            gdf = gpd.read_file(str(fn), bbox=bbox, mask=geom, mode=mode, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:
