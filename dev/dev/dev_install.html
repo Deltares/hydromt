@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Developer’s environment &#8212; HydroMT  documentation</title>
+    <title>Developer installation guide &#8212; HydroMT  documentation</title>
   
   
   
@@ -407,11 +407,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer’s guide</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Developer’s environment</a></li>
-
-
-
-
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Developer installation guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="team.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin-quickstart.html">Starting your own HydroMT Plugin</a></li>
 
@@ -455,7 +451,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="intro.html" class="nav-link">Dev guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Developer’s...</li>
+    <li class="breadcrumb-item active" aria-current="page">Developer...</li>
   </ul>
 </nav>
 </div>
@@ -472,18 +468,10 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="developer-s-environment">
-<span id="dev-env"></span><h1>Developer’s environment<a class="headerlink" href="#developer-s-environment" title="Link to this heading">#</a></h1>
-<p>Developing HydroMT requires Python &gt;= 3.9. We prefer developing with the most recent
-version of Python. We strongly encourage you to develop in a separate conda environment.
-To make sure all dependencies are up to dat we only provide a pyproject.toml that lists the dependencies.
-However, there is a script that can generate the conda environment specification for you.</p>
-<section id="developer-installation-guide">
-<span id="dev-install"></span><h2>Developer installation guide<a class="headerlink" href="#developer-installation-guide" title="Link to this heading">#</a></h2>
+  <section id="developer-installation-guide">
+<span id="dev-install"></span><h1>Developer installation guide<a class="headerlink" href="#developer-installation-guide" title="Link to this heading">#</a></h1>
 <p>Here we describe three ways to install HydroMT for development.
-The first is using the <cite>makefile</cite> which boils down to running a single command.
-The second is a step-by-step guide that shows you exactly what the makefile does
-and how to do it manually.</p>
+HydroMT makes use of pixi as a task runner with multiple environments that can be activated.</p>
 <p>But first, you need to clone the HydroMT <code class="docutils literal notranslate"><span class="pre">git</span></code> repo using
 <a class="reference external" href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account">ssh</a>
 from <a class="reference external" href="https://github.com/Deltares/hydromt.git">github</a>.
@@ -492,101 +480,67 @@ Then, navigate into the the code folder (where the pyproject.toml is located)</p
 <span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>hydromt
 </pre></div>
 </div>
-</section>
-</section>
-<section id="makefile-based-installation">
-<h1>Makefile based installation<a class="headerlink" href="#makefile-based-installation" title="Link to this heading">#</a></h1>
-<p>You wil need a usable installation of <cite>make</cite>. If you’re using linux this should already be installed by default.
-If you are using windows we recommend you install it using <a class="reference external" href="https://chocolatey.org/install">chocolatey</a> like so:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>choco<span class="w"> </span>install<span class="w"> </span>make
-</pre></div>
-</div>
-<p>Afterwards to create an environment you can simply call:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>dev
-</pre></div>
-</div>
-<p>This will create an environment file, create an environment called <cite>hydromt-dev</cite> using a package manager
-and install hydromt into it. By default the makefile will attempt to use <cite>mamba</cite>. If you want it to use a
-different one like, conda, you only have to set the environment variable like this:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>dev<span class="w"> </span><span class="nv">PY_ENV_MANAGER</span><span class="o">=</span>conda
-</pre></div>
-</div>
-<p>If you would like this to be the case you can also add make this the default behavior with the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PY_ENV_MANAGER=conda&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.<span class="k">$(</span>basename<span class="w"> </span><span class="nv">$0</span><span class="k">)</span>rc
-</pre></div>
-</div>
-</section>
 <section id="pixi-based-installation">
-<h1>Pixi based installation<a class="headerlink" href="#pixi-based-installation" title="Link to this heading">#</a></h1>
-<p>As a more cross-platform compatible alternative, we use <a class="reference external" href="https://prefix.dev/docs/pixi/overview">pixi</a> as our task runner. For more information about installing pixi please refer to the linked webpage.</p>
-<p>Once pixi is installed you can create a developer instalation by running the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pixi<span class="w"> </span>run<span class="w"> </span>dev
+<h2>Pixi based installation<a class="headerlink" href="#pixi-based-installation" title="Link to this heading">#</a></h2>
+<p>We use <a class="reference external" href="https://prefix.dev/docs/pixi/overview">pixi</a> as our task runner. For more information about installing pixi please refer to the linked webpage.</p>
+<p>Once pixi is installed you can create a developer installation by running the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>&lt;ENVIRONMENT&gt;<span class="w"> </span>install
 </pre></div>
 </div>
-<p>This will create an environment file, create an environment called <cite>hydromt-dev</cite> using mamba as a package manager and install hydromt into it. As of yet, using other package managers is not supported out of the box, though you can edit the <cite>pixi.toml</cite> file directly</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Because pixi does not support all the features that HydroMT uses at the time of writing, pixi is only used as a task runner. The pixi tasks (aside from <cite>dev</cite>) still assume that HydroMT is already instlled. We plan to expand support for installing via pixi as soon as the necessary features are released.</p>
-</div>
-</section>
-<section id="step-by-step-installation">
-<h1>Step-by-step installation<a class="headerlink" href="#step-by-step-installation" title="Link to this heading">#</a></h1>
-<p>If you want you can also do the steps of <cite>make dev</cite> manually.</p>
-<p>To generate a usable mamba/conda environment you’ll need to have <cite>tomli</cite> installed.
-You can simply install this with pip (only required for python &lt; 3.11):</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>tomli
-</pre></div>
-</div>
-<p>The first step is to create the <cite>environment.yml</cite>:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>make_env.py<span class="w"> </span>full<span class="w"> </span>-n<span class="w"> </span>hydromt-dev
-</pre></div>
-</div>
-<p>When the script is finished, a file called <cite>environment.yml</cite> will be created which you can pass to mamba
-as demonstrated in the sections below. This will include all optional dependencies of HydroMT.</p>
-<p>After the environment file has been created you can create an environment out of it by running:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
-<span class="gp">$ </span>mamba<span class="w"> </span>activate<span class="w"> </span>hydromt-dev
-</pre></div>
-</div>
-<p>Finally, create a developer installation of HydroMT:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In the commands above you can exchange <cite>mamba</cite> for <cite>conda</cite>,
-see <a class="reference internal" href="../getting_started/installation.html#installation-guide"><span class="std std-ref">installation guide</span></a> for the difference between both.</p>
-</div>
+<p>This will automatically install all dependencies needed to develop HydroMT, and it install HydroMT within the current environment in editable mode.
+You can use <code class="docutils literal notranslate"><span class="pre">open-vscode.bat</span></code> to open the current folder in VSCode with the correct environment activated.
+This bat-file simply runs <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">&lt;ENVIRONMENT&gt;</span> <span class="pre">code</span> <span class="pre">.</span></code> to set up the pixi environment before starting VSCode.
+The python installation can be found in the <code class="docutils literal notranslate"><span class="pre">.pixi</span></code> folder. No need to switch interpreters.
+The <code class="docutils literal notranslate"><span class="pre">ENVIRONMENT</span></code> to specify is of your preference, based on what you are going to do.
+The most complete environment would be <code class="docutils literal notranslate"><span class="pre">full-py311</span></code> / <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
 </section>
 <section id="fine-tuned-installation">
-<h1>Fine tuned installation<a class="headerlink" href="#fine-tuned-installation" title="Link to this heading">#</a></h1>
-<p>If you want a more fine tuned installation you can also specify exactly
-which dependency groups you’d like. For instance, this will create an environment
-with the extra, io and doc dependencies.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>env<span class="w"> </span><span class="nv">OPT_DEPS</span><span class="o">=</span><span class="s2">&quot;extra,io,doc&quot;</span><span class="w"> </span><span class="nv">ENV_NAME</span><span class="o">=</span><span class="s2">&quot;hydromt-extra-io-doc&quot;</span>
+<h2>Fine tuned installation<a class="headerlink" href="#fine-tuned-installation" title="Link to this heading">#</a></h2>
+<p>If you want a more fine tuned installation you can also specify exactly which features you’d like to install.
+For instance, you can add a new environment in <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code> to install _extra_, _io_ and _doc_ dependencies.</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[environments]</span>
+<span class="n">my_env</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;extra&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;io&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;doc&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Or manually:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>tomli<span class="w"> </span><span class="c1"># only required for python &lt; 3.11</span>
-<span class="gp">$ </span>python<span class="w"> </span>make_env.py<span class="w"> </span><span class="s2">&quot;extra,io,doc&quot;</span><span class="w"> </span>-n<span class="w"> </span>hydromt-extra-io-doc
-<span class="gp">$ </span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
-</pre></div>
-</div>
-<p>We have 7 optional dependency groups you can specify (see <cite>pyproject.toml</cite> for list of dependencies in each group):</p>
+<p>We have 7 optional dependency groups you can specify (see <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code> for list of dependencies in each group):</p>
 <ol class="arabic simple">
-<li><p><cite>io</cite>: Reading and writing various formats like excel but also cloud file systems</p></li>
-<li><p><cite>extra</cite>: Couldn’t think of a better name for this one, but it has some extra for ET and mesh calculations</p></li>
-<li><p><cite>dev</cite>: everything you need to develop and publish HydroMT</p></li>
-<li><p><cite>test</cite> What you need to run the test suite. Test suite should be setup that only tests that use the dependencies that are installed are run, so this should always pass no matter what other dependencies you may or may not have installed.</p></li>
-<li><p><cite>doc</cite> generate the docs</p></li>
-<li><p><cite>examples</cite> Run Jupyter notebook examples. Used this for binder support mostly.</p></li>
-<li><p><cite>deprecated</cite> dependencies that we hope to remove soon, but aren’t quite ready to yet.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">io</span></code>: Reading and writing various formats like excel but also cloud file systems</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">extra</span></code>: Couldn’t think of a better name for this one, but it has some extra for ET and mesh calculations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dev</span></code>: everything you need to develop and publish HydroMT</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test</span></code> What you need to run the test suite. Test suite should be setup that only tests that use the dependencies that are installed are run, so this should always pass no matter what other dependencies you may or may not have installed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">doc</span></code> generate the docs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">examples</span></code> Run Jupyter notebook examples. Used this for binder support mostly.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deprecated</span></code> dependencies that we hope to remove soon, but aren’t quite ready to yet.</p></li>
 </ol>
-<p>We also have 3 “flavors”. These are more or less just collections of one or more groups designed for common use cases:
-1. <cite>min</cite> no optional dependencies. mostly as a base to build your DIY stack on.
-2. <cite>slim</cite> Just the operational bits, what most people will probably want if you using HydroMT and what the cloud will most likely use
-3. <cite>full</cite> absolutely everything, useful for developing.</p>
+<p>We also have 3 pre-defined environments. These are more or less just collections of one or more groups designed for common use cases:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span></code> no optional dependencies. mostly as a base to build your DIY stack on.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">slim</span></code> Just the operational bits, what most people will probably want if you’re using HydroMT, and it’s what the cloud will most likely use</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">full</span></code> absolutely everything, useful for developing.</p></li>
+</ol>
 <p>We also have docker images for each of the flavours available on the deltares dockerhub page.</p>
+</section>
+<section id="adding-a-dependency">
+<h2>Adding a dependency<a class="headerlink" href="#adding-a-dependency" title="Link to this heading">#</a></h2>
+<p>In order to add a dependency you need to:</p>
+<ol class="arabic simple">
+<li><p>Add it to the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file in the <code class="docutils literal notranslate"><span class="pre">[project.dependencies]</span></code> section.</p></li>
+<li><p>And you need to add it to the <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code> file in the <code class="docutils literal notranslate"><span class="pre">[dependencies]</span></code> section.</p></li>
+<li><p>Then you will need to run <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">&lt;ENVIRONMENT&gt;</span> <span class="pre">install</span></code> to install the new dependency. It will update the <code class="docutils literal notranslate"><span class="pre">pixi.lock</span></code> file.</p></li>
+<li><p>Commit the changes to the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code>, and <code class="docutils literal notranslate"><span class="pre">pixi.lock</span></code> files.</p></li>
+</ol>
+</section>
+<section id="updating-dependencies">
+<h2>Updating dependencies<a class="headerlink" href="#updating-dependencies" title="Link to this heading">#</a></h2>
+<p>The dependencies in pixi are managed via the <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code> and <code class="docutils literal notranslate"><span class="pre">pixi.lock</span></code> file.
+We commit the <code class="docutils literal notranslate"><span class="pre">pixi.lock</span></code> file to the repository to ensure that everyone has the same versions of the dependencies installed.
+Since it freezes the dependencies, we will need to schedule regular updates.</p>
+<ol class="arabic simple">
+<li><p>Remove the <code class="docutils literal notranslate"><span class="pre">pixi.lock</span></code> file.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">&lt;ENVIRONMENT&gt;</span> <span class="pre">install</span></code> to update the dependencies.</p></li>
+</ol>
+<p>There is a Github action workflow that does this on a monthly basis. It will create a pull request with the updated <code class="docutils literal notranslate"><span class="pre">pixi.lock</span></code> file.</p>
+</section>
 </section>
 
 
@@ -635,16 +589,11 @@ with the extra, io and doc dependencies.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Developer’s environment</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#developer-installation-guide">Developer installation guide</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pixi-based-installation">Pixi based installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fine-tuned-installation">Fine tuned installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-a-dependency">Adding a dependency</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-dependencies">Updating dependencies</a></li>
 </ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#makefile-based-installation">Makefile based installation</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#pixi-based-installation">Pixi based installation</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-by-step-installation">Step-by-step installation</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#fine-tuned-installation">Fine tuned installation</a></li>
-</ul>
-
   </nav></div>
 
   <div class="sidebar-secondary-item">

@@ -407,11 +407,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer’s guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dev_install.html">Developer’s environment</a></li>
-
-
-
-
+<li class="toctree-l1"><a class="reference internal" href="dev_install.html">Developer installation guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="team.html">Contributors</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Starting your own HydroMT Plugin</a></li>
 
@@ -637,9 +633,7 @@ your project (which will contain the definition of your new Model class). Eg <em
 <span class="gp">$ </span>git<span class="w"> </span>init
 </pre></div>
 </div>
-<p>If your project has dependencies, you can add them in the pyproject.toml under the <cite>dependencies</cite> array. If you have <cite>tomli</cite> installed, you can
-use the <cite>make_env.py</cite> script to generate a conda environment specification see <a class="reference internal" href="dev_install.html#dev-install"><span class="std std-ref">The developer installation page</span></a> for
-more information on how to use this script.</p>
+<p>If your project has dependencies, you can add them in the pyproject.toml under the <cite>dependencies</cite> array.</p>
 <p>Now, assuming that you’ve made a repository in your personal GitHub repository (eg user savente93) you just need to add it as a remote in the
 repository and push it (for an organisation, you will need specific rights to do this).</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>origin<span class="w"> </span>https://github.com/savente93/hydromt_mymodel
