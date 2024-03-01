@@ -1,7 +1,8 @@
 from logging import Logger, getLogger
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, cast
+from weakref import ReferenceType, ref
 
 from geopandas import GeoDataFrame, gpd
 from pyproj import CRS
@@ -11,6 +12,10 @@ from xugrid import UgridDataArrayAccessor
 from hydromt._typing.model_mode import ModelMode
 from hydromt.data_catalog import DataCatalog
 from hydromt.models._region.utils import _parse_region
+from hydromt.models.root import ModelRoot
+
+if TYPE_CHECKING:
+    from hydromt.models import Model
 
 logger = getLogger(__name__)
 
@@ -18,69 +23,82 @@ logger = getLogger(__name__)
 class ModelRegion:
     def __init__(
         self,
-        region_dict: Optional[Dict[str, Any]] = None,
-        root: Optional[Path] = None,
-        rel_path: Optional[Path] = None,
-        catalog: Optional[DataCatalog] = None,
-        model_mode: ModelMode = ModelMode.READ,
+        model: "Model",
         logger: Logger = logger,
-        **read_kwargs,
     ) -> None:
-        self._spec = region_dict
-        if region_dict is not None:
-            kind, data = _parse_region(region_dict, catalog, logger)
-            self.set(kind, data)
+        self.model_ref: ReferenceType["Model"] = ref(model)
+        self._data: Optional[GeoDataFrame] = None
 
-        elif rel_path is not None and root is not None:
-            self.read(root, rel_path, model_mode, **read_kwargs)
+    def create(
+        self, region_dict: Dict[str, Any], catalog: Optional[DataCatalog] = None
+    ):
+        self._kind, data = _parse_region(region_dict, catalog, logger)
+        if self._kind == "mesh":
+            self._data = cast(UgridDataArrayAccessor, data["mesh"]).to_geodataframe()
 
-    def set(self, kind, parsed_dict):
-        if kind == "mesh":
-            self._data: GeoDataFrame = cast(
-                UgridDataArrayAccessor, parsed_dict["mesh"]
-            ).to_geodataframe()
-
-        elif kind == "bbox":
+        elif self._kind == "bbox":
             self._data = gpd.GeoDataFrame(
-                geometry=[box(*parsed_dict["bbox"])], crs=CRS.from_epsg(4326)
+                geometry=[box(*data["bbox"])], crs=CRS.from_epsg(4326)
             )
-        elif kind == "geom":
-            self._data = parsed_dict["geom"]
-        elif kind == "grid":
+        elif self._kind == "geom":
+            self._data = data["geom"]
+        elif self._kind == "grid":
             raise NotImplementedError("TODO")
-            #  raster_dataset = self.data_catalog.get_rasterdataset(
-            #     self.source, driver_kwargs=self.driver_kwargs
-            # )
-            # if raster_dataset is None:
-            #     raise ValueError("raster dataset was not found")
-            # self._data = self._rasterdataset_to_geom(parsed_dict["grid"])
-        elif kind in ["basin", "subbasin", "interbasin"]:
+        elif self._kind in ["basin", "subbasin", "interbasin"]:
             raise NotImplementedError("TODO")
         else:
-            raise ValueError(f"Could not understand kind {kind}")
+            raise ValueError(f"Could not understand kind {self._kind}")
 
-    def _rasterdataset_to_geom(self, raster_dataset) -> GeoDataFrame:
-        raise NotImplementedError("TODO")
-        # crs = raster_dataset.raster.crs
-        # coord_index = cast(pd.Index, raster_dataset.raster.coords.to_index())
-        # dims_max = cast(np.ndarray, coord_index.max())
-        # dims_min = cast(np.ndarray, coord_index.min())
+    # def _rasterdataset_to_geom(self, raster_dataset) -> GeoDataFrame:
+    # crs = raster_dataset.raster.crs
+    # coord_index = cast(pd.Index, raster_dataset.raster.coords.to_index())
+    # dims_max = cast(np.ndarray, coord_index.max())
+    # dims_min = cast(np.ndarray, coord_index.min())
 
-        # # in raster datasets it is guaranteed that y_dim is penultimate dim and x_dim is last dim
-        # geom: GeoDataFrame = GeoDataFrame(
-        #     geometry=[
-        #         box(
-        #             xmin=dims_min[-1],
-        #             ymin=dims_min[-2],
-        #             xmax=dims_max[-1],
-        #             ymax=dims_max[-2],
-        #         )
-        #     ],
-        #     crs=crs,
-        # )
-        # return geom
+    # # in raster datasets it is guaranteed that y_dim is penultimate dim and x_dim is last dim
+    # geom: GeoDataFrame = GeoDataFrame(
+    #     geometry=[
+    #         box(
+    #             xmin=dims_min[-1],
+    #             ymin=dims_min[-2],
+    #             xmax=dims_max[-1],
+    #             ymax=dims_max[-2],
+    #         )
+    #     ],
+    #     crs=crs,
+    # )
+    # return geom
 
-    def read(self, root: Path, rel_path: Path, model_mode: ModelMode, **read_kwargs):
+    @property
+    def total_bounds(self):
+        return self.data.total_bounds
+
+    @property
+    def data(self) -> GeoDataFrame:
+        if self._data is None:
+            # cast is necessary because technically the model could have been
+            # dealocated, but it shouldn't be in this case.
+            root: Optional[ModelRoot] = cast("Model", self.model_ref())._root
+
+            # cannot read geom files for purely in memory models
+            if root is None:
+                raise ValueError("Root was not set, cannot read region file")
+            else:
+                self.read(Path(root.path))
+
+        return cast(GeoDataFrame, self._data)
+
+    @property
+    def crs(self) -> CRS:
+        return self.data.crs
+
+    def read(
+        self,
+        root: Path,
+        rel_path: Path = Path("region.geojson"),
+        model_mode: ModelMode = ModelMode.READ,
+        **read_kwargs,
+    ):
         if model_mode.is_reading_mode():
             self._data = cast(
                 GeoDataFrame, gpd.read_file(join(root, rel_path), **read_kwargs)
@@ -89,9 +107,18 @@ class ModelRegion:
         else:
             raise ValueError("Cannot read while not in read mode")
 
-    def write(self, root: Path, rel_path: Path, model_mode: ModelMode):
-        if self._data is None:
-            raise ValueError("Region was not initialised, so cannot read")
-
+    def write(
+        self,
+        rel_path: Path = Path("region.geojson"),
+        model_mode: ModelMode = ModelMode.WRITE,
+        **write_kwargs,
+    ):
         if model_mode.is_writing_mode():
-            self._data.to_file(join(root, rel_path))
+            root: Optional[ModelRoot] = cast("Model", self.model_ref())._root
+
+            # cannot read geom files for purely in memory models
+            if root is None:
+                raise ValueError("Root was not set, cannot read region file")
+            else:
+                self.read(Path(root.path))
+            self.data.to_file(join(root.path, rel_path), **write_kwargs)

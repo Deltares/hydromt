@@ -132,7 +132,7 @@ def test_root_overwrite_deletes_old_log(tmpdir, caplog):
     assert "hey!" in first_log_str, first_log_str
     root.set(path, "w+")
     root.logger.warning("what were we talking about again?")
-    with open(join(root._path, "hydromt.log"), "r") as file:
+    with open(join(root.path, "hydromt.log"), "r") as file:
         second_log_str = file.read()
     assert "hey!" not in second_log_str, second_log_str
     assert exists(path)

@@ -12,7 +12,7 @@ from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -25,11 +25,13 @@ from shapely.geometry import box
 from hydromt import __version__, workflows
 from hydromt._compat import HAS_XUGRID, Distribution
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
-from hydromt._utils import _classproperty, log
+from hydromt._utils import _classproperty
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
+from hydromt.models._region.region import ModelRegion
+from hydromt.models.root import ModelRoot
 
 if HAS_XUGRID:
     import xugrid as xu
@@ -73,9 +75,9 @@ class Model(object, metaclass=ABCMeta):
     def __init__(
         self,
         root: Optional[str] = None,
-        mode: Optional[str] = "w",
+        mode: str = "w",
         config_fn: Optional[str] = None,
-        data_libs: Union[List, str] = None,
+        data_libs: Optional[Union[List, str]] = None,
         logger=logger,
         **artifact_keys,
     ):
@@ -120,9 +122,9 @@ class Model(object, metaclass=ABCMeta):
 
         # placeholders
         # metadata maps that can be at different resolutions
-        self._config: Optional[Dict[str:Literal]] = None  # nested dictionary
+        self._config: Optional[Dict[str, Any]] = None  # nested dictionary
         self._maps: Optional[XArrayDict] = None
-        self._tables: Dict[str, pd.DataFrame] = None
+        self._tables: Optional[Dict[str, pd.DataFrame]] = None
 
         self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
         self._forcing: Optional[XArrayDict] = None
@@ -133,17 +135,31 @@ class Model(object, metaclass=ABCMeta):
         self._staticgeoms = None
 
         # file system
-        self._root = ""
+        if root is None:
+            self._root: Optional[ModelRoot] = None
+        else:
+            self._root: Optional[ModelRoot] = ModelRoot(root, mode=mode)
+
+        self.region: ModelRegion = ModelRegion(self, logger)
+
         self._read = True
         self._write = False
         self._defered_file_closes = []
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
-        self.set_root(root, mode)  # also creates hydromt.log file
+        # self.set_root(root, mode)  # also creates hydromt.log file
         self.logger.info(
             f"Initializing {self._NAME} model from {dist_name} (v{version})."
         )
+
+    @property
+    def root(self) -> Optional[Path]:
+        """Path to the model root."""
+        if self._root is not None:
+            return self._root.path
+        else:
+            raise RuntimeError("Root was not set, cannot retrieve root path")
 
     @_classproperty
     def api(cls) -> Dict:
@@ -434,14 +450,6 @@ class Model(object, metaclass=ABCMeta):
         )
 
     ## file system
-
-    @property
-    def root(self):
-        """Path to model folder."""
-        if self._root is None:
-            raise ValueError("Root unknown, use set_root method")
-        return self._root
-
     def _assert_write_mode(self):
         if not self._write:
             raise IOError("Model opened in read-only mode")
@@ -449,73 +457,6 @@ class Model(object, metaclass=ABCMeta):
     def _assert_read_mode(self):
         if not self._read:
             raise IOError("Model opened in write-only mode")
-
-    def set_root(self, root: Optional[str], mode: Optional[str] = "w"):
-        """Initialize the model root.
-
-        In read/append mode a check is done if the root exists.
-        In write mode the required model folder structure is created.
-
-        Parameters
-        ----------
-        root : str, optional
-            path to model root
-        mode : {"r", "r+", "w"}, optional
-            read/append/write mode for model files
-        """
-        ignore_ext = set([".log", ".yml"])
-        if mode not in ["r", "r+", "w", "w+"]:
-            raise ValueError(
-                f'mode "{mode}" unknown, select from "r", "r+", "w" or "w+"'
-            )
-        self._root = root if root is None else abspath(root)
-        self._read = mode.startswith("r")
-        self._write = mode != "r"
-        self._overwrite = mode == "w+"
-        if self._root is not None:
-            if self._write:
-                for name in self._FOLDERS:
-                    path = join(self._root, name)
-                    if not isdir(path):
-                        os.makedirs(path)
-                        continue
-                    # path already exists check files
-                    fns = glob.glob(join(path, "*.*"))
-                    exts = set([os.path.splitext(fn)[1] for fn in fns])
-                    exts -= ignore_ext
-                    if len(exts) != 0:
-                        if mode.endswith("+"):
-                            self.logger.warning(
-                                "Model dir already exists and "
-                                f"files might be overwritten: {path}."
-                            )
-                        else:
-                            msg = (
-                                "Model dir already exists and cannot be "
-                                + f"overwritten: {path}. Use 'mode=w+' to force "
-                                + "overwrite existing files."
-                            )
-                            self.logger.error(msg)
-                            raise IOError(msg)
-            # check directory
-            elif not isdir(self._root):
-                raise IOError(f'model root not found at "{self._root}"')
-            # remove old logging file handler and add new filehandler
-            # in root if it does not exist
-            has_log_file = False
-            log_level = 20  # default, but overwritten by the level of active loggers
-            for i, h in enumerate(self.logger.handlers):
-                log_level = h.level
-                if hasattr(h, "baseFilename"):
-                    if dirname(h.baseFilename) != self._root:
-                        # remove handler and close file
-                        self.logger.handlers.pop(i).close()
-                    else:
-                        has_log_file = True
-                    break
-            if not has_log_file:
-                new_path = join(self._root, "hydromt.log")
-                log.add_filehandler(self.logger, new_path, log_level)
 
     # I/O
     def read(
@@ -695,9 +636,9 @@ class Model(object, metaclass=ABCMeta):
                 cfdict = self._configread(config_fn)
                 self.logger.debug(f"{prefix} config read from {config_fn}")
             elif (
-                self._root is not None
+                self.root is not None
                 and not isabs(config_fn)
-                and isfile(join(self._root, config_fn))
+                and isfile(join(self.root, config_fn))
             ):
                 cfdict = self._configread(join(self.root, config_fn))
                 self.logger.debug(
@@ -1886,28 +1827,6 @@ class Model(object, metaclass=ABCMeta):
             return self.staticmaps.raster.bounds
         else:
             return self.region.total_bounds
-
-    @property
-    def region(self) -> gpd.GeoDataFrame:
-        """Returns the geometry of the model area of interest."""
-        region = gpd.GeoDataFrame()
-        if "region" in self.geoms:
-            region = self.geoms["region"]
-        # TODO: For now stays here but move to grid in GridModel and delete
-        elif len(self.staticmaps) > 0:
-            warnings.warn(
-                'Defining "region" based on staticmaps will be deprecated. Either use'
-                " region from GridModel or define your own method.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            crs = self.staticmaps.raster.crs
-            if crs is None and hasattr(crs, "to_epsg"):
-                crs = crs.to_epsg()  # not all CRS have an EPSG code
-            region = gpd.GeoDataFrame(
-                geometry=[box(*self.staticmaps.raster.bounds)], crs=crs
-            )
-        return region
 
     # test methods
     def test_model_api(self):

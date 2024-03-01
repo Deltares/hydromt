@@ -1,6 +1,7 @@
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Generator
 
 import geopandas as gpd
 import numpy as np
@@ -8,15 +9,9 @@ import pandas as pd
 import pyflwdir
 import pytest
 import xarray as xr
+import xugrid as xu
 from dask import config as dask_config
 from shapely.geometry import box
-
-dask_config.set(scheduler="single-threaded")
-
-from hydromt._compat import HAS_XUGRID
-
-if HAS_XUGRID:
-    import xugrid as xu
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
@@ -34,9 +29,14 @@ DATADIR = join(dirname(abspath(__file__)), "data")
 
 
 @pytest.fixture(scope="class")
-def tmp_dir() -> Path:
+def tmp_dir() -> Generator[Path, None, None]:
     with TemporaryDirectory() as tempdirname:
         yield Path(tempdirname)
+
+
+@pytest.fixture()
+def test_model(tmpdir) -> Model:
+    return Model(tmpdir)
 
 
 @pytest.fixture()

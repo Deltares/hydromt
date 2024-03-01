@@ -145,7 +145,7 @@ def test_run_log_method():
 def test_write_data_catalog(tmpdir):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
     sources = list(model.data_catalog.sources.keys())
-    data_lib_fn = join(model.root, "hydromt_data.yml")
+    data_lib_fn = join(model._root, "hydromt_data.yml")
     # used_only=True -> no file written
     model.write_data_catalog()
     assert not isfile(data_lib_fn)
@@ -158,7 +158,7 @@ def test_write_data_catalog(tmpdir):
     model.write_data_catalog(data_lib_fn=data_lib_fn1)
     assert isfile(data_lib_fn1)
     # append source
-    model1 = Model(root=model.root, data_libs=["artifact_data"], mode="r+")
+    model1 = Model(root=model._root, data_libs=["artifact_data"], mode="r+")
     model1.data_catalog.get_source(sources[1]).mark_as_used()
     model1.write_data_catalog(append=False)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == [sources[1]]
@@ -167,8 +167,8 @@ def test_write_data_catalog(tmpdir):
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
     # test writing table of datacatalog as csv
     model.write_data_catalog(used_only=False, save_csv=True)
-    assert isfile(join(model.root, "hydromt_data.csv"))
-    data_catalog_df = pd.read_csv(join(model.root, "hydromt_data.csv"))
+    assert isfile(join(model._root, "hydromt_data.csv"))
+    data_catalog_df = pd.read_csv(join(model._root, "hydromt_data.csv"))
     assert len(data_catalog_df) == len(sources)
     assert data_catalog_df.iloc[0, 0] == sources[0]
     assert data_catalog_df.iloc[-1, 0] == sources[-1]
@@ -282,8 +282,8 @@ def test_model_build_update(tmpdir, demda, obsda):
         opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
     )
     assert "region" in model._geoms
-    assert isfile(join(model.root, "model.yaml"))
-    assert isfile(join(model.root, "hydromt.log"))
+    assert isfile(join(model._root, "model.yaml"))
+    assert isfile(join(model._root, "hydromt.log"))
     # test update with specific write method
     model.update(
         opt={
@@ -292,7 +292,7 @@ def test_model_build_update(tmpdir, demda, obsda):
             "write_geoms": {"fn": "geoms/{name}.gpkg", "driver": "GPKG"},
         }
     )
-    assert isfile(join(model.root, "geoms", "region.gpkg"))
+    assert isfile(join(model._root, "geoms", "region.gpkg"))
     with pytest.raises(
         ValueError, match='Model testmodel has no method "unknown_method"'
     ):
