@@ -18,6 +18,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
+import xugrid as xu
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
@@ -32,9 +33,6 @@ from hydromt.io import configread
 from hydromt.io.writers import configwrite
 from hydromt.models._region.region import ModelRegion
 from hydromt.models.root import ModelRoot
-
-if HAS_XUGRID:
-    import xugrid as xu
 
 __all__ = ["Model"]
 
@@ -67,7 +65,7 @@ class Model(object, metaclass=ABCMeta):
         "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
-        "region": gpd.GeoDataFrame,
+        "region": ModelRegion,
         "results": XArrayDict,
         "states": XArrayDict,
     }
@@ -136,30 +134,19 @@ class Model(object, metaclass=ABCMeta):
 
         # file system
         if root is None:
-            self._root: Optional[ModelRoot] = None
+            self.root: ModelRoot = ModelRoot(".", mode=mode)
         else:
-            self._root: Optional[ModelRoot] = ModelRoot(root, mode=mode)
+            self.root: ModelRoot = ModelRoot(root, mode=mode)
 
         self.region: ModelRegion = ModelRegion(self, logger)
 
-        self._read = True
-        self._write = False
         self._defered_file_closes = []
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
-        # self.set_root(root, mode)  # also creates hydromt.log file
         self.logger.info(
             f"Initializing {self._NAME} model from {dist_name} (v{version})."
         )
-
-    @property
-    def root(self) -> Optional[Path]:
-        """Path to the model root."""
-        if self._root is not None:
-            return self._root.path
-        else:
-            raise RuntimeError("Root was not set, cannot retrieve root path")
 
     @_classproperty
     def api(cls) -> Dict:
@@ -318,16 +305,16 @@ class Model(object, metaclass=ABCMeta):
         opt = self._check_get_opt(opt)
 
         # read current model
-        if not self._write:
+        if not self.root.is_writing_mode():
             if model_out is None:
                 raise ValueError(
                     '"model_out" directory required when updating in "read-only" mode'
                 )
             self.read()
             if forceful_overwrite:
-                self.set_root(model_out, mode="w+")
+                self.root.set(model_out, mode="w+")
             else:
-                self.set_root(model_out, mode="w")
+                self.root.set(model_out, mode="w")
 
         # check if model has a region
         if self.region is None:
@@ -451,11 +438,11 @@ class Model(object, metaclass=ABCMeta):
 
     ## file system
     def _assert_write_mode(self):
-        if not self._write:
+        if not self.root.is_writing_mode():
             raise IOError("Model opened in read-only mode")
 
     def _assert_read_mode(self):
-        if not self._read:
+        if not self.root.is_reading_mode():
             raise IOError("Model opened in write-only mode")
 
     # I/O
@@ -483,7 +470,7 @@ class Model(object, metaclass=ABCMeta):
                 "states",
                 "results",
             ]
-        self.logger.info(f"Reading model data from {self.root}")
+        self.logger.info(f"Reading model data from {self.root.path}")
         for component in components:
             if not hasattr(self, f"read_{component}"):
                 raise AttributeError(
@@ -514,7 +501,7 @@ class Model(object, metaclass=ABCMeta):
                 "states",
                 "config",
             ]
-        self.logger.info(f"Writing model data to {self.root}")
+        self.logger.info(f"Writing model data to {self.root.path}")
         for component in components:
             if not hasattr(self, f"write_{component}"):
                 raise AttributeError(
@@ -547,10 +534,10 @@ class Model(object, metaclass=ABCMeta):
         save_csv: bool, optional
             If True, save the data catalog also as an csv table. By default False.
         """
-        path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
+        path = data_lib_fn if isabs(data_lib_fn) else join(self.root.path, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
         # read hydromt_data yml file and add to data catalog
-        if self._read and isfile(path) and append:
+        if self.root.is_reading_mode() and isfile(path) and append:
             cat.from_yml(path)
         # update data catalog with new used sources
         for name, source in self.data_catalog.iter_sources(used_only=used_only):
@@ -624,11 +611,11 @@ class Model(object, metaclass=ABCMeta):
         """
         prefix = "User defined"
         if config_fn is None:  # prioritize user defined config path (new v0.4.1)
-            if not self._read:  # write-only mode > read default config
+            if not self.root.is_reading_mode():  # write-only mode > read default config
                 config_fn = join(self._DATADIR, self._NAME, self._CONF)
                 prefix = "Default"
             elif self.root is not None:  # append or write mode > read model config
-                config_fn = join(self.root, self._config_fn)
+                config_fn = join(self.root.path, self._config_fn)
                 prefix = "Model"
         cfdict = dict()
         if config_fn is not None:
@@ -638,11 +625,11 @@ class Model(object, metaclass=ABCMeta):
             elif (
                 self.root is not None
                 and not isabs(config_fn)
-                and isfile(join(self.root, config_fn))
+                and isfile(join(self.root.path, config_fn))
             ):
-                cfdict = self._configread(join(self.root, config_fn))
+                cfdict = self._configread(join(self.root.path, config_fn))
                 self.logger.debug(
-                    f"{prefix} config read from {join(self.root,config_fn)}"
+                    f"{prefix} config read from {join(self.root.path,config_fn)}"
                 )
             elif isfile(abspath(config_fn)):
                 cfdict = self._configread(abspath(config_fn))
@@ -663,7 +650,7 @@ class Model(object, metaclass=ABCMeta):
         elif self._config_fn is None:
             self._config_fn = self._CONF
         if config_root is None:
-            config_root = self.root
+            config_root = self.root.path
         fn = join(config_root, self._config_fn)
         self.logger.info(f"Writing model config to {fn}")
         self._configwrite(fn)
@@ -728,7 +715,7 @@ class Model(object, metaclass=ABCMeta):
         if abs_path and isinstance(value, str):
             value = Path(value)
             if not value.is_absolute():
-                value = Path(abspath(join(self.root, value)))
+                value = Path(abspath(join(self.root.path, value)))
         return value
 
     @property
@@ -742,7 +729,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize the model tables."""
         if self._tables is None:
             self._tables = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_tables()
 
     def write_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
@@ -753,7 +740,7 @@ class Model(object, metaclass=ABCMeta):
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
             for name in self.tables:
-                fn_out = join(self.root, fn.format(name=name))
+                fn_out = join(self.root.path, fn.format(name=name))
                 os.makedirs(dirname(fn_out), exist_ok=True)
                 self.tables[name].to_csv(fn_out, **local_kwargs)
         else:
@@ -764,7 +751,7 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode()
         self._initialize_tables(skip_read=True)
         self.logger.info("Reading model table files.")
-        fns = glob.glob(join(self.root, fn.format(name="*")))
+        fns = glob.glob(join(self.root.path, fn.format(name="*")))
         if len(fns) > 0:
             for fn in fns:
                 name = basename(fn).split(".")[0]
@@ -797,7 +784,7 @@ class Model(object, metaclass=ABCMeta):
             if name in self._tables:
                 if not self._write:
                     raise IOError(f"Cannot overwrite table {name} in read-only mode")
-                elif self._read:
+                elif self.root.is_reading_mode():
                     self.logger.warning(f"Overwriting table: {name}")
 
             self._tables[name] = df
@@ -825,7 +812,7 @@ class Model(object, metaclass=ABCMeta):
         )
         if self._staticmaps is None:
             self._staticmaps = xr.Dataset()
-            if self._read:
+            if self.root.is_reading_mode():
                 self.read_staticmaps()
         return self._staticmaps
 
@@ -1092,7 +1079,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize maps."""
         if self._maps is None:
             self._maps = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_maps()
 
     def set_maps(
@@ -1179,7 +1166,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize geoms."""
         if self._geoms is None:
             self._geoms = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_geoms()
 
     def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
@@ -1223,7 +1210,7 @@ class Model(object, metaclass=ABCMeta):
         """
         self._assert_read_mode()
         self._initialize_geoms(skip_read=True)
-        fns = glob.glob(join(self.root, fn))
+        fns = glob.glob(join(self.root.path, fn))
         for fn in fns:
             name = basename(fn).split(".")[0]
             self.logger.debug(f"Reading model file {name}.")
@@ -1258,7 +1245,7 @@ class Model(object, metaclass=ABCMeta):
                 )
                 continue
             self.logger.debug(f"Writing file {fn.format(name=name)}")
-            _fn = join(self.root, fn.format(name=name))
+            _fn = join(self.root.path, fn.format(name=name))
             if not isdir(dirname(_fn)):
                 os.makedirs(dirname(_fn))
             if to_wgs84 and (
@@ -1281,7 +1268,7 @@ class Model(object, metaclass=ABCMeta):
             DeprecationWarning,
             stacklevel=2,
         )
-        if self._geoms is None and self._read:
+        if self._geoms is None and self.root.is_reading_mode():
             self.read_staticgeoms()
         self._staticgeoms = self._geoms
         return self._staticgeoms
@@ -1340,7 +1327,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize forcing."""
         if self._forcing is None:
             self._forcing = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_forcing()
 
     def set_forcing(
@@ -1426,7 +1413,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize states."""
         if self._states is None:
             self._states = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_states()
 
     def set_states(
@@ -1506,7 +1493,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize results."""
         if self._results is None:
             self._results = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_results()
 
     def set_results(
@@ -1649,7 +1636,7 @@ class Model(object, metaclass=ABCMeta):
                 )
                 continue
             self.logger.debug(f"Writing file {fn.format(name=name)}")
-            _fn = join(self.root, fn.format(name=name))
+            _fn = join(self.root.path, fn.format(name=name))
             if not isdir(dirname(_fn)):
                 os.makedirs(dirname(_fn))
             if gdal_compliant:
@@ -1713,7 +1700,7 @@ class Model(object, metaclass=ABCMeta):
             dict of xarray.Dataset
         """
         ncs = dict()
-        fns = glob.glob(join(self.root, fn))
+        fns = glob.glob(join(self.root.path, fn))
         if "chunks" not in kwargs:  # read lazy by default
             kwargs.update(chunks="auto")
         for fn in fns:

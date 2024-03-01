@@ -6,7 +6,7 @@ from hydromt._typing.model_mode import ModelMode
 
 
 def test_model_reads_region_jit(test_model, geodf):
-    test_dir = test_model.root
+    test_dir = test_model.root.path
     test_model.mode = ModelMode.READ
     region_file_path = join(test_dir, "region.geojson")
     geodf.to_file(region_file_path)
@@ -16,8 +16,8 @@ def test_model_reads_region_jit(test_model, geodf):
 
 
 def test_model_writes_region(test_model, geodf):
-    test_dir = test_model.root
-    test_model.mode = ModelMode.APPEND
+    test_dir = test_model.root.path
+    test_model.mode = ModelMode.WRITE
     region_file_path = join(test_dir, "region.geojson")
     assert not exists(region_file_path)
     test_model.region.create({"bbox": geodf.total_bounds})

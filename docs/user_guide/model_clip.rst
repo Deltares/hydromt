@@ -65,5 +65,5 @@ From Python
     mod = WflowModel(r'/path/to/model_root', mode='r')  # initialize model with default logger in read mode
     mod.clip_staticmaps(region={'subbasin': [-7.24, 62.09], 'wflow_streamorder': 4})
     mod.clip_forcing()
-    mod.set_root(r'path/to/model_destination')  # change root to output directory
+    mod.root.set(r'path/to/model_destination')  # change root to output directory
     mod.write()

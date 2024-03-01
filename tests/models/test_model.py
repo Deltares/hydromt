@@ -145,7 +145,7 @@ def test_run_log_method():
 def test_write_data_catalog(tmpdir):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
     sources = list(model.data_catalog.sources.keys())
-    data_lib_fn = join(model._root, "hydromt_data.yml")
+    data_lib_fn = join(model.root, "hydromt_data.yml")
     # used_only=True -> no file written
     model.write_data_catalog()
     assert not isfile(data_lib_fn)
@@ -158,7 +158,7 @@ def test_write_data_catalog(tmpdir):
     model.write_data_catalog(data_lib_fn=data_lib_fn1)
     assert isfile(data_lib_fn1)
     # append source
-    model1 = Model(root=model._root, data_libs=["artifact_data"], mode="r+")
+    model1 = Model(root=model.root, data_libs=["artifact_data"], mode="r+")
     model1.data_catalog.get_source(sources[1]).mark_as_used()
     model1.write_data_catalog(append=False)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == [sources[1]]
@@ -167,8 +167,8 @@ def test_write_data_catalog(tmpdir):
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
     # test writing table of datacatalog as csv
     model.write_data_catalog(used_only=False, save_csv=True)
-    assert isfile(join(model._root, "hydromt_data.csv"))
-    data_catalog_df = pd.read_csv(join(model._root, "hydromt_data.csv"))
+    assert isfile(join(model.root, "hydromt_data.csv"))
+    data_catalog_df = pd.read_csv(join(model.root, "hydromt_data.csv"))
     assert len(data_catalog_df) == len(sources)
     assert data_catalog_df.iloc[0, 0] == sources[0]
     assert data_catalog_df.iloc[-1, 0] == sources[-1]
@@ -182,7 +182,7 @@ def test_model(model, tmpdir):
         non_compliant = model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    model.set_root(str(tmpdir), mode="w")
+    model.root.set(str(tmpdir), mode="w")
     model.write()
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         model.read()
@@ -207,7 +207,7 @@ def test_model(model, tmpdir):
 def test_model_tables(model, df, tmpdir):
     # make a couple copies of the dfs for testing
     dfs = {str(i): df.copy() for i in range(5)}
-    model.set_root(tmpdir, mode="r+")  # append mode
+    model.root.set(tmpdir, mode="r+")  # append mode
     clean_model = deepcopy(model)
 
     with pytest.raises(KeyError):
@@ -282,8 +282,8 @@ def test_model_build_update(tmpdir, demda, obsda):
         opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
     )
     assert "region" in model._geoms
-    assert isfile(join(model._root, "model.yaml"))
-    assert isfile(join(model._root, "hydromt.log"))
+    assert isfile(join(model.root, "model.yaml"))
+    assert isfile(join(model.root, "hydromt.log"))
     # test update with specific write method
     model.update(
         opt={
@@ -292,7 +292,7 @@ def test_model_build_update(tmpdir, demda, obsda):
             "write_geoms": {"fn": "geoms/{name}.gpkg", "driver": "GPKG"},
         }
     )
-    assert isfile(join(model._root, "geoms", "region.gpkg"))
+    assert isfile(join(model.root, "geoms", "region.gpkg"))
     with pytest.raises(
         ValueError, match='Model testmodel has no method "unknown_method"'
     ):
@@ -406,7 +406,7 @@ def test_model_set_geoms(tmpdir):
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_config(model, tmpdir):
     # config
-    model.set_root(str(tmpdir))
+    model.root.set(str(tmpdir))
     model.set_config("global.name", "test")
     assert "name" in model._config["global"]
     assert model.get_config("global.name") == "test"
@@ -445,7 +445,7 @@ def test_maps_setup(tmpdir):
     non_compliant = mod._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    mod.set_root(str(tmpdir), mode="w")
+    mod.root.set(str(tmpdir), mode="w")
     mod.write(components=["config", "geoms", "maps"])
 
 
@@ -458,7 +458,7 @@ def test_gridmodel(grid_model, tmpdir, demda):
     assert np.all(grid_model.bounds == grid_model.grid.raster.bounds)
     assert np.all(grid_model.transform == grid_model.grid.raster.transform)
     # write model
-    grid_model.set_root(str(tmpdir), mode="w")
+    grid_model.root.set(str(tmpdir), mode="w")
     grid_model.write()
     # read model
     model1 = GridModel(str(tmpdir), mode="r")
@@ -468,7 +468,7 @@ def test_gridmodel(grid_model, tmpdir, demda):
     assert equal, errors
 
     # try update
-    grid_model.set_root(str(join(tmpdir, "update")), mode="w")
+    grid_model.root.set(str(join(tmpdir, "update")), mode="w")
     grid_model.write()
 
     model1 = GridModel(str(join(tmpdir, "update")), mode="r+")
@@ -641,7 +641,7 @@ def test_gridmodel_setup(tmpdir):
     assert len(non_compliant) == 0, non_compliant
 
     # write model
-    mod.set_root(str(tmpdir), mode="w")
+    mod.root.set(str(tmpdir), mode="w")
     mod.write(components=["geoms", "grid"])
 
 
@@ -650,7 +650,7 @@ def test_vectormodel(vector_model, tmpdir):
     non_compliant = vector_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    vector_model.set_root(str(tmpdir), mode="w")
+    vector_model.root.set(str(tmpdir), mode="w")
     vector_model.write()
     # read model
     model1 = VectorModel(str(tmpdir), mode="r")
@@ -692,19 +692,19 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
 
     # test write vector
     vector_model.set_vector(data=gdf)
-    vector_model.set_root(str(tmpdir), mode="w")
+    vector_model.root.set(str(tmpdir), mode="w")
     # netcdf+geojson --> tested in test_vectormodel
     # netcdf only
     vector_model.write_vector(fn="vector/vector_full.nc", fn_geom=None)
     # geojson only
     # automatic split
     vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
-    assert isfile(join(vector_model.root, "vector", "vector_split.nc"))
-    assert not isfile(join(vector_model.root, "vector", "vector_all.nc"))
+    assert isfile(join(vector_model.root.path, "vector", "vector_split.nc"))
+    assert not isfile(join(vector_model.root.path, "vector", "vector_all.nc"))
     # geojson 1D data only
     vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
     vector_model.write_vector(fn=None, fn_geom="vector/vector_all2.geojson")
-    assert not isfile(join(vector_model.root, "vector", "vector_all2.nc"))
+    assert not isfile(join(vector_model.root.path, "vector", "vector_all2.nc"))
 
     # test read vector
     vector_model1 = VectorModel(str(tmpdir), mode="r")
@@ -728,7 +728,7 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
 
 
 def test_networkmodel(network_model, tmpdir):
-    network_model.set_root(str(tmpdir), mode="r+")
+    network_model.root.set(str(tmpdir), mode="r+")
     with pytest.raises(NotImplementedError):
         network_model.read(["network"])
     with pytest.raises(NotImplementedError):
@@ -746,7 +746,7 @@ def test_meshmodel(mesh_model, tmpdir):
     non_compliant = mesh_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    mesh_model.set_root(str(tmpdir), mode="w")
+    mesh_model.root.set(str(tmpdir), mode="w")
     mesh_model.write()
     # read model
     model1 = MeshModel(str(tmpdir), mode="r")

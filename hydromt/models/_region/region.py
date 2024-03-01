@@ -10,6 +10,7 @@ from shapely import box
 from xugrid import UgridDataArrayAccessor
 
 from hydromt._typing.model_mode import ModelMode
+from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.models._region.utils import _parse_region
 from hydromt.models.root import ModelRoot
@@ -78,13 +79,13 @@ class ModelRegion:
         if self._data is None:
             # cast is necessary because technically the model could have been
             # dealocated, but it shouldn't be in this case.
-            root: Optional[ModelRoot] = cast("Model", self.model_ref())._root
+            root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
 
             # cannot read geom files for purely in memory models
             if root is None:
                 raise ValueError("Root was not set, cannot read region file")
             else:
-                self.read(Path(root.path))
+                self.read("region.geojson")
 
         return cast(GeoDataFrame, self._data)
 
@@ -94,24 +95,25 @@ class ModelRegion:
 
     def read(
         self,
-        rel_path: Path = Path("region.geojson"),
+        rel_path: StrPath = Path("region.geojson"),
         model_mode: ModelMode = ModelMode.READ,
         **read_kwargs,
     ):
-        if model_mode.is_reading_mode():
-            root: Optional[ModelRoot] = cast("Model", self.model_ref())._root
+        if self._data is None:
+            if model_mode.is_reading_mode():
+                root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
 
-            # cannot read geom files for purely in memory models
-            if root is None:
-                raise ValueError("Root was not set, cannot read region file")
+                # cannot read geom files for purely in memory models
+                if root is None:
+                    raise ValueError("Root was not set, cannot read region file")
+                else:
+                    self._data = cast(
+                        GeoDataFrame,
+                        gpd.read_file(join(root.path, rel_path), **read_kwargs),
+                    )
+                    self._kind = "geom"
             else:
-                self._data = cast(
-                    GeoDataFrame,
-                    gpd.read_file(join(root.path, rel_path), **read_kwargs),
-                )
-                self._kind = "geom"
-        else:
-            raise ValueError("Cannot read while not in read mode")
+                raise ValueError("Cannot read while not in read mode")
 
     def write(
         self,
@@ -120,7 +122,7 @@ class ModelRegion:
         **write_kwargs,
     ):
         if model_mode.is_writing_mode():
-            root: Optional[ModelRoot] = cast("Model", self.model_ref())._root
+            root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
 
             # cannot read geom files for purely in memory models
             if root is None:

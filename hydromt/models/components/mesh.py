@@ -225,7 +225,7 @@ class MeshMixin(object):
         method.
         """
         # XU grid data type Xarray dataset with xu sampling.
-        if self._mesh is None and self._read:
+        if self._mesh is None and self.root.is_reading_mode():
             self.read_mesh()
         return self._mesh
 
@@ -697,16 +697,3 @@ class MeshModel(MeshMixin, Model):
             return crs
         else:
             return None
-
-    @property
-    def region(self) -> gpd.GeoDataFrame:
-        """Returns geometry of region of the model area of interest based on mesh total bounds."""  # noqa: E501
-        region = gpd.GeoDataFrame()
-        if "region" in self.geoms:
-            region = self.geoms["region"]
-        elif self.mesh is not None:
-            region = gpd.GeoDataFrame(
-                geometry=[box(*self.mesh.ugrid.total_bounds)], crs=self.crs
-            )
-            self.set_geoms(region, name="region")
-        return region

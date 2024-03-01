@@ -216,7 +216,6 @@ High level methods
    Model.write
    Model.build
    Model.update
-   Model.set_root
    Model.write_data_catalog
 
 Model attributes

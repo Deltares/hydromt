@@ -39,7 +39,7 @@ class VectorMixin:
         """Initialize vector data."""
         if self._vector is None:
             self._vector = xr.Dataset()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_vector()
 
     def set_vector(
@@ -174,8 +174,8 @@ class VectorMixin:
             # check if ds is empty (default fn has a value)
             if len(ds.sizes) == 0:
                 fn = None
-        if fn_geom is not None and isfile(join(self.root, fn_geom)):
-            gdf = gpd.read_file(join(self.root, fn_geom))
+        if fn_geom is not None and isfile(join(self.root.path, fn_geom)):
+            gdf = gpd.read_file(join(self.root.path, fn_geom))
             # geom + netcdf data
             if fn is not None:
                 ds = GeoDataset.from_gdf(gdf, data_vars=ds)
@@ -251,7 +251,7 @@ class VectorMixin:
                 # check 1D variables with matching index_dim
                 if len(dims) > 1 or dims[0] != ds.vector.index_dim:
                     fn = join(
-                        dirname(join(self.root, fn_geom)),
+                        dirname(join(self.root.path, fn_geom)),
                         f"{basename(fn_geom).split('.')[0]}.nc",
                     )
                     self.logger.warning(
@@ -261,7 +261,7 @@ class VectorMixin:
 
         # write to netcdf only
         if fn_geom is None:
-            os.makedirs(dirname(join(self.root, fn)), exist_ok=True)
+            os.makedirs(dirname(join(self.root.path, fn)), exist_ok=True)
             # cannot call directly ds.vector.to_netcdf
             # because of possible PermissionError
             if ogr_compliant:
@@ -272,15 +272,15 @@ class VectorMixin:
             self.write_nc({"vector": ds}, fn, engine="netcdf4", **kwargs)
         # write to geojson only
         elif fn is None:
-            os.makedirs(dirname(join(self.root, fn_geom)), exist_ok=True)
+            os.makedirs(dirname(join(self.root.path, fn_geom)), exist_ok=True)
             gdf = ds.vector.to_gdf(**kwargs)
-            gdf.to_file(join(self.root, fn_geom))
+            gdf.to_file(join(self.root.path, fn_geom))
         # write data to netcdf and geometry to geojson
         else:
-            os.makedirs(dirname(join(self.root, fn_geom)), exist_ok=True)
+            os.makedirs(dirname(join(self.root.path, fn_geom)), exist_ok=True)
             # write geometry
             gdf = ds.vector.geometry.to_frame("geometry")
-            gdf.to_file(join(self.root, fn_geom))
+            gdf.to_file(join(self.root.path, fn_geom))
             # write_nc requires dict - use dummy key
             self.write_nc({"vector": ds.drop_vars("geometry")}, fn, **kwargs)
 
@@ -371,17 +371,6 @@ class VectorModel(VectorMixin, Model):
             "states",
         ]
         super().write(components=components)
-
-    @property
-    def region(self) -> gpd.GeoDataFrame:
-        """Returns the geometry of the model area of interest."""
-        region = gpd.GeoDataFrame()
-        if "region" in self.geoms:
-            region = self.geoms["region"]
-        elif len(self.vector) > 0:
-            gdf = self.vector_geometry.to_frame("geometry")
-            region = gpd.GeoDataFrame(geometry=[box(*gdf.total_bounds)], crs=gdf.crs)
-        return region
 
     def _test_equal(self, other, skip_component=None) -> Tuple[bool, Dict]:
         """Test if two models including their data components are equal.
