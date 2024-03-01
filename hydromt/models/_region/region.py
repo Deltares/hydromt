@@ -94,16 +94,22 @@ class ModelRegion:
 
     def read(
         self,
-        root: Path,
         rel_path: Path = Path("region.geojson"),
         model_mode: ModelMode = ModelMode.READ,
         **read_kwargs,
     ):
         if model_mode.is_reading_mode():
-            self._data = cast(
-                GeoDataFrame, gpd.read_file(join(root, rel_path), **read_kwargs)
-            )
-            self._kind = "geom"
+            root: Optional[ModelRoot] = cast("Model", self.model_ref())._root
+
+            # cannot read geom files for purely in memory models
+            if root is None:
+                raise ValueError("Root was not set, cannot read region file")
+            else:
+                self._data = cast(
+                    GeoDataFrame,
+                    gpd.read_file(join(root.path, rel_path), **read_kwargs),
+                )
+                self._kind = "geom"
         else:
             raise ValueError("Cannot read while not in read mode")
 
@@ -120,5 +126,5 @@ class ModelRegion:
             if root is None:
                 raise ValueError("Root was not set, cannot read region file")
             else:
-                self.read(Path(root.path))
+                self.read()
             self.data.to_file(join(root.path, rel_path), **write_kwargs)
