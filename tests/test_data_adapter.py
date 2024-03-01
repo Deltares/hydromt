@@ -126,7 +126,9 @@ def test_aws_worldcover():
     assert da.name == "landuse"
 
 
-@pytest.mark.skipif(system() == "Windows", reason="Temprorarily disable failing test")
+@pytest.mark.skipif(
+    system() == "Windows", reason="fails due to expired certificate at dest"
+)
 def test_http_data():
     dc = DataCatalog().from_dict(
         {
@@ -484,7 +486,7 @@ def test_geodataframe(geodf, tmpdir):
     assert isinstance(gdf1, gpd.GeoDataFrame)
     assert np.all(gdf1 == geodf)
     # testt read shapefile using mask
-    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]})
+    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
     gdf1 = hydromt.open_vector(fn_shp, geom=mask)
     assert np.all(gdf1 == geodf)
     # test read with buffer
