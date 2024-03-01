@@ -286,6 +286,7 @@ eobs:
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
     meta:
       processing_script: v25.0e_fix_qq_dims_and_match_extent.py
+      processing_notes: correct lat/lon dimension for variable qq to match the grid of the other variables
   rename:
     pp: press_msl
     qq: kin
