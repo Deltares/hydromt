@@ -25,13 +25,15 @@
 | eobs_orography_v..             | eobs_orography            |
 | lake_atlas_pol_v10             | hydro_lake_atlas_pol      |
 | river_atlas_v10                | hydro_river_atlas         |
-| ghs_pop_2015_54009_v2019a      | ghs_pop_2015_54009        |
+| ghs_pop_2015_54009_v2019a      | ghs_pop_2015	             |
+| ghs_smod_2015_54009_v2019a     | ghs_smod_2015             |
 | glofas_era5_v31                | glofas_era5               |
-| guf_bld_2012                   | guf                       |
+| guf_bld_2012                   | guf_bld_2012              |
 | rivers_lin2019_v1              | hydro_rivers_lin2019      |
 | SM2RAIN_ASCAT_monthly_025_v1.4 | SM2RAIN_ASCAT_monthly_025 |
 | SM2RAIN_ASCAT_monthly_05_v1.4  | SM2RAIN_ASCAT_monthly_05  |
-| soilgrids_2020                 | soilgrids                 |
+| vito 					         | vito_2015                 |
+| vito_2015_v2.0.2			   	 | vito_2015                 |
 | vito_2016_v3.0.1               | vito_2016                 |
 | vito_2017_v3.0.1               | vito_2017                 |
 | vito_2018_v3.0.1               | vito_2018                 |
@@ -39,14 +41,10 @@
 
 - Some datasets have multiple versions, for these datasets the default can be changed if you do not supply a version in your config file. See the table below for which dataset the default version has changed.
 
-| Dataset name   | Default version |
-|----------------|-----------------|
-| eobs           | 25.0e           |
-| eobs_orography | 25.0e           |
-| ghs_mod        | R2019A_v2.0     |
-| pcr_globwb     | 2005            |
-| soilgrids      | 2.0             |
-
+| Dataset name   | Default version | Previous default version |
+|----------------|-----------------|--------------------------|
+| eobs           | 25.0e           | 22.0e                    |
+| eobs_orography | 25.0e           | 22.0e                    |
 
 
 ### version 2024.1.30

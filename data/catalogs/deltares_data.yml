@@ -360,6 +360,7 @@ era5:
       daily frequency using right label for time.
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
+    processing_script: https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
     source_temporal_extent:
@@ -405,9 +406,9 @@ era5_daily_zarr:
       daily frequency
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
+    processing_script: https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    processing_script: meteo/era5_zarr/scripts/
     source_temporal_extent:
       start: '1950-01-02'
       end: '2023-02-01'
@@ -557,6 +558,7 @@ esa_worldcover:
       y: 36000
   meta:
     category: landuse
+    processing_notes: prepare vrt file with gdalbuildvrt
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.5571936
     source_spatial_extent:
@@ -741,7 +743,7 @@ gebco:
   rename:
     gebco: elevtn
 
-ghs_pop:
+ghs_pop_2015:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -786,7 +788,7 @@ ghs_pop_2015_54009:
   version: R2019A_v1.0
   path: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_54009_250_V1_0.tif
 
-ghs_smod:
+ghs_smod_2015:
   crs: ESRI:54009
   data_type: RasterDataset
   driver: raster
@@ -907,6 +909,7 @@ glw_buffaloes:
       y: 3600
   meta:
     category: socio-economic
+    notes: last downloaded 2020-06-11
     paper_doi: 10.7910/DVN/5U8MWI
     paper_ref: Gilbert at al (2018)
     source_author: glw (Gridded Livestock of World 3 Dataverse)
@@ -1176,7 +1179,7 @@ gswo:
   version: 1.1
   path: hydrography/gswo/occur.vrt
 
-guf:
+guf_bld_2012:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -1204,8 +1207,8 @@ hydro_lakes:
   driver: vector
   meta:
     category: surface water
-    notes: HydroLAKES.v10_extract
-    source_author: Arjen Haag
+    processing_notes: extract of hydrolakes to only include natural lakes and exclude reservoirs and control lakes (ie filter on Lake_type = 1)
+    source_author: HydroSHEDS
     source_spatial_extent:
       West: -180.0
       South: -55.865
@@ -1365,6 +1368,8 @@ merit_hydro:
     category: topography
     paper_doi: 10.1029/2019WR024873
     paper_ref: Yamazaki et al. (2019)
+    processing_notes: create vrt file with gdalbuildvrt;
+      additional variables for stream-order, basin index (basins), and slope (lndslp) derived with pyflwdir
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
     source_spatial_extent:
@@ -1467,6 +1472,7 @@ merit_hydro_patch:
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
     processing_script: topography/merit_hydro/patches/scripts
+    processing_notes: local corrections of flow direction raster and re-derive the related maps (basins, uparea, strord)
     source_spatial_extent:
       West: -180.0
       South: -60.0
@@ -1495,12 +1501,12 @@ modis_lai:
     concat: true
   meta:
     category: landuse
-    notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the
-      period '2003-01-01', '2017-12-31'
     paper_doi: 10.5067/MODIS/MCD15A3H.006
     paper_ref: Myneni et al (2015)
     source_license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
     source_url: https://lpdaac.usgs.gov/products/mcd15a3hv006/
+    processing_notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H')
+      for the period '2003-01-01', '2017-12-31'
     processing_script:
       GEE_script: landuse/modis/MODIS_MCD15A3H_LAI/GEE_MODIS_LAI.js
       merge_script: landuse/modis/MODIS_MCD15A3H_LAI/merge_rasters_GEE_LAI.py
