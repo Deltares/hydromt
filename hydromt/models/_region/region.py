@@ -30,6 +30,86 @@ class ModelRegion:
         self.model_ref: ReferenceType["Model"] = ref(model)
         self._data: Optional[GeoDataFrame] = None
 
+    def setup_region(
+        self,
+        region: dict,
+        hydrography_fn: str = "merit_hydro",
+        basin_index_fn: str = "merit_hydro_index",
+    ) -> dict:
+        """Set the `region` of interest of the model.
+
+        Adds model layer:
+
+        * **region** geom: region boundary vector
+
+        Parameters
+        ----------
+        region : dict
+            Dictionary describing region of interest, e.g.:
+
+            * {'bbox': [xmin, ymin, xmax, ymax]}
+
+            * {'geom': 'path/to/polygon_geometry'}
+
+            * {'basin': [xmin, ymin, xmax, ymax]}
+
+            * {'subbasin': [x, y], '<variable>': threshold}
+
+            For a complete overview of all region options,
+            see :py:function:~hydromt.workflows.basin_mask.parse_region
+        hydrography_fn : str
+            Name of data source for hydrography data.
+            FIXME describe data requirements
+        basin_index_fn : str
+            Name of data source with basin (bounding box) geometries associated with
+            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
+            based on a (sub)(inter)basins without a 'bounds' argument.
+
+        Returns
+        -------
+        region: dict
+            Parsed region dictionary
+
+        See Also
+        --------
+        hydromt.workflows.basin_mask.parse_region
+        """
+        kind, region = parse_region(
+            region, data_catalog=self.data_catalog, logger=self.logger
+        )
+        if kind in ["basin", "subbasin", "interbasin"]:
+            # retrieve global hydrography data (lazy!)
+            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
+            if "bounds" not in region:
+                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
+            # get basin geometry
+            geom, xy = workflows.get_basin_geometry(
+                ds=ds_org,
+                kind=kind,
+                logger=self.logger,
+                **region,
+            )
+            region.update(xy=xy)
+        elif "bbox" in region:
+            bbox = region["bbox"]
+            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+        elif "geom" in region:
+            geom = region["geom"]
+            if geom.crs is None:
+                raise ValueError('Model region "geom" has no CRS')
+        elif "grid" in region:  # Grid specific - should be removed in the future
+            geom = region["grid"].raster.box
+        elif "model" in region:
+            geom = region["model"].region
+        else:
+            raise ValueError(f"model region argument not understood: {region}")
+
+        self.set_geoms(geom, name="region")
+
+        # This setup method returns region so that it can be wrapped for models which
+        # require more information, e.g. grid RasterDataArray or xy coordinates.
+        return region
+
     def create(
         self, region_dict: Dict[str, Any], catalog: Optional[DataCatalog] = None
     ):

@@ -68,6 +68,7 @@ def test_cli_build_grid_model(tmpdir):
     _ = CliRunner().invoke(hydromt_cli, cmd)
 
     # test force overwrite
+    breakpoint()
     with pytest.raises(IOError, match="Model dir already exists"):
         _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
 

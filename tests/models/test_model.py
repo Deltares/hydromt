@@ -275,7 +275,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     # build model
     model = Model(root=str(tmpdir), mode="w")
     # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
-    model._CLI_ARGS.update({"region": "setup_region"})
+    model._CLI_ARGS.update({"region": "create"})
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
@@ -350,10 +350,10 @@ def test_model_build_update(tmpdir, demda, obsda):
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_setup_region(model, demda, tmpdir):
     # bbox
-    model.setup_region({"bbox": [12.05, 45.30, 12.85, 45.65]})
+    model.region.create({"bbox": [12.05, 45.30, 12.85, 45.65]})
     region = model._geoms.pop("region")
     # geom
-    model.setup_region({"geom": region})
+    model.region.create({"geom": region})
     gpd.testing.assert_geodataframe_equal(region, model.region)
     # geom via data catalog
     fn_region = str(tmpdir.join("region.gpkg"))
@@ -368,17 +368,17 @@ def test_setup_region(model, demda, tmpdir):
         }
     )
     model._geoms.pop("region")  # remove old region
-    model.setup_region({"geom": "region"})
+    model.region.create({"geom": "region"})
     gpd.testing.assert_geodataframe_equal(region, model.region)
     # grid
     model._geoms.pop("region")  # remove old region
     grid_fn = str(tmpdir.join("grid.tif"))
     demda.raster.to_raster(grid_fn)
-    model.setup_region({"grid": grid_fn})
+    model.region.create({"grid": grid_fn})
     assert np.all(demda.raster.bounds == model.region.total_bounds)
     # basin
     model._geoms.pop("region")  # remove old region
-    model.setup_region({"basin": [12.2, 45.833333333333329]})
+    model.region.create({"basin": [12.2, 45.833333333333329]})
     assert np.all(model.region["value"] == 210000039)  # basin id
 
 
@@ -398,7 +398,7 @@ def test_model_set_geoms(tmpdir):
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom_28992 = geom.to_crs(epsg=28992)
     model = Model(root=str(tmpdir), mode="w")
-    model.setup_region({"geom": geom_28992})  # set model crs based on epsg28992
+    model.region.create({"geom": geom_28992})  # set model crs based on epsg28992
     model.set_geoms(geom, "geom_wgs84")  # this should convert the geom crs to epsg28992
     assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
 
@@ -423,7 +423,7 @@ def test_maps_setup(tmpdir):
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = Model(data_libs=["artifact_data", dc_param_fn], mode="w")
     bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
-    mod.setup_region({"bbox": bbox})
+    mod.region.create({"bbox": bbox})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.setup_maps_from_rasterdataset(
         raster_fn="merit_hydro",
