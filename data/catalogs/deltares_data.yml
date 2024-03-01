@@ -342,7 +342,7 @@ era5:
   meta:
     category: meteo
     notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
-      daily frequency
+      daily frequency using right label for time.
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
