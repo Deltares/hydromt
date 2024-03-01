@@ -796,4 +796,5 @@ worldclim:
     paper_ref: Fick and Hijmans (2017)
     source_url: https://www.worldclim.org/data/worldclim21.html
   version: 2
+  nodata: -999.0
   path: worldclim.nc
