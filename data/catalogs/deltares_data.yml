@@ -281,6 +281,7 @@ eobs:
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
     meta:
       processing_script: meteo/eobs/scripts/v24.0e_fix_qq_dims_and_match_extent.py
+      processing_notes: correct lat/lon dimension for variable qq to match the grid of the other variables
   - version: 25.0e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
     meta:
@@ -341,7 +342,7 @@ era5:
   meta:
     category: meteo
     notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
-      daily frequency
+      daily frequency using right label for time.
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
