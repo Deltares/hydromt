@@ -275,18 +275,32 @@ eobs:
   variants:
   - version: 22.0e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
+    meta:
+      source_temporal_extent:
+        start: '1950-01-02'
+        end: '2020-07-01'
   - version: 23.1e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v23.1e.nc
+    meta:
+      source_temporal_extent:
+        start: '1950-01-02'
+        end: '2021-01-01'
   - version: 24.0e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
     meta:
       processing_script: meteo/eobs/scripts/v24.0e_fix_qq_dims_and_match_extent.py
       processing_notes: correct lat/lon dimension for variable qq to match the grid of the other variables
+      source_temporal_extent:
+        start: '1950-01-02'
+        end: '2021-07-01'
   - version: 25.0e
     path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
     meta:
       processing_script: v25.0e_fix_qq_dims_and_match_extent.py
       processing_notes: correct lat/lon dimension for variable qq to match the grid of the other variables
+      source_temporal_extent:
+        start: '1950-01-02'
+        end: '2022-01-01'
   rename:
     pp: press_msl
     qq: kin
