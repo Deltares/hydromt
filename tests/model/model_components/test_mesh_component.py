@@ -38,6 +38,12 @@ def test_add_mesh(tmp_dir):
     data = xu.data.elevation_nl().to_dataset()
     with pytest.raises(ValueError, match="Data should have CRS."):
         mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
+    mesh_component._data = data
+
+    with pytest.raises(
+        ValueError, match="Data and self.data should have the same CRS."
+    ):
+        mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
 
 
 def test_set_raises_errors(tmp_dir):
