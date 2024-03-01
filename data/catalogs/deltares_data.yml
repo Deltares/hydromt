@@ -1065,12 +1065,11 @@ glw_sheeps:
   version: 3
   path: socio_economic/glw/5_Sh_2010_Da.tif
 
-
 grdc:
   crs: 4326
   data_type: GeoDataFrame
   driver: csv
-  kwargs:
+  driver_kwargs:
     index_col: grdc_no
   meta:
     category: observed data
@@ -1739,184 +1738,91 @@ soilgrids:
       y: 2400
   meta:
     category: soil
-    source_spatial_extent:
-      West: -19949000.0
-      South: -6147500.0
-      East: 19861750.0
-      North: 8361000.0
-  variants:
-  - version: 1.0
-    path: soil/soilgrids_v1.0/*_250m_ll.tif
-    meta:
-      notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
+    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
         \ (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database\
         \ distribution version 2.0, european commission and the European soil bureau\n\
         \ network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van\
         \ Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre:\
         \ Response to european policy support  and public data requirements. Land\
         \ Use Policy 29 (2), 329\xC3\xA2\xE2\u201A\xAC\xE2\u20AC\u0153338. \n"
-      paper_doi: 10.1371/journal.pone.0169748
-      paper_ref: Hengl et al. (2017)
-      source_license: ODbL
-      source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids-201
-    rename:
-      BLDFIE_M_sl1_250m_ll: bd_sl1
-      BLDFIE_M_sl2_250m_ll: bd_sl2
-      BLDFIE_M_sl3_250m_ll: bd_sl3
-      BLDFIE_M_sl4_250m_ll: bd_sl4
-      BLDFIE_M_sl5_250m_ll: bd_sl5
-      BLDFIE_M_sl6_250m_ll: bd_sl6
-      BLDFIE_M_sl7_250m_ll: bd_sl7
-      CLYPPT_M_sl1_250m_ll: clyppt_sl1
-      CLYPPT_M_sl2_250m_ll: clyppt_sl2
-      CLYPPT_M_sl3_250m_ll: clyppt_sl3
-      CLYPPT_M_sl4_250m_ll: clyppt_sl4
-      CLYPPT_M_sl5_250m_ll: clyppt_sl5
-      CLYPPT_M_sl6_250m_ll: clyppt_sl6
-      CLYPPT_M_sl7_250m_ll: clyppt_sl7
-      ORCDRC_M_sl1_250m_ll: oc_sl1
-      ORCDRC_M_sl2_250m_ll: oc_sl2
-      ORCDRC_M_sl3_250m_ll: oc_sl3
-      ORCDRC_M_sl4_250m_ll: oc_sl4
-      ORCDRC_M_sl5_250m_ll: oc_sl5
-      ORCDRC_M_sl6_250m_ll: oc_sl6
-      ORCDRC_M_sl7_250m_ll: oc_sl7
-      PHIHOX_M_sl1_250m_ll: ph_sl1
-      PHIHOX_M_sl2_250m_ll: ph_sl2
-      PHIHOX_M_sl3_250m_ll: ph_sl3
-      PHIHOX_M_sl4_250m_ll: ph_sl4
-      PHIHOX_M_sl5_250m_ll: ph_sl5
-      PHIHOX_M_sl6_250m_ll: ph_sl6
-      PHIHOX_M_sl7_250m_ll: ph_sl7
-      SLTPPT_M_sl1_250m_ll: sltppt_sl1
-      SLTPPT_M_sl2_250m_ll: sltppt_sl2
-      SLTPPT_M_sl3_250m_ll: sltppt_sl3
-      SLTPPT_M_sl4_250m_ll: sltppt_sl4
-      SLTPPT_M_sl5_250m_ll: sltppt_sl5
-      SLTPPT_M_sl6_250m_ll: sltppt_sl6
-      SLTPPT_M_sl7_250m_ll: sltppt_sl7
-      SNDPPT_M_sl1_250m_ll: sndppt_sl1
-      SNDPPT_M_sl2_250m_ll: sndppt_sl2
-      SNDPPT_M_sl3_250m_ll: sndppt_sl3
-      SNDPPT_M_sl4_250m_ll: sndppt_sl4
-      SNDPPT_M_sl5_250m_ll: sndppt_sl5
-      SNDPPT_M_sl6_250m_ll: sndppt_sl6
-      SNDPPT_M_sl7_250m_ll: sndppt_sl7
-      SoilThickness_250m_ll: soilthickness
-      TAXOUSDA_250m_ll: tax_usda
-    unit_mult:
-      bd_sl1: 0.001
-      bd_sl2: 0.001
-      bd_sl3: 0.001
-      bd_sl4: 0.001
-      bd_sl5: 0.001
-      bd_sl6: 0.001
-      bd_sl7: 0.001
-      oc_sl1: 0.1
-      oc_sl2: 0.1
-      oc_sl3: 0.1
-      oc_sl4: 0.1
-      oc_sl5: 0.1
-      oc_sl6: 0.1
-      oc_sl7: 0.1
-      ph_sl1: 0.1
-      ph_sl2: 0.1
-      ph_sl3: 0.1
-      ph_sl4: 0.1
-      ph_sl5: 0.1
-      ph_sl6: 0.1
-      ph_sl7: 0.1
-  - version: 2.0
-    path: soil/soilgrids_v2.0/*/*_mean.vrt
-    meta:
-      paper_doi: https://doi.org/10.5194/soil-2020-65
-      paper_ref: de Sousa et al. (2020)
-      source_license: CC BY 4.0
-      source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids
-      processing_script: soil/soilgrids_v2.0/src/preprocess_soilgrids_v2020.ipynb
-      processing_notes: soil/soilgrids_v2.0/src/readme.txt
-    rename:
-      bdod_0-5cm_mean: bd_sl1
-      bdod_5-15cm_mean: bd_sl2
-      bdod_15-30cm_mean: bd_sl3
-      bdod_30-60cm_mean: bd_sl4
-      bdod_60-100cm_mean: bd_sl5
-      bdod_100-200cm_mean: bd_sl6
-      clay_0-5cm_mean: clyppt_sl1
-      clay_5-15cm_mean: clyppt_sl2
-      clay_15-30cm_mean: clyppt_sl3
-      clay_30-60cm_mean: clyppt_sl4
-      clay_60-100cm_mean: clyppt_sl5
-      clay_100-200cm_mean: clyppt_sl6
-      soc_0-5cm_mean: oc_sl1
-      soc_5-15cm_mean: oc_sl2
-      soc_15-30cm_mean: oc_sl3
-      soc_30-60cm_mean: oc_sl4
-      soc_60-100cm_mean: oc_sl5
-      soc_100-200cm_mean: oc_sl6
-      phh2o_0-5cm_mean: ph_sl1
-      phh2o_5-15cm_mean: ph_sl2
-      phh2o_15-30cm_mean: ph_sl3
-      phh2o_30-60cm_mean: ph_sl4
-      phh2o_60-100cm_mean: ph_sl5
-      phh2o_100-200cm_mean: ph_sl6
-      silt_0-5cm_mean: sltppt_sl1
-      silt_5-15cm_mean: sltppt_sl2
-      silt_15-30cm_mean: sltppt_sl3
-      silt_30-60cm_mean: sltppt_sl4
-      silt_60-100cm_mean: sltppt_sl5
-      silt_100-200cm_mean: sltppt_sl6
-      sand_0-5cm_mean: sndppt_sl1
-      sand_5-15cm_mean: sndppt_sl2
-      sand_15-30cm_mean: sndppt_sl3
-      sand_30-60cm_mean: sndppt_sl4
-      sand_60-100cm_mean: sndppt_sl5
-      sand_100-200cm_mean: sndppt_sl6
-      SoilThickness_250_mean: soilthickness
-      TAXOUSDA_250_mean: tax_usda
-    unit_mult:
-      bd_sl1: 0.01
-      bd_sl2: 0.01
-      bd_sl3: 0.01
-      bd_sl4: 0.01
-      bd_sl5: 0.01
-      bd_sl6: 0.01
-      bd_sl7: 0.01
-      oc_sl1: 0.01
-      oc_sl2: 0.01
-      oc_sl3: 0.01
-      oc_sl4: 0.01
-      oc_sl5: 0.01
-      oc_sl6: 0.01
-      oc_sl7: 0.01
-      ph_sl1: 0.1
-      ph_sl2: 0.1
-      ph_sl3: 0.1
-      ph_sl4: 0.1
-      ph_sl5: 0.1
-      ph_sl6: 0.1
-      ph_sl7: 0.1
-      clyppt_sl1: 0.1
-      clyppt_sl2: 0.1
-      clyppt_sl3: 0.1
-      clyppt_sl4: 0.1
-      clyppt_sl5: 0.1
-      clyppt_sl6: 0.1
-      clyppt_sl7: 0.1
-      sltppt_sl1: 0.1
-      sltppt_sl2: 0.1
-      sltppt_sl3: 0.1
-      sltppt_sl4: 0.1
-      sltppt_sl5: 0.1
-      sltppt_sl6: 0.1
-      sltppt_sl7: 0.1
-      sndppt_sl1: 0.1
-      sndppt_sl2: 0.1
-      sndppt_sl3: 0.1
-      sndppt_sl4: 0.1
-      sndppt_sl5: 0.1
-      sndppt_sl6: 0.1
-      sndppt_sl7: 0.1
+    paper_doi: 10.1371/journal.pone.0169748
+    paper_ref: Hengl et al. (2017)
+    source_license: ODbL
+    source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids-201
+    source_spatial_extent:
+      West: -19949000.0
+      South: -6147500.0
+      East: 19861750.0
+      North: 8361000.0
+  version: 1.0
+  path: soil/soilgrids_v1.0/*_250m_ll.tif
+  rename:
+    BLDFIE_M_sl1_250m_ll: bd_sl1
+    BLDFIE_M_sl2_250m_ll: bd_sl2
+    BLDFIE_M_sl3_250m_ll: bd_sl3
+    BLDFIE_M_sl4_250m_ll: bd_sl4
+    BLDFIE_M_sl5_250m_ll: bd_sl5
+    BLDFIE_M_sl6_250m_ll: bd_sl6
+    BLDFIE_M_sl7_250m_ll: bd_sl7
+    CLYPPT_M_sl1_250m_ll: clyppt_sl1
+    CLYPPT_M_sl2_250m_ll: clyppt_sl2
+    CLYPPT_M_sl3_250m_ll: clyppt_sl3
+    CLYPPT_M_sl4_250m_ll: clyppt_sl4
+    CLYPPT_M_sl5_250m_ll: clyppt_sl5
+    CLYPPT_M_sl6_250m_ll: clyppt_sl6
+    CLYPPT_M_sl7_250m_ll: clyppt_sl7
+    ORCDRC_M_sl1_250m_ll: oc_sl1
+    ORCDRC_M_sl2_250m_ll: oc_sl2
+    ORCDRC_M_sl3_250m_ll: oc_sl3
+    ORCDRC_M_sl4_250m_ll: oc_sl4
+    ORCDRC_M_sl5_250m_ll: oc_sl5
+    ORCDRC_M_sl6_250m_ll: oc_sl6
+    ORCDRC_M_sl7_250m_ll: oc_sl7
+    PHIHOX_M_sl1_250m_ll: ph_sl1
+    PHIHOX_M_sl2_250m_ll: ph_sl2
+    PHIHOX_M_sl3_250m_ll: ph_sl3
+    PHIHOX_M_sl4_250m_ll: ph_sl4
+    PHIHOX_M_sl5_250m_ll: ph_sl5
+    PHIHOX_M_sl6_250m_ll: ph_sl6
+    PHIHOX_M_sl7_250m_ll: ph_sl7
+    SLTPPT_M_sl1_250m_ll: sltppt_sl1
+    SLTPPT_M_sl2_250m_ll: sltppt_sl2
+    SLTPPT_M_sl3_250m_ll: sltppt_sl3
+    SLTPPT_M_sl4_250m_ll: sltppt_sl4
+    SLTPPT_M_sl5_250m_ll: sltppt_sl5
+    SLTPPT_M_sl6_250m_ll: sltppt_sl6
+    SLTPPT_M_sl7_250m_ll: sltppt_sl7
+    SNDPPT_M_sl1_250m_ll: sndppt_sl1
+    SNDPPT_M_sl2_250m_ll: sndppt_sl2
+    SNDPPT_M_sl3_250m_ll: sndppt_sl3
+    SNDPPT_M_sl4_250m_ll: sndppt_sl4
+    SNDPPT_M_sl5_250m_ll: sndppt_sl5
+    SNDPPT_M_sl6_250m_ll: sndppt_sl6
+    SNDPPT_M_sl7_250m_ll: sndppt_sl7
+    SoilThickness_250m_ll: soilthickness
+    TAXOUSDA_250m_ll: tax_usda
+  unit_mult:
+    bd_sl1: 0.001
+    bd_sl2: 0.001
+    bd_sl3: 0.001
+    bd_sl4: 0.001
+    bd_sl5: 0.001
+    bd_sl6: 0.001
+    bd_sl7: 0.001
+    oc_sl1: 0.1
+    oc_sl2: 0.1
+    oc_sl3: 0.1
+    oc_sl4: 0.1
+    oc_sl5: 0.1
+    oc_sl6: 0.1
+    oc_sl7: 0.1
+    ph_sl1: 0.1
+    ph_sl2: 0.1
+    ph_sl3: 0.1
+    ph_sl4: 0.1
+    ph_sl5: 0.1
+    ph_sl6: 0.1
+    ph_sl7: 0.1
 
 vito:
   crs: 4326
