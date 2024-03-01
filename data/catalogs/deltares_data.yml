@@ -1749,6 +1749,8 @@ soilgrids:
     paper_ref: Hengl et al. (2017)
     source_license: ODbL
     source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids-201
+    processing_notes: "soilthickness is based on 1) soilgrids (global, depth to bedrock - BDRICM variable) and 2) dataset for Eurasia"
+    processing_script: p:/wflow_global/static_data/wflow_sbm_parameters/
     source_spatial_extent:
       West: -19949000.0
       South: -6147500.0
@@ -1824,7 +1826,7 @@ soilgrids:
     ph_sl6: 0.1
     ph_sl7: 0.1
 
-vito:
+vito_2015:
   crs: 4326
   data_type: RasterDataset
   driver: raster
