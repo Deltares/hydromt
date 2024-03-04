@@ -275,7 +275,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     # build model
     model = Model(root=str(tmpdir), mode="w")
     # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
-    model._CLI_ARGS.update({"region": "create"})
+    model._CLI_ARGS.update({"region": "region.create"})
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
