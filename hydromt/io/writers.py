@@ -1,10 +1,13 @@
 """Implementations for all of the necessary IO writing for HydroMT."""
 import abc
 import codecs
+import logging
 import os
 from configparser import ConfigParser
+from logging import Logger
 from os.path import dirname, isdir, join, splitext
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import List, Optional, Union
 
 import numpy as np
@@ -12,7 +15,10 @@ import xarray as xr
 import yaml
 from tomli_w import dump as dump_toml
 
+from hydromt._typing.type_def import DeferedFileClose, XArrayDict
 from hydromt.io.path import parse_relpath
+
+logger = logging.getLogger(__name__)
 
 
 def write_xy(fn, gdf, fmt="%.4f"):
@@ -187,3 +193,73 @@ def zarr_writer(
         obj = obj.to_dataset()
     obj.to_zarr(fn_out, **kwargs)
     return fn_out
+
+
+def write_nc(
+    nc_dict: XArrayDict,
+    fn: str,
+    root,
+    logger: Logger,
+    temp_data_dir=None,
+    gdal_compliant: bool = False,
+    rename_dims: bool = False,
+    force_sn: bool = False,
+    **kwargs,
+) -> DeferedFileClose | None:
+    """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
+
+    Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
+    files, using :py:meth:`~hydromt.raster.gdal_compliant`.
+    The function will first try to directly write to file. In case of
+    PermissionError, it will first write a temporary file and add to the
+    self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
+    will be done by calling the self._cleanup function.
+
+    key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+
+    Parameters
+    ----------
+    nc_dict: dict
+        Dictionary of xarray.Dataset and/or xarray.DataArray to write
+    fn: str
+        filename relative to model root and should contain a {name} placeholder
+    gdal_compliant: bool, optional
+        If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
+        format using :py:meth:`~hydromt.raster.gdal_compliant`
+    rename_dims: bool, optional
+        If True, rename x_dim and y_dim to standard names depending on the CRS
+        (x/y for projected and lat/lon for geographic). Only used if
+        ``gdal_compliant`` is set to True. By default, False.
+    force_sn: bool, optional
+        If True, forces the dataset to have South -> North orientation. Only used
+        if ``gdal_compliant`` is set to True. By default, False.
+    **kwargs:
+        Additional keyword arguments that are passed to the `to_netcdf`
+        function.
+    """
+    for name, ds in nc_dict.items():
+        if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
+            logger.error(f"{name} object of type {type(ds).__name__} not recognized")
+            continue
+        logger.debug(f"Writing file {fn.format(name=name)}")
+        _fn = join(root, fn.format(name=name))
+        if not isdir(dirname(_fn)):
+            os.makedirs(dirname(_fn))
+        if gdal_compliant:
+            ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
+        try:
+            ds.to_netcdf(_fn, **kwargs)
+        except PermissionError:
+            logger.warning(f"Could not write to file {_fn}, defering write")
+            if temp_data_dir is None:
+                temp_data_dir = TemporaryDirectory()
+
+            tmp_fn = join(str(temp_data_dir), f"{_fn}.tmp")
+            ds.to_netcdf(tmp_fn, **kwargs)
+
+            return DeferedFileClose(
+                ds=ds,
+                org_fn=join(str(temp_data_dir), _fn),
+                tmp_fn=tmp_fn,
+                close_attempts=1,
+            )

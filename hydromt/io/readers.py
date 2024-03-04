@@ -6,6 +6,7 @@ import io as pyio
 import logging
 from ast import literal_eval
 from configparser import ConfigParser
+from logging import Logger
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
@@ -24,7 +25,9 @@ from shapely.geometry.base import GEOMETRY_TYPES
 from tomli import load as load_toml
 
 from hydromt import gis
+from hydromt._typing.type_def import StrPath
 from hydromt.gis import merge, raster, vector
+from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.path import parse_abspath
 
 logger = logging.getLogger(__name__)
@@ -906,3 +909,65 @@ def _process_config_in(d):
         ret = d
 
     return ret
+
+
+def read_nc(
+    fn: StrPath,
+    root,
+    logger: Logger,
+    mask_and_scale: bool = False,
+    single_var_as_array: bool = True,
+    load: bool = False,
+    **kwargs,
+) -> Dict[str, xr.Dataset]:
+    """Read netcdf files at <root>/<fn> and return as dict of xarray.Dataset.
+
+    NOTE: Unless `single_var_as_array` is set to False a single-variable data source
+    will be returned as :py:class:`xarray.DataArray` rather than
+    :py:class:`xarray.Dataset`.
+    key-word arguments are passed to :py:func:`xarray.open_dataset`.
+
+    Parameters
+    ----------
+    fn : str
+        filename relative to model root, may contain wildcards
+    mask_and_scale : bool, optional
+        If True, replace array values equal to _FillValue with NA and scale values
+        according to the formula original_values * scale_factor + add_offset, where
+        _FillValue, scale_factor and add_offset are taken from variable attributes
+        (if they exist).
+    single_var_as_array : bool, optional
+        If True, return a DataArray if the dataset consists of a single variable.
+        If False, always return a Dataset. By default True.
+    load : bool, optional
+        If True, the data is loaded into memory. By default False.
+    **kwargs:
+        Additional keyword arguments that are passed to the `xr.open_dataset`
+        function.
+
+    Returns
+    -------
+    Dict[str, xr.Dataset]
+        dict of xarray.Dataset
+    """
+    ncs = dict()
+    fns = glob.glob(join(root, fn))
+    if "chunks" not in kwargs:  # read lazy by default
+        kwargs.update(chunks="auto")
+    for fn in fns:
+        name = basename(fn).split(".")[0]
+        logger.debug(f"Reading model file {name}.")
+        # Load data to allow overwritting in r+ mode
+        if load:
+            ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs).load()
+            ds.close()
+        else:
+            ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs)
+        # set geo coord if present as coordinate of dataset
+        if GEO_MAP_COORD in ds.data_vars:
+            ds = ds.set_coords(GEO_MAP_COORD)
+        # single-variable Dataset to DataArray
+        if single_var_as_array and len(ds.data_vars) == 1:
+            (ds,) = ds.data_vars.values()
+        ncs.update({name: ds})
+    return ncs
