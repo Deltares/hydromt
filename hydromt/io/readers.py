@@ -955,7 +955,7 @@ def read_nc(
     if "chunks" not in kwargs:  # read lazy by default
         kwargs.update(chunks="auto")
     for fn in fns:
-        name = basename(fn).split(".")[0]
+        name = splitext(basename(fn))[0]
         logger.debug(f"Reading model file {name}.")
         # Load data to allow overwritting in r+ mode
         if load:
