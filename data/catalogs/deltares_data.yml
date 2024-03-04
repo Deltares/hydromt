@@ -701,7 +701,7 @@ gdp_world:
   driver: vector
   meta:
     category: socio-economic
-    notes: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
+    processing_notes: data combined by Deltares (Wilfred Altena) from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
       and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
     source_author: Wilfred Altena
     source_license: CC BY-4.0
