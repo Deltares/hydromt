@@ -316,7 +316,7 @@ class Model(object, metaclass=ABCMeta):
                 self.root.set(model_out, mode="w")
 
         # check if model has a region
-        if self.region is None:
+        if self.region.data is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
         # remove setup_basemaps from options and throw warning
