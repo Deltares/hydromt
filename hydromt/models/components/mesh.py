@@ -10,7 +10,6 @@ import pandas as pd
 import xarray as xr
 import xugrid as xu
 from pyproj import CRS
-from shapely.geometry import box
 
 from hydromt import workflows
 from hydromt.gis.raster import GEO_MAP_COORD

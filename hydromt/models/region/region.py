@@ -9,11 +9,9 @@ from weakref import ReferenceType, ref
 from geopandas import GeoDataFrame, gpd
 from pyproj import CRS
 from shapely import box
-from xugrid import UgridDataArrayAccessor
 
 from hydromt._typing.model_mode import ModelMode
 from hydromt._typing.type_def import StrPath
-from hydromt.data_catalog import DataCatalog
 from hydromt.models.region._utils import _parse_region
 from hydromt.models.root import ModelRoot
 from hydromt.workflows.basin_mask import get_basin_geometry
@@ -35,58 +33,111 @@ class ModelRegion:
         self._data: Optional[GeoDataFrame] = None
         self.logger = model.logger
 
-    def setup_region(
+    def create(
         self,
         region: dict,
         hydrography_fn: str = "merit_hydro",
         basin_index_fn: str = "merit_hydro_index",
-    ) -> dict:
-        """Set the `region` of interest of the model.
-
-        Adds model layer:
-
-        * **region** geom: region boundary vector
+    ) -> Dict[str, Any]:
+        """Check and return parsed region arguments.
 
         Parameters
         ----------
         region : dict
-            Dictionary describing region of interest, e.g.:
+            Dictionary describing region of interest.
+
+            For an exact clip of the region:
 
             * {'bbox': [xmin, ymin, xmax, ymax]}
 
-            * {'geom': 'path/to/polygon_geometry'}
+            * {'geom': /path/to/polygon_geometry}
+
+            For a region based of another models grid:
+
+            * {'<model_name>': root}
+
+            For a region based of the grid of a raster file:
+
+            * {'grid': /path/to/raster}
+
+            For a region based on a mesh grid of a mesh file:
+
+            * {'mesh': /path/to/mesh}
+
+            Entire basin can be defined based on an ID, one or multiple point location
+            (x, y), or a region of interest (bounding box or geometry) for which the
+            basin IDs are looked up. The basins withint the area of interest can be further
+            filtered to only include basins with their outlet within the area of interest
+            ('outlets': true) of stream threshold arguments (e.g.: 'uparea': 1000).
+
+            Common use-cases include:
+
+            * {'basin': ID}
+
+            * {'basin': [ID1, ID2, ..]}
+
+            * {'basin': [x, y]}
+
+            * {'basin': [[x1, x2, ..], [y1, y2, ..]]}
+
+            * {'basin': /path/to/point_geometry}
 
             * {'basin': [xmin, ymin, xmax, ymax]}
 
+            * {'basin': [xmin, ymin, xmax, ymax], 'outlets': true}
+
+            * {'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
+
+            Subbasins are defined by its outlet locations and include all area upstream
+            from these points. The outlet locations can be passed as xy coordinate pairs,
+            but also derived from the most downstream cell(s) within a area of interest
+            defined by a bounding box or geometry, optionally refined by stream threshold
+            arguments.
+
+            The method can be speed up by providing an additional ``bounds`` argument which
+            should contain all upstream cell. If cells upstream of the subbasin are not
+            within the provide bounds a warning will be raised. Common use-cases include:
+
             * {'subbasin': [x, y], '<variable>': threshold}
 
-            For a complete overview of all region options,
-            see :py:function:~hydromt.workflows.basin_mask.parse_region
-        hydrography_fn : str
-            Name of data source for hydrography data.
-            FIXME describe data requirements
-        basin_index_fn : str
-            Name of data source with basin (bounding box) geometries associated with
-            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
-            based on a (sub)(inter)basins without a 'bounds' argument.
+            * {
+                'subbasin': [[x1, x2, ..], [y1, y2, ..]],
+                '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
+                }
+
+            * {'subbasin': /path/to/point_geometry, '<variable>': threshold}
+
+            * {'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
+
+            * {'subbasin': /path/to/polygon_geometry, '<variable>': threshold}
+
+            Interbasins are similar to subbasins but are bounded by a bounding box or
+            geometry and do not include all upstream area. Common use-cases include:
+
+            * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
+
+            * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
+
+            * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
+        logger:
+            The logger to use.
 
         Returns
         -------
-        region: dict
-            Parsed region dictionary
-
-        See Also
-        --------
-        hydromt.workflows.basin_mask.parse_region
+        kind : {'basin', 'subbasin', 'interbasin', 'geom', 'bbox', 'grid'}
+            region kind
+        kwargs : dict
+            parsed region json
         """
+        data_catalog = cast("Model", self.model_ref()).data_catalog
         kind, region = _parse_region(
-            region, data_catalog=self.data_catalog, logger=self.logger
+            region, data_catalog=data_catalog, logger=self.logger
         )
         if kind in ["basin", "subbasin", "interbasin"]:
             # retrieve global hydrography data (lazy!)
-            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
+            ds_org = data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
+                region.update(basin_index=data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = get_basin_geometry(
                 ds=ds_org,
@@ -109,32 +160,9 @@ class ModelRegion:
         else:
             raise ValueError(f"model region argument not understood: {region}")
 
-        self.set_geoms(geom, name="region")
-
         # This setup method returns region so that it can be wrapped for models which
         # require more information, e.g. grid RasterDataArray or xy coordinates.
         return region
-
-    def create(
-        self, region_dict: Dict[str, Any], catalog: Optional[DataCatalog] = None
-    ):
-        """Calculate the actual model region."""
-        self._kind, data = _parse_region(region_dict, catalog, logger)
-        if self._kind == "mesh":
-            self._data = cast(UgridDataArrayAccessor, data["mesh"]).to_geodataframe()
-
-        elif self._kind == "bbox":
-            self._data = gpd.GeoDataFrame(
-                geometry=[box(*data["bbox"])], crs=CRS.from_epsg(4326)
-            )
-        elif self._kind == "geom":
-            self._data = data["geom"]
-        elif self._kind == "grid":
-            raise NotImplementedError("TODO")
-        elif self._kind in ["basin", "subbasin", "interbasin"]:
-            raise NotImplementedError("TODO")
-        else:
-            raise ValueError(f"Could not understand kind {self._kind}")
 
     # def _rasterdataset_to_geom(self, raster_dataset) -> GeoDataFrame:
     # crs = raster_dataset.raster.crs

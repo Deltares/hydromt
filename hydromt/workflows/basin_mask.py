@@ -14,7 +14,6 @@ from shapely.geometry import box
 
 from hydromt.data_adapter import GeoDataFrameAdapter
 from hydromt.gis.flw import basin_map, flwdir_from_da, outlet_map, stream_map
-from hydromt.models._region.utils import _check_size
 
 logger = logging.getLogger(__name__)
 
@@ -292,3 +291,14 @@ def get_basin_geometry(
         outlet_geom = gpd.GeoDataFrame(geometry=points, crs=ds.raster.crs)
 
     return basin_geom, outlet_geom
+
+
+def _check_size(ds, logger=logger, threshold=12e3**2):
+    # warning for large domain
+    if (
+        np.multiply(*ds.raster.shape) > threshold
+    ):  # 12e3 ** 2 > 10x10 degree at 3 arcsec
+        logger.warning(
+            "Loading very large spatial domain to derive a subbasin. "
+            "Provide initial 'bounds' if this takes too long."
+        )

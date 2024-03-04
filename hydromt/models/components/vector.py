@@ -9,7 +9,6 @@ from typing import Dict, List, Optional, Tuple, Union
 import geopandas as gpd
 import numpy as np
 import xarray as xr
-from shapely.geometry import box
 
 from hydromt.gis.vector import GeoDataset
 from hydromt.models.api import Model, _check_equal
