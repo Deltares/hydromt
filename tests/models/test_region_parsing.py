@@ -12,7 +12,7 @@ from hydromt.workflows.basin_mask import _check_size
 
 
 def test_region_from_geom(world):
-    kind, region = _parse_region({"geom": world})
+    _kind, region = _parse_region({"geom": world})
     assert isinstance(region["geom"], gpd.GeoDataFrame)
 
 
@@ -20,7 +20,7 @@ def test_region_from_geom(world):
 def test_region_from_file(tmpdir, world):
     fn_gdf = str(tmpdir.join("world.geojson"))
     world.to_file(fn_gdf, driver="GeoJSON")
-    kind, region = _parse_region({"geom": fn_gdf})
+    _kind, region = _parse_region({"geom": fn_gdf})
     assert isinstance(region["geom"], gpd.GeoDataFrame)
 
 
@@ -38,19 +38,19 @@ def test_geom_from_cat(tmpdir, world):
             },
         }
     )
-    kind, region = _parse_region({"geom": "world"}, data_catalog=cat)
+    _kind, region = _parse_region({"geom": "world"}, data_catalog=cat)
     assert isinstance(region["geom"], gpd.GeoDataFrame)
 
 
 def test_geom_from_points_fails(geodf):
     region = {"geom": geodf}
     with pytest.raises(ValueError, match=r"Region value.*"):
-        kind, region = _parse_region(region)
+        _kind, region = _parse_region(region)
 
 
 @pytest.mark.skip(reason="Needs Rasterdataset impl")
 def test_region_from_grid(rioda):
-    kind, region = _parse_region({"grid": rioda})
+    _kind, region = _parse_region({"grid": rioda})
     assert isinstance(region["grid"], xr.DataArray)
 
 
@@ -58,7 +58,7 @@ def test_region_from_grid(rioda):
 def test_region_from_grid_file(tmpdir, rioda):
     fn_grid = str(tmpdir.join("grid.tif"))
     rioda.raster.to_raster(fn_grid)
-    kind, region = _parse_region({"grid": fn_grid})
+    _kind, region = _parse_region({"grid": fn_grid})
     assert isinstance(region["grid"], xr.DataArray)
 
 
@@ -76,7 +76,7 @@ def test_region_from_grid_cat(tmpdir, rioda):
             },
         }
     )
-    kind, region = _parse_region({"grid": "grid"}, data_catalog=cat)
+    _kind, region = _parse_region({"grid": "grid"}, data_catalog=cat)
     assert isinstance(region["grid"], xr.DataArray)
 
 
@@ -104,13 +104,13 @@ def test_region_from_subbasin():
 
 def test_region_from_basin_xy():
     region = {"basin": [[1.0, 1.5], [0.0, -1.0]]}
-    kind, region = _parse_region(region)
+    _kind, region = _parse_region(region)
     assert "xy" in region
 
 
 def test_region_from_inter_basin(geodf):
     region = {"interbasin": geodf}
-    kind, region = _parse_region(region)
+    _kind, region = _parse_region(region)
     assert "xy" in region
 
 

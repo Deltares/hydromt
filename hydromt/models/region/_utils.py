@@ -11,8 +11,6 @@ import xugrid as xu
 from hydromt import _compat
 from hydromt.data_catalog import DataCatalog
 
-# from hydromt.models import MODELS
-
 logger = logging.getLogger(__name__)
 
 
@@ -26,8 +24,7 @@ def _parse_region(
     options = {
         "basin": ["basid", "geom", "bbox", "xy"],
         "subbasin": ["geom", "bbox", "xy"],
-        "interbasin": ["geom", "bbox", "xy"],  # FIXME remove interbasin & xy combi?
-        "outlet": ["geom", "bbox"],  # deprecated!
+        "interbasin": ["geom", "bbox", "xy"],
         "geom": ["geom"],
         "bbox": ["bbox"],
         "grid": ["RasterDataArray"],
@@ -35,11 +32,12 @@ def _parse_region(
     }
     kind = next(iter(kwargs))  # first key of region
     value0 = kwargs.pop(kind)
-    # TODO: fix MODELS circulair Imports
-    # if kind in MODELS:
-    #     model_class = MODELS.load(kind)
-    #     kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
-    #     kind = "model"
+    from hydromt.models import MODELS
+
+    if kind in MODELS:
+        model_class = MODELS.load(kind)
+        kwargs = dict(mod=model_class.__init__(root=value0, mode="r", logger=logger))
+        kind = "model"
 
     if kind == "grid":
         kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
@@ -62,7 +60,6 @@ def _parse_region(
         else:
             raise ImportError("xugrid is required to read mesh files.")
     elif kind not in options:
-        # k_lst = '", "'.join(list(options.keys()) + list(MODELS))
         k_lst = '", "'.join(list(options.keys()))
         raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
     else:

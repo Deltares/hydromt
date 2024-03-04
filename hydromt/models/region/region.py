@@ -200,17 +200,20 @@ class ModelRegion:
     def data(self) -> GeoDataFrame:
         """Provide access to the underlying data of the model region."""
         if self._data is None:
-            # cast is necessary because technically the model could have been
-            # dealocated, but it shouldn't be in this case.
-            root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
-
-            # cannot read geom files for purely in memory models
-            if root is None:
-                raise ValueError("Root was not set, cannot read region file")
-            else:
-                self.read("region.geojson")
+            self.read("region.geojson")
 
         return cast(GeoDataFrame, self._data)
+
+    def _get_root(self) -> ModelRoot:
+        # cast is necessary because technically the model could have been
+        # dealocated, but it shouldn't be in this case.
+        root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
+
+        # cannot read geom files for purely in memory models
+        if root is None:
+            raise ValueError("Root was not set, cannot read region file")
+
+        return root
 
     @property
     def crs(self) -> CRS:
@@ -224,18 +227,14 @@ class ModelRegion:
     ):
         """Read the model region from a file on disk."""
         if self._data is None:
-            model = cast("Model", self.model_ref())
-            root: Optional[ModelRoot] = model.root
+            root = self._get_root()
             if root.mode.is_reading_mode():
                 # cannot read geom files for purely in memory models
-                if root is None:
-                    raise ValueError("Root was not set, cannot read region file")
-                else:
-                    self._data = cast(
-                        GeoDataFrame,
-                        gpd.read_file(join(root.path, rel_path), **read_kwargs),
-                    )
-                    self._kind = "geom"
+                self._data = cast(
+                    GeoDataFrame,
+                    gpd.read_file(join(root.path, rel_path), **read_kwargs),
+                )
+                self._kind = "geom"
             else:
                 raise ValueError(
                     "Cannot read while not in read mode either add data or rerun in read mode."
@@ -248,12 +247,9 @@ class ModelRegion:
         **write_kwargs,
     ):
         """Write the model region to a file."""
-        model = cast("Model", self.model_ref())
-        root: Optional[ModelRoot] = model.root
+        root: ModelRoot = self._get_root()
 
         # cannot read geom files for purely in memory models
-        if root is None:
-            raise ValueError("Root was not set, cannot read region file")
         if root.mode.is_reading_mode():
             self.read()
 
