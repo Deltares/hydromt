@@ -160,6 +160,7 @@ class ModelRegion:
         else:
             raise ValueError(f"model region argument not understood: {region}")
 
+        self._data = geom
         # This setup method returns region so that it can be wrapped for models which
         # require more information, e.g. grid RasterDataArray or xy coordinates.
         return region

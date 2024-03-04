@@ -25,6 +25,7 @@ from hydromt.models import (
 )
 from hydromt.models.api import _check_data
 from hydromt.models.components.grid import GridMixin
+from hydromt.models.region.region import ModelRegion
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
@@ -40,7 +41,7 @@ def test_api_attrs():
     assert "asdf" in dm.api
     assert dm.api["asdf"] == "yeah"
     assert "region" in dm.api
-    assert dm.api["region"] == gpd.GeoDataFrame
+    assert dm.api["region"] == ModelRegion
     assert "grid" in dm.api
     assert dm.api["grid"] == xr.Dataset
 
@@ -273,7 +274,31 @@ def test_model_append(demda, df, tmpdir):
     assert "df" in mod1.tables
 
 
-@pytest.mark.filterwarnings("ignore:The setup_basemaps")
+def test_model_errors_on_unknown_method():
+    model = Model()
+    with pytest.raises(
+        ValueError, match='Model testmodel has no method "unknown_method"'
+    ):
+        model.update(opt={"unknown_method": {}})
+
+
+def test_model_does_not_overwrite_in_write_mode(tmpdir):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    model = Model(root=str(tmpdir), mode="w")
+    model.region.create({"bbox": bbox})
+    model.region.write()
+    with pytest.raises(
+        IOError, match="Model dir already exists and cannot be overwritten: "
+    ):
+        model.region.write()
+
+    with pytest.raises(
+        IOError, match="Model dir already exists and cannot be overwritten: "
+    ):
+        model = Model(root=str(tmpdir), mode="w")
+
+
+@pytest.mark.integration()
 def test_model_build_update(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     # build model
@@ -286,35 +311,29 @@ def test_model_build_update(tmpdir, demda, obsda):
         opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
     )
     assert hasattr(model, "region")
-    assert isfile(join(model.root.path, "model.yaml"))
+    assert isfile(join(model.root.path, "model.yml"))
     assert isfile(join(model.root.path, "hydromt.log"))
     # test update with specific write method
     model.update(
         opt={
             "region.create": {},  # should be removed with warning
             "setup_basemaps": {},
-            "write_geoms": {"fn": "geoms/{name}.gpkg", "driver": "GPKG"},
+            "write_region": {},
         }
     )
-    assert isfile(join(model.root.path, "geoms", "region.gpkg"))
-    with pytest.raises(
-        ValueError, match='Model testmodel has no method "unknown_method"'
-    ):
-        model.update(opt={"unknown_method": {}})
+    assert isfile(join(model.root.path, "region.geojson"))
+
     # read and update model
     model = Model(root=str(tmpdir), mode="r")
     model_out = str(tmpdir.join("update"))
     model.update(model_out=model_out, opt={})  # write only
-    assert isfile(join(model_out, "model.yaml"))
+    assert isfile(join(model_out, "model.yml"))
 
-    # Now test update for a model with some data
-    geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-    # Quick check that model can't be overwritten without w+
-    with pytest.raises(
-        IOError, match="Model dir already exists and cannot be overwritten: "
-    ):
-        model = Model(root=str(tmpdir), mode="w")
+
+def test_model_build_update_with_data(tmpdir, demda, obsda):
     # Build model with some data
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
     model = Model(root=str(tmpdir), mode="w+")
     # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
     model._CLI_ARGS.update({"region": "setup_region"})

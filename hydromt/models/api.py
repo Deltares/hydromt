@@ -43,8 +43,8 @@ class Model(object, metaclass=ABCMeta):
     """General and basic API for models in HydroMT."""
 
     _DATADIR = ""  # path to the model data folder
-    _NAME = "modelname"
-    _CONF = "model.yaml"
+    _NAME: str = "modelname"
+    _CONF: StrPath = "model.yml"
     _CF = dict()  # configreader kwargs
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
@@ -388,6 +388,7 @@ class Model(object, metaclass=ABCMeta):
                 "config",
                 "staticmaps",
                 "maps",
+                "region",
                 "tables",
                 "geoms",
                 "forcing",
@@ -1146,6 +1147,10 @@ class Model(object, metaclass=ABCMeta):
     ):
         """Write the model region to the path relative to the modelroot."""
         self.region.write(rel_path, to_wgs84=to_wgs84, **write_kwargs)
+
+    def read_region(self, rel_path: StrPath = Path("region.geojson"), **read_kwargs):
+        """Write the model region to the path relative to the modelroot."""
+        self.region.read(rel_path, **read_kwargs)
 
     def write_geoms(
         self, fn: str = "geoms/{name}.geojson", to_wgs84: bool = False, **kwargs
