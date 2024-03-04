@@ -21,9 +21,8 @@ import xarray as xr
 import xugrid as xu
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
-from shapely.geometry import box
 
-from hydromt import __version__, workflows
+from hydromt import __version__
 from hydromt._compat import HAS_XUGRID, Distribution
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
@@ -31,7 +30,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
-from hydromt.models._region.region import ModelRegion
+from hydromt.models.region import ModelRegion
 from hydromt.models.root import ModelRoot
 
 __all__ = ["Model"]

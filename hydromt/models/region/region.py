@@ -1,3 +1,5 @@
+"""Model Region class."""
+
 from logging import Logger, getLogger
 from os.path import join
 from pathlib import Path
@@ -12,8 +14,9 @@ from xugrid import UgridDataArrayAccessor
 from hydromt._typing.model_mode import ModelMode
 from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
-from hydromt.models._region.utils import _parse_region
+from hydromt.models.region._utils import _parse_region
 from hydromt.models.root import ModelRoot
+from hydromt.workflows.basin_mask import get_basin_geometry
 
 if TYPE_CHECKING:
     from hydromt.models import Model
@@ -22,6 +25,8 @@ logger = getLogger(__name__)
 
 
 class ModelRegion:
+    """Define the model region."""
+
     def __init__(
         self,
         model: "Model",
@@ -74,7 +79,7 @@ class ModelRegion:
         --------
         hydromt.workflows.basin_mask.parse_region
         """
-        kind, region = parse_region(
+        kind, region = _parse_region(
             region, data_catalog=self.data_catalog, logger=self.logger
         )
         if kind in ["basin", "subbasin", "interbasin"]:
@@ -83,7 +88,7 @@ class ModelRegion:
             if "bounds" not in region:
                 region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
             # get basin geometry
-            geom, xy = workflows.get_basin_geometry(
+            geom, xy = get_basin_geometry(
                 ds=ds_org,
                 kind=kind,
                 logger=self.logger,
@@ -113,6 +118,7 @@ class ModelRegion:
     def create(
         self, region_dict: Dict[str, Any], catalog: Optional[DataCatalog] = None
     ):
+        """Calculate the actual model region."""
         self._kind, data = _parse_region(region_dict, catalog, logger)
         if self._kind == "mesh":
             self._data = cast(UgridDataArrayAccessor, data["mesh"]).to_geodataframe()
@@ -150,12 +156,20 @@ class ModelRegion:
     # )
     # return geom
 
+    def set(self, data: GeoDataFrame, kind: str = "user"):
+        """Set the model region based on provided GeoDataFrame."""
+        # if nothing is provided, record that the region was set by the user
+        self._kind = kind
+        self._data = data
+
     @property
     def total_bounds(self):
+        """Return the total bound sof the model region."""
         return self.data.total_bounds
 
     @property
     def data(self) -> GeoDataFrame:
+        """Provide access to the underlying data of the model region."""
         if self._data is None:
             # cast is necessary because technically the model could have been
             # dealocated, but it shouldn't be in this case.
@@ -171,6 +185,7 @@ class ModelRegion:
 
     @property
     def crs(self) -> CRS:
+        """Provide access to the CRS of the model region."""
         return self.data.crs
 
     def read(
@@ -179,6 +194,7 @@ class ModelRegion:
         model_mode: ModelMode = ModelMode.READ,
         **read_kwargs,
     ):
+        """Read the model region from a file on disk."""
         if self._data is None:
             if model_mode.is_reading_mode():
                 root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
@@ -201,6 +217,7 @@ class ModelRegion:
         model_mode: ModelMode = ModelMode.WRITE,
         **write_kwargs,
     ):
+        """Write the model region to a file."""
         if model_mode.is_writing_mode():
             root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
 
