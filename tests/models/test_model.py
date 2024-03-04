@@ -135,10 +135,14 @@ def test_run_log_method():
     model = Model()
     region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
     model._run_log_method("region.create", region)  # args
-    assert "region" in model._geoms
-    model._geoms = {}
+    assert hasattr(model, "region")
+
+
+def test_run_log_kwargs_method():
+    model = Model()
+    region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
     model._run_log_method("region.create", region=region)  # kwargs
-    assert "region" in model._geoms
+    assert hasattr(model, "region")
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
@@ -281,18 +285,18 @@ def test_model_build_update(tmpdir, demda, obsda):
         region={"bbox": bbox},
         opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
     )
-    assert "region" in model._geoms
-    assert isfile(join(model.root, "model.yaml"))
-    assert isfile(join(model.root, "hydromt.log"))
+    assert hasattr(model, "region")
+    assert isfile(join(model.root.path, "model.yaml"))
+    assert isfile(join(model.root.path, "hydromt.log"))
     # test update with specific write method
     model.update(
         opt={
-            "setup_region": {},  # should be removed with warning
+            "region.create": {},  # should be removed with warning
             "setup_basemaps": {},
             "write_geoms": {"fn": "geoms/{name}.gpkg", "driver": "GPKG"},
         }
     )
-    assert isfile(join(model.root, "geoms", "region.gpkg"))
+    assert isfile(join(model.root.path, "geoms", "region.gpkg"))
     with pytest.raises(
         ValueError, match='Model testmodel has no method "unknown_method"'
     ):
@@ -387,9 +391,9 @@ def test_model_write_geoms(tmpdir):
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom.to_crs(epsg=28992, inplace=True)
-    model.set_geoms(geom=geom, name="region")
-    model.write_geoms(to_wgs84=True)
-    region_geom = gpd.read_file(str(join(tmpdir, "geoms/region.geojson")))
+    model.region.set(geom)
+    model.write_region(to_wgs84=True)
+    region_geom = gpd.read_file(str(join(tmpdir, "region.geojson")))
     assert region_geom.crs.to_epsg() == 4326
 
 

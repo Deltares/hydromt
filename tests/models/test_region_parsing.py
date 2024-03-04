@@ -7,7 +7,8 @@ import xarray as xr
 
 from hydromt import DataCatalog, raster
 from hydromt.models import MODELS
-from hydromt.models._region.utils import _check_size, _parse_region, _parse_region_value
+from hydromt.models.region._utils import _parse_region, _parse_region_value
+from hydromt.workflows.basin_mask import _check_size
 
 
 def test_region_from_geom(world):

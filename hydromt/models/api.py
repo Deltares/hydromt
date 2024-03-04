@@ -12,7 +12,7 @@ from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -163,14 +163,29 @@ class Model(object, metaclass=ABCMeta):
         """Check all opt keys and raise sensible error messages if unknown."""
         for method in opt.keys():
             m = method.strip("0123456789")
-            if not callable(getattr(self, m, None)):
+            meth = self._get_sub_method(m)
+            if not callable(meth):
                 raise ValueError(f'Model {self._NAME} has no method "{method}"')
         return opt
+
+    def _get_sub_method(self, method_name: str) -> Optional[Callable]:
+        # temporary code until the component logic is added.
+        # now we need this to be able to call region.create
+        obj = self
+        for subojb in method_name.split("."):
+            try:
+                obj = getattr(obj, subojb)
+            except AttributeError:
+                return None
+        func = cast(Callable, obj)
+        return func
 
     def _run_log_method(self, method, *args, **kwargs):
         """Log method parameters before running a method."""
         method = method.strip("0123456789")
-        func = getattr(self, method)
+        func = self._get_sub_method(method)
+        if not callable(func):
+            raise ValueError(f'Model {self._NAME} has no method "{method}"')
         signature = inspect.signature(func)
         # combine user and default options
         params = {}
@@ -389,7 +404,7 @@ class Model(object, metaclass=ABCMeta):
 
     def write(
         self,
-        components: List = None,
+        components: Optional[List] = None,
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -406,6 +421,7 @@ class Model(object, metaclass=ABCMeta):
                 "maps",
                 "tables",
                 "geoms",
+                "region",
                 "forcing",
                 "states",
                 "config",
@@ -1124,6 +1140,12 @@ class Model(object, metaclass=ABCMeta):
             name = basename(fn).split(".")[0]
             self.logger.debug(f"Reading model file {name}.")
             self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
+
+    def write_region(
+        self, rel_path: StrPath = Path("region.geojson"), to_wgs84=False, **write_kwargs
+    ):
+        """Write the model region to the path relative to the modelroot."""
+        self.region.write(rel_path, to_wgs84=to_wgs84, **write_kwargs)
 
     def write_geoms(
         self, fn: str = "geoms/{name}.geojson", to_wgs84: bool = False, **kwargs

@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, cast
 from weakref import ReferenceType, ref
 
 from geopandas import GeoDataFrame, gpd
+from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely import box
 
-from hydromt._typing.model_mode import ModelMode
 from hydromt._typing.type_def import StrPath
 from hydromt.models.region._utils import _parse_region
 from hydromt.models.root import ModelRoot
@@ -219,14 +219,13 @@ class ModelRegion:
     def read(
         self,
         rel_path: StrPath = Path("region.geojson"),
-        model_mode: ModelMode = ModelMode.READ,
         **read_kwargs,
     ):
         """Read the model region from a file on disk."""
         if self._data is None:
-            if model_mode.is_reading_mode():
-                root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
-
+            model = cast("Model", self.model_ref())
+            root: Optional[ModelRoot] = model.root
+            if root.mode.is_reading_mode():
                 # cannot read geom files for purely in memory models
                 if root is None:
                     raise ValueError("Root was not set, cannot read region file")
@@ -237,21 +236,37 @@ class ModelRegion:
                     )
                     self._kind = "geom"
             else:
-                raise ValueError("Cannot read while not in read mode")
+                raise ValueError(
+                    "Cannot read while not in read mode either add data or rerun in read mode."
+                )
 
     def write(
         self,
-        rel_path: Path = Path("region.geojson"),
-        model_mode: ModelMode = ModelMode.WRITE,
+        rel_path: StrPath = Path("region.geojson"),
+        to_wgs84=False,
         **write_kwargs,
     ):
         """Write the model region to a file."""
-        if model_mode.is_writing_mode():
-            root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
+        model = cast("Model", self.model_ref())
+        root: Optional[ModelRoot] = model.root
 
-            # cannot read geom files for purely in memory models
-            if root is None:
-                raise ValueError("Root was not set, cannot read region file")
-            else:
-                self.read()
-            self.data.to_file(join(root.path, rel_path), **write_kwargs)
+        # cannot read geom files for purely in memory models
+        if root is None:
+            raise ValueError("Root was not set, cannot read region file")
+        if root.mode.is_reading_mode():
+            self.read()
+
+        if to_wgs84:
+            self._data = self.data.to_crs(4326)
+
+        self.data.to_file(join(root.path, rel_path), **write_kwargs)
+
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, ModelRegion):
+            return False
+        else:
+            try:
+                assert_geodataframe_equal(self.data, __value.data)
+                return True
+            except AssertionError:
+                return False
