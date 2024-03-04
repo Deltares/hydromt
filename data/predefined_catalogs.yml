@@ -37,10 +37,8 @@ aws_data:
     v2023.2: 897e5c5272875f1c066f393798b7ae59721c9e9d
   notes: This data are stored in public Amazon Web Services.
 artifact_data:
-  urlpath: https://github.com/DirkEilander/hydromt-artifacts/releases/download/{version}/data.tar.gz
+  urlpath:  https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/artifact_data.yml
   versions:
-    v0.0.9: v0.0.9
-    v0.0.8: v0.0.8
-    v0.0.7: v0.0.7
-    v0.0.6: v0.0.6
+    v0.0.9: main
+    v0.0.8: 0ec2411c2548785d6ee4c8925b75287ca8fad0b0
   notes: This data archive contains a sample dataset for the Piave basin (North Italy) to be used for tests and docs/demo purposes.

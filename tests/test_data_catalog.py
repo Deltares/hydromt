@@ -594,8 +594,8 @@ def test_get_dataframe(df, tmpdir):
 
 def test_deprecation_warnings(artifact_data):
     with pytest.deprecated_call():
-        # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
-        DataCatalog(artifact_data="v0.0.6")
+        # should be DataCatalog(data_libs=['v0.0.6'])
+        DataCatalog(artifact_data="v0.0.9")
     with pytest.deprecated_call():
         cat = DataCatalog()
         # should be cat.from_predefined_catalogs('artifact_data', 'v0.0.6')
