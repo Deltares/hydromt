@@ -106,6 +106,13 @@
 #### fixed
 - enable versioning of yml.files
 
+## aws_data
+
+### version 0.0.9
+
+#### changed
+- updated source naming to match deltares_data version 2024.2
+
 ## cmip6_data
 
 ### version: 2024.1.30

@@ -594,12 +594,12 @@ def test_get_dataframe(df, tmpdir):
 
 def test_deprecation_warnings(artifact_data):
     with pytest.deprecated_call():
-        # should be DataCatalog(data_libs=['v0.0.6'])
-        DataCatalog(artifact_data="v0.0.9")
+        # should be DataCatalog(data_libs=['v0.0.8'])
+        DataCatalog(artifact_data="v0.0.8")
     with pytest.deprecated_call():
         cat = DataCatalog()
-        # should be cat.from_predefined_catalogs('artifact_data', 'v0.0.6')
-        cat.from_artifacts("artifact_data", version="v0.0.6")
+        # should be cat.from_predefined_catalogs('artifact_data', 'v0.0.8')
+        cat.from_artifacts("artifact_data", version="v0.0.8")
     with pytest.deprecated_call():
         fn = artifact_data["chelsa"].path
         # should be driver_kwargs=dict(chunks={'x': 100, 'y': 100})
