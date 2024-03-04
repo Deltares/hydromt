@@ -1,6 +1,6 @@
 """Model Region class."""
 
-from logging import Logger, getLogger
+from logging import getLogger
 from os.path import join
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, cast
@@ -30,10 +30,10 @@ class ModelRegion:
     def __init__(
         self,
         model: "Model",
-        logger: Logger = logger,
     ) -> None:
         self.model_ref: ReferenceType["Model"] = ref(model)
         self._data: Optional[GeoDataFrame] = None
+        self.logger = model.logger
 
     def setup_region(
         self,
