@@ -16,11 +16,9 @@ from hydromt._typing.type_def import DeferedFileClose
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
+from hydromt.io.readers import read_nc
+from hydromt.io.writers import write_nc
 from hydromt.models.components.model_component import ModelComponent
-from hydromt.models.model_utils import (
-    read_nc,
-    write_nc,
-)
 from hydromt.models.root import ModelRoot
 from hydromt.workflows.basin_mask import get_basin_geometry, parse_region
 from hydromt.workflows.grid import (
@@ -122,7 +120,7 @@ class GridComponent(ModelComponent):
         rename_dims: bool = False,
         force_sn: bool = False,
         **kwargs,
-    ) -> DeferedFileClose | None:
+    ) -> Optional[DeferedFileClose]:
         """Write model grid data to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
@@ -164,7 +162,7 @@ class GridComponent(ModelComponent):
 
     def read(
         self,
-        fn: str = "grid/grid.nc",
+        data_like: str = "grid/grid.nc",
         **kwargs,
     ) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
@@ -186,7 +184,7 @@ class GridComponent(ModelComponent):
         if self.root.is_reading_mode() and self.root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
-            fn, self.root, logger=logger, single_var_as_array=False, **kwargs
+            data_like, self.root, logger=logger, single_var_as_array=False, **kwargs
         )
         for ds in loaded_nc_files.values():
             self.set(ds)
@@ -416,7 +414,7 @@ class GridComponent(ModelComponent):
         return grid
 
     @property
-    def res(self) -> Tuple[float, float] | None:
+    def res(self) -> Optional[Tuple[float, float]]:
         """Returns the resolution of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.res
@@ -427,7 +425,7 @@ class GridComponent(ModelComponent):
         )
 
     @property
-    def transform(self) -> Affine | None:
+    def transform(self) -> Optional[Affine]:
         """Returns spatial transform of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.transform
@@ -438,14 +436,14 @@ class GridComponent(ModelComponent):
         )
 
     @property
-    def crs(self) -> CRS | None:
+    def crs(self) -> Optional[CRS]:
         """Returns coordinate reference system embedded in the model grid."""
         if self.data.raster.crs is not None:
             return CRS(self.data.raster.crs)
         logger.warn("Grid data has no crs")
 
     @property
-    def bounds(self) -> List[float] | None:
+    def bounds(self) -> Optional[List[float]]:
         """Returns the bounding box of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.bounds
@@ -456,7 +454,7 @@ class GridComponent(ModelComponent):
         )
 
     @property
-    def region(self) -> gpd.GeoDataFrame | None:
+    def region(self) -> Optional[gpd.GeoDataFrame]:
         """Returns the geometry of the model area of interest."""
         if len(self.data) > 0:
             crs = self.crs
