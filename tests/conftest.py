@@ -292,7 +292,7 @@ def griduda():
 @pytest.fixture()
 def model(demda, world, obsda):
     mod = Model(data_libs=["artifact_data"])
-    mod.setup_region({"geom": demda.raster.box})
+    mod.region.create({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
     with pytest.deprecated_call():
         mod.set_staticmaps(demda, "elevtn")
@@ -307,7 +307,7 @@ def model(demda, world, obsda):
 @pytest.fixture()
 def grid_model(demda, flwda):
     mod = GridModel()
-    mod.setup_region({"geom": demda.raster.box})
+    mod.region.create({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_grid(demda, "elevtn")
     mod.set_grid(flwda, "flwdir")
@@ -343,7 +343,7 @@ def mesh_model(griduda):
     region = gpd.GeoDataFrame(
         geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
     )
-    mod.setup_region({"geom": region})
+    mod.region.create({"geom": region})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(griduda, "elevtn")
     return mod

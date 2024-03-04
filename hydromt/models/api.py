@@ -136,7 +136,7 @@ class Model(object, metaclass=ABCMeta):
         else:
             self.root: ModelRoot = ModelRoot(root, mode=mode)
 
-        self.region: ModelRegion = ModelRegion(self, logger)
+        self.region: ModelRegion = ModelRegion(self)
 
         self._defered_file_closes = []
 

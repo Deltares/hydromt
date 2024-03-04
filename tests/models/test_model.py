@@ -134,10 +134,10 @@ def test_model_api(grid_model):
 def test_run_log_method():
     model = Model()
     region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    model._run_log_method("setup_region", region)  # args
+    model._run_log_method("region.create", region)  # args
     assert "region" in model._geoms
     model._geoms = {}
-    model._run_log_method("setup_region", region=region)  # kwargs
+    model._run_log_method("region.create", region=region)  # kwargs
     assert "region" in model._geoms
 
 
