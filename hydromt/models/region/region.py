@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
+DEFAULT_REGION_FILE_PATH = "region.geojson"
+
 
 class ModelRegion:
     """Define the model region."""
@@ -200,7 +202,7 @@ class ModelRegion:
     def data(self) -> GeoDataFrame:
         """Provide access to the underlying data of the model region."""
         if self._data is None:
-            self.read("region.geojson")
+            self.read(DEFAULT_REGION_FILE_PATH)
 
         return cast(GeoDataFrame, self._data)
 
@@ -222,7 +224,7 @@ class ModelRegion:
 
     def read(
         self,
-        rel_path: StrPath = Path("region.geojson"),
+        rel_path: StrPath = Path(DEFAULT_REGION_FILE_PATH),
         **read_kwargs,
     ):
         """Read the model region from a file on disk."""
@@ -242,7 +244,7 @@ class ModelRegion:
 
     def write(
         self,
-        rel_path: StrPath = Path("region.geojson"),
+        rel_path: StrPath = Path(DEFAULT_REGION_FILE_PATH),
         to_wgs84=False,
         **write_kwargs,
     ):

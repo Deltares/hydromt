@@ -369,9 +369,8 @@ class GridMixin(object):
             self._grid = data
         else:
             for dvar in data.data_vars:
-                if dvar in self._grid:
-                    if self.root.is_reading_mode():
-                        self.logger.warning(f"Replacing grid map: {dvar}")
+                if dvar in self._grid and self.root.is_reading_mode():
+                    self.logger.warning(f"Replacing grid map: {dvar}")
                 self._grid[dvar] = data[dvar]
 
     def read_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
