@@ -283,7 +283,7 @@ def test_model_build_update(tmpdir, demda, obsda):
         opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
     )
     assert "region" in model._geoms
-    assert isfile(join(model.root, "model.ini"))
+    assert isfile(join(model.root, "model.yaml"))
     assert isfile(join(model.root, "hydromt.log"))
     # test update with specific write method
     model.update(
@@ -302,7 +302,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     model = Model(root=str(tmpdir), mode="r")
     model_out = str(tmpdir.join("update"))
     model.update(model_out=model_out, opt={})  # write only
-    assert isfile(join(model_out, "model.ini"))
+    assert isfile(join(model_out, "model.yaml"))
 
     # Now test update for a model with some data
     geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)

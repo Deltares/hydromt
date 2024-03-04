@@ -1,11 +1,8 @@
 """Implementations for all of the necessary IO reading for HydroMT."""
-import abc
-import codecs
 import glob
 import io as pyio
 import logging
 from ast import literal_eval
-from configparser import ConfigParser
 from logging import Logger
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
@@ -22,13 +19,12 @@ import yaml
 from pyogrio import read_dataframe
 from shapely.geometry import Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
-from tomli import load as load_toml
 
 from hydromt import gis
 from hydromt._typing.type_def import StrPath
 from hydromt.gis import merge, raster, vector
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.io.path import parse_abspath
+from hydromt.io.path import make_config_paths_abs
 
 logger = logging.getLogger(__name__)
 
@@ -649,7 +645,7 @@ def open_vector(
             )
             gdf = read_dataframe(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
         else:
-            gdf = gpd.read_file(str(fn), bbox=bbox, mode=mode, **kwargs)
+            gdf = gpd.read_file(str(fn), bbox=bbox, mask=geom, mode=mode, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:
@@ -749,54 +745,6 @@ def open_vector_from_table(
     return gdf
 
 
-def read_ini_config(
-    config_fn: Union[Path, str],
-    encoding: str = "utf-8",
-    cf: ConfigParser = None,
-    skip_eval: bool = False,
-    skip_eval_sections: Optional[list] = None,
-    noheader: bool = False,
-) -> dict:
-    """Read configuration ini file and parse to (nested) dictionary.
-
-    Parameters
-    ----------
-    config_fn : Union[Path, str]
-        Path to configuration file
-    encoding : str, optional
-        File encoding, by default "utf-8"
-    cf : ConfigParser, optional
-        Alternative configuration parser, by default None
-    skip_eval : bool, optional
-        If True, do not evaluate string values, by default False
-    skip_eval_sections : list, optional
-        These sections are not evaluated for string values
-        if skip_eval=True, by default []
-    noheader : bool, optional
-        Set true for a single-level configuration file with no headers, by default False
-
-    Returns
-    -------
-    cfdict : dict
-        Configuration dictionary.
-    """
-    skip_eval_sections = skip_eval_sections or []
-    if cf is None:
-        cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
-    elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
-        cf = cf()
-    cf.optionxform = str  # preserve capital letter
-    with codecs.open(config_fn, "r", encoding=encoding) as fp:
-        cf.read_file(fp)
-        cfdict = cf._sections
-    # parse values
-    cfdict = parse_values(cfdict, skip_eval, skip_eval_sections)
-    # add dummy header
-    if noheader and "dummy" in cfdict:
-        cfdict = cfdict["dummy"]
-    return cfdict
-
-
 def configread(
     config_fn: Union[Path, str],
     defaults: Optional[Dict] = None,
@@ -835,17 +783,13 @@ def configread(
     if ext in [".yaml", ".yml"]:
         with open(config_fn, "rb") as f:
             cfdict = yaml.safe_load(f)
-        cfdict = _process_config_in(cfdict)
-    elif ext == ".toml":  # user defined
-        with open(config_fn, "rb") as f:
-            cfdict = load_toml(f)
-        cfdict = _process_config_in(cfdict)
     else:
-        cfdict = read_ini_config(config_fn, **kwargs)
+        raise ValueError(f"Unknown extention: {ext} Hydromt only supports yaml")
+
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_fn))
-        cfdict = parse_abspath(cfdict, root, skip_abspath_sections)
+        cfdict = make_config_paths_abs(cfdict, root, skip_abspath_sections)
 
     # update defaults
     if defaults:
@@ -879,7 +823,7 @@ def parse_values(
     skip_eval_sections = skip_eval_sections or []
     # loop through two-level dict: section, key-value pairs
     for section in cfdict:
-        # evaluate ini items to parse to python default objects:
+        # evaluate yaml items to parse to python default objects:
         if skip_eval or section in skip_eval_sections:
             cfdict[section].update(
                 {key: str(var) for key, var in cfdict[section].items()}

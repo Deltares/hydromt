@@ -14,3 +14,4 @@ Furthermore it informs you on recent and planned developments.
    dev_install.rst
    team.rst
    plugin-quickstart.rst
+   migrating-to-v1.rst

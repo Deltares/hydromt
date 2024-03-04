@@ -1,9 +1,6 @@
 """Implementations for all of the necessary IO writing for HydroMT."""
-import abc
-import codecs
 import logging
 import os
-from configparser import ConfigParser
 from logging import Logger
 from os.path import dirname, isdir, join, splitext
 from pathlib import Path
@@ -13,10 +10,9 @@ from typing import List, Optional, Union
 import numpy as np
 import xarray as xr
 import yaml
-from tomli_w import dump as dump_toml
 
 from hydromt._typing.type_def import DeferedFileClose, XArrayDict
-from hydromt.io.path import parse_relpath
+from hydromt.io.path import make_config_paths_relative
 
 logger = logging.getLogger(__name__)
 
@@ -38,41 +34,6 @@ def write_xy(fn, gdf, fmt="%.4f"):
     xy = np.stack((gdf.geometry.x.values, gdf.geometry.y.values)).T
     with open(fn, "w") as f:
         np.savetxt(f, xy, fmt=fmt)
-
-
-def write_ini_config(
-    config_fn: Union[Path, str],
-    cfdict: dict,
-    encoding: str = "utf-8",
-    cf: ConfigParser = None,
-    noheader: bool = False,
-) -> None:
-    """Write configuration dictionary to ini file.
-
-    Parameters
-    ----------
-    config_fn : Union[Path, str]
-        Path to configuration file
-    cfdict : dict
-        Configuration dictionary.
-    encoding : str, optional
-        File encoding, by default "utf-8"
-    cf : ConfigParser, optional
-        Alternative configuration parser, by default None
-    noheader : bool, optional
-        Set true for a single-level configuration dictionary with no headers,
-        by default False
-    """
-    if cf is None:
-        cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
-    elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
-        cf = cf()
-    cf.optionxform = str  # preserve capital letter
-    if noheader:  # add dummy header
-        cfdict = {"dummy": cfdict}
-    cf.read_dict(cfdict)
-    with codecs.open(config_fn, "w", encoding=encoding) as fp:
-        cf.write(fp)
 
 
 def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
@@ -98,32 +59,15 @@ def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
         function.
     """
     root = Path(dirname(config_fn))
-    _cfdict = parse_relpath(cfdict.copy(), root)
+    _cfdict = make_config_paths_relative(cfdict.copy(), root)
     ext = splitext(config_fn)[-1].strip()
     if ext in [".yaml", ".yml"]:
-        _cfdict = _process_config_out(_cfdict)  # should not be done for ini
         with open(config_fn, "w") as f:
             yaml.dump(_cfdict, f, sort_keys=False)
-    elif ext == ".toml":  # user defined
-        _cfdict = _process_config_out(_cfdict)
-        with open(config_fn, "wb") as f:
-            dump_toml(_cfdict, f)
     else:
-        write_ini_config(config_fn, _cfdict, **kwargs)
-
-
-def _process_config_out(d):
-    ret = {}
-    if isinstance(d, dict):
-        for k, v in d.items():
-            if v is None:
-                ret[k] = "NONE"
-            else:
-                ret[k] = _process_config_out(v)
-    else:
-        ret = d
-
-    return ret
+        raise ValueError(
+            f"Could not write to unknown extension: {ext} hydromt only supports yaml"
+        )
 
 
 def netcdf_writer(

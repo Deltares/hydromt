@@ -24,7 +24,7 @@ Before getting started **you should ask yourself these questions**:
   3. Will there be a lot of users for my model?
 
 And depending on the answers, you can decide to start your own plugin yes or no. Answering *yes* to any of the previous
-questions could be a protential reason for starting your own plugin. Below are a couple of advantages and drawbacks of making your own plugin:
+questions could be a potential reason for starting your own plugin. Below are a couple of advantages and drawbacks of making your own plugin:
 
 *Advantages*
 
@@ -44,7 +44,7 @@ As mentioned user guide, HydroMT interacts with models using the ``Model`` API c
 ``GridModel``, ``MeshModel``, ``VectorModel``, ``NetworkModel`` which will be described in more detail below. Using
 these sub-model classes, you might be able to already prepare most and if not all of
 the data you need to build your own model. Do note however that these generic classes can only write model data in netcdf,
-geojson (or other formats supported by geopandas), and configurations in either yaml, toml or ini file format. So
+geojson (or other formats supported by geopandas), and configurations in yaml. So
 in case your model needs different file formats, you will need to convert or write the output files in different formats.
 
 Another advantage of writing your own plugin is that other users from the same model can easily build instances of that model
@@ -192,9 +192,7 @@ Let's say you just created the plugin called `hydromt_mymodel` before you can st
 	$ cd hydromt_mymodel
 	$ git init
 
-If your project has dependencies, you can add them in the pyproject.toml under the `dependencies` array. If you have `tomli` installed, you can
-use the `make_env.py` script to generate a conda environment specification see :ref:`The developer installation page <dev_install>` for
-more information on how to use this script.
+If your project has dependencies, you can add them in the pyproject.toml under the `dependencies` array.
 
 Now, assuming that you've made a repository in your personal GitHub repository (eg user savente93) you just need to add it as a remote in the
 repository and push it (for an organisation, you will need specific rights to do this).
@@ -233,15 +231,23 @@ But if you choose to, a classic folder structure and files for a HydroMT plugin 
 
 Model class and components
 --------------------------
-In this section, we will detail the bottom part of the schematic ie how to initialise your HydroMT Model class for your plugin, the main properties and how to
-work with its model components.
+The main goal of your plugin is to be able to build and update model instances for your own
+software. As a reminder, the figure below illustrates the process of model building in HydroMT:
+
+.. figure:: ../_static/model_building_process.png
+   :align: center
+
+   Model building process in HydroMT.
+
+In this section, we will detail the bottom part of the schematic above ie how to initialise your HydroMT Model class for your plugin, the main properties
+and setup methods and how to work with its model components. The top part of the schematic (data preparation) is taken care of by the core of HydroMT.
 
 Initialisation
 ^^^^^^^^^^^^^^
 In the :ref:`create plugin section <plugin_create>`, we already saw which HydroMT ``Model`` class to choose for your plugin. Here we will focus on additional
-properties and the initiliasation of your new Model subclass.
+properties and the initialisation of your new Model subclass.
 
-To fully initiliase your new subclass (eg *MyModelModel*), you need to initialise a couple of high level properties and in some cases, you may wish to modify
+To fully initialise your new subclass (eg *MyModelModel*), you need to initialise a couple of high level properties and in some cases, you may wish to modify
 the default initialisation function of you parent class (the HydroMT core class you choose, ``Model`` or ``GridModel`` etc.).
 
 .. TIP::
@@ -282,7 +288,7 @@ be overwriting most ``read_<component>`` or ``write_<component>`` methods in you
 data comes in and goes out exactly as you want.
 
 In the default HydroMT CORE read and write methods, xarray objects are written as netcdf files, ``geoms`` as GeoJSON files by
-default but any geopandas driver is allowed. ``config`` can be either a TOML or YAML file. So again, you could decide to
+default but any geopandas driver is allowed. ``config`` must be a YAML file. So again, you could decide to
 completely overwrite the parent read and write methods or change the defaults.
 
 Eg if your geoms should be written in GeoPackage format rather than GeoJSON and in a geometry folder in your model:
@@ -332,7 +338,7 @@ and, if in appending mode, existing layers of the model component are read first
 
   In the background, the actual data is stored not directly in the <component> attribute itself but in a private
   attribute (eg ``_maps`` for ``maps``). The public component, (eg ``maps``), actually just fetched the data
-  from the private attriute ``_maps``, but makes sure that in read mode it reads existing layers of the component first.
+  from the private attribute ``_maps``, but makes sure that in read mode it reads existing layers of the component first.
   It is highly recommended, in your plugin to always use the public model component (eg ``maps``).
 
 Additional Model properties

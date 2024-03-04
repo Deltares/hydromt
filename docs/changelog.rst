@@ -24,17 +24,40 @@ Changed
 Removed
 -------
 - support for `**artifact_keys` when initializing the DataCatalog has been removed. (#786)
+- support for dictionary like features on the DataCatalog have been removed. (#790)
+
+Removed
+-------
+- Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
+
 
 Unreleased
 ==========
+
+Changed
+-------
+- Development environment is now set up via pixi instead of mamba / conda. See the documentation for more information on how to install.
+
+
+
+v0.9.4 (2024-02-26)
+===================
+This release fixes a performance regression when reading geometry masks, relaxed warnings for empty raster datasets and updated the documention of the new hydromt commands.
+
+Fixed
+-----
+- Added back geometry mask when reading vector files with `fiona` as engine/ driver. (#777)
+- Relaxed empty data checking on `RasterDatasetAdapter`. (#782)
+- Add documentation for `hydromt check` and `hydromt export` commands. (#767)
+
+v0.9.3 (2024-02-08)
+===================
+This release fixes several bugs. Most notably the `NoDataSrategy` is available in much more data reading methods so plugins can use it more directly. Additionally there are some bug fixes relating to reading shapefiles and reading COGs.
 
 Added
 -----
 - Test script for testing predefined catalogs locally. (#735)
 - Option to write a data catalog to a csv file (#425)
-
-Changed
--------
 
 Fixed
 -----
