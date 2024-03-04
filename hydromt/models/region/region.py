@@ -1,7 +1,7 @@
 """Model Region class."""
 
 from logging import getLogger
-from os.path import join
+from os.path import exists, join
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, cast
 from weakref import ReferenceType, ref
@@ -257,10 +257,14 @@ class ModelRegion:
         if root.mode.is_reading_mode():
             self.read()
 
+        write_path = join(root.path, rel_path)
+        if exists(write_path) and not root.mode.is_override_mode():
+            raise OSError(f"Not in overwrite mode and file {write_path} already exists")
+
         if to_wgs84:
             self._data = self.data.to_crs(4326)
 
-        self.data.to_file(join(root.path, rel_path), **write_kwargs)
+        self.data.to_file(write_path, **write_kwargs)
 
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, ModelRegion):

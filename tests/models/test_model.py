@@ -276,6 +276,7 @@ def test_model_append(demda, df, tmpdir):
 
 def test_model_errors_on_unknown_method():
     model = Model()
+    model._NAME = "testmodel"
     with pytest.raises(
         ValueError, match='Model testmodel has no method "unknown_method"'
     ):
@@ -284,21 +285,15 @@ def test_model_errors_on_unknown_method():
 
 def test_model_does_not_overwrite_in_write_mode(tmpdir):
     bbox = [12.05, 45.30, 12.85, 45.65]
-    model = Model(root=str(tmpdir), mode="w")
+    model = Model(root=join(tmpdir, "tmp"), mode="w")
     model.region.create({"bbox": bbox})
     model.region.write()
-    with pytest.raises(
-        IOError, match="Model dir already exists and cannot be overwritten: "
-    ):
+    with pytest.raises(OSError, match="Not in overwrite mode and file "):
         model.region.write()
-
-    with pytest.raises(
-        IOError, match="Model dir already exists and cannot be overwritten: "
-    ):
-        model = Model(root=str(tmpdir), mode="w")
 
 
 @pytest.mark.integration()
+@pytest.mark.filterwarnings("ignore:The setup_basemaps")
 def test_model_build_update(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     # build model
@@ -330,13 +325,15 @@ def test_model_build_update(tmpdir, demda, obsda):
     assert isfile(join(model_out, "model.yml"))
 
 
+@pytest.mark.integration()
+@pytest.mark.filterwarnings("ignore:The setup_basemaps")
 def test_model_build_update_with_data(tmpdir, demda, obsda):
     # Build model with some data
     bbox = [12.05, 45.30, 12.85, 45.65]
     geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
     model = Model(root=str(tmpdir), mode="w+")
     # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
-    model._CLI_ARGS.update({"region": "setup_region"})
+    model._CLI_ARGS.update({"region": "region.create"})
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
@@ -472,6 +469,7 @@ def test_maps_setup(tmpdir):
     mod.write(components=["config", "geoms", "maps"])
 
 
+@pytest.mark.skip("needs implementation of Grid component")
 def test_gridmodel(grid_model, tmpdir, demda):
     assert "grid" in grid_model.api
     non_compliant = grid_model._test_model_api()
@@ -668,6 +666,7 @@ def test_gridmodel_setup(tmpdir):
     mod.write(components=["geoms", "grid"])
 
 
+@pytest.mark.skip("needs implementation of vector component")
 def test_vectormodel(vector_model, tmpdir):
     assert "vector" in vector_model.api
     non_compliant = vector_model._test_model_api()

@@ -49,7 +49,7 @@ class ModelRoot:
             self._check_root_exists()
 
         if self.mode is not None:
-            is_override = self.mode.is_override()
+            is_override = self.mode.is_override_mode()
         else:
             is_override = False
 
