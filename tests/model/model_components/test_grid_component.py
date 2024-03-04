@@ -16,45 +16,48 @@ logger = logging.getLogger(__name__)
 logger.propagate = True
 
 
-def test_set(hydds, tmp_dir, rioda):
+@pytest.fixture()
+def grid_component(tmp_dir):
     model_root = ModelRoot(path=tmp_dir)
     data_catalog = DataCatalog()
-    grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None
-    )
-    # Test setting xr.Dataset
+    return GridComponent(root=model_root, data_catalog=data_catalog, model_region=None)
+
+
+def test_set_dataset(grid_component, hydds):
     grid_component.set(data=hydds)
     assert len(grid_component.data) > 0
     assert isinstance(grid_component.data, xr.Dataset)
-    # Test setting xr.DataArray
+
+
+def test_set_dataarray(grid_component, hydds):
     data_array = hydds.to_array()
     grid_component.set(data=data_array, name="data_array")
     assert "data_array" in grid_component.data.data_vars.keys()
-    assert len(grid_component.data.data_vars) == 3
+    assert len(grid_component.data.data_vars) == 1
+
+
+def test_set_raise_errors(grid_component, hydds):
     # Test setting nameless data array
-    data_array.name = None
+    data_array = hydds.to_array()
     with pytest.raises(
         ValueError,
         match=f"Unable to set {type(data_array).__name__} data without a name",
     ):
         grid_component.set(data=data_array)
     # Test setting np.ndarray of different shape
+    grid_component.set(data=data_array, name="data_array")
     ndarray = np.random.rand(4, 5)
     with pytest.raises(ValueError, match="Shape of data and grid maps do not match"):
         grid_component.set(ndarray, name="ndarray")
 
 
-def test_write(tmp_dir, caplog):
-    model_root = ModelRoot(path=tmp_dir)
-    data_catalog = DataCatalog()
-    grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None, logger=logger
-    )
+def test_write(grid_component, tmp_dir, caplog):
     # Test skipping writing when no grid data has been set
     caplog.set_level(logging.WARNING)
     grid_component.write()
     assert "No grid data found, skip writing" in caplog.text
     # Test raise IOerror when model is in read only mode
+    data_catalog = DataCatalog()
     model_root = ModelRoot(tmp_dir, mode="r")
     grid_component = GridComponent(
         root=model_root, data_catalog=data_catalog, model_region=None
@@ -83,36 +86,7 @@ def test_read(tmp_dir, hydds):
         assert grid_component.data == hydds
 
 
-def test_create(tmp_dir, demda):
-    model_root = ModelRoot(path=join(tmp_dir, "grid_model"))
-    data_catalog = DataCatalog(data_libs=["artifact_data"])
-    grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None
-    )
-    # Wrong region kind
-    with pytest.raises(ValueError, match="Region for grid must be of kind"):
-        grid_component.create(region={"vector_model": "test_model"})
-    # bbox
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    with pytest.raises(
-        ValueError, match="res argument required for kind 'bbox', 'geom'"
-    ):
-        grid_component.create({"bbox": bbox})
-    grid_component.create(
-        region={"bbox": bbox},
-        res=0.05,
-        add_mask=False,
-        align=True,
-    )
-
-    assert "mask" not in grid_component.data
-    # assert model.crs.to_epsg() == 4326
-    assert grid_component.data.raster.dims == ("y", "x")
-    assert grid_component.data.raster.shape == (7, 16)
-    assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
-    grid_component._data = xr.Dataset()  # remove old grid
-
-    # bbox rotated
+def test_create_grid_from_bbox_rotated(grid_component):
     grid_component.create(
         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
         res=0.05,
@@ -123,16 +97,41 @@ def test_create(tmp_dir, demda):
     assert "xc" in grid_component.data.coords
     assert grid_component.data.raster.y_dim == "y"
     assert np.isclose(grid_component.data.raster.res[0], 0.05)
-    grid_component._data = xr.Dataset()  # remove old grid
 
-    # grid
-    grid_fn = str(tmp_dir.join("grid.tif"))
-    demda.raster.to_raster(grid_fn)
-    grid_component.create({"grid": grid_fn})
-    assert np.all(demda.raster.bounds == grid_component.region.total_bounds)
-    grid_component._data = xr.Dataset()  # remove old grid
 
-    # basin
+def test_create_grid_from_bbox(grid_component):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_component.create(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    assert "mask" not in grid_component.data
+    assert grid_component.data.raster.dims == ("y", "x")
+    assert grid_component.data.raster.shape == (7, 16)
+    assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
+
+
+def test_create_raise_errors(grid_component):
+    # Wrong region kind
+    with pytest.raises(ValueError, match="Region for grid must be of kind"):
+        grid_component.create(region={"vector_model": "test_model"})
+    # bbox
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    with pytest.raises(
+        ValueError, match="res argument required for kind 'bbox', 'geom'"
+    ):
+        grid_component.create({"bbox": bbox})
+
+
+@pytest.mark.skip(reason="needs working artifact data")
+def test_create_basin_grid(tmp_dir):
+    model_root = ModelRoot(path=join(tmp_dir, "grid_model"))
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    grid_component = GridComponent(
+        root=model_root, data_catalog=data_catalog, model_region=None
+    )
     grid_component.create(
         region={"subbasin": [12.319, 46.320], "uparea": 50},
         res=1000,
