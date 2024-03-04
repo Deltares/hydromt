@@ -51,7 +51,7 @@ class Model(object, metaclass=ABCMeta):
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
     # tell hydroMT which methods should receive the res and region arguments
-    _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
+    _CLI_ARGS = {"region": "region.create"}
     _TMP_DATA_DIR = None
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
