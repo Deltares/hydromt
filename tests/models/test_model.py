@@ -123,6 +123,7 @@ def test_check_data(demda):
         _check_data({"wrong": "type"})
 
 
+@pytest.mark.skip(reason="GridModel has been removed")
 def test_model_api(grid_model):
     assert np.all(np.isin(["grid", "geoms"], list(grid_model.api.keys())))
     # add some wrong data
