@@ -18,6 +18,7 @@
         ".ruff_cache": true,
         "**/__pycache__": true
     },
+    "mypy-type-checker.importStrategy": "fromEnvironment",
     "files.insertFinalNewline": true,
     "cSpell.words": [
         "dtype",
