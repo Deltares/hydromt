@@ -18,8 +18,8 @@ logger.propagate = True
 
 
 @pytest.fixture()
-def grid_component(tmp_dir):
-    model_root = ModelRoot(path=tmp_dir)
+def grid_component(tmpdir):
+    model_root = ModelRoot(path=tmpdir)
     data_catalog = DataCatalog()
     return GridComponent(
         root=model_root, data_catalog=data_catalog, model_region=None, model=Model()
@@ -54,14 +54,14 @@ def test_set_raise_errors(grid_component, hydds):
         grid_component.set(ndarray, name="ndarray")
 
 
-def test_write(grid_component, tmp_dir, caplog):
+def test_write(grid_component, tmpdir, caplog):
     # Test skipping writing when no grid data has been set
     caplog.set_level(logging.WARNING)
     grid_component.write()
     assert "No grid data found, skip writing" in caplog.text
     # Test raise IOerror when model is in read only mode
     data_catalog = DataCatalog()
-    model_root = ModelRoot(tmp_dir, mode="r")
+    model_root = ModelRoot(tmpdir, mode="r")
     grid_component = GridComponent(
         root=model_root, data_catalog=data_catalog, model_region=None, model=Model()
     )
@@ -70,9 +70,9 @@ def test_write(grid_component, tmp_dir, caplog):
             grid_component.write()
 
 
-def test_read(tmp_dir, hydds):
+def test_read(tmpdir, hydds):
     # Test for raising IOError when model is in writing mode
-    model_root = ModelRoot(path=tmp_dir, mode="w")
+    model_root = ModelRoot(path=tmpdir, mode="w")
     data_catalog = DataCatalog()
     grid_component = GridComponent(
         root=model_root,
@@ -83,7 +83,7 @@ def test_read(tmp_dir, hydds):
     )
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         grid_component.read()
-    model_root = ModelRoot(path=tmp_dir, mode="r+")
+    model_root = ModelRoot(path=tmpdir, mode="r+")
     data_catalog = DataCatalog()
     grid_component = GridComponent(
         root=model_root,
@@ -145,8 +145,8 @@ def test_create_raise_errors(grid_component):
 
 
 @pytest.mark.skip(reason="needs working artifact data")
-def test_create_basin_grid(tmp_dir):
-    model_root = ModelRoot(path=join(tmp_dir, "grid_model"))
+def test_create_basin_grid(tmpdir):
+    model_root = ModelRoot(path=join(tmpdir, "grid_model"))
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     grid_component = GridComponent(
         root=model_root,
@@ -193,9 +193,9 @@ def test_properties(caplog, demda, grid_component):
     assert all(region.bounds == demda.raster.bounds)
 
 
-def test_initialize_grid(tmp_dir):
+def test_initialize_grid(tmpdir):
     grid_component = GridComponent(
-        root=ModelRoot(path=tmp_dir, mode="r"),
+        root=ModelRoot(path=tmpdir, mode="r"),
         data_catalog=None,
         model_region=None,
         model=Model(),
