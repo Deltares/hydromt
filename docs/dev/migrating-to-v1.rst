@@ -27,7 +27,7 @@ Dictionary like features such as `catalog['source']`, `catalog['source'] = data`
    :widths: auto
 
 +--------------------------+--------------------------------------+
-| Dictionary               | v1                                   |
+| v0.x                     | v1                                   |
 +==========================+======================================+
 | if 'name' in catalog:    | if catalog.contains_source('name'):  |
 +--------------------------+--------------------------------------+
@@ -49,3 +49,33 @@ Changes required
 ================
 
 Convert any model config files that are still in `ini` or `toml` format to their equivalent YAML files. This can be done with any converter, or by reading and writing it through the standard Python interfaces.
+
+
+Making the model region it's own component
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Rationale
+=========
+
+The model region is a very integral part for the functioning of HydroMT. Additionally there was a lot of logic to handle the differnt ways of specifying a region throught the code. To simplify this, hilight the importance of the model region, make this part of the code easier to customise and consolidate a lot of functionality for easier maintenence, we decided to bring all this functionality together in the `ModelRegionComponent` class. This is a required component for a HydroMT model, and should contain all functionality necessary to deal with it.
+
+
+Changes required
+================
+
+The Model Region is no longer part of the `geoms` data, which means that you will need a seperate write function in your config file. You can use `region.write` for this.
+Additionally the default path the region is written to is no longer `/path/to/root/geoms/region.format` but is now `/path/to/root/region.geojson`. This behaviour can be moddified both from the config file and the python API. We have further more restricted the file format of the model region to `GeoJSON` and the data type to `GeoDataFrame`. `GeoSeries` are allso acceptable but will be converted internally. Other data types or formats are nolonger allowed. Adjust your data and file calls as appropriate.
+
+As aluded to above, since region is no longer part of the `geoms` family, it has recieved it's own object with appropriate functions to use. These are `region.create`, `region.read`, `region.write` and `region.set`. These work as expected and similar to the ther comopnents. (which will be described more indetail in this migration guide later.) For convinience a table with the previous function calls that were removed and their new equivalent is provided below:
+
+
++--------------------------+---------------------------+
+| v0.x                     | v1                        |
++==========================+===========================+
+| model.setup_region(dict) | model.region.create(dict) |
++--------------------------+---------------------------+
+| model.write_geoms()      | model.region.write()      |
++--------------------------+---------------------------+
+| model.set_region(...)    | model.region.set(...)     |
++--------------------------+---------------------------+
