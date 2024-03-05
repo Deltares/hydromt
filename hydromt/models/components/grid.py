@@ -1,4 +1,5 @@
 """Grid Component."""
+import weakref
 from logging import Logger, getLogger
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
@@ -18,6 +19,7 @@ from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
+from hydromt.models.api import Model
 from hydromt.models.components.model_component import ModelComponent
 from hydromt.models.root import ModelRoot
 from hydromt.workflows.basin_mask import get_basin_geometry, parse_region
@@ -44,6 +46,7 @@ class GridComponent(ModelComponent):
         self,
         root: ModelRoot,
         data_catalog: DataCatalog,
+        model: Model,
         model_region=None,
         logger: Logger = logger,
     ):
@@ -66,6 +69,7 @@ class GridComponent(ModelComponent):
         self.data_catalog = data_catalog
         self.model_region = model_region
         self._data = None
+        self._model_ref = weakref.ref(model)
 
     def set(
         self,
@@ -412,6 +416,11 @@ class GridComponent(ModelComponent):
         self.set(grid)
 
         return grid
+
+    @property
+    def model(self) -> Model:
+        """Access the Model instance through the weak reference."""
+        return self._model_ref()
 
     @property
     def res(self) -> Optional[Tuple[float, float]]:
