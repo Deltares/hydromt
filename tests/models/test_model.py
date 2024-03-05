@@ -26,7 +26,7 @@ from hydromt.models import (
 )
 from hydromt.models.api import _check_data
 from hydromt.models.components.grid import GridMixin
-from hydromt.models.region.region import ModelRegion
+from hydromt.models.components.region import ModelRegionComponent
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
@@ -42,7 +42,7 @@ def test_api_attrs():
     assert "asdf" in dm.api
     assert dm.api["asdf"] == "yeah"
     assert "region" in dm.api
-    assert dm.api["region"] == ModelRegion
+    assert dm.api["region"] == ModelRegionComponent
     assert "grid" in dm.api
     assert dm.api["grid"] == xr.Dataset
 

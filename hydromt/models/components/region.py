@@ -4,7 +4,6 @@ from logging import getLogger
 from os.path import exists, isdir, isfile, join
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, cast
-from weakref import ReferenceType, ref
 
 import geopandas as gpd
 import numpy as np
@@ -18,7 +17,7 @@ from shapely import box
 from hydromt import _compat
 from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
-from hydromt.models.root import ModelRoot
+from hydromt.models.components.base import ModelComponent
 from hydromt.workflows.basin_mask import get_basin_geometry
 
 if TYPE_CHECKING:
@@ -29,16 +28,15 @@ logger = getLogger(__name__)
 DEFAULT_REGION_FILE_PATH = "region.geojson"
 
 
-class ModelRegion:
+class ModelRegionComponent(ModelComponent):
     """Define the model region."""
 
     def __init__(
         self,
         model: "Model",
     ) -> None:
-        self.model_ref: ReferenceType["Model"] = ref(model)
+        super().__init__(model)
         self._data: Optional[GeoDataFrame] = None
-        self.logger = model.logger
 
     def create(
         self,
@@ -136,15 +134,14 @@ class ModelRegion:
         kwargs : dict
             parsed region json
         """
-        data_catalog = cast("Model", self.model_ref()).data_catalog
         kind, region = _parse_region(
-            region, data_catalog=data_catalog, logger=self.logger
+            region, data_catalog=self.data_catalog, logger=self.logger
         )
         if kind in ["basin", "subbasin", "interbasin"]:
             # retrieve global hydrography data (lazy!)
-            ds_org = data_catalog.get_rasterdataset(hydrography_fn)
+            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=data_catalog.get_source(basin_index_fn))
+                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = get_basin_geometry(
                 ds=ds_org,
@@ -186,22 +183,10 @@ class ModelRegion:
     @property
     def data(self) -> GeoDataFrame:
         """Provide access to the underlying data of the model region."""
-        root = self._get_root()
-        if self._data is None and root.is_reading_mode():
+        if self._data is None and self.model_root.is_reading_mode():
             self.read(DEFAULT_REGION_FILE_PATH)
 
         return cast(GeoDataFrame, self._data)
-
-    def _get_root(self) -> ModelRoot:
-        # cast is necessary because technically the model could have been
-        # dealocated, but it shouldn't be in this case.
-        root: Optional[ModelRoot] = cast("Model", self.model_ref()).root
-
-        # cannot read geom files for purely in memory models
-        if root is None:
-            raise ValueError("Root was not set, cannot read region file")
-
-        return root
 
     @property
     def crs(self) -> CRS:
@@ -215,12 +200,11 @@ class ModelRegion:
     ):
         """Read the model region from a file on disk."""
         if self._data is None:
-            root = self._get_root()
-            if root.mode.is_reading_mode():
+            if self.model_root.mode.is_reading_mode():
                 # cannot read geom files for purely in memory models
                 self._data = cast(
                     GeoDataFrame,
-                    gpd.read_file(join(root.path, rel_path), **read_kwargs),
+                    gpd.read_file(join(self.model_root.path, rel_path), **read_kwargs),
                 )
                 self._kind = "geom"
             else:
@@ -235,14 +219,12 @@ class ModelRegion:
         **write_kwargs,
     ):
         """Write the model region to a file."""
-        root: ModelRoot = self._get_root()
-
         # cannot read geom files for purely in memory models
-        if root.mode.is_reading_mode():
+        if self.model_root.mode.is_reading_mode():
             self.read()
 
-        write_path = join(root.path, rel_path)
-        if exists(write_path) and not root.mode.is_override_mode():
+        write_path = join(self.model_root.path, rel_path)
+        if exists(write_path) and not self.model_root.mode.is_override_mode():
             raise OSError(
                 f"Model dir already exists and cannot be overwritten: {write_path}"
             )
@@ -253,7 +235,7 @@ class ModelRegion:
         self.data.to_file(write_path, **write_kwargs)
 
     def __eq__(self, __value: object) -> bool:
-        if not isinstance(__value, ModelRegion):
+        if not isinstance(__value, ModelRegionComponent):
             return False
         else:
             try:

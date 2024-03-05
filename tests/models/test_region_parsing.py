@@ -7,7 +7,7 @@ import xarray as xr
 
 from hydromt import DataCatalog, raster
 from hydromt.models import MODELS
-from hydromt.models.region._utils import _parse_region, _parse_region_value
+from hydromt.models.components.region import _parse_region, _parse_region_value
 from hydromt.workflows.basin_mask import _check_size
 
 

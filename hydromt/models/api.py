@@ -29,7 +29,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
-from hydromt.models.region import ModelRegion
+from hydromt.models.components import ModelRegionComponent
 from hydromt.models.root import ModelRoot
 
 __all__ = ["Model"]
@@ -62,7 +62,7 @@ class Model(object, metaclass=ABCMeta):
         "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
-        "region": ModelRegion,
+        "region": ModelRegionComponent,
         "results": XArrayDict,
         "states": XArrayDict,
     }
@@ -135,7 +135,7 @@ class Model(object, metaclass=ABCMeta):
         else:
             self.root: ModelRoot = ModelRoot(root, mode=mode)
 
-        self.region: ModelRegion = ModelRegion(self)
+        self.region: ModelRegionComponent = ModelRegionComponent(self)
 
         self._defered_file_closes = []
 

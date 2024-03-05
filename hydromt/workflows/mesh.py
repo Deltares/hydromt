@@ -13,7 +13,7 @@ from xugrid.ugrid import conventions
 
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.models import ModelRegion
+from hydromt.models import ModelRegionComponent
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ def create_mesh2d(
     mesh2d : xu.UgridDataset
         Generated mesh2d.
     """  # noqa: E501
-    model_region = ModelRegion(region)
+    model_region = ModelRegionComponent(region)
     if model_region._kind != "mesh":
         if not isinstance(res, (int, float)):
             raise ValueError("res argument required for kind 'bbox', 'geom'")
