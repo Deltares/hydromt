@@ -9,6 +9,7 @@ import pytest
 import xarray as xr
 
 from hydromt.data_catalog import DataCatalog
+from hydromt.models.api import Model
 from hydromt.models.components.grid import GridComponent
 from hydromt.models.root import ModelRoot
 
@@ -20,7 +21,9 @@ logger.propagate = True
 def grid_component(tmp_dir):
     model_root = ModelRoot(path=tmp_dir)
     data_catalog = DataCatalog()
-    return GridComponent(root=model_root, data_catalog=data_catalog, model_region=None)
+    return GridComponent(
+        root=model_root, data_catalog=data_catalog, model_region=None, model=Model()
+    )
 
 
 def test_set_dataset(grid_component, hydds):
@@ -60,7 +63,7 @@ def test_write(grid_component, tmp_dir, caplog):
     data_catalog = DataCatalog()
     model_root = ModelRoot(tmp_dir, mode="r")
     grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None
+        root=model_root, data_catalog=data_catalog, model_region=None, model=Model()
     )
     with patch.object(GridComponent, "data", ["test"]):
         with pytest.raises(IOError, match="Model opened in read-only mode"):
@@ -72,14 +75,22 @@ def test_read(tmp_dir, hydds):
     model_root = ModelRoot(path=tmp_dir, mode="w")
     data_catalog = DataCatalog()
     grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None, logger=logger
+        root=model_root,
+        data_catalog=data_catalog,
+        model_region=None,
+        logger=logger,
+        model=Model(),
     )
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         grid_component.read()
     model_root = ModelRoot(path=tmp_dir, mode="r+")
     data_catalog = DataCatalog()
     grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None, logger=logger
+        root=model_root,
+        data_catalog=data_catalog,
+        model_region=None,
+        model=Model(),
+        logger=logger,
     )
     with patch("hydromt.models.components.grid.read_nc", return_value={"grid": hydds}):
         grid_component.read()
@@ -130,7 +141,10 @@ def test_create_basin_grid(tmp_dir):
     model_root = ModelRoot(path=join(tmp_dir, "grid_model"))
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None
+        root=model_root,
+        data_catalog=data_catalog,
+        model_region=None,
+        model=Model(),
     )
     grid_component.create(
         region={"subbasin": [12.319, 46.320], "uparea": 50},
@@ -143,7 +157,7 @@ def test_create_basin_grid(tmp_dir):
     assert grid_component.data.raster.shape == (47, 61)
 
 
-def test_properties(caplog, tmp_dir, demda, grid_component):
+def test_properties(caplog, demda, grid_component):
     # Test properties on empty grid
     caplog.set_level(logging.WARNING)
     res = grid_component.res
@@ -173,7 +187,10 @@ def test_properties(caplog, tmp_dir, demda, grid_component):
 
 def test_initialize_grid(tmp_dir):
     grid_component = GridComponent(
-        root=ModelRoot(path=tmp_dir, mode="r"), data_catalog=None, model_region=None
+        root=ModelRoot(path=tmp_dir, mode="r"),
+        data_catalog=None,
+        model_region=None,
+        model=Model(),
     )
     grid_component.read = MagicMock()
     grid_component._initialize_grid()
@@ -197,11 +214,8 @@ def test_add_data_from_constant(grid_component, demda):
 
 @patch("hydromt.models.components.grid.grid_from_rasterdataset")
 def test_add_data_from_rasterdataset(
-    mock_grid_from_rasterdataset, demda, tmp_dir, caplog
+    mock_grid_from_rasterdataset, demda, caplog, grid_component
 ):
-    grid_component = GridComponent(
-        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
-    )
     caplog.set_level(logging.INFO)
     demda.name = "demda"
     demda = demda.to_dataset()
@@ -230,11 +244,8 @@ def test_add_data_from_rasterdataset(
         assert all([x in result for x in demda.data_vars.keys()])
 
 
-def test_add_data_from_raster_reclass(caplog, tmp_dir, demda):
+def test_add_data_from_raster_reclass(caplog, demda, grid_component):
     caplog.set_level(logging.INFO)
-    grid_component = GridComponent(
-        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
-    )
     raster_fn = "vito"
     reclass_table_fn = "vito_mapping"
 
@@ -284,12 +295,9 @@ def test_add_data_from_raster_reclass(caplog, tmp_dir, demda):
             )
 
 
-def test_add_data_from_geodataframe(caplog, tmp_dir, geodf, demda):
+def test_add_data_from_geodataframe(caplog, geodf, demda, grid_component):
     caplog.set_level(logging.INFO)
     demda.name = "name"
-    grid_component = GridComponent(
-        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
-    )
     grid_component.data_catalog.get_geodataframe = create_autospec(
         grid_component.data_catalog.get_geodataframe, return_value=geodf
     )
