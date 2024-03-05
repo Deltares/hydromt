@@ -30,7 +30,7 @@ from hydromt.workflows.grid import (
     grid_from_rasterdataset,
     rotated_grid,
 )
-
+__all__ = ["GridComponent"]
 logger = getLogger(__name__)
 
 
