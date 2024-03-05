@@ -98,6 +98,7 @@ def test_read(tmp_dir, hydds):
 
 
 def test_create_grid_from_bbox_rotated(grid_component):
+    grid_component._model_ref = MagicMock()
     grid_component.create(
         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
         res=0.05,
@@ -108,10 +109,14 @@ def test_create_grid_from_bbox_rotated(grid_component):
     assert "xc" in grid_component.data.coords
     assert grid_component.data.raster.y_dim == "y"
     assert np.isclose(grid_component.data.raster.res[0], 0.05)
+    # Check set_geoms call
+    geom = grid_component.model.method_calls[0][1][0]
+    assert isinstance(geom, gpd.GeoDataFrame)
 
 
 def test_create_grid_from_bbox(grid_component):
     bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_component._model_ref = MagicMock()
     grid_component.create(
         region={"bbox": bbox},
         res=0.05,
@@ -122,6 +127,9 @@ def test_create_grid_from_bbox(grid_component):
     assert grid_component.data.raster.dims == ("y", "x")
     assert grid_component.data.raster.shape == (7, 16)
     assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
+    # Check set_geoms call
+    geom = grid_component.model.method_calls[0][1][0]
+    assert isinstance(geom, gpd.GeoDataFrame)
 
 
 def test_create_raise_errors(grid_component):
