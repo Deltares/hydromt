@@ -18,7 +18,6 @@ from hydromt import _compat
 from hydromt.data_adapter import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.flw import basin_map, flwdir_from_da, outlet_map, stream_map
-from hydromt.models import MODELS
 
 if _compat.HAS_XUGRID:
     import xugrid as xu
@@ -135,6 +134,8 @@ def parse_region(region, logger=logger, data_catalog=None):
     }
     kind = next(iter(kwargs))  # first key of region
     value0 = kwargs.pop(kind)
+    from hydromt.models import MODELS  # temporary solution to circular imports
+
     if kind in MODELS:
         model_class = MODELS.load(kind)
         kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
