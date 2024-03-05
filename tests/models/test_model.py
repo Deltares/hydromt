@@ -313,7 +313,7 @@ def test_model_build_update(tmpdir, demda, obsda):
         opt={
             "region.create": {},  # should be removed with warning
             "setup_basemaps": {},
-            "write_region": {},
+            "region.write": {},
         }
     )
     assert isfile(join(model.root.path, "region.geojson"))
@@ -408,7 +408,7 @@ def test_model_write_geoms(tmpdir):
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom.to_crs(epsg=28992, inplace=True)
     model.region.set(geom)
-    model.write_region(to_wgs84=True)
+    model.region.write(to_wgs84=True)
     region_geom = gpd.read_file(str(join(tmpdir, "region.geojson")))
     assert region_geom.crs.to_epsg() == 4326
 
@@ -573,7 +573,7 @@ def test_setup_grid(tmpdir, demda):
     grid_fn = str(tmpdir.join("grid.tif"))
     demda.raster.to_raster(grid_fn)
     model.setup_grid({"grid": grid_fn})
-    assert np.all(demda.raster.bounds == model.region.total_bounds)
+    assert np.all(demda.raster.bounds == model.region.bounds)
     model._grid = xr.Dataset()  # remove old grid
 
     # basin

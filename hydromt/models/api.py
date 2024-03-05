@@ -352,13 +352,6 @@ class Model(object, metaclass=ABCMeta):
 
         self._cleanup(forceful_overwrite=forceful_overwrite)
 
-    # TODO remove placeholder to make make sure
-    # build with the current _CLI_ARGS does not raise an error
-    def setup_basemaps(self, *args, **kwargs):  # noqa: D102
-        warnings.warn(
-            "The setup_basemaps method is not implemented.", UserWarning, stacklevel=2
-        )
-
     ## file system
     def _assert_write_mode(self):
         if not self.root.is_writing_mode():
@@ -428,11 +421,16 @@ class Model(object, metaclass=ABCMeta):
             ]
         self.logger.info(f"Writing model data to {self.root.path}")
         for component in components:
-            if not hasattr(self, f"write_{component}"):
+            if hasattr(self, f"write_{component}"):
+                getattr(self, f"write_{component}")()
+            elif hasattr(self, component) and hasattr(
+                getattr(self, component), "write"
+            ):
+                getattr(self, component).write()
+            else:
                 raise AttributeError(
-                    f"{type(self).__name__} does not have write_{component}"
+                    f"{type(self).__name__} does not have write_{component} or a component of that name with a write attr"
                 )
-            getattr(self, f"write_{component}")()
 
     def write_data_catalog(
         self,
@@ -1141,16 +1139,6 @@ class Model(object, metaclass=ABCMeta):
             self.logger.debug(f"Reading model file {name}.")
             self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
 
-    def write_region(
-        self, rel_path: StrPath = Path("region.geojson"), to_wgs84=False, **write_kwargs
-    ):
-        """Write the model region to the path relative to the modelroot."""
-        self.region.write(rel_path, to_wgs84=to_wgs84, **write_kwargs)
-
-    def read_region(self, rel_path: StrPath = Path("region.geojson"), **read_kwargs):
-        """Write the model region to the path relative to the modelroot."""
-        self.region.read(rel_path, **read_kwargs)
-
     def write_geoms(
         self, fn: str = "geoms/{name}.geojson", to_wgs84: bool = False, **kwargs
     ) -> None:
@@ -1748,7 +1736,7 @@ class Model(object, metaclass=ABCMeta):
         if len(self.staticmaps) > 0:
             return self.staticmaps.raster.bounds
         else:
-            return self.region.total_bounds
+            return self.region.bounds
 
     # test methods
     def test_model_api(self):

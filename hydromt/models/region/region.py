@@ -194,14 +194,15 @@ class ModelRegion:
         self._data = data
 
     @property
-    def total_bounds(self):
+    def bounds(self):
         """Return the total bound sof the model region."""
         return self.data.total_bounds
 
     @property
     def data(self) -> GeoDataFrame:
         """Provide access to the underlying data of the model region."""
-        if self._data is None:
+        root = self._get_root()
+        if self._data is None and root.is_reading_mode():
             self.read(DEFAULT_REGION_FILE_PATH)
 
         return cast(GeoDataFrame, self._data)
