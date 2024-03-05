@@ -317,7 +317,7 @@ class Model(object, metaclass=ABCMeta):
         opt = self._check_get_opt(opt)
 
         # read current model
-        if not self.root.is_writing_mode():
+        if self.root.is_writing_mode():
             if model_out is None:
                 raise ValueError(
                     '"model_out" directory required when updating in "read-only" mode'
@@ -341,7 +341,7 @@ class Model(object, metaclass=ABCMeta):
         # loop over other methods from config file
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write()
-            if method.startswith("write_"):
+            if "write" in method:
                 write = False
             kwargs = {} if opt[method] is None else opt[method]
             self._run_log_method(method, **kwargs)

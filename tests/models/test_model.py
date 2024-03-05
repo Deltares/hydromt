@@ -2,6 +2,7 @@
 """Tests for the hydromt.models module of HydroMT."""
 
 from copy import deepcopy
+from os import listdir
 from os.path import abspath, dirname, isfile, join
 
 import geopandas as gpd
@@ -293,30 +294,24 @@ def test_model_does_not_overwrite_in_write_mode(tmpdir):
 
 
 @pytest.mark.integration()
-@pytest.mark.filterwarnings("ignore:The setup_basemaps")
 def test_model_build_update(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     # build model
     model = Model(root=str(tmpdir), mode="w")
-    # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
-    model._CLI_ARGS.update({"region": "region.create"})
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
-        opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
+        opt={
+            "region.create": {},
+            "region.write": {},
+            "write_geoms": {},
+            "write_config": {},
+        },
     )
     assert hasattr(model, "region")
     assert isfile(join(model.root.path, "model.yml"))
     assert isfile(join(model.root.path, "hydromt.log"))
-    # test update with specific write method
-    model.update(
-        opt={
-            "region.create": {},  # should be removed with warning
-            "setup_basemaps": {},
-            "region.write": {},
-        }
-    )
-    assert isfile(join(model.root.path, "region.geojson"))
+    assert isfile(join(model.root.path, "region.geojson")), listdir(model.root.path)
 
     # read and update model
     model = Model(root=str(tmpdir), mode="r")
@@ -326,7 +321,6 @@ def test_model_build_update(tmpdir, demda, obsda):
 
 
 @pytest.mark.integration()
-@pytest.mark.filterwarnings("ignore:The setup_basemaps")
 def test_model_build_update_with_data(tmpdir, demda, obsda):
     # Build model with some data
     bbox = [12.05, 45.30, 12.85, 45.65]

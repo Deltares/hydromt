@@ -167,27 +167,7 @@ class ModelRegion:
         # require more information, e.g. grid RasterDataArray or xy coordinates.
         return region
 
-    # def _rasterdataset_to_geom(self, raster_dataset) -> GeoDataFrame:
-    # crs = raster_dataset.raster.crs
-    # coord_index = cast(pd.Index, raster_dataset.raster.coords.to_index())
-    # dims_max = cast(np.ndarray, coord_index.max())
-    # dims_min = cast(np.ndarray, coord_index.min())
-
-    # # in raster datasets it is guaranteed that y_dim is penultimate dim and x_dim is last dim
-    # geom: GeoDataFrame = GeoDataFrame(
-    #     geometry=[
-    #         box(
-    #             xmin=dims_min[-1],
-    #             ymin=dims_min[-2],
-    #             xmax=dims_max[-1],
-    #             ymax=dims_max[-2],
-    #         )
-    #     ],
-    #     crs=crs,
-    # )
-    # return geom
-
-    def set(self, data: GeoDataFrame, kind: str = "user"):
+    def set(self, data: GeoDataFrame, kind: str = "geom"):
         """Set the model region based on provided GeoDataFrame."""
         # if nothing is provided, record that the region was set by the user
         self._kind = kind
