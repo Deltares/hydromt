@@ -76,20 +76,20 @@ def create_mesh2d(
         Generated mesh2d.
     """  # noqa: E501
     model_region = ModelRegionComponent(region)
-    if model_region._kind != "mesh":
+    if model_region.kind != "mesh":
         if not isinstance(res, (int, float)):
             raise ValueError("res argument required for kind 'bbox', 'geom'")
-        if model_region._kind == "bbox":
+        if model_region.kind == "bbox":
             bbox = region["bbox"]
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-        elif model_region._kind == "geom":
+        elif model_region.kind == "geom":
             geom = region["geom"]
             if geom.crs is None:
                 raise ValueError('Model region "geom" has no CRS')
         else:
             raise ValueError(
                 "Region for mesh must be of kind [bbox, geom, mesh], "
-                f"kind {model_region._kind} not understood."
+                f"kind {model_region.kind} not understood."
             )
         # Parse crs and reproject geom if needed
         if crs is not None:
@@ -116,7 +116,7 @@ def create_mesh2d(
                 faces.append(box(left, bottom, right, top))
         grid = gpd.GeoDataFrame(geometry=faces, crs=geom.crs)
         # If needed clip to geom
-        if model_region._kind != "bbox":
+        if model_region.kind != "bbox":
             grid = grid.loc[
                 gpd.sjoin(
                     grid, geom, how="left", predicate="intersects"

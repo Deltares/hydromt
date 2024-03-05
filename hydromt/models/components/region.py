@@ -1,7 +1,8 @@
 """Model Region class."""
 
 from logging import getLogger
-from os.path import exists, isdir, isfile, join
+from os import makedirs
+from os.path import basename, exists, isdir, isfile, join
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, cast
 
@@ -9,7 +10,7 @@ import geopandas as gpd
 import numpy as np
 import xarray as xr
 import xugrid as xu
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, GeoSeries
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely import box
@@ -172,26 +173,40 @@ class ModelRegionComponent(ModelComponent):
     def set(self, data: GeoDataFrame, kind: str = "geom"):
         """Set the model region based on provided GeoDataFrame."""
         # if nothing is provided, record that the region was set by the user
-        self._kind = kind
-        self._data = data
+        self.kind = kind
+        if self._data is not None:
+            self.logger.info("Updating region geometry.")
+
+        if isinstance(data, GeoSeries):
+            self._data = GeoDataFrame(data)
+        elif isinstance(data, GeoDataFrame):
+            self._data = data
+        else:
+            raise ValueError("Only GeoSeries or GeoDataFrame can be used as region.")
 
     @property
     def bounds(self):
         """Return the total bound sof the model region."""
-        return self.data.total_bounds
+        if self.data is not None:
+            return self.data.total_bounds
+        else:
+            raise ValueError("Could not read or construct region to read bounds from")
 
     @property
-    def data(self) -> GeoDataFrame:
+    def data(self) -> Optional[GeoDataFrame]:
         """Provide access to the underlying data of the model region."""
         if self._data is None and self.model_root.is_reading_mode():
-            self.read(DEFAULT_REGION_FILE_PATH)
+            self.read()
 
-        return cast(GeoDataFrame, self._data)
+        return self._data
 
     @property
     def crs(self) -> CRS:
         """Provide access to the CRS of the model region."""
-        return self.data.crs
+        if self.data is not None:
+            return self.data.crs
+        else:
+            raise ValueError("Could not read or construct region to read crs from")
 
     def read(
         self,
@@ -199,18 +214,13 @@ class ModelRegionComponent(ModelComponent):
         **read_kwargs,
     ):
         """Read the model region from a file on disk."""
-        if self._data is None:
-            if self.model_root.mode.is_reading_mode():
-                # cannot read geom files for purely in memory models
-                self._data = cast(
-                    GeoDataFrame,
-                    gpd.read_file(join(self.model_root.path, rel_path), **read_kwargs),
-                )
-                self._kind = "geom"
-            else:
-                raise ValueError(
-                    "Cannot read while not in read mode either add data or rerun in read mode."
-                )
+        self.model._assert_read_mode()
+        # cannot read geom files for purely in memory models
+        self._data = cast(
+            GeoDataFrame,
+            gpd.read_file(join(self.model_root.path, rel_path), **read_kwargs),
+        )
+        self.kind = "geom"
 
     def write(
         self,
@@ -219,20 +229,22 @@ class ModelRegionComponent(ModelComponent):
         **write_kwargs,
     ):
         """Write the model region to a file."""
-        # cannot read geom files for purely in memory models
-        if self.model_root.mode.is_reading_mode():
-            self.read()
-
         write_path = join(self.model_root.path, rel_path)
-        if exists(write_path) and not self.model_root.mode.is_override_mode():
-            raise OSError(
-                f"Model dir already exists and cannot be overwritten: {write_path}"
-            )
+        self.model._assert_write_mode()
 
-        if to_wgs84:
-            self._data = self.data.to_crs(4326)
+        base_name = basename(write_path)
+        if not exists(base_name):
+            makedirs(base_name, exist_ok=True)
 
-        self.data.to_file(write_path, **write_kwargs)
+        if self.data is None:
+            self.logger.info("No region data found. skipping writing...")
+        else:
+            self.logger.info(f"writing region data to {write_path}")
+
+            if to_wgs84:
+                self._data = self.data.to_crs(4326)
+
+            self.data.to_file(write_path, **write_kwargs)
 
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, ModelRegionComponent):
