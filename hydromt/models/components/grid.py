@@ -413,7 +413,7 @@ class GridComponent(ModelComponent):
             grid = grid.drop_vars("mask")
 
         # Add region and grid to model
-        self.model.region.set_geoms(geom, "region")
+        self.model.set_geoms(geom, "region")
         self.set(grid)
 
         return grid
