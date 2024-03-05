@@ -11,7 +11,7 @@ if HAS_XUGRID:
     from hydromt.models.components.mesh import MeshModel
 
 from hydromt.models.region import ModelRegion
-from hydromt.models.root import ModeLike, ModelMode
+from hydromt.models.root import ModeLike, ModelMode, ModelRoot 
 
 # expose global MODELS object which discovers and loads
 # any local generalized or plugin model class on-the-fly
