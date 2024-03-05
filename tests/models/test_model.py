@@ -328,8 +328,6 @@ def test_model_build_update_with_data(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
     model = Model(root=str(tmpdir), mode="w+")
-    # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
-    model._CLI_ARGS.update({"region": "region.create"})
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
