@@ -24,12 +24,10 @@ from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.models import MODELS
 from hydromt.models.api import Model
-from hydromt.models.components.grid import GridComponent
 
 # from hydromt.models.components.grid import GridModel
 from hydromt.models.components.network import NetworkModel
 from hydromt.models.components.vector import VectorModel
-from hydromt.models.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
@@ -377,9 +375,3 @@ def artifact_data():
     datacatalog = DataCatalog()
     datacatalog.from_predefined_catalogs("artifact_data")
     return datacatalog
-
-
-@pytest.fixture()
-def grid_component(tmp_dir):
-    model_root = ModelRoot(path=tmp_dir)
-    return GridComponent(root=model_root, data_catalog=None, model_region=None)
