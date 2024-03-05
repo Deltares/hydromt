@@ -3,7 +3,7 @@
 
 from copy import deepcopy
 from os import listdir
-from os.path import abspath, dirname, isfile, join
+from os.path import abspath, dirname, exists, isfile, join
 
 import geopandas as gpd
 import numpy as np
@@ -286,9 +286,11 @@ def test_model_errors_on_unknown_method():
 
 def test_model_does_not_overwrite_in_write_mode(tmpdir):
     bbox = [12.05, 45.30, 12.85, 45.65]
-    model = Model(root=join(tmpdir, "tmp"), mode="w")
+    root = join(tmpdir, "tmp")
+    model = Model(root=root, mode="w")
     model.region.create({"bbox": bbox})
     model.region.write()
+    assert exists(join(root, "region.geojson"))
     with pytest.raises(
         OSError, match="Model dir already exists and cannot be overwritten: "
     ):

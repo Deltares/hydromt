@@ -81,6 +81,10 @@ class ModelRoot:
         """Test whether we are in reading mode or not."""
         return self._mode.is_reading_mode()
 
+    def is_override_mode(self) -> bool:
+        """Test whether we are in override mode or not."""
+        return self._mode.is_override_mode()
+
     def _update_logger_filehandler(
         self, old_path: Optional[Path] = None, overwrite: bool = False
     ):

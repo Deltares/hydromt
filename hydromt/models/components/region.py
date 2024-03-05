@@ -232,6 +232,10 @@ class ModelRegionComponent(ModelComponent):
         write_path = join(self.model_root.path, rel_path)
         self.model._assert_write_mode()
 
+        if exists(write_path) and not self.model_root.is_override_mode():
+            raise OSError(
+                f"Model dir already exists and cannot be overwritten: {write_path}"
+            )
         base_name = basename(write_path)
         if not exists(base_name):
             makedirs(base_name, exist_ok=True)

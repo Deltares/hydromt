@@ -317,7 +317,7 @@ class Model(object, metaclass=ABCMeta):
         opt = self._check_get_opt(opt)
 
         # read current model
-        if self.root.is_writing_mode():
+        if not self.root.is_writing_mode():
             if model_out is None:
                 raise ValueError(
                     '"model_out" directory required when updating in "read-only" mode'
@@ -389,11 +389,14 @@ class Model(object, metaclass=ABCMeta):
             ]
         self.logger.info(f"Reading model data from {self.root.path}")
         for component in components:
-            if not hasattr(self, f"read_{component}"):
+            if hasattr(self, f"read_{component}"):
+                getattr(self, f"read_{component}")()
+            elif hasattr(self, component) and hasattr(getattr(self, component), "read"):
+                getattr(self, component).read()
+            else:
                 raise AttributeError(
-                    f"{type(self).__name__} does not have read_{component}"
+                    f"{type(self).__name__} does not have read_{component} or a component of that name with a read attr"
                 )
-            getattr(self, f"read_{component}")()
 
     def write(
         self,
