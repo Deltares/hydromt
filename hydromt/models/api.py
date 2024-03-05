@@ -1868,14 +1868,3 @@ def _check_equal(a, b, name="") -> Dict[str, str]:
     except AssertionError as e:
         errors.update({name: e})
     return errors
-
-
-def _check_size(ds, logger=logger, threshold=12e3**2):
-    # warning for large domain
-    if (
-        np.multiply(*ds.raster.shape) > threshold
-    ):  # 12e3 ** 2 > 10x10 degree at 3 arcsec
-        logger.warning(
-            "Loading very large spatial domain to derive a subbasin. "
-            "Provide initial 'bounds' if this takes too long."
-        )

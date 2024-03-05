@@ -238,7 +238,9 @@ class ModelRegion:
 
         write_path = join(root.path, rel_path)
         if exists(write_path) and not root.mode.is_override_mode():
-            raise OSError(f"Not in overwrite mode and file {write_path} already exists")
+            raise OSError(
+                f"Model dir already exists and cannot be overwritten: {write_path}"
+            )
 
         if to_wgs84:
             self._data = self.data.to_crs(4326)

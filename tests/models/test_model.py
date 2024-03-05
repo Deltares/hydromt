@@ -289,7 +289,9 @@ def test_model_does_not_overwrite_in_write_mode(tmpdir):
     model = Model(root=join(tmpdir, "tmp"), mode="w")
     model.region.create({"bbox": bbox})
     model.region.write()
-    with pytest.raises(OSError, match="Not in overwrite mode and file "):
+    with pytest.raises(
+        OSError, match="Model dir already exists and cannot be overwritten: "
+    ):
         model.region.write()
 
 
