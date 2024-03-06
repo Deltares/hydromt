@@ -20,6 +20,8 @@ jobs:
     steps:
 
       - uses: actions/checkout@v4
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - name: check migration guide is updated
         run: |
           git diff --name-status v1 | grep migrating
