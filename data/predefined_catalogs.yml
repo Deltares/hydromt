@@ -40,5 +40,5 @@ artifact_data:
   urlpath:  https://raw.githubusercontent.com/Deltares/hydromt/{version}/data/catalogs/artifact_data.yml
   versions:
     v0.0.9: main
-    v0.0.8: 0ec2411c2548785d6ee4c8925b75287ca8fad0b0
+    v0.0.8: 202874eb4fe3415d0608ea81cd61620af6f5816a
   notes: This data archive contains a sample dataset for the Piave basin (North Italy) to be used for tests and docs/demo purposes.
