@@ -46,7 +46,3 @@ jobs:
             echo "api.rst is not updated"
             exit 1
           fi
-
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
