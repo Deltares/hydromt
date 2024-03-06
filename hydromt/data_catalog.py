@@ -1913,9 +1913,6 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             variants = source.pop("variants")
             for diff in variants:
                 source_copy = copy.deepcopy(source)
-                if "meta" in source_copy:
-                    # Update meta if variant has variant specific meta data
-                    source_copy["meta"].update(diff.pop("meta", {}))
                 source_copy.update(**diff)
                 data_dicts.append({name: source_copy})
         elif "placeholders" in source:

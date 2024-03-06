@@ -37,11 +37,6 @@ Added
 - Test script for testing predefined catalogs locally. (#735)
 - Option to write a data catalog to a csv file (#425)
 
-Changed
--------
-- Datacatalog preserves variant specific meta data (#521)
-- Updated DataCatalogValidator to deal with provider and driver_kwargs (#521)
-
 Fixed
 -----
 - Reading Vector formats that consist of more than one file via geopandas. (#691)
@@ -49,7 +44,6 @@ Fixed
 - add option to ignore empty data sets when exporting data (#743)
 - Fix bug in `raster._check_dimensions` for datasets with multiple variables with varying dimension size (#761)
 - Fix bug when reading COGs at requested zoom level (#758)
-
 
 v0.9.2 (2024-01-09)
 ===================
@@ -61,11 +55,9 @@ Added
 - New stats.skills VE and RSR (#666)
 - Check CLI command can now validate bbox and geom regions (#664)
 
-
 Changed
 -------
 - Export CLI now uses '-s' for source, '-t' for time and '-i' for config. (#660)
-- Updated deltares_data data catalog to incorporate the newest data catalog features (#667)
 
 Fixed
 -----
