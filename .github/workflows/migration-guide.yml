@@ -15,14 +15,33 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
-    name: Migration guide is updated
     runs-on: ubuntu-latest
     steps:
 
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docs/dev/migrating-to-v1.rst
+            docs/api.rst
+          sparse-checkout-cone-mode: false
+          path: head
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docs/dev/migrating-to-v1.rst
+            docs/api.rst
+          sparse-checkout-cone-mode: false
+          path: v1
+          ref: v1
       - name: check migration guide is updated
         run: |
-          git diff --name-status v1 | grep migrating
+          if cmp head/docs/dev/migrating-to-v1.rst v1/docs/dev/migrating-to-v1.rst; then
+            echo "migraion guide is not updated"
+            exit 1
+          fi
       - name: check api.rst is updated
         run: |
-          git diff --name-status v1 | grep "api.rst"
+          if cmp head/docs/api.rst v1/docs/api.rst; then
+            echo "api.rst is not updated"
+            exit 1
+          fi

@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_basin(caplog):
     data_catalog = hydromt.DataCatalog("artifact_data", logger=logger)
     ds = data_catalog.get_rasterdataset("merit_hydro_1k")
