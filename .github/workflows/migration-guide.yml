@@ -20,14 +20,10 @@ jobs:
     steps:
 
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
         with:
-          ref: v1
+          fetch-depth: 0
+          # bit of a shame to fetch all history but oh well, I'll try and optimise this later
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
-      # by default only a detached head state is checked out so we have to fetch v1 itself
 
       - name: check migration guide is updated
         run: |
