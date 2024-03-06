@@ -1,0 +1,752 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hydromt.merge &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/merge';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.5';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../dev/intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">hydromt.merge</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for hydromt.merge</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Implementations relating to merging of datasets and arrays.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span>
+
+<span class="kn">from</span> <span class="nn">.raster</span> <span class="kn">import</span> <span class="n">full_from_transform</span>
+
+
+<div class="viewcode-block" id="merge">
+<a class="viewcode-back" href="../../_generated/hydromt.merge.merge.html#hydromt.merge.merge">[docs]</a>
+<span class="k">def</span> <span class="nf">merge</span><span class="p">(</span>
+    <span class="n">data_arrays</span><span class="p">,</span>
+    <span class="n">dst_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dst_bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dst_res</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">align</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">merge_method</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge multiple tiles to a single DataArray.</span>
+
+<span class="sd">    If mismatching grid CRS or resolution, tiles are reprojected</span>
+<span class="sd">    to match the output DataArray grid. If no destination</span>
+<span class="sd">    grid is defined it is based on the first DataArray in the list.</span>
+
+<span class="sd">    Based on :py:meth:`rasterio.merge.merge`.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    data_arrays: list of xarray.DataArray</span>
+<span class="sd">        Tiles to merge</span>
+<span class="sd">    dst_crs: pyproj.CRS, int</span>
+<span class="sd">        CRS (or EPSG code) of destination grid</span>
+<span class="sd">    dst_bounds: list of float</span>
+<span class="sd">        Bounding box [xmin, ymin, xmax, ymax] of destination grid</span>
+<span class="sd">    dst_res: float</span>
+<span class="sd">        Resolution of destination grid</span>
+<span class="sd">    align : bool, optional</span>
+<span class="sd">        If True, align grid with dst_res</span>
+<span class="sd">    mask: geopands.GeoDataFrame, optional</span>
+<span class="sd">        Mask of destination area of interest.</span>
+<span class="sd">        Used to determine dst_crs, dst_bounds and dst_res if missing.</span>
+<span class="sd">    merge_method: {&#39;first&#39;,&#39;last&#39;,&#39;min&#39;,&#39;max&#39;,&#39;new&#39;}, callable</span>
+<span class="sd">        Merge method:</span>
+
+<span class="sd">        * first: reverse painting</span>
+<span class="sd">        * last: paint valid new on top of existing</span>
+<span class="sd">        * min: pixel-wise min of existing and new</span>
+<span class="sd">        * max: pixel-wise max of existing and new</span>
+<span class="sd">        * new: assert no pixel overlap</span>
+<span class="sd">    **kwargs:</span>
+<span class="sd">        Key-word arguments passed to</span>
+<span class="sd">        :py:meth:`~hydromt.raster.RasterDataArray.reproject`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    da_out: xarray.DataArray</span>
+<span class="sd">        Merged tiles.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># define merge method</span>
+    <span class="k">if</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+            <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
+            <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+            <span class="n">dmask</span> <span class="o">=</span> <span class="o">~</span><span class="n">new_nodata</span>
+            <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+            <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="o">~</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
+            <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">],</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">])</span>
+            <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
+            <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+            <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="o">~</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
+            <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">],</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">])</span>
+            <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
+            <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+            <span class="n">data_overlap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="o">~</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">data_overlap</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">new_nodata</span>
+            <span class="n">old_data</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="nb">callable</span><span class="p">(</span><span class="n">merge_method</span><span class="p">):</span>
+        <span class="n">copyto</span> <span class="o">=</span> <span class="n">merge_method</span>
+
+    <span class="c1"># resolve arguments</span>
+    <span class="k">if</span> <span class="n">data_arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mosaic is only implemented for 2D DataArrays.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dst_crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dst_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dst_res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dst_bounds and dst_res not understood without dst_crs.&quot;</span><span class="p">)</span>
+    <span class="n">idx0</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dst_res</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dst_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># select array with largest overlap of valid cells if mask</span>
+        <span class="n">areas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="n">data_arrays</span><span class="p">:</span>
+            <span class="n">da_clipped</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">clip_geom</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">da_clipped</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">areas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">idx0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">areas</span><span class="p">)</span>
+        <span class="c1"># if single layer with overlap of valid cells: return clip</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">areas</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data_arrays</span><span class="p">[</span><span class="n">idx0</span><span class="p">]</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">clip_geom</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+    <span class="n">da0</span> <span class="o">=</span> <span class="n">data_arrays</span><span class="p">[</span><span class="n">idx0</span><span class="p">]</span>  <span class="c1"># used for default dst_crs and dst_res</span>
+    <span class="c1"># dst CRS</span>
+    <span class="k">if</span> <span class="n">dst_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">dst_crs</span><span class="p">)</span>
+    <span class="c1"># dst res</span>
+    <span class="k">if</span> <span class="n">dst_res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dst_res</span> <span class="o">=</span> <span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dst_res</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">x_res</span><span class="p">,</span> <span class="n">y_res</span> <span class="o">=</span> <span class="n">dst_res</span><span class="p">,</span> <span class="o">-</span><span class="n">dst_res</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dst_res</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">dst_res</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">x_res</span><span class="p">,</span> <span class="n">y_res</span> <span class="o">=</span> <span class="n">dst_res</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dst_res not understood.&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">x_res</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="c1"># TODO test y_res &gt; 0</span>
+    <span class="n">dst_res</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_res</span><span class="p">,</span> <span class="o">-</span><span class="n">y_res</span><span class="p">)</span>  <span class="c1"># NOTE: y_res is multiplied with -1 in rasterio!</span>
+    <span class="c1"># dst bounds</span>
+    <span class="k">if</span> <span class="n">dst_bounds</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">dst_crs</span><span class="p">)</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x_res</span><span class="p">))</span><span class="o">.</span><span class="n">total_bounds</span>
+        <span class="c1"># align with da0 grid</span>
+        <span class="n">w0</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">e0</span><span class="p">,</span> <span class="n">n0</span> <span class="o">=</span> <span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">w</span> <span class="o">-</span> <span class="n">w0</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x_res</span><span class="p">))</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x_res</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">n0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">n</span> <span class="o">-</span> <span class="n">n0</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y_res</span><span class="p">))</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y_res</span><span class="p">)</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">e</span> <span class="o">-</span> <span class="n">w</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x_res</span><span class="p">)))</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x_res</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">n</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y_res</span><span class="p">)))</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y_res</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># don&#39;t align with resolution</span>
+    <span class="k">elif</span> <span class="n">dst_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">da</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_arrays</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">w</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span><span class="n">dst_crs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">w1</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">e1</span><span class="p">,</span> <span class="n">n1</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span><span class="n">dst_crs</span><span class="p">)</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">w1</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e1</span><span class="p">)</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">dst_bounds</span>
+    <span class="c1"># check N&gt;S orientation</span>
+    <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">if</span> <span class="n">y_res</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">dst_bounds</span> <span class="o">=</span> <span class="n">w</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">top</span>
+    <span class="c1"># dst transform</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">e</span> <span class="o">-</span> <span class="n">w</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x_res</span><span class="p">)))</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">n</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y_res</span><span class="p">)))</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">from_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">dst_bounds</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+    <span class="c1"># align with dst_res</span>
+    <span class="k">if</span> <span class="n">align</span><span class="p">:</span>
+        <span class="n">transform</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">warp</span><span class="o">.</span><span class="n">aligned_target</span><span class="p">(</span>
+            <span class="n">transform</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">dst_res</span>
+        <span class="p">)</span>
+
+    <span class="c1"># creat output array</span>
+    <span class="n">nodata</span> <span class="o">=</span> <span class="n">da0</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span>
+    <span class="n">isnan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">da0</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="n">da_out</span> <span class="o">=</span> <span class="n">full_from_transform</span><span class="p">(</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">da0</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">attrs</span><span class="o">=</span><span class="n">da0</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+        <span class="n">crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">da_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">ycoords</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">da_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">xcoords</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">dest</span> <span class="o">=</span> <span class="n">da_out</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dst_crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span> <span class="n">dst_res</span><span class="o">=</span><span class="n">dst_res</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sf_lst</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">da</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_arrays</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">aligned_grid</span><span class="p">(</span><span class="n">da_out</span><span class="p">):</span>
+            <span class="c1"># clip with buffer</span>
+            <span class="n">src_bbox</span> <span class="o">=</span> <span class="n">da_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+            <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">clip_bbox</span><span class="p">(</span><span class="n">src_bbox</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">da</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">]):</span>
+                <span class="k">continue</span>  <span class="c1"># out of bounds</span>
+            <span class="c1"># reproject</span>
+            <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># clip to dst_bounds</span>
+        <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">clip_bbox</span><span class="p">(</span><span class="n">dst_bounds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">da</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">]):</span>
+            <span class="k">continue</span>  <span class="c1"># out of bounds</span>
+        <span class="k">if</span> <span class="s2">&quot;source_file&quot;</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+            <span class="n">sf_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;source_file&quot;</span><span class="p">])</span>
+        <span class="c1"># merge overlap</span>
+        <span class="n">w0</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">e0</span><span class="p">,</span> <span class="n">n0</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="k">if</span> <span class="n">y_res</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ys</span> <span class="o">&lt;=</span> <span class="n">n0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">n0</span> <span class="o">&lt;</span> <span class="n">ys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ys</span> <span class="o">&lt;</span> <span class="n">s0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">s0</span> <span class="o">&gt;</span> <span class="n">ys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ys</span> <span class="o">&gt;</span> <span class="n">n0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">n0</span> <span class="o">&lt;</span> <span class="n">ys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ys</span> <span class="o">&gt;=</span> <span class="n">s0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">s0</span> <span class="o">&gt;</span> <span class="n">ys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">xs</span> <span class="o">&gt;=</span> <span class="n">w0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">w0</span> <span class="o">&gt;</span> <span class="n">xs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">xs</span> <span class="o">&gt;</span> <span class="n">e0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">e0</span> <span class="o">&lt;</span> <span class="n">xs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">y_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)</span>
+        <span class="n">x_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+        <span class="n">region</span> <span class="o">=</span> <span class="n">dest</span><span class="p">[</span><span class="n">y_slice</span><span class="p">,</span> <span class="n">x_slice</span><span class="p">]</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_equal</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">),</span> <span class="n">nodata</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isnan</span><span class="p">:</span>
+            <span class="n">region_nodata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+            <span class="n">temp_nodata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">region_nodata</span> <span class="o">=</span> <span class="n">region</span> <span class="o">==</span> <span class="n">nodata</span>
+            <span class="n">temp_nodata</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">mask</span>
+        <span class="n">copyto</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">region_nodata</span><span class="p">,</span> <span class="n">temp_nodata</span><span class="p">)</span>
+
+    <span class="c1"># set attrs</span>
+    <span class="n">da_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">source_file</span><span class="o">=</span><span class="s2">&quot;; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sf_lst</span><span class="p">))</span>
+    <span class="n">da_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">dst_crs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">da_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reset_spatial_dims_attrs</span><span class="p">()</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
