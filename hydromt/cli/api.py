@@ -3,13 +3,10 @@
 import inspect
 import logging
 import typing
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
-from hydromt import workflows
 from hydromt.data_catalog import DataCatalog
-from hydromt.gis import utm_crs
 from hydromt.models import MODELS
-from hydromt.models.api import parse_region
 
 logger = logging.getLogger(__name__)
 
@@ -123,64 +120,3 @@ def get_predifined_catalogs() -> Dict:
 
     """
     return DataCatalog().predefined_catalogs
-
-
-def get_region(
-    region: dict,
-    data_libs: Optional[Union[List, str]] = None,
-    hydrography_fn: str = "merit_hydro",
-    basin_index_fn: str = "merit_hydro_index",
-) -> str:
-    """Get jsonified basin/subbasin/interbasin geometry including area as a property.
-
-    Parameters
-    ----------
-    region : dict
-        dictionary containing region definition
-    data_libs : (list of) str, Path, optional
-        One or more paths to data catalog configuration files or names of predefined
-        data catalogs. By default the data catalog is initiated without data entries.
-        See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml`
-        for accepted yaml format.
-    hydrography_fn : str
-        Name of data source for hydrography data.
-    basin_index_fn : str
-        Name of data source with basin (bounding box) geometries associated with
-            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
-            based on a (sub)(inter)basins without a 'bounds' argument.
-
-
-    Returns
-    -------
-    geom: str
-        Geojson of geodataframe
-    """
-    if data_libs:
-        data_catalog = DataCatalog(data_libs, logger=logger)
-    else:
-        data_catalog = DataCatalog(logger=logger)
-    kind, region = parse_region(region, logger=logger)
-    # NOTE: kind=outlet is deprecated!
-    if kind in ["basin", "subbasin", "interbasin", "outlet"]:
-        # retrieve global hydrography data (lazy!)
-        ds_org = data_catalog.get_rasterdataset(hydrography_fn)
-        if "bounds" not in region:
-            region.update(basin_index=data_catalog.get_source(basin_index_fn))
-        # get basin geometry
-        geom, xy = workflows.get_basin_geometry(
-            ds=ds_org,
-            kind=kind,
-            logger=logger,
-            **region,
-        )
-
-        geom_bbox = geom.geometry.total_bounds
-        projected_crs = utm_crs(geom_bbox)
-        geom_projected = geom.to_crs(crs=projected_crs)
-        geom["area"] = geom_projected["geometry"].area
-
-        return geom.to_json()
-    else:
-        raise ValueError(
-            "Only basin, subbasin, and interbasin are accepted region definitions"
-        )

@@ -19,15 +19,13 @@ Added
 Changed
 -------
 - The `root` meta key of data catalogs yaml files has become `roots` (#786)
+- The model region is no longer a subset of the `geoms` but rather it's own component class. See the migration guide for more info (#810)
 
 
 Removed
 -------
 - support for `**artifact_keys` when initializing the DataCatalog has been removed. (#786)
 - support for dictionary like features on the DataCatalog have been removed. (#790)
-
-Removed
--------
 - Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
 
 

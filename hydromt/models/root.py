@@ -25,11 +25,6 @@ class ModelRoot:
     ):
         self.set(path, mode, logger)
 
-    @property
-    def path(self) -> Path:
-        """The path to the model root in question."""
-        return self._path
-
     def set(
         self,
         path: StrPath,
@@ -37,15 +32,15 @@ class ModelRoot:
         logger: Logger = logger,
     ) -> Path:
         """Set the path of the root, and create the necessary loggers."""
-        if hasattr(self, "_path"):
-            old_path = self._path
+        if hasattr(self, "path"):
+            old_path = self.path
         else:
             old_path = None
 
         self.logger = logger
         self.logger.info(f"setting root to {path}")
 
-        self._path = Path(path)
+        self.path = Path(path)
 
         if mode:
             self._mode = ModelMode.from_str_or_mode(mode)
@@ -54,12 +49,12 @@ class ModelRoot:
             self._check_root_exists()
 
         if self.mode is not None:
-            is_override = self.mode.is_override()
+            is_override = self.mode.is_override_mode()
         else:
             is_override = False
 
         self._update_logger_filehandler(old_path, is_override)
-        return self._path
+        return self.path
 
     def _close_logs(self):
         for _ in range(len(self.logger.handlers)):
@@ -86,21 +81,25 @@ class ModelRoot:
         """Test whether we are in reading mode or not."""
         return self._mode.is_reading_mode()
 
+    def is_override_mode(self) -> bool:
+        """Test whether we are in override mode or not."""
+        return self._mode.is_override_mode()
+
     def _update_logger_filehandler(
         self, old_path: Optional[Path] = None, overwrite: bool = False
     ):
         """Update the file handler to save logs in self.path/hydromt.log. If a log file at old_path exists copy it to self.path and append."""
-        new_path = join(self._path, "hydromt.log")
+        new_path = join(self.path, "hydromt.log")
         if old_path == new_path:
             return
 
-        makedirs(self._path, exist_ok=True)
+        makedirs(self.path, exist_ok=True)
 
         log_level = 20  # default, but overwritten by the level of active loggers
         for i, h in enumerate(self.logger.handlers):
             log_level = h.level
             if isinstance(h, FileHandler):
-                if dirname(h.baseFilename) != self._path:
+                if dirname(h.baseFilename) != self.path:
                     self.logger.handlers.pop(i).close()
                 break
 
@@ -115,9 +114,9 @@ class ModelRoot:
         add_filehandler(self.logger, new_path, log_level)
 
     def __repr__(self):
-        return f"ModelRoot(path={self._path}, mode={self._mode})"
+        return f"ModelRoot(path={self.path}, mode={self._mode})"
 
     def _check_root_exists(self):
         # check directory
-        if not isdir(self._path):
-            raise IOError(f'model root not found at "{self._path}"')
+        if not isdir(self.path):
+            raise IOError(f'model root not found at "{self.path}"')
