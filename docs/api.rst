@@ -1031,5 +1031,3 @@ Design Events
    :toctree: _generated
 
    stats.design_events.get_peak_hydrographs
-
-   I'm updating the api.rst

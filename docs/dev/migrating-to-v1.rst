@@ -153,5 +153,3 @@ removed and their new equivalent is provided below:
 +--------------------------+---------------------------+
 | model.set_region(...)    | model.region.set(...)     |
 +--------------------------+---------------------------+
-
-add a chagne
