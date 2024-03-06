@@ -677,7 +677,7 @@ def open_vector_from_table(
     crs=None,
     **kwargs,
 ):
-    """Read point geometry files from csv, parquet, xy or excel table files.
+    r"""Read point geometry files from csv, parquet, xy or excel table files.
 
     Parameters
     ----------
@@ -686,7 +686,7 @@ def open_vector_from_table(
         If 'parquet' use :py:meth:`pandas.read_parquet` to read the data;
         If 'xls' or 'xlsx' use :py:meth:`pandas.read_excel` with `engine=openpyxl`
         If 'xy' use :py:meth:`pandas.read_csv` with `index_col=False`, `header=None`,
-        `delim_whitespace=True`.
+        `sep='\s+'`.
     x_dim, y_dim: str
         Name of x, y column. By default the x-column header should be one of
         ['x', 'longitude', 'lon', 'long'], and y-column header one of
@@ -717,7 +717,7 @@ def open_vector_from_table(
     elif driver == "xy":
         x_dim = x_dim if x_dim is not None else "x"
         y_dim = y_dim if y_dim is not None else "y"
-        kwargs.update(index_col=False, header=None, delim_whitespace=True)
+        kwargs.update(index_col=False, header=None, sep=r"\s+")
         df = pd.read_csv(fn, **kwargs).rename(columns={0: x_dim, 1: y_dim})
     else:
         raise IOError(f"Driver {driver} unknown.")

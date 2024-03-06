@@ -698,10 +698,13 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
     assert "precip" in vector_model.vector
     assert "param1" in vector_model.vector
     # geometry and update grid
-    geoda_test = geoda.vector.update_geometry(geoda.vector.geometry.buffer(0.1))
+    crs = geoda.vector.crs
+    geoda_test = geoda.vector.update_geometry(
+        geoda.vector.geometry.to_crs(3857).buffer(0.1).to_crs(crs)
+    )
     with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
         vector_model.set_vector(data=geoda_test)
-    param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop("geometry")
+    param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop_vars("geometry")
     with pytest.raises(ValueError, match="Index coordinate of data variable"):
         vector_model.set_vector(data=param3, name="param3")
     vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")

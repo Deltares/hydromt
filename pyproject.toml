@@ -137,18 +137,9 @@ exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 [tool.pytest.ini_options]
 addopts = "--ff "
 testpaths = ["tests"]
-markers = [
-  "integration: marks tests as being integration tests"
-]
+markers = ["integration: marks tests as being integration tests"]
 
 filterwarnings = [
-  "ignore:distutils Version classes are deprecated:DeprecationWarning",
-  "ignore:getargs:DeprecationWarning",                                     # The 'u' format is deprecated. Use 'U' instead.
-  "ignore:The *staticgeoms:DeprecationWarning",
-  "ignore:The *staticmaps:DeprecationWarning",
-  "ignore:The set_staticmaps:DeprecationWarning",
-  "ignore:Adding a predefined data catalog:DeprecationWarning",
-  "ignore:Shapely 2.0 is installed:UserWarning",
-  "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
-  "ignore:.*isinstance:numba.core.errors.NumbaExperimentalFeatureWarning", # soon to be solved upstream. see https://github.com/numba/numba/pull/8911
+  "ignore:*staticmaps:DeprecationWarning",
+  # "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
 ]
