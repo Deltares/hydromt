@@ -36,10 +36,16 @@ jobs:
           ref: v1
       - name: check migration guide is updated
         run: |
-          cmp head/docs/dev/migrating-to-v1.rst v1/docs/dev/migrating-to-v1.rst
+          if cmp head/docs/dev/migrating-to-v1.rst v1/docs/dev/migrating-to-v1.rst; then
+            echo "migraion guide is not updated"
+            exit 1
+          fi
       - name: check api.rst is updated
         run: |
-          cmp head/docs/api.rst v1/docs/api.rst
+          if cmp head/docs/api.rst v1/docs/api.rst; then
+            echo "api.rst is not updated"
+            exit 1
+          fi
 
       - name: Setup tmate session
         if: ${{ failure() }}
