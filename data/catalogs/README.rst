@@ -80,21 +80,24 @@ structure per data set:
 - order the components of each data set alphabetically
 - for adding meta data use the following optional keys:
 
-category:
-notes:
-paper_doi:
-paper_ref:
-source_author: (if different from paper_ref)
-source_license:
-source_url:
-source_version:
-unit:
+meta:
+	category:
+	notes:
+	paper_doi:
+	paper_ref:
+	source_author: (if different from paper_ref)
+	source_license:
+	source_url:
+	source_spatial_extent:
+	source_temporal_extent:
+	processing_script:
+	processing_notes:
 
 updates
 -------
 
 - create new branch on github
 - make changes and bump the version in the global meta section using `calendar versioning <https://calver.org/>`
-- test your yml file (Can the added/changed data sources be read through HydroMT?)
+- test your yml file (Can the added/changed data sources be read through HydroMT?), this can be done by running the test_data_catalog.py file located in this folder. Read the docstring for more information.
 - create pull request
 - add new version to hydromt\data\predefined_catalogs.yml
