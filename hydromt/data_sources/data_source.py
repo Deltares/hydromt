@@ -1,9 +1,14 @@
 """Abstract DataSource class."""
 from os.path import abspath, join
 from pathlib import Path
-from typing import Any, ClassVar, Dict, Optional, Union
+from typing import Any, Callable, ClassVar, Dict, Optional, Union
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from hydromt._typing import DataType
 from hydromt.data_adapter.caching import _uri_validator
@@ -22,27 +27,29 @@ class DataSource(BaseModel):
     this driver.
     """
 
+    @model_validator(mode="wrap")
     @classmethod
-    def submodel_validate(
-        cls,
-        obj: Any,
-        *,
-        strict: Optional[bool] = None,
-        from_attributes: Optional[bool] = None,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> "DataSource":
-        """Validate the DataSource."""
-        if data_type := obj.get("data_type"):
+    def _init_subclass_data_type(cls, data: Any, handler: Callable):
+        """Initialize the subclass based on the 'data_type' class variable.
+
+        this does not yet support submodels of submodels. If we need more hierarchy, check:
+        https://github.com/pydantic/pydantic/discussions/7008#discussioncomment-7966076.
+        """
+        if not isinstance(data, dict):
+            # Other objects should already be the correct subclass.
+            return handler(data)
+
+        if DataSource in cls.__bases__:
+            # If cls is subclass DataSource, just validate as normal
+            return handler(data)
+
+        if data_type := data.get("data_type"):
             try:
+                # Find which DataSource to instantiate.
                 target_cls: DataSource = next(
                     filter(lambda sc: sc.data_type == data_type, cls.__subclasses__())
                 )  # subclasses should be loaded from __init__.py
-                return target_cls.model_validate(
-                    obj,
-                    strict=strict,
-                    from_attributes=from_attributes,
-                    context=context,
-                )
+                return target_cls.model_validate(data)
             except StopIteration:
                 raise ValueError(f"Unknown 'data_type': '{data_type}'")
 

@@ -1,21 +1,22 @@
-from polyfactory.factories.pydantic_factory import ModelFactory
-from polyfactory.pytest_plugin import register_fixture
+import pytest
 
-from hydromt.data_sources.data_source import DataSource
+from hydromt.data_sources.rasterdataset import RasterDataSource
+from hydromt.drivers.zarr_driver import ZarrDriver
 from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
 
 
-@register_fixture
-class DataSourceFactory(ModelFactory[DataSource]):
-    name = "test"
-    data_type = "RasterDataset"
-    uri = "/{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc"
-    metadata_resolver = ConventionResolver()
+@pytest.fixture()
+def mock_source() -> RasterDataSource:
+    return RasterDataSource(
+        name="test",
+        uri="/{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc",
+        metadata_resolver=ConventionResolver(),
+        driver=ZarrDriver(),
+    )
 
 
 class TestConventionResolver:
-    def test_resolve(self, data_source_factory: DataSourceFactory):
-        mock_source = data_source_factory.build()
+    def test_resolve(self, mock_source: RasterDataSource):
         resolver = ConventionResolver()
         # test
         uris = resolver.resolve(mock_source)

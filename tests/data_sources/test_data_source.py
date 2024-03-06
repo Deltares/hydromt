@@ -6,10 +6,10 @@ from hydromt.metadata_resolvers import MetaDataResolver
 
 
 class TestDataSource:
-    def test_submodel_validate(
+    def test_polymorphism(
         self, mock_geodf_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     ):
-        submodel: DataSource = DataSource.submodel_validate(
+        submodel: DataSource = DataSource.model_validate(
             {
                 "name": "geojsonfile",
                 "data_type": "GeoDataFrame",
@@ -20,7 +20,7 @@ class TestDataSource:
         )
         assert isinstance(submodel, GeoDataSource)
         with pytest.raises(ValueError, match="Unknown 'data_type'"):
-            DataSource.submodel_validate(
+            DataSource.model_validate(
                 {
                     "name": "geojsonfile",
                     "data_type": "Bogus",

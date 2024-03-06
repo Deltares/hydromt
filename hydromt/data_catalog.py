@@ -1800,8 +1800,7 @@ def _parse_data_source_dict(
             )
     source["driver_kwargs"] = driver_kwargs
 
-    # TODO: return DataSource
-    return DataSource.submodel_validate(source)
+    return DataSource.model_validate(source)
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
