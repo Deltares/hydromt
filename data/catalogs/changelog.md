@@ -16,7 +16,11 @@
 - kwargs to driver_kwargs
 - updated source_url if url was not working anymore
 - sorted datasets by alphabetical order
-- Removed version from dataset names and prefixed 'hydro' where necessary, see table below for mapping of old and new names.
+- Removed version from dataset names
+- prefixed 'hydro' where for all HydroSHEDS datasets
+- added the epoch of the dataset to the name of the dataset
+
+See table below for mapping of old and new names:
 
 | Old name                       | New name                  |
 |--------------------------------|---------------------------|
@@ -38,8 +42,13 @@
 | vito_2017_v3.0.1               | vito_2017                 |
 | vito_2018_v3.0.1               | vito_2018                 |
 | vito_2019_v3.0.1               | vito_2019                 |
+| esa_worldcover 			     | esa_worldcover_2020       |
+| corine 					     | corine_2018               |
+| globcover 				     | globcover_2009            |
 
-- Some datasets have multiple versions, for these datasets the default can be changed if you do not supply a version in your config file. See the table below for which dataset the default version has changed.
+- Some datasets have multiple versions, for these datasets the default can be changed if
+you do not supply a version in your config file. See the table below for which dataset
+the default version has changed.
 
 | Dataset name   | Default version | Previous default version |
 |----------------|-----------------|--------------------------|

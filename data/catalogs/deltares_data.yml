@@ -179,7 +179,7 @@ copdem30_masked:
   rename:
     copdem_masked: elevtn
 
-corine:
+corine_2018:
   data_type: RasterDataset
   driver: raster
   driver_kwargs:
@@ -196,7 +196,6 @@ corine:
       South: 900000.0
       East: 7400000.0
       North: 5500000.0
-  provider: local
   version: 2020_20u1
   path: landuse/corine/CLC2018_CLC2018_V2018_20.tif
 
@@ -418,6 +417,27 @@ era5_daily_zarr:
       East: 359.875
       North: 90.125
   path: meteo/era5_daily.zarr
+  rename:
+    d2m: temp_dew
+    msl: press_msl
+    ssrd: kin
+    t2m: temp
+    tisr: kout
+    tmax: temp_max
+    tmin: temp_min
+    tp: precip
+    u10: wind10_u
+    v10: wind10_v
+  unit_add:
+    temp: -273.15
+    temp_dew: -273.15
+    temp_max: -273.15
+    temp_min: -273.15
+  unit_mult:
+    kin: 0.000277778
+    kout: 0.000277778
+    ssr: 0.000277778
+    press_msl: 0.01
 
 era5_hourly:
   crs: 4326
@@ -489,6 +509,24 @@ era5_hourly_zarr:
       East: 359.875
       North: 90.125
   path: meteo/era5.zarr
+  rename:
+    d2m: temp_dew
+    msl: press_msl
+    ssrd: kin
+    t2m: temp
+    tisr: kout
+    tp: precip
+    u10: wind10_u
+    v10: wind10_v
+  unit_add:
+    temp: -273.15
+    temp_dew: -273.15
+  unit_mult:
+    kin: 0.000277778
+    kout: 0.000277778
+    ssr: 0.000277778
+    precip: 1000
+    press_msl: 0.01
 
 era5_ocean:
   crs: 4326
@@ -548,7 +586,7 @@ era5_orography:
   unit_mult:
     elevtn: 0.10197162129779283
 
-esa_worldcover:
+esa_worldcover_2020:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -566,6 +604,9 @@ esa_worldcover:
       South: -60.0
       East: 180.0
       North: 84.0
+    source_temporal_extent:
+      start: '2020-01-01'
+      end: '2020-12-31'
   version: 100
   path: landuse/esa_worldcover/esa-worldcover.vrt
 
@@ -818,7 +859,7 @@ ghs_smod_2015:
       paper_ref: Pesaresi et al (2019)
       source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
 
-globcover:
+globcover_2009:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -1515,7 +1556,7 @@ modis_lai:
       South: -90.002
       East: 180.004
       North: 90.002
-  version: MCD15A3H V006
+  version: 6
   path: landuse/modis/MODIS_MCD15A3H_LAI/*.tif
   unit_mult:
     LAI: 0.1
