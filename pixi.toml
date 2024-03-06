@@ -92,6 +92,17 @@ docker-publish = { depends_on = [
 docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
 
 html = { cmd = ["sphinx-build", "-M", "html", "docs", "docs/_build", "-W"] }
+html-test = { cmd = ["sphinx-build", "-M", "html", "docs", "docs/_build"] }
+html-test-skip-examples = { cmd = [
+  "export",
+  "SPHINX_SKIP_EXAMPLES=1;",
+  "sphinx-build",
+  "-M",
+  "html",
+  "docs",
+  "docs/_build",
+] }
+html-clean = { cmd = ["rm", "-rf", "docs/_build", "docs/_generated"] }
 docs = { depends_on = ["html"] }
 doc = { depends_on = ["html"] }
 serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
@@ -124,7 +135,13 @@ clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 test = { cmd = ["pytest"] }
 test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
-test-cov = { cmd = ["pytest", "--verbose", "--cov=hydromt", "--cov-report", "xml"] }
+test-cov = { cmd = [
+  "pytest",
+  "--verbose",
+  "--cov=hydromt",
+  "--cov-report",
+  "xml",
+] }
 
 [dependencies]
 affine = "*"
@@ -212,13 +229,60 @@ jupyterlab = "*"
 notebook = "*"
 
 [environments]
-default = { features = ["py311", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py311" }
-full-py311 = { features = ["py311", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py311" }
-slim-py311 = { features = ["py311", "io", "extra", "examples"], solve-group = "py311" }
+default = { features = [
+  "py311",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py311" }
+full-py311 = { features = [
+  "py311",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py311" }
+slim-py311 = { features = [
+  "py311",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py311" }
 min-py311 = { features = ["py311"], solve-group = "py311" }
-full-py310 = { features = ["py310", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py310" }
-slim-py310 = { features = ["py310", "io", "extra", "examples"], solve-group = "py310" }
+full-py310 = { features = [
+  "py310",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py310" }
+slim-py310 = { features = [
+  "py310",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py310" }
 min-py310 = { features = ["py310"], solve-group = "py310" }
-full-py39 = { features = ["py39", "io", "extra", "dev", "test", "doc", "examples"], solve-group = "py39" }
-slim-py39 = { features = ["py39", "io", "extra", "examples"], solve-group = "py39" }
+full-py39 = { features = [
+  "py39",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py39" }
+slim-py39 = { features = [
+  "py39",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py39" }
 min-py39 = { features = ["py39"], solve-group = "py39" }
