@@ -15,7 +15,6 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
-    name: Migration guide is updated
     runs-on: ubuntu-latest
     steps:
 
