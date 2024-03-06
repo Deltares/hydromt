@@ -77,11 +77,11 @@ dev = [
   "twine",       # needed to publish to pypi
 ]
 test = [
-  "polyfactory>=2",      # factory for pydantic models
-  "pytest>=2.7.3",       # testing framework
-  "pytest-cov",          # test coverage
-  "pytest-mock",         # mocking
-  "pytest-timeout",      # darn hanging tests
+  "polyfactory>=2", # factory for pydantic models
+  "pytest>=2.7.3",  # testing framework
+  "pytest-cov",     # test coverage
+  "pytest-mock",    # mocking
+  "pytest-timeout", # darn hanging tests
   "xugrid",
 ]
 doc = [
@@ -140,6 +140,7 @@ testpaths = ["tests"]
 markers = ["integration: marks tests as being integration tests"]
 
 filterwarnings = [
-  "ignore:*staticmaps:DeprecationWarning",
+  "ignore:.*staticmaps:DeprecationWarning",           # our own deprecation, will be removed soon
+  "ignore:numpy.ndarray size changed:RuntimeWarning", # upstream issue with xarray. see https://github.com/pydata/xarray/issues/7259
   # "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
 ]
