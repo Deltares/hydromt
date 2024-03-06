@@ -140,7 +140,6 @@ testpaths = ["tests"]
 markers = ["integration: marks tests as being integration tests"]
 
 filterwarnings = [
-  "ignore:.*staticmaps:DeprecationWarning",           # our own deprecation, will be removed soon
-  "ignore:numpy.ndarray size changed:RuntimeWarning", # upstream issue with xarray. see https://github.com/pydata/xarray/issues/7259
+  "ignore:.*staticmaps:DeprecationWarning", # our own deprecation, will be removed soon
   # "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
 ]
