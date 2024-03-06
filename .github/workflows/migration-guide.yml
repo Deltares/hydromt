@@ -20,15 +20,26 @@ jobs:
     steps:
 
       - uses: actions/checkout@v4
-      - run: git fetch
-          #shame to fetch the whole repo but oh well
-
+        with:
+          sparse-checkout: |
+            docs/dev/migrating-to-v1.rst
+            docs/api.rst
+          sparse-checkout-cone-mode: false
+          path: head
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docs/dev/migrating-to-v1.rst
+            docs/api.rst
+          sparse-checkout-cone-mode: false
+          path: v1
+          ref: v1
       - name: check migration guide is updated
         run: |
-          git diff --name-status v1 ${GITHUB_HEAD_REF} | grep migrating
+          cmp head/docs/dev/migrating-to-v1.rst v1/docs/dev/migrating-to-v1.rst
       - name: check api.rst is updated
         run: |
-          git diff --name-status v1 ${GITHUB_HEAD_REF} | grep "api.rst"
+          cmp head/docs/api.rst v1/docs/api.rst
 
       - name: Setup tmate session
         if: ${{ failure() }}
