@@ -20,8 +20,7 @@ jobs:
     steps:
 
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - run: git fetch
           #shame to fetch the whole repo but oh well
 
       - name: check migration guide is updated
