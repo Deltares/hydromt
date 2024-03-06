@@ -21,16 +21,15 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          # bit of a shame to fetch all history but oh well, I'll try and optimise this later
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
+          fetch-depth: 3
 
       - name: check migration guide is updated
         run: |
-          git diff --name-status v1 | grep migrating
+          git diff --name-status origin/v1 origin/${GITHUB_HEAD_REF} | grep migrating
       - name: check api.rst is updated
         run: |
-          git diff --name-status v1 | grep "api.rst"
+          git diff --name-status origin/v1 origin/${GITHUB_HEAD_REF} | grep "api.rst"
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
