@@ -24,6 +24,9 @@ jobs:
           fetch-depth: 0
           # bit of a shame to fetch all history but oh well, I'll try and optimise this later
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
 
       - name: check migration guide is updated
         run: |
