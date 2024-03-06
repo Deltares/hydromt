@@ -332,7 +332,7 @@ class Model(object, metaclass=ABCMeta):
         if self.region.data is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
-        # remove setup_basemaps from options and throw warning
+        # remove CLI_ARGS method from options and throw warning
         method = self._CLI_ARGS["region"]
         if method in opt:
             opt.pop(method)  # remove from opt

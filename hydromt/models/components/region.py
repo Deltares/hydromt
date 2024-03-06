@@ -194,7 +194,7 @@ class ModelRegionComponent(ModelComponent):
 
     @property
     def data(self) -> Optional[GeoDataFrame]:
-        """Provide access to the underlying data of the model region."""
+        """Provide access to the underlying GeoDataFrame data of the model region."""
         if self._data is None and self.model_root.is_reading_mode():
             self.read()
 
@@ -216,6 +216,7 @@ class ModelRegionComponent(ModelComponent):
         """Read the model region from a file on disk."""
         self.model._assert_read_mode()
         # cannot read geom files for purely in memory models
+        self.logger.debug(f"Reading model file {rel_path}.")
         self._data = cast(
             GeoDataFrame,
             gpd.read_file(join(self.model_root.path, rel_path), **read_kwargs),
@@ -244,11 +245,15 @@ class ModelRegionComponent(ModelComponent):
             self.logger.info("No region data found. skipping writing...")
         else:
             self.logger.info(f"writing region data to {write_path}")
+            gdf = self.data.copy()
 
-            if to_wgs84:
-                self._data = self.data.to_crs(4326)
+            if to_wgs84 and (
+                write_kwargs.get("driver") == "GeoJSON"
+                or str(rel_path).lower().endswith(".geojson")
+            ):
+                gdf = gdf.to_crs(4326)
 
-            self.data.to_file(write_path, **write_kwargs)
+            gdf.to_file(write_path, **write_kwargs)
 
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, ModelRegionComponent):
